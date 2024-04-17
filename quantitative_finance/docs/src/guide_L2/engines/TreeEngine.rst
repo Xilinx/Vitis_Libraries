@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Tree Bermudan Swaption, engine, Swap, capfloor, callable
@@ -27,11 +17,11 @@ Internal Design of Tree Bermudan Swaption Engine
 
 Overview
 ========
-Swap engine, swaption engine, capfloor engine and callable engine are all pricing engines to price the interested products. The swap is mainly an interest rate swap. For both parties to the swap, the buyer needs execute a specified swap agreement with the issuer on a specified future date.
+Swap engine, swaption engine, capfloor engine, and callable engine are all pricing engines to price the interested products. The swap is mainly an interest rate swap. For both parties to the swap, the buyer needs execute a specified swap agreement with the issuer on a specified future date.
 
 The swaption mainly refers to an option to do swap. The buyer acquires the right but not the obligation to enter into a specified swap agreement with the issuer on a specified future date. 
 
-The capfloor includes 2 interest rate derivatives: cap, and floor. For the interest rate cap, the buyer receives payments from the issuer at the end of each period in which the interest rate exceeds the agreed strike price. For interest rate floor, the buyer receives payments from the issuer at the end of each period in which the interest rate is below the agreed strike price.
+The capfloor includes two interest rate derivatives: cap, and floor. For the interest rate cap, the buyer receives payments from the issuer at the end of each period in which the interest rate exceeds the agreed strike price. For interest rate floor, the buyer receives payments from the issuer at the end of each period in which the interest rate is below the agreed strike price.
 
 The callable bond is a type of bond that provides the issuer of the bond with the right, but not the obligation, to redeem the bond on a specified future date before its maturity date.
 
@@ -48,7 +38,7 @@ As shown in the figure below, this engine uses the framework of Tree Lattice in 
 
 1. From the input parameters, the time grid and the corresponding counter of exercise times and payment times of fixed or floating interest rate are obtained (All time points are relative values based on the reference date in year, and the engine only supports the case where the time point is not less than 0).
 2. By calling the function setup of the framework, the floating interest rates and tree related parameters are calculated from 0 to N timepoint-by-timepoint to prepare the interest rates and the tree related parameters for the following calculations.
-3. Take treeSwaptionEngine, for example, by calling the function rollback of the framework using the same structure of the tree, the net present value (NPV) is calculated from N to 0 timepoint-by-timepoint. The implementation is shown in the figure below, where the data flow along with the arrows.
+3. Take treeSwaptionEngine, for example, by calling the function rollback of the framework using the same structure of the tree, the net present value (NPV) is calculated from N to 0 timepoint-by-timepoint. The implementation is shown in the following figure, where the data flow along with the arrows.
 
 
 .. _my-figure2:
@@ -62,7 +52,7 @@ As shown in the figure below, this engine uses the framework of Tree Lattice in 
 Profiling
 =========
 
-The hardware resources are listed in the following table (from Vivado 18.3 report).
+The hardware resources are listed in the following table (from AMD Vivado |trade| 18.3 report).
 
 .. table:: Table 1 Hardware resources
     :align: center
@@ -137,3 +127,7 @@ The following table shows the comparison of the performance between U250 result 
     +----------------------+---------------+----------------------------+-------+-------+-------+--------+
 
 
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

@@ -1,19 +1,9 @@
 
 
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: fintech, RNG, Random Number Generator, Monte Carlo, Mersenne Twister, NRNG, UDRNG, normal distributed, uniform distributed
@@ -30,7 +20,7 @@ Overview
 =========
 
 `Random Number Generator` (RNG) is one of the core utilities needed by Monte Carlo Simulation. 
-We provide RNGs that generate uniform distribution and normal distribution. The detailed supported RNGs are listed below.
+RNGs are provided that generate uniform distribution and normal distribution. The detailed supported RNGs are listed below.
 
 ============================== ================================== =================== ==========================
 RNG name                       Distribution generated             DataType supported  Underlying Algorithm
@@ -47,7 +37,7 @@ Uniform Distributed Random Number Generator
 ===========================================
 
 Uniform Distributed Random Number Generator is the foundation of all RNGs. 
-In this implementation, we use the Mersenne Twister Algorithm (MT19937 and MT2203) as the underlying algorithm.
+In this implementation, the Mersenne Twister Algorithm (MT19937 and MT2203) is used as the underlying algorithm.
 
 Reference: `Mersenne Twister`_.
 
@@ -106,23 +96,23 @@ Implementation Details
 ----------------------
 
 The optimization happens in the first part.
-We don't store all history of vectors generated, only the last :math:`n` vectors.
-We use a circular queue in BRAMs to store these values.
+All history of vectors generated is not stored, only the last :math:`n` vectors.
+A circular queue is used in BRAMs to store these values.
 Depth of BRAM is set to be least 2's power that larger than n.
-This will make the calculation of the address simpler.
-By keeping and updating the address of the starting vector, we can always calculate the address of vectors we need to access.
+This makes the calculation of the address simpler.
+By keeping and updating the address of the starting vector, always calculate the address of vectors we need to access.
 
 .. image:: /images/circular_queue.png
    :alt: Circular Queue of vectors
    :width: 80%
    :align: center
 
-To generate k-th vector, we need 3 read ops, for :math:`X_{k}`, :math:`X_{k + 1}` and :math:`X_{k + m}`.
-In the next iteration, we need to read :math:`X_{k + 1}`, :math:`X_{k + 2}` and :math:`X_{k + m + 1}`. 
-This means we only need to read :math:`X_{k + 2}` and :math:`X_{k + m + 1}`, since we could save :math:`X_{k + 1}` in a register.
-So, we need 2 read accesses at different vectors and 1 write access for generating the new vector.
-Since BRAM only allows 2 read or write accesses at a single cycle, it's not capable of generating the new vector at each clock cycle.
-In the implementation, we copy the identical vectors to different BRAMs, and each of them provides sufficient read or write access port.
+To generate k-th vector, you need three read ops, for :math:`X_{k}`, :math:`X_{k + 1}` and :math:`X_{k + m}`.
+In the next iteration, read :math:`X_{k + 1}`, :math:`X_{k + 2}` and :math:`X_{k + m + 1}`. 
+This means that you only need to read :math:`X_{k + 2}` and :math:`X_{k + m + 1}`, since you can save :math:`X_{k + 1}` in a register.
+So, you need two read accesses at different vectors and 1 write access for generating the new vector.
+Since BRAM only allows two read or write accesses at a single cycle, it is not capable of generating the new vector at each clock cycle.
+In the implementation, copy the identical vectors to different BRAMs, and each of them provides sufficient read or write access port.
 
 .. image:: /images/dup_queue.png
    :alt: Duplicated vectors.
@@ -134,7 +124,7 @@ Normal Distributed Random Number Generator (NRNG)
 =================================================
 
 NRNG is the most useful RNG in Monte Carlo Simulation. 
-We provide two kinds of NRNG: Inverse Cumulative Distributed Function based NRNG and Box-Muller transformation based NRNG.
+Two kinds of NRNG are provided: Inverse Cumulative Distributed Function based NRNG and Box-Muller transformation based NRNG.
 
 Inverse cumulative distribution transformation based RNG
 --------------------------------------------------------
@@ -145,10 +135,10 @@ Since :math:`\Psi(x)` is monotonically increasing function, it has an inverse fu
 It is mathematically approved that for uniform-distributed random variable :math:`U` in range (0, 1), 
 :math:`\Psi^{-1}(U)` is also a random variable and its cumulative distribution function is :math:`\Psi(x)`.
     
-We have two versions of Inverse Cumulative Distribution Function (ICDF) with the data type of float or double, details of algorithms could be found from reference papers. 
+You have two versions of Inverse Cumulative Distribution Function (ICDF) with the data type of float or double, details of algorithms could be found from reference papers. 
 Both of them use fractional polynomial approximation method.
 They both have two branches for value from different input range and they share similar logics.
-To save DSPs, we combined the two branches and manually binding calculation to the same hardware resource to get the same performance and accuracy.
+To save DSPs, the two branches are combined and manually binding calculation to the same hardware resource to get the same performance and accuracy.
 Take ICDF with float data type as an example, the basic approximation formula is (main fractional polynomial approximation part, not all) shown as below:
 
 .. math::
@@ -158,7 +148,7 @@ Take ICDF with float data type as an example, the basic approximation formula is
    y = \frac {((c_2 x) + c_1)x + c_0}{(d_2 x) + d_1}   \:\:\:\: if \:x_{lower}< x < x_{upper}
 
 Although these two conditions have different formulas, they can merge into one formula with parameters configured by which range that :math:`x` belongs to.
-As shown in the diagram below, if parameters took the value at left, it would become the first formula above. If at right, it would become the second formula above.
+As shown in the following diagram, if parameters took the value at left, it becomes the first formula above. If at right, it becomes the second formula above.
 
 .. image:: /images/combine_branch.png
    :alt: Combine branch
@@ -175,7 +165,7 @@ Box-Muller transformation based NRNG
 Box-Muller transformation takes two uniformed distributed random numbers to generate two normal-distributed random number. 
 Although it is an efficient method, it could not hold certain algebra characteristics of input uniformed distributed random number serials, 
 especially when we need NRNG in low-discrepancy serials. 
-It's not the first choice of NRNG in the current stage.
+It is not the first choice of NRNG in the current stage.
 
 .. math::
    Z_0 = \sqrt[2]{-2\ln{U_1}}\cos{2\pi U_2}
@@ -183,9 +173,9 @@ It's not the first choice of NRNG in the current stage.
 .. math::
    Z_1 = \sqrt[2]{-2\ln{U_1}}\sin{2\pi U_2}
 
-To smooth output, Box-Muller implementation takes 1 uniformed random number at each call of next(), 
-outputs 1 normal distributed random number which is already generated and cached.
-When 2 inputs have been cached, it performs Box-Muller transformation above and generates the next two normal-distributed random numbers.
+To get a smooth output, Box-Muller implementation takes one uniformed random number at each call of next(), 
+outputs one normal distributed random number which is already generated and cached.
+When two inputs have been cached, it performs Box-Muller transformation above and generates the next two normal-distributed random numbers.
 
 .. image:: /images/smooth_input_output.png
    :alt: Smooth input and ouput

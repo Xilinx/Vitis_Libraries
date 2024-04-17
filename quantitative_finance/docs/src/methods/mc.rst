@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Monte Carlo, Simulation, Antithetic paths, MCM
@@ -39,7 +29,7 @@ Most of the time, the value of underlying asset are affected by multiple factors
 Framework
 =========
 
-The framework of Monte Carlo Simulations is as follows. The top module Monte Carlo Simulation will call the Monte Carlo Module (MCM) multiple times until it reaches the required samples number or required tolerance.
+The framework of Monte Carlo Simulations is as follows. The top module Monte Carlo Simulation calls the Monte Carlo Module (MCM) multiple times until it reaches the required samples number or required tolerance.
 
 
 .. image:: /images/mc1.PNG
@@ -58,7 +48,7 @@ RNG module generates the normal random numbers. Currently, only generating pseud
 
 Path Generator uses the random number to calculate the price paths of underlying asset. Currently, Black-Scholes and Heston valuation model are supported.
 
-Path pricer will exercise the option based on the price paths of underlying asset and calculate the payoff, discount the payoff to time zero for option value. Different option has associated implementation for path pricer.
+Path pricer exercises the option based on the price paths of underlying asset and calculate the payoff, discount the payoff to time zero for option value. Different option has associated implementation for path pricer.
 
 Accumulator sums together the option value and square of option value on all the paths. These sums are prepared for calculation of average and variance. Because the accumulation of floating point data type cannot achieve II = 1, the input is dispatched to 16 sub-accumulator and sum the result of 16 sub-accumulator at last.
 
@@ -75,8 +65,8 @@ Antithetic paths
    
    The precision of Monte Carlo Simulation is related with the simulations times. The error of results is an order of O(:math:`\frac{1}{\sqrt{N}}`). 
 
-   If :math:`X` applies to :math:`\phi(0,1)`, then the antithetic variable of is :math:`-X`. We can call :math:`X` and :math:`-X` as an antithetic pair. 
-   In our implementation, when the antithetic template parameter is set to true. The RNG module will generate two random number at one clock cycles. Then, two path generators are followed to make sure it can consume two random number at on clock cycles. At the same time, the two price paths are averaged at path pricer. The structure with antithetic is as follows.
+   If :math:`X` applies to :math:`\phi(0,1)`, then the antithetic variable of is :math:`-X`. You can call :math:`X` and :math:`-X` as an antithetic pair. 
+   In our implementation, when the antithetic template parameter is set to true. The RNG module generates two random number at one clock cycles. Then, two path generators are followed to make sure it can consume two random number at on clock cycles. At the same time, the two price paths are averaged at path pricer. The structure with antithetic is as follows.
 
    The advantage of antithetic paths is not only reducing the number of generated random number from 2N to N, but also reduces the variance of samples paths and improves the accuracy if the correlation of two antithetic variables is negative.
 

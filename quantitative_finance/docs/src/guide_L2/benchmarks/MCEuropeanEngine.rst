@@ -1,22 +1,11 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: benchmark, European, engine, option
-   :description: This is a benchmark of MC (Monte-Carlo) European Engine using the Xilinx Vitis environment to compare with QuantLib.  
+   :description: This is a benchmark of MC (Monte-Carlo) European Engine using the AMD Vitis environment to compare with QuantLib.  
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
@@ -29,9 +18,9 @@ Benchmark of MCEuropeanEngine
 
 Overview
 ========
-This is a benchmark of MC (Monte-Carlo) European Engine using the Xilinx Vitis environment to compare with QuantLib.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
+This is a benchmark of MC (Monte-Carlo) European Engine using the AMD Vitis |trade| environment to compare with QuantLib.  It supports software and hardware emulation as well as running the hardware accelerator on the AMD Alveo |trade| U250.
 
-This example resides in ``L2/benchmarks/MCEuropeanEngine`` directory. The tutorial provides a step-by-step guide that covers commands for build and runging kernel.
+This example resides in ``L2/benchmarks/MCEuropeanEngine`` directory. The tutorial provides a step-by-step guide that covers commands for build and running kernel.
 
 
 Executable Usage
@@ -39,7 +28,7 @@ Executable Usage
 
 * **Work Directory(Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_quantitative_finance`. For getting the design,
+The steps for library download and environment setup can be found in :ref:`l2_vitis_quantitative_finance`. To get the design,
 
 .. code-block:: bash
 
@@ -47,8 +36,7 @@ The steps for library download and environment setup can be found in :ref:`l2_vi
 
 * **Build kernel(Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
-
+Run the following make command to build your XCLBIN and host binary targeting a specific device. This process might take long.
 .. code-block:: bash
 
    source /opt/xilinx/Vitis/2021.1/settings64.sh
@@ -59,7 +47,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
 * **Run kernel(Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
@@ -73,7 +61,7 @@ Input Arguments:
           -xclbin     MCEuropeanEngine binary;
           -rep        repeat number; 
 
-Note: Default num_rep(repeat number) is set in host code. For sw_emu, num_rep is cu_number*3; for hw_emu, num_rep is cu_number; for hw, the default value is 1, user could reset num_rep by paramter ``rep``. As this case is a 4CU design, cu_number is 4.   
+.. Note:: Default num_rep(repeat number) is set in host code. For sw_emu, num_rep is cu_number*3; for hw_emu, num_rep is cu_number; for hw, the default value is 1, user could reset num_rep by paramter ``rep``. As this case is a 4CU design, cu_number is 4.   
 
 * **Example output(Step 4)** 
 
@@ -125,9 +113,9 @@ The application scenario in this case is:
     |  workload     | 1 steps, 47000 paths       |
     +---------------+----------------------------+
 
-The performance comparison of the MCEuropeanEngine is shown in the table below, where timesteps is 1, requiredSamples is 16383, and FPGA frequency is 250MHz. The execution time is the average of 1000 runs. 
+The performance comparison of the MCEuropeanEngine is shown in the following table, where timesteps is 1, requiredSamples is 16383, and FPGA frequency is 250MHz. The execution time is the average of 1000 runs. 
 Our cold run has 380X and warm run has 1521X compared to baseline.
-Baseline is Quantlib, a Widely Used C++ Open Source Library, running on platform with 2 Intel(R) Xeon(R) CPU E5-2690 v4 @3.20GHz, 8 cores per processor and 2 threads per core.
+Baseline is Quantlib, a Widely Used C++ Open Source Library, running on platform with 2 Intel(R) Xeon(R) CPU E5-2690 v4 @3.20GHz, eight cores per processor, and two threads per core.
 
 .. _tab_MCEE_Execution_Time:
 
@@ -145,7 +133,7 @@ Baseline is Quantlib, a Widely Used C++ Open Source Library, running on platform
    | Accelaration Ratio      | 380X            | 1521X                 |
    +-------------------------+-----------------+-----------------------+
 
-.. note:: 
+.. Note:: 
   What is cold run and warm run? 
 
   - Cold run means to run one application on board 1 time. 
@@ -191,16 +179,21 @@ The performance of this demo is listed in :numref:`tab_MCEE_performance`. In thi
     |               |           | (1000 loop)| (1000 loop) |   
     +---------------+-----------+------------+-------------+
 
-Because only one output data is transferred from device to host for each CU, The kernel execution time doesn't differentiate so much to E2E time.
+Because only one output data is transferred from device to host for each CU, The kernel execution time does not differentiate so much to E2E time.
 
 
-In order to maximize the resource utilization on FPGA, four MCEuropeaEngine CUs are placed on different SLRs on U250. Due to place and route on FPGA, the kernel runs at 250MHz finally. 
+To maximize the resource utilization on FPGA, four MCEuropeaEngine CUs are placed on different SLRs on U250. Due to place and route on FPGA, the kernel runs at 250MHz finally. 
 
 .. note:: 
   **Analyzation of the execution time of MCEuropeanEngine**
 
-  There are 4 CUs. Each CU could execution one application at one time. When there are multiple applications, they are distributed on different CUs and could be executed at the same time. So the warm run time is 1/4 of the cold run.
+  There are four CUs. Each CU could execution one application at one time. When there are multiple applications, they are distributed on different CUs and could be executed at the same time. So the warm run time is 1/4 of the cold run.
 
 
 .. toctree::
    :maxdepth: 1
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

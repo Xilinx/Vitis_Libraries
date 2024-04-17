@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Finite Difference, PDE, Heston Pricing Model, Hout, Foulon
@@ -84,7 +74,7 @@ Precalculate algorithm fixed matrices
 
 A function in the host software generates the finite-difference grid (possibly non-uniform) and the :math:`\alpha`, :math:`\beta`, :math:`\gamma` and :math:`\delta` coefficients based on the grid. These are converted into a set of :math:`\mathbf{A}` matrices (in sparse form) and :math:`\mathbf{b}` boundary vectors, plus modified forms of the :math:`\mathbf{A}` matrices for the tridiagonal and pentadiagonal solvers (the :math:`\mathbf{X}` matrices). The initial condition of the grid is also calculated on the host, and all of these cofficients are moved into the DDR memory on the Alveo card.
 
-The following three steps are performed in hardware on the Alveo card for each timestep of the simulation.
+The following three steps are performed in hardware on the AMD Alveo |trade| card for each timestep of the simulation.
 
 Explicit estimation at timestep t
 +++++++++++++++++++++++++++++++++
@@ -115,3 +105,8 @@ References
 .. [HOUT2010] Hout and Foulon, "ADI Finite Difference Schemes for Option Pricing in the Heston Model with correlation", International Journal of Numerical Analysis and Modeling, Vol 7, Number 2 (2010).
 
 .. [DOUGLAS1962] Douglas Jr., J, "Alternating direction methods for three space variables", Numerische Mathematik, 4(1), pp41-63 (1962).
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

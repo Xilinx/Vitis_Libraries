@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Heston, Closed-Form, Heston PDE
@@ -36,7 +26,7 @@ The `Heston Model`_ , published by Steven Heston in paper "A Closed-Form Solutio
 .. _Heston Model: https://en.wikipedia.org/wiki/Heston_model
 
 The stochastic equations of the model, and the partial differential equation (PDE) derived from them, are shown in the section on the Heston Model under "Models".  There are a number of ways in which the 
-equations may be solved, including Monte-Carlo and Finite-Difference methods. Here, we show the closed-form solution originally obtained in [HEST1993]_ - sometimes referred to as the "semi-analytic" solution 
+equations may be solved, including Monte-Carlo and Finite-Difference methods. Here, it is shown that the closed-form solution originally obtained in [HEST1993]_ - sometimes referred to as the "semi-analytic" solution 
 since an analytic solution of its integrals is not known. 
 
 The expression for a European Call option, derived from the Heston PDE, is shown below, (in the form presented by Crisostomo in [CHRSO2014]_ ): 

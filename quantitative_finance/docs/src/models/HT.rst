@@ -1,19 +1,9 @@
 
 
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Model, finance, Heston, Stochastic, PED
@@ -92,7 +82,7 @@ The discrete form (Euler-Maruyama Form) of Heston Model is:
 Where :math:`\Delta` stands for unit timestep length. 
 :math:`S(j\Delta)` stands for S in j th timesteps, AKA :math:`S(j * \Delta t)`. 
 :math:`\nu(j\Delta)` has a similar meaning. 
-To simplify the process, we use :math:`\ln{S(j\Delta)}` instead of :math:`S` since multiplication becomes addition after \logarithm. 
+To simplify the process, use :math:`\ln{S(j\Delta)}` instead of :math:`S` since multiplication becomes addition after \logarithm. 
 
 :math:`\Delta W_t^S` and :math:`\Delta W_t^\nu` could be calculated by:
 
@@ -104,8 +94,8 @@ To simplify the process, we use :math:`\ln{S(j\Delta)}` instead of :math:`S` sin
 
 Where :math:`Z_S` and :math:`Z_\nu` are two uniform distributed random numbers that have correlation :math:`\rho`
 
-Although :math:`\nu` is non-negative in continuous form, it would become negative if we use the Euler-Maruyama form above directly. 
-There are several variations to solve this issue, here we provide 5 of most commonly used.
+Although :math:`\nu` is non-negative in continuous form, it would become negative if you use the Euler-Maruyama form above directly. 
+There are several variations to solve this issue. They are as follows:
 
 **kDTReflection**: use absolute value of the volatility of the last iteration.
 
@@ -139,7 +129,7 @@ There are several variations to solve this issue, here we provide 5 of most comm
 **kDTQuadraticExponential** and **kDTQuadraticExponentialMartingale** are more accurate variation, details could be found in reference papers [ANDERSON2005]_. 
 They use a different approximation method to calculate :math:`\nu`, here's brief on its algorithm
 
-Step 1: we calculate first order moment and second order moment of :math:`\nu`.
+Step 1: Calculate first order moment and second order moment of :math:`\nu`.
 
 .. math::
      m = \theta + (\nu((j-1)\Delta) - \theta)e^{-\kappa \theta}
@@ -184,21 +174,21 @@ Step 4.3: Calculate :math:`\nu(j\Delta)`
 .. math::
     \nu(j\Delta) = \frac{1}{\beta}(\frac{\log{(1-p)}}{1-U_\nu}) \:\: if \:\:  p < U_\nu
     
-It should be noticed that they both have two branches for value in different range. 
+They both have two branches for value in different range. 
 These two branches have a similar calculation process. 
 Furthermore, only one branch is active at the same time. 
-By merging these two branches into one branch and manually binding calculations to DSPs, it will cut off DSP cost. 
-This won't change its performance and accuracy.
+By merging these two branches into one branch and manually binding calculations to DSPs, it cuts off the DSP cost. 
+This is not going to change its performance and accuracy.
 
-In Monte Carlo Simulation, we need to compute stock prices of multiple paths at multiple time steps.
-Therefore we need two loops to calculate prices and volatilities, the inner loop is either timestep loop or path loop.
+In Monte Carlo Simulation, you need to compute stock prices of multiple paths at multiple time steps.
+Therefore you need two loops to calculate prices and volatilities, the inner loop is either timestep loop or path loop.
 Price at each time step is calculated using last time step's price and volatility as input.
-And we use 1-D array to store price and volatility of each path's history (last timestep).
+And use 1-D array to store price and volatility of each path's history (last timestep).
 
-If the inner loop is timestep loop, as red arrows demonstrate in the diagram below, it will keep update the same array element until reaches max timesteps.
-Such operation can not achieve initiation interval (II)=1 and will greatly slow down the calculation process.
-If the inner loop is path loop, as green arrows demonstrate in the diagram below, it will keep updating different array element each time.
-Such operation will avoid dependency issue and reach II=1, which is used in this implementation.
+If the inner loop is timestep loop, as red arrows demonstrate in the diagram below, it keeps updating the same array element until it reaches max timesteps.
+Such operation can not achieve initiation interval (II)=1 and greatly slows down the calculation process.
+If the inner loop is path loop, as green arrows demonstrate in the diagram below, it keeps updating different array element each time.
+Such operation avoids dependency issues and reach II=1, which is used in this implementation.
 
 .. image:: /images/inner_loop.png
    :alt: Inner Loop of timesteps and path

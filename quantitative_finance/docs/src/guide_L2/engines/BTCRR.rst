@@ -1,17 +1,7 @@
 ..
-   Copyright 2019 Xilinx, Inc.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 .. meta::
@@ -30,7 +20,7 @@ Overview
 
 The Cox-Ross-Rubinstein Binomial Tree method is a numerical implementation of the assumptions in the Black-Scholes financial model. The detail is described in the "Numerical Methods" section here.
 
-The equations for obtaining the option price can be found online (see for example https://en.wikipedia.org/wiki/Binomial_options_pricing_model) and will not be reproduced here. 
+The equations for obtaining the option price can be found online (see for example https://en.wikipedia.org/wiki/Binomial_options_pricing_model) and is not reproduced here. 
 
 
 Design Structure
@@ -57,16 +47,16 @@ It then writes the results back out. This level is where the HLS #pragmas are us
 bt_engine (bt_engine.hpp)
 =======================
 
-The code is an implementation of the Cox, Ross, & Rubinstein (CRR) method and is template to accept different data types (float/double). 
+The code is an implementation of the Cox, Ross, and Rubinstein (CRR) method and is template to accept different data types (float/double). 
 It uses standard C++ and allows the code to be easily used in a software only environment by swapping to the standard math namespace. 
 
 The implementation is broken into a number of steps:
 
-- Calculation of the option at each final node i.e. at the time of expiration
+- Calculation of the option at each final node, that is, at the time of expiration
 - Sequential calculation of the option value at each preceding node (working backwards through the tree towards the valuation)
 - Calculation of the early exercise (in the case of the American option only) at each stage.
 
-There are some optimizations to the algorithm for the FPGA to allow for parallelization, i.e to obtain an II value of 1 for each loop; the generated report shows:
+There are some optimizations to the algorithm for the FPGA to allow for parallelization,that is, to obtain an II value of one for each loop; the generated report shows:
 
 Pipelining function 'pow_generic<double>'.
 Pipelining result : Target II = 1, Final II = 1, Depth = 89.
@@ -90,7 +80,7 @@ Finished kernel compilation
 binomialtreekernel (binomialtreekernel.cpp)
 ===========================================
 
-The kernel is the HLS wrapper level which implements the pipelining and parallelization to allow high throughput. The kernel uses a dataflow methodology to pass the data through the design.
+The kernel is the HLS wrapper level, which implements the pipelining and parallelization to allow high throughput. The kernel uses a dataflow methodology to pass the data through the design.
 
 The top level's input and output ports are 512 bit wide, which is designed to match the whole DDR bus width and allowing vector access. In the case of float data type (4 bytes), sixteen parameters can be accessed from the bus in parallel. Each port is connected to its own AXI master with arbitration handled by the AXI switch and DDR controller under the hood.
 
@@ -113,9 +103,9 @@ Resource Utilization
                               [  4.35%]    [  0.75%]    [  2.34%]    [  6.79%]    [  0.00%]     [  6.53%] 
 ========================== ============ ============ ============ ============ ============= =============
 
-The hardware resources are listed in the table above. This is for the demonstration as configured by default (one engine), achieving a 300 MHz clock rate.
+The hardware resources are listed in the preceding table. This is for the demonstration as configured by default (one engine), achieving a 300 MHz clock rate.
 
-The number of engines in a build may be configured by the user.  For an example build of eight engines, the following table shows the resources used:
+The number of engines in a build might be configured by the user.  For an example build of eight engines, the following table shows the resources used:
 
 ========================== ============ ============ ============ ============ ============= =============
   Name                      LUT          LUTAsMem     REG          BRAM         URAM          DSP        
@@ -139,11 +129,11 @@ Throughput
 
 The demo application Makefile has a check target option which can be used to verify the output from the Binomial tree Kernel compared to CPU/Quantlib and the throughput.
 
-For a 1 engine kernel with a tree height of 1024 we obtain a throughput of approximately 0.7K option calculations per second. 
+For a one engine kernel with a tree height of 1024, obtain a throughput of approximately 0.7K option calculations per second. 
 
-For a 4 engine kernel with a tree height of 1024 we obtain a throughput of approximately 2.7K option calculations per second.
+For a four engine kernel with a tree height of 1024, obtain a throughput of approximately 2.7K option calculations per second.
 
-Both these values are obtained when calculating 49 options (i.e. the stock and volatility test grid). The values are the same, whether European or American option prices are being calculated. 
+Both these values are obtained when calculating 49 options (that is, the stock and volatility test grid). The values are the same, whether European or American option prices are being calculated. 
 
 .. toctree::
    :maxdepth: 1

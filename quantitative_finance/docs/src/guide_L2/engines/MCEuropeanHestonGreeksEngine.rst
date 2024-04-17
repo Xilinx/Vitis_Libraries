@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: European, pricing, engine, MCEuropeanHestonGreeksEngine
@@ -52,7 +42,7 @@ Both :math:`\delta` and :math:`\gamma` measures the impact of price changes on o
 .. math::
         vega:\frac{\partial X_t}{\partial \sigma} 
 
-:math:`vega` measure the impact of volatility on option price. Actually, the volatility changes over time. So, that means the option price will change
+:math:`vega` measure the impact of volatility on option price. Actually, the volatility changes over time. So, that means the option price changes
 over mature time.
 
 
@@ -73,13 +63,13 @@ To measure the sensitivity of option price to model parameter, the following mod
 Implementation
 ==============
 
-The numerical method for Greeks calculation includes finite difference, pathwise and likelihood ratio.
+The numerical method for Greeks calculation includes finite difference, pathwise, and likelihood ratio.
 
-In our implementation, we use the finite difference method to calculate Greeks. Finite difference methods use the following differential expression to approximate 
+In this implementation, the finite difference method is used to calculate Greeks. Finite difference methods use the following differential expression to approximate 
 partition derivative. 
 
 .. math::
          \delta = \frac{X(t, S_t + h, r, \sigma) - X(t, S_t, r, \sigma)} {h}
-When any of the parameter changes, MCEuropeanHestonEngine will be called once to calculate the option price.
+When any of the parameter changes, MCEuropeanHestonEngine is called once to calculate the option price.
 
 

@@ -1,18 +1,8 @@
 
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 ************************************
 Covariance Matrix and Regularizaiton
@@ -21,7 +11,7 @@ Covariance Matrix and Regularizaiton
 Overview
 ========
 
-In probability theory and statistics, a covariance matrix, (aka, variance-covariance matrix) is a :math: `N\times N` square matrix that contains the variances and covariances associated with N observed variables. The diagonal elements of the matrix contain the variances of the variables, and the off-diagonal elements contain the covariances between all possible pairs of variables. At the same time, in order to solve an ill-posed problem or to prevent overfitting, there are four ways to regularize the covariance matrix, including hard-thresholding. soft-thresholding, banding, and tapering.
+In probability theory and statistics, a covariance matrix, (aka, variance-covariance matrix) is a :math: `N\times N` square matrix that contains the variances and covariances associated with N observed variables. The diagonal elements of the matrix contain the variances of the variables, and the off-diagonal elements contain the covariances between all possible pairs of variables. At the same time, to solve an ill-posed problem or to prevent overfitting. There are four ways to regularize the covariance matrix, including hard-thresholding. soft-thresholding, banding, and tapering.
 
 Algorithm
 =========
@@ -44,7 +34,7 @@ The variance-covariance matrix is symmetric because the element :math: `c\left (
 Covariance Regularizaiton
 -------------------------
 
-For the algorithm of covariance regularization, please refer to "High-Dimensional Covariance Estimation" by Mohsen Pourahmadi.
+For the algorithm of covariance regularization, refer to "High-Dimensional Covariance Estimation" by Mohsen Pourahmadi.
 
 
 Implementation
@@ -57,7 +47,7 @@ Firstly, the loop of the bottom and middle layers is unrolled to increase throug
 Profiling
 =========
 
-The hardware resources utilization for the covariance matrix are listed in :numref:`tabCov`. (Vivado result)
+The hardware resources utilization for the covariance matrix are listed in :numref:`tabCov`. (AMD Vivado |trade| result)
 
 .. _tabCov:
 
@@ -80,3 +70,8 @@ The hardware resources utilization for the covariance matrix are listed in :numr
 
 .. toctree::
    :maxdepth: 1
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

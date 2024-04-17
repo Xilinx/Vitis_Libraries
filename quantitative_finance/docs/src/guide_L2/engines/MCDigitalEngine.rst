@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Digital, pricing, engine, MCDigitalEngine
@@ -49,9 +39,9 @@ When argument `exEarly` is false, the fixed cash is paid at the expiry time and 
 Otherwise, once the maximum or the minimum of the asset price hits the strike value, the fixed cash is paid and it is discounted to time 0 for the value of option.
 
 
-In the following, we will take put digital option as an example to elaborate.
+In the following, take put digital option as an example to elaborate.
 Let :math:`T` be the maturity time of option. The maturity time :math:`T` is discretized by time steps :math:`N`. 
-The strike value is :math:`K`. :math:`C` is the fixed cash which paid when option is in the money.
+The strike value is :math:`K`. :math:`C` is the fixed cash that is paid when option is in the money.
 
 The detailed procedure of Monte Carlo Simulation is as follows:
 

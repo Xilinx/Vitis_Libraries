@@ -1,17 +1,7 @@
 ..
-   Copyright 2019 Xilinx, Inc.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Heston
@@ -42,7 +32,7 @@ The Engine (hcf_engine.hpp)
 
 The engine performs a single Heston Closed Form solution for a European Call Option.
 
-It is template to generate either a floating point (Float-32) kernel or a double (Float-64) kernel. The double kernel will be more accurate but takes up more FPGA resource. The code contains some HLS directives which ensure the design is pipeline and parallel in order to improve its performance. It uses complex number arithmetic which is implemented in wrapper functions by using the HLS math library.
+It is template to generate either a floating point (Float-32) kernel or a double (Float-64) kernel. The double kernel is more accurate but takes up more FPGA resource. The code contains some HLS directives, which ensure the design is pipeline and parallel to improve its performance. It uses complex number arithmetic, which is implemented in wrapper functions by using the HLS math library.
 
 The integration is performed using the trapezoidal rule with a configurable dw (the integration time step) and Wmax (the upper limit of the integral). These parameters are configurable at run time and passed to the kernel along with the Heston parameters.
 
@@ -75,7 +65,7 @@ The double kernel Area Information:
 Throughput
 ==========
 
-The theoretical throughput depends on different factors. A floating point kernel will be faster than a double kernel. A smaller dw and larger Wmax will provide more accurate results but will decrease throughput. The kernel has been pipelined in order to increase the throughput when a large number of input needs to be processed.
+The theoretical throughput depends on different factors. A floating point kernel will be faster than a double kernel. A smaller dw and larger Wmax provides more accurate results but will decrease throughput. The kernel has been pipelined to increase the throughput when a large number of input needs to be processed.
 
 Throughput is composed of three processes; transferring data to the FPGA, running the computations and transferring the results back from the FPGA. The demo contains options to measure timings as described in the README.md file.
 

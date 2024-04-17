@@ -136,6 +136,12 @@ LIBRARY_PATH := $(XILINX_HLS)/lnx64/tools/fpo_v7_1
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
 
 ######################### binary container global settings ##########################
+VPP_LDFLAGS_quad_hcf_kernel += --hls.clock 150000000:quad_hcf_kernel
+ifneq ($(HOST_ARCH_temp), x86)
+VPP_LDFLAGS_quad_hcf_kernel += --clock.defaultFreqHz 150000000
+else
+VPP_LDFLAGS_quad_hcf_kernel += --kernel_frequency 150
+endif
 
 ifneq ($(SD_CARD_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/quad_hcf_kernel.xclbin

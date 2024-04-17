@@ -1,22 +1,11 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: benchmark, tree, engine
-   :description: This is a benchmark based on tree structure using the Xilinx Vitis environment to compare with QuantLib, where the Rate Model supports multiple models, including Vasicek, HullWhite, BlackKarasinski, CoxIngersollRoss, ExtendedCoxIngersollRoss, Two-additive-factor gaussian, and the Instrument supports multiple Instruments, including swaption, swap, capfloor, callablebond. 
+   :description: This is a benchmark based on tree structure using the AMD Vitis environment to compare with QuantLib, where the Rate Model supports multiple models, including Vasicek, HullWhite, BlackKarasinski, CoxIngersollRoss, ExtendedCoxIngersollRoss, Two-additive-factor gaussian, and the Instrument supports multiple Instruments, including swaption, swap, capfloor, callablebond. 
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
@@ -29,9 +18,9 @@ Benchmark of TreeEngine
 
 Overview
 ========
-This is a serial of benchmark based on tree structure using the Xilinx Vitis environment to compare with QuantLib, where the Instrument supports multiple instruments, including swaption, swap, capfloor, callablebond, the Rate Model supports multiple models, including Vasicek, HullWhite, BlackKarasinski, CoxIngersollRoss, ExtendedCoxIngersollRoss, Two-additive-factor gaussian. It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
+This is a serial of benchmark based on tree structure using the AMD Vitis |trade| environment to compare with QuantLib, where the Instrument supports multiple instruments, including swaption, swap, capfloor, callablebond, the Rate Model supports multiple models, including Vasicek, HullWhite, BlackKarasinski, CoxIngersollRoss, ExtendedCoxIngersollRoss, Two-additive-factor gaussian. It supports software and hardware emulation as well as running the hardware accelerator on the AMD Alveo |trade| U250.
 
-These examples reside in ``L2/benchmarks/TreeEngine`` directory. Take `TreeSwaptionEngineHWMOdel` as example, the tutorial bellow provides a step-by-step guide that covers commands for build and runging kernel.
+These examples reside in ``L2/benchmarks/TreeEngine`` directory. Take `TreeSwaptionEngineHWMOdel` as example, the tutorial below provides a step-by-step guide that covers commands for build and running kernel.
 
 
 Executable Usage
@@ -39,7 +28,7 @@ Executable Usage
 
 * **Work Directory(Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_quantitative_finance`. For getting the design,
+The steps for library download and environment setup can be found in :ref:`l2_vitis_quantitative_finance`. To get the design,
 
 .. code-block:: bash
 
@@ -47,7 +36,7 @@ The steps for library download and environment setup can be found in :ref:`l2_vi
 
 * **Build kernel(Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your XCLBIN and host binary targeting a specific device. This process might take long.
 
 .. code-block:: bash
 
@@ -59,7 +48,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
 * **Run kernel(Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
@@ -124,12 +113,12 @@ The application scenarios in this case is:
     +------------+-----------+------+-------+-----------------------+-------------+----------+----------------------+-----------------------+------------+-----------------------+---------+--------+
 
 
-the benchmarks include 2 parts: TreeSwaptionEngine based on different Rate Model, different Instrument based on HullWhite Rate Model.
-Baseline is Quantlib, a Widely Used C++ Open Source Library, running on platform with 2 Intel(R) Xeon(R) CPU E5-2667 v3 @3.200GHz, 8 cores per procssor and 2 threads per core.
+The benchmarks include two parts: TreeSwaptionEngine based on different Rate Model, different Instrument based on HullWhite Rate Model.
+Baseline is Quantlib, a Widely Used C++ Open Source Library, running on platform with 2 Intel(R) Xeon(R) CPU E5-2667 v3 @3.200GHz, eight cores per processor and two threads per core.
 
 TreeSwaptionEngine
 ------------------
-The performance of the TreeSwaptionEngine based on HullWhite and other different rate models are shown in the table below.
+The performance of the TreeSwaptionEngine based on HullWhite and other different rate models are shown in the following table.
 
 .. _tab_TreeSwaptionEngine_Execution_Time:
 
@@ -181,7 +170,7 @@ The performance of the TreeSwaptionEngine based on HullWhite and other different
 
 TreeEngine Based on HullWhite Rate Model
 ------------------------------------------
-The performance comparison of the diffferent TreeEngine Instruments based on the HullWhite rate model are shown in the table below.
+The performance comparison of the different TreeEngine Instruments based on the HullWhite rate model are shown in the following table.
 
 .. _tab_TreeEngineHWModel_Execution_Time:
 
@@ -253,3 +242,8 @@ The resource utilization and performance of TreeEngine on U250 FPGA card are lis
 
 .. toctree::
    :maxdepth: 1
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

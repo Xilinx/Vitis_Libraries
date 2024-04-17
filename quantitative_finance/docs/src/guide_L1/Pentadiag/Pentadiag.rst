@@ -1,19 +1,9 @@
 
 
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: fintech, trapezoidal, Simpson, Romberg
@@ -43,6 +33,6 @@ The input matrix is stored as five vectors, one for each diagonal.
 Since the algorithm needs random memory access in every iteration, 3 copies of the whole matrix are stored internally in the solver to allow full pipelining of the implementation. 
 
 .. caution::
-    Please note that the solver is very sensitive to zeros in **any** of the diagonals on input data. Due to the nature of the algorithm, any zeros on the three inner diagonals will lead to an attempt to divide-by-zero and the algorithm will fail.
+    The solver is very sensitive to zeros in **any** of the diagonals on input data. Due to the nature of the algorithm, any zeros on the three inner diagonals lead to an attempt to divide-by-zero and the algorithm will fail.
 
 

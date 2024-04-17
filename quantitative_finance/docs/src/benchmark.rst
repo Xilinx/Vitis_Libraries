@@ -1,19 +1,8 @@
 
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Finance, Quantitative, Vitis Quantitative Finance Library, quantitative_finance, quality, performance
@@ -30,12 +19,12 @@ Benchmark
 Application Scenario
 ---------------------
 
-The application scenarios are provided for each case. User could find details in Profiling section under each case's benchmark description page.
+The application scenarios are provided for each case. You can find details in the Profiling section under each case's benchmark description page.
 
 Performance
 -----------
 
-For representing the resource utilization in each benchmark, we separate the overall utilization into 2 parts, where P stands for the resource usage in platform, that is those instantiated in static region of the FPGA card, as well as K represents those used in kernels (dynamic region). The input is matrix, and the target device is set to Alveo U250.
+To represent the resource utilization in each benchmark, separate the overall utilization into two parts, where P stands for the resource usage in platform, that is those instantiated in static region of the FPGA card. K represents those used in kernels (dynamic region). The input is matrix, and the target device is set to AMD Alveo |trade| U250.
 
 .. table:: Performance for processing quantitative_finance on FPGA
     :align: center
@@ -69,7 +58,7 @@ For representing the resource utilization in each benchmark, we separate the ove
     +------------------------------------------------+-----------+--------------+----------+----------------+-----+-------+------------+------------+
 
 
-These are details for benchmark result and usage steps.
+These are the details for benchmark result and usage steps.
 
 .. toctree::
    :maxdepth: 1
@@ -83,7 +72,7 @@ These are details for benchmark result and usage steps.
 Test Overview
 --------------
 
-Here are benchmarks of the Vitis Quantitative_Finance Library using the Vitis environment. 
+Here are benchmarks of the AMD Vitis |trade| Quantitative_Finance Library using the Vitis environment. 
 
 
 .. _l2_vitis_quantitative_finance:
@@ -104,10 +93,16 @@ These quantitative_finance benchmarks can be downloaded from `vitis libraries <h
 
 * **Setup environment**
 
-Specifying the corresponding Vitis, XRT, and path to the platform repository by running following commands.
+Specifying the corresponding Vitis, XRT, and the path to the platform repository by running the following commands.
 
 .. code-block:: bash
 
    source /opt/xilinx/Vitis/2021.1/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
+
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

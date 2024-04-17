@@ -1,21 +1,11 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Asian, pricing, engine, MCAsianAPEngine
-   :description: Asian option pricing engine uses Monte Carlo simulation to estimate the value of the Asian option. Here, we assume the process of asset pricing applies to Black-Scholes process. 
+   :description: Asian option pricing engine uses Monte Carlo simulation to estimate the value of the Asian option. Here, it is assumed that the process of asset pricing applies to Black-Scholes process. 
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
@@ -28,7 +18,7 @@ Internal Design of Asian Option Pricing Engine
 Overview
 ========
 
-The Asian option pricing engine uses Monte Carlo Simulation to estimate the value of the Asian option. Here, we assume the process of asset pricing applies to Black-Scholes process. 
+The Asian option pricing engine uses Monte Carlo Simulation to estimate the value of the Asian option. Here, it is assumed that the process of asset pricing applies to Black-Scholes process. 
 
 Asian Option is kind of exotic option. The payoff is path dependent and it is dependent on the
 average price of underlying asset over the settled period of time :math:`T`.
@@ -114,7 +104,7 @@ where :math:`M` is the total timesteps, :math:`dt` is the time interval
 .. math::
         Payoff = \max(0,Price_t - Strike_t) \> for \> put \> options
 
-The pricing architecture on FPGA can be shown as the following figure:
+The pricing architecture on FPGA can be shown in the following figure:
 
 .. _my-figureAS:
 .. figure:: /images/AS/framework.png
@@ -154,9 +144,9 @@ The pricing architecture on FPGA can be shown as the following figure:
     :align: center
     
     
-.. note::
+.. Note::
 
-    The 3 figures above shows the pricing part of McAsianAPEngine, McAsianASEngine and McAsianGPEngine respectively; the other parts, for example, PathGenerator, MCSimulation and other modules, are the same as in MCEuropeanEngine.
+    The three figures above shows the pricing part of McAsianAPEngine, McAsianASEngine and McAsianGPEngine respectively. Tthe other parts, for example, PathGenerator, MCSimulation and other modules, are the same as in MCEuropeanEngine.
 
 
 Profiling
@@ -208,7 +198,7 @@ The hardware resources are listed in :numref:`tab1MCU`. The Arithmetic and Geome
     +---------------------------------+-----------------+----------------+-----------------+
 
 
-:numref:`tab_Max_Performance` shows the max performance of McAsianEngines in one SLR of Xilinx xcu250-figd2104-2L-e (Vivado report).
+:numref:`tab_Max_Performance` shows the max performance of McAsianEngines in one SLR of an AMD xcu250-figd2104-2L-e (Vivado report).
 
 .. _tab_Max_Performance:
 

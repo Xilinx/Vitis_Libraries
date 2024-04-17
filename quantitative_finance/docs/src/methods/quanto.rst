@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Quanto, Closed-Form, Black Scholes Merton
@@ -33,9 +23,9 @@ Overview
 
 Quanto option gives the buyer the right to sell a foreign asset in a foreign currency at the exercise date and receive the proceeds in his domestic currency.
 
-The operation of Quanto option can help explain what it is:
+The operation of Quanto option explains what it is:
 
-The buyer of a call Quanto will agree with the seller a foreign target asset, a future strike price for that asset in the foreign currency, an exercise date and an agreed fixed exchange rate for the exercise.
+The buyer of a call Quanto agrees with the seller a foreign target asset, a future strike price for that asset in the foreign currency, an exercise date and an agreed fixed exchange rate for the exercise.
 
 At the exercise date, if the option is in the money, the payoff (current foreign currency asset price - foreign currency strike price) is converted to the domestic currency at the agreed fixed exchange rate and delivered to the Option buyer. 
 

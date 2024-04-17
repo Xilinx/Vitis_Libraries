@@ -1,18 +1,8 @@
 
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: fintech, Ornstein-Uhlenbeck
@@ -27,7 +17,7 @@ Ornstein-Uhlenbeck Process
 
 Overview
 =========
-`Ornstein-Uhlenbeck process` is a stochastic process which uses the Random Number Generator (RNG) to generate locations for mesher. It uses a reference time point :math:`\Delta w` and a time step :math:`\Delta t` to calculate the drift and diffusion. The Ornstein-Uhlenbeck process is a simple stochastic processes, whose feature of interest is its mean-reverting drift term :math:`a(r-x)` and its constant diffusion term :math:`\sigma`.
+`Ornstein-Uhlenbeck process` is a stochastic process, which uses the Random Number Generator (RNG) to generate locations for mesher. It uses a reference time point :math:`\Delta w` and a time step :math:`\Delta t` to calculate the drift and diffusion. The Ornstein-Uhlenbeck process is a simple stochastic processes, whose feature of interest is its mean-reverting drift term :math:`a(r-x)` and its constant diffusion term :math:`\sigma`.
 
 The Ornstein-Uhlenbeck process can be described by
 

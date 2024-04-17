@@ -1,18 +1,7 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Finance, Library, Vitis Quantitative Finance Library, fintech
@@ -24,14 +13,14 @@
 Vitis Quantitative Finance Library
 **********************************
 
-The Vitis Quantitative Finance Library is a Vitis Library aimed at providing a comprehensive FPGA acceleration library for quantitative finance. 
-It is an open-sourced library that can be used in a variety of financial applications, such as modeling, trading, evaluation and risk management.
+The AMD Vitis |trade| Quantitative Finance Library is a Vitis Library aimed at providing a comprehensive FPGA acceleration library for quantitative finance. 
+It is an open-sourced library that can be used in a variety of financial applications, such as modeling, trading, evaluation, and risk management.
 
 The Vitis Quantitative Finance Library provides extensive APIs at three levels of abstraction:
 
 * L1, the basic functions heavily used in higher level implementations. It includes statistical functions such as Random Number Generation (RNG), numerical methods, e.g., Monte Carlo Simulation, and linear algebra functions such as Singular Value Decomposition (SVD), and tridiagonal and pentadiagonal matrix solvers.
 
-* L2, the APIs provided at the level of pricing engines. Various pricing engines are provided to evaluate different financial derivatives, including equity products, interest-rate products, foreign exchange (FX) products, and credit products. At this level, each pricing engine API can be seen as a kernel. The customers may write their own CPU code to call different pricing engines under the framework of OpenCL.  
+* L2, the APIs provided at the level of pricing engines. Various pricing engines are provided to evaluate different financial derivatives, including equity products, interest-rate products, foreign exchange (FX) products, and credit products. At this level, each pricing engine API can be seen as a kernel. The customers might write their own CPU code to call different pricing engines under the framework of OpenCL.  
 
   
 Library Contents
@@ -413,7 +402,7 @@ A Makefile is used to drive this flow with available steps including `CSIM` (hig
     # Only run C++ simulation on U250
     make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 PLATFORM=u250_xdma_201830_1
 
-As well as verifying functional correctness, the reports generated from this flow give an indication of logic utilization, timing performance, latency and throughput. The output files of interest can be located at the location examples as below where the file names are correlated with the source code. i.e. the callable functions within the design under test.::
+As well as verifying functional correctness, the reports generated from this flow give an indication of logic utilization, timing performance, latency and throughput. The output files of interest can be located at the location examples as below where the file names are correlated with the source code, that is, the callable functions within the design under test.::
 
     Simulation Log: <library_root>/L1/tests/bk_model/prj/solution1/csim/report/dut_csim.log
     Synthesis Report: <library_root>/L1/tests/bk_model/prj/solution1/syn/report/dut_csynth.rpt
@@ -446,7 +435,7 @@ The outputs of this flow are packaged kernel binaries (xclbin files) that can be
     Host Executable: L2/tests/GarmanKohlhagenEngine/bin_#PLATFORM/gk_test.exe
     Kernel Packaged Binary: L2/tests/GarmanKohlhagenEngine/xclbin_#PLATFORM_#TARGET/gk_kernel.xclbin #ARGS
 
-This flow can be used to verify functional correctness in hardware and enable real world performance to be measured.
+This flow can be used to verify functional correctness in hardware and enable real-world performance to be measured.
 
 
 
@@ -479,3 +468,8 @@ This flow can be used to verify functional correctness in hardware and enable re
    Benchmark <benchmark.rst>
 
 
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

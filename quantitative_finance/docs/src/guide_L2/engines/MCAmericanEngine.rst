@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: American, pricing, engine, MCAmericanEnginePricing
@@ -47,7 +37,7 @@ In the process above, for each time step :math:`t`, conditional expectation :mat
 
 where :math:`t` is the time prior to maturity, :math:`B_i(S_t)` is the basis function of the values of actual stock prices :math:`S_t` at time :math:`t`. The constant coefficients of basis functions are written as :math:`a_i` , and acts as weights to the basis functions. The discounted subsequent realized cash flows from continuation called :math:`Y_t`. 
 
-Here we employed polynomial function with weights as the basis functions, so the conditional expectations can be re-written as:
+Here, the polynomial function is employed with weights as the basis functions, so the conditional expectations can be re-written as:
 
 .. math::
         E_t[Y_t|S_t] = a + bS_t + cS_t^2 
@@ -60,10 +50,10 @@ By adding immediate exercise value :math:`E_t(S_t)` to the Equation above, and e
         a + bS_t + cS_t^2 + dE_t(S_t) = E_t[Y_t|S_t]
     :label: expect_calc 
 
-:math:`a`, :math:`b`, :math:`c`, :math:`d` are constant coefficients. These coefficients need to be known while calculating the optimal exercise price in mcSimulation model. More details of American-style optimal algorithm used in our library refer to **"da Silva, J. N., & Fernández, L. A Monte Carlo Approach to Price American-Bermudan-Style Derivatives."**
+:math:`a`, :math:`b`, :math:`c`, :math:`d` are constant coefficients. These coefficients need to be known while calculating the optimal exercise price in mcSimulation model. For more details of American-style optimal algorithm used in the library, refer to **"da Silva, J. N., & Fernández, L. A Monte Carlo Approach to Price American-Bermudan-Style Derivatives."**
 
 .. note::
-    Theoretically, the basis functions :math:`B_i(S_t)` can be any complex functions and the number of basis function may be any number. The American Option implemented in our library employs three polynomial functions, namely, 1, :math:`S_t` and :math:`S_t^2`, which proved by Longstaff and Schwartz that works well, and is a typical setup in real implementations.
+    Theoretically, the basis functions :math:`B_i(S_t)` can be any complex functions and the number of basis function might be any number. The American Option implemented in the library employs three polynomial functions, namely, 1, :math:`S_t` and :math:`S_t^2`, which proved by Longstaff and Schwartz that works well, and is a typical setup in real implementations.
 
 Implementation
 =================
@@ -78,18 +68,18 @@ th: 50%
 
 .. hint:: Why two processes are required in MCAmericanEngine and only one process, pricing, is enough for European Option Monte Carlo engine?
 
-    | For European Option, the exercise price of the stork at the last time step :math:`T` needs to be and only need to be calculated. However, for American Option, the exercise price of the stock at all time steps :math:`t, 0 \leq t \leq T` are required to be computed. Therefore, the mathematical model of American Option Monte Carlo employs several basis functions, refer to Equation :eq:`expect_calc`. 
+    | For European Option, the exercise price of the stork at the last time step :math:`T` needs to be and only need to be calculated. However, for American Option, the exercise price of the stock at all time steps :math:`t, 0 \leq t \leq T` are required to be computed. Therefore, the mathematical model of American Option Monte Carlo employs several basis functions, refer to the Equation :eq:`expect_calc`. 
     | In the aspect of basis functions, the European Option employed only one basis function: :math:`S_T`, where :math:`T` is the maturity date. By introducing multiple basis functions, the coefficients are also introduced. Thus, the calibration process is deployed to compute these coefficients. 
 
 
 Calibration Process
 ---------------------
-Calibration process aims to calculate the coefficients that will be used in the pricing process. 
+Calibration process aims to calculate the coefficients that are used in the pricing process. 
 
 The detailed calculation process is as follows:
 
 1. Generate uniform random numbers with Mersenne Twister UNiform MT19937 Random Number Generator (RNG) followed by Inverse Cumulative Normal (ICN) uniform random numbers. Thereafter, generate independent stock paths with the uniform random numbers and Black-Sholes path generator. The default paths (samples) number used in the calibration process is 4096. Thus, 4096 random numbers are generated for each time step :math:`t`.  
-2. Refer to Equation :eq:`expect_calc`, :math:`a`, :math:`b`, :math:`c`, :math:`d` are the unknown coefficients that should be calculated. We denote these coefficients as :math:`x`, so
+2. Refer to Equation :eq:`expect_calc`, :math:`a`, :math:`b`, :math:`c`, :math:`d` are the unknown coefficients that should be calculated. Denote these coefficients as :math:`x`, so
 
 .. math::
         x = \begin{bmatrix}
@@ -99,7 +89,7 @@ The detailed calculation process is as follows:
               d
             \end{bmatrix}
 
-The expressions derived from path data :math:`S_t`, :math:`S_t^2` and :math:`E_t` can be obtained for each time step :math:`t`. Here we denote them as :math:`A`. 
+The expressions derived from path data :math:`S_t`, :math:`S_t^2` and :math:`E_t` can be obtained for each time step :math:`t`. Here denote them as :math:`A`. 
    
 .. math::
        A = \begin{bmatrix}
@@ -115,7 +105,7 @@ Equation :eq:`expect_calc` can be re-written as:
 where :math:`y` is the conditional expectation :math:`E_t(Y_t|S_t)` in Equation :eq:`expect_calc`. To simplify the expression in deduction, it is denoted as :math:`y` in this section. By backward process, this conditional expectation :math:`y` for each time step can be obtained. Which is to say, :math:`y` is actually the optimal exercise price in the period of :math:`t` to :math:`T`. 
 Therefore, the problem of computing coefficients is changes to find the solution for Equation :eq:`y=ax`. 
 
-In practical, in this step, we calculate the value of 4 elements in vector :math:`A_t` for each time step :math:`t`. Which is to say, 4 outputs of this stage are :math:`1`, :math:`S_t`, :math:`S_t^2` and :math:`E_t`. The default size of ::math:`A_t` for each time step is 4096 * 4.  
+In practical, in this step, calculate the value of four elements in vector :math:`A_t` for each time step :math:`t`. Which is to say, four outputs of this stage are :math:`1`, :math:`S_t`, :math:`S_t^2` and :math:`E_t`. The default size of ::math:`A_t` for each time step is 4096 * 4.  
 
 To simplify the process of solving Equation :eq:`y=ax`, matrix data :math:`A` is multiplied with its transform :math:`A^T`. A new 4*4 matrix :math:`B` can be derived:
 
@@ -130,11 +120,11 @@ Corresponding to the two steps described above, the hardware architecture is sho
         :width: 60%
         :align: center
 
-We denote the process from RNG to generate matrix data :math:`B` and exercise price for each timestep :math:`t` as a Monte-Carlo-Model (MCM) in American Option Calibration Process. Each MCM process 1024 data. With a template parameter UN_PATH, more pieces of MCM can be instanced when hardware resources available. 
+Denote the process from RNG to generate matrix data :math:`B` and exercise price for each timestep :math:`t` as a Monte-Carlo-Model (MCM) in American Option Calibration Process. Each MCM process 1024 data. With a template parameter UN_PATH, more pieces of MCM can be instanced when hardware resources available. 
 
 To connect multiple MCM data, two merger blocks are created: one for merge price data, one for merge matrix :math:`B`. Meanwhile, to guarantee all calibration path data can be executed in a loop when there is not enough MCM available, a soft-layer Merger that accumulates all elements of :math:`B` data is employed. Since these intermediate data need to be accumulated multiple times, a BRAM is used to save and load them. 
 
-3. Once we get the matrix :math:`B`, the singular matrix :math:`\Sigma` of :math:`B` could be obtained by SVD (Singular Value Decomposition).
+3. Once you get the matrix :math:`B`, the singular matrix :math:`\Sigma` of :math:`B` could be obtained by SVD (Singular Value Decomposition).
 
 .. math::
         B = U \Sigma V.
@@ -158,8 +148,8 @@ The implementation of step 3 and steps 4 is shown in :numref:`Figure %s <my-figu
 
 Besides, notice that since SVD is purely computing dependent, which is pretty slow in the design. Therefore, a template parameter UN_STEP is added to speed up the SVD calculation process.
 
-.. note::
-  It is worth mentioning that 4096 is only the default calibrate sample/path size. This number may change by customers' demands. However, the size must be a multiple of 1024.
+.. Note::
+  It is worth mentioning that 4096 is only the default calibrate sample/path size. This number might change by customers' demands. However, the size must be a multiple of 1024.
 
 
 Pricing Process
@@ -186,23 +176,23 @@ The theory of the pricing process is actually already introduced in the Theory S
 5. Check if the standard deviation is smaller than the required tolerance defined by customers. If not, repeat step 1-4, until the final optimal exercise price is obtained. 
 
 .. caution::
-  Notice that the pricing module also supports another approach of ending pricing process, which utilizes the input parameter *requiredSamples*. When the *requiredSamples* are processed, we assume the output mean result is the final optimal exercise price. This mode is also supported in the American Option Pricing Engine. And the figure above only illustrates the ending approach with the required tolerance.
+  Notice that the pricing module also supports another approach of ending pricing process, which utilizes the input parameter *requiredSamples*. When the *requiredSamples* are processed, it is assumed that the output mean result is the final optimal exercise price. This mode is also supported in the American Option Pricing Engine. And the figure above only illustrates the ending approach with the required tolerance.
 
 .. note::
-  In the figure, BRAM is used to load coefficients data that calculated from the calibration process. Here may use BRAM or DDR, it depends on the amount of data that need to be stored beforehand. The reason that coefficients data cannot be streamed is that the multi-Monte-Carlo process in pricing always needs to execute multiple times. Each time execution, these need to be loaded. Thus, it is impossible to use *hls::stream*.
+  In the figure, BRAM is used to load coefficients data that calculated from the calibration process. Here you can use BRAM or DDR, it depends on the amount of data that needs to be stored beforehand. The reason that coefficients data cannot be streamed is that the multi-Monte-Carlo process in pricing always needs to execute multiple times. At each time of execution, these need to be loaded. Thus, it is impossible to use *hls::stream*.
 
 
 MCAmericanEngine APIs 
 -------------------------------------------------------
-In our library, the MCAmerican Option Pricing with Monte Carlo simulation is provided as an API MCAmericanEngine(). However, due to external memory usage on DDR/HBM and avoiding the designed hardware cross-SLR placed and routed. The American engine option supports two modes:
+In the library, the MCAmerican Option Pricing with Monte Carlo simulation is provided as an API MCAmericanEngine(). However, due to external memory usage on DDR/HBM and avoiding the designed hardware cross-SLR placed and routed. The American engine option supports two modes:
 
 - **single API version**: use one API to run the whole American option
 - **three APIs version**: three APIs/kernels are provided, connecting them on the host side to compose the overall design.
  
-The boundary between them is external memory access. For the calibration process, two APIs are provided. Calibration step 1 and 2 are wrapped as one kernel, namely, **MCAmericanEnginePreSamples**. Step 3 and step 4 compose another kernel **MCAmericanEngineCalibrate**. And pricing process as another kernel **MCAmericanEnginePricing** in this library. Because the pricing process is separated as a kernel, the data exchange between the calibration and pricing process may not through the BRAM any more. Thus, in the implementation, DDR/HBM is used as the coefficients data storage memory.
+The boundary between them is external memory access. For the calibration process, two APIs are provided. Calibration step 1 and 2 are wrapped as one kernel, namely, **MCAmericanEnginePreSamples**. Step 3 and step 4 compose another kernel **MCAmericanEngineCalibrate**. And pricing process as another kernel **MCAmericanEnginePricing** in this library. Because the pricing process is separated as a kernel, the data exchange between the calibration and pricing process might not through the BRAM any more. Thus, in the implementation, DDR/HBM is used as the coefficients data storage memory.
 
 
-With the three kernels, the kernel level pipeline by shortening the overall execution time could be achieved. However, employing kernel level pipeline requires a complex schedule from the host code side. An illustration of connection 3 kernels as a complete system is given in this part, which can be seen in :numref:`Figure %s <my-figure_am>`. Price data and :math:`B` matrix data are the outputs from kernel MCAmericanEnginePreSamples. For each timestep, path number (default 4096) price data B and x matrix data (a number of 9) need to be saved to DDR or HBM memory. 
+With the three kernels, the kernel level pipeline by shortening the overall execution time could be achieved. However, employing kernel level pipeline requires a complex schedule from the host code side. An illustration of connection three kernels as a complete system is given in this part, which can be seen in :numref:`Figure %s <my-figure_am>`. Price data and :math:`B` matrix data are the outputs from kernel MCAmericanEnginePreSamples. For each timestep, path number (default 4096) price data B and x matrix data (a number of 9) need to be saved to DDR or HBM memory. 
 
 .. _my-figure_am:
 .. figure:: /images/AM/AM_structure.png
@@ -241,7 +231,7 @@ Kernel 1 MCAmericanEngineCalibrate reads price data :math:`y` and matrix data :m
                          \sum(E_i)\   \sum(S_iE_i)\ \sum(S_i^2E_i)\ \sum(E_i^2) \\
                         \end{bmatrix} 
 
-  It is evident that some elements are the same. After removing duplicated elements, the following 9 elements of :math:`B` are stored to DDR/HBM each timestep:
+  It is evident that some elements are the same. After removing duplicated elements, the following nine elements of :math:`B` are stored to DDR/HBM each timestep:
 
   .. math:: 
       B_{save} = \begin{bmatrix}
@@ -255,7 +245,7 @@ Kernel 1 MCAmericanEngineCalibrate reads price data :math:`y` and matrix data :m
 
 
 .. caution:: 
-  The architecture illustrated above is only an example design. In fact, multiple numbers of kernels, each with a different unroll number (UN) may be deployed. The number of kernels that can be instanced in design depends on the resource/size of the FPGA.
+  The architecture illustrated above is only an example design. In fact, multiple numbers of kernels, each with a different unroll number (UN) might be deployed. The number of kernels that can be instanced in design depends on the resource/size of the FPGA.
 
 .. toctree::
    :maxdepth: 1

@@ -159,11 +159,11 @@ endif
 
 ######################### binary container global settings ##########################
 VPP_FLAGS_FDMG2_k0 +=  -D DPRAGMA
-VPP_FLAGS_FDMG2_k0 += --hls.clock 200000000:FDMG2_k0
+VPP_FLAGS_FDMG2_k0 += --hls.clock 150000000:FDMG2_k0
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_FDMG2_k += --clock.defaultFreqHz 200000000
+VPP_LDFLAGS_FDMG2_k += --clock.defaultFreqHz 150000000
 else
-VPP_LDFLAGS_FDMG2_k += --kernel_frequency 200
+VPP_LDFLAGS_FDMG2_k += --kernel_frequency 150
 endif
 
 ifneq ($(SD_CARD_NEEDED), on)

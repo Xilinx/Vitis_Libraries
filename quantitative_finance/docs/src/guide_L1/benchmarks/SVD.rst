@@ -1,22 +1,11 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: benchmark, European, engine, option
-   :description: This is a benchmark of MC (Monte-Carlo) European Engine using the Xilinx Vitis environment to compare with QuantLib.  
+   :description: This is a benchmark of MC (Monte-Carlo) European Engine using the AMD Vitis |trade| environment to compare with QuantLib.  
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
@@ -29,9 +18,9 @@ Benchmark of Singular Value Decomposition (SVD)
 
 Overview
 ========
-This is a benchmark of Singular Value Decomposition.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
+This is a benchmark of Singular Value Decomposition.  It supports software and hardware emulation as well as running the hardware accelerator on the AMD Alveo |trade| U250.
 
-This example resides in ``L1/benchmarks/SVD`` directory. The tutorial provides a step-by-step guide that covers commands for build and runging kernel.
+This example resides in ``L1/benchmarks/SVD`` directory. The tutorial provides a step-by-step guide that covers commands for build and running kernel.
 
 
 Executable Usage
@@ -39,7 +28,7 @@ Executable Usage
 
 * **Work Directory(Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_quantitative_finance`. For getting the design,
+The steps for library download and environment setup can be found in :ref:`l2_vitis_quantitative_finance`. To get the design,
 
 .. code-block:: bash
 
@@ -47,7 +36,7 @@ The steps for library download and environment setup can be found in :ref:`l2_vi
 
 * **Build kernel(Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your XCLBIN and host binary targeting a specific device. This process might take long.
 
 .. code-block:: bash
 
@@ -59,7 +48,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
 * **Run kernel(Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
@@ -92,7 +81,7 @@ Input Arguments:
 Profiling 
 ==========
 
-The timing performance of the 4x4 SVD is shown in the table below, where matrix size is 4 x 4, and FPGA frequency is 300MHz.
+The timing performance of the 4x4 SVD is shown in the following table, where matrix size is 4 x 4, and FPGA frequency is 300MHz.
 
 .. _tab_SVD_Execution_Time:
 
@@ -126,3 +115,8 @@ The hardware resources are listed in the following table (vivado 18.3 report wit
 
 .. toctree::
    :maxdepth: 1
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

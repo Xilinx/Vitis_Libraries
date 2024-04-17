@@ -1,22 +1,11 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: benchmark, American, engine, option
-   :description: This is a benchmark of MC (Monte-Carlo) European Engine using the Xilinx Vitis environment to compare with QuantLib.   
+   :description: This is a benchmark of MC (Monte-Carlo) European Engine using the AMD Vitis environment to compare with QuantLib.   
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
@@ -28,16 +17,16 @@ Benchmark of MCAmericanEngineMultiKernel
 
 Overview
 ========
-This is a benchmark of MC (Monte-Carlo) European Engine using the Xilinx Vitis environment to compare with QuantLib.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
+This is a benchmark of MC (Monte-Carlo) European Engine using the AMD Vitis |trade| environment to compare with QuantLib.  It supports software and hardware emulation as well as running the hardware accelerator on the AMD Alveo |trade| U250.
 
-This example resides in ``L2/benchmarks/MCAmericanEngineMultiKernel`` directory. The tutorial provides a step-by-step guide that covers commands for build and runging kernel.
+This example resides in ``L2/benchmarks/MCAmericanEngineMultiKernel`` directory. The tutorial provides a step-by-step guide that covers commands for build and running kernel.
 
 Executable Usage
 =================
 
 * **Work Directory(Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_quantitative_finance`. For getting the design,
+The steps for library download and environment setup can be found in :ref:`l2_vitis_quantitative_finance`. To get the design,
 
 .. code-block:: bash
 
@@ -45,7 +34,7 @@ The steps for library download and environment setup can be found in :ref:`l2_vi
 
 * **Build kernel(Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your XCLBIN and host binary targeting a specific device. This process takes long.
 
 .. code-block:: bash
 
@@ -57,7 +46,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
 * **Run kernel(Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
@@ -123,8 +112,8 @@ The application scenario in this case is:
     +---------------+----------------------------+
 
 
-The performance comparison of the MCAmericanEngine is shown in the table below, where timesteps is 100, requiredSamples is 24576, calibSamples is 4096, and FPGA frequency is 300MHz. 
-Baseline is Quantlib, a Widely Used C++ Open Source Library, running on CPU with 1 thread. The  CPU is Intel(R) Xeon(R) CPU E5-2667 v3 @3.200GHz, 8 cores per procssor and 2 threads per core.
+The performance comparison of the MCAmericanEngine is shown in the following table, where timesteps is 100, requiredSamples is 24576, calibSamples is 4096, and FPGA frequency is 300MHz. 
+Baseline is Quantlib, a Widely Used C++ Open Source Library, running on CPU with one thread. The  CPU is Intel(R) Xeon(R) CPU E5-2667 v3 @3.200GHz, eight cores per processor and two threads per core.
 Our cold run has 197X and warm run has 590X compared to baseline.
 
 .. _tab_MCAE_Execution_Time:
@@ -170,7 +159,7 @@ The resource utilization and performance of MCAmericanEngine on U250 FPGA card i
     |               |  (k2_0: UN=4; k2_1: UN=4)  |        |        |      |      |     |
     +---------------+----------------------------+--------+--------+------+------+-----+
 
-:numref:`tab_MCAE_resource` gives the resource utilization report of four American option APIs. Note that the resource statistics are under specific UN (Unroll Number) configurations. These UN configurations are the templated parameters of the corresponding API.
+:numref:`tab_MCAE_resource` gives the resource utilization report of four American option APIs. The resource statistics are under specific UN (Unroll Number) configurations. These UN configurations are the templated parameters of the corresponding API.
 
 The complete Vitis demos of MCAmericanEngineMultiKernel is executed with a U250 card on Nimbix. The performance is listed in :numref:`tab_MCAE_performance`. In this table, kernel execution time and end-to-end execution time (E2E) are calculated. 
 
@@ -198,9 +187,14 @@ Due to place and route on FPGA, the kernel runs at 260MHz finally. Because the l
 .. hint::
   Why instance two kernels of MCAmericanEnginePricing with UN=4 instead of using one pricing kernel with UN=8? 
 
-  For one pricing kernel with UN=4, the resource it used is around 74% of one SLR. When UN=8, two SLRs are required to fit 1 kernel. This means that cross SLR for single kernel has to be processed. This may decrease the overall frequency dramatically. In real applications, we are always trying to avoid cross SLR place & routing. Using two exactly the same pricing kernel with UN=4, each kernel can be successfully placed on one SLR. The cross SLR logic can be avoided. Therefore, two pricing kernels with UN=4 are employed in the end.
+  For one pricing kernel with UN=4, the resource it used is around 74% of one SLR. When UN=8, two SLRs are required to fit one kernel. This means that cross SLR for single kernel has to be processed. This may decrease the overall frequency dramatically. In real applications, we are always trying to avoid cross SLR place & routing. Using two exactly the same pricing kernel with UN=4, each kernel can be successfully placed on one SLR. The cross SLR logic can be avoided. Therefore, two pricing kernels with UN=4 are employed in the end.
 
 
 
 .. toctree::
    :maxdepth: 1
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

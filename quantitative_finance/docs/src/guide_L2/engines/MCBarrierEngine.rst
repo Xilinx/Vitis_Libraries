@@ -1,21 +1,11 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Barrier, pricing, engine, MCBarrierEngine
-   :description: Barrier option pricing engine uses Monte Carlo Simulation method to estimate the payoff of barrier option. Here, we assume the process of asset pricing applies to Black-Scholes process. 
+   :description: Barrier option pricing engine uses Monte Carlo Simulation method to estimate the payoff of barrier option. Here, it is assumed that the process of asset pricing applies to Black-Scholes process. 
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
@@ -27,9 +17,9 @@ Internal Design of Barrier Option Pricing Engine
 Overview 
 =========
 
-The Barrier option pricing engine uses Monte Carlo Simulation method to estimate the payoff of barrier option. Here, we assume the process of asset pricing applies to Black-Scholes process.
+The Barrier option pricing engine uses Monte Carlo Simulation method to estimate the payoff of barrier option. Here, it is assumed that the process of asset pricing applies to Black-Scholes process.
 
-Barrier option is a kind of option whose payoff depends on whether the option is effective at the maturity time. Only when the option is effective, the holder of the option has the right, but not the obligation, to buy/sell the underlying asset at the strike price. If the option is effective, the payoff of it will be calculated as the European Option.
+Barrier option is a kind of option whose payoff depends on whether the option is effective at the maturity time. Only when the option is effective, the holder of the option has the right, but not the obligation, to buy/sell the underlying asset at the strike price. If the option is effective, its payoff is calculated as the European Option.
 
 There are four barrier option types, including:
 
@@ -44,21 +34,21 @@ There are four barrier option types, including:
 The rebate is a fixed value which is paid when the option is ineffective.
 
 .. NOTE::
-   In our implementation, barrier option means continuous and single barrier option. That is to say, the barrier event could happen at any time during the lifetime of option. 
+   In this implementation, the barrier option means continuous and single barrier option. That is to say, the barrier event can happen at any time during the lifetime of option. 
 
 Implementation
 ================
 
-We provide two kinds of pricing engines, MCBarrierEngine and MCBarrierNoBiasEngine to evaluate the barrier option. 
+Two kinds of pricing engines, MCBarrierEngine and MCBarrierNoBiasEngine are provided to evaluate the barrier option. 
 
 MCBarrierEngine generates the result with bias because it only considers whether the asset price at each discrete time point hits the barrier level.
 
 However, the asset price during each discrete time interval maybe go up and down to hit the barrier level, which causes the bias of result. MCBarrierNoBiasEngine is to approximate the price process during the interval by a Brownian bridge.
 After simulating the asset price at each discrete time point, draw the maximum or minimum of the stock price on the interval using the known theoretical distribution of a Brownian Bridge, refer to **''Going to Extremes: Correcting Simulation Bias in Exotic Option Valuation - D.R. Beaglehole, P.H. Dybvig and G. Zhou, Correcting for Simulation Bias in Monte Carlo methods to Value Exotic Opitons in Models Driven by Levy Process - Claudia Ribeiro and Nick Webber.''**
 
-In the following, we will take up-and-out barrier option as an example to elaborate the two kinds of pricing engines.
+In the following, take up-and-out barrier option as an example to elaborate the two kinds of pricing engines.
 Let :math:`T` be the maturity time of option, the barrier level is :math:`B`. The maturity time :math:`T` is discretized by time steps :math:`N`. 
-The rebate value is :math:`R`. If a barrier option fails to exercise, the seller may pay a rebate to the buyer of the option. Knock-outs may pay a rebate when they are knocked out, and knock-ins may pay a rebate if they expire without ever knocking in.
+The rebate value is :math:`R`. If a barrier option fails to exercise, the seller might pay a rebate to the buyer of the option. Knock-outs might pay a rebate when they are knocked out, and knock-ins may pay a rebate if they expire without ever knocking in.
 
 
 MCBarrierEngine
@@ -95,17 +85,17 @@ So, the estimated value of option is the average of all the samples.
 .. math::
    c = \frac{1}{M}\sum_{i=1}^{M} P_i
 
-The :math:`c` is a biased estimate of the barrier option value, because the sample path may have exceeded the barrier level, knocking out the option, during the time interval. 
+The :math:`c` is a biased estimate of the barrier option value, because the sample path might have exceeded the barrier level, knocking out the option, during the time interval. 
 
 MCBarrierNoBiasEngine
 ----------------------
 
 For barrier option, the payoff is decided by the maximum or minimum value of the underlying asset during the lifetime of option.
-The maximum of the price process on a discrete set of times is always lower than the maximum for all times, so the MCBarrierEngine always underestimate the option price.  
+The maximum of the price process on a discrete set of times is always lower than the maximum for all times, so the MCBarrierEngine always underestimates the option price.  
 
-Here, we use the Brownian bridge approach to eliminate the bias. For the discrete time interval :math:`[t_j, t_j+1]`, when :math:`S(t_j)` and :math:`S(t_{j+1})` is fixed,
-the process of :math:`S(t), t\in[t_j,t_j+1]` is a Brownian bridge. We will consider :math:`Pr` is the probability of the maximum asset price during time interval :math:`[t_i, t_i+1]` less than barrier level.
-Then, we have:
+Here, the Brownian bridge approach is used to eliminate the bias. For the discrete time interval :math:`[t_j, t_j+1]`, when :math:`S(t_j)` and :math:`S(t_{j+1})` is fixed,
+the process of :math:`S(t), t\in[t_j,t_j+1]` is a Brownian bridge. Considering :math:`Pr` is the probability of the maximum asset price during time interval :math:`[t_i, t_i+1]` less than barrier level.
+Then, you have:
 
 .. math::
    Pr[max_{t\in{t_j, t_j+1}}(S_t) <= B|S(t_j), S(t_{j+1})] = 1 - \exp (-2\frac {(\underline{B}-R_j)(\underline{B}-R_{j+1})} {\sigma^2 \Delta t})

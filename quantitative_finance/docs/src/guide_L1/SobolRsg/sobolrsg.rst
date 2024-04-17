@@ -1,18 +1,8 @@
 
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: fintech, sobol, LD sequence, Monte-Carlo, gray code, quasi-random
@@ -77,7 +67,7 @@ Then the :math:`x_{i,j}` element of the `j`-th dimension of the `i`-th point in 
 
     x_{i,j} := i_{1} \nu_{1,j} \oplus i_{2} \nu_{2,j} \oplus \cdots \nu_{n,j}
 
-where :math:`i_{k}` is the :math:`k`-th digit from the right-hand side when :math:`i` is written in binary :math:`i = ( \cdots i_{3} i_{2} i_{1} )_{2}`. Here and elsewhere in this article, we use the notation :math:`()_{2}` to denote the binary representation of numbers.
+where :math:`i_{k}` is the :math:`k`-th digit from the right-hand side when :math:`i` is written in binary :math:`i = ( \cdots i_{3} i_{2} i_{1} )_{2}`. Here and elsewhere in this article, the notation :math:`()_{2}` is used to denote the binary representation of numbers.
 The formula above corresponds to the original implementation of Sobol. The (binary-reflected) Gray code of an integer :math:`i` is defined as:
 
 .. math::
@@ -86,7 +76,7 @@ The formula above corresponds to the original implementation of Sobol. The (bina
 
 It has the property that the binary representations of :math:`gray(i)` and :math:`gray(i-1)` differs in only one position, namely, the index of the first 0 digit from the right in the binary representation of :math:`i-1`.
   
-We generate the points of Sobol using 
+Generate the points of Sobol using 
 
 .. math::
 
@@ -99,7 +89,7 @@ where :math:`g_{i,k}` is the `k`-th digit from the right of the Gray code of :ma
 
 where :math:`c_{i}` is the index of the first 0 digit from the right in the binary representation of :math:`i = ( \cdots i_{3} i_{2} i_{1})_{2}`. We have :math:`c_{0}=1, c_{1}=2, c_{2}=1, c_{3}=3, c_{4}=1, c_{5}=2`, etc.
 
-With the implementation of Gray Code, we simply obtain the points in a different order, which still preserve their uniformity properties. It is because every block of :math:`2^{m}` points for :math:`m=0,1, \cdots` is the same as the original implementation. It is known that the two equations closely mentioned above can generate exactly the same sequence, and the former one allows one to start from any position in the sequence, while the later one is recursive and more computationally efficient. The reference is `equation reference`_.
+With the implementation of Gray Code, simply obtain the points in a different order, which still preserve their uniformity properties. It is because every block of :math:`2^{m}` points for :math:`m=0,1, \cdots` is the same as the original implementation. It is known that the two equations closely mentioned above can generate exactly the same sequence, and the former one allows one to start from any position in the sequence, while the later one is recursive and more computationally efficient. The reference is `equation reference`_.
 
 .. _equation reference: https://web.maths.unsw.edu.au/~fkuo/sobol/joe-kuo-notes.pdf
 
@@ -120,7 +110,7 @@ Sobol Workflow:
     :align: center
     
    
-The initialization function will set :math:`addr=0` and read parameter list to initialize polynomial :math:`m_{ S_{j},j}`. The parameter reference file `new-joe-kuo-6.21201` is given by `sobol reference`_ mentioned above. The parameter field is shown as below:
+The initialization function sets :math:`addr=0` and read parameter list to initialize polynomial :math:`m_{ S_{j},j}`. The parameter reference file `new-joe-kuo-6.21201` is given by `sobol reference`_ mentioned above. The parameter field is shown as below:
 
 .. _my-figure-param:
 .. figure:: /images/param.png

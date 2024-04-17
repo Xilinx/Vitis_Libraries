@@ -1,18 +1,8 @@
 
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: fintech, singular value decomposition, SVD, Jacobi, Profiling
@@ -28,9 +18,9 @@ Singular Value Decomposition (SVD)
 Overview
 ========
 
-The `singular value decomposition` (SVD) is a very useful technique for dealing with general dense matrix problems. Recent years, SVD has become a computationally viable tool for solving a wide variety of problems raised in many practical applications, such as least-squares data fitting, image compression, facial recognition, principal component analysis, latent semantic analysis, and computing the 2-norm, condition number, and numerical rank of a matrix. 
+The `singular value decomposition` (SVD) is a useful technique for dealing with general dense matrix problems. In recent years, SVD has become a computationally viable tool for solving a wide variety of problems raised in many practical applications, such as least-squares data fitting, image compression, facial recognition, principal component analysis, latent semantic analysis, and computing the 2-norm, condition number, and numerical rank of a matrix. 
 
-For more information, please refer to `SVD`_.
+For more information, refer to `SVD`_.
 
 .. _`SVD`: http://www.netlib.org/utk/people/JackDongarra/PAPERS/svd-sirev-M111773R.pdf
 
@@ -88,7 +78,7 @@ where :math:`c=cos \theta` and :math:`s=sin \theta`. The angle :math:`\theta` is
                   \end{vmatrix}= \hat{A}_{(k+1)}
          \end{equation}
 
-where :math:`\hat{A}` is a 2X2 submatrix of matrix A. After the Givens rotations of the whole matrix A, the off-diagonal value of A will be reduced after 5-10 times iteration of the process.
+where :math:`\hat{A}` is a 2X2 submatrix of matrix A. After the Givens rotations of the whole matrix A, the off-diagonal value of A is reduced after 5-10 times iteration of the process.
             
 
 Implementation
@@ -110,15 +100,15 @@ The input parameters for the 4x4 SVD function is the 4x4 matrix :math:`A`, and t
 3. The iterative process of Jacobi SVD;
 4. Sort matrix :math:`S`, and change :math:`U` and :math:`V`;
 
-The iterative process of Jacobi SVD is the core function. Firstly, the matrix :math:`A` will be divided into 2x3 (= :math:`C_{4}^{2}`) sub-blocks of 2x2 through its diagonal elements, since for a 4x4 matrix, at the same moment, it has only 2 pairs independent 2x2 matrix, and 3 rounds of nonredundant full permutation. 
+The iterative process of Jacobi SVD is the core function. Firstly, the matrix :math:`A` will be divided into 2x3 (= :math:`C_{4}^{2}`) sub-blocks of 2x2 through its diagonal elements, since for a 4x4 matrix, at the same moment, it has only 2 pairs independent 2x2 matrix, and 3 rounds of non-redundant full permutation. 
 
-Once we get the 2x2 Submatrix, the Jacobi methods or Givens rotation (module SVD 2x2) can be applied. Here we use pipelining to bind the two 2x2 SVD process. The output of 2x2 SVD is the rotation matrix Equation :eq:`Jacobi_rotation`. 
+Once you get the 2x2 Submatrix, the Jacobi methods or Givens rotation (module SVD 2x2) can be applied. Here we use pipelining to bind the two 2x2 SVD process. The output of 2x2 SVD is the rotation matrix Equation :eq:`Jacobi_rotation`. 
 
 The next step is to decompose the rotation matrix from original matrix :math:`A` and add it to matrix :math:`U` and :math:`V`. After that, a convergence determination is performed to reduce the off-diagonal value of matrix :math:`A`. When the matrix :math:`A` is reduced to a diagonal matrix, step 3 will be finished.
 
 
 .. note::
-    The SVD function in this library is a customized function designated to solve the decomposition for a 3X3 or 4X4 symmetric matrix. It has some tradeoffs between resources and latency. A general SVD solver can be found in Vitis Solver Library.
+    The SVD function in this library is a customized function designated to solve the decomposition for a 3X3 or 4X4 symmetric matrix. It has some tradeoffs between resources and latency. A general SVD solver can be found in AMD Vitis |trade| Solver Library.
 
 
 Profiling
@@ -140,7 +130,12 @@ The hardware resources for 4x4 SVD are listed in :numref:`tabSVD`. (Vivado resul
 The accuracy of SVD implementation has been verified with Lapack dgesvd (QR based SVD) and dgesvj (Jacobi SVD) functions. For a 2545-by-4 matrix, the relative error between our SVD and the two Lapack functions (dgesvd and dgesvj) is about :math:`1e^{-9}`
 
 .. caution::
-    The profiling resources differ a lot when choosing different chips. Here we use xcu250-figd2104-2L-e, with clock frequency 300MHz and the margin for clock uncertainty is set to 12.5%.
+    The profiling resources differ a lot when choosing different chips. Here, xcu250-figd2104-2L-e is used, with clock frequency 300MHz and the margin for clock uncertainty is set to 12.5%.
 
 .. toctree::
    :maxdepth: 1
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

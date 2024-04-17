@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 *************************************************
@@ -78,7 +68,7 @@ The terms are derived from:
 Cap/Floor
 *********
 
-ZBC & ZBP can be used to price caps & floors since they can be viewed as portfolios of zero-bond options:
+ZBC and ZBP can be used to price caps & floors since they can be viewed as portfolios of zero-bond options:
 
 .. math::
         Cap(t,T,N,X) = N \sum_{i=1}^{n}[P(t,t_{i-1})\theta(-h_i + \sigma_p^i) - (1+X_{Ti})P(t,t_i)\theta(-h_i)]
@@ -97,13 +87,13 @@ The terms are derived from:
         {h_i} = {\frac{1}{\sigma_p^i}} ln (\frac{P(t,t_i)(1+X_{Ti})}{P(t,t_{i-1})}) + \frac{\sigma_p^i}{2}
 
 
-Implemention
+Implementation
 ============
 The framework is split into host and kernel code.
 
 Kernel
 ******
-The kernel directory contains the 3 kernels based on the above formula:
+The kernel directory contains the three kernels based on the above formula:
 
 - HWA_K0.cpp contains the bond pricing engine
 - HWA_k1.cpp contains the option pricing engine

@@ -1,19 +1,9 @@
 
 
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: fintech, trapezoidal, Simpson, Romberg
@@ -29,16 +19,16 @@ Numerical Integration Methods
 Overview
 ========
 
-Three Numerical Integration methods are included: the Adaptive Trapezoidal method, the Adaptive Simpson method and the Romberg method. 
+Three Numerical Integration methods are included: the Adaptive Trapezoidal method, the Adaptive Simpson method, and the Romberg method. 
 
 Adaptive Trapezoidal Theory
 ===========================
 
-The trapezoidal rule works by splitting the function to be integrated up into a number of equal chunks and for each chunk, the curve is approximated by a straight line; in effect, the curve is approximated by a number of trapezoids. The area under the curve then can be approximated by summing the area of all the trapezoids. See `wiki Trapezoidal entry`_ for the theory.
+The trapezoidal rule works by splitting the function to be integrated up into a number of equal chunks and for each chunk, the curve is approximated by a straight line. In effect, the curve is approximated by a number of trapezoids. The area under the curve then can be approximated by summing the area of all the trapezoids. See `wiki Trapezoidal entry`_ for the theory.
 
 .. _wiki Trapezoidal entry: https://en.wikipedia.org/wiki/Trapezoidal_rule
 
-The Adaptive Trapezoidal rule takes advantage of the fact that a curve, or part of a curve, that is fairly straight (a small second derivative) needs far fewer chunks than a rapidly changing part of the curve. This rule chunks up the curve in a variable way only using more chunks where they are absolutely required. The algorithm uses a required tolerance to determine how many chunks a given part of the curve requires.
+The Adaptive Trapezoidal rule takes an advantage of the fact that a curve, or part of a curve, that is fairly straight (a small second derivative) needs far fewer chunks than a rapidly changing part of the curve. This rule chunks up the curve in a variable way only using more chunks where they are absolutely required. The algorithm uses a required tolerance to determine how many chunks a given part of the curve requires.
 
 Adaptive Simpson Theory
 =======================
