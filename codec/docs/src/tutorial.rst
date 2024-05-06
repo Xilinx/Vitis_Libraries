@@ -1,18 +1,7 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+SPDX-License-Identifier: X11
+
 
 .. meta::
    :keywords: Vitis, Database, Vitis Database Library, Alveo
@@ -49,7 +38,7 @@ Lab-1: How Vitis Codec Library Works
 Vitis Codec Library is an open-sourced library written in HLS C/C++ for the acceleration of image processing. It aims to provides reference designs for image codec algorithms that fit the `Xilinx Alveo Series <https://www.xilinx.com/products/boards-and-kits/alveo.html>`_
 acceleration cards. The APIs in Vitis Codec Library have been classified into two layers, namely L1/L2. Each targets to serve different audience.
 
-* L1 APIs locate at ``Vitis_Libraries/codec/L1``. They are basic components that will be used to compose compute-units. The L1 APIs are all well-optimized HLS designs and are able to fit into various resource constraints.
+* L1 APIs locate at ``Vitis_Libraries/codec/L1``. They are basic components that are used to compose compute-units. The L1 APIs are all well-optimized HLS designs and are able to fit into various resource constraints.
 
 * L2 APIs locate at ``Vitis_Libraries/codec/L2``. They are a number of compute-unit designs running on Alveo cards. It provides a set of compute-unit designs implemented in HLS codes. These L2 APIs needs to be compiled as OpenCL kernels and will be called by OpenCL APIs.
 
@@ -859,7 +848,7 @@ The following figure shows the host information when run on board. The time list
     Info: Test passed
 
 
-To get the accurate kernel execution time, please add a file "xrt.ini", and fill this file with following directives.
+To get the accurate kernel execution time, add a file "xrt.ini", and fill this file with following directives.
 
 .. code-block:: shell
 
@@ -897,3 +886,7 @@ Tutorial Summary
 ------------------
 
 JPEG decoder and webp encoder are very representative in image transcoding applications. Codec Library has also launched many other open source and self-developed APIs some of them can support the developing flow based on System Compiler from 22.1. The tutorial will be developed to cover more codecs and their combinations, more flows and more classic applications.
+
+.. Copyright © 2020–2023 Advanced Micro Devices, Inc
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.

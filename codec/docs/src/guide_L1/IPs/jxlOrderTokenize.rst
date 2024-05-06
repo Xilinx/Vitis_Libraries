@@ -1,18 +1,6 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-
+Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+SPDX-License-Identifier: X11
 
 ***********************************
 Internal Design of Order Tokenize
@@ -21,7 +9,7 @@ Internal Design of Order Tokenize
 Overview
 ===========
 
-This API is a submodule of the jpegXL encoder. It is an optimized implementation of the Xilinx HLS design methodology. This API is able to construct tokens of the orders of the ac coefficients of jpegXL. The supported AC strategy includes 8x8, IDENTITY, 16x16 and 32x32 DCT. The input of this API is a set of orders of coefficients to be encoded under all the supported strategies. And the output is a number of tokens which can be encoded by the following ANS encoder.
+This API is a submodule of the jpegXL encoder. It is an optimized implementation of the Vitis HLS design methodology. This API is able to construct tokens of the orders of the ac coefficients of jpegXL. The supported AC strategy includes 8x8, IDENTITY, 16x16, and 32x32 DCT. The input of this API is a set of orders of coefficients to be encoded under all the supported strategies. And the output is a number of tokens which can be encoded by the following ANS encoder.
 
 Implemention
 ============
@@ -80,3 +68,6 @@ The Order Tokenize C/RTL co-simulation on CPU, and the result is based it in tab
 
 .. toctree::
     :maxdepth: 1
+	
+.. Copyright © 2020–2023 Advanced Micro Devices, Inc
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.

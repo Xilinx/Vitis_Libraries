@@ -641,10 +641,13 @@ void load_histo(uint32_t numNonempty_ptr,
     }
 
     for (int i = 0; i < numNonempty_ptr; i++) {
+#pragma HLS loop_flatten off
         uint32_t reg = nonempty_histo_ptr[i];
         nonempty_histo_tmp[i] = reg;
         for (ap_uint<8> j = 0; j < 20; j++) {
+#pragma HLS loop_flatten off
 #pragma HLS PIPELINE II = 1
+#pragma HLS loop_flatten off
             ap_uint<64> val;
             val.range(31, 0) = histograms_ptr[reg * 40 + j * 2];
             val.range(63, 32) = histograms_ptr[reg * 40 + j * 2 + 1];

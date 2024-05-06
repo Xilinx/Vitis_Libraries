@@ -159,7 +159,7 @@ endif
 $(TEMP_DIR)/JxlEnc_ans_clusterHistogram.xo: $(XFLIB_DIR)/L2/demos/jxlEnc/acc_cluster_histogram/kernel/hls_cluster_histogram.cpp 
 	$(ECHO) "Compiling Kernel: JxlEnc_ans_clusterHistogram"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_JxlEnc_ans_clusterHistogram) $(VPP_FLAGS) -k JxlEnc_ans_clusterHistogram -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_JxlEnc_ans_clusterHistogram) $(VPP_FLAGS) -k JxlEnc_ans_clusterHistogram -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/cfg_hls.tcl
 BINARY_CONTAINER_jxlEnc_OBJS += $(TEMP_DIR)/JxlEnc_ans_clusterHistogram.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_jxlEnc_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

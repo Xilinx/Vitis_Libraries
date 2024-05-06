@@ -1,18 +1,6 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+SPDX-License-Identifier: X11
 
 .. _l1_manual_jpeg_huffman_decoder:
 
@@ -35,7 +23,7 @@ The steps for library download and environment setup can be found in :ref:`l1_vi
 
 * **Run and Build IP(Step 2)**
 
-Run the following make command to build your IP targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your IP targeting a specific device. Note that this process takes a long time, maybe couple of hours.
 
 .. code-block:: bash
 
@@ -109,3 +97,5 @@ Table 2 : Jpeg Huffman Decoder IP profiling
 .. toctree::
    :maxdepth: 1
 
+.. Copyright © 2020–2023 Advanced Micro Devices, Inc
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.

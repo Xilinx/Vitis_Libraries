@@ -1,17 +1,6 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+SPDX-License-Identifier: X11
 
 
 *************************************************
@@ -21,12 +10,12 @@ kernelParserDecoderTop
 
 Overview
 ========
-This API is decoder supports the 'Sequential DCT-based mode' of ISO/IEC 10918-1 standard. It is a high-performance implementation based-on Xilinx HLS design methodolygy. It can process 1 Huffman token and create 1 non-zero symbol coeffiectsi (before iDCT) within one cycle. It is also an easy-to-use decoder as it can direct parser the JPEG file header without help of software functions.
+This API is decoder supports the 'Sequential DCT-based mode' of ISO/IEC 10918-1 standard. It is a high-performance implementation based-on AMD Vitis™ HLS design methodolygy. It can process 1 Huffman token and create 1 non-zero symbol coeffiectsi (before iDCT) within one cycle. It is also an easy-to-use decoder as it can direct parser the JPEG file header without help of software functions.
 
 As an independent IP, L1 API is the key circuit of L2 API, which achieve the JPEG parser and Huffman decoder, without the IDCT module achieved in L2.  
 L2 API runs as a kernel demo, which can also show the overall performance of the circuit.
 
-It can be seen from the benchmark of the API that the decoding speed of huffman decoder(L1 IP) is usually faster than that of iDCT(in L2 kernel). In practical applications, jpeg decoder is often used as the front module of the entire codec board.
+It can be seen from the benchmark of the API that the decoding speed of huffman decoder (L1 IP) is usually faster than that of iDCT (in L2 kernel). In practical applications, jpeg decoder is used as the front module of the entire codec board.
 
 Implemention
 ============
@@ -76,3 +65,6 @@ Profiling
    :maxdepth: 1
 
    JPEG Huffman Decoder <../../benchmark/jpegHuffmanDecoderIP.rst>
+
+.. Copyright © 2020–2023 Advanced Micro Devices, Inc
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
