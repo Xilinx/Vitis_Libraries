@@ -2562,8 +2562,8 @@ class pickMaxProcess {
         ap_uint<32> ptrTR = 0;
         ap_uint<32> counter = 0;
         while (!eInStrm.read()) {
-#pragma HLS dependence variable = buffMax inter false
-#pragma HLS dependence variable = buffIdx inter false
+// #pragma HLS dependence variable = buffMax inter false
+// #pragma HLS dependence variable = buffIdx inter false
 #pragma HLS pipeline II = 1
             // load data
             MType oldMax;

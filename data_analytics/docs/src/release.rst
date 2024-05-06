@@ -11,6 +11,15 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2024.1
+------
+
+- The following cases are removed due to Vitis System Compiler deprecation.
+
+  - L2/tests/knn_sc
+  - L3/tests/gunzip_csv_sc_test
+  - L3/tests/re_sc_test
+
 2023.2
 ------
 
