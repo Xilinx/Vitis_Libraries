@@ -1,12 +1,12 @@
 HDR Decompanding
-================
+=================
 
 .. rubric:: API Syntax
 
-For imaging sensors that do not equip with high bit width in the transmission side, they can compress(compand) data in a piece-wise linear (PWL) mapping to a lower bit depth.
+For imaging sensors that do not equip with high bit width in the transmission side, they can compress (compand) data in a piece-wise linear (PWL) mapping to a lower bit depth.
 The receiving end will do the inverse (or de-compand) to recover the data with satisfiable aliasing.
 
-This implementaion supports Bayer Raw data with 4 knee points PWL mapping and default equations are provided for 12bit to 20bit and 16bit to 24bit conversion.
+This implementation supports Bayer Raw data with four knee points. PWL mapping and default equations are provided for 12-bit to 20-bit and 16-bit to 24-bit conversion.
 
 .. code:: c
 
@@ -24,7 +24,7 @@ This implementaion supports Bayer Raw data with 4 knee points PWL mapping and de
 
 The following table describes the template and the function parameters.
 
-.. table:: Table HDR Decompand Parameter Description
+.. table:: Table: HDR Decompand Parameter Description
     
     +----------------------+-------------------------------------------------------------+
     | Parameter            | Description                                                 |
@@ -61,9 +61,9 @@ The following table describes the template and the function parameters.
 
 .. rubric:: Resource Utilization
 
-The following table summarizes the resource utilization in different configurations, generated using Vitis HLS 2022.2 tool for the xcu200-fsgd2104-2-e, to process a FHD Bayer image.
+The following table summarizes the resource utilization in different configurations, generated using the Vitis HLS 2022.2 tool for the xcu200-fsgd2104-2-e, to process an FHD Bayer image.
 
-.. table:: Table HDR Decompand Resource Utilization Summary
+.. table:: Table: HDR Decompand Resource Utilization Summary
 
     +----------------+---------------------+------------------+----------+-------+-------+------+
     | Operating Mode | Operating Frequency |              Utilization Estimate                  |
@@ -80,9 +80,9 @@ The following table summarizes the resource utilization in different configurati
 .. rubric:: Performance Estimate
 
 
-The following table summarizes the performance estimates in different configurations, generated using Vitis HLS 2022.2 tool for the xcu200-fsgd2104-2-e, to process a FHD Bayer image.
+The following table summarizes the performance estimates in different configurations, generated using the Vitis HLS 2022.2 tool for the xcu200-fsgd2104-2-e, to process an FHD Bayer image.
 
-.. table:: Table HDR Decompand Performance Estimate Summary
+.. table:: Table: HDR Decompand Performance Estimate Summary
 
     +----------------+---------------------+------------------+
     | Operating Mode | Operating Frequency | Latency Estimate |

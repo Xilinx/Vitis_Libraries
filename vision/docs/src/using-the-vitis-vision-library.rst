@@ -5,28 +5,31 @@
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
+.. 
+   Copyright 2024 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-Using the Vitis vision Library
-===============================
+Using the Vitis Vision Library
+################################
 
-This section describes using the Vitis vision library in the Vitis development
+This section describes using the Vitis Vision library in the Vitis development
 environment.
 
-Note: The instructions in this section assume that you have downloaded
+**Note**: The instructions in this section assume that you have downloaded
 and installed all the required packages. 
 
-*include* folder constitutes all the necessary components to build a
-Computer Vision or Image Processing pipeline using the library. The
-folders *common* and *core* contain the infrastructure that the library
+The ``include`` folder constitutes all the necessary components to build a
+Computer Vision or Image Processing pipeline using the library. The ``common`` and ``core`` folders contain the infrastructure that the library
 functions need for basic functions, Mat class, and macros. The library
-functions are categorized into 4 folders, *features*, *video*, *dnn*, and
-*imgproc* based on the operation they perform. The names of the folders
+functions are categorized into four folders: ``features``, ``video``, ``dnn``, and
+``imgproc``, based on the operation they perform. The names of the folders
 are self-explanatory.
 
 To work with the library functions, you need to include the path to the
-the *include* folder in the Vitis project. You can include relevant header files
+the ``include`` folder in the Vitis project. You can include relevant header files
 for the library functions you will be working with after you source the
-*include* folder’s path to the compiler. For example, if you would like to
+``include`` folder’s path to the compiler. For example, if you would like to
 work with Harris Corner Detector and Bilateral Filter, you must use the
 following lines in the host code:
 
@@ -41,10 +44,10 @@ as described in the `Vitis vision Library API
 Reference <api-reference.html#ycb1504034263746>`__ using the examples
 in the examples folder as reference.
 
-The following table gives the name of the header file, including the
+The following table gives the name of the header file and the
 folder name, which contains the library function.
 
-.. table:: Table : Vitis Vision Library 
+.. table:: Table: Vitis Vision Library 
 
    +-------------------------------------------+-----------------------------------+
    | Function Name                             | File Path in the include folder   |
@@ -249,21 +252,21 @@ folder name, which contains the library function.
 
 
 Changing the Hardware Kernel Configuration
-------------------------------------------
+==============================================
 
    To modify the configuration of any function, update the following file:
    
-   <path to vitis vision git folder>/vision/L1/examples/<function>/config/xf_config_params.h .
+   ``<path to vitis vision git folder>/vision/L1/examples/<function>/config/xf_config_params.h``
 
 
-Using the Vitis vision Library Functions on Hardware
-----------------------------------------------------
+Using the Vitis Vision Library Functions on Hardware
+=====================================================
 
-The following table lists the Vitis vision library functions and the command
+The following table lists the Vitis vision library functions and the commands
 to run the respective examples on hardware. It is assumed that your
 design is completely built and the board has booted up correctly.
 
-.. table:: Table : Using the Vitis vision Library Function on Hardware
+.. table:: Table: Using the Vitis Vision Library Function on Hardware
 
    +--------------+---------------------------+--------------------------+
    | Example      | Function Name             | Usage on Hardware        |

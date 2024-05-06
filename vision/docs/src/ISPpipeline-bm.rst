@@ -1,17 +1,7 @@
 .. 
-   Copyright 2021 Xilinx, Inc.
+   Copyright 2024 Advanced Micro Devices, Inc
   
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 .. _l3_isppipeline:
@@ -20,26 +10,26 @@
 Image Sensor Processing (ISP) Pipeline
 =======================================
 
-ISP Pipeline example resides in ``L3/examples/isppipeline`` directory.
+The ISP Pipeline example resides in the ``L3/examples/isppipeline`` directory.
 
-This benchmark tests the performance of `isppipeline` function. Image Sensor Processing (ISP) is a pipeline of functions that enhance the overall visual quality of the raw image from the sensor.
+This benchmark tests the performance of the `isppipeline` function. ISP is a pipeline of functions that enhance the overall visual quality of the raw image from the sensor.
 
-The tutorial provides a step-by-step guide that covers commands for building and running kernel.
+The tutorial provides a step-by-step guide that covers commands for building and running a kernel.
 
 Executable Usage
 ================
 
-* **Work Directory(Step 1)**
+* **Work Directory (Step 1)**
 
-The steps for library download and environment setup can be found in README of L3 folder. For getting the design,
+The steps for library download and environment setup can be found in the README of the L3 folder. To get the design:
 
 .. code-block:: bash
 
    cd L3/examples/isppipeline
 
-* **Build kernel(Step 2)**
+* **Build Kernel (Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your XCLBIN and host binary targeting a specific device. Be aware that this process can take up to a couple of hours.
 
 .. code-block:: bash
 
@@ -49,15 +39,15 @@ Run the following make command to build your XCLBIN and host binary targeting a 
    export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
    make host xclbin TARGET=hw
 
-* **Run kernel(Step 3)**
+* **Run Kernel (Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
    make run TARGET=hw
 
-* **Example output(Step 4)** 
+* **Example Output (Step 4)** 
 
 .. code-block:: bash
    
@@ -73,10 +63,10 @@ To get the benchmark results, please run the following command.
 Profiling 
 =========
 
-The ISP Pipeline design is validated on Alveo U200 board at 300 MHz frequency. 
-The hardware resource utilizations are listed in the following table.
+The ISP Pipeline design is validated on an Alveo U200 board at 300 MHz frequency. 
+Hardware resource utilization is shown in the following table.
 
-.. table:: Table 1 Hardware resources for ISP Pipeline
+.. table:: Table 1: Hardware Resources for the ISP Pipeline
     :align: center
 
     +------------------------------------------+-----------------+------------+------------+------------+
@@ -90,9 +80,9 @@ The hardware resource utilizations are listed in the following table.
     +------------+------+----------------------+-----------------+------------+------------+------------+
 
 
-The performance is shown below
+The performance is shown in the following table.
 
-.. table:: Table 2 Performance numbers in terms of FPS (Frames Per Second) for ISP Pipeline
+.. table:: Table 2: Performance Numbers in Frames Per Second (FPS) for the ISP Pipeline
     :align: center
 	
     +----------------------+--------------+--------------+
@@ -100,7 +90,7 @@ The performance is shown below
     +======================+==============+==============+
     |     4k (3840x2160)   |     0.11     |     135      |
     +----------------------+--------------+--------------+
-    |   Full HD(1920x1080) |     0.44     |     520      |
+    |   Full HD (1920x1080) |     0.44     |     520      |
     +----------------------+--------------+--------------+
 
 .. toctree::

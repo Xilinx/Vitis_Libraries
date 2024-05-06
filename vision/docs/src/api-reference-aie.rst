@@ -6,10 +6,15 @@
 
 .. _libapireference_aie:
 
+.. 
+   Copyright 2024 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 xfcvDataMovers
 ##############
 
-xfcvDataMovers class object takes input some simple parameters from users and provides a simple data transaction API where user does not have to bother about the complexity. Moreover it provides a template parameter using which application can switch from PL based data movement to  GMIO based (and vice versa) seamlessly. For more details please refer :ref:`xfcvDataMovers <xfcvdatamovers_aie>`.
+xfcvDataMovers class object takes input some simple parameters from users and provides a simple data transaction API where user does not have to bother about the complexity. Moreover it provides a template parameter using which application can switch from PL based data movement to  GMIO based (and vice versa) seamlessly. For more details refer to :ref:`xfcvDataMovers <xfcvdatamovers_aie>`.
 
 Class Definition
 ================
@@ -105,7 +110,7 @@ Class Definition
        void wait(std::array<std::string, CORES> portNames);
    };
 
-.. table:: Table xF::xfcvDataMovers Member Function Descriptions
+.. table:: Table: xF::xfcvDataMovers Member Function Descriptions
 
    +----------------------------------------------------------+---------------------------------------------------------------------------------------------+
    | Member                                                   | Description                                                                                 |
@@ -133,12 +138,12 @@ Class Definition
    +----------------------------------------------------------+---------------------------------------------------------------------------------------------+
 
 .. note::
-   If XRT mapped buffer handle is associated with image it can also be passed to imgHndl argument avoid copy
+   If the XRT mapped buffer handle is associated with an image, it can also be passed to imgHndl argument avoid copy.
 
 .. note::
-   Parameter *tiles* can be obtained from tiler data transfer API host2aie_nb
+   Parameter *tiles* can be obtained from the tiler data transfer API host2aie_nb.
 
-.. table:: Table xF::xfcvDataMovers Member Function Descriptions (GMIO specialization)
+.. table:: Table: xF::xfcvDataMovers Member Function Descriptions (GMIO Specialization)
 
    +----------------------------------------------------------+---------------------------------------------------------------------------------------------+
    | Member                                                   | Description                                                                                 |
@@ -184,12 +189,12 @@ Class Definition
 
 .. _aie_library_functions:
 
-Vitis Vision AIE Library Functions API list with performance estimates
-#######################################################################
+Vitis Vision AIE Library Functions API list with Performance Estimates
+======================================================================
 
-Frames per second (FPS) measured from host-code and includes data-transfer latencies and AIEngine™ kernel latencies. Measurements done on VCK190 evaluation boards and use only *one* AIE core.
+Frames per second (FPS) is measured from the host-code and includes data-transfer latencies and AIEngine kernel latencies. Measurements are done on a VCK190 evaluation boards and use only one AIE core.
 
-.. table:: Table AIE Library Functions API list with performance estimates
+.. table:: Table AIE Library Functions API List with Performance Estimates
 
 
    +---------------------------------+------------------------------------------------+--------------------------------------------+--------------------------------------------------+-----------------------------------------------+

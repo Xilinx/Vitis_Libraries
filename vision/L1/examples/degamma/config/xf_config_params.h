@@ -57,7 +57,7 @@
 
 void degamma_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
                    ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                   ap_ufixed<32, 18> params[3][NUM][3],
+                   uint32_t params[3][NUM][3],
                    unsigned short bayerp,
                    int height,
                    int width);

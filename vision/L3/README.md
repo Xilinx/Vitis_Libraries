@@ -1,6 +1,6 @@
 ## Level 3: Pipeline Applications
 
-This directory contains whole applications formed by stitching a pipeline of Vitis Vision functions. The host code shows how to call this multiple functions in OpenCL.
+This directory contains full applications, formed by stitching a pipeline of Vitis Vision functions. The host code shows how to call this multiple functions in OpenCL.
 
 'examples' folder contains the OpenCL host code file and a C++ accel file that demonstrate the call of Vitis Vision functions to build for Vitis.
 
@@ -10,9 +10,9 @@ This directory contains whole applications formed by stitching a pipeline of Vit
 
 'benchmarks' directory has applications ready to build that give out their performance comparison against other architectures.
 
-### Commands to run:
+### Commands to Run
 
-**For PCIe Devices:**
+**For PCIe Devices**
 
     source < path-to-Vitis-installation-directory >/settings64.sh
     source < path-to-XRT-installation-directory >/setup.sh
@@ -47,7 +47,7 @@ Hardware Emulation and Hardware Build:
     make host xclbin TARGET=< hw_emu|hw > 
     make run TARGET=< hw_emu|hw > #This command will generate only the sd_card folder in case of hardware build.
 
-**Note**. For hw run on embedded devices, copy the generated sd_card folder content under package_hw to an SD Card. More information on preparing the SD Card is available [here](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18842385/How+to+format+SD+card+for+SD+boot#HowtoformatSDcardforSDboot-CopingtheImagestotheNewPartitions). After successful booting of the board, run the following commands:
+**Note**: For hw runs on embedded devices, copy the generated ``sd_card`` folder content under ``package_hw`` to an SD Card. More information on preparing the SD Card is available [here](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18842385/How+to+format+SD+card+for+SD+boot#HowtoformatSDcardforSDboot-CopingtheImagestotheNewPartitions). After successful booting of the board, run the following commands:
 
     cd /mnt
 

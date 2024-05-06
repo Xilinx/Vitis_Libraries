@@ -74,11 +74,10 @@ void preprocess_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
 
     xf::cv::fw_cca<OUT_TYPE, HEIGHT, WIDTH, XF_NPPCX>(in_mat_fw, out_mat_fw, tmp_obj, rows, cols);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT, 1>(out_mat_ret, img_out,
-                                                                                                 stride);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT, 1>(out_mat_ret, img_out);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT, 1>(out_mat_fw, fw_img_out,
-                                                                                                 stride);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT, 1>(out_mat_fw,
+                                                                                                 fw_img_out);
 
     *obj_pix = tmp_obj;
 }

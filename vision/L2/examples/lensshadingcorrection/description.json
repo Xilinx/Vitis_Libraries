@@ -68,7 +68,19 @@
                         "$(OPENCV_LIB)"
                     ]
                 }
-            }
+            },
+            "containers": [
+                {
+                    "name": "krnl_lensshading",
+                    "accelerators": [
+                        {
+                            "name": "lensshading_accel",
+                            "frequency": 150.0
+                        }
+                    ],
+                    "frequency": 150.0
+                }
+            ]
         },
         "zcu104": {
             "host": {

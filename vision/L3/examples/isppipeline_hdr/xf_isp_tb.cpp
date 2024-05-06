@@ -20,6 +20,51 @@
 
 #include "xcl2.hpp"
 
+const float bt2020_bt709_arr[3][3] = {
+    {1.6605, -0.5876, -0.0728}, {-0.1246, 1.1329, -0.0083}, {-0.0182, -0.1006, 1.1187}};
+
+const float bt2020_bt709_off[3] = {0.0, 0.0, 0.0};
+
+const float bt709_bt2020_arr[3][3] = {{0.627, 0.329, 0.0433}, {0.0691, 0.92, 0.0113}, {0.0164, 0.088, 0.896}};
+
+const float bt709_bt2020_off[3] = {0.0, 0.0, 0.0};
+
+const float rgb_yuv_601_arr[3][3] = {{0.257, 0.504, 0.098}, {-0.148, -0.291, 0.439}, {0.439, -0.368, -0.071}};
+
+const float rgb_yuv_601_off[3] = {0.0625, 0.500, 0.500};
+
+const float rgb_yuv_709_arr[3][3] = {{0.183, 0.614, 0.062}, {-0.101, -0.338, 0.439}, {0.439, -0.399, -0.040}};
+
+const float rgb_yuv_709_off[3] = {0.0625, 0.500, 0.500};
+
+const float rgb_yuv_2020_arr[3][3] = {
+    {0.225613, 0.582282, 0.050928}, {-0.119918, -0.309494, 0.429412}, {0.429412, -0.394875, -0.034537}};
+
+const float rgb_yuv_2020_off[3] = {0.062745, 0.500, 0.500};
+
+const float yuv_rgb_601_arr[3][3] = {{1.164, 0.000, 1.596}, {1.164, -0.813, -0.391}, {1.164, 2.018, 0.000}};
+
+const float yuv_rgb_601_off[3] = {-0.87075, 0.52925, -1.08175};
+
+const float yuv_rgb_709_arr[3][3] = {{1.164, 0.000, 1.793}, {1.164, -0.213, -0.534}, {1.164, 2.115, 0.000}};
+
+const float yuv_rgb_709_off[3] = {-0.96925, 0.30075, -1.13025};
+
+const float yuv_rgb_2020_arr[3][3] = {
+    {1.164384, 0.000000, 1.717000}, {1.164384, -0.191603, -0.665274}, {1.164384, 2.190671, 0.000000}};
+
+const float yuv_rgb_2020_off[3] = {-0.931559, 0.355379, -1.168395};
+
+const float full_to_16_235_arr[3][3] = {
+    {0.856305, 0.000000, 0.000000}, {0.000000, 0.856305, 0.000000}, {0.000000, 0.000000, 0.856305}};
+
+const float full_to_16_235_off[3] = {0.0625, 0.0625, 0.0625};
+
+const float full_from_16_235_arr[3][3] = {
+    {1.167808, 0.000000, 0.000000}, {0.000000, 1.167808, 0.000000}, {0.000000, 0.000000, 1.167808}};
+
+const float full_from_16_235_off[3] = {-0.0729880, -0.0729880, -0.0729880};
+
 int g_value_com(unsigned short& value_in, float& alpha, float& ob) {
     float radiance_out = (value_in - ob) / alpha;
 
@@ -263,16 +308,125 @@ int main(int argc, char** argv) {
             }
         }
     }
+    float ccm_matrix[3][3];
+    float offsetarray[3];
 
+    switch (XF_CCM_TYPE) {
+        case 0:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = bt2020_bt709_arr[i][j];
+                }
+                offsetarray[i] = bt2020_bt709_off[i];
+            }
+
+            break;
+        case 1:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = bt709_bt2020_arr[i][j];
+                }
+                offsetarray[i] = bt709_bt2020_off[i];
+            }
+
+            break;
+        case 2:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = rgb_yuv_601_arr[i][j];
+                }
+                offsetarray[i] = rgb_yuv_601_off[i];
+            }
+
+            break;
+        case 3:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = rgb_yuv_709_arr[i][j];
+                }
+                offsetarray[i] = rgb_yuv_709_off[i];
+            }
+
+            break;
+        case 4:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = rgb_yuv_2020_arr[i][j];
+                }
+                offsetarray[i] = rgb_yuv_2020_off[i];
+            }
+
+            break;
+        case 5:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = yuv_rgb_601_arr[i][j];
+                }
+                offsetarray[i] = yuv_rgb_601_off[i];
+            }
+
+            break;
+        case 6:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = yuv_rgb_709_arr[i][j];
+                }
+                offsetarray[i] = yuv_rgb_709_off[i];
+            }
+
+            break;
+        case 7:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = yuv_rgb_2020_arr[i][j];
+                }
+                offsetarray[i] = yuv_rgb_2020_off[i];
+            }
+
+            break;
+        case 8:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = full_to_16_235_arr[i][j];
+                }
+                offsetarray[i] = full_to_16_235_off[i];
+            }
+
+            break;
+        case 9:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = full_from_16_235_arr[i][j];
+                }
+                offsetarray[i] = full_from_16_235_off[i];
+            }
+
+            break;
+        default:
+            break;
+    }
+    // cmm matrix shifted 20 bits to the left
+    signed int ccm_matrix_int[3][3];
+    signed int offsetarray_int[3];
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            ccm_matrix_int[i][j] = (signed int)(ccm_matrix[i][j] * 1048576);
+        }
+        offsetarray_int[i] = (signed int)(offsetarray[i] * 1048576);
+    }
     /////////////////////////////////////// CL ////////////////////////
 
     int height = in_img1.rows;
     int width = in_img1.cols;
     std::cout << "Input image height : " << height << std::endl;
     std::cout << "Input image width  : " << width << std::endl;
+    size_t ccm_matrix_int_size_bytes = 3 * 3 * sizeof(signed int);
+    size_t offsetarray_int_size_bytes = 3 * sizeof(signed int);
 
     unsigned short rgain = 153;
     unsigned short bgain = 140;
+    unsigned short ggain = 200;
 
     unsigned char mode_reg = 1;
 
@@ -285,6 +439,7 @@ int main(int argc, char** argv) {
     float gamma_val_r = 1.5f, gamma_val_g = 1.5f, gamma_val_b = 1.5f;
 
     compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut);
+    unsigned short bformat = XF_BAYER_PATTERN; // Bayer format BG-0; GB-1; GR-2; RG-3
 
     // int channels=out_img.channels();
 
@@ -316,6 +471,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::Buffer buffer_inVec(context, CL_MEM_READ_ONLY, vec_in_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer buffer_inVec_Weights(context, CL_MEM_READ_ONLY, vec_weight_size_bytes, NULL, &err));
 
+    OCL_CHECK(err, cl::Buffer buffer_ccm_matrix_int(context, CL_MEM_READ_ONLY, ccm_matrix_int_size_bytes, NULL, &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_offsetarray_int(context, CL_MEM_READ_ONLY, offsetarray_int_size_bytes, NULL, &err));
     // Set the kernel arguments
     OCL_CHECK(err, err = kernel.setArg(0, imageToDevice1));
     OCL_CHECK(err, err = kernel.setArg(1, imageToDevice2));
@@ -328,6 +486,10 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(8, mode_reg));
     OCL_CHECK(err, err = kernel.setArg(9, pawb));
     OCL_CHECK(err, err = kernel.setArg(10, buffer_inVec_Weights));
+    OCL_CHECK(err, err = kernel.setArg(11, buffer_ccm_matrix_int));
+    OCL_CHECK(err, err = kernel.setArg(12, buffer_offsetarray_int));
+    OCL_CHECK(err, err = kernel.setArg(13, bformat));
+    OCL_CHECK(err, err = kernel.setArg(14, ggain));
 
     for (int i = 0; i < 2; i++) {
         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inVec,      // buffer on the FPGA
@@ -341,6 +503,17 @@ int main(int argc, char** argv) {
                                             0,                     // buffer offset in bytes
                                             vec_weight_size_bytes, // Size in bytes
                                             wr_hls));
+        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_ccm_matrix_int,     // buffer on the FPGA
+                                            CL_TRUE,                   // blocking call
+                                            0,                         // buffer offset in bytes
+                                            ccm_matrix_int_size_bytes, // Size in bytes
+                                            ccm_matrix_int));
+
+        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_offsetarray_int,     // buffer on the FPGA
+                                            CL_TRUE,                    // blocking call
+                                            0,                          // buffer offset in bytes
+                                            offsetarray_int_size_bytes, // Size in bytes
+                                            offsetarray_int));
 
         OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice1, CL_TRUE, 0, image_in_size_bytes, in_img1.data));
         OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice2, CL_TRUE, 0, image_in_size_bytes, in_img2.data));

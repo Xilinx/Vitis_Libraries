@@ -4,29 +4,34 @@
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
+.. 
+   Copyright 2024 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 .. _overview_aie:
 
 Overview 
-########
+#########
  
-In the 2021.1 release, Vitis Vision library has added few functions which are implemented on `AI Engine™` of Xilinx ACAP Versal devices and validated on `VCK190`_ boards. These implementations exploit the VLIW, SIMD vector processing capabilities of `AI Engine™`_ .  
+In the 2021.1 release, the AMD Vitis™ Vision library added some functions which are implemented on the AI Engine of AMD Versal Adaptive SoC devices and validated on `VCK190`_ boards. These implementations exploit the VLIW, SIMD vector processing capabilities of `AI Engines`_.  
 
-.. _AI Engine™ : https://www.xilinx.com/products/technology/ai-engine.html
+.. _AI Engines: https://www.xilinx.com/products/technology/ai-engine.html
 .. _VCK190: https://www.xilinx.com/products/boards-and-kits/vck190.html
 
 .. _basic-features-aie:
 
 Basic Features
 ===============
-To process high resolution images, xfcvDataMovers component is also provided which divides the image into tiled-units and uses efficient data-movers to manage the transfer of tiled-units to and from AIEngine™ cores. You can find more information on the types of data-movers and their usage, in the :ref:`Getting Started with Vitis Vision AIEngine Library Functions <aie_prerequisites>` section.  
+To process high resolution images, the xfcvDataMovers component is provided. This divides the image into tiled units and uses efficient data-movers to manage the transfer of tiled units to and from AI Engine cores. You can find more information on the types of data-movers and their usage, in the :ref:`Getting Started with Vitis Vision AIEngine Library Functions <aie_prerequisites>` section.  
 
 
 Vitis Vision AIE Library Contents
 ==================================
 
-Vitis Vision AIEngine™ files are organized into the following directories: 
+Vitis Vision AIEngine files are organized into the following directories: 
 
-.. table:: Table Vitis Vision AIE Library Contents
+.. table:: Table: Vitis Vision AIE Library Contents
 
    +----------------------------------------------------------+---------------------------------------------------------------------------------------------+
    | Folder                                                   | Details                                                                                     |

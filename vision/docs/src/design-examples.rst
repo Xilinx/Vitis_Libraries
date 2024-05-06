@@ -7,15 +7,20 @@
 
 .. _design-example:
 
-Design Examples Using Vitis Vision Library
+.. 
+   Copyright 2024 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+Design Examples Using the Vitis Vision Library
 ###########################################
 
-All the hardware functions in the library have their own respective
-examples that are available in the github. This section provides details
+All hardware functions in the library have their own respective
+examples that are available in GitHub. This section provides details
 of image processing functions and pipelines implemented using a
 combination of various functions in Vitis vision. They illustrate how to
 best implement various functionalities using the capabilities of both
-the processor and the programmable logic. These examples also illustrate
+the processor and the programmable logic (PL). These examples also illustrate
 different ways to implement complex dataflow paths. The following
 examples are described in this section:
 
@@ -37,12 +42,10 @@ examples are described in this section:
 -  `Image Sensor Processing all-in-one pipeline <#isp-aio>`_
 -  `24 bits-per-channel Image Sensor Processing pipeline <#isp-24bit>`_
 
-.. Important::
-   **All the functions in the library are implemented in streaming model except 7. Crop, EdgeTracing, MeanShiftTracking, Rotate are memory mapped implemenations. These functions need to have the flag __SDA_MEM_MAP__ set for compiling correctly**
+.. Important::All functions in the library are implemented in streaming model except 7. Crop, EdgeTracing, MeanShiftTracking, and Rotate are memory mapped implementations. These functions need to have the flag ``__SDA_MEM_MAP__`` set to compile correctly.
 
-.. Important::
-   **Default depth value for all the memory mapped implemenations(Crop, EdgeTracing, MeanShiftTracking, Rotate) is "_XFCVDEPTH_DEFAULT = -1". 
-   Default depth value for all the streaming model implemenations is "_XFCVDEPTH_DEFAULT = 2".**
+.. Important::The default depth value for all the memory mapped implemenations (Crop, EdgeTracing, MeanShiftTracking, Rotate) is "_XFCVDEPTH_DEFAULT = -1". 
+   The default depth value for all the streaming model implemenations is "_XFCVDEPTH_DEFAULT = 2".**
 
 
 .. _iterative-pyramidal:
@@ -72,12 +75,12 @@ The Iterative Pyramidal Dense Optical Flow is computed in a nested for
 loop which runs for iterations*pyramid levels number of iterations. The
 main loop starts from the smallest image size and iterates up to the
 largest image size. Before the loop iterates in one pyramid level, it
-sets the current pyramid level’s height and width, in curr_height and
-current_width variables. In the nested loop, the next_height variable is
+sets the current pyramid level’s height and width, in ``curr_height`` and
+``current_width`` variables. In the nested loop, the next_height variable is
 set to the previous image height if scaling up is necessary, that is, in
 the first iterations. As divisions are costly and one time divisions can
 be avoided in hardware, the scale factor is computed in the host and
-passed as an argument to the hardware kernel. After each pyramid level,
+passed as an argument to the hardware kernel. After each pyramid level
 in the first iteration, the scale-up flag is set to let the hardware
 function know that the input flow vectors need to be scaled up to the
 next higher image size. Scaling up is done using bilinear interpolation
@@ -96,7 +99,7 @@ Corner Tracking Using Optical Flow
 This example illustrates how to detect and track the characteristic
 feature points in a set of successive frames of video. A Harris corner
 detector is used as the feature detector, and a modified version of
-Lucas Kanade optical flow is used for tracking. The core part of the
+the Lucas Kanade optical flow is used for tracking. The core part of the
 algorithm takes in current and next frame as the inputs and outputs the
 list of tracked corners. The current image is the first frame in the
 set, then corner detection is performed to detect the features to track.
@@ -145,8 +148,8 @@ The following table describes the template and the function parameters.
 .. table:: Table: CornerUpdate Function Parameter Descriptions
 
    +------------------+-----------------------------------------------------------+
-   | Paramete         | Description                                               |
-   | r                |                                                           |
+   | Parameter        | Description                                               |
+   |                  |                                                           |
    +==================+===========================================================+
    | MAXCORNE         | Maximum number of corners that the function needs to work |
    | RSNO             | on                                                        |
@@ -180,11 +183,11 @@ The following table describes the template and the function parameters.
    +------------------+-----------------------------------------------------------+
    | nCorners         | Number of corners to track                                |
    +------------------+-----------------------------------------------------------+
-   | flow_vec         | Packed flow vectors as in xf::cv::DensePyrOpticalFlow     |
-   | tors             | function                                                  |
+   | flow_vectors     | Packed flow vectors as in xf::cv::DensePyrOpticalFlow     |
+   |                  | function                                                  |
    +------------------+-----------------------------------------------------------+
-   | harris_f         | If set to 1, the function takes input corners from list.  |
-   | lag              |                                                           |
+   | harris_flag      | If set to 1, the function takes input corners from list.  |
+   |                  |                                                           |
    |                  | if set to 0, the function takes input corners from        |
    |                  | list_fix.                                                 |
    +------------------+-----------------------------------------------------------+
@@ -212,11 +215,11 @@ The following table describes the function parameters.
 .. table:: Table: CornerImgToList Function Parameter Descriptions
 
    +------------------+-----------------------------------------------------------+
-   | Paramete         | Description                                               |
-   | r                |                                                           |
+   | Parameter        | Description                                               |
+   |                  |                                                           |
    +==================+===========================================================+
-   | MAXCORNE         | Maximum number of corners that the function needs to work |
-   | RSNO             | on                                                        |
+   | MAXCORNERSNO     | Maximum number of corners that the function needs to work |
+   |                  | on                                                        |
    +------------------+-----------------------------------------------------------+
    | TYPE             | Input Pixel Type. Only 8-bit, unsigned, 1 channel is      |
    |                  | supported (XF_8UC1)                                       |
@@ -237,7 +240,7 @@ The following table describes the function parameters.
    |                  | Harris corner detector. The value of each pixel is 255 if |
    |                  | a corner is present in the location, 0 otherwise.         |
    +------------------+-----------------------------------------------------------+
-   | list             | A 32 bit memory allocated, the size of MAXCORNERS, to     |
+   | list             | A 32-bit memory allocated, the size of MAXCORNERS, to     |
    |                  | store the corners detected by Harris Detector             |
    +------------------+-----------------------------------------------------------+
    | ncorners         | Total number of corners detected by Harris, that is, the  |
@@ -251,10 +254,10 @@ Image Processing
 ~~~~~~~~~~~~~~~~~
 
 The following steps demonstrate the Image Processing procedure in the
-hardware pipeline
+hardware pipeline:
 
 #. ``xf::cv::cornerharris`` is called to start processing the first input
-   image
+   image.
 #. The output of\ ``xf::cv::cornerHarris`` is fed to\ ``xf::cv::cornersImgToList``. This function takes in an
    image with corners (marked as 255 and 0 elsewhere), and converts them
    to a list of corners.
@@ -264,21 +267,21 @@ hardware pipeline
 #. ``xf::cv::densePyrOpticalFlow`` is called with the two image pyramids as
    inputs.
 #. ``xf::cv::cornerUpdate`` function is called to track the corner locations
-   in the second image. If harris_flag is enabled, the ``cornerUpdate``
+   in the second image. If ``harris_flag`` is enabled, the ``cornerUpdate``
    tracks corners from the output of the list, else it tracks the
    previously tracked corners.
 
 
 The ``HarrisImg()`` function takes a flag called
-harris_flag which is set during the first frame or when the corners need
-to be redetected. The ``xf::cv::cornerUpdate`` function outputs the updated
+``harris_flag`` which is set during the first frame or when the corners need
+to be re-detected. The ``xf::cv::cornerUpdate`` function outputs the updated
 corners to the same memory location as the output corners list of
 ``xf::cv::cornerImgToList``. This means that when harris_flag is unset, the
 corners input to the ``xf::cv::cornerUpdate`` are the corners tracked in the
 previous cycle, that is, the corners in the first frame of the current
 input frames.
 
-After the Dense Optical Flow is computed, if harris_flag is set, the
+After the Dense Optical Flow is computed, if ``harris_flag`` is set, the
 number of corners that ``xf::cv::cornerharris`` has detected and
 ``xf::cv::cornersImgToList`` has updated is copied to num_corners variable
 . The other being the tracked corners list, listfixed. If
@@ -652,15 +655,15 @@ The following code shows the top level wrapper containing the ``xf::cv::resize()
 
     }
 
-This piepeline is integrated with Deep learning Processign Unit(DPU) as part of `Vitis-AI-Library
+This piepeline is integrated with Deep learning Processign Unit (DPU) as part of `Vitis-AI-Library
 <https://github.com/Xilinx/Vitis-AI>`_  and achieved
 11 % speed up compared to software pre-procesing. 
 
 * Overall Performance (Images/sec):
 
-* with software pre-processing : 125 images/sec
+  * with software pre-processing : 125 images/sec
 
-* with hardware accelerated pre-processing : 140 images/sec
+  * with hardware accelerated pre-processing : 140 images/sec
 
 .. _letter-box: 
 
@@ -765,16 +768,16 @@ Image Sensor Processing (ISP) is a pipeline of image processing functions proces
 
 This ISP includes following blocks:
 
-*  Black level correction : Black level leads to the whitening of image in dark region and perceived loss of overall
+*  Black level correction: Black level leads to the whitening of image in dark region and perceived loss of overall
    contrast. The Blacklevelcorrection algorithm corrects the black and white levels of the overall image.
-*  BPC (Bad pixel correction) : An image sensor may have a certain number of defective/bad pixels that may be the result of manufacturing faults or variations in pixel voltage levels based on temperature or exposure. Bad pixel correction module removes defective pixels.
-*  Gain Control : The Gain control module improves the overall brightness of the image.
-*  Demosaicing : The demosaic module reconstructs RGB pixels from the input Bayer image (RGGB,BGGR,RGBG,GRGB).
+*  BPC (Bad pixel correction): An image sensor may have a certain number of defective/bad pixels that may be the result of manufacturing faults or variations in pixel voltage levels based on temperature or exposure. Bad pixel correction module removes defective pixels.
+*  Gain Control: The Gain control module improves the overall brightness of the image.
+*  Demosaicing: The demosaic module reconstructs RGB pixels from the input Bayer image (RGGB,BGGR,RGBG,GRGB).
 *  Auto white balance: The AWB module improves color balance of the image by using  image statistics.
-*  Colorcorrection matrix : corrects color suitable for display or video system.
-*  Quantization and Dithering : Quantization and Dithering performs the uniform quantization to also reduce higher bit depth to lower bit depths.
-*  Gamma correction : Gamma correction improves the overall brightness of image.
-*  Color space conversion : Converting RGB image to YUV422(YUYV) image for HDMI display purpose.RGB2YUYV converts the RGB image into Y channel for every pixel and U and V for alternate pixels.
+*  Colorcorrection matrix: corrects color suitable for display or video system.
+*  Quantization and Dithering: Quantization and Dithering performs the uniform quantization to also reduce higher bit depth to lower bit depths.
+*  Gamma correction: Gamma correction improves the overall brightness of image.
+*  Color space conversion: Converting RGB image to YUV422(YUYV) image for HDMI display purpose. RGB2YUYV converts the RGB image into Y channel for every pixel and U and V for alternate pixels.
 
 |isp-20211|
 
@@ -819,7 +822,7 @@ User can also use below compile time parameters to the pipeline.
    | XF_HEIGHT       | Maximum height of input and output image             |
    +-----------------+------------------------------------------------------+
    | XF_WIDTH        | Maximum width of input and output image              |
-   |                 | (Must be multiple of NPC)                            |
+   |                 | (Must be a multiple of NPC)                          |
    +-----------------+------------------------------------------------------+
    |XF_BAYER_PATTERN | The Bayer format of the RAW input image.             |
    |                 | supported formats are RGGB,BGGR,GBRG,GRBG.           |
@@ -896,9 +899,11 @@ The following example demonstrates the ISP pipeline with above list of functions
 					float thresh = (float)pawb / 256;
 					float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
 					float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
+               unsigned int blc_config_1 = (int)(mul_fact * 65536); // mul_fact int Q16_16 format
+               unsigned int blc_config_2 = BLACK_LEVEL;
 
 					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0>(img_inp, imgInput1);
-					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1>(imgInput1, imgInput2, BLACK_LEVEL,mul_fact);
+					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1>(imgInput1, imgInput2, blc_config_2,blc_config_1);
 					xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_3>(imgInput2, gain_out, rgain, bgain);
 					xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_IN_3, XF_CV_DEPTH_OUT_0>(gain_out, demosaic_out);
 					function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_2>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,height, width, mode_reg, thresh);																			   
@@ -915,13 +920,13 @@ The following example demonstrates the ISP pipeline with above list of functions
 				
 .. _isp-201hdr:
 				
-Image Sensor Processing pipeline with HDR
+Image Sensor Processing Pipeline with HDR
 =========================================
 
-This ISP includes HDR function with 2021.1 pipeline with out color space conversion. It takes two exposure frames as inputs(Short exposure frame and Long exposure frame) and
-after HDR fusion it will return hdr merged output frame. The HDR output goes to ISP 2021.1 pipeline and returns the output RGB image.
+This ISP includes HDR function with 2021.1 pipeline without color space conversion. It takes two exposure frames as inputs (a short exposure frame and a long exposure frame) and
+after HDR fusion it will return an HDR merged output frame. The HDR output goes to the ISP 2021.1 pipeline and returns the output RGB image.
 
-* HDRMerge : HDRMerge module generates the Hign dynamic range image from a set of different exposure frames. Usually, image sensors has limited dynamic range and it's difficult to get HDR image with single image capture. From the sensor, the frames are collected with different exposure times and will get different exposure frames, HDRMerge will generates the HDR frame with those exposure frames.
+* HDRMerge: The HDRMerge module generates the HDR image from a set of different exposure frames. Usually, image sensors have limited dynamic range and it is difficult to get an HDR image with a single image capture. From the sensor, the frames are collected with different exposure times and will get different exposure frames, HDRMerge will generates the HDR frame with those exposure frames.
 
 |isp-hdr|
 
@@ -1000,13 +1005,15 @@ The following example demonstrates the ISP pipeline with HDR.
 					float thresh = (float)pawb / 256;
 					float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
 					float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
+               unsigned int blc_config_1 = (int)(mul_fact * 65536); // mul_fact int Q16_16 format
+               unsigned int blc_config_2 = BLACK_LEVEL;
 					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_DR1>(img_inp1, imgInputhdr1);
 					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_DR2>(img_inp2, imgInputhdr2);
 
 					xf::cv::Hdrmerge_bayer<XF_SRC_T, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_DR1, XF_CV_DEPTH_IN_DR2, NO_EXPS, W_B_SIZE>(
 						imgInputhdr1, imgInputhdr2, imgInput1, wr_hls);
 
-					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(imgInput1, imgInput2, BLACK_LEVEL,mul_fact);																														
+					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(imgInput1, imgInput2, blc_config_2,blc_config_1);																														
 					xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_GAIN_OUT>(imgInput2, gain_out, rgain, bgain);
 					xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_GAIN_OUT,XF_CV_DEPTH_DEMOSAIC_OUT>(gain_out, demosaic_out);
 					function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DEMOSAIC_OUT, XF_CV_DEPTH_LTM_IN>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,height, width, mode_reg, thresh);																				   
@@ -1027,24 +1034,24 @@ Image Sensor Processing pipeline with GTM
 
 This ISP includes following blocks:
 
-*  Black level correction : Black level leads to the whitening of image in dark region and perceived loss of overall
+*  Black level correction: Black level leads to the whitening of image in dark region and perceived loss of overall
    contrast. The Blacklevelcorrection algorithm corrects the black and white levels of the overall image.
-*  BPC (Bad pixel correction) : An image sensor may have a certain number of defective/bad pixels that may be the result of manufacturing faults or variations in pixel voltage levels based on temperature or exposure. Bad pixel correction module removes defective pixels.
-*  Gain Control : The Gain control module improves the overall brightness of the image.
-*  Demosaicing : The demosaic module reconstructs RGB pixels from the input Bayer image (RGGB,BGGR,RGBG,GRGB).
+*  BPC (Bad pixel correction): An image sensor may have a certain number of defective/bad pixels that may be the result of manufacturing faults or variations in pixel voltage levels based on temperature or exposure. The Bad pixel correction module removes defective pixels.
+*  Gain Control: The Gain control module improves the overall brightness of the image.
+*  Demosaicing: The demosaic module reconstructs RGB pixels from the input Bayer image (RGGB,BGGR,RGBG,GRGB).
 *  Auto white balance: The AWB module improves color balance of the image by using  image statistics.
-*  Colorcorrection matrix : corrects color suitable for display or video system.
-*  Global tone mapping : Reduces the dynamic range from higher range to display range using tone mapping.
-*  Gamma correction : Gamma correction improves the overall brightness of image.
+*  Colorcorrection matrix: corrects color suitable for display or video system.
+*  Global tone mapping: Reduces the dynamic range from higher range to display range using tone mapping.
+*  Gamma correction: Gamma correction improves the overall brightness of image.
 *  Color space conversion : Converting RGB image to YUV422(YUYV) image for HDMI display purpose.RGB2YUYV converts the RGB image into Y channel for every pixel and U and V for alternate pixels.
 
 |isp-gtm|
 
 Current design example demonstrates how to use ISP functions in a pipeline. 
  
-User can dynamically configure the below parameters to the pipeline.
+You can dynamically configure the following parameters to the pipeline.
 
-.. table::  Runtime parameters for the pipeline
+.. table::  Runtime Parameters for the Pipeline
 
    +---------------+------------------------------------------------------+
    | Parameter     | Description                                          |
@@ -1077,9 +1084,9 @@ User can dynamically configure the below parameters to the pipeline.
    |               | output device dynamic range.                         |
    +---------------+------------------------------------------------------+
 
-User can also use below compile time parameters to the pipeline.
+You can also use the following compile-time parameters to the pipeline.
 
-.. table::  Compiletime parameters for the pipeline
+.. table::  Compile-Time Parameters for the Pipeline
 
    +-----------------+------------------------------------------------------+
    | Parameter       | Description                                          |
@@ -1087,7 +1094,7 @@ User can also use below compile time parameters to the pipeline.
    | XF_HEIGHT       | Maximum height of input and output image             |
    +-----------------+------------------------------------------------------+
    | XF_WIDTH        | Maximum width of input and output image              |
-   |                 | (Must be multiple of NPC)                            |
+   |                 | (Must be a multiple of NPC)                          |
    +-----------------+------------------------------------------------------+
    |XF_BAYER_PATTERN | The Bayer format of the RAW input image.             |
    |                 | supported formats are RGGB,BGGR,GBRG,GRBG.           |
@@ -1097,7 +1104,7 @@ User can also use below compile time parameters to the pipeline.
    
 
 
-The following example demonstrates the ISP pipeline with above list of functions.
+The following example demonstrates the ISP pipeline with the above list of functions.
 
 .. code:: c
 
@@ -1174,9 +1181,11 @@ The following example demonstrates the ISP pipeline with above list of functions
 					float thresh = (float)pawb / 256;
 					float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
 					float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
+               unsigned int blc_config_1 = (int)(mul_fact * 65536); // mul_fact int Q16_16 format
+               unsigned int blc_config_2 = BLACK_LEVEL; 
 
 					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0>(img_inp, imgInput1);
-					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1>(imgInput1, imgInput2, BLACK_LEVEL,mul_fact);
+					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1>(imgInput1, imgInput2, blc_config_2,blc_config_1);
 					xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPCC, XF_CV_DEPTH_IN_1,>(imgInput2, gain_out, rgain, bgain);
 					xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_IN_3, XF_CV_DEPTH_OUT_0>(gain_out, demosaic_out);
 					function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_2>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,height, width, mode_reg, thresh);																			   
@@ -1195,31 +1204,31 @@ The following example demonstrates the ISP pipeline with above list of functions
 
 .. _isp-201mono:
 				
-Mono image Sensor Processing pipeline
+Mono Image Sensor Processing pipeline
 =====================================
 
-The Mono image sensor is different when compared to RGB Bayer sensor. Few applications does not need color information, in such cases user can use mono image
-sensor instead of color sensor. The mono image sensor pipeline has lot of advantages compared to color sensor processing , computational cost and higher resolution because of
-single channel and also reduce errors occured while doing image reconstruction using demosaic in the color sensor processing.
+The Mono image sensor is different to the RGB Bayer sensor. Some applications do not need color information. In such cases, you can use the mono image
+sensor instead of the color sensor. The mono image sensor pipeline has a lot of advantages over the color sensor processing: computational cost and higher resolution because of
+a single channel, and also reduced errors while doing image reconstruction using demosaic in the color sensor processing.
 
 
 This ISP includes following blocks:
 
-*  Black level correction : Black level leads to the whitening of image in dark region and perceived loss of overall
+*  Black level correction: Black level leads to the whitening of image in dark region and perceived loss of overall
    contrast. The Blacklevelcorrection algorithm corrects the black and white levels of the overall image.
-*  BPC (Bad pixel correction) : Using median filter for BPC. An image sensor may have a certain number of defective/bad pixels that may be the result of manufacturing faults or variations in pixel voltage levels based on temperature or exposure. Bad pixel correction module removes defective pixels.
-*  Gain Control : The Gain control module improves the overall brightness of the image.
-*  Quantization and Dithering : Quantization and Dithering performs the uniform quantization to also reduce higher bit depth to lower bit depths.
-*  Gamma correction : Gamma correction improves the overall brightness of image.
-*  Autoexposure correction : Using CLAHE algorithm to improve brightness and contrast of the image.
+*  BPC (Bad pixel correction): Using median filter for BPC. An image sensor may have a certain number of defective/bad pixels that may be the result of manufacturing faults or variations in pixel voltage levels based on temperature or exposure. Bad pixel correction module removes defective pixels.
+*  Gain Control: The Gain control module improves the overall brightness of the image.
+*  Quantization and Dithering: Quantization and Dithering performs the uniform quantization to also reduce higher bit depth to lower bit depths.
+*  Gamma correction: Gamma correction improves the overall brightness of image.
+*  Autoexposure correction: Using the CLAHE algorithm to improve brightness and contrast of the image.
 
 |isp-mono|
 
 Current design example demonstrates how to use ISP functions in a pipeline. 
  
-User can dynamically configure the below parameters to the pipeline.
+You can dynamically configure the following parameters to the pipeline.
 
-.. table::  Runtime parameters for the pipeline
+.. table::  Runtime Parameters for the Pipeline
 
    +---------------+------------------------------------------------------+
    | Parameter     | Description                                          |
@@ -1245,9 +1254,9 @@ User can dynamically configure the below parameters to the pipeline.
    |               | tilesY represents the number of tiles in X direction.|
    +---------------+------------------------------------------------------+
 
-User can also use below compile time parameters to the pipeline.
+You can also use the following compile-time parameters to the pipeline.
 
-.. table::  Compiletime parameters for the pipeline
+.. table::  Compile-Time Parameters for the Pipeline
 
    +-----------------+------------------------------------------------------+
    | Parameter       | Description                                          |
@@ -1255,14 +1264,14 @@ User can also use below compile time parameters to the pipeline.
    | XF_HEIGHT       | Maximum height of input and output image             |
    +-----------------+------------------------------------------------------+
    | XF_WIDTH        | Maximum width of input and output image              |
-   |                 | (Must be multiple of NPC)                            |
+   |                 | (Must be a multiple of NPC)                          |
    +-----------------+------------------------------------------------------+
    | XF_SRC_T        |Input pixel type,Supported pixel widths are 8,10,12,16|
    +-----------------+------------------------------------------------------+
    
 
 
-The following example demonstrates the ISP pipeline with above list of functions.
+The following example demonstrates the ISP pipeline with the above list of functions.
 
 .. code:: c
 
@@ -1338,10 +1347,12 @@ The following example demonstrates the ISP pipeline with above list of functions
 					float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; 
 
 					float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
+               unsigned int blc_config_1 = (int)(mul_fact * 65536); // mul_fact int Q16_16 format
+               unsigned int blc_config_2 = BLACK_LEVEL; 
 
 					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1>(img_inp, imgInput1);
-					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(imgInput1, imgInput2, BLACK_LEVEL,
-																									mul_fact);
+					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(imgInput1, imgInput2, blc_config_2,
+																									blc_config_1);
 
 					xf::cv::medianBlur<WINDOW_SIZE, XF_BORDER_REPLICATE, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_DPC_OUT>(imgInput2, dpc_out);
 					xf::cv::gaincontrol_mono<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DPC_OUT, XF_CV_DEPTH_GAIN_OUT>(dpc_out, gain_out, lgain);
@@ -1361,28 +1372,28 @@ The following example demonstrates the ISP pipeline with above list of functions
 				
 .. _isp_201rgbir:
 
-RGB-IR image Sensor Processing pipeline
+RGB-IR image Sensor Processing Pipeline
 =======================================
 
 This Image Sensor Processing (ISP) pipeline works on a raw bayer pattern image that has IR data at some pixel loactions. It creates a fully processed RGB image and an IR image.
 
 This ISP includes following blocks:
 
-*  RGBIR to Bayer : This module converts the input image with R,G,B,IR pixel data into a standard bayer pattern image along with a full IR data image.
-*  Gain Control : The Gain control module improves the overall brightness of the image.
-*  Demosaicing : The demosaic module reconstructs RGB pixels from the input Bayer image (RGGB,BGGR,RGBG,GRGB).
+*  RGBIR to Bayer: This module converts the input image with R,G,B,IR pixel data into a standard bayer pattern image along with a full IR data image.
+*  Gain Control: The Gain control module improves the overall brightness of the image.
+*  Demosaicing: The demosaic module reconstructs RGB pixels from the input Bayer image (RGGB,BGGR,RGBG,GRGB).
 *  Auto white balance: The AWB module improves color balance of the image by using  image statistics.
-*  Quantization and Dithering : Quantization and Dithering performs the uniform quantization to also reduce higher bit depth to lower bit depths.
-*  Gamma correction : Gamma correction improves the overall brightness of image.
-*  Color space conversion : Converting RGB image to YUV422(YUYV) image for HDMI display purpose.RGB2YUYV converts the RGB image into Y channel for every pixel and U and V for alternate pixels.
+*  Quantization and Dithering: Quantization and Dithering performs the uniform quantization to also reduce higher bit depth to lower bit depths.
+*  Gamma correction: Gamma correction improves the overall brightness of image.
+*  Color space conversion: Converting RGB image to YUV422 (YUYV) image for HDMI display purpose.RGB2YUYV converts the RGB image into Y channel for every pixel and U and V for alternate pixels.
 
 |isp-rgbir|
 
 Current design example demonstrates how to use ISP functions in a pipeline. 
  
-User can dynamically configure the below parameters to the pipeline.
+You can dynamically configure the following parameters to the pipeline.
 
-.. table::  Runtime parameters for the pipeline
+.. table::  Runtime Parameters for the Pipeline
 
    +---------------+-------------------------------------------------------------+
    | Parameter     | Description                                                 |
@@ -1424,9 +1435,9 @@ User can dynamically configure the below parameters to the pipeline.
    |               | sub_wgts[3] -> calculated B Pixel                           |
    +---------------+-------------------------------------------------------------+
    
-User can also use below compile time parameters to the pipeline.
+You can also use the following compile-time parameters to the pipeline.
 
-.. table::  Compiletime parameters for the pipeline
+.. table::  Compile-Time Parameters for the Pipeline
 
    +-----------------+------------------------------------------------------+
    | Parameter       | Description                                          |
@@ -1434,7 +1445,7 @@ User can also use below compile time parameters to the pipeline.
    | XF_HEIGHT       | Maximum height of input and output image             |
    +-----------------+------------------------------------------------------+
    | XF_WIDTH        | Maximum width of input and output image              |
-   |                 | (Must be multiple of NPC)                            |
+   |                 | (Must be a multiple of NPC)                          |
    +-----------------+------------------------------------------------------+
    |XF_BAYER_PATTERN | The Bayer format of the RAW input image.             |
    |                 | Supported formats are BGGR, GRBG.                    |
@@ -1540,6 +1551,8 @@ User can also use below compile time parameters to the pipeline.
 				float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
 
 				float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
+            unsigned int blc_config_1 = (int)(mul_fact * 65536); // mul_fact int Q16_16 format
+            unsigned int blc_config_2 = BLACK_LEVEL; 
 
 				xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_imgInput>(img_inp, imgInput);
 
@@ -1565,22 +1578,22 @@ User can also use below compile time parameters to the pipeline.
 
 .. _isp-201multistream:
 
-Image Sensor Processing multistream pipeline
+Image Sensor Processing Multistream Pipeline
 ==============================================================
 
-ISP multistream pipeline allows user to process input from multi streams using one instance of ISP.
-Current multistream pipeline processes 4 streams in a Round-Robin method with input TYPE as XF_16UC1 
-and output TYPE as XF_8UC3(RGB). After the color conversion from RGB to YUV colorspace the output TYPE is XF_16UC1(YUYV).
+The ISP multistream pipeline allows you to process input from multiple streams using one instance of ISP.
+Current multistream pipeline processes four streams in a round-robin method with input TYPE XF_16UC1 
+and output TYPE XF_8UC3(RGB). After the color conversion from the RGB to the YUV colorspace, the output TYPE is XF_16UC1(YUYV).
 
-This ISP pipeline includes 19 modules, they are following:
+This ISP pipeline includes 19 modules, they are as follows:
 
 -  **Extract Exposure Frames:** The Extract Exposure Frames module returns
    the Short Exposure Frame and Long Exposure Frame from the input frame
    using the Digital overlap parameter.
 
--  **HDR Merge:** HDR Merge module generates the High Dynamic Range
+-  **HDR Merge:** The HDR Merge module generates the HDR
    image from a set of different exposure frames. Usually, image sensors
-   have limited dynamic range and it’s difficult to get HDR image with
+   have limited dynamic range and it is difficult to get HDR image with
    single image capture. From the sensor, the frames are collected with
    different exposure times and will get different exposure frames.
    HDR Merge will generate the HDR frame with those exposure frames.
@@ -1588,7 +1601,7 @@ This ISP pipeline includes 19 modules, they are following:
 -  **HDR Decompand:** This module decompands or decompresses a piecewise 
    linear (PWL) companded data. Companding is performed in image sensors
    not capable of high bitwidth during data transmission. This decompanding
-   module supports Bayer raw data with 4 knee point PWL mapping and equations
+   module supports Bayer raw data with four knee point PWL mapping and equations
    are provided for 12-bit to 16-bit conversion.    
 
 -  **RGBIR to Bayer (RGBIR):** This module converts the input image with 
@@ -1658,7 +1671,7 @@ This ISP pipeline includes 19 modules, they are following:
 
 .. rubric:: Parameter Descriptions    
   
-.. table:: Runtime parameter
+.. table:: Runtime Parameter
 
     +------------------+-----------------------------------+
     | **Parameter**    | **Description**                   |
@@ -1705,8 +1718,8 @@ This ISP pipeline includes 19 modules, they are following:
     |                  | are B.                            |
     +------------------+-----------------------------------+
     | dgam_params      | Array containing upper limit,     |
-    |                  | slope and intercept of linear     |
-    |                  | equations for Red, Green and      |
+    |                  | slope, and intercept of linear    |
+    |                  | equations for Red, Green, and     |
     |                  | Blue colour.                      |
     +------------------+-----------------------------------+
     | c1               | To retain the details in bright   |
@@ -1719,7 +1732,7 @@ This ISP pipeline includes 19 modules, they are following:
     +------------------+-----------------------------------+
     
     
-.. table:: Compile time parameter
+.. table:: Compile Time Parameter
 
     +------------------+-----------------------------------+
     | **Parameter**    | **Description**                   |
@@ -2215,13 +2228,13 @@ The following example demonstrates the top-level ISP pipeline:
         }
 
 
-Create and Launch kernel in the testbench:
+Create and Launch Kernel in the Testbench:
 
-Histogram needs two frames to populate the histogram and to get correct result in
-auto exposure frame. Auto white balance, GTM and other tone-mapping functions needs
+The histogram needs two frames to populate the histogram and to get correct results in
+the auto exposure frame. Auto white balance, GTM and other tone-mapping functions need
 one extra frame in each to populate its parameters and apply those parameters to
 get a correct image. For the specific example below, four iterations
-are needed because the AEC, AWB and LTM module selected.
+are needed because the AEC, AWB, and LTM modulea are selected.
 
 
 .. code:: c
@@ -2380,10 +2393,10 @@ are needed because the AEC, AWB and LTM module selected.
         
 .. rubric:: Resource Utilization
 
-The following table summarizes the resource utilization of ISP multistream generated using Vitis 
-HLS 2023.1 tool on ZCU102 board.
+The following table summarizes the resource utilization of ISP multistream generated using the Vitis 
+HLS 2024.1 tool on a ZCU102 board.
 
-.. table:: ISP multistream Resource Utilization Summary
+.. table:: ISP Multistream Resource Utilization Summary
 
 
     +----------------+----------------------+-------------------------------------------------+
@@ -2398,12 +2411,12 @@ HLS 2023.1 tool on ZCU102 board.
 .. rubric:: Performance Estimate    
 
 The following table summarizes the performance of the ISP multistream in 1-pixel
-mode as generated using Vitis HLS 2023.1 tool on ZCU102 board.
+mode as generated using the Vitis HLS 2024.1 tool on a ZCU102 board.
  
-Estimated average latency is obtained by running the accel with 4 iterations. 
+Estimated average latency is obtained by running the accel with four iterations. 
 The input to the accel is a 12bit non-linearized full-HD (1920x1080) image.
 
-.. table:: ISP multistream Performance Estimate Summary
+.. table:: ISP Multistream Performance Estimate Summary
 
     +-----------------------------+-------------------------+
     |                             | Latency Estimate        |

@@ -216,7 +216,7 @@ void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& demosaic_out,
 #pragma HLS INLINE OFF
     // clang-format on	
 	xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_OUT> impop(height, width);
-
+    uint32_t awb_config = (int)(thresh * 256); // thresh_awb int Q24_8 format change to Q16_16 format
 	float inputMin = 0.0f;
     float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
     float outputMin = 0.0f;
@@ -227,15 +227,16 @@ void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& demosaic_out,
     // clang-format on
     if (WB_TYPE) {
         xf::cv::AWBhistogram<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_USE_URAM, WB_TYPE, HIST_SIZE,
-                             XFCVDEPTH_IN, XFCVDEPTH_OUT>(demosaic_out, impop, hist0, thresh, inputMin, inputMax,
+                             XFCVDEPTH_IN, XFCVDEPTH_OUT>(demosaic_out, impop, hist0, awb_config, inputMin, inputMax,
                                                           outputMin, outputMax);
         xf::cv::AWBNormalization<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE, HIST_SIZE, XFCVDEPTH_OUT,
-                                 XFCVDEPTH_OUT>(impop, ltm_in, hist1, thresh, inputMin, inputMax, outputMin, outputMax);
+                                 XFCVDEPTH_OUT>(impop, ltm_in, hist1, awb_config, inputMin, inputMax, outputMin,
+                                                outputMax);
     } else {
         xf::cv::AWBChannelGain<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XFCVDEPTH_IN, XFCVDEPTH_OUT>(
-            demosaic_out, impop, thresh, gain0);
+            demosaic_out, impop, awb_config, gain0);
         xf::cv::AWBGainUpdate<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XFCVDEPTH_OUT, XFCVDEPTH_OUT>(
-            impop, ltm_in, thresh, gain1);
+            impop, ltm_in, awb_config, gain1);
     }
 }
 
@@ -279,7 +280,11 @@ void ISPpipeline(InVideoStrm_t& s_axis_video,
                  unsigned char gamma_lut[256 * 3],
                  unsigned char mode_reg,
                  uint16_t pawb,
-                 short wr_hls[NO_EXPS * XF_NPPC * W_B_SIZE]) {
+                 short wr_hls[NO_EXPS * XF_NPPC * W_B_SIZE],
+                 signed int ccm_matrix[3][3],
+                 signed int offsetarray[3],
+                 unsigned short ggain,
+                 uint16_t bformat) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
@@ -308,6 +313,8 @@ void ISPpipeline(InVideoStrm_t& s_axis_video,
     float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
 
     float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
+    unsigned int blc_config_1 = (int)(mul_fact * 65536); // mul_fact int Q16_16 format
+    unsigned int blc_config_2 = BLACK_LEVEL;
 
     //    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT * 2, XF_WIDTH + NUM_H_BLANK, XF_NPPC,
     //    XF_CV_DEPTH_IN_DR1>(img_inp1,
@@ -322,18 +329,18 @@ void ISPpipeline(InVideoStrm_t& s_axis_video,
                                                                                      imgInput1, wr_hls);
 
     xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(
-        imgInput1, imgInput2, BLACK_LEVEL, mul_fact);
+        imgInput1, imgInput2, blc_config_2, blc_config_1);
     // xf::cv::badpixelcorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, 0>(imgInput2, bpc_out);
-    xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2,
-                        XF_CV_DEPTH_GAIN_OUT>(imgInput2, gain_out, rgain, bgain);
-    xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_GAIN_OUT,
-                        XF_CV_DEPTH_DEMOSAIC_OUT>(gain_out, demosaic_out);
+    xf::cv::gaincontrol<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_GAIN_OUT>(
+        imgInput2, gain_out, rgain, bgain, ggain, bformat);
+    xf::cv::demosaicing<XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_GAIN_OUT,
+                        XF_CV_DEPTH_DEMOSAIC_OUT>(gain_out, demosaic_out, bformat);
 
     function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DEMOSAIC_OUT, XF_CV_DEPTH_LTM_IN>(
         demosaic_out, ltm_in, hist0, hist1, gain0, gain1, height, width, mode_reg, thresh);
 
-    xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LTM_IN,
-                                  XF_CV_DEPTH_LSC_OUT>(ltm_in, lsc_out);
+    xf::cv::colorcorrectionmatrix<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LTM_IN,
+                                  XF_CV_DEPTH_LSC_OUT>(ltm_in, lsc_out, ccm_matrix, offsetarray);
 
     if (XF_DST_T == XF_8UC3) {
         fifo_copy<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LSC_OUT, XF_CV_DEPTH_AEC_IN>(
@@ -367,7 +374,11 @@ void isppipeline(uint16_t width,
                  unsigned char gamma_lut[256 * 3],
                  unsigned char mode_reg,
                  uint16_t pawb,
-                 short wr_hls[NO_EXPS * XF_NPPC * W_B_SIZE]) {
+                 short wr_hls[NO_EXPS * XF_NPPC * W_B_SIZE],
+                 signed int ccm_config_1[3][3],
+                 signed int ccm_config_2[3],
+                 uint16_t ggain,
+                 uint16_t bformat) {
 // clang-format off
 #pragma HLS INTERFACE axis port=&s_axis_video register
 #pragma HLS INTERFACE axis port=&m_axis_video register
@@ -380,6 +391,13 @@ void isppipeline(uint16_t width,
 #pragma HLS INTERFACE s_axilite port=pawb bundle=CTRL offset=0x54
 #pragma HLS INTERFACE s_axilite port=gamma_lut bundle=CTRL offset=0x800
 #pragma HLS INTERFACE s_axilite port=wr_hls bundle=CTRL offset=0x1000
+
+#pragma HLS INTERFACE s_axilite port=ccm_config_1 bundle=CTRL offset=0x04000
+#pragma HLS INTERFACE s_axilite port=ccm_config_2 bundle=CTRL offset=0x04100
+#pragma HLS INTERFACE s_axilite port=bformat bundle=CTRL 
+#pragma HLS INTERFACE s_axilite port=ggain bundle=CTRL 
+
+
 #pragma HLS INTERFACE s_axilite port=return bundle=CTRL
 // clang-format on
 
@@ -391,12 +409,12 @@ void isppipeline(uint16_t width,
 
     if (!flag) {
         ISPpipeline(s_axis_video, m_axis_video, height, width, hist0_awb, hist1_awb, igain_0, igain_1, rgain, bgain,
-                    gamma_lut, mode_reg, pawb, wr_hls);
+                    gamma_lut, mode_reg, pawb, wr_hls, ccm_config_1, ccm_config_2, ggain, bformat);
         flag = 1;
 
     } else {
         ISPpipeline(s_axis_video, m_axis_video, height, width, hist1_awb, hist0_awb, igain_1, igain_0, rgain, bgain,
-                    gamma_lut, mode_reg, pawb, wr_hls);
+                    gamma_lut, mode_reg, pawb, wr_hls, ccm_config_1, ccm_config_2, ggain, bformat);
         flag = 0;
     }
 }

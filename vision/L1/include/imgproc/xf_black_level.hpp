@@ -76,7 +76,7 @@ template <int SRC_T,
 void blackLevelCorrection(xf::cv::Mat<SRC_T, _MAX_ROWS, _MAX_COLS, NPPC, XFCVDEPTH_IN>& _Src,
                           xf::cv::Mat<SRC_T, _MAX_ROWS, _MAX_COLS, NPPC, XFCVDEPTH_OUT>& _Dst,
                           unsigned short black_level,
-                          float mul_value // ap_uint<MUL_VALUE_WIDTH> mul_value
+                          int mul_value // ap_uint<MUL_VALUE_WIDTH> mul_value
                           ) {
 // clang-format off
 #pragma HLS INLINE OFF
@@ -93,7 +93,9 @@ void blackLevelCorrection(xf::cv::Mat<SRC_T, _MAX_ROWS, _MAX_COLS, NPPC, XFCVDEP
 
     uint32_t max_value = (1 << (XF_DTPIXELDEPTH(SRC_T, NPPC))) - 1;
 
-    ap_ufixed<16, 1> mulval = (ap_ufixed<16, 1>)mul_value;
+    ap_ufixed<32, 18> mul_fact = (float)mul_value;
+
+    ap_ufixed<16, 1> mulval = (ap_ufixed<16, 1>)(mul_fact >> 16);
 
     int value = 0;
 
@@ -147,8 +149,9 @@ void blackLevelCorrection_multi(xf::cv::Mat<SRC_T, _MAX_ROWS, _MAX_COLS, NPPC, X
     // clang-format on
     float inputMax = (1 << (XF_DTPIXELDEPTH(SRC_T, NPPC))) - 1; // 65535.0f;
     float mul_value = (inputMax / (inputMax - black_level[stream_id]));
+    int mulvalue_int = (int)(mul_value * 65536); // mul_fact int Q16_16 format
     blackLevelCorrection<SRC_T, _MAX_ROWS, _MAX_COLS, NPPC, MUL_VALUE_WIDTH, FL_POS, USE_DSP, XFCVDEPTH_IN,
-                         XFCVDEPTH_OUT>(_Src, _Dst, black_level[stream_id], mul_value);
+                         XFCVDEPTH_OUT>(_Src, _Dst, black_level[stream_id], mulvalue_int);
 }
 }
 }

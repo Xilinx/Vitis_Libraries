@@ -6,16 +6,21 @@
 
 .. _overview:
 
+.. 
+   Copyright 2024 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 Overview
 ########
 
-The Vitis vision library has been designed to work in the Vitis development environment, and provides a software
+The AMD Vitis™ vision library has been designed to work in the Vitis development environment, and provides a software
 interface for computer vision functions accelerated on an FPGA device.
 Vitis vision library functions are mostly similar in functionality to their
 OpenCV equivalent. Any deviations, if present, are documented.
 
 
-.. seealso:: For more information on the Vitis vision library please refer :ref:`Prerequisites <prerequisites_hls>` section
+.. seealso:: For more information on the Vitis vision library please refer to the :ref:`Prerequisites <prerequisites_hls>` section
 
 To familiarize yourself with the steps required to use the Vitis vision library
 functions, see the `Using the Vitis vision
@@ -27,7 +32,7 @@ Basic Features
 ===============
 
 All Vitis vision library functions follow a common format. The following
-properties hold true for all the functions.
+properties are true for all functions:
 
 -  All the functions are designed as templates and all arguments that
    are images, must be provided as ``xf::cv::Mat``.

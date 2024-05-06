@@ -1,14 +1,19 @@
 .. vim: syntax=rst
 
-ISP multistream pipeline:
-========================
+.. 
+   Copyright 2023 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-ISP multistream pipeline allows user to process input from multi streams using one instance of ISP.
-Current multi stream pipeline process 4 streams in a Round-Robin method with input TYPE as XF_16UC1 
-and output TYPE as XF_8UC3(RGB) after the color conversion to YUV color space the output TYPE is 
+ISP Multistream Pipeline
+##########################
+
+The ISP multistream pipeline allows you to process input from multi streams using one instance of ISP.
+Current multi stream pipeline processes four streams in a Round-Robin method with the input TYPE as XF_16UC1 
+and the output TYPE as XF_8UC3(RGB). After the color conversion to the YUV color space, the output TYPE is 
 XF_16UC1(YUYV).
 
-This ISP pipeline includes 9 blocks, they are following:
+This ISP pipeline includes nine blocks, as follows:
 
 -  **Extract Exposure Frames:** The Extract Exposure Frames module returns
    the Short Exposure Frame and Long Exposure Frame from the input frame
@@ -35,7 +40,7 @@ This ISP pipeline includes 9 blocks, they are following:
 -  **Auto White Balance:** The AWB module improves color balance of the
    image by using image statistics.
 
--  **Color Correction Matrix**: Color Correction Matrix algorithm
+-  **Color Correction Matrix**: The Color Correction Matrix algorithm
    converts the input image color format to output image color format
    using the Color Correction Matrix provided by the user (CCM_TYPE).
 
@@ -56,7 +61,7 @@ This ISP pipeline includes 9 blocks, they are following:
 
 .. rubric:: Parameter Descriptions    
   
-.. table:: Table: Runtime parameter
+.. table:: Table: Runtime Parameters
 
     +------------------+-----------------------------------+
     | **Parameter**    | **Description**                   |
@@ -75,7 +80,7 @@ This ISP pipeline includes 9 blocks, they are following:
     |                  | are B.                            |
     +------------------+-----------------------------------+
     
-.. table:: Table: Compile time parameter
+.. table:: Table: Compile Time Parameters
 
     +------------------+-----------------------------------+
     | **Parameter**    | **Description**                   |
@@ -345,11 +350,11 @@ The following example demonstrates the top-level ISP pipeline:
         }
         
 
-Create and Launch kernel in the testbench:
+Create and Launch Kernel in the Testbench:
+=============================================
 
-Histogram function needs two frames to populate the histogram array and to get correct
-auto white balance results. For the example below too, two iterations
-are needed as AWB function is used.
+The histogram function needs two frames to populate the histogram array and to get correct
+auto white balance results. For the example below, two iterations are also needed because the AWB function is used.
 
 
 .. code:: c

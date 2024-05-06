@@ -126,107 +126,34 @@ int rgb_bgr_kernel(T imgblock[5][buf_size], int loop) {
     return res;
 }
 
-template <int BFORMAT, int SRC_T, int NPC, int DEPTH, int buf_size>
+template <int SRC_T, int NPC, int DEPTH, int buf_size>
 void Core_Process(XF_DTUNAME(SRC_T, NPC) imgblock[5][buf_size], int& b, int& g, int& r, int row, int col, int loop) {
-    if (BFORMAT == XF_BAYER_RG) {
-        if ((row & 0x00000001) == 0) {     // if R row
-            if ((col & 0x00000001) == 0) { // We already have R value at this location
-                b = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                g = g_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                r = imgblock[2][2 + loop];
-            } else { // We already have G value at this location
-                b = rgb_bgr_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                g = imgblock[2][2 + loop];
-                r = rgr_bgb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-            }
-        } else {                           // B row
-            if ((col & 0x00000001) == 0) { // We have already G value at this location
-                b = rgr_bgb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                g = imgblock[2][2 + loop];
-                r = rgb_bgr_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-            } else { // We already have B value at this location
-                b = imgblock[2][2 + loop];
-                g = g_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                r = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-            }
+    if ((row & 0x00000001) == 0) {     // if B row
+        if ((col & 0x00000001) == 0) { // Even row, even column - We already have
+                                       // B value at this location
+            r = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
+            g = g_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
+            b = imgblock[2][2 + loop];
+        } else { // Even row, odd column - We already have G value at this
+                 // location
+            b = rgr_bgb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
+            g = imgblock[2][2 + loop];
+            r = rgb_bgr_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
         }
-    } else if (BFORMAT == XF_BAYER_BG) {
-        if ((row & 0x00000001) == 0) {     // if B row
-            if ((col & 0x00000001) == 0) { // Even row, even column - We already have
-                                           // B value at this location
-                r = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                g = g_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                b = imgblock[2][2 + loop];
-            } else { // Even row, odd column - We already have G value at this
-                     // location
-                b = rgr_bgb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                g = imgblock[2][2 + loop];
-                r = rgb_bgr_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-            }
-        } else {                           // if R row
-            if ((col & 0x00000001) == 0) { // Odd row, even column - We have G value at this location
-                b = rgb_bgr_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                g = imgblock[2][2 + loop];
-                r = rgr_bgb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-            } else { // Odd row, odd column - We already have R value at this location
-                r = imgblock[2][2 + loop];
-                g = g_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                b = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-            }
-        }
-    } else if (BFORMAT == XF_BAYER_GB) {
-        if ((row & 0x00000001) == 0) {     // if B row
-            if ((col & 0x00000001) == 0) { // Even row, even column - We already have
-                                           // G value at this location
-                b = rgr_bgb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                g = imgblock[2][2 + loop];
-                r = rgb_bgr_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-            } else { // Even row, odd column - We already have B value at this
-                     // location
-                b = imgblock[2][2 + loop];
-                g = g_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                r = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-            }
-        } else {                           // if R row
-            if ((col & 0x00000001) == 0) { // Odd row, even column - We have R value at this location
-                r = imgblock[2][2 + loop];
-                g = g_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                b = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-            } else { // Odd row, odd column - We already have G value at this location
-                b = rgb_bgr_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                g = imgblock[2][2 + loop];
-                r = rgr_bgb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-            }
-        }
-    } else if (BFORMAT == XF_BAYER_GR) {
-        if ((row & 0x00000001) == 0) {     // if R row
-            if ((col & 0x00000001) == 0) { // Even row, even column - We already have
-                                           // G value at this location
-                b = rgb_bgr_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                g = imgblock[2][2 + loop];
-                r = rgr_bgb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-            } else { // Even row, odd column - We already have R value at this
-                     // location
-                r = imgblock[2][2 + loop];
-                g = g_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                b = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-            }
-        } else {                           // if B row
-            if ((col & 0x00000001) == 0) { // Odd row, even column - We have B value at this location
-                b = imgblock[2][2 + loop];
-                g = g_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                r = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-            } else { // Odd row, odd column - We already have G value at this location
-                b = rgr_bgb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                g = imgblock[2][2 + loop];
-                r = rgb_bgr_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-            }
+    } else {                           // if R row
+        if ((col & 0x00000001) == 0) { // Odd row, even column - We have G value at this location
+            b = rgb_bgr_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
+            g = imgblock[2][2 + loop];
+            r = rgr_bgb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
+        } else { // Odd row, odd column - We already have R value at this location
+            r = imgblock[2][2 + loop];
+            g = g_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
+            b = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
         }
     }
 }
 
-template <int BFORMAT,
-          int SRC_T,
+template <int SRC_T,
           int DST_T,
           int ROWS,
           int COLS,
@@ -235,21 +162,22 @@ template <int BFORMAT,
           int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
 void demosaicing(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src_mat,
-                 xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst_mat) {
+                 xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst_mat,
+                 unsigned short& bformat) {
 #ifndef __SYNTHESIS__
-    assert(((BFORMAT == XF_BAYER_BG) || (BFORMAT == XF_BAYER_GB) || (BFORMAT == XF_BAYER_GR) ||
-            (BFORMAT == XF_BAYER_RG)) &&
+    assert(((bformat == XF_BAYER_BG) || (bformat == XF_BAYER_GB) || (bformat == XF_BAYER_GR) ||
+            (bformat == XF_BAYER_RG)) &&
            ("Unsupported Bayer pattern. Use anyone among: "
             "XF_BAYER_BG;XF_BAYER_GB;XF_BAYER_GR;XF_BAYER_RG"));
     assert(((src_mat.rows <= ROWS) && (src_mat.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((NPC == 1) || (NPC == 2) || (NPC == 4)) && "Only 1, 2 and 4 pixel-parallelism are supported");
     assert(((SRC_T == XF_8UC1) || (SRC_T == XF_10UC1) || (SRC_T == XF_12UC1) || (SRC_T == XF_14UC1) ||
             (SRC_T == XF_16UC1)) &&
-           "Only 8, 10, 12 , 14 and 16 bit, single channel images are supported");
+           "Only 8, 10, 12 and 16 bit, single channel images are supported");
     assert(((DST_T == XF_8UC3) || (DST_T == XF_10UC3) || (DST_T == XF_12UC3) || (DST_T == XF_14UC3) ||
             (DST_T == XF_16UC3) || (DST_T == XF_8UC4) || (DST_T == XF_10UC4) || (DST_T == XF_12UC4) ||
             (DST_T == XF_16UC4)) &&
-           "Only 8, 10, 12, 14, and 16 bit, 3 and 4 channel images are supported");
+           "Only 8, 10, 12 and 16 bit, 3 and 4 channel images are supported");
 #endif
     const int __BHEIGHT = 5;
     const int __BHEIGHTMINUSONE = __BHEIGHT - 1;
@@ -428,9 +356,25 @@ Row_Loop:
             int r, g, b;
             XF_TNAME(DST_T, NPC) res_pixel[NPC];
 
+            short int candidateRow = 0, candidateCol = 0;
             for (int loop = 0; loop < NPC; loop++) {
-                Core_Process<BFORMAT, SRC_T, NPC, XF_DEPTH(SRC_T, NPC), __BWIDTH>(imgblock, b, g, r, i, j * NPC + loop,
-                                                                                  loop);
+                candidateCol = j * NPC + loop;
+                candidateRow = i;
+                if (bformat == XF_BAYER_GB) {
+                    candidateCol += 1;
+                }
+
+                if (bformat == XF_BAYER_GR) {
+                    candidateRow += 1;
+                }
+
+                if (bformat == XF_BAYER_RG) {
+                    candidateCol += 1;
+                    candidateRow += 1;
+                }
+
+                Core_Process<SRC_T, NPC, XF_DEPTH(SRC_T, NPC), __BWIDTH>(imgblock, b, g, r, candidateRow, candidateCol,
+                                                                         loop);
 
                 b = xf_satcast<XF_DTPIXELDEPTH(DST_T, NPC)>(b);
                 g = xf_satcast<XF_DTPIXELDEPTH(DST_T, NPC)>(g);
@@ -738,7 +682,7 @@ Row_Loop:
             int r, g, b;
             XF_TNAME(DST_T, NPC) res_pixel[NPC];
 
-            short int candidateRow = i, candidateCol = 0;
+            short int candidateRow = 0, candidateCol = 0;
 
             // Prohibit writing last two rows o/p in all slices except last
             // Prohibit writing last two rows o/p in first slice
@@ -746,6 +690,7 @@ Row_Loop:
             if ((SLICES == 1) || (!((slice_id == 0) && (i > (src_mat.rows - 3))))) {
                 for (int loop = 0; loop < NPC; loop++) {
                     candidateCol = j * NPC + loop;
+                    candidateRow = i;
                     if ((SLICES > 1) && (slice_id != 0)) {
                         candidateRow = slice_rows - 7 + i;
                     }
@@ -808,8 +753,8 @@ void demosaicing_multi_wrap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>&
 #pragma HLS ARRAY_PARTITION variable= bformat dim=1 complete
    // clang-format on	
     demosaicing_multi<SRC_T, DST_T, ROWS, COLS, NPC, USE_URAM, STREAMS, SLICES, XFCVDEPTH_IN_1,XFCVDEPTH_OUT_1>(
-        src_mat, dst_mat, bformat[stream_id], slice_id, stream_id, demo_buffs, slice_rows);
-    
+        src_mat, dst_mat, bformat[stream_id], slice_id, stream_id, demo_buffs, slice_rows);   
+        
 }        
 
 } // namespace cv

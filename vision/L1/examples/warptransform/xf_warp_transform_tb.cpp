@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
     }
 
     cv::RNG rng;
-    float R[9];
+    float R[9] = {0};
     cv::Mat _transformation_matrix(TRMAT_DIM1, TRMAT_DIM2, CV_32FC1);
     cv::Mat _transformation_matrix_2(TRMAT_DIM1, TRMAT_DIM2, CV_32FC1);
 
@@ -54,12 +54,23 @@ int main(int argc, char* argv[]) {
     src_p[1] = cv::Point2f(WIDTH - 1, 0.0f);
     src_p[2] = cv::Point2f(WIDTH - 1, HEIGHT - 1);
     src_p[3] = cv::Point2f(0.0f, HEIGHT - 1);
+
     //  to points
-    dst_p[0] = cv::Point2f(rng.uniform(int(M_NUMI1), int(M_NUMI2)), rng.uniform(int(M_NUMI1), int(M_NUMI2)));
-    dst_p[1] = cv::Point2f(WIDTH - rng.uniform(int(M_NUMI1), int(M_NUMI2)), rng.uniform(int(M_NUMI1), int(M_NUMI2)));
-    dst_p[2] =
-        cv::Point2f(WIDTH - rng.uniform(int(M_NUMI1), int(M_NUMI2)), HEIGHT - rng.uniform(int(M_NUMI1), int(M_NUMI2)));
-    dst_p[3] = cv::Point2f(rng.uniform(int(M_NUMI1), int(M_NUMI2)), HEIGHT - rng.uniform(int(M_NUMI1), int(M_NUMI2)));
+    int param2 = rng.uniform(int(M_NUMI1), int(M_NUMI2));
+    int param1 = rng.uniform(int(M_NUMI1), int(M_NUMI2));
+    dst_p[0] = cv::Point2f(param1, param2);
+
+    param2 = rng.uniform(int(M_NUMI1), int(M_NUMI2));
+    param1 = WIDTH - rng.uniform(int(M_NUMI1), int(M_NUMI2));
+    dst_p[1] = cv::Point2f(param1, param2);
+
+    param2 = HEIGHT - rng.uniform(int(M_NUMI1), int(M_NUMI2));
+    param1 = WIDTH - rng.uniform(int(M_NUMI1), int(M_NUMI2));
+    dst_p[2] = cv::Point2f(param1, param2);
+
+    param2 = HEIGHT - rng.uniform(int(M_NUMI1), int(M_NUMI2));
+    param1 = rng.uniform(int(M_NUMI1), int(M_NUMI2));
+    dst_p[3] = cv::Point2f(param1, param2);
 
     _transformation_matrix = cv::getPerspectiveTransform(dst_p, src_p);
     cv::Mat transform_mat = _transformation_matrix;
@@ -71,9 +82,17 @@ int main(int argc, char* argv[]) {
     src_p[2] = cv::Point2f(0.0f, HEIGHT - 1);
 
     //	  to points
-    dst_p[0] = cv::Point2f(rng.uniform(int(M_NUMI1), int(M_NUMI2)), rng.uniform(int(M_NUMI1), int(M_NUMI2)));
-    dst_p[1] = cv::Point2f(WIDTH - rng.uniform(int(M_NUMI1), int(M_NUMI2)), rng.uniform(int(M_NUMI1), int(M_NUMI2)));
-    dst_p[2] = cv::Point2f(rng.uniform(int(M_NUMI1), int(M_NUMI2)), HEIGHT - rng.uniform(int(M_NUMI1), int(M_NUMI2)));
+    int param2 = rng.uniform(int(M_NUMI1), int(M_NUMI2));
+    int param1 = rng.uniform(int(M_NUMI1), int(M_NUMI2));
+    dst_p[0] = cv::Point2f(param1, param2);
+
+    param2 = rng.uniform(int(M_NUMI1), int(M_NUMI2));
+    param1 = WIDTH - rng.uniform(int(M_NUMI1), int(M_NUMI2));
+    dst_p[1] = cv::Point2f(param1, param2);
+
+    param2 = HEIGHT - rng.uniform(int(M_NUMI1), int(M_NUMI2));
+    param1 = rng.uniform(int(M_NUMI1), int(M_NUMI2));
+    dst_p[2] = cv::Point2f(param1, param2);
 
     _transformation_matrix = cv::getAffineTransform(dst_p, src_p);
     cv::Mat transform_mat = _transformation_matrix;
@@ -118,7 +137,7 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
-    int src_point[8];
+    int src_point[8] = {0};
     if (TRANSFORM_TYPE == 1) {
         int point_0_x = 0, point_0_y = 0;
         int point_1_x = image_input.cols - 1, point_1_y = 0;

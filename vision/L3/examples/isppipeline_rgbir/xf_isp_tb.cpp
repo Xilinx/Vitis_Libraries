@@ -134,6 +134,7 @@ int main(int argc, char** argv) {
 
     unsigned short rgain = 256;
     unsigned short bgain = 256;
+    unsigned short ggain = 200;
 
     unsigned char mode_reg = 1;
 
@@ -164,6 +165,7 @@ int main(int argc, char** argv) {
     float gamma_val_r = 0.5f, gamma_val_g = 0.8f, gamma_val_b = 0.8f;
 
     compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut);
+    unsigned short bformat = XF_BAYER_PATTERN; // Bayer format BG-0; GB-1; GR-2; RG-3
 
     /////////////////////////////////////// CL ////////////////////////
     size_t filter1_in_size_bytes = 25 * sizeof(unsigned char);
@@ -224,6 +226,8 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(13, buffer_inVec));
     OCL_CHECK(err, err = kernel.setArg(14, mode_reg));
     OCL_CHECK(err, err = kernel.setArg(15, pawb));
+    OCL_CHECK(err, err = kernel.setArg(16, bformat));
+    OCL_CHECK(err, err = kernel.setArg(17, ggain));
 
     for (int i = 0; i < 2; i++) {
         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inVec,      // buffer on the FPGA

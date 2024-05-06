@@ -47,20 +47,22 @@ void AWBKernel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
+    uint32_t awb_config = (int)(thresh * 256); // thresh_awb int Q24_8 format change to Q16_16 format
 
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1>(img_inp, in_mat);
 
     if (WB_TYPE == 1) {
         xf::cv::AWBhistogram<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_USE_URAM, 1, HIST_SIZE, XF_CV_DEPTH_IN_1,
-                             XF_CV_DEPTH_IN_2>(in_mat, impop, hist0, thresh, inputMin, inputMax, outputMin, outputMax);
+                             XF_CV_DEPTH_IN_2>(in_mat, impop, hist0, awb_config, inputMin, inputMax, outputMin,
+                                               outputMax);
         xf::cv::AWBNormalization<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPPCX, 1, HIST_SIZE, XF_CV_DEPTH_IN_2,
-                                 XF_CV_DEPTH_OUT_1>(impop, out_mat, hist1, thresh, inputMin, inputMax, outputMin,
+                                 XF_CV_DEPTH_OUT_1>(impop, out_mat, hist1, awb_config, inputMin, inputMax, outputMin,
                                                     outputMax);
     } else {
         xf::cv::AWBChannelGain<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPPCX, 0, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(
-            in_mat, impop, thresh, gain0);
+            in_mat, impop, awb_config, gain0);
         xf::cv::AWBGainUpdate<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPPCX, 0, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_OUT_1>(
-            impop, out_mat, thresh, gain1);
+            impop, out_mat, awb_config, gain1);
     }
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1>(out_mat, img_out);
 }

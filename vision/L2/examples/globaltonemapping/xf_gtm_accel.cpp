@@ -39,8 +39,8 @@ void gtm_kernel(ap_uint<INPUT_PTR_WIDTH>* src,
                 ap_ufixed<16, 4>& L_max2,
                 ap_ufixed<16, 4>& L_min1,
                 ap_ufixed<16, 4>& L_min2,
-                float c1,
-                float c2) {
+                unsigned int c1,
+                unsigned int c2) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
@@ -60,8 +60,12 @@ void gtm_kernel(ap_uint<INPUT_PTR_WIDTH>* src,
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1>(imgOutput, dst);
 }
 extern "C" {
-void gtm_accel(
-    ap_uint<INPUT_PTR_WIDTH>* in_ptr, ap_uint<OUTPUT_PTR_WIDTH>* out_ptr, float c1, float c2, int height, int width) {
+void gtm_accel(ap_uint<INPUT_PTR_WIDTH>* in_ptr,
+               ap_uint<OUTPUT_PTR_WIDTH>* out_ptr,
+               unsigned c1,
+               unsigned c2,
+               int height,
+               int width) {
 // clang-format off
 #pragma HLS INTERFACE m_axi     port=in_ptr  offset=slave bundle=gmem0 depth=__XF_DEPTH_IN
 #pragma HLS INTERFACE m_axi     port=out_ptr offset=slave bundle=gmem1 depth=__XF_DEPTH_OUT

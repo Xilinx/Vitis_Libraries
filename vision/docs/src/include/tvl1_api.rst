@@ -1,11 +1,16 @@
 .. _tvl1:
 
-TVL1 Optical flow
-================================
+.. 
+   Copyright 2023 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+TVL1 Optical Flow
+##################
 
 The ``tvl1`` function is used for Optical flow application and its formulation is based on Total Variation (TV) 
-regularization & the robust L1 normalization in the data fidelity term. TVL1 algorithm preserves discontinuties 
-in the flow field and increases robustness against occlusions, illumination changes and noise. 
+regularization and the robust L1 normalization in the data fidelity term. TVL1 algorithm preserves discontinuities 
+in the flow field and increases robustness against occlusions, illumination changes, and noise. 
 
 .. rubric:: Public member functions
 .. code:: c
@@ -114,7 +119,7 @@ in the flow field and increases robustness against occlusions, illumination chan
 
 The following table describes the template and the function parameters.
 
-.. table:: Table . TVL1 Parameter Description
+.. table:: Table: TVL1 Parameters Description
 
    +-------------------+--------------------------------------------------+
    | Parameter         | Description                                      |
@@ -162,10 +167,10 @@ The following table describes the template and the function parameters.
 .. rubric:: Resource Utilization
 
 
-The following table summarizes the resource utilization in different configurations, generated using Vitis HLS 2022.1 tool for the
+The following table summarizes the resource utilization in different configurations, generated using the Vitis HLS 2022.1 tool for the
 xcu50-fsvh2104-2-e FPGA.
 
-.. table:: Table . TVL1 Function Resource Utilization Summary
+.. table:: Table: TVL1 Function Resource Utilization Summary
 
     +----------------+---------------------------+----------------------+-----------+--------+--------+
     | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                 |
@@ -180,11 +185,11 @@ xcu50-fsvh2104-2-e FPGA.
 
 
 The following table summarizes the performance of the kernel in 2-pixel
-mode as generated using Vitis HLS 2022.1 tool for the Xilinx
+mode as generated using the Vitis HLS 2022.1 tool for the
 xcu50-fsvh2104-2-e FPGA to process a grayscale 384x288 image
 image.
 
-.. table:: Table . TVL1 Function Performance Estimate Summary
+.. table:: Table: TVL1 Function Performance Estimate Summary
 
     +-----------------------------+------------------+
     | Operating Mode              | Latency Estimate |

@@ -5,6 +5,10 @@
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
+.. Copyright © 2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 Getting Started with HLS
 #########################
 
@@ -13,19 +17,19 @@ This section of the document provides steps on how to run a single library compo
 the Vitis HLS 2023.1 flow which includes, C-simulation,
 C-synthesis, C/RTL co-simulation, and exporting the RTL as an IP.
 
-All the functions under L1 folder of the Vitis Vision library can be built through Vitis HLS flow
+All the functions in the L1 folder of the Vitis Vision library can be built through Vitis HLS flow
 in the following two modes:
 
 #. Command line Mode
 #. GUI Mode
 
 
-.. rubric:: Command line Mode
+.. rubric:: Command Line Mode
 
 Each configuration of all functions in L1 are provided with a Makefile which can be run to create
-HLS project.
+an HLS project.
 
-Open a terminal and run the following commands to set the environment and build :
+Open a terminal and run the following commands to set the environment and build:
 
 .. code:: c
 
@@ -86,7 +90,7 @@ Use the following steps to operate the HLS Standalone Mode using GUI:
 
 .. rubric:: Constraints for Co-simulation
 
-There are few limitations in performing co-simulation of the Vitis vision
+There are a few limitations in performing co-simulation of the Vitis vision
 functions. They are:
 
 #. Functions with multiple accelerators are not supported.
@@ -95,21 +99,21 @@ functions. They are:
    also does not support multi-kernel integration. Hence, the Pyramidal
    Optical flow and Canny Edge Detection functions and examples are not
    supported in this flow.
-#. The maximum image size (HEIGHT and WIDTH) set in config.h file should
+#. The maximum image size (HEIGHT and WIDTH) set in the ``config.h`` file should
    be equal to the actual input image size.
 
 
 AXI Video Interface Functions
 =============================
 
-Vitis vision has functions that will transform the xf::cv::Mat into Xilinx®
+Vitis vision has functions that will transform the xf::cv::Mat into an AMD
 Video Streaming interface and vice-versa. ``xf::cv::AXIvideo2xfMat()`` and
 ``xf::cv::xfMat2AXIVideo()`` act as video interfaces to the IPs of the
 Vitis vision functions in the Vivado® IP integrator.
 ``cvMat2AXIvideoxf<NPC>`` and ``AXIvideo2cvMatxf<NPC>``
 are used on the host side.
 
-An example function, 'axiconv', depicting the usage of these functions
+An example function, ``axiconv``, depicting the usage of these functions
 is provided in the L1/examples directory.
 
 .. table:: Table. AXI Video Interface Functions
@@ -150,7 +154,7 @@ AXI4 Streaming Video and produces an ``xf::cv::Mat`` representation.
 
 The following table describes the template and the function parameters.
 
-.. table:: Table. AXIvideo2cvMatxf Function Parameter Description
+.. table:: Table: AXIvideo2cvMatxf Function Parameter Description
 
    +-----------------------------------+-----------------------------------+
    | Parameter                         | Description                       |
@@ -239,9 +243,7 @@ The following table describes the template and the function parameters.
 
 This function returns the value 0.
 
-Note: The NPC values across all the functions in a data flow must follow
-the same value. If there is mismatch it throws a compilation error in
-HLS.
+.. note:: The NPC values across all the functions in a data flow must follow the same value. If there is mismatch it throws a compilation error in HLS.
 
 
 cvMat2AXIvideoxf
@@ -264,7 +266,7 @@ representation and produces the AXI4 streaming video of image.
 
 The following table describes the template and the function parameters.
 
-.. table:: Table. AXIvideo2cvMatxf Function Parameter Description
+.. table:: Table: AXIvideo2cvMatxf Function Parameter Description
 
    +-----------------------------------+-----------------------------------+
    | Parameter                         | Description                       |
@@ -303,7 +305,7 @@ and produces the cv::Mat representation of image
 
 The following table describes the template and the function parameters.
 
-.. table:: Table. AXIvideo2cvMatxf Function Parameter Description
+.. table:: Table: AXIvideo2cvMatxf Function Parameter Description
 
    +-----------------------------------+-----------------------------------+
    | Parameter                         | Description                       |

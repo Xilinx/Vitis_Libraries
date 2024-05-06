@@ -18,7 +18,8 @@
 #include "xf_gaincontrol_tb_config.h"
 
 #include <time.h>
-void gainControlOCV(cv::Mat input, cv::Mat& output, int code, unsigned short rgain, unsigned short bgain) {
+void gainControlOCV(
+    cv::Mat input, cv::Mat& output, int code, unsigned short rgain, unsigned short bgain, unsigned short ggain) {
     cv::Mat mat = input.clone();
     int height = mat.size().height;
     int width = mat.size().width;
@@ -43,21 +44,29 @@ void gainControlOCV(cv::Mat input, cv::Mat& output, int code, unsigned short rga
                     pixel = (maxSize)((pixel * rgain) >> 7);
                 else if (i % 2 != 0 && cond2)
                     pixel = (maxSize)((pixel * bgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
             } else if (code == XF_BAYER_GR) {
                 if (i % 2 == 0 && cond2)
                     pixel = (maxSize)((pixel * rgain) >> 7);
                 else if (i % 2 != 0 && cond1)
                     pixel = (maxSize)((pixel * bgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
             } else if (code == XF_BAYER_BG) {
                 if (i % 2 == 0 && cond1)
                     pixel = (maxSize)((pixel * bgain) >> 7);
                 else if (i % 2 == 0 && cond2)
                     pixel = (maxSize)((pixel * rgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
             } else if (code == XF_BAYER_GB) {
                 if (i % 2 == 0 && cond2)
                     pixel = (maxSize)((pixel * bgain) >> 7);
                 else if (i % 2 != 0 && cond1)
                     pixel = (maxSize)((pixel * rgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
             }
             // std::cout<<"Final: "<<pixel<<std::endl;
             mat.at<realSize>(i, j) = cv::saturate_cast<realSize>(pixel); // writing each pixel
@@ -93,14 +102,16 @@ int main(int argc, char** argv) {
     int width = in_gray.cols;
     unsigned short rgain = 154;
     unsigned short bgain = 140;
+    unsigned short ggain = 200;
+    uint16_t bformat = BFORMAT; // Bayer format BG-0; GB-1; GR-2; RG-3
 
     // OpenCV Reference
-    gainControlOCV(in_gray, ocv_ref, BFORMAT, rgain, bgain);
+    gainControlOCV(in_gray, ocv_ref, BFORMAT, rgain, bgain, ggain);
 
     ///////////////////////////Top function call ///////////////////////////
 
     gaincontrol_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_gray.data, height, width,
-                      rgain, bgain);
+                      rgain, bgain, ggain, bformat);
 
     imwrite("out_hls.jpg", out_gray);
     imwrite("ocv_ref.png", ocv_ref);

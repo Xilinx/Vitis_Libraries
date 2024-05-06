@@ -1,20 +1,23 @@
+.. 
+   Copyright 2023 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-
-ISP all_in_one pipeline:
-========================
+ISP all_in_one Pipeline:
+#########################
 
 The ISP all_in_one pipeline contains all the necessary functions that
 will enable the user to test several combinations of the image sensor
 processing pipeline. In this specific ISP pipeline version, optional
 modules can be enabled or disabled using compile-time parameters.
 
-This ISP pipeline includes 19 modules, they are following:
+This ISP pipeline includes 19 modules, as follows:
 
 -  **Extract Exposure Frames:** The Extract Exposure Frames module returns
    the Short Exposure Frame and Long Exposure Frame from the input frame
    using the Digital overlap parameter.
 
--  **HDR Merge:** HDR Merge module generates the High Dynamic Range
+-  **HDR Merge:** The HDR Merge module generates the High Dynamic Range
    image from a set of different exposure frames. Usually, image sensors
    have limited dynamic range and it’s difficult to get HDR image with
    single image capture. From the sensor, the frames are collected with
@@ -24,7 +27,7 @@ This ISP pipeline includes 19 modules, they are following:
 -  **HDR Decompand:** This module decompands or decompresses a piecewise 
    linear (PWL) companded data. Companding is performed in image sensors
    not capable of high bitwidth during data transmission. This decompanding
-   module supports Bayer raw data with 4 knee point PWL mapping and equations
+   module supports Bayer raw data with four knee point PWL mapping and equations
    are provided for 12-bit to 16-bit conversion.    
 
 -  **RGBIR to Bayer (RGBIR):** This module converts the input image with 
@@ -32,19 +35,19 @@ This ISP pipeline includes 19 modules, they are following:
    a full IR data image. 
 
 -  **Auto Exposure Compensation (AEC):** This module automatically 
-   attempts to correct the exposure level of captured image and also 
-   improves contrast of the image.
+   attempts to correct the exposure level of the captured image and also 
+   improve the contrast of the image.
 
 -  **Black Level Correction (BLC):** This module corrects the black and white 
    levels of the overall image. Black level leads to the whitening of
    image in dark regions and perceived loss of overall contrast. 
    
 -  **Bad Pixel Correction (BPC):** This module removes defective/bad pixels 
-   from an image sensor resulting from of manufacturing faults or variations 
+   from an image sensor resulting from manufacturing faults or variations 
    in pixel voltage levels based on temperature or exposure.
  
 
--  **Degamma:** This module linearizes the input from sensor in order to facilitate ISP processing that operates on linear domain. 
+-  **Degamma:** This module linearizes the input from the sensor in order to facilitate ISP processing that operates on the linear domain. 
 
 -  **Lens Shading Correction (LSC):** This module corrects the darkening toward 
    the edge of the image caused by camera lens limitations. This darkening 
@@ -55,17 +58,17 @@ This ISP pipeline includes 19 modules, they are following:
 -  **Demosaicing:** This module reconstructs RGB pixels from the input Bayer 
    image (RGGB, BGGR, RGBG, GRGB).
 
--  **Auto White Balance (AWB):** This module improves color balance of the
+-  **Auto White Balance (AWB):** This module improves the color balance of the
    image by using image statistics.
 
 -  **Color Correction Matrix (CCM):** This module converts the input image 
-   color format to output image color format using the Color Correction Matrix 
+   color format to the output image color format using the Color Correction Matrix 
    provided by the user (CCM_TYPE).
 
 -  **Quantization & Dithering (QnD):** This module is a tone-mapper that 
-   dithers input image using Floyd-Steinberg dithering method. It is commonly 
+   dithers the input image using the Floyd-Steinberg dithering method. It is commonly 
    used by image manipulation software, for example when an image is converted 
-   into GIF format each pixel intensity value is quantized to 8 bits i.e. 256
+   into GIF format each pixel intensity value is quantized to 8 bits i.e., 256
    colors.
 
 -  **Global Tone Mapping (GTM):** This module is a tone-mapper that reduces 
@@ -83,8 +86,8 @@ This ISP pipeline includes 19 modules, they are following:
    where n is the bit depth, whereas a 3D LUT processing 3 channels will have
    2^n \* 2^n \* 2^n possible values.
    
--  **Color Space Conversion (CSC):** The CSS module converts RGB image to 
-   YUV422(YUYV) image for HDMI display purpose. RGB2YUYV converts the RGB image 
+-  **Color Space Conversion (CSC):** The CSS module converts an RGB image to 
+   a YUV422(YUYV) image for HDMI display purposes. RGB2YUYV converts the RGB image 
    into Y channel for every pixel and U and V for alternating pixels.
 
 
@@ -92,7 +95,7 @@ This ISP pipeline includes 19 modules, they are following:
    :class: image 
    :width: 1000 
       
-.. table:: Runtime parameter for the pipeline
+.. table:: Table: Runtime Parameters for the Pipeline
 
     +-------------------------+-----------------------------------+
     | **Parameter**           | **Descriptions**                  |
@@ -175,7 +178,7 @@ This ISP pipeline includes 19 modules, they are following:
     | lutDim                  | Dimension of input LUT.           |
     +-------------------------+-----------------------------------+
 
-.. table:: Compile time flags 
+.. table:: Table: Compile Time Flags 
 
     +------------------+-----------------------------------+
     | **Parameter**    | **Description**                   |
@@ -215,7 +218,7 @@ This ISP pipeline includes 19 modules, they are following:
     +------------------+-----------------------------------+
    
 
-.. table:: Compile time parameter
+.. table:: Table: Compile Time Parameter
 
     +-------------------------+-----------------------------------+
     | **Parameter**           | **Description**                   |
@@ -363,13 +366,14 @@ The following example demonstrates the top-level ISP pipeline:
             }
            }
 
-Create and Launch kernel in the testbench:
+Create and Launch Kernel in the Testbench:
+===========================================
 
-Histogram needs two frames to populate the histogram and to get correct result in
-auto exposure frame. Auto white balance, GTM and other tone-mapping functions needs
+The histogram needs two frames to populate the histogram array and to get correct results in the
+auto exposure frame. Auto white balance, GTM and other tone-mapping functions need
 one extra frame in each to populate its parameters and apply those parameters to
 get a correct image. For the specific example below, four iterations
-are needed because the AEC, AWB and LTM module selected.
+are needed because the AEC, AWB, and LTM modules are selected.
 
 
 .. code:: c
@@ -490,7 +494,7 @@ are needed because the AEC, AWB and LTM module selected.
 The following table summarizes the resource utilization of ISP all_in_one generated using Vitis 
 HLS 2023.1 tool on ZCU102 board.
 
-.. table:: ISP all_in_one Resource Utilization Summary
+.. table:: Table: ISP all_in_one Resource Utilization Summary
 
 
     +----------------+---------------------------+-------------------------------------------------+
@@ -507,10 +511,10 @@ HLS 2023.1 tool on ZCU102 board.
 The following table summarizes the performance of the ISP all_in_one in 1-pixel
 mode as generated using Vitis HLS 2023.1 tool on ZCU102 board.
  
-Estimated average latency is obtained by running the accel with 4 iterations. 
-The input to the accel is a 12bit non-linearized full-HD (1920x1080) image.
+Estimated average latency is obtained by running the accel with four iterations. 
+The input to the accel is a 12-bit non-linearized full-HD (1920x1080) image.
 
-.. table:: ISP all_in_one Performance Estimate Summary
+.. table:: Table: ISP all_in_one Performance Estimate Summary
 
     +-----------------------------+-------------------------+
     |                             | Latency Estimate        |

@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "common/xf_headers.hpp"
-#include "xf_threshold_config.h"
+#include "xf_threshold_tb_config.h"
 
 #include "xcl2.hpp"
 #include <unistd.h>
@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
-    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_threshold_xo");
+    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_threshold");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
 

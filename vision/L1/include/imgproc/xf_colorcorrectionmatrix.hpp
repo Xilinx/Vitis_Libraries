@@ -33,56 +33,6 @@ typedef unsigned char uchar;
 #include "common/xf_utility.hpp"
 #include "hls_stream.h"
 
-const ap_fixed<32, 4> bt2020_bt709_arr_hls_1[3][3] = {
-    {1.6605, -0.5876, -0.0728}, {-0.1246, 1.1329, -0.0083}, {-0.0182, -0.1006, 1.1187}};
-
-const ap_fixed<32, 4> bt2020_bt709_off_hls_1[3] = {0.0, 0.0, 0.0};
-
-const ap_fixed<32, 4> bt709_bt2020_arr_hls_1[3][3] = {
-    {0.627, 0.329, 0.0433}, {0.0691, 0.92, 0.0113}, {0.0164, 0.088, 0.896}};
-
-const ap_fixed<32, 4> bt709_bt2020_off_hls_1[3] = {0.0, 0.0, 0.0};
-
-const ap_fixed<32, 4> rgb_yuv_601_arr_hls_1[3][3] = {
-    {0.257, 0.504, 0.098}, {-0.148, -0.291, 0.439}, {0.439, -0.368, -0.071}};
-
-const ap_fixed<32, 4> rgb_yuv_601_off_hls_1[3] = {0.0625, 0.500, 0.500};
-
-const ap_fixed<32, 4> rgb_yuv_709_arr_hls_1[3][3] = {
-    {0.183, 0.614, 0.062}, {-0.101, -0.338, 0.439}, {0.439, -0.399, -0.040}};
-
-const ap_fixed<32, 4> rgb_yuv_709_off_hls_1[3] = {0.0625, 0.500, 0.500};
-
-const ap_fixed<32, 4> rgb_yuv_2020_arr_hls_1[3][3] = {
-    {0.225613, 0.582282, 0.050928}, {-0.119918, -0.309494, 0.429412}, {0.429412, -0.394875, -0.034537}};
-
-const ap_fixed<32, 4> rgb_yuv_2020_off_hls_1[3] = {0.062745, 0.500, 0.500};
-
-const ap_fixed<32, 4> yuv_rgb_601_arr_hls_1[3][3] = {
-    {1.164, 0.000, 1.596}, {1.164, -0.813, -0.391}, {1.164, 2.018, 0.000}};
-
-const ap_fixed<32, 4> yuv_rgb_601_off_hls_1[3] = {-0.87075, 0.52925, -1.08175};
-
-const ap_fixed<32, 4> yuv_rgb_709_arr_hls_1[3][3] = {
-    {1.164, 0.000, 1.793}, {1.164, -0.213, -0.534}, {1.164, 2.115, 0.000}};
-
-const ap_fixed<32, 4> yuv_rgb_709_off_hls_1[3] = {-0.96925, 0.30075, -1.13025};
-
-const ap_fixed<32, 4> yuv_rgb_2020_arr_hls_1[3][3] = {
-    {1.164384, 0.000000, 1.717000}, {1.164384, -0.191603, -0.665274}, {1.164384, 2.190671, 0.000000}};
-
-const ap_fixed<32, 4> yuv_rgb_2020_off_hls_1[3] = {-0.931559, 0.355379, -1.168395};
-
-const ap_fixed<32, 4> full_to_16_235_arr_hls_1[3][3] = {
-    {0.856305, 0.000000, 0.000000}, {0.000000, 0.856305, 0.000000}, {0.000000, 0.000000, 0.856305}};
-
-const ap_fixed<32, 4> full_to_16_235_off_hls_1[3] = {0.0625, 0.0625, 0.0625};
-
-const ap_fixed<32, 4> full_from_16_235_arr_hls_1[3][3] = {
-    {1.167808, 0.000000, 0.000000}, {0.000000, 1.167808, 0.000000}, {0.000000, 0.000000, 1.167808}};
-
-const ap_fixed<32, 4> full_from_16_235_off_hls_1[3] = {-0.0729880, -0.0729880, -0.0729880};
-
 template <typename T>
 T xf_satcast_ccm(int in_val){};
 
@@ -126,105 +76,20 @@ template <int SRC_T,
           int COLS_TRIP>
 void xfccmkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
-                 ap_uint<8> _ccm_type,
+                 signed int ccm_matrix_1[3][3],
+                 signed int offsetarray_1[3],
                  unsigned short height,
                  unsigned short width) {
     ap_fixed<32, 4> ccm_matrix[3][3];
     ap_fixed<32, 4> offsetarray[3];
 
-    switch (_ccm_type) {
-        case 0:
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    ccm_matrix[i][j] = bt2020_bt709_arr_hls_1[i][j];
-                }
-                offsetarray[i] = bt2020_bt709_off_hls_1[i];
-            }
-
-            break;
-        case 1:
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    ccm_matrix[i][j] = bt709_bt2020_arr_hls_1[i][j];
-                }
-                offsetarray[i] = bt709_bt2020_off_hls_1[i];
-            }
-
-            break;
-        case 2:
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    ccm_matrix[i][j] = rgb_yuv_601_arr_hls_1[i][j];
-                }
-                offsetarray[i] = rgb_yuv_601_off_hls_1[i];
-            }
-
-            break;
-        case 3:
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    ccm_matrix[i][j] = rgb_yuv_709_arr_hls_1[i][j];
-                }
-                offsetarray[i] = rgb_yuv_709_off_hls_1[i];
-            }
-
-            break;
-        case 4:
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    ccm_matrix[i][j] = rgb_yuv_2020_arr_hls_1[i][j];
-                }
-                offsetarray[i] = rgb_yuv_2020_off_hls_1[i];
-            }
-
-            break;
-        case 5:
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    ccm_matrix[i][j] = yuv_rgb_601_arr_hls_1[i][j];
-                }
-                offsetarray[i] = yuv_rgb_601_off_hls_1[i];
-            }
-
-            break;
-        case 6:
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    ccm_matrix[i][j] = yuv_rgb_709_arr_hls_1[i][j];
-                }
-                offsetarray[i] = yuv_rgb_709_off_hls_1[i];
-            }
-
-            break;
-        case 7:
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    ccm_matrix[i][j] = yuv_rgb_2020_arr_hls_1[i][j];
-                }
-                offsetarray[i] = yuv_rgb_2020_off_hls_1[i];
-            }
-
-            break;
-        case 8:
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    ccm_matrix[i][j] = full_to_16_235_arr_hls_1[i][j];
-                }
-                offsetarray[i] = full_to_16_235_off_hls_1[i];
-            }
-
-            break;
-        case 9:
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    ccm_matrix[i][j] = full_from_16_235_arr_hls_1[i][j];
-                }
-                offsetarray[i] = full_from_16_235_off_hls_1[i];
-            }
-
-            break;
-        default:
-            break;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            ap_fixed<44, 24> temp1 = (float)ccm_matrix_1[i][j];
+            ccm_matrix[i][j] = temp1 >> 20;
+        }
+        ap_fixed<44, 24> temp2 = (float)offsetarray_1[i];
+        offsetarray[i] = temp2 >> 20;
     }
 
     const int STEP = XF_DTPIXELDEPTH(SRC_T, NPC);
@@ -298,8 +163,7 @@ rowLoop:
  * @param _src_mat input image
  * @param _dst_mat output image
  */
-template <int CCM_TYPE,
-          int SRC_T,
+template <int SRC_T,
           int DST_T,
           int ROWS,
           int COLS,
@@ -307,7 +171,9 @@ template <int CCM_TYPE,
           int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
 void colorcorrectionmatrix(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
-                           xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat) {
+                           xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
+                           signed int ccm_matrix[3][3],
+                           signed int offsetarray[3]) {
     unsigned short width = _src_mat.cols >> XF_BITSHIFT(NPC);
     unsigned short height = _src_mat.rows;
     assert(((height <= ROWS) && (width <= COLS)) && "ROWS and COLS should be greater than input image");
@@ -317,7 +183,25 @@ void colorcorrectionmatrix(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& 
     // clang-format on
 
     xfccmkernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC),
-                XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src_mat, _dst_mat, CCM_TYPE, height, width);
+                XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src_mat, _dst_mat, ccm_matrix, offsetarray,
+                                                                      height, width);
+}
+
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int STREAMS = 2,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void colorcorrectionmatrix_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
+                                 signed int ccm_matrix[STREAMS][3][3],
+                                 signed int offsetarray[STREAMS][3],
+                                 int strm_id) {
+    colorcorrectionmatrix<SRC_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(
+        _src_mat, _dst_mat, ccm_matrix[strm_id], offsetarray[strm_id]);
 }
 } // namespace cv
 } // namespace xf

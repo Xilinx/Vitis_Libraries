@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright 2019 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +21,6 @@
 #include "hls_stream.h"
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
-//#include "xf_config_params.h"
 #include "imgproc/xf_duplicateimage.hpp"
 #include "hls_math.h"
 #include <type_traits>
@@ -30,6 +28,7 @@
 namespace xf {
 namespace cv {
 
+static int tmp = 0;
 template <int BLK_ROWS, int BLK_COLS, int ROWS, int COLS, int NPC>
 class LTMTile {
    public:
@@ -211,6 +210,7 @@ template <int IN_TYPE,
 class LTM {
    public:
     static constexpr int BILINEAR_INTERPOLATE_TYPE = XF_32FC1;
+    static constexpr int BILINEAR_INTERPOLATE_TYPE_C = XF_32FC3;
     static constexpr float OUT_DEPTH = (1 << XF_DTPIXELDEPTH(OUT_TYPE, NPC)) - 1;
     static constexpr int COLS_NPC_ALIGNED = LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::COLS_NPC_ALIGNED;
     static constexpr int MinMaxVArrSize = LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize;
@@ -242,16 +242,21 @@ class LTM {
     template <int T = IN_TYPE, typename std::enable_if<!is_floating_point<T>::value>::type* = nullptr>
     static constexpr XF_CTUNAME(IN_TYPE, NPC) LOW() {
         return 0;
+        //            return floatToRawBits(0.0f);
     }
 
     template <int T = IN_TYPE, typename std::enable_if<is_floating_point<T>::value>::type* = nullptr>
     static constexpr XF_CTUNAME(IN_TYPE, NPC) LOW() {
-        return floatToRawBits(0.0);
+        return floatToRawBits(0.0f);
     }
 
     template <int T = IN_TYPE, typename std::enable_if<!is_floating_point<T>::value>::type* = nullptr>
-    static constexpr XF_CTUNAME(IN_TYPE, NPC) HIGH() {
-        return std::numeric_limits<unsigned int>::max();
+    static constexpr XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE, NPC) HIGH() {
+        unsigned int temp = std::numeric_limits<unsigned int>::max();
+        float a = std::log(temp);
+        unsigned int b = floatToRawBits(a);
+        //            return floatToRawBits(std::log(temp));
+        return (XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE, NPC))b;
     }
 
     template <int T = IN_TYPE, typename std::enable_if<is_floating_point<T>::value>::type* = nullptr>
@@ -276,31 +281,35 @@ class LTM {
 
     // Overload is_less using SFINAE principal [[
     template <int T = IN_TYPE, typename std::enable_if<!is_floating_point<T>::value>::type* = nullptr>
-    static inline bool is_less(XF_CTUNAME(T, NPC) a, XF_CTUNAME(T, NPC) b) {
-        return (a < b) ? true : false;
-    }
-
-    template <int T = IN_TYPE, typename std::enable_if<is_floating_point<T>::value>::type* = nullptr>
-    static inline bool is_less(XF_CTUNAME(T, NPC) a, XF_CTUNAME(T, NPC) b) {
+    static inline bool is_less(XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE, NPC) a,
+                               XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE, NPC) b) {
+        //            return (a < b) ? true : false;
         return (rawBitsToFloat((unsigned long)a) < rawBitsToFloat((unsigned long)b)) ? true : false;
     }
-    //]]
 
-    static XF_CTUNAME(IN_TYPE, NPC) max(XF_DTUNAME(IN_TYPE, NPC) in) {
-        XF_CTUNAME(IN_TYPE, NPC) ret = LOW();
+    /*        template<int T = IN_TYPE, typename std::enable_if<is_floating_point<T>::value>::type * = nullptr>
+            static inline bool is_less(XF_CTUNAME(T,NPC) a, XF_CTUNAME(T,NPC) b) {
+                return (rawBitsToFloat((unsigned long)a) < rawBitsToFloat((unsigned long)b)) ? true : false;
+            }*/
+    //]]
+    template <int T = BILINEAR_INTERPOLATE_TYPE_C, int OUT_T = BILINEAR_INTERPOLATE_TYPE>
+    static XF_CTUNAME(OUT_T, NPC) max(XF_DTUNAME(T, NPC) in) {
+        XF_CTUNAME(OUT_T, NPC) ret = LOW();
     CH0:
         for (int i = 0; i < XF_CHANNELS(IN_TYPE, NPC); i++) {
-            XF_CTUNAME(IN_TYPE, NPC)
-            val = in.range((i + 1) * XF_DTPIXELDEPTH(IN_TYPE, NPC) - 1, i * XF_DTPIXELDEPTH(IN_TYPE, NPC));
+            XF_CTUNAME(OUT_T, NPC) val = in.range((i + 1) * XF_DTPIXELDEPTH(T, NPC) - 1, i * XF_DTPIXELDEPTH(T, NPC));
             if (is_less(ret, val)) ret = val;
         }
         return ret;
     }
 
-    static void getMaxImage(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
-                            LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>& Tile,
-                            xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in_copy,
-                            hls::stream<ap_uint<XF_DTPIXELDEPTH(IN_TYPE, NPC) * XF_NPIXPERCYCLE(NPC)> >& in_max) {
+    static void getMaxImage(
+        xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
+        LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>& Tile,
+        xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in_copy,
+        xf::cv::Mat<BILINEAR_INTERPOLATE_TYPE_C, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in_copy_log,
+        hls::stream<ap_uint<XF_DTPIXELDEPTH(BILINEAR_INTERPOLATE_TYPE_C, NPC) * XF_NPIXPERCYCLE(NPC)> >& in_max) {
+        //            FILE* fp3 = fopen("in_max.csv", "w");
         int addr = 0;
     R:
         for (int i = 0; i < Tile.getInputRows(); i++) {
@@ -315,28 +324,59 @@ class LTM {
                 // clang-format on
                 XF_TNAME(IN_TYPE, NPC) val = in.read(addr);
                 in_copy.write(addr, val);
-                addr++;
-                ap_uint<XF_DTPIXELDEPTH(IN_TYPE, NPC) * XF_NPIXPERCYCLE(NPC)> valMax;
+                XF_TNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) copy_val;
+                XF_DTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) pinval_log;
+                //                    ap_uint<XF_DTPIXELDEPTH(BILINEAR_INTERPOLATE_TYPE_C,NPC)> pin_ext, pin_ext_log;
+                float pin_ext, pin_ext_log;
+                ap_uint<XF_DTPIXELDEPTH(BILINEAR_INTERPOLATE_TYPE_C, NPC) * XF_NPIXPERCYCLE(NPC)> valMax;
             N:
                 for (int l = 0; l < XF_NPIXPERCYCLE(NPC); l++) {
                     XF_DTUNAME(IN_TYPE, NPC)
                     pinVal = val.range((l + 1) * XF_PIXELWIDTH(IN_TYPE, NPC) - 1, l * XF_PIXELWIDTH(IN_TYPE, NPC));
-                    valMax.range((l + 1) * XF_DTPIXELDEPTH(IN_TYPE, NPC) - 1, l * XF_DTPIXELDEPTH(IN_TYPE, NPC)) =
-                        max(pinVal);
+                    for (int m = 0; m < XF_CHANNELS(IN_TYPE, NPC); m++) {
+                        pin_ext = pinVal.range((m + 1) * XF_DTPIXELDEPTH(IN_TYPE, NPC) - 1,
+                                               m * XF_DTPIXELDEPTH(IN_TYPE, NPC));
+                        pin_ext_log = std::log(pin_ext + std::numeric_limits<float>::epsilon());
+                        pinval_log.range((m + 1) * XF_DTPIXELDEPTH(BILINEAR_INTERPOLATE_TYPE_C, NPC) - 1,
+                                         m * XF_DTPIXELDEPTH(BILINEAR_INTERPOLATE_TYPE_C, NPC)) =
+                            floatToRawBits(pin_ext_log);
+                    }
+                    copy_val.range((l + 1) * XF_PIXELWIDTH(BILINEAR_INTERPOLATE_TYPE_C, NPC) - 1,
+                                   l * XF_PIXELWIDTH(BILINEAR_INTERPOLATE_TYPE_C, NPC)) = pinval_log;
+                    //                        std::cout << (unsigned int)pinVal << " - " <<
+                    //                        rawBitsToFloat(max(pinval_log)) << std::endl;
+                    valMax.range((l + 1) * XF_DTPIXELDEPTH(BILINEAR_INTERPOLATE_TYPE_C, NPC) - 1,
+                                 l * XF_DTPIXELDEPTH(BILINEAR_INTERPOLATE_TYPE_C, NPC)) = max(pinval_log);
                 }
+                //                    fprintf(fp3, "(%d,%d,%f)", i,j,rawBitsToFloat(valMax));
+
                 in_max.write(valMax);
+                in_copy_log.write(addr, copy_val);
+                addr++;
             }
+            //                fprintf(fp3, "\n");
         }
+        //            fclose(fp3);
     }
 
-    static void getMinMax(hls::stream<ap_uint<XF_DTPIXELDEPTH(IN_TYPE, NPC) * XF_NPIXPERCYCLE(NPC)> >& in_max,
-                          int vBlkSize,
-                          int vBlkIndex,
-                          LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>& Tile,
-                          XF_CTUNAME(IN_TYPE, NPC) omin[MinMaxVArrSize][MinMaxHArrSize],
-                          XF_CTUNAME(IN_TYPE, NPC) omax[MinMaxVArrSize][MinMaxHArrSize]) {
-        XF_CTUNAME(IN_TYPE, NPC) omin_l[MinMaxHArrSize];
-        XF_CTUNAME(IN_TYPE, NPC) omax_l[MinMaxHArrSize];
+    // FILE* fp3 = fopen("in_max.csv", "w");
+    // for (int i = 0; i < in.rows; ++i) {
+    //     for (int j = 0; j < in.cols; ++j) {
+
+    //         fprintf(fp3, "(%d,%d,%f)", i,j,rawBitsToFloat(in_max.read((i*j)+j)));
+    //     }
+    //     fprintf(fp3, "\n");
+    // }
+    // fclose(fp3);
+    static void getMinMax(
+        hls::stream<ap_uint<XF_DTPIXELDEPTH(BILINEAR_INTERPOLATE_TYPE_C, NPC) * XF_NPIXPERCYCLE(NPC)> >& in_max,
+        int vBlkSize,
+        int vBlkIndex,
+        LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>& Tile,
+        XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omin[MinMaxVArrSize][MinMaxHArrSize],
+        XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omax[MinMaxVArrSize][MinMaxHArrSize]) {
+        XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omin_l[MinMaxHArrSize];
+        XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omax_l[MinMaxHArrSize];
         bool bStart = true;
 // clang-format off
 #pragma HLS ARRAY_PARTITION variable=omin_l dim=1 complete
@@ -353,25 +393,32 @@ class LTM {
 #pragma HLS LOOP_TRIPCOUNT min=COLS_NPC_ALIGNED max=COLS_NPC_ALIGNED
 #pragma HLS PIPELINE II=1
                 // clang-format on
-                ap_uint<XF_DTPIXELDEPTH(IN_TYPE, NPC) * XF_NPIXPERCYCLE(NPC)> val = in_max.read();
+                ap_uint<XF_DTPIXELDEPTH(BILINEAR_INTERPOLATE_TYPE_C, NPC) * XF_NPIXPERCYCLE(NPC)> val = in_max.read();
                 int hBlkSize = Tile.getHBlkSize(j);
 
-                XF_CTUNAME(IN_TYPE, NPC) pinValMin = HIGH();
-                XF_CTUNAME(IN_TYPE, NPC) pinValMax = LOW();
+                XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) pinValMin = HIGH();
+                XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) pinValMax = LOW();
+
+                float c = rawBitsToFloat(pinValMin);
             N0:
                 for (int l = 0; l < XF_NPIXPERCYCLE(NPC); l++) {
-                    XF_CTUNAME(IN_TYPE, NPC)
-                    pinVal = val.range((l + 1) * XF_DTPIXELDEPTH(IN_TYPE, NPC) - 1, l * XF_DTPIXELDEPTH(IN_TYPE, NPC));
+                    XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC)
+                    pinVal = val.range((l + 1) * XF_DTPIXELDEPTH(BILINEAR_INTERPOLATE_TYPE_C, NPC) - 1,
+                                       l * XF_DTPIXELDEPTH(BILINEAR_INTERPOLATE_TYPE_C, NPC));
 
+                    float d = rawBitsToFloat(pinVal);
                     // Update min
                     if (is_less(pinVal, pinValMin)) pinValMin = pinVal;
 
                     // Update max
                     if (is_less(pinValMax, pinVal)) pinValMax = pinVal;
+
+                    //                        std::cout << rawBitsToFloat(pinVal) << " " << rawBitsToFloat(pinValMin) <<
+                    //                        " " << rawBitsToFloat(pinValMax) << std::endl;
                 }
 
-                XF_CTUNAME(IN_TYPE, NPC) min = omin_l[blk];
-                XF_CTUNAME(IN_TYPE, NPC) max = omax_l[blk];
+                XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) min = omin_l[blk];
+                XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) max = omax_l[blk];
                 if (bStart) {
                     min = pinValMin;
                     max = pinValMin;
@@ -391,16 +438,19 @@ class LTM {
                 omin_l[blk] = min;
                 omax_l[blk] = max;
 
+                //                    std::cout << rawBitsToFloat(min) << " " << rawBitsToFloat(max) << std::endl;
+
                 omin[vBlkIndex][blk] = min;
                 omax[vBlkIndex][blk] = max;
             }
         }
     }
 
-    static void processMinMax(hls::stream<ap_uint<XF_DTPIXELDEPTH(IN_TYPE, NPC) * XF_NPIXPERCYCLE(NPC)> >& in_max,
-                              LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>& Tile,
-                              XF_CTUNAME(IN_TYPE, NPC) omin[MinMaxVArrSize][MinMaxHArrSize],
-                              XF_CTUNAME(IN_TYPE, NPC) omax[MinMaxVArrSize][MinMaxHArrSize]) {
+    static void processMinMax(
+        hls::stream<ap_uint<XF_DTPIXELDEPTH(BILINEAR_INTERPOLATE_TYPE_C, NPC) * XF_NPIXPERCYCLE(NPC)> >& in_max,
+        LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>& Tile,
+        XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omin[MinMaxVArrSize][MinMaxHArrSize],
+        XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omax[MinMaxVArrSize][MinMaxHArrSize]) {
     R1:
         for (int i = 0; i <= Tile.getVBlkCount(); i++) {
 // clang-format off
@@ -410,35 +460,51 @@ class LTM {
         }
     }
 
-    template <int I_T,
-              int O_T = BILINEAR_INTERPOLATE_TYPE,
-              typename std::enable_if<!is_floating_point<O_T>::value>::type* = nullptr>
-    static XF_CTUNAME(O_T, NPC)
-        bilinear(XF_CTUNAME(I_T, NPC) & in1, XF_CTUNAME(I_T, NPC) & in2, float blkSize, float offset) {
-        assert(is_floating_point<I_T>::value ==
-               false); // If bilinear interpolation is not floating then input type cant be floating as well
-        XF_CTUNAME(O_T, NPC) op1 = in1;
-        XF_CTUNAME(O_T, NPC) op2 = (in2 - in1);
-        XF_CTUNAME(O_T, NPC) op3 = offset / blkSize;
-        XF_CTUNAME(O_T, NPC) op4 = op3 * op2;
-        XF_CTUNAME(O_T, NPC) ret = op1 + op4;
-        return ret;
-    }
-
+    /*        template<int I_T, int O_T = BILINEAR_INTERPOLATE_TYPE, typename
+       std::enable_if<!is_floating_point<O_T>::value>::type * = nullptr>
+            static XF_CTUNAME(O_T, NPC) bilinear(XF_CTUNAME(I_T,NPC)& in1,
+                                                 XF_CTUNAME(I_T,NPC)& in2,
+                                                 float blkSize,
+                                                 float offset) {
+                assert(is_floating_point<I_T>::value == false); //If bilinear interpolation is not floating then input
+       type cant be floating as well
+                XF_CTUNAME(O_T, NPC) op1 = in1;
+                XF_CTUNAME(O_T, NPC) op2 = (in2 - in1);
+                XF_CTUNAME(O_T, NPC) op3 = offset/blkSize;
+                XF_CTUNAME(O_T, NPC) op4 = op3*op2;
+                XF_CTUNAME(O_T, NPC) ret = op1 + op4;
+                return ret;
+            }
+    */
+    /*        template<int I_T, int O_T = BILINEAR_INTERPOLATE_TYPE, typename
+       std::enable_if<is_floating_point<O_T>::value>::type * = nullptr>
+            static XF_CTUNAME(O_T, NPC) bilinear(XF_CTUNAME(I_T,NPC)& in1,
+                                                 XF_CTUNAME(I_T,NPC)& in2,
+                                                 float blkSize,
+                                                 float offset) {
+                float op1 = to_float<I_T>(in1);
+                float op2 = (to_float<I_T>(in2) - to_float<I_T>(in1));
+                float op3 = offset/blkSize;
+                float op4 = op3*op2;
+                XF_CTUNAME(O_T, NPC) ret = floatToRawBits(op1 + op4);
+                return ret;
+            }*/
     template <int I_T,
               int O_T = BILINEAR_INTERPOLATE_TYPE,
               typename std::enable_if<is_floating_point<O_T>::value>::type* = nullptr>
-    static XF_CTUNAME(O_T, NPC)
-        bilinear(XF_CTUNAME(I_T, NPC) & in1, XF_CTUNAME(I_T, NPC) & in2, float blkSize, float offset) {
-        float op1 = to_float<I_T>(in1);
-        float op2 = (to_float<I_T>(in2) - to_float<I_T>(in1));
+    static XF_CTUNAME(O_T, NPC) bilinear(float& in1, float& in2, float blkSize, float offset) {
+        float op1 = in1;
+        float op2 = in2 - in1;
         float op3 = offset / blkSize;
         float op4 = op3 * op2;
         XF_CTUNAME(O_T, NPC) ret = floatToRawBits(op1 + op4);
+        //            std::cout << in1 << " " << in2 << " " << op2 << " " << op3 << " " << op4 << " " << (op1 + op4) <<
+        //            std::endl;
+        //            std::cout << op4 << " " << (op1 + op4) << std::endl;
         return ret;
     }
 
-    static void interpolate(XF_CTUNAME(IN_TYPE, NPC) arr[MinMaxVArrSize][MinMaxHArrSize],
+    static void interpolate(XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) arr[MinMaxVArrSize][MinMaxHArrSize],
                             int vBlkSize,
                             int vBlkIndex,
                             LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>& Tile,
@@ -456,21 +522,71 @@ class LTM {
                 // clang-format on
                 XF_TNAME(BILINEAR_INTERPOLATE_TYPE, NPC) out;
                 int hBlkSize = Tile.getHBlkSize(j);
-                XF_CTUNAME(IN_TYPE, NPC) a[4];
+                /*                    XF_CTUNAME(IN_TYPE,NPC) a[4];
+                                    for(int m = 0; m < 2; m++) {
+                                        for(int n = 0; n < 2; n++) {
+                                            a[(m << 1) + n] = arr[vBlkIndex + m][blk + n];
+                                        }
+                                    }*/
+                // if(i ==0 && j==0){
+                //     std::cout<<"before raw to float :"<<arr[0][0]<<" "<<arr[0][1]<<" "<<arr[1][0]<<"
+                //     "<<arr[1][1]<<std::endl;
+                // }
+                float floatValue[4];
+
+                float a[4];
                 for (int m = 0; m < 2; m++) {
                     for (int n = 0; n < 2; n++) {
-                        a[(m << 1) + n] = arr[vBlkIndex + m][blk + n];
+                        a[(m << 1) + n] =
+                            rawBitsToFloat(arr[vBlkIndex + m][blk + n]); // + std::numeric_limits<float>::epsilon();
+                        // a[(m << 1) + n] = reinterpret_cast<float&>(arr[vBlkIndex + m][blk + n]);// +
+                        // std::numeric_limits<float>::epsilon();
+                        // std::memcpy(&a[(m << 1) + n] , &arr[vBlkIndex + m][blk + n] , sizeof(float));
+
+                        // floatValue[(m << 1) + n] = reinterpret_cast<float&>(arr[vBlkIndex + m][blk + n]);// +
+                        // std::numeric_limits<float>::epsilon();
+                        // std::memcpy(&floatValue[(m << 1) + n] , &arr[vBlkIndex + m][blk + n] , sizeof(float));
                     }
                 }
 
+            // if(i ==0 && j==0){
+            //     std::cout<<"with raw to float :"<<a[0]<<" "<<a[1]<<" "<<a[2]<<" "<<a[3]<<std::endl;
+            //     std::cout<<"with reinter raw to float :"<<floatValue[0]<<" "<<floatValue[1]<<" "<<floatValue[2]<<"
+            //     "<<floatValue[3]<<std::endl;
+
+            // }
+
             N2:
                 for (int l = 0; l < XF_NPIXPERCYCLE(NPC); l++) {
+                    /*                        XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE, NPC) x1 = bilinear<IN_TYPE>(a[0],
+                       a[1], hBlkSize, offset);
+                                            XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE, NPC) x2 = bilinear<IN_TYPE>(a[2],
+                       a[3], hBlkSize, offset);
+                                            XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE, NPC) y =
+                       bilinear<BILINEAR_INTERPOLATE_TYPE>(x1, x2, vBlkSize, i);*/
                     XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE, NPC) x1 = bilinear<IN_TYPE>(a[0], a[1], hBlkSize, offset);
                     XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE, NPC) x2 = bilinear<IN_TYPE>(a[2], a[3], hBlkSize, offset);
+                    float x1f = rawBitsToFloat(x1);
+                    float x2f = rawBitsToFloat(x2);
+
+                    // float x1f = reinterpret_cast<float&>(x1);
+                    // float x2f = reinterpret_cast<float&>(x2);
+
+                    // float x1f;
+                    // float x2f;
+                    // std::memcpy(&x1f ,&x1 , sizeof(float))
+                    // std::memcpy(&x2f ,&x2 , sizeof(float))
+
                     XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE, NPC)
-                    y = bilinear<BILINEAR_INTERPOLATE_TYPE>(x1, x2, vBlkSize, i);
+                    y = bilinear<BILINEAR_INTERPOLATE_TYPE>(x1f, x2f, vBlkSize, i);
+                    float y1 = rawBitsToFloat(y);
+                    // float y1 = reinterpret_cast<float&>(y);
+                    // std::memcpy(&y1 ,&y , sizeof(float));
+
                     out.range((l + 1) * XF_PIXELWIDTH(BILINEAR_INTERPOLATE_TYPE, NPC) - 1,
                               l * XF_PIXELWIDTH(BILINEAR_INTERPOLATE_TYPE, NPC)) = y;
+                    //                        std::cout << rawBitsToFloat(x1) << " - " << rawBitsToFloat(x2) << " - " <<
+                    //                        rawBitsToFloat(y) << std::endl;
                 }
 
                 offset++;
@@ -483,7 +599,7 @@ class LTM {
         }
     }
 
-    static void processInterpolate(XF_CTUNAME(IN_TYPE, NPC) arr[MinMaxVArrSize][MinMaxHArrSize],
+    static void processInterpolate(XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) arr[MinMaxVArrSize][MinMaxHArrSize],
                                    LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>& Tile,
                                    hls::stream<XF_TNAME(BILINEAR_INTERPOLATE_TYPE, NPC)>& interpolateOut) {
     R3:
@@ -497,14 +613,20 @@ class LTM {
 
     static inline float compute(float val, float min, float max) {
         // Add epsillon to avoid floating point compute errors
-        float op1 = std::log(val + std::numeric_limits<float>::epsilon());
-        float op2 = std::log(min + std::numeric_limits<float>::epsilon());
-        float op3 = std::log(max + std::numeric_limits<float>::epsilon());
+        /*            float op1 = std::log(val + std::numeric_limits<float>::epsilon());
+                    float op2 = std::log(min + std::numeric_limits<float>::epsilon());
+                    float op3 = std::log(max + std::numeric_limits<float>::epsilon());*/
+        float op1 = val; // std::log(val + std::numeric_limits<float>::epsilon());
+        float op2 = min;
+        float op3 = max;
         float ret = (op1 - op2) / ((op3 - op2) + std::numeric_limits<float>::epsilon());
+        //            std::cout << op1 << " " << op2 << " " << op3 << " " << op1-op2 << " " << ((op3 - op2) +
+        //            std::numeric_limits<float>::epsilon()) << std::endl;
         return ret;
     }
 
     static void compute(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
+                        xf::cv::Mat<BILINEAR_INTERPOLATE_TYPE_C, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in_log,
                         LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>& Tile,
                         hls::stream<XF_TNAME(BILINEAR_INTERPOLATE_TYPE, NPC)>& interpolateMin,
                         hls::stream<XF_TNAME(BILINEAR_INTERPOLATE_TYPE, NPC)>& interpolateMax,
@@ -521,36 +643,71 @@ class LTM {
 #pragma HLS LOOP_TRIPCOUNT min=COLS_NPC_ALIGNED max=COLS_NPC_ALIGNED
 #pragma HLS PIPELINE II=1
                 // clang-format on
-                XF_TNAME(IN_TYPE, NPC) val = in.read(addr);
+                XF_TNAME(IN_TYPE, NPC) val_in = in.read(addr);
+                XF_TNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) val = in_log.read(addr);
                 XF_TNAME(BILINEAR_INTERPOLATE_TYPE, NPC) interpolateMinVal = interpolateMin.read();
                 XF_TNAME(BILINEAR_INTERPOLATE_TYPE, NPC) interpolateMaxVal = interpolateMax.read();
                 XF_TNAME(OUT_TYPE, NPC) valF;
             N4:
                 for (int l = 0; l < XF_NPIXPERCYCLE(NPC); l++) {
+                    XF_DTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC)
+                    vali = val.range((l + 1) * XF_PIXELWIDTH(BILINEAR_INTERPOLATE_TYPE_C, NPC) - 1,
+                                     l * XF_PIXELWIDTH(BILINEAR_INTERPOLATE_TYPE_C, NPC));
                     XF_DTUNAME(IN_TYPE, NPC)
-                    vali = val.range((l + 1) * XF_PIXELWIDTH(IN_TYPE, NPC) - 1, l * XF_PIXELWIDTH(IN_TYPE, NPC));
+                    vali_in = val_in.range((l + 1) * XF_PIXELWIDTH(IN_TYPE, NPC) - 1, l * XF_PIXELWIDTH(IN_TYPE, NPC));
                     // Since interpolated value is single channel XF_DTUNAME is sane as XF_CTUNAME
-                    XF_CTUNAME(IN_TYPE, NPC) maxVal = max(vali);
-                    XF_DTUNAME(BILINEAR_INTERPOLATE_TYPE, NPC)
+                    XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE, NPC) maxVal = max(vali);
+                    XF_CTUNAME(IN_TYPE, NPC) maxVal_in = max<IN_TYPE, IN_TYPE>(vali_in);
+                    XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE, NPC)
                     iMin = interpolateMinVal.range((l + 1) * XF_PIXELWIDTH(BILINEAR_INTERPOLATE_TYPE, NPC) - 1,
                                                    l * XF_PIXELWIDTH(BILINEAR_INTERPOLATE_TYPE, NPC));
-                    XF_DTUNAME(BILINEAR_INTERPOLATE_TYPE, NPC)
+                    XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE, NPC)
                     iMax = interpolateMaxVal.range((l + 1) * XF_PIXELWIDTH(BILINEAR_INTERPOLATE_TYPE, NPC) - 1,
                                                    l * XF_PIXELWIDTH(BILINEAR_INTERPOLATE_TYPE, NPC));
 
+                    //                        std::cout << rawBitsToFloat(vali) << " " << rawBitsToFloat(maxVal) << " "
+                    //                        << rawBitsToFloat(iMin) << " " << rawBitsToFloat(iMax) << std::endl;
+
                     // If difference between Max and Min is very small then it is a saturation point
-                    float computeVal = compute(to_float<IN_TYPE>(maxVal), to_float<BILINEAR_INTERPOLATE_TYPE>(iMin),
-                                               to_float<BILINEAR_INTERPOLATE_TYPE>(iMax));
-                    float ratio = computeVal / to_float<IN_TYPE>(maxVal);
+                    // int b,x,y;
+                    // if(i==778 && j==1694){
+                    // 	b = rawBitsToFloat(maxVal);
+                    // 	x=rawBitsToFloat(iMin);
+                    // 	y=rawBitsToFloat(iMax);
+                    // }
+                    float computeVal = compute(rawBitsToFloat(maxVal), rawBitsToFloat(iMin), rawBitsToFloat(iMax));
+// float maxVal_float,iMin_float,iMax_float;
+// std::memcpy(&maxVal_float ,&maxVal , sizeof(float));
+// std::memcpy(&iMin_float ,&iMin , sizeof(float));
+// std::memcpy(&iMax_float ,&iMax , sizeof(float));
+
+// float computeVal = compute(maxVal_float, iMin_float, iMax_float);
+
+//                        float ratio = computeVal/rawBitsToFloat(maxVal);
+#if 1
+                    float ratio = computeVal / (float)(maxVal_in + std::numeric_limits<float>::epsilon());
+#endif
+#if 0
+                        float ratio = computeVal/rawBitsToFloat(maxVal);
+#endif
+                    //                        std::cout << computeVal << " " << (float)maxVal_in << " " << ratio <<
+                    //                        std::endl;
 
                     XF_DTUNAME(OUT_TYPE, NPC) valO;
                 CH4:
                     for (int m = 0; m < XF_CHANNELS(OUT_TYPE, NPC); m++) {
+#if 1
                         XF_CTUNAME(IN_TYPE, NPC)
-                        valiC =
-                            vali.range((m + 1) * XF_DTPIXELDEPTH(IN_TYPE, NPC) - 1, m * XF_DTPIXELDEPTH(IN_TYPE, NPC));
-                        float finalValue = (to_float<IN_TYPE>(valiC) * ratio * OUT_DEPTH);
+                        valiC = vali_in.range((m + 1) * XF_DTPIXELDEPTH(IN_TYPE, NPC) - 1,
+                                              m * XF_DTPIXELDEPTH(IN_TYPE, NPC));
+                        float finalValue = ((unsigned short)valiC * ratio * OUT_DEPTH);
+#endif
+#if 0
+                            XF_DTUNAME(BILINEAR_INTERPOLATE_TYPE_C,NPC) valiC = vali.range((m+1)*XF_DTPIXELDEPTH(BILINEAR_INTERPOLATE_TYPE_C,NPC) - 1, m*XF_DTPIXELDEPTH(BILINEAR_INTERPOLATE_TYPE_C,NPC));
+                            float tempv = rawBitsToFloat(valiC);
+                            float finalValue = (rawBitsToFloat(valiC)*ratio*OUT_DEPTH);
 
+#endif
                         XF_CTUNAME(OUT_TYPE, NPC) valiCOut;
                         if (finalValue < 0)
                             valiCOut = 0;
@@ -558,45 +715,96 @@ class LTM {
                             valiCOut = 255;
                         else
                             valiCOut = finalValue;
+                        int a;
+                        if (i == 50 && j == 332) {
+                            a = valiCOut;
+                        }
 
+                        //                            std::cout << finalValue << " " << (unsigned int)valiCOut <<
+                        //                            std::endl;
                         valO.range((m + 1) * XF_DTPIXELDEPTH(OUT_TYPE, NPC) - 1, m * XF_DTPIXELDEPTH(OUT_TYPE, NPC)) =
                             valiCOut;
+                        //                            std::cout << (unsigned int)valiCOut << " ";
                     }
                     valF.range((l + 1) * XF_PIXELWIDTH(OUT_TYPE, NPC) - 1, l * XF_PIXELWIDTH(OUT_TYPE, NPC)) = valO;
                 }
                 out.write(addr, valF);
                 addr++;
             }
+            //                std::cout << std::endl;
         }
     }
 
     static void process_i(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
                           LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>& Tile,
-                          XF_CTUNAME(IN_TYPE, NPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
-                          XF_CTUNAME(IN_TYPE, NPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
-                          XF_CTUNAME(IN_TYPE, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
-                          XF_CTUNAME(IN_TYPE, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
+                          XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
+                          XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
+                          XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
+                          XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
                           xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& out) {
         xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1> in_copy(in.rows, in.cols);
-        hls::stream<ap_uint<XF_DTPIXELDEPTH(IN_TYPE, NPC) * XF_NPIXPERCYCLE(NPC)> > in_max;
+        xf::cv::Mat<BILINEAR_INTERPOLATE_TYPE_C, ROWS, COLS, NPC, XFCVDEPTH_IN_1> in_copy_log(in.rows, in.cols);
+        hls::stream<ap_uint<XF_DTPIXELDEPTH(BILINEAR_INTERPOLATE_TYPE_C, NPC) * XF_NPIXPERCYCLE(NPC)> > in_max;
         hls::stream<XF_TNAME(BILINEAR_INTERPOLATE_TYPE, NPC)> interpolateMin;
         hls::stream<XF_TNAME(BILINEAR_INTERPOLATE_TYPE, NPC)> interpolateMax;
 
 // clang-format off
 #pragma HLS DATAFLOW
         // clang-format on
-        getMaxImage(in, Tile, in_copy, in_max);
+        getMaxImage(in, Tile, in_copy, in_copy_log, in_max);
+
+        // FILE* fp3 = fopen("in_max.csv", "w");
+        // for (int i = 0; i < in.rows; ++i) {
+        //     for (int j = 0; j < in.cols; ++j) {
+
+        //         fprintf(fp3, "(%d,%d,%f)", i,j,rawBitsToFloat(in_max.read((i*j)+j)));
+        //     }
+        //     fprintf(fp3, "\n");
+        // }
+        // fclose(fp3);
+
         processMinMax(in_max, Tile, omin_w, omax_w);
         processInterpolate(omin_r, Tile, interpolateMin);
         processInterpolate(omax_r, Tile, interpolateMax);
-        compute(in_copy, Tile, interpolateMin, interpolateMax, out);
+
+        // FILE* fp5 = fopen("omin.csv", "w");
+        // FILE* fp6 = fopen("omax.csv", "w");
+        // for (int i = 0; i < MinMaxVArrSize; i++) {
+        //     for (int j = 0; j < MinMaxHArrSize; j++) {
+        //         double max_value = omin_r[i][j];
+        //         double min_value = omax_r[i][j];
+        //         fprintf(fp5, "%f ", rawBitsToFloat(max_value));
+        //         fprintf(fp6, "%f ", rawBitsToFloat(min_value));
+        //     }
+        //     fprintf(fp5, "\n");
+        //     fprintf(fp6, "\n");
+        // }
+        // fclose(fp5);
+        // fclose(fp6);
+
+        // FILE* fp7 = fopen("interpolateMin.csv", "w");
+        // FILE* fp8 = fopen("interpolateMax.csv", "w");
+        // for (int i = 0; i < rows; i++) {
+        //     for (int j = 0; j < cols; j++) {
+        //         double max_value = interpolateMax[i][j];
+        //         double min_value = interpolateMin[i][j];
+        //         fprintf(fp7, "%f ", rawBitsToFloat(interpolateMax));
+        //         fprintf(fp8, "%f ", rawBitsToFloat(interpolateMax));
+        //     }
+        //     fprintf(fp7, "\n");
+        //     fprintf(fp8, "\n");
+        // }
+        // fclose(fp7);
+        // fclose(fp8);
+
+        compute(in_copy, in_copy_log, Tile, interpolateMin, interpolateMax, out);
     }
 
     static void process(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
-                        XF_CTUNAME(IN_TYPE, NPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
-                        XF_CTUNAME(IN_TYPE, NPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
-                        XF_CTUNAME(IN_TYPE, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
-                        XF_CTUNAME(IN_TYPE, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
+                        XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
+                        XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
+                        XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
+                        XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
                         xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& out) {
         LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC> Tile(in.rows, in.cols);
 // clang-format off
@@ -609,10 +817,10 @@ class LTM {
     static void process(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
                         int block_rows,
                         int block_cols,
-                        XF_CTUNAME(IN_TYPE, NPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
-                        XF_CTUNAME(IN_TYPE, NPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
-                        XF_CTUNAME(IN_TYPE, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
-                        XF_CTUNAME(IN_TYPE, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
+                        XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
+                        XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
+                        XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
+                        XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
                         xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& out) {
         LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC> Tile(in.rows, in.cols, block_rows, block_cols);
 // clang-format off
@@ -623,108 +831,6 @@ class LTM {
     }
 };
 
-// multistream
-
-template <int IN_TYPE,
-          int OUT_TYPE,
-          int BLK_ROWS,
-          int BLK_COLS,
-          int ROWS,
-          int COLS,
-          int NPC,
-          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
-          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
-class LTM_multi {
-   public:
-    static constexpr int MinMaxVArrSize = LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize;
-    static constexpr int MinMaxHArrSize = LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxHArrSize;
-
-    static void LTM_multistream(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
-                                int block_rows,
-                                int block_cols,
-                                XF_CTUNAME(IN_TYPE, NPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
-                                XF_CTUNAME(IN_TYPE, NPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
-                                XF_CTUNAME(IN_TYPE, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
-                                XF_CTUNAME(IN_TYPE, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
-                                xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& out,
-                                bool& flag,
-                                bool& eof) {
-// clang-format off
-#pragma HLS INLINE OFF
-        // clang-format on
-
-        if (!flag) {
-            LTM<IN_TYPE, OUT_TYPE, BLK_ROWS, BLK_COLS, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>::process(
-                in, block_rows, block_cols, omin_r, omax_r, omin_w, omax_w, out);
-            if (eof) flag = 1;
-        } else {
-            LTM<IN_TYPE, OUT_TYPE, BLK_ROWS, BLK_COLS, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>::process(
-                in, block_rows, block_cols, omin_w, omax_w, omin_r, omax_r, out);
-            if (eof) flag = 0;
-        }
-        return;
-    }
-};
-
-template <int IN_TYPE,
-          int OUT_TYPE,
-          int BLK_ROWS,
-          int BLK_COLS,
-          int ROWS,
-          int COLS,
-          int NPC,
-          int STREAMS = 2,
-          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
-          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
-class LTM_multi_wrap {
-   public:
-    static constexpr int MinMaxVArrSize = LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize;
-    static constexpr int MinMaxHArrSize = LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxHArrSize;
-
-    static void LTM_multistream_wrap(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
-                                     unsigned short block_rows[STREAMS],
-                                     unsigned short block_cols[STREAMS],
-                                     XF_CTUNAME(IN_TYPE, NPC) omin_r[STREAMS][MinMaxVArrSize][MinMaxHArrSize],
-                                     XF_CTUNAME(IN_TYPE, NPC) omax_r[STREAMS][MinMaxVArrSize][MinMaxHArrSize],
-                                     XF_CTUNAME(IN_TYPE, NPC) omin_w[STREAMS][MinMaxVArrSize][MinMaxHArrSize],
-                                     XF_CTUNAME(IN_TYPE, NPC) omax_w[STREAMS][MinMaxVArrSize][MinMaxHArrSize],
-                                     xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& out,
-                                     bool flag[STREAMS],
-                                     bool eof[STREAMS],
-                                     int strm_id) {
-// clang-format off
-#pragma HLS ARRAY_PARTITION variable= block_rows dim=1 complete
-#pragma HLS ARRAY_PARTITION variable= block_cols dim=1 complete
-#pragma HLS ARRAY_PARTITION variable=omin_r dim=1 complete
-#pragma HLS ARRAY_PARTITION variable=omin_r dim=2 cyclic factor=2
-#pragma HLS ARRAY_PARTITION variable=omin_r dim=3 cyclic factor=2
-
-#pragma HLS ARRAY_PARTITION variable=omax_r dim=1 complete
-#pragma HLS ARRAY_PARTITION variable=omax_r dim=2 cyclic factor=2
-#pragma HLS ARRAY_PARTITION variable=omax_r dim=3 cyclic factor=2
-
-#pragma HLS ARRAY_PARTITION variable=omin_w dim=1 complete
-#pragma HLS ARRAY_PARTITION variable=omin_w dim=2 cyclic factor=2
-#pragma HLS ARRAY_PARTITION variable=omin_w dim=3 cyclic factor=2
-
-#pragma HLS ARRAY_PARTITION variable=omax_w dim=1 complete
-#pragma HLS ARRAY_PARTITION variable=omax_w dim=2 cyclic factor=2
-#pragma HLS ARRAY_PARTITION variable=omax_w dim=3 cyclic factor=2  
- 
-#pragma HLS ARRAY_PARTITION variable=flag dim=1 complete
-#pragma HLS ARRAY_PARTITION variable=eof dim=1 complete
-
-
-    // clang-format on                   
-   
-    LTM_multi<IN_TYPE, OUT_TYPE, BLK_ROWS, BLK_COLS, ROWS, COLS, NPC, XFCVDEPTH_IN_1,
-                    XFCVDEPTH_OUT_1>::LTM_multistream(in, block_rows[strm_id], block_cols[strm_id], omin_r[strm_id],
-                    omax_r[strm_id], omin_w[strm_id], omax_w[strm_id], out, flag[strm_id], eof[strm_id]);  
-                                              
-}                                              
-
-};  
-                                                 
 } // namespace cv
 } // namespace xf
 

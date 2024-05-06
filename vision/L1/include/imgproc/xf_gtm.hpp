@@ -292,8 +292,8 @@ void xFcompute_xyzmapped(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVD
                          ap_ufixed<16, 4>& mean,
                          ap_ufixed<16, 4>& L_max,
                          ap_ufixed<16, 4>& L_min,
-                         float c1,
-                         float c2,
+                         unsigned int c1,
+                         unsigned int c2,
                          xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& xmapped,
                          xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& ymapped,
                          xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& zmapped,
@@ -318,7 +318,10 @@ void xFcompute_xyzmapped(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVD
 		ap_ufixed<16, 4> K1 = (ld_nume * inv_L_range);
 		ap_fixed<16, 4> _k1 = 1- K1; 
 		
-		ap_ufixed<16, 4> c1_fixed = (ap_ufixed<16, 8>) c1;
+		ap_ufixed<32, 16> c1_float = (float)c1;
+        c1_float = c1_float >> 8;
+
+		ap_ufixed<16, 4> c1_fixed = (ap_ufixed<16, 8>) c1_float;
 		
 		ap_ufixed<16, 8> ld_dinom_sq = (ld_dinom * ld_dinom);
 		ap_ufixed<16, 1> inv_comp = (ap_ufixed<16, 1>)1/(ap_ufixed<16, 8>)(2 * ld_dinom_sq);
@@ -335,7 +338,11 @@ void xFcompute_xyzmapped(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVD
 		XF_TNAME(SIN_CHANNEL_OUT_TYPE, NPC) val_xout, val_zout, val_yout;
 		
 		rd_ptr=0, wr_ptr=0;
-		ap_ufixed<16, 4> c2_fixed = (ap_ufixed<16, 8>) c2;
+		
+        ap_ufixed<32, 16> c2_float = (float)c2;
+        c2_float = c2_float >> 8;
+
+		ap_ufixed<16, 4> c2_fixed = (ap_ufixed<16, 8>) c2_float;
 	
 	rowLoop2:
 		for (i = 0; i < rows; i++) {
@@ -424,8 +431,8 @@ void gtm(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
          ap_ufixed<16, 4>& L_max2,
          ap_ufixed<16, 4>& L_min1,
          ap_ufixed<16, 4>& L_min2,
-         float c1,
-         float c2) {
+         unsigned int c1,
+         unsigned int c2) {
 #ifndef __SYNTHESIS__
     assert(((SRC_T == XF_16UC3) || (SRC_T == XF_14UC3)) && "Input TYPE must be XF_16UC3 or XF_14UC3");
     assert(((SIN_CHANNEL_IN_TYPE == XF_16UC1) || (SIN_CHANNEL_IN_TYPE == XF_14UC1)) &&
@@ -507,8 +514,8 @@ void gtm_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
                ap_ufixed<16, 4>& L_max2,
                ap_ufixed<16, 4>& L_min1,
                ap_ufixed<16, 4>& L_min2,
-               float c1,
-               float c2,
+               unsigned int c1,
+               unsigned int c2,
                unsigned short org_height,
                int slc_id,
                ap_ufixed<32, 24>& acc_sum) {
@@ -593,8 +600,8 @@ void gtm_multistream(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
                      ap_ufixed<16, 4>& L_max2,
                      ap_ufixed<16, 4>& L_min1,
                      ap_ufixed<16, 4>& L_min2,
-                     float c1,
-                     float c2,
+                     unsigned int c1,
+                     unsigned int c2,
                      bool& flag,
                      bool& eof,
                      unsigned short org_height,
@@ -637,8 +644,8 @@ void gtm_multi_wrap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
                     ap_ufixed<16, 4> L_max2[STREAMS],
                     ap_ufixed<16, 4> L_min1[STREAMS],
                     ap_ufixed<16, 4> L_min2[STREAMS],
-                    float c1[STREAMS],
-                    float c2[STREAMS],
+                    unsigned int c1[STREAMS],
+                    unsigned int c2[STREAMS],
                     bool flag[STREAMS],
                     bool eof[STREAMS],
                     int strm_id,

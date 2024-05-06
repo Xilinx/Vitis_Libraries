@@ -223,6 +223,117 @@ int main(int argc, char** argv) {
     int width = in_img.cols;
     std::cout << "Input image height : " << height << std::endl;
     std::cout << "Input image width  : " << width << std::endl;
+
+    float ccm_matrix[3][3];
+    float offsetarray[3];
+
+    switch (XF_CCM_TYPE) {
+        case 0:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = bt2020_bt709_arr[i][j];
+                }
+                offsetarray[i] = bt2020_bt709_off[i];
+            }
+
+            break;
+        case 1:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = bt709_bt2020_arr[i][j];
+                }
+                offsetarray[i] = bt709_bt2020_off[i];
+            }
+
+            break;
+        case 2:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = rgb_yuv_601_arr[i][j];
+                }
+                offsetarray[i] = rgb_yuv_601_off[i];
+            }
+
+            break;
+        case 3:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = rgb_yuv_709_arr[i][j];
+                }
+                offsetarray[i] = rgb_yuv_709_off[i];
+            }
+
+            break;
+        case 4:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = rgb_yuv_2020_arr[i][j];
+                }
+                offsetarray[i] = rgb_yuv_2020_off[i];
+            }
+
+            break;
+        case 5:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = yuv_rgb_601_arr[i][j];
+                }
+                offsetarray[i] = yuv_rgb_601_off[i];
+            }
+
+            break;
+        case 6:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = yuv_rgb_709_arr[i][j];
+                }
+                offsetarray[i] = yuv_rgb_709_off[i];
+            }
+
+            break;
+        case 7:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = yuv_rgb_2020_arr[i][j];
+                }
+                offsetarray[i] = yuv_rgb_2020_off[i];
+            }
+
+            break;
+        case 8:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = full_to_16_235_arr[i][j];
+                }
+                offsetarray[i] = full_to_16_235_off[i];
+            }
+
+            break;
+        case 9:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = full_from_16_235_arr[i][j];
+                }
+                offsetarray[i] = full_from_16_235_off[i];
+            }
+
+            break;
+        default:
+            break;
+    }
+
+    // cmm matrix shifted 20 bits to the left
+    signed int ccm_matrix_int[3][3];
+    signed int offsetarray_int[3];
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            ccm_matrix_int[i][j] = (signed int)(ccm_matrix[i][j] * 1048576);
+        }
+        offsetarray_int[i] = (signed int)(offsetarray[i] * 1048576);
+    }
+    size_t ccm_matrix_int_size_bytes = 3 * 3 * sizeof(signed int);
+    size_t offsetarray_int_size_bytes = 3 * sizeof(signed int);
 #if T_8U
     out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
     out_img_hls.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
@@ -269,12 +380,16 @@ int main(int argc, char** argv) {
     // Allocate the buffers:
     OCL_CHECK(err, cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY, image_in_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer buffer_outImage(context, CL_MEM_WRITE_ONLY, image_out_size_bytes, NULL, &err));
-
+    OCL_CHECK(err, cl::Buffer buffer_ccm_matrix_int(context, CL_MEM_READ_ONLY, ccm_matrix_int_size_bytes, NULL, &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_offsetarray_int(context, CL_MEM_READ_ONLY, offsetarray_int_size_bytes, NULL, &err));
     // Set kernel arguments:
     OCL_CHECK(err, err = kernel.setArg(0, buffer_inImage));
     OCL_CHECK(err, err = kernel.setArg(1, buffer_outImage));
-    OCL_CHECK(err, err = kernel.setArg(2, in_img.rows));
-    OCL_CHECK(err, err = kernel.setArg(3, in_img.cols));
+    OCL_CHECK(err, err = kernel.setArg(2, buffer_ccm_matrix_int));
+    OCL_CHECK(err, err = kernel.setArg(3, buffer_offsetarray_int));
+    OCL_CHECK(err, err = kernel.setArg(4, in_img.rows));
+    OCL_CHECK(err, err = kernel.setArg(5, in_img.cols));
 
     // Initialize the buffers:
     cl::Event event;
@@ -286,6 +401,17 @@ int main(int argc, char** argv) {
                                        image_in_size_bytes, // Size in bytes
                                        in_img.data,         // Pointer to the data to copy
                                        nullptr, &event));
+    OCL_CHECK(err, queue.enqueueWriteBuffer(buffer_ccm_matrix_int,     // buffer on the FPGA
+                                            CL_TRUE,                   // blocking call
+                                            0,                         // buffer offset in bytes
+                                            ccm_matrix_int_size_bytes, // Size in bytes
+                                            ccm_matrix_int));
+
+    OCL_CHECK(err, queue.enqueueWriteBuffer(buffer_offsetarray_int,     // buffer on the FPGA
+                                            CL_TRUE,                    // blocking call
+                                            0,                          // buffer offset in bytes
+                                            offsetarray_int_size_bytes, // Size in bytes
+                                            offsetarray_int));
 
     // Execute the kernel:
     OCL_CHECK(err, err = queue.enqueueTask(kernel));

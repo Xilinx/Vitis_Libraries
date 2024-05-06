@@ -218,6 +218,7 @@ void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& demosaic_out,
 #pragma HLS INLINE OFF
     // clang-format on	
 	xf::cv::Mat<OUT_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XFCVDEPTH_OUT> impop(height, width);
+    uint32_t awb_config = (int)(thresh * 256); // thresh_awb int Q24_8 format change to Q16_16 format
 
 	float inputMin = 0.0f;
     float inputMax = (1 << (XF_DTPIXELDEPTH(IN_TYPE, NPPCX))) - 1; // 65535.0f;
@@ -229,15 +230,16 @@ void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& demosaic_out,
     // clang-format on
     if (WB_TYPE) {
         xf::cv::AWBhistogram<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_USE_URAM, WB_TYPE, HIST_SIZE,
-                             XFCVDEPTH_IN, XFCVDEPTH_OUT>(demosaic_out, impop, hist0, thresh, inputMin, inputMax,
+                             XFCVDEPTH_IN, XFCVDEPTH_OUT>(demosaic_out, impop, hist0, awb_config, inputMin, inputMax,
                                                           outputMin, outputMax);
         xf::cv::AWBNormalization<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, WB_TYPE, HIST_SIZE, XFCVDEPTH_OUT,
-                                 XFCVDEPTH_OUT>(impop, ltm_in, hist1, thresh, inputMin, inputMax, outputMin, outputMax);
+                                 XFCVDEPTH_OUT>(impop, ltm_in, hist1, awb_config, inputMin, inputMax, outputMin,
+                                                outputMax);
     } else {
         xf::cv::AWBChannelGain<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, 0, XFCVDEPTH_IN, XFCVDEPTH_OUT>(
-            demosaic_out, impop, thresh, gain0);
+            demosaic_out, impop, awb_config, gain0);
         xf::cv::AWBGainUpdate<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, 0, XFCVDEPTH_OUT, XFCVDEPTH_OUT>(
-            impop, ltm_in, thresh, gain1);
+            impop, ltm_in, awb_config, gain1);
     }
 }
 
@@ -353,7 +355,9 @@ void ISPpipeline(unsigned short height,
                  uint16_t bgain,
                  unsigned char gamma_lut[256 * 3],
                  unsigned char mode_reg,
-                 uint16_t pawb) {
+                 uint16_t pawb,
+                 uint16_t ggain,
+                 uint16_t bformat) {
 #pragma HLS INLINE OFF
 
     xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_IN> imgInput(height, width);
@@ -386,11 +390,11 @@ void ISPpipeline(unsigned short height,
                         XF_CV_DEPTH_3XWIDTH>(imgInput, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts,
                                              IR_at_B_wgts, sub_wgts, rggb_out, fullir_out);
 
-    xf::cv::gaincontrol<XF_BAYER_PATTERN, IN_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_RRGB_OUT,
-                        XF_CV_DEPTH_GAIN_OUT>(rggb_out, gain_out, rgain, bgain);
+    xf::cv::gaincontrol<IN_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_RRGB_OUT, XF_CV_DEPTH_GAIN_OUT>(
+        rggb_out, gain_out, rgain, bgain, ggain, bformat);
 
-    xf::cv::demosaicing<XF_BAYER_PATTERN, IN_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, 0, XF_CV_DEPTH_GAIN_OUT,
-                        XF_CV_DEPTH_DEMOSAIC_OUT>(gain_out, demosaic_out);
+    xf::cv::demosaicing<IN_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, 0, XF_CV_DEPTH_GAIN_OUT,
+                        XF_CV_DEPTH_DEMOSAIC_OUT>(gain_out, demosaic_out, bformat);
 
     function_awb<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_DEMOSAIC_OUT, XF_CV_DEPTH_LTM_IN>(
         demosaic_out, ltm_in, hist0, hist1, gain0, gain1, height, width, mode_reg, thresh);
@@ -435,7 +439,9 @@ void ISPPipeline_accel(uint16_t height,
                        uint16_t bgain,
                        unsigned char gamma_lut[256 * 3],
                        unsigned char mode_reg,
-                       uint16_t pawb) {
+                       uint16_t pawb,
+                       uint16_t ggain,
+                       uint16_t bformat) {
 // Create AXI Streaming Interfaces for the core
 // clang-format off
 #pragma HLS INTERFACE axis port=in_axis_video register
@@ -456,6 +462,10 @@ void ISPPipeline_accel(uint16_t height,
 #pragma HLS INTERFACE s_axilite port=mode_reg bundle=CTRL
 #pragma HLS INTERFACE s_axilite port=pawb bundle=CTRL
 #pragma HLS INTERFACE s_axilite port=gamma_lut bundle=CTRL
+#pragma HLS INTERFACE s_axilite port=bformat bundle=CTRL
+#pragma HLS INTERFACE s_axilite port=ggain bundle=CTRL
+
+
 
 #pragma HLS INTERFACE s_axilite port=return bundle=CTRL
 
@@ -466,13 +476,13 @@ void ISPPipeline_accel(uint16_t height,
     if (!flag) {
         ISPpipeline(height, width, in_axis_video, out_axis_video, ir_axis_video, R_IR_C1_wgts, R_IR_C2_wgts,
                     B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, hist0_awb, hist1_awb, igain_0, igain_1, rgain,
-                    bgain, gamma_lut, mode_reg, pawb);
+                    bgain, gamma_lut, mode_reg, pawb, ggain, bformat);
         flag = 1;
 
     } else {
         ISPpipeline(height, width, in_axis_video, out_axis_video, ir_axis_video, R_IR_C1_wgts, R_IR_C2_wgts,
                     B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, hist1_awb, hist0_awb, igain_1, igain_0, rgain,
-                    bgain, gamma_lut, mode_reg, pawb);
+                    bgain, gamma_lut, mode_reg, pawb, ggain, bformat);
         flag = 0;
     }
 }

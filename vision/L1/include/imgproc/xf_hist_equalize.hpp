@@ -185,7 +185,7 @@ template <int SRC_T,
 void xFEqualize_norm_sin(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src,
                          uint32_t hist[AEC_HISTSIZE],
                          xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
-                         float p,
+                         int p,
                          float inputMin,
                          float inputMax,
                          float outputMin,
@@ -208,9 +208,14 @@ void xFEqualize_norm_sin(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& sr
     ap_fixed<STEP + 8, STEP + 2> max_vals = inputMax + 0.5f;
 
     ap_fixed<STEP + 8, STEP + 2> minValue = min_vals; //{-0.5, -0.5, -0.5};
-    ap_fixed<STEP + 8, STEP + 2> maxValue = max_vals; //{12287.5, 16383.5, 12287.5};
-    ap_fixed<STEP + 8, 4> s1 = p;
-    ap_fixed<STEP + 8, 4> s2 = p;
+    ap_fixed<STEP + 8, STEP + 2> maxValue = max_vals; //{12287.5, 16383.5, 12287.5};.
+
+    ap_fixed<32, 16> p_float = (float)p;
+
+    p_float = p_float >> 8;
+
+    ap_fixed<STEP + 8, 4> s1 = (ap_fixed<STEP + 8, 4>)p_float;
+    ap_fixed<STEP + 8, 4> s2 = (ap_fixed<STEP + 8, 4>)p_float;
 
     int rval = s1 * total / 100;
     int rval1 = (100 - s2) * total / 100;

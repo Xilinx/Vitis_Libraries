@@ -1,45 +1,34 @@
-.. 
-   Copyright 2021 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 .. _l1_pyroptflow:
 
-===============================
+
 Dense Pyramidal LK Optical Flow
-===============================
+################################
 
-Dense Pyramidal LK Optical Flow example resides in ``L2/examples/lkdensepyrof`` directory.
+The Dense Pyramidal LK Optical Flow example resides in the ``L2/examples/lkdensepyrof`` directory.
 
-This benchmark tests the performance of `lkdensepyrof` function with a pair of images. Optical flow is the pattern of apparent motion of image objects between two consecutive frames, caused by the movement of object or camera. It is a 2D vector field, where each vector is a displacement vector showing the movement of points from first frame to second.
+This benchmark tests the performance of the `lkdensepyrof` function with a pair of images. Optical flow is the pattern of apparent motion of image objects between two consecutive frames, caused by the movement of an object or camera. It is a 2D vector field, where each vector is a displacement vector showing the movement of points from the first frame to the second.
 
-The tutorial provides a step-by-step guide that covers commands for building and running kernel.
+The tutorial provides a step-by-step guide that covers commands for building and running a kernel.
 
 Executable Usage
 ================
 
-* **Work Directory(Step 1)**
+* **Work Directory (Step 1)**
 
-The steps for library download and environment setup can be found in README of L2 folder. For getting the design,
+The steps for library download and environment setup can be found in the README of the L2 folder. For getting the design:
 
 .. code-block:: bash
 
    cd L2/examples/lkdensepyrof
 
-* **Build kernel(Step 2)**
+* **Build Kernel (Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your XCLBIN and host binary targeting a specific device. Be aware that this process can take up to a couple of hours.
 
 .. code-block:: bash
 
@@ -49,7 +38,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
    export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
    make host xclbin TARGET=hw
 
-* **Run kernel(Step 3)**
+* **Run Kernel (Step 3)**
 
 To get the benchmark results, please run the following command.
 
@@ -57,7 +46,7 @@ To get the benchmark results, please run the following command.
 
    make run TARGET=hw
 
-* **Example output(Step 4)** 
+* **Example Output (Step 4)** 
 
 .. code-block:: bash
    
@@ -374,10 +363,10 @@ To get the benchmark results, please run the following command.
 Profiling 
 ==========
 
-The lkdensepyrof design is validated on Alveo U200 board at 300 MHz frequency. 
-The hardware resource utilizations are listed in the following table.
+The lkdensepyrof design is validated on an Alveo U200 board at 300 MHz frequency. 
+Fardware resource utilizations is listed in the following table.
 
-.. table:: Table 1 Hardware resources for LK Dense Pyramidal Optical Flow
+.. table:: Table 1: Hardware Resources for LK Dense Pyramidal Optical Flow
     :align: center
 
     +------------------------------------------+-----------------+------------+------------+------------+
@@ -395,7 +384,7 @@ The hardware resource utilizations are listed in the following table.
 
 The performance is shown below
 
-.. table:: Table 2 Performance numbers in terms of FPS (Frames Per Second) for 2 consecutive frames for LK Dense Pyramidal Optical Flow
+.. table:: Table 2: Performance Numbers in terms of FPS (Frames Per Second) for Two Consecutive Frames for LK Dense Pyramidal Optical Flow
     :align: center
 	
     +----------------------+--------------+--------------+

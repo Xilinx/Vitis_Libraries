@@ -65,8 +65,7 @@ namespace xf {
 
 namespace cv {
 
-template <int BFORMAT,
-          int SRC_T,
+template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC,
@@ -83,7 +82,9 @@ void gaincontrolkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1
                        uint16_t height,
                        uint16_t width,
                        unsigned short rgain,
-                       unsigned short bgain) {
+                       unsigned short bgain,
+                       unsigned short ggain,
+                       unsigned short bayer_p) {
     ap_uint<13> i, j, k, l;
 
     const int STEP = XF_PIXELWIDTH(SRC_T, NPC);
@@ -116,7 +117,7 @@ RowLoop:
                     cond2 = ((l % 2) != 0);
                 }
 
-                if (BFORMAT == XF_BAYER_RG) {
+                if (bayer_p == XF_BAYER_RG) {
                     if (i % 2 == 0 && cond1) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
                         int v2 = (int)((v1 * rgain) >> 7);
@@ -126,10 +127,12 @@ RowLoop:
                         int v2 = (int)((v1 * bgain) >> 7);
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else {
-                        t = pxl1;
+                        XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
+                        int v2 = (int)((v1 * ggain) >> 7);
+                        t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     }
                 }
-                if (BFORMAT == XF_BAYER_GR) {
+                if (bayer_p == XF_BAYER_GR) {
                     if (i % 2 == 0 && cond2) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
                         int v2 = (int)((v1 * rgain) >> 7);
@@ -139,10 +142,12 @@ RowLoop:
                         int v2 = (int)((v1 * bgain) >> 7);
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else {
-                        t = pxl1;
+                        XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
+                        int v2 = (int)((v1 * ggain) >> 7);
+                        t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     }
                 }
-                if (BFORMAT == XF_BAYER_BG) {
+                if (bayer_p == XF_BAYER_BG) {
                     if (i % 2 == 0 && cond1) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
                         int v2 = (int)((v1 * bgain) >> 7);
@@ -152,10 +157,12 @@ RowLoop:
                         int v2 = (int)((v1 * rgain) >> 7);
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else {
-                        t = pxl1;
+                        XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
+                        int v2 = (int)((v1 * ggain) >> 7);
+                        t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     }
                 }
-                if (BFORMAT == XF_BAYER_GB) {
+                if (bayer_p == XF_BAYER_GB) {
                     if (i % 2 == 0 && cond2) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
                         int v2 = (int)((v1 * bgain) >> 7);
@@ -165,7 +172,9 @@ RowLoop:
                         int v2 = (int)((v1 * rgain) >> 7);
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else {
-                        t = pxl1;
+                        XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
+                        int v2 = (int)((v1 * ggain) >> 7);
+                        t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     }
                 }
 
@@ -177,8 +186,7 @@ RowLoop:
     }
 }
 
-template <int BFORMAT,
-          int SRC_T,
+template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC = 1,
@@ -187,7 +195,9 @@ template <int BFORMAT,
 void gaincontrol(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                  unsigned short rgain,
-                 unsigned short bgain) {
+                 unsigned short bgain,
+                 unsigned short ggain,
+                 unsigned short bayer_p) {
 #pragma HLS INLINE OFF
 #ifndef __SYNTHESIS__
     assert(((src1.rows == dst.rows) && (src1.cols == dst.cols)) && "Input and output image should be of same size");
@@ -195,9 +205,9 @@ void gaincontrol(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
 #endif
     short width = src1.cols >> XF_BITSHIFT(NPC);
 
-    gaincontrolkernel<BFORMAT, SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, XF_CHANNELS(SRC_T, NPC),
+    gaincontrolkernel<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, XF_CHANNELS(SRC_T, NPC),
                       XF_DEPTH(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
-                      (COLS >> XF_BITSHIFT(NPC))>(src1, dst, src1.rows, width, rgain, bgain);
+                      (COLS >> XF_BITSHIFT(NPC))>(src1, dst, src1.rows, width, rgain, bgain, ggain, bayer_p);
 }
 
 template <int SRC_T,

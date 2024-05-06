@@ -340,6 +340,7 @@ int main(int argc, char** argv) {
 
     unsigned short rgain = 256;
     unsigned short bgain = 256;
+    unsigned short ggain = 200;
 
     unsigned char mode_reg = 1;
 
@@ -352,13 +353,15 @@ int main(int argc, char** argv) {
     float gamma_val_r = 0.5f, gamma_val_g = 0.8f, gamma_val_b = 0.8f;
 
     compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut);
+    uint16_t bformat = XF_BAYER_PATTERN; // Bayer format BG-0; GB-1; GR-2; RG-3
 
     for (int i = 0; i < 2; i++) {
         Mat2MultiBayerAXIvideo(raw_input, src_axi, InColorFormat);
 
         // Call IP Processing function
         ISPPipeline_accel(in_rows, in_cols, src_axi, dst_axi, ir_axi, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts,
-                          IR_at_R_wgts, IR_at_B_wgts, sub_wgts, rgain, bgain, gamma_lut, mode_reg, pawb);
+                          IR_at_R_wgts, IR_at_B_wgts, sub_wgts, rgain, bgain, gamma_lut, mode_reg, pawb, ggain,
+                          bformat);
 
         // Convert processed image back to CV image
         AXIvideo2cvMatxf<NPPCX, XF_DTPIXELDEPTH(XF_YUV_T, NPPCX)>(dst_axi, final_output);

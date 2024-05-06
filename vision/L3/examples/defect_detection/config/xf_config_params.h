@@ -65,26 +65,30 @@ typedef ap_uint<64> ap_uint64_t;
 
 #define XF_USE_URAM 0
 
-#define RGB 0
-#define GRAY 1
+#define _MONO 0
+#define _COLOR 1
+
+// Set the pixel depth:
+#if _MONO
+#define OTSU_PIXEL_TYPE XF_8UC1
+#elif _COLOR
+#define OTSU_PIXEL_TYPE XF_8UC3
+#endif
 
 /* Gaussian filter params */
 #define FILTER_SIZE_3 1
 #define FILTER_SIZE_5 0
 #define FILTER_SIZE_7 0
 
+#if _MONO
+#define GAUSSIAN_INPUT_PTR_WIDTH 8
+#elif _COLOR
 #define GAUSSIAN_INPUT_PTR_WIDTH 32
+#endif
+
 #define GAUSSIAN_OUTPUT_PTR_WIDTH 8
 /* Gaussian filter Param ends  */
 
-/* OTSU kernel params */
-// Set the pixel depth:
-#define OTSU_PIXEL_TYPE XF_8UC1
-
-#define RGB2GRAY 0
-#define GRAY 1
-
-#define XF_NPPCX XF_NPPC1
 #define XF_NPPCX XF_NPPC1
 
 #define IN_TYPE XF_8UC1

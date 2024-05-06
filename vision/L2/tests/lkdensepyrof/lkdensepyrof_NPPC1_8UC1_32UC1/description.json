@@ -59,14 +59,14 @@
                     "accelerators": [
                         {
                             "name": "pyr_dense_optical_flow_accel",
-                            "frequency": 200.0
+                            "frequency": 150.0
                         },
                         {
                             "name": "pyr_down_accel",
-                            "frequency": 200.0
+                            "frequency": 150.0
                         }
                     ],
-                    "frequency": 200.0
+                    "frequency": 150.0
                 }
             ]
         },
@@ -101,14 +101,14 @@
                     "accelerators": [
                         {
                             "name": "pyr_dense_optical_flow_accel",
-                            "frequency": 200.0
+                            "frequency": 150.0
                         },
                         {
                             "name": "pyr_down_accel",
-                            "frequency": 200.0
+                            "frequency": 150.0
                         }
                     ],
-                    "frequency": 200.0
+                    "frequency": 150.0
                 }
             ]
         }

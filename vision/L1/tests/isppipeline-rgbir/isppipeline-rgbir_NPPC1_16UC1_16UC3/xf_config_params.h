@@ -186,10 +186,9 @@ typedef struct {
 // top level function for HW synthesis
 void ISPPipeline_accel(uint16_t height,
                        uint16_t width,
-                       InVideoStrm_t& s_axis_video,
-                       OutVideoStrm_t& m_axis_video,
-
-                       // InVideoStrm_t& m_axis_video,
+                       InVideoStrm_t& in_axis_video,
+                       OutVideoStrm_t& out_axis_video,
+                       // InVideoStrm_t& out_axis_video,
                        OutVideoStrmIR_t& ir_axis_video,
                        char R_IR_C1_wgts[25],
                        char R_IR_C2_wgts[25],
@@ -201,6 +200,8 @@ void ISPPipeline_accel(uint16_t height,
                        uint16_t bgain,
                        unsigned char gamma_lut[256 * 3],
                        unsigned char mode_reg,
-                       uint16_t pawb);
+                       uint16_t pawb,
+                       uint16_t ggain,
+                       uint16_t bformat);
 #endif
 //_XF_ISP_TYPES_H_

@@ -1,9 +1,14 @@
+.. 
+   Copyright 2023 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 Rotate
-=======
+########
 
 .. rubric:: API Syntax
 
-Rotate function rotates the input image by 90, 180 or 270 degrees in clockwise direction.
+The Rotate function rotates the input image by 90, 180 or 270 degrees in a clockwise direction.
 
 .. code:: c
 
@@ -16,7 +21,7 @@ Rotate function rotates the input image by 90, 180 or 270 degrees in clockwise d
 
 The following table describes the template and the function parameters.
 
-.. table:: Table Rotate Parameter Description
+.. table:: Table: Rotate Parameters Description
 
     +----------------------+-------------------------------------------------------------+
     | Parameter            | Description                                                 |
@@ -50,9 +55,9 @@ The following table describes the template and the function parameters.
     
 .. rubric:: Resource Utilization
 
-The following table summarizes the resource utilization in different configurations, generated using Vitis HLS 2022.1 tool for the xcu200-fsgd2104-2-e, to process a 4k, 3 channel image.  
+The following table summarizes the resource utilization in different configurations, generated using the Vitis HLS 2022.1 tool for the xcu200-fsgd2104-2-e, to process a 4k, three channel image.  
 
-.. table:: Table Rotate Resource Utilization Summary
+.. table:: Table: Rotate Resource Utilization Summary
 
     +----------------+----------------+---------------------+----------------------+----------+------+------+------+
     | Operating Mode | Direction of   | Operating Frequency | Utilization Estimate |          |      |      |      |
@@ -76,9 +81,9 @@ The following table summarizes the resource utilization in different configurati
 
 .. rubric:: Performance Estimate
 
-The following table summarizes the performance estimates in different configurations, generated using Vitis HLS 2022.1 tool for the xcu200-fsgd2104-2-e, to process a 4k, 3 channel image.
+The following table summarizes the performance estimates in different configurations, generated using the Vitis HLS 2022.1 tool for the xcu200-fsgd2104-2-e, to process a 4k, 3 channel image.
 
-.. table:: Table Rotate Performance Estimate Summary
+.. table:: Table: Rotate Performance Estimate Summary
 
     +----------------+---------------------+------------------+
     | Operating Mode | Operating Frequency | Latency Estimate |

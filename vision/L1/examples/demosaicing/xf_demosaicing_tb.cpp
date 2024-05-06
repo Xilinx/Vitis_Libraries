@@ -168,13 +168,14 @@ int main(int argc, char** argv) {
 
     int height = img.rows;
     int width = img.cols;
+    uint16_t bformat = BPATTERN; // Bayer format BG-0; GB-1; GR-2; RG-3
 
 #if (T_16U)
     demosaicing_accel((ap_uint<INPUT_PTR_WIDTH>*)cfa_bayer_16bit.data,
-                      (ap_uint<OUTPUT_PTR_WIDTH>*)output_image_hls.data, height, width);
+                      (ap_uint<OUTPUT_PTR_WIDTH>*)output_image_hls.data, bformat, height, width);
 #else
     demosaicing_accel((ap_uint<INPUT_PTR_WIDTH>*)cfa_bayer_output.data,
-                      (ap_uint<OUTPUT_PTR_WIDTH>*)output_image_hls.data, height, width);
+                      (ap_uint<OUTPUT_PTR_WIDTH>*)output_image_hls.data, bformat, height, width);
 #endif
 
     // Results verification:

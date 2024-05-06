@@ -19,12 +19,19 @@
 static constexpr int __XF_DEPTH_IN = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPPCX)) / 8) / (INPUT_PTR_WIDTH / 8);
 static constexpr int __XF_DEPTH_OUT = (HEIGHT * WIDTH * (XF_PIXELWIDTH(OUT_TYPE, NPPCX)) / 8) / (OUTPUT_PTR_WIDTH / 8);
 
-void ccm_accel(ap_uint<INPUT_PTR_WIDTH>* src, ap_uint<OUTPUT_PTR_WIDTH>* dst, int rows, int cols) {
+void ccm_accel(ap_uint<INPUT_PTR_WIDTH>* src,
+               ap_uint<OUTPUT_PTR_WIDTH>* dst,
+               signed int ccm_config_1[3][3],
+               signed int ccm_config_2[3],
+               int rows,
+               int cols) {
 // clang-format off
     #pragma HLS INTERFACE m_axi     port=src  offset=slave bundle=gmem1 depth=__XF_DEPTH_IN
     #pragma HLS INTERFACE m_axi     port=dst  offset=slave bundle=gmem2 depth=__XF_DEPTH_OUT
     #pragma HLS INTERFACE s_axilite port=rows              
-    #pragma HLS INTERFACE s_axilite port=cols              
+    #pragma HLS INTERFACE s_axilite port=cols        
+    #pragma HLS INTERFACE s_axilite port=ccm_config_1              
+    #pragma HLS INTERFACE s_axilite port=ccm_config_2      
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
@@ -37,8 +44,8 @@ void ccm_accel(ap_uint<INPUT_PTR_WIDTH>* src, ap_uint<OUTPUT_PTR_WIDTH>* dst, in
 
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1>(src, imgInput);
 
-    xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1,
-                                  XF_CV_DEPTH_OUT_1>(imgInput, imgOutput);
+    xf::cv::colorcorrectionmatrix<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(
+        imgInput, imgOutput, ccm_config_1, ccm_config_2);
 
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1>(imgOutput, dst);
 }

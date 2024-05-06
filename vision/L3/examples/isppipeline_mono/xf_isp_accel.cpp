@@ -104,10 +104,11 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     float inputMax = (1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX))) - 1; // 65535.0f;
 
     float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
-
+    unsigned int blc_config_1 = (int)(mul_fact * 65536); // mul_fact int Q16_16 format
+    unsigned int blc_config_2 = BLACK_LEVEL;
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_IN_1>(img_inp, imgInput1);
     xf::cv::blackLevelCorrection<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 16, 15, 1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(
-        imgInput1, imgInput2, BLACK_LEVEL, mul_fact);
+        imgInput1, imgInput2, blc_config_2, blc_config_1);
 
     xf::cv::medianBlur<WINDOW_SIZE, XF_BORDER_REPLICATE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM,
                        XF_CV_DEPTH_IN_2, XF_CV_DEPTH_DPC_OUT>(imgInput2, dpc_out);

@@ -168,7 +168,8 @@ void xfAXIGetBitFields(ap_uint<W> pix, IplImage* img, int row, int col) {
                     cv_pix.val[k] = temp;
                 } break;
                 case IPL_DEPTH_64F: {
-                    double temp;
+                    double temp = pix.range(start + depth - 1, start);
+                    ;
                     cv_pix.val[k] = temp;
                 } break;
                 default: {

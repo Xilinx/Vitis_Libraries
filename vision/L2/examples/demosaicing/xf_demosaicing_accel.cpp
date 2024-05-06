@@ -17,12 +17,15 @@
 #include "xf_demosaicing_accel_config.h"
 extern "C" {
 
-void demosaicing_accel(ap_uint<INPUT_PTR_WIDTH>* img_in, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int height, int width) {
+void demosaicing_accel(
+    ap_uint<INPUT_PTR_WIDTH>* img_in, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int height, int width, uint16_t bformat) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem1
     #pragma HLS INTERFACE s_axilite  port=height 	              
-    #pragma HLS INTERFACE s_axilite  port=width 	              
+    #pragma HLS INTERFACE s_axilite  port=width 
+    #pragma HLS INTERFACE s_axilite  port=bformat 	              
+
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
@@ -37,8 +40,8 @@ void demosaicing_accel(ap_uint<INPUT_PTR_WIDTH>* img_in, ap_uint<OUTPUT_PTR_WIDT
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::demosaicing<BPATTERN, IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_USE_URAM, XF_CV_DEPTH_IN_1,
-                        XF_CV_DEPTH_OUT_1>(imgInput, imgOutput);
+    xf::cv::demosaicing<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_USE_URAM, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(
+        imgInput, imgOutput, bformat);
 
     // Convert _dst xf::cv::Mat object to output array:
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);

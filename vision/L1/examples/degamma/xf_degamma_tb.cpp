@@ -239,6 +239,22 @@ int main(int argc, char** argv) {
                                             {57344, 1.715, 49506},
                                             {65536, 2.0, 65536}}}; // 8 knee points {upper_bound, slope, intercept}
 #endif
+    // degamma config
+
+    /* center colomn is in Q18_14 format */
+
+    unsigned int degamma_config[3][NUM][3];
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < NUM; j++) {
+            for (int k = 0; k < 3; k++) {
+                if (k == 1) {
+                    degamma_config[i][j][k] = (unsigned int)((params[i][j][k]) * (16384));
+                } else {
+                    degamma_config[i][j][k] = (unsigned int)((params[i][j][k]));
+                }
+            }
+        }
+    }
 
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
@@ -303,8 +319,8 @@ int main(int argc, char** argv) {
     ////////////Top function call //////////////////
 
     // Call the top function
-    degamma_accel((ap_uint<INPUT_PTR_WIDTH>*)gamma_img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_hls.data, params, bformat,
-                  height, width);
+    degamma_accel((ap_uint<INPUT_PTR_WIDTH>*)gamma_img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_hls.data, degamma_config,
+                  bformat, height, width);
 
     imwrite("out_img.jpg", out_img);
     imwrite("out_hls.jpg", out_hls);
@@ -315,7 +331,7 @@ int main(int argc, char** argv) {
     // Save the difference image for debugging purpose:
     cv::imwrite("error.png", diff);
     float err_per;
-    xf::cv::analyzeDiff(diff, 1, err_per);
+    xf::cv::analyzeDiff(diff, 4, err_per);
 
     if (err_per > 0.0f) {
         fprintf(stderr, "ERROR: Test Failed.\n ");

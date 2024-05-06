@@ -44,8 +44,11 @@
 #define INPUT_PTR_WIDTH 64
 #define OUTPUT_PTR_WIDTH 32
 
-void gtm_accel(
-    ap_uint<INPUT_PTR_WIDTH>* img_in, ap_uint<OUTPUT_PTR_WIDTH>* img_out, float c1, float c2, int height, int width);
-
+void gtm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
+               ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+               unsigned int c1,
+               unsigned int c2,
+               int height,
+               int width);
 #endif
 //_XF_GTM_CONFIG_H_

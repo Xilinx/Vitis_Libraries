@@ -458,9 +458,14 @@ void xfThinning(ap_uint<12> accumulator[AngleN + 1][rhoN + 1], short threshold) 
         vote_at_rho_theta_reg[ang1] = 0;
         four_conds_reg[ang1] = 0;
         four_conds_reg_2[ang1] = 1;
+        cond2[ang1] = 0;
+        four_conds[ang1] = 0;
     }
     vote_at_rho_theta[0] = 0;
     vote_at_rho_theta[AngleN + 1] = 0;
+    cond1 = 0;
+    cond3 = 0;
+    cond4 = 0;
 
 RHOLOOPTHINNING:
     for (ap_uint<13> r = 0; r < rhoN + 1; r++) {

@@ -6,6 +6,10 @@
 
 .. _libapireference:
 
+.. 
+   Copyright 2024 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 Overview
 ##################################
@@ -21,7 +25,7 @@ copied back to ``cv::Mat`` to write it into the memory.
 
 
 xf::cv::Mat Image Container Class
-##################################
+===================================
 
 ``xf::cv::Mat`` is a template class that serves as a container for storing
 image data and its attributes.
@@ -172,7 +176,7 @@ Class Definition
 The following table lists the ``xf::cv::Mat`` class parameters and their
 descriptions:
 
-.. table:: Table xf::cv::Mat Class Parameter Descriptions
+.. table:: Table: xf::cv::Mat Class Parameter Descriptions
 
    +---------------+------------------------------------------------------+
    | Parameter     | Description                                          |
@@ -196,7 +200,7 @@ descriptions:
 
 The following table lists the member functions and their descriptions:
 
-.. table:: Table xf::cv::Mat Member Function Descriptions
+.. table:: Table: xf::cv::Mat Member Function Descriptions
 
    +---------------+--------------------------------------------------------+
    | Member        | Description                                            |
@@ -257,7 +261,7 @@ The following table lists the member functions and their descriptions:
    +---------------+--------------------------------------------------------+
    | depth()       | Returns the depth of the image                         |
    +---------------+--------------------------------------------------------+
-   | channels()    | Returns number of channels of the image                |
+   | channels()    | Returns the number of channels of the image.           |
    +---------------+--------------------------------------------------------+
    | ~Mat()        | This is a default destructor of the Mat object.        |
    +---------------+--------------------------------------------------------+
@@ -267,7 +271,7 @@ of the pixel, number of channels in the image, number of pixels packed
 per word, maximum number of rows and columns of the image. The following
 table lists the template parameters and their descriptions:
 
-.. table:: Table xf::cv::Mat Template Parameter Descriptions
+.. table:: Table: xf::cv::Mat Template Parameter Descriptions
 
    +---------------+------------------------------------------------------+
    | Parameters    | Description                                          |
@@ -282,20 +286,17 @@ table lists the template parameters and their descriptions:
    +---------------+------------------------------------------------------+
    | NPC           | The number of pixels to be packed per word. For      |
    |               | instance, XF_NPPC1 for 1 pixel per word; and         |
-   |               | XF_NPPC8 for 8 pixels per word.                      |
+   |               | XF_NPPC8 for eight pixels per word.                  |
    +---------------+------------------------------------------------------+
    | XFCVDEPTH     | Depth of the hls::stream in the xf::cv::Mat          |
    +---------------+------------------------------------------------------+
 
-.. Important::
-   **All the functions in the library are implemented in streaming model except 7. Bounding box, Canny, Cornertracker, Crop, EdgeTracing, MeanShiftTracking, Rotate are memory mapped implemenations. These functions need to have the flag __SDA_MEM_MAP__ set for compiling correctly**
+.. important::All functions in the library are implemented in streaming model, except 7. Bounding box, Canny, Cornertracker, Crop, EdgeTracing, MeanShiftTracking, Rotate are memory mapped implemenations. These functions need to have the flag __SDA_MEM_MAP__ set for compiling correctly
 
-.. Important::
-   **Depth of the image mentioned in the API parameter description tables represents the depth of the hls::stream defined inside the xf::cv::Mat**
+.. important::The depth of the image mentioned in the API parameter description tables represents the depth of the hls::stream defined inside the xf::cv::Mat
 
-.. Important::
-   **Default depth value for all the memory mapped implemenations(Bounding box, Canny, Cornertracker, Crop, EdgeTracing, MeanShiftTracking, Rotate) is "_XFCVDEPTH_DEFAULT = -1". 
-   Default depth value for all the streaming model implemenations is "_XFCVDEPTH_DEFAULT = 2".**
+.. important::The default depth value for all the memory mapped implementations (Bounding box, Canny, Cornertracker, Crop, EdgeTracing, MeanShiftTracking, Rotate) is "_XFCVDEPTH_DEFAULT = -1". 
+   The Default depth value for all the streaming model implementations is "_XFCVDEPTH_DEFAULT = 2".**
 
 
 Pixel-Level Parallelism
@@ -303,7 +304,7 @@ Pixel-Level Parallelism
 
 The amount of parallelism to be implemented in a function from Vitis Vision
 is kept as a configurable parameter. In most functions, there are two
-options for processing data.
+options for processing data:
 
 -  Single-pixel processing per clock cycle (SPC)
 -  Processing Multiple pixels in parallel per clock cycle (MPC)
@@ -311,7 +312,7 @@ options for processing data.
 The following table describes the options available for specifying the
 level of parallelism required in a particular function:
 
-.. table:: Table Options Available for Specifying the Level of Parallelism
+.. table:: Table: Options Available for Specifying the Level of Parallelism
 
    +----------+----------------------------------+
    | Option   | Description                      |
@@ -328,7 +329,7 @@ level of parallelism required in a particular function:
 Macros to Work With Parallelism
 ---------------------------------
 
-There are two macros that are defined to work with parallelism.
+There are two macros that are defined to work with parallelism:
 
 -  The ``XF_NPIXPERCYCLE(flags)`` macro resolves to the number of pixels
    processed per cycle.
@@ -350,7 +351,7 @@ There are two macros that are defined to work with parallelism.
 Data Types
 ===========
 
-Data types will differ, depending on the combination of the depth
+Data types will differ depending on the combination of the depth
 of pixels and the number of channels in the image. The generic
 nomenclature of the parameter is listed below.
 
@@ -364,7 +365,7 @@ For example, for an 8-bit pixel - unsigned - 1 channel the data type is
 The following table lists the available data types for the ``xf::cv::Mat``
 class:
 
-.. table:: Table xf::cv::Mat Class - Available Data Types
+.. table:: Table: xf::cv::Mat Class - Available Data Types
 
    +-------------+-----------------+--------------------+-----------------+
    | Option      | Number of bits  | Unsigned/ Signed/  | Number of       |
@@ -414,7 +415,7 @@ Manipulating Data Type
 -----------------------
 
 Based on the number of pixels to process per clock cycle and the type
-parameter, there are different possible data types. The Vitis Vision library
+parameter, there are different possible datatypes. The Vitis Vision library
 uses these datatypes for internal processing and inside the ``xf::cv::Mat``
 class. The following are a few supported types:
 
@@ -445,7 +446,7 @@ xf::cv::imread
 ==============
 
 The function `xf::cv::imread` loads an image from the specified file path,
-copies into xf::cv::Mat and returns it. If the image cannot be read (because
+copies it into xf::cv::Mat and returns it. If the image cannot be read (because
 of missing file, improper permissions, unsupported or invalid format),
 the function exits with a non-zero return code and an error statement.
 
@@ -460,9 +461,9 @@ the function exits with a non-zero return code and an error statement.
 
 .. rubric:: Parameter Descriptions
 
-The table below describes the template and the function parameters.
+The following table describes the template and the function parameters.
 
-.. table:: Table xf::cv::imread Parameter Description
+.. table:: Table: xf::cv::imread Parameter Description
 
    +--------------+-------------------------------------------------------+
    | Parameter    | Description                                           |
@@ -507,9 +508,9 @@ xf::cv::imwrite.
 
 .. rubric:: Parameter Descriptions
 
-The table below describes the template and the function parameters.
+The following table describes the template and the function parameters.
 
-.. table:: Table xf::cv::imwrite Parameter Description
+.. table:: Table: xf::cv::imwrite Parameter Description
 
    +--------------+-------------------------------------------------------+
    | Parameter    | Description                                           |
@@ -548,9 +549,9 @@ difference values in a cv::Mat.
 
 .. rubric:: Parameter Descriptions
 
-The table below describes the template and the function parameters.
+The following table describes the template and the function parameters.
 
-.. table:: Table xf::cv::absDiff Parameter Description
+.. table:: Table: xf::cv::absDiff Parameter Description
 
    +--------------+-------------------------------------------------------+
    | Parameter    | Description                                           |
@@ -597,9 +598,9 @@ converted image cannot be stored in the Mat of the input image.
 
 .. rubric:: Parameter Descriptions
 
-The table below describes the template and function parameters.
+The following table describes the template and function parameters.
 
-.. table:: Table xf::cv::convertTo Parameter Description
+.. table:: Table: xf::cv::convertTo Parameter Description
 
    +--------------+-------------------------------------------------------+
    | Parameter    | Description                                           |
@@ -657,17 +658,17 @@ Vitis Vision Library Functions
 ###############################
 
 The Vitis Vision library is a set of select OpenCV functions optimized for
-Zynq-7000, Zynq UltraScale+ MPSoC, Versal VCK190, Alveo U200 and U50 devices. The maximum resolution supported for all the functions is 4K, except
+Zynq-7000, Zynq UltraScale+ MPSoC, Versal VCK190, Alveo U200, and U50 devices. The maximum resolution supported for all the functions is 4K, except
 Houghlines and HOG (RB mode).
 
 .. Important::
-   **All the functions in the library are implemented in streaming model except 7. Bounding box, Canny, Cornertracker, Crop, EdgeTracing, MeanShiftTracking, Rotate are memory mapped implemenations. These functions need to have the flag __SDA_MEM_MAP__ set for compiling correctly**
+   **All functions in the library are implemented in the streaming model except 7. Bounding box, Canny, Cornertracker, Crop, EdgeTracing, MeanShiftTracking, Rotate are memory mapped implemenations. These functions need to have the flag __SDA_MEM_MAP__ set for compiling correctly**
 
 .. Important::
-   **Default depth value for all the memory mapped implemenations(Bounding box, Canny, Cornertracker, Crop, EdgeTracing, MeanShiftTracking, Rotate) is "_XFCVDEPTH_DEFAULT = -1". 
-   Default depth value for all the streaming model implemenations is "_XFCVDEPTH_DEFAULT = 2".**
+   **The default depth value for all the memory mapped implementations (Bounding box, Canny, Cornertracker, Crop, EdgeTracing, MeanShiftTracking, Rotate) is "_XFCVDEPTH_DEFAULT = -1". 
+   The default depth value for all the streaming model implementations is "_XFCVDEPTH_DEFAULT = 2".**
 
-.. note:: Number of pixel per clock depends on the maximum bus width a device can support. For example: Zynq-7000 SoC has 64-bit interface and so for a pixel type 16UC1, maximum of four pixel per clock (XF_NPPC4) is possible.
+.. note:: The Number of pixel per clock depends on the maximum bus width a device can support. For example: Zynq-7000 SoC has 64-bit interface and so for a pixel type 16UC1, maximum of four pixel per clock (XF_NPPC4) is possible.
 
 .. _absdiff:
 
@@ -676,7 +677,7 @@ Absolute Difference
 
 The ``absdiff`` function finds the pixel wise absolute difference
 between two input images and returns an output image. The input and the
-output images must be the XF_8UC1 type.
+output images must be of the XF_8UC1 type.
 
 | 
 | |image0|
@@ -705,7 +706,7 @@ Where,
 
 The following table describes the template and the function parameters.
 
-.. table:: Table absdiff Parameter Description
+.. table:: Table: absdiff Parameter Description
 
    +-----------------------------------+-----------------------------------+
    | Parameter                         | Description                       |
@@ -832,9 +833,8 @@ The following table describes the template and the function parameters.
    |                 | using a multiple of 8, for an 8-pixel operation.   |
    +-----------------+----------------------------------------------------+
    | NPC             | Number of pixels to be processed per cycle;        |
-   |                 | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4    | 
-   |                 | and XF_NPPC8 for 1,2,4                             |
-   |                 | pixel and 8 pixels operations respectively.        |
+   |                 | possible options are XF_NPPC1 and XF_NPPC8 for 1   |
+   |                 | pixel and 8 pixel operations respectively.         |
    +-----------------+----------------------------------------------------+
    | XFCVDEPTH_IN_1  | Depth of the input image                           |
    +-----------------+----------------------------------------------------+
@@ -969,10 +969,9 @@ The following table describes the template and the function parameters.
    | COLS            | Maximum width of input and output image (must be       |
    |                 | multiple of 8, for 8-pixel operation)                  |
    +-----------------+--------------------------------------------------------+
-   | NPC             | Number of pixels to be processed per cycle;            |
-   |                 | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4        | 
-   |                 | and XF_NPPC8 for 1,2,4                                 |
-   |                 | pixels and 8 pixel operations respectively.            |
+   | NPC             | Number of pixels to be processed per cycle; possible   |
+   |                 | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8    |
+   |                 | pixel operations respectively.                         |
    +-----------------+--------------------------------------------------------+
    | XFCVDEPTH_IN_1  | Depth of the input image                               |
    +-----------------+--------------------------------------------------------+
@@ -1107,10 +1106,9 @@ The following table describes the template and the function parameters.
    | COLS            | Maximum width of input and output image. Recommend     |
    |                 | multiples of 8, for an 8-pixel operation.              |
    +-----------------+--------------------------------------------------------+
-   | NPC             | Number of pixels to be processed per cycle;            |
-   |                 | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4        | 
-   |                 | and XF_NPPC8 for 1,2,4                                 |
-   |                 | pixel and 8 pixel operations respectively.             |
+   | NPC             | Number of pixels to be processed per cycle; possible   |
+   |                 | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8    |
+   |                 | pixel operations respectively.                         |
    +-----------------+--------------------------------------------------------+
    | XFCVDEPTH_IN_1  | Depth of the input image                               |
    +-----------------+--------------------------------------------------------+
@@ -1234,8 +1232,8 @@ The following table describes the template and the function parameters.
    |                | XF_CONVERT_POLICY_SATURATE or                        |
    |                | XF_CONVERT_POLICY_TRUNCATE.                          |
    +----------------+------------------------------------------------------+
-   | SRC_T          | Pixel type. Options are XF_8UC1, XF_8UC3, XF_16SC3   |
-   |                | , and XF_16SC1.                                      |
+   | SRC_T          | Input pixel type. 8-bit, unsigned, 1 channel is      |
+   |                | supported (XF_8UC1).                                 |
    +----------------+------------------------------------------------------+
    | ROWS           | Maximum height of input and output image.            |
    +----------------+------------------------------------------------------+
@@ -1338,21 +1336,20 @@ The following table describes the template and the function parameters.
    +-----------------+------------------------------------------------------+
    | Parameter       | Description                                          |
    +=================+======================================================+
-   | SRC_T           | Input Pixel Type.  XF_8UC1,XF_8UC3 are               |
-   |                 | supported                                            |
+   | SRC_T           | Input Pixel Type. 8-bit, unsigned,1 channel is       |
+   |                 | supported (XF_8UC1)                                  |
    +-----------------+------------------------------------------------------+
-   | DST_T           | Output Pixel Type.  XF_8UC1,XF_8UC3 are              |
-   |                 | supported                                            |
+   | DST_T           | Output Pixel Type. 8-bit, unsigned,1 channel is      |
+   |                 | supported (XF_8UC1)                                  |
    +-----------------+------------------------------------------------------+
    | ROWS            | Maximum height of input and output image             |
    +-----------------+------------------------------------------------------+
    | COLS            | Maximum width of input and output image. In case of  |
    |                 | N-pixel parallelism, width should be multiple of N   |
    +-----------------+------------------------------------------------------+
-   | NPC             | Number of pixels to be processed per cycle;          |
-   |                 | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4      | 
-   |                 | and XF_NPPC8 for 1,2,4                               |
-   |                 | pixel and 8 pixel operations respectively.           |
+   | NPC             | Number of pixels to be processed per cycle; possible |
+   |                 | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8  |
+   |                 | pixel operations respectively.                       |
    +-----------------+------------------------------------------------------+
    | XFCVDEPTH_IN_1  | Depth of the input image                             |
    +-----------------+------------------------------------------------------+
@@ -1452,11 +1449,11 @@ The following table describes template parameters and arguments of the function.
    +------------------+------------------------------------------------------+
    | Parameter        | Description                                          |
    +==================+======================================================+
-   | SRC_T            | Input pixel type. XF_8UC3 ,XF_16UC3 are              |
-   |                  | supported                                            |
+   | SRC_T            | Input pixel type. 8-bit unsigned 3 channel is        |
+   |                  | supported (XF_8UC3).                                 |
    +------------------+------------------------------------------------------+
-   | DST_T            | Output pixel type. XF_8UC3 ,XF_16UC3 are             |
-   |                  | supported                                            |
+   | DST_T            | Output pixel type. 8-bit unsigned 3 channel is       |
+   |                  | supported (XF_8UC3).                                 |
    +------------------+------------------------------------------------------+
    | ROWS             | Maximum height of input and output image             |
    +------------------+------------------------------------------------------+
@@ -1465,12 +1462,8 @@ The following table describes template parameters and arguments of the function.
    +------------------+------------------------------------------------------+
    | SIN_CHANNEL_TYPE | Single channel type. should be XF_8UC1               |
    +------------------+------------------------------------------------------+
-   | NPC              | Number of pixels to be processed per cycle;          |
-   |                  | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4      | 
-   |                  | and XF_NPPC8 for 1,2,4                               |
-   |                  | pixel and 8 pixel operations respectively.           |
-   +------------------+------------------------------------------------------+
-   | USE_URAM         | Enable to map storage structures to UltraRAM.        |
+   | NPC              | Number of pixels to be processed per cycle; possible |
+   |                  | options is XF_NPPC1, XF_NPPC2 AND so on              |
    +------------------+------------------------------------------------------+
    | XFCVDEPTH_IN     | Depth of input image                                 |
    +------------------+------------------------------------------------------+
@@ -1546,7 +1539,7 @@ A simple white balance algorithm that works by independently stretching each of 
     void AWBhistogram(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& src2,
                   uint32_t histogram[3][HIST_SIZE],
-                  float thresh,
+                  uint32_t thresh,
                   float inputMin,
                   float inputMax,
                   float outputMin,
@@ -1556,7 +1549,7 @@ A simple white balance algorithm that works by independently stretching each of 
     void AWBNormalization(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src,
                       xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                       uint32_t histogram[3][HIST_SIZE],
-                      float thresh,
+                      uint32_t thresh,
                       float inputMin,
                       float inputMax,
                       float outputMin,
@@ -1569,13 +1562,13 @@ A simple white balance algorithm that works by independently stretching each of 
     template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
     void AWBChannelGain(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src,
                     xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
-                    float thresh,
+                    uint32_t thresh,
                     int i_gain[3])
                     
     template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
     void AWBGainUpdate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
                    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& src2,
-                   float thresh,
+                   uint32_t thresh,
                    int i_gain[3])
 .. rubric:: Parameter Descriptions
 
@@ -1587,21 +1580,19 @@ The following table describes the template and the function parameters.
     +-----------------+------------------------------------------------------------------------------------------------------------------------------+
     |   Parameter     |   Description                                                                                                                |
     +=================+==============================================================================================================================+
-    |   SRC_T         | Input Pixel Type.XF_8UC3,XF_16UC3 are supported                                                                              |
+    |   SRC_T         | Input Pixel Type.                                                                                                            |
     +-----------------+------------------------------------------------------------------------------------------------------------------------------+
-    |   DST_T         | Output Pixel Type.XF_8UC3,XF_16UC3 are supported                                                                             |
+    |   DST_T         | Output Pixel Type.                                                                                                           |
     +-----------------+------------------------------------------------------------------------------------------------------------------------------+
     |   ROWS          | Maximum height of input and output image (Must be multiple of NPC)                                                           |
     +-----------------+------------------------------------------------------------------------------------------------------------------------------+
     |   COLS          | Maximum width of input and output image (Must be multiple of NPC)                                                            |
     +-----------------+------------------------------------------------------------------------------------------------------------------------------+
-    |   NPC           | Number of Pixels to be processed per cycle.XF_NPPC1,XF_NPPC2,XF_NPPC4 and XF_NPPC8.                                          |
+    |   NPC           | Number of Pixels to be processed per cycle.                                                                                  |
     +-----------------+------------------------------------------------------------------------------------------------------------------------------+
     |   WB_TYPE       | White balance type. Supported types are Gray world and simple.                                                               |
     +-----------------+------------------------------------------------------------------------------------------------------------------------------+
     |   HIST_SIZE     | Histogram size.                                                                                                              |
-    +-----------------+------------------------------------------------------------------------------------------------------------------------------+
-    | USE_URAM        | Enable to map storage structures to UltraRAM.                                                                                |
     +-----------------+------------------------------------------------------------------------------------------------------------------------------+
     | XFCVDEPTH_IN_1  | Depth of input image                                                                                                         |
     +-----------------+------------------------------------------------------------------------------------------------------------------------------+
@@ -1690,14 +1681,13 @@ The following table describes the template and the function parameters.
    +-------------------+-----------------------------------------------------------------------+
    | Parameter         | Description                                                           |
    +===================+=======================================================================+
-   | TYPE              | Input and Output Pixel Type.XF_8UC1,XF_16UC1 are supported            |
+   | TYPE              | Input and Output Pixel Type.                                          |
    +-------------------+-----------------------------------------------------------------------+
    | ROWS              | Maximum height of input and output image (Must be multiple of NPPC)   |
    +-------------------+-----------------------------------------------------------------------+
    | COLS              | Maximum width of input and output image (Must be multiple of NPPC)    |
    +-------------------+-----------------------------------------------------------------------+
-   | NPPC              | Number of Pixels to be processed per cycle.XF_NPPC1,XF_NPPC2          |
-   |                   | ,XF_NPPC4 and XF_NPPC8.                                               |
+   | NPPC              | Number of Pixels to be processed per cycle.                           |
    +-------------------+-----------------------------------------------------------------------+
    | BORDER_T          | Border Type supported is XF_BORDER_CONSTANT                           |
    +-------------------+-----------------------------------------------------------------------+
@@ -1888,7 +1878,7 @@ The following table describes the template and the function parameters.
    +----------------------+-----------------------------------------------+
    | Parameter            | Description                                   |
    +======================+===============================================+
-   | WINDOW_SIZE          | Filter size. Filter size of 3                 |
+   | FILTER_SIZE          | Filter size. Filter size of 3                 |
    |                      | (XF_FILTER_3X3), 5 (XF_FILTER_5X5) and 7      |
    |                      | (XF_FILTER_7X7) are supported                 |
    +----------------------+-----------------------------------------------+
@@ -2189,17 +2179,16 @@ The following table describes the template and the function parameters.
    | Parameter       | Description                                             |
    +=================+=========================================================+
    | SRC_T           | Input and output pixel type. Supports 1 channel and 3   |
-   |                 | channels (XF_8UC1,XF_16SC1,XF_16SC3 and XF_8UC3)        |
+   |                 | channels (XF_8UC1 and XF_8UC3)                          |
    +-----------------+---------------------------------------------------------+
    | ROWS            | Maximum height of input and output image.               |
    +-----------------+---------------------------------------------------------+
    | COLS            | Maximum width of input and output image (must be a      |
    |                 | multiple of 8, for 8 pixel mode)                        |
    +-----------------+---------------------------------------------------------+
-   | NPC             | Number of pixels to be processed per cycle;             |
-   |                 | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4         | 
-   |                 | and XF_NPPC8 for 1,2,4                                  |
-   |                 | pixel and 8 pixel operations respectively.              |
+   | NPC             | Number of pixels to be processed per cycle; possible    |
+   |                 | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8     |
+   |                 | pixel operations, respectively.                         |
    +-----------------+---------------------------------------------------------+
    | XFCVDEPTH_IN_1  | Depth of the input image                                |
    +-----------------+---------------------------------------------------------+
@@ -2312,17 +2301,16 @@ The following table describes the template and the function parameters.
    | Parameter            | Description                                           |
    +======================+=======================================================+
    | SRC_T                | Input and output pixel type. Supports 1 channel and 3 |
-   |                      | channels (XF_8UC1,XF_16SC1,XF_16SC3 and XF_8UC3)      |
+   |                      | channels (XF_8UC1 and XF_8UC3).                       |
    +----------------------+-------------------------------------------------------+
    | ROWS                 | Maximum height of input and output image.             |
    +----------------------+-------------------------------------------------------+
-   | COLS                 | Maximum width of input and output image (must be a    |
-   |                      | multiple of 8, for 8 pixel mode)                      |
+   | COLS                 | Maximum width of input and output image. Must be a    |
+   |                      | multiple of 8 for 8 pixel mode.                       |
    +----------------------+-------------------------------------------------------+
-   | NPC                  | Number of pixels to be processed per cycle;           |
-   |                      | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4       | 
-   |                      | and XF_NPPC8 for 1,2,4                                |
-   |                      | pixel and 8 pixel operations respectively.            |
+   | NPC                  | Number of pixels to be processed per cycle; possible  |
+   |                      | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8   |
+   |                      | pixel operations, respectively.                       |
    +----------------------+-------------------------------------------------------+
    | XFCVDEPTH_IN_1       | Depth of input image                                  |
    +----------------------+-------------------------------------------------------+
@@ -2430,17 +2418,16 @@ The following table describes the template and the function parameters.
    | Parameter        | Description                                            |
    +==================+========================================================+
    | SRC_T            | Input and output pixel type. Supports 1 channel and 3  |
-   |                  | channels (XF_8UC1,XF_16SC1,XF_16SC3 and XF_8UC3)       |
+   |                  | channels (XF_8UC1 and XF_8UC3).                        |
    +------------------+--------------------------------------------------------+
    | ROWS             | Maximum height of input and output image.              |
    +------------------+--------------------------------------------------------+
-   | COLS             | Maximum width of input and output image (must be a     |
-   |                  | multiple of 8, for 8 pixel mode)                       |
+   | COLS             | Maximum width of input and output image. Must be       |
+   |                  | multiple of 8, for 8 pixel mode.                       |
    +------------------+--------------------------------------------------------+
-   | NPC              | Number of pixels to be processed per cycle;            |
-   |                  | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4        | 
-   |                  | and XF_NPPC8 for 1,2,4                                 |
-   |                  | pixel and 8 pixel operations respectively.             |
+   | NPC              | Number of pixels to be processed per cycle; possible   |
+   |                  | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8    |
+   |                  | pixel operations respectively.                         |
    +------------------+--------------------------------------------------------+
    | XFCVDEPTH_IN_1   | Depth of the input image                               |
    +------------------+--------------------------------------------------------+
@@ -2547,34 +2534,33 @@ The following table describes the template and the function parameters.
 
 .. table:: Table 53. bitwise_xor Parameter Description
 
-   +-------------------+---------------------------------------------------------+
-   | Parameter         | Description                                             |
-   +===================+=========================================================+
-   | SRC_T             | Input and output pixel type. Supports 1 channel and 3   |
-   |                   | channels (XF_8UC1,XF_16SC1,XF_16SC3 and XF_8UC3)        |
-   +-------------------+---------------------------------------------------------+
-   | ROWS              | Maximum height of input and output image.               |
-   +-------------------+---------------------------------------------------------+
-   | COLS              | Maximum width of input and output image (must be a      |
-   |                   | multiple of 8, for 8 pixel mode)                        |
-   +-------------------+---------------------------------------------------------+
-   | NPC               | Number of pixels to be processed per cycle;             |
-   |                   | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4         | 
-   |                   | and XF_NPPC8 for 1,2,4                                  |
-   |                   | pixel and 8 pixel operations respectively.              |
-   +-------------------+---------------------------------------------------------+
-   | XFCVDEPTH_IN_1    | Depth of the input image                                |
-   +-------------------+---------------------------------------------------------+
-   | XFCVDEPTH_IN_2    | Depth of the input image                                |
-   +-------------------+---------------------------------------------------------+
-   | XFCVDEPTH_OUT_1   | Depth of the output image                               |
-   +-------------------+---------------------------------------------------------+
-   | src1              | Input image                                             |
-   +-------------------+---------------------------------------------------------+
-   | src2              | Input image                                             |
-   +-------------------+---------------------------------------------------------+
-   | dst               | Output image                                            |
-   +-------------------+---------------------------------------------------------+
+   +-------------------+--------------------------------------------------+
+   | Parameter         | Description                                      |
+   +===================+==================================================+
+   | SRC_T             | Input and output pixel type. Supports 1 channel  |
+   |                   | and 3 channels (XF_8UC1 and XF_8UC3).            |
+   +-------------------+--------------------------------------------------+
+   | ROWS              | Maximum height of input and output image.        |
+   +-------------------+--------------------------------------------------+
+   | COLS              | Maximum width of input and output image. Must be |
+   |                   | multiple of 8, for 8 pixel mode.                 |
+   +-------------------+--------------------------------------------------+
+   | NPC               | Number of pixels to be processed per cycle;      |
+   |                   | possible options are XF_NPPC1 and XF_NPPC8 for 1 |
+   |                   | pixel and 8 pixel operations respectively.       |
+   +-------------------+--------------------------------------------------+
+   | XFCVDEPTH_IN_1    | Depth of the input image                         |
+   +-------------------+--------------------------------------------------+
+   | XFCVDEPTH_IN_2    | Depth of the input image                         |
+   +-------------------+--------------------------------------------------+
+   | XFCVDEPTH_OUT_1   | Depth of the output image                        |
+   +-------------------+--------------------------------------------------+
+   | src1              | Input image                                      |
+   +-------------------+--------------------------------------------------+
+   | src2              | Input image                                      |
+   +-------------------+--------------------------------------------------+
+   | dst               | Output image                                     |
+   +-------------------+--------------------------------------------------+
 
 
 .. rubric:: Resource Utilization
@@ -2672,6 +2658,9 @@ The following table describes the template and the function parameters.
    | SRC_T           | Input pixel type. 8/10/12/16-bit unsigned 1 channel       |
    |                 | are supported (XF_8UC1, XF_10UC1, XF_12UC1, XF_16UC1).    |
    +-----------------+-----------------------------------------------------------+
+   | DST_T           | Output pixel type. 8/10/12/16-bit unsigned 1 channel are  |
+   |                 | supported (XF_8UC1, XF_10UC1, XF_12UC1, XF_16UC1).        |
+   +-----------------+-----------------------------------------------------------+
    | MAX_ROWS        | Maximum height of input and output image.                 |
    +-----------------+-----------------------------------------------------------+
    | MAX_COLS        | Maximum width of input and output image. In case of       |
@@ -2764,7 +2753,7 @@ The following table describes the template and the function parameters.
    +-----------------+-----------------------------------------------------+
    | SRC_T           | Input and output pixel type. 8-bit, unsigned,       |
    |                 | 16-bit unsigned and 16-bit signed, 1 channel is     |
-   |                 | supported (XF_8UC1,XF_16UC1,XF_16SC1)               |
+   |                 | supported (XF_8UC1)                                 |
    +-----------------+-----------------------------------------------------+
    | ROWS            | Maximum height of input and output image.           |
    +-----------------+-----------------------------------------------------+
@@ -2902,8 +2891,8 @@ The following table describes the template and the function parameters.
    | Parameter         | Description                                      |
    +===================+==================================================+
    | SRC_T             | Input pixel Type. Only 8-bit, unsigned, 1        |
-   |                   | channel and 4 channel is supported               |
-   |                   | (XF_8UC1,XF_8UC4).                               |
+   |                   | channel and 3 channel is supported               |
+   |                   | (XF_8UC1,XF_8UC3).                               |
    +-------------------+--------------------------------------------------+
    | ROWS              | Maximum height of input and output image.        |
    +-------------------+--------------------------------------------------+
@@ -2969,7 +2958,7 @@ image for highlighting 3 different boundaries (480x640, 100x200,
 .. rubric:: Vitis Vision Reference
 
 
-The ``xf::cv::boundingbox`` is complaint with below Vitis Vision function:
+The ``xf::cv::boundingbox`` is complaint with the following Vitis Vision function:
 
 .. code:: c
 
@@ -3260,10 +3249,8 @@ The following table describes the template and the function parameters.
    | COLS                  | Maximum width of input and output image. Must be multiple |
    |                       | of 8 for 8 pixel mode.                                    |
    +-----------------------+-----------------------------------------------------------+
-   | NPC                   | Number of pixels to be processed per cycle;               |
-   |                       | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4           | 
-   |                       | and XF_NPPC8 for 1,2,4                                    |
-   |                       | pixel and 8 pixel operations respectively.                |
+   | NPC                   | Number of pixels to be processed per cycle; possible      |
+   |                       | options are XF_NPPC1 for 1 pixel operation.               |
    +-----------------------+-----------------------------------------------------------+
    | XFCVDEPTH_IN_1        | Depth of input image                                      |
    +-----------------------+-----------------------------------------------------------+
@@ -3386,9 +3373,11 @@ The following table describes the template and the function parameters.
    | Paramete              | Description                                               |
    | r                     |                                                           |
    +=======================+===========================================================+
-   | SRC_T                 | Input pixel type. XF_8UC3, XF_8UC4, XF_16UC3, XF_16UC4.   |
+   | SRC_T                 | Input pixel type. Only 8-bit, unsigned, 4channel is       |
+   |                       | supported (XF_8UC4)                                       |
    +-----------------------+-----------------------------------------------------------+
-   | DST_T                 | Output pixel type. XF_8UC3, XF_16UC3 are supported        |
+   | DST_T                 | Output pixel type. Only 8-bit, unsigned, 1 channel is     |
+   |                       | supported (XF_8UC1)                                       |
    +-----------------------+-----------------------------------------------------------+
    | ROWS                  | Maximum height of input and output image                  |
    +-----------------------+-----------------------------------------------------------+
@@ -3396,7 +3385,7 @@ The following table describes the template and the function parameters.
    |                       | of 8 for 8 pixel mode                                     |
    +-----------------------+-----------------------------------------------------------+
    | NPC                   | Number of pixels to be processed per cycle; possible      |
-   |                       | options are XF_NPPC1,XF_NPPC2,XF_NPPC4 and XF_NPPC8.      |
+   |                       | options are XF_NPPC1 for 1 pixel operation.               |
    +-----------------------+-----------------------------------------------------------+
    | XFCVDEPTH_IN_1        | Depth of input image                                      |
    +-----------------------+-----------------------------------------------------------+
@@ -7859,7 +7848,7 @@ the source image with low and high threshold values, and returns either
 .. rubric:: Parameter Descriptions
 
 
-The table below describes the template and the function parameters.
+The following table describes the template and the function parameters.
 
     +-----------------------+-------------------------------------------------------+
     | Parameter             | Description                                           |
@@ -7939,18 +7928,17 @@ The following table describes the template and the function parameters.
    | CMP_OP                 | The flag that specify the relation between the       |
    |                        | elements needs to be checked                         |
    +------------------------+------------------------------------------------------+
-   | SRC_T                  | Input and output pixel type. Supports 1 channel and  |
-   |                        | 3 channels (XF_8UC1,XF_16SC1,XF_16SC3 and XF_8UC3)   |
+   | SRC_T                  | Input Pixel Type. 8-bit, unsigned, 1 channel is      |
+   |                        | supported (XF_8UC1)                                  |
    +------------------------+------------------------------------------------------+
    | ROWS                   | Maximum height of input and output image.            |
    +------------------------+------------------------------------------------------+
-   | COLS                   | Maximum width of input and output image (must be a   |
-   |                        | multiple of 8, for 8 pixel mode)                     |
+   | COLS                   | Maximum width of input and output image. In case of  |
+   |                        | N-pixel parallelism, width should be multiple of N   |
    +------------------------+------------------------------------------------------+
-   | NPC                    | Number of pixels to be processed per cycle;          |
-   |                        | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4      | 
-   |                        | and XF_NPPC8 for 1,2,4                               |
-   |                        | pixel and 8 pixel operations respectively.           |
+   | NPC                    | Number of pixels to be processed per cycle; possible |
+   |                        | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8  |
+   |                        | pixel operations respectively.                       |
    +------------------------+------------------------------------------------------+
    | XFCVDEPTH_IN_1         | Depth of input image                                 |
    +------------------------+------------------------------------------------------+
@@ -8047,7 +8035,7 @@ is set to 255, else it is set to 0.
 .. code:: c
 
    template<int CMP_OP,  int SRC_T , int ROWS, int COLS, int NPC=1, int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
-   void compare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1> & _dst)
+   void compareS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -8063,18 +8051,18 @@ The following table describes the template and the function parameters.
    | CMP_OP                | The flag that specifying the relation between the    |
    |                       | elements to be checked                               |
    +-----------------------+------------------------------------------------------+
-   | SRC_T                 | Input and output pixel type. Supports 1 channel and  |
-   |                       | 3 channels (XF_8UC1,XF_16SC1,XF_16SC3 and XF_8UC3)   |
+   | SRC_T                 | Input pixel type. 8-bit, unsigned, 1 channel is      |
+   |                       | supported (XF_8UC1).                                 |
    +-----------------------+------------------------------------------------------+
-   | ROWS                  | Maximum height of input and output image.            |
+   | ROWS                  | Maximum height of input and output image             |
    +-----------------------+------------------------------------------------------+
-   | COLS                  | Maximum width of input and output image (must be a   |
-   |                       | multiple of 8, for 8 pixel mode)                     |
+   | COLS                  | Maximum width of input and output image. In case of  |
+   |                       | N-pixel parallelism, the width should be a multiple  |
+   |                       | of N                                                 |
    +-----------------------+------------------------------------------------------+
-   | NPC                   | Number of pixels to be processed per cycle;          |
-   |                       | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4      | 
-   |                       | and XF_NPPC8 for 1,2,4                               |
-   |                       | pixel and 8 pixel operations respectively.           |
+   | NPC                   | Number of pixels to be processed per cycle; possible |
+   |                       | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8  |
+   |                       | pixels operations respectively.                      |
    +-----------------------+------------------------------------------------------+
    | XFCVDEPTH_IN_1        | Depth of input image                                 |
    +-----------------------+------------------------------------------------------+
@@ -8180,10 +8168,9 @@ The following table describes the template and the function parameters.
    | COLS                  | Maximum width of input and output image. In case of  |
    |                       | N-pixel parallelism, width should be multiple of N.  |
    +-----------------------+------------------------------------------------------+
-   | NPC                   | Number of pixels to be processed per cycle;          |
-   |                       | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4      | 
-   |                       | and XF_NPPC8 for 1,2,4                               |
-   |                       | pixel and 8 pixel operations respectively.           |
+   | NPC                   | Number of pixels to be processed per cycle; possible |
+   |                       | options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8  |
+   |                       | pixel operations respectively.                       |
    +-----------------------+------------------------------------------------------+
    | XFCVDEPTH_IN_1        | Depth of input image                                 |
    +-----------------------+------------------------------------------------------+
@@ -8287,8 +8274,8 @@ The following table describes the template and the function parameters.
    +-----------------------+------------------------------------------------------+
    | Parameter             | Description                                          |
    +=======================+======================================================+
-   | SRC_T                 | Input pixel type. Only 8-bit, unsigned, 1 and 4      |
-   |                       | channels are supported (XF_8UC1 and XF_8UC4).        |
+   | SRC_T                 | Input pixel type. Only 8-bit, unsigned, 1 and 3      |
+   |                       | channels are supported (XF_8UC1 and XF_8UC3).        |
    +-----------------------+------------------------------------------------------+
    | ROWS                  | Maximum height of input and output image.            |
    +-----------------------+------------------------------------------------------+
@@ -8689,7 +8676,7 @@ number of clock cycles.
 .. rubric:: Parameter Descriptions
 
 
-The table below describes the template and the function parameters.
+The following table describes the template and the function parameters.
 
     +-----------------------+-------------------------------------------------------+
     | Parameter             | Description                                           |
@@ -8798,7 +8785,7 @@ The following table describes the template and the function parameters.
 . rubric:: Resource Utilization
 
 
-The following table below shows the resource utilization of the
+The following table shows the resource utilization of the
 Demosaicing function, generated using Vivado HLS 2019.1 version tool for
 the Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
@@ -9118,7 +9105,7 @@ facilitates the duplication process of the FIFOs.
 .. rubric:: Parameter Descriptions
 
 
-The table below describes the template and the function parameters.
+The following table describes the template and the function parameters.
 
     +-----------------------+-----------------------------------------------------------+
     | Paramete              | Description                                               |
@@ -9444,16 +9431,13 @@ The following table describes the template and the function parameters.
     +=======================+====================================================================+
     | BFORMAT               | Input Bayer pattern.                                               |
     +-----------------------+--------------------------------------------------------------------+
-    | SRC_T                 | Input and Output Pixel Type. (XF_8UC1, XF_16UC1) are supported     |
+    | SRC_T                 | Input and Output Pixel Type.                                       |
     +-----------------------+--------------------------------------------------------------------+
     | ROWS                  | Maximum height of input and output image (Must be multiple of NPC) |
     +-----------------------+--------------------------------------------------------------------+
     | COLS                  | Maximum width of input and output image (Must be multiple of NPC)  |
     +-----------------------+--------------------------------------------------------------------+
-    | NPC                   | Number of pixels to be processed per cycle;                        |
-    |                       | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4                    | 
-    |                       | and XF_NPPC8 for 1,2,4                                             |
-    |                       | pixel and 8 pixel operations respectively.                         |
+    | NPC                   | Number of Pixels to be processed per cycle.                        |
     +-----------------------+--------------------------------------------------------------------+
     | XFCVDEPTH_IN_1        | Depth of the input image.                                          |
     +-----------------------+--------------------------------------------------------------------+
@@ -9533,8 +9517,6 @@ The following table describes the template and the function parameters.
     | SRC_T                 | Input and Output Pixel Type.                                       |
     +-----------------------+--------------------------------------------------------------------+
     | N_ROWS                | Number of Digital overlap rows between SEF and LEF                 |
-    +-----------------------+--------------------------------------------------------------------+
-    | N_COLS                | Number of Digital overlap cols between SEF and LEF                 |
     +-----------------------+--------------------------------------------------------------------+
     | MAX_ROWS              | Maximum height of input and output image (Must be multiple of NPC) |
     +-----------------------+--------------------------------------------------------------------+
@@ -9621,17 +9603,13 @@ The following table describes the template and the function parameters.
     +===========+====================================================================+
     | PTR_WIDTH | Pixel Width of Input and Output Pointer                            |
     +-----------+--------------------------------------------------------------------+
-    | TYPE      | Input pixel type. XF_8UC1 ,XF_8UC3 are                             |
-    |           | supported                                                          |
+    | TYPE      | Input and Output Pixel type                                        |
     +-----------+--------------------------------------------------------------------+
     | ROWS      | Maximum height of input and output image (Must be multiple of NPC) |
     +-----------+--------------------------------------------------------------------+
     | COLS      | Maximum width of input and output image (Must be multiple of NPC)  |
     +-----------+--------------------------------------------------------------------+
-    | NPC       | Number of pixels to be processed per cycle;                        |
-    |           | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4                    | 
-    |           | and XF_NPPC8 for 1,2,4                                             |
-    |           | pixel and 8 pixel operations respectively.                         |
+    | NPC       | Number of Pixels to be processed per cycle.                        |
     +-----------+--------------------------------------------------------------------+
     | SrcPtr    | Input Image pointer.                                               |
     +-----------+--------------------------------------------------------------------+
@@ -9744,18 +9722,15 @@ The following table describes the template and the function parameters.
     +------------------+--------------------------------------------------------------------+
     | Parameter        | Description                                                        |
     +==================+====================================================================+
-    | SRC_T            | Input Pixel Type. XF_8UC3 is supported.                            |
+    | SRC_T            | Input Pixel Type.                                                  |
     +------------------+--------------------------------------------------------------------+
-    | DST_T            | Output Pixel Type.XF_8UC3 is supported.                            |
+    | DST_T            | Output Pixel Type.                                                 |
     +------------------+--------------------------------------------------------------------+
     | ROWS             | Maximum height of input and output image (Must be multiple of NPC) |
     +------------------+--------------------------------------------------------------------+
     | COLS             | Maximum width of input and output image (Must be multiple of NPC)  |
     +------------------+--------------------------------------------------------------------+
-    | NPC              | Number of pixels to be processed per cycle;                        |
-    |                  | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4                    | 
-    |                  | and XF_NPPC8 for 1,2,4                                             |
-    |                  | pixel and 8 pixel operations respectively.                         |
+    | NPC              | Number of Pixels to be processed per cycle.                        |
     +------------------+--------------------------------------------------------------------+
     | XFCVDEPTH_IN_1   | Depth of the input image.                                          |
     +------------------+--------------------------------------------------------------------+
@@ -9851,26 +9826,19 @@ The following table describes the template and the function parameters.
     +----------------------+--------------------------------------------------------------------+
     | Parameter            | Description                                                        |
     +======================+====================================================================+
-    | SRC_T                | Input pixel type. XF_8UC1 ,XF_8UC3 are                             |
-    |                      | supported                                                          |
+    | SRC_T                | Input Pixel Type.                                                  |
     +----------------------+--------------------------------------------------------------------+
-    | DST_T                | Input pixel type. XF_8UC1 ,XF_8UC3 are                             |
-    |                      | supported                                                          |
+    | DST_T                | Output Pixel Type.                                                 |
     +----------------------+--------------------------------------------------------------------+
     | ROWS                 | Maximum height of input and output image (Must be multiple of NPC) |
     +----------------------+--------------------------------------------------------------------+
     | COLS                 | Maximum width of input and output image (Must be multiple of NPC)  |
     +----------------------+--------------------------------------------------------------------+
-    | NPC                  | Number of pixels to be processed per cycle;                        |
-    |                      | possible options are XF_NPPC1,XF_NPPC2,XF_NPPC4                    | 
-    |                      | and XF_NPPC8 for 1,2,4                                             |
-    |                      | pixel and 8 pixel operations respectively.                         |
+    | NPC                  | Number of Pixels to be processed per cycle.                        |
     +----------------------+--------------------------------------------------------------------+
-    | NO_EXPS              | Number exposure frames to be merged in the module."2" is supported |
+    | NO_EXPS              | Number exposure frames to be merged in the module                  |
     +----------------------+--------------------------------------------------------------------+
-    | W_SIZE               | W_SIZE should be 2 power pixel width.                              |
-    +----------------------+--------------------------------------------------------------------+
-    | USE_URAM             | Enable to map storage structures to UltraRAM.                      |
+    | W_SIZE               | W_SIZE is should be 2 power pixel width.                           |
     +----------------------+--------------------------------------------------------------------+
     | XFCVDEPTH_IN_1       | Depth of the input image.                                          |
     +----------------------+--------------------------------------------------------------------+
@@ -11399,8 +11367,7 @@ The following table describes the template and the function parameters.
    | COLS           | Maximum width of input and output image (must be         |
    |                | multiple of 8, for 8-pixel operation)                    |
    +----------------+----------------------------------------------------------+
-   | NPC            | Number of pixels to be processed per cycle XF_NPPC1      |
-   |                | XF_NPPC8 are supported                                   |
+   | NPC            | Number of pixels to be processed per cycle               |
    +----------------+----------------------------------------------------------+
    | XFCVDEPTH_IN   | Depth of the input image.                                |
    +----------------+----------------------------------------------------------+
@@ -11527,8 +11494,7 @@ The following table describes the template and the function parameters.
    | COLS           | Maximum width of input and output image (must be a      |
    |                | multiple of 8, for 8-pixel operation)                   |
    +----------------+---------------------------------------------------------+
-   | NPC            | Number of pixels to be processed per cycle XF_NPPC1     |
-   |                | XF_NPPC8 are supported                                  |
+   | NPC            | Number of pixels to be processed per cycle              |
    +----------------+---------------------------------------------------------+
    | XFCVDEPTH_IN   | Depth of the input image.                               |
    +----------------+---------------------------------------------------------+
@@ -11938,7 +11904,7 @@ The following table describes the template and the function parameters.
 .. rubric:: Resource Utilization
 
 
-The table below shows the resource utilization of the kernel for
+The following table shows the resource utilization of the kernel for
 different configurations, generated using Vivado HLS 2019.1 version tool
 for the Xczu9eg-ffvb1156-1-i-es1 to process a grayscale HD (1080x1920)
 image for 512 lines.
@@ -11984,11 +11950,11 @@ Xczu9eg-ffvb1156-1-i-es1 to process a grayscale HD (1080x1920) image for
 Preprocessing for Deep Neural Networks
 ======================================
 
-The input image are typically pre-processed before being fed for inference of different deep neural networks (DNNs). The preProcess function provides various modes to perform various preprocessing operations. The preprocessing function\ :math:`\ f(x`) can be described using below equations.
+The input image are typically pre-processed before being fed for inference of different deep neural networks (DNNs). The preProcess function provides various modes to perform various preprocessing operations. The preprocessing function\ :math:`\ f(x`) can be described using the following equations.
 
 |image164|
 
-The preProcess function supports operating modes presented in the below table:
+The preProcess function supports operating modes presented in the following table:
 
     +---------+--------------------------------------------------+--------------------------------------+
     | Op Code | Operation                                        | Description                          |
@@ -13063,7 +13029,7 @@ The Kalman filter assumes the following:
 The representation |image116| means the estimate of x at time instant k
 using all the data measured till the time instant j.
 
-The Kalman filter algorithm can be summarized as shown in the below
+The Kalman filter algorithm can be summarized as shown in the following
 equations:
 
 Initialization
@@ -14448,7 +14414,7 @@ MinS
 The MinS function calculates the minimum elements between src and given
 scalar value scl and stores the result in dst.
 
-dst(x,y)=min( src(x,y) ,scl )
+dst(x,y)=minS( src(x,y) ,scl )
 
 
 .. rubric:: API Syntax
@@ -14457,7 +14423,7 @@ dst(x,y)=min( src(x,y) ,scl )
 .. code:: c
 
    template< int SRC_T , int ROWS, int COLS, int NPC=1>
-   void min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
+   void minS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _src1, unsigned char _scl[XF_CHANNELS(SRC_T,NPC)], xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & _dst)
 
 
 .. rubric:: Parameter Descriptions
@@ -14813,7 +14779,7 @@ The following table describes the template and the function parameters.
    +--------------+-------------------------------------------------------+
    | NPC          | Number of pixels to be processed in parallel. Options |
    |              | are XF_NPPC1 (for 1 pixel processing per clock),      |
-   |              | XF_NPPC8 (for 8 pixel processing per clock)            |
+   |              | XF_NPPC8 (for 8 pixel processing per clock            |
    +--------------+-------------------------------------------------------+
    | XFCVDEPTH_IN | Depth of the input image.                             |
    +--------------+-------------------------------------------------------+
@@ -16065,7 +16031,7 @@ color space and returns the HSV image as the output.
 .. rubric:: Parameter Descriptions
 
 
-The table below describes the template and the function parameters.
+The following table describes the template and the function parameters.
 
     +-----------------+-------------------------------------------------------+
     | Parameter       | Description                                           |
@@ -16261,16 +16227,15 @@ The following table describes the template and the function parameters.
    +------------------+------------------------------------------------------+
    | Parameter        | Description                                          |
    +==================+======================================================+
-   | SRC_T            | Input pixel type. 8-bit, unsigned 1 and 3 channels   |
-   |                  | are supported (XF_8UC1,XF_8UC3).                     |
+   | SRC_T            | Input pixel type. 8-bit, unsigned, 1 channel is      |
+   |                  | supported (XF_8UC1).                                 |
    +------------------+------------------------------------------------------+
    | ROWS             | Maximum height of input and output image             |
    +------------------+------------------------------------------------------+
    | COLS             | Maximum width of input and output image. Must be     |
    |                  | multiple of 8, for 8-pixel operation.                |
    +------------------+------------------------------------------------------+
-   | NPC              | Number of pixels to be processed per cycle XF_NPPC1  |
-   |                  | XF_NPPC8 are supported                               |
+   | NPC              | Number of pixels to be processed per cycle.          |
    +------------------+------------------------------------------------------+
    | XFCVDEPTH_IN_1   | Depth of the input image.                            |
    +------------------+------------------------------------------------------+
@@ -16857,9 +16822,6 @@ The following table describes the template and the function parameters.
    +------------------+------------------------------------------------------+
    | Parameter        | Description                                          |
    +==================+======================================================+
-   | POLICY_TYPE      | Conversion Policy for fixed point arithmetic.        |
-   |                  | (XF_CONVERT_POLICY_SATURATE)                         |
-   +------------------+------------------------------------------------------+
    | SRC_T            | Input Pixel Type. 8-bit, unsigned, 1 channel is      |
    |                  | supported (XF_8UC1).                                 |
    +------------------+------------------------------------------------------+
@@ -17064,16 +17026,15 @@ The following table describes the template and the function parameters.
    +---------------+------------------------------------------------------+
    | Parameter     | Description                                          |
    +===============+======================================================+
-   | SRC_T         | Input pixel type. 8-bit, unsigned 1 and 3 channels   |
-   |               | are supported (XF_8UC1,XF_8UC3).                     |
+   | SRC_T         | Input pixel type. 8-bit, unsigned, 1 channel is      |
+   |               | supported (XF_8UC1).                                 |
    +---------------+------------------------------------------------------+
    | ROWS          | Maximum height of input and output image.            |
    +---------------+------------------------------------------------------+
    | COLS          | Maximum width of input and output image (must be     |
    |               | multiple of 8).                                      |
    +---------------+------------------------------------------------------+
-   | NPC           | Number of pixels to be processed per cycle XF_NPPC1  |
-   |               | XF_NPPC8 are supported                               |
+   | NPC           | Number of pixels to be processed per cycle.          |
    +---------------+------------------------------------------------------+
    | XFCVDEPTH_IN  | Depth of the input image.                            |
    +---------------+------------------------------------------------------+
@@ -17393,10 +17354,8 @@ The following table describes the template and the function parameters.
    +--------------+-------------------------------------------------------+
    | Parameter    | Description                                           |
    +==============+=======================================================+
-   | THRESHOLD_TY | Type of thresholding. (XF_THRESHOLD_TYPE_BINARY       |
-   | PE           | ,XF_THRESHOLD_TYPE_BINARY_INV,XF_THRESHOLD_TYPE_TRUNC |
-   |              | ,XF_THRESHOLD_TYPE_TOZERO                             |
-   |              | ,XF_THRESHOLD_TYPE_TOZERO_INV)                        |
+   | THRESHOLD_TY | Type of thresholding.                                 |
+   | PE           |                                                       |
    +--------------+-------------------------------------------------------+
    | SRC_T        | Input pixel type. Only 8-bit, unsigned, 1 channel is  |
    |              | supported (XF_8UC1).                                  |
@@ -17406,8 +17365,7 @@ The following table describes the template and the function parameters.
    | COLS         | Maximum width of input and output image. Must be      |
    |              | multiple of 8, for 8-pixel operation.                 |
    +--------------+-------------------------------------------------------+
-   | NPC          | Number of pixels to be processed per cycle XF_NPPC1   |
-   |              | XF_NPPC8 are supported                                |
+   | NPC          | Number of pixels to be processed per cycle.           |
    +--------------+-------------------------------------------------------+
    | XFCVDEPTH_IN | Depth of the input image.                             |
    +--------------+-------------------------------------------------------+
@@ -17666,7 +17624,7 @@ result value even in the last bit.
 
 Input argument D must be 16-bit number, though it is declared as 32-bit.
 The output sqrt(D) is 16-bit type. If format of D is QM.N (where M+N =
-16) then format of output is Q(M/2).N
+1)  then format of output is Q(M/2).N
 
 To get a precision of 'n' bits in fractional part, you can simply left
 shift the radicand (D) by '2n' before the function call and shift the

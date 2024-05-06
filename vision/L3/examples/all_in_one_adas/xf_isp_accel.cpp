@@ -24,9 +24,10 @@ static int igain_1[3] = {0};
 
 static constexpr int MinMaxVArrSize = LTMTile<BLOCK_HEIGHT, BLOCK_WIDTH, XF_HEIGHT, XF_WIDTH, XF_NPPCX>::MinMaxVArrSize;
 static constexpr int MinMaxHArrSize = LTMTile<BLOCK_HEIGHT, BLOCK_WIDTH, XF_HEIGHT, XF_WIDTH, XF_NPPCX>::MinMaxHArrSize;
+static constexpr int BILINEAR_INTERPOLATE_TYPE_C = XF_32FC3;
 
-static XF_CTUNAME(IN_TYPE, XF_NPPCX) omin[2][MinMaxVArrSize][MinMaxHArrSize];
-static XF_CTUNAME(IN_TYPE, XF_NPPCX) omax[2][MinMaxVArrSize][MinMaxHArrSize];
+static XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omin[2][MinMaxVArrSize][MinMaxHArrSize];
+static XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omax[2][MinMaxVArrSize][MinMaxHArrSize];
 
 static ap_ufixed<16, 4> mean1 = 0;
 static ap_ufixed<16, 4> mean2 = 0;
@@ -166,6 +167,7 @@ void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_demosaic_out>& demos
     // clang-format on
 
     xf::cv::Mat<OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_ltm_in> impop(height, width);
+    uint32_t awb_config = (int)(thresh * 256); // thresh_awb int Q24_8 format change to Q16_16 format
 
     float inputMin = 0.0f;
     float inputMax = (1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX))) - 1; // 65535.0f;
@@ -177,16 +179,16 @@ void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_demosaic_out>& demos
 
     if (WB_TYPE) {
         xf::cv::AWBhistogram<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM, WB_TYPE, HIST_SIZE,
-                             XFCVDEPTH_demosaic_out, XFCVDEPTH_ltm_in>(demosaic_out, impop, hist0, thresh, inputMin,
+                             XFCVDEPTH_demosaic_out, XFCVDEPTH_ltm_in>(demosaic_out, impop, hist0, awb_config, inputMin,
                                                                        inputMax, outputMin, outputMax);
         xf::cv::AWBNormalization<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, WB_TYPE, HIST_SIZE,
-                                 XFCVDEPTH_demosaic_out, XFCVDEPTH_ltm_in>(impop, ltm_in, hist1, thresh, inputMin,
+                                 XFCVDEPTH_demosaic_out, XFCVDEPTH_ltm_in>(impop, ltm_in, hist1, awb_config, inputMin,
                                                                            inputMax, outputMin, outputMax);
     } else {
         xf::cv::AWBChannelGain<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 0, XFCVDEPTH_demosaic_out,
-                               XFCVDEPTH_ltm_in>(demosaic_out, impop, thresh, gain0);
+                               XFCVDEPTH_ltm_in>(demosaic_out, impop, awb_config, gain0);
         xf::cv::AWBGainUpdate<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 0, XFCVDEPTH_demosaic_out,
-                              XFCVDEPTH_ltm_in>(impop, ltm_in, thresh, gain1);
+                              XFCVDEPTH_ltm_in>(impop, ltm_in, awb_config, gain1);
     }
 }
 
@@ -220,10 +222,10 @@ void function_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_demosaic_out>& d
 template <int DST_T, int GTM_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_ltm_in, int XFCVDEPTH_aecin>
 void function_tm(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_ltm_in>& ltm_in,
                  xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_aecin>& aecin,
-                 XF_CTUNAME(IN_TYPE, XF_NPPCX) omin_r[MinMaxVArrSize][MinMaxHArrSize],
-                 XF_CTUNAME(IN_TYPE, XF_NPPCX) omax_r[MinMaxVArrSize][MinMaxHArrSize],
-                 XF_CTUNAME(IN_TYPE, XF_NPPCX) omin_w[MinMaxVArrSize][MinMaxHArrSize],
-                 XF_CTUNAME(IN_TYPE, XF_NPPCX) omax_w[MinMaxVArrSize][MinMaxHArrSize],
+                 XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omin_r[MinMaxVArrSize][MinMaxHArrSize],
+                 XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omax_r[MinMaxVArrSize][MinMaxHArrSize],
+                 XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omin_w[MinMaxVArrSize][MinMaxHArrSize],
+                 XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omax_w[MinMaxVArrSize][MinMaxHArrSize],
                  int blk_height,
                  int blk_width,
                  ap_ufixed<16, 4>& mean1,
@@ -232,8 +234,8 @@ void function_tm(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_ltm_in>& ltm_in,
                  ap_ufixed<16, 4>& L_max2,
                  ap_ufixed<16, 4>& L_min1,
                  ap_ufixed<16, 4>& L_min2,
-                 float c1,
-                 float c2,
+                 uint32_t c1,
+                 uint32_t c2,
                  unsigned short mode_reg,
                  unsigned short height,
                  unsigned short width) {
@@ -397,6 +399,8 @@ template <int DST_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_dst, int XFC
 void function_ccm_fifo(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_dst>& awb_out,
                        xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_ccm>& ccm_out,
                        unsigned short mode_reg,
+                       signed int ccm_matrix[3][3],
+                       signed int offsetarray[3],
                        unsigned short height,
                        unsigned short width) {
 // clang-format off
@@ -407,8 +411,8 @@ void function_ccm_fifo(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_dst>& awb_o
     ap_uint<1> mode_ccm = mode.range(CCM_EN_LSB, CCM_EN_LSB);
 
     if (mode_ccm) {
-        xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_dst,
-                                      XFCVDEPTH_ccm>(awb_out, ccm_out);
+        xf::cv::colorcorrectionmatrix<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_dst, XFCVDEPTH_ccm>(
+            awb_out, ccm_out, ccm_matrix, offsetarray);
     } else {
         fifo_copy<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_dst, XFCVDEPTH_ccm>(awb_out, ccm_out,
                                                                                                    height, width);
@@ -478,22 +482,26 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                  int gain1[3],                 /* function_awb */
                  uint16_t pawb,
                  unsigned char gamma_lut[256 * 3],
-                 XF_CTUNAME(IN_TYPE, XF_NPPCX) omin_r[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
-                 XF_CTUNAME(IN_TYPE, XF_NPPCX) omax_r[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
-                 XF_CTUNAME(IN_TYPE, XF_NPPCX) omin_w[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
-                 XF_CTUNAME(IN_TYPE, XF_NPPCX) omax_w[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
-                 int blk_height,                                                       /* LTM */
-                 int blk_width,                                                        /* LTM */
-                 ap_ufixed<16, 4>& mean1,                                              /* gtm */
-                 ap_ufixed<16, 4>& mean2,                                              /* gtm */
-                 ap_ufixed<16, 4>& L_max1,                                             /* gtm */
-                 ap_ufixed<16, 4>& L_max2,                                             /* gtm */
-                 ap_ufixed<16, 4>& L_min1,                                             /* gtm */
-                 ap_ufixed<16, 4>& L_min2,                                             /* gtm */
-                 float c1,                                                             /* gtm */
-                 float c2,                                                             /* gtm */
+                 XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omin_r[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
+                 XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omax_r[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
+                 XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omin_w[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
+                 XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omax_w[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
+                 int blk_height,                                                                           /* LTM */
+                 int blk_width,                                                                            /* LTM */
+                 ap_ufixed<16, 4>& mean1,                                                                  /* gtm */
+                 ap_ufixed<16, 4>& mean2,                                                                  /* gtm */
+                 ap_ufixed<16, 4>& L_max1,                                                                 /* gtm */
+                 ap_ufixed<16, 4>& L_max2,                                                                 /* gtm */
+                 ap_ufixed<16, 4>& L_min1,                                                                 /* gtm */
+                 ap_ufixed<16, 4>& L_min2,                                                                 /* gtm */
+                 uint32_t c1,                                                                              /* gtm */
+                 uint32_t c2,                                                                              /* gtm */
                  ap_uint<INPUT_PTR_WIDTH>* lut,
-                 int lutDim) {
+                 int lutDim,
+                 signed int ccm_config_1[3][3],
+                 signed int ccm_config_2[3],
+                 unsigned short bformat,
+                 unsigned short ggain) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
@@ -532,6 +540,8 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     float inputMax = (1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX))) - 1; // 65535.0f;
 
     float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
+    unsigned int blc_config_1 = (int)(mul_fact * 65536); // mul_fact int Q16_16 format
+    unsigned int blc_config_2 = BLACK_LEVEL;
 
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, MAX_HEIGHT, MAX_WIDTH, XF_NPPCX, XF_CV_DEPTH_imgInput>(img_inp,
                                                                                                          imgInput1);
@@ -545,7 +555,7 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
         mode_reg, height, width);
 
     xf::cv::blackLevelCorrection<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 16, 15, 1, XF_CV_DEPTH_rggb_out,
-                                 XF_CV_DEPTH_blc_out>(rggb_out, blc_out, BLACK_LEVEL, mul_fact);
+                                 XF_CV_DEPTH_blc_out>(rggb_out, blc_out, blc_config_2, blc_config_1);
 
     xf::cv::badpixelcorrection<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 0, 0, XF_CV_DEPTH_blc_out, XF_CV_DEPTH_bpc_out>(
         blc_out, bpc_out);
@@ -553,17 +563,17 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     xf::cv::Lscdistancebased<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_bpc_out, XF_CV_DEPTH_lsc_out>(
         bpc_out, LscOut);
 
-    xf::cv::gaincontrol<XF_BAYER_PATTERN, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_lsc_out,
-                        XF_CV_DEPTH_gain_out>(LscOut, gain_out, rgain, bgain);
+    xf::cv::gaincontrol<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_lsc_out, XF_CV_DEPTH_gain_out>(
+        LscOut, gain_out, rgain, bgain, ggain, bformat);
 
-    xf::cv::demosaicing<XF_BAYER_PATTERN, IN_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 0, XF_CV_DEPTH_gain_out,
-                        XF_CV_DEPTH_demosaic_out>(gain_out, demosaic_out);
+    xf::cv::demosaicing<IN_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 0, XF_CV_DEPTH_gain_out,
+                        XF_CV_DEPTH_demosaic_out>(gain_out, demosaic_out, bformat);
 
     function_awb<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_demosaic_out, XF_CV_DEPTH_awb_out>(
         demosaic_out, awb_out, hist0, hist1, gain0, gain1, height, width, mode_reg, thresh);
 
     function_ccm_fifo<OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_awb_out, XF_CV_DEPTH_ccm>(
-        awb_out, ccm_out, mode_reg, height, width);
+        awb_out, ccm_out, mode_reg, ccm_config_1, ccm_config_2, height, width);
 
     if (OUT_TYPE == XF_8UC3) {
         fifo_copy<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_ccm, XF_CV_DEPTH_aecin>(ccm_out, aecin,
@@ -605,14 +615,17 @@ void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,           /* Array2xfM
                        char sub_wgts[4],                            /* rgbir2bayer */
                        int blk_height,                              /* LTM */
                        int blk_width,                               /* LTM */
-                       float c1,                                    /* gtm */
-                       float c2,                                    /* gtm */
+                       uint32_t c1,                                 /* gtm */
+                       uint32_t c2,                                 /* gtm */
                        unsigned char gamma_lut[256 * 3],            /* gammacorrection */
                        unsigned short mode_reg,
                        ap_uint<INPUT_PTR_WIDTH>* lut, /* lut3d */
                        int lutDim,                    /* lut3d */
-                       uint16_t pawb                  /* used to calculate thresh which is used in function_awb */
-                       ) {
+                       uint16_t pawb,                 /* used to calculate thresh which is used in function_awb */
+                       signed int ccm_config_1[3][3],
+                       signed int ccm_config_2[3],
+                       unsigned short bformat,
+                       unsigned short ggain) {
 // clang-format off
 
 #pragma HLS INTERFACE m_axi port=img_inp      offset=slave bundle=gmem1 
@@ -627,6 +640,9 @@ void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,           /* Array2xfM
 #pragma HLS INTERFACE m_axi port=gamma_lut    offset=slave bundle=gmem6
 #pragma HLS INTERFACE m_axi port=wr_hls       offset=slave bundle=gmem7
 #pragma HLS INTERFACE m_axi port=lut          offset=slave bundle=gmem8
+
+#pragma HLS INTERFACE m_axi port=ccm_config_1     bundle=gmem9 offset=slave
+#pragma HLS INTERFACE m_axi port=ccm_config_2     bundle=gmem10 offset=slave
 
 #pragma HLS ARRAY_PARTITION variable=hist0_awb    complete dim=1
 #pragma HLS ARRAY_PARTITION variable=hist1_awb    complete dim=1
@@ -662,14 +678,14 @@ WR_HLS_INIT_LOOP:
         ISPpipeline(img_inp, img_out, img_out_ir, mode_reg, height, width, wr_hls_tmp, R_IR_C1_wgts, R_IR_C2_wgts,
                     B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, rgain, bgain, hist0_awb, hist1_awb, igain_0,
                     igain_1, pawb, gamma_lut, omin[0], omax[0], omin[1], omax[1], blk_height, blk_width, mean2, mean1,
-                    L_max2, L_max1, L_min2, L_min1, c1, c2, lut, lutDim);
+                    L_max2, L_max1, L_min2, L_min1, c1, c2, lut, lutDim, ccm_config_1, ccm_config_2, bformat, ggain);
         flag = 1;
 
     } else {
         ISPpipeline(img_inp, img_out, img_out_ir, mode_reg, height, width, wr_hls_tmp, R_IR_C1_wgts, R_IR_C2_wgts,
                     B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, rgain, bgain, hist1_awb, hist0_awb, igain_1,
                     igain_0, pawb, gamma_lut, omin[1], omax[1], omin[0], omax[0], blk_height, blk_width, mean1, mean2,
-                    L_max1, L_max2, L_min1, L_min2, c1, c2, lut, lutDim);
+                    L_max1, L_max2, L_min1, L_min2, c1, c2, lut, lutDim, ccm_config_1, ccm_config_2, bformat, ggain);
         flag = 0;
     }
 }

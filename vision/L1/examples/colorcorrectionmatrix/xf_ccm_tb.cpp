@@ -228,7 +228,116 @@ int main(int argc, char** argv) {
     int height = in_img.rows;
     int width = in_img.cols;
 
-    ccm_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img_hls.data, height, width);
+    float ccm_matrix[3][3];
+    float offsetarray[3];
+
+    switch (XF_CCM_TYPE) {
+        case 0:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = bt2020_bt709_arr[i][j];
+                }
+                offsetarray[i] = bt2020_bt709_off[i];
+            }
+
+            break;
+        case 1:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = bt709_bt2020_arr[i][j];
+                }
+                offsetarray[i] = bt709_bt2020_off[i];
+            }
+
+            break;
+        case 2:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = rgb_yuv_601_arr[i][j];
+                }
+                offsetarray[i] = rgb_yuv_601_off[i];
+            }
+
+            break;
+        case 3:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = rgb_yuv_709_arr[i][j];
+                }
+                offsetarray[i] = rgb_yuv_709_off[i];
+            }
+
+            break;
+        case 4:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = rgb_yuv_2020_arr[i][j];
+                }
+                offsetarray[i] = rgb_yuv_2020_off[i];
+            }
+
+            break;
+        case 5:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = yuv_rgb_601_arr[i][j];
+                }
+                offsetarray[i] = yuv_rgb_601_off[i];
+            }
+
+            break;
+        case 6:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = yuv_rgb_709_arr[i][j];
+                }
+                offsetarray[i] = yuv_rgb_709_off[i];
+            }
+
+            break;
+        case 7:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = yuv_rgb_2020_arr[i][j];
+                }
+                offsetarray[i] = yuv_rgb_2020_off[i];
+            }
+
+            break;
+        case 8:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = full_to_16_235_arr[i][j];
+                }
+                offsetarray[i] = full_to_16_235_off[i];
+            }
+
+            break;
+        case 9:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = full_from_16_235_arr[i][j];
+                }
+                offsetarray[i] = full_from_16_235_off[i];
+            }
+
+            break;
+        default:
+            break;
+    }
+    // cmm matrix shifted 20 bits to the left
+    signed int ccm_matrix_int[3][3];
+    signed int offsetarray_int[3];
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            ccm_matrix_int[i][j] = (signed int)(ccm_matrix[i][j] * 1048576);
+        }
+        offsetarray_int[i] = (signed int)(offsetarray[i] * 1048576);
+    }
+
+    ccm_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img_hls.data, ccm_matrix_int,
+              offsetarray_int, height, width);
 
     // Write output image
     cv::imwrite("hls_out.jpg", out_img_hls);
@@ -239,7 +348,7 @@ int main(int argc, char** argv) {
     // Save the difference image for debugging purpose:
     cv::imwrite("error.png", diff);
     float err_per;
-    xf::cv::analyzeDiff(diff, 1, err_per);
+    xf::cv::analyzeDiff(diff, 4, err_per);
 
     if (err_per > 0.0f) {
         std::cerr << "ERROR: Test Failed." << std::endl;

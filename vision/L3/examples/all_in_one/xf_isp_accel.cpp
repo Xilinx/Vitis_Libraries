@@ -28,9 +28,9 @@ static int igain_1[3] = {0};
 
 static constexpr int MinMaxVArrSize = LTMTile<BLOCK_HEIGHT, BLOCK_WIDTH, XF_HEIGHT, XF_WIDTH, XF_NPPCX>::MinMaxVArrSize;
 static constexpr int MinMaxHArrSize = LTMTile<BLOCK_HEIGHT, BLOCK_WIDTH, XF_HEIGHT, XF_WIDTH, XF_NPPCX>::MinMaxHArrSize;
-
-static XF_CTUNAME(IN_TYPE, XF_NPPCX) omin[2][MinMaxVArrSize][MinMaxHArrSize];
-static XF_CTUNAME(IN_TYPE, XF_NPPCX) omax[2][MinMaxVArrSize][MinMaxHArrSize];
+static constexpr int BILINEAR_INTERPOLATE_TYPE_C = XF_32FC3;
+static XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omin[2][MinMaxVArrSize][MinMaxHArrSize];
+static XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omax[2][MinMaxVArrSize][MinMaxHArrSize];
 
 static ap_ufixed<16, 4> mean1 = 0;
 static ap_ufixed<16, 4> mean2 = 0;
@@ -119,6 +119,7 @@ void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_demosaic_out>& demos
     // clang-format on
 
     xf::cv::Mat<OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_ltm_in> impop(height, width);
+    uint32_t awb_config = (int)(thresh * 256); // thresh_awb int Q24_8 format change to Q16_16 format
 
     float inputMin = 0.0f;
     float inputMax = (1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX))) - 1; // 65535.0f;
@@ -130,16 +131,16 @@ void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_demosaic_out>& demos
 
     if (WB_TYPE) {
         xf::cv::AWBhistogram<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM, WB_TYPE, HIST_SIZE,
-                             XFCVDEPTH_demosaic_out, XFCVDEPTH_ltm_in>(demosaic_out, impop, hist0, thresh, inputMin,
+                             XFCVDEPTH_demosaic_out, XFCVDEPTH_ltm_in>(demosaic_out, impop, hist0, awb_config, inputMin,
                                                                        inputMax, outputMin, outputMax);
         xf::cv::AWBNormalization<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, WB_TYPE, HIST_SIZE,
-                                 XFCVDEPTH_demosaic_out, XFCVDEPTH_ltm_in>(impop, ltm_in, hist1, thresh, inputMin,
+                                 XFCVDEPTH_demosaic_out, XFCVDEPTH_ltm_in>(impop, ltm_in, hist1, awb_config, inputMin,
                                                                            inputMax, outputMin, outputMax);
     } else {
         xf::cv::AWBChannelGain<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 0, XFCVDEPTH_demosaic_out,
-                               XFCVDEPTH_ltm_in>(demosaic_out, impop, thresh, gain0);
+                               XFCVDEPTH_ltm_in>(demosaic_out, impop, awb_config, gain0);
         xf::cv::AWBGainUpdate<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 0, XFCVDEPTH_demosaic_out,
-                              XFCVDEPTH_ltm_in>(impop, ltm_in, thresh, gain1);
+                              XFCVDEPTH_ltm_in>(impop, ltm_in, awb_config, gain1);
     }
 }
 
@@ -177,6 +178,7 @@ void function_aec(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_rggb_out_aec>& r
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
+    uint32_t aec_config = (int)(aec_pawb * 256); // thresh_aec int Q24_8 format change to Q16_16 format
 
     float aec_inputMin = 0.0f;
     float aec_inputMax = (1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX))) - 1; // 65535.0f;
@@ -189,7 +191,7 @@ void function_aec(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_rggb_out_aec>& r
     if (USE_AEC) {
         xf::cv::autoexposurecorrection_sin<IN_TYPE, IN_TYPE, AEC_SIN_CHANNEL_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX,
                                            XF_USE_URAM, XFCVDEPTH_rggb_out_aec, XFCVDEPTH_aec_out, AEC_HIST_SIZE>(
-            rggb_out, aec_out, aec_hist0, aec_hist1, aec_pawb, aec_inputMin, aec_inputMax, aec_outputMin,
+            rggb_out, aec_out, aec_hist0, aec_hist1, aec_config, aec_inputMin, aec_inputMax, aec_outputMin,
             aec_outputMax);
 
     } else {
@@ -201,10 +203,10 @@ void function_aec(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_rggb_out_aec>& r
 template <int DST_T, int GTM_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_ltm_in, int XFCVDEPTH_aecin>
 void function_tm(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_ltm_in>& ltm_in,
                  xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_aecin>& aecin,
-                 XF_CTUNAME(IN_TYPE, XF_NPPCX) omin_r[MinMaxVArrSize][MinMaxHArrSize],
-                 XF_CTUNAME(IN_TYPE, XF_NPPCX) omax_r[MinMaxVArrSize][MinMaxHArrSize],
-                 XF_CTUNAME(IN_TYPE, XF_NPPCX) omin_w[MinMaxVArrSize][MinMaxHArrSize],
-                 XF_CTUNAME(IN_TYPE, XF_NPPCX) omax_w[MinMaxVArrSize][MinMaxHArrSize],
+                 XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omin_r[MinMaxVArrSize][MinMaxHArrSize],
+                 XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omax_r[MinMaxVArrSize][MinMaxHArrSize],
+                 XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omin_w[MinMaxVArrSize][MinMaxHArrSize],
+                 XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omax_w[MinMaxVArrSize][MinMaxHArrSize],
                  int blk_height,
                  int blk_width,
                  ap_ufixed<16, 4>& mean1,
@@ -213,8 +215,8 @@ void function_tm(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_ltm_in>& ltm_in,
                  ap_ufixed<16, 4>& L_max2,
                  ap_ufixed<16, 4>& L_min1,
                  ap_ufixed<16, 4>& L_min2,
-                 float c1,
-                 float c2,
+                 unsigned int c1,
+                 unsigned int c2,
                  unsigned short height,
                  unsigned short width) {
 // clang-format off
@@ -312,7 +314,7 @@ void function_rgbir_or_fifo(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_hdr_ou
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_bpc_in, int XFCVDEPTH_bpc_out, int N>
 void function_degamma(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_bpc_in>& bpc_out,
                       xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_bpc_out>& dgamma_out,
-                      ap_ufixed<32, 18> params[3][N][3],
+                      uint32_t params[3][N][3],
                       unsigned short bayerp,
                       unsigned short height,
                       unsigned short width) {
@@ -382,6 +384,8 @@ void function_3dlut_fifo(xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_dst>& _ds
 template <int DST_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_dst, int XFCVDEPTH_ccm>
 void function_ccm_fifo(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_dst>& awb_out,
                        xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_ccm>& ccm_out,
+                       signed int ccm_matrix[3][3],
+                       signed int offsetarray[3],
                        unsigned short height,
                        unsigned short width) {
 // clang-format off
@@ -389,8 +393,8 @@ void function_ccm_fifo(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_dst>& awb_o
     // clang-format on
 
     if (USE_CCM) {
-        xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_dst,
-                                      XFCVDEPTH_ccm>(awb_out, ccm_out);
+        xf::cv::colorcorrectionmatrix<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_dst, XFCVDEPTH_ccm>(
+            awb_out, ccm_out, ccm_matrix, offsetarray);
     } else {
         fifo_copy<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_dst, XFCVDEPTH_ccm>(awb_out, ccm_out,
                                                                                                    height, width);
@@ -432,48 +436,51 @@ void function_csc_or_mat_array(xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_csc
     }
 }
 
-void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,     /* Array2xfMat */
-                 ap_uint<OUTPUT_PTR_WIDTH>* img_out,    /* xfMat2Array */
-                 ap_uint<OUTPUT_PTR_WIDTH>* img_out_ir, /* xfMat2Array */
-                 unsigned short height,                 /* Height of the image */
-                 unsigned short width,                  /* Width of the image */
-                 short* wr_hls,                         /* HDR extract merge */
-                 int params_decompand[3][4][3],         /* hdr_decompand */
-                 char R_IR_C1_wgts[25],                 /* rgbir */
-                 char R_IR_C2_wgts[25],                 /* rgbir */
-                 char B_at_R_wgts[25],                  /* rgbir */
-                 char IR_at_R_wgts[9],                  /* rgbir */
-                 char IR_at_B_wgts[9],                  /* rgbir */
-                 char sub_wgts[4],                      /* rgbir */
-                 uint32_t aec_hist0[AEC_HIST_SIZE],     /* function_aec */
-                 uint32_t aec_hist1[AEC_HIST_SIZE],     /* function_aec */
-                 uint16_t pawb,                         /*Used to calculate thresh which is used in function_awb */
-                 unsigned short bayerp,                 /* hdr_decompand, degamma*/
-                 ap_ufixed<32, 18> params_degamma[3][DEGAMMA_KP][3],                   /* degamma */
-                 uint16_t rgain,                                                       /* gaincontrol */
-                 uint16_t bgain,                                                       /* gaincontrol */
-                 uint32_t hist0[3][HIST_SIZE],                                         /* function_awb */
-                 uint32_t hist1[3][HIST_SIZE],                                         /* function_awb */
-                 int gain0[3],                                                         /* function_awb */
-                 int gain1[3],                                                         /* function_awb */
-                 XF_CTUNAME(IN_TYPE, XF_NPPCX) omin_r[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
-                 XF_CTUNAME(IN_TYPE, XF_NPPCX) omax_r[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
-                 XF_CTUNAME(IN_TYPE, XF_NPPCX) omin_w[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
-                 XF_CTUNAME(IN_TYPE, XF_NPPCX) omax_w[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
-                 int blk_height,                                                       /* LTM */
-                 int blk_width,                                                        /* LTM */
-                 ap_ufixed<16, 4>& mean1,                                              /* gtm */
-                 ap_ufixed<16, 4>& mean2,                                              /* gtm */
-                 ap_ufixed<16, 4>& L_max1,                                             /* gtm */
-                 ap_ufixed<16, 4>& L_max2,                                             /* gtm */
-                 ap_ufixed<16, 4>& L_min1,                                             /* gtm */
-                 ap_ufixed<16, 4>& L_min2,                                             /* gtm */
-                 float c1,                                                             /* gtm */
-                 float c2,                                                             /* gtm */
-                 unsigned char gamma_lut[256 * 3],                                     /* gamma correction */
-                 ap_uint<LUT_PTR_WIDTH>* lut,                                          /* 3dlut */
-                 int lutDim) {                                                         /* 3dlut */
-// clang-format off
+void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,         /* Array2xfMat */
+                 ap_uint<OUTPUT_PTR_WIDTH>* img_out,        /* xfMat2Array */
+                 ap_uint<OUTPUT_PTR_WIDTH>* img_out_ir,     /* xfMat2Array */
+                 unsigned short height,                     /* Height of the image */
+                 unsigned short width,                      /* Width of the image */
+                 short* wr_hls,                             /* HDR extract merge */
+                 int params_decompand[3][4][3],             /* hdr_decompand */
+                 char R_IR_C1_wgts[25],                     /* rgbir */
+                 char R_IR_C2_wgts[25],                     /* rgbir */
+                 char B_at_R_wgts[25],                      /* rgbir */
+                 char IR_at_R_wgts[9],                      /* rgbir */
+                 char IR_at_B_wgts[9],                      /* rgbir */
+                 char sub_wgts[4],                          /* rgbir */
+                 uint32_t aec_hist0[AEC_HIST_SIZE],         /* function_aec */
+                 uint32_t aec_hist1[AEC_HIST_SIZE],         /* function_aec */
+                 uint16_t pawb,                             /*Used to calculate thresh which is used in function_awb */
+                 unsigned short bayerp,                     /* hdr_decompand, degamma*/
+                 uint32_t params_degamma[3][DEGAMMA_KP][3], /* degamma */
+                 uint16_t rgain,                            /* gaincontrol */
+                 uint16_t bgain,                            /* gaincontrol */
+                 uint32_t hist0[3][HIST_SIZE],              /* function_awb */
+                 uint32_t hist1[3][HIST_SIZE],              /* function_awb */
+                 int gain0[3],                              /* function_awb */
+                 int gain1[3],                              /* function_awb */
+                 XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omin_r[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
+                 XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omax_r[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
+                 XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omin_w[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
+                 XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, XF_NPPCX) omax_w[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
+                 int blk_height,                                                                           /* LTM */
+                 int blk_width,                                                                            /* LTM */
+                 ap_ufixed<16, 4>& mean1,                                                                  /* gtm */
+                 ap_ufixed<16, 4>& mean2,                                                                  /* gtm */
+                 ap_ufixed<16, 4>& L_max1,                                                                 /* gtm */
+                 ap_ufixed<16, 4>& L_max2,                                                                 /* gtm */
+                 ap_ufixed<16, 4>& L_min1,                                                                 /* gtm */
+                 ap_ufixed<16, 4>& L_min2,                                                                 /* gtm */
+                 unsigned int c1,                                                                          /* gtm */
+                 unsigned int c2,                                                                          /* gtm */
+                 unsigned char gamma_lut[256 * 3], /* gamma correction */
+                 ap_uint<LUT_PTR_WIDTH>* lut,      /* 3dlut */
+                 int lutDim,
+                 signed int ccm_config_1[3][3],
+                 signed int ccm_config_2[3],
+                 unsigned short ggain) { /* 3dlut */
+                                         // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
 
@@ -510,11 +517,13 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,     /* Array2xfMat */
     // clang-format on
 
     float thresh_aec = (float)pawb / 256;
-    float thresh = 0.9;
+    float thresh_awb = 0.9;
 
     float inputMax = (1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX))) - 1; // 65535.0f;
 
     float mul_fact = (float)(inputMax / (inputMax - BLACK_LEVEL));
+    unsigned int blc_config_1 = (int)(mul_fact * 65536); // mul_fact int Q16_16 format
+    unsigned int blc_config_2 = BLACK_LEVEL;
     if (USE_HDR) {
         if (USE_HDR_FUSION) {
             xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, MAX_HEIGHT, MAX_WIDTH, XF_NPPCX, XF_CV_DEPTH_imgInput>(
@@ -541,7 +550,7 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,     /* Array2xfMat */
         rggb_out, aec_out, height, width, thresh_aec, aec_hist0, aec_hist1);
 
     xf::cv::blackLevelCorrection<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 16, 15, 1, XF_CV_DEPTH_aec_out,
-                                 XF_CV_DEPTH_blc_out>(aec_out, blc_out, BLACK_LEVEL, mul_fact);
+                                 XF_CV_DEPTH_blc_out>(aec_out, blc_out, blc_config_2, blc_config_1);
 
     xf::cv::badpixelcorrection<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 0, XF_USE_URAM, XF_CV_DEPTH_blc_out,
                                XF_CV_DEPTH_bpc_out>(blc_out, bpc_out);
@@ -552,17 +561,17 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,     /* Array2xfMat */
     xf::cv::Lscdistancebased<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_dgamma_out,
                              XF_CV_DEPTH_lsc_out>(dgamma_out, LscOut);
 
-    xf::cv::gaincontrol<XF_BAYER_PATTERN, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_lsc_out,
-                        XF_CV_DEPTH_gain_out>(LscOut, gain_out, rgain, bgain);
+    xf::cv::gaincontrol<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_lsc_out, XF_CV_DEPTH_gain_out>(
+        LscOut, gain_out, rgain, bgain, ggain, bayerp);
 
-    xf::cv::demosaicing<XF_BAYER_PATTERN, IN_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM,
-                        XF_CV_DEPTH_gain_out, XF_CV_DEPTH_demosaic_out>(gain_out, demosaic_out);
+    xf::cv::demosaicing<IN_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM, XF_CV_DEPTH_gain_out,
+                        XF_CV_DEPTH_demosaic_out>(gain_out, demosaic_out, bayerp);
 
     function_awb<OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_demosaic_out, XF_CV_DEPTH_awb_out>(
-        demosaic_out, awb_out, hist0, hist1, gain0, gain1, height, width, thresh);
+        demosaic_out, awb_out, hist0, hist1, gain0, gain1, height, width, thresh_awb);
 
-    function_ccm_fifo<OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_awb_out, XF_CV_DEPTH_ccm>(awb_out, ccm_out,
-                                                                                                     height, width);
+    function_ccm_fifo<OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_awb_out, XF_CV_DEPTH_ccm>(
+        awb_out, ccm_out, ccm_config_1, ccm_config_2, height, width);
 
     if (OUT_TYPE == XF_8UC3) {
         fifo_copy<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_ccm, XF_CV_DEPTH_aecin>(ccm_out, aecin,
@@ -604,17 +613,20 @@ void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,           /* Array2xfM
                        char sub_wgts[4],                            /* rgbir2bayer */
                        uint16_t pawb,         /* used to calculate thresh which is used in function_awb */
                        unsigned short bayerp, /* hdr_decompand, degamma */
-                       ap_ufixed<32, 18> params_degamma[3][DEGAMMA_KP][3], /*degamma*/
-                       uint16_t rgain,                                     /* gaincontrol */
-                       uint16_t bgain,                                     /* gaincontrol */
-                       int blk_height,                                     /* LTM */
-                       int blk_width,                                      /* LTM */
-                       float c1,                                           /* gtm */
-                       float c2,                                           /* gtm */
-                       unsigned char gamma_lut[256 * 3],                   /* gammacorrection */
-                       ap_uint<LUT_PTR_WIDTH>* lut,                        /* lut3d */
-                       int lutDim) {                                       /* lut3d */
-                                                                           // clang-format off
+                       uint32_t params_degamma[3][DEGAMMA_KP][3], /*degamma*/
+                       uint16_t rgain,                            /* gaincontrol */
+                       uint16_t bgain,                            /* gaincontrol */
+                       int blk_height,                            /* LTM */
+                       int blk_width,                             /* LTM */
+                       uint32_t c1,                               /* gtm */
+                       uint32_t c2,                               /* gtm */
+                       unsigned char gamma_lut[256 * 3],          /* gammacorrection */
+                       ap_uint<LUT_PTR_WIDTH>* lut,               /* lut3d */
+                       int lutDim,
+                       signed int ccm_config_1[3][3],
+                       signed int ccm_config_2[3],
+                       unsigned short ggain) { /* lut3d */
+                                               // clang-format off
 
 #pragma HLS INTERFACE m_axi port=img_inp          offset=slave bundle=gmem1 
 #pragma HLS INTERFACE m_axi port=img_out          offset=slave bundle=gmem2
@@ -630,6 +642,8 @@ void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,           /* Array2xfM
 #pragma HLS INTERFACE m_axi port=params_degamma   offset=slave bundle=gmem12
 #pragma HLS INTERFACE m_axi port=gamma_lut        offset=slave bundle=gmem13
 #pragma HLS INTERFACE m_axi port=lut              offset=slave bundle=gmem14
+#pragma HLS INTERFACE m_axi port=ccm_config_1     bundle=gmem15 offset=slave
+#pragma HLS INTERFACE m_axi port=ccm_config_2     bundle=gmem16 offset=slave
 
 #pragma HLS ARRAY_PARTITION variable=hist0_awb    complete dim=1
 #pragma HLS ARRAY_PARTITION variable=hist1_awb    complete dim=1
@@ -666,7 +680,7 @@ WR_HLS_INIT_LOOP:
                     R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, hist0_aec, hist1_aec, pawb, bayerp,
                     params_degamma, rgain, bgain, hist0_awb, hist1_awb, igain_0, igain_1, omin[0], omax[0], omin[1],
                     omax[1], blk_height, blk_width, mean2, mean1, L_max2, L_max1, L_min2, L_min1, c1, c2, gamma_lut,
-                    lut, lutDim);
+                    lut, lutDim, ccm_config_1, ccm_config_2, ggain);
 
         flag = 1;
 
@@ -675,7 +689,7 @@ WR_HLS_INIT_LOOP:
                     R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, hist1_aec, hist0_aec, pawb, bayerp,
                     params_degamma, rgain, bgain, hist1_awb, hist0_awb, igain_1, igain_0, omin[1], omax[1], omin[0],
                     omax[0], blk_height, blk_width, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2, gamma_lut,
-                    lut, lutDim);
+                    lut, lutDim, ccm_config_1, ccm_config_2, ggain);
 
         flag = 0;
     }

@@ -1,3 +1,7 @@
+.. 
+   Copyright 2023 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 Getting Started with Vitis Vision Libraries
 ############################################
@@ -10,18 +14,18 @@ OpenCV equivalent.
 Get Vitis Libraries
 ====================
 
-First we need to clone the Vitis Libraries into local path.
+First, clone the Vitis Libraries into local path.
 
 The Vitis Library repo is located at this link:
-https://github.com/Xilinx/Vitis_Libraries. Assuming you are using $/home/project as working directory, then use following command to clone the Vitis Library repository into the working directory:
+https://github.com/Xilinx/Vitis_Libraries. Assuming you are using ``$/home/project`` as working directory, use following command to clone the Vitis Library repository into the working directory:
 
 .. code:: c
 
 	cd /home/project
 	git clone https://github.com/Xilinx/Vitis_Libraries.git
 
-This will take a few seconds to minutes for downloading depending on network.
-After it is completed, you may browse into the sub folders to get familiar with the file structure.
+This might take a few minutes to download, depending on network speed.
+After it is downloaded, browse into the sub folders to get familiar with the file structure.
 
 Vitis_Libraries/
 
@@ -60,7 +64,7 @@ Vitis_Libraries/
 └── vision/
 
 
-There are many different categories of libraries under the top-level folder. In this lab, we are going to use the **vision** library. So, let’s enter the sub-directory *vision*, and you can find following directory structure.
+There are many different categories of libraries under the top-level folder. In this lab, you will use the **vision** library. So, enter the sub-directory **vision**, and you will find following directory structure.
 
 
 vision/
@@ -131,11 +135,11 @@ vision/
 
 
 
-This library is written in C++ and it contains three levels of abstractions.
+This library is written in C++ and it contains three levels of abstraction:
 
-**L1**: Examples that evaluate the Vitis Vision kernels, and demonstrate the kernels' use model in HLS flow
+**L1**: Examples that evaluate the Vitis Vision kernels and demonstrate the kernels' use model in HLS flow.
 
-**L2**: Examples that evaluate the Vitis Vision kernels and demonstrate the kernels' use model in Vitis flow
+**L2**: Examples that evaluate the Vitis Vision kernels and demonstrate the kernels' use model in Vitis flow.
 
 **L3**: Applications formed by stitching a pipeline of Vitis Vision functions.
 
@@ -143,9 +147,9 @@ In the first section, this tutorial focuses on how to leverage the Vitis Vision 
 
 L1 functions are targeted for Vitis HLS flow, where C-Simulation, Synthesis, Co-Simulation and RTL implementation can be performed. 
 
-OpenCV-4.4.0 x86 version libs need to be installed before hand. Please refer this `page <https://support.xilinx.com/s/article/Vitis-2021-1-Libraries-Compiling-and-Installing-OpenCV?language=en_US>`__ for details on installation.
+OpenCV-4.4.0 x86 version libs need to be installed beforehand. Refer to this `page <https://support.xilinx.com/s/article/Vitis-Libraries-Compiling-and-Installing-OpenCV?language=en_US>`__ for details on installation.
 
-This section contains instructions from cloning the library, compile and simulate the top-level design.
+This section contains instructions for cloning the library, compiling, and simulating the top-level design.
 
 Before You Begin
 -----------------
@@ -153,23 +157,23 @@ Before You Begin
 Prerequisites
 ~~~~~~~~~~~~~~~
 #.  Valid installation of `Vitis™ 2022.2 <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-the-Vitis-Software-Platform>`__ or later version and the corresponding licenses.
-#.  Xilinx® Runtime `XRT <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Xilinx-Runtime-and-Platforms>`__ must be installed. XRT provides software interface to Xilinx FPGAs.
-#.  Install `OpenCV-4.4.0 <https://github.com/opencv/opencv/tree/4.4.0>`__ x86 libraries(with compatible libjpeg.so). x86 libs have to be used for
+#.  Xilinx Runtime `XRT <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Xilinx-Runtime-and-Platforms>`__ must be installed. XRT provides the software interface to AMD FPGAs.
+#.  Install `OpenCV-4.4.0 <https://github.com/opencv/opencv/tree/4.4.0>`__ x86 libraries (with compatible ``libjpeg.so``). x86 libs have to be used for:
 
-		a) L1 flow irrespective of target FPGA device being PCIe or embedded.
-		b) L2/L3 flow when the target device is PCIe based.
-		c) L2/L3 flow when performing software emulation for an embedded platform.
+		a) L1 flows, irrespective of the target FPGA device being PCIe or embedded.
+		b) L2/L3 flows when the target device is PCIe-based.
+		c) L2/L3 flows when performing software emulation for an embedded platform.
 		
-	For L2/L3 flow targeting embedded platforms (for hardware emulationa and hardware build), aarch32/aarch64 version OpenCV shipped within their *sysroot* should be used.	
-#. libOpenCL.so must be `installed <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/OpenCL-Installable-Client-Driver-Loader>`_ if not present.
+	For L2/L3 flows targeting embedded platforms (for hardware emulations and hardware build), the aarch32/aarch64 version of OpenCV shipped with their *sysroot* should be used.	
+#. libOpenCL.so must be `installed <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/OpenCL-Installable-Client-Driver-Loader>`_ if not already present.
 #. `Install the card <https://www.xilinx.com/support/documentation/boards_and_kits/accelerator-cards/1_9/ug1301-getting-started-guide-alveo-accelerator-cards.pdf>`_ for which the platform is supported in Vitis 2022.2 or later versions.
 #. If targeting an embedded platform, `install <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Embedded-Platforms?tocId=hfE7LFeS8mU4dexvgPL31Q>`_ it and set up the `evaluation board <https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/444006775/Zynq+UltraScale+MPSoC>`_.
 
-Setup Environment
-~~~~~~~~~~~~~~~~~~
-Before playing with the libraries, you need to set up Vitis environment first. For how to set up Vitis environment, please refer to https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Setting-Up-the-Vitis-Environment.
+Set up the Environment
+~~~~~~~~~~~~~~~~~~~~~~~~
+Before playing with the libraries, you need to set up Vitis environment. For instructions on how to set up the Vitis environment, refer to https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Setting-Up-the-Vitis-Environment.
 
-Below are the example scripts to do environment settings for L1 functions:
+Below are the example scripts to configure environment settings for L1 functions:
 
 .. code:: c
 
@@ -187,17 +191,17 @@ Running the Tutorial
 Create and run a Vitis HLS project
 -----------------------------------
 
-In this step, we are going to create an HLS project by using the files provided in Vitis Library at this link: https://github.com/Xilinx/Vitis_Libraries/tree/main/vision/L1/examples/customconv. 
-The source files and script file are all located under this folder. Here we assume you have cloned the Vitis Libraries into */home/project/Vitis_Libraries* directory.
+In this step, you will create an HLS project by using the files provided in Vitis Library at this link: https://github.com/Xilinx/Vitis_Libraries/tree/main/vision/L1/examples/customconv. 
+The source files and script file are all located in this folder. It is assumed that you have cloned the Vitis Libraries into the ``/home/project/Vitis_Libraries`` directory.
 
-1. Go into the */home/project/Vitis_libraries/vision/L1/examples/customconv* folder and run below command to create the HLS project.
+1. Navigate to the ``/home/project/Vitis_libraries/vision/L1/examples/customconv`` folder and run the following command to create the HLS project.
 
 .. code:: c
 
 	make run CSIM=1 CSYNTH=1 COSIM=1
 
-By executing the command, it will run through project creation, C simulation, C synthesis, and Co-simulation flow. You can modify the parameter to skip certain steps. After 
-the execution, console window will print out the verification results and show ***PASS*** at the end of simulation.
+Executing this command will run through the project creation, C simulation, C synthesis, and Co-simulation flows. You can modify the parameter to skip certain steps. After 
+the execution, the console window will print out the verification results and show ***PASS*** at the end of simulation.
 
 .. code:: c
 
@@ -215,33 +219,33 @@ Input image:
 
 |in_img|
 
-OpenCV reference image:
+OpenCV Reference Image:
 
 |ref_img|
 
-HLS Output image:
+HLS Output Image:
 
 |out_img|
 
-Difference image:
+Difference Image:
 
 |diff_img|
 
-2. Now we will open the project in Vitis HLS GUI. Enter the following  */home/project/Vitis_libraries/vision/L1/examples/customconv* directory and run the below command:
+2. Now you will open the project in the Vitis HLS GUI. Navigate to ``/home/project/Vitis_libraries/vision/L1/examples/customconv`` and run the following command:
 
 .. code:: c
 
 	vitis_hls -p customconv.prj &
 
 
-You may browse into the source files, synthesis report or waveform viewer by simply selecting them from the *Explorer* window and *Flow Navigator* window.
+You can browse the source files, synthesis report, or waveform viewer by selecting them from the *Explorer* and *Flow Navigator* windows.
 
-The *xf_custom_convolution_tb.cpp* calls the *Filter2d* accel and the parameters are defined in the *xf_custom_convolution_config.h* and *xf_config_params.h* files. For detailed instructions about how to use *custom convolution*, please refer to the github page at: https://docs.xilinx.com/r/en-US/Vitis_Libraries/vision/api-reference.html#custom-convolution.
+The ``xf_custom_convolution_tb.cpp`` calls the ``Filter2d`` accel and the parameters are defined in the ``xf_custom_convolution_config.h`` and ``xf_config_params.h`` files. For detailed instructions about how to use *custom convolution*, refer to the github page at: https://docs.xilinx.com/r/en-US/Vitis_Libraries/vision/api-reference.html#custom-convolution.
 
 3. Export IP in HLS project
 
-Now we have verified that the library IP is working properly and we will export it to a Vivado IP. To do so, click the *Export RTL* from *IMPLEMENTATION* item in *Flow Navigator*. In the pop-up window, we will leave every settings unchanged and click *OK* to export the IP.
-By default, the IP will be exported to the <project folder>/solN/impl; in this case, it is in following directory:
+Now you have verified that the library IP is working properly, you will export it to a Vivado IP. To do so, click **Export RTL** from the **IMPLEMENTATION** item in **Flow Navigator**. In the pop-up window, leave every settings unchanged and click **OK** to export the IP.
+By default, the IP will be exported to  ``<project folder>/solN/impl``; in this case it is in following directory:
 
 .. code:: c
 
@@ -251,7 +255,7 @@ However, you may customize the path in the export pop-up menu.
 
 4. View Co-Simulation Waveform
 
-You could either modify the co-simulation related command lines in file *./run_hls.tcl* (around line 46) as below to turn-on the xsim waveform dump switch:
+You can either modify the co-simulation related command lines in the file ``./run_hls.tcl`` (around line 46) as below to turn-on the xsim waveform dump switch:
 
 .. code:: c
 
@@ -267,41 +271,41 @@ Then re-run the command:
 
 Or
 
-You can also perform this operation in GUI, by clicking Run Co-Simulation icon in *Flow Navigator* and selecting *Wave debug* option. In this way you could get the simulation waveform, as shown in following example image:
+You can also perform this operation in the GUI, by clicking **Run Co-Simulation** in the **Flow Navigator** and selecting the **Wave debug** option. In this way you get the simulation waveform, as shown in following example image:
 
 |cosim|
 
 
 5. Implement the top-level project
 
-Click *Run Implementation* from *Flow navigator* panel and click ***OK*** in the pop-up window. This will run through the Vivado synthesis and implementation flow which will generate both timing and resource reports for this IP.
+Click **Run Implementation** from the **Flow Navigator** panel and click **OK** in the pop-up window. This will run through the Vivado synthesis and implementation flow which will generate both timing and resource reports for this IP.
 
 
 
-Create and run a Vitis project
+Create and Run a Vitis Project
 ===============================
 
-In this section, we are going to create a Vitis project by using an L2 example.
-L2/L3 functions are targeted for Vitis flow, where software-emulation, hardware-emulation, and hardware build (to generate FPGA binaries) can be performed. 
+In this section, you will create a Vitis project using an L2 example.
+L2/L3 functions are targeted for Vitis flows where software-emulation, hardware-emulation, and hardware build (to generate FPGA binaries) can be performed. 
 OpenCL is used in the testbench for calling the accelerator in L2/L3.
 
-We will use the files provided in Vitis Library at this link: https://github.com/Xilinx/Vitis_Libraries/tree/main/vision/L2/examples/customconv. 
-The source files and script file are all located under this folder. Here we assume you have cloned the Vitis Libraries into */home/project/Vitis_Libraries* directory.
+You will use the files provided in the Vitis Library at this link: https://github.com/Xilinx/Vitis_Libraries/tree/main/vision/L2/examples/customconv. 
+The source files and script file are all located under this folder. It is assumed that you have cloned the Vitis Libraries into the ``/home/project/Vitis_Libraries`` directory.
 
-Go into the */home/project/Vitis_libraries/vision/L2/examples/customconv* folder and run below command to create the Vitis project for a DC platform like U200.
+Navigate to ``/home/project/Vitis_libraries/vision/L2/examples/customconv`` and run the following command to create the Vitis project for a DC platform like U200.
 
 .. code:: c
 
 	make run TARGET=sw_emu
 
-Here, `TARGET` decides the FPGA binary type
+Here, `TARGET` decides the FPGA binary type:
 
 * `sw_emu` is for software emulation
 * `hw_emu` is for hardware emulation
 * `hw` is for deployment on physical card. (Compilation to hardware binary often takes hours.)
 
 **Note** : For embedded devices, platforms and common images have to downloaded separately from the 
-Xilinx official `download center <https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-platforms.html>`__
+AMD official `download center <https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-platforms.html>`__
 
 * If targeting an embedded platform, `install <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Embedded-Platforms?tocId=hfE7LFeS8mU4dexvgPL31Q>`__  it and set up the `evaluation board <https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/444006775/Zynq+UltraScale+MPSoC>`__
 
@@ -312,8 +316,8 @@ For an embedded device like ZCU102, the command would be
 	make run TARGET=sw_emu 
 
 
-Besides *run*, the Vitis case makefile also allows *host* and *xclbin* as build target.
-At the end of the flow, console window will print out the verification results and show ***Test Passed .... !!!*** at the end of simulation. The output image is saved in the working directory.
+Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as build targets.
+At the end of the flow, the console window will print out the verification results and show **Test Passed .... !!!** at the end of simulation. The output image is saved in the working directory.
 
 .. code:: c
 
@@ -325,8 +329,8 @@ At the end of the flow, console window will print out the verification results a
 	Test Passed .... !!!
 
 
-Running L3 examples is also the same as L2. The difference between L2 and L3 in Vitis Vision library is that the former generally calls a single kernel in the accelerator, whereas the latter has multiple kernels called in
-pipeline fashion to form a definite end application. Below is an example L3 application formed by stitching multiple kernels in Dataflow.
+Running L3 examples is the same as L2. The difference between L2 and L3 in the Vitis Vision library is that the former generally calls a single kernel in the accelerator, whereas the latter has multiple kernels called in
+a pipeline fashion to form a definite end application. Below is an example L3 application formed by stitching multiple kernels in Dataflow.
 
 .. code:: c
 
@@ -394,14 +398,14 @@ pipeline fashion to form a definite end application. Below is an example L3 appl
 
   }
 	
-You can create custom applications similar to above example by calling set of desired kernels from the library.
+You can create custom applications similar to the above example by calling a set of desired kernels from the library.
 
 
 Summary
 ========
 
-In this tutorial, we explained how to run L1, L2 examples and leverage individual Vitis library kernels to build your own L3 model designs. The *custom convolution* example is selected for explanation for L1, L2, and *color detection* for L3.
-You may follow similar flow to use other library elements.
+This tutorial explained how to run L1 and L2 examples and leverage individual Vitis library kernels to build your own L3 model designs. The *custom convolution* example is selected for explanation for L1, L2, and *color detection* for L3.
+You can follow similar flows when using other library elements.
 
 Reference
 ==========

@@ -53,13 +53,18 @@
                     ]
                 }
             },
-            "v++": {
-                "linker": {
-                    "ldclflags": [
-                        "--vivado.impl.strategies Performance_Explore"
-                    ]
+            "containers": [
+                {
+                    "name": "krnl_ispstats",
+                    "accelerators": [
+                        {
+                            "name": "ispstats_accel",
+                            "frequency": 150.0
+                        }
+                    ],
+                    "frequency": 150.0
                 }
-            }
+            ]
         }
     },
     "gui": true,

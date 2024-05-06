@@ -1,9 +1,14 @@
 .. ispstats:
 
+.. 
+   Copyright 2023 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 ISP Stats
 ================================
 
-The ``ispstats`` function returns histogram of the input BAYER, BGR or GRAY
+The ``ispstats`` function returns a histogram of the input BAYER, BGR, or GRAY
 image. 
 
 .. rubric:: API Syntax
@@ -41,7 +46,7 @@ image.
 
 The following table describes the template and the function parameters.
 
-.. table:: Table . ispstats Parameter Description
+.. table:: Table: ispstats Parameter Description
 
     +-------------------+--------------------------------------------------+
     | Parameter         | Description                                      |
@@ -107,10 +112,10 @@ The following table describes the template and the function parameters.
 .. rubric:: Resource Utilization
 
 
-The following table summarizes the resource utilization in different configurations, generated using Vitis HLS 2023.1 tool for the
+The following table summarizes the resource utilization in different configurations, generated using the Vitis HLS 2023.1 tool for the
 zcu102 FPGA.
 
-.. table:: Table . ispstats Function Resource Utilization Summary
+.. table:: Table: ispstats Function Resource Utilization Summary
 
     +----------------+---------------------------+------------------+-----------------+---------------------------------+---------------+----------+
     | Operating Mode | Operating Frequency (MHz) | Input pattern    |   MERGE BINS    |               Utilization Estimate                         |     
@@ -131,10 +136,10 @@ zcu102 FPGA.
 
 
 The following table summarizes the performance of the kernel in 1-pixel
-mode as generated using Vitis HLS 2023.1 tool for the Xilinx zcu102 FPGA 
+mode as generated using the Vitis HLS 2023.1 tool for the AMD zcu102 FPGA 
 to process a BGR FHD (1920x1080) image.
 
-.. table:: Table . ispstats Function Performance Estimate Summary
+.. table:: Table: ispstats Function Performance Estimate Summary
 
     +-----------------------------+------------------+------------------+------------------+
     | Operating Mode              | Input pattern    |    MERGE BINS    |Latency Estimate  |

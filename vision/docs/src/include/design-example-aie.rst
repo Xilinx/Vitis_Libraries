@@ -1,19 +1,24 @@
-Design example Using Vitis Vision AIE Library
-#############################################
+.. 
+   Copyright 2023 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-Following example application performs a 2D filtering operation over a gray scale image. The
+Design example Using Vitis Vision AIE Library
+###############################################
+
+The following example application performs a 2D filtering operation over a gray scale image. The
 convolution kernel is a 3x3 window with floating point representation. The coefficients are
-converted to fixed point representation before being passed to AIE core for computation. The
-results are cross validated against OpenCV reference implementation. The example illustrates
-both PLIO and GMIO based data transfers.
+converted to fixed point representation before being passed to the AI Engine core for computation. The
+results are cross validated against the OpenCV reference implementation. The example illustrates
+both PLIO- and GMIO-based data transfers.
 
 ADF Graph
 =========
 
-An AI Engine program consists of a data flow graph specification written in C++. The dataflow graph consists of top level ports, 
-kernel instances and connectivity. a graph.h file is created which includes the header adf.h.
+An AI Engine program consists of a data flow graph specification written in C++. The dataflow graph consists of top-level ports, 
+kernel instances, and connectivity. a ``graph.h`` file is created which includes the header ``adf.h``.
 
-For more details on data flow graph creation, please refer `AI Engine Programming`_ .
+For more details on data flow graph creation, refer to `AI Engine Programming`_ .
 
 .. _AI Engine Programming: https://docs.xilinx.com/r/en-US/ug1076-ai-engine-environment/Creating-a-Data-Flow-Graph-Including-Kernels 
 
@@ -46,7 +51,7 @@ For more details on data flow graph creation, please refer `AI Engine Programmin
 Platform Ports
 ==============
 
-A top-level application file graph.cpp is created which contains an instance of the graph class and is connected to a simulation platform. A virtual platform specification helps to connect the data flow graph written with external I/O
+A top-level application file ``graph.cpp`` is created which contains an instance of the graph class and is connected to a simulation platform. A virtual platform specification helps to connect the data flow graph written with external I/O
 mechanisms specific to the chosen target for testing or eventual deployment.
 
 .. code:: c
@@ -69,7 +74,7 @@ mechanisms specific to the chosen target for testing or eventual deployment.
 #. PLIO
 
    A PLIO port attribute is used to make external stream connections that cross the AI Engine to programmable logic (PL) boundary. PLIO attributes are used to specify the port name, port bit width and the input/output file names.
-   Note that when simulating PLIO with data files, the data should be organized to accomodate both the width of the PL block as well as the data type of connecting port on the AI Engine block.
+   Note that when simulating PLIO with data files, the data should be organized to accommodate both the width of the PL block as well as the data type of connecting port on the AI Engine block.
 
    .. code:: c
 
@@ -101,10 +106,10 @@ mechanisms specific to the chosen target for testing or eventual deployment.
 Host code
 =========
 
-Host code 'host.cpp' will be running on the host processor which conatins the code to initialize and run the datamovers and the ADF graph. XRT APIs are
+Host code ``host.cpp`` will be running on the host processor, which contains the code to initialize and run the datamovers and the ADF graph. XRT APIs are
 used to create the required buffers in the device memory. 
 
-First a golden reference image is generated using OpenCV
+First a golden reference image is generated using OpenCV.
 
 .. code:: c
 
@@ -115,13 +120,13 @@ First a golden reference image is generated using OpenCV
     return 0;
     }
 
-Then, xclbin is loaded on the device and the device handles are created
+Then, ``xclbin`` is loaded on the device and the device handles are created.
 
 .. code:: c
 
    xF::deviceInit(xclBinName);
 
-Buffers for input and output data are created using the XRT APIs and data from input CV::Mat is copied to the XRT buffer.
+Buffers for input and output data are created using the XRT APIs and data from input ``CV::Mat`` is copied to the XRT buffer.
 
 .. code:: c
 
@@ -136,7 +141,7 @@ Buffers for input and output data are created using the XRT APIs and data from i
         dstData = xrtBOMap(dst_hndl);
         cv::Mat dst(op_height, op_width, srcImageR.type(), dstData);
 
-xfcvDataMovers objects tiler and stitcher are created. For more details on xfcvDataMovers refer :ref:`xfcvDataMovers <xfcvdatamovers_aie>`
+``xfcvDataMovers`` objects tiler and stitcher are created. For more details on ``xfcvDataMovers`` refer to :ref:`xfcvDataMovers <xfcvdatamovers_aie>`
 
 .. code:: c
 
@@ -156,7 +161,7 @@ Metadata containing the tile information is generated.
 
    tiler.compute_metadata(srcImageR.size());
 
-The data transfer to AIE via datamovers is initiated along with graph run and further execution waits till the data transfer is complete.
+The data transfer to AIE via datamovers is initiated along with graph run. Further execution waits until the data transfer is complete.
 
 .. code:: c
 
@@ -179,7 +184,7 @@ The data transfer to AIE via datamovers is initiated along with graph run and fu
 Makefile
 ========
 
-Run 'make help' to get list of commands and flows supported. Running below commands will initiate a hardware build.
+Run 'make help' to get the list of supported commands and flows. Running the following commands will initiate a hardware build.
 
 .. code:: c
 

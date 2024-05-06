@@ -217,8 +217,8 @@ void function_tm(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& awb_out,
                  ap_ufixed<16, 4> L_max2[STREAMS],
                  ap_ufixed<16, 4> L_min1[STREAMS],
                  ap_ufixed<16, 4> L_min2[STREAMS],
-                 float c1[STREAMS],
-                 float c2[STREAMS],
+                 unsigned int c1[STREAMS],
+                 unsigned int c2[STREAMS],
                  bool tm_flg[STREAMS],
                  bool eof_tm[STREAMS],
                  int stream_id,
@@ -235,16 +235,18 @@ void function_tm(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& awb_out,
             awb_out, aecin, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2, tm_flg, eof_tm, stream_id,
             full_height, slice_id, acc_sum);
 
-    } else if (USE_LTM) {
-        xf::cv::LTM_multi_wrap<OUT_TYPE, XF_LTM_T, BLOCK_HEIGHT, BLOCK_WIDTH, SLICE_HEIGHT, XF_WIDTH, XF_NPPC,
-                               NUM_STREAMS, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>::LTM_multistream_wrap(awb_out, blk_height,
-                                                                                                   blk_width, omin_r,
-                                                                                                   omax_r, omin_w,
-                                                                                                   omax_w, aecin,
-                                                                                                   tm_flg, eof_tm,
-                                                                                                   stream_id);
+    }
+    //  else if (USE_LTM) {
+    // xf::cv::LTM_multi_wrap<OUT_TYPE, XF_LTM_T, BLOCK_HEIGHT, BLOCK_WIDTH, SLICE_HEIGHT, XF_WIDTH, XF_NPPC,
+    //                        NUM_STREAMS, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>::LTM_multistream_wrap(awb_out, blk_height,
+    //                                                                                            blk_width, omin_r,
+    //                                                                                            omax_r, omin_w,
+    //                                                                                            omax_w, aecin,
+    //                                                                                            tm_flg, eof_tm,
+    //                                                                                            stream_id);
 
-    } else if (USE_QnD) {
+    // }
+    else if (USE_QnD) {
         xf::cv::xf_QuatizationDithering<OUT_TYPE, XF_LTM_T, SLICE_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC, XF_USE_URAM,
                                         XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(awb_out, aecin);
     }
@@ -295,7 +297,7 @@ template <int SRC_T,
           int STREAMS>
 void function_degamma(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& bpc_out,
                       xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dgamma_out,
-                      ap_ufixed<32, 18> dgam_params[STREAMS][3][N][3],
+                      unsigned int dgam_params[STREAMS][3][N][3],
                       unsigned short dgam_bayer[STREAMS],
                       unsigned short height,
                       unsigned short width,
@@ -383,7 +385,7 @@ void Streampipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                     unsigned short width,
                     uint16_t strm_rows,
 
-                    ap_ufixed<32, 18> dgam_params[NUM_STREAMS][3][DGAMMA_KP][3],
+                    unsigned int dgam_params[NUM_STREAMS][3][DGAMMA_KP][3],
                     uint32_t awb_hist0[NUM_STREAMS][3][HIST_SIZE],
                     uint32_t awb_hist1[NUM_STREAMS][3][HIST_SIZE],
                     int awb_gain0[NUM_STREAMS][3],
@@ -422,13 +424,15 @@ void Streampipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                     ap_ufixed<16, 4> L_max2[NUM_STREAMS],
                     ap_ufixed<16, 4> L_min1[NUM_STREAMS],
                     ap_ufixed<16, 4> L_min2[NUM_STREAMS],
-                    float c1[NUM_STREAMS],
-                    float c2[NUM_STREAMS],
+                    unsigned int c1[NUM_STREAMS],
+                    unsigned int c2[NUM_STREAMS],
                     bool tm_flg[NUM_STREAMS],
                     bool eof_tm[NUM_STREAMS],
                     int stream_id,
                     int slice_id,
-                    ap_ufixed<32, 24> acc_sum[NUM_STREAMS]) {
+                    ap_ufixed<32, 24> acc_sum[NUM_STREAMS],
+                    signed int ccm_config_1[NUM_STREAMS][3][3],
+                    signed int ccm_config_2[NUM_STREAMS][3]) {
     int max_height, max_width;
     static unsigned short black_level[NUM_STREAMS];
     static unsigned short rgain[NUM_STREAMS];
@@ -558,8 +562,9 @@ void Streampipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                                     awb_flg, eof_awb, pawb, stream_id, slice_id, full_height);
 
     xf::cv::Mat<OUT_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3> ccm_out(height, width);
-    xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, OUT_TYPE, OUT_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2,
-                                  XF_CV_DEPTH_OUT_3>(awb_out, ccm_out);
+    xf::cv::colorcorrectionmatrix_multi<OUT_TYPE, OUT_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, NUM_STREAMS,
+                                        XF_CV_DEPTH_OUT_2, XF_CV_DEPTH_OUT_3>(awb_out, ccm_out, ccm_config_1,
+                                                                              ccm_config_2, stream_id);
 
     xf::cv::Mat<XF_LTM_T, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_4> aecin(height, width);
 
@@ -614,15 +619,17 @@ void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
                        char IR_at_R_wgts[NUM_STREAMS][9],
                        char IR_at_B_wgts[NUM_STREAMS][9],
                        char sub_wgts[NUM_STREAMS][4],
-                       ap_ufixed<32, 18> dgam_params[NUM_STREAMS][3][DGAMMA_KP][3],
-                       float c1[NUM_STREAMS],
-                       float c2[NUM_STREAMS],
+                       unsigned int dgam_params[NUM_STREAMS][3][DGAMMA_KP][3],
+                       unsigned int c1[NUM_STREAMS],
+                       unsigned int c2[NUM_STREAMS],
                        unsigned short array_params[NUM_STREAMS][11],
                        unsigned char gamma_lut[NUM_STREAMS][256 * 3],
                        ap_uint<LUT_PTR_WIDTH>* lut1,
                        ap_uint<LUT_PTR_WIDTH>* lut2,
                        ap_uint<LUT_PTR_WIDTH>* lut3,
-                       ap_uint<LUT_PTR_WIDTH>* lut4) {
+                       ap_uint<LUT_PTR_WIDTH>* lut4,
+                       signed int ccm_config_1[NUM_STREAMS][3][3],
+                       signed int ccm_config_2[NUM_STREAMS][3]) {
 // clang-format off
 #pragma HLS INTERFACE m_axi     port=img_inp1             offset=slave bundle=gmem1
 #pragma HLS INTERFACE m_axi     port=img_inp2             offset=slave bundle=gmem2
@@ -654,7 +661,8 @@ void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
 #pragma HLS INTERFACE m_axi     port=lut2                 offset=slave bundle=gmem27
 #pragma HLS INTERFACE m_axi     port=lut3                 offset=slave bundle=gmem28
 #pragma HLS INTERFACE m_axi     port=lut4                 offset=slave bundle=gmem29
-
+#pragma HLS INTERFACE m_axi port=ccm_config_1     bundle=gmem30 offset=slave
+#pragma HLS INTERFACE m_axi port=ccm_config_2     bundle=gmem31 offset=slave
     // clang-format on
 
     // struct ispparams_config params[NUM_STREAMS];
@@ -664,8 +672,8 @@ void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
 
     static short wr_hls_tmp[NUM_STREAMS][NO_EXPS * XF_NPPC * W_B_SIZE];
     static unsigned char gamma_lut_tmp[NUM_STREAMS][256 * 3];
-    static float c1_tmp[NUM_STREAMS], c2_tmp[NUM_STREAMS];
-    static ap_ufixed<32, 18> dgam_params_tmp[NUM_STREAMS][3][DGAMMA_KP][3];
+    static unsigned int c1_tmp[NUM_STREAMS], c2_tmp[NUM_STREAMS];
+    unsigned int dgam_params_tmp[NUM_STREAMS][3][DGAMMA_KP][3];
 
     static int dcp_params_12to16_tmp[NUM_STREAMS][3][4][3];
 
@@ -674,6 +682,10 @@ void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
 
     unsigned short height_arr[NUM_STREAMS], width_arr[NUM_STREAMS];
 
+    static int ccm_config_1_tmp[NUM_STREAMS][3][3];
+    static int ccm_config_2_tmp[NUM_STREAMS][3];
+    constexpr int ccm_row = 3, ccm_col = 3;
+
     constexpr int dg_parms_c1 = 3;
     constexpr int dg_parms_c2 = 3;
 
@@ -681,6 +693,25 @@ void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
     constexpr int dcp_parms2 = 4;
     constexpr int dcp_parms3 = 3;
 
+CCM1_CCM2_INIT_LOOP:
+    for (int i = 0; i < NUM_STREAMS; i++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=NUM_STREAMS max=NUM_STREAMS
+        // clang-format on   
+        for(int j=0; j< ccm_row; j++){
+            // clang-format off
+    #pragma HLS LOOP_TRIPCOUNT min=ccm_row max=ccm_row
+           // clang-format on   
+           for(int k=0; k< ccm_col; k++){
+    // clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=ccm_col max=ccm_col
+                    // clang-format on    
+            ccm_config_1_tmp[i][j][k] = ccm_config_1[i][j][k];
+           }
+            ccm_config_2_tmp[i][j] = ccm_config_2[i][j];
+        }
+    }
+    
 DEGAMMA_PARAMS_LOOP:
     for (int n = 0; n < NUM_STREAMS; n++) {
 // clang-format off
@@ -891,7 +922,7 @@ TOTAL_ROWS_LOOP:
                            sub_wgts_tmp, dcp_params_12to16_tmp, hist0_aec, hist1_aec, flag_aec, eof_aec, omin_r, omax_r,
                            omin_w, omax_w, demo_buffs, rgbir_buffs, rgbir_ir_buffs, rgbir_wgt_buffs, mean1, mean2,
                            L_max1, L_max2, L_min1, L_min2, c1_tmp, c2_tmp, flag_tm, eof_tm, stream_idx, slice_idx,
-                           acc_sum);
+                           acc_sum, ccm_config_1_tmp, ccm_config_2_tmp);
 
             rd_offset1 += (RD_MULT * num_rows * ((width_arr[stream_idx] + RD_ADD) >> XF_BITSHIFT(XF_NPPC))) / 4;
 
@@ -911,7 +942,7 @@ TOTAL_ROWS_LOOP:
                            sub_wgts_tmp, dcp_params_12to16_tmp, hist0_aec, hist1_aec, flag_aec, eof_aec, omin_r, omax_r,
                            omin_w, omax_w, demo_buffs, rgbir_buffs, rgbir_ir_buffs, rgbir_wgt_buffs, mean1, mean2,
                            L_max1, L_max2, L_min1, L_min2, c1_tmp, c2_tmp, flag_tm, eof_tm, stream_idx, slice_idx,
-                           acc_sum);
+                           acc_sum, ccm_config_1_tmp, ccm_config_2_tmp);
 
             rd_offset2 += (RD_MULT * num_rows * ((width_arr[stream_idx] + RD_ADD) >> XF_BITSHIFT(XF_NPPC))) / 4;
 
@@ -931,7 +962,7 @@ TOTAL_ROWS_LOOP:
                            sub_wgts_tmp, dcp_params_12to16_tmp, hist0_aec, hist1_aec, flag_aec, eof_aec, omin_r, omax_r,
                            omin_w, omax_w, demo_buffs, rgbir_buffs, rgbir_ir_buffs, rgbir_wgt_buffs, mean1, mean2,
                            L_max1, L_max2, L_min1, L_min2, c1_tmp, c2_tmp, flag_tm, eof_tm, stream_idx, slice_idx,
-                           acc_sum);
+                           acc_sum, ccm_config_1_tmp, ccm_config_2_tmp);
 
             rd_offset3 += (RD_MULT * num_rows * ((width_arr[stream_idx] + RD_ADD) >> XF_BITSHIFT(XF_NPPC))) / 4;
 
@@ -952,7 +983,7 @@ TOTAL_ROWS_LOOP:
                            sub_wgts_tmp, dcp_params_12to16_tmp, hist0_aec, hist1_aec, flag_aec, eof_aec, omin_r, omax_r,
                            omin_w, omax_w, demo_buffs, rgbir_buffs, rgbir_ir_buffs, rgbir_wgt_buffs, mean1, mean2,
                            L_max1, L_max2, L_min1, L_min2, c1_tmp, c2_tmp, flag_tm, eof_tm, stream_idx, slice_idx,
-                           acc_sum);
+                           acc_sum, ccm_config_1_tmp, ccm_config_2_tmp);
 
             rd_offset4 += (RD_MULT * num_rows * ((width_arr[stream_idx] + RD_ADD) >> XF_BITSHIFT(XF_NPPC))) / 4;
 

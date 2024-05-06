@@ -68,7 +68,19 @@
                         "$(OPENCV_LIB)"
                     ]
                 }
-            }
+            },
+            "containers": [
+                {
+                    "name": "krnl_stereopipeline",
+                    "accelerators": [
+                        {
+                            "name": "stereopipeline_accel",
+                            "frequency": 150.0
+                        }
+                    ],
+                    "frequency": 150.0
+                }
+            ]
         },
         "zcu104": {
             "host": {
@@ -94,7 +106,19 @@
                         "$(OPENCV_LIB)"
                     ]
                 }
-            }
+            },
+            "containers": [
+                {
+                    "name": "krnl_stereopipeline",
+                    "accelerators": [
+                        {
+                            "name": "stereopipeline_accel",
+                            "frequency": 150.0
+                        }
+                    ],
+                    "frequency": 150.0
+                }
+            ]
         },
         "vck190": {
             "host": {
@@ -120,7 +144,19 @@
                         "$(OPENCV_LIB)"
                     ]
                 }
-            }
+            },
+            "containers": [
+                {
+                    "name": "krnl_stereopipeline",
+                    "accelerators": [
+                        {
+                            "name": "stereopipeline_accel",
+                            "frequency": 150.0
+                        }
+                    ],
+                    "frequency": 150.0
+                }
+            ]
         }
     },
     "gui": true,

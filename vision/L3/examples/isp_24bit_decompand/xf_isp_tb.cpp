@@ -20,6 +20,51 @@
 #include <bitset>
 #include <iostream>
 
+const float bt2020_bt709_arr[3][3] = {
+    {1.6605, -0.5876, -0.0728}, {-0.1246, 1.1329, -0.0083}, {-0.0182, -0.1006, 1.1187}};
+
+const float bt2020_bt709_off[3] = {0.0, 0.0, 0.0};
+
+const float bt709_bt2020_arr[3][3] = {{0.627, 0.329, 0.0433}, {0.0691, 0.92, 0.0113}, {0.0164, 0.088, 0.896}};
+
+const float bt709_bt2020_off[3] = {0.0, 0.0, 0.0};
+
+const float rgb_yuv_601_arr[3][3] = {{0.257, 0.504, 0.098}, {-0.148, -0.291, 0.439}, {0.439, -0.368, -0.071}};
+
+const float rgb_yuv_601_off[3] = {0.0625, 0.500, 0.500};
+
+const float rgb_yuv_709_arr[3][3] = {{0.183, 0.614, 0.062}, {-0.101, -0.338, 0.439}, {0.439, -0.399, -0.040}};
+
+const float rgb_yuv_709_off[3] = {0.0625, 0.500, 0.500};
+
+const float rgb_yuv_2020_arr[3][3] = {
+    {0.225613, 0.582282, 0.050928}, {-0.119918, -0.309494, 0.429412}, {0.429412, -0.394875, -0.034537}};
+
+const float rgb_yuv_2020_off[3] = {0.062745, 0.500, 0.500};
+
+const float yuv_rgb_601_arr[3][3] = {{1.164, 0.000, 1.596}, {1.164, -0.813, -0.391}, {1.164, 2.018, 0.000}};
+
+const float yuv_rgb_601_off[3] = {-0.87075, 0.52925, -1.08175};
+
+const float yuv_rgb_709_arr[3][3] = {{1.164, 0.000, 1.793}, {1.164, -0.213, -0.534}, {1.164, 2.115, 0.000}};
+
+const float yuv_rgb_709_off[3] = {-0.96925, 0.30075, -1.13025};
+
+const float yuv_rgb_2020_arr[3][3] = {
+    {1.164384, 0.000000, 1.717000}, {1.164384, -0.191603, -0.665274}, {1.164384, 2.190671, 0.000000}};
+
+const float yuv_rgb_2020_off[3] = {-0.931559, 0.355379, -1.168395};
+
+const float full_to_16_235_arr[3][3] = {
+    {0.856305, 0.000000, 0.000000}, {0.000000, 0.856305, 0.000000}, {0.000000, 0.000000, 0.856305}};
+
+const float full_to_16_235_off[3] = {0.0625, 0.0625, 0.0625};
+
+const float full_from_16_235_arr[3][3] = {
+    {1.167808, 0.000000, 0.000000}, {0.000000, 1.167808, 0.000000}, {0.000000, 0.000000, 1.167808}};
+
+const float full_from_16_235_off[3] = {-0.0729880, -0.0729880, -0.0729880};
+
 void bayerizeImage(cv::Mat img, cv::Mat& cfa_output, unsigned short code) {
     for (int i = 0; i < img.rows; i++) {
         for (int j = 0; j < img.cols; j++) {
@@ -200,31 +245,31 @@ int main(int argc, char** argv) {
          {2097152, 0.0039, 1024},
          {16777215, 0.000488, 8192}}}; // 24 bit to 14 bit
 
-    ap_ufixed<32, 18> params_degamma[3][DEGAMMA_KP][3] = {
-        {{2048, 0.0824, 0},
-         {4096, 0.2966, 438},
-         {6144, 0.5456, 1459},
-         {8192, 0.8165, 3123},
-         {10240, 1.103, 5470},
-         {12288, 1.403, 8541},
-         {14336, 1.7152, 12376},
-         {16384, 2.03, 16888}},
-        {{2048, 0.0824, 0},
-         {4096, 0.2966, 438},
-         {6144, 0.5456, 1459},
-         {8192, 0.8165, 3123},
-         {10240, 1.103, 5470},
-         {12288, 1.403, 8541},
-         {14336, 1.7152, 12376},
-         {16384, 2.03, 16888}},
-        {{2048, 0.0824, 0},
-         {4096, 0.2966, 438},
-         {6144, 0.5456, 1459},
-         {8192, 0.8165, 3123},
-         {10240, 1.103, 5470},
-         {12288, 1.403, 8541},
-         {14336, 1.7152, 12376},
-         {16384, 2.03, 16888}}}; // 8 knee points {upper_bound, slope, intercept} 14bit
+    uint32_t params_degamma[3][DEGAMMA_KP][3] = {
+        {{2048, 1136, 0},
+         {4096, 4105, 57344},
+         {6144, 7552, 189184},
+         {8192, 10994, 404367},
+         {10240, 14924, 900096},
+         {12288, 18318, 1405312},
+         {14336, 22153, 1801090},
+         {16384, 27443, 2190040}},
+        {{2048, 1136, 0},
+         {4096, 4105, 57344},
+         {6144, 7552, 189184},
+         {8192, 10994, 404367},
+         {10240, 14924, 900096},
+         {12288, 18318, 1405312},
+         {14336, 22153, 1801090},
+         {16384, 27443, 2190040}},
+        {{2048, 1136, 0},
+         {4096, 4105, 57344},
+         {6144, 7552, 189184},
+         {8192, 10994, 404367},
+         {10240, 14924, 900096},
+         {12288, 18318, 1405312},
+         {14336, 22153, 1801090},
+         {16384, 27443, 2190040}}}; // 8 knee points {upper_bound, slope, intercept} 14bit
 
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
@@ -261,6 +306,7 @@ int main(int argc, char** argv) {
 
     unsigned short rgain = 256;
     unsigned short bgain = 256;
+    unsigned short ggain = 200;
 
     unsigned short pawb = 128;
     unsigned short paec = 128;
@@ -271,6 +317,8 @@ int main(int argc, char** argv) {
     float c1 = 3.0;
     float c2 = 1.5;
 
+    unsigned int gtm_config_1 = (unsigned int)(c1 * 256);
+    unsigned int gtm_config_2 = (unsigned int)(c2 * 256);
     // 6 represents 0
     // 7 represents -1
     // All other numbers represent inverse of their value raised to 2 powers (ex: -5 represents -(1/32) )
@@ -367,19 +415,128 @@ int main(int argc, char** argv) {
     size_t stats_out_size_bytes_awb = N * M * NUM_OUT_CH * STATS_SIZE_AWB * sizeof(uint32_t);
 #endif
 
+    float ccm_matrix[3][3];
+    float offsetarray[3];
+
+    switch (XF_CCM_TYPE) {
+        case 0:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = bt2020_bt709_arr[i][j];
+                }
+                offsetarray[i] = bt2020_bt709_off[i];
+            }
+
+            break;
+        case 1:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = bt709_bt2020_arr[i][j];
+                }
+                offsetarray[i] = bt709_bt2020_off[i];
+            }
+
+            break;
+        case 2:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = rgb_yuv_601_arr[i][j];
+                }
+                offsetarray[i] = rgb_yuv_601_off[i];
+            }
+
+            break;
+        case 3:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = rgb_yuv_709_arr[i][j];
+                }
+                offsetarray[i] = rgb_yuv_709_off[i];
+            }
+
+            break;
+        case 4:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = rgb_yuv_2020_arr[i][j];
+                }
+                offsetarray[i] = rgb_yuv_2020_off[i];
+            }
+
+            break;
+        case 5:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = yuv_rgb_601_arr[i][j];
+                }
+                offsetarray[i] = yuv_rgb_601_off[i];
+            }
+
+            break;
+        case 6:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = yuv_rgb_709_arr[i][j];
+                }
+                offsetarray[i] = yuv_rgb_709_off[i];
+            }
+
+            break;
+        case 7:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = yuv_rgb_2020_arr[i][j];
+                }
+                offsetarray[i] = yuv_rgb_2020_off[i];
+            }
+
+            break;
+        case 8:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = full_to_16_235_arr[i][j];
+                }
+                offsetarray[i] = full_to_16_235_off[i];
+            }
+
+            break;
+        case 9:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = full_from_16_235_arr[i][j];
+                }
+                offsetarray[i] = full_from_16_235_off[i];
+            }
+
+            break;
+        default:
+            break;
+    }
+    // cmm matrix shifted 20 bits to the left
+    signed int ccm_matrix_int[3][3];
+    signed int offsetarray_int[3];
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            ccm_matrix_int[i][j] = (signed int)(ccm_matrix[i][j] * 1048576);
+        }
+        offsetarray_int[i] = (signed int)(offsetarray[i] * 1048576);
+    }
+
     /////////////////////////////////////// CL ////////////////////////
     size_t filter1_size_bytes = 25 * sizeof(unsigned char);
     size_t filter2_size_bytes = 9 * sizeof(unsigned char);
     size_t sub_wgts_size_bytes = 4 * sizeof(unsigned char);
     size_t params_bytes = 36 * sizeof(int);
-    size_t degamma_params_bytes = 3 * DEGAMMA_KP * 3 * sizeof(int);
+    size_t degamma_params_bytes = 3 * DEGAMMA_KP * 3 * sizeof(uint32_t);
     size_t params_14bit_bytes = 36 * sizeof(long);
 
     size_t lut_in_size_bytes = lut_dim * lut_dim * lut_dim * sizeof(float) * 3;
     size_t bins_size_bytes = FINAL_BINS_NUM * 3 * sizeof(unsigned int);
 
     float gamma_val_r = 0.5f, gamma_val_g = 0.8f, gamma_val_b = 0.8f;
-
+    size_t ccm_matrix_int_size_bytes = 3 * 3 * sizeof(signed int);
+    size_t offsetarray_int_size_bytes = 3 * sizeof(signed int);
     compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut);
 
     cl_int err;
@@ -424,7 +581,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::Buffer buffer_params(context, CL_MEM_READ_ONLY, params_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer buffer_degamma_params(context, CL_MEM_READ_ONLY, degamma_params_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer buffer_params_14bit(context, CL_MEM_READ_ONLY, params_14bit_bytes, NULL, &err));
-
+    OCL_CHECK(err, cl::Buffer buffer_ccm_matrix_int(context, CL_MEM_READ_ONLY, ccm_matrix_int_size_bytes, NULL, &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_offsetarray_int(context, CL_MEM_READ_ONLY, offsetarray_int_size_bytes, NULL, &err));
     // Set the kernel arguments
 
     OCL_CHECK(err, err = kernel.setArg(0, imageToDevice));
@@ -456,13 +615,16 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(26, M));
     OCL_CHECK(err, err = kernel.setArg(27, blk_height));
     OCL_CHECK(err, err = kernel.setArg(28, blk_width));
-    OCL_CHECK(err, err = kernel.setArg(29, c1));
-    OCL_CHECK(err, err = kernel.setArg(30, c2));
+    OCL_CHECK(err, err = kernel.setArg(29, gtm_config_1));
+    OCL_CHECK(err, err = kernel.setArg(30, gtm_config_2));
     OCL_CHECK(err, err = kernel.setArg(31, buffer_inVec));
     OCL_CHECK(err, err = kernel.setArg(32, buffer_inLut));
     OCL_CHECK(err, err = kernel.setArg(33, lut_dim));
     OCL_CHECK(err, err = kernel.setArg(34, pawb));
     OCL_CHECK(err, err = kernel.setArg(35, paec));
+    OCL_CHECK(err, err = kernel.setArg(36, buffer_ccm_matrix_int));
+    OCL_CHECK(err, err = kernel.setArg(37, buffer_offsetarray_int));
+    OCL_CHECK(err, err = kernel.setArg(38, ggain));
 
     for (int i = 0; i < 4; i++) {
         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inVec,      // buffer on the FPGA
@@ -547,6 +709,17 @@ int main(int argc, char** argv) {
                                             bins_size_bytes,   // Size in bytes
                                             final_bins_awb,    // Pointer to the data to copy
                                             nullptr));
+        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_ccm_matrix_int,     // buffer on the FPGA
+                                            CL_TRUE,                   // blocking call
+                                            0,                         // buffer offset in bytes
+                                            ccm_matrix_int_size_bytes, // Size in bytes
+                                            ccm_matrix_int));
+
+        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_offsetarray_int,     // buffer on the FPGA
+                                            CL_TRUE,                    // blocking call
+                                            0,                          // buffer offset in bytes
+                                            offsetarray_int_size_bytes, // Size in bytes
+                                            offsetarray_int));
         // Profiling Objects
         cl_ulong start = 0;
         cl_ulong end = 0;

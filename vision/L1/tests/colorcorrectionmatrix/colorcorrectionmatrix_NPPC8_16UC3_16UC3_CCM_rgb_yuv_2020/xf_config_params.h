@@ -57,6 +57,11 @@
 #define INPUT_PTR_WIDTH 512
 #define OUTPUT_PTR_WIDTH 512
 
-void ccm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int rows, int cols);
+void ccm_accel(ap_uint<INPUT_PTR_WIDTH>* src,
+               ap_uint<OUTPUT_PTR_WIDTH>* dst,
+               signed int ccm_config_1[3][3],
+               signed int ccm_config_2[3],
+               int rows,
+               int cols);
 
 #endif

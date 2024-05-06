@@ -168,20 +168,29 @@ void write_row_to_mem(uint8_t* ram,
     }
 }
 template <int WIDTH>
-void proc_write_to_out(
-    uint8_t* fw_linebuffer, uint8_t* rev_linebuffer, uint8_t* out_ptr, int& def_pix, int wrt_offset, int width) {
+void proc_write_to_out(uint8_t* fw_linebuffer,
+                       uint8_t* rev_linebuffer,
+                       uint8_t* out_ptr,
+                       int& def_pix,
+                       int wrt_offset,
+                       int width,
+                       int stride) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
 
-    for (int j = 0; j < width; j++) {
+    for (int j = 0; j < stride; j++) {
 // clang-format off
 #pragma HLS LOOP_TRIPCOUNT min=1 max=WIDTH
 #pragma HLS PIPELINE II=1
         // clang-format on
-        uint8_t tmp = fw_linebuffer[j] & rev_linebuffer[j];
-        out_ptr[wrt_offset + j] = tmp;
-        if (tmp != 0) def_pix++;
+        if (j < width) {
+            uint8_t tmp = fw_linebuffer[j] & rev_linebuffer[j];
+            out_ptr[wrt_offset + j] = tmp;
+            if (tmp != 0) def_pix++;
+        } else {
+            out_ptr[wrt_offset + j] = 0;
+        }
     }
 }
 
@@ -305,13 +314,14 @@ void pass_1(uint8_t* in_ptr1,
         //rev_cca<HEIGHT,WIDTH>(in_ptr2,tmp_out_ptr2,height,width);
 }*/
 
-template <int SRC_T, int HEIGHT, int WIDTH, int NPC, int XFCVDEPTH_OUT>
+template <int SRC_T, int HEIGHT, int WIDTH, int STRIDE, int NPC, int XFCVDEPTH_OUT>
 void pass_2(uint8_t* fwd_in_ptr,
             xf::cv::Mat<SRC_T, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT>& tmp_out_mat,
             uint8_t* out_ptr,
             int& def_pix,
             int height,
-            int width) {
+            int width,
+            int stride) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
@@ -339,7 +349,7 @@ void pass_2(uint8_t* fwd_in_ptr,
     uint8_t fwd_linebuff2[WIDTH], rev_linebuff2[WIDTH];
 
     int rd_offset = (height * width);
-    int wrt_offset = (height * width);
+    int wrt_offset = (height * stride);
 
     rd_offset -= width;
     read_row_to_ram<WIDTH>(fwd_in_ptr + rd_offset, fwd_linebuff1, width);
@@ -351,27 +361,27 @@ PASS2_ROW_LOOP:
 #pragma HLS LOOP_TRIPCOUNT min=1 max=HEIGHT
         // clang-format on
         rd_offset -= width;
-        wrt_offset -= width;
+        wrt_offset -= stride;
 
         if (flag == 0) {
             read_row_to_ram<WIDTH>(fwd_in_ptr + rd_offset, fwd_linebuff2, width);
             read_row_mat_to_ram<SRC_T, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT>(tmp_out_mat, rev_linebuff2, rd_offset, width);
-            proc_write_to_out<WIDTH>(fwd_linebuff1, rev_linebuff1, out_ptr, def_pix, wrt_offset, width);
+            proc_write_to_out<STRIDE>(fwd_linebuff1, rev_linebuff1, out_ptr, def_pix, wrt_offset, width, stride);
             flag = 1;
         } else {
             read_row_to_ram<WIDTH>(fwd_in_ptr + rd_offset, fwd_linebuff1, width);
             read_row_mat_to_ram<SRC_T, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT>(tmp_out_mat, rev_linebuff1, rd_offset, width);
-            proc_write_to_out<WIDTH>(fwd_linebuff2, rev_linebuff2, out_ptr, def_pix, wrt_offset, width);
+            proc_write_to_out<STRIDE>(fwd_linebuff2, rev_linebuff2, out_ptr, def_pix, wrt_offset, width, stride);
             flag = 0;
         }
     }
 
-    wrt_offset -= width;
+    wrt_offset -= stride;
 
     if (flag == 0)
-        proc_write_to_out<WIDTH>(fwd_linebuff1, rev_linebuff1, out_ptr, def_pix, wrt_offset, width);
+        proc_write_to_out<STRIDE>(fwd_linebuff1, rev_linebuff1, out_ptr, def_pix, wrt_offset, width, stride);
     else
-        proc_write_to_out<WIDTH>(fwd_linebuff2, rev_linebuff2, out_ptr, def_pix, wrt_offset, width);
+        proc_write_to_out<STRIDE>(fwd_linebuff2, rev_linebuff2, out_ptr, def_pix, wrt_offset, width, stride);
 }
 
 template <int SRC_T, int HEIGHT, int WIDTH, int NPC>

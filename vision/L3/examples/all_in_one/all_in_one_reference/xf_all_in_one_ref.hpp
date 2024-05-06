@@ -74,6 +74,7 @@ void all_in_one_ref(cv::Mat& all_in_one_input,
                     unsigned short pawb,
                     unsigned short rgain,
                     unsigned short bgain,
+                    unsigned short ggain,
                     int blk_height,
                     int blk_width,
                     int lut_dim,
@@ -232,7 +233,8 @@ void all_in_one_ref(cv::Mat& all_in_one_input,
     //////////GAIN_CONTROL_REF_SECTION//////////////////
     // cv::Mat gaincontrol_out_ref;
     // gaincontrol_out_ref.create(rows, cols, CV_IN_TYPE);
-    gainControlOCV(lsc_out_ref, gaincontrol_out_ref, rgain, bgain);
+    int bformat = XF_BAYER_PATTERN;
+    gainControlOCV(lsc_out_ref, gaincontrol_out_ref, bformat, rgain, bgain, ggain);
     cv::imwrite("gaincontrol_out_ref.png", gaincontrol_out_ref);
 
     //////////DEMOSAIC_REF_SECTION//////////////////
@@ -366,6 +368,7 @@ void all_in_one_ref(cv::Mat& all_in_one_input,
                     unsigned short pawb,
                     unsigned short rgain,
                     unsigned short bgain,
+                    unsigned short ggain,
                     int blk_height,
                     int blk_width,
                     int lut_dim,
@@ -490,7 +493,8 @@ void all_in_one_ref(cv::Mat& all_in_one_input,
     //////////GAIN_CONTROL_REF_SECTION//////////////////
     // cv::Mat gaincontrol_out_ref;
     // gaincontrol_out_ref.create(rows, cols, CV_IN_TYPE);
-    gainControlOCV(lsc_out_ref, gaincontrol_out_ref, rgain, bgain);
+    int bformat = XF_BAYER_PATTERN;
+    gainControlOCV(lsc_out_ref, gaincontrol_out_ref, bformat, rgain, bgain, ggain);
     cv::imwrite("gaincontrol_out_ref.png", gaincontrol_out_ref);
 
     //////////DEMOSAIC_REF_SECTION//////////////////

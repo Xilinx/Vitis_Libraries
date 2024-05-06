@@ -19,17 +19,17 @@ static constexpr int __XF_DEPTH_IN = (HEIGHT * WIDTH * XF_PIXELWIDTH(IN_TYPE, NP
 static constexpr int __XF_DEPTH_OUT = (HEIGHT * WIDTH * XF_PIXELWIDTH(OUT_TYPE, NPPCX)) / OUTPUT_PTR_WIDTH;
 static constexpr int MinMaxVArrSize = LTMTile<BLOCK_HEIGHT, BLOCK_WIDTH, HEIGHT, WIDTH, NPPCX>::MinMaxVArrSize;
 static constexpr int MinMaxHArrSize = LTMTile<BLOCK_HEIGHT, BLOCK_WIDTH, HEIGHT, WIDTH, NPPCX>::MinMaxHArrSize;
-
+static constexpr int BILINEAR_INTERPOLATE_TYPE_C = XF_32FC3;
 static bool flg = false;
-static XF_CTUNAME(IN_TYPE, NPPCX) omin[2][MinMaxVArrSize][MinMaxHArrSize];
-static XF_CTUNAME(IN_TYPE, NPPCX) omax[2][MinMaxVArrSize][MinMaxHArrSize];
+static XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPPCX) omin[2][MinMaxVArrSize][MinMaxHArrSize];
+static XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPPCX) omax[2][MinMaxVArrSize][MinMaxHArrSize];
 
 void tonemapping_accel_i(ap_uint<INPUT_PTR_WIDTH>* in_ptr,
                          ap_uint<OUTPUT_PTR_WIDTH>* out_ptr,
-                         XF_CTUNAME(IN_TYPE, NPPCX) omin_r[MinMaxVArrSize][MinMaxHArrSize],
-                         XF_CTUNAME(IN_TYPE, NPPCX) omax_r[MinMaxVArrSize][MinMaxHArrSize],
-                         XF_CTUNAME(IN_TYPE, NPPCX) omin_w[MinMaxVArrSize][MinMaxHArrSize],
-                         XF_CTUNAME(IN_TYPE, NPPCX) omax_w[MinMaxVArrSize][MinMaxHArrSize],
+                         XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPPCX) omin_r[MinMaxVArrSize][MinMaxHArrSize],
+                         XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPPCX) omax_r[MinMaxVArrSize][MinMaxHArrSize],
+                         XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPPCX) omin_w[MinMaxVArrSize][MinMaxHArrSize],
+                         XF_CTUNAME(BILINEAR_INTERPOLATE_TYPE_C, NPPCX) omax_w[MinMaxVArrSize][MinMaxHArrSize],
                          int height,
                          int width,
                          int blk_height,

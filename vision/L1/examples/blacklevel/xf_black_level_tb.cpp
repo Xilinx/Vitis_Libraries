@@ -27,8 +27,8 @@
 #if XF_HLS_MODE
 void blackLevelCorrection_accel(ap_uint<IMAGE_PTR_WIDTH>* in_img_ptr,
                                 ap_uint<IMAGE_PTR_WIDTH>* out_img_ptr,
-                                int black_level,
-                                float mul_value,
+                                uint32_t black_level,
+                                int mul_value,
                                 int height,
                                 int width);
 #endif
@@ -50,7 +50,8 @@ int main(int argc, char** argv) {
 
     float MulValue = (float)(MaxLevel / (MaxLevel - BlackLevel));
     ; // int((MaxLevel*(1<<IMAGE_MUL_FL_BITS))/(MaxLevel - BlackLevel));
-
+    unsigned int blc_config_1 = (int)(MulValue * 65536); // mul_fact int Q16_16 format
+    unsigned int blc_config_2 = BlackLevel;
 #if T_8U
     InImg = cv::imread(argv[1], 0);
 #else
@@ -80,14 +81,14 @@ int main(int argc, char** argv) {
 #if XF_HLS_MODE
 
     blackLevelCorrection_accel((ap_uint<IMAGE_PTR_WIDTH>*)InImg.data, (ap_uint<IMAGE_PTR_WIDTH>*)OutImg.data,
-                               BlackLevel, MulValue, height, width);
+                               blc_config_2, blc_config_1, height, width);
 
 #else
 
     msg.info("Registering Kernel ...");
 
     (void)cl_kernel_mgr::registerKernel("blackLevelCorrection_accel", "krnl_black_level", XCLIN(InImg), XCLOUT(OutImg),
-                                        XCLIN(BlackLevel), XCLIN(MulValue), XCLIN(height), XCLIN(width));
+                                        XCLIN(blc_config_2), XCLIN(blc_config_1), XCLIN(height), XCLIN(width));
 
     msg.info("Executing HW Kernel ...");
     cl_kernel_mgr::exec_all();

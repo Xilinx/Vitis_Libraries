@@ -1,45 +1,34 @@
-.. 
-   Copyright 2021 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. xfOpenCVlib
+
+   .. Copyright © 2024 Advanced Micro Devices, Inc
 
 
 .. _l2_kalmanfilter:
 
-=============
+
 Kalman Filter
-=============
+##############
 
-Kalman Filter example resides in ``L2/examples/kalmanfilter`` directory.
+The Kalman Filter example resides in the ``L2/examples/kalmanfilter`` directory.
 
-This benchmark tests the performance of `kalmanfilter` function. The classic Kalman Filter is proposed for linear system.
+This benchmark tests the performance of the `kalmanfilter` function. The classic Kalman Filter is proposed for linear systems.
 
-The tutorial provides a step-by-step guide that covers commands for building and running kernel.
+The tutorial provides a step-by-step guide that covers the commands for building and running a kernel.
 
 Executable Usage
 ================
 
-* **Work Directory(Step 1)**
+* **Work Directory (Step 1)**
 
-The steps for library download and environment setup can be found in README file of L2 folder. For getting the design,
+The steps for library download and environment setup can be found in the README file of the L2 folder. For getting the design:
 
 .. code-block:: bash
 
    cd L2/example/kalmanfilter
 
-* **Build kernel(Step 2)**
+* **Build Kernel (Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your XCLBIN and host binary targeting a specific device. Be aware that this process can take up to a couple of hours.
 
 .. code-block:: bash
 
@@ -50,16 +39,16 @@ Run the following make command to build your XCLBIN and host binary targeting a 
    make host xclbin TARGET=hw
 
 
-* **Run kernel(Step 3)**
+* **Run Kernel (Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
    make run TARGET=hw 
 
 
-* **Example output(Step 4)** 
+* **Example Output (Step 4)** 
 
 .. code-block:: bash
    
@@ -82,10 +71,10 @@ To get the benchmark results, please run the following command.
 Profiling 
 =========
 
-The Kalman Filter design is validated on Alveo u200 board at 300 MHz frequency. 
-The hardware resource utilizations are listed in the following table.
+The Kalman Filter design is validated on an Alveo u200 board at 300 MHz frequency. 
+Hardware resource utilization is listed in the following table.
 
-.. table:: Table 1 Hardware resources for Kalman Filter
+.. table:: Table 1: Hardware Resources for Kalman Filter
     :align: center
 
     +------------------------------------------+-----------------+------------+------------+------------+
@@ -97,9 +86,9 @@ The hardware resource utilizations are listed in the following table.
     +------------+------+----------------------+-----------------+------------+------------+------------+
 
 
-The performance is shown below
+The performance is shown in the following table.
 
-.. table:: Table 2 Performance numbers for Kalman Filter
+.. table:: Table 2: Performance numbers for Kalman Filter
     :align: center
 	
     +----------------------+-------------------+--------------+

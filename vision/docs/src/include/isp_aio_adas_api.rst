@@ -1,15 +1,20 @@
-ISP all_in_one_adas pipeline
-=============================
+.. 
+   Copyright 2023 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+ISP all_in_one_adas Pipeline
+##############################
 
 The ISP all_in_one_adas pipeline contains all the necessary functions that
-will enable the user to test several combinations of the image sensor
+will enable you to test several combinations of the image sensor
 processing pipeline.
 
-For example, we can test the Surround View System (SVS), INCABIN and
-Forward/Rear view pipeline using this ISP all_in_one_adas pipeline. This ISP
+For example, you can test the Surround View System (SVS), INCABIN, and
+Forward/Rear view pipeline using the ISP all_in_one_adas pipeline. The ISP
 all_in_one_adas pipeline takes an interleaved image which contains Short
 Exposure Frame (SEF) and Long Exposure Frame (LEF) as input when HDR
-modules are enabled for SVS pipeline and returns the HDR merged
+modules are enabled for the SVS pipeline and returns the HDR merged
 output.
 
 -  **Extract Exposure Frames:** The Extract Exposure Frames module returns
@@ -81,7 +86,7 @@ output.
    :class: image 
    :width: 1000 
       
-.. table:: Runtime parameter for the pipeline
+.. table:: Table: Runtime Parameter for the Pipeline
 
     +-----------------------------------+-----------------------------------+
     | **Parameter**                     | **Descriptions**                  |
@@ -152,7 +157,7 @@ output.
     | lutDim                            | Dimension of input lut.           |
     +-----------------------------------+-----------------------------------+
 
-.. table:: Description of mode_reg
+.. table:: Table: Description of mode_reg
 
     +-----------------------------------+-----------------------------------+
     | **Bit position**                  | **Descriptions**                  |
@@ -193,7 +198,7 @@ output.
     | mode_reg[15:11]                   | Don't care.                       |
     +-----------------------------------+-----------------------------------+
     
-.. table:: Compile time parameter
+.. table:: Table: Compile Time Parameter
 
     +-----------------------------------+-----------------------------------+
     | **Parameter**                     | **Description**                   |
@@ -319,7 +324,8 @@ The following example demonstrates the top-level ISP pipeline:
     
 
 
-Create and Launch kernel in the testbench:
+Create and Launch Kernel in the Testbench:
+============================================
 
 Histogram needs two frames to populate the histogram and to get correct
 auto white balance results. GTM and other tone-mapping functions need
@@ -432,7 +438,7 @@ are needed because the GTM function is selected.
 The following table summarizes the resource utilization of ISP all_in_one_adas generated using Vitis 
 HLS 2022.2 tool on ZCU102 board.
 
-.. table:: Table . ISP all_in_one_adas Resource Utilization Summary
+.. table:: Table: ISP all_in_one_adas Resource Utilization Summary
 
 
     +----------------+---------------------------+-------------------------------------------------+
@@ -449,17 +455,17 @@ HLS 2022.2 tool on ZCU102 board.
 The following table summarizes the performance of the ISP all_in_one_adas in 1-pixel
 mode as generated using Vitis HLS 2022.2 tool on ZCU102 board.
  
-Estimated average latency is obtained by running the accel with 3 iterations. 
+Estimated average latency is obtained by running the accel with three iterations. 
 The input to the accel is an interleaved image containing one long-exposure frame 
 and one short-exposure frame which are both full-HD (1920x1080) images.
 
-.. table:: Table . ISP all_in_one_adas Performance Estimate Summary
+.. table:: Table: ISP all_in_one_adas Performance Estimate Summary
 
-    +-----------------------------+-------------------------+
-    |                             | Latency Estimate        |
-    +      Operating Mode         +-------------------------+
-    |                             | Average latency(ms)     |             
-    +=============================+=========================+
-    | 1 pixel operation (150 MHz) |        29.509           | 
-    +-----------------------------+-------------------------+
+    +-----------------------------+--------------------------+
+    |                             | Latency Estimate         |
+    +      Operating Mode         +--------------------------+
+    |                             | Average latency (ms)     |             
+    +=============================+==========================+
+    | 1 pixel operation (150 MHz) |        29.509            | 
+    +-----------------------------+--------------------------+
           

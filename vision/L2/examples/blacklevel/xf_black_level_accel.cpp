@@ -34,8 +34,8 @@ extern "C" {
 
 void blackLevelCorrection_accel(ap_uint<IMAGE_PTR_WIDTH>* in_img_ptr,
                                 ap_uint<IMAGE_PTR_WIDTH>* out_img_ptr,
-                                int black_level,
-                                float mul_value, // = 1/(white-black)
+                                uint32_t black_level,
+                                int mul_value, // = 1/(white-black)
                                 int height,
                                 int width) {
 // -----------------------------------------------

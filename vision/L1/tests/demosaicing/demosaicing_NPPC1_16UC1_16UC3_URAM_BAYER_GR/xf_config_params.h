@@ -51,7 +51,7 @@
 
 #define ERROR_THRESHOLD 1
 
-void demosaicing_accel(ap_uint<INPUT_PTR_WIDTH>* img_in, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int height, int width);
-
+void demosaicing_accel(
+    ap_uint<INPUT_PTR_WIDTH>* img_in, ap_uint<OUTPUT_PTR_WIDTH>* img_out, uint16_t bformat, int height, int width);
 #endif
 // _XF_DEMOSAICING_CONFIG_H_

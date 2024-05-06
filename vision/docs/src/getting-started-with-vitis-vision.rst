@@ -5,11 +5,15 @@
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
+   .. Copyright © 2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 Getting Started with Vitis Vision
 #################################
 
 Describes the methodology to create a kernel, corresponding host code and a suitable
-makefile to compile an Vitis Vision kernel for any of the supported
+makefile to compile an Vitis™ Vision kernel for any of the supported
 platforms in Vitis. The subsequent section also explains the
 methodology to verify the kernel in various emulation modes and on the
 hardware.
@@ -19,16 +23,16 @@ hardware.
 Prerequisites
 =============
 
-#. Valid installation of Vitis™ 2023.2 or later version and the
+#. Valid installation of Vitis 2024.1 or later and the
    corresponding licenses.
 #. Download the Vitis Vision library from github.
-#. Install the card for which the platform is supported in Vitis 2023.2 or
+#. Install the card for which the platform is supported in Vitis 2024.1 or
    later versions.
-#. If targeting an embedded platform, downlaod the platform, common images and set up the evaluation board.
+#. If targeting an embedded platform, download the platform, common images and set up the evaluation board.
 #. Xilinx® Runtime (XRT) must be installed. XRT provides software
-   interface to Xilinx FPGAs.
-#. Install/compile OpenCV libraries(with compatible libjpeg.so). 
-   Appropriate version (X86/aarch32/aarch64) of compiler must be used based 
+   interface to AMD FPGAs.
+#. Install/compile OpenCV libraries (with compatible ``libjpeg.so``). 
+   An appropriate version (X86/aarch32/aarch64) of compiler must be used based 
    on the available processor for the target board.
 #. libOpenCL.so must be installed if not present along with the
    platform.
@@ -39,7 +43,7 @@ Vitis Design Methodology
 =========================
 
 There are three critical components in making a kernel work on a
-platform using Vitis™:
+platform using Vitis:
 
 #. Host code with OpenCL constructs
 #. Wrappers around HLS Kernel(s)
@@ -88,7 +92,7 @@ Vitis flow (OpenCL) requires kernel interfaces to be memory pointers
 with width in power(s) of 2. So glue logic is required for converting
 memory pointers to xf::cv::Mat class data type and vice-versa when
 interacting with Vitis Vision kernel(s). Wrapper(s) are build over the
-kernel(s) with this glue logic. Below examples will provide a
+kernel(s) with this glue logic. The following examples provide a
 methodology to handle different kernel (Vitis Vision kernels located at
 <Github repo>/include) types (stream and memory mapped).
 
@@ -96,7 +100,7 @@ methodology to handle different kernel (Vitis Vision kernels located at
 Stream Based Kernels
 ~~~~~~~~~~~~~~~~~~~~
 
-To facilitate the conversion of pointer to xf::Mat and vice versa, two
+To facilitate the conversion of the pointer to xf::Mat and vice versa, two
 adapter functions are included as part of Vitis Vision xf::cv::Array2xfMat() and
 xf::cv::xfMat2Array(). It is necessary for the xf::Mat objects to be invoked
 as streams using HLS pragma with a minimum depth of 2. This results in a
@@ -165,7 +169,7 @@ first pixel of the next row.
    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
    void Array2xfMat(ap_uint< PTR_WIDTH > *srcPtr, xf::cv::Mat<MAT_T,ROWS,COLS,NPC,XFCVDEPTH>& dstMat, int stride)
 
-.. table:: Table. Array2xfMat Parmater Description
+.. table:: Table: Array2xfMat Parameter Description
 
    +-----------------------------------+-----------------------------------+
    | Parameter                         | Description                       |
@@ -251,13 +255,13 @@ first pixel of the next row.
    |                                   | Default value is srcMat.cols      |
    +-----------------------------------+-----------------------------------+
 
-Interface pointer widths
+Interface Pointer Widths
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Minimum pointer widths for different configurations is shown in the
 following table:
 
-.. table:: Table . Minimum and maximum pointer widths for different Mat types
+.. table:: Table: Minimum and Maximum Pointer Widths for Different Mat Types
 
    +-----------------+-----------------+-----------------+-----------------+
    | MAT type        | Parallelism     | Min PTR_WIDTH   | Max PTR_WIDTH   |
@@ -279,20 +283,19 @@ following table:
    | XF_8UC3         | XF_NPPC16       | 512             | 512             |
    +-----------------+-----------------+-----------------+-----------------+
 
-Kernel-to-Kernel streaming
+Kernel-to-Kernel Streaming
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There are two utility functions available in Vitis Vision, axiStrm2xfMat and xfMat2axiStrm to support streaming 
-of data between two kernels. For more details on kernel-to-kernel streaming, refer to the "Streaming Data Transfers Between the
-Kernels" section of [UG1393](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration) document.
+There are two utility functions available in Vitis Vision, axiStrm2xfMat and xfMat2axiStrm to support data streaming between two kernels. For more details on kernel-to-kernel streaming, refer to the "Streaming Data Transfers Between the
+Kernels" section of [UG1393](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration).
 
 axiStrm2xfMat
 ~~~~~~~~~~~~~
 
-axiStrm2xfMat is used by consumer kernel to support streaming data transfer between two kernels. 
+axiStrm2xfMat is used by the consumer kernel to support streaming data transfer between two kernels. 
 Consumer kernel receives data from producer kernel through kernel streaming interface which is defined by hls:stream 
 with the ap_axiu< PTR_WIDTH, 0, 0, 0> data type. axiStrm2xfMat would read from AXI stream and write into xf::cv:Mat based 
-on particular configuration (bit-depth, channels, pixel-parallelism) the xf::cv:Mat was created.
+on the particular configuration (bit-depth, channels, pixel-parallelism) the xf::cv:Mat was created.
 
 
 .. code:: c
@@ -300,7 +303,7 @@ on particular configuration (bit-depth, channels, pixel-parallelism) the xf::cv:
    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
    void axiStrm2xfMat(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat)
 
-.. table:: Table . Parameter description of axiStrm2xfMat function
+.. table:: Table: Parameter Description of the axiStrm2xfMat Function
 
 
    +-----------------+-------------------------------------------------------------------------------------+
@@ -324,15 +327,15 @@ on particular configuration (bit-depth, channels, pixel-parallelism) the xf::cv:
 xfMat2axiStrm
 ~~~~~~~~~~~~~
 
-xfMat2axiStrm is used by producer kernel to support streaming data transfer between two kernels. 
-This function converts the input xf:cv::Mat to AXI stream based on particular configuration (bit-depth, channels, pixel-parallelism). 
+xfMat2axiStrm is used by the producer kernel to support streaming data transfer between two kernels. 
+This function converts the input xf:cv::Mat to AXI stream based on the particular configuration (bit-depth, channels, pixel-parallelism). 
 
 .. code:: c
 
    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
    void xfMat2axiStrm(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& dstPtr)
 
-.. table:: Table . Parameter description of xfMat2axiStrm function
+.. table:: Table: Parameter Description of the xfMat2axiStrm Function
 
 
    +-----------------+-------------------------------------------------------------------------------------+
@@ -357,10 +360,10 @@ This function converts the input xf:cv::Mat to AXI stream based on particular co
 Memory Mapped Kernels
 ~~~~~~~~~~~~~~~~~~~~~
 
-In the memory map based kernels such as crop, Mean-shift tracking and
+In the memory map-based kernels such as crop, Mean-shift tracking, and
 bounding box, the input read will be for particular block of memory
 based on the requirement for the algorithm. The streaming interfaces
-will require the image to be read in raster scan manner, which is not
+will require the image to be read in a raster scan manner, which is not
 the case for the memory mapped kernels. The methodology to handle this
 case is as follows:
 
@@ -374,7 +377,7 @@ case is as follows:
    }
    }
 
-The gmem pointers must be mapped to the xf::cv::Mat objects during the
+The gmem pointers must be mapped to the xf::cv::Mat objects during
 object creation, and then the memory mapped kernels are called with
 these mats at the interface. It is necessary that the pointer size must
 be same as the size required for the xf::Vitis-Vision-func, unlike the
@@ -388,19 +391,19 @@ Makefile
 Examples for makefile are provided in the examples and tests section of GitHub.
 
 
-Design example Using Library on Vitis
+Design Example using Library on Vitis
 -------------------------------------
 
-Following is a multi-kernel example, where different kernel runs
+Following is a multi-kernel example, where different kernels run
 sequentially in a pipeline to form an application. This example performs
-Canny edge detection, where two kernels are involved, Canny and edge
-tracing. Canny function will take gray-scale image as input and provided
-the edge information in 3 states (weak edge (1), strong edge (3), and
+'Canny Edge Detection', where two kernels are involved, Canny and edge
+tracing. The Canny function will take gray-scale image as input and provided
+the edge information in three states (weak edge (1), strong edge (3), and
 background (0)), which is being fed into edge tracing, which filters out
 the weak edges. The prior works in a streaming based implementation and
 the later in a memory mapped manner.
 
-Host code
+Host Code
 ~~~~~~~~~
 
 The following is the Host code for the canny edge detection example. The
@@ -488,7 +491,7 @@ Vitis Vision.
        q.enqueueReadBuffer(imageFromDeviceedge, CL_TRUE, 0,(height*width),out_img_edge.data);
        q.finish();
 
-Top level kernel
+Top Level Kernel
 ~~~~~~~~~~~~~~~~~
 
 Below is the top-level/wrapper function with all necessary glue logic.
@@ -552,26 +555,26 @@ Evaluating the Functionality
 =============================
 
 You can build the kernels and test the functionality through software
-emulation, hardware emulation, and running directly on a supported
+emulation, hardware emulation, and running directly on supported
 hardware with the FPGA. 
 
-Software Emulation: Software emulation is equivalent to running a C-simulation of the
+**Software Emulation**: Software emulation is equivalent to running a C-simulation of the
 kernel. The time for compilation is minimal, and is therefore
 recommended to be the first step in testing the kernel.
 
-Hardware Emulation: Hardware emulation runs the test on the generated RTL after synthesis of
+**Hardware Emulation**: Hardware emulation runs the test on the generated RTL after synthesis of
 the C/C++ code. The simulation, since being done on RTL requires longer
 to complete when compared to software emulation. 
 
-Testing on the Hardware: To test on the hardware, the kernel must be compiled into a bitstream
+**Testing on the Hardware**: To test on hardware, the kernel must be compiled into a bitstream
 (building for hardware). This would consume some time since the C/C++ code must be converted to
 RTL, run through synthesis and implementation process before a bitstream
-is created. As a prerequisite the drivers has to be installed for
-corresponding XSA, for which the example was built for. 
+is created. As a prerequisite the drivers must be installed for the
+corresponding XSA, for which the example was built. 
 
 Use the following commands to run PL tests:
 
-*For PCIe devices:*
+**For PCIe devices:**
 
 .. code:: c
 
@@ -584,7 +587,7 @@ Use the following commands to run PL tests:
    make host xclbin TARGET=< sw_emu|hw_emu|hw >
    make run TARGET=< sw_emu|hw_emu|hw >
 
-*For embedded devices:*
+**For embedded devices:**
 
 Software Emulation: 
 

@@ -1,5 +1,10 @@
+.. 
+   Copyright 2023 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 RGBIR  to Standard Bayer Format
-================================
+################################
 
 The ``rgbir2bayer`` function creates a standard RGB-only-mosaic
 and an IR image from input RGB-IR combined mosaic image. 
@@ -38,7 +43,7 @@ and an IR image from input RGB-IR combined mosaic image.
 
 The following table describes the template and the function parameters.
 
-.. table:: Table . rgbir2bayer Parameter Description
+.. table:: Table: rgbir2bayer Parameters Description
 
    +-------------------+--------------------------------------------------+
    | Parameter         | Description                                      |
@@ -73,7 +78,7 @@ The following table describes the template and the function parameters.
    +-------------------+--------------------------------------------------+
    | BORDER_T          | Border handling type. Fixed to XF_BORDER_CONSTANT|
    +-------------------+--------------------------------------------------+
-   | USE_URAM          | Enable URAM storage strucure                     |
+   | USE_URAM          | Enable URAM storage structure                     |
    +-------------------+--------------------------------------------------+
    | \_src_mat         | Input image                                      |
    +-------------------+--------------------------------------------------+
@@ -106,7 +111,7 @@ The following table describes the template and the function parameters.
 The following table summarizes the resource utilization in different configurations, generated using Vitis HLS 2021.1 tool for the
 Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
-.. table:: Table . rgbir2bayer Function Resource Utilization Summary
+.. table:: Table: rgbir2bayer Function Resource Utilization Summary
 
     +----------------+---------------------------+----------------------+-----------+------+------+-----+
     | Operating Mode | Operating Frequency (MHz) |               Utilization Estimate                   |
@@ -121,11 +126,11 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
 
 
 The following table summarizes the performance of the kernel in 1-pixel
-mode as generated using Vitis HLS 2021.1 tool for the Xilinx
+mode as generated using the Vitis HLS 2021.1 tool for the Xilinx
 xczu9eg-ffvb1156-2-i-es2 FPGA to process a grayscale 4K (2160x3840)
 image.
 
-.. table:: Table . rgbir2bayer Function Performance Estimate Summary
+.. table:: Table: rgbir2bayer Function Performance Estimate Summary
 
     +-----------------------------+------------------+
     | Operating Mode              | Latency Estimate |

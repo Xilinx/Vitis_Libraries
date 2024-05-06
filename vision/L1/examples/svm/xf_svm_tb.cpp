@@ -38,7 +38,7 @@ int main() {
         a += 0.0008;
     }
 
-    unsigned char out_frac;
+    unsigned char out_frac = 0;
 
     // top function call (fixed point computation)
     uint16_t ind1 = INDEX_ARR_1;

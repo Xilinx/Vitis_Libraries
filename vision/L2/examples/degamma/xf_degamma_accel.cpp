@@ -21,7 +21,7 @@ static constexpr int __XF_DEPTH_OUT = (HEIGHT * WIDTH * XF_PIXELWIDTH(OUT_TYPE, 
 extern "C" {
 void degamma_accel(ap_uint<INPUT_PTR_WIDTH>* in_ptr,
                    ap_uint<OUTPUT_PTR_WIDTH>* out_ptr,
-                   ap_ufixed<32, 18> params[3][NUM][3],
+                   uint32_t params[3][NUM][3],
                    unsigned short bayerp,
                    int height,
                    int width) {

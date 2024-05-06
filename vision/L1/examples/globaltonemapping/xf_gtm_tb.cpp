@@ -57,6 +57,8 @@ int main(int argc, char** argv) {
 
     float c1 = 3.0;
     float c2 = 1.5;
+    unsigned int gtm_config_1 = (unsigned int)(c1 * 256);
+    unsigned int gtm_config_2 = (unsigned int)(c2 * 256);
 
     double maxL = 0, minL = 100;
     double mean = 0;
@@ -113,8 +115,8 @@ int main(int argc, char** argv) {
     ////////////Top function call //////////////////
     for (int i = 0; i < 2; i++) {
         // Call the top function
-        gtm_accel((ap_uint<INPUT_PTR_WIDTH>*)hdr_img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_hls.data, c1, c2, height,
-                  width);
+        gtm_accel((ap_uint<INPUT_PTR_WIDTH>*)hdr_img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_hls.data, gtm_config_1,
+                  gtm_config_2, height, width);
     }
 
     imwrite("out_img.jpg", out_img);

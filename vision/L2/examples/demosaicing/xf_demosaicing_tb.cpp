@@ -158,6 +158,8 @@ int main(int argc, char** argv) {
 
     int height = img.rows;
     int width = img.cols;
+    uint16_t bformat = BPATTERN; // Bayer format BG-0; GB-1; GR-2; RG-3
+
     std::cout << "Input image height : " << height << std::endl;
     std::cout << "Input image width  : " << width << std::endl;
     cl_int err;
@@ -195,6 +197,7 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(1, buffer_outImage));
     OCL_CHECK(err, err = kernel.setArg(2, height));
     OCL_CHECK(err, err = kernel.setArg(3, width));
+    OCL_CHECK(err, err = kernel.setArg(4, bformat));
 
     // Initialize the buffers:
     cl::Event event;

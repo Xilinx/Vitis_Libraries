@@ -60,6 +60,9 @@ int main(int argc, char** argv) {
     float c1 = 3.0;
     float c2 = 1.5;
 
+    unsigned int gtm_config_1 = (unsigned int)(c1 * 256);
+    unsigned int gtm_config_2 = (unsigned int)(c2 * 256);
+
     double maxL = 0, minL = 100;
     double mean = 0;
     float pxl_val;
@@ -153,8 +156,8 @@ int main(int argc, char** argv) {
     // Set kernel arguments:
     OCL_CHECK(err, err = kernel.setArg(0, buffer_inImage));
     OCL_CHECK(err, err = kernel.setArg(1, buffer_outImage));
-    OCL_CHECK(err, err = kernel.setArg(2, c1));
-    OCL_CHECK(err, err = kernel.setArg(3, c2));
+    OCL_CHECK(err, err = kernel.setArg(2, gtm_config_1));
+    OCL_CHECK(err, err = kernel.setArg(3, gtm_config_2));
     OCL_CHECK(err, err = kernel.setArg(4, hdr_img.rows));
     OCL_CHECK(err, err = kernel.setArg(5, hdr_img.cols));
 

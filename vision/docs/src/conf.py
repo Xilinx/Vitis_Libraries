@@ -27,13 +27,13 @@ sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest_b/sphinx'))
 # -- Project information -----------------------------------------------------
 
 project = 'Vitis Vision Library'
-copyright = '2023, Xilinx'
+copyright = '2024, Xilinx'
 author = 'Xilinx'
 
 # The short X.Y version
-version = '2023.2'
+version = '2024.1'
 # The full version, including alpha/beta/rc tags
-release = 'v2023.2'
+release = 'v2024.1'
 html_last_updated_fmt = '%B %d, %Y'
 
 # -- General configuration ---------------------------------------------------

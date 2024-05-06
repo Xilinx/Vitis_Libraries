@@ -182,7 +182,7 @@ void autoexposurecorrection_sin(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN
                                 xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
                                 uint32_t hist_array1[AEC_HISTSIZE],
                                 uint32_t hist_array2[AEC_HISTSIZE],
-                                float p,
+                                int p,
                                 float inputMin,
                                 float inputMax,
                                 float outputMin,

@@ -1389,7 +1389,7 @@ _GENERIC_REMAP_TPLT void _GENERIC_REMAP::process_image_remap(
 // clang-format off
 #pragma HLS inline off
 
-#pragma HLS ARRAY_PARTITION variable=cubic_wts cyclic factor=16 dim=1 partition
+#pragma HLS ARRAY_PARTITION variable=cubic_wts cyclic factor=16 dim=1
     // clang-format on
 
     // Constant declaration

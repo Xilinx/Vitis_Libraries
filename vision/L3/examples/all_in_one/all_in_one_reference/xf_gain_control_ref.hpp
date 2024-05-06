@@ -23,7 +23,8 @@
 #include "common/xf_types.hpp"
 #include "common/xf_infra.hpp"
 
-void gainControlOCV(cv::Mat input, cv::Mat& output, unsigned short rgain, unsigned short bgain) {
+void gainControlOCV(
+    cv::Mat input, cv::Mat& output, int code, unsigned short rgain, unsigned short bgain, unsigned short ggain) {
     cv::Mat mat = input.clone();
     int height = mat.size().height;
     int width = mat.size().width;
@@ -43,26 +44,34 @@ void gainControlOCV(cv::Mat input, cv::Mat& output, unsigned short rgain, unsign
             bool cond1, cond2;
             cond1 = (j % 2 == 0);
             cond2 = (j % 2 != 0);
-            if (XF_BAYER_PATTERN == XF_BAYER_RG) {
+            if (code == XF_BAYER_RG) {
                 if (i % 2 == 0 && cond1)
                     pixel = (maxSize)((pixel * rgain) >> 7);
                 else if (i % 2 != 0 && cond2)
                     pixel = (maxSize)((pixel * bgain) >> 7);
-            } else if (XF_BAYER_PATTERN == XF_BAYER_GR) {
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
+            } else if (code == XF_BAYER_GR) {
                 if (i % 2 == 0 && cond2)
                     pixel = (maxSize)((pixel * rgain) >> 7);
                 else if (i % 2 != 0 && cond1)
                     pixel = (maxSize)((pixel * bgain) >> 7);
-            } else if (XF_BAYER_PATTERN == XF_BAYER_BG) {
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
+            } else if (code == XF_BAYER_BG) {
                 if (i % 2 == 0 && cond1)
                     pixel = (maxSize)((pixel * bgain) >> 7);
                 else if (i % 2 == 0 && cond2)
                     pixel = (maxSize)((pixel * rgain) >> 7);
-            } else if (XF_BAYER_PATTERN == XF_BAYER_GB) {
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
+            } else if (code == XF_BAYER_GB) {
                 if (i % 2 == 0 && cond2)
                     pixel = (maxSize)((pixel * bgain) >> 7);
                 else if (i % 2 != 0 && cond1)
                     pixel = (maxSize)((pixel * rgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
             }
             // std::cout<<"Final: "<<pixel<<std::endl;
             mat.at<realSize>(i, j) = cv::saturate_cast<realSize>(pixel); // writing each pixel

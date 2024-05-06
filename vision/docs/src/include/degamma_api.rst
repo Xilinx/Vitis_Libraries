@@ -1,12 +1,17 @@
+.. 
+   Copyright 2023 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 Degamma
-=======
+########
 
 .. rubric:: API Syntax
 
-Degamma also known as linearization is typically designed to linearize the input from sensor (or any pre-processing IP) in order to facilitate ISP processing that operates on linear domain, such as noise reduction.
+Degamma also known as linearization is typically designed to linearize the input from a sensor (or any pre-processing IP) in order to facilitate ISP processing that operates on a linear domain, such as noise reduction.
 While non-linearization comes in several forms, this module is served to linearize only simple curves.
 
-This implementaion supports Bayer Raw data of 8, 10, 12, 16 bits per pixel with maximum 64 knee points PWL mapping.
+This implementation supports Bayer Raw data of 8, 10, 12, and 16 bits per pixel with a maximum of 64 knee points PWL mapping.
 
 .. code:: c
 
@@ -25,7 +30,7 @@ This implementaion supports Bayer Raw data of 8, 10, 12, 16 bits per pixel with 
 
 The following table describes the template and the function parameters.
 
-.. table:: Table HDR Decompand Parameter Description
+.. table:: Table: HDR Decompand Parameter Description
 
     +----------------------+-------------------------------------------------------------+
     | Parameter            | Description                                                 |
@@ -55,8 +60,8 @@ The following table describes the template and the function parameters.
     +----------------------+-------------------------------------------------------------+
     | dst                  | Output Image                                                |
     +----------------------+-------------------------------------------------------------+
-    | params               | array containing upper limit, slope and intercept of linear |
-    |                      | equations for Red, Green and Blue colours.                  |
+    | params               | Array containing upper limit, slope, and intercept of linear|
+    |                      | equations for Red, Green, and Blue colors.                  |
     +----------------------+-------------------------------------------------------------+
     | bayerp               | Input Bayer pattern. XF_BAYER_BG, XF_BAYER_GB, XF_BAYER_GR  |
     |                      | and XF_BAYER_RG are the supported values.                   |
@@ -66,7 +71,7 @@ The following table describes the template and the function parameters.
 
 The following table summarizes the resource utilization in different configurations, generated using Vitis HLS 2022.2 tool for the xcu200-fsgd2104-2-e, to process a FHD Bayer image.
 
-.. table:: Table Degamma Resource Utilization Summary
+.. table:: Table: Degamma Resource Utilization Summary
 
     +----------------+---------------------+------------------+----------+-------+-------+------+
     | Operating Mode | Operating Frequency |              Utilization Estimate                  |
@@ -85,7 +90,7 @@ The following table summarizes the resource utilization in different configurati
 
 The following table summarizes the performance estimates in different configurations, generated using Vitis HLS 2022.2 tool for the xcu200-fsgd2104-2-e, to process a FHD Bayer image.
 
-.. table:: Table Degamma Performance Estimate Summary
+.. table:: Table: Degamma Performance Estimate Summary
 
     +----------------+---------------------+------------------+
     | Operating Mode | Operating Frequency | Latency Estimate |

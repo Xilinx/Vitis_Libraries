@@ -5,31 +5,35 @@
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
-Migrating HLS Video Library to Vitis vision
-============================================
+.. xfOpenCVlib
+
+   .. Copyright © 2024 Advanced Micro Devices, Inc
+
+Migrating the HLS Video Library to Vitis vision
+################################################
 
 The HLS video library has been deprecated. All the functions and
 most of the infrastructure available in HLS video library are now
-available in Vitis vision with their names changed and some modifications.
-These HLS video library functions ported to Vitis vision supports build
-flow also.
+available in AMD Vitis™ Vision, with their names changed and some modifications.
+These HLS video library functions ported to Vitis vision support build
+flow.
 
 This section provides the details on using the C++ video processing
-functions and the infrastructure present in HLS video library.
+functions and the infrastructure present in the HLS video library.
 
 Infrastructure Functions and Classes
 -------------------------------------
 
-All the functions imported from HLS video library now take xf::cv::Mat (in
+All functions imported from HLS video library now take xf::cv::Mat (in
 sync with Vitis vision library) to represent image data instead of hls::Mat.
 The main difference between these two is that the hls::Mat uses
 hls::stream to store the data whereas xf::cv::Mat uses a pointer. Therefore,
 hls:: Mat cannot be exactly replaced with xf::cv::Mat for migrating.
 
-Below table summarizes the differences between member functions of
+The following table summarizes the differences between member functions of
 hls::Mat to xf::cv::Mat.
 
-.. table:: Table : Infrastructure Functions and Classes
+.. table:: Table: Infrastructure Functions and Classes
 
    +----------------------+----------------------+--------------------------+
    | Member Function      | hls::Mat (HLS Video  | xf::cv::Mat (Vitis vision|
@@ -64,10 +68,10 @@ hls::Mat to xf::cv::Mat.
    |                      |                      | location.                |
    +----------------------+----------------------+--------------------------+
 
-Infrastructure files available in HLS Video Library hls_video_core.hpp,
+Infrastructure files available in the HLS Video Library hls_video_core.hpp,
 hls_video_mem.hpp, hls_video_types.hpp are moved to xf_video_core.hpp,
-xf_video_mem.hpp, xf_video_types.hpp in Vitis vision Library and
-hls_video_imgbase.hpp is deprecated. Code inside these files unchanged
+xf_video_mem.hpp, xf_video_types.hpp in the Vitis vision Library and
+hls_video_imgbase.hpp is deprecated. Code inside these files is unchanged
 except that these are now under xf::cv::namespace.
 
 Classes
@@ -75,32 +79,32 @@ Classes
 
 Memory Window Buffer
    hls::window is now xf::cv::window. No change in the implementation,
-   except the namespace change. This is located in “xf_video_mem.h”
+   except the namespace change. This is located in the “xf_video_mem.h”
    file.
 Memory Line Buffer
    hls::LineBuffer is now xf::cv::LineBuffer. No difference between the two,
    except xf::cv::LineBuffer has extra template arguments for inferring
-   different types of RAM structures, for the storage structure used.
-   Default storage type is “RAM_S2P_BRAM” with RESHAPE_FACTOR=1.
-   Complete description can be found here
+   different types of RAM structures for the storage structure used.
+   The default storage type is “RAM_S2P_BRAM” with RESHAPE_FACTOR=1.
+   A complete description can be found here
    `xf::cv::LineBuffer <Migrating HLS Video Library to Vitis vision.html#ndi1542884914646>`__. This is
-   located in xf_video_mem.hpp file.
+   located in the xf_video_mem.hpp file.
 
-Funtions
+Functions
 ---------
 
 OpenCV interface functions
-   These functions covert image data of OpenCV Mat format to/from HLS
-   AXI types. HLS Video Library had 14 interface functions, out of
-   which, two functions are available in Vitis vision Library:
-   cvMat2AXIvideo and AXIvideo2cvMat located in “xf_axi.h” file. The
-   rest are all deprecated.
+   These functions convert image data of OpenCV Mat format to/from HLS
+   AXI types. The HLS Video Library had 14 interface functions out of
+   which two functions are available in the Vitis vision Library:
+   cvMat2AXIvideo and AXIvideo2cvMat, located in the “xf_axi.h” file. The
+   rest are deprecated.
 
 AXI4-Stream I/O Functions
    The I/O functions which convert hls::Mat to/from AXI4-Stream
-   compatible data type (hls::stream) are hls::AXIvideo2Mat,
-   hls::Mat2AXIvideo. These functions are now deprecated and added 2 new
-   functions xf::cv::AXIvideo2xfMat and xf::cv:: xfMat2AXIvideo to facilitate
+   compatible data type (hls::stream) are hls::AXIvideo2Mat and
+   hls::Mat2AXIvideo. These functions are now deprecated. Two new functions were added:
+   xf::cv::AXIvideo2xfMat and xf::cv:: xfMat2AXIvideo to facilitate
    the xf::cv::Mat to/from conversion. To use these functions, the header
    file "xf_infra.hpp" must be included.
 
@@ -110,10 +114,10 @@ xf::cv::window
 ---------------
 
 A template class to represent the 2D window buffer. It has three
-parameters to specify the number of rows, columns in window buffer and
+parameters to specify the number of rows, columns in th window buffer and
 the pixel data type.
 
-Class definition
+Class Definition
 ~~~~~~~~~~~~~~~~~
 
 .. code:: c
@@ -150,7 +154,7 @@ Parameter Descriptions
 The following table lists the xf::cv::Window class members and their
 descriptions.
 
-.. table:: Table : Window Function Parameter Descriptions
+.. table:: Table: Window Function Parameter Descriptions
 
    +-----------------+----------------------------------------------------+
    | Parameter       | Description                                        |
@@ -161,7 +165,7 @@ descriptions.
 Member Function Description
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. table:: Table : Member Function Description
+.. table:: Table: Member Function Description
 
    +-----------------------------------+-----------------------------------+
    | Function                          | Description                       |
@@ -227,7 +231,7 @@ Member Function Description
 Template Parameter Description
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. table:: Table : Template Parameter Description
+.. table:: Table: Template Parameter Description
 
    +-----------+------------------------------------------+
    | Parameter | Description                              |
@@ -378,7 +382,7 @@ Video Processing Functions
 --------------------------
 
 The following table summarizes the video processing functions ported
-from HLS Video Library into Vitis vision Library along with the API
+from the HLS Video Library into the Vitis vision Library along with the API
 modifications.
 
 .. table:: Table : Video Processing Functions
@@ -689,8 +693,7 @@ modifications.
 
 
 
-Note: All the functions except Reduce can process N-pixels per clock
-where N is power of 2.
+.. note::All functions except 'Reduce' can process N-pixels per clock (where N is power of 2).
 
 
   

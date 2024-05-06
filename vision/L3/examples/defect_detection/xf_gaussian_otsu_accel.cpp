@@ -17,6 +17,38 @@
 
 #include "xf_gaussian_otsu_accel_config.h"
 
+template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_IN = 2, int XFCVDEPTH_OUT = 2>
+void fifo_copy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& in_img,
+               xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& out_img,
+               unsigned short height,
+               unsigned short width) {
+// clang-format off
+#pragma HLS INLINE OFF
+    // clang-format on
+    ap_uint<13> row, col;
+    int readindex = 0, writeindex = 0;
+
+    ap_uint<13> img_width = width >> XF_BITSHIFT(NPC);
+
+Row_Loop:
+    for (row = 0; row < height; row++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+#pragma HLS LOOP_FLATTEN off
+    // clang-format on
+    Col_Loop:
+        for (col = 0; col < img_width; col++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=COLS/NPC max=COLS/NPC
+#pragma HLS pipeline
+            // clang-format on
+            XF_TNAME(SRC_T, NPC) tmp_src;
+            tmp_src = in_img.read(readindex++);
+            out_img.write(writeindex++, tmp_src);
+        }
+    }
+}
+
 extern "C" {
 void gaussian_otsu_accel(ap_uint<GAUSSIAN_INPUT_PTR_WIDTH>* img_inp,
                          ap_uint<GAUSSIAN_OUTPUT_PTR_WIDTH>* img_out,
@@ -36,7 +68,7 @@ void gaussian_otsu_accel(ap_uint<GAUSSIAN_INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN> in_mat(rows, cols);
+    xf::cv::Mat<OTSU_PIXEL_TYPE, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN> in_mat(rows, cols);
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT> out_bgr2y8_mat(rows, cols);
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT> out_mat(rows, cols);
@@ -63,10 +95,20 @@ void gaussian_otsu_accel(ap_uint<GAUSSIAN_INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<GAUSSIAN_INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN>(img_inp, in_mat);
+    xf::cv::Array2xfMat<GAUSSIAN_INPUT_PTR_WIDTH, OTSU_PIXEL_TYPE, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN>(img_inp,
+                                                                                                            in_mat);
 
-    xf::cv::custom_bgr2y8<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(
-        in_mat, out_bgr2y8_mat, pxl_val);
+#if (_COLOR == 1)
+    {
+        xf::cv::custom_bgr2y8<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(
+            in_mat, out_bgr2y8_mat, pxl_val);
+    }
+#else
+    {
+        fifo_copy<OTSU_PIXEL_TYPE, OTSU_PIXEL_TYPE, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(
+            in_mat, out_bgr2y8_mat, rows, cols);
+    }
+#endif
 
     xf::cv::GaussianBlur<FILTER_WIDTH, XF_BORDER_CONSTANT, XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN,
                          XF_CV_DEPTH_OUT>(out_bgr2y8_mat, out_mat, sigma);
@@ -74,8 +116,7 @@ void gaussian_otsu_accel(ap_uint<GAUSSIAN_INPUT_PTR_WIDTH>* img_inp,
     xf::cv::duplicateMat<XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT, XF_CV_DEPTH_OUT_1>(
         out_mat, out_mat_otsu, out_mat_ret);
 
-    xf::cv::OtsuThreshold<OTSU_PIXEL_TYPE, HEIGHT, WIDTH, XF_NPPCX, XF_USE_URAM, XF_CV_DEPTH_OUT>(out_mat_otsu,
-                                                                                                  *Otsuval);
+    xf::cv::OtsuThreshold<XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_USE_URAM, XF_CV_DEPTH_OUT>(out_mat_otsu, *Otsuval);
 
     xf::cv::xfMat2Array<GAUSSIAN_OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT_1>(out_mat_ret,
                                                                                                         img_out);

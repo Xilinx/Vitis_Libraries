@@ -20,6 +20,51 @@
 
 #include "xcl2.hpp"
 
+const float bt2020_bt709_arr[3][3] = {
+    {1.6605, -0.5876, -0.0728}, {-0.1246, 1.1329, -0.0083}, {-0.0182, -0.1006, 1.1187}};
+
+const float bt2020_bt709_off[3] = {0.0, 0.0, 0.0};
+
+const float bt709_bt2020_arr[3][3] = {{0.627, 0.329, 0.0433}, {0.0691, 0.92, 0.0113}, {0.0164, 0.088, 0.896}};
+
+const float bt709_bt2020_off[3] = {0.0, 0.0, 0.0};
+
+const float rgb_yuv_601_arr[3][3] = {{0.257, 0.504, 0.098}, {-0.148, -0.291, 0.439}, {0.439, -0.368, -0.071}};
+
+const float rgb_yuv_601_off[3] = {0.0625, 0.500, 0.500};
+
+const float rgb_yuv_709_arr[3][3] = {{0.183, 0.614, 0.062}, {-0.101, -0.338, 0.439}, {0.439, -0.399, -0.040}};
+
+const float rgb_yuv_709_off[3] = {0.0625, 0.500, 0.500};
+
+const float rgb_yuv_2020_arr[3][3] = {
+    {0.225613, 0.582282, 0.050928}, {-0.119918, -0.309494, 0.429412}, {0.429412, -0.394875, -0.034537}};
+
+const float rgb_yuv_2020_off[3] = {0.062745, 0.500, 0.500};
+
+const float yuv_rgb_601_arr[3][3] = {{1.164, 0.000, 1.596}, {1.164, -0.813, -0.391}, {1.164, 2.018, 0.000}};
+
+const float yuv_rgb_601_off[3] = {-0.87075, 0.52925, -1.08175};
+
+const float yuv_rgb_709_arr[3][3] = {{1.164, 0.000, 1.793}, {1.164, -0.213, -0.534}, {1.164, 2.115, 0.000}};
+
+const float yuv_rgb_709_off[3] = {-0.96925, 0.30075, -1.13025};
+
+const float yuv_rgb_2020_arr[3][3] = {
+    {1.164384, 0.000000, 1.717000}, {1.164384, -0.191603, -0.665274}, {1.164384, 2.190671, 0.000000}};
+
+const float yuv_rgb_2020_off[3] = {-0.931559, 0.355379, -1.168395};
+
+const float full_to_16_235_arr[3][3] = {
+    {0.856305, 0.000000, 0.000000}, {0.000000, 0.856305, 0.000000}, {0.000000, 0.000000, 0.856305}};
+
+const float full_to_16_235_off[3] = {0.0625, 0.0625, 0.0625};
+
+const float full_from_16_235_arr[3][3] = {
+    {1.167808, 0.000000, 0.000000}, {0.000000, 1.167808, 0.000000}, {0.000000, 0.000000, 1.167808}};
+
+const float full_from_16_235_off[3] = {-0.0729880, -0.0729880, -0.0729880};
+
 void compute_gamma(float r_g, float g_g, float b_g, uchar gamma_lut[256 * 3]) {
     float gamma_inv[256] = {
         0.000000, 0.003922, 0.007843, 0.011765, 0.015686, 0.019608, 0.023529, 0.027451, 0.031373, 0.035294, 0.039216,
@@ -121,16 +166,126 @@ int main(int argc, char** argv) {
 
     // Write input image
     imwrite("input.png", in_img);
+    float ccm_matrix[3][3];
+    float offsetarray[3];
+
+    switch (XF_CCM_TYPE) {
+        case 0:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = bt2020_bt709_arr[i][j];
+                }
+                offsetarray[i] = bt2020_bt709_off[i];
+            }
+
+            break;
+        case 1:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = bt709_bt2020_arr[i][j];
+                }
+                offsetarray[i] = bt709_bt2020_off[i];
+            }
+
+            break;
+        case 2:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = rgb_yuv_601_arr[i][j];
+                }
+                offsetarray[i] = rgb_yuv_601_off[i];
+            }
+
+            break;
+        case 3:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = rgb_yuv_709_arr[i][j];
+                }
+                offsetarray[i] = rgb_yuv_709_off[i];
+            }
+
+            break;
+        case 4:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = rgb_yuv_2020_arr[i][j];
+                }
+                offsetarray[i] = rgb_yuv_2020_off[i];
+            }
+
+            break;
+        case 5:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = yuv_rgb_601_arr[i][j];
+                }
+                offsetarray[i] = yuv_rgb_601_off[i];
+            }
+
+            break;
+        case 6:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = yuv_rgb_709_arr[i][j];
+                }
+                offsetarray[i] = yuv_rgb_709_off[i];
+            }
+
+            break;
+        case 7:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = yuv_rgb_2020_arr[i][j];
+                }
+                offsetarray[i] = yuv_rgb_2020_off[i];
+            }
+
+            break;
+        case 8:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = full_to_16_235_arr[i][j];
+                }
+                offsetarray[i] = full_to_16_235_off[i];
+            }
+
+            break;
+        case 9:
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    ccm_matrix[i][j] = full_from_16_235_arr[i][j];
+                }
+                offsetarray[i] = full_from_16_235_off[i];
+            }
+
+            break;
+        default:
+            break;
+    }
+    // cmm matrix shifted 20 bits to the left
+    signed int ccm_matrix_int[3][3];
+    signed int offsetarray_int[3];
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            ccm_matrix_int[i][j] = (signed int)(ccm_matrix[i][j] * 1048576);
+        }
+        offsetarray_int[i] = (signed int)(offsetarray[i] * 1048576);
+    }
 
     /////////////////////////////////////// CL ////////////////////////
 
     int height = in_img.rows;
     int width = in_img.cols;
+    size_t ccm_matrix_int_size_bytes = 3 * 3 * sizeof(signed int);
+    size_t offsetarray_int_size_bytes = 3 * sizeof(signed int);
     std::cout << "Input image height : " << height << std::endl;
     std::cout << "Input image width  : " << width << std::endl;
 
     unsigned short rgain = 256;
     unsigned short bgain = 256;
+    unsigned short ggain = 200;
 
     unsigned char mode_reg = 1;
 
@@ -144,7 +299,11 @@ int main(int argc, char** argv) {
     float c1 = 3.0;
     float c2 = 1.5;
 
+    unsigned int gtm_config_1 = (unsigned int)(c1 * 256);
+    unsigned int gtm_config_2 = (unsigned int)(c2 * 256);
+
     float gamma_val_r = 0.5f, gamma_val_g = 0.8f, gamma_val_b = 0.8f;
+    unsigned short bformat = XF_BAYER_PATTERN; // Bayer format BG-0; GB-1; GR-2; RG-3
 
     compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut);
 
@@ -175,6 +334,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, image_in_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer imageFromDevice(context, CL_MEM_WRITE_ONLY, image_out_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer buffer_inVec(context, CL_MEM_READ_ONLY, vec_in_size_bytes, NULL, &err));
+    OCL_CHECK(err, cl::Buffer buffer_ccm_matrix_int(context, CL_MEM_READ_ONLY, ccm_matrix_int_size_bytes, NULL, &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_offsetarray_int(context, CL_MEM_READ_ONLY, offsetarray_int_size_bytes, NULL, &err));
     // Set the kernel arguments
     OCL_CHECK(err, err = kernel.setArg(0, imageToDevice));
     OCL_CHECK(err, err = kernel.setArg(1, imageFromDevice));
@@ -185,8 +347,12 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(6, buffer_inVec));
     OCL_CHECK(err, err = kernel.setArg(7, mode_reg));
     OCL_CHECK(err, err = kernel.setArg(8, pawb));
-    OCL_CHECK(err, err = kernel.setArg(9, c1));
-    OCL_CHECK(err, err = kernel.setArg(10, c2));
+    OCL_CHECK(err, err = kernel.setArg(9, gtm_config_1));
+    OCL_CHECK(err, err = kernel.setArg(10, gtm_config_2));
+    OCL_CHECK(err, err = kernel.setArg(11, buffer_ccm_matrix_int));
+    OCL_CHECK(err, err = kernel.setArg(12, buffer_offsetarray_int));
+    OCL_CHECK(err, err = kernel.setArg(13, bformat));
+    OCL_CHECK(err, err = kernel.setArg(14, ggain));
 
     for (int i = 0; i < 3; i++) {
         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inVec,      // buffer on the FPGA
@@ -205,6 +371,17 @@ int main(int argc, char** argv) {
         // Launch the kernel
         OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &event_sp));
         clWaitForEvents(1, (const cl_event*)&event_sp);
+        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_ccm_matrix_int,     // buffer on the FPGA
+                                            CL_TRUE,                   // blocking call
+                                            0,                         // buffer offset in bytes
+                                            ccm_matrix_int_size_bytes, // Size in bytes
+                                            ccm_matrix_int));
+
+        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_offsetarray_int,     // buffer on the FPGA
+                                            CL_TRUE,                    // blocking call
+                                            0,                          // buffer offset in bytes
+                                            offsetarray_int_size_bytes, // Size in bytes
+                                            offsetarray_int));
 
         event_sp.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
         event_sp.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);

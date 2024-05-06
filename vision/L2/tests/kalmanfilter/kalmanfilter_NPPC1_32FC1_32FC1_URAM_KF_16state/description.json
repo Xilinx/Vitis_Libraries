@@ -80,7 +80,19 @@
                     ]
                 }
             }
-        }
+        },
+        "containers": [
+            {
+                "name": "krnl_kalmanfilter",
+                "accelerators": [
+                    {
+                        "name": "kalmanfilter_accel",
+                        "frequency": 150.0
+                    }
+                ],
+                "frequency": 150.0
+            }
+        ]
     },
     "gui": true,
     "launch": [

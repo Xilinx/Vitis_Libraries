@@ -68,6 +68,7 @@ int main(int argc, char** argv) {
     size_t data_out_size_bytes = sizeof(unsigned char);
     uint8_t Otsuval;
 
+    int stride = STRIDE;
 #if READ_y8
     FILE* fp_y8;
 
@@ -98,7 +99,6 @@ int main(int argc, char** argv) {
     in_height = in_img.rows;
     in_depth = in_img.depth();
 
-    int stride = STRIDE;
     fprintf(stderr, "row = %d col = %d depth = %d\n", in_height, in_width, in_depth);
 
     ocv_ref.create(in_img.rows, in_img.cols, in_img.depth());
@@ -230,7 +230,8 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = cca_krnl.setArg(2, cca_imageFromDevice));
     OCL_CHECK(err, err = cca_krnl.setArg(3, def_pix_buffer));
     OCL_CHECK(err, err = cca_krnl.setArg(4, height));
-    OCL_CHECK(err, err = cca_krnl.setArg(5, stride));
+    OCL_CHECK(err, err = cca_krnl.setArg(5, width));
+    OCL_CHECK(err, err = cca_krnl.setArg(6, stride));
 
     OCL_CHECK(err, q.enqueueWriteBuffer(imageToGaus,                     // buffer on the FPGA
                                         CL_TRUE,                         // blocking call

@@ -71,7 +71,7 @@ template <int SRC_T,
           int TC>
 void AWBGainUpdateKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
                          xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
-                         float thresh,
+                         int thresh,
                          int i_gain[3]) {
     int width = src1.cols >> XF_BITSHIFT(NPC);
     int height = src1.rows;
@@ -126,7 +126,7 @@ template <int SRC_T,
           int TC>
 void AWBChannelGainKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
                           xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
-                          float thresh,
+                          int thresh,
                           int i_gain[3]) {
     int width = src1.cols >> XF_BITSHIFT(NPC);
     int height = src1.rows;
@@ -142,7 +142,10 @@ void AWBChannelGainKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& s
 
     int maxval = (1 << (XF_DTPIXELDEPTH(SRC_T, NPC))) - 1; // 65535.0f;
 
-    ap_ufixed<32, 32> thresh255 = ap_ufixed<32, 32>(thresh * maxval);
+    ap_fixed<32, 16> thresh_float = (float)thresh;
+    thresh_float = thresh_float >> 8;
+
+    ap_ufixed<32, 32> thresh255 = ap_ufixed<32, 32>((thresh_float)*maxval);
 
     int minRGB, maxRGB;
 
@@ -280,7 +283,7 @@ template <int SRC_T,
 void AWBNormalizationkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src,
                             xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                             uint32_t hist[3][HISTSIZE],
-                            float p,
+                            int p,
                             float inputMin,
                             float inputMax,
                             float outputMin,
@@ -301,8 +304,14 @@ void AWBNormalizationkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>&
     ap_fixed<STEP + 8, STEP + 2> max_vals = inputMax + 0.5f;
     ap_fixed<STEP + 8, STEP + 2> minValue[3] = {min_vals, min_vals, min_vals}; //{-0.5, -0.5, -0.5};
     ap_fixed<STEP + 8, STEP + 2> maxValue[3] = {max_vals, max_vals, max_vals}; //{12287.5, 16383.5, 12287.5};
-    ap_fixed<STEP + 8, 4> s1 = p;
-    ap_fixed<STEP + 8, 4> s2 = p;
+
+    ap_fixed<32, 16> p_float = (float)p;
+    p_float = p_float >> 8;
+
+    ap_fixed<STEP + 8, 4> s1 = (ap_fixed<STEP + 8, 4>)p_float;
+    ap_fixed<STEP + 8, 4> s2 = (ap_fixed<STEP + 8, 4>)p_float;
+
+    // std::cout << "AWBNormalizationkernel"<< s1<< std::endl;
 
     int rval = s1 * total / 100;
     int rval1 = (100 - s2) * total / 100;
@@ -997,7 +1006,7 @@ template <int SRC_T,
 void AWBhistogramkernel_imp(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
                             xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& src2,
                             uint32_t hist[3][HISTSIZE],
-                            float p,
+                            int p,
                             float inputMin,
                             float inputMax,
                             float outputMin,
@@ -1373,7 +1382,7 @@ template <int SRC_T,
 void AWBhistogram(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& src2,
                   uint32_t histogram[3][HISTSIZE],
-                  float thresh,
+                  int thresh,
                   float inputMin,
                   float inputMax,
                   float outputMin,
@@ -1426,7 +1435,7 @@ template <int SRC_T,
 void AWBNormalization(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src,
                       xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                       uint32_t histogram[3][HISTSIZE],
-                      float thresh,
+                      int thresh,
                       float inputMin,
                       float inputMax,
                       float outputMin,
@@ -1476,7 +1485,7 @@ template <int SRC_T,
           int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
 void AWBGainUpdate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
                    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& src2,
-                   float thresh,
+                   int thresh,
                    int i_gain[3]) {
     xf::cv::AWBGainUpdateKernel<SRC_T, SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, XF_CHANNELS(SRC_T, NPC),
                                 XF_DEPTH(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
@@ -1493,7 +1502,7 @@ template <int SRC_T,
           int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
 void AWBChannelGain(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src,
                     xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
-                    float thresh,
+                    int thresh,
                     int i_gain[3]) {
     xf::cv::AWBChannelGainKernel<SRC_T, SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1,
                                  XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), XF_DEPTH(SRC_T, NPC),

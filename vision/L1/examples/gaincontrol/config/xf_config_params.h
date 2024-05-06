@@ -52,6 +52,8 @@ void gaincontrol_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                        int rows,
                        int cols,
                        unsigned short rgain,
-                       unsigned short bgain);
+                       unsigned short bgain,
+                       unsigned short ggain,
+                       unsigned short bformat);
 #endif
 //_XF_GC_CONFIG_H_

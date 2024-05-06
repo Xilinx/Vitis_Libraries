@@ -1,6 +1,11 @@
 
 .. _custom bgr2y8:
 
+.. 
+   Copyright 2023 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 CUSTOM BGR2Y8
 =============
 
@@ -23,7 +28,7 @@ Custom Y8 image is generated from bgr image using h, s, v values.
 
 The following table describes the template and the function parameters.
 
-.. table:: Table CUSTOM BGR2Y8 Parameter Description
+.. table:: Table: CUSTOM BGR2Y8 Parameter Description
 
     +----------------------+-------------------------------------------------------------+
     | Parameter            | Description                                                 |
@@ -57,9 +62,9 @@ The following table describes the template and the function parameters.
 
 .. rubric:: Resource Utilization
 
-The following table summarizes the resource utilization in different configurations, generated using Vitis HLS 2022.1 tool for the xcu200-fsgd2104-2-e, to process a 4k, 3 channel image.  
+The following table summarizes the resource utilization in different configurations, generated using Vitis HLS 2022.1 tool for the xcu200-fsgd2104-2-e, to process a 4k, three channel image.  
 
-.. table:: Table Resource Utilization Summary
+.. table:: Table: Resource Utilization Summary
 
     +----------------+---------------------+------------------+----------+-------+-------+------+
     | Operating Mode | Operating Frequency |              Utilization Estimate                  |
@@ -76,9 +81,9 @@ The following table summarizes the resource utilization in different configurati
 .. rubric:: Performance Estimate
 
 
-The following table summarizes the performance estimates in different configurations, generated using Vitis HLS 2022.1 tool for the xcu200-fsgd2104-2-e, to process a 4k, 3 channel image.
+The following table summarizes the performance estimates in different configurations, generated using Vitis HLS 2022.1 tool for the xcu200-fsgd2104-2-e, to process a 4k, three channel image.
 
-.. table:: Table Performance Estimate Summary
+.. table:: Table: Performance Estimate Summary
 
     +----------------+---------------------+------------------+
     | Operating Mode | Operating Frequency | Latency Estimate |

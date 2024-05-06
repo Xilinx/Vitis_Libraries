@@ -129,5 +129,9 @@ void isppipeline(uint16_t width,
                  unsigned char gamma_lut[256 * 3],
                  unsigned char mode_reg,
                  uint16_t pawb,
-                 short wr_hls[NO_EXPS * XF_NPPC * W_B_SIZE]);
+                 short wr_hls[NO_EXPS * XF_NPPC * W_B_SIZE],
+                 signed int ccm_config_1[3][3],
+                 signed int ccm_config_2[3],
+                 uint16_t ggain,
+                 uint16_t bformat);
 #endif //_XF_ISP_TYPES_H_

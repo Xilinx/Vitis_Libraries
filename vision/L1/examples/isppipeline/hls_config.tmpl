@@ -10,15 +10,16 @@ tb.file=${XF_PROJ_ROOT}/L1/examples/isppipeline/xf_isp_tb.cpp
 tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/isppipeline/xf_isp_tb.cpp, -I ${XF_PROJ_ROOT}/L1/examples/isppipeline/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
 tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/isppipeline/xf_isp_tb.cpp, -I ${XF_PROJ_ROOT}/L1/examples/isppipeline/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
 
-csim.argv= ${XF_PROJ_ROOT}/data/gaincontrol_hd_input.png 
+csim.argv= ${XF_PROJ_ROOT}/data/ltm_input_HD.png  
 csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
 
-cosim.argv= ${XF_PROJ_ROOT}/data/gaincontrol_hd_input.png 
+cosim.argv= ${XF_PROJ_ROOT}/data/ltm_input_HD.png  
 cosim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
 
 
 
 vivado.flow=${VIVADO_FLOW}
 vivado.rtl=verilog
+sim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
 
 

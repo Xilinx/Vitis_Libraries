@@ -2,21 +2,21 @@
 
 Level 2 contains the OpenCL host-callable kernels and engines for various Vitis Vision functions.
 
-'examples' folder contains the OpenCL host code file and a C++ accel file that demonstrate the call of Vitis Vision functions to build for Vitis.
+The 'examples' folder contains the OpenCL host code file and a C++ accel file that demonstrate the call of Vitis Vision functions to build for Vitis.
 
-'examples/build' folder has the configuration file that would help modify the default configuration of the function.
+The 'examples/build' folder contains the configuration file used to modify the default configuration of the function.
 
-'tests' folder has sub-folders named according to the function and the configuration it would run. Each individual folder has Makefiles and config files that would perform software emulation, hardware emulation and hardware build of the corresponding function in examples folder, based on the 'platform' the user selects.
+The 'tests' folder has sub-folders named according to the function and the configuration it would run. Each individual folder has Makefiles and config files that would perform software emulation, hardware emulation and hardware build of the corresponding function in examples folder, based on the platform you select.
 
-'tests/aie' directory has tests that are targeted for AI engine.
+The 'tests/aie' directory contains tests that are targeted for AI engine.
 
-### Commands to run AIE tests:
+### Commands to Run AIE Tests
 
 Please refer to the [L2/tests/aie/README.md](https://github.com/Xilinx/Vitis_Libraries/blob/master/vision/L2/tests/aie/README.md) file.
 
-### Commands to run PL tests:
+### Commands to Run PL Tests
 
-**For PCIe devices:**
+**For PCIe Devices:**
 
     source < path-to-Vitis-installation-directory >/settings64.sh
     source < path-to-XRT-installation-directory >/setup.sh
@@ -27,7 +27,7 @@ Please refer to the [L2/tests/aie/README.md](https://github.com/Xilinx/Vitis_Lib
     make host xclbin TARGET=< sw_emu|hw_emu|hw >
     make run TARGET=< sw_emu|hw_emu|hw >
 
-**For embedded devices:**
+**For Embedded Devices**
 
 Software Emulation:
 
@@ -51,7 +51,7 @@ Hardware Emulation and Hardware Build:
     make host xclbin TARGET=< hw_emu|hw > 
     make run TARGET=< hw_emu|hw > #This command will generate only the sd_card folder in case of hardware build.
 
-**Note**. For hw run on embedded devices, copy the generated sd_card folder content under package_hw to an SD Card. More information on preparing the SD Card is available [here](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18842385/How+to+format+SD+card+for+SD+boot#HowtoformatSDcardforSDboot-CopingtheImagestotheNewPartitions). After successful booting of the board, run the following commands:
+**Note**: For hw runs on embedded devices, copy the generated ``sd_card`` folder content under ``package_hw`` to an SD Card. More information on preparing the SD Card is available [here](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18842385/How+to+format+SD+card+for+SD+boot#HowtoformatSDcardforSDboot-CopingtheImagestotheNewPartitions). After successful booting of the board, run the following commands:
 
     cd /mnt
 

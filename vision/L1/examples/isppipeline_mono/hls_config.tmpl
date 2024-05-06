@@ -1,0 +1,25 @@
+[hls]
+
+clock=3.3
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/examples/isppipeline_mono/xf_isp_accel.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/examples/isppipeline_mono/xf_isp_accel.cpp, -I ${XF_PROJ_ROOT}/L1/examples/isppipeline_mono/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/isppipeline_mono/xf_isp_accel.cpp, -I ${XF_PROJ_ROOT}/L1/examples/isppipeline_mono/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+syn.top=ISPPipeline_accel
+tb.file=${XF_PROJ_ROOT}/L1/examples/isppipeline_mono/xf_isp_tb.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/isppipeline_mono/xf_isp_tb.cpp, -I ${XF_PROJ_ROOT}/L1/examples/isppipeline_mono/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/isppipeline_mono/xf_isp_tb.cpp, -I ${XF_PROJ_ROOT}/L1/examples/isppipeline_mono/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+
+csim.argv= ${XF_PROJ_ROOT}/data/ltm_input_HD.png 
+csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
+
+cosim.argv= ${XF_PROJ_ROOT}/data/ltm_input_HD.png  
+cosim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+sim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
+
+

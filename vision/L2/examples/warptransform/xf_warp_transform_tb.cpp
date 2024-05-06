@@ -17,6 +17,8 @@
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
 #include "xf_warp_transform_tb_config.h"
+#include <pthread.h>
+#include <sys/resource.h>
 
 // Changing transformation matrix dimensions with transform Affine 2x3,
 // Perspecitve 3x3
@@ -35,7 +37,27 @@
 // Image operations and transformation matrix input format
 typedef float image_oper;
 
+void* thread_function(void* arg) {
+    printf("Thread started\n");
+    return NULL;
+}
+
 int main(int argc, char* argv[]) {
+    const rlim_t kStackSize = 32L * 1024L * 1024L; // min stack size = 64 Mb
+    struct rlimit rl;
+    int result;
+
+    result = getrlimit(RLIMIT_STACK, &rl);
+    if (result == 0) {
+        if (rl.rlim_cur < kStackSize) {
+            rl.rlim_cur = kStackSize;
+            result = setrlimit(RLIMIT_STACK, &rl);
+            if (result != 0) {
+                fprintf(stderr, "setrlimit returned result = %d\n", result);
+            }
+        }
+    }
+
     if (argc != 2) {
         fprintf(stderr, "Usage: <INPUT IMAGE PATH 1>\n");
         return EXIT_FAILURE;

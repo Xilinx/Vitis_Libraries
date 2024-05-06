@@ -695,7 +695,7 @@
                                                                           {
                                                                                             "name": "thresh",
                                                                                             "direction": "",
-                                                                                            "type": "float"
+                                                                                            "type": "uint32_t"
                                                                           },
                                                                           {
                                                                                             "name": "inputMin",
@@ -1025,7 +1025,7 @@
                                                             {
                                                                               "name": "mul_value",
                                                                               "direction": "",
-                                                                              "type": "float"
+                                                                              "type": "int"
                                                             }
                                           ]
                         } 
@@ -5453,7 +5453,7 @@
                                                         "api_name": "xf::cv::remap",
                                                         "target_domain": "PL",
                                                         "display_name": "remap",
-                                                        "brief": "| The ``remap`` function takes pixels from one place in the image and   relocates them to another position in another image. Two types of   interpolation methods are used here for mapping the image from source   to destination image. | |image146|",
+                                                        "brief": "| The ``remap`` function takes pixels from one place in the image and   relocates them to another position in another image. Two types of   interpolation methods are used here for mapping the image from source   to destination image. dst(x,y) = src(mapx(x,y), mapy(x,y))",
                                                         
                                                         "header_file_name": [
                                                                           "imgproc/xf_remap.hpp"
@@ -5497,7 +5497,7 @@
                                                                                             "type": "int",
                                                                                             "minimum": 16,
                                                                                             "maximum": 2160,
-                                                                                            "description": " Number of input image rows to be buffered inside.    Must be set based on the map data. For instance, for    left right flip, 2 rows are sufficient. "
+                                                                                            "description": " Height of input and output images "
                                                                           },
                                                                           {
                                                                                             "name": "COLS",

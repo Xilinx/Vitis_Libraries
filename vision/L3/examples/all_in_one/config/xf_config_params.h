@@ -98,8 +98,8 @@
 #define USE_DEGAMMA 1
 #define USE_AWB 1
 #define USE_CCM 1
-#define USE_LTM 0
-#define USE_GTM 1
+#define USE_LTM 1
+#define USE_GTM 0
 #define USE_QND 0
 #define USE_3DLUT 0
 #define USE_CSC 0

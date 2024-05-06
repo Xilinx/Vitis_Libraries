@@ -18,7 +18,8 @@
 #include "xcl2.hpp"
 #include "xf_gaincontrol_tb_config.h"
 #include <time.h>
-void gainControlOCV(cv::Mat input, cv::Mat& output, int code, unsigned short rgain, unsigned short bgain) {
+void gainControlOCV(
+    cv::Mat input, cv::Mat& output, int code, unsigned short rgain, unsigned short bgain, unsigned short ggain) {
     cv::Mat mat = input.clone();
     int height = mat.size().height;
     int width = mat.size().width;
@@ -43,21 +44,29 @@ void gainControlOCV(cv::Mat input, cv::Mat& output, int code, unsigned short rga
                     pixel = (maxSize)((pixel * rgain) >> 7);
                 else if (i % 2 != 0 && cond2)
                     pixel = (maxSize)((pixel * bgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
             } else if (code == XF_BAYER_GR) {
                 if (i % 2 == 0 && cond2)
                     pixel = (maxSize)((pixel * rgain) >> 7);
                 else if (i % 2 != 0 && cond1)
                     pixel = (maxSize)((pixel * bgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
             } else if (code == XF_BAYER_BG) {
                 if (i % 2 == 0 && cond1)
                     pixel = (maxSize)((pixel * bgain) >> 7);
                 else if (i % 2 == 0 && cond2)
                     pixel = (maxSize)((pixel * rgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
             } else if (code == XF_BAYER_GB) {
                 if (i % 2 == 0 && cond2)
                     pixel = (maxSize)((pixel * bgain) >> 7);
                 else if (i % 2 != 0 && cond1)
                     pixel = (maxSize)((pixel * rgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
             }
             // std::cout<<"Final: "<<pixel<<std::endl;
             mat.at<realSize>(i, j) = cv::saturate_cast<realSize>(pixel); // writing each pixel
@@ -65,7 +74,6 @@ void gainControlOCV(cv::Mat input, cv::Mat& output, int code, unsigned short rga
     }
     output = mat;
 }
-
 int main(int argc, char** argv) {
     if (argc != 2) {
         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
@@ -96,13 +104,16 @@ int main(int argc, char** argv) {
 
     unsigned short rgain = 154;
     unsigned short bgain = 140;
+    unsigned short ggain = 140;
+
+    uint16_t bformat = BFORMAT; // Bayer format BG-0; GB-1; GR-2; RG-3
 
     // TIMER START CODE
     struct timespec begin_hw, end_hw;
     clock_gettime(CLOCK_REALTIME, &begin_hw);
 
     // OpenCV Reference
-    gainControlOCV(in_gray, ocv_ref, BFORMAT, rgain, bgain);
+    gainControlOCV(in_gray, ocv_ref, BFORMAT, rgain, bgain, ggain);
 
     // TIMER END CODE
     clock_gettime(CLOCK_REALTIME, &end_hw);
@@ -159,6 +170,8 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(3, in_gray.cols));
     OCL_CHECK(err, err = kernel.setArg(4, rgain));
     OCL_CHECK(err, err = kernel.setArg(5, bgain));
+    OCL_CHECK(err, err = kernel.setArg(6, ggain));
+    OCL_CHECK(err, err = kernel.setArg(7, bformat));
 
     // Initialize the buffers:
     cl::Event event;

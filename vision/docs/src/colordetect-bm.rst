@@ -1,45 +1,34 @@
-.. 
-   Copyright 2021 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 .. _l3_colordetect:
 
-=============
+
 Color Detect
-=============
+#############
 
-Color Detect example resides in ``L3/examples/colordetect`` directory.
+The Color Detect example resides in ``L3/examples/colordetect`` directory.
 
-This benchmark tests the performance of `colordetect` function. The Color Detection algorithm is basically used for color object tracking and object detection, based on the color of the object. 
+This benchmark tests the performance of the `colordetect` function. The Color Detection algorithm is basically used for color object tracking and object detection, based on the color of the object. 
 
-The tutorial provides a step-by-step guide that covers commands for building and running kernel.
+The tutorial provides a step-by-step guide that covers commands for building and running a kernel.
 
 Executable Usage
 ================
 
-* **Work Directory(Step 1)**
+* **Work Directory (Step 1)**
 
-The steps for library download and environment setup can be found in README file of L3 folder. For getting the design,
+The steps for library download and environment setup can be found in the README file of the L3 folder. For getting the design:
 
 .. code-block:: bash
 
    cd L3/example/colordetect
 
-* **Build kernel(Step 2)**
+* **Build Kernel (Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your XCLBIN and host binary targeting a specific device. Be aware that this process can take up to a couple of hours.
 
 .. code-block:: bash
 
@@ -50,16 +39,16 @@ Run the following make command to build your XCLBIN and host binary targeting a 
    make host xclbin TARGET=hw
 
 
-* **Run kernel(Step 3)**
+* **Run Kernel (Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
    make run TARGET=hw 
 
 
-* **Example output(Step 4)** 
+* **Example Output (Step 4)** 
 
 .. code-block:: bash
    
@@ -79,9 +68,9 @@ Profiling
 =========
 
 The Color Detect design is validated on Alveo U200 board at 300 MHz frequency. 
-The hardware resource utilizations are listed in the following table.
+Hardware resource utilization is shown in the following table.
 
-.. table:: Table 1 Hardware resources for Colour Detection
+.. table:: Table 1: Hardware resources for Color Detection
     :align: center
 
     +------------------------------------------+-----------------+------------+------------+------------+
@@ -95,9 +84,9 @@ The hardware resource utilizations are listed in the following table.
     +------------+------+----------------------+-----------------+------------+------------+------------+
 
 
-The performance is shown below
+Performance is shown in the following table.
 
-.. table:: Table 2 Performance numbers in terms of FPS (Frames Per Second) for Colour Detection
+.. table:: Table 2: Performance Numbers in terms of FPS (Frames Per Second) for Color Detection
     :align: center
 	
     +----------------------+--------------+--------------+

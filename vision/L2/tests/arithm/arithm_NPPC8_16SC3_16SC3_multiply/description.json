@@ -78,7 +78,19 @@
                         "$(OPENCV_LIB)"
                     ]
                 }
-            }
+            },
+            "containers": [
+                {
+                    "name": "krnl_arithm",
+                    "accelerators": [
+                        {
+                            "name": "arithm_accel",
+                            "frequency": 150.0
+                        }
+                    ],
+                    "frequency": 150.0
+                }
+            ]
         }
     },
     "gui": true,

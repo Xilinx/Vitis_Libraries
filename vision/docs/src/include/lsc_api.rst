@@ -1,7 +1,12 @@
-Lens Shading Correction
-========================
+.. 
+   Copyright 2023 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-Vignetting/Lensshading refers to the fall-off pixel intensity from the centre towards the edges of the image.
+Lens Shading Correction
+########################
+
+Vignetting/Lens shading refers to the fall-off pixel intensity from the centre towards the edges of the image.
 In this algorithm, vignette is corrected by considering the distance between the centre pixel and actual image pixel position. This distance is used to calculate intensity gain per pixel per channel which is used for the correction.
 
 .. rubric:: API Syntax
@@ -17,7 +22,7 @@ In this algorithm, vignette is corrected by considering the distance between the
 
 The following table describes template parameters and arguments to the function.
 
-.. table:: Table Lensshading correction Parameter Description
+.. table:: Table: Lens Shading Correction Parameter Descriptions
 
   +-----------------+-----------------------------------------------------------+
   | Parameter       | Description                                               |
@@ -48,9 +53,9 @@ The following table describes template parameters and arguments to the function.
    
 .. rubric:: Resource Utilization
 
-The following table summarizes the resource utilization  of the kernel in different configurations, generated using Vitis HLS 2020.2 tool, to process a FULL HD image.
+The following table summarizes the resource utilization  of the kernel in different configurations, generated using the Vitis HLS 2020.2 tool, to process a FULL HD image.
 
-.. table:: Table Lensshading correction Resource Utilization Summary
+.. table:: Table: Lens Shading Correction Resource Utilization Summary
 
   +--------------------+-------------------------+--------------------------+--------------+--------+---------+---------+
   |   Operating Mode   |   Operating Frequency   |   Utilization Estimate                                               |
@@ -67,7 +72,7 @@ The following table summarizes the resource utilization  of the kernel in differ
 
 The following table summarizes a performance estimate of the kernel in different configurations, as generated using Vitis HLS 2020.2 tool, to process a FULL HD image.
 
-.. table:: Table Lensshading correction Function Performance Estimate Summary
+.. table:: Table: Lens Shading Correction Function Performance Estimate Summary
 
   +--------------------+-------------------------+---------------------------------------------+
   |   Operating Mode   |   Operating Frequency   |  Latency Estimate                           |

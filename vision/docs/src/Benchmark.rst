@@ -1,43 +1,32 @@
 .. 
-   Copyright 2021 Xilinx, Inc.
+   Copyright 2024 Advanced Micro Devices, Inc
   
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. Project documentation master file, created by
    sphinx-quickstart on Thu Jun 20 14:04:09 2020.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-==========
+
 Benchmark 
-==========
+##########
     
 .. _datasets:
 
 Datasets
------------
+===========
 
-Dataset is selected based on maximum resolution of the image to be processed, number of pixels processed per clock cycle (NPPC) and few other function specific parameters.
+The dataset is selected based on the maximum resolution of the image to be processed, the number of pixels processed per clock cycle (NPPC), and other function-specific parameters.
 
 Performance
-------------
+============
 
-Resource utilization numbers along with the achieved Frames Per Second (FPS) are represented for standalone kernel for both Full HD(1920x1080) and 4K(3840x2160) image resolutions. CPU numbers are an average of 100 runs and are calculated on Intel(R) Xeon(R) CPU E5-2680 @ 2.70GHz.
+Resource utilization numbers and achieved Frames Per Second (FPS) are represented by standalone kernels for both Full HD(1920x1080) and 4K(3840x2160) image resolutions. CPU numbers are an average of 100 runs and are calculated on an Intel(R) Xeon(R) CPU E5-2680 @ 2.70GHz.
 
-.. note:: Some of the reference functions against which benchmark is done, although follow similar algorithm as Vitis Vision function, doesnot match functionally with the corresponding Vitis Vision function because of different output format. In such cases there are two reference functions, one, a standard function, used to calculate the performance which can be enabled or disabled through the macro "__XF_BENCHMARK" defined in the config file. The other is internal reference function used for verifying functional correctness against the Vitis Vision function.
+.. note:: Some of the reference functions against which benchmarking is done (although following similar algorithms as Vitis Vision function), do not functionally match the corresponding Vitis Vision function because of a different output format. In such cases there are two reference functions; a standard function, used to calculate the performance which can be enabled or disabled through the macro "__XF_BENCHMARK" defined in the ``config`` file, and an internal reference function used for verifying functional correctness against the Vitis Vision function.
 
-.. table:: Table 1 Performance on FPGA
+.. table:: Table 1: Performance on FPGA
     :align: center
 
     +-------------------------------+------------------------------------------+--------------+----------+-----------------+------------+------------+------------+
@@ -118,9 +107,9 @@ Below are the links to the individual benchmark result files.
 .. _l2_vitis_vision:
 
 
-* **Download code**
+* **Download Code**
 
-These Vitis Vision benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``main`` branch.
+Vitis Vision benchmarks can be downloaded from the `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``main`` branch.
 
 .. code-block:: bash
 
@@ -131,7 +120,7 @@ These Vitis Vision benchmarks can be downloaded from `vitis libraries <https://g
 
 * **Setup environment**
 
-Specify the corresponding Vitis, XRT, FPGA device, and path to the OpenCV libs by running following commands.
+Specify the corresponding Vitis, XRT, FPGA device, and path to the OpenCV libs by running following commands:
 
 .. code-block:: bash
 

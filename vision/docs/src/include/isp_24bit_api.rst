@@ -1,11 +1,16 @@
 
+.. 
+   Copyright 2023 Advanced Micro Devices, Inc
+  
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 ISP 24-bit Pipeline
 ====================
 
-	For imaging sensors that do not equip with a high bit width on the transmission side, they can be compressed(compand) in a piece-wise linear(PWL) mapping to a lower bit depth.
-	Through HDR De-companding kernel, the data can be recovered to higher bit widths and processed through further kernels of ISP by converting to 14bit for efficient use of resources.
+Imaging sensors that do not equip with a high bit-width on the transmission side can be compressed (compand) in a piece-wise linear (PWL) mapping to a lower bit depth.
+ Through the HDR De-companding kernel, the data can be recovered to higher bit-widths and processed through further kernels of ISP by converting to 14-bit for efficient use of resources.
 	
-This ISP 24-bit pipeline inclues 17 blocks, they are following:
+This ISP 24-bit pipeline includes the following 17 blocks:
 	
     *	HDR Decompand
     *   ConvertTo
@@ -25,7 +30,7 @@ This ISP 24-bit pipeline inclues 17 blocks, they are following:
     *	3D LUT
     *   Color space conversion
       
-Current design example demonstrates how to use ISP functions in a pipeline. 
+The current design example demonstrates how to use ISP functions in a pipeline. 
 
 .. image:: ./images/block_diagram_24bit.png
    :class: image 
@@ -34,7 +39,7 @@ Current design example demonstrates how to use ISP functions in a pipeline.
 
 The following table describes the parameters of the pipeline which can be configured dynamically.
       
-.. table:: Runtime parameter for the pipeline
+.. table:: Table: Runtime Parameter for the Pipeline
 
 
     +-----------------------------+--------------------------------------------------+
@@ -146,7 +151,7 @@ The following table describes the parameters of the pipeline which can be config
 The following table describes the template parameters which can be configured.
 
 
-.. table:: Compile time parameters
+.. table:: Table: Compile Time Parameters
 
 
     +----------------------+------------------------------------------------------+
@@ -183,7 +188,7 @@ The following table describes the template parameters which can be configured.
     | LUTDIM               | 33x33 dimension of input LUT                         |
     +----------------------+------------------------------------------------------+
    
-The following example demonstrates the ISP pipeline with above list of functions.
+The following example demonstrates the ISP pipeline with the above list of functions.
 
 .. code:: c
 
@@ -272,7 +277,8 @@ The following example demonstrates the ISP pipeline with above list of functions
 					float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
 
 					float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
-
+                    unsigned int blc_config_1 = (int)(mul_fact * 65536); // mul_fact int Q16_16 format
+                    unsigned int blc_config_2 = BLACK_LEVEL; 
 					float inputmin = 0.0f;
 					float inputmax1 = 255.0f;
 					float outputmin = 0.0f;
@@ -299,7 +305,7 @@ The following example demonstrates the ISP pipeline with above list of functions
 						rggb_out, aec_out, height, width, aec_thresh, aec_hist0, aec_hist1);
 
 					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_aec_out,
-												 XF_CV_DEPTH_blc_out>(aec_out, blc_out, BLACK_LEVEL, mul_fact);
+												 XF_CV_DEPTH_blc_out>(aec_out, blc_out, blc_config_2, blc_config_1);
 					xf::cv::badpixelcorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, 0, XF_CV_DEPTH_blc_out, XF_CV_DEPTH_bpc_out>(
 						blc_out, bpc_out);
 
@@ -343,7 +349,7 @@ The following example demonstrates the ISP pipeline with above list of functions
 
 The ISP 24bit Pipeline design is validated on zcu102 board at 150 MHz frequency. 
 
-.. table:: Resource Utilization Summary for a 1920x1080 image
+.. table:: Table: Resource Utilization Summary for a 1920x1080 Image
 
     +----------------+---------------------+----------------+-------------+-----------+--------+------+
     | Operating Mode | Operating Frequency |              Utilization Estimate                        |
@@ -358,7 +364,7 @@ The ISP 24bit Pipeline design is validated on zcu102 board at 150 MHz frequency.
 
 
 
-.. table:: Performance Estimate Summary for a 1920x1080 image
+.. table:: Table: Performance Estimate Summary for a 1920x1080 Image
 
     +----------------+---------------------+------------------+
     | Operating Mode | Operating Frequency | Latency Estimate |
