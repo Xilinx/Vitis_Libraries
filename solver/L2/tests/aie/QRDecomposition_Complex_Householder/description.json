@@ -3,7 +3,7 @@
     "description": [
         "QRD based on Householder Algorithm"
     ],
-    "flow": "versal",
+    "flow": "aie",
     "keywords": [
         "aiecompiler", 
         "aiesimulator",
