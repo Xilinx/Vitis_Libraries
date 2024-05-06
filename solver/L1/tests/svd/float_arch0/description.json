@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx SVD",
+    "name": "Xilinx_SVD_float_arch0",
     "description": "",
     "flow": "hls",
     "platform_allowlist": [
@@ -64,5 +64,6 @@
             "vivado_impl"
         ],
         "category": "canary"
-    }
+    },
+    "gui": true
 }

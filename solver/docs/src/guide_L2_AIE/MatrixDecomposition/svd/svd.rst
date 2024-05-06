@@ -47,7 +47,8 @@ Template Parameters
 ---------------------
 * `column_num`: the number of columns;
 * `row_num`: the number of rows;
-* `k_rep`: Each graph call will perform one "column-sweep" on all `k_rep` input matrixs and make columns.
+* `round_num`: the number of sweeps to get result converged.
+* `batch_num`: the number of number of matrix to be process in one graph call.
 
 To access more details, see :ref:`AIE APIs Overview`.
 
@@ -56,18 +57,32 @@ Ports
 To access more details, see :ref:`AIE APIs Overview`.
 
 
-AIE Kernel
+AIE Graph
 ===============
 
 Design Notes
 --------------------
-* Target: :math:`A=UMV*`, :math:`A[M*N]` is input matrix, :math:`U[M*M]`, :math:`V*[N*N]` and  :math:`R[M*N]` are the output matrix via singular value decomposition. 
+* Target: :math:`A=UMV*`, :math:`A[M*N]` is input matrix, :math:`U[M*N]`, :math:`M*[N*N]` and  :math:`V[N*N]` are the output matrix via singular value decomposition. 
 * DataType supported: `cfloat`.
 * DataSize supported: input matrix size :math:`M` is the times of 4 and no bigger than 1024, and :math:`N` shoulb be no bigger than 256.
 * Description: 
-    Singular value decomposition took one-sided Jacobi algorithm to solve. It's an iterative approximation algorithm. Each time the AIE graph perform "column-sweep" on the input matrixs and make columns of its inputs more "orthogonal". After number of iterations, the final result is considered to be good enough as approximation of result of singular value decomposition. The number of iteration needed depends on size of matrix and precision requirements. Thus our design does not put any assumption on it and leave it to users to determine how many iterations they need.
+    Singular value decomposition took one-sided Jacobi algorithm to solve. It's an iterative approximation algorithm. Each time the AIE graph perform "column-sweep" on the input matrixs.
+    It makes columns of its inputs more "orthogonal". After number of iterations, the final result is considered to be good enough as approximation of result of SVD. 
+    The number of iteration needed depends on size of matrix and precision requirements. This design leaves it to users to determine how many iterations they need.
+* Implementation Notes:
+    * This design utilize "One-sided Jacobi" method to solve SVD.
+    * This design takes two streams as input interface and two streams as output interface.
+    * It needs to take `round_num` rounds to get the final result. Each rounds contains inputs of `batch_num` matrixes. 
+    * The first rounds are raw inputs of matrix `A`, identity matrix `I`, and vector of zeros.
+    * Each following round after the first one takes last round's output as its inputs.
+    * So for first round, inputs are first matrix A, identity matrix, vector of zeros, second matrix A, identity matrix, vector of zeros... `batch_num` th matrix A, identity matrix, vector of zeros.
+    * Matrix A, I, zero vectors are concated in row to form a (m+n+1) rows x (n) columns matrix, thus Elements[0:M-1] of each column are from A, Elements[M:M+N-1] is from I, Elements[M+N] is zeros.
+    * Matrix U, V, diagonal value of M are concated in row to form a (m+n+1) rows x (n) columns matrix, thus Elements[0:M-1] of each column are from U, Elements[M:M+N-1] is from V, Elements[M+N] is from diagonal of M.
+    * Concated inputs are injected column by column, concated outputs are extracted in the same way.
+    * Each column of inputs are injected to two input stream in such way: Elem[N*4] and Elem[N*4+1] to stream 0, Elem[N*4+2], Elem[N*4+3] to stream 1.
+    * Each column of outputs are extracted in the same way as inputs, but from output stream 0 and 1.
 
-Kernel Interfaces
+Graph Interfaces
 --------------------
 
 .. code::

@@ -47,20 +47,29 @@ Ports
 To access more details, see :ref:`AIE APIs Overview`.
 
 
-AIE Kernel
+AIE Graph
 ===============
 
 Design Notes
 --------------------
-* Target: :math:`A=QR`, :math:`A[M*N]` is input matrix, :math:`Q[M*M]` and  :math:`R[M*N]` are the output matrix via QR decomposition. 
+* Target: :math:`A=QR`, :math:`A[M*N]` is input matrix, :math:`Q[M*N]` and  :math:`R[N*N]` are the output matrix via QR decomposition. 
 * DataType supported: `cfloat`.
 * DataSize supported: input matrix size :math:`M` is the times of 4 and no bigger than 1024, and :math:`N` shoulb be no bigger than 256.
 * Description: 
     * The AIE core function calculate one column of :math:`Q` and update the rest elements of :math:`matA` 
     * To calculate all columns of :math:`Q`, N AIE cores are used, N is the number of input matrix's column number. The first core's output is fed to the second core's input, and continued till the last column is computed;
     * The information of matrix dimension, the target column id which is updated, and so on are read from the head of input streams;
+* Implementation Notes:
+    * This design utilzied "Modified Gram-Schmidt" method to solve QR decomposition.
+    * This design takes two streams as input interface and two streams as output interface.
+    * It takes input of matrix A and matrix I (identity matrix) as inputs, and generate matrix Q and R as output.
+    * Matrix A and I are concated in row to form a (m+n) rows x (n) columns matrix, so Elements[0:M-1] of each column are from A and Elements[M:M+N-1] are from I.
+    * Matrix Q and R are concated in row to form a (m+n) rows x (n) columns matrix, so Elements[0:M-1] of each column are from Q and Elements[M:M+N-1] are from R.
+    * Concated inputs are injected column by column, concated outputs are extracted in the same way.
+    * Each column of inputs are injected to two input stream in such way: Elem[N*4] and Elem[N*4+1] to stream 0, Elem[N*4+2], Elem[N*4+3] to stream 1.
+    * Each column of outputs are extracted in the same way as inputs, but from output stream 0 and 1.
 
-Kernel Interfaces
+Graph Interfaces
 --------------------
 
 .. Code::
@@ -84,17 +93,3 @@ Kernel Interfaces
 
   *  ``input_stream_cfloat* out_0``    stream of output matrix, contains lower two elements of each 4 elements.
   *  ``input_stream_cfloat* out_1``    stream of output matrix, contains higher two elements of each 4 elements.
-
-Performance
-==============
-
-Test_1
---------------------
-* DataSize: matrix size is 64x64;
-* Total cycles consumed: 10752
-
-Test_2
---------------------
-* DataSize: matrix size is 512x256;
-* Total cycles consumed: 344064
-

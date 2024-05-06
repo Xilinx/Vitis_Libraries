@@ -39,7 +39,7 @@
     "data": [
         "PROJECT/data/matA_real_64.txt",
         "PROJECT/data/matA_imag_64.txt",
-        "PROJECT/data/gldMatL_real_64.tx ",
+        "PROJECT/data/gldMatL_real_64.txt",
         "PROJECT/data/gldMatL_imag_64.txt"
     ],
     "launch": [

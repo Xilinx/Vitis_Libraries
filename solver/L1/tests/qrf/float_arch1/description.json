@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx QR Factorization",
+    "name": "Xilinx_QR_Factorization_float_arch1",
     "description": "",
     "flow": "hls",
     "platform_allowlist": [
@@ -64,5 +64,6 @@
             "vivado_impl"
         ],
         "category": "canary"
-    }
+    },
+    "gui": true
 }

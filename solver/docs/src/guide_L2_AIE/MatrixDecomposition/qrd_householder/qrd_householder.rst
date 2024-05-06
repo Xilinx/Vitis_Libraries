@@ -62,7 +62,7 @@ Ports
 To access more details, see :ref:`AIE APIs Overview`.
 
 
-AIE Kernel
+AIE Graph
 ===============
 
 Design Notes
@@ -74,8 +74,17 @@ Design Notes
     * For single AIE core, AIE core function calculate the reflection vector in column k, and then update the rest of elements of :math:`matA` and update orthogonal matrix math:`matQ` using the reflection vector.
     * For the whole design, :math:`N` AIE cores are used, :math:`N` is the number of input matrix's column number. The reason is that zeros below diagonal is introduced column by column.
     * The previous core's output is fed to the next core's input, and on and on, till the last column is computed;
+* Implementation Notes:
+    * This design utilzied "HouseHolder" method to solve QR decomposition.
+    * This design takes two streams as input interface and two streams as output interface.
+    * It takes input of matrix A and matrix I (identity matrix) as inputs, and generate matrix Q and R as output.
+    * Matrix A and I are concated in row to form a (m+n) rows x (n) columns matrix, so Elements[0:M-1] of each column are from A and Elements[M:M+N-1] are from I.
+    * Matrix Q and R are concated in row to form a (m+n) rows x (n) columns matrix, so Elements[0:M-1] of each column are from Q and Elements[M:M+N-1] are from R.
+    * Concated inputs are injected column by column, concated outputs are extracted in the same way.
+    * Each column of inputs are injected to two input stream in such way: Elem[N*4] and Elem[N*4+1] to stream 0, Elem[N*4+2], Elem[N*4+3] to stream 1.
+    * Each column of outputs are extracted in the same way as inputs, but from output stream 0 and 1.
 
-Kernel Interfaces
+Graph Interfaces
 --------------------
 
 .. code::
@@ -102,19 +111,3 @@ Kernel Interfaces
 
   *  ``input_stream<cfloat>* matRQ_0``    stream of output matrix, contains lower two elements of each 4 elements.
   *  ``input_stream<cfloat>* matRQ_1``    stream of output matrix, contains higher two elements of each 4 elements.
-
-Performance
-==============
-
-Test_1
---------------------
-* DataSize: matrix size is 64x32;
-* Total cycles consumed: 10752
-
-Test_2
---------------------
-* DataSize: matrix size is 512x256;
-* Total cycles consumed: 344064
-
-.. toctree::
-   :maxdepth: 1
