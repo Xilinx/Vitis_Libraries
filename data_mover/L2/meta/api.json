@@ -108,6 +108,11 @@
       "api_name": "xf::data_mover::s2mm_4d_hsk",
       "target_domain": "PL",
       "spec_file": "s2mm_4d_hsk.json"
+    },
+    {
+      "api_name": "xf::data_mover::bi_dm_4d_hsk",
+      "target_domain": "PL",
+      "spec_file": "bi_dm_4d_hsk.json"
     }
   ]
 }

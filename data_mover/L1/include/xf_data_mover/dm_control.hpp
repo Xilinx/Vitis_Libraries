@@ -186,7 +186,7 @@ void alu_for_axis(ap_uint<32> pm[1024],
 PL_ALU_CORE_LOOP:
     while (!last) {
 #pragma HLS pipeline II = 1
-        //#pragma HLS latency min = 1 max = 1
+        // #pragma HLS latency min = 1 max = 1
         ap_uint<32> op = pm[pc];
         ap_uint<5> op_type = op(4, 0);
         ap_uint<3> mode = op(7, 5);

@@ -478,10 +478,10 @@ FLATTERN_URAM_READ_REQUEST_LOOP:
  * @tparam W width of AXI-master/URAM/AXI-stream port
  * @tparam D depth of external URAM.
  *
- * @param waddr_strm, input write address
- * @param wdata_strm, input write data
- * @param raddr_strm, input read address
- * @param rdata_strm, output read data
+ * @param waddr_strm input write address
+ * @param wdata_strm input write data
+ * @param raddr_strm input read address
+ * @param rdata_strm output read data
  */
 template <int W, int D>
 void uram_access(hls::stream<ap_uint<32> >& waddr_strm,
@@ -563,7 +563,7 @@ BURST_READ_LOOP:
 #pragma HLS pipeline II = 1
         ap_uint<10> req_left;
         if (rec_tail == rec_head)
-            req_left == OUTSTANDING / 2;
+            req_left = OUTSTANDING / 2;
         else if (rec_tail < rec_head)
             req_left = OUTSTANDING / 2 - (rec_head - rec_tail);
         else

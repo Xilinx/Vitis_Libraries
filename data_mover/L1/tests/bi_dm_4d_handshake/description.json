@@ -1,6 +1,6 @@
 {
-    "name": "Preloadable URAM HLS Test",
-    "description": "",
+    "name": "Xilinx Check Handshakes of Bi-directional Data Mover",
+    "description": "Check handshakes of Bi-DM in multiple cases",
     "flow": "hls",
     "platform_allowlist": [
         "u200",
@@ -13,13 +13,13 @@
     "topfunction": "dut",
     "top": {
         "source": [
-            "test_preloadable_ram.cpp"
+            "tb.cpp"
         ],
         "cflags": "-I${XF_PROJ_ROOT}/L1/include"
     },
     "testbench": {
         "source": [
-            "test_preloadable_ram.cpp"
+            "tb.cpp"
         ],
         "cflags": "-I${XF_PROJ_ROOT}/L1/include",
         "ldflags": "",
@@ -51,10 +51,7 @@
             }
         ],
         "targets": [
-            "hls_csim",
-            "hls_csynth",
-            "hls_cosim",
-            "vivado_syn"
+            "hls_csim"
         ],
         "category": "canary"
     },

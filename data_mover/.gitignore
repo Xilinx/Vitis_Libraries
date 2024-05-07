@@ -41,3 +41,5 @@ jks.*
 
 # Python temp
 __pycache__
+.vscode
+
