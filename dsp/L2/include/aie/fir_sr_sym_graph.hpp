@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ namespace sr_sym {
  *
  * These are the templates to configure the Symmetric Single Rate FIR class.
  * @tparam TT_DATA describes the type of individual data samples input to and
- *         output from the filter function. This is a typename and must be one
- *         of the following: \n
+ *         output from the filter function. \n
+ *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  * @tparam TT_COEFF describes the type of individual coefficients of the filter
  *         taps. \n It must be one of the same set of types listed for TT_DATA
@@ -66,8 +66,8 @@ namespace sr_sym {
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
- *         descriptive macros are recommended where
+ *         shift down stage of processing. \n
+ *         Although, TP_RND accepts unsigned integer values descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
  *         - rnd_sym_floor  = Truncate LSB, always round towards 0.
@@ -86,7 +86,7 @@ namespace sr_sym {
  *         in a single iteration run.  \n
  *         When TP_API is set to 0, samples are buffered and stored in a ping-pong window buffer mapped onto Memory
  *Group banks. \n
- *         As a results, maximum number of samples processed by the graph is limited by the size of Memory Group. \n
+ *         As a result, maximum number of samples processed by the graph is limited by the size of Memory Group. \n
  *         When TP_API is set to 1 and TP_SSR is set to 1, incoming samples are buffered in a similar manner.  \n
  *         When TP_API is set to 1 and TP_SSR > 1, samples are processed directly from the stream inputs and no
  *buffering takes place. \n
@@ -94,7 +94,7 @@ namespace sr_sym {
  *iteration).  \n
  *         Note: For SSR configurations (TP_SSR>1), the input data must be split over multiple ports,
  *         where each successive sample is sent to a different input port in a round-robin fashion. \n
- *         As a results, each SSR input path will process a fraction of the frame defined by the TP_INPUT_WINDOW_VSIZE.
+ *         As a result, each SSR input path will process a fraction of the frame defined by the TP_INPUT_WINDOW_VSIZE.
  *\n
  *         The number of values in the output window will be TP_INPUT_WINDOW_VSIZE
  *         also by virtue the single rate nature of this function. \n
@@ -142,13 +142,13 @@ namespace sr_sym {
  *         The values supported are 0 (window API) or 1 (stream API). \n
  *         Note: due to the data buffering requirement imposed through symmetry, input interface is always set to
  *window. \n
- *         Auto-infeffed DMA stream-to-window conversion is applied when FIR is connected with an input stream. \n
+ *         Auto-inferred DMA stream-to-window conversion is applied when FIR is connected with an input stream. \n
  * @tparam TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths,
  *         giving an overall higher throughput.   \n
  *         A TP_SSR of 1 means just one output leg and 1 input phase, and is the backwards compatible option. \n
  *         The number of AIEs used is given by ``TP_SSR^2 * TP_CASC_LEN``. \n
- * @tparam TP_SAT describes the selection of saturation to be applied during the
- *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
+ *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
  *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
  *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
@@ -194,7 +194,7 @@ class fir_sr_sym_graph : public graph {
     static_assert(TP_FIR_LEN / TP_SSR / TP_CASC_LEN <= kMaxTapsPerKernel,
                   "ERROR: Requested FIR length and Cascade length exceeds supported number of taps per kernel. Please "
                   "increase the cascade length to accommodate the FIR design.");
-    // static_assert(!(TP_API == 0 && TP_DUAL_IP == 1),"ERROR: DUUAL_IP is only supported for streaming
+    // static_assert(!(TP_API == 0 && TP_DUAL_IP == 1),"ERROR: DUAL_IP is only supported for streaming
     // implementations");
     // Limit FIR length for reloadable coeffs. Reloadable coeffs need a storage space that contributes to system memory
     // exceeding Memory Module size.
@@ -440,7 +440,7 @@ class fir_sr_sym_graph : public graph {
      **/
     port_conditional_array<input, (TP_DUAL_IP == 1), TP_SSR> in2;
     /**
-     * The conditional array of input async ports used to pass run-time programmable (RTP) coeficients.
+     * The conditional array of input async ports used to pass run-time programmable (RTP) coefficients.
      * This port_conditional_array is (generated when TP_USE_COEFF_RELOAD == 1) an array of input ports, which size is
      *defined by TP_SSR.
      * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.

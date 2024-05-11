@@ -114,5 +114,6 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_UPSHIFT_CT"] = args["upshift_ct"]
     tmpargs["TP_PARA_INTERP_POLY"] = args["interp_poly"]
     tmpargs["TP_SAT"] = args["sat_mode"]
+    tmpargs["AIE_VARIANT"] = args["AIE_VARIANT"]
 
     return generate_graph(name, tmpargs)

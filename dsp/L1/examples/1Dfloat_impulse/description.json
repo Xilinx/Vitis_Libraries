@@ -1,0 +1,68 @@
+{
+    "name": "Xilinx Impulse Test 1D Float",
+    "description": "HLS case",
+    "flow": "hls",
+    "platform_allowlist": [
+        "u200",
+        "aws-vu9p-f1",
+        "vck190"
+    ],
+    "platform_blocklist": [],
+    "part_allowlist": [],
+    "part_blocklist": [],
+    "project": "prj_impulse_test_float",
+    "solution": "solution1",
+    "clock": "10",
+    "topfunction": "fft_top",
+    "top": {
+        "source": [
+            "src/data_path.hpp",
+            "src/top_module.cpp",
+            "src/top_module.hpp"
+        ],
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw/vitis_fft/float"
+    },
+    "testbench": {
+        "source": [
+            "src/main.cpp"
+        ],
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw/vitis_fft/float",
+        "ldflags": "",
+        "argv": {},
+        "stdmath": false
+    },
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": {
+                    "vivado_syn": 40960,
+                    "hls_csim": 10240,
+                    "hls_cosim": 16384,
+                    "vivado_impl": 32768,
+                    "hls_csynth": 10240
+                },
+                "max_time_min": {
+                    "vivado_syn": 470,
+                    "hls_csim": 60,
+                    "hls_cosim": 470,
+                    "vivado_impl": 470,
+                    "hls_csynth": 60
+                }
+            }
+        ],
+        "targets": [
+            "hls_csim",
+            "hls_csynth",
+            "hls_cosim",
+            "vivado_syn",
+            "vivado_impl"
+        ],
+        "category": "canary"
+    },
+    "gui": true
+}

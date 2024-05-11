@@ -50,5 +50,6 @@ def vmc_generate_graph(name, args):
   tmpargs["TP_API"] = 0
   tmpargs["TP_SSR"] = 1
   tmpargs["TP_DYN_PT_SIZE"] = 1 if args["is_dyn_pt_size"] else 0
+  tmpargs["AIE_VARIANT"] = args["AIE_VARIANT"]
   tmpargs["weights"] = args["coeff"]
   return generate_graph(name, tmpargs)

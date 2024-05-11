@@ -1,7 +1,7 @@
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
-
-.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
-
+..
+   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   
+   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _DDS_MIXER_LUT:
 
@@ -17,6 +17,13 @@ The graph entry point is the following:
 .. code-block::
 
     xf::dsp::aie::mixer::dds_mixer::dds_mixer_lut_graph
+
+Device Support
+==============
+
+The DDS/Mixer LUT library element supports both AIE1 and AIE-ML with the following differences:
+
+- Round modes available and the enumerated values of round modes differ between AIE1 and AIE-ML. See :ref:`COMPILING_AND_SIMULATING`.
 
 Supported Types
 ===============
@@ -66,14 +73,14 @@ In a conventional DDS (sometimes known as an Numerically Controlled Oscillator),
 
 It should be noted that, in the dds_mixer_lut the sin/cos values are not scaled to the full range of the bit-width to avoid saturation effects that arise due to 2s complement representation of numbers. The maximum positive value representable by an n-bit 2s complement number is 1 less than the magnitude of the largest negative value. So, the sin/cos values are scaled by the magnitude of the maximum positive value only. So, for cint16 type, +1 scales to +32767 and -1 scales to -32767. Also, following the runtime multiplication of the looked-up cartesian value for a cycle by the precomputed vector, scaling down and rounding will lead to other small reductions in the maximum magnitude of the waveform produced.
 
-Code Example Including Constraints
-==================================
+Code Example
+============
 
 The following code example shows how the DDS/Mixer graph class can be used within a user super-graph to use an instance configured as a mixer.
 
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_dds_lut.hpp
     :language: cpp
-    :lines: 15-
+    :lines: 17-
 
 .. |image1| image:: ./media/image1.png
 .. |image2| image:: ./media/image2.png

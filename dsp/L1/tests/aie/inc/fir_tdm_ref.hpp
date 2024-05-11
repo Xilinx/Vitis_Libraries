@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ class fir_tdm_ref {
     // FIR
     void filter(input_circular_buffer<TT_DATA,
                                       extents<inherited_extent>,
-                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_TDM_CHANNELS>()> >& inWindow,
+                                      margin<fnTDMFirMargin<TP_FIR_LEN, TT_DATA, TP_TDM_CHANNELS>()> >& inWindow,
                 output_circular_buffer<TT_DATA>& outWindow);
 };
 }

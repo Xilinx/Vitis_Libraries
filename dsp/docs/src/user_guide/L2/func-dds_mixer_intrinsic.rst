@@ -1,7 +1,7 @@
-
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
-
-.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+..
+   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   
+   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _DDS_MIXER_INTRINSIC:
 
@@ -17,6 +17,11 @@ The graph entry point is the following:
 .. code-block::
 
     xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph
+
+Device Support
+==============
+
+The DDS/Mixer is supported on AIE1 only. For other devices, please use the DDS/Mixer LUT library element.
 
 Supported Types
 ===============
@@ -76,14 +81,14 @@ It should be noted that the cartesian values for lookup in hardware are scaled t
 
     **DDS Implementation**
 
-Code Example Including Constraints
-==================================
+Code Example
+============
 
 The following code example shows how the DDS/Mixer graph class can be used within a user super-graph to use an instance configured as a mixer.
 
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_dds.hpp
     :language: cpp
-    :lines: 15-
+    :lines: 17-
 
 .. |image1| image:: ./media/image1.png
 .. |image2| image:: ./media/image2.png

@@ -1,0 +1,15 @@
+{
+    "spec": "vmc_mixed_radix_ifft.json",
+    "outdir": "./xmc_aie_lib/Mixed_Radix_IFFT_28c24eb3",
+    "parameters": {
+        "data_type": "cint16",
+        "twiddle_type": "cint16",
+        "point_size": 64,
+        "input_window_size": 64,
+        "shift_val": 0,
+        "rnd_mode": 0,
+        "sat_mode": 0,
+        "casc_length": 1,
+        "AIE_VARIANT": 1
+    }
+}

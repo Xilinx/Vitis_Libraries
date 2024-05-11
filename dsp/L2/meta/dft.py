@@ -19,16 +19,12 @@ TP_NUM_FRAMES_min = 1
 TP_NUM_FRAMES_max = 100
 TP_CASC_LEN_min = 1
 TP_CASC_LEN_max = 16
+TP_SSR_min = 1
+TP_SSR_max = 16
 TP_SHIFT_min=0
 TP_SHIFT_max=60
-#TP_API_min=0
-#TP_API_max=1
-#TP_FFT_NIFFT_min=0
-#TP_FFT_NIFFT_max=1
-#AIE_VARIANT_min=1
-#AIE_VARIANT_max=2
 
-# Validate Twiddle type
+# Validate Twiddle type 
 def fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE):
   validTypeCombos = [
       ("cint16", "cint16"),
@@ -47,16 +43,53 @@ def validate_TT_TWIDDLE(args):
   return fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE)
 
 # Validate point size
-def fn_validate_point_size(TP_POINT_SIZE):
-  return (
-    isValid if (TP_POINT_SIZE >= TP_POINT_SIZE_min and TP_POINT_SIZE <=TP_POINT_SIZE_max)
-    else (
-    isError(f"Minimum and maximum values for TP_POINT_SIZE are {TP_POINT_SIZE_min} and {TP_POINT_SIZE_max}. Got ({TP_POINT_SIZE}).  ")
-    )
-  )
+def fn_validate_point_size(AIE_VARIANT, TP_POINT_SIZE, TT_DATA, TT_TWIDDLE, TP_SSR, TP_CASC_LEN):
+  if AIE_VARIANT == 1:
+    maxDataMemBytes = 32768; #Bytes
+  if AIE_VARIANT == 2:
+    maxDataMemBytes = 65536; #Bytes
+  COEFF_COL_DIM = CEIL(TP_POINT_SIZE, fn_size_by_byte(TT_TWIDDLE)) / TP_SSR 
+  COEFF_ROW_DIM = round(TP_POINT_SIZE / TP_CASC_LEN)
+  KERNEL_COEFF_SIZE = COEFF_COL_DIM * COEFF_ROW_DIM * fn_size_by_byte(TT_TWIDDLE)
+  res = fn_validate_minmax_value("TP_POINT_SIZE", TP_POINT_SIZE, TP_POINT_SIZE_min, TP_POINT_SIZE_max)
+
+  kSamplesDataVector = 256/8/fn_size_by_byte(TT_DATA)
+  paddedPointSize = CEIL(CEIL(TP_POINT_SIZE, kSamplesDataVector), kSamplesDataVector * TP_CASC_LEN)
+  kSamplesTwiddleVector = 256/8/fn_size_by_byte(TT_TWIDDLE)
+  twiddleColSize = CEIL(TP_POINT_SIZE, kSamplesTwiddleVector)
+
+  if (res["is_valid"] == False):  
+    return res
+  else:
+    if (KERNEL_COEFF_SIZE > maxDataMemBytes):
+      return(
+        isError(f"""Invalid POINT_SIZE ({TP_POINT_SIZE}). 
+                The coefficient/twiddles require {KERNEL_COEFF_SIZE}B per kernel for this POINT_SIZE which exceeds the maximum allowed data memory per kernel ({maxDataMemBytes}B). 
+                The memory required for the coeffecients per kernel is (CEIL(TP_POINT_SIZE{TP_POINT_SIZE}, sizeof(TT_TWIDDLE{TT_TWIDDLE})) / TP_SSR {TP_SSR}) * (TP_POINT_SIZE{TP_POINT_SIZE} / TP_CASC_LEN{TP_CASC_LEN}).  
+                Increase the value of TP_CASC_LEN{TP_CASC_LEN} or TP_SSR{TP_SSR} to split the coefficeients across multiple kernels.""")
+                )
+    # if (paddedPointSize % (TP_CASC_LEN * kSamplesDataVector) != 0):
+    #   return (
+    #     isError(f""""Invalid TP_POINT_SIZE ({TP_POINT_SIZE}) and CASC_LEN ({TP_CASC_LEN}) combination. 
+    #             TP_POINT_SIZE ({TP_POINT_SIZE}) should zero-padded to be an integer multiple of TP_CASC_LEN ({TP_CASC_LEN}) and vector size. Vector size for {TT_DATA} is {kSamplesDataVector} . 
+    #             The resulting zero-padded POINT_SIZE->({paddedPointSize}) must be a multiple of TP_CASC_LEN * 256/8/sizeof(TT_DATA)->({TP_CASC_LEN * kSamplesDataVector}) """)
+    #             )
+    # if (twiddleColSize % (TP_SSR * kSamplesTwiddleVector) != 0):
+    #   return (
+    #   isError(f"""Invalid TP_POINT_SIZE ({TP_POINT_SIZE}) and TP_SSR ({TP_SSR}) combination. 
+    #           The matrix of coefficients/twiddles are created with a column dimension of TP_POINT_SIZE zero-padded to a multiple 256/8/sizeof(TT_TWIDDLE) -> ({twiddleColSize}). 
+    #           This must be a multiple of TP_SSR * 256/8/sizeof(TT_TWIDDLE) -> ({TP_SSR * kSamplesTwiddleVector})""")
+    #   )
+    return isValid
+    
 def validate_TP_POINT_SIZE(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
   TP_POINT_SIZE = args["TP_POINT_SIZE"]
-  return fn_validate_point_size(TP_POINT_SIZE)
+  TT_DATA = args["TT_DATA"]
+  TT_TWIDDLE = args["TT_TWIDDLE"]
+  TP_SSR = args["TP_SSR"]
+  TP_CASC_LEN = args["TP_CASC_LEN"]
+  return fn_validate_point_size(AIE_VARIANT, TP_POINT_SIZE, TT_DATA, TT_TWIDDLE, TP_SSR, TP_CASC_LEN)
 
 # Validate SHIFT
 def validate_TP_SHIFT(args):
@@ -65,37 +98,35 @@ def validate_TP_SHIFT(args):
   return fn_validate_shift_val(TT_DATA, TP_SHIFT)
 
 def fn_validate_shift_val(TT_DATA, TP_SHIFT):
-  if TP_SHIFT< TP_SHIFT_min or TP_SHIFT > TP_SHIFT_max:
-        return isError(f"Minimum and Maximum value for Shift is {TP_SHIFT_min} and {TP_SHIFT_max},respectively, but got {TP_SHIFT}. ")
+  res = fn_validate_minmax_value("TP_SHIFT", TP_SHIFT, TP_SHIFT_min, TP_SHIFT_max)
+  if (res["is_valid"] == False):  
+    return res
   return fn_float_no_shift(TT_DATA, TP_SHIFT)
 
-
 # Validate CASC_LEN
-def fn_validate_casc_len(TP_POINT_SIZE, TP_NUM_FRAMES, TP_CASC_LEN):
-  if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max :
-        return isError(f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max},respectively, but got {TP_CASC_LEN}.")
-  return (
-    isValid if ((TP_NUM_FRAMES*TP_POINT_SIZE)/TP_CASC_LEN >= 4)
-    else (
-    isError(f"Invalid CASC_LEN ({TP_CASC_LEN}). ")
-    )
-  )
+def fn_validate_casc_len(TP_CASC_LEN):
+  return fn_validate_minmax_value("TP_CASC_LEN", TP_CASC_LEN, TP_CASC_LEN_min, TP_CASC_LEN_max)
+
 def validate_TP_CASC_LEN(args):
-  TP_POINT_SIZE = args["TP_POINT_SIZE"]
-  TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
   TP_CASC_LEN = args["TP_CASC_LEN"]
+  return fn_validate_casc_len(TP_CASC_LEN)
 
-  return fn_validate_casc_len(TP_POINT_SIZE, TP_NUM_FRAMES, TP_CASC_LEN)
+# Validate TP_SSR
+def fn_validate_ssr(TP_SSR):
+  return fn_validate_minmax_value("TP_SSR", TP_SSR, TP_SSR_min, TP_SSR_max)
 
+def validate_TP_SSR(args):
+  TP_SSR = args["TP_SSR"]
+  return fn_validate_ssr(TP_SSR)
+
+# TP_SAT
 def validate_TP_SAT(args):
   TP_SAT = args["TP_SAT"]
   return fn_validate_satMode(TP_SAT)
 
+# NUM_FRAMES
 def fn_validate_numFrames(TP_NUM_FRAMES):
-  if TP_NUM_FRAMES< TP_NUM_FRAMES_min or TP_NUM_FRAMES > TP_NUM_FRAMES_max:
-        return isError(f"Minimum and Maximum value for Num of Frames is {TP_NUM_FRAMES_min} and {TP_NUM_FRAMES_max},respectively, but got {TP_NUM_FRAMES}. ")
-  return isValid
-
+  return fn_validate_minmax_value("TP_NUM_FRAMES", TP_NUM_FRAMES, TP_NUM_FRAMES_min, TP_NUM_FRAMES_max)
 
 def validate_TP_NUM_FRAMES(args):
   TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
@@ -108,14 +139,13 @@ def validate_TP_NUM_FRAMES(args):
   ######### Graph Generator ############
 
 # Used by higher layer software to figure out how to connect blocks together.
-def get_window_sizes(TT_DATA,TP_POINT_SIZE,TP_NUM_FRAMES,TP_CASC_LEN ):
+def get_window_sizes(TT_DATA,TP_POINT_SIZE,TP_NUM_FRAMES,TP_CASC_LEN,TP_SSR):
   kSamplesInVect = 256/8/fn_size_by_byte(TT_DATA)
-  paddedDataSize = CEIL(TP_POINT_SIZE, kSamplesInVect)
-  OUT_WINDOW_VSIZE = paddedDataSize*TP_NUM_FRAMES
-  PAD_WINDOW_VSIZE = (CEIL(paddedDataSize,(kSamplesInVect*TP_CASC_LEN))*TP_NUM_FRAMES)
-  CASC_WINDOW_VSIZE = PAD_WINDOW_VSIZE/TP_CASC_LEN
+  OUT_WINDOW_VSIZE = (CEIL(TP_POINT_SIZE, (kSamplesInVect * TP_SSR)) / TP_SSR) * TP_NUM_FRAMES
+  IN_WINDOW_VSIZE = (CEIL(TP_POINT_SIZE, (kSamplesInVect * TP_CASC_LEN)) / TP_CASC_LEN) * TP_NUM_FRAMES
 
-  return OUT_WINDOW_VSIZE, CASC_WINDOW_VSIZE
+
+  return IN_WINDOW_VSIZE, OUT_WINDOW_VSIZE
 
 def info_ports(args):
   """Standard function creating a static dictionary of information
@@ -125,13 +155,13 @@ def info_ports(args):
   TT_DATA = args["TT_DATA"]
   TP_POINT_SIZE = args["TP_POINT_SIZE"]
   TP_CASC_LEN = args["TP_CASC_LEN"]
-  TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
+  TP_SSR = args["TP_SSR"]
+  TP_NUM_FRAMES = args["TP_NUM_FRAMES"]  
+  
+  IN_WINDOW_VSIZE, OUT_WINDOW_VSIZE = get_window_sizes(TT_DATA,TP_POINT_SIZE,TP_NUM_FRAMES,TP_CASC_LEN,TP_SSR)
 
-  OUT_WINDOW_VSIZE, CASC_WINDOW_VSIZE = get_window_sizes(TT_DATA,TP_POINT_SIZE,TP_NUM_FRAMES,TP_CASC_LEN)
-
-
-  in_ports = get_port_info("in", "in", TT_DATA, CASC_WINDOW_VSIZE, TP_CASC_LEN, 0)
-  out_ports = get_port_info("out", "out", TT_DATA, OUT_WINDOW_VSIZE, 1, 0)
+  in_ports = get_port_info("in", "in", TT_DATA, IN_WINDOW_VSIZE, TP_CASC_LEN * TP_SSR, 0)
+  out_ports = get_port_info("out", "out", TT_DATA, OUT_WINDOW_VSIZE, TP_SSR, 0)
   return in_ports + out_ports
 
 def generate_graph(graphname, args):
@@ -147,6 +177,7 @@ def generate_graph(graphname, args):
   TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
   TP_RND = args["TP_RND"]
   TP_SAT = args["TP_SAT"]
+  TP_SSR= args["TP_SSR"]
 
 
   code = (
@@ -155,9 +186,9 @@ class {graphname} : public adf::graph {{
 public:
   // ports
   //template <typename dir>
-
-  std::array<adf::port<input>, {TP_CASC_LEN}> in;
-  std::array<adf::port<output>, 1> out;
+  
+  std::array<adf::port<input>, {TP_SSR} * {TP_CASC_LEN}> in;
+  std::array<adf::port<output>, {TP_SSR}> out;
 
   xf::dsp::aie::fft::dft::dft_graph<
     {TT_DATA}, // TT_DATA
@@ -168,15 +199,19 @@ public:
     {TP_CASC_LEN}, // TP_CASC_LEN
     {TP_NUM_FRAMES}, //TP_NUM_FRAMES
     {TP_RND}, //TP_RND
-    {TP_SAT} //TP_SAT
+    {TP_SAT}, //TP_SAT
+    {TP_SSR} //TP_SSR
+
 
   > dft_graph;
 
   {graphname}() : dft_graph() {{
-    for (int i=0; i < {TP_CASC_LEN}; i++) {{
-      adf::connect<> net_in(in[i], dft_graph.in[i]);
+    for (int ssrIdx = 0; ssrIdx < {TP_SSR}; ssrIdx++) {{
+      for (int cascIdx = 0; cascIdx < {TP_CASC_LEN}; cascIdx++) {{
+        adf::connect<> net_in(in[cascIdx + ssrIdx * {TP_CASC_LEN}], dft_graph.in[cascIdx + ssrIdx * {TP_CASC_LEN}]);
+      }}
+      adf::connect<> net_out(dft_graph.out[ssrIdx], out[ssrIdx]);
     }}
-    adf::connect<> net_out(dft_graph.out[0], out[0]);
   }}
 }};
 """

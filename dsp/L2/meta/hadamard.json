@@ -28,7 +28,8 @@
                 "file": "hadamard.py",
                 "function": "validate_TT_DATA_A",
                 "args": [
-                    "TT_DATA_B"
+                    "TT_DATA_B",
+                    "AIE_VARIANT"
                 ]
             }
         },
@@ -59,7 +60,11 @@
                 "file": "hadamard.py",
                 "function": "validate_TP_DIM",
                 "args": [
-
+                    "TP_API",
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TP_SSR",
+                    "AIE_VARIANT"
                 ]
             }
         },
@@ -75,7 +80,8 @@
                     "TP_DIM",
                     "TP_SSR",
                     "TT_DATA_A",
-                    "TT_DATA_B"
+                    "TT_DATA_B",
+                    "AIE_VARIANT"
                 ]
             },
             "updater": {
@@ -109,8 +115,15 @@
         },
         {
             "name": "TP_API",
-            "description": "The interface selection (windows/streams) of the function.",
-            "type": "uint"
+            "description": "The interface selection (iobuffers/streams) of the function.",
+            "type": "uint",
+            "validator": {
+                "file": "hadamard.py",
+                "function": "validate_TP_API",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            }
         },
         {
             "name": "TP_SSR",
@@ -120,8 +133,7 @@
                 "file": "hadamard.py",
                 "function": "validate_TP_SSR",
                 "args": [
-                    "TP_DIM",
-                    "TP_API"
+
                 ]
             },
             "updater": {
@@ -131,11 +143,6 @@
                     "TP_DIM"
                 ]
             }
-        },
-        {
-            "name": "TP_DYN_PT_SIZE",
-            "description": "specifies the dynamic point size, not applicaple in hadamard IP",
-            "type": "uint"
         },
         {
             "name": "TP_RND",

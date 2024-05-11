@@ -74,7 +74,7 @@ def vmc_validate_ssr(args):
     return fn_validate_deci_ssr(ssr, api, decimate_factor, deci_poly, AIE_VARIANT)
 
 def vmc_validate_input_ports(args):
-    dual_ip = args["dual_ip"]
+    dual_ip = 1 if args["dual_ip"] else 0
     AIE_VARIANT = args["AIE_VARIANT"]
     api = 1
     return fn_validate_dual_ip(api, dual_ip, AIE_VARIANT)

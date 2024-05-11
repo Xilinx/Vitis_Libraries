@@ -1,5 +1,6 @@
 #
-# Copyright 2021 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -7,7 +8,7 @@
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software 
+# Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
@@ -25,21 +26,19 @@ HELPER:= $(HELPER_CUR_DIR)/.helper
 
 WINDOW_VSIZE_A 	= $(shell echo $$(( $(DIM_A) * $(DIM_B) * $(NUM_FRAMES))))
 WINDOW_VSIZE_B 	= $(shell echo $$(( $(DIM_B) * $(NUM_FRAMES))))
-PARAM_MAP = DATA_A $(DATA_A) DATA_B $(DATA_B) DIM_A $(DIM_A) DIM_B $(DIM_B) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) NUM_FRAMES $(NUM_FRAMES) CASC_LEN $(CASC_LEN) UUT_SSR $(UUT_SSR)
+PARAM_MAP = DATA_A $(DATA_A) DATA_B $(DATA_B) DIM_A $(DIM_A) DIM_B $(DIM_B) DIM_A_LEADING $(DIM_A_LEADING) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) NUM_FRAMES $(NUM_FRAMES) CASC_LEN $(CASC_LEN) UUT_SSR $(UUT_SSR) AIE_VARIANT $(AIE_VARIANT)
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 
-AIE_PART = XCVC1902-VSVD1760-1LP-E-S
-
 $(HELPER):
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(WINDOW_VSIZE_A) $(NITER) 0 $(STIM_TYPE_A) 0 0 $(DATA_A) 0 1 |& tee -a $(REF_LOG_FILE);\
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(WINDOW_VSIZE_B) $(NITER) 0 $(STIM_TYPE_B) 0 0 $(DATA_B) 0 1 |& tee -a $(REF_LOG_FILE);\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -f $(LOC_INPUT_FILE_A) --rows $(DIM_A) --cols $(DIM_B) --ssrSplit $(UUT_SSR) --casc $(CASC_LEN) --split -t $(DATA_A) |& tee -a $(REF_LOG_FILE);\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -f $(LOC_INPUT_FILE_B) --rows 1 --cols $(DIM_B) --ssrClone $(UUT_SSR) --casc $(CASC_LEN) --split -t $(DATA_B) |& tee -a $(REF_LOG_FILE);\
-	UUT_KERNEL=matrix_vector_mul_ref UUT_SIM_FILE=./data/ref_output.txt make run TARGET=x86sim TAG=REF |& tee -a $(REF_LOG_FILE);\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(WINDOW_VSIZE_A) $(NITER) 0 $(STIM_TYPE_A) 0 0 $(DATA_A) 0 1 ;\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(WINDOW_VSIZE_B) $(NITER) 0 $(STIM_TYPE_B) 0 0 $(DATA_B) 0 1 ;\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -f $(LOC_INPUT_FILE_A) --rows $(DIM_A) --cols $(DIM_B) --ssrSplit $(UUT_SSR) --casc $(CASC_LEN) --split -t $(DATA_A) --colMajor $(DIM_A_LEADING) ;\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -f $(LOC_INPUT_FILE_B) --rows 1 --cols $(DIM_B) --ssrClone $(UUT_SSR) --casc $(CASC_LEN) --split -t $(DATA_B) ;\
+	UUT_KERNEL=matrix_vector_mul_ref UUT_SIM_FILE=./data/ref_output.txt make run TARGET=x86sim TAG=REF ;\
 	make cleanall
 
 get_latency:
-	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_PART)
+	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_inputA_0_0.txt ./data/uut_output_0.txt $(STATUS_FILE) $(WINDOW_VSIZE_A) $(NITER)
 
 get_stats:

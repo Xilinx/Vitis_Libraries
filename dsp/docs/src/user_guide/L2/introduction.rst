@@ -1,6 +1,7 @@
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
-
-.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+..
+   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   
+   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _INTRODUCTION:
 
@@ -37,6 +38,8 @@ AMD documentation is organized around a set of standard design processes to help
 
 -  **System and Solution Planning:** Identifying the components, performance, I/O, and data transfer requirements at a system level. Includes application mapping for the solution to the processing subsystem (PS), PL, and AI Engine. Topics in this document that apply to this design process include:
 
+   -  :ref:`CONVOLUTION_CORRELATION`
+
    -  :ref:`DDS_MIXER`
 
    -  :ref:`DFT`
@@ -47,13 +50,23 @@ AMD documentation is organized around a set of standard design processes to help
 
    -  :ref:`FILTERS`
 
+   -  :ref:`FIR_TDM`
+
+   -  :ref:`HADAMARD_PRODUCT`
+
+   -  :ref:`KRONECKER_MATRIX_PRODUCT`
+
    -  :ref:`MATRIX_MULTIPLY`
 
    -  :ref:`MATRIX_VECTOR_MULTIPLY`
 
-   -  :ref:`WIDGETS`
-   
-   -  :ref:'SAMPLE_DELAY'
+   -  :ref:`OUTER_TENSOR_PRODUCT`
+
+   -  :ref:`SAMPLE_DELAY`
+
+   -  :ref:`WIDGET_API_CAST`
+
+   -  :ref:`WIDGET_REAL2COMPLEX`
 
 -  **System Integration and Validation:** Integrating and validating the system functional performance, including timing, resource use, and power closure. Topics in this document that apply to this design process include:
 
@@ -130,9 +143,9 @@ Vitis Tutorials
 
 AMD provides an extensive library of purpose build tutorials. It is recommended to visit `Vitis Tutorials <https://github.com/Xilinx/Vitis-Tutorials>`__ to get familiar with the AMD Vitis |trade| in-Depth tutorials.
 
-To learn how to use the Vitis core tools to develop for AMD Versal |trade|, the first Adaptive SoC, visit `AI Engine Development Tutorials <https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development>`__. There is a variety of design, methodology, and feature tutorials, where you can also find a highly recommended `DSP Library Tutorial <https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development/Feature_Tutorials/08-dsp-library>`__, which demonstrates how to use kernels provided by the DSP library for a filtering application, how to analyze the design results, and how to use filter parameters to optimize the design's performance using simulation.
+To learn how to use the Vitis core tools to develop for AMD Versal |trade|, the first Adaptive SoC, visit `AI Engine Development Tutorials <https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development>`__. There is a variety of design, methodology, and feature tutorials, where you can also find a highly recommended `DSP Library Tutorial <https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development/AIE/Feature_Tutorials/08-dsp-library>`__, which demonstrates how to use kernels provided by the DSP library for a filtering application, how to analyze the design results, and how to use filter parameters to optimize the design's performance using simulation.
 
-Finally, Simulink users might be interested in the `AI Engine DSP Library and Model Composer Tutorial <https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development/Feature_Tutorials/10-aie-dsp-lib-model-composer>`__, which shows how to design AI Engine applications using Model Composer.
+Finally, Simulink users might be interested in the `AI Engine DSP Library and Model Composer Tutorial <https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development/AIE/Feature_Tutorials/10-aie-dsp-lib-model-composer>`__, which shows how to design AI Engine applications using Model Composer.
 
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN

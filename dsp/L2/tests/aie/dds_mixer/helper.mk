@@ -1,5 +1,6 @@
 #
-# Copyright 2021 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +29,7 @@ DIFF_TOLERANCE     = 0.01
 CC_TOLERANCE       = 0
 PARAM_MAP = DATA_TYPE $(DATA_TYPE) \
 			MIXER_MODE $(MIXER_MODE) \
+			USE_PHASE_RELOAD $(USE_PHASE_RELOAD) \
 			P_API $(P_API) \
 			UUT_SSR $(UUT_SSR) \
 			INPUT_WINDOW_VSIZE $(INPUT_WINDOW_VSIZE) \
@@ -67,8 +69,6 @@ else ifeq ($(DATA_TYPE), cfloat)
 endif
 
 HELPER_CUR_DIR ?= .
-AIE_PART = XCVC1902-VSVD1760-1LP-E-S
-
 
 diff:
 	@echo helper.mk stage: diff
@@ -91,7 +91,7 @@ get_status:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
 
 get_latency:
-	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_PART)
+	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input_0_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) USE_OUTPUTS_IF_NO_INPUTS
 
 get_stats:

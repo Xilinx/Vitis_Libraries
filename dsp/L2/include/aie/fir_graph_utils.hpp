@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,9 @@ class casc_kernels {
             }
         else if
             constexpr(thisKernelClass::getFirType() == eFIRVariant::kTDM) {
-                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>(taps);
+                std::array<typename casc_params::BTT_DATA, thisKernelClass::getInternalBufferSize()> internalBuffer{};
+
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>(taps, internalBuffer);
             }
         if
             constexpr(casc_params::Bdim != 0) { next_casc_kernels::create_and_recurse(firKernels, taps); }
@@ -168,6 +170,7 @@ class ssr_kernels {
     using TT_COEFF = typename ssr_params::BTT_COEFF;
     static constexpr unsigned int dim = ssr_params::Bdim;
     static constexpr unsigned int TP_FIR_LEN = ssr_params::BTP_FIR_LEN;
+    static constexpr unsigned int TP_TDM_CHANNELS = ssr_params::BTP_TDM_CHANNELS;
     static constexpr unsigned int TP_FIR_RANGE_LEN = ssr_params::BTP_FIR_RANGE_LEN;
     static constexpr unsigned int TP_SHIFT = ssr_params::BTP_SHIFT;
     static constexpr unsigned int TP_RND = ssr_params::BTP_RND;
@@ -192,8 +195,12 @@ class ssr_kernels {
                                           // decomposition polyphases.
     static constexpr bool TP_CASC_IN = ssr_params::BTP_CASC_IN;
     static constexpr bool TP_CASC_OUT = ssr_params::BTP_CASC_OUT;
-
-    static constexpr unsigned int totalKernels = TP_CASC_LEN * TP_SSR * TP_SSR;
+    // 0 - default: decompose to array of TP_SSR^2; 1 - decompose to a vector of TP_SSR, where kernels form independent
+    // paths; otherwise set it to 1.
+    static constexpr unsigned int isSSRaVector = ssr_params::BTP_SSR_MODE;
+    static constexpr unsigned int SSRSize =
+        ssr_params::BTP_SSR_MODE == 0 ? (TP_SSR * TP_SSR) : ssr_params::BTP_SSR_MODE == 1 ? TP_SSR : 1;
+    static constexpr unsigned int totalKernels = TP_CASC_LEN * SSRSize;
 
     using in2_type = port_conditional_array<input, (TP_DUAL_IP == 1), TP_SSR>;
     using out2_type = port_conditional_array<output, (TP_NUM_OUTPUTS == 2), TP_SSR>;
@@ -236,12 +243,10 @@ class ssr_kernels {
     static void create_and_recurse(kernel (&firKernels)[totalKernels], const std::vector<TT_COEFF>& taps) {
         // only pass a subset of the taps to the casc_kernels, and have it treat that as it normally would.
         std::vector<TT_COEFF> ssrPhaseTaps(segment_taps_array_for_phase(taps, ssrCoeffPhase));
-        // pass the kernels from a specific index so cascades can be placed as normal.
+        unsigned int kernelStartingIndexInt = isSSRaVector == 1 ? ssrDataPhase * TP_CASC_LEN : kernelStartingIndex;
 
-        static_assert(TP_FIR_LEN % TP_SSR == 0, "TP_FIR LEN must be divisble by TP_SSR. "); //
-        // static_assert(TP_USE_COEFF_RELOAD != 2 || (TP_FIR_LEN % TP_SSR == 0), "TP_FIR LEN must be divisble by TP_SSR,
-        // at least for the header based coefficient reaload."); //
-        this_casc_kernels::create_and_recurse(firKernels + kernelStartingIndex, ssrPhaseTaps);
+        static_assert((TP_FIR_LEN * TP_TDM_CHANNELS) % TP_SSR == 0, "TP_FIR LEN must be divisble by TP_SSR. "); //
+        this_casc_kernels::create_and_recurse(firKernels + kernelStartingIndexInt, ssrPhaseTaps);
 
         if
             constexpr(ssr_params::Bdim > 0) { next_ssr_kernels::create_and_recurse(firKernels, taps); }
@@ -325,6 +330,60 @@ class ssr_kernels {
             }
         }
     };
+    static void create_tdm_connections(kernel* m_firKernels,
+                                       port<input>* in,
+                                       in2_type(&in2),
+                                       port<output>* out,
+                                       out2_type out2,
+                                       coeff_type coeff,
+                                       net_type& net,
+                                       net_type& net2,
+                                       casc_in_type(&casc_in),
+                                       const char* srcFileName = "fir_sr_asym.cpp") {
+        for (unsigned int ssrInnerPhase = 0; ssrInnerPhase < TP_SSR; ssrInnerPhase++) {
+            unsigned int ssrOutputPath = ssrInnerPhase;
+            unsigned int ssrDataPhase = ssrInnerPhase;
+            unsigned int kernelStartingIndex = ssrDataPhase * TP_CASC_LEN;
+            kernel* firstKernelOfCascadeChain = m_firKernels + kernelStartingIndex;
+            input_connections(in[ssrDataPhase], firstKernelOfCascadeChain, ssrOutputPath, ssrInnerPhase, net);
+
+            if
+                constexpr(TP_DUAL_IP == DUAL_IP_DUAL) {
+                    conditional_dual_ip_connections(in2[ssrDataPhase], firstKernelOfCascadeChain, ssrOutputPath,
+                                                    ssrInnerPhase, net2);
+                }
+
+            // if
+            //     constexpr(TP_USE_COEFF_RELOAD == USE_COEFF_RELOAD_TRUE && TP_CASC_IN == CASC_IN_FALSE) {
+            //         // Currently only first kernels in chain are configured with RTP port.
+            //         // Subsequent kernels in cascade chain expect it's coneffs to be passed through the cascade IF.
+
+            //         if (ssrInnerPhase == 0) {
+            //             conditional_rtp_connections(coeff[ssrOutputPath], firstKernelOfCascadeChain);
+            //         }
+            //     }
+
+            // if (ssrInnerPhase == 0)
+            //     if
+            //         constexpr(TP_CASC_IN == CASC_IN_TRUE) {
+            //             conditional_casc_in_connections(casc_in[ssrOutputPath], firstKernelOfCascadeChain);
+            //         }
+
+            // Each SSR path has an output.
+            output_connections(out[ssrOutputPath], firstKernelOfCascadeChain);
+            if
+                constexpr(TP_NUM_OUTPUTS == 2) {
+                    conditional_out_connections(out2[ssrOutputPath], firstKernelOfCascadeChain);
+                }
+
+            for (int i = 0; i < TP_CASC_LEN; i++) {
+                // Specify mapping constraints
+                runtime<ratio>(m_firKernels[kernelStartingIndex + i]) = 0.8;
+                // Source files
+                source(m_firKernels[kernelStartingIndex + i]) = srcFileName;
+            }
+        }
+    };
 
 #ifndef COEFF_DATA_ALIGNMENT
 #define COEFF_DATA_ALIGNMENT 1 // data
@@ -394,15 +453,16 @@ class ssr_kernels {
 
     static constexpr unsigned int kDF = fir_type<ssr_params>::getDF();
     static constexpr unsigned int kIF = fir_type<ssr_params>::getIF();
-    static constexpr unsigned int ssrOutputPath = (dim / TP_SSR);
     static constexpr unsigned int ssrInnerPhase = (dim % TP_SSR);
+    static constexpr unsigned int ssrOutputPath = isSSRaVector == 1 ? ssrInnerPhase : (dim / TP_SSR);
 
     // aligned by coefficients
     static constexpr unsigned int ssrDataPhase = getSSRDataPhase(ssrOutputPath, ssrInnerPhase, ssr_params::BTP_SSR);
     static constexpr unsigned int ssrCoeffPhase =
-        ((getSSRCoeffPhase(ssrOutputPath, ssrInnerPhase, ssr_params::BTP_SSR)) +
-         ((TP_PARA_DECI_INDEX == 0) ? 0 : (TP_SSR - 1))) %
-        TP_SSR; //
+        isSSRaVector == 1 ? ssrInnerPhase
+                          : ((getSSRCoeffPhase(ssrOutputPath, ssrInnerPhase, ssr_params::BTP_SSR)) +
+                             ((TP_PARA_DECI_INDEX == 0) ? 0 : (TP_SSR - 1))) %
+                                TP_SSR; //
 
     /** SSR 4 Example why we need margin offset.
      * numbers are data indexes contributing at each ssr kernel.
@@ -478,7 +538,7 @@ class ssr_kernels {
         ssr_params::BTP_MODIFY_MARGIN_OFFSET; // add whatever margin offset that is sent to ssr kernels
 
     /**
-     * @brief Seperate taps into a specific SSR phase.
+     * @brief Separate taps into a specific SSR phase.
      *    Phase 0 contains taps index 0, TP_SSR, 2*TP_SSR, ...
      *    Phase 1 contains taps index 1, TP_SSR+1, 2*TP_SSR+1, ...
      *    ...
@@ -506,15 +566,19 @@ class ssr_kernels {
         return ssrTapsRange;
     }
 
-    // middle kernels connect to eachother.
-    static constexpr bool casc_in = (ssrInnerPhase == 0) ? (false || TP_CASC_IN) : true; // first kernel of output phase
+    // middle kernels connect to each other.
+    static constexpr bool casc_in =
+        isSSRaVector == 1 ? false : (ssrInnerPhase == 0) ? (false || TP_CASC_IN) : true; // first kernel of output phase
     static constexpr bool casc_out =
-        (ssrInnerPhase == TP_SSR - 1) ? (false || TP_CASC_OUT) : true; // last kernel of output phase
+        isSSRaVector == 1
+            ? false
+            : (ssrInnerPhase == TP_SSR - 1) ? (false || TP_CASC_OUT) : true; // last kernel of output phase
     // static constexpr int rnd = TP_SSR * kDF * kIF; // causes resampler to create excessive FIR lenths
     static constexpr int rnd = TP_SSR;
     struct last_casc_params : public ssr_params {
         static constexpr int Bdim = TP_CASC_LEN - 1;
-        static constexpr int BTP_FIR_LEN = CEIL(TP_FIR_LEN, rnd) / TP_SSR;
+        static constexpr int BTP_FIR_LEN = isSSRaVector == 1 ? TP_FIR_LEN : (CEIL(TP_FIR_LEN, rnd) / TP_SSR);
+        static constexpr int BTP_TDM_CHANNELS = ssr_params::BTP_TDM_CHANNELS / TP_SSR;
         static constexpr int BTP_CASC_IN = casc_in;
         static constexpr int BTP_CASC_OUT = casc_out;
         static constexpr int BTP_COEFF_PHASE = ssrCoeffPhase * TP_PARA_INTERP_POLY * TP_PARA_DECI_POLY +
@@ -669,7 +733,7 @@ constexpr unsigned int getOptCascLen() {
 /**
  * @defgroup graph_utils Graph utils
  *
- * The Graphs utilities contain helper funcitons and classes that ease usage of library elements.
+ * The Graphs utilities contain helper functions and classes that ease usage of library elements.
  *
  */
 

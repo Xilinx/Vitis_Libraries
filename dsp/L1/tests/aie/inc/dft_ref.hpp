@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,8 @@ template <typename TT_DATA,    // type of data input and output
           unsigned int TP_SHIFT,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_SSR>
 class dft_ref {
    private:
     TT_TWIDDLE coeff[TP_POINT_SIZE][TP_POINT_SIZE];

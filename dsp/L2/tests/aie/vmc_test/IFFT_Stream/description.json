@@ -58,7 +58,7 @@
         "customized_params": {
                 "params": "--aie.Xchess=llvm.xargs=-std=c++2a --aie.Xx86sim=-client=vmc --aie.verbose",
                 "default": {
-                    "GRAPHNAME": "IFFT_Stream_cc0e4fa5",
+                    "GRAPHNAME": "IFFT_Stream_01c57c86",
                     "VMC_GRAPHDIR": "xmc_aie_lib/$(GRAPHNAME)",
                     "VMC_KERNEL": "vmc_stream_ifft"
                 }

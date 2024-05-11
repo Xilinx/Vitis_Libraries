@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,14 @@ This file holds the body of the test harness for dds_mixer reference model graph
 #include "test.hpp"
 
 xf::dsp::aie::testcase::test_graph ddsMix;
+
+// void testRTP(unsigned int numIter, unsigned int RTPval) {
+//         for(int k=0; k<P_SSR; k++){
+//             ddsMix.update(ddsMix.PhaseRTP[k], ddsMix.PhaseRTP_vec[0]);
+//         }
+//         ddsMix.run(ddsMix.numIterRTP_vec[0]);
+//     sampleDelayTestHarness.wait();
+// }
 
 int main(void) {
     printf("\n");
@@ -47,9 +55,22 @@ int main(void) {
 
     ddsMix.init();
 
-    ddsMix.run(NITER);
-
+#if (USE_PHASE_RELOAD == 1)
+    for (int i = 0; i < NITER; i++) {
+        for (int k = 0; k < P_SSR; k++) {
+            ddsMix.update(ddsMix.PhaseRTP[k], ddsMix.PhaseRTP_vec[i]);
+            printf("Phase is = %d\n", ddsMix.PhaseRTP_vec[i]);
+        }
+        ddsMix.run(1);
+        ddsMix.wait();
+    }
+    ddsMix.run(1);
+    ddsMix.wait();
     ddsMix.end();
+#else
+    ddsMix.run(NITER);
+    ddsMix.end();
+#endif
 
     printf("TEST.CPP IS FINISHED \n");
     printf("========================\n");

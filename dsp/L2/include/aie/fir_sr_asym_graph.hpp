@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ using namespace adf;
  *
  * These are the templates to configure the Asymmetric Single Rate FIR class.
  * @tparam TT_DATA describes the type of individual data samples input to and
- *         output from the filter function. This is a typename and must be one
- *         of the following: \n
+ *         output from the filter function. \n
+ *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  * @tparam TT_COEFF describes the type of individual coefficients of the filter
  *         taps. \n It must be one of the same set of types listed for TT_DATA
@@ -66,8 +66,8 @@ using namespace adf;
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
- *         descriptive macros are recommended where
+ *         shift down stage of processing. \n
+ *         Although, TP_RND accepts unsigned integer values descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
  *         - rnd_sym_floor  = Truncate LSB, always round towards 0.
@@ -86,14 +86,14 @@ using namespace adf;
  *         in a single iteration run.  \n
  *         When TP_API is set to 0, samples are buffered and stored in a ping-pong window buffer mapped onto Memory
  *Group banks. \n
- *         As a results, maximum number of samples processed by the graph is limited by the size of Memory Group. \n
+ *         As a result, maximum number of samples processed by the graph is limited by the size of Memory Group. \n
  *         When TP_API is set to 1, samples are processed directly from the stream inputs and no buffering takes place.
  *\n
  *         In such case, maximum number of samples processed by the graph is limited to 32-bit value (4.294B samples per
  *iteration).  \n
  *         Note: For SSR configurations (TP_SSR>1), the input data must be split over multiple ports,
  *         where each successive sample is sent to a different input port in a round-robin fashion. \n
- *         As a results, each SSR input path will process a fraction of the frame defined by the TP_INPUT_WINDOW_VSIZE.
+ *         As a result, each SSR input path will process a fraction of the frame defined by the TP_INPUT_WINDOW_VSIZE.
  *\n
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  * @tparam TP_CASC_LEN describes the number of AIE processors to split the operation
@@ -128,10 +128,12 @@ using namespace adf;
  *         Therefore, dual input ports are only supported with streams and not windows.
  * @tparam TP_API specifies if the input/output interface should be window-based or stream-based.  \n
  *         The values supported are 0 (window API) or 1 (stream API).
- *        A TP_SSR of 1 means just one output leg and 1 input phase, and is the backwards compatible option. \n
+ * @tparam TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths,
+ * giving an overall higher throughput.   \n
+ *         A TP_SSR of 1 means just one output leg and 1 input phase, and is the backwards compatible option. \n
  *         The number of AIEs used is given by ``TP_SSR^2 * TP_CASC_LEN``. \n
- * @tparam TP_SAT describes the selection of saturation to be applied during the
- *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
+ *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
  *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
  *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
@@ -182,14 +184,14 @@ class fir_sr_asym_graph : public graph {
         // In FIFO mode, FIFO size has to be a multiple of 128 bits.
         // In FIFO mode, BD length has to be >= 128 bytes!
         // Conservative assumptions need to be made here.
-        // For an overall decimation factor, with instreasing decimation factor,
+        // For an overall decimation factor, with increasing decimation factor,
         // the amount of input stream data required to produce output samples also increases.
-        // This strains the FIFOs closer to the begining of the chain comparably more
+        // This strains the FIFOs closer to the beginning of the chain comparably more
         // than the ones closest to the output.
         //
         // Conservative assumptions need to be made here, as mapper may place multiple buffers in
         // each of the memory banks, that may introduce Memory conflicts.
-        // On top of that, the placement of input source wrt brodcast kernel inputs may introduce significant routing
+        // On top of that, the placement of input source wrt broadcast kernel inputs may introduce significant routing
         // delays.
         // which may have an adverse effect on the amount of FIFO storage available for filter design purposes.
         int fifoStep = (TP_CASC_LEN - kernelPos + 1);
@@ -242,9 +244,9 @@ class fir_sr_asym_graph : public graph {
                   "Dual stream ports not supported on this device. Please set TP_NUM_OUTPUTS to 1.");
     static_assert(TP_SSR >= 1, "ERROR: TP_SSR must be 1 or higher");
 
-    static_assert(TP_FIR_LEN % TP_SSR == 0, "TP_FIR LEN must be divisble by TP_SSR"); //
-    // static_assert(TP_USE_COEFF_RELOAD != 2 || (TP_FIR_LEN % TP_SSR == 0), "TP_FIR LEN must be divisble by TP_SSR, at
-    // least for the header based coefficient reaload."); //
+    static_assert(TP_FIR_LEN % TP_SSR == 0, "TP_FIR LEN must be divisible by TP_SSR"); //
+    // static_assert(TP_USE_COEFF_RELOAD != 2 || (TP_FIR_LEN % TP_SSR == 0), "TP_FIR LEN must be divisible by TP_SSR, at
+    // least for the header based coefficient reload."); //
     static_assert(TP_CASC_LEN <= 40, "ERROR: Unsupported Cascade length");
 
     static_assert(TP_INPUT_WINDOW_VSIZE % TP_SSR == 0,
@@ -368,7 +370,7 @@ class fir_sr_asym_graph : public graph {
     port_conditional_array<input, (TP_DUAL_IP == 1), TP_SSR> in2;
 
     /**
-     * The conditional array of input async ports used to pass run-time programmable (RTP) coeficients.
+     * The conditional array of input async ports used to pass run-time programmable (RTP) coefficients.
      * This port_conditional_array is (generated when TP_USE_COEFF_RELOAD == 1) an array of input ports, which size is
      *defined by TP_SSR.
      * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.

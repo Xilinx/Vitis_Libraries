@@ -28,78 +28,72 @@ import json
 TP_POINT_SIZE_min = 16
 TP_POINT_SIZE_max = 65536
 TP_WINDOW_VSIZE_min = 16
-TP_WINDOW_VSIZE_max = 65536
-TP_INPUT_WINDOW_VSIZE_min = 4
 TP_SSR_min = 1
 TP_SSR_max = 32
 TP_SHIFT_min = 0
 TP_SHIFT_max = 60
-TP_CASC_LEN_min = 1
-TP_CASC_LEN_max = 11
-#TP_API_min=0
-#TP_API_max=1
-#TP_DYN_PT_SIZE_min=0
-#TP_DYN_PT_SIZE_max=1
-#AIE_VARIANT_min=2
-#AIE_VARIANT_max=1
 
 def fn_validate_coeff_type(TT_DATA, TT_COEFF):
   if ((TT_DATA=="cint16" and TT_COEFF=="int16") or (TT_DATA=="cint32" and TT_COEFF=="int32") or (TT_DATA=="cfloat" and TT_COEFF=="float")):
     return isValid
   else:
-    return isError("Coefficient type must be the atomic type of data, e.g. for TT_DATA=cint16 TT_COEFF must be int16. Got TT_DATA={TT_DATA} and TT_COEFF={TT_COEFF}")
+    return isError(f"Coefficient type must be the atomic type of data, e.g. for TT_DATA=cint16 TT_COEFF must be int16. Got TT_DATA={TT_DATA} and TT_COEFF={TT_COEFF}")
 
 def fn_validate_point_size(TP_POINT_SIZE, TT_DATA):
-  if TP_POINT_SIZE < TP_POINT_SIZE_min or TP_POINT_SIZE > TP_POINT_SIZE_max :
-        return isError(f"Minimum and maximum value for Point Size is {TP_POINT_SIZE_min} and {TP_POINT_SIZE_max},respectively, but got {TP_POINT_SIZE}.")
+  res = fn_validate_minmax_value("TP_POINT_SIZE", TP_POINT_SIZE, TP_POINT_SIZE_min, TP_POINT_SIZE_max)
+  if (res["is_valid"] == False):  
+    return res
   if (TP_POINT_SIZE % (16/fn_size_by_byte(TT_DATA) ) == 0) :
     return isValid
   else:
     return isError("Point size must describe a frame size which is a multiple of 128 bits.")
 
 def fn_validate_window_vsize(TP_POINT_SIZE,TP_WINDOW_VSIZE):
-  if TP_WINDOW_VSIZE < TP_WINDOW_VSIZE_min or TP_WINDOW_VSIZE > TP_WINDOW_VSIZE_max :
-        return isError(f"Minimum and maximum value for Input size is {TP_WINDOW_VSIZE_min} and {TP_WINDOW_VSIZE_max},respectively, but got {TP_WINDOW_VSIZE}.")
+  res = fn_validate_min_value("TP_WINDOW_VSIZE", TP_WINDOW_VSIZE, TP_WINDOW_VSIZE_min)
+  if (res["is_valid"] == False):  
+    return res
   if ((TP_WINDOW_VSIZE>=TP_POINT_SIZE) and (TP_WINDOW_VSIZE%TP_POINT_SIZE==0)) :
     return isValid
   else:
-    return isError("Window size must be an integer multiple of point size. Got window size of {TP_WINDOW_VSIZE} and point size of {TP_POINT_SIZE}.")
+    return isError(f"Window size must be an integer multiple of point size. Got window size of {TP_WINDOW_VSIZE} and point size of {TP_POINT_SIZE}.")
 
 def fn_validate_shift_val(TT_DATA, TP_SHIFT):
-  if TP_SHIFT < TP_SHIFT_min or TP_SHIFT > TP_SHIFT_max :
-        return isError(f"Minimum and maximum value for Shift is {TP_SHIFT_min} and {TP_SHIFT_max},respectively, but got {TP_SHIFT}.")
+  res = fn_validate_minmax_value("TP_SHIFT", TP_SHIFT, TP_SHIFT_min, TP_SHIFT_max)
+  if (res["is_valid"] == False):  
+    return res
   if (TT_DATA=="cfloat"):
     if (TP_SHIFT==0) :
       return isValid
     else:
-      return isError("Shift must be 0 for cfloat data type. Got {TP_SHIFT}.")
+      return isError(f"Shift must be 0 for cfloat data type. Got {TP_SHIFT}.")
   if (TT_DATA=="cint32"):
     if (TP_SHIFT>=0 and TP_SHIFT<61) :
       return isValid
     else:
-      return isError("Shift must be in range 0 to 61 for cint32 data type. Got {TP_SHIFT}.")
+      return isError(f"Shift must be in range 0 to 61 for cint32 data type. Got {TP_SHIFT}.")
   if (TT_DATA=="cint16"):
     if (TP_SHIFT>=0 and TP_SHIFT<32) :
       return isValid
     else:
-      return isError("Shift must be in range 0 to 31 for cint16 data type. Got {TP_SHIFT}.")
+      return isError(f"Shift must be in range 0 to 31 for cint16 data type. Got {TP_SHIFT}.")
 
 def fn_validate_ssr(TT_DATA, TP_POINT_SIZE, TP_API, TP_SSR):
-  if TP_SSR < TP_SSR_min or TP_SSR > TP_SSR_max:
-        return isError(f"Minimum and maximum value for SSR is {TP_SSR_min} and {TP_SSR_max},respectively, but got {TP_SSR}.")
+  res = fn_validate_minmax_value("TP_SSR", TP_SSR, TP_SSR_min, TP_SSR_max)
+  if (res["is_valid"] == False):  
+    return res
   if (TP_POINT_SIZE/TP_SSR >=16 and TP_POINT_SIZE/TP_SSR<=4096) :
     if (TP_POINT_SIZE/TP_SSR<=1024 or TP_API==1) :
       return isValid
     else:
-      return isError("(Point size/SSR) must be less than 1024 for windowed configurations. Got TP_POINT_SIZE={TP_POINT_SIZE} and TP_SSR={TP_SSR}.")
+      return isError(f"(Point size/SSR) must be less than 1024 for windowed configurations. Got TP_POINT_SIZE={TP_POINT_SIZE} and TP_SSR={TP_SSR}.")
   else:
-    return isError("(Point size/SSR) must be between 16 and 4096. Got TP_POINT_SIZE={TP_POINT_SIZE} and TP_SSR={TP_SSR}.")
+    return isError(f"(Point size/SSR) must be between 16 and 4096. Got TP_POINT_SIZE={TP_POINT_SIZE} and TP_SSR={TP_SSR}.")
 
 def fn_validate_dyn_pt_size(TP_POINT_SIZE, TP_SSR, TP_DYN_PT_SIZE):
   if (TP_DYN_PT_SIZE==0 or TP_POINT_SIZE/TP_SSR >32) :
     return isValid
   else:
-    return isError("When dynamic point FFT is selected, (Point size/SSR) must be greater than 32. Got TP_POINT_SIZE={TP_POINT_SIZE} and TP_SSR={TP_SSR}.")
+    return isError(f"When dynamic point FFT is selected, (Point size/SSR) must be greater than 32. Got TP_POINT_SIZE={TP_POINT_SIZE} and TP_SSR={TP_SSR}.")
 
 def fn_validate_weights(TP_POINT_SIZE, TP_DYN_PT_SIZE, weights_list):
   if TP_DYN_PT_SIZE == 0:
@@ -268,49 +262,74 @@ def info_ports(args):
   TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
   complex = fn_is_complex(TT_DATA)
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
-  if (TP_API==0 and TP_DYN_PT_SIZE == 0):
-    portsIn = get_port_info(
-      portname = "in",
-      dir = "in",
-      dataType = TT_DATA,
-      windowVsize = TP_WINDOW_VSIZE,
-      apiType = "window",
-      vectorLength = TP_SSR
-    )
-    portsOut = get_port_info(
-      portname = "out",
-      dir = "out",
-      dataType = TT_DATA,
-      windowVsize = TP_WINDOW_VSIZE,
-      apiType = "window",
-      vectorLength = TP_SSR
-    )
+  AIE_VARIANT = args["AIE_VARIANT"]
 
-  elif (TP_API == 0 and TP_DYN_PT_SIZE == 1):
-    portsIn = get_dyn_pt_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE, TP_SSR, 0, TP_API)
-    portsOut = get_dyn_pt_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE, TP_SSR, 0, TP_API)
-
-  elif (TP_API == 1 and TP_DYN_PT_SIZE == 1):
-    portsIn = get_dyn_pt_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE, TP_SSR, 0, TP_API)
-    portsOut = get_dyn_pt_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE, TP_SSR, 0, TP_API)
-
+  if TP_API == 0 :
+    if TP_DYN_PT_SIZE == 0 :
+      portsIn = get_port_info(
+        portname = "in",
+        dir = "in",
+        dataType = TT_DATA,
+        windowVsize = TP_WINDOW_VSIZE/TP_SSR,
+        apiType = "window",
+        vectorLength = TP_SSR
+      )
+      portsOut = get_port_info(
+        portname = "out",
+        dir = "out",
+        dataType = TT_DATA,
+        windowVsize = TP_WINDOW_VSIZE/TP_SSR,
+        apiType = "window",
+        vectorLength = TP_SSR
+      )
+    else :
+      portsIn = get_dyn_pt_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE/TP_SSR, TP_SSR, 0, TP_API)
+      portsOut = get_dyn_pt_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE/TP_SSR, TP_SSR, 0, TP_API)
   else:
-    portsIn = get_port_info(
-      portname = "in",
-      dir = "in",
-      dataType = TT_DATA,
-      windowVsize = TP_WINDOW_VSIZE,
-      apiType = "stream",
-      vectorLength = TP_SSR
-    )
-    portsOut = get_port_info(
-      portname = "out",
-      dir = "out",
-      dataType = TT_DATA,
-      windowVsize = TP_WINDOW_VSIZE,
-      apiType = "stream",
-      vectorLength = TP_SSR
-    )
+    #AIE_VARIANT=1 and TP_API=1 uses 2x ports
+    if AIE_VARIANT == 1:
+      if TP_DYN_PT_SIZE == 0 :
+        portsIn = get_port_info(
+          portname = "in",
+          dir = "in",
+          dataType = TT_DATA,
+          windowVsize = TP_WINDOW_VSIZE*2/TP_SSR,
+          apiType = "stream",
+          vectorLength = TP_SSR
+        )
+        portsOut = get_port_info(
+          portname = "out",
+          dir = "out",
+          dataType = TT_DATA,
+          windowVsize = TP_WINDOW_VSIZE*2/TP_SSR,
+          apiType = "stream",
+          vectorLength = TP_SSR
+        )
+      else:
+        portsIn = get_dyn_pt_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE*2/TP_SSR, TP_SSR, 0, TP_API)
+        portsOut = get_dyn_pt_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE*2/TP_SSR, TP_SSR, 0, TP_API)
+    else: #AIE-ML
+      if TP_DYN_PT_SIZE == 0 :
+        portsIn = get_port_info(
+          portname = "in",
+          dir = "in",
+          dataType = TT_DATA,
+          windowVsize = TP_WINDOW_VSIZE/TP_SSR,
+          apiType = "stream",
+          vectorLength = TP_SSR
+        )
+        portsOut = get_port_info(
+          portname = "out",
+          dir = "out",
+          dataType = TT_DATA,
+          windowVsize = TP_WINDOW_VSIZE/TP_SSR,
+          apiType = "stream",
+          vectorLength = TP_SSR
+        )
+      else:
+        portsIn = get_dyn_pt_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE/TP_SSR, TP_SSR, 0, TP_API)
+        portsOut = get_dyn_pt_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE/TP_SSR, TP_SSR, 0, TP_API)
+
   return portsIn+portsOut
 
 
@@ -337,8 +356,9 @@ def generate_graph(graphname, args):
   TP_API = args["TP_API"]
   TP_SSR = args["TP_SSR"]
   TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
+  AIE_VARIANT = args["AIE_VARIANT"]
   coeff_list = args["weights"]
-  if TP_API == 1:
+  if TP_API == 1 and AIE_VARIANT == 1: #2 streams per tile
     ssr = TP_SSR//2
   else:
     ssr = TP_SSR

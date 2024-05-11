@@ -1,6 +1,7 @@
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
-
-.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+.. 
+   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   
+   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _L1_2DFFT_LABEL:
 
@@ -83,51 +84,51 @@ Template Parameters
 
 Function: fft2d is the top-level L1 API which takes a number of template parameters and in/out streams. These template functions describe the architecture and the data path of 1-D SSR FFT processors deployed as line processors. The description of these parameters is as follows:
 
-+-----------------------+-------------------------------------------------------------------+
-|                       |                                                                   |
-|  Template Parameter   |                            Functionality                          |
-+=======================+===================================================================+
-|       t_memWidth      | Describes the width of the wide stream in complex<T_elemType> words   |
-+-----------------------+-------------------------------------------------------------------+
-|       t_numRows       | Number of rows in the 2-D FFT input data (currently limited to 256)   |
-+-----------------------+-------------------------------------------------------------------+
-|       t_numCols       | Number of column in the 2-D FFT input data (currently limited to 256) |
-+-----------------------+-------------------------------------------------------------------+
-|      t_numKernels     | Number of parallel kernels used to process the rows/columns           |
-+-----------------------+-------------------------------------------------------------------+
-| t_ssrFFTParamsRowProc | Configuration parameter structure for the row processors              |
-+-----------------------+-------------------------------------------------------------------+
-| t_ssrFFTParamsColProc | Configuration parameter structure for the column processors           |
-+-----------------------+-------------------------------------------------------------------+
-| t_rowInstanceIDOffset | Instance ID offset for the row processors                             |
-+-----------------------+-------------------------------------------------------------------+
-| t_colInstanceIDOffset | Instance ID offset for the column processors                          |
-+-----------------------+-------------------------------------------------------------------+
-|       T_elemType      | The inner type for the complex wrapper                                |
-+-----------------------+-------------------------------------------------------------------+
++-----------------------+----------------------------------------------------------------------+
+|                       |                                                                      |
+|  Template Parameter   |                          Functionality                               |  
++=======================+======================================================================+
+|       t_memWidth      | Describes the width of the wide stream in complex<T_elemType> words  |
++-----------------------+----------------------------------------------------------------------+
+|       t_numRows       | Number of rows in the 2-D FFT input data (currently limited to 256)  |
++-----------------------+----------------------------------------------------------------------+
+|       t_numCols       | Number of column in the 2-D FFT input data (currently limited to 256)|
++-----------------------+----------------------------------------------------------------------+
+|      t_numKernels     | Number of parallel kernels used to process the rows/columns          |
++-----------------------+----------------------------------------------------------------------+
+| t_ssrFFTParamsRowProc | Configuration parameter structure for the row processors             |
++-----------------------+----------------------------------------------------------------------+
+| t_ssrFFTParamsColProc | Configuration parameter structure for the column processors          |
++-----------------------+----------------------------------------------------------------------+
+| t_rowInstanceIDOffset | Instance ID offset for the row processors                            |
++-----------------------+----------------------------------------------------------------------+
+| t_colInstanceIDOffset | Instance ID offset for the column processors                         |
++-----------------------+----------------------------------------------------------------------+
+|       T_elemType      | The inner type for the complex wrapper                               |
++-----------------------+----------------------------------------------------------------------+
 
-* t_memWidth: Gives the width of a wide stream in complex<inner_type> words can be calculated as: t_memWidth=(wide stream size in bits)/(sizeof(complex<T_elemType>)*8)).
+* t_memWidth: Gives the width of a wide stream in complex<inner_type> words can be calculated as: t_memWidth=(wide stream size in bits)/(sizeof(complex<T_elemType>)*8).
 
 * t_numRows: 2-D SSR FFT processes a matrix the number of rows in the input matrix given by t_numRows.
 
 * t_numCols: 2-D SSR FFT processes a matrix the number of columns in the input matrix given by t_numCols.
 
-* t_numKernels: 2-D SSR FFT can deploy multiple 1-D SSR FFT processors along the rows and columns to processes numerous row/columns in parallel. This paramter gives the number of processors to be used along the rows/columns. The number of columns used along the rows and columns are the same and equal t_numKernels.
+* t_numKernels: 2-D SSR FFT can deploy multiple 1-D SSR FFT processors along the rows and columns to processes numerous row/columns in parallel. This parameter gives the number of processors to be used along the rows/columns. The number of columns used along the rows and columns are the same and equal t_numKernels.
 
-* t_ssrFFTParamsRowProc: Structure of parameters that describes the tranform direction, data path, etc. for row processors. The details of the configuration parameter structures can be found in :ref:`Configuration Parameter Structure for Floating Point SSR FFT <FLOAT_FFT_PARAMS_STRUCT_LABEL>`. For the fixed point case (currently not supported), it is :ref:`Configuration Parameter Structure for Fixed Point SSR FFT <FIXED_FFT_PARAMS_STRUCT_LABEL>`.
+* t_ssrFFTParamsRowProc: Structure of parameters that describes the transform direction, data path, etc. for row processors. The details of the configuration parameter structures can be found in :ref:`Configuration Parameter Structure for Floating Point SSR FFT <FLOAT_FFT_PARAMS_STRUCT_LABEL>`. For the fixed point case (currently not supported), it is :ref:`Configuration Parameter Structure for Fixed Point SSR FFT <FIXED_FFT_PARAMS_STRUCT_LABEL>`.
 
-* t_ssrFFTParamsColProc: Structure of parameters that describes the tranform direction, data path, etc. for column processors. The details of the configuration parameter structures can be found in :ref:`Configuration Parameter Structure for Floating Point SSR FFT <FLOAT_FFT_PARAMS_STRUCT_LABEL>`. For the fixed point case (currently not supported), it is :ref:`Configuration Parameter Structure for Fixed Point SSR FFT <FIXED_FFT_PARAMS_STRUCT_LABEL>`.
+* t_ssrFFTParamsColProc: Structure of parameters that describes the transform direction, data path, etc. for column processors. The details of the configuration parameter structures can be found in :ref:`Configuration Parameter Structure for Floating Point SSR FFT <FLOAT_FFT_PARAMS_STRUCT_LABEL>`. For the fixed point case (currently not supported), it is :ref:`Configuration Parameter Structure for Fixed Point SSR FFT <FIXED_FFT_PARAMS_STRUCT_LABEL>`.
 
-* t_rowInstanceIDOffset: 2-D SSR FFT deploys multiple 1D SSR FFT processors, and it is required that every 1D SSR FFT proessor has a unique ID. If 'M' processors are used along rows, then their IDs will be in the range: (t_rowInstanceIDOffset+1 , t_rowInstanceIDOffset+M). The selection of the offset for rows and columns should be made so these ranges are unique without any overlap. Essentially, it requires that **abs(t_rowInstanceIDOffset - t_colInstanceIDOffset) > M**.
+* t_rowInstanceIDOffset: 2-D SSR FFT deploys multiple 1D SSR FFT processors, and it is required that every 1D SSR FFT processor has a unique ID. If 'M' processors are used along rows, then their IDs will be in the range: (t_rowInstanceIDOffset+1 , t_rowInstanceIDOffset+M). The selection of the offset for rows and columns should be made so these ranges are unique without any overlap. Essentially, it requires that **abs(t_rowInstanceIDOffset - t_colInstanceIDOffset) > M**.
 
-* t_colInstanceIDOffset: 2-D SSR FFT deploys multiple 1D SSR FFT processors, and it is required that every 1D SSR FFT proessor has a unique ID. If 'M' processors are used along rows, then their IDs will be in the range: (t_rowInstanceIDOffset+1 , t_rowInstanceIDOffset+M). The selection of the offset for rows and columns should be made so these ranges are unique without any overlap. Essentially, it requires that **abs(t_rowInstanceIDOffset - t_colInstanceIDOffset) > M**.
+* t_colInstanceIDOffset: 2-D SSR FFT deploys multiple 1D SSR FFT processors, and it is required that every 1D SSR FFT processor has a unique ID. If 'M' processors are used along rows, then their IDs will be in the range: (t_rowInstanceIDOffset+1 , t_rowInstanceIDOffset+M). The selection of the offset for rows and columns should be made so these ranges are unique without any overlap. Essentially, it requires that **abs(t_rowInstanceIDOffset - t_colInstanceIDOffset) > M**.
 
 * T_elemType: 2-D SSR FFT processes complex samples and T_elemType gives the inner type used to store real and imaginary parts. Currently, it supports only float as the inner type for simulation and synthesis.
 
 Constraints on the Choice of Template Parameters
 ------------------------------------------------
 
-Currently, the template paramters for 2-D SSR FFT should follow the following constraints:
+Currently, the template parameters for 2-D SSR FFT should follow the following constraints:
 
 1. The radix ``R`` specified for both the row and column processors in ``t_ssrFFTParamsRowProc`` and ``t_ssrFFTParamsColProc`` should be the same.
 
@@ -477,7 +478,7 @@ Before compiling and running the example, it is required to set up the path to t
    export XILINX_VIVADO=${TA_PATH}/Vivado/2021.1
    source ${XILINX_VIVADO}/settings64.sh
 
-The example discussed above is also provided as an example test and is available at the following path: ``REPO_PATH/dsp/L1/examples/2Dfix_impluse``. It can be simulated, synthesized, or co-simulated as follows: Simply go to the directory, ``REPO_PATH/dsp/L1/examples/2Dfix_impluse``, and simulate, build, and cosimulate the project using: ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1``. You can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0, choose what to build and run with the make target.
+The example discussed above is also provided as an example test and is available at the following path: ``REPO_PATH/dsp/L1/examples/2Dfix_impulse``. It can be simulated, synthesized, or co-simulated as follows: Simply go to the directory, ``REPO_PATH/dsp/L1/examples/2Dfix_impulse``, and simulate, build, and cosimulate the project using: ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1``. You can choose the part number as required and by settting CSIM/CSYNTH/COSIM=0, choose what to build and run with the make target.
 
 2-D Floating Point Example
 --------------------------
@@ -660,7 +661,7 @@ Before compiling and running the example, it is required to set up the path to t
    export XILINX_VIVADO=${TA_PATH}/Vivado/2021.1
    source ${XILINX_VIVADO}/settings64.sh
 
-The example discussed above is also provided as an example test and available at the following path: ``REPO_PATH/dsp/L1/examples/2Dfloat_impluse``. It can be simulated, synthesized, or cosimulated as follows: Simply go to the directory, ``REPO_PATH/dsp/L1/examples/2Dfloat_impluse``, and simulate, build, and co-simulate project using: ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1``. You can choose the part number as required, and by settting CSIM/CSYNTH/COSIM=0, choose what to build and run with make target.
+The example discussed above is also provided as an example test and available at the following path: ``REPO_PATH/dsp/L1/examples/2Dfloat_impulse``. It can be simulated, synthesized, or cosimulated as follows: Simply go to the directory, ``REPO_PATH/dsp/L1/examples/2Dfloat_impulse``, and simulate, build, and co-simulate project using: ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1``. You can choose the part number as required, and by settting CSIM/CSYNTH/COSIM=0, choose what to build and run with make target.
 
 2-D SSR FFT Tests
 -----------------
@@ -679,3 +680,6 @@ To launch an individual test, it is first required to set up the environment for
    source ${XILINX_VIVADO}/settings64.sh
 
 Once the environment settings are done, an individual test can be launched by going to the test folder (any folder inside subdirectory at any level of ``REPO_PATH/dsp/L1/test/hw/`` that has Makefile is a test) and running the make command: ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1``. You can choose the part number as required, and by settting CSIM/CSYNTH/COSIM=0, choose what to build and run with the make target.
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:

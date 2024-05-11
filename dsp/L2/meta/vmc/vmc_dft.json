@@ -37,7 +37,7 @@
       "validator": {
         "file": "vmc_dft_common.py",
         "function": "vmc_validate_point_size",
-        "args": []
+        "args": ["AIE_VARIANT","data_type","twiddle_type","casc_length"]
       },
             "label": "DFT size:",
             "tablabel": "Main",
@@ -75,9 +75,7 @@
       "key": "TP_RND",
       "name": "rnd_mode",
       "description": "The rounding to be applied during the shift down stage of processing.",
-      "enum": [0, 1, 2, 3, 4, 5, 6, 7],
-      "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"],
-      "default": 4,
+      "default": "Round symmetrical to infinity",
           "label": "Rounding mode:",
             "tablabel": "Main",
           "parameterType": "popup"
@@ -106,12 +104,22 @@
        "validator": {
         "file": "vmc_dft_common.py",
         "function": "vmc_validate_casc_length",
-        "args": ["num_frames", "point_size"]
+        "args": []
       },
             "label": "Number of cascade stages:",
             "tablabel": "Main",
             "parameterType":"edit"
+    },
+	{
+	  "key": "AIE_VARIANT",
+	  "name": "AIE_VARIANT",
+      "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
+      "default": 1,
+	  "label": "AIE Variant:",
+      "tablabel": "Main",
+      "parameterType":"edit"
     }
+
   ],
   "generator": {
     "file": "vmc_dft.py",

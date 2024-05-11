@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,27 +49,34 @@ namespace dft {
 
 // Start of recursive kernel creation for cascaded dft kernels
 // This is the specialization for kernels in the middle of the cascade.
-template <int kPos,
+template <int cascPos,
           typename TT_DATA,
           typename TT_TWIDDLE,
           unsigned int TP_POINT_SIZE,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR,
           unsigned int TP_NUM_FRAMES,
-          unsigned int TP_RND = 0,
-          unsigned int TP_SAT = 1>
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 class create_casc_kernel_recur {
    public:
-    static void create(kernel (&dftKernels)[TP_CASC_LEN], const std::vector<std::vector<TT_TWIDDLE> >& coeffs) {
-        static constexpr unsigned int TP_KERNEL_POSITION = kPos - 1;
-        dftKernels[kPos - 1] =
-            kernel::create_object<dft<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN,
-                                      TP_NUM_FRAMES, TP_KERNEL_POSITION, true, true, TP_RND, TP_SAT> >(
-                coeffs[kPos - 1]);
-
-        create_casc_kernel_recur<kPos - 1, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN,
-                                 TP_NUM_FRAMES, TP_RND, TP_SAT>::create(dftKernels, coeffs);
+    //             casc
+    //        [0] - [1] - [2]       [cascPos + ssrPos*TP_CASC_LEN]
+    //  SSR   [3] - [4] - [5]
+    //        [6] - [7] - [8]
+    static void create(kernel (&dftKernels)[TP_CASC_LEN * TP_SSR],
+                       const std::vector<std::vector<TT_TWIDDLE> >& coeffs) {
+        static constexpr unsigned int TP_KERNEL_POSITION = cascPos - 1;
+        for (int ssrPos = 0; ssrPos < TP_SSR; ssrPos++) {
+            dftKernels[cascPos - 1 + ssrPos * TP_CASC_LEN] =
+                kernel::create_object<dft<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN,
+                                          TP_SSR, TP_NUM_FRAMES, TP_KERNEL_POSITION, true, true, TP_RND, TP_SAT> >(
+                    coeffs[cascPos - 1 + ssrPos * TP_CASC_LEN]);
+        }
+        create_casc_kernel_recur<cascPos - 1, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN,
+                                 TP_SSR, TP_NUM_FRAMES, TP_RND, TP_SAT>::create(dftKernels, coeffs);
     }
 };
 
@@ -81,6 +88,7 @@ template <typename TT_DATA,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_RND,
           unsigned int TP_SAT>
@@ -91,40 +99,49 @@ class create_casc_kernel_recur<1,
                                TP_FFT_NIFFT,
                                TP_SHIFT,
                                TP_CASC_LEN,
+                               TP_SSR,
                                TP_NUM_FRAMES,
                                TP_RND,
                                TP_SAT> {
    public:
-    static void create(kernel (&dftKernels)[TP_CASC_LEN], const std::vector<std::vector<TT_TWIDDLE> >& coeffs) {
+    static void create(kernel (&dftKernels)[TP_CASC_LEN * TP_SSR],
+                       const std::vector<std::vector<TT_TWIDDLE> >& coeffs) {
         static constexpr unsigned int TP_KERNEL_POSITION = 0;
-        dftKernels[0] =
-            kernel::create_object<dft<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN,
-                                      TP_NUM_FRAMES, TP_KERNEL_POSITION, false, true, TP_RND, TP_SAT> >(coeffs[0]);
+        for (int ssrPos = 0; ssrPos < TP_SSR; ssrPos++) {
+            dftKernels[0 + ssrPos * TP_CASC_LEN] =
+                kernel::create_object<dft<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN,
+                                          TP_SSR, TP_NUM_FRAMES, TP_KERNEL_POSITION, false, true, TP_RND, TP_SAT> >(
+                    coeffs[0 + ssrPos * TP_CASC_LEN]);
+        }
     }
 };
 
 // dft Kernel creation, entry to recursion, also end of cascade.
-template <int kPos,
+template <int cascPos,
           typename TT_DATA,
           typename TT_TWIDDLE,
           unsigned int TP_POINT_SIZE,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_RND,
           unsigned int TP_SAT>
 class create_casc_kernel {
    public:
-    static void create(kernel (&dftKernels)[TP_CASC_LEN], const std::vector<std::vector<TT_TWIDDLE> >& coeffs) {
-        static constexpr unsigned int TP_KERNEL_POSITION = kPos - 1;
-        dftKernels[kPos - 1] =
-            kernel::create_object<dft<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN,
-                                      TP_NUM_FRAMES, TP_KERNEL_POSITION, true, false, TP_RND, TP_SAT> >(
-                coeffs[kPos - 1]);
+    static void create(kernel (&dftKernels)[TP_CASC_LEN * TP_SSR],
+                       const std::vector<std::vector<TT_TWIDDLE> >& coeffs) {
+        static constexpr unsigned int TP_KERNEL_POSITION = cascPos - 1;
+        for (int ssrPos = 0; ssrPos < TP_SSR; ssrPos++) {
+            dftKernels[cascPos - 1 + ssrPos * TP_CASC_LEN] =
+                kernel::create_object<dft<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN,
+                                          TP_SSR, TP_NUM_FRAMES, TP_KERNEL_POSITION, true, false, TP_RND, TP_SAT> >(
+                    coeffs[cascPos - 1 + ssrPos * TP_CASC_LEN]);
+        }
 
-        create_casc_kernel_recur<kPos - 1, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN,
-                                 TP_NUM_FRAMES, TP_RND, TP_SAT>::create(dftKernels, coeffs);
+        create_casc_kernel_recur<cascPos - 1, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN,
+                                 TP_SSR, TP_NUM_FRAMES, TP_RND, TP_SAT>::create(dftKernels, coeffs);
     }
 };
 
@@ -135,6 +152,7 @@ template <typename TT_DATA,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_RND,
           unsigned int TP_SAT>
@@ -145,15 +163,20 @@ class create_casc_kernel<1,
                          TP_FFT_NIFFT,
                          TP_SHIFT,
                          TP_CASC_LEN,
+                         TP_SSR,
                          TP_NUM_FRAMES,
                          TP_RND,
                          TP_SAT> {
    public:
-    static void create(kernel (&dftKernels)[1], const std::vector<std::vector<TT_TWIDDLE> >& coeffs) {
+    static void create(kernel (&dftKernels)[TP_CASC_LEN * TP_SSR],
+                       const std::vector<std::vector<TT_TWIDDLE> >& coeffs) {
         static constexpr unsigned int TP_KERNEL_POSITION = 0;
-        dftKernels[0] =
-            kernel::create_object<dft<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN,
-                                      TP_NUM_FRAMES, TP_KERNEL_POSITION, false, false, TP_RND, TP_SAT> >(coeffs[0]);
+        for (int ssrPos = 0; ssrPos < TP_SSR; ssrPos++) {
+            dftKernels[ssrPos] =
+                kernel::create_object<dft<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN,
+                                          TP_SSR, TP_NUM_FRAMES, TP_KERNEL_POSITION, false, false, TP_RND, TP_SAT> >(
+                    coeffs[ssrPos]);
+        }
     }
 };
 /**
@@ -169,7 +192,7 @@ class create_casc_kernel<1,
  * @ingroup dft_graph
  *
  * These are the templates to configure the function.
- * @tparam TT_DATA describes the type of individual data samples input to the function.
+ * @tparam TT_DATA describes the type of individual data samples input to the function. \n
  *         This is a typename and must be one of the following: \n
  *         cint16, cint32, cfloat.
  * @tparam TT_TWIDDLE describes the type of twiddle factors used in the transform. \n
@@ -184,10 +207,10 @@ class create_casc_kernel<1,
  * @tparam TP_CASC_LEN selects the number of kernels the DFT will be split over in series
  *         to improve throughput
  * @tparam TP_NUM_FRAMES describes the number of frames of input data samples that occur
- *          within each input window of data.
+ *         within each input window of data.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
- *         descriptive macros are recommended where
+ *         shift down stage of processing. \n
+ *         Although, TP_RND accepts unsigned integer values descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
  *         - rnd_sym_floor  = Truncate LSB, always round towards 0.
@@ -201,13 +224,17 @@ class create_casc_kernel<1,
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
- * @tparam TP_SAT describes the selection of saturation to be applied during the
- *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
+ *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
  *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
  *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
  *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds
  *         an n-bit signed value in the range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
+ * @tparam TP_SSR selects number cascade chains that will operate in parallel.
+ *         The kernels in each SSR rank will receive the same input data as the kernels in all other SSR ranks. \n
+ *         The internally calculated twiddles are split by across each SSR rank.
+ *         There will be TP_SSR output ports that should be interleaved together to give the output of the DFT. \n
  **/
 
 template <typename TT_DATA,
@@ -218,14 +245,15 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_SSR>
 class dft_graph : public graph {
    public:
     /**
-     * The chain of kernels that will be created and mapped onto AIE tiles.
-     * Number of kernels (``TP_CASC_LEN``) will be connected with each other in series via a cascade interface.
+     * The array of kernels that will be created and mapped onto AIE tiles.
+     * There will be ``TP_SSR`` number of parallel cascade chains of length ``TP_CASC_LEN``.
      **/
-    kernel m_dftKernels[TP_CASC_LEN];
+    kernel m_dftKernels[TP_CASC_LEN * TP_SSR];
 
     /**
      * Access function to get pointer to kernel (or first kernel in a chained configuration).
@@ -234,28 +262,26 @@ class dft_graph : public graph {
 
     /**
      * The input data to each of the kernels in the function.
-     * This input is a window of samples of TT_DATA type.
-     * The number of samples in the window is
-     * derived from the POINT_SIZE and NUM_FRAMES parameters. A data frame of size (``TP_POINT_SIZE``) may require
-     * zero-padding so that the length is a multiple of the size of the vector being used to read this data.
+     * This input is a window of samples of ``TT_DATA`` type.
+     * The number of samples in the window to each kernel is derived by ``(TP_POINT_SIZE / TP_CASC_LEN) *
+     *TP_NUM_FRAMES``.
+     * A data frame of size ``TP_POINT_SIZE`` may require zero-padding so that after it has been divided by TP_CASC_LEN,
+     *so that it is aligned to the vector read size
+     * (for AIE this would 4, 8, and 8 samples for cint16, cint32, and cfloat respectively, and for AIE-Ml this would be
+     *8 samples for all data types).
      * Each kernel in a cascaded design will receive an equal share of the input data.
      * Further zero-padding of the input data to each kernel in cascade may be required to ensure this is possible.
      * More information about the required padding of the input data can be found in the documentation for the DFT.
      *
      **/
-    port<input> in[TP_CASC_LEN];
+    port<input> in[TP_SSR * TP_CASC_LEN];
 
     /**
      * The output data of the function. For cascaded designs, this is located at the end of the cascaded kernel chain.
-     * This input will be a complex TT_DATA type.
-     * The number of samples in the output window is derived from the POINT_SIZE and NUM_FRAMES parameters.
-     * A data frame of size (``TP_POINT_SIZE``) may require zero-padding so that the length is a multiple of the size of
-     *the vector being used to read this data.
-     * Any additional padding added that was required for the input of a cascaded design will not be included in
-     * the size of the output data window.
-     *
+     * This input will be a complex ``TT_DATA`` type, and there will be ``TP_SSR`` output ports.
+     * The number of samples in each SSR output window is derived by ``(TP_POINT_SIZE / TP_SSR) * TP_NUM_FRAMES``.
      **/
-    port<output> out[1];
+    port<output> out[TP_SSR];
 
     typedef typename std::conditional_t<
         std::is_same<TT_DATA, int16>::value,
@@ -271,45 +297,36 @@ class dft_graph : public graph {
      * @brief This is the constructor function for the Discrete Fourier Transform graph.
      **/
     dft_graph() {
-#if __SUPPORTS_CFLOAT__ == 1
         static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value) ||
                           (std::is_same<TT_DATA, cfloat>::value),
                       "ERROR: TT_DATA is not supported");
-#else
-        // AIE variants that don't support cfloat should flag that.
+#ifdef __SUPPORTS_ACC64__
         static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value),
                       "ERROR: TT_DATA is not supported");
-#endif //__SUPPORTS_CFLOAT__ == 0
+#endif //__SUPPORTS_ACC64__
 
 // Number of samples in output vector, and twiddle vector. Depends on type of output data, and twiddle
 #ifdef __SUPPORTS_ACC64__
-        constexpr int kSamplesInVectOutData = 8;
+        constexpr int kSamplesInVectData = 8;
 #else
-        constexpr int kSamplesInVectOutData = 256 / 8 / sizeof(TT_DATA);
+        constexpr int kSamplesInVectData = 256 / 8 / sizeof(TT_DATA);
 #endif //__SUPPORTS_ACC64__
-        // constexpr int kSamplesInVectTwiddle =  256 / 8 / sizeof(TT_TWIDDLE);
-        constexpr int kSamplesInVectTwiddle = kSamplesInVectOutData;
-        constexpr int paddedDataSize = CEIL(TP_POINT_SIZE, kSamplesInVectOutData);
-        constexpr int paddedCoeffSize = CEIL(TP_POINT_SIZE, kSamplesInVectTwiddle);
-        constexpr int outWindowSize = paddedDataSize * TP_NUM_FRAMES;
-        constexpr int paddedFrameSize = CEIL(paddedDataSize, (kSamplesInVectOutData * TP_CASC_LEN));
+        constexpr int kCoeffVectSize = kSamplesInVectData;
+        constexpr int paddedDataSize = CEIL(TP_POINT_SIZE, kSamplesInVectData);
+
+        constexpr int paddedCoeffSize = CEIL(TP_POINT_SIZE, (TP_SSR * kCoeffVectSize));
+
+        constexpr int outWindowSize = paddedCoeffSize * TP_NUM_FRAMES / TP_SSR;
+
+        constexpr int paddedFrameSize = CEIL(paddedDataSize, (kSamplesInVectData * TP_CASC_LEN));
         constexpr int paddedWindowSize = TP_NUM_FRAMES * paddedFrameSize;
         constexpr int cascWindowSize = paddedWindowSize / TP_CASC_LEN;
         constexpr int cascFrameSize = paddedFrameSize / TP_CASC_LEN;
-        constexpr int kVecInCoeff = paddedCoeffSize / kSamplesInVectTwiddle;
-
-        printf("kSamplesInVectOutData = %d\n", kSamplesInVectOutData);
-        printf("kSamplesInVectTwiddle = %d\n", kSamplesInVectTwiddle);
-        printf("paddedDataSize = %d\n", paddedDataSize);
-        printf("paddedCoeffSize = %d\n", paddedCoeffSize);
-        printf("paddedFrameSize = %d\n", paddedFrameSize);
-        printf("paddedWindowSize = %d\n", paddedWindowSize);
-        printf("cascWindowSize = %d\n", cascWindowSize);
-        printf("cascFrameSize = %d\n", cascFrameSize);
+        constexpr int kVecInCoeff = paddedCoeffSize / kCoeffVectSize;
 
         cfloat tmpCoeff[TP_POINT_SIZE][paddedCoeffSize];
         TT_TWIDDLE masterCoeff[TP_POINT_SIZE][paddedCoeffSize];
-        std::vector<std::vector<TT_TWIDDLE> > cascCoeffs(TP_CASC_LEN);
+        std::vector<std::vector<TT_TWIDDLE> > cascCoeffs(TP_CASC_LEN * TP_SSR);
 
         // create master table of dft coefficients
         // n is matrix row, k is matrix column
@@ -322,7 +339,6 @@ class dft_graph : public graph {
                 if (k >= TP_POINT_SIZE) {
                     tmpCoeff[n][k] = {0.0, 0.0};
                 }
-
                 if (std::is_same<TT_TWIDDLE, cfloat>::value) {
                     masterCoeff[n][k].real = tmpCoeff[n][k].real;
                     masterCoeff[n][k].imag = tmpCoeff[n][k].imag;
@@ -343,56 +359,51 @@ class dft_graph : public graph {
             // printf("\n");
         }
 
-        // // Deal coefficients across kernels
-        // for (int vectorSlice = 0; vectorSlice < paddedCoeffSize/kSamplesInVectTwiddle; vectorSlice++) {
-        //   for (int row = 0; row < TP_POINT_SIZE; row++) {
-        //     for (int col = (vectorSlice*kSamplesInVectTwiddle); col < (vectorSlice + 1)*kSamplesInVectTwiddle;
-        //     col++){
-        //       cascCoeffs[row % TP_CASC_LEN].push_back(masterCoeff[row][col]);
-        //       // printf("Kernel %d: %d rows %d cols\n", row % TP_CASC_LEN, row, col);
-        //     }
-        //   }
-        // }
-
-        // Deal coefficients across kernels
+        int cascRank = 0;
+        int ssrRank = 0;
+        int ssrVsize = TP_SSR * kCoeffVectSize;
         int pairOrSingle;
-        for (int vectorPair = 0; vectorPair < kVecInCoeff; vectorPair += 2) {
-            for (int row = 0; row < TP_POINT_SIZE; row++) {
-                pairOrSingle = (kVecInCoeff - vectorPair > 1) + 1;
+        // int doubleLoad = ()
+        for (int vectorPair = 0; vectorPair < paddedCoeffSize / ssrVsize; vectorPair += 2) {
+            for (int n = 0; n < TP_POINT_SIZE; n++) {
+                pairOrSingle = ((paddedCoeffSize / ssrVsize) - vectorPair > 1) + 1;
                 for (int i = 0; i < pairOrSingle; i++) {
-                    for (int col = ((vectorPair + i) * kSamplesInVectTwiddle);
-                         col < (vectorPair + 1 + i) * kSamplesInVectTwiddle; col++) {
-                        cascCoeffs[row % TP_CASC_LEN].push_back(masterCoeff[row][col]);
-                        // printf("Kernel %d: %d rows %d cols\n", row % TP_CASC_LEN, row, col);
+                    for (int k = (vectorPair + i) * (ssrVsize); k < (vectorPair + i + 1) * (ssrVsize); k++) {
+                        cascRank = n % TP_CASC_LEN;
+                        ssrRank = k % TP_SSR;
+                        // printf("n %d k %d -> cascRank %d ssrRank %d on Kernel %d\n", n, k, cascRank, ssrRank,
+                        // cascRank+(TP_CASC_LEN*ssrRank));
+                        cascCoeffs[cascRank + (TP_CASC_LEN * ssrRank)].push_back(masterCoeff[n][k]);
                     }
                 }
             }
         }
 
         // Create kernel classes
-        create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN,
+        create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_SSR,
                            TP_NUM_FRAMES, TP_RND, TP_SAT>::create(m_dftKernels, cascCoeffs);
 
-        // create object for each kernel in cascade
-        for (int cascNum = 0; cascNum < TP_CASC_LEN; cascNum++) {
-            // connect cascaded kernels
-            if (cascNum >= 1 && TP_CASC_LEN > 1) {
-                connect<cascade>(m_dftKernels[cascNum - 1].out[0], m_dftKernels[cascNum].in[1]);
+        for (int ssr = 0; ssr < TP_SSR; ssr++) { // create object for each kernel in cascade
+            for (int cascNum = 0; cascNum < TP_CASC_LEN; cascNum++) {
+                int kernelIdx = (ssr * TP_CASC_LEN) + cascNum;
+                // connect cascaded kernels
+                if (cascNum >= 1 && TP_CASC_LEN > 1) {
+                    connect<cascade>(m_dftKernels[kernelIdx - 1].out[0], m_dftKernels[kernelIdx].in[1]);
+                }
+                // // connect input data to each kernel
+                connect(in[kernelIdx], m_dftKernels[kernelIdx].in[0]);
+                dimensions(m_dftKernels[kernelIdx].in[0]) = {cascWindowSize};
+
+                // Specify mapping constraints
+                runtime<ratio>(m_dftKernels[kernelIdx]) = 0.8;
+                // Source files
+                source(m_dftKernels[kernelIdx]) = "dft.cpp";
+                headers(m_dftKernels[kernelIdx]) = {"dft.hpp"};
             }
-            // // connect input data to each kernel
-            connect(in[cascNum], m_dftKernels[cascNum].in[0]);
-            dimensions(m_dftKernels[cascNum].in[0]) = {cascWindowSize};
-
-            // Specify mapping constraints
-            runtime<ratio>(m_dftKernels[cascNum]) = 0.8;
-            // Source files
-            source(m_dftKernels[cascNum]) = "dft.cpp";
-            headers(m_dftKernels[cascNum]) = {"dft.hpp"};
+            // connect final kernel output to output of the graph
+            connect(m_dftKernels[((ssr * TP_CASC_LEN) + TP_CASC_LEN - 1)].out[0], out[ssr]);
+            dimensions(m_dftKernels[((ssr * TP_CASC_LEN) + TP_CASC_LEN - 1)].out[0]) = {outWindowSize};
         }
-
-        // connect final kernel output to output of the graph
-        connect(m_dftKernels[(TP_CASC_LEN - 1)].out[0], out[0]);
-        dimensions(m_dftKernels[(TP_CASC_LEN - 1)].out[0]) = {outWindowSize};
     };
 };
 

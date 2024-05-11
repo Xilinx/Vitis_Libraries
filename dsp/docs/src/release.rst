@@ -1,6 +1,7 @@
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
-
-.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+..
+   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   
+   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _release_note:
 
@@ -12,11 +13,76 @@ Release Notes
    :hidden:
    :maxdepth: 1
 
-2023.2
+2024.1
 ======
 
 The following features have been added to the library in this release.
 
+*  **TDM FIR** - New library element.
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and class name**                                                |
++=======================================+=============================================================================+
+| TDM FIR                               |  xf::dsp::aie::fir::tdm::fir_tdm_graph                                      |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This element adds an implementation of the Time-Division Multiplexing (TDM) variant of finite impulse response (FIR) filter.
+
+Supports AIE and AIE-ML devices.
+
+*  **Convolution / Correlation** - New library element.
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and class name**                                                |
++=======================================+=============================================================================+
+| Convolution / Correlation             |  xf::dsp::aie::conv_corr::conv_corr_graph                                   |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This element adds an implementation of the Convolution and Correlation, depending on the specified FUNCT_TYPE template
+parameter.
+
+Supports AIE and AIE-ML devices.
+
+*  **Hadamard Product** - New library element.
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and Class Name**                                                |
++=======================================+=============================================================================+
+| Hadamard Product                      |  xf::dsp::aie::hadamard::hadamard_graph                                     |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This element adds an implementation of the Hadamard Product.
+
+Supports AIE and AIE-ML devices.
+
+*  **Outer Tensor Product** - New library element.
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and Class Name**                                                |
++=======================================+=============================================================================+
+| Outer Tensor Product                  |  xf::dsp::aie::outer_tensor::outer_tensor_graph                             |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This element adds an implementation of the Outer Tensor Product.
+
+Supports AIE devices.
+
+*  **Kronecker Matrix Product** - New library element.
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and Class Name**                                                |
++=======================================+=============================================================================+
+| Kronecker Matrix Product              |  xf::dsp::aie::kronecker::kronecker_graph                                   |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This element adds an implementation of the  Kronecker Matrix Product.
+
+Supports AIE devices.
+
+2023.2
+======
+
+The following features have been added to the library in this release.
 * **DFT**: New library element.
 
 +---------------------------------------+-----------------------------------------------------------------------------+
@@ -29,7 +95,7 @@ This element adds an implementation of the Discrete Fourier transform (DFT).
 
 Supports both AI Engine (AIE) and AIE-ML devices.
 
-* **Mixed-Radix FFT **: New library element.
+* **Mixed-Radix FFT**: New library element.
 
 +---------------------------------------+-----------------------------------------------------------------------------+
 | **Function**                          | **Namespace and Class Name**                                                |

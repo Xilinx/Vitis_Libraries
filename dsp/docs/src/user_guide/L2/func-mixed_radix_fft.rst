@@ -1,6 +1,7 @@
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
-
-.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+..
+   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   
+   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _Mixed_Radix_FFT:
 
@@ -19,6 +20,15 @@ The graph entry point is the following:
 .. code-block::
 
     xf::dsp::aie::fft::mixed_radix_fft_graph
+
+~~~~~~~~~~~~~~~
+Device Support
+~~~~~~~~~~~~~~~
+The mixed_radix_fft supports AIE1 and AIE_ML. All features are supported on these variants with minor differences as follows:
+
+- ``TP_POINT_SIZE``: The width of vectors used for calculations differs by AIE variant. The point size ``TP_POINT_SIZE`` must be a multiple of the number of samples processed in an atomic vectorized butterfly operation. This is 16 for AIE1 and 32 for AIE-ML.
+- ``TP_RND``: Supported round modes differ between AIE1 and AIE2 as for all library elements.
+- Number of ports: When configured for ``TP_API=1`` (stream IO), AIE1 will require 2 input ports (sample interleaved - even samples on the first port) and 2 output ports similarly interleaved. AIE-ML accepts one stream only.
 
 ~~~~~~~~~~~~~~~
 Supported Types
@@ -43,7 +53,7 @@ To see details on the access functions for the Mixed Radix FFT, see :ref:`API_RE
 Ports
 ~~~~~
 
-To see details on the ports for the Mixed Radix FFT, see :ref:`API_REFERENCE`. 
+To see details on the ports for the Mixed Radix FFT, see :ref:`API_REFERENCE`.
 
 .. note:: The number and type of ports are determined by the configuration of template parameters.
 
@@ -151,7 +161,7 @@ Code Example
 ------------
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_mixed_radix_fft.hpp
     :language: cpp
-    :lines: 15-
+    :lines: 17-
 
 ~~~~~~~~~~~~~~~~~~~
 Configuration Notes

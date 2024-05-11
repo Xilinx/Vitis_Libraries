@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -632,7 +632,7 @@ template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL void writeCascade(T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface, T_acc<TT_DATA, TT_COEFF> acc) {
     //    using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
     using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
-    writeincr<accTag, fnNumLanes<TT_DATA, TT_COEFF>()>((output_stream<accTag>*)outInterface.outCascade, acc.val);
+    writeincr<accTag, fnNumLanes<TT_DATA, TT_COEFF>()>((output_cascade<accTag>*)outInterface.outCascade, acc.val);
 }
 
 // Overloaded function to write to cascade output.
@@ -646,7 +646,7 @@ template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DUAL_IP = 0>
 INLINE_DECL void writeCascade(T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface, T_acc384<TT_DATA, TT_COEFF> acc) {
     // using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
     using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
-    writeincr<accTag, fnNumLanes384<TT_DATA, TT_COEFF>()>((output_stream<accTag>*)outInterface.outCascade, acc.val);
+    writeincr<accTag, fnNumLanes384<TT_DATA, TT_COEFF>()>((output_cascade<accTag>*)outInterface.outCascade, acc.val);
 }
 
 // Overloaded function to read from cascade input.
@@ -668,7 +668,7 @@ INLINE_DECL T_acc<TT_DATA, TT_COEFF> readCascade(T_inputIF<true, TT_DATA, TP_DUA
     T_acc<TT_DATA, TT_COEFF> ret;
     // using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
     using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
-    ret.val = readincr_v<fnNumLanes<TT_DATA, TT_COEFF>(), accTag>((input_stream<accTag>*)inInterface.inCascade);
+    ret.val = readincr_v<fnNumLanes<TT_DATA, TT_COEFF>(), accTag>((input_cascade<accTag>*)inInterface.inCascade);
     return ret;
 };
 
@@ -691,7 +691,7 @@ INLINE_DECL T_acc384<TT_DATA, TT_COEFF> readCascade(T_inputIF<true, TT_DATA, TP_
     T_acc384<TT_DATA, TT_COEFF> ret;
     // using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
     using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
-    ret.val = readincr_v<fnNumLanes384<TT_DATA, TT_COEFF>(), accTag>((input_stream<accTag>*)inInterface.inCascade);
+    ret.val = readincr_v<fnNumLanes384<TT_DATA, TT_COEFF>(), accTag>((input_cascade<accTag>*)inInterface.inCascade);
     return ret;
 };
 

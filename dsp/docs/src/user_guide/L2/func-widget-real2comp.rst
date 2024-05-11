@@ -1,8 +1,9 @@
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+.. 
+   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   
+   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
-
-.. _WIDGET_REAL2CMPLX:
+.. _WIDGET_REAL2COMPLEX:
 
 ======================
 Widget Real to Complex
@@ -19,6 +20,12 @@ The graph entry point is the following:
 .. code-block::
 
     xf::dsp::aie::widget::real2complex::widget_real2complex_graph
+
+~~~~~~~~~~~~~~
+Device Support
+~~~~~~~~~~~~~~
+
+The widget real2complex supports AIE1 and AIE-ML.
 
 ~~~~~~~~~~~~~~~
 Supported Types
@@ -58,7 +65,7 @@ The following code example shows how the widget_real2complex graph class can be 
 
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_widg_r2c.hpp
     :language: cpp
-    :lines: 15-
+    :lines: 17-
 
 
 .. |image1| image:: ./media/image1.png

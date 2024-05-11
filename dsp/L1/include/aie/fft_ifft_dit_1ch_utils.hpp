@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -287,6 +287,7 @@ void INLINE_DECL r2comb_dit<cint32, cint16, 1>(const cint32* x,
     stage_radix2_dit<cint32, cint32, cint16, 1, 1>(x, tw, n, shift, y, inv);
 };
 
+#if __SUPPORTS_32B_TW__ == 1
 template <>
 void INLINE_DECL r2comb_dit<cint16, cint32, 0>(const cint16* x,
                                                const cint32* tw,
@@ -294,8 +295,8 @@ void INLINE_DECL r2comb_dit<cint16, cint32, 0>(const cint16* x,
                                                unsigned int r,
                                                unsigned int shift,
                                                cint16* __restrict y,
-                                               bool inv){
-    // stage_radix2_dit <cint16, cint16, cint32, 1, 0>(x, tw, n, shift, y, inv); //Not supported in 23.2
+                                               bool inv) {
+    stage_radix2_dit<cint16, cint16, cint32, 1, 0>(x, tw, n, shift, y, inv); // Not supported in 23.2
 };
 template <>
 void INLINE_DECL r2comb_dit<cint16, cint32, 1>(const cint16* x,
@@ -304,11 +305,10 @@ void INLINE_DECL r2comb_dit<cint16, cint32, 1>(const cint16* x,
                                                unsigned int r,
                                                unsigned int shift,
                                                cint16* __restrict y,
-                                               bool inv){
-    // stage_radix2_dit <cint16, cint16, cint32, 1, 1>(x, tw, n, shift, y, inv); //Not supported in 23.2
+                                               bool inv) {
+    stage_radix2_dit<cint16, cint16, cint32, 1, 1>(x, tw, n, shift, y, inv); // Not supported in 23.2
 };
 
-#if __SUPPORTS_32B_TW__ == 1
 template <>
 void INLINE_DECL r2comb_dit<cint32, cint32, 0>(const cint32* x,
                                                const cint32* tw,

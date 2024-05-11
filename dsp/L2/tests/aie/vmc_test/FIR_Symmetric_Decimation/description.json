@@ -58,7 +58,7 @@
         "customized_params": {
                 "params": "--aie.Xchess=llvm.xargs=-std=c++2a --aie.Xx86sim=-client=vmc --aie.verbose",
                 "default": {
-                    "GRAPHNAME": "FIR_Symmetric_Decimation_4be29b05",
+                    "GRAPHNAME": "FIR_Symmetric_Decimation_00ec06ee",
                     "VMC_GRAPHDIR": "xmc_aie_lib/$(GRAPHNAME)",
                     "VMC_KERNEL": "vmc_fir_decimate_sym"
                 }

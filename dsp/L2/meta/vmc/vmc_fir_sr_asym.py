@@ -45,10 +45,11 @@ def vmc_validate_coeff(args):
     coeff = args["coeff"]
     data_type = args["data_type"]
     casc_length = args["casc_length"]
+    AIE_VARIANT = args["AIE_VARIANT"]
     ssr = 1
     api = 0
     fir_length = fn_get_fir_length(args)
-    return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload)
+    return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload, AIE_VARIANT)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]

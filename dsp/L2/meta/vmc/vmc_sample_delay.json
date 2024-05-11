@@ -43,7 +43,17 @@
               "label": "Maximum sample delay:",
               "tablabel": "Main",
               "parameterType":"edit"
-      }
+      },
+	{
+	  "key": "AIE_VARIANT",
+	  "name": "AIE_VARIANT",
+      "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
+      "default": 1,
+	  "label": "AIE Variant:",
+      "tablabel": "Main",
+      "parameterType":"edit"
+    }
+
   ],
 
   "generator": {

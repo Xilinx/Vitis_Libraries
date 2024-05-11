@@ -1,0 +1,9 @@
+digraph G {
+AIE_VARIANT -> point_size;
+data_type -> point_size;
+twiddle_type -> point_size;
+casc_length -> point_size;
+ssr -> point_size;
+data_type -> twiddle_type;
+data_type -> shift_val;
+}

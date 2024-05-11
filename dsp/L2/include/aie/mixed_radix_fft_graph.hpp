@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -261,7 +261,7 @@ class create_casc_kernel<1,
 };    // create_casc_kernel class
 
 //--------------------------------------------------------------------------------------------------
-// mixed_radix_fft template parameteters
+// mixed_radix_fft template parameters
 //--------------------------------------------------------------------------------------------------
 /**
  * @ingroup fft_graphs
@@ -272,8 +272,8 @@ class create_casc_kernel<1,
  *
  * These are the templates to configure the single-channel decimation-in-time class.
  * @tparam TT_DATA describes the type of individual data samples input to and
- *         output from the transform function. This is a typename and must be one
- *         of the following: \n
+ *         output from the transform function. \n
+ *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  * @tparam TT_TWIDDLE describes the type of twiddle factors of the transform. \n
  *         It must be one of the following: cint16, cint32, cfloat
@@ -302,8 +302,8 @@ class create_casc_kernel<1,
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` will only be supported on AIE-ML device. \n
- * @tparam TP_SAT describes the selection of saturation to be applied during the
- *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
+ *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
  *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
  *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
@@ -321,7 +321,7 @@ class create_casc_kernel<1,
  *         to improve throughput
  * @tparam TP_API is an unsigned integer to select window (0) or stream (1) interfaces.
  *         When stream I/O is selected, one sample is taken from, or output to, a stream and the next sample
- *         from or two the next stream. Two streams mimimum are used. In this example, even samples are
+ *         from or two the next stream. Two streams minimum are used. In this example, even samples are
  *         read from input stream[0] and odd samples from input stream[1].
  **/
 template <typename TT_DATA,
@@ -370,6 +370,9 @@ class mixed_radix_fft_graph : public graph {
     static constexpr int m_kR3factor = fnGetRadixFactor<TP_POINT_SIZE, 3>();
     static constexpr int m_kR4factor = fnGetRadixFactor<TP_POINT_SIZE, 4>();
     static constexpr int m_kR2factor = fnGetRadixFactor<(TP_POINT_SIZE >> (2 * m_kR4Stages)), 2>();
+
+    static_assert(m_kR5factor* m_kR3factor* m_kR4factor* m_kR2factor == TP_POINT_SIZE,
+                  "ERROR: TP_POINT_SIZE failed to factorize");
 
     static constexpr int m_kTotalStages = m_kR5Stages + m_kR3Stages + m_kR2Stages + m_kR4Stages;
     static_assert(m_kTotalStages >= TP_CASC_LEN, "Error: TP_CASC_LEN is greater than the number of stages required");
@@ -437,8 +440,8 @@ class mixed_radix_fft_graph : public graph {
                     // double phase = M_PI * (double)(index * leg) / (double)(ptSizeOfStage[stage] /
                     // radixOfStage[stage]); // W index * 2pi.
                     double phase = M_PI * (double)(2 * index * leg) / (double)(ptSizeOfStage[stage]); // W index * 2pi.
-                    reald = (cos(phase) * twiddleScale);
-                    imagd = (-sin(phase) * twiddleScale);
+                    reald = round(cos(phase) * twiddleScale); // cast to follow is a floor operation
+                    imagd = round(-sin(phase) * twiddleScale);
                     realVal = (T_twiddlebase)(reald > 32767.0 ? 32767.0 : reald);
                     imagVal = (T_twiddlebase)(imagd > 32767.0 ? 32767.0 : imagd);
                     TT_TWIDDLE val;
@@ -457,14 +460,16 @@ class mixed_radix_fft_graph : public graph {
 
         for (int stage = m_kR5Stages + m_kR3Stages + m_kR2Stages; stage < m_kTotalStages;
              stage++) { // radix4 breaks the pattern
+
+            //------First leg---------
             // first leg twiddle is tw(ptSize/4)
             m_twiddlePtrs[ptrPtr++] = masterIdx; // base of table for this leg
 
             for (int index = 0; index < ptSizeOfStage[stage] / radixOfStage[stage]; index++) {
                 double phase =
                     (double)(M_PI * index) / (double)(ptSizeOfStage[stage] / radixOfStage[stage]); // W index * 2pi.
-                reald = (cos(phase) * twiddleScale);
-                imagd = (-sin(phase) * twiddleScale);
+                reald = round(cos(phase) * twiddleScale);
+                imagd = round(-sin(phase) * twiddleScale);
                 realVal = (T_twiddlebase)(reald > 32767.0 ? 32767.0 : reald);
                 imagVal = (T_twiddlebase)(imagd > 32767.0 ? 32767.0 : imagd);
                 TT_TWIDDLE val;
@@ -481,11 +486,17 @@ class mixed_radix_fft_graph : public graph {
             // second leg twiddle is tw(ptSize/2)
             m_twiddlePtrs[ptrPtr++] = masterIdx; // base of table for this leg
 
-            for (int index = 0; index < 2 * ptSizeOfStage[stage] / radixOfStage[stage]; index++) {
+#if __FFT_R4_IMPL__ == 0
+            constexpr int secondLegMult = 2;
+#else
+            constexpr int secondLegMult = 1;
+#endif
+
+            for (int index = 0; index < secondLegMult * ptSizeOfStage[stage] / radixOfStage[stage]; index++) {
                 double phase =
                     M_PI * (double)(index) / (double)(2 * ptSizeOfStage[stage] / radixOfStage[stage]); // W index * 2pi.
-                reald = (cos(phase) * twiddleScale);
-                imagd = (-sin(phase) * twiddleScale);
+                reald = round(cos(phase) * twiddleScale);
+                imagd = round(-sin(phase) * twiddleScale);
                 realVal = (T_twiddlebase)(reald > 32767.0 ? 32767.0 : reald);
                 imagVal = (T_twiddlebase)(imagd > 32767.0 ? 32767.0 : imagd);
                 TT_TWIDDLE val;
@@ -496,10 +507,31 @@ class mixed_radix_fft_graph : public graph {
                 masterIdx++;
             }
             masterIdx = CEIL(masterIdx, alignment); // skip up to next aligned place for next leg
-// end of second r4 leg
+                                                    // end of second r4 leg
 
 #if __FFT_R4_IMPL__ == 1
-// third leg only for AIE-ML Radix4
+            // third leg only for AIE-ML Radix4
+            //----------------------------------
+            // 3rd leg twiddle is tw(3*ptSize/4)
+            m_twiddlePtrs[ptrPtr++] = masterIdx; // base of table for this leg
+
+            for (int index = 0; index < ptSizeOfStage[stage] / radixOfStage[stage]; index++) {
+                double phase = M_PI * (double)(3 * index) /
+                               (double)(2 * ptSizeOfStage[stage] / radixOfStage[stage]); // W index * 2pi.
+                reald = round(cos(phase) * twiddleScale);
+                imagd = round(-sin(phase) * twiddleScale);
+                realVal = (T_twiddlebase)(reald > 32767.0 ? 32767.0 : reald);
+                imagVal = (T_twiddlebase)(imagd > 32767.0 ? 32767.0 : imagd);
+                TT_TWIDDLE val;
+                val.real = realVal;
+                val.imag = imagVal;
+                m_twiddleTable[masterIdx] = val;
+
+                masterIdx++;
+            }
+            masterIdx = CEIL(masterIdx, alignment); // skip up to next aligned place for next leg
+                                                    // end of second r4 leg
+
 #endif //__FFT_R4_IMPL__ == 1
         }
 
@@ -527,7 +559,8 @@ class mixed_radix_fft_graph : public graph {
                 kernel::create_object<widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE,
                                                       kStreamsPerTile, kSampleIntlv, 0 /*kHeaderBytes*/> >();
             connect(in[0], m_inWidgetKernel.in[0]);
-            connect(in[1], m_inWidgetKernel.in[1]);
+            if
+                constexpr(kStreamsPerTile > 1) { connect(in[1], m_inWidgetKernel.in[1]); }
             connect(m_inWidgetKernel.out[0], m_mixed_radix_fftKernels[0].in[0]);
             dimensions(m_inWidgetKernel.out[0]) = {TP_WINDOW_VSIZE};
             dimensions(m_mixed_radix_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE};
@@ -536,7 +569,8 @@ class mixed_radix_fft_graph : public graph {
             dimensions(m_mixed_radix_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE};
             dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE};
             connect(m_outWidgetKernel.out[0], out[0]);
-            connect(m_outWidgetKernel.out[1], out[1]);
+            if
+                constexpr(kStreamsPerTile > 1) { connect(m_outWidgetKernel.out[1], out[1]); }
 
             // Specify mapping constraints
             source(m_inWidgetKernel) = "widget_api_cast.cpp";

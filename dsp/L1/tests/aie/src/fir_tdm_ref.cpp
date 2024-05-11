@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ Single rate asymetric FIR filter reference model
 #define TDM_COEFF_SCHEME_5 5
 
 #define TDM_COEFF_SCHEME TDM_COEFF_SCHEME_4
-#define _DSPLIB_FIR_TDM_REF_HPP_DEBUG_
+// #define _DSPLIB_FIR_TDM_REF_HPP_DEBUG_
 
 #include "aie_api/aie_adf.hpp"
 #include "fir_tdm_ref.hpp"
@@ -58,7 +58,7 @@ void filter_ref(
     TT_DATA d_in[TP_FIR_LEN];
     TT_DATA accumSrs;
 
-    const unsigned int kFirMargin = fnFirMargin<TP_FIR_LEN, TT_DATA, TP_TDM_CHANNELS>();
+    const unsigned int kFirMargin = fnTDMFirMargin<TP_FIR_LEN, TT_DATA, TP_TDM_CHANNELS>();
     const unsigned int kFirMarginOffset = kFirMargin - ((TP_FIR_LEN - 1) * TP_TDM_CHANNELS); // FIR Margin Offset.
 
     inWindowPtr += kFirMarginOffset;
@@ -125,7 +125,7 @@ void fir_tdm_ref<TT_DATA,
                  TP_NUM_OUTPUTS,
                  TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                        extents<inherited_extent>,
-                                                       margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_TDM_CHANNELS>()> >&
+                                                       margin<fnTDMFirMargin<TP_FIR_LEN, TT_DATA, TP_TDM_CHANNELS>()> >&
                                      inWindow,
                                  output_circular_buffer<TT_DATA>& outWindow) {
     auto inWindowPtr = ::aie::begin_random_circular(inWindow);

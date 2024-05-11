@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,8 @@ namespace aie {
 namespace blas {
 namespace matrix_vector_mul {
 
-// MATRIX_VECTOR_MUL single channel function - base of specialization .
+// MATRIX_VECTOR_MUL - base of specialization .
 //-----------------------------------------------------------------------------------------------------
-//// TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND, TP_NUM_FRAMES, TP_CASC_LEN
 template <typename TT_DATA_A,
           typename TT_DATA_B,
           unsigned int TP_DIM_A,
@@ -70,109 +69,75 @@ kernelMatVecMulClass<TT_DATA_A,
                      TP_CASC_OUT>::kernelMatVecMul(T_inputIF<TP_CASC_IN, TT_DATA_A, TT_DATA_B> inInterface,
                                                    T_outputIF<TP_CASC_OUT, TT_DATA_A, TT_DATA_B> outInterface) {
     using TT_OUT = outType_t<TT_DATA_A, TT_DATA_B>;
-    using dataA_t = ::aie::vector<TT_DATA_A, kSamplesVecA>;
-    using dataB_t = ::aie::vector<TT_DATA_B, kSamplesVecB>;
-    using dataOut_t = ::aie::vector<TT_OUT, kSamplesVecOut>;
-    using accVect_t = ::aie::accum<typename tAccBaseType<TT_DATA_A, TT_DATA_B>::type, kSamplesVecOut>;
-
-    // This is a workaround to support cint32 x cint16, and int32 x int16 but casting the smaller data in the B vector
-    // to the datatype of the matrix, A
-    typedef typename std::conditional_t<
-        std::is_same<TT_DATA_A, int32>::value && std::is_same<TT_DATA_B, int16>::value, TT_DATA_A,
-        std::conditional_t<std::is_same<TT_DATA_A, cint32>::value && std::is_same<TT_DATA_B, cint16>::value, TT_DATA_A,
-                           TT_DATA_B> >
-        T_internalDataB;
+    using dataA_t = ::aie::vector<TT_DATA_A, vecSampleNumA>;
+    using dataB_t = ::aie::vector<TT_DATA_B, vecSampleNumB>;
+    using dataAcc_t = ::aie::vector<TT_OUT, vecSampleNumA>;
+    using dataOut_t = ::aie::vector<TT_OUT, vecSampleNumOut>;
+    using accVect_t = ::aie::accum<typename accType<TT_DATA_A, TT_DATA_B>::type, vecSampleNumA>;
 
     set_rnd_mode<TP_RND>();
     set_sat_mode<TP_SAT>();
 
     dataA_t dataA;
-    dataA_t* inPtrA;
+    dataA_t* __restrict inPtrA;
     dataB_t dataB;
-    dataB_t* inPtrB;
+    dataB_t* __restrict inPtrB;
 
-    accVect_t acc, acc2;
-
-    dataOut_t blankVect = ::aie::zeros<TT_OUT, kSamplesVecOut>(); // to initialise acc
-    dataOut_t outVect, outVect2;
+    accVect_t acc;
+    dataAcc_t blankVect = ::aie::zeros<TT_OUT, vecSampleNumA>(); // to initialise acc
+    dataAcc_t outVect;
 
     dataA_t* matrixStartPtr = (dataA_t*)inInterface.inWindowA;
     dataB_t* vectorStartPtr = (dataB_t*)inInterface.inWindowB;
-    dataOut_t* outPtr = (dataOut_t*)outInterface.outWindow;
+    dataOut_t* __restrict outPtr = (dataOut_t*)outInterface.outWindow;
 
-    // used to store an element of the vector B. This is potentially casted to TT_DATA_A depending on T_internalDataB
-    T_internalDataB tempElem;
+    // // Each frame contains a mutliplcation of one matrix-vector multiplication
+    for (int frame = 0; frame < TP_NUM_FRAMES; frame++) {
+        // data loads per A column
+        for (int idx = 0; idx < loadsPerColA; idx++) chess_prepare_for_pipelining chess_loop_count(loadsPerColA) {
+                inPtrA = (matrixStartPtr) + (frame * loadsPerMatrix) + (idx);
+                inPtrB = (vectorStartPtr) + (frame * loadsPerVectorB);
 
-    // Each frame contains a mutliplcation of one matrix-vector multiplication
-    for (int frame = 0; frame < TP_NUM_FRAMES; frame++) chess_prepare_for_pipelining chess_loop_count(loadsPerCol) {
-            // data loads per A column
-            // #pragma unroll loadsPerCol
-            for (int idx = 0; idx < loadsPerCol; idx++) chess_prepare_for_pipelining chess_loop_count(loadsPerCol) {
-                    inPtrA = matrixStartPtr + idx;
-                    inPtrB = vectorStartPtr;
-
-                    if
-                        constexpr(TP_CASC_IN == CASC_IN_TRUE) {
-                            acc = (accVect_t)readincr_v<kSamplesVecOut>(inInterface.inCascade);
-                            if
-                                constexpr(doubleAccPerCol) {
-                                    acc2 = (accVect_t)readincr_v<kSamplesVecOut>(inInterface.inCascade);
-                                }
-                        }
-                    else {
-                        acc = blankVect; // Initialize if one kernel used or the first used
-                        if
-                            constexpr(doubleAccPerCol) { acc2 = blankVect; }
+                if
+                    constexpr(TP_CASC_IN == CASC_IN_TRUE) {
+                        acc = (accVect_t)readincr_v<vecSampleNumA>(inInterface.inCascade);
                     }
-
-#pragma unroll(kSamplesVecB)
-                    for (int elemB = 0; elemB < TP_DIM_B / TP_CASC_LEN; elemB++) {
-                        // Load a vector of dataB,after each element in B has been used
-                        if (elemB % kSamplesVecB == 0) {
-                            dataB = *inPtrB++;
-                        }
-
+                else {
+                    acc = (accVect_t)blankVect;
+                }
+                for (int vecInB = 0; vecInB < loadsPerVectorB; vecInB++) {
+                    dataB = *inPtrB++;
+#pragma unroll(vecSampleNumB)
+                    for (int jdx = 0; jdx < vecSampleNumB; jdx++) {
                         dataA = *inPtrA;
-                        inPtrA += loadsPerCol;
-                        tempElem = (T_internalDataB)dataB.get(elemB % kSamplesVecB);
-
+                        inPtrA += loadsPerColA;
                         if
-                            constexpr(doubleAccPerCol) {
-                                acc = ::aie::mac(acc, tempElem, dataA.template extract<kSamplesVecOut>(0));
-                                acc2 = ::aie::mac(acc2, tempElem, dataA.template extract<kSamplesVecOut>(1));
-                            }
+                            constexpr(castBtoA) { acc = ::aie::mac(acc, (TT_DATA_A)dataB[jdx], dataA); }
                         else {
-                            acc = ::aie::mac(acc, dataA, tempElem);
+                            acc = ::aie::mac(acc, dataB[jdx], dataA);
                         }
-                    }
-
-                    // output to outVect or to outCascade
-                    if
-                        constexpr(TP_CASC_OUT == CASC_OUT_FALSE) {
-                            if
-                                constexpr(std::is_same<TT_OUT, cfloat>() || std::is_same<TT_OUT, float>()) {
-                                    outVect = acc.template to_vector<TT_OUT>();
-                                    if
-                                        constexpr(doubleAccPerCol) { outVect2 = acc2.template to_vector<TT_OUT>(); }
-                                }
-                            else {
-                                outVect = acc.template to_vector<TT_OUT>(shift);
-                                if
-                                    constexpr(doubleAccPerCol) { outVect2 = acc2.template to_vector<TT_OUT>(shift); }
-                            }
-                            *outPtr++ = outVect;
-                            if
-                                constexpr(doubleAccPerCol) { *outPtr++ = outVect2; }
-                        }
-                    else {
-                        writeincr(outInterface.outCascade, acc);
-                        if
-                            constexpr(doubleAccPerCol) { writeincr(outInterface.outCascade, acc2); }
                     }
                 }
-            vectorStartPtr += loadsPerVectorB;
-            matrixStartPtr += loadsPerMatrix;
-        }
+                // output to outVect or to outCascade
+                if
+                    constexpr(TP_CASC_OUT == CASC_OUT_FALSE) {
+                        if
+                            constexpr(std::is_same<TT_OUT, cfloat>() || std::is_same<TT_OUT, float>()) {
+                                outVect = acc.template to_vector<TT_OUT>();
+                            }
+                        else {
+                            outVect = acc.template to_vector<TT_OUT>(shift);
+                        }
+#pragma unroll(vecSampleNumA / vecSampleNumOut)
+                        for (int n = 0; n < vecSampleNumA / vecSampleNumOut; n++) {
+                            *outPtr++ = outVect.template extract<vecSampleNumOut>(n);
+                        }
+                    }
+                else {
+                    writeincr(outInterface.outCascade, acc);
+                }
+            }
+    }
 }
 //-----------------------------------------------------------------------------------------------------
 // For a single kernel - iobuffer in and out, no cascades
@@ -188,20 +153,20 @@ template <typename TT_DATA_A,
           unsigned int TP_KERNEL_POSITION,
           bool TP_CASC_IN,
           bool TP_CASC_OUT>
-NOINLINE_DECL void matrix_vector_mul<TT_DATA_A,
-                                     TT_DATA_B,
-                                     TP_DIM_A,
-                                     TP_DIM_B,
-                                     TP_SHIFT,
-                                     TP_RND,
-                                     TP_SAT,
-                                     TP_NUM_FRAMES,
-                                     TP_CASC_LEN,
-                                     TP_KERNEL_POSITION,
-                                     TP_CASC_IN,
-                                     TP_CASC_OUT>::matVecMulMain(input_buffer<TT_DATA_A>& __restrict inWindowA,
-                                                                 input_buffer<TT_DATA_B>& __restrict inWindowB,
-                                                                 output_buffer<TT_OUT>& __restrict outWindow) {
+void matrix_vector_mul<TT_DATA_A,
+                       TT_DATA_B,
+                       TP_DIM_A,
+                       TP_DIM_B,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_SAT,
+                       TP_NUM_FRAMES,
+                       TP_CASC_LEN,
+                       TP_KERNEL_POSITION,
+                       TP_CASC_IN,
+                       TP_CASC_OUT>::matVecMulMain(input_buffer<TT_DATA_A>& __restrict inWindowA,
+                                                   input_buffer<TT_DATA_B>& __restrict inWindowB,
+                                                   output_buffer<TT_OUT>& __restrict outWindow) {
     T_inputIF<CASC_IN_FALSE, TT_DATA_A, TT_DATA_B> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA_A, TT_DATA_B> outInterface;
     inInterface.inWindowA = inWindowA.data();
@@ -222,21 +187,20 @@ template <typename TT_DATA_A,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
           unsigned int TP_KERNEL_POSITION>
-NOINLINE_DECL void
-matrix_vector_mul<TT_DATA_A,
-                  TT_DATA_B,
-                  TP_DIM_A,
-                  TP_DIM_B,
-                  TP_SHIFT,
-                  TP_RND,
-                  TP_SAT,
-                  TP_NUM_FRAMES,
-                  TP_CASC_LEN,
-                  TP_KERNEL_POSITION,
-                  CASC_IN_FALSE,
-                  CASC_OUT_TRUE>::matVecMulMain(input_buffer<TT_DATA_A>& __restrict inWindowA,
-                                                input_buffer<TT_DATA_B>& __restrict inWindowB,
-                                                output_stream<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade) {
+void matrix_vector_mul<TT_DATA_A,
+                       TT_DATA_B,
+                       TP_DIM_A,
+                       TP_DIM_B,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_SAT,
+                       TP_NUM_FRAMES,
+                       TP_CASC_LEN,
+                       TP_KERNEL_POSITION,
+                       CASC_IN_FALSE,
+                       CASC_OUT_TRUE>::matVecMulMain(input_buffer<TT_DATA_A>& __restrict inWindowA,
+                                                     input_buffer<TT_DATA_B>& __restrict inWindowB,
+                                                     output_stream<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade) {
     T_inputIF<CASC_IN_FALSE, TT_DATA_A, TT_DATA_B> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA_A, TT_DATA_B> outInterface;
     inInterface.inWindowA = inWindowA.data();
@@ -256,22 +220,21 @@ template <typename TT_DATA_A,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
           unsigned int TP_KERNEL_POSITION>
-NOINLINE_DECL void
-matrix_vector_mul<TT_DATA_A,
-                  TT_DATA_B,
-                  TP_DIM_A,
-                  TP_DIM_B,
-                  TP_SHIFT,
-                  TP_RND,
-                  TP_SAT,
-                  TP_NUM_FRAMES,
-                  TP_CASC_LEN,
-                  TP_KERNEL_POSITION,
-                  CASC_IN_TRUE,
-                  CASC_OUT_TRUE>::matVecMulMain(input_buffer<TT_DATA_A>& __restrict inWindowA,
-                                                input_buffer<TT_DATA_B>& __restrict inWindowB,
-                                                input_stream<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
-                                                output_stream<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade) {
+void matrix_vector_mul<TT_DATA_A,
+                       TT_DATA_B,
+                       TP_DIM_A,
+                       TP_DIM_B,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_SAT,
+                       TP_NUM_FRAMES,
+                       TP_CASC_LEN,
+                       TP_KERNEL_POSITION,
+                       CASC_IN_TRUE,
+                       CASC_OUT_TRUE>::matVecMulMain(input_buffer<TT_DATA_A>& __restrict inWindowA,
+                                                     input_buffer<TT_DATA_B>& __restrict inWindowB,
+                                                     input_stream<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
+                                                     output_stream<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA_A, TT_DATA_B> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA_A, TT_DATA_B> outInterface;
     inInterface.inWindowA = inWindowA.data();
@@ -292,22 +255,21 @@ template <typename TT_DATA_A,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
           unsigned int TP_KERNEL_POSITION>
-NOINLINE_DECL void
-matrix_vector_mul<TT_DATA_A,
-                  TT_DATA_B,
-                  TP_DIM_A,
-                  TP_DIM_B,
-                  TP_SHIFT,
-                  TP_RND,
-                  TP_SAT,
-                  TP_NUM_FRAMES,
-                  TP_CASC_LEN,
-                  TP_KERNEL_POSITION,
-                  CASC_IN_TRUE,
-                  CASC_OUT_FALSE>::matVecMulMain(input_buffer<TT_DATA_A>& __restrict inWindowA,
-                                                 input_buffer<TT_DATA_B>& __restrict inWindowB,
-                                                 input_stream<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
-                                                 output_buffer<TT_OUT>& __restrict outWindow) {
+void matrix_vector_mul<TT_DATA_A,
+                       TT_DATA_B,
+                       TP_DIM_A,
+                       TP_DIM_B,
+                       TP_SHIFT,
+                       TP_RND,
+                       TP_SAT,
+                       TP_NUM_FRAMES,
+                       TP_CASC_LEN,
+                       TP_KERNEL_POSITION,
+                       CASC_IN_TRUE,
+                       CASC_OUT_FALSE>::matVecMulMain(input_buffer<TT_DATA_A>& __restrict inWindowA,
+                                                      input_buffer<TT_DATA_B>& __restrict inWindowB,
+                                                      input_stream<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
+                                                      output_buffer<TT_OUT>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA_A, TT_DATA_B> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA_A, TT_DATA_B> outInterface;
     inInterface.inWindowA = inWindowA.data();

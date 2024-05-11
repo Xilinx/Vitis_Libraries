@@ -1,0 +1,55 @@
+{
+    "graphName": "Vectorized_Sample_Delay_Stream_806dda42",
+    "graphHeaderFile": "Vectorized_Sample_Delay_Stream_806dda42.h",
+    "graphSearchPath": [
+        "L2/include/aie",
+        "L2/tests/aie/common/inc",
+        "L1/include/aie",
+        "L1/src/aie",
+        "L1/tests/aie/inc",
+        "L1/tests/aie/src"
+    ],
+    "graphPreProcOptions": [],
+    "ports": [
+        {
+            "name": "in",
+            "portkind": "stream",
+            "direction": "in",
+            "basictype": "int8",
+            "windowsize": 0,
+            "margin": 0,
+            "synchronicity": "sync",
+            "isArray": true,
+            "numElements": 256,
+            "isComplex": false,
+            "isStdComplex": false
+        },
+        {
+            "name": "numSampleDelay",
+            "portkind": "parameter",
+            "direction": "in",
+            "basictype": "uint32",
+            "windowsize": 0,
+            "margin": 0,
+            "synchronicity": "async",
+            "isArray": false,
+            "numElements": 1,
+            "isComplex": false,
+            "isStdComplex": false
+        },
+        {
+            "name": "out",
+            "portkind": "stream",
+            "direction": "out",
+            "basictype": "int8",
+            "windowsize": 0,
+            "margin": 0,
+            "synchronicity": "sync",
+            "isArray": true,
+            "numElements": 256,
+            "isComplex": false,
+            "isStdComplex": false
+        }
+    ],
+    "graphSourceFileUpdated": false
+}

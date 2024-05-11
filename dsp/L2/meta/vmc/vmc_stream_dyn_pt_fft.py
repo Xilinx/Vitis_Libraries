@@ -5,7 +5,9 @@ import json
 #### VMC validators ####
 def vmc_validate_point_size(args):
     ssr = args["ssr"]
-    pp = fn_get_parallel_power(ssr)
+    api = 1 #stream.
+    variant = args["AIE_VARIANT"]
+    pp = fn_get_parallel_power(ssr, api, variant)
 
     if pp == -1:
       return isError(f"Invalid SSR value specified. The value should be of the form 2^N between 2 and 512.")
@@ -33,7 +35,9 @@ def vmc_validate_casc_length(args):
     point_size = args["point_size"]
     casc_length = args["casc_length"]
     ssr = args["ssr"]
-    pp = fn_get_parallel_power(ssr)
+    api = 1
+    variant = args["AIE_VARIANT"]
+    pp = fn_get_parallel_power(ssr, api, variant)
 
     if pp == -1:
       return isError(f"Invalid SSR value specified. The value should be of the form 2^N between 2 and 512.")
@@ -49,6 +53,7 @@ def fn_get_twiddle_type(data_type):
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):
     tmpargs = {}
+    tmpargs["AIE_VARIANT"] = args["AIE_VARIANT"]
     tmpargs["TT_DATA"] = args["data_type"]
     tmpargs["TT_TWIDDLE"] = args["twiddle_type"]
     tmpargs["TP_POINT_SIZE"] = args["point_size"]
@@ -59,7 +64,9 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_DYN_PT_SIZE"] = 1
     tmpargs["TP_API"] = 1
     ssr = args["ssr"]
-    pp = fn_get_parallel_power(ssr)
+    api = 1
+    variant = args["AIE_VARIANT"]
+    pp = fn_get_parallel_power(ssr, api, variant)
 
     if pp == -1:
       return isError(f"Invalid SSR value specified. The value should be of the form 2^N between 2 and 512.")
@@ -70,5 +77,6 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_SAT"] = args["sat_mode"]
     tmpargs["AIE_VARIANT"] = args["AIE_VARIANT"]
     tmpargs["TP_USE_WIDGETS"] = 1 if args["use_ssr_widget_kernels"] else 0
-
+    # tmpargs["TP_TWIDDLE_MODE"] = args["TP_TWIDDLE_MODE"]
+    tmpargs["TP_TWIDDLE_MODE"] = 0
     return generate_graph(name, tmpargs)

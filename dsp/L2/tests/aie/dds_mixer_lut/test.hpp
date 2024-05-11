@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@
 #include "uut_config.h"
 #include "uut_static_config.h"
 #include "test_stim.hpp"
+#include "graph_utils.hpp"
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
@@ -51,8 +52,15 @@ class test_graph : public graph {
     std::array<input_plio, P_SSR> in2;
     std::array<output_plio, P_SSR> out;
 
+    port_conditional_array<input, (USE_PHASE_RELOAD == 1), P_SSR> PhaseRTP;
+
     static constexpr unsigned int phaseInc = DDS_PHASE_INC; // single sample phase increment
     static constexpr unsigned int initialPhaseOffset = INITIAL_DDS_OFFSET;
+    // static constexpr std::array<unsigned int, 4> PhaseRTP_vec = {1235645898, 562455525, 0, 2235645898};
+    static constexpr std::array<unsigned int, 32> PhaseRTP_vec = {
+        252102568, 258985748, 0, 1288589647, 1235645898, 562455525, 0, 2235645898, 0,         125869457, 0, 2546963257,
+        759812036, 125525694, 0, 2235645898, 20312534,   12896458,  0, 145571369,  458589620, 369896569, 0, 1569478023,
+        125985669, 0,         0, 225583741,  78999580,   11253303,  0, 42558996};
     // Constructor
     test_graph() {
         printf("========================\n");
@@ -69,14 +77,15 @@ class test_graph : public graph {
         printf("Data type          = ");
         printf(QUOTE(DATA_TYPE));
         printf("\n");
-        printf("MIXER_MODE         = %d \n", MIXER_MODE);
-        printf("SFDR               = %d \n", SFDR);
-        printf("P_API              = %d \n", P_API);
-        printf("INPUT_WINDOW_VSIZE = %d \n", INPUT_WINDOW_VSIZE);
-        printf("P_SSR              = %d \n", P_SSR);
-        printf("ROUND_MODE         = %d \n", ROUND_MODE);
-        printf("SAT_MODE           = %d \n", SAT_MODE);
-        printf("Mixer Mode      = %d \n", MIXER_MODE);
+        printf("MIXER_MODE                  = %d \n", MIXER_MODE);
+        printf("USE_PHASE_RELOAD            = %d \n", USE_PHASE_RELOAD);
+        printf("SFDR                        = %d \n", SFDR);
+        printf("P_API                       = %d \n", P_API);
+        printf("INPUT_WINDOW_VSIZE          = %d \n", INPUT_WINDOW_VSIZE);
+        printf("P_SSR                       = %d \n", P_SSR);
+        printf("ROUND_MODE                  = %d \n", ROUND_MODE);
+        printf("SAT_MODE                    = %d \n", SAT_MODE);
+        printf("Mixer Mode                  = %d \n", MIXER_MODE);
         if (MIXER_MODE == 0) printf(" ( DDS Only Mode ) \n");
         if (MIXER_MODE == 1) printf(" ( DDS Plus Mixer (1 data input) Mode ) \n");
         if (MIXER_MODE == 2) printf(" ( DDS Plus Symmetrical Mixer (2 data input) Mode ) \n");
@@ -86,7 +95,7 @@ class test_graph : public graph {
 
         namespace dsplib = xf::dsp::aie;
         dsplib::mixer::dds_mixer::UUT_GRAPH<DATA_TYPE, MIXER_MODE, SFDR, P_API, INPUT_WINDOW_VSIZE, P_SSR, ROUND_MODE,
-                                            SAT_MODE>
+                                            SAT_MODE, USE_PHASE_RELOAD>
             ddsGraph(phaseInc, initialPhaseOffset);
 
         for (unsigned int i = 0; i < P_SSR; ++i) {
@@ -100,7 +109,9 @@ class test_graph : public graph {
             filenameIn1.insert(filenameIn1.length() - 4, ("_" + std::to_string(i) + "_0"));
             filenameIn2.insert(filenameIn2.length() - 4, ("_" + std::to_string(i) + "_0"));
 #endif
-
+#if (USE_PHASE_RELOAD == 1)
+            connect<parameter>(PhaseRTP[i], ddsGraph.PhaseRTP[i]);
+#endif
 #if (MIXER_MODE == 2 || MIXER_MODE == 1)
             in1[i] = input_plio::create("PLIO_in1_" + std::to_string(i), adf::plio_32_bits, filenameIn1);
             connect<>(in1[i].out[0], ddsGraph.in1[i]);

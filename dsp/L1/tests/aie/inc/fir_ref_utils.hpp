@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,24 +49,24 @@ functions for use by the reference model classes.
 // isComplex
 template <typename T>
 constexpr bool isComplex() {
-#if __SUPPORTS_CFLOAT__ == 1
+    // #if __SUPPORTS_CFLOAT__ == 1
     return (std::is_same<T, cint16>::value || std::is_same<T, cint32>::value || std::is_same<T, cfloat>::value) ? true
                                                                                                                 : false;
-#endif
-#if __SUPPORTS_CFLOAT__ == 0
-    return (std::is_same<T, cint16>::value || std::is_same<T, cint32>::value) ? true : false;
-#endif
+    // #endif
+    // #if __SUPPORTS_CFLOAT__ == 0
+    //     return (std::is_same<T, cint16>::value || std::is_same<T, cint32>::value) ? true : false;
+    // #endif
 };
 
 // isFloat
 template <typename T>
 constexpr bool isFloat() {
-#if __SUPPORTS_CFLOAT__ == 1
+    // #if __SUPPORTS_CFLOAT__ == 1
     return (std::is_same<T, float>::value || std::is_same<T, cfloat>::value) ? true : false;
-#endif
-#if __SUPPORTS_CFLOAT__ == 0
-    return (std::is_same<T, float>::value) ? true : false;
-#endif
+    // #endif
+    // #if __SUPPORTS_CFLOAT__ == 0
+    //     return (std::is_same<T, float>::value) ? true : false;
+    // #endif
 };
 
 static const int C_PMAX16 = std::numeric_limits<short int>::max();
@@ -87,12 +87,18 @@ template <>
 struct T_accRef<float> {
     float real;
 };
-#if __SUPPORTS_CFLOAT__ == 1
+#ifdef _SUPPORTS_BFLOAT16_
+template <>
+struct T_accRef<bfloat16> {
+    float real;
+};
+#endif
+// #if __SUPPORTS_CFLOAT__ == 1
 template <>
 struct T_accRef<cfloat> {
     float real, imag;
 };
-#endif
+// #endif
 
 // Zero accumulator type
 template <typename T_A>
@@ -130,7 +136,16 @@ inline T_accRef<float> null_accRef() {
     return retVal;
 };
 
-#if __SUPPORTS_CFLOAT__ == 1
+#ifdef _SUPPORTS_BFLOAT16_
+template <>
+inline T_accRef<bfloat16> null_accRef() {
+    T_accRef<bfloat16> retVal;
+    retVal.real = 0.0;
+    return retVal;
+};
+#endif
+
+// #if __SUPPORTS_CFLOAT__ == 1
 template <>
 inline T_accRef<cfloat> null_accRef() {
     T_accRef<cfloat> retVal;
@@ -138,7 +153,7 @@ inline T_accRef<cfloat> null_accRef() {
     retVal.imag = 0.0;
     return retVal;
 };
-#endif
+// #endif
 
 // Rounding and shift function
 // this function depends on the rounding mode macros to be set correctly in the tools
@@ -380,7 +395,7 @@ inline cint32_t castAcc(T_accRef<cint32_t> acc) {
     return cacc32;
 };
 
-#if __SUPPORTS_CFLOAT__ == 1
+// #if __SUPPORTS_CFLOAT__ == 1
 template <>
 inline cfloat castAcc(T_accRef<cfloat> acc) {
     cfloat caccfloat;
@@ -388,7 +403,7 @@ inline cfloat castAcc(T_accRef<cfloat> acc) {
     caccfloat.imag = (float)acc.imag;
     return caccfloat;
 };
-#endif
+// #endif
 
 // Multiply
 template <typename T_D, typename T_C, typename T_A = T_D>
@@ -488,7 +503,7 @@ inline void multiplyAcc(T_accRef<float>& accum, float data, float coeff) {
     accum.real += (float)data * coeff;
 };
 
-#if __SUPPORTS_CFLOAT__ == 1
+// #if __SUPPORTS_CFLOAT__ == 1
 template <>
 inline void multiplyAcc(T_accRef<cfloat>& accum, cfloat data, float coeff) {
     accum.real += (float)data.real * coeff;
@@ -504,7 +519,7 @@ inline void multiplyAcc(T_accRef<cfloat>& accum, cfloat data, cfloat coeff) {
     accum.real += (float)coeff.real * (float)data.real - (float)coeff.imag * (float)data.imag;
     accum.imag += (float)coeff.real * (float)data.imag + (float)coeff.imag * (float)data.real;
 };
-#endif
+// #endif
 
 // Multiply Accumulate - using UCT shift.
 template <typename T_D>
@@ -531,17 +546,23 @@ template <>
 inline void multiplyAccUct(T_accRef<float>& accum, float data, unsigned int shift) {
     accum.real += (float)data * (float)(1 << shift);
 };
-#if __SUPPORTS_CFLOAT__ == 1
+// #if __SUPPORTS_CFLOAT__ == 1
 template <>
 inline void multiplyAccUct(T_accRef<cfloat>& accum, cfloat data, unsigned int shift) {
     accum.real += (float)data.real * (float)(1 << shift);
     accum.imag += (float)data.imag * (float)(1 << shift);
 };
-#endif
+// #endif
 
 // function to return Margin length.
-template <size_t TP_FIR_LEN, typename TT_DATA, unsigned int TP_TDM_CHANNELS = 1>
-inline constexpr unsigned int fnFirMargin() {
+template <unsigned int TP_FIR_LEN, typename TT_DATA, int TP_MODIFY_MARGIN_OFFSET = 0>
+constexpr unsigned int fnFirMargin() {
+    return CEIL(TP_FIR_LEN, (32 / sizeof(TT_DATA)));
+};
+
+// function to return Margin length.
+template <size_t TP_FIR_LEN, typename TT_DATA, int TP_TDM_CHANNELS = 1>
+constexpr unsigned int fnTDMFirMargin() {
     return CEIL(((TP_FIR_LEN - 1) * (TP_TDM_CHANNELS)), (32 / sizeof(TT_DATA)));
 };
 
@@ -576,7 +597,7 @@ inline float nullElem() {
     return 0.0;
 };
 
-#if __SUPPORTS_CFLOAT__ == 1
+// #if __SUPPORTS_CFLOAT__ == 1
 // Null cint32 element
 template <>
 inline cfloat nullElem() {
@@ -586,6 +607,6 @@ inline cfloat nullElem() {
     retVal.imag = 0.0;
     return retVal;
 };
-#endif
+// #endif
 
 #endif // ifdef _DSPLIB_FIR_REF_UTILS_HPP_

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,11 @@ using namespace std;
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
 #include "aie_api/aie_adf.hpp"
 
+//#define _DSPLIB_MIXED_RADIX_FFT_HPP_DEBUG_
+
 #include "mixed_radix_fft.hpp"
 #include "mixed_radix_fft_utils.hpp"
 #include "kernel_api_utils.hpp"
-
-//#define _DSPLIB_MIXED_RADIX_FFT_HPP_DEBUG_
 
 namespace xf {
 namespace dsp {
@@ -97,25 +97,8 @@ INLINE_DECL void kernel_MixedRadixFFTClass<TT_IN_DATA,
     bool inv = TP_FFT_NIFFT == 1 ? false : true;
     unsigned int pingPong = 0; // read from ping, write to pong, or vice versa.
 
-    set_rnd(TP_RND);
-    if
-        constexpr(TP_SAT == 0) {
-            clr_sat();
-            clr_symsat();
-        }; // 0 = no saturation, 1 = 2's complement range, 3 = symmetric saturation e.g. +/- 2^(n-1) - 1. Where n = 8,
-           // 16 or 32
-    if
-        constexpr(TP_SAT == 1) {
-            set_sat();
-            clr_symsat();
-        }; // 0 = no saturation, 1 = 2's complement range, 3 = symmetric saturation e.g. +/- 2^(n-1) - 1. Where n = 8,
-           // 16 or 32
-    if
-        constexpr(TP_SAT == 3) {
-            set_sat();
-            set_symsat();
-        }; // 0 = no saturation, 1 = 2's complement range, 3 = symmetric saturation e.g. +/- 2^(n-1) - 1. Where n = 8,
-           // 16 or 32
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     int tw = 0; // indicates which table within the master to use, and we always use the next table, so this simply
                 // increments.
@@ -167,7 +150,8 @@ INLINE_DECL void kernel_MixedRadixFFTClass<TT_IN_DATA,
                          kR3twbase + (kR3 - 1) * 4>(inbuff, outbuff, tmp_bufs, pingPong, inv, m_twTable,
                                                     m_twiddlePtrPtr);
 
-    // Radix 2 stage
+    // Radix 2 stage (s) - ideally use radix4 for speed, so only one r2 stage should ever exist, but radix2 can support
+    // low powers of 2 where radix4 cannot.
     constexpr int kr2shift0 = m_kR5Stages + m_kR3Stages == m_kTotalStages - 1
                                   ? TP_SHIFT
                                   : 0; // TP_SHIFT should only be applied on the last stage of the FFT. In the context

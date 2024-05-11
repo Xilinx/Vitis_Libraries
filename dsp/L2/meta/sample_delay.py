@@ -39,11 +39,11 @@ def info_ports(args):
 
   in_1 = com.get_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE, None, 0, TP_API)
   in_2 = com.get_parameter_port_info("numSampleDelay", "in", "uint32", None, 1, "async")
-  out_1 = com.get_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE, None, 0, TP_API)
+  out_1 = com.get_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE, None, 0, TP_API)  
   return (in_1+in_2+out_1)
 
 def generate_graph(graphname, args):
-
+  
   if graphname =="":
     graphname = "default_graphname"
   TT_DATA = args["TT_DATA"]
@@ -54,11 +54,11 @@ def generate_graph(graphname, args):
 f"""
 class {graphname} : public adf::graph {{
 public:
-  adf::port<input> in;
+  adf::port<input> in; 
   adf::port<input> numSampleDelay;
   adf::port<output> out;
   xf::dsp::aie::sample_delay::sample_delay_graph<
-  {TT_DATA},
+  {TT_DATA}, 
   {TP_WINDOW_VSIZE},
   {TP_API},
   {TP_MAX_DELAY}
@@ -67,7 +67,7 @@ public:
   {graphname}() : sample_delay_graph(){{
   adf::connect<>(in, sample_delay_graph.in);
   adf::connect<>(sample_delay_graph.out, out);
-  adf::connect<>(numSampleDelay, sample_delay_graph.numSampleDelay); // RTP
+  adf::connect<>(numSampleDelay, sample_delay_graph.numSampleDelay); // RTP 
   }}
 
 }};
@@ -87,3 +87,5 @@ public:
   ]
 
   return out
+
+print("finished")

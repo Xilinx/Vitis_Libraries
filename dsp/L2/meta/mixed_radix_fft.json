@@ -13,6 +13,15 @@
     ],
     "parameters": [
         {
+            "name": "AIE_VARIANT",
+            "type": "uint",
+            "description": "specifies the device type",
+            "validator": {
+                "file": "mixed_radix_fft.py",
+                "function": "validate_AIE_VARIANT"
+            }
+        },
+        {
             "name": "TT_DATA",
             "description": "The type of individual data samples input to and output of the filter function",
             "type": "typename",
@@ -42,7 +51,10 @@
             "type": "uint",
             "validator": {
                 "file": "mixed_radix_fft.py",
-                "function": "validate_TP_POINT_SIZE"
+                "function": "validate_TP_POINT_SIZE",
+                "args": [
+                    "AIE_VARIANT"
+                ]
             }
         },
         {
@@ -72,7 +84,10 @@
             "type": "uint",
             "validator": {
                 "file": "mixed_radix_fft.py",
-                "function": "validate_TP_RND"
+                "function": "validate_TP_RND",
+                "args": [
+                    "AIE_VARIANT"
+                ]
             }
         },
         {
@@ -115,18 +130,6 @@
             "validator": {
                 "file": "mixed_radix_fft.py",
                 "function": "validate_TP_API",
-                "args": [
-                    "TP_POINT_SIZE"
-                ]
-            }
-        },
-        {
-            "name": "AIE_VARIANT",
-            "type": "uint",
-            "description": "specifies the device type",
-            "validator": {
-                "file": "mixed_radix_fft.py",
-                "function": "validate_AIE_VARIANT",
                 "args": [
                     "TP_POINT_SIZE"
                 ]

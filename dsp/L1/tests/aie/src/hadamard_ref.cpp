@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,9 @@
 /*
 Hadamard Product reference model
 */
-#include "device_defs.h"
+
 #include "hadamard_ref.hpp"
-#include "hadamard_ref_utils.hpp"
 #include "aie_api/aie_adf.hpp"
-#include "fir_ref_utils.hpp"
 
 //#define _DSPLIB_HADAMARD_REF_DEBUG_
 
@@ -30,8 +28,8 @@ namespace dsp {
 namespace aie {
 namespace hadamard {
 template <typename T_A, typename T_B>
-outTypeMult_t<T_A, T_B> scalar_mult(T_A a, T_B b, const int shift, unsigned int t_rnd, unsigned int t_sat) {
-    using TT_OUT = outTypeMult_t<T_A, T_B>;
+out_mul_type<T_A, T_B> scalar_mult(T_A a, T_B b, const int shift, unsigned int t_rnd, unsigned int t_sat) {
+    using TT_OUT = out_mul_type<T_A, T_B>;
     TT_OUT ret_val;
     T_accRef<T_A> aAcc;
     T_accRef<T_B> bAcc;
@@ -129,8 +127,8 @@ template <typename TT_DATA_A,
 void hadamard_ref<TT_DATA_A, TT_DATA_B, TP_DIM, TP_NUM_FRAMES, TP_SHIFT, TP_API, TP_SSR, TP_RND, TP_SAT>::hadamard_main(
     input_buffer<TT_DATA_A>& inWindowA,
     input_buffer<TT_DATA_B>& inWindowB,
-    output_buffer<outTypeMult_t<TT_DATA_A, TT_DATA_B> >& outWindow0) {
-    using TT_OUT = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    output_buffer<out_mul_type<TT_DATA_A, TT_DATA_B> >& outWindow0) {
+    using TT_OUT = out_mul_type<TT_DATA_A, TT_DATA_B>;
     TT_DATA_A dA_in;
     TT_DATA_B dB_in;
     TT_OUT d_out;

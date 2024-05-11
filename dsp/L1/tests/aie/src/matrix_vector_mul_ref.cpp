@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ template <typename TT_DATA_A,
           typename TT_DATA_B,
           unsigned int TP_DIM_A,
           unsigned int TP_DIM_B,
+          unsigned int TP_DIM_A_LEADING,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_SAT,
@@ -44,6 +45,7 @@ void matrix_vector_mul_ref<TT_DATA_A,
                            TT_DATA_B,
                            TP_DIM_A,
                            TP_DIM_B,
+                           TP_DIM_A_LEADING,
                            TP_SHIFT,
                            TP_RND,
                            TP_SAT,
@@ -71,23 +73,23 @@ void matrix_vector_mul_ref<TT_DATA_A,
     printf("windowSizeOut = %d\n", windowSizeOut);
     printf("NUM_FRAMES = %d\n\n", TP_NUM_FRAMES);
 
+    const int matrixRowInc = (TP_DIM_A_LEADING == COL_MAJOR) ? 1 : TP_DIM_B;
+    const int matrixElemInc = (TP_DIM_A_LEADING == COL_MAJOR) ? TP_DIM_A : 1;
     for (int frame = 0; frame < TP_NUM_FRAMES; frame++) {
         // Load vector data
-
         for (int elemB = 0; elemB < TP_DIM_B; elemB++) {
             dB_in[elemB] = *inPtrB++;
         }
-
         // Multiply each row of matrix with the vector
         for (int row = 0; row < TP_DIM_A; row++) {
-            inRowA = inPtrA++;
+            inRowA = inPtrA + (row * matrixRowInc);
             // Load a row of the the matrix
             for (int elemA = 0; elemA < TP_DIM_B; elemA++) {
                 dA_in[elemA] = *inRowA;
-                inRowA += TP_DIM_A;
+                inRowA += matrixElemInc;
             }
-
             accum = null_accRef<TT_OUT>();
+
             for (int elemAB = 0; elemAB < TP_DIM_B; elemAB++) {
                 multiplyAcc(accum, dA_in[elemAB], dB_in[elemAB]);
             }
@@ -96,7 +98,7 @@ void matrix_vector_mul_ref<TT_DATA_A,
             outData = castAcc(accum);
             *outPtr++ = outData;
         }
-        inPtrA += (TP_DIM_B - 1) * (TP_DIM_A);
+        inPtrA += (TP_DIM_B) * (TP_DIM_A);
     }
 };
 }

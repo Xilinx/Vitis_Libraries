@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ namespace sample_delay {
 /**
  * @defgroup sample_delay_graph Sample Delay
  *
- * Vectorised Sample Delay
+ * Vectorized Sample Delay
 **/
 
 /**
@@ -51,10 +51,10 @@ namespace sample_delay {
  * @ingroup sample_delay_graph
  *
  * These are the templates parameters:
- * @tparam TT_DATA describes the type of individual data samples input to the function. This is a typename and must be
- *one of the following: \n
+ * @tparam TT_DATA describes the type of individual data samples input to the function. \n
+ *         This is a typename and must be one of the following: \n
  *         unit8, int8, int16, int32, float, cint16, cint32, cfloat.
- * @tparam TP_WINDOW_VSIZE describes the number of samples in the window API. It is only applicable when TP_API = 0.
+ * @tparam TP_WINDOW_VSIZE describes the number of samples in the window API. \n It is only applicable when TP_API = 0.
  * @tparam TP_API describes if the interface is IOBuf/Window (0) or stream (1)
  * @tparam TP_MAX_DELAY sets the max threshold on the delay.
  *

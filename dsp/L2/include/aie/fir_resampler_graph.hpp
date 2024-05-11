@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,6 @@ namespace fir {
 namespace resampler {
 using namespace adf;
 
-enum IO_API { WINDOW = 0, STREAM };
-
 //--------------------------------------------------------------------------------------------------
 // fir_resampler_graph template
 //--------------------------------------------------------------------------------------------------
@@ -50,8 +48,8 @@ enum IO_API { WINDOW = 0, STREAM };
  *
  * These are the templates to configure the generic FIR class.
  * @tparam TT_DATA describes the type of individual data samples input to and
- *         output from the filter function. This is a typename and must be one
- *         of the following: \n
+ *         output from the filter function. \n
+ *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  * @tparam TT_COEFF describes the type of individual coefficients of the filter
  *         taps. \n It must be one of the same set of types listed for TT_DATA
@@ -62,7 +60,8 @@ enum IO_API { WINDOW = 0, STREAM };
  * @tparam TP_FIR_LEN is an unsigned integer which describes the number of taps
  *         in the filter.
  * @tparam TP_INTERPOLATE_FACTOR is an unsigned integer which describes the
- *         interpolation factor of the filter. TP_INTERPOLATE_FACTOR must be in the
+ *         interpolation factor of the filter. \n
+ *         TP_INTERPOLATE_FACTOR must be in the
  *         range 3 to 16.
  * @tparam TP_DECIMATE_FACTOR is an unsigned integer which describes the
  *         decimation factor of the filter. TP_DECIMATE_FACTOR must be in the
@@ -70,8 +69,8 @@ enum IO_API { WINDOW = 0, STREAM };
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
- *         descriptive macros are recommended where
+ *         shift down stage of processing. \n
+ *         Although, TP_RND accepts unsigned integer values descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
  *         - rnd_sym_floor  = Truncate LSB, always round towards 0.
@@ -90,14 +89,14 @@ enum IO_API { WINDOW = 0, STREAM };
  *         in a single iteration run.  \n
  *         When TP_API is set to 0, samples are buffered and stored in a ping-pong window buffer mapped onto Memory
  *Group banks. \n
- *         As a results, maximum number of samples processed by the graph is limited by the size of Memory Group. \n
+ *         As a result, maximum number of samples processed by the graph is limited by the size of Memory Group. \n
  *         When TP_API is set to 1, samples are processed directly from the stream inputs and no buffering takes place.
  *\n
  *         In such case, maximum number of samples processed by the graph is limited to 32-bit value (4.294B samples per
  *iteration).  \n
  *         TP_INPUT_WINDOW_VSIZE must be an integer multiple of TP_DECIMATE_FACTOR.
  *         The number of values in the output window will be TP_INPUT_WINDOW_VSIZE
- *         multipled by TP_INTERPOLATE_FACTOR and divided by TP_DECIMATE_FACTOR. \n
+ *         multiplied by TP_INTERPOLATE_FACTOR and divided by TP_DECIMATE_FACTOR. \n
  *         The resulting output window size must be a multiple of 256bits. \n
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  * @tparam TP_CASC_LEN describes the number of AIE processors to split the operation
@@ -156,8 +155,8 @@ enum IO_API { WINDOW = 0, STREAM };
  *         TP_PARA_DECI_POLY = TP_DECIMATE_FACTOR will result in an decimate factor of polyphases,
  * operating as independent single rate filters connected by cascades.
  *         The number of AIEs used is given by TP_PARA_DECI_POLY * TP_SSR^2 * TP_CASC_LEN. \n
- * @tparam TP_SAT describes the selection of saturation to be applied during the
- *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
+ *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
  *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
  *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
@@ -278,9 +277,9 @@ class fir_resampler_graph : public graph {
         // In FIFO mode, FIFO size has to be a multiple of 128 bits.
         // In FIFO mode, BD length has to be >= 128 bytes!
         // Conservative assumptions need to be made here.
-        // For an overall decimation factor, with instreasing decimation factor,
+        // For an overall decimation factor, with increasing decimation factor,
         // the amount of input stream data required to produce output samples also increases.
-        // This strains the FIFOs closer to the begining of the chain comparably more
+        // This strains the FIFOs closer to the beginning of the chain comparably more
         // than the ones closest to the output.
         // For an overall interpolation design, with increasing interpolation factor,
         // the amount of output stream data produced also increases.
@@ -290,7 +289,7 @@ class fir_resampler_graph : public graph {
         //
         // Conservative assumptions need to be made here, as mapper may place multiple buffers in
         // each of the memory banks, that may introduce Memory conflicts.
-        // On top of that, the placement of input source wrt brodcast kernel inputs may introduce significant routing
+        // On top of that, the placement of input source wrt broadcast kernel inputs may introduce significant routing
         // delays.
         // which may have an adverse effect on the amount of FIFO storage available for filter design purposes.
         int fifoStep =
@@ -430,7 +429,7 @@ class fir_resampler_graph : public graph {
     port_conditional_array<input, (TP_DUAL_IP == 1), IN_SSR> in2;
 
     /**
-     * The conditional array of input async ports used to pass run-time programmable (RTP) coeficients.
+     * The conditional array of input async ports used to pass run-time programmable (RTP) coefficients.
      * This port_conditional_array is (generated when TP_USE_COEFF_RELOAD == 1) an array of input ports, which size is
      *defined by TP_SSR.
      * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.

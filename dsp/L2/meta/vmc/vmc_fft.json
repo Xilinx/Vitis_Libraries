@@ -6,7 +6,16 @@
     "description": "FFT block targeted for AI Engines."
   },
   "parameters": [
-      {
+	{
+	  "key": "AIE_VARIANT",
+	  "name": "AIE_VARIANT",
+      "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
+      "default": 1,
+	  "label": "AIE Variant:",
+      "tablabel": "Main",
+      "parameterType":"edit"
+    },
+    {
       "key": "TT_DATA",
       "name": "data_type",
       "description": "The type of individual data samples input to and output of the fft function",
@@ -23,7 +32,7 @@
       "validator": {
         "file": "vmc_fft_common.py",
         "function": "vmc_validate_twiddle_type",
-        "args": ["data_type"]
+        "args": ["AIE_VARIANT", "data_type"]
       },
             "label": "Twiddle factor data type:",
             "tablabel": "Main",
@@ -36,7 +45,7 @@
       "default": 64,
       "validator": {
         "file": "vmc_fft.py",
-        "function": "vmc_validate_point_size",
+        "function": "vmc_validate_point_size_window",
         "args": ["data_type", "AIE_VARIANT"]
       },
             "label": "FFT size:",
@@ -75,9 +84,7 @@
       "key": "TP_RND",
       "name": "rnd_mode",
       "description": "The rounding to be applied during the shift down stage of processing.",
-      "enum": [0, 1, 2, 3, 4, 5, 6, 7],
-      "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"],
-      "default": 4,
+      "default": "Round symmetrical to infinity",
       "validator": {
                 "file": "vmc_fft_common.py",
                 "function": "vmc_validate_TP_RND",
@@ -104,6 +111,20 @@
             "parameterType":"popup"
     },
     {
+      "key": "TP_TWIDDLE_MODE",
+      "name": "twiddle_mode",
+      "description": "Twiddle amplitude mode.",
+      "validator": {
+            "file": "vmc_fft_common.py",
+            "function": "vmc_validate_twiddle_mode",
+            "args": []
+       },
+       "default": 0,
+       "label": "Twiddle Mode:",
+       "tablabel": "Main",
+       "parameterType":"edit"
+    },
+    {
       "key": "TP_USE_WIDGETS",
       "name": "use_ssr_widget_kernels",
       "type":"bool",
@@ -119,13 +140,14 @@
       "default": 1,
        "validator": {
         "file": "vmc_fft.py",
-        "function": "vmc_validate_casc_length",
-        "args": ["data_type", "point_size"]
+        "function": "vmc_validate_casc_length_window",
+        "args": ["data_type", "point_size", "AIE_VARIANT"]
       },
             "label": "Number of cascade stages:",
             "tablabel": "Main",
             "parameterType":"edit"
     }
+
   ],
   "generator": {
     "file": "vmc_fft.py",

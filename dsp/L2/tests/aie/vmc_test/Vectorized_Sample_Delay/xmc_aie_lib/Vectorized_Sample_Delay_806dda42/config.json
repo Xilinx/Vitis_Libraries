@@ -1,0 +1,10 @@
+{
+    "spec": "vmc_sample_delay.json",
+    "outdir": "./xmc_aie_lib/Vectorized_Sample_Delay_806dda42",
+    "parameters": {
+        "data_type": "int8",
+        "input_window_size": 256,
+        "max_sample_delay": 256,
+        "AIE_VARIANT": 1
+    }
+}

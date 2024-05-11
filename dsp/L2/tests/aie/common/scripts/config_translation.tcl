@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,9 +52,12 @@ proc get_param_map {libElement} {
         "P_DIM_B" "TP_DIM_B"
         "DIM_A" "TP_DIM_A"
         "DIM_B" "TP_DIM_B"
+        "DIM_SIZE_A" "TP_DIM_A"
+        "DIM_SIZE_B" "TP_DIM_B"
         "P_SHIFT" "TP_SHIFT"
         "P_ROUND_MODE" "TP_RND"
         "P_DIM_A_LEADING" "TP_DIM_A_LEADING"
+        "DIM_A_LEADING" "TP_DIM_A_LEADING"
         "P_DIM_B_LEADING" "TP_DIM_B_LEADING"
         "P_DIM_OUT_LEADING" "TP_DIM_OUT_LEADING"
         "P_ADD_TILING_A" "TP_ADD_TILING_A"
@@ -65,6 +68,7 @@ proc get_param_map {libElement} {
         "P_CASC_LEN" "TP_CASC_LEN"
         "NUM_FRAMES" "TP_NUM_FRAMES"
         "MIXER_MODE" "TP_MIXER_MODE"
+        "USE_PHASE_RELOAD" "TP_USE_PHASE_RELOAD"
         "P_API" "TP_API"
         "DDS_PHASE_INC" "phaseInc"
         "INITIAL_DDS_OFFSET" "initialPhaseOffset"
@@ -87,6 +91,17 @@ proc get_param_map {libElement} {
         "DIM_A_COLS" "TP_DIM_A_COLS"
         "DIM_B_ROWS" "TP_DIM_B_ROWS"
         "DIM_B_COLS" "TP_DIM_B_COLS"
+        "DATA_F" "TT_DATA_F"
+        "DATA_G" "TT_DATA_G"
+        "DATA_OUT" "TT_DATA_OUT"
+        "FUNCT_TYPE" "TP_FUNCT_TYPE"
+        "COMPUTE_MODE" "TP_COMPUTE_MODE"
+        "F_LEN" "TP_F_LEN"
+        "G_LEN"  "TP_G_LEN"
+        "API_PORT" "TP_API"
+        "RND" "TP_RND"
+        "SAT" "TP_SAT"        
+        "DIM_A_LEADING" "TP_DIM_A_LEADING"
 
     }
     return $param_map

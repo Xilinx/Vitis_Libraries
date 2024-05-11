@@ -19,5 +19,17 @@ L2/examples/*/Work*
 *TestResults*
 *__pycache__
 *_generated_graph
+.vscode/
 
-L2/tests/aie/*/results/*
+L2/tests/aie/*/runmake.sh
+L2/tests/aie/*/uut_config.h
+L2/tests/aie/*/multi_params_*
+L2/tests/aie/*/*results*
+L2/tests/aie/*/build_dir*
+L2/tests/aie/*/logs*
+L2/tests/aie/*/runmake_logs*
+L2/tests/aie/*/data*
+L2/tests/aie/*/.Xil*
+L2/tests/aie/*/_x_temp*
+L2/tests/aie/*/aiesimulator_output*
+L2/tests/aie/*/x86simulator_output*

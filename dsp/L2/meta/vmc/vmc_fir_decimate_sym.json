@@ -74,7 +74,7 @@
       "validator": {
         "file": "vmc_fir_decimate_sym.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "decimate_factor"]
+        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "decimate_factor", "AIE_VARIANT"]
       },
             "label": "Filter coefficients:",
             "tablabel": "Main",
@@ -111,7 +111,7 @@
       "validator": {
         "file": "vmc_fir_decimate_sym.py",
         "function": "vmc_validate_input_window_size",
-        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "decimate_factor"]
+        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "decimate_factor", "AIE_VARIANT"]
       },
             "label": "Input window size (Number of samples):",
             "tablabel": "Main",
@@ -135,9 +135,7 @@
       "key": "TP_RND",
       "name": "rnd_mode",
       "description": "The rounding to be applied during the shift down stage of processing.",
-      "enum": [0, 1, 2, 3, 4, 5, 6, 7],
-      "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"],
-      "default": 2,
+      "default": "Round to positive infinity",
       "validator": {
         "file": "vmc_fir_decimate_sym.py",
         "function": "vmc_validate_rnd_mode",
@@ -176,7 +174,17 @@
             "label": "Number of cascade stages:",
             "tablabel": "Main",
             "parameterType":"edit"
+    },
+	{
+	  "key": "AIE_VARIANT",
+	  "name": "AIE_VARIANT",
+      "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
+      "default": 1,
+	  "label": "AIE Variant:",
+      "tablabel": "Main",
+      "parameterType":"edit"
     }
+
   ],
   "generator": {
     "file": "vmc_fir_decimate_sym.py",

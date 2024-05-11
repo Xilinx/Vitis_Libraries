@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,16 +59,16 @@ class test_graph : public graph {
 #endif
 
     using uut_g = dsplib::fir::tdm::UUT_GRAPH<DATA_TYPE,
-                                                  COEFF_TYPE,
-                                                  FIR_LEN,
-                                                  SHIFT,
-                                                  ROUND_MODE,
-                                                  INPUT_WINDOW_VSIZE,
-                                                  TDM_CHANNELS,
-                                                  NUM_OUTPUTS,
-                                                  DUAL_IP,
-                                                  P_SSR, // Note P_SSR forced to 1 for REF
-                                                  SAT_MODE>;
+                                              COEFF_TYPE,
+                                              FIR_LEN,
+                                              SHIFT,
+                                              ROUND_MODE,
+                                              INPUT_WINDOW_VSIZE,
+                                              TDM_CHANNELS,
+                                              NUM_OUTPUTS,
+                                              DUAL_IP,
+                                              P_SSR, // Note P_SSR forced to 1 for REF
+                                              SAT_MODE>;
 
     std::vector<COEFF_TYPE> m_taps_v;
 

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,8 @@ class hadamard {
     static constexpr unsigned int kVecInFrame = CEIL(TP_DIM, kSamplesInVect) / kSamplesInVect;
 
    public:
-    using TT_OUT = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using TT_OUT = out_mul_type<TT_DATA_A, TT_DATA_B>;
+    using ACC_TYPE = acc_mul_type<TT_DATA_A, TT_DATA_B>;
 
     // Constructor
     hadamard();
@@ -112,7 +113,8 @@ class hadamard<TT_DATA_A, TT_DATA_B, TP_DIM, TP_NUM_FRAMES, TP_SHIFT, 1, TP_SSR,
     static constexpr unsigned int kVecInFrame = CEIL(TP_DIM, kSamplesInVect) / kSamplesInVect;
 
    public:
-    using TT_OUT = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using TT_OUT = out_mul_type<TT_DATA_A, TT_DATA_B>;
+    using ACC_TYPE = acc_mul_type<TT_DATA_A, TT_DATA_B>;
     // Constructor
     hadamard();
 

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ Coding conventions
 #endif
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
 #include "aie_api/aie_adf.hpp"
+
 #include "device_defs.h"
 #include "kernel_api_utils.hpp"
 #include "fir_resampler.hpp"
@@ -727,6 +728,7 @@ void kernelFilterClass<TT_DATA,
                               (offsetPhase + strobe * m_kPolyphaseLaneAlias) * m_kVOutSize * TP_DECIMATE_FACTOR /
                                   TP_INTERPOLATE_FACTOR) %
                              m_kSamplesInBuff; //
+                    // xstart =  xstartPhase[offsetPhase]; //+m_kDataBuffXOffset (i've inadvertnly already added this)
 
                     // dataNeeded += CEIL(TP_DECIMATE_FACTOR * m_kVOutSize,TP_INTERPOLATE_FACTOR) /
                     // TP_INTERPOLATE_FACTOR; // inaccurate due to CEIL()
@@ -940,19 +942,20 @@ void kernelFilterClass<TT_DATA,
 
                 for (int iphase = 0; iphase < kInterPhases; ++iphase) {
                     for (int dphase = 0; dphase < kDeciPhases; ++dphase) {
+                        int coeOffset =
+                            iphase * kDeciPhases + (dphase + kDeciPhases - 1 + kFirLenCeil % kDeciPhases) % kDeciPhases;
                         if ((op) % m_kCoeffRegVsize == 0) {
 #if SHUFFLE_POLYPHASES == 0
                             chess_protect_access T_buff_256b<TT_COEFF>* coeff =
-                                ((T_buff_256b<TT_COEFF>*)m_internalTaps2[dphase + iphase * kDeciPhases] +
-                                 (op) / m_kCoeffRegVsize);
+                                ((T_buff_256b<TT_COEFF>*)m_internalTaps2[coeOffset] + (op / m_kCoeffRegVsize));
 #else
                             chess_protect_access T_buff_256b<TT_COEFF>* coeff =
                                 ((T_buff_256b<TT_COEFF>*)
                                      m_internalTaps2[decimate_asym::fnCoeffPhase(dphase, kDeciPhases) +
                                                      iphase * kDeciPhases] +
-                                 (op) / m_kCoeffRegVsize);
+                                 (op / m_kCoeffRegVsize));
 #endif
-                            coe[iphase * kDeciPhases + dphase] = *coeff;
+                            coe[coeOffset] = *coeff;
                         }
 #if SHUFFLE_POLYPHASES == 0
                         int sbuffOffset = (iphase * kDeciPhases / kInterPhases + dphase) % kDeciPhases;
@@ -961,8 +964,6 @@ void kernelFilterClass<TT_DATA,
                         int sbuffOffset = (iphase * kDeciPhases / kInterPhases - dphase) % kDeciPhases;
                         int dphaseIdx = (kDeciPhases + dphase) % kDeciPhases;
 #endif
-                        int coeOffset =
-                            iphase * kDeciPhases + (dphase + kDeciPhases - 1 + kFirLenCeil % kDeciPhases) % kDeciPhases;
                         int dataBuffToPhaseOffset =
                             CEIL(m_kDataBuffXOffset - (kDeciPhases - kDataMappedToPhaseOffset) % kDeciPhases,
                                  kDeciPhases) /
@@ -1190,11 +1191,12 @@ void kernelFilterClass<TT_DATA,
                     for (int op = m_kColumns; op < kFirLenCeilCols; op += m_kColumns) {
                         for (int iphase = 0; iphase < kInterPhases; ++iphase) {
                             for (int dphase = 0; dphase < kDeciPhases; ++dphase) {
+                                int coeOffset = iphase * kDeciPhases +
+                                                (dphase + kDeciPhases - 1 + kFirLenCeil % kDeciPhases) % kDeciPhases;
                                 if ((op) % m_kCoeffRegVsize == 0) {
 #if SHUFFLE_POLYPHASES == 0
                                     chess_protect_access T_buff_256b<TT_COEFF>* coeff =
-                                        ((T_buff_256b<TT_COEFF>*)m_internalTaps2[dphase + iphase * kDeciPhases] +
-                                         (op) / m_kCoeffRegVsize);
+                                        ((T_buff_256b<TT_COEFF>*)m_internalTaps2[coeOffset] + (op) / m_kCoeffRegVsize);
 #else
                                     chess_protect_access T_buff_256b<TT_COEFF>* coeff =
                                         ((T_buff_256b<TT_COEFF>*)
@@ -1202,7 +1204,7 @@ void kernelFilterClass<TT_DATA,
                                                              iphase * kDeciPhases] +
                                          (op) / m_kCoeffRegVsize);
 #endif
-                                    coe[iphase * kDeciPhases + dphase] = *coeff;
+                                    coe[coeOffset] = *coeff;
                                 }
 #if SHUFFLE_POLYPHASES == 0
                                 int sbuffOffset = (iphase * kDeciPhases / kInterPhases + dphase) % kDeciPhases;
@@ -1211,8 +1213,6 @@ void kernelFilterClass<TT_DATA,
                                 int sbuffOffset = (iphase * kDeciPhases / kInterPhases - dphase) % kDeciPhases;
                                 int dphaseIdx = (kDeciPhases + dphase) % kDeciPhases;
 #endif
-                                int coeOffset = iphase * kDeciPhases +
-                                                (dphase + kDeciPhases - 1 + kFirLenCeil % kDeciPhases) % kDeciPhases;
                                 int dataBuffToPhaseOffset =
                                     initDataOffset + (streamInitNullAccs + strobe) * m_kVOutSize;
                                 ;
@@ -1328,11 +1328,12 @@ void kernelFilterClass<TT_DATA,
                 for (int op = m_kColumns; op < kFirLenCeilCols; op += m_kColumns) {
                     for (int iphase = 0; iphase < kInterPhases; ++iphase) {
                         for (int dphase = 0; dphase < kDeciPhases; ++dphase) {
+                            int coeOffset = iphase * kDeciPhases +
+                                            (dphase + kDeciPhases - 1 + kFirLenCeil % kDeciPhases) % kDeciPhases;
                             if ((op) % m_kCoeffRegVsize == 0) {
 #if SHUFFLE_POLYPHASES == 0
                                 T_buff_256b<TT_COEFF>* coeff =
-                                    ((T_buff_256b<TT_COEFF>*)m_internalTaps2[dphase + iphase * kDeciPhases] +
-                                     (op) / m_kCoeffRegVsize);
+                                    ((T_buff_256b<TT_COEFF>*)m_internalTaps2[coeOffset] + (op) / m_kCoeffRegVsize);
 #else
                                 T_buff_256b<TT_COEFF>* coeff =
                                     ((T_buff_256b<TT_COEFF>*)
@@ -1340,7 +1341,7 @@ void kernelFilterClass<TT_DATA,
                                                          iphase * kDeciPhases] +
                                      (op) / m_kCoeffRegVsize);
 #endif
-                                coe[iphase * kDeciPhases + dphase] = *coeff;
+                                coe[coeOffset] = *coeff;
                             }
 #if SHUFFLE_POLYPHASES == 0
                             int sbuffOffset = (iphase * kDeciPhases / kInterPhases + dphase) % kDeciPhases;
@@ -1349,8 +1350,6 @@ void kernelFilterClass<TT_DATA,
                             int sbuffOffset = (iphase * kDeciPhases / kInterPhases - dphase) % kDeciPhases;
                             int dphaseIdx = (kDeciPhases + dphase) % kDeciPhases;
 #endif
-                            int coeOffset = iphase * kDeciPhases +
-                                            (dphase + kDeciPhases - 1 + kFirLenCeil % kDeciPhases) % kDeciPhases;
                             int dataBuffToPhaseOffset = startDataOffset + (streamInitNullAccs + strobe) * m_kVOutSize;
                             int dphaseToLaneOffset = (iphase * kDeciPhases / kInterPhases < dphaseIdx) ? -1 : 0;
                             xstart = dataBuffToPhaseOffset +

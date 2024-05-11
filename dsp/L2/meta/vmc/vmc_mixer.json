@@ -11,6 +11,11 @@
       "name": "data_type",
       "description": "The type of individual data samples input to and output of the mixer function",
       "default": "cint16",
+      "validator": {
+        "file": "vmc_mixer.py",
+        "function": "vmc_validate_data_type",
+        "args": ["mixer_mode"]
+      },
             "label": "Input/Output data type:",
             "tablabel": "Main",
             "parameterType":"popup"
@@ -33,9 +38,7 @@
       "key": "TP_RND",
       "name": "rnd_mode",
       "description": "The rounding to be applied during the shift down stage of processing.",
-      "enum": [0, 1, 2, 3, 4, 5, 6, 7],
-      "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"],
-      "default": 2,
+      "default": "Round to positive infinity",
           "label": "Rounding mode:",
             "tablabel": "Main",
           "parameterType": "popup"
@@ -68,6 +71,21 @@
             "parameterType":"popup"
     },
     {
+      	    "key": "TP_USE_PHASE_RELOAD",
+	    "name": "USE_PHASE_RELOAD",
+            "description": "specifies if initial phase is to be implemented as a reloadable RTP port or not.",
+            "default": false,
+      	    "type": "bool",       
+	    "validator": {
+               "file": "vmc_mixer.py",
+                "function": "validate_USE_PHASE_RELOAD",
+                "args": []
+		},
+	    "label": "Reload initial phase via input port",
+            "tablabel": "Main",
+            "parameterType":"checkbox"
+    },
+    {
       "key": "phaseInc",
       "name": "phase_increment",
       "description": "The phase increment between samples.",
@@ -75,7 +93,22 @@
             "label": "Phase increment:",
             "tablabel": "Main",
             "parameterType":"edit"
+    },
+	{
+	  "key": "AIE_VARIANT",
+	  "name": "AIE_VARIANT",
+      "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
+      "default": 1,
+    "validator": {
+                "file": "vmc_mixer.py",
+                "function": "validate_AIE_VARIANT",
+                "args": []
+            },
+	  "label": "AIE Variant:",
+      "tablabel": "Main",
+      "parameterType":"edit"
     }
+
 
   ],
   "generator": {

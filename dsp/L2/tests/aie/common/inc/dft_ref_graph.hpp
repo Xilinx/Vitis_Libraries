@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,11 @@ template <typename TT_DATA,
           unsigned int TP_POINT_SIZE,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
-          unsigned int TP_CASC_LEN = 1, // necessary to match UUT, but unused by ref model
-          unsigned int TP_NUM_FRAMES = 1,
-          unsigned int TP_RND = 0,
-          unsigned int TP_SAT = 1>
+          unsigned int TP_CASC_LEN, // necessary to match UUT, but unused by ref model
+          unsigned int TP_NUM_FRAMES,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_SSR>
 class dft_ref_graph : public graph {
    public:
     port<input> in[1];
@@ -52,12 +53,13 @@ class dft_ref_graph : public graph {
         T_outDataType;
 
 #ifdef __SUPPORTS_ACC64__
-    static constexpr int kSamplesInVectOutData = 8;
+    static constexpr int kSamplesInVectData = 8;
 #else
-    static constexpr int kSamplesInVectOutData = 256 / 8 / sizeof(T_outDataType);
+    static constexpr int kSamplesInVectData = 256 / 8 / sizeof(T_outDataType);
 #endif //__SUPPORTS_ACC64__
-
-    static constexpr int windowSize = CEIL(TP_POINT_SIZE, kSamplesInVectOutData) * TP_NUM_FRAMES;
+    static constexpr int windowSizeIn = TP_POINT_SIZE * TP_NUM_FRAMES;
+    // Account for padding in the output required for SSR in UUT
+    static constexpr int windowSizeOut = CEIL(TP_POINT_SIZE, (TP_SSR * kSamplesInVectData)) * TP_NUM_FRAMES;
     // FIR Kernel
     kernel m_dftKernel;
 
@@ -74,7 +76,8 @@ class dft_ref_graph : public graph {
         printf("Number of kernels    = %d \n", TP_CASC_LEN);
         printf("Rounding mode    = %d \n", TP_RND);
         printf("Saturation mode    = %d \n", TP_SAT);
-        printf("Window Size (ref)         = %d \n", windowSize);
+        printf("Window Size In (ref)         = %d \n", windowSizeIn);
+        printf("Window Size Out (ref)         = %d \n", windowSizeOut);
         printf("Data type            = ");
         printf(QUOTE(TT_DATA_TYPE));
         printf("\n");
@@ -83,16 +86,16 @@ class dft_ref_graph : public graph {
         printf("\n");
 
         // Create DFT class
-        m_dftKernel = kernel::create_object<
-            dft_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_NUM_FRAMES, TP_RND, TP_SAT> >();
+        m_dftKernel = kernel::create_object<dft_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
+                                                    TP_NUM_FRAMES, TP_RND, TP_SAT, TP_SSR> >();
 
         // Make connections
         // Size of window in Bytes. Dynamic point size adds a 256 bit (32 byte) header. This is larger than required,
         // but keeps 256 bit alignment
         connect(in[0], m_dftKernel.in[0]);
-        dimensions(m_dftKernel.in[0]) = {windowSize};
+        dimensions(m_dftKernel.in[0]) = {windowSizeIn};
         connect(m_dftKernel.out[0], out[0]);
-        dimensions(m_dftKernel.out[0]) = {windowSize};
+        dimensions(m_dftKernel.out[0]) = {windowSizeOut};
 
         // Specify mapping constraints
         runtime<ratio>(m_dftKernel) = 0.8;

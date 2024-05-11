@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -423,12 +423,19 @@ void ddsMixerHelper<T_ACC_TYPE, T_DDS_TYPE, TP_NUM_LANES, USE_LUT_SINCOS, TP_NUM
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_MIXER_MODE,
+          unsigned int TP_USE_PHASE_RELOAD,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>::dds_mixer_ref(
-    uint32_t phaseInc, uint32_t initialPhaseOffset) {
+dds_mixer_ref<TT_DATA,
+              TP_INPUT_WINDOW_VSIZE,
+              TP_MIXER_MODE,
+              TP_USE_PHASE_RELOAD,
+              TP_SC_MODE,
+              TP_NUM_LUTS,
+              TP_RND,
+              TP_SAT>::dds_mixer_ref(uint32_t phaseInc, uint32_t initialPhaseOffset) {
     this->m_phaseAccum = initialPhaseOffset;
     this->m_samplePhaseInc = phaseInc;
     ddsFuncs.populateRotVecInbuilt(phaseInc, phRotref);
@@ -437,11 +444,93 @@ dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_SC_MODE, TP_NUM_
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_MIXER_MODE,
+          unsigned int TP_USE_PHASE_RELOAD,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, USE_LUT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>::
-    dds_mixer_ref(uint32_t phaseInc, uint32_t initialPhaseOffset) {
+dds_mixer_ref<TT_DATA,
+              TP_INPUT_WINDOW_VSIZE,
+              TP_MIXER_MODE,
+              TP_USE_PHASE_RELOAD,
+              USE_LUT_SINCOS,
+              TP_NUM_LUTS,
+              TP_RND,
+              TP_SAT>::dds_mixer_ref(uint32_t phaseInc, uint32_t initialPhaseOffset) {
+    this->m_phaseAccum = initialPhaseOffset;
+    this->m_samplePhaseInc = phaseInc;
+    ddsFuncs.populateRotVecLUT(phaseInc, phRotSml, phRotBig);
+}
+
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_USE_PHASE_RELOAD,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+dds_mixer_ref<TT_DATA,
+              TP_INPUT_WINDOW_VSIZE,
+              MIXER_MODE_1,
+              TP_USE_PHASE_RELOAD,
+              USE_INBUILT_SINCOS,
+              TP_NUM_LUTS,
+              TP_RND,
+              TP_SAT>::dds_mixer_ref(uint32_t phaseInc, uint32_t initialPhaseOffset) {
+    this->m_phaseAccum = initialPhaseOffset;
+    this->m_samplePhaseInc = phaseInc;
+    ddsFuncs.populateRotVecInbuilt(phaseInc, phRotref);
+}
+
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_USE_PHASE_RELOAD,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+dds_mixer_ref<TT_DATA,
+              TP_INPUT_WINDOW_VSIZE,
+              MIXER_MODE_1,
+              TP_USE_PHASE_RELOAD,
+              USE_LUT_SINCOS,
+              TP_NUM_LUTS,
+              TP_RND,
+              TP_SAT>::dds_mixer_ref(uint32_t phaseInc, uint32_t initialPhaseOffset) {
+    this->m_phaseAccum = initialPhaseOffset;
+    this->m_samplePhaseInc = phaseInc;
+    ddsFuncs.populateRotVecLUT(phaseInc, phRotSml, phRotBig);
+}
+
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_USE_PHASE_RELOAD,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+dds_mixer_ref<TT_DATA,
+              TP_INPUT_WINDOW_VSIZE,
+              MIXER_MODE_0,
+              TP_USE_PHASE_RELOAD,
+              USE_INBUILT_SINCOS,
+              TP_NUM_LUTS,
+              TP_RND,
+              TP_SAT>::dds_mixer_ref(uint32_t phaseInc, uint32_t initialPhaseOffset) {
+    this->m_phaseAccum = initialPhaseOffset;
+    this->m_samplePhaseInc = phaseInc;
+    ddsFuncs.populateRotVecInbuilt(phaseInc, phRotref);
+}
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_USE_PHASE_RELOAD,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+dds_mixer_ref<TT_DATA,
+              TP_INPUT_WINDOW_VSIZE,
+              MIXER_MODE_0,
+              TP_USE_PHASE_RELOAD,
+              USE_LUT_SINCOS,
+              TP_NUM_LUTS,
+              TP_RND,
+              TP_SAT>::dds_mixer_ref(uint32_t phaseInc, uint32_t initialPhaseOffset) {
     this->m_phaseAccum = initialPhaseOffset;
     this->m_samplePhaseInc = phaseInc;
     ddsFuncs.populateRotVecLUT(phaseInc, phRotSml, phRotBig);
@@ -452,9 +541,16 @@ template <typename TT_DATA,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1, USE_INBUILT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>::dds_mixer_ref(
-    uint32_t phaseInc, uint32_t initialPhaseOffset) {
+dds_mixer_ref<TT_DATA,
+              TP_INPUT_WINDOW_VSIZE,
+              MIXER_MODE_2,
+              USE_PHASE_RELOAD_TRUE,
+              USE_INBUILT_SINCOS,
+              TP_NUM_LUTS,
+              TP_RND,
+              TP_SAT>::dds_mixer_ref(uint32_t phaseInc, uint32_t initialPhaseOffset) {
     this->m_phaseAccum = initialPhaseOffset;
+    this->m_phaseValpre = initialPhaseOffset;
     this->m_samplePhaseInc = phaseInc;
     ddsFuncs.populateRotVecInbuilt(phaseInc, phRotref);
 }
@@ -464,9 +560,17 @@ template <typename TT_DATA,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1, USE_LUT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>::dds_mixer_ref(
-    uint32_t phaseInc, uint32_t initialPhaseOffset) {
+dds_mixer_ref<TT_DATA,
+              TP_INPUT_WINDOW_VSIZE,
+              MIXER_MODE_2,
+              USE_PHASE_RELOAD_TRUE,
+              USE_LUT_SINCOS,
+              TP_NUM_LUTS,
+              TP_RND,
+              TP_SAT>::dds_mixer_ref(uint32_t phaseInc, uint32_t initialPhaseOffset) {
     this->m_phaseAccum = initialPhaseOffset;
+    this->m_phaseValpre = initialPhaseOffset;
+
     this->m_samplePhaseInc = phaseInc;
     ddsFuncs.populateRotVecLUT(phaseInc, phRotSml, phRotBig);
 }
@@ -476,9 +580,57 @@ template <typename TT_DATA,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0, USE_INBUILT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>::dds_mixer_ref(
-    uint32_t phaseInc, uint32_t initialPhaseOffset) {
+dds_mixer_ref<TT_DATA,
+              TP_INPUT_WINDOW_VSIZE,
+              MIXER_MODE_1,
+              USE_PHASE_RELOAD_TRUE,
+              USE_INBUILT_SINCOS,
+              TP_NUM_LUTS,
+              TP_RND,
+              TP_SAT>::dds_mixer_ref(uint32_t phaseInc, uint32_t initialPhaseOffset) {
     this->m_phaseAccum = initialPhaseOffset;
+    this->m_phaseValpre = initialPhaseOffset;
+
+    this->m_samplePhaseInc = phaseInc;
+    ddsFuncs.populateRotVecInbuilt(phaseInc, phRotref);
+}
+
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+dds_mixer_ref<TT_DATA,
+              TP_INPUT_WINDOW_VSIZE,
+              MIXER_MODE_1,
+              USE_PHASE_RELOAD_TRUE,
+              USE_LUT_SINCOS,
+              TP_NUM_LUTS,
+              TP_RND,
+              TP_SAT>::dds_mixer_ref(uint32_t phaseInc, uint32_t initialPhaseOffset) {
+    this->m_phaseAccum = initialPhaseOffset;
+    this->m_phaseValpre = initialPhaseOffset;
+
+    this->m_samplePhaseInc = phaseInc;
+    ddsFuncs.populateRotVecLUT(phaseInc, phRotSml, phRotBig);
+}
+
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+dds_mixer_ref<TT_DATA,
+              TP_INPUT_WINDOW_VSIZE,
+              MIXER_MODE_0,
+              USE_PHASE_RELOAD_TRUE,
+              USE_INBUILT_SINCOS,
+              TP_NUM_LUTS,
+              TP_RND,
+              TP_SAT>::dds_mixer_ref(uint32_t phaseInc, uint32_t initialPhaseOffset) {
+    this->m_phaseAccum = initialPhaseOffset;
+    this->m_phaseValpre = initialPhaseOffset;
+
     this->m_samplePhaseInc = phaseInc;
     ddsFuncs.populateRotVecInbuilt(phaseInc, phRotref);
 }
@@ -487,9 +639,17 @@ template <typename TT_DATA,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0, USE_LUT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>::dds_mixer_ref(
-    uint32_t phaseInc, uint32_t initialPhaseOffset) {
+dds_mixer_ref<TT_DATA,
+              TP_INPUT_WINDOW_VSIZE,
+              MIXER_MODE_0,
+              USE_PHASE_RELOAD_TRUE,
+              USE_LUT_SINCOS,
+              TP_NUM_LUTS,
+              TP_RND,
+              TP_SAT>::dds_mixer_ref(uint32_t phaseInc, uint32_t initialPhaseOffset) {
     this->m_phaseAccum = initialPhaseOffset;
+    this->m_phaseValpre = initialPhaseOffset;
+
     this->m_samplePhaseInc = phaseInc;
     ddsFuncs.populateRotVecLUT(phaseInc, phRotSml, phRotBig);
 }
@@ -500,14 +660,21 @@ dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0, USE_LUT_SINCOS, TP_NUM_LUTS, TP
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_MIXER_MODE,
+          unsigned int TP_USE_PHASE_RELOAD,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>::ddsMix(
-    input_buffer<TT_DATA>& __restrict inWindowA,
-    input_buffer<TT_DATA>& __restrict inWindowB,
-    output_buffer<TT_DATA>& __restrict outWindow) {
+void dds_mixer_ref<TT_DATA,
+                   TP_INPUT_WINDOW_VSIZE,
+                   TP_MIXER_MODE,
+                   TP_USE_PHASE_RELOAD,
+                   TP_SC_MODE,
+                   TP_NUM_LUTS,
+                   TP_RND,
+                   TP_SAT>::ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
+                                   input_buffer<TT_DATA>& __restrict inWindowB,
+                                   output_buffer<TT_DATA>& __restrict outWindow) {
     T_ACC_TYPE ddsOutPrime;
     T_ACC_TYPE ddsOutValidation;
     T_ACC_TYPE ddsOutRaw;
@@ -561,13 +728,20 @@ void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_SC_MODE, TP
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_MIXER_MODE,
+          unsigned int TP_USE_PHASE_RELOAD,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, USE_LUT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>::ddsMix(
-    input_buffer<TT_DATA>& __restrict inWindowA,
-    input_buffer<TT_DATA>& __restrict inWindowB,
-    output_buffer<TT_DATA>& __restrict outWindow) {
+void dds_mixer_ref<TT_DATA,
+                   TP_INPUT_WINDOW_VSIZE,
+                   TP_MIXER_MODE,
+                   TP_USE_PHASE_RELOAD,
+                   USE_LUT_SINCOS,
+                   TP_NUM_LUTS,
+                   TP_RND,
+                   TP_SAT>::ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
+                                   input_buffer<TT_DATA>& __restrict inWindowB,
+                                   output_buffer<TT_DATA>& __restrict outWindow) {
     T_ACC_TYPE ddsOutPrime;
     T_ACC_TYPE ddsOutValidation;
     T_ACC_TYPE ddsOutRaw;
@@ -632,11 +806,19 @@ void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, USE_LUT_SINCOS
 
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_USE_PHASE_RELOAD,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, USE_INBUILT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>::
-    ddsMix(input_buffer<TT_DATA>& __restrict inWindowA, output_buffer<TT_DATA>& __restrict outWindow) {
+void dds_mixer_ref<TT_DATA,
+                   TP_INPUT_WINDOW_VSIZE,
+                   MIXER_MODE_1,
+                   TP_USE_PHASE_RELOAD,
+                   USE_INBUILT_SINCOS,
+                   TP_NUM_LUTS,
+                   TP_RND,
+                   TP_SAT>::ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
+                                   output_buffer<TT_DATA>& __restrict outWindow) {
     T_ACC_TYPE ddsOutPrime;
     T_ACC_TYPE ddsOutValidation;
     TT_DATA ddsOut;
@@ -677,11 +859,19 @@ void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, USE_INBUILT_SIN
 
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_USE_PHASE_RELOAD,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, USE_LUT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>::ddsMix(
-    input_buffer<TT_DATA>& __restrict inWindowA, output_buffer<TT_DATA>& __restrict outWindow) {
+void dds_mixer_ref<TT_DATA,
+                   TP_INPUT_WINDOW_VSIZE,
+                   MIXER_MODE_1,
+                   TP_USE_PHASE_RELOAD,
+                   USE_LUT_SINCOS,
+                   TP_NUM_LUTS,
+                   TP_RND,
+                   TP_SAT>::ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
+                                   output_buffer<TT_DATA>& __restrict outWindow) {
     T_ACC_TYPE ddsOutPrime;
     T_ACC_TYPE ddsOutValidation;
     T_ACC_TYPE ddsOut;
@@ -732,11 +922,18 @@ void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, USE_LUT_SINCOS,
 
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_USE_PHASE_RELOAD,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, USE_INBUILT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>::
-    ddsMix(output_buffer<TT_DATA>& outWindow) {
+void dds_mixer_ref<TT_DATA,
+                   TP_INPUT_WINDOW_VSIZE,
+                   MIXER_MODE_0,
+                   TP_USE_PHASE_RELOAD,
+                   USE_INBUILT_SINCOS,
+                   TP_NUM_LUTS,
+                   TP_RND,
+                   TP_SAT>::ddsMix(output_buffer<TT_DATA>& outWindow) {
     T_ACC_TYPE ddsOutPrime;
     T_ACC_TYPE ddsOutRaw;
     T_ACC_TYPE ddsOutValidation;
@@ -764,11 +961,393 @@ void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, USE_INBUILT_SIN
 
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_USE_PHASE_RELOAD,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, USE_LUT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>::ddsMix(
-    output_buffer<TT_DATA>& outWindow) {
+void dds_mixer_ref<TT_DATA,
+                   TP_INPUT_WINDOW_VSIZE,
+                   MIXER_MODE_0,
+                   TP_USE_PHASE_RELOAD,
+                   USE_LUT_SINCOS,
+                   TP_NUM_LUTS,
+                   TP_RND,
+                   TP_SAT>::ddsMix(output_buffer<TT_DATA>& outWindow) {
+    T_ACC_TYPE ddsOutPrime;
+    T_ACC_TYPE ddsOutRaw;
+    int max = 1;
+    if
+        constexpr(std::is_same<TT_DATA, cint16>::value || std::is_same<TT_DATA, cint32>::value) {
+            max = (1 << (((sizeof(TT_DATA) / 2) * 8) - 1)) - 1;
+        }
+    double errTolPercent = TP_NUM_LUTS == 1 ? 0.013 : 0.00023;
+    double errTol = (double)(errTolPercent) * (double)(max);
+    T_ACC_TYPE ddsOutValidation;
+    T_ACC_TYPE phRot;
+    t_lutDataType phRotS;
+    t_lutDataType phRotB;
+    TT_DATA ddsOut;
+    TT_DATA* outPtr = outWindow.data();
+    for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE / (kNumLanes * kNumLanes); i++) {
+        ddsOutPrime = ddsFuncs.phaseToCartesian(m_phaseAccum);
+        for (int cyc = 0; cyc < kNumLanes; cyc++) { // the big phase rotator stores rotations for every lane-th sample.
+            phRotB = phRotBig[cyc];
+            for (int l = 0; l < kNumLanes; l++) {
+                phRotS = phRotSml[l];
+                ddsOutValidation = ddsFuncs.phaseToCartesian(m_phaseAccum);
+                ddsOutRaw = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, t_lutDataType>(ddsOutPrime, phRotB, 0);
+                roundAccDDSLuts(ddsShift, ddsOutRaw);
+                ddsOutRaw = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, t_lutDataType>(ddsOutRaw, phRotS, 0);
+                roundAccDDSLuts(ddsShift, ddsOutRaw);
+                // validate dds output before continuing using bit-accurate output
+                validate_ref_data(ddsOutValidation, ddsOutRaw, errTol, "mode 0");
+                // update phase_accum for next sample
+                ddsOut.real = ddsOutRaw.real;
+                ddsOut.imag = ddsOutRaw.imag;
+                // write single dds raf sample to output window
+                *outPtr++ = ddsOut;
+                m_phaseAccum = m_phaseAccum + (m_samplePhaseInc);
+            }
+        }
+    }
+};
+
+//===========================================================
+// SPECIALIZATION for mixer_mode = 2, RTP Enabled
+//===========================================================
+
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+void dds_mixer_ref<TT_DATA,
+                   TP_INPUT_WINDOW_VSIZE,
+                   MIXER_MODE_2,
+                   USE_PHASE_RELOAD_TRUE,
+                   USE_INBUILT_SINCOS,
+                   TP_NUM_LUTS,
+                   TP_RND,
+                   TP_SAT>::ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
+                                   input_buffer<TT_DATA>& __restrict inWindowB,
+                                   output_buffer<TT_DATA>& __restrict outWindow,
+                                   const unsigned int PhaseRTP) {
+    T_ACC_TYPE ddsOutPrime;
+    T_ACC_TYPE ddsOutValidation;
+    T_ACC_TYPE ddsOutRaw;
+    T_ACC_TYPE ddsOutRawConj;
+    T_ACC_TYPE ddsOut;
+    T_ACC_TYPE ddsOutConj;
+    T_ACC_TYPE phRot;
+    TT_DATA d_in;
+    T_ACC_TYPE d_in64;
+    TT_DATA d_in2;
+    T_ACC_TYPE ddsMixerOut;
+    T_ACC_TYPE ddsMixerOut2;
+    T_ACC_TYPE ddsMixerOutAcc;
+    T_ACC_TYPE mixerOutRaw;
+    TT_DATA mixerOut;
+    TT_DATA* in0Ptr = inWindowA.data();
+    TT_DATA* in1Ptr = inWindowB.data();
+    TT_DATA* outPtr = outWindow.data();
+
+    m_phaseAccum += (PhaseRTP - m_phaseValpre);
+    m_phaseValpre = PhaseRTP;
+
+    for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE / kNumLanes; i++) {
+        ddsOutPrime = ddsFuncs.phaseToCartesian(m_phaseAccum);
+        for (int k = 0; k < kNumLanes; k++) {
+            ddsOutValidation = ddsFuncs.phaseToCartesian(m_phaseAccum);
+            phRot.real = phRotref[k].real;
+            phRot.imag = phRotref[k].imag;
+            ddsOut = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, T_ACC_TYPE>(ddsOutPrime, phRot, ddsShift, TP_RND);
+            ddsOutConj.real = ddsOut.real;
+            ddsOutConj.imag = -ddsOut.imag;
+            validate_ref_data(ddsOutValidation, ddsOut, 2.0, "mode 2");
+            d_in = *in0Ptr++;
+            d_in2 = *in1Ptr++;
+            d_in64.real = d_in.real;
+            d_in64.imag = d_in.imag;
+            ddsMixerOut = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, T_ACC_TYPE>(d_in64, ddsOut, 0, TP_RND);
+            d_in64.real = d_in2.real;
+            d_in64.imag = d_in2.imag;
+            ddsMixerOut2 = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, T_ACC_TYPE>(d_in64, ddsOutConj, 0, TP_RND);
+            ddsMixerOutAcc.real = (ddsMixerOut.real + ddsMixerOut2.real);
+            ddsMixerOutAcc.imag = (ddsMixerOut.imag + ddsMixerOut2.imag);
+            roundAccDDS(mixerShift, ddsMixerOutAcc, TP_RND);
+            mixerOut = saturate<TT_DATA, T_ACC_TYPE>(ddsMixerOutAcc, TP_SAT);
+            *outPtr++ = mixerOut;
+            m_phaseAccum = m_phaseAccum + (m_samplePhaseInc); // accumulate phase over multiple input windows of data
+        }
+    }
+};
+
+//===========================================================
+// SPECIALIZATION for mixer_mode = 2, LUT Based Implementation, RTP Enabled
+//===========================================================
+
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+void dds_mixer_ref<TT_DATA,
+                   TP_INPUT_WINDOW_VSIZE,
+                   MIXER_MODE_2,
+                   USE_PHASE_RELOAD_TRUE,
+                   USE_LUT_SINCOS,
+                   TP_NUM_LUTS,
+                   TP_RND,
+                   TP_SAT>::ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
+                                   input_buffer<TT_DATA>& __restrict inWindowB,
+                                   output_buffer<TT_DATA>& __restrict outWindow,
+                                   const unsigned int PhaseRTP) {
+    T_ACC_TYPE ddsOutPrime;
+    T_ACC_TYPE ddsOutValidation;
+    T_ACC_TYPE ddsOutRaw;
+    T_ACC_TYPE ddsOutRawConj;
+    T_ACC_TYPE ddsOut;
+    T_ACC_TYPE ddsOutConj;
+    T_ACC_TYPE phRot;
+    TT_DATA d_in;
+    T_ACC_TYPE d_in64;
+    TT_DATA d_in2;
+    T_ACC_TYPE ddsMixerOut;
+    T_ACC_TYPE ddsMixerOut2;
+    T_ACC_TYPE ddsMixerOutAcc;
+    T_ACC_TYPE mixerOutRaw;
+    TT_DATA mixerOut;
+    TT_DATA* in0Ptr = inWindowA.data();
+    TT_DATA* in1Ptr = inWindowB.data();
+    TT_DATA* outPtr = outWindow.data();
+
+    m_phaseAccum += (PhaseRTP - m_phaseValpre);
+    m_phaseValpre = PhaseRTP;
+
+    int max = 1;
+    if
+        constexpr(std::is_same<TT_DATA, cint16>::value || std::is_same<TT_DATA, cint32>::value) {
+            max = (1 << (((sizeof(TT_DATA) / 2) * 8) - 1)) - 1;
+        }
+    double errTol = (double)(0.00023) * (double)(max);
+    t_lutDataType phRotS;
+    t_lutDataType phRotB;
+    for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE / (kNumLanes * kNumLanes); i++) {
+        ddsOutPrime = ddsFuncs.phaseToCartesian(m_phaseAccum);
+        for (int cyc = 0; cyc < kNumLanes; cyc++) {
+            phRotB = phRotBig[cyc];
+            for (int l = 0; l < kNumLanes; l++) {
+                phRotS = phRotSml[l];
+                ddsOutValidation = ddsFuncs.phaseToCartesian(m_phaseAccum);
+                ddsOut = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, t_lutDataType>(ddsOutPrime, phRotB, 0);
+                roundAccDDSLuts(ddsShift, ddsOut);
+                ddsOut = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, t_lutDataType>(ddsOut, phRotS, 0);
+                roundAccDDSLuts(ddsShift, ddsOut);
+                ddsOutConj.real = ddsOut.real;
+                ddsOutConj.imag = -ddsOut.imag;
+                validate_ref_data(ddsOutValidation, ddsOut, errTol, "mode 2");
+                d_in = *in0Ptr++;
+                d_in2 = *in1Ptr++;
+                d_in64.real = d_in.real;
+                d_in64.imag = d_in.imag;
+                ddsMixerOut = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, T_ACC_TYPE>(d_in64, ddsOut, 0);
+                d_in64.real = d_in2.real;
+                d_in64.imag = d_in2.imag;
+                ddsMixerOut2 = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, T_ACC_TYPE>(d_in64, ddsOutConj, 0);
+                ddsMixerOutAcc.real = (ddsMixerOut.real + ddsMixerOut2.real);
+                ddsMixerOutAcc.imag = (ddsMixerOut.imag + ddsMixerOut2.imag);
+                roundAccDDSLuts(mixerShift, ddsMixerOutAcc);
+                mixerOut = saturate<TT_DATA, T_ACC_TYPE>(ddsMixerOutAcc, TP_SAT);
+                *outPtr++ = mixerOut;
+                m_phaseAccum = m_phaseAccum + (m_samplePhaseInc);
+            }
+        }
+    }
+};
+
+//===========================================================
+// SPECIALIZATION for mixer_mode = 1 , RTP Enabled
+//===========================================================
+
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+void dds_mixer_ref<TT_DATA,
+                   TP_INPUT_WINDOW_VSIZE,
+                   MIXER_MODE_1,
+                   USE_PHASE_RELOAD_TRUE,
+                   USE_INBUILT_SINCOS,
+                   TP_NUM_LUTS,
+                   TP_RND,
+                   TP_SAT>::ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
+                                   output_buffer<TT_DATA>& __restrict outWindow,
+                                   const unsigned int PhaseRTP) {
+    T_ACC_TYPE ddsOutPrime;
+    T_ACC_TYPE ddsOutValidation;
+    TT_DATA ddsOut;
+    T_ACC_TYPE ddsOutraw;
+    T_ACC_TYPE phRot;
+    TT_DATA d_in;
+    T_ACC_TYPE d_in64;
+    TT_DATA d_in32;
+    T_ACC_TYPE ddsMixerOutraw;
+    TT_DATA ddsMixerOut;
+    TT_DATA* inPtr = inWindowA.data();
+    TT_DATA* outPtr = outWindow.data();
+
+    m_phaseAccum += (PhaseRTP - m_phaseValpre);
+    m_phaseValpre = PhaseRTP;
+
+    for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE / kNumLanes; i++) {
+        ddsOutPrime = ddsFuncs.phaseToCartesian(m_phaseAccum);
+        for (int k = 0; k < kNumLanes; k++) {
+            ddsOutValidation = ddsFuncs.phaseToCartesian(m_phaseAccum);
+            phRot.real = phRotref[k].real;
+            phRot.imag = phRotref[k].imag;
+            ddsOutraw = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, T_ACC_TYPE>(ddsOutPrime, phRot, ddsShift, TP_RND);
+            ddsOut = saturate<TT_DATA, T_ACC_TYPE>(ddsOutraw, TP_SAT);
+            validate_ref_data(ddsOutValidation, ddsOut, 2.0, "mode 1");
+            m_phaseAccum = m_phaseAccum + (m_samplePhaseInc); // accumulate phase over multiple input windows of data
+            d_in = *inPtr++;
+            d_in64.real = d_in.real;
+            d_in64.imag = d_in.imag;
+            d_in32 = saturate<TT_DATA, T_ACC_TYPE>(d_in64, TP_SAT);
+            ddsMixerOutraw = cmplxMult<T_ACC_TYPE, 0, TT_DATA, TT_DATA>(d_in32, ddsOut, ddsShift, TP_RND);
+            ddsMixerOut = saturate<TT_DATA, T_ACC_TYPE>(ddsMixerOutraw, TP_SAT);
+            // write single dds raf sample to output window
+            *outPtr++ = ddsMixerOut;
+        }
+    }
+};
+
+//===========================================================
+// SPECIALIZATION for mixer_mode = 1, LUT Based Implementation, RTP Enabled
+//===========================================================
+
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+void dds_mixer_ref<TT_DATA,
+                   TP_INPUT_WINDOW_VSIZE,
+                   MIXER_MODE_1,
+                   USE_PHASE_RELOAD_TRUE,
+                   USE_LUT_SINCOS,
+                   TP_NUM_LUTS,
+                   TP_RND,
+                   TP_SAT>::ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
+                                   output_buffer<TT_DATA>& __restrict outWindow,
+                                   const unsigned int PhaseRTP) {
+    T_ACC_TYPE ddsOutPrime;
+    T_ACC_TYPE ddsOutValidation;
+    T_ACC_TYPE ddsOut;
+    T_ACC_TYPE phRot;
+    TT_DATA d_in;
+    T_ACC_TYPE d_in64;
+    T_ACC_TYPE ddsMixerOutraw;
+    TT_DATA ddsMixerOut;
+    TT_DATA* inPtr = inWindowA.data();
+    TT_DATA* outPtr = outWindow.data();
+
+    m_phaseAccum += (PhaseRTP - m_phaseValpre);
+    m_phaseValpre = PhaseRTP;
+
+    int max = 1;
+    if
+        constexpr(std::is_same<TT_DATA, cint16>::value || std::is_same<TT_DATA, cint32>::value) {
+            max = (1 << (((sizeof(TT_DATA) / 2) * 8) - 1)) - 1;
+        }
+    double errTol = (double)(0.00023) * (double)(max);
+    typedef TT_DATA T_DDS_TYPE;
+    t_lutDataType phRotS;
+    t_lutDataType phRotB;
+    for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE / (kNumLanes * kNumLanes); i++) {
+        ddsOutPrime = ddsFuncs.phaseToCartesian(m_phaseAccum);
+        for (int cyc = 0; cyc < kNumLanes; cyc++) { // the big phase rotator stores rotations for every lane-th sample.
+            phRotB = phRotBig[cyc];
+            for (int l = 0; l < kNumLanes; l++) {
+                phRotS = phRotSml[l];
+                ddsOutValidation = ddsFuncs.phaseToCartesian(m_phaseAccum);
+                ddsOut = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, t_lutDataType>(ddsOutPrime, phRotB, 0);
+                roundAccDDSLuts(ddsShift, ddsOut);
+                ddsOut = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, t_lutDataType>(ddsOut, phRotS, 0);
+                roundAccDDSLuts(ddsShift, ddsOut);
+                validate_ref_data(ddsOutValidation, ddsOut, errTol, "mode 1");
+                d_in = *inPtr++;
+                d_in64.real = d_in.real;
+                d_in64.imag = d_in.imag;
+                ddsMixerOutraw = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, T_ACC_TYPE>(d_in64, ddsOut, 0);
+                roundAccDDSLuts(ddsShift, ddsMixerOutraw);
+                ddsMixerOut = saturate<TT_DATA, T_ACC_TYPE>(ddsMixerOutraw, TP_SAT);
+                m_phaseAccum = m_phaseAccum + (m_samplePhaseInc);
+                *outPtr++ = ddsMixerOut;
+            }
+        }
+    }
+};
+
+// ========================================================================
+// SPECIALIZATION for mixer_mode = 0, LUT Based Implementation, RTP Port
+// ========================================================================
+
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+void dds_mixer_ref<TT_DATA,
+                   TP_INPUT_WINDOW_VSIZE,
+                   MIXER_MODE_0,
+                   USE_PHASE_RELOAD_TRUE,
+                   USE_INBUILT_SINCOS,
+                   TP_NUM_LUTS,
+                   TP_RND,
+                   TP_SAT>::ddsMix(output_buffer<TT_DATA>& outWindow, const unsigned int PhaseRTP) {
+    T_ACC_TYPE ddsOutPrime;
+    T_ACC_TYPE ddsOutRaw;
+    T_ACC_TYPE ddsOutValidation;
+    T_ACC_TYPE phRot;
+    TT_DATA ddsOut;
+    TT_DATA* outPtr = outWindow.data();
+
+    m_phaseAccum += (PhaseRTP - m_phaseValpre);
+    m_phaseValpre = PhaseRTP;
+
+    for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE / kNumLanes; i++) {
+        ddsOutPrime = ddsFuncs.phaseToCartesian(m_phaseAccum);
+        for (int k = 0; k < kNumLanes; k++) {
+            ddsOutValidation = ddsFuncs.phaseToCartesian(m_phaseAccum);
+            phRot.real = phRotref[k].real;
+            phRot.imag = phRotref[k].imag;
+            ddsOutRaw = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, T_ACC_TYPE>(ddsOutPrime, phRot, ddsShift, TP_RND);
+            m_phaseAccum = m_phaseAccum + (m_samplePhaseInc); // accumulate phase per sample
+            validate_ref_data(ddsOutValidation, ddsOutRaw, 3.0, "mode 0");
+            ddsOut = saturate<TT_DATA, T_ACC_TYPE>(ddsOutRaw, TP_SAT);
+            *outPtr++ = ddsOut;
+        }
+    }
+};
+
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          //   unsigned int TP_USE_PHASE_RELOAD,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+void dds_mixer_ref<TT_DATA,
+                   TP_INPUT_WINDOW_VSIZE,
+                   MIXER_MODE_0,
+                   USE_PHASE_RELOAD_TRUE,
+                   USE_LUT_SINCOS,
+                   TP_NUM_LUTS,
+                   TP_RND,
+                   TP_SAT>::ddsMix(output_buffer<TT_DATA>& outWindow, const unsigned int PhaseRTP) {
+    m_phaseAccum += (PhaseRTP - m_phaseValpre);
+    m_phaseValpre = PhaseRTP;
+
     T_ACC_TYPE ddsOutPrime;
     T_ACC_TYPE ddsOutRaw;
     int max = 1;

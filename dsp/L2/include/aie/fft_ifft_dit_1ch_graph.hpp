@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,10 @@ using namespace xf::dsp::aie::widget::api_cast;
 using namespace xf::dsp::aie::fft::r2comb;
 
 // Note on heap. The FFT twiddles and internal scratch memories can be handled by the graph scope mechanism which allows
-// the use of adjacent tile's memory, hence aleviating the 32kB memory limit.
+// the use of adjacent tile's memory, hence alleviating the 32kB memory limit.
 // Without the graph scope mechanism, heap can be set explicitly, or set automatically using aiecompiler switch
 // --xlopt=1
-// The following #defines allow control over which mechansims is used, though this must be done in conjunction with the
+// The following #defines allow control over which mechanisms is used, though this must be done in conjunction with the
 // Makefile
 #ifndef __X86SIM__
 #define USE_GRAPH_SCOPE
@@ -157,7 +157,12 @@ template <int dim,
 class create_casc_kernel_recur {
    public:
     static void create(kernel (&fftKernels)[TP_CASC_LEN]) {
-        static constexpr int kRawStartRank = (int)TP_END_RANK - (int)TP_RANKS_PER_KERNEL;
+        static constexpr int kRawRanksPerKernel =
+            std::is_same<TT_DATA, cfloat>::value ? (TP_END_RANK / dim) : (TP_END_RANK / dim / 2) * 2;
+        static constexpr unsigned int kRanksPerKernel = std::is_same<TT_DATA, cfloat>::value
+                                                            ? kRawRanksPerKernel
+                                                            : (kRawRanksPerKernel < 2 ? 2 : kRawRanksPerKernel);
+        static constexpr int kRawStartRank = (int)TP_END_RANK - (int)kRanksPerKernel;
         static constexpr unsigned int TP_START_RANK = kRawStartRank < 0 ? 0 : kRawStartRank;
 
         fftKernels[dim - 1] = kernel::create_object<
@@ -165,7 +170,7 @@ class create_casc_kernel_recur {
                              TP_END_RANK, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, 0, 0, TP_ORIG_PAR_POWER, TP_RND, TP_SAT,
                              TP_TWIDDLE_MODE> >(); // 0's are for window connection for internal cascade connections
         create_casc_kernel_recur<dim - 1, TT_DATA, TT_INT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
-                                 TP_CASC_LEN, TP_START_RANK, TP_RANKS_PER_KERNEL, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE,
+                                 TP_CASC_LEN, TP_START_RANK, kRanksPerKernel, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE,
                                  TP_IN_API, TP_ORIG_PAR_POWER, TP_RND, TP_SAT, TP_TWIDDLE_MODE>::create(fftKernels);
     }
 };
@@ -394,7 +399,7 @@ class create_casc_kernel<1,
 };
 
 //-----------------------------------------
-// Recusive classes for r2 combiner creation
+// Recursive classes for r2 combiner creation
 
 // Base specialization
 template <typename TT_DATA,
@@ -406,7 +411,7 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_INDEX,
-          unsigned int TP_INDEX_BASE, // the wider context. Allows calculation of TP_INDEX in overal design, not just
+          unsigned int TP_INDEX_BASE, // the wider context. Allows calculation of TP_INDEX in overall design, not just
                                       // this level of recursion.
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_API,
@@ -601,7 +606,7 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_INDEX,
-          unsigned int TP_INDEX_BASE, // the wider context. Allows calculation of TP_INDEX in overal design, not just
+          unsigned int TP_INDEX_BASE, // the wider context. Allows calculation of TP_INDEX in overall design, not just
                                       // this level of recursion.
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_API,
@@ -655,7 +660,7 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_INDEX,
-          unsigned int TP_INDEX_BASE, // the wider context. Allows calculation of TP_INDEX in overal design, not just
+          unsigned int TP_INDEX_BASE, // the wider context. Allows calculation of TP_INDEX in overall design, not just
                                       // this level of recursion.
           unsigned int TP_HEADER_BYTES,
           unsigned int TP_ORIG_PAR_POWER,
@@ -740,10 +745,10 @@ class fft_ifft_dit_1ch_base_graph : public graph {
     parameter fft_buf1[TP_CASC_LEN];
 
     // twiddle table
-    parameter fft_lut1[TP_CASC_LEN], fft_lut1a[TP_CASC_LEN], fft_lut1b[TP_CASC_LEN]; // large twiddle tables
-    parameter fft_lut2[TP_CASC_LEN], fft_lut2a[TP_CASC_LEN], fft_lut2b[TP_CASC_LEN];
-    parameter fft_lut3[TP_CASC_LEN], fft_lut3a[TP_CASC_LEN], fft_lut3b[TP_CASC_LEN];
-    parameter fft_lut4[TP_CASC_LEN], fft_lut4a[TP_CASC_LEN], fft_lut4b[TP_CASC_LEN];
+    parameter fft_lut1[TP_CASC_LEN]; // large twiddle tables
+    parameter fft_lut2[TP_CASC_LEN];
+    parameter fft_lut3[TP_CASC_LEN];
+    parameter fft_lut4[TP_CASC_LEN];
 
     // interrank store
     parameter fft_buf4096;
@@ -779,7 +784,7 @@ class fft_ifft_dit_1ch_base_graph : public graph {
             dimensions(m_fftKernels[k + 1].in[0]) = {
                 TP_WINDOW_VSIZE + kHeaderBytes / sizeof(T_internalDataType)}; // dimension is in units of data type
 
-            // Removing this restiction as it hammers throughput to the point where cascade is ineffective. Also, it is
+            // Removing this restriction as it hammers throughput to the point where cascade is ineffective. Also, it is
             // futile to attempt to calculate the point
             // at which memory limit will be exceeded especially with multiple AIE variants
             //      if (TP_POINT_SIZE*sizeof(TT_DATA) >= 8192) { //This would exceed data memory limits for AIE1.
@@ -990,7 +995,7 @@ class fft_ifft_dit_1ch_base_graph : public graph {
 
         for (int k = 0; k < TP_CASC_LEN; ++k) {
             // Specify mapping constraints
-            runtime<ratio>(m_fftKernels[k]) = 0.9;
+            runtime<ratio>(m_fftKernels[k]) = 0.7;
 
             // Source files
             source(m_fftKernels[k]) = "fft_ifft_dit_1ch.cpp";
@@ -1997,15 +2002,16 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
  *
  * This class definition is only used with stream interfaces (TP_API == 1).
  * Stream interface FFT graph is offered with a dual input stream configuration,
- * which interleaves data samples betwwen the streams.
+ * which interleaves data samples between the streams.
  * Stream interface FFT implementation is capable of supporting parallel computation (TP_PARALLEL_POWER > 0).
  * Dynamic point size, with a header embedded in the data stream.
  *
  * These are the templates to configure the single-channel decimation-in-time class.
  * @tparam TT_DATA describes the type of individual data samples input to and
- *         output from the transform function. This is a typename and must be one
- *         of the following: \n
- *         int16, cint16, int32, cint32, float, cfloat.
+ *         output from the transform function. \n
+ *         This is a typename and must be one of the following: \n
+ *         cint16, cint32, cfloat.
+ *         For real-only operation, consider use of the widget_real2complex library element.
  * @tparam TT_TWIDDLE describes the type of twiddle factors of the transform. \n
  *         It must be one of the following: cint16, cint32, cfloat
  *         and must also satisfy the following rules:
@@ -2048,26 +2054,26 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
  *         process a given number of input data samples. \n
  *         As a result, the overheads inferred during kernel triggering are reduced and overall performance
  *         is increased.
- * @tparam TP_API is an unsigned integer to select window (0) or stream (1) interfaces.
+ * @tparam TP_API is an unsigned integer to select window (0) or stream (1) interfaces. \n
  *         When stream I/O is selected, one sample is taken from, or output to, a stream and the next sample
- *         from or two the next stream. Two streams mimimum are used. In this example, even samples are
+ *         from or two the next stream. Two streams minimum are used. In this example, even samples are
  *         read from input stream[0] and odd samples from input stream[1].
  * @tparam TP_PARALLEL_POWER is an unsigned integer to describe N where 2^N is the numbers of subframe processors
  *         to use, so as to achieve higher throughput. \n
  *         The default is 0. With TP_PARALLEL_POWER set to 2, 4 subframe processors will be used, each of which
- *         takes 2 streams in for a total of 8 streams input and output. Sample[p] must be written to stream[p modulus
- *q]
+ *         takes 2 streams in for a total of 8 streams input and output. Sample[p] must be written to
+ *         stream[p modulus q]
  *         where q is the number of streams.
  * @tparam TP_USE_WIDGETS is an unsigned integer to control the use of widgets for configurations which either use
- *TP_API=1 (streaming IO)
- *         or TP_PARALLEL_POWER>0 which uses streams internally, even if not externally. The default is not to use
- *widgets
+ *         TP_API=1 or TP_PARALLEL_POWER>0. \n
+ *         Designs with streaming IO (TP_API=1) and/or multiple subframe processors (TP_PARALLEL_POWER>0)
+ *         will use streams internally, even if not externally. \n The default is not to use widgets
  *         but to have the stream to window conversion performed as part of the FFT kernel or R2combiner kernel.
  *         Using widget kernels allows this conversion to be placed in a separate tile and so boost performance
  *         at the expense of more tiles being used.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
- *         descriptive macros are recommended where
+ *         shift down stage of processing. \n
+ *         Although, TP_RND accepts unsigned integer values descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
  *         - rnd_sym_floor  = Truncate LSB, always round towards 0.
@@ -2082,24 +2088,26 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
- * @tparam TP_SAT describes the selection of saturation to be applied during the
- *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
+ *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
- *         - 1: saturate       = Default. Saturation rounds an n-bit signed value in the range [- ( 2^(n-1) ) : +2^(n-1)
- *- 1 ].
+ *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
+ *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
  *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
  *range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
- * @tparam TP_TWIDDLE_MODE describes the magnitude of integer twiddles. It has no effect for cfloat.
+ * @tparam TP_TWIDDLE_MODE describes the magnitude of integer twiddles. It has no effect for cfloat. \n
  *         - 0: Max amplitude. Values at 2^15 (for TT_TWIDDLE=cint16) and 2^31 (TT_TWIDDLE=cint32) will saturate and so
  *introduce errors
  *         - 1: 0.5 amplitude. Twiddle values are 1/2 that of mode 0 so as to avoid twiddle saturation. However,
  *twiddles are one bit less precise versus mode 0.
  * @tparam TP_INDEX
- *         This parameter is for internal use regarding the recursion of the parallel power feature. It is recommended
+ *         This parameter is for internal use regarding the recursion of the parallel power feature. \n
+ *         It is recommended
  *         to miss this parameter from the configuration and rely instead on default values. If this parameter is set
  *         by the user, the behaviour of the library unit is undefined.
  * @tparam TP_ORIG_PAR_POWER
- *         This parameter is for internal use regarding the recursion of the parallel power feature. It is recommended
+ *         This parameter is for internal use regarding the recursion of the parallel power feature. \n
+ *         It is recommended
  *         to miss this parameter from the configuration and rely instead on default values. If this parameter is set
  *         by the user, the behaviour of the library unit is undefined.
  *
@@ -2132,6 +2140,9 @@ class fft_ifft_dit_1ch_graph : public graph {
                   "Error: FFT does not support TP_RND set to floor, ceil, symmetric floor, and symmetric ceil. Please "
                   "set TP_RND to any of the other rounding modes. The mapping of integers to rounding modes is device "
                   "dependent. Please refer to documentation for more information.");
+    static_assert(!(std::is_same<TT_TWIDDLE, cint32>::value) || __SUPPORTS_32B_TW__ == 1,
+                  "ERROR: This variant of AIE does not support TT_TWIDDLE = cint32");
+
 #if __SUPPORTS_CFLOAT__ == 1
     static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value) ||
                       (std::is_same<TT_DATA, cfloat>::value),
@@ -2192,7 +2203,7 @@ class fft_ifft_dit_1ch_graph : public graph {
 
     /**
      * FFT recursive decomposition. Subframe0
-     * FFT is split into 2 subframe processors with a stage of r2cominers connecting subframe processors.
+     * FFT is split into 2 subframe processors with a stage of r2combiners connecting subframe processors.
      * This is a recursive call with decrementing TP_PARALLEL_POWER template parameter.
      **/
     fft_ifft_dit_1ch_graph<TT_DATA,
@@ -2215,7 +2226,7 @@ class fft_ifft_dit_1ch_graph : public graph {
 
     /**
      * FFT recursive decomposition. Subframe1.
-     * FFT is split into 2 subframe processors with a stage of r2cominers connecting subframe processors.
+     * FFT is split into 2 subframe processors with a stage of r2combiners connecting subframe processors.
      * This is a recursive call with decrementing TP_PARALLEL_POWER template parameter.
      **/
     fft_ifft_dit_1ch_graph<TT_DATA,
@@ -2473,6 +2484,9 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
                   "Error: FFT does not support TP_RND set to floor, ceil, symmetric floor, and symmetric ceil. Please "
                   "set TP_RND to any of the other rounding modes. The mapping of integers to rounding modes is device "
                   "dependent. Please refer to documentation for more information.");
+    static_assert(!(std::is_same<TT_TWIDDLE, cint32>::value) || __SUPPORTS_32B_TW__ == 1,
+                  "ERROR: This variant of AIE does not support TT_TWIDDLE = cint32");
+
     /**
      * The input data to the function. This input is a window API of
      * samples of TT_DATA type. The number of samples in the window is
@@ -2636,49 +2650,3 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
 } // namespace xf
 
 #endif // _DSPLIB_FFT_IFFT_DIT_1CH_GRAPH_HPP_
-
-/*  (c) Copyright 2020 Xilinx, Inc. All rights reserved.
-
-    This file contains confidential and proprietary information
-    of Xilinx, Inc. and is protected under U.S. and
-    international copyright and other intellectual property
-    laws.
-
-    DISCLAIMER
-    This disclaimer is not a license and does not grant any
-    rights to the materials distributed herewith. Except as
-    otherwise provided in a valid license issued to you by
-    Xilinx, and to the maximum extent permitted by applicable
-    law: (1) THESE MATERIALS ARE MADE AVAILABLE "AS IS" AND
-    WITH ALL FAULTS, AND XILINX HEREBY DISCLAIMS ALL WARRANTIES
-    AND CONDITIONS, EXPRESS, IMPLIED, OR STATUTORY, INCLUDING
-    BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, NON-
-    INFRINGEMENT, OR FITNESS FOR ANY PARTICULAR PURPOSE; and
-    (2) Xilinx shall not be liable (whether in contract or tort,
-    including negligence, or under any other theory of
-    liability) for any loss or damage of any kind or nature
-    related to, arising under or in connection with these
-    materials, including for any direct, or any indirect,
-    special, incidental, or consequential loss or damage
-    (including loss of data, profits, goodwill, or any type of
-    loss or damage suffered as a result of any action brought
-    by a third party) even if such damage or loss was
-    reasonably foreseeable or Xilinx had been advised of the
-    possibility of the same.
-
-    CRITICAL APPLICATIONS
-    Xilinx products are not designed or intended to be fail-
-    safe, or for use in any application requiring fail-safe
-    performance, such as life-support or safety devices or
-    systems, Class III medical devices, nuclear facilities,
-    applications related to the deployment of airbags, or any
-    other applications that could lead to death, personal
-    injury, or severe property or environmental damage
-    (individually and collectively, "Critical
-    Applications"). Customer assumes the sole risk and
-    liability of any use of Xilinx products in Critical
-    Applications, subject only to applicable laws and
-    regulations governing limitations on product liability.
-
-    THIS COPYRIGHT NOTICE AND DISCLAIMER MUST BE RETAINED AS
-    PART OF THIS FILE AT ALL TIMES.                       */

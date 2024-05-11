@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,7 @@ Hadamard Product reference model
 #include <adf.h>
 #include <limits>
 #include <array>
-#include "device_defs.h"
-#include "fir_ref_utils.hpp"
+
 #include "hadamard_ref_utils.hpp"
 
 using namespace adf;
@@ -72,7 +71,7 @@ class hadamard_ref
                     : (128 / 8 / (vectByte<TT_DATA_A, TT_DATA_B>().val_byteBuffStream));
 
    public:
-    using TT_OUT = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using TT_OUT = out_mul_type<TT_DATA_A, TT_DATA_B>;
 
     // Constructor
     hadamard_ref() {}

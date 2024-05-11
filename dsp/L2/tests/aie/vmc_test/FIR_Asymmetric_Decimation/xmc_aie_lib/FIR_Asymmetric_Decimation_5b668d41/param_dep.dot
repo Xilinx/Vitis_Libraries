@@ -1,0 +1,25 @@
+digraph G {
+use_coeff_reload -> casc_length;
+fir_length -> casc_length;
+AIE_VARIANT -> rnd_mode;
+data_type -> shift_val;
+data_type -> coef_type;
+AIE_VARIANT -> coef_type;
+AIE_VARIANT -> num_outputs;
+use_coeff_reload -> coeff;
+coef_type -> coeff;
+fir_length -> coeff;
+data_type -> coeff;
+casc_length -> coeff;
+decimate_factor -> coeff;
+AIE_VARIANT -> coeff;
+data_type -> decimate_factor;
+coef_type -> decimate_factor;
+AIE_VARIANT -> decimate_factor;
+data_type -> input_window_size;
+coef_type -> input_window_size;
+use_coeff_reload -> input_window_size;
+coeff -> input_window_size;
+fir_length -> input_window_size;
+decimate_factor -> input_window_size;
+}

@@ -42,8 +42,9 @@ def vmc_validate_coeff(args):
     ssr = 1
     api = 0
     deci_poly = args["deci_poly"]
+    AIE_VARIANT = args["AIE_VARIANT"]
     fir_length = fn_get_fir_length_hb(args)
-    return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload, deci_poly )
+    return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload, deci_poly, AIE_VARIANT)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]
@@ -104,5 +105,6 @@ def vmc_generate_graph(name, args):
     tmpargs["coeff"] = args["coeff"]
     tmpargs["TP_SAT"] = args["sat_mode"]
     tmpargs["TP_PARA_DECI_POLY"] = args["deci_poly"]
+    tmpargs["AIE_VARIANT"] = args["AIE_VARIANT"]
 
     return generate_graph(name, tmpargs)

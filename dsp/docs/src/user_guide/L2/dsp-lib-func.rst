@@ -1,6 +1,7 @@
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
-
-.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+..
+   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   
+   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _DSP_LIB_FUNC:
 
@@ -16,16 +17,22 @@ The DSPLib consists of the following DSP elements:
    :maxdepth: 2
 
    DDS / Mixer <func-dds.rst>
-   FFT/iFFT <func-fft.rst>
    DFT <func-dft.rst>
-   Mixed Radix FFT <func-mixed_radix_fft.rst>
+   Example of FFT spanning AIE and PL <example-2d-fft.rst>
+   FFT/iFFT <func-fft.rst>
    FFT Window <func-fft_window.rst>
    Filters <func-fir-filtersAIE.rst>
+   FIR TDM <func-fir-TDM.rst>
+   Hadamard Product <func-hadamard.rst>
+   Kronecker <func-kronecker.rst>
    Matrix Multiply <func-matmul.rst>
    Matrix-Vector Multiply <func-matrix_vector_mul.rst>
+   Mixed Radix FFT <func-mixed_radix_fft.rst>
+   Outer Tensor <func-outer-tensor.rst>
    Sample Delay <func-sample_delay.rst>
    Widget API Cast <func-widget-apicast.rst>
    Widget Real to Complex <func-widget-real2comp.rst>
+   Convolution / Correlation <func-conv-corr.rst>
 
 .. |image1| image:: ./media/image1.png
 .. |image2| image:: ./media/image2.png

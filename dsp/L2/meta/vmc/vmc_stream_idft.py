@@ -14,6 +14,7 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_CASC_LEN"] = args["casc_length"]
     tmpargs["TP_DYN_PT_SIZE"] = 0
     tmpargs["TP_API"] = 0
+    tmpargs["TP_SSR"] = args["ssr"]
     parallel_power = 0
     tmpargs["TP_PARALLEL_POWER"] = parallel_power
     tmpargs["TP_FFT_NIFFT"] = 0

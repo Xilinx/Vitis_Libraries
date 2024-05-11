@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -504,29 +504,29 @@ INLINE_DECL constexpr T_TW* fnGetTwPtr() {
     if
         constexpr(std::is_same<T_TW, cfloat>::value) {
             if
-                constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw1_cfloat;
+                constexpr(T_TWPT == 1 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw1_cfloat;
             else if
-                constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw2_cfloat;
+                constexpr(T_TWPT == 2 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw2_cfloat;
             else if
-                constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw4_cfloat;
+                constexpr(T_TWPT == 4 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw4_cfloat;
             else if
-                constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw8_cfloat;
+                constexpr(T_TWPT == 8 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw8_cfloat;
             else if
-                constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw16_cfloat;
+                constexpr(T_TWPT == 16 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw16_cfloat;
             else if
-                constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw32_cfloat;
+                constexpr(T_TWPT == 32 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw32_cfloat;
             else if
-                constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw64_cfloat;
+                constexpr(T_TWPT == 64 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw64_cfloat;
             else if
-                constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw128_cfloat;
+                constexpr(T_TWPT == 128 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw128_cfloat;
             else if
-                constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw256_cfloat;
+                constexpr(T_TWPT == 256 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw256_cfloat;
             else if
-                constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw512_cfloat;
+                constexpr(T_TWPT == 512 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw512_cfloat;
             else if
-                constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw1024_cfloat;
+                constexpr(T_TWPT == 1024 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw1024_cfloat;
             else if
-                constexpr(T_TWPT == 2048 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw2048_cfloat;
+                constexpr(T_TWPT == 2048 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw2048_cfloat;
             else
                 return NULL;
         }
@@ -535,45 +535,45 @@ INLINE_DECL constexpr T_TW* fnGetTwPtr() {
             if
                 constexpr(T_TW_MODE == 0) {
                     if
-                        constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw1_cint32;
+                        constexpr(T_TWPT == 1 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw1_cint32;
                     else if
-                        constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw2_cint32;
+                        constexpr(T_TWPT == 2 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw2_cint32;
                     else if
-                        constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw4_cint32;
+                        constexpr(T_TWPT == 4 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw4_cint32;
                     else if
-                        constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 8 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw8_cint32_half
                             : (T_TW*)fft_lut_tw8_cint32;
                     else if
-                        constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 16 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw16_cint32_half
                             : (T_TW*)fft_lut_tw16_cint32;
                     else if
-                        constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 32 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw32_cint32_half
                             : (T_TW*)fft_lut_tw32_cint32;
                     else if
-                        constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 64 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw64_cint32_half
                             : (T_TW*)fft_lut_tw64_cint32;
                     else if
-                        constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 128 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw128_cint32_half
                             : (T_TW*)fft_lut_tw128_cint32;
                     else if
-                        constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 256 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw256_cint32_half
                             : (T_TW*)fft_lut_tw256_cint32;
                     else if
-                        constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 512 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw512_cint32_half
                             : (T_TW*)fft_lut_tw512_cint32;
                     else if
-                        constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 1024 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw1024_cint32_half
                             : (T_TW*)fft_lut_tw1024_cint32;
                     else if
-                        constexpr(T_TWPT == 2048 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 2048 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw2048_cint32_half
                             : (T_TW*)fft_lut_tw2048_cint32;
                     else
@@ -581,44 +581,41 @@ INLINE_DECL constexpr T_TW* fnGetTwPtr() {
                 }
             else {
                 if
-                    constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw1_cint31;
+                    constexpr(T_TWPT == 1 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw1_cint31;
                 else if
-                    constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw2_cint31;
+                    constexpr(T_TWPT == 2 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw2_cint31;
                 else if
-                    constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw4_cint31;
+                    constexpr(T_TWPT == 4 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw4_cint31;
                 else if
-                    constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw8_cint31_half
-                                                                                       : (T_TW*)fft_lut_tw8_cint31;
+                    constexpr(T_TWPT == 8 && T_TWPT < T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw8_cint31_half
+                                                                                      : (T_TW*)fft_lut_tw8_cint31;
                 else if
-                    constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
-                        ? (T_TW*)fft_lut_tw16_cint31_half
-                        : (T_TW*)fft_lut_tw16_cint31;
+                    constexpr(T_TWPT == 16 && T_TWPT < T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw16_cint31_half
+                                                                                       : (T_TW*)fft_lut_tw16_cint31;
                 else if
-                    constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
-                        ? (T_TW*)fft_lut_tw32_cint31_half
-                        : (T_TW*)fft_lut_tw32_cint31;
+                    constexpr(T_TWPT == 32 && T_TWPT < T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw32_cint31_half
+                                                                                       : (T_TW*)fft_lut_tw32_cint31;
                 else if
-                    constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
-                        ? (T_TW*)fft_lut_tw64_cint31_half
-                        : (T_TW*)fft_lut_tw64_cint31;
+                    constexpr(T_TWPT == 64 && T_TWPT < T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw64_cint31_half
+                                                                                       : (T_TW*)fft_lut_tw64_cint31;
                 else if
-                    constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 128 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw128_cint31_half
                         : (T_TW*)fft_lut_tw128_cint31;
                 else if
-                    constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 256 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw256_cint31_half
                         : (T_TW*)fft_lut_tw256_cint31;
                 else if
-                    constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 512 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw512_cint31_half
                         : (T_TW*)fft_lut_tw512_cint31;
                 else if
-                    constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 1024 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw1024_cint31_half
                         : (T_TW*)fft_lut_tw1024_cint31;
                 else if
-                    constexpr(T_TWPT == 2048 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 2048 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw2048_cint31_half
                         : (T_TW*)fft_lut_tw2048_cint31;
                 else
@@ -630,45 +627,45 @@ INLINE_DECL constexpr T_TW* fnGetTwPtr() {
             if
                 constexpr(T_TW_MODE == 0) {
                     if
-                        constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw1_cint16;
+                        constexpr(T_TWPT == 1 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw1_cint16;
                     else if
-                        constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw2_cint16;
+                        constexpr(T_TWPT == 2 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw2_cint16;
                     else if
-                        constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw4_cint16;
+                        constexpr(T_TWPT == 4 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw4_cint16;
                     else if
-                        constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 8 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw8_cint16_half
                             : (T_TW*)fft_lut_tw8_cint16;
                     else if
-                        constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 16 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw16_cint16_half
                             : (T_TW*)fft_lut_tw16_cint16;
                     else if
-                        constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 32 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw32_cint16_half
                             : (T_TW*)fft_lut_tw32_cint16;
                     else if
-                        constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 64 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw64_cint16_half
                             : (T_TW*)fft_lut_tw64_cint16;
                     else if
-                        constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 128 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw128_cint16_half
                             : (T_TW*)fft_lut_tw128_cint16;
                     else if
-                        constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 256 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw256_cint16_half
                             : (T_TW*)fft_lut_tw256_cint16;
                     else if
-                        constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 512 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw512_cint16_half
                             : (T_TW*)fft_lut_tw512_cint16;
                     else if
-                        constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 1024 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw1024_cint16_half
                             : (T_TW*)fft_lut_tw1024_cint16;
                     else if
-                        constexpr(T_TWPT == 2048 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 2048 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw2048_cint16_half
                             : (T_TW*)fft_lut_tw2048_cint16;
                     else
@@ -676,44 +673,41 @@ INLINE_DECL constexpr T_TW* fnGetTwPtr() {
                 }
             else {
                 if
-                    constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw1_cint15;
+                    constexpr(T_TWPT == 1 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw1_cint15;
                 else if
-                    constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw2_cint15;
+                    constexpr(T_TWPT == 2 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw2_cint15;
                 else if
-                    constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw4_cint15;
+                    constexpr(T_TWPT == 4 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw4_cint15;
                 else if
-                    constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw8_cint15_half
-                                                                                       : (T_TW*)fft_lut_tw8_cint15;
+                    constexpr(T_TWPT == 8 && T_TWPT < T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw8_cint15_half
+                                                                                      : (T_TW*)fft_lut_tw8_cint15;
                 else if
-                    constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
-                        ? (T_TW*)fft_lut_tw16_cint15_half
-                        : (T_TW*)fft_lut_tw16_cint15;
+                    constexpr(T_TWPT == 16 && T_TWPT < T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw16_cint15_half
+                                                                                       : (T_TW*)fft_lut_tw16_cint15;
                 else if
-                    constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
-                        ? (T_TW*)fft_lut_tw32_cint15_half
-                        : (T_TW*)fft_lut_tw32_cint15;
+                    constexpr(T_TWPT == 32 && T_TWPT < T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw32_cint15_half
+                                                                                       : (T_TW*)fft_lut_tw32_cint15;
                 else if
-                    constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
-                        ? (T_TW*)fft_lut_tw64_cint15_half
-                        : (T_TW*)fft_lut_tw64_cint15;
+                    constexpr(T_TWPT == 64 && T_TWPT < T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw64_cint15_half
+                                                                                       : (T_TW*)fft_lut_tw64_cint15;
                 else if
-                    constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 128 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw128_cint15_half
                         : (T_TW*)fft_lut_tw128_cint15;
                 else if
-                    constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 256 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw256_cint15_half
                         : (T_TW*)fft_lut_tw256_cint15;
                 else if
-                    constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 512 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw512_cint15_half
                         : (T_TW*)fft_lut_tw512_cint15;
                 else if
-                    constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 1024 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw1024_cint15_half
                         : (T_TW*)fft_lut_tw1024_cint15;
                 else if
-                    constexpr(T_TWPT == 2048 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 2048 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw2048_cint15_half
                         : (T_TW*)fft_lut_tw2048_cint15;
                 else

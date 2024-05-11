@@ -1,0 +1,258 @@
+{
+    "name": "Xilinx DSPLIB fft_ifft_2d_aie_pl",
+    "description": "",
+    "gui": false,
+    "flow": "versal",
+    "platform_allowlist": [
+        "vck190",
+        "vek280"
+    ],
+    "platform_properties": {
+        "vck190": {
+            "param_set": ["test_0_tool_canary_aie"],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                },
+                "package": {
+                    "clflags": [
+                        "--package.defer_aie_run"
+                    ]
+                }
+            }
+        },
+        "vek280": {
+                "param_set": ["test_0_tool_canary_ml"],
+                "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                },
+                "package": {
+                    "clflags": [
+                        "--package.defer_aie_run"
+                    ]
+                }
+            }
+        }       
+    },
+    "data": [
+        "PROJECT/data/input_front.txt",
+        "PROJECT/data/ref_output.txt"
+    ],
+    "host": {
+        "host_exe": "host.elf",
+        "compiler": {
+            "sources": [
+                "PROJECT/host.cpp"
+            ],
+            "includepaths": [
+                "$(SYSROOT)/usr/include/xrt/",
+                "LIB_DIR/L2/include/aie",
+                "LIB_DIR/L2/tests/aie/common/inc",
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L1/src/aie",
+                "LIB_DIR/L1/tests/aie/inc",
+                "LIB_DIR/L1/tests/aie/src",
+                "PROJECT"
+            ],
+            "options": "--sysroot=$(SYSROOT) -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE\")",
+            "symbols": [
+                "__PS_ENABLE_AIE__",
+                "USING_UUT=1"
+            ]
+        },
+        "linker": {
+            "librarypaths": [
+                "$(SYSROOT)/usr/lib/"
+            ],
+            "options": "--sysroot=$(SYSROOT)"
+        }
+    },
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/src/hw/ifft_dma_src",
+                "LIB_DIR/L1/src/hw/ifft_dma_snk",
+                "PROJECT/kernel",
+                "PROJECT"
+            ]
+        }
+    },
+    "pre_build": [
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) TAG=$(TAG) FRONT_INPUT_FILE=$(FRONT_INPUT_FILE) BACK_INPUT_FILE=$(BACK_INPUT_FILE) REF_INPUT_FILE=$(REF_INPUT_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\")"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) vss_generator.py --ssr $(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"SSR\"))"
+        }
+    ],
+    "post_launch": [
+        {
+            "target": "aiesim",
+            "launch_cmd": [
+                "mkdir -p logs",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL) FRONT_OUTPUT_FILE=$(FRONT_OUTPUT_FILE) BACK_OUTPUT_FILE=$(BACK_OUTPUT_FILE)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_latency HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_stats HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) \"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_theoretical_min HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk harvest_mem HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
+            ]
+        },
+        {
+            "target": "x86sim",
+            "launch_cmd": [
+                "mkdir -p logs",
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\")",
+                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
+            ]
+        }
+    ],
+    "launch": [
+        {
+            "name": "swemu-launch",
+            "target": "sw_emu"
+        },
+        {
+            "name": "hwemu-launch",
+            "target": "hw_emu"
+        },
+        {
+            "name": "aiesim-launch",
+            "target": "aiesim",
+            "sim_options": "--graph-latency"
+        },
+        {
+            "name": "x86sim-launch",
+            "target": "x86sim",
+            "sim_options": ""
+        }
+    ],
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L1/src/aie",
+                "LIB_DIR/L1/tests/aie/inc",
+                "LIB_DIR/L1/tests/aie/src",
+                "LIB_DIR/L2/include/aie",
+                "LIB_DIR/L2/tests/aie/common/inc",
+                "./"
+            ],
+            "customized_params": {
+                "params": "--aie.verbose  $($(TAG)_TARGET_COMPILE_ARGS)  $($(TAG)_PREPROC_ARGS)",
+                "default": {
+                    "TAG": "UUT",
+                    "UUT_KERNEL": "fft_ifft_dit_1ch",
+                    "REF_KERNEL": "fft_ifft_dit_1ch_ref",
+                    "UUT_GRAPH": "fft_ifft_2d_aie_pl_graph",
+                    "REF_GRAPH": "fft_ifft_dit_1ch_ref_graph",
+                    "STACKSIZE_VAL": "16384",
+                    "UUT_SIM_FILE": "./data/uut_output.txt",
+                    "REF_SIM_FILE": "./data/ref_output.txt",
+                    "FRONT_INPUT_FILE": "./data/input_front.txt",
+                    "BACK_INPUT_FILE": "./data/input_back.txt",
+                    "FRONT_OUTPUT_FILE": "./data/output_front.txt",
+                    "BACK_OUTPUT_FILE": "./data/output_back.txt",
+                    "INPUT_FILE": "./data/input.txt",
+                    "REF_INPUT_FILE": "./data/input_ref.txt",
+                    "UUT_TARGET_COMPILE_ARGS": "--aie.Xchess=llvm.xargs=\"-std=c++2a\" --aie.Xchess=main:backend.mist2.xargs=\"+NOdra\" --aie.Xchess=main:backend.mist2.pnll=\"off\" --aie.stacksize=$(STACKSIZE_VAL)",
+                    "REF_TARGET_COMPILE_ARGS": "",
+                    "REF_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) --aie.Xpreproc=-DINPUT_FILE=$(REF_INPUT_FILE) $(PREPROC_ARGS) ",
+                    "UUT_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) --aie.Xpreproc=-DFRONT_INPUT_FILE=$(FRONT_INPUT_FILE) --aie.Xpreproc=-DBACK_INPUT_FILE=$(BACK_INPUT_FILE) --aie.Xpreproc=-DFRONT_OUTPUT_FILE=$(FRONT_OUTPUT_FILE) --aie.Xpreproc=-DBACK_OUTPUT_FILE=$(BACK_OUTPUT_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1"
+                }
+            }
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "test.cpp",
+                    "files": [
+                        "LIB_DIR/L1/src/aie/fft_ifft_dit_1ch.cpp",
+                        "LIB_DIR/L1/src/aie/fft_window.cpp",
+                        "uut_config.h"
+                    ],
+                    "pl-freq": 1000,                    
+                    "workdir": "./Work",
+                    "options": "",
+                    "name": "libadf.a",
+                    "pl_kernels_in_aie_graph": [
+                        "LIB_DIR/L1/src/aie/fft_ifft_dit_1ch.cpp"
+                    ]
+                }
+            ]
+        }
+    ],
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L1/src/hw/ifft_dma_src/ifft_dma_src.cpp",
+                    "clflags": "-DSSR=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"SSR\") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE\")",
+                    "name": "ifft_dma_src_wrapper"
+                },
+                {
+                    "location": "LIB_DIR/L1/src/hw/ifft_dma_snk/ifft_dma_snk.cpp",
+                    "clflags": "-DSSR=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"SSR\") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE\")",
+                    "name": "ifft_dma_snk_wrapper"
+                },
+                {
+                    "location": "LIB_DIR/L1/src/hw/ifft_transpose/ifft_transpose.cpp",
+                    "clflags": "-DSSR=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"SSR\") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE\")",
+                    "name": "ifft_transpose_wrapper"
+                }
+            ],
+            "name": "kernel"
+        }
+    ],
+    "generators": {
+        "uut_config.h": {
+            "file": "LIB_DIR/L2/tests/aie/common/scripts/tb_gen.py",
+            "function": "generate_testbench"
+        }
+    },
+    "parameter_file": "multi_params.json",
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": {
+                    "vitis_aie_x86sim": 8192,
+                    "vitis_aie_sim": 32768,
+                    "vitis_hw_build": 40960,
+                    "vitis_hw_emu": 40960,
+                    "vitis_hw_run": 40960
+                },
+                "max_time_min": {
+                    "vitis_aie_sim": 200,
+                    "vitis_aie_x86sim": 60,
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 470,
+                    "vitis_hw_run": 60
+                }
+            }
+        ],
+        "targets": [
+            "vitis_hw_emu",
+            "vitis_hw_build",
+            "vitis_hw_run"
+        ],
+        "category": "canary"
+    }
+}

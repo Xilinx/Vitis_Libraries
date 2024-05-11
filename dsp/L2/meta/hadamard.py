@@ -2,6 +2,7 @@ from ctypes import sizeof
 from socket import TIPC_SUB_SERVICE
 from aie_common import *
 import json
+import math
 
 #### naming ####
 #
@@ -24,12 +25,9 @@ import json
 # A validator function returns a dictionary, with required boolean key "is_valid",
 # and "err_message" if "is_valid" is False.
 #
-
-TP_DIM_min = 16
-TP_DIM_max = 65536
-TP_WINDOW_VSIZE_min = 16
-TP_WINDOW_VSIZE_max = 65536
-TP_INPUT_NUM_FRAMES_min = 4
+PING_PONG_BUFFER_16kB = 16384
+PING_PONG_BUFFER_32kB = 32768
+TP_INPUT_NUM_FRAMES_min = 1
 TP_SSR_min = 1
 TP_SSR_max = 32
 TP_SHIFT_min = 0
@@ -50,16 +48,40 @@ def fn_validate_data_type(TT_DATA):
   else:
     return isError("Data type must be the atomic type of data.")
 
-def fn_validate_dim_size(TP_DIM):
-  if TP_DIM < TP_DIM_min or TP_DIM > TP_DIM_max :
-    return isError(f"Minimum and maximum value for Point Size is {TP_DIM_min} and {TP_DIM_max},respectively, but got {TP_DIM}.")
-  else:
-    return isValid
+def fn_validate_dim_size(AIE_VARIANT,TP_DIM_PADDED, TP_DIM, TP_API, TP_SSR, TT_DATA_A, TT_DATA_B):
+  if (AIE_VARIANT==1):
+    PING_PONG_BUFFER_SIZE = PING_PONG_BUFFER_16kB
+  if (AIE_VARIANT==2):
+    PING_PONG_BUFFER_SIZE = PING_PONG_BUFFER_32kB
 
-def fn_validate_window_vsize(TP_WINDOW_VSIZE, VEC_IN_FRAME):
-  if TP_WINDOW_VSIZE < TP_WINDOW_VSIZE_min or TP_WINDOW_VSIZE > TP_WINDOW_VSIZE_max :
-    return isError(f"Minimum and maximum value for Point Size is {TP_WINDOW_VSIZE_min} and {TP_WINDOW_VSIZE_max},respectively, but got {TP_WINDOW_VSIZE}.\
-                   TP_WINDOW_VSIZE = TP_NUM_FRAMES * ((TP_DIM+{VEC_IN_FRAME}-1) / {VEC_IN_FRAME}) * {VEC_IN_FRAME} ")
+  TP_DIM_BYTE = TP_DIM_PADDED * fn_det_calc_byte(TT_DATA_A, TT_DATA_B)
+  VEC_IN_FRAME = calc_vecinframe(TP_API,TT_DATA_A,TT_DATA_B)
+  TP_DIM_max = math.floor(PING_PONG_BUFFER_SIZE / fn_det_calc_byte(TT_DATA_A, TT_DATA_B))
+
+  if TP_DIM_PADDED < VEC_IN_FRAME or TP_DIM_BYTE > PING_PONG_BUFFER_SIZE :
+    return isError(f"Minimum and maximum value for Point Size is {VEC_IN_FRAME} and {TP_DIM_max},respectively, but got {TP_DIM}.")
+  
+  if (TP_DIM % TP_SSR) != 0:
+    return isError(f"TP_DIM should be multiple of TP_SSR. TP_DIM and TP_SSR are {TP_DIM} and {TP_SSR},respectively.")
+
+  if (TP_DIM/TP_SSR >=16 and TP_DIM/TP_SSR<=4096):
+    if (TP_DIM/TP_SSR<=1024 or TP_API==1) :
+      return isValid
+    else:
+      return isError(f"(Vector size/SSR) must be less than 1024 for windowed configurations. Got TP_DIM {TP_DIM} and TP_SSR {TP_SSR}")
+  else:
+    return isError(f"(Vector size/SSR) must be between 16 and 4096. Got TP_DIM {TP_DIM} and TP_SSR {TP_SSR}")
+
+
+def fn_validate_num_frames(AIE_VARIANT, TP_INPUT_NUM_FRAME, TP_DIM_PADDED_BYTE):
+  if (AIE_VARIANT==1):
+    PING_PONG_BUFFER_SIZE = PING_PONG_BUFFER_16kB
+  if (AIE_VARIANT==2):
+    PING_PONG_BUFFER_SIZE = PING_PONG_BUFFER_32kB
+
+  TP_INPUT_NUM_FRAMES_max = math.floor(PING_PONG_BUFFER_SIZE / TP_DIM_PADDED_BYTE)
+  if TP_INPUT_NUM_FRAME < TP_INPUT_NUM_FRAMES_min or TP_INPUT_NUM_FRAME > TP_INPUT_NUM_FRAMES_max :
+    return isError(f"Minimum and maximum value for Num Frame is {TP_INPUT_NUM_FRAMES_min} and {TP_INPUT_NUM_FRAMES_max},respectively, but got {TP_INPUT_NUM_FRAME}.")
   else:
     return isValid
   
@@ -143,26 +165,17 @@ def fn_validate_shift_val(TT_DATA_A, TT_DATA_B, TP_SHIFT):
   else:
     return isError(f"Shift must be in range {TP_SHIFT_min} to {TP_SHIFT_max}. Got {TP_SHIFT}.")
         
-def fn_validate_ssr(TP_DIM, TP_API, TP_SSR):
+def fn_validate_ssr(TP_SSR):
   if TP_SSR < TP_SSR_min or TP_SSR > TP_SSR_max:
     return isError(f"Minimum and maximum value for SSR is {TP_SSR_min} and {TP_SSR_max},respectively, but got {TP_SSR}.")
-  
-  if (TP_DIM % TP_SSR) != 0:
-    return isError(f"TP_DIM should be multiple of TP_SSR. TP_DIM and TP_SSR are {TP_DIM} and {TP_SSR},respectively.")
-
-  if (TP_DIM/TP_SSR >=16 and TP_DIM/TP_SSR<=4096):
-    if (TP_DIM/TP_SSR<=1024 or TP_API==1) :
-      return isValid
-    else:
-      return isError(f"(Vector size/SSR) must be less than 1024 for windowed configurations. Got TP_DIM {TP_DIM} and TP_SSR {TP_SSR}")
   else:
-    return isError(f"(Vector size/SSR) must be between 16 and 4096. Got TP_DIM {TP_DIM} and TP_SSR {TP_SSR}")
+    return isValid
 
 def calc_vecinframe(TP_API,TT_DATA_A,TT_DATA_B):
     if(TP_API==0):
-      if (TT_DATA_A=="int16" and TT_DATA_A=="cint32"):
+      if (TT_DATA_A=="int16" and TT_DATA_B=="cint32"):
         VEC_IN_FRAME=16/fn_det_calc_byte(TT_DATA_A, TT_DATA_B)
-      elif (TT_DATA_A=="cint32" and TT_DATA_A=="int16"):
+      elif (TT_DATA_A=="cint32" and TT_DATA_B=="int16"):
         VEC_IN_FRAME=16/fn_det_calc_byte(TT_DATA_A, TT_DATA_B)
       else: 
         VEC_IN_FRAME=32/fn_det_calc_byte(TT_DATA_A, TT_DATA_B)
@@ -170,16 +183,23 @@ def calc_vecinframe(TP_API,TT_DATA_A,TT_DATA_B):
       VEC_IN_FRAME=16/fn_det_calc_byte(TT_DATA_A, TT_DATA_B)
     return VEC_IN_FRAME
 
-def calc_window_size(VEC_IN_FRAME, TP_NUM_FRAMES, TP_DIM, TP_SSR):
+def calc_padded_tp_dim(VEC_IN_FRAME, TP_DIM, TP_SSR):
     TP_DIM_perSSR = TP_DIM / TP_SSR
-    TP_WINDOW_VSIZE = TP_NUM_FRAMES * ((TP_DIM_perSSR+VEC_IN_FRAME-1) / VEC_IN_FRAME) * VEC_IN_FRAME
-    return TP_WINDOW_VSIZE
+    TP_DIM_PADDED = (math.ceil(TP_DIM_perSSR / VEC_IN_FRAME)) * VEC_IN_FRAME
+    return TP_DIM_PADDED
 
+def calc_window_size(TP_DIM_PADDED,TP_NUM_FRAMES):
+    TP_WINDOW_VSIZE = TP_NUM_FRAMES * TP_DIM_PADDED
+    return TP_WINDOW_VSIZE
 
 #### validation APIs ####
 def validate_TT_DATA_A(args):
     TT_DATA_A     = args["TT_DATA_A"]
     TT_DATA_B     = args["TT_DATA_B"]
+    AIE_VARIANT   = args["AIE_VARIANT"]
+    if (AIE_VARIANT==2) and ((TT_DATA_A=="cint16" and TT_DATA_B=="int32") or (TT_DATA_A=="int32" and TT_DATA_B=="cint16")):
+      return isError(f"{TT_DATA_A} and {TT_DATA_B} data combination is not supported by AIE Variant {AIE_VARIANT}.")
+
     if ((TT_DATA_A=="cfloat" or TT_DATA_A=="float") and (TT_DATA_B=="int16" or TT_DATA_B=="int32"or TT_DATA_B=="cint16" or TT_DATA_B=="cint32")):
       return isError("Data types float/cfloat cannot be multiplied with integers!")
     elif ((TT_DATA_B=="cfloat" or TT_DATA_B=="float") and (TT_DATA_A=="int16" or TT_DATA_A=="int32"or TT_DATA_A=="cint16" or TT_DATA_A=="cint32")):
@@ -193,7 +213,14 @@ def validate_TT_DATA_B(args):
 
 def validate_TP_DIM(args):
     TP_DIM = args["TP_DIM"]
-    return fn_validate_dim_size(TP_DIM)
+    TP_API = args["TP_API"]
+    TP_SSR = args["TP_SSR"]
+    TT_DATA_A = args["TT_DATA_A"]
+    TT_DATA_B = args["TT_DATA_B"]
+    AIE_VARIANT = args["AIE_VARIANT"]
+    VEC_IN_FRAME = calc_vecinframe(TP_API,TT_DATA_A,TT_DATA_B)
+    TP_DIM_PADDED = calc_padded_tp_dim(VEC_IN_FRAME, TP_DIM, TP_SSR)
+    return fn_validate_dim_size(AIE_VARIANT,TP_DIM_PADDED, TP_DIM, TP_API, TP_SSR, TT_DATA_A, TT_DATA_B)
 
 def validate_TP_NUM_FRAMES(args):
     TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
@@ -202,10 +229,12 @@ def validate_TP_NUM_FRAMES(args):
     TT_DATA_A = args["TT_DATA_A"]
     TT_DATA_B = args["TT_DATA_B"]
     TP_SSR = args["TP_SSR"]
+    AIE_VARIANT = args["AIE_VARIANT"]
     VEC_IN_FRAME = calc_vecinframe(TP_API,TT_DATA_A,TT_DATA_B)
-    TP_WINDOW_VSIZE = calc_window_size(VEC_IN_FRAME, TP_NUM_FRAMES, TP_DIM, TP_SSR)
-    return fn_validate_window_vsize(TP_WINDOW_VSIZE, VEC_IN_FRAME)
-
+    TP_DIM_PADDED = calc_padded_tp_dim(VEC_IN_FRAME, TP_DIM, TP_SSR)
+    OUT_BYTE = fn_det_calc_byte(TT_DATA_A, TT_DATA_B)
+    TP_DIM_PADDED_BYTE = TP_DIM_PADDED * OUT_BYTE
+    return fn_validate_num_frames(AIE_VARIANT, TP_NUM_FRAMES, TP_DIM_PADDED_BYTE)
 
 def validate_TP_SHIFT(args):
     TT_DATA_A = args["TT_DATA_A"]
@@ -214,14 +243,20 @@ def validate_TP_SHIFT(args):
     return fn_validate_shift_val(TT_DATA_A, TT_DATA_B, TP_SHIFT)
 
 def validate_TP_SSR(args):
-    TP_DIM = args["TP_DIM"]
-    TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
-    return fn_validate_ssr(TP_DIM, TP_API, TP_SSR)
+    return fn_validate_ssr(TP_SSR)
 
 def validate_TP_SAT(args):
     TP_SAT = args["TP_SAT"]
     return fn_validate_satMode(TP_SAT)
+
+def validate_TP_API(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TP_API = args["TP_API"]
+
+    if (AIE_VARIANT == 2) and (TP_API == 1):
+      return isError(f"AIE Variant {AIE_VARIANT} does not support stream interface for Hadamard IP.")
+    return isValid
 
 # Example of updater.
 #
@@ -310,8 +345,9 @@ def info_ports(args):
   TP_DIM = args["TP_DIM"]
 
   VEC_IN_FRAME = calc_vecinframe(TP_API,TT_DATA_A,TT_DATA_B)
-  TP_WINDOW_VSIZE = calc_window_size(VEC_IN_FRAME, TP_NUM_FRAMES, TP_DIM, TP_SSR)
-
+  TP_DIM_PADDED = calc_padded_tp_dim(VEC_IN_FRAME, TP_DIM, TP_SSR)
+  TP_WINDOW_VSIZE = calc_window_size(TP_DIM_PADDED, TP_NUM_FRAMES)
+  
   if (TP_API==0):
     portsInA = get_port_info(
       portname = "inA",

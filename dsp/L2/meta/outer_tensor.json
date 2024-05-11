@@ -1,0 +1,174 @@
+{
+    "schema": "vitis_library_api_spec_schema-1.0",
+    "api_name": "xf::dsp::aie::outer_tensor::outer_tensor_graph",
+    "display_name": "outer_tensor_graph",
+    "header_file_name": "outer_tensor_graph.hpp",
+    "search_paths": [
+        "L1/include/aie",
+        "L1/src/aie",
+        "L1/tests/aie/inc",
+        "L1/tests/aie/src",
+        "L2/include/aie",
+        "L2/tests/aie/common/inc"
+    ],
+    "parameters": [
+        {
+            "name": "TT_DATA_A",
+            "description": "The type of individual data samples input to port A.",
+            "type": "typename",
+            "enum": [
+                "cint16",
+                "cint32",
+                "int16",
+                "int32",
+                "cfloat",
+                "float"
+            ],
+            "validator": {
+                "file": "outer_tensor.py",
+                "function": "validate_TT_DATA_A",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            }
+        },
+        {
+            "name": "TT_DATA_B",
+            "description": "The type of individual data samples input to port B.",
+            "type": "typename",
+            "enum": [
+                "cint16",
+                "cint32",
+                "int16",
+                "int32",
+                "cfloat",
+                "float"
+            ],
+            "validator": {
+                "file": "outer_tensor.py",
+                "function": "validate_TT_DATA_B",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            }
+        },
+        {
+            "name": "TP_DIM_A",
+            "description": "The number of sample inputs in port A.",
+            "type": "uint"
+        },
+        {
+            "name": "TP_DIM_B",
+            "description": "The number of sample inputs in port B.",
+            "type": "uint"
+        },
+        {
+            "name": "TP_NUM_FRAMES",
+            "description": "The number of operations per call to the kernel",
+            "type": "uint",
+            "validator": {
+                "file": "outer_tensor.py",
+                "function": "validate_TP_NUM_FRAMES",
+                "args": [
+                    "TP_DIM_A",
+                    "TP_DIM_B",
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TP_API",
+                    "TP_SSR"
+                ]
+            }
+        },
+        {
+            "name": "TP_SHIFT",
+            "description": "The power of 2 shift down applied the product of sample and coefficient",
+            "type": "uint",
+            "validator": {
+                "file": "outer_tensor.py",
+                "function": "validate_TP_SHIFT",
+                "args": [
+                    "TT_DATA_A",
+                    "TT_DATA_B"
+                ]
+            },
+            "updater": {
+                "file": "outer_tensor.py",
+                "function": "update_TP_SHIFT",
+                "args": [
+                    "TT_DATA_A",
+                    "TT_DATA_B"
+                ]
+            }
+        },
+        {
+            "name": "TP_API",
+            "description": "The interface selection (windows/streams) of the function.",
+            "type": "uint",
+            "validator": {
+                "file": "outer_tensor.py",
+                "function": "validate_TP_API",
+                "args": [
+                ]
+            }
+        },
+        {
+            "name": "TP_SSR",
+            "description": "The number of kernels to be used in parallel to perform the function.",
+            "type": "uint",
+            "validator": {
+                "file": "outer_tensor.py",
+                "function": "validate_TP_SSR",
+                "args": [
+                ]
+            },
+            "updater": {
+                "file": "outer_tensor.py",
+                "function": "update_TP_SSR",
+                "args": [
+                    "TP_DIM_A"
+                ]
+            }
+        },
+        {
+            "name": "TP_RND",
+            "description": "The rounding to be applied during the shift down stage of processing.",
+            "type": "uint",
+            "validator": {
+                "file": "outer_tensor.py",
+                "function": "validate_TP_RND",
+                "args": [
+                ]
+            }
+        },
+        {
+            "name": "TP_SAT",
+            "description": "Saturation mode.",
+            "type": "uint",
+            "validator": {
+                "file": "outer_tensor.py",
+                "function": "validate_TP_SAT", 
+                "args": [
+                ]
+            }
+        },
+        {
+            "name": "AIE_VARIANT",
+            "type": "uint",
+            "description": "specifies the device type",
+            "validator": {
+                "file": "outer_tensor.py",
+                "function": "validate_AIE_VARIANT", 
+                "args": [
+                ]
+            }
+        }
+    ],
+    "ports": {
+        "file": "outer_tensor.py",
+        "function": "info_ports"
+    },
+    "generator": {
+        "file": "outer_tensor.py",
+        "function": "generate_graph"
+    }
+}

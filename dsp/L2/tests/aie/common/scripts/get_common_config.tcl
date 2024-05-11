@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,12 @@
 set outStatus           [lindex $argv 0]
 set fileDir             [lindex $argv 1]
 
+set logDir [file dirname $outStatus]
+# Check if the directory exists  
+if { ![file exists $logDir] } {  
+    # If the directory doesn't exist, create it  
+    exec mkdir -p -- $logDir  
+} 
 
 # ---------------------------
 # --- Grep Status Results ---

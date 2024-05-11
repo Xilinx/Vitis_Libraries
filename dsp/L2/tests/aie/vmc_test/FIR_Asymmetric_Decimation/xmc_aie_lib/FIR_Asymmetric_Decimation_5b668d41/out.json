@@ -1,0 +1,42 @@
+{
+    "graphName": "FIR_Asymmetric_Decimation_5b668d41",
+    "graphHeaderFile": "FIR_Asymmetric_Decimation_5b668d41.h",
+    "graphSearchPath": [
+        "L2/include/aie",
+        "L2/tests/aie/common/inc",
+        "L1/include/aie",
+        "L1/src/aie",
+        "L1/tests/aie/inc",
+        "L1/tests/aie/src"
+    ],
+    "graphPreProcOptions": [],
+    "ports": [
+        {
+            "name": "in[0]",
+            "portkind": "window",
+            "direction": "in",
+            "basictype": "int16",
+            "windowsize": 1024,
+            "margin": 128,
+            "synchronicity": "sync",
+            "isArray": false,
+            "numElements": 1,
+            "isComplex": true,
+            "isStdComplex": false
+        },
+        {
+            "name": "out[0]",
+            "portkind": "window",
+            "direction": "out",
+            "basictype": "int16",
+            "windowsize": 512,
+            "margin": 0,
+            "synchronicity": "sync",
+            "isArray": false,
+            "numElements": 1,
+            "isComplex": true,
+            "isStdComplex": false
+        }
+    ],
+    "graphSourceFileUpdated": false
+}

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ void filter_ref(
 
     for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR; i++) {
         accum = null_accRef<TT_DATA>(); // reset accumulator at the start of the mult-add for each output sample
-        // Accumulation
+                                        // Accumulation
         for (unsigned int j = 0; j < TP_FIR_LEN; j++) {
             d_in[j] = *inItr++; // read input data
 

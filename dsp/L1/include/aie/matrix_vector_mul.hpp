@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 
 /*
 MATRIX_VECTOR_MUL
-This file exists to capture the definition of the single channel MATRIX_VECTOR_MUL/iMATRIX_VECTOR_MUL filter kernel
+This file exists to capture the definition matrix_vector_mul kernel
 class.
 The class definition holds defensive checks on parameter range and other legality.
 The constructor definition is held in this class because this class must be accessible to graph
@@ -42,227 +42,12 @@ included in aie graph level compilation.
 #include "matrix_vector_mul_traits.hpp"
 #include "fir_utils.hpp"
 #include "aie_api/aie.hpp"
-#ifndef _DSPLIB_MATRIX_VECTOR_MUL_HPP_DEBUG_
-// #define _DSPLIB_MATRIX_VECTOR_MUL_HPP_DEBUG_
-#endif //_DSPLIB_MATRIX_VECTOR_MUL_HPP_DEBUG_
 
 namespace xf {
 namespace dsp {
 namespace aie {
 namespace blas {
 namespace matrix_vector_mul {
-
-struct no_port {};
-template <typename T_A, typename T_B>
-struct accType {
-    using type = cacc48;
-};
-template <typename T_A, typename T_B>
-struct outType {
-    using type = cint16;
-};
-template <>
-struct accType<int16, int16> {
-    using type = acc48;
-};
-template <>
-struct outType<int16, int16> {
-    using type = int16;
-};
-template <>
-struct accType<int16, cint16> {
-    using type = cacc48;
-};
-template <>
-struct outType<int16, cint16> {
-    using type = cint16;
-};
-template <>
-struct accType<int16, cint32> {
-    using type = cacc80;
-};
-template <>
-struct outType<int16, cint32> {
-    using type = cint32;
-};
-template <>
-struct accType<int16, int32> {
-    using type = acc80;
-};
-template <>
-struct outType<int16, int32> {
-    using type = int32;
-};
-
-template <>
-struct accType<cint16, int16> {
-    using type = cacc48;
-};
-template <>
-struct outType<cint16, int16> {
-    using type = cint16;
-};
-template <>
-struct accType<cint16, cint16> {
-    using type = cacc48;
-};
-template <>
-struct outType<cint16, cint16> {
-    using type = cint16;
-};
-template <>
-struct accType<cint16, int32> {
-    using type = cacc80;
-};
-template <>
-struct outType<cint16, int32> {
-    using type = cint32;
-};
-template <>
-struct accType<cint16, cint32> {
-    using type = cacc80;
-};
-template <>
-struct outType<cint16, cint32> {
-    using type = cint32;
-};
-
-template <>
-struct accType<int32, int16> {
-    using type = acc80;
-};
-template <>
-struct outType<int32, int16> {
-    using type = int32;
-};
-template <>
-struct accType<int32, cint16> {
-    using type = cacc80;
-};
-template <>
-struct outType<int32, cint16> {
-    using type = cint32;
-};
-template <>
-struct accType<int32, int32> {
-    using type = acc80;
-};
-template <>
-struct outType<int32, int32> {
-    using type = int32;
-};
-template <>
-struct accType<int32, cint32> {
-    using type = cacc80;
-};
-template <>
-struct outType<int32, cint32> {
-    using type = cint32;
-};
-
-template <>
-struct accType<cint32, int16> {
-    using type = cacc80;
-};
-template <>
-struct outType<cint32, int16> {
-    using type = cint32;
-};
-template <>
-struct accType<cint32, cint16> {
-    using type = cacc80;
-};
-template <>
-struct outType<cint32, cint16> {
-    using type = cint32;
-};
-template <>
-struct accType<cint32, int32> {
-    using type = cacc80;
-};
-template <>
-struct outType<cint32, int32> {
-    using type = cint32;
-};
-template <>
-struct accType<cint32, cint32> {
-    using type = cacc80;
-};
-template <>
-struct outType<cint32, cint32> {
-    using type = cint32;
-};
-
-template <>
-struct accType<float, float> {
-    using type = accfloat;
-};
-template <>
-struct outType<float, float> {
-    using type = float;
-};
-template <>
-struct accType<cfloat, float> {
-    using type = caccfloat;
-};
-template <>
-struct outType<cfloat, float> {
-    using type = cfloat;
-};
-template <>
-struct accType<float, cfloat> {
-    using type = caccfloat;
-};
-template <>
-struct outType<float, cfloat> {
-    using type = cfloat;
-};
-template <>
-struct accType<cfloat, cfloat> {
-    using type = caccfloat;
-};
-template <>
-struct outType<cfloat, cfloat> {
-    using type = cfloat;
-};
-
-template <typename T_D_A, typename T_D_B>
-using accType_t = typename accType<T_D_A, T_D_B>::type;
-template <typename T_D_A, typename T_D_B>
-using outType_t = typename outType<T_D_A, T_D_B>::type;
-
-// IF input type-------------------------------------
-template <bool T_CASC_IN, typename T_A, typename T_B>
-struct T_inputIF {};
-// CASC_IN_FALSE
-template <typename T_A, typename T_B>
-struct T_inputIF<CASC_IN_FALSE, T_A, T_B> {
-    T_A* __restrict inWindowA;
-    T_B* __restrict inWindowB;
-    no_port* inCascade;
-};
-// CASC_IN_TRUE
-template <typename T_A, typename T_B>
-struct T_inputIF<CASC_IN_TRUE, T_A, T_B> {
-    T_A* __restrict inWindowA;
-    T_B* __restrict inWindowB;
-    input_stream<accType_t<T_A, T_B> >* inCascade;
-};
-// IF output type ------------------------------------
-template <bool T_CASC_OUT, typename T_A, typename T_B>
-struct T_outputIF {};
-// CASC_OUT_FALSE
-template <typename T_A, typename T_B>
-struct T_outputIF<CASC_OUT_FALSE, T_A, T_B> {
-    outType_t<T_A, T_B>* __restrict outWindow;
-    no_port* outCascade;
-};
-// CASC_OUT_TRUE
-template <typename T_A, typename T_B>
-struct T_outputIF<CASC_OUT_TRUE, T_A, T_B> {
-    no_port* outWindow;
-    output_stream<accType_t<T_A, T_B> >* outCascade;
-};
 
 //-----------------------------------------------------------------------------------------------------
 // Base class
@@ -301,28 +86,19 @@ class kernelMatVecMulClass {
                                                                                                   // TT_DATA_B will also
                                                                                                   // be float or integer
                                                                                                   // to match TT_DATA_A.
-    // Currently unsupported data combinations
-    static_assert(!(std::is_same<TT_DATA_A, cint32>::value && std::is_same<TT_DATA_B, int16>::value),
-                  "Matrix-vector mutliplcation of a cint32 matrix (TT_DATA_A=cint32) and an int16 vector "
-                  "(TT_DATA_B=int16) is currently unsupported");
-    static_assert(!(std::is_same<TT_DATA_A, int16>::value && std::is_same<TT_DATA_B, cint32>::value),
-                  "Matrix-vector mutliplcation of an int16 matrix (TT_DATA_A=int16) and a cint32 vector "
-                  "(TT_DATA_B=cint32) is currently unsupported");
-    static_assert(!(std::is_same<TT_DATA_A, int32>::value && std::is_same<TT_DATA_B, cint16>::value),
-                  "Matrix-vector mutliplcation of an int32 matrix (TT_DATA_A=int32) and a cint16 vector "
-                  "(TT_DATA_B=cint16) is currently unsupported");
 
     using TT_OUT = outType_t<TT_DATA_A, TT_DATA_B>;
-    static constexpr int kSamplesVecA = 256 / 8 / sizeof(TT_DATA_A);
-    static constexpr int kSamplesVecB = 256 / 8 / sizeof(TT_DATA_B);
-    static constexpr int kSamplesVecOut = 256 / 8 / sizeof(TT_OUT);
+    static constexpr int vecSampleNumA = mumLanesMatVec<TT_DATA_A, TT_DATA_B>().lanesInA;
+    static constexpr int vecSampleNumB = mumLanesMatVec<TT_DATA_A, TT_DATA_B>().lanesInB;
+    static constexpr int vecSampleNumOut = mumLanesMatVec<TT_DATA_A, TT_DATA_B>().lanesInOut;
 
-    static constexpr int loadsPerCol = TP_DIM_A / kSamplesVecA;
-    static constexpr int loadsPerMatrix = loadsPerCol * (TP_DIM_B / TP_CASC_LEN);
-    static constexpr int loadsPerVectorB = (TP_DIM_B / TP_CASC_LEN) / kSamplesVecB;
-
-    static constexpr int doubleAccPerCol = (kSamplesVecA / kSamplesVecOut == 2);
+    static constexpr int loadsPerColA = TP_DIM_A / vecSampleNumA;
+    static constexpr int loadsPerMatrix = loadsPerColA * (TP_DIM_B / TP_CASC_LEN);
+    static constexpr int loadsPerVectorB = (TP_DIM_B / TP_CASC_LEN) / vecSampleNumB;
     static constexpr int shift = TP_SHIFT;
+    static constexpr int castBtoA =
+        (std::is_same<TT_DATA_A, cint32>::value && std::is_same<TT_DATA_B, cint16>::value) ||
+        (std::is_same<TT_DATA_A, int32>::value && std::is_same<TT_DATA_B, int16>::value);
 
    public:
     // Constructor
@@ -475,7 +251,7 @@ class matrix_vector_mul<TT_DATA_A,
                        output_stream<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade);
 };
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interafce - MIDDLE kernel in cascade
+// Partially specialized classes for cascaded interafce - FINAL kernel in cascade
 
 template <typename TT_DATA_A,
           typename TT_DATA_B,

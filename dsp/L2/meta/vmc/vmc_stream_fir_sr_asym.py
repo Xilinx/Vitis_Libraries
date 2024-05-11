@@ -33,7 +33,7 @@ def vmc_validate_dual_ip(args):
     dual_ip = args["dual_ip"]
     num_outputs = fn_get_num_outputs(args)
     api = 1
-    AIE_VARIANT = 1
+    AIE_VARIANT = args["AIE_VARIANT"]
     return fn_validate_sr_dual_ip(num_outputs, api, dual_ip, AIE_VARIANT)
 
 def vmc_validate_out_ports(args):
@@ -51,7 +51,8 @@ def vmc_validate_coeff(args):
     ssr = args["ssr"]
     api = 1
     fir_length = fn_get_fir_length(args)
-    return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload )
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload, AIE_VARIANT)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]

@@ -52,6 +52,19 @@
             "minimum": 0
         },
         {
+            "name": "TP_USE_PHASE_RELOAD",
+            "type": "uint",
+            "description": "specifies if initial phase is to be implemented as a reloadable RTP port or not.",
+            "minimum": 0,
+            "maximum": 1,
+            "validator": {
+                "file": "dds_mixer_lut.py",
+                "function": "validate_TP_USE_PHASE_RELOAD",
+                "args": [
+                    "TP_SSR"
+                ]}
+        },
+        {
             "name": "TP_API",
             "type": "uint",
             "description": "specifies if the input/output interface should be window-based or stream-based.",
@@ -73,17 +86,17 @@
             "minimum": 1
         },
         {
-            "name": "TP_SFDR",
-            "type": "uint",
-            "description": "specifies the expected SFDR of dds output.",
-            "maximum": 180,
-            "minimum": 1
-        },
-        {
             "name": "AIE_VARIANT",
             "type": "uint",
             "description": "specifies the device type",
             "maximum": 2,
+            "minimum": 1
+        },
+        {
+            "name": "TP_SFDR",
+            "type": "uint",
+            "description": "specifies the expected SFDR of dds output.",
+            "maximum": 180,
             "minimum": 1
         },
         {

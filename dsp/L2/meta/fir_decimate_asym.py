@@ -31,7 +31,14 @@ current_uut_kernel = Path(__file__).stem
 #
 
 fn_decimate_asym_lanes = fnNumLanes384b
-
+TP_DECIMATE_FACTOR_min = 2
+TP_DECIMATE_FACTOR_max = 7
+TP_INPUT_WINDOW_VSIZE_min = 4
+TP_PARA_DECI_POLY_min = 1
+TP_CASC_LEN_min = 1
+TP_CASC_LEN_max = 40
+TP_FIR_LEN_min = 4
+TP_FIR_LEN_max = 8192
 
 def fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
   # CAUTION: this constant overlaps many factors. The main need is a "strobe" concept that means we unroll until xbuff is back to starting conditions.
@@ -40,8 +47,9 @@ def fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FAC
   # Given that we know there will be 3 additional loads, we need to work out how many output vector chunks that covers.
   # 8 seems to work for all current decimation values and lanes across data types..
   streamRptFactor = 8
-  if TP_INPUT_WINDOW_VSIZE < TP_INPUT_WINDOW_VSIZE_min:
-        return isError(f"Minimum value for Input window size is {TP_INPUT_WINDOW_VSIZE_min}, but got {TP_INPUT_WINDOW_VSIZE}.")
+  res = fn_validate_min_value("TP_INPUT_WINDOW_VSIZE", TP_INPUT_WINDOW_VSIZE, TP_INPUT_WINDOW_VSIZE_min)
+  if (res["is_valid"] == False):
+    return res
 
   # decimator uses 384b accs, but also checks for multiple of decimate factor. When using streams, also takes into account the stream repeat factor.
   windowSizeMultiplier = (fn_decimate_asym_lanes(TT_DATA, TT_COEFF)*TP_DECIMATE_FACTOR) if TP_API == 0 else (fn_decimate_asym_lanes(TT_DATA, TT_COEFF)*TP_DECIMATE_FACTOR*streamRptFactor)
@@ -101,17 +109,16 @@ def fn_data_needed_within_buffer_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN
             m_kInitDataNeeded          = m_kInitDataNeededNoCasc + (dataOffsetNthKernel - streamInitNullAccs * TP_DECIMATE_FACTOR * m_kLanes)
             if (m_kInitDataNeeded > m_kSamplesInBuff) :
               return isError(
-                f"Kernel[{TP_KP}] requires too much data ({m_kInitDataNeeded} samples) "\
-                  f"to fit in a single buffer ({m_kSamplesInBuff} samples), due to the filter length per kernel- "\
-                  f"influenced by filter length ({TP_FIR_LEN}), SSR ({TP_SSR}), cascade length ({TP_CASC_LEN}).\n"
+                    f"Requested parameters: FIR length ({TP_FIR_LEN}), cascade length ({TP_CASC_LEN}) and SSR ({TP_SSR}) result in a kernel ({TP_KP}) that requires more data samples ({m_kInitDataNeeded}) than capacity of a data buffer ({m_kSamplesInBuff}) "
+                    f"Please increase the cascade length ({TP_CASC_LEN}) and/or SSR ({TP_SSR})."
               )
     return isValid
 
 def fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT):
-    if TP_FIR_LEN < TP_FIR_LEN_min or TP_FIR_LEN > TP_FIR_LEN_max :
-        return isError(f"Minimum and maximum value for Filter length is {TP_FIR_LEN_min} and {TP_FIR_LEN_max}, respectively, but got {TP_FIR_LEN}.")
-
-    minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
+    res = fn_validate_minmax_value("TP_FIR_LEN", TP_FIR_LEN, TP_FIR_LEN_min, TP_FIR_LEN_max)
+    if (res["is_valid"] == False):
+        return res
+    minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_DECIMATE_FACTOR)
     if AIE_VARIANT == 2:
         if (TP_FIR_LEN / TP_CASC_LEN) <  (TP_DECIMATE_FACTOR):
             return isError(
@@ -180,8 +187,9 @@ def fn_ssr_poly(AIE_VARIANT, TP_DECIMATE_FACTOR, TP_SSR, TP_PARA_DECI_POLY):
 
 def fn_validate_decimate_factor(TT_DATA, TT_COEFF, TP_DECIMATE_FACTOR, TP_API, AIE_VARIANT):
 
-  if TP_DECIMATE_FACTOR < TP_DECIMATE_FACTOR_min or TP_DECIMATE_FACTOR > TP_DECIMATE_FACTOR_max :
-        return isError(f"Minimum and maximum value for Decimation factor is {TP_DECIMATE_FACTOR_min} and {TP_DECIMATE_FACTOR_max}, respectively, but got {TP_DECIMATE_FACTOR}.")
+  res = fn_validate_minmax_value("TP_DECIMATE_FACTOR", TP_DECIMATE_FACTOR, TP_DECIMATE_FACTOR_min, TP_DECIMATE_FACTOR_max)
+  if (res["is_valid"] == False):
+        return res
   if AIE_VARIANT == 1 :
     # Check if permute xoffset is within range for the data type in question
     offsetRangeCheck = fn_xoffset_range_valid(TT_DATA, TT_COEFF, TP_DECIMATE_FACTOR, TP_API )
@@ -203,14 +211,10 @@ def fn_validate_deci_ssr(TP_SSR, TP_API, TP_DECIMATE_FACTOR, TP_PARA_DECI_POLY, 
   return isValid
 
 def fn_validate_deci_poly(TP_PARA_DECI_POLY):
-    if TP_PARA_DECI_POLY < TP_PARA_DECI_POLY_min :
-        return isError(f"Minimum value for Decimation poly phase is {TP_PARA_DECI_POLY_min}, but got {TP_PARA_DECI_POLY}.")
-    return isValid
+    return fn_validate_min_value("TP_PARA_DECI_POLY", TP_PARA_DECI_POLY, TP_PARA_DECI_POLY_min)
 
 def fn_validate_casc_len(TP_CASC_LEN):
-    if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max :
-        return isError(f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max}, respectively, but got {TP_CASC_LEN}.")
-    return isValid
+    return fn_validate_minmax_value("TP_CASC_LEN", TP_CASC_LEN, TP_CASC_LEN_min, TP_CASC_LEN_max)
 
 #### validation APIs ####
 def validate_TT_COEFF(args):

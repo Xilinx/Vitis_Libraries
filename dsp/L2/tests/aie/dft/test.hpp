@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ namespace testcase {
 class test_graph : public graph {
    private:
    public:
-    std::array<input_plio, ((CASC_LEN))> in;
-    std::array<output_plio, ((1))> out;
+    std::array<input_plio, (UUT_SSR * CASC_LEN)> in;
+    std::array<output_plio, (UUT_SSR)> out;
 
     // Constructor
     test_graph() {
@@ -62,19 +62,24 @@ class test_graph : public graph {
         printf(QUOTE(UUT_GRAPH));
         printf("\n");
         printf("========================\n");
-        printf("Point size            = %d \n", POINT_SIZE);
-        printf("FFT/nIFFT             = %d \n", FFT_NIFFT);
-        printf("Final scaling Shift   = %d \n", SHIFT);
-        printf("Number of kernels     = %d \n", CASC_LEN);
-        printf("Rounding mode     = %d \n", ROUND_MODE);
-        printf("Saturation mode     = %d \n", SAT_MODE);
-        printf("Num frames per window = %d \n", NUM_FRAMES);
         printf("Data type             = ");
         printf(QUOTE(DATA_TYPE));
         printf("\n");
         printf("TWIDDLE type         = ");
         printf(QUOTE(TWIDDLE_TYPE));
         printf("\n");
+        printf("Point size            = %d \n", POINT_SIZE);
+        printf("Num frames per window = %d \n", NUM_FRAMES);
+        printf("FFT/nIFFT             = %d \n", FFT_NIFFT);
+        printf("Final scaling Shift   = %d \n", SHIFT);
+        printf("Cascade len           = %d \n", CASC_LEN);
+        printf("SSR                   = %d \n", UUT_SSR);
+        printf("Number of kernels     = %d \n", CASC_LEN * UUT_SSR);
+        printf("Number of inputs      = %d \n", CASC_LEN * UUT_SSR);
+        printf("Number of outputs     = %d \n", UUT_SSR);
+        printf("Rounding mode         = %d \n", ROUND_MODE);
+        printf("Saturation mode       = %d \n", SAT_MODE);
+
         printf("PARAMETERS OF TEST:\n-------------------\n");
         printf("STIM_TYPE            = %d \n", STIM_TYPE);
         printf("NITER                = %d \n", NITER);
@@ -91,32 +96,38 @@ class test_graph : public graph {
         // NUM_FRAMES>();
 
         xf::dsp::aie::fft::dft::UUT_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, CASC_LEN, NUM_FRAMES,
-                                          ROUND_MODE, SAT_MODE>
+                                          ROUND_MODE, SAT_MODE, UUT_SSR>
             dftGraph;
 
 #ifdef USING_UUT
-        for (int i = 0; i < CASC_LEN; i++) {
-            std::string filenameIn = QUOTE(INPUT_FILE);
-            // filenameIn.insert(filenameIn.length()-4, ("_"+std::to_string(i)));
-            filenameIn.insert(filenameIn.length() - 4, ("_" + std::to_string(i) + "_0"));
-            // Make connections
-            in[i] = input_plio::create("PLIO_in_" + std::to_string(i), adf::plio_32_bits, filenameIn);
-            connect<>(in[i].out[0], dftGraph.in[i]);
+        for (int ssr = 0; ssr < UUT_SSR; ssr++) {
+            for (int casc = 0; casc < CASC_LEN; casc++) {
+                std::string filenameIn = QUOTE(INPUT_FILE);
+                // Each rank of ssr receives same input data
+                filenameIn.insert(filenameIn.length() - 4, ("_0_" + std::to_string(casc)));
+                // Make connections
+                in[casc + ssr * CASC_LEN] = input_plio::create("PLIO_in_" + std::to_string(casc + ssr * CASC_LEN),
+                                                               adf::plio_32_bits, filenameIn);
+                connect<>(in[casc + ssr * CASC_LEN].out[0], dftGraph.in[casc + ssr * CASC_LEN]);
+            }
+        }
+        for (int ssrOut = 0; ssrOut < UUT_SSR; ssrOut++) {
+            std::string filenameOut = QUOTE(OUTPUT_FILE);
+            filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(ssrOut) + "_0"));
+            out[ssrOut] = output_plio::create("PLIO_out_" + std::to_string(ssrOut), adf::plio_32_bits, filenameOut);
+            connect<>(dftGraph.out[ssrOut], out[ssrOut].in[0]);
         }
 #else // using ref
         std::string filenameIn = QUOTE(INPUT_FILE);
-        // filenameIn.insert(filenameIn.length()-4, ("_"+std::to_string(0)));
         // Make connections
         in[0] = input_plio::create("PLIO_in_" + std::to_string(0), adf::plio_32_bits, filenameIn);
         connect<>(in[0].out[0], dftGraph.in[0]);
-#endif
 
         std::string filenameOut = QUOTE(OUTPUT_FILE);
-        // filenameOut.insert(filenameOut.length()-4, ("_"+std::to_string(i)+"_0"));
-        filenameOut.insert(filenameOut.length() - 4, ("_0_0"));
-        // filenameOut.insert(filenameOut.length()-4, ("_"+std::to_string(0)));
+        // filenameOut.insert(filenameOut.length() - 4, ("_0_0"));
         out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_32_bits, filenameOut);
         connect<>(dftGraph.out[0], out[0].in[0]);
+#endif
     };
 };
 }

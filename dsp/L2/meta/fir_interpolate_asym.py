@@ -32,7 +32,12 @@ current_uut_kernel = Path(__file__).stem
 # and "err_message" if "is_valid" is False.
 #
 
-
+TP_INPUT_WINDOW_VSIZE_min = 4
+TP_PARA_INTERP_POLY_min = 1
+TP_CASC_LEN_min = 1
+TP_CASC_LEN_max = 40
+TP_FIR_LEN_min = 4
+TP_FIR_LEN_max = 8192
 
 
 def fn_fir_len_multiple_interp(TP_FIR_LEN, TP_INTERPOLATE_FACTOR):
@@ -45,7 +50,6 @@ def fn_check_samples_can_fit_streaming(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPO
   sizeOfA256Read = (256//8)//fn_size_by_byte(TT_DATA)
 
   sizeOfARead = sizeOfA256Read//2 if TP_DUAL_IP == 0 else sizeOfA256Read;
-  m_kSpaces = m_kSamplesInBuff - sizeOfARead; # duplicating conservative spaces.
   firLenPerSsr = CEIL(TP_FIR_LEN, (TP_INTERPOLATE_FACTOR*TP_SSR))/TP_SSR
   if TP_API != 0:
     for kernelPos in range(TP_CASC_LEN):
@@ -55,9 +59,12 @@ def fn_check_samples_can_fit_streaming(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPO
           else
             fnFirRange(firLenPerSsr,TP_CASC_LEN,kernelPos,TP_INTERPOLATE_FACTOR)
       )
-      numSamples = CEIL(TP_FIR_RANGE_LEN//TP_INTERPOLATE_FACTOR, m_kNumColumns)
-      if numSamples > m_kSpaces :
-        return isError(f"kernel[{kernelPos}] requires too much data ({numSamples} samples) to fit in a single buffer ({m_kSpaces} samples), due to the filter length per kernel- influenced by filter length ({TP_FIR_LEN}), interpolate factor ({TP_INTERPOLATE_FACTOR}) and cascade length ({TP_CASC_LEN})")
+      numSamples = CEIL(TP_FIR_RANGE_LEN//TP_INTERPOLATE_FACTOR, m_kNumColumns) + sizeOfARead
+      if numSamples > m_kSamplesInBuff :
+        return isError(
+            f"Requested parameters: FIR length ({TP_FIR_LEN}), interpolate factor ({TP_INTERPOLATE_FACTOR}), cascade length ({TP_CASC_LEN}) and SSR ({TP_SSR}) result in a kernel ({kernelPos}) that requires more data samples ({numSamples}) than capacity of a data buffer ({m_kSamplesInBuff}) "
+            f"Please increase the cascade length ({TP_CASC_LEN}) and/or SSR ({TP_SSR})."
+        )
 
   return isValid
 
@@ -86,12 +93,17 @@ def fn_max_fir_len_overall(TT_DATA, TT_COEFF, TP_FIR_LEN):
       else isValid
   )
 
-def fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, TP_DUAL_IP):
-    if TP_FIR_LEN < TP_FIR_LEN_min or TP_FIR_LEN > TP_FIR_LEN_max :
-        return isError(f"Minimum and maximum value for Filter length is {TP_FIR_LEN_min} and {TP_FIR_LEN_max},respectively, but got {TP_FIR_LEN}.")
+def fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, TP_DUAL_IP, AIE_VARIANT):
+    res = fn_validate_minmax_value("TP_FIR_LEN", TP_FIR_LEN, TP_FIR_LEN_min, TP_FIR_LEN_max)
+    if (res["is_valid"] == False):
+        return res
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_Rnd=TP_INTERPOLATE_FACTOR)
 
-    coeffSizeMult = 1 if TP_API == 0 else TP_INTERPOLATE_FACTOR
+    coeffSizeMult = 1
+    if AIE_VARIANT == 1:
+      coeffSizeMult = 1 if TP_API == 0 else TP_INTERPOLATE_FACTOR
+    if AIE_VARIANT == 2:
+      coeffSizeMult = TP_INTERPOLATE_FACTOR
 
     maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_SSR, TP_API, coeffSizeMult)
 
@@ -110,8 +122,9 @@ def fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP
 def fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN,TP_INTERPOLATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
     # CAUTION: this constant overlaps many factors. The main need is a "strobe" concept that means we unroll until xbuff is back to starting conditions.
     streamRptFactor = 4
-    if TP_INPUT_WINDOW_VSIZE < TP_INPUT_WINDOW_VSIZE_min:
-        return isError(f"Minimum value for Input size is {TP_INPUT_WINDOW_VSIZE_min}, but got {TP_INPUT_WINDOW_VSIZE}.")
+    res = fn_validate_min_value("TP_INPUT_WINDOW_VSIZE", TP_INPUT_WINDOW_VSIZE, TP_INPUT_WINDOW_VSIZE_min)
+    if (res["is_valid"] == False):
+      return res
     # Need to take unrolloing into account
     windowSizeMultiplier = (fnNumLanes(TT_DATA, TT_COEFF, TP_API)) if TP_API == 0 else (fnNumLanes(TT_DATA, TT_COEFF, TP_API)*streamRptFactor)
     # interpolate asym uses common lanes, but doesn't use shorter acc for streaming arch.. why?
@@ -136,10 +149,9 @@ def validate_TP_INTERPOLATE_FACTOR(args):
     return fn_validate_interpolate_factor(TP_INTERPOLATE_FACTOR, AIE_VARIANT)
 
 def fn_validate_para_interp_poly(TP_INTERPOLATE_FACTOR, TP_PARA_INTERP_POLY):
-    if TP_PARA_INTERP_POLY < TP_PARA_INTERP_POLY_min:
-        return isError(
-            f"Minimum value for Interpolation poly phase is {TP_PARA_INTERP_POLY_min}, but got {TP_PARA_INTERP_POLY}."
-        )
+    res = fn_validate_min_value("TP_PARA_INTERP_POLY", TP_PARA_INTERP_POLY, TP_PARA_INTERP_POLY_min)
+    if (res["is_valid"] == False):
+      return res
     if TP_INTERPOLATE_FACTOR % TP_PARA_INTERP_POLY != 0:
         return isError(
             f"TP_PARA_INTERP_POLY must be a number that is exactly divisible by TP_INTERPOLATE_FACTOR. Got TP_PARA_INTERP_POLY {TP_PARA_INTERP_POLY} and TP_INTERPOLATE_FACTOR {TP_INTERPOLATE_FACTOR}."
@@ -227,9 +239,9 @@ def validate_TP_FIR_LEN(args):
     TP_API = args["TP_API"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     TP_DUAL_IP = args["TP_DUAL_IP"]
+    AIE_VARIANT = args["AIE_VARIANT"]
 
-
-    return fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN,TP_INTERPOLATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, TP_DUAL_IP)
+    return fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN,TP_INTERPOLATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, TP_DUAL_IP, AIE_VARIANT)
 
 def validate_TP_DUAL_IP(args):
     TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
@@ -248,13 +260,11 @@ def fn_validate_interp_ssr(TP_SSR, TP_INTERPOLATE_FACTOR, TP_PARA_INTERP_POLY, T
   if AIE_VARIANT == 2:
     # AIE-ML doesn't allow SSR on a non-decomposed designs, as it is highly inefficient.
     if TP_SSR > 1 and TP_INTERPOLATE_FACTOR != TP_PARA_INTERP_POLY:
-      return isError(f"SSR mode not available when design is not fully decomposed. Please use Parallel polyphase decomposition before increasing SSR.")
+        return isError(f"SSR mode not available when design is not fully decomposed. Please set TP_PARA_INTERP_POLY ({TP_PARA_INTERP_POLY}) to match TP_INTERPOLATE_FACTOR {TP_INTERPOLATE_FACTOR} before increasing TP_SSR {TP_SSR}.")
   return fn_stream_only_ssr(TP_API, TP_SSR)
 
 def fn_validate_casc_len(TP_CASC_LEN):
-    if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max :
-        return isError(f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max},respectively, but got {TP_CASC_LEN}.")
-    return isValid
+    return fn_validate_minmax_value("TP_CASC_LEN", TP_CASC_LEN, TP_CASC_LEN_min, TP_CASC_LEN_max)
 
 def validate_TP_CASC_LEN(args):
     TP_CASC_LEN = args["TP_CASC_LEN"]

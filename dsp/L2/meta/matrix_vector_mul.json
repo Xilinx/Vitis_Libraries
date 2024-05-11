@@ -48,12 +48,29 @@
         {
             "name": "TP_DIM_A",
             "type": "uint",
-            "description": "is an unsigned integer which describes the number of elements along the unique dimension (rows) of Matrix A."
+            "description": "is an unsigned integer which describes the number of elements along the unique dimension (rows) of Matrix A.",
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TP_DIM_A",
+                "args": [
+                    "TT_DATA_A",
+                    "TP_SSR"
+                ]
+            }
         },
         {
             "name": "TP_DIM_B",
             "type": "uint",
-            "description": "is an unsigned integer which describes the number of elements along vector B, this is a shared dimension with Matrix A"
+            "description": "is an unsigned integer which describes the number of elements along vector B, this is a shared dimension with Matrix A.",
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TP_DIM_B",
+                "args": [
+                    "TT_DATA_B",
+                    "TP_CASC_LEN",
+                    "TP_SSR"
+                ]
+            }
         },
         {
             "name": "TP_SHIFT",
@@ -70,11 +87,43 @@
             }
         },
         {
+            "name": "TP_SSR",
+            "type": "uint",
+            "description": "The number of kernels to be used in parallel to perform the function.",
+            "maximum": 80,
+            "minimum": 0,
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TP_SSR",
+                "args": [
+                ]
+            }
+        },
+        {
+            "name": "TP_CASC_LEN",
+            "type": "uint",
+            "description": "describes the number of AIE Tiles to split the GEMV operation into.",
+            "minimum": 1,
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TP_CASC_LEN",
+                "args": [
+                ]
+            }
+        },
+        {
             "name": "TP_RND",
             "type": "uint",
             "description": "describes the selection of rounding to be applied during the shift down stage of processing. TP_RND must be in the range 0 to 7 where",
             "maximum": 7,
-            "minimum": 0
+            "minimum": 0,
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TP_RND",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            }
         },
         {
             "name": "TP_SAT",
@@ -89,19 +138,35 @@
             "name": "TP_NUM_FRAMES",
             "type": "uint",
             "description": "describes the number matrix-vector multiplications occuring per window of matrix/vector input data",
-            "minimum": 1
+            "minimum": 1,
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TP_NUM_FRAMES",
+                "args": [
+                    "TP_DIM_A",
+                    "TP_DIM_B",
+                    "TP_CASC_LEN",
+                    "TP_SSR"
+                ]
+            }
         },
         {
-            "name": "TP_CASC_LEN",
+            "name": "TP_DIM_A_LEADING",
+            "description": "Describes which dimension of the Matrix A input data is contigious in memory. TP_DIM_A_LEADING=1 is column major, and TP_DIM_A_LEADING=0 is row major. Row major data will be transposed to column major data by the DMA buffer descriptors.",
             "type": "uint",
-            "description": "describes the number of AIE Tiles to split the GEMV operation into.",
-            "minimum": 1
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TP_DIM_A_LEADING",
+                "args": [
+                    "TP_NUM_FRAMES",
+                    "TT_DATA_A"
+                ]
+            }
         },
         {
-            "name": "TP_SSR",
+            "name": "AIE_VARIANT",
             "type": "uint",
-            "description": "describes the dimension of AIE Tiles to split the GEMV operation into.",
-            "minimum": 1
+            "description": "specifies the device type"
         }
     ],
     "ports": {

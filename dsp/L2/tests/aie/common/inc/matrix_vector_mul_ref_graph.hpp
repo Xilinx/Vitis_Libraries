@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,9 @@ template <typename TT_DATA_A,
           unsigned int TP_RND,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SAT,
           unsigned int TP_SSR,
-          unsigned int TP_SAT>
+          unsigned int TP_DIM_A_LEADING>
 class matrix_vector_mul_ref_graph : public graph {
    public:
     // std::array<port<input>, 1> inA[1];
@@ -60,8 +61,8 @@ class matrix_vector_mul_ref_graph : public graph {
         // Create MATRIX_VECTOR_MUL class
         printf("\nMatrix Vector Multiply Ref\n");
         m_matrix_vector_mulKernel =
-            kernel::create_object<matrix_vector_mul_ref<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND,
-                                                        TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN> >();
+            kernel::create_object<matrix_vector_mul_ref<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_DIM_A_LEADING,
+                                                        TP_SHIFT, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN> >();
 
         connect<>(inA[0], m_matrix_vector_mulKernel.in[0]);
         dimensions(m_matrix_vector_mulKernel.in[0]) = {TP_NUM_FRAMES * TP_DIM_A * TP_DIM_B};

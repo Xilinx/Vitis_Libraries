@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,14 +40,14 @@ namespace matrix_mult {
 using namespace adf;
 
 /**
- * @defgroup gemm_graph GEneral Matrix Multiply (GEMM)
+ * @defgroup gemm_graph General Matrix Multiply (GEMM)
  *
- * Matrix Multiply/GEMM (GEneral Matrix Multiply) solution.
+ * Matrix Multiply/GEMM (General Matrix Multiply) solution.
  *
  */
 
 /**
- * @brief matrix_mult performs a GEneral Matrix Multiply (GEMM), taking two input matrices of configurable dimensions
+ * @brief matrix_mult performs a General Matrix Multiply (GEMM), taking two input matrices of configurable dimensions
  *and data type.
  *
  * These are the templates to configure the Matrix Multiply graph class.
@@ -55,12 +55,12 @@ using namespace adf;
  * @ingroup gemm_graph
  *
  * @tparam TT_DATA_A describes the type of individual data samples input of
- *         Matrix A to the gemm function. This is a typename and must be one
- *         of the following: \n
+ *         Matrix A to the gemm function. \n
+ *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  * @tparam TT_DATA_B describes the type of individual data samples input of
- *         Matrix B to the gemm function. This is a typename and must be one
- *         of the following: \n
+ *         Matrix B to the gemm function. \n
+ *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  *         The following rules apply:
  *         - must be an integer type if TT_DATA_A is an integer type
@@ -74,8 +74,8 @@ using namespace adf;
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         product terms before each output. TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
- *         descriptive macros are recommended where
+ *         shift down stage of processing. \n
+ *         Although, TP_RND accepts unsigned integer values descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
  *         - rnd_sym_floor  = Truncate LSB, always round towards 0.
@@ -111,31 +111,36 @@ using namespace adf;
  *          the AIE matrix multiply graph.
  * @tparam TP_INPUT_WINDOW_VSIZE_A describes the number of samples in the window API
  *         used for input to Matrix A. \n It must be of size TP_DIM_A*TP_DIM_AB*N.
- *         Typical use has N=1, however N>1 can be utilised to minimise overhead of
+ *         Typical use has N=1, however N>1 can be utilized to minimize overhead of
  *         window API. \n This parameter is optional and has a default value of
  *         TP_DIM_A*TP_DIM_AB (N=1).
  * @tparam TP_INPUT_WINDOW_VSIZE_B describes the number of samples in the window API
  *         used for input to Matrix B. \n It must be of size TP_DIM_B*TP_DIM_AB*M.
- *         Typical use has M=1, however M>1 can be utilised to minimise overhead of
+ *         Typical use has M=1, however M>1 can be utilized to minimize overhead of
  *         window API. \n This parameter is optional and has a default value of
  *         TP_DIM_B*TP_DIM_AB (M=1). \n
  *         Note, the output window will be of size:
  *           (TP_INPUT_WINDOW_VSIZE_A/TP_DIM_AB * TP_INPUT_WINDOW_VSIZE_B/TP_DIM_AB).
  *          When N and M is 1, output window size will be TP_DIM_A * TP_DIM_B.
- * @tparam TP_CASC_LEN describes the number of AIE Tiles to split the GEMM operation into. \n
- *         TP_CASC_LEN splits the operation over TP_DIM_AB, where each kernel
- *         utilises the cascade stream to pass partial accumulation results to
+ * @tparam TP_CASC_LEN describes the number of AIE kernels the matrix multiplication will be divided into in series. \n
+ *         TP_CASC_LEN splits the operation over shared dimension TP_DIM_AB, where each kernel
+ *         utilizes the cascade stream to pass partial accumulation results to
  *         the next kernel. In effect, dot(A,B) + C. \n
  *         Note, it is also possible to tile the operation over multiple AIE tiles
  *         by instantiating multiple GEMM graphs with smaller dimensions.
- * @tparam TP_SAT describes the selection of saturation to be applied during the
- *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
+ *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
  *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
  *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
  *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds
  *         an n-bit signed value in the range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
- *
+ * @tparam TP_SSR describes the number of kernels (or cascaded kernel chains) that will compute the matrix
+ *multiplication in parallel.
+ *         Each SSR rank will receive an equal sized split (along the unique dimension) of Matrix A data. \n
+ *         There is no splitting of the Matrix B data when TP_SSR > 1 (only split when TP_CASC_LEN > 1). The Matrix B
+ *inputs across a
+ *         chain of cascaded kernels will be the same across all SSR ranks \n.
 **/
 
 template <typename TT_DATA_A,
@@ -154,54 +159,58 @@ template <typename TT_DATA_A,
           unsigned int TP_INPUT_WINDOW_VSIZE_A = TP_DIM_A* TP_DIM_AB,
           unsigned int TP_INPUT_WINDOW_VSIZE_B = TP_DIM_B* TP_DIM_AB,
           unsigned int TP_CASC_LEN = 1,
-          unsigned int TP_SAT = 1>
+          unsigned int TP_SAT = 1,
+          unsigned int TP_SSR = 1>
 class matrix_mult_graph : public graph {
    public:
     /**
      * The input A data to the function. This input is a window of samples of
      * TT_DATA_A type. The number of samples in the window is
      * described by TP_INPUT_WINDOW_VSIZE_A, which is
-     * derived from TP_DIM_A, TP_DIM_AB.
+     * derived from (TP_DIM_A / TP_SSR) * (TP_DIM_AB / TP_CASC_LEN).
+     * There are TP_CASC_LEN * TP_SSR input A ports.
      **/
-    port<input> inA[TP_CASC_LEN];
+    port<input> inA[TP_CASC_LEN * TP_SSR];
 
     /**
      * The input B data to the function. This input is a window of samples of
      * TT_DATA_B type. The number of samples in the window is
      * described by TP_INPUT_WINDOW_VSIZE_B, which is
-     * derived from TP_DIM_AB and TP_DIM_B.
+     * derived from (TP_DIM_AB / TP_CASC_LEN) * TP_DIM_B.
+     * There are TP_CASC_LEN * TP_SSR input B ports.
      **/
-    port<input> inB[TP_CASC_LEN];
+    port<input> inB[TP_CASC_LEN * TP_SSR];
 
     /**
      * A window API of
-     * TP_INPUT_WINDOW_VSIZE_A/TP_DIM_AB * TP_INPUT_WINDOW_VSIZE_B/TP_DIM_AB samples,
-     * or simply TP_DIM_A * TP_DIM_B samples of a derived output type.
+     * (TP_DIM_A / TP_SSR) * TP_DIM_B samples of a derived output type.
+     * There are TP_SSR output ports.
      **/
-    port<output> out[1];
+    port<output> out[TP_SSR];
 
     /**
      * The array of kernels that will be created and mapped onto AIE tiles.
-     * Number of kernels (``TP_CASC_LEN``) will be connected with each other by cascade interface.
+     * There will be TP_SSR number of parallel cascade chains of length TP_CASC_LEN.
      **/
-    kernel m_MatmultKernels[TP_CASC_LEN];
+    kernel m_MatmultKernels[TP_CASC_LEN * TP_SSR];
 
     /**
-     * The kernel that that will be created when output tiling is enabled (``TP_ADD_DETILING_OUT = 1``).
+     * The kernels that that will be created when output tiling is enabled (``TP_ADD_DETILING_OUT = 1``) for each SSR
+     *rank.
      **/
-    kernel untiler;
-
-    /**
-     * The array of kernels that will be created when tiling on input A is enabled (``TP_ADD_TILING_A = 1``).
-     * Kernels will pre-process and sent the data through cascade interface to corresponding: ``m_MatmultKernels``.
-     **/
-    kernel tilerA[TP_CASC_LEN];
+    kernel untiler[TP_SSR];
 
     /**
      * The array of kernels that will be created when tiling on input A is enabled (``TP_ADD_TILING_A = 1``).
      * Kernels will pre-process and sent the data through cascade interface to corresponding: ``m_MatmultKernels``.
      **/
-    kernel tilerB[TP_CASC_LEN];
+    kernel tilerA[TP_CASC_LEN * TP_SSR];
+
+    /**
+     * The array of kernels that will be created when tiling on input A is enabled (``TP_ADD_TILING_A = 1``).
+     * Kernels will pre-process and sent the data through cascade interface to corresponding: ``m_MatmultKernels``.
+     **/
+    kernel tilerB[TP_CASC_LEN * TP_SSR];
 
     /**
      * Access function to get pointer to kernel (or first kernel in a chained configuration).
@@ -210,14 +219,20 @@ class matrix_mult_graph : public graph {
     kernel* getKernels() { return m_MatmultKernels; };
 
     // Empty type for a fallback to avoid redundant instantiations from the compiler in x86
+    /**
+     * @cond NOCOMMENTS
+     */
     struct no_kernel {};
+    /**
+     * @endcond
+     */
     // TODO: Have the first or last kernel take the remainder. ie DIM_AB=15 and CASC =2; should be one kernel of 8 and
     // one kernel of 6, where we round by tilingScheme.ABtile.
     static_assert(TP_DIM_AB % TP_CASC_LEN == 0, "TP_DIM_AB needs to be a multiple of TP_CASC_LEN");
     template <bool cascIn, bool cascOut>
     using matMultCasc = matrix_mult<TT_DATA_A,
                                     TT_DATA_B,
-                                    TP_DIM_A,
+                                    (TP_DIM_A / TP_SSR),
                                     (TP_DIM_AB / TP_CASC_LEN),
                                     TP_DIM_B,
                                     TP_SHIFT,
@@ -226,7 +241,7 @@ class matrix_mult_graph : public graph {
                                     TP_DIM_A_LEADING,
                                     TP_DIM_B_LEADING,
                                     TP_DIM_OUT_LEADING,
-                                    (TP_INPUT_WINDOW_VSIZE_A / TP_CASC_LEN),
+                                    (TP_INPUT_WINDOW_VSIZE_A / (TP_SSR * TP_CASC_LEN)),
                                     (TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN),
                                     cascIn,
                                     cascOut>;
@@ -248,7 +263,7 @@ class matrix_mult_graph : public graph {
 
     using TilerClassA = tilerKernelClass<tilingScheme.Atile,
                                          tilingScheme.ABtile,
-                                         dimAPerKernel,
+                                         (dimAPerKernel / TP_SSR),
                                          (TP_DIM_AB / TP_CASC_LEN),
                                          TP_DIM_A_LEADING,
                                          TT_DATA_A>;
@@ -260,7 +275,7 @@ class matrix_mult_graph : public graph {
                                          TT_DATA_B>;
     using DetilerClassOut = untilerKernelClass<tilingScheme.Atile,
                                                tilingScheme.Btile,
-                                               dimAPerKernel,
+                                               (dimAPerKernel / TP_SSR),
                                                dimBPerKernel,
                                                TP_DIM_OUT_LEADING,
                                                outType_t<TT_DATA_A, TT_DATA_B> >;
@@ -278,91 +293,95 @@ class matrix_mult_graph : public graph {
     matrix_mult_graph() {
         if (isRedundantTilerA && TP_ADD_TILING_A == 1) {
             printf(
-                "WARNING: TP_ADD_TILING_A is true, but P_DIM_AB is small enough that tiling is not nessecary for this "
+                "WARNING: TP_ADD_TILING_A is true, but P_DIM_AB is small enough that tiling is not necessary for this "
                 "configuration. TP_ADD_TILING_A will be ignored. \n");
         }
         if (isRedundantTilerB && TP_ADD_TILING_B == 1) {
             printf(
-                "WARNING: TP_ADD_TILING_B is true, but P_DIM_B is small enough that tiling is not nessecary for this "
+                "WARNING: TP_ADD_TILING_B is true, but P_DIM_B is small enough that tiling is not necessary for this "
                 "configuration. TP_ADD_TILING_B will be ignored. \n");
         }
         if (isRedundantTilerOut && TP_ADD_DETILING_OUT == 1) {
             printf(
-                "WARNING: TP_ADD_DETILING_OUT is true, but P_DIM_B is small enough that detiling is not nessecary for "
+                "WARNING: TP_ADD_DETILING_OUT is true, but P_DIM_B is small enough that detiling is not necessary for "
                 "this configuration. TP_ADD_DETILING_OUT will be ignored. \n");
         }
         printf("\n");
 
-        // make input connections
-        for (int i = 0; i < TP_CASC_LEN; i++) {
-            if (i >= 1 && i < (TP_CASC_LEN - 1)) {
-                // both casccade
-                m_MatmultKernels[i] = kernel::create_object<middleMatMult>();
+        for (int ssrRank = 0; ssrRank < TP_SSR; ssrRank++) {
+            // make input connections
+            for (int cascRank = 0; cascRank < TP_CASC_LEN; cascRank++) {
+                int kernelNum = (ssrRank * TP_CASC_LEN) + cascRank;
+                if (cascRank >= 1 && cascRank < (TP_CASC_LEN - 1)) {
+                    // both cascade
+                    m_MatmultKernels[kernelNum] = kernel::create_object<middleMatMult>();
+                } else if (cascRank >= 1 && cascRank >= (TP_CASC_LEN - 1)) {
+                    // last kernel
+                    m_MatmultKernels[kernelNum] = kernel::create_object<lastMatMult>();
+                } else {
+                    // first kernel
+                    m_MatmultKernels[kernelNum] = kernel::create_object<firstMatMult>();
+                }
+                if (cascRank >= 1) {
+                    connect<cascade>(m_MatmultKernels[kernelNum - 1].out[0], m_MatmultKernels[kernelNum].in[2]);
+                }
+                // TODO, different window sizes for end kernel if the window size doesn't evenly split by CASC_LEN.
 
-            } else if (i >= 1 && i >= (TP_CASC_LEN - 1)) {
-                // last kernel
-                m_MatmultKernels[i] = kernel::create_object<lastMatMult>();
-            } else {
-                // first kernel
-                m_MatmultKernels[i] = kernel::create_object<firstMatMult>();
-            }
-            if (i >= 1) {
-                connect<cascade>(m_MatmultKernels[i - 1].out[0], m_MatmultKernels[i].in[2]);
-            }
-            // TODO, different window sizes for end kernel if the window size doesn't evenly split by CASC_LEN.
+                if
+                    constexpr(!isRedundantTilerA && TP_ADD_TILING_A) {
+                        tilerA[kernelNum] = kernel::create_object<TilerClassA>();
+                        connect<>(inA[kernelNum], tilerA[kernelNum].in[0]);
+                        dimensions(tilerA[kernelNum].in[0]) = {TP_INPUT_WINDOW_VSIZE_A / (TP_SSR * TP_CASC_LEN)};
 
+                        connect<>(tilerA[kernelNum].out[0], m_MatmultKernels[kernelNum].in[0]);
+                        dimensions(tilerA[kernelNum].out[0]) = {TP_INPUT_WINDOW_VSIZE_A / (TP_SSR * TP_CASC_LEN)};
+                        dimensions(m_MatmultKernels[kernelNum].in[0]) = {TP_INPUT_WINDOW_VSIZE_A /
+                                                                         (TP_SSR * TP_CASC_LEN)};
+                    }
+                else {
+                    connect<>(inA[kernelNum], m_MatmultKernels[kernelNum].in[0]);
+                    dimensions(m_MatmultKernels[kernelNum].in[0]) = {TP_INPUT_WINDOW_VSIZE_A / (TP_SSR * TP_CASC_LEN)};
+                }
+
+                if
+                    constexpr(!isRedundantTilerB && TP_ADD_TILING_B) {
+                        tilerB[kernelNum] = kernel::create_object<TilerClassB>();
+                        connect<>(inB[kernelNum], tilerB[kernelNum].in[0]);
+                        dimensions(tilerB[kernelNum].in[0]) = {TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN};
+                        connect<>(tilerB[kernelNum].out[0], m_MatmultKernels[kernelNum].in[1]);
+                        dimensions(tilerB[kernelNum].out[0]) = {TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN};
+                        dimensions(m_MatmultKernels[kernelNum].in[1]) = {TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN};
+                    }
+                else {
+                    connect<>(inB[kernelNum], m_MatmultKernels[kernelNum].in[1]);
+                    dimensions(m_MatmultKernels[kernelNum].in[1]) = {TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN};
+                }
+                // Specify mapping constraints - Can be overriden in parent graph.
+                runtime<ratio>(m_MatmultKernels[kernelNum]) = 0.8;
+                runtime<ratio>(tilerA[kernelNum]) = 0.4;
+                runtime<ratio>(tilerB[kernelNum]) = 0.4;
+                // Source files
+                source(m_MatmultKernels[kernelNum]) = "matrix_mult.cpp";
+                source(tilerA[kernelNum]) = "matrix_mult_tiler.cpp";
+                source(tilerB[kernelNum]) = "matrix_mult_tiler.cpp";
+            }
+            int kernelOutNum = (ssrRank * TP_CASC_LEN) + TP_CASC_LEN - 1;
             if
-                constexpr(!isRedundantTilerA && TP_ADD_TILING_A) {
-                    tilerA[i] = kernel::create_object<TilerClassA>();
-                    connect<>(inA[i], tilerA[i].in[0]);
-                    dimensions(tilerA[i].in[0]) = {TP_INPUT_WINDOW_VSIZE_A / TP_CASC_LEN};
-                    connect<>(tilerA[i].out[0], m_MatmultKernels[i].in[0]);
-                    dimensions(tilerA[i].out[0]) = {TP_INPUT_WINDOW_VSIZE_A / TP_CASC_LEN};
-                    dimensions(m_MatmultKernels[i].in[0]) = {TP_INPUT_WINDOW_VSIZE_A / TP_CASC_LEN};
+                constexpr(!isRedundantTilerOut && TP_ADD_DETILING_OUT) {
+                    untiler[ssrRank] = kernel::create_object<DetilerClassOut>();
+                    connect<>(m_MatmultKernels[kernelOutNum].out[0], untiler[ssrRank].in[0]);
+                    dimensions(m_MatmultKernels[kernelOutNum].out[0]) = {(dimAPerKernel / TP_SSR) * dimBPerKernel};
+                    dimensions(untiler[ssrRank].in[0]) = {(dimAPerKernel / TP_SSR) * dimBPerKernel};
+                    connect<>(untiler[ssrRank].out[0], out[ssrRank]);
+                    dimensions(untiler[ssrRank].out[0]) = {(dimAPerKernel / TP_SSR) * dimBPerKernel};
                 }
             else {
-                connect<>(inA[i], m_MatmultKernels[i].in[0]);
-                dimensions(m_MatmultKernels[i].in[0]) = {TP_INPUT_WINDOW_VSIZE_A / TP_CASC_LEN};
+                connect<>(m_MatmultKernels[kernelOutNum].out[0], out[ssrRank]);
+                dimensions(m_MatmultKernels[kernelOutNum].out[0]) = {(dimAPerKernel / TP_SSR) * dimBPerKernel};
             }
-
-            if
-                constexpr(!isRedundantTilerB && TP_ADD_TILING_B) {
-                    tilerB[i] = kernel::create_object<TilerClassB>();
-                    connect<>(inB[i], tilerB[i].in[0]);
-                    dimensions(tilerB[i].in[0]) = {TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN};
-                    connect<>(tilerB[i].out[0], m_MatmultKernels[i].in[1]);
-                    dimensions(tilerB[i].out[0]) = {TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN};
-                    dimensions(m_MatmultKernels[i].in[1]) = {TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN};
-                }
-            else {
-                connect<>(inB[i], m_MatmultKernels[i].in[1]);
-                dimensions(m_MatmultKernels[i].in[1]) = {TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN};
-            }
-            // Specify mapping constraints - Can be overriden in parent graph.
-            runtime<ratio>(m_MatmultKernels[i]) = 0.8;
-            runtime<ratio>(tilerA[i]) = 0.4;
-            runtime<ratio>(tilerB[i]) = 0.4;
-            // Source files
-            source(m_MatmultKernels[i]) = "matrix_mult.cpp";
-            source(tilerA[i]) = "matrix_mult_tiler.cpp";
-            source(tilerB[i]) = "matrix_mult_tiler.cpp";
+            runtime<ratio>(untiler[ssrRank]) = 0.4;
+            source(untiler[ssrRank]) = "matrix_mult_untiler.cpp";
         }
-
-        if
-            constexpr(!isRedundantTilerOut && TP_ADD_DETILING_OUT) {
-                untiler = kernel::create_object<DetilerClassOut>();
-                connect<>(m_MatmultKernels[(TP_CASC_LEN - 1)].out[0], untiler.in[0]);
-                dimensions(m_MatmultKernels[(TP_CASC_LEN - 1)].out[0]) = {dimAPerKernel * dimBPerKernel};
-                dimensions(untiler.in[0]) = {dimAPerKernel * dimBPerKernel};
-                connect<>(untiler.out[0], out[0]);
-                dimensions(untiler.out[0]) = {dimAPerKernel * dimBPerKernel};
-            }
-        else {
-            connect<>(m_MatmultKernels[(TP_CASC_LEN - 1)].out[0], out[0]);
-            dimensions(m_MatmultKernels[(TP_CASC_LEN - 1)].out[0]) = {dimAPerKernel * dimBPerKernel};
-        }
-        runtime<ratio>(untiler) = 0.4;
-        source(untiler) = "matrix_mult_untiler.cpp";
     }
 };
 }

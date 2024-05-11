@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,13 @@
 
 #define USE_INBUILT_SINCOS 0
 #define USE_LUT_SINCOS 1
+
+#define USE_PHASE_RELOAD_FALSE 0
+#define USE_PHASE_RELOAD_TRUE 1
+
+#define IOBUFFER_API 0
+#define STREAM_API 1
+
 /*
 This file contains sets of overloaded, templatized and specialized templatized functions which
 encapsulate properties of the intrinsics used by the main kernal class. Specifically,

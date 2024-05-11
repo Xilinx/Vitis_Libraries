@@ -24,15 +24,49 @@ import fir_sr_asym as sr_asym
 # and "err_message" if "is_valid" is False.
 #
 
+TP_INPUT_WINDOW_VSIZE_min = 4
+TP_PARA_DECI_POLY_min = 1
+TP_CASC_LEN_min = 1
+TP_CASC_LEN_max = 40
+TP_FIR_LEN_min = 4
+TP_FIR_LEN_max = 8192
+
+def fn_data_needed_within_buffer_size_ml(T_D, T_C, TP_FIR_LEN, TP_CASC_LEN, TP_SSR):
+    df = 2
+    aie_variant = 2
+    for pos in range(TP_CASC_LEN):
+        samplesInBuff =  (1024 // 8) // fn_size_by_byte(T_D)
+        firRangeLen = fnFirRangeRem(TP_FIR_LEN, TP_CASC_LEN, pos, df) if (pos + 1 == TP_CASC_LEN) else fnFirRange(TP_FIR_LEN, TP_CASC_LEN, pos, df)
+        numTaps = (firRangeLen + 1) / 2 if (pos == TP_CASC_LEN - 1) else firRangeLen / 2
+        dataLoadVSize = 256 // 8 // fn_size_by_byte(T_D)
+        firRangeOffset = sr_asym.fnFirRangeOffset(TP_FIR_LEN, TP_CASC_LEN, pos, 2) / df
+        streamInitNullLanes = ((TP_FIR_LEN - firRangeLen - firRangeOffset * df + 1) / 2)
+        lanes = fnNumLanes384b(T_D, T_C, aie_variant)
+        streamInitNullAccs = streamInitNullLanes / lanes
+        streamRptFactor = samplesInBuff / lanes
+        streamInitAccs = sr_asym.fn_ceil(streamInitNullAccs, streamRptFactor) - streamInitNullAccs
+        cascOffset = streamInitNullLanes - streamInitNullAccs * lanes
+        m_kInitDataNeeded = numTaps + cascOffset + dataLoadVSize - 1
+        if m_kInitDataNeeded > samplesInBuff:
+                return isError(
+                    f"Requested parameters: FIR length ({TP_FIR_LEN}), cascade length ({TP_CASC_LEN}) and TP_SSR ({TP_SSR}) result in a kernel ({pos}) that requires more data samples ({m_kInitDataNeeded}) than capacity of a data buffer ({samplesInBuff}) "
+                    f"Please increase the cascade length ({TP_CASC_LEN}) and/or TP_SSR ({TP_SSR})."
+                )
+    return isValid
+
+
+
 
 def fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1, TP_PARA_DECI_POLY=1):
     # decimate halfband always uses 384b version of lanes.
-    if TP_INPUT_WINDOW_VSIZE < TP_INPUT_WINDOW_VSIZE_min:
-        return isError(f"Minimum value for Input window size is {TP_INPUT_WINDOW_VSIZE_min}, but got {TP_INPUT_WINDOW_VSIZE}.")
+    res = fn_validate_min_value("TP_INPUT_WINDOW_VSIZE", TP_INPUT_WINDOW_VSIZE, TP_INPUT_WINDOW_VSIZE_min)
+    if (res["is_valid"] == False):
+      return res
+
     checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEFF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=fnNumLanes384b(TT_DATA, TT_COEFF)*4)
-    symApiSSR      = 0 if (TP_SSR == 1 and TP_PARA_DECI_POLY == 1) else TP_API  # Force buffer checks when not in SSR mode.
+    symApiSSR      = 0 if (TP_SSR == 1 and TP_PARA_DECI_POLY == 1) else TP_API  # Force buffer checks when not in TP_SSR mode.
     checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, symApiSSR, TP_SSR, TP_INTERPOLATE_FACTOR=1, TP_DECIMATE_FACTOR=2)
-    # Input samples are round-robin split to each SSR input paths, so total frame size must be divisable by SSR factor.
+    # Input samples are round-robin split to each TP_SSR input paths, so total frame size must be divisable by TP_SSR factor.
     checkIfDivisableBySSR = fn_windowsize_divisible_by_param(TP_INPUT_WINDOW_VSIZE, TP_SSR * TP_PARA_DECI_POLY)
 
     for check in (checkMultipleLanes,checkMaxBuffer,checkIfDivisableBySSR):
@@ -42,22 +76,26 @@ def fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW
     return isValid
 
 def fn_halfband_len(TP_FIR_LEN):
-  return isValid if ((TP_FIR_LEN + 1) % 4 == 0) else isError("Filter length must be 4N-1 where N is a positive integer. Got TP_FIR_LEN {TP_FIR_LEN}")
+  return isValid if ((TP_FIR_LEN + 1) % 4 == 0) else isError(f"Filter length must be 4N-1 where N is a positive integer. Got TP_FIR_LEN {TP_FIR_LEN}")
 
-def fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, TP_PARA_DECI_POLY):
-    if TP_FIR_LEN < TP_FIR_LEN_min or TP_FIR_LEN > TP_FIR_LEN_max :
-        return isError(f"Minimum and maximum value for Filter Length is {TP_FIR_LEN_min} and {TP_FIR_LEN_max}, respectively, but got {TP_FIR_LEN}.")
+def fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, TP_PARA_DECI_POLY, AIE_VARIANT):
+    res = fn_validate_minmax_value("TP_FIR_LEN", TP_FIR_LEN, TP_FIR_LEN_min, TP_FIR_LEN_max)
+    if (res["is_valid"] == False):
+        return res
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
 
     symFactor   = 4 # Symmetric, half-band
-    symFactorSSR   = 2 if (TP_SSR != 1 ) else symFactor # SSR mode will discard the symmetry
-    symApiSSR      = 0 if (TP_SSR == 1 and TP_PARA_DECI_POLY == 1) else TP_API  # Force buffer checks when not in SSR mode.
+    symFactorSSR   = 2 if (TP_SSR != 1 ) else symFactor # TP_SSR mode will discard the symmetry
+    symApiSSR      = 0 if (TP_SSR == 1 and TP_PARA_DECI_POLY == 1) else TP_API  # Force buffer checks when not in TP_SSR mode.
     maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_SSR, symApiSSR, symFactorSSR)
     halfbandLenCheck = fn_halfband_len(TP_FIR_LEN)
     dataNeededCheck = isValid
+    dataNeededAIEMLCheck = isValid
     if TP_PARA_DECI_POLY > 1:
       dataNeededCheck = sr_asym.fn_data_needed_within_buffer_size(TT_DATA, TT_COEFF, (TP_FIR_LEN + 1)/2, TP_CASC_LEN, TP_API, TP_SSR )
-    for check in (minLenCheck, maxLenCheck, halfbandLenCheck, dataNeededCheck):
+    if AIE_VARIANT == 2 and TP_API == 1:
+      dataNeededAIEMLCheck = fn_data_needed_within_buffer_size_ml(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
+    for check in (minLenCheck, maxLenCheck, halfbandLenCheck, dataNeededCheck, dataNeededAIEMLCheck):
       if check["is_valid"] == False :
         return check
 
@@ -65,22 +103,23 @@ def fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_A
 
 def fn_parapoly_value(TP_PARA_DECI_POLY):
     if TP_PARA_DECI_POLY != 1 and TP_PARA_DECI_POLY != 2:
-      return isError(f"TP_PARA_DECI_POLY can be only set to 1 or 2 for halfbands. Got {TP_PARA_DECI_POLY}")
+      return isError(f"TP_PARA_DECI_POLY {TP_PARA_DECI_POLY} can be only set to 1 or 2 for halfbands.")
     return isValid
 
 def fn_ssr_for_para_poly(TP_PARA_DECI_POLY, TP_SSR):
   if TP_SSR > 1 and TP_PARA_DECI_POLY != 2:
-    return isError(f"SSR > 1 is only supported with TP_PARA_DECI_POLY set to 2. Got TP_SSR {TP_SSR}")
+    return isError(f"TP_SSR ({TP_SSR}) > 1 is only supported with TP_PARA_DECI_POLY {TP_PARA_DECI_POLY} set to 2.")
   return isValid
 
 def fn_stream_api_poly(TP_PARA_DECI_POLY, TP_API):
     if (TP_PARA_DECI_POLY == 1 or TP_API == 1):
         return isValid
-    return isError(f"TP_PARA_DECI_POLY can be set to 2 only for streaming API")
+    return isError(f"TP_PARA_DECI_POLY {TP_PARA_DECI_POLY}  can be set to 2 only for streaming API")
 
 def fn_validate_para_deci_poly(TP_API, TP_PARA_DECI_POLY, TP_SSR):
-    if TP_PARA_DECI_POLY < TP_PARA_DECI_POLY_min :
-        return isError(f"Minimum value for Decimation poly phase is {TP_PARA_DECI_POLY_min}, but got {TP_PARA_DECI_POLY}.")
+    res = fn_validate_min_value("TP_PARA_DECI_POLY", TP_PARA_DECI_POLY, TP_PARA_DECI_POLY_min)
+    if (res["is_valid"] == False):
+      return res
     checkParaPolyVal = fn_parapoly_value(TP_PARA_DECI_POLY)
     checkSSRPoly     = fn_ssr_for_para_poly(TP_PARA_DECI_POLY, TP_SSR)
 
@@ -91,9 +130,8 @@ def fn_validate_para_deci_poly(TP_API, TP_PARA_DECI_POLY, TP_SSR):
     return isValid
 
 def fn_validate_casc_len(TP_CASC_LEN):
-    if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max :
-        return isError(f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max}, respectively, but got  {TP_CASC_LEN}.")
-    return isValid
+    return fn_validate_minmax_value("TP_CASC_LEN", TP_CASC_LEN, TP_CASC_LEN_min, TP_CASC_LEN_max)
+
 
 #### validation APIs ####
 def validate_TT_COEFF(args):
@@ -145,8 +183,9 @@ def validate_TP_FIR_LEN(args):
     TP_API = args["TP_API"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
+    AIE_VARIANT = args["AIE_VARIANT"]
 
-    return fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, TP_PARA_DECI_POLY)
+    return fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, TP_PARA_DECI_POLY, AIE_VARIANT)
 
 def validate_TP_DUAL_IP(args):
     TP_API = args["TP_API"]
@@ -221,9 +260,10 @@ def info_ports(args):
     TP_API = args["TP_API"]
     TP_DUAL_IP = args["TP_DUAL_IP"]
     TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
+    AIE_VARIANT = args["AIE_VARIANT"]
     TP_DECIMATE_FACTOR = 2
     TP_INTERPOLATE_FACTOR = 1
-
+    rtp_ports = (TP_FIR_LEN + 1)/2 + 1 if AIE_VARIANT == 2 else (TP_FIR_LEN + 1)/4 + 1
     margin_size = sr_asym.fn_margin_size(TP_FIR_LEN, TT_DATA)
     num_poly_ssr = TP_SSR * TP_PARA_DECI_POLY
     num_out_ports = TP_SSR
@@ -232,7 +272,7 @@ def info_ports(args):
 
     in_ports = get_port_info("in", "in", TT_DATA, in_win_size, num_poly_ssr, marginSize=margin_size, TP_API=TP_API)
     in2_ports = (get_port_info("in2", "in", TT_DATA, in_win_size, num_poly_ssr, marginSize=margin_size, TP_API=TP_API) if (TP_DUAL_IP == 1) else [])
-    coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEFF, TP_SSR, ((TP_FIR_LEN+1)/4+1), "async") if (args["TP_USE_COEFF_RELOAD"] == 1) else [])
+    coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEFF, TP_SSR, rtp_ports, "async") if (args["TP_USE_COEFF_RELOAD"] == 1) else [])
 
     # decimate by 2 for halfband
     out_ports = get_port_info("out", "out", TT_DATA, out_win_size, num_out_ports, TP_API=args["TP_API"])

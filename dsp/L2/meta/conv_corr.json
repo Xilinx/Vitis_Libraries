@@ -1,0 +1,142 @@
+{
+    "schema": "vitis_library_api_spec_schema-1.0",
+    "api_name": "xf::dsp::aie::conv_corr::conv_corr_graph",
+    "display_name": "conv_corr_graph",
+    "header_file_name": "conv_corr.hpp",
+    "search_paths": [
+        "L1/include/aie",
+        "L1/src/aie",
+        "L1/tests/aie/inc",
+        "L1/tests/aie/src",
+        "L2/include/aie",
+        "L2/tests/aie/common/inc"
+    ],
+    "parameters": [
+        {
+            "name": "TT_DATA_F",
+            "type": "typename",
+            "description": "The type of individual data samples input to port F.",
+            "enum":["int8", "int16", "int32", "cint16", "cint32", "float", "cfloat", "bfloat16"],
+            "validator": {
+                "file": "conv_corr.py",
+                "function": "validate_TT_DATA_F",
+                "args": ["TT_DATA_G", "AIE_VARIANT"]
+            }
+        },
+        {
+            "name": "TT_DATA_G",
+            "type": "typename",
+            "description": "The type of individual data samples input to port G.",
+            "enum":["int8", "int16", "int32", "cint16", "cint32", "float", "cfloat", "bfloat16"]
+        },
+        {
+            "name": "TT_DATA_OUT",
+            "type": "typename",
+            "description": "The type of individual data samples at output port.",
+            "enum":["int16", "int32", "cint16", "cint32", "float", "cfloat", "bfloat16"],
+            "validator": {
+                "file": "conv_corr.py",
+                "function": "validate_TT_DATA_OUT",
+                "args": ["TT_DATA_F", "TT_DATA_G", "AIE_VARIANT"]
+            }
+        },
+        {
+            "name": "TP_FUNCT_TYPE",
+            "type": "uint",
+            "description": "The function type (correlation/convolution).",
+            "validator": {
+                "file": "conv_corr.py",
+                "function": "validate_TP_FUNCT_TYPE",
+                "args": []
+            }
+        },
+        {
+            "name": "TP_COMPUTE_MODE",
+            "type": "uint",
+            "description": "The compute mode (full/valid/same).",
+            "validator": {
+                "file": "conv_corr.py",
+                "function": "validate_TP_COMPUTE_MODE",
+                "args": []
+            }
+        },
+        {
+            "name": "TP_F_LEN",
+            "type": "uint",
+            "description": "The number of input samples at port F.",
+            "validator": {
+                "file": "conv_corr.py",
+                "function": "validate_TP_F_LEN",
+                "args": ["TT_DATA_F"]
+            }
+        },
+        {
+            "name": "TP_G_LEN",
+            "type": "uint",
+            "description": "The number of input samples at port G.",
+            "validator": {
+                "file": "conv_corr.py",
+                "function": "validate_TP_G_LEN",
+                "args": ["TT_DATA_G", "TP_F_LEN"]
+            }
+        },
+        {
+            "name": "TP_SHIFT",
+            "description": "The power of 2 shift down applied the product of sample and coefficient",
+            "type": "uint",
+            "validator": {
+                "file": "conv_corr.py",
+                "function": "validate_TP_SHIFT",
+                "args": []
+            }
+        },
+        {
+            "name": "TP_API",
+            "description": "The interface selection (windows/streams) of the function.",
+            "type": "uint",
+            "validator": {
+                "file": "conv_corr.py",
+                "function": "validate_TP_API",
+                "args": []
+            }
+        },
+        {
+            "name": "TP_RND",
+            "description": "The rounding to be applied during the shift down stage of processing.",
+            "type": "uint",
+            "validator": {
+                "file": "conv_corr.py",
+                "function": "validate_TP_RND",
+                "args": []
+            }
+        },
+        {
+            "name": "TP_SAT",
+            "description": "Saturation mode.",
+            "type": "uint",
+            "validator": {
+                "file": "conv_corr.py",
+                "function": "validate_TP_SAT", 
+                "args": []
+            }
+        },
+        {
+            "name": "AIE_VARIANT",
+            "type": "uint",
+            "description": "specifies the device type",
+            "validator": {
+                "file": "conv_corr.py",
+                "function": "validate_AIE_VARIANT", 
+                "args": []
+            }
+        }
+    ],
+    "ports": {
+        "file": "conv_corr.py",
+        "function": "info_ports"
+    },
+    "generator": {
+        "file": "conv_corr.py",
+        "function": "generate_graph"
+    }
+}

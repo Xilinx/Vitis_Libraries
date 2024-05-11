@@ -1,13 +1,14 @@
 {
     "spec": "vmc_mixer.json",
-    "outdir": "./xmc_aie_lib/Mixer_f965d91e",
+    "outdir": "./xmc_aie_lib/Mixer_ca330474",
     "parameters": {
         "data_type": "cint16",
         "input_window_size": 32,
-        "rnd_mode": 2,
+        "rnd_mode": 0,
         "sat_mode": 0,
         "mixer_mode": 1,
         "phase_increment": 0,
+        "USE_PHASE_RELOAD": false,
         "AIE_VARIANT": 1
     }
 }

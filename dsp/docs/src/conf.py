@@ -1,3 +1,9 @@
+#
+# Copyright © 2019–2024 Advanced Micro Devices, Inc
+# 
+# `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+#
+
 # -*- coding: utf-8 -*-
 #
 # Configuration file for the Sphinx documentation builder.

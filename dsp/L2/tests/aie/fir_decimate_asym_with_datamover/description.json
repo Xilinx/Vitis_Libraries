@@ -96,10 +96,10 @@
                 "./"
             ],
             "clflags": [
-                "--Xpreproc=-DUUT_GRAPH=fir_decimate_asym_graph",
-                "--Xpreproc=-DOUTPUT_FILE=./data/uut_output.txt",
-                "--Xpreproc=-DINPUT_FILE=./data/input.txt",
-                "--Xpreproc=-DUSING_UUT=1"
+                "--aie.Xpreproc=-DUUT_GRAPH=fir_decimate_asym_graph",
+                "--aie.Xpreproc=-DOUTPUT_FILE=./data/uut_output.txt",
+                "--aie.Xpreproc=-DINPUT_FILE=./data/input.txt",
+                "--aie.Xpreproc=-DUSING_UUT=1"
             ]
         }
     },

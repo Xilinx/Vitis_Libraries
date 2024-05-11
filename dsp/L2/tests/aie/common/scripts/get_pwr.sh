@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,10 +18,16 @@
 CURRENT_DIR=$1
 UUT_KERNEL=$2
 STATUS_FILE=$3
-PART=$4
+AIE_VARIANT=$4
 
 PWR_DIR=./pwr_test
 VCD_DIR=${CURRENT_DIR}/${UUT_KERNEL}_sim.vcd
+
+if [ $AIE_VARIANT == 1 ]; then 
+    PART="XCVC1902-VSVD1760-1LP-E-S"
+    elif [ $AIE_VARIANT == 2 ]; then 
+    PART="XCVE2802-VSVH1760-1MP-E-S"
+fi
 
 if [ -f "$VCD_DIR" ]; then #does the vcd file exist to run the power tests?
     # create power folder

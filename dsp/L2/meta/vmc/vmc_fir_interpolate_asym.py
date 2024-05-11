@@ -42,11 +42,12 @@ def vmc_validate_coeff(args):
     data_type = args["data_type"]
     casc_length = args["casc_length"]
     interpolate_factor = args["interpolate_factor"]
+    AIE_VARIANT = args["AIE_VARIANT"]
     ssr = 1
     api = 0
     dual_ip = 0
     fir_length = fn_get_fir_length(args)
-    return fn_validate_fir_len(data_type, coef_type, fir_length, interpolate_factor, casc_length, ssr, api, use_coeff_reload, dual_ip )
+    return fn_validate_fir_len(data_type, coef_type, fir_length, interpolate_factor, casc_length, ssr, api, use_coeff_reload, dual_ip, AIE_VARIANT)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]

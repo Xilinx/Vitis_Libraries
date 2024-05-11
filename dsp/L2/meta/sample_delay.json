@@ -48,6 +48,11 @@
             "function": "validate_TP_MAX_DELAY",
             "args": ["TT_DATA", "TP_API"]
             }
+        },
+        {
+            "name": "AIE_VARIANT",
+            "type": "uint",
+            "description": "specifies the device type"
         }
     ],
     "ports": {

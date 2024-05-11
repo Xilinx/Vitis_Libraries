@@ -45,6 +45,11 @@
       "name": "dual_ip",
       "description": "TP_DUAL_IP allows 2 stream inputs to be connected to FIR, increasing available throughput. When set to 0, single stream input will be connected to FIR kernel, when set to 1, both input stream ports will be used.",
       "default": false,
+      "validator": {
+        "file": "vmc_stream_fir_sr_sym.py",
+        "function": "vmc_validate_dual_ip",
+        "args": ["AIE_VARIANT"]
+      },
       "type": "bool",
           "label": "Provide second set of input ports",
             "tablabel": "Main",
@@ -74,7 +79,7 @@
       "validator": {
         "file": "vmc_stream_fir_sr_sym.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "ssr"]
+        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "ssr","AIE_VARIANT"]
       },
           "label": "Filter coefficients:",
             "tablabel": "Main",
@@ -121,9 +126,7 @@
       "key": "TP_RND",
       "name": "rnd_mode",
       "description": "The rounding to be applied during the shift down stage of processing.",
-      "enum": [0, 1, 2, 3, 4, 5, 6, 7],
-      "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"],
-      "default": 2,
+      "default": "Round to positive infinity",
       "validator": {
         "file": "vmc_stream_fir_sr_sym.py",
         "function": "vmc_validate_rnd_mode",
@@ -176,7 +179,17 @@
             "label": "Number of cascade stages:",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
+      },
+	{
+	  "key": "AIE_VARIANT",
+	  "name": "AIE_VARIANT",
+      "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
+      "default": 1,
+	 "label": "AIE Variant:",
+      "tablabel": "Main",
+      "parameterType":"edit"
+    }
+
   ],
   "generator": {
     "file": "vmc_stream_fir_sr_sym.py",

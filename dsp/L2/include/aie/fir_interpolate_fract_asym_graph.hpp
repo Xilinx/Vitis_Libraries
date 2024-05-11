@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -309,8 +309,8 @@ class create_casc_kernel<1,
  *
  * These are the templates to configure the Asymmetric Fractional Interpolation FIR class.
  * @tparam TT_DATA describes the type of individual data samples input to and
- *         output from the filter function. This is a typename and must be one
- *         of the following: \n
+ *         output from the filter function. \n
+ *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  * @tparam TT_COEFF describes the type of individual coefficients of the filter
  *         taps. \n It must be one of the same set of types listed for TT_DATA
@@ -322,7 +322,8 @@ class create_casc_kernel<1,
  * @tparam TP_FIR_LEN is an unsigned integer which describes the number of taps
  *         in the filter.
  * @tparam TP_INTERPOLATE_FACTOR is an unsigned integer which describes the
- *         interpolation factor of the filter. TP_INTERPOLATE_FACTOR must be in the
+ *         interpolation factor of the filter. \n
+ *         TP_INTERPOLATE_FACTOR must be in the
  *         range 3 to 16.
  * @tparam TP_DECIMATE_FACTOR is an unsigned integer which describes the
  *         decimation factor of the filter. TP_DECIMATE_FACTOR must be in the
@@ -346,7 +347,7 @@ class create_casc_kernel<1,
  * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples in the window API
  *         used for input to the filter function. \n
  *         The number of values in the output window will be TP_INPUT_WINDOW_VSIZE
- *         multipled by TP_INTERPOLATE_FACTOR and divided by TP_DECIMATE_FACTOR. \n
+ *         multiplied by TP_INTERPOLATE_FACTOR and divided by TP_DECIMATE_FACTOR. \n
  *         In the instance this would lead to a fraction number of output samples,
  *         this would be rounded down. \n
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.

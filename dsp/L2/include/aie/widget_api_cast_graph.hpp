@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ using namespace adf;
 /**
  * @defgroup widget_graph Widgets
  *
- * Contains elements that provide flexibilty when connecting other kernels.
+ * Contains elements that provide flexibility when connecting other kernels.
  * Widgets may change the interface type between Window buffers and Streams, as well as change the data pattern by
  * reordering or converting data samples.
  *
@@ -60,29 +60,29 @@ using namespace adf;
  *
  * These are the templates to configure the Widget API Cast class.
  * @tparam TT_DATA describes the type of individual data samples input to and
- *         output from the function. This is a typename and must be one
- *         of the following: \n
+ *         output from the function. \n
+ *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
- * @tparam TP_IN_API defines the input interface type.
+ * @tparam TP_IN_API defines the input interface type. \n
  *         0 = Window, 1 = Stream
- * @tparam TP_OUT_API defines the output interface type.
+ * @tparam TP_OUT_API defines the output interface type. \n
  *         0 = Window, 1 = Stream
- * @tparam TP_NUM_INPUTS describes the number of input stream interfaces to be processed.
+ * @tparam TP_NUM_INPUTS describes the number of input stream interfaces to be processed. \n
  *         When 2 inputs are configured, whe data will be read sequentially from each.
  * @tparam TP_WINDOW_VSIZE describes the number of samples in the window API
- *         used if either input or output is a window.
+ *         used if either input or output is a window. \n
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  * @tparam TP_NUM_OUTPUT_CLONES sets the number of output ports to write the input
  *         data to. Note that while input data from multiple ports is independent,
  *         data out is not.
  * @tparam TP_PATTERN sets the interleave or deinterleave pattern for configurations using dual
- *         streams, since streams are not considered clones for input nor for output.
+ *         streams, since streams are not considered clones for input nor for output. \n
  *         The patterns supported are:
  *         0 (default) : 128bits are taken from each input, concatenated to 256b and output to window.
- *                       or one 256b window read is split into upper and lower 128b cunks for output.
+ *                       or one 256b window read is split into upper and lower 128b chunks for output.
  *         1           : kSampleIntlv. One TT_DATA sample is taken from each stream and written to window or vice versa.
  *         2           : kSplit. The window is split into 2 halves with each half going to a stream.
- * @tparam TP_HEADER_BYTES sets the number of bytes at the beginning of a window which are not subject to interlace.
+ * @tparam TP_HEADER_BYTES sets the number of bytes at the beginning of a window which are not subject to interlace. \n
  *         These bytes are not included in TP_WINDOW_VSIZE as that refers to payload data whereas a header is intended
  *         for control information. Where this widget is configured for 2 streams in, the header is read from the first
  *         stream and copied to output. The header on the second stream is read and discarded. The header is written

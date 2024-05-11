@@ -1,6 +1,7 @@
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
-
-.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+..
+   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   
+   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _MATRIX_MULTIPLY:
 
@@ -8,9 +9,9 @@
 Matrix Multiply
 ===============
 
-The DSPLib contains one Matrix Multiply/GEMM (General Matrix Multiply) solution for AI Engine (AIE) and AIE-ML. The GEMM has two input ports connected to two windows of data. The inputs are denoted as Matrix A (inA) and Matrix B (inB). Matrix A has a ``TP_DIM_A`` template parameter to describe the number of rows of A. The number of columns of inA must be equal to the number of rows of inB. This is denoted with the ``TP_DIM_AB`` template parameter. The number of columns of B is denoted by ``TP_DIM_B``.
+The DSPLib contains one Matrix Multiply/GEMM (General Matrix Multiply) solution for AI Engine (AIE) and AIE-ML. The GEMM has two input ports connected to two windows of data. The inputs are denoted as Matrix A (inA) and Matrix B (inB). Matrix A has a ``TP_DIM_A`` template parameter to describe the number of rows in Matrix A. The number of columns in Matrix A must be equal to the number of rows in Matrix. This is denoted with the ``TP_DIM_AB`` template parameter. The number of columns in Matrix B is denoted by ``TP_DIM_B``.
 
-An output port connects to a window, where the data for the output matrix will be stored. The output matrix will have rows = inA rows (``TP_DIM_A``) and columns = inB (``TP_DIM_B``) columns. The data type of both input matrices can be configured, and the data type of the output is derived from the inputs.
+An output port connects to a window, where the data for the output matrix will be stored. The output matrix will have (``TP_DIM_A``) rows and (``TP_DIM_B``) columns. The data type of both input matrices can be configured, and the data type of the output is derived from the inputs.
 
 ~~~~~~~~~~~
 Entry Point
@@ -41,11 +42,11 @@ To see details on the template parameters for the Matrix Multiply, see :ref:`API
 The maximum memory accessible by an AIE kernel is 32 kB x 4 for AIE. The maximum matrix dimensions per kernel is limited by the memory requirements and how much memory is available.
 A matrix_mult design needs to allocate memory for the following:
 
-* Window Size A: Input matrix A of size P_DIM_A x P_DIM_AB x sizeof(T_DATA_A).
+* Window Size A: Input matrix A of size (TP_DIM_A / TP_SSR) x (TP_DIM_AB / TP_SSR) x sizeof(TT_DATA_A).
 
-* Window Size B: Input matrix B of size P_DIM_B x P_DIM_AB x sizeof(T_DATA_B).
+* Window Size B: Input matrix B of size TP_DIM_B x (TP_DIM_AB / TP_CASC_LEN) x sizeof(TT_DATA_B).
 
-* Window Size Out: Output matrix of size P_DIM_A x P_DIM_B x sizeof(T_DATA_OUT).
+* Window Size Out: Output matrix of size (TP_DIM_A / TP_SSR) x TP_DIM_B x sizeof(TT_DATA_OUT).
 
 Optionally, depending on whether you use the tiling/detiling feature of the element, you need:
 
@@ -58,7 +59,7 @@ Optionally, depending on whether you use the tiling/detiling feature of the elem
 Further, if these buffers are ping-pong buffers, their memory requirement doubles in size. You can reduce this factor by using the single_buffer constraint on the buffer.
 Apart from these, the program also needs some system memory to run which has been empirically observed to occupy around 2.5 kB.
 
-To get around issues of memory requirements too large to fit in a single kernel, increase the value of ``TP_CASC_LEN`` to split the dimension P_DIM_AB over multiple kernels.
+To get around issues of memory requirements too large to fit in a single kernel, increase the value of ``TP_CASC_LEN`` to split the dimension ``TP_DIM_AB`` over multiple kernels, or the value of ``TP_SSR`` to split the ``TP_DIM_A`` dimension of Matrix A.
 
 ~~~~~~~~~~~~~~~~
 Access Functions
@@ -177,7 +178,7 @@ Multiplying a 16x16 matrix (with 4x4 tiling) with a 16x16 matrix (with 4x2 tilin
 
 Tiling Schemes and Data Type Combinations
 -----------------------------------------
-   
+
 The following table specifies the tiling scheme used for a given data type combination and the corresponding output data type for AIE devices:
 
 .. _table-tile-pattern-AIE:
@@ -229,11 +230,11 @@ The following table specifies the tiling scheme used for a given data type combi
    +---------+--------------+--------+-------+--------------+
    |cfloat   |       cfloat |   4x2  |  2x2  |  cfloat      |
    +---------+--------------+--------+-------+--------------+
-   
+
 
 The following table specifies the tiling scheme used for a given data type combination and the corresponding output data type for AIE-ML devices:
 
-   .. _table-tile-pattern-AIE-ML:
+.. _table-tile-pattern-AIE-ML:
 .. table:: Matrix Multiply Tiling Pattern Combination for AIE-ML
    :align: center
 
@@ -258,11 +259,12 @@ The following table specifies the tiling scheme used for a given data type combi
    +---------+--------------+--------+-------+--------------+
    |cint32   |       cint32 |   1x2  |   2x8 |   cint32     |
    +---------+--------------+--------+-------+--------------+
-   
+
 Tiling Parameters
 -----------------
-   
-The parameters ``TP_ADD_TILING_A``, ``TP_ADD_TILING_B``, and ``TP_ADD_DETILING_OUT`` control the inclusion of an additional pre-processing/post-processing kernel to perform the required data storage reordering. When used with ``TP_DIM_A_LEADING``, ``TP_DIM_B_LEADING``, or ``TP_DIM_OUT_LEADING``, the matrix is also transposed in the tiling kernel.
+
+The parameters ``TP_ADD_TILING_A``, ``TP_ADD_TILING_B``, and ``TP_ADD_DETILING_OUT`` control the inclusion of an additional pre-processing/post-processing kernel to perform the required data storage reordering. 
+When used with ``TP_DIM_A_LEADING``, ``TP_DIM_B_LEADING``, or ``TP_DIM_OUT_LEADING``, the matrix is also transposed in the tiling kernel.
 
 If the additional kernels are not selected, then the matrix multiply kernels assume incoming data is in the correct format, as specified above.
 
@@ -272,7 +274,7 @@ Cascaded Kernels
 ----------------
 When using the ``TP_CASC_LEN`` parameter, the matrix multiply operation is split across ``TP_DIM_AB`` and processed in a ``TP_CASC_LEN`` number of kernels. The accumulated partial results of each kernel are passed down the cascade port to the next kernel in the cascade chain until the final kernel provides the expected output. Cascade connections are made internally to the matrix multiply graph and external interfaces to the graph remain unchanged.
 
-Each AI Engine kernel in the array is given a sub-matrix, so the interface to the graph is an array of ports for both A and B. The sub matrices are obtained by dividing the input matrices in their common dimension TP_DIM_AB.
+Each AI Engine kernel in the array is given a sub-matrix, so the interface to the graph is an array of ports for both A and B. The sub matrices are obtained by dividing the input matrices in their common dimension ``TP_DIM_AB``.
 
 **Input Matrix A (16x16 - 4x4 Tile - Cascade Length 2)**:
 
@@ -281,7 +283,7 @@ Each AI Engine kernel in the array is given a sub-matrix, so the interface to th
    :align: center
 
    +------------+---------------------------------------------------------------+---------------------------------------------------------------+
-   |            | AIE 0                                                         | AIE 1                                                         |
+   |            | Cascade 0                                                     | Cascade 1                                                     |
    +============+===============================+===============================+===============================+===============================+
    |            | Tile Col 0                    | Tile Col 1                    | Tile Col 2                    | Tile Col 3                    |
    +------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
@@ -326,7 +328,7 @@ Each AI Engine kernel in the array is given a sub-matrix, so the interface to th
    +------------+------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+
    |            |            | Tile Col 0    | Tile Col 1    | Tile Col 2    | Tile Col 3    | Tile Col 4    | Tile Col 5    | Tile Col 6    | Tile Col 7    |
    +============+============+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+
-   | AIE 0      | Tile Row 0 |    0  |    1  |    2  |    3  |    4  |    5  |    6  |    7  |    8  |    9  |   10  |   11  |   12  |   13  |   14  |   15  |
+   | Cascade 0  | Tile Row 0 |    0  |    1  |    2  |    3  |    4  |    5  |    6  |    7  |    8  |    9  |   10  |   11  |   12  |   13  |   14  |   15  |
    |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
    |            |            |   16  |   17  |   18  |   19  |   20  |   21  |   22  |   23  |   24  |   25  |   26  |   27  |   28  |   29  |   30  |   31  |
    |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
@@ -342,7 +344,7 @@ Each AI Engine kernel in the array is given a sub-matrix, so the interface to th
    |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
    |            |            |  112  |  113  |  114  |  115  |  116  |  117  |  118  |  119  |  120  |  121  |  122  |  123  |  124  |  125  |  126  |  127  |
    +------------+------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
-   | AIE 1      | Tile Row 2 |  128  |  129  |  130  |  131  |  132  |  133  |  134  |  135  |  136  |  137  |  138  |  139  |  140  |  141  |  142  |  143  |
+   | Cascade 1  | Tile Row 2 |  128  |  129  |  130  |  131  |  132  |  133  |  134  |  135  |  136  |  137  |  138  |  139  |  140  |  141  |  142  |  143  |
    |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
    |            |            |  144  |  145  |  146  |  147  |  148  |  149  |  150  |  151  |  152  |  153  |  154  |  155  |  156  |  157  |  158  |  159  |
    |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
@@ -371,18 +373,168 @@ Connections to the cascade ports can be made as follows:
     }
     connect<>(mmultGraph.out, out);
 
+
+SSR
+---
+When using the ``TP_SSR`` parameter, this will determine the number of parallel cascaded (if ``TP_CASC_LEN`` > 1) paths that the Matrix-Multiplication output will be split into. The data of Matrix A will be split by ``TP_SSR`` along the ``TP_DIM_A`` dimension but there will be no additional splitting (other than the necessary cascade splitting) for Matrix B. Each SSR path will produce a split of the output matrix with a size of ``(TP_DIM_A / TP_SSR) * TP_DIM_B``. Depending on the set value of ``TP_DIM_OUT_LEADING``, the output for each SSR path will be row major or column major (``TP_DIM_OUT_LEADING`` set to 0 or 1 respectively). For row major the output for each SSR can be concatenated together, and for column major the output for each SSR should be interleaved with a step of ``(TP_DIM_A / TP_SSR)``.
+
+**Input Matrix A (16x16 - 4x4 Tile - Cascade Length 2 and SSR 4)**:
+
+.. table:: Input Matrix A (16x16 - 4x4 Tile - Cascade Length 2 and SSR 4)
+   :align: center
+
+   +------------+------------+---------------------------------------------------------------+---------------------------------------------------------------+
+   |            |            | Cascade 0                                                     | Cascade 1                                                     |
+   +============+============+===============================+===============================+===============================+===============================+
+   |            |            | Tile Col 0                    | Tile Col 1                    | Tile Col 2                    | Tile Col 3                    |
+   +------------+------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            | Tile Row 0 |    0  |    1  |    2  |    3  |    4  |    5  |    6  |    7  |    8  |    9  |   10  |   11  |   12  |   13  |   14  |   15  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |   16  |   17  |   18  |   19  |   20  |   21  |   22  |   23  |   24  |   25  |   26  |   27  |   28  |   29  |   30  |   31  |
+   |    SSR 0   |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |   32  |   33  |   34  |   35  |   36  |   37  |   38  |   39  |   40  |   41  |   42  |   43  |   44  |   45  |   46  |   47  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |   48  |   49  |   50  |   51  |   52  |   53  |   54  |   55  |   56  |   57  |   58  |   59  |   60  |   61  |   62  |   63  |
+   +------------+------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            | Tile Row 1 |   64  |   65  |   66  |   67  |   68  |   69  |   70  |   71  |   72  |   73  |   74  |   75  |   76  |   77  |   78  |   79  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |   80  |   81  |   82  |   83  |   84  |   85  |   86  |   87  |   88  |   89  |   90  |   91  |   92  |   93  |   94  |   95  |
+   |    SSR 1   |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |   96  |   97  |   98  |   99  |  100  |  101  |  102  |  103  |  104  |  105  |  106  |  107  |  108  |  109  |  110  |  111  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  112  |  113  |  114  |  115  |  116  |  117  |  118  |  119  |  120  |  121  |  122  |  123  |  124  |  125  |  126  |  127  |
+   +------------+------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            | Tile Row 2 |  128  |  129  |  130  |  131  |  132  |  133  |  134  |  135  |  136  |  137  |  138  |  139  |  140  |  141  |  142  |  143  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  144  |  145  |  146  |  147  |  148  |  149  |  150  |  151  |  152  |  153  |  154  |  155  |  156  |  157  |  158  |  159  |
+   |    SSR 2   |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  160  |  161  |  162  |  163  |  164  |  165  |  166  |  167  |  168  |  169  |  170  |  171  |  172  |  173  |  174  |  175  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  176  |  177  |  178  |  179  |  180  |  181  |  182  |  183  |  184  |  185  |  186  |  187  |  188  |  189  |  190  |  191  |
+   +------------+------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            | Tile Row 3 |  192  |  193  |  194  |  195  |  196  |  197  |  198  |  199  |  200  |  201  |  202  |  203  |  204  |  205  |  206  |  207  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  208  |  209  |  210  |  211  |  212  |  213  |  214  |  215  |  216  |  217  |  218  |  219  |  220  |  221  |  222  |  223  |
+   |    SSR 3   |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  224  |  225  |  226  |  227  |  228  |  229  |  230  |  231  |  232  |  233  |  234  |  235  |  236  |  237  |  238  |  239  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  240  |  241  |  242  |  243  |  244  |  245  |  246  |  247  |  248  |  249  |  250  |  251  |  252  |  253  |  254  |  255  |
+   +------------+------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+
+
+**Input Matrix B (16x16 - 4x2 Tile - Cascade Length 2 and SSR 4)**:
+
+.. table:: Input Matrix B (16x16 - 4x2 Tile - Cascade Length 2 and SSR 4)
+   :align: center
+
+   +------------+------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+
+   |            |            | SSR 0, 1, 2, and 3  (Each Sub Matrix for a particular cascade position should go to all SSR paths)                            |
+   +------------+------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+
+   |            |            | Tile Col 0    | Tile Col 1    | Tile Col 2    | Tile Col 3    | Tile Col 4    | Tile Col 5    | Tile Col 6    | Tile Col 7    |
+   +============+============+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+
+   | Cascade 0  | Tile Row 0 |    0  |    1  |    2  |    3  |    4  |    5  |    6  |    7  |    8  |    9  |   10  |   11  |   12  |   13  |   14  |   15  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |   16  |   17  |   18  |   19  |   20  |   21  |   22  |   23  |   24  |   25  |   26  |   27  |   28  |   29  |   30  |   31  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |   32  |   33  |   34  |   35  |   36  |   37  |   38  |   39  |   40  |   41  |   42  |   43  |   44  |   45  |   46  |   47  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |   48  |   49  |   50  |   51  |   52  |   53  |   54  |   55  |   56  |   57  |   58  |   59  |   60  |   61  |   62  |   63  |
+   |            +------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            | Tile Row 1 |   64  |   65  |   66  |   67  |   68  |   69  |   70  |   71  |   72  |   73  |   74  |   75  |   76  |   77  |   78  |   79  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |   80  |   81  |   82  |   83  |   84  |   85  |   86  |   87  |   88  |   89  |   90  |   91  |   92  |   93  |   94  |   95  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |   96  |   97  |   98  |   99  |  100  |  101  |  102  |  103  |  104  |  105  |  106  |  107  |  108  |  109  |  110  |  111  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  112  |  113  |  114  |  115  |  116  |  117  |  118  |  119  |  120  |  121  |  122  |  123  |  124  |  125  |  126  |  127  |
+   +------------+------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   | Cascade 1  | Tile Row 2 |  128  |  129  |  130  |  131  |  132  |  133  |  134  |  135  |  136  |  137  |  138  |  139  |  140  |  141  |  142  |  143  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  144  |  145  |  146  |  147  |  148  |  149  |  150  |  151  |  152  |  153  |  154  |  155  |  156  |  157  |  158  |  159  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  160  |  161  |  162  |  163  |  164  |  165  |  166  |  167  |  168  |  169  |  170  |  171  |  172  |  173  |  174  |  175  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  176  |  177  |  178  |  179  |  180  |  181  |  182  |  183  |  184  |  185  |  186  |  187  |  188  |  189  |  190  |  191  |
+   |            +------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            | Tile Row 3 |  192  |  193  |  194  |  195  |  196  |  197  |  198  |  199  |  200  |  201  |  202  |  203  |  204  |  205  |  206  |  207  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  208  |  209  |  210  |  211  |  212  |  213  |  214  |  215  |  216  |  217  |  218  |  219  |  220  |  221  |  222  |  223  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  224  |  225  |  226  |  227  |  228  |  229  |  230  |  231  |  232  |  233  |  234  |  235  |  236  |  237  |  238  |  239  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  240  |  241  |  242  |  243  |  244  |  245  |  246  |  247  |  248  |  249  |  250  |  251  |  252  |  253  |  254  |  255  |
+   +------------+------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+
+
+**Output Matrix (16x16 - 4x2 Tile - Cascade Length 2 and SSR 4)**:
+
+.. table:: Output Matrix (16x16 - 4x2 Tile - Cascade Length 2 and SSR 4)
+   :align: center
+
+   +------------+------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+
+   |            |            | Tile Col 0    | Tile Col 1    | Tile Col 2    | Tile Col 3    | Tile Col 4    | Tile Col 5    | Tile Col 6    | Tile Col 7    |
+   +============+============+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+
+   | SSR 0      | Tile Row 0 |    0  |    1  |    2  |    3  |    4  |    5  |    6  |    7  |    8  |    9  |   10  |   11  |   12  |   13  |   14  |   15  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |   16  |   17  |   18  |   19  |   20  |   21  |   22  |   23  |   24  |   25  |   26  |   27  |   28  |   29  |   30  |   31  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |   32  |   33  |   34  |   35  |   36  |   37  |   38  |   39  |   40  |   41  |   42  |   43  |   44  |   45  |   46  |   47  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |   48  |   49  |   50  |   51  |   52  |   53  |   54  |   55  |   56  |   57  |   58  |   59  |   60  |   61  |   62  |   63  |
+   |            +------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            | Tile Row 1 |   64  |   65  |   66  |   67  |   68  |   69  |   70  |   71  |   72  |   73  |   74  |   75  |   76  |   77  |   78  |   79  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |   80  |   81  |   82  |   83  |   84  |   85  |   86  |   87  |   88  |   89  |   90  |   91  |   92  |   93  |   94  |   95  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |   96  |   97  |   98  |   99  |  100  |  101  |  102  |  103  |  104  |  105  |  106  |  107  |  108  |  109  |  110  |  111  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  112  |  113  |  114  |  115  |  116  |  117  |  118  |  119  |  120  |  121  |  122  |  123  |  124  |  125  |  126  |  127  |
+   +------------+------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   | SSR 1      | Tile Row 2 |  128  |  129  |  130  |  131  |  132  |  133  |  134  |  135  |  136  |  137  |  138  |  139  |  140  |  141  |  142  |  143  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  144  |  145  |  146  |  147  |  148  |  149  |  150  |  151  |  152  |  153  |  154  |  155  |  156  |  157  |  158  |  159  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  160  |  161  |  162  |  163  |  164  |  165  |  166  |  167  |  168  |  169  |  170  |  171  |  172  |  173  |  174  |  175  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  176  |  177  |  178  |  179  |  180  |  181  |  182  |  183  |  184  |  185  |  186  |  187  |  188  |  189  |  190  |  191  |
+   |            +------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            | Tile Row 3 |  192  |  193  |  194  |  195  |  196  |  197  |  198  |  199  |  200  |  201  |  202  |  203  |  204  |  205  |  206  |  207  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  208  |  209  |  210  |  211  |  212  |  213  |  214  |  215  |  216  |  217  |  218  |  219  |  220  |  221  |  222  |  223  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  224  |  225  |  226  |  227  |  228  |  229  |  230  |  231  |  232  |  233  |  234  |  235  |  236  |  237  |  238  |  239  |
+   |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   |            |            |  240  |  241  |  242  |  243  |  244  |  245  |  246  |  247  |  248  |  249  |  250  |  251  |  252  |  253  |  254  |  255  |
+   +------------+------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+
+You can find a full list of the descriptions and parameters in the :ref:`API_REFERENCE`.
+
+Connections to the cascade ports can be made as follows:
+
+.. code-block::
+   
+   for (int i = 0; i < TP_SSR; i++)
+      for (int j = 0 ; j < P_CASC_LEN; j++) {
+         connect<>(inA[(i*TP_CASC_LEN) + j], mmultGraph.inA[(i*TP_CASC_LEN) + j]);
+         connect<>(inB[(i*TP_CASC_LEN) + j], mmultGraph.inB[(i*TP_CASC_LEN) + j]);
+      }
+      connect<>(mmultGraph.out[i], out[i]);
+   }
+
+   
 Constraints
 -----------
+A Matrix-Multiplication solution can consist of a ``TP_SSR`` number of cascaded kernel paths (each containing ``TP_CASC_LEN`` kernels). There is also the option to add tiler and detiler kernels to the solution. Tiler kernels can be added for each input port for each kernel, and detiler kernels can be added on the final output of each SSR path.
 
-A Matrix Multiply solution can consist of a cascade of kernels for the multiply operations themselves but also tiling kernels on each input to each member of that cascade, and a tiling kernel on the output. The tiling kernels' function is to convert between the arrangement of matrix elements in memory to a form of arrangement optimized for vector multiply, or vice versa. In the entry level graph, the following names are used to identify the various kernels as follows:
+The tiling kernels' function is to convert between the arrangement of matrix elements in memory to a form of arrangement optimized for vector multiply, or vice versa. In the entry level graph, the following names are used to identify the various kernels as follows:
 
 'm_MatmultKernels' - This is the array of kernel pointers returned by getKernels which point to the cascade ``TP_CASC_LEN`` of matrix multiply kernels. These kernels perform the matrix multiply operations.
 
-'untiler' - This is a single kernel on the output of the matrix multiply kernel or cascade of kernels. It performs the transformation from a tiled format to the output format.
+'untiler' - This is an array of ``TP_SSR`` kernels on the output of the each Matrix Multiply SSR path. It performs the transformation from a tiled format to the true output format.
 
-'tilerA' - This is an array of ``TP_CASC_LEN`` kernels which connect 1:1 with the A input port of the matrix multiply kernels.
+'tilerA' - This is an array of ``TP_CASC_LEN * TP_SSR`` kernels which connect 1:1 with the A input port of the matrix multiply kernels.
 
-'tilerB' - This is an array of ``TP_CASC_LEN`` kernels which connect 1:1 with the B input port of the matrix multiply kernels.
+'tilerB' - This is an array of ``TP_CASC_LEN * TP_SSR`` kernels which connect 1:1 with the B input port of the matrix multiply kernels.
 
 .. note:: For some combinations of the template parameters, the log will give out an error message "ERROR: shouldn't be here". This combination of factors is not supported by the AIE Compiler. A possible workaround is to pad up the matrices with zeroes so that their dimensions become the closest multiple of 8 for cint32 data types, 16 for cint16/int16 data types, and 32 for int16 data types.
 
@@ -394,7 +546,7 @@ The following code example shows how the matrix_multiply_graph class can be used
 
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_matmul.hpp
     :language: cpp
-    :lines: 17-75
+    :lines: 17-
 
 .. |image1| image:: ./media/image1.png
 .. |image2| image:: ./media/image2.png

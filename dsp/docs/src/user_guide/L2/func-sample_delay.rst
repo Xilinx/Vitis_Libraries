@@ -1,8 +1,9 @@
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+.. 
+   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   
+   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
-
-_SAMPLE_DELAY:
+.. _SAMPLE_DELAY:
 
 ======================
 Sample Delay
@@ -19,6 +20,12 @@ The graph entry point is the following:
 .. code-block::
 
     xf::dsp::aie::sample_delay
+
+~~~~~~~~~~~~~~
+Device Support
+~~~~~~~~~~~~~~
+
+The Sample Delay supports both AIE1 and AIE-ML.
 
 ~~~~~~~~~~~~~~~
 Supported Types

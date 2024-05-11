@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,10 @@ template <>
 struct accType<cint32, cint16> {
     using type = cacc64;
 };
+template <>
+struct accType<cfloat, cfloat> {
+    using type = caccfloat;
+};
 #else
 struct accType {
     using type = cacc48;
@@ -92,14 +96,12 @@ struct T_inputIF {};
 // CASC_IN_FALSE
 template <typename T_D, typename T_T>
 struct T_inputIF<CASC_IN_FALSE, T_D, T_T> {
-    // input_buffer<T_D> &inWindow;
     T_D* __restrict inWindow;
-    no_port* inCascade;
+    input_stream<accType_t<T_D, T_T> >* inCascade = {};
 };
 // CASC_IN_TRUE
 template <typename T_D, typename T_T>
 struct T_inputIF<CASC_IN_TRUE, T_D, T_T> {
-    // input_buffer<T_D> &inWindow;
     T_D* __restrict inWindow;
     input_stream<accType_t<T_D, T_T> >* inCascade;
 };
@@ -110,12 +112,12 @@ struct T_outputIF {};
 template <typename T_D, typename T_T>
 struct T_outputIF<CASC_OUT_FALSE, T_D, T_T> {
     T_D* __restrict outWindow;
-    no_port* outCascade;
+    output_stream<accType_t<T_D, T_T> >* outCascade{};
 };
 // CASC_OUT_TRUE
 template <typename T_D, typename T_T>
 struct T_outputIF<CASC_OUT_TRUE, T_D, T_T> {
-    no_port* outWindow;
+    T_D* __restrict outWindow = {};
     output_stream<accType_t<T_D, T_T> >* outCascade;
 };
 
@@ -127,6 +129,7 @@ template <typename TT_DATA,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_KERNEL_POSITION,
           bool TP_CASC_IN = CASC_IN_FALSE,
@@ -162,25 +165,32 @@ class kernelDFTClass {
     static constexpr int kSamplesInVectData = 256 / 8 / sizeof(TT_DATA);
 #endif //__SUPPORTS_ACC64__
 
-    static constexpr int kSamplesInVectTwiddle = kSamplesInVectData;
-
+    // frame and data sizes
     static constexpr int paddedDataSize = CEIL(TP_POINT_SIZE, kSamplesInVectData);
-    static constexpr int paddedCoeffSize = CEIL(TP_POINT_SIZE, kSamplesInVectTwiddle);
-
     static constexpr int paddedFrameSize = CEIL(paddedDataSize, (kSamplesInVectData * TP_CASC_LEN));
-    static constexpr int paddedWindowSize = TP_NUM_FRAMES * paddedFrameSize;
-
-    static constexpr int cascWindowSize = paddedWindowSize / TP_CASC_LEN;
+    // static constexpr int paddedWindowSize = TP_NUM_FRAMES * paddedFrameSize;
+    // frame and window sizes per cascade (TP_CASC_LEN, TP_SSR has no affect on data)
     static constexpr int cascFrameSize = paddedFrameSize / TP_CASC_LEN;
+    // static constexpr int cascWindowSize = paddedWindowSize / TP_CASC_LEN;
+    static constexpr int kVecInFrame = cascFrameSize / kSamplesInVectData;
 
+    // number of data points each cascade will recieve
+    // for example POINT_SIZE=29 CASC_LEN=3, casc1 gets 10 samples, casc2 gets 10 samples, casc3 gets 9 samples
     static constexpr int stepSize =
         (TP_KERNEL_POSITION < (TP_POINT_SIZE % TP_CASC_LEN)) + (TP_POINT_SIZE / TP_CASC_LEN);
+    static constexpr int coeffColSize = CEIL(TP_POINT_SIZE, (kSamplesInVectData * TP_SSR)) / TP_SSR;
+    static constexpr int kTotalCoeffSize = coeffColSize * stepSize;
+    static constexpr int kVecInCoeff = coeffColSize / kSamplesInVectData;
 
-    static constexpr int kTotalCoeffSize = paddedCoeffSize * stepSize;
-    static constexpr int kVecInCoeff = paddedCoeffSize / kSamplesInVectData;
-    static constexpr int kPairsInCoeff = kVecInCoeff / 2;
-    static constexpr int singleAccRequired = kVecInCoeff % 2;
-    static constexpr int kVecInFrame = cascFrameSize / kSamplesInVectData;
+    static constexpr int kPairsInCoeff = kVecInCoeff / 2;     // Use Parallel Accumulator/MAC when possible
+    static constexpr int singleAccRequired = kVecInCoeff % 2; // Use single if necessary
+
+    // Number of full vectors in a data frame (no zero-padding)
+    static constexpr int kVecTotal = (cascFrameSize / kSamplesInVectData);
+    // number of elements in the final padded vector of a frame
+    static constexpr int kVecNoPad = (stepSize / kSamplesInVectData);
+    // number of elements in the final padded vector of a frame
+    static constexpr int elemsInPaddedVec = stepSize % (kSamplesInVectData);
     static constexpr int shift = TP_SHIFT + 15;
 
    public:
@@ -206,6 +216,7 @@ template <typename TT_DATA,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_KERNEL_POSITION,
           bool TP_CASC_IN = CASC_IN_FALSE,
@@ -220,6 +231,7 @@ class dft {
                    TP_FFT_NIFFT,
                    TP_SHIFT,
                    TP_CASC_LEN,
+                   TP_SSR,
                    TP_NUM_FRAMES,
                    TP_KERNEL_POSITION,
                    TP_CASC_IN,
@@ -240,13 +252,10 @@ class dft {
 #else
     static constexpr int kSamplesInVectData = 256 / 8 / sizeof(TT_DATA);
 #endif //__SUPPORTS_ACC64__
-
-    static constexpr int kSamplesInVectTwiddle = kSamplesInVectData;
-    static constexpr int paddedCoeffSize = CEIL(TP_POINT_SIZE, kSamplesInVectTwiddle);
-
+    static constexpr int coeffColSize = CEIL(TP_POINT_SIZE, (kSamplesInVectData * TP_SSR)) / TP_SSR;
     static constexpr int stepSize =
         (TP_KERNEL_POSITION < (TP_POINT_SIZE % TP_CASC_LEN)) + (TP_POINT_SIZE / TP_CASC_LEN);
-    static constexpr int kTotalCoeffSize = paddedCoeffSize * stepSize;
+    static constexpr int kTotalCoeffSize = coeffColSize * stepSize;
 
    public:
     TT_TWIDDLE (&inCoeff)[kTotalCoeffSize]; // Need to change
@@ -271,6 +280,7 @@ template <typename TT_DATA,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_RND,
@@ -281,6 +291,7 @@ class dft<TT_DATA,
           TP_FFT_NIFFT,
           TP_SHIFT,
           TP_CASC_LEN,
+          TP_SSR,
           TP_NUM_FRAMES,
           TP_KERNEL_POSITION,
           CASC_IN_FALSE,
@@ -294,6 +305,7 @@ class dft<TT_DATA,
                    TP_FFT_NIFFT,
                    TP_SHIFT,
                    TP_CASC_LEN,
+                   TP_SSR,
                    TP_NUM_FRAMES,
                    TP_KERNEL_POSITION,
                    CASC_IN_FALSE,
@@ -314,13 +326,10 @@ class dft<TT_DATA,
 #else
     static constexpr int kSamplesInVectData = 256 / 8 / sizeof(TT_DATA);
 #endif //__SUPPORTS_ACC64__
-
-    static constexpr int kSamplesInVectTwiddle = kSamplesInVectData;
-    static constexpr int paddedCoeffSize = CEIL(TP_POINT_SIZE, kSamplesInVectTwiddle);
-
+    static constexpr int coeffColSize = CEIL(TP_POINT_SIZE, (kSamplesInVectData * TP_SSR)) / TP_SSR;
     static constexpr int stepSize =
         (TP_KERNEL_POSITION < (TP_POINT_SIZE % TP_CASC_LEN)) + (TP_POINT_SIZE / TP_CASC_LEN);
-    static constexpr int kTotalCoeffSize = paddedCoeffSize * stepSize;
+    static constexpr int kTotalCoeffSize = coeffColSize * stepSize;
 
    public:
     TT_TWIDDLE (&inCoeff)[kTotalCoeffSize];
@@ -345,6 +354,7 @@ template <typename TT_DATA,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_RND,
@@ -355,6 +365,7 @@ class dft<TT_DATA,
           TP_FFT_NIFFT,
           TP_SHIFT,
           TP_CASC_LEN,
+          TP_SSR,
           TP_NUM_FRAMES,
           TP_KERNEL_POSITION,
           CASC_IN_TRUE,
@@ -370,6 +381,7 @@ class dft<TT_DATA,
                    TP_FFT_NIFFT,
                    TP_SHIFT,
                    TP_CASC_LEN,
+                   TP_SSR,
                    TP_NUM_FRAMES,
                    TP_KERNEL_POSITION,
                    CASC_IN_TRUE,
@@ -390,13 +402,10 @@ class dft<TT_DATA,
 #else
     static constexpr int kSamplesInVectData = 256 / 8 / sizeof(TT_DATA);
 #endif //__SUPPORTS_ACC64__
-
-    static constexpr int kSamplesInVectTwiddle = kSamplesInVectData;
-    static constexpr int paddedCoeffSize = CEIL(TP_POINT_SIZE, kSamplesInVectTwiddle);
-
+    static constexpr int coeffColSize = CEIL(TP_POINT_SIZE, (TP_SSR * kSamplesInVectData)) / TP_SSR;
     static constexpr int stepSize =
         (TP_KERNEL_POSITION < (TP_POINT_SIZE % TP_CASC_LEN)) + (TP_POINT_SIZE / TP_CASC_LEN);
-    static constexpr int kTotalCoeffSize = paddedCoeffSize * stepSize;
+    static constexpr int kTotalCoeffSize = coeffColSize * stepSize;
 
    public:
     TT_TWIDDLE (&inCoeff)[kTotalCoeffSize];
@@ -422,6 +431,7 @@ template <typename TT_DATA,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_RND,
@@ -432,6 +442,7 @@ class dft<TT_DATA,
           TP_FFT_NIFFT,
           TP_SHIFT,
           TP_CASC_LEN,
+          TP_SSR,
           TP_NUM_FRAMES,
           TP_KERNEL_POSITION,
           CASC_IN_TRUE,
@@ -445,6 +456,7 @@ class dft<TT_DATA,
                    TP_FFT_NIFFT,
                    TP_SHIFT,
                    TP_CASC_LEN,
+                   TP_SSR,
                    TP_NUM_FRAMES,
                    TP_KERNEL_POSITION,
                    CASC_IN_TRUE,
@@ -465,13 +477,10 @@ class dft<TT_DATA,
 #else
     static constexpr int kSamplesInVectData = 256 / 8 / sizeof(TT_DATA);
 #endif //__SUPPORTS_ACC64__
-
-    static constexpr int kSamplesInVectTwiddle = kSamplesInVectData;
-    static constexpr int paddedCoeffSize = CEIL(TP_POINT_SIZE, kSamplesInVectTwiddle);
-
+    static constexpr int coeffColSize = CEIL(TP_POINT_SIZE, (TP_SSR * kSamplesInVectData)) / TP_SSR;
     static constexpr int stepSize =
         (TP_KERNEL_POSITION < (TP_POINT_SIZE % TP_CASC_LEN)) + (TP_POINT_SIZE / TP_CASC_LEN);
-    static constexpr int kTotalCoeffSize = paddedCoeffSize * stepSize;
+    static constexpr int kTotalCoeffSize = coeffColSize * stepSize;
 
    public:
     TT_TWIDDLE (&inCoeff)[kTotalCoeffSize];

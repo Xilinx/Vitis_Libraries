@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ WORK_DIR=Work
 
 echo -n "    NUM_BANKS: "                                       >> $STATUS_FILE;\
 $PATHTOSCRIPTS/get_num_banks.sh $WORK_DIR dummy                 >> $STATUS_FILE;\
-echo -n "    NUM_ME: "                                          >> $STATUS_FILE;\
+echo -n "    NUM_AIE: "                                          >> $STATUS_FILE;\
 $PATHTOSCRIPTS/get_num_me.sh $WORK_DIR 1                        >> $STATUS_FILE;\
 echo -n "    DATA_MEMORY: "                                     >> $STATUS_FILE;\
 $PATHTOSCRIPTS/get_data_memory.sh $WORK_DIR dummy               >> $STATUS_FILE;\

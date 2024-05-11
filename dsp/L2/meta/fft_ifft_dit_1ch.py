@@ -75,7 +75,7 @@ def fn_log2(n):
     #return Inf
 
 #---------------------------------------------------
-def fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE):
+def fn_validate_twiddle_type(AIE_VARIANT, TT_DATA, TT_TWIDDLE):
   validTypeCombos = [
       ("cint16", "cint16"),
       ("cint32", "cint16"),
@@ -83,6 +83,8 @@ def fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE):
       ("cint32", "cint32"),
       ("cfloat", "cfloat")
     ]
+  if (AIE_VARIANT==2) and (TT_TWIDDLE == "cint32"):
+    return isError(f"This variant of AIE does not support TT_TWIDDLE of cint32.")
   return (
     isValid if ((TT_DATA,TT_TWIDDLE) in validTypeCombos)
     else (
@@ -91,9 +93,10 @@ def fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE):
   )
 
 def validate_TT_TWIDDLE(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA = args["TT_DATA"]
   TT_TWIDDLE = args["TT_TWIDDLE"]
-  return fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE)
+  return fn_validate_twiddle_type(AIE_VARIANT, TT_DATA, TT_TWIDDLE)
 
 #---------------------------------------------------
 def fn_validate_point_size(TP_POINT_SIZE, TP_DYN_PT_SIZE, TT_DATA, TP_PARALLEL_POWER, TP_API, AIE_VARIANT):
@@ -160,8 +163,9 @@ def validate_TP_POINT_SIZE(args):
 
 #---------------------------------------------------
 def fn_validate_shift_val(TT_DATA, TP_SHIFT):
-  if TP_SHIFT< TP_SHIFT_min or TP_SHIFT > TP_SHIFT_max:
-      return isError(f"Minimum and Maximum value for parameter Shift is {TP_SHIFT_min} and {TP_SHIFT_max},respectively, but got {TP_SHIFT}. ")
+  res = fn_validate_minmax_value("TP_SHIFT", TP_SHIFT, TP_SHIFT_min, TP_SHIFT_max)
+  if (res["is_valid"] == False):  
+    return res
   return fn_float_no_shift(TT_DATA, TP_SHIFT)
 
 def validate_TP_SHIFT(args):
@@ -173,10 +177,14 @@ def validate_TP_SHIFT(args):
 def fn_validate_round_val(TP_RND, AIE_VARIANT):
   if AIE_VARIANT == 1:
     if TP_RND == k_rnd_mode_map_aie1["rnd_ceil"] or TP_RND == k_rnd_mode_map_aie1["rnd_floor"]:
-      return isError(f"Round mode of {TP_RND} is not supported for FFT. For the targeted AIE-ML device, supported values are \n2: rnd_pos_inf,\n3: rnd_neg_inf,\n4: rnd_sym_zero,\n5: rnd_sym_inf,\n6: rnd_conv_even,\n7: rnd_conv_odd")
+      return isError(f"Round mode of {TP_RND} is not supported for FFT. For the targeted AIE device, supported values are \n2: rnd_pos_inf,\n3: rnd_neg_inf,\n4: rnd_sym_zero,\n5: rnd_sym_inf,\n6: rnd_conv_even,\n7: rnd_conv_odd")
+    else:
+      return fn_validate_roundMode(TP_RND, AIE_VARIANT)
   elif AIE_VARIANT == 2:
     if TP_RND == k_rnd_mode_map_aie2["rnd_ceil"] or TP_RND == k_rnd_mode_map_aie2["rnd_floor"] or TP_RND == k_rnd_mode_map_aie2["rnd_sym_floor"] or TP_RND == k_rnd_mode_map_aie2["rnd_sym_ceil"]:
       return isError(f"Round mode of {TP_RND} is not supported for FFT. For the targeted AIE device, supported values are \n 8: rnd_neg_inf,\n9: rnd_pos_inf,\n10: rnd_sym_zero,\n11: rnd_sym_inf,\n12: rnd_conv_even,\n13: rnd_conv_odd")
+    else:
+      fn_validate_roundMode(TP_RND, AIE_VARIANT)
   return isValid
 
 def validate_TP_RND(args):
@@ -187,8 +195,9 @@ def validate_TP_RND(args):
 
 #---------------------------------------------------
 def fn_validate_casc_len(TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_CASC_LEN):
-  if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max :
-        return isError(f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max},respectively, but got {TP_CASC_LEN}.")
+  res = fn_validate_minmax_value("TP_CASC_LEN", TP_CASC_LEN, TP_CASC_LEN_min, TP_CASC_LEN_max)
+  if (res["is_valid"] == False):  
+    return res
   # Defines how many radix-2 ranks there are in the FFT itself (subframe or main FFT).
   log2PointSize = fn_log2(TP_POINT_SIZE>>TP_PARALLEL_POWER)
   # equation for integer ffts is complicated by the fact that odd power of 2 point sizes start with a radix 2 stage
@@ -212,8 +221,9 @@ def validate_TP_CASC_LEN(args):
 #---------------------------------------------------
 def fn_validate_window_size(TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_DYN_PT_SIZE):
   # Disable the window_vsize check for dynamic point size, due to incorrectly created caller function's arguments.
-  if TP_WINDOW_VSIZE < TP_WINDOW_VSIZE_min:
-      return isError(f"Minimum value for Input size is {TP_WINDOW_VSIZE_min}, but got {TP_WINDOW_VSIZE}.")
+  res = fn_validate_min_value("TP_WINDOW_VSIZE", TP_WINDOW_VSIZE, TP_WINDOW_VSIZE_min)
+  if (res["is_valid"] == False):  
+    return res
   if (TP_DYN_PT_SIZE == 1) :
    return isValid
 
@@ -251,10 +261,12 @@ def validate_TP_SAT(args):
 #Twiddle mode 1 means use 1/2 max magnitude twiddles, i.e. 2^(N-1). This avoids saturation, but loses 1 bit of
 #precision and so noise overall will be higher.
 def fn_validate_twiddleMode(TP_TWIDDLE_MODE):
-  if TP_TWIDDLE_MODE < TP_TWIDDLE_MODE_min:
-      return isError(f"Minimum value for TWIDDLE_MODE is {TP_TWIDDLE_MODE_min}, but got {TP_TWIDDLE_MODE}.")
-  if TP_TWIDDLE_MODE > TP_TWIDDLE_MODE_max:
-      return isError(f"Maximum value for TWIDDLE_MODE is {TP_TWIDDLE_MODE_max}, but got {TP_TWIDDLE_MODE}.")
+  res = fn_validate_min_value("TP_TWIDDLE_MODE", TP_TWIDDLE_MODE, TP_TWIDDLE_MODE_min)
+  if (res["is_valid"] == False):  
+    return res
+  res = fn_validate_max_value("TP_TWIDDLE_MODE", TP_TWIDDLE_MODE, TP_TWIDDLE_MODE_max)
+  if (res["is_valid"] == False):  
+    return res
   return isValid
 
 def validate_TP_TWIDDLE_MODE(args):
@@ -278,7 +290,7 @@ def get_dyn_pt_port_info(portname, dir, TT_DATA, windowVSize, vectorLength=None,
     "direction" : f"{dir}",
     "data_type" : TT_DATA,
     "fn_is_complex" : fn_is_complex(TT_DATA),
-    "window_size" : fn_input_window_size(windowVSize, TT_DATA) + 32,
+    "window_size" : fn_input_window_size(windowVSize, TT_DATA) + 32, #32bytes is the size of the header
     "margin_size": marginSize
   } for idx in range((vectorLength if vectorLength else 1))] # do just one port if vectorLength=None
 
@@ -297,8 +309,8 @@ def info_ports(args):
 
   if TP_API == 0 :
     if TP_DYN_PT_SIZE == 0 :
-      in_ports = get_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE, 1, 0, TP_API)
-      out_ports = get_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE, 1, 0, TP_API)
+      in_ports = get_port_info("in", "in", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER)), 2**TP_PARALLEL_POWER, 0, TP_API)
+      out_ports = get_port_info("out", "out", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER)), 2**TP_PARALLEL_POWER, 0, TP_API)
     else :
       in_ports = get_dyn_pt_port_info("in", "in", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER)), 2**TP_PARALLEL_POWER, 0, TP_API)
       out_ports = get_dyn_pt_port_info("out", "out", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER)), 2**TP_PARALLEL_POWER, 0, TP_API)
@@ -308,15 +320,15 @@ def info_ports(args):
         in_ports = get_port_info("in", "in", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER+1)), 2**(TP_PARALLEL_POWER+1), 0, 1)
         out_ports = get_port_info("out", "out", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER+1)), 2**(TP_PARALLEL_POWER+1), 0, 1)
       else:
-        in_ports = get_dyn_pt_port_info("in", "in", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER + 1)), 2**(TP_PARALLEL_POWER + 1), 0, TP_API)
-        out_ports = get_dyn_pt_port_info("out", "out", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER + 1)), 2**(TP_PARALLEL_POWER + 1), 0, TP_API)
+        in_ports = get_dyn_pt_port_info("in", "in", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER+1)), 2**(TP_PARALLEL_POWER+1), 0, TP_API)
+        out_ports = get_dyn_pt_port_info("out", "out", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER+1)), 2**(TP_PARALLEL_POWER+1), 0, TP_API)
     else : #1 port per kernel
       if TP_DYN_PT_SIZE == 0 :
-        in_ports = get_port_info("in", "in", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER+1)), 2**(TP_PARALLEL_POWER), 0, 1)
-        out_ports = get_port_info("out", "out", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER+1)), 2**(TP_PARALLEL_POWER), 0, 1)
+        in_ports = get_port_info("in", "in", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER)), 2**(TP_PARALLEL_POWER), 0, 1)
+        out_ports = get_port_info("out", "out", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER)), 2**(TP_PARALLEL_POWER), 0, 1)
       else:
-        in_ports = get_dyn_pt_port_info("in", "in", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER + 1)), 2**(TP_PARALLEL_POWER), 0, TP_API)
-        out_ports = get_dyn_pt_port_info("out", "out", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER + 1)), 2**(TP_PARALLEL_POWER), 0, TP_API)
+        in_ports = get_dyn_pt_port_info("in", "in", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER)), 2**(TP_PARALLEL_POWER), 0, TP_API)
+        out_ports = get_dyn_pt_port_info("out", "out", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER)), 2**(TP_PARALLEL_POWER), 0, TP_API)
 
   return in_ports + out_ports
 
@@ -338,6 +350,7 @@ def generate_graph(graphname, args):
   TP_USE_WIDGETS = args["TP_USE_WIDGETS"]
   TP_RND = args["TP_RND"]
   TP_SAT = args["TP_SAT"]
+  TP_TWIDDLE_MODE = args["TP_TWIDDLE_MODE"]
   AIE_VARIANT = args["AIE_VARIANT"]
 
   if TP_API == 0:
@@ -375,7 +388,8 @@ public:
     {TP_PARALLEL_POWER}, // TP_PARALLEL_POWER
     {TP_USE_WIDGETS}, // TP_USE_WIDGETS
     {TP_RND}, // TP_RND
-    {TP_SAT} // TP_SAT
+    {TP_SAT}, // TP_SAT
+    {TP_TWIDDLE_MODE} //TP_TWIDDLE_MODE
   > fft_graph;
 
   {graphname}() : fft_graph() {{

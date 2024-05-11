@@ -55,7 +55,7 @@
       "validator": {
         "file": "fir_sr_asym.py",
         "function": "validate_TP_FIR_LEN",
-        "args": ["TT_DATA", "TT_COEFF", "TP_CASC_LEN", "TP_SSR", "TP_API", "TP_USE_COEFF_RELOAD"]
+        "args": ["TT_DATA", "TT_COEFF", "TP_CASC_LEN", "TP_SSR", "TP_API", "TP_USE_COEFF_RELOAD", "AIE_VARIANT"]
       }
     },
     {

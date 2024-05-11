@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@
 HELPER_CUR_DIR ?= .
 HELPER_ROOT_DIR ?= ./../../../../
 SEED ?= 1
-
 
 ifeq ($(T_DATA_A), int16)
 	ifeq ($(T_DATA_B), int16)
@@ -172,9 +171,10 @@ else ifeq ($(T_DATA_A), cfloat)
 			VEC_IN_FRAME := 2
 			endif
 endif
-DIM_SIZE_PADDED := $$(( $(DIM_SIZE) / $(UUT_SSR)))
-DIM_SIZE_PADDED := $$(( $$(($$(( $(DIM_SIZE_PADDED) + $(VEC_IN_FRAME) - 1)) / $(VEC_IN_FRAME))) * $(VEC_IN_FRAME)))
-WINDOW_VSIZE := $$(( $(DIM_SIZE_PADDED)*$(NUM_FRAMES)*$(UUT_SSR)))
+DIM_SIZE_PADDED := $(shell echo $$(( $(DIM_SIZE) / $(UUT_SSR))) )
+DIM_SIZE_PADDED := $(shell echo $$(( $$(($$(( $(DIM_SIZE_PADDED) + $(VEC_IN_FRAME) - 1)) / $(VEC_IN_FRAME))) * $(VEC_IN_FRAME))) )
+WINDOW_VSIZE := $(shell echo $$(( $(DIM_SIZE_PADDED) * $(NUM_FRAMES) * $(UUT_SSR))))
+
 
 ifeq ($(DIM_SIZE_PADDED), 16)
 	PT_SIZE_PWR       := 4
@@ -238,12 +238,13 @@ else
 endif
 
 ifeq ($(API_IO), 1)
-	NUM_PORTS := $$(( $(UUT_SSR)*$(PORTS_PER_TILE) ))
+	NUM_PORTS := $(shell echo $$(( $(UUT_SSR)*$(PORTS_PER_TILE) )) )
 else
 	NUM_PORTS := $(UUT_SSR)
 endif
 
-DYN_PT_HEADER_MODE = 0
+DYN_PT_HEADER_MODE := 0
+DYN_PT_SIZE := 0
 ifeq ($(DYN_PT_SIZE), 1)
 	DYN_PT_HEADER_MODE = 1
 else
@@ -256,14 +257,16 @@ else ifeq ($(T_DATA_B), cfloat)
 	T_DATA_OUT := cfloat
 endif
 
-PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) T_DATA_A $(T_DATA_A) T_DATA_B $(T_DATA_B) DIM_SIZE $(DIM_SIZE_PADDED) NUM_FRAMES $(NUM_FRAMES) SHIFT $(SHIFT) DYN_PT_SIZE $(DYN_PT_SIZE)  UUT_SSR $(UUT_SSR) API_IO $(API_IO) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE)
+STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
+PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) T_DATA_A $(T_DATA_A) T_DATA_B $(T_DATA_B) DIM_SIZE $(DIM_SIZE) NUM_FRAMES $(NUM_FRAMES) SHIFT $(SHIFT) UUT_SSR $(UUT_SSR) API_IO $(API_IO) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE)
 
 HELPER:= $(HELPER_CUR_DIR)/.HELPER
 
 $(HELPER): create_input sim_ref prep_x86_out
 	make cleanall
 
-AIE_PART = XCVC1902-VSVD1760-1LP-E-S
+create_config:
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP);
 
 create_input:
 	@echo starting create_input
@@ -299,7 +302,7 @@ prep_aie_out:
 		grep -ve '[XT]' $(HELPER_CUR_DIR)/aiesimulator_output/data/$$n > $(HELPER_CUR_DIR)/data/$$n;\
 	done
 
-get_diff: prep_x86_out prep_aie_out
+get_diff:
 	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(T_DATA_OUT) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) ;\
 	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(T_DATA_OUT) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) ;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)
@@ -311,8 +314,9 @@ get_qor:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_hadamard_theoretical_min.tcl $(T_DATA_A) $(T_DATA_B) $(WINDOW_VSIZE) $(STATUS_FILE) $(UUT_KERNEL) $(API_IO)
 
 get_latency:
-	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_PART)
+	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input_A_0_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
 
 get_stats:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output "hadamard_main" $(NITER)
+	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts

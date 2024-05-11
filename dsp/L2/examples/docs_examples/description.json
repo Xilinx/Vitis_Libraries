@@ -70,7 +70,6 @@
             }
         ],
         "targets": [
-            "vitis_aie_sim",
             "vitis_aie_x86sim"
         ],
         "category": "canary"

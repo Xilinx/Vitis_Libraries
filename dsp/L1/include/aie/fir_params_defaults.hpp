@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,12 @@ struct fir_params_defaults {
     static constexpr unsigned int BTP_FIR_RANGE_LEN = 4;
     static constexpr unsigned int BTP_SHIFT = 0;
     static constexpr unsigned int BTP_RND = 0;
+    static constexpr unsigned int BTP_TDM_CHANNELS = 1;
     static constexpr unsigned int BTP_INTERPOLATE_FACTOR = 1;
     static constexpr unsigned int BTP_DECIMATE_FACTOR = 1;
     static constexpr unsigned int BTP_INPUT_WINDOW_VSIZE = 256;
     static constexpr unsigned int BTP_CASC_LEN = 1;
     static constexpr unsigned int BTP_USE_COEFF_RELOAD = 0;
-    static constexpr unsigned int BTP_TDM_CHANNELS = 1;
     static constexpr unsigned int BTP_NUM_OUTPUTS = 1;
     static constexpr unsigned int BTP_DUAL_IP = 0;
     static constexpr unsigned int BTP_API = 0;
@@ -58,6 +58,8 @@ struct fir_params_defaults {
     static constexpr int BTP_MODIFY_MARGIN_OFFSET = 0;
     static constexpr unsigned int BTP_KERNEL_POSITION = 0;
     static constexpr unsigned int BTP_SAT = 1;
+    static constexpr unsigned int BTP_SSR_MODE = 0; // 0 - default: decompose to array of TP_SSR^2; 1 - decompose to a
+                                                    // vector of TP_SSR, where kernels form independent paths.
 };
 template <typename fp = fir_params_defaults>
 void printParams() {
@@ -67,6 +69,7 @@ void printParams() {
     printf("BTP_FIR_RANGE_LEN         = %d.\n", fp::BTP_FIR_RANGE_LEN);
     printf("BTP_SHIFT                 = %d.\n", fp::BTP_SHIFT);
     printf("BTP_RND                   = %d.\n", fp::BTP_RND);
+    printf("BTP_TDM_CHANNELS          = %d.\n", fp::BTP_TDM_CHANNELS);
     printf("BTP_INTERPOLATE_FACTOR    = %d.\n", fp::BTP_INTERPOLATE_FACTOR);
     printf("BTP_DECIMATE_FACTOR       = %d.\n", fp::BTP_DECIMATE_FACTOR);
     printf("BTP_INPUT_WINDOW_VSIZE    = %d.\n", fp::BTP_INPUT_WINDOW_VSIZE);
@@ -89,6 +92,7 @@ void printParams() {
     printf("BTP_MODIFY_MARGIN_OFFSET  = %d.\n", fp::BTP_MODIFY_MARGIN_OFFSET);
     printf("BTP_KERNEL_POSITION       = %d.\n", fp::BTP_KERNEL_POSITION);
     printf("BTP_RND                   = %d.\n", fp::BTP_SAT);
+    printf("BTP_SSR_MODE              = %d.\n", fp::BTP_SSR_MODE);
 }
 template <typename fp = fir_params_defaults>
 class fir_type_default {

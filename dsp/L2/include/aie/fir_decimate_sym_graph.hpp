@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -361,8 +361,8 @@ class create_casc_kernel<1,
  *
  * These are the templates to configure the symmetrical decimator FIR class.
  * @tparam TT_DATA describes the type of individual data samples input to and
- *         output from the filter function. This is a typename and must be one
- *         of the following: \n
+ *         output from the filter function. \n
+ *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  * @tparam TT_COEFF describes the type of individual coefficients of the filter
  *         taps. \n It must be one of the same set of types listed for TT_DATA
@@ -371,17 +371,17 @@ class create_casc_kernel<1,
  *         - TT_COEFF must be an integer type if TT_DATA is an integer type
  *         - TT_COEFF must be a float type if TT_DATA is a float type.
  * @tparam TP_FIR_LEN is an unsigned integer which describes the number of taps
- *         in the filter. TP_FIR_LEN must be in the range 4 to 240 and
- *         must be an integer multiple of the TP_DECIMATE_FACTOR value.
+ *         in the filter. \n
+ *         TP_FIR_LEN must be an integer multiple of the TP_DECIMATE_FACTOR value.
  * @tparam TP_DECIMATE_FACTOR is an unsigned integer which describes the
- *         decimation factor of the filter, the ratio of input to output samples.
+ *         decimation factor of the filter, the ratio of input to output samples. \n
  *         TP_DECIMATE_FACTOR must be in the range 2 to 3. For larger factors, use
  *         the fir_decimate_asym library element.
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
- *         descriptive macros are recommended where
+ *         shift down stage of processing. \n
+ *         Although, TP_RND accepts unsigned integer values descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
  *         - rnd_sym_floor  = Truncate LSB, always round towards 0.
@@ -400,7 +400,7 @@ class create_casc_kernel<1,
  *         in a single iteration run.  \n
  *         When TP_API is set to 0, samples are buffered and stored in a ping-pong window buffer mapped onto Memory
 *Group banks. \n
- *         As a results, maximum number of samples processed by the graph is limited by the size of Memory Group. \n
+ *         As a result, maximum number of samples processed by the graph is limited by the size of Memory Group. \n
  *         When TP_API is set to 1 and TP_SSR is set to 1, incoming samples are buffered in a similar manner.  \n
  *         When TP_API is set to 1 and TP_SSR > 1, samples are processed directly from the stream inputs and no
 *buffering takes place. \n
@@ -408,7 +408,7 @@ class create_casc_kernel<1,
 *iteration).  \n
  *         Note: For SSR configurations (TP_SSR>1), the input data must be split over multiple ports,
  *         where each successive sample is sent to a different input port in a round-robin fashion. \n
- *         As a results, each SSR input path will process a fraction of the frame defined by the TP_INPUT_WINDOW_VSIZE.
+ *         As a result, each SSR input path will process a fraction of the frame defined by the TP_INPUT_WINDOW_VSIZE.
 *\n
  *         The number of values in the output window will be TP_INPUT_WINDOW_VSIZE
  *         divided by TP_DECIMATE_FACTOR by virtue the decimation factor.
@@ -688,7 +688,7 @@ class fir_decimate_sym_graph : public graph {
      **/
     port_conditional_array<input, (TP_DUAL_IP == 1), TP_SSR> in2;
     /**
-     * The conditional array of input async ports used to pass run-time programmable (RTP) coeficients.
+     * The conditional array of input async ports used to pass run-time programmable (RTP) coefficients.
      * This port_conditional_array is (generated when TP_USE_COEFF_RELOAD == 1) an array of input ports, which size is
      *defined by TP_SSR.
      * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.

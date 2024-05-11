@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,281 +60,6 @@ namespace dsp {
 namespace aie {
 namespace blas {
 namespace matrix_mult {
-
-// TO BE MOVED:
-// IF input type
-
-struct no_port {};
-
-template <typename T_A, typename T_B>
-#ifdef __SUPPORTS_ACC64__
-struct accType {
-    using type = cacc64;
-};
-template <>
-struct accType<int16, int16> {
-    using type = acc64;
-};
-template <>
-struct accType<int16, cint16> {
-    using type = cacc64;
-};
-template <>
-struct accType<int16, cint32> {
-    using type = cacc64;
-};
-template <>
-struct accType<int16, int32> {
-    using type = acc64;
-};
-template <>
-struct accType<cint16, int16> {
-    using type = cacc64;
-};
-template <>
-struct accType<cint16, cint16> {
-    using type = cacc64;
-};
-template <>
-struct accType<cint16, int32> {
-    using type = cacc64;
-};
-template <>
-struct accType<cint16, cint32> {
-    using type = cacc64;
-};
-template <>
-struct accType<int32, int16> {
-    using type = acc64;
-};
-template <>
-struct accType<int32, cint16> {
-    using type = cacc64;
-};
-template <>
-struct accType<int32, int32> {
-    using type = acc64;
-};
-template <>
-struct accType<int32, cint32> {
-    using type = cacc64;
-};
-template <>
-struct accType<cint32, int16> {
-    using type = cacc64;
-};
-template <>
-struct accType<cint32, cint16> {
-    using type = cacc64;
-};
-template <>
-struct accType<cint32, int32> {
-    using type = cacc64;
-};
-template <>
-struct accType<cint32, cint32> {
-    using type = cacc64;
-};
-
-#else
-
-struct accType {
-    using type = cacc48;
-};
-template <>
-struct accType<int16, int16> {
-    using type = acc48;
-};
-template <>
-struct accType<int16, cint16> {
-    using type = cacc48;
-};
-template <>
-struct accType<int16, cint32> {
-    using type = cacc80;
-};
-template <>
-struct accType<int16, int32> {
-    using type = acc80;
-};
-template <>
-struct accType<cint16, int16> {
-    using type = cacc48;
-};
-template <>
-struct accType<cint16, cint16> {
-    using type = cacc48;
-};
-template <>
-struct accType<cint16, int32> {
-    using type = cacc80;
-};
-template <>
-struct accType<cint16, cint32> {
-    using type = cacc80;
-};
-template <>
-struct accType<int32, int16> {
-    using type = acc80;
-};
-template <>
-struct accType<int32, cint16> {
-    using type = cacc80;
-};
-template <>
-struct accType<int32, int32> {
-    using type = acc80;
-};
-template <>
-struct accType<int32, cint32> {
-    using type = cacc80;
-};
-template <>
-struct accType<cint32, int16> {
-    using type = cacc80;
-};
-template <>
-struct accType<cint32, cint16> {
-    using type = cacc80;
-};
-template <>
-struct accType<cint32, int32> {
-    using type = cacc80;
-};
-template <>
-struct accType<cint32, cint32> {
-    using type = cacc80;
-};
-
-template <>
-struct accType<float, float> {
-    using type = accfloat;
-};
-template <>
-struct accType<cfloat, float> {
-    using type = caccfloat;
-};
-template <>
-struct accType<float, cfloat> {
-    using type = caccfloat;
-};
-template <>
-struct accType<cfloat, cfloat> {
-    using type = caccfloat;
-};
-#endif //__SUPPORTS_ACC64__
-
-template <typename T_D_A, typename T_D_B>
-using accType_t = typename accType<T_D_A, T_D_B>::type;
-
-template <typename T_A, typename T_B>
-struct outType {
-    using type = cint16;
-};
-
-template <>
-struct outType<int16, int16> {
-    using type = int16;
-};
-template <>
-struct outType<int16, cint16> {
-    using type = cint16;
-};
-template <>
-struct outType<int16, cint32> {
-    using type = cint32;
-};
-template <>
-struct outType<int16, int32> {
-    using type = int32;
-};
-
-template <>
-struct outType<cint16, int16> {
-    using type = cint16;
-};
-template <>
-struct outType<cint16, cint16> {
-    using type = cint16;
-};
-template <>
-struct outType<cint16, int32> {
-    using type = cint32;
-};
-template <>
-struct outType<cint16, cint32> {
-    using type = cint32;
-};
-
-template <>
-struct outType<int32, int16> {
-    using type = int32;
-};
-template <>
-struct outType<int32, cint16> {
-    using type = cint32;
-};
-template <>
-struct outType<int32, int32> {
-    using type = int32;
-};
-template <>
-struct outType<int32, cint32> {
-    using type = cint32;
-};
-
-template <>
-struct outType<cint32, int16> {
-    using type = cint32;
-};
-template <>
-struct outType<cint32, cint16> {
-    using type = cint32;
-};
-template <>
-struct outType<cint32, int32> {
-    using type = cint32;
-};
-template <>
-struct outType<cint32, cint32> {
-    using type = cint32;
-};
-
-template <>
-struct outType<float, float> {
-    using type = float;
-};
-template <>
-struct outType<cfloat, float> {
-    using type = cfloat;
-};
-template <>
-struct outType<float, cfloat> {
-    using type = cfloat;
-};
-template <>
-struct outType<cfloat, cfloat> {
-    using type = cfloat;
-};
-
-template <typename T_D_A, typename T_D_B>
-using outType_t = typename outType<T_D_A, T_D_B>::type;
-
-template <bool T_CASC_IN, typename T_D_A, typename T_D_B>
-struct T_inputIF {
-    void* __restrict inWindowA;
-    void* __restrict inWindowB;
-    typename std::conditional<T_CASC_IN == CASC_IN_FALSE, no_port, input_stream<accType_t<T_D_A, T_D_B> > >::type*
-        inCascade;
-};
-
-// IF output type
-template <bool T_CASC_OUT, typename T_D_A, typename T_D_B>
-struct T_outputIF {
-    typename std::conditional<T_CASC_OUT == CASC_OUT_FALSE,
-                              outType_t<T_D_A, T_D_B>,
-                              output_stream<accType_t<T_D_A, T_D_B> > >::type* __restrict outWindow;
-};
 
 // TODO: Move this into a common dsp::aie namespace.
 // Functions to support defensive checks
@@ -469,27 +194,31 @@ class kernelMatMultClass {
         // needs to be compatible with c++14 -> so just use plain ifs
         // int16 or int32 x int16 x int 32
         if ((std::is_same<A, int16>::value || std::is_same<A, int32>::value) &&
-            (std::is_same<A, int16>::value || std::is_same<A, int32>::value)) {
+            (std::is_same<B, int16>::value || std::is_same<B, int32>::value)) {
             return {4, 4, 4};
         }
         // cint16 x int16
-        if (std::is_same<A, cint16>::value && std::is_same<B, int16>::value) {
+        else if (std::is_same<A, cint16>::value && std::is_same<B, int16>::value) {
             return {4, 4, 4};
         }
         // cint16 x cint16
-        if (std::is_same<A, cint16>::value && std::is_same<B, cint16>::value) {
+        else if (std::is_same<A, cint16>::value && std::is_same<B, cint16>::value) {
             return {1, 4, 8};
         }
         // cint32 x cint16
-        if (std::is_same<A, cint32>::value && std::is_same<B, cint16>::value) {
+        else if (std::is_same<A, cint32>::value && std::is_same<B, cint16>::value) {
             return {2, 4, 8};
         }
         // cint32 x cint32
-        if (std::is_same<A, cint32>::value && std::is_same<B, cint32>::value) {
+        else if (std::is_same<A, cint32>::value && std::is_same<B, cint32>::value) {
             return {1, 2, 8};
         }
+        // All other combinations are not supported
+        else {
+            return {1, 1, 1};
+        }
     };
-#else
+#else  // __SUPPORTS_ACC48__
     static INLINE_DECL constexpr tilingStruct getTilingScheme() {
         using A = TT_DATA_A;
         using B = TT_DATA_B;
@@ -553,6 +282,8 @@ class kernelMatMultClass {
         return (TP_DIM_A % Atile == 0) && (TP_DIM_B % Btile == 0) && (TP_DIM_AB % ABtile == 0);
     }
     static constexpr tilingStruct tilingScheme = getTilingScheme();
+    static_assert((tilingScheme.Atile > 1 || tilingScheme.ABtile > 1 || tilingScheme.Btile > 1),
+                  "ERROR: There are no supported Matrix Multiplication Modes for this data type combination");
     static_assert(tilingSchemeMultiples<tilingScheme.Atile, tilingScheme.ABtile, tilingScheme.Btile>(),
                   "Error: Dimensions are not multiples of tiling scheme.");
 

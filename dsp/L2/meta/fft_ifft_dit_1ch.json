@@ -13,6 +13,11 @@
     ],
     "parameters": [
         {
+            "name": "AIE_VARIANT",
+            "type": "uint",
+            "description": "specifies the device type"
+        },
+        {
             "name": "TT_DATA",
             "description": "The type of individual data samples input to and output of the filter function",
             "type": "typename",
@@ -35,6 +40,7 @@
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TT_TWIDDLE",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA"
                 ]
             }
@@ -153,11 +159,6 @@
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TP_TWIDDLE_MODE" 
             }
-        },
-        {
-            "name": "AIE_VARIANT",
-            "type": "uint",
-            "description": "specifies the device type"
         }
     ],
     "ports": {

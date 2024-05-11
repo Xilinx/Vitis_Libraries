@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,10 @@ using namespace adf;
  *        frame of data samples.
  *
  * These are the templates to configure the function.
- * @tparam TT_DATA describes the type of individual data samples input to the function.
+ * @tparam TT_DATA describes the type of individual data samples input to the function. \n
  *         This is a typename and must be one of the following: \n
  *         cint16, cint32, cfloat.
- * @tparam TT_COEFF describes the type of weights in the FFT window.
+ * @tparam TT_COEFF describes the type of weights in the FFT window. \n
  *         This is a typename and must be one of the following: \n
  *         int16, int32, float.
  *         TT_DATA and TT_COEFF must be both integer types or both float types.
@@ -61,7 +61,8 @@ using namespace adf;
  * @tparam TP_WINDOW_VSIZE describes the number of samples to be processed in each
  *         call to this function. It must be an integer multiple of TP_POINT_SIZE.
  * @tparam TP_SHIFT described the number of bits to downshift after the scaling by the window
- *         value. e.g. for a TT_COEFF of int16 and a window value of 16384 meaning 1.000,
+ *         value. \n
+ *         For example, for a TT_COEFF of int16 and a window value of 16384 meaning 1.000,
  *         a TP_SHIFT value of 14 is appropriate.
  * @tparam TP_API described whether to use streams (1) or windows (0).
  * @tparam TP_SSR describes the number of kernels to use in parallel to perform the windowing
@@ -69,8 +70,8 @@ using namespace adf;
  * @tparam TP_DYN_PT_SIZE describes whether to support run-time selectable point size for
  *         the frames of data within the AIE window to be processed.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
- *         descriptive macros are recommended where
+ *         shift down stage of processing. \n
+ *         Although, TP_RND accepts unsigned integer values descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
  *         - rnd_sym_floor  = Truncate LSB, always round towards 0.
@@ -85,8 +86,8 @@ using namespace adf;
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
- * @tparam TP_SAT describes the selection of saturation to be applied during the
- *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
+ *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
  *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
  *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
@@ -121,9 +122,6 @@ class fft_window_graph : public graph {
     static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value),
                   "ERROR: TT_DATA is not supported");
 #endif //__SUPPORTS_CFLOAT__ == 0
-    static_assert((std::is_same<TT_COEFF, int16>::value) || (std::is_same<TT_COEFF, int32>::value) ||
-                      (std::is_same<TT_COEFF, float>::value),
-                  "ERROR: TT_COEFF is not supported");
     static_assert((std::is_same<TT_DATA, cfloat>::value && std::is_same<TT_COEFF, float>::value) ||
                       (!std::is_same<TT_DATA, cfloat>::value && !std::is_same<TT_COEFF, float>::value),
                   "ERROR: TT_DATA and TT_COEFF are not a supported combination");

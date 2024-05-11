@@ -1,0 +1,21 @@
+digraph G {
+data_type -> input_window_size;
+coef_type -> input_window_size;
+fir_length -> input_window_size;
+ssr -> input_window_size;
+tdm_channels -> input_window_size;
+data_type -> tdm_channels;
+coef_type -> tdm_channels;
+ssr -> tdm_channels;
+fir_length -> tdm_channels;
+ssr -> num_outputs;
+AIE_VARIANT -> num_outputs;
+data_type -> shift_val;
+data_type -> coef_type;
+num_outputs -> dual_ip;
+AIE_VARIANT -> dual_ip;
+data_type -> fir_length;
+coef_type -> fir_length;
+ssr -> fir_length;
+AIE_VARIANT -> rnd_mode;
+}

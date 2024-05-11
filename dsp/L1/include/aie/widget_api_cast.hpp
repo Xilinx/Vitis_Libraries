@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -513,7 +513,7 @@ class widget_api_cast<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
 
     // Main function
-    void transferData(input_stream_cacc64* __restrict inStream0,
+    void transferData(input_cascade<cacc64>* __restrict inStream0,
                       input_stream<TT_DATA>* __restrict inStream1,
                       output_circular_buffer<TT_DATA>& __restrict outWindow0);
 };
@@ -534,7 +534,7 @@ class widget_api_cast<TT_DATA, kStreamCascAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1
 
     // Main function
     void transferData(input_stream<TT_DATA>* __restrict inStream0,
-                      input_stream_cacc64* __restrict inStream1,
+                      input_cascade<cacc64>* __restrict inStream1,
                       output_circular_buffer<TT_DATA>& __restrict outWindow0);
 };
 #endif //__SUPPORTS_ACC64__
@@ -554,7 +554,7 @@ class widget_api_cast<TT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE, 2
 
     // Main function
     void transferData(input_buffer<TT_DATA>& __restrict inWindow0,
-                      output_stream_cacc64* __restrict outStream0,
+                      output_cascade<cacc64>* __restrict outStream0,
                       output_stream<TT_DATA>* __restrict outStream1);
 };
 #endif //__SUPPORTS_ACC64__
@@ -575,7 +575,7 @@ class widget_api_cast<TT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE, 2
     // Main function
     void transferData(input_buffer<TT_DATA>& __restrict inWindow0,
                       output_stream<TT_DATA>* __restrict outStream0,
-                      output_stream_cacc64* __restrict outStream1);
+                      output_cascade<cacc64>* __restrict outStream1);
 };
 #endif //__SUPPORTS_ACC64__
 

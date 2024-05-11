@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,13 @@ namespace dsp {
 namespace aie {
 namespace blas {
 namespace matrix_vector_mul {
+
+#ifndef ROW_MAJOR
+#define ROW_MAJOR 0
+#endif // ROW_MAJOR
+#ifndef COL_MAJOR
+#define COL_MAJOR 1
+#endif // COL_MAJOR
 
 template <typename T_A, typename T_B>
 struct outType {
@@ -129,6 +136,7 @@ template <typename TT_DATA_A,
           typename TT_DATA_B,
           unsigned int TP_DIM_A,
           unsigned int TP_DIM_B,
+          unsigned int TP_DIM_A_LEADING,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_SAT,

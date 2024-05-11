@@ -1,3 +1,0 @@
-digraph G {
-data_type -> output_window_size;
-}

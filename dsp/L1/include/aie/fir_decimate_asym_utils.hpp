@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -455,8 +455,8 @@ INLINE_DECL void bufferLoadAndDeinterleave(std::array<T_buff_1024b<TT_DATA>, TP_
                 TT_DATA readSample;
                 upd_win_incr_sample(readSample, inItr);
 
-                sbuffArray[(phaseOffset + j) % TP_NUM_INPUTS].val.set(readSample,
-                                                                      splice * kSamplesIn256b + j / TP_NUM_INPUTS);
+                sbuffArray[(phaseOffset + j) % TP_NUM_INPUTS].val.set(
+                    readSample, (splice * kSamplesIn256b + j / TP_NUM_INPUTS) % T_buff_1024b<TT_DATA>::getLanes());
             }
 
             // Interleave 4 to 1
@@ -522,8 +522,8 @@ INLINE_DECL void bufferLoadAndDeinterleave(std::array<T_buff_1024b<TT_DATA>, TP_
                 // output vectors
                 TT_DATA readSample = *inPtr++;
 
-                sbuffArray[(phaseOffset + j) % TP_NUM_INPUTS].val.set(readSample,
-                                                                      splice * kSamplesIn256b + j / TP_NUM_INPUTS);
+                sbuffArray[(phaseOffset + j) % TP_NUM_INPUTS].val.set(
+                    readSample, (splice * kSamplesIn256b + j / TP_NUM_INPUTS) % T_buff_1024b<TT_DATA>::getLanes());
             }
 
             // Interleave 4 to 1

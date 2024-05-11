@@ -4,7 +4,8 @@ import json
 #### VMC validators ####
 def vmc_validate_point_size(args):
     point_size = args["point_size"]
-    return fn_validate_point_size(point_size)
+    aie_variant = args["AIE_VARIANT"]
+    return fn_validate_point_size(point_size, aie_variant)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]
@@ -23,7 +24,8 @@ def vmc_validate_casc_length(args):
 
 def vmc_validate_TP_RND(args):
   rnd_mode = args["rnd_mode"]
-  return fn_validate_rnd(rnd_mode)
+  aie_variant = args["AIE_VARIANT"]
+  return fn_validate_rnd(rnd_mode, aie_variant)
 
 def vmc_validate_sat_mode(args):
     sat_mode = args["sat_mode"]
@@ -48,5 +50,6 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_FFT_NIFFT"] = 0
     tmpargs["TP_RND"] = args["rnd_mode"]
     tmpargs["TP_SAT"] = args["sat_mode"]
+    tmpargs["AIE_VARIANT"] = args["AIE_VARIANT"]
 
     return generate_graph(name, tmpargs)

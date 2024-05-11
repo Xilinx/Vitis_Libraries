@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,8 @@ namespace aie {
 namespace fft {
 namespace mixed_radix_fft {
 
+#define __24_1__
+
 // new FFT functions with vectorization
 template <typename TT_INPUT_DATA, typename TT_OUTPUT_DATA, typename TT_TWIDDLE, unsigned int TP_R>
 void INLINE_DECL stage_radix2_dit(const TT_INPUT_DATA* x,
@@ -56,9 +58,13 @@ void INLINE_DECL stage_radix2_dit(const TT_INPUT_DATA* x,
                                   const unsigned int& shift,
                                   TT_OUTPUT_DATA* __restrict y,
                                   const bool& inv) {
+    constexpr unsigned int kTwShift = std::is_same<TT_INPUT_DATA, cfloat>::value ? 0 : 15;
+#ifdef __24_1__
+    // New rank-level entry to AIE API FFT.
+    ::aie::fft_dit_r2_stage<TP_R, TT_INPUT_DATA, TT_OUTPUT_DATA, TT_TWIDDLE>(x, tw, n, kTwShift, shift, inv, y);
+#else  // 23_2
     constexpr unsigned int kStageRadix = 2;
 
-    constexpr unsigned int shift_tw = std::is_same<TT_INPUT_DATA, cfloat>::value ? 0 : 15;
     using FFT = ::aie::fft_dit<TP_R, kStageRadix, TT_INPUT_DATA, TT_OUTPUT_DATA>; // type = cint32, stage = 0, radix = 2
 
     FFT fft;
@@ -69,10 +75,11 @@ void INLINE_DECL stage_radix2_dit(const TT_INPUT_DATA* x,
 
     for (int j = 0; j < n / (kStageRadix * FFT::out_vector_size); ++j)
         chess_prepare_for_pipelining chess_loop_range(1, ) {
-            const auto out = fft.dit(*it_stage++, shift_tw, shift, inv);
+            const auto out = fft.dit(*it_stage++, kTwShift, shift, inv);
             *it_out0++ = out[0];
             *it_out1++ = out[1];
         }
+#endif //__24_1__
 };
 
 // Stage 0 radix 4. This is used in most internal stages.
@@ -86,8 +93,12 @@ void INLINE_DECL stage_radix4_dit(const TT_INPUT_DATA* x,
                                   TT_OUTPUT_DATA* __restrict y,
                                   const bool& inv) {
     const unsigned kStageRadix = 4;
-    unsigned shift_tw = 15;
+    constexpr unsigned int kTwShift = std::is_same<TT_INPUT_DATA, cfloat>::value ? 0 : 15;
 
+#ifdef __24_1__
+    ::aie::fft_dit_r4_stage<TP_R, TT_INPUT_DATA, TT_OUTPUT_DATA, TT_TWIDDLE>(x, tw1, tw2, tw3, n, kTwShift, shift, inv,
+                                                                             y);
+#else
     using FFT = ::aie::fft_dit<TP_R, kStageRadix, TT_INPUT_DATA, TT_OUTPUT_DATA>;
 
     FFT fft;
@@ -104,7 +115,7 @@ void INLINE_DECL stage_radix4_dit(const TT_INPUT_DATA* x,
             auto it_out3 = ::aie::begin_restrict_vector<FFT::out_vector_size>(y + 3 * n / kStageRadix);
 
             for (int j = 0; j < block_size; ++j) chess_prepare_for_pipelining chess_loop_range(1, ) {
-                    const auto out = fft.dit(*it_stage++, shift_tw, shift, inv);
+                    const auto out = fft.dit(*it_stage++, kTwShift, shift, inv);
                     *it_out0++ = out[0];
                     *it_out1++ = out[1];
                     *it_out2++ = out[2];
@@ -116,7 +127,7 @@ void INLINE_DECL stage_radix4_dit(const TT_INPUT_DATA* x,
         auto it_out1 = ::aie::begin_restrict_vector<FFT::out_vector_size>(y + 2 * n / kStageRadix);
 
         for (int j = 0; j < block_size; ++j) chess_prepare_for_pipelining chess_loop_range(1, ) {
-                const auto out = fft.dit(*it_stage++, shift_tw, shift, inv);
+                const auto out = fft.dit(*it_stage++, kTwShift, shift, inv);
                 *it_out0 = out[0];
                 it_out0 += block_size;
                 *it_out0 = out[1];
@@ -128,43 +139,44 @@ void INLINE_DECL stage_radix4_dit(const TT_INPUT_DATA* x,
             }
     }
 
-    /*
-    const unsigned int kStockhamStage = 0;
-    const unsigned int kStageRadix = 4;
-    unsigned shift_tw = 15;
-    using FFT = ::aie::fft_dit< TP_R, kStageRadix, TT_INPUT_DATA, TT_OUTPUT_DATA>; // type = cint32, stage = 0, radix =
-  2
+/*
+const unsigned int kStockhamStage = 0;
+const unsigned int kStageRadix = 4;
+constexpr unsigned int kTwShift = std::is_same<TT_INPUT_DATA, cfloat>::value ? 0 : 15;
+using FFT = ::aie::fft_dit< TP_R, kStageRadix, TT_INPUT_DATA, TT_OUTPUT_DATA>; // type = cint32, stage = 0, radix =
+2
 
-    FFT fft;
+FFT fft;
 
-    auto it_stage  = fft.begin_stage(x, tw1, tw2, tw3);
-    auto it_out0 = ::aie::begin_restrict_vector<FFT::out_vector_size>(y);
-    auto it_out1 = ::aie::begin_restrict_vector<FFT::out_vector_size>(y + 2*n / kStageRadix);
-    const int block_size = n / (kStageRadix * FFT::out_vector_size);
+auto it_stage  = fft.begin_stage(x, tw1, tw2, tw3);
+auto it_out0 = ::aie::begin_restrict_vector<FFT::out_vector_size>(y);
+auto it_out1 = ::aie::begin_restrict_vector<FFT::out_vector_size>(y + 2*n / kStageRadix);
+const int block_size = n / (kStageRadix * FFT::out_vector_size);
 
-    for (int j = 0; j < block_size; ++j)
-      chess_prepare_for_pipelining
-      chess_loop_range(1,)
-      {
-        auto out = fft.dit(*it_stage++, shift_tw, shift, inv);
-        //in AIE1 or at least at one point the compiler failed to optimize the pointer
-        //handling correctly, so two pointers interlaced were required to allow the
-        //pointer arithmetic not to become an issue.
-        // In AIE-ML, or after and update to the compiler, this was no longer needed
-  #if __FFT_R4_IMPL__ == 0
-        *it_out0 = out[0]; it_out0 +=  block_size;
-        *it_out0 = out[1]; it_out0 += -block_size + 1;
-        *it_out1 = out[2]; it_out1 +=  block_size;
-        *it_out1 = out[3]; it_out1 += -block_size + 1;
-  #endif //__FFT_R4_IMPL__ == 0
-  #if __FFT_R4_IMPL__ == 1
-        *it_out0 = out[0]; it_out0 +=  block_size;
-        *it_out0 = out[1]; it_out0 +=  block_size;
-        *it_out0 = out[2]; it_out0 +=  block_size;
-        *it_out0 = out[3]; it_out0 += -3*block_size + 1;
-  #endif //__FFT_R4_IMPL__ == 1
-      }
-    */
+for (int j = 0; j < block_size; ++j)
+  chess_prepare_for_pipelining
+  chess_loop_range(1,)
+  {
+    auto out = fft.dit(*it_stage++, kTwShift, shift, inv);
+    //in AIE1 or at least at one point the compiler failed to optimize the pointer
+    //handling correctly, so two pointers interlaced were required to allow the
+    //pointer arithmetic not to become an issue.
+    // In AIE-ML, or after and update to the compiler, this was no longer needed
+#if __FFT_R4_IMPL__ == 0
+    *it_out0 = out[0]; it_out0 +=  block_size;
+    *it_out0 = out[1]; it_out0 += -block_size + 1;
+    *it_out1 = out[2]; it_out1 +=  block_size;
+    *it_out1 = out[3]; it_out1 += -block_size + 1;
+#endif //__FFT_R4_IMPL__ == 0
+#if __FFT_R4_IMPL__ == 1
+    *it_out0 = out[0]; it_out0 +=  block_size;
+    *it_out0 = out[1]; it_out0 +=  block_size;
+    *it_out0 = out[2]; it_out0 +=  block_size;
+    *it_out0 = out[3]; it_out0 += -3*block_size + 1;
+#endif //__FFT_R4_IMPL__ == 1
+  }
+*/
+#endif //__24_1__
 };
 
 template <typename TT_INPUT_DATA, typename TT_OUTPUT_DATA, typename TT_TWIDDLE, unsigned int TP_R>
@@ -175,8 +187,12 @@ void INLINE_DECL stage_radix3_dit(const TT_INPUT_DATA* x,
                                   const unsigned int& shift,
                                   TT_OUTPUT_DATA* __restrict y,
                                   const bool& inv) {
-    unsigned shift_tw = 15;
+    constexpr unsigned int kTwShift = std::is_same<TT_INPUT_DATA, cfloat>::value ? 0 : 15;
     const unsigned kStageRadix = 3;
+#ifdef __24_1__
+    ::aie::fft_dit_r3_stage<TP_R, TT_INPUT_DATA, TT_OUTPUT_DATA, TT_TWIDDLE>(x, twb, twc, n, kTwShift, shift, inv, y);
+#else
+
     using FFT = ::aie::fft_dit<TP_R, kStageRadix, TT_INPUT_DATA, TT_OUTPUT_DATA>;
 
     FFT fft;
@@ -192,11 +208,12 @@ void INLINE_DECL stage_radix3_dit(const TT_INPUT_DATA* x,
     auto it_out2 = ::aie::begin_restrict_vector<FFT::out_vector_size>(y + 2 * n_div_3);
 
     for (int j = 0; j < block_size; ++j) chess_prepare_for_pipelining chess_loop_range(1, ) {
-            const auto out = fft.dit(*it_stage++, shift_tw, shift, inv);
+            const auto out = fft.dit(*it_stage++, kTwShift, shift, inv);
             *it_out0++ = out[0];
             *it_out1++ = out[1];
             *it_out2++ = out[2];
         }
+#endif //__24_1__
 };
 
 template <typename TT_INPUT_DATA, typename TT_OUTPUT_DATA, typename TT_TWIDDLE, unsigned int TP_R>
@@ -209,8 +226,13 @@ void INLINE_DECL stage_radix5_dit(const TT_INPUT_DATA* x,
                                   const unsigned int& shift,
                                   TT_OUTPUT_DATA* __restrict y,
                                   const bool& inv) {
-    unsigned shift_tw = 15;
+    constexpr unsigned int kTwShift = std::is_same<TT_INPUT_DATA, cfloat>::value ? 0 : 15;
     const unsigned kStageRadix = 5;
+#ifdef __24_1__
+    ::aie::fft_dit_r5_stage<TP_R, TT_INPUT_DATA, TT_OUTPUT_DATA, TT_TWIDDLE>(x, tw0, tw1, tw2, tw3, n, kTwShift, shift,
+                                                                             inv, y);
+#else
+
     using FFT = ::aie::fft_dit<TP_R, kStageRadix, TT_INPUT_DATA, TT_OUTPUT_DATA>;
 
     FFT fft;
@@ -222,7 +244,7 @@ void INLINE_DECL stage_radix5_dit(const TT_INPUT_DATA* x,
     auto it_out = ::aie::begin_restrict_vector<FFT::out_vector_size>(y);
 
     for (int j = 0; j < block_size; ++j) chess_prepare_for_pipelining chess_loop_range(1, ) {
-            const auto out = fft.dit(*it_stage++, shift_tw, shift, inv);
+            const auto out = fft.dit(*it_stage++, kTwShift, shift, inv);
             *it_out = out[0];
             it_out += block_size;
             *it_out = out[1];
@@ -234,6 +256,7 @@ void INLINE_DECL stage_radix5_dit(const TT_INPUT_DATA* x,
             *it_out = out[4];
             it_out += -4 * block_size + 1;
         }
+#endif //__24_1__
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -516,9 +539,10 @@ void INLINE_DECL opt_r4_stage(TT_IN_DATA* xbuff,
             stage_radix4_dit<TT_IN_DATA,  // Not first stage, so using internal data type
                              TT_OUT_DATA, // last stage so output is data type
                              TT_TWIDDLE,
-                             TP_POINT_SIZE / RMOD>                                   // the 'r' factor.
-                (xbuff,                                                              // input
-                 &tw_table[tw_ptrs[TW_BASE]], &tw_table[tw_ptrs[TW_BASE + 1]], NULL, // the twiddles
+                             TP_POINT_SIZE / RMOD> // the 'r' factor.
+                (xbuff,                            // input
+                 &tw_table[tw_ptrs[TW_BASE]], &tw_table[tw_ptrs[TW_BASE + 1]],
+                 &tw_table[tw_ptrs[TW_BASE + 2]], // the twiddles
                  TP_POINT_SIZE,
                  FFT_SHIFT15 + TP_SHIFT, // compensate for twiddles AND perform final stage shift
                  obuff,                  // the destination buffer

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,13 @@
 #include "test_widg_r2c.hpp"
 #include "test_fft_window.hpp"
 #include "test_dds_lut.hpp"
+#include "test_outer_tensor.hpp"
+#include "test_hadamard.hpp"
+#include "test_kronecker.hpp"
+#include "test_conv.hpp"
+#include "test_corr.hpp"
+#include "test_dft.hpp"
+#include "test_matvec.hpp"
 
 using namespace adf;
 #define NUM_IP_FIR 1
@@ -38,6 +45,20 @@ using namespace adf;
 #define NUM_IP_FFTW 1
 #define NUM_IP_DDS_LUT 1
 #define NUM_OP_DDS_LUT 1
+#define NUM_IP_OT 2
+#define NUM_OP_OT 1
+#define NUM_IP_HAD 2
+#define NUM_OP_HAD 1
+#define NUM_IP_KMP 2
+#define NUM_OP_KMP 1
+#define NUM_IP_CONV 2
+#define NUM_OP_CONV 1
+#define NUM_IP_CORR 2
+#define NUM_OP_CORR 1
+#define NUM_IP_DFT 2
+#define NUM_OP_DFT 2
+#define NUM_IP_MV 4
+#define NUM_OP_MV 2
 
 template <unsigned int elem_start, unsigned int num_ports, unsigned int NUM_IP_ALL, typename plioType>
 void createPLIOFileConnections(std::array<plioType, NUM_IP_ALL>& plioPorts,
@@ -57,9 +78,11 @@ namespace all_example {
 class test_example : public graph {
    public:
     static constexpr unsigned int NUM_IP_ALL = NUM_IP_FIR + NUM_IP_DDS + NUM_IP_FFT + NUM_IP_MM + NUM_IP_WIDG_API +
-                                               NUM_IP_WIDG_R2C + NUM_IP_FFTW + NUM_IP_DDS_LUT;
+                                               NUM_IP_WIDG_R2C + NUM_IP_FFTW + NUM_IP_DDS_LUT + NUM_IP_OT + NUM_IP_HAD +
+                                               NUM_IP_KMP + NUM_IP_CONV + NUM_IP_CORR + NUM_IP_DFT + NUM_IP_MV;
     static constexpr unsigned int NUM_OP_ALL = NUM_IP_FIR + NUM_IP_DDS + NUM_IP_FFT + NUM_OP_MM + NUM_OP_WIDG_API +
-                                               NUM_OP_WIDG_R2C + NUM_IP_FFTW + NUM_OP_DDS_LUT;
+                                               NUM_OP_WIDG_R2C + NUM_IP_FFTW + NUM_OP_DDS_LUT + NUM_OP_OT + NUM_OP_HAD +
+                                               NUM_OP_KMP + NUM_OP_CONV + NUM_OP_CORR + NUM_OP_DFT + NUM_OP_MV;
 
     std::array<input_plio, NUM_IP_ALL> in;
     std::array<output_plio, NUM_OP_ALL> out;
@@ -72,6 +95,13 @@ class test_example : public graph {
     widgr2c_example::test_widg_r2c uut_widg_r2c;
     fft_win_example::test_fftw uut_fftw;
     dds_lut_example::test_dds_lut uut_dds_lut;
+    outer_tensor_example::test_outer_tensor uut_outer_tensor;
+    hadamard_example::test_hadamard uut_hadamard;
+    kronecker_example::test_kronecker uut_kronecker;
+    conv_example::test_conv uut_conv;
+    corr_example::test_corr uut_corr;
+    dft_example::test_dft uut_dft;
+    mv_example::test_mv uut_mv;
 
     test_example() {
         // create input file connections - first template argument indicates first index of plio port for this library
@@ -84,6 +114,13 @@ class test_example : public graph {
         createPLIOFileConnections<10, NUM_IP_WIDG_R2C, NUM_IP_ALL>(in, "input", "w_r2c", "in");
         createPLIOFileConnections<11, NUM_IP_FFTW, NUM_IP_ALL>(in, "input", "fftw", "in");
         createPLIOFileConnections<12, NUM_IP_DDS_LUT, NUM_IP_ALL>(in, "input", "ddslut", "in");
+        createPLIOFileConnections<13, NUM_IP_OT, NUM_IP_ALL>(in, "input", "outer_tensor", "in");
+        createPLIOFileConnections<15, NUM_IP_HAD, NUM_IP_ALL>(in, "input", "hadamard", "in");
+        createPLIOFileConnections<17, NUM_IP_KMP, NUM_IP_ALL>(in, "input", "kronecker", "in");
+        createPLIOFileConnections<19, NUM_IP_CONV, NUM_IP_ALL>(in, "input", "conv", "in");
+        createPLIOFileConnections<21, NUM_IP_CORR, NUM_IP_ALL>(in, "input", "corr", "in");
+        createPLIOFileConnections<23, NUM_IP_DFT, NUM_IP_ALL>(in, "input", "dft", "in");
+        createPLIOFileConnections<25, NUM_IP_MV, NUM_IP_ALL>(in, "input", "mv", "in");
 
         // create output file connections
         createPLIOFileConnections<0, NUM_IP_DDS, NUM_OP_ALL>(out, "output", "dds", "out");
@@ -94,6 +131,13 @@ class test_example : public graph {
         createPLIOFileConnections<8, NUM_OP_WIDG_R2C, NUM_OP_ALL>(out, "output", "w_r2c", "out");
         createPLIOFileConnections<9, NUM_IP_FFTW, NUM_OP_ALL>(out, "output", "fftw", "out");
         createPLIOFileConnections<10, NUM_OP_DDS_LUT, NUM_OP_ALL>(out, "output", "ddslut", "out");
+        createPLIOFileConnections<11, NUM_OP_OT, NUM_OP_ALL>(out, "output", "outer_tensor", "out");
+        createPLIOFileConnections<12, NUM_OP_HAD, NUM_OP_ALL>(out, "output", "hadamard", "out");
+        createPLIOFileConnections<13, NUM_OP_KMP, NUM_OP_ALL>(out, "output", "kronecker", "out");
+        createPLIOFileConnections<14, NUM_OP_CONV, NUM_OP_ALL>(out, "output", "conv", "out");
+        createPLIOFileConnections<15, NUM_OP_CORR, NUM_OP_ALL>(out, "output", "corr", "out");
+        createPLIOFileConnections<16, NUM_OP_DFT, NUM_OP_ALL>(out, "output", "dft", "out");
+        createPLIOFileConnections<18, NUM_OP_MV, NUM_OP_ALL>(out, "output", "mv", "out");
 
         // wire up dds testbench
         connect<>(in[0].out[0], uut_dds.in);
@@ -105,8 +149,8 @@ class test_example : public graph {
 
         // wire up fft testbench
         for (int i = 0; i < 4; i++) {
-            connect<>(uut_fft.out[i], out[2 + i].in[0]);
             connect<>(in[2 + i].out[0], uut_fft.in[i]);
+            connect<>(uut_fft.out[i], out[2 + i].in[0]);
         }
 
         // wire up matmul testbench
@@ -124,12 +168,51 @@ class test_example : public graph {
         connect<>(uut_widg_r2c.out, out[8].in[0]);
 
         // wire up fft window
-        connect<>(uut_fftw.out, out[9].in[0]);
         connect<>(in[11].out[0], uut_fftw.in);
+        connect<>(uut_fftw.out, out[9].in[0]);
 
         // wire up dds lut
-        connect<>(uut_dds_lut.out, out[10].in[0]);
         connect<>(in[12].out[0], uut_dds_lut.in);
+        connect<>(uut_dds_lut.out, out[10].in[0]);
+
+        // wire up outer tensor
+        connect<>(in[13].out[0], uut_outer_tensor.inA);
+        connect<>(in[14].out[0], uut_outer_tensor.inB);
+        connect<>(uut_outer_tensor.out, out[11].in[0]);
+
+        // wire up hadamard
+        connect<>(in[15].out[0], uut_hadamard.inA);
+        connect<>(in[16].out[0], uut_hadamard.inB);
+        connect<>(uut_hadamard.out, out[12].in[0]);
+
+        // wire up kronecker
+        connect<>(in[17].out[0], uut_kronecker.inA);
+        connect<>(in[18].out[0], uut_kronecker.inB);
+        connect<>(uut_kronecker.out, out[13].in[0]);
+
+        // wire up convolution
+        connect<>(in[19].out[0], uut_conv.inF);
+        connect<>(in[20].out[0], uut_conv.inG);
+        connect<>(uut_conv.out, out[14].in[0]);
+
+        // wire up correlation
+        connect<>(in[21].out[0], uut_corr.inF);
+        connect<>(in[22].out[0], uut_corr.inG);
+        connect<>(uut_corr.out, out[15].in[0]);
+
+        // wire up dft
+        connect<>(in[23].out[0], uut_dft.in[0]);
+        connect<>(in[24].out[0], uut_dft.in[1]);
+        connect<>(uut_dft.out[0], out[16].in[0]);
+        connect<>(uut_dft.out[1], out[17].in[0]);
+
+        // wire up matrix_vector_mul
+        connect<>(in[25].out[0], uut_mv.inA[0]);
+        connect<>(in[26].out[0], uut_mv.inB[0]);
+        connect<>(in[27].out[0], uut_mv.inA[1]);
+        connect<>(in[28].out[0], uut_mv.inB[1]);
+        connect<>(uut_mv.out[0], out[18].in[0]);
+        connect<>(uut_mv.out[1], out[19].in[0]);
     };
 };
 };

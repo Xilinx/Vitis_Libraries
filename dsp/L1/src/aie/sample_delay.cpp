@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,9 @@ Coding conventions
 #include "aie_api/aie_adf.hpp"
 #include "kernel_api_utils.hpp"
 #include "sample_delay.hpp"
+//#include "debug_utils.h"
+//#include "sample_delay_traits.hpp"
+//#include "sample_delay_utils.hpp"
 
 using namespace adf;
 namespace xf {
@@ -112,9 +115,9 @@ NOINLINE_DECL // This function is the hook for QoR profiling, so must be identif
     auto cacheRdItr0 =
         ::aie::begin_vector_random_circular<vecSize>(miniCache, miniCacheSize); // will point to cacheItr--
 
-    // check if the sampleDelayValue is within the range (0, MAX_DELAY)
+    // check if the sampleDelayValue is within the range (0, MAX_DELAY -1)
     if (sampleDelayValue > TP_MAX_DELAY) {
-        sampleDelayValueTemp = TP_MAX_DELAY - 1;
+        sampleDelayValueTemp = TP_MAX_DELAY;
     } else {
         sampleDelayValueTemp = sampleDelayValue;
     }

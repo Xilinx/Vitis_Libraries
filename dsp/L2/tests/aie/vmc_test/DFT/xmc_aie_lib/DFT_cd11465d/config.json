@@ -1,0 +1,15 @@
+{
+    "spec": "vmc_dft.json",
+    "outdir": "./xmc_aie_lib/DFT_cd11465d",
+    "parameters": {
+        "data_type": "cint16",
+        "twiddle_type": "cint16",
+        "point_size": 64,
+        "num_frames": 64,
+        "shift_val": 0,
+        "rnd_mode": 0,
+        "sat_mode": 0,
+        "casc_length": 1,
+        "AIE_VARIANT": 1
+    }
+}

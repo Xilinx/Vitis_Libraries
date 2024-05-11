@@ -1,7 +1,7 @@
 
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ options:
 my $file = "";
 my $rows = 1;
 my $cols = 1;
+my $colMajor = 1;
 my $ssrSplit = 1;
 my $ssrClone = 0;
 my $casc = 1;
@@ -60,6 +61,7 @@ GetOptions (
     "f|file=s" => \$file,
     "rows=i" => \$rows,
     "cols=i" => \$cols,
+    "colMajor=i" => \$colMajor,
     "s|ssrSplit=i"  => \$ssrSplit,
     "ssrClone=i"  => \$ssrClone,
     "casc=i" => \$casc,
@@ -84,7 +86,7 @@ if ( ($split and $zip) or ((not $split) and (not $zip)) ) {
     die "ERROR: need only split or zip. -h for usage"
 }
 if ( ($zip) and ($findOutType eq "") ) {
-    die "ERROR: When zip, insert the data type that -type DATA_A is multiplied with with -findOutType DATA_B -h for usage"
+    die "ERROR: When zip, insert the data type that -type DATA_A is multiplied with -findOutType DATA_B -h for usage"
 }
 if ( ($zip) and ($findOutType ne "") ) {
     # print "Calculating output data type depending on $type and $findOutType\n";
@@ -93,12 +95,25 @@ if ( ($zip) and ($findOutType ne "") ) {
         $type = "cfloat"
     } elsif ($type eq "cint32" or $findOutType eq "cint32") {
         $type = "cint32";
+    } elsif ($type eq "int32" and $findOutType eq "int32") {
+        $type = "int32";
+    } elsif ($type eq "int32" and $findOutType eq "int16") {
+        $type = "int32";
     } elsif ($type eq "int32" and $findOutType eq "cint16") {
         $type = "cint32";
+    } elsif ($type eq "cint16" and $findOutType eq "cint16") {
+        $type = "cint16";
+    } elsif ($type eq "cint16" and $findOutType eq "int16") {
+        $type = "cint16";     
     } elsif ($type eq "cint16" and $findOutType eq "int32") {
-        $type = "cint32";    
+        $type = "cint32"; 
     } elsif ($type eq "int16" and $findOutType eq "int16") {
         $type = "int16";
+    } elsif ($type eq "int16" and $findOutType eq "cint16") {
+        $type = "cint16";
+    } elsif ($type eq "int16" and $findOutType eq "int32") {
+        $type = "int32";
+
     }
     # print "Output type is $type\n"; 
 }
@@ -178,7 +193,7 @@ if ($split) {
     # Open a bunch of files in an array of file handles with a specific filename
     for my $cascIdx (@cascRange){
       for my $ssrIdx (@ssrRange){
-          my $fileIdx = $cascIdx * ($ssrSplit) + $ssrIdx;
+          my $fileIdx = $cascIdx + ($ssrIdx)*$casc;
           $subFiles[$fileIdx] = "${fileDir}${fileName}_${ssrIdx}_${cascIdx}${fileExt}${outFileMod}";
         #   print "Writing file $fileIdx to $subFiles[$fileIdx]\n";
           open($subFilesH[$fileIdx], ">", $subFiles[$fileIdx])
@@ -201,26 +216,38 @@ if ($split) {
         $lineNum = $lineNum + 1;
         my $ssrIndex = $rowNum/$rowsPerSSR;
         my $cascIndex = $colNum/$colsPerCasc;
-        my $fileIdx = $cascIndex * ($ssrSplit) + $ssrIndex;
-        # print " $fileIdx\n";
-        #         print "lineNum = $lineNum\n";
-        # print "rowNum = $rowNum\n";
-        # print "colNum = $colNum\n";
+        my $fileIdx = $cascIndex + ($ssrIndex)*$casc;
+        # print "lineNum = $lineNum\n";
+        # print "rowNum = $rowNum ";
+        # print "colNum = $colNum ->";
         # print "fileIdx = $fileIdx\n\n";
+
         print {$subFilesH[$fileIdx]} $line;
-
-
-        if ($lineNum % ($linesPerSample) == 0 ) {
-            $rowNum = $rowNum + 1;
+        if($colMajor) { 
+            # new row with each sample
+            if ($lineNum % ($linesPerSample) == 0 ) {
+                $rowNum = $rowNum + 1;
+            }
+            if ($rowNum == ($rows)) {
+                $colNum = $colNum + 1;
+                $rowNum = 0;
+            }
+            if ($colNum == ($cols)) {
+                $colNum = 0;
+            }
+        } else {
+            # new row with each sample
+            if ($lineNum % ($linesPerSample) == 0 ) {
+                $colNum = $colNum + 1;
+            }
+            if ($colNum == ($cols)) {
+                $rowNum = $rowNum + 1;
+                $colNum = 0;
+            }
+            if ($rowNum == ($rows)) {
+                $rowNum = 0;
+            }
         }
-        if ($rowNum == ($rows)) {
-            $colNum = $colNum + 1;
-            $rowNum = 0;
-        }
-        if ($colNum == ($cols)) {
-            $colNum = 0;
-        }
-
     }
 
     if  ($samplesPerLine > 1) {
@@ -264,7 +291,7 @@ if ($split) {
                 for (my $i = 1; $i < $ssrClone; $i++) {  
                     # print "ssr is $i\n";
                     my $cloneFile = $subFile;  
-                    $cloneFile =~ s/_0_\./_${i}_\./; # replace "_0." with "_$i."  
+                    $cloneFile =~ s/_0_/_${i}_/; # replace "_0." with "_$i."  
                     system("cp $subFile $cloneFile"); # clone the file  
                 }  
             }

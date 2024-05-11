@@ -97,13 +97,13 @@
                 "./"
             ],
             "clflags": [
-                "--Xpreproc=-DUUT_GRAPH=matrix_mult_graph",
-                "--Xpreproc=-DP_SAT_MODE=0",
-                "--Xpreproc=-DUSING_UUT=1",
-                "--Xpreproc=-DUSING_PL_MOVER=1",
-                "--Xpreproc=-DOUTPUT_FILE=./data/uut_output.txt",
-                "--Xpreproc=-DINPUT_FILE_A=./data/inputA.txt",
-                "--Xpreproc=-DINPUT_FILE_B=./data/inputB.txt"
+                "--aie.Xpreproc=-DUUT_GRAPH=matrix_mult_graph",
+                "--aie.Xpreproc=-DP_SAT_MODE=0",
+                "--aie.Xpreproc=-DUSING_UUT=1",
+                "--aie.Xpreproc=-DUSING_PL_MOVER=1",
+                "--aie.Xpreproc=-DOUTPUT_FILE=./data/uut_output.txt",
+                "--aie.Xpreproc=-DINPUT_FILE_A=./data/inputA.txt",
+                "--aie.Xpreproc=-DINPUT_FILE_B=./data/inputB.txt"
             ]
         }
     },

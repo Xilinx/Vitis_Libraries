@@ -1,5 +1,5 @@
 import aie_common as com
-from aie_common import isError,isValid, fn_validate_satMode
+from aie_common import isError,isValid, fn_validate_satMode, fn_validate_min_value, fn_validate_max_value, fn_validate_minmax_value
 #dds_mixer.hpp:74:    static_assert(TP_MIXER_MODE <= 2, "ERROR: DDS Mixer Mode must be 0, 1 or 2. ");
 #dds_mixer.hpp:75:    static_assert(fnEnumType<TT_DATA>() != enumUnknownType,
 #dds_mixer.hpp:77:    static_assert((TP_INPUT_WINDOW_VSIZE % m_kNumLanes) == 0,
@@ -11,10 +11,6 @@ from aie_common import isError,isValid, fn_validate_satMode
 
 TP_SSR_min = 1
 TP_INPUT_WINDOW_VSIZE_min = 4
-#TP_MIXER_MODE_min=0
-#TP_MIXER_MODE_max=2
-#TP_API_min=0
-#TP_API_max=1
 
 def fn_get_dds_lanes(TT_DATA):
   type_lane_dict = {
@@ -24,21 +20,38 @@ def fn_get_dds_lanes(TT_DATA):
   }
   return type_lane_dict[TT_DATA]
 
-def fn_validate_ssr(TP_SSR):
-    if TP_SSR < TP_SSR_min:
-        return isError(
-            f"Minimum value for SSR is {TP_SSR_min}, but got {TP_SSR}."
-        )
+def fn_validate_tt_data(TT_DATA,TP_MIXER_MODE):
+    if (TP_MIXER_MODE == 0) and (TT_DATA == "cint32" ):
+        return isError(f"MIXER_MODE_{TP_MIXER_MODE} does not support requested data type TT_DATA {TT_DATA} ")
     return isValid
+
+def fn_validate_ssr(TP_SSR):
+    return fn_validate_min_value("TP_SSR", TP_SSR, TP_SSR_min)
+
+def fn_validate_aieVar(AIE_VARIANT):
+    if AIE_VARIANT == 1:
+      return isValid
+    return isError(f"Please use the dds_mixer_lut library element for this device. This device does not support the dds_mixer element.")
+
+def fn_validate_aieVarVMC(AIE_VARIANT):
+    if AIE_VARIANT == 1:
+      return isValid
+    return isError(f"This library block is not supported on AIE-ML devices.")
+
+def validate_TT_DATA(args):
+    TT_DATA = args["TT_DATA"]
+    TP_MIXER_MODE = args["TP_MIXER_MODE"]
+    return fn_validate_tt_data(TT_DATA,TP_MIXER_MODE)
 
 def validate_TP_WINDOW_VSIZE(args):
   TP_INPUT_WINDOW_VSIZE= args["TP_INPUT_WINDOW_VSIZE"]
-  if TP_INPUT_WINDOW_VSIZE < TP_INPUT_WINDOW_VSIZE_min:
-        return isError(f"Minimum value for Input window size is {TP_INPUT_WINDOW_VSIZE_min},respectively, but got {TP_INPUT_WINDOW_VSIZE}.")
+  res = fn_validate_min_value("TP_INPUT_WINDOW_VSIZE", TP_INPUT_WINDOW_VSIZE, TP_INPUT_WINDOW_VSIZE_min)
+  if (res["is_valid"] == False):
+    return res
   TT_DATA= args["TT_DATA"]
   lanes = fn_get_dds_lanes(TT_DATA)
   if (TP_INPUT_WINDOW_VSIZE % lanes != 0):
-    return isError(f"Window size ({TP_INPUT_WINDOW_VSIZE}) must be a multiple of number of lanes ({lanes})")
+      return isError(f"Window size ({TP_INPUT_WINDOW_VSIZE}) must be a multiple of number of lanes ({lanes})")
 
   return isValid
 
@@ -50,6 +63,17 @@ def validate_TP_SAT(args):
   TP_SAT = args["TP_SAT"]
   return fn_validate_satMode(TP_SAT)
 
+def validate_AIE_VARIANT(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_validate_aieVar(AIE_VARIANT)
+
+def validate_TP_USE_PHASE_RELOAD(args):
+  TP_USE_PHASE_RELOAD = args["TP_USE_PHASE_RELOAD"]
+  TP_SSR = args["TP_SSR"]
+  if (TP_USE_PHASE_RELOAD == 1 and TP_SSR !=1):
+    return isError("Phase Offset Update cannot be used for TP_SSR > 1!")
+  return isValid
+
   ######### Graph Generator ############
 
 # Used by higher layer software to figure out how to connect blocks together.
@@ -59,29 +83,35 @@ def info_ports(args):
   TP_SSR = args["TP_SSR"]
   TP_API = args["TP_API"]
   TP_MIXER_MODE = args["TP_MIXER_MODE"]
+  TP_USE_PHASE_RELOAD = args["TP_USE_PHASE_RELOAD"]
   in1_ports = (com.get_port_info("in1", "in", TT_DATA, (TP_INPUT_WINDOW_VSIZE/TP_SSR), TP_SSR, 0, TP_API) if (TP_MIXER_MODE in [1,2]) else [])
   in2_ports = (com.get_port_info("in2", "in", TT_DATA, (TP_INPUT_WINDOW_VSIZE/TP_SSR), TP_SSR, 0, TP_API) if (TP_MIXER_MODE == 2) else [])
+  in3_ports = (com.get_parameter_port_info("PhaseRTP", "in", "int32", None, TP_SSR, "async") if (TP_USE_PHASE_RELOAD == 1) else [])
   out_ports = com.get_port_info("out", "out", TT_DATA, (TP_INPUT_WINDOW_VSIZE/TP_SSR), TP_SSR, 0, TP_API)
 
-  return (in1_ports+in2_ports+out_ports) # concat lists
+  return (in1_ports+in2_ports+in3_ports+out_ports) # concat strings
 
 def gen_ports_code(args):
   TP_SSR = args["TP_SSR"]
   TP_MIXER_MODE = args["TP_MIXER_MODE"]
+  TP_USE_PHASE_RELOAD = args["TP_USE_PHASE_RELOAD"]
   in1_ports = ((f"  std::array<adf::port<input>, {TP_SSR}> in1;\n") if (TP_MIXER_MODE in [1,2]) else "")
   in2_ports = ((f"  std::array<adf::port<input>, {TP_SSR}> in2;\n") if (TP_MIXER_MODE == 2) else "")
+  in3_ports = ((f"  std::array<adf::port<input>, {TP_SSR}> PhaseRTP;\n") if (TP_USE_PHASE_RELOAD == 1) else "")
   out_ports = (f"  std::array<adf::port<output>, {TP_SSR}> out;\n")
 
-  return (in1_ports+in2_ports+out_ports) # concat strings
+  return (in1_ports+in2_ports+in3_ports+out_ports) # concat strings
 
 def gen_ports_connections(args):
   TP_SSR = args["TP_SSR"]
+  TP_USE_PHASE_RELOAD = args["TP_USE_PHASE_RELOAD"]
   TP_MIXER_MODE = args["TP_MIXER_MODE"]
   in1_ports = ((f"      adf::connect<>(in1[ssrIdx],mixer_graph.in1[ssrIdx]);\n") if (TP_MIXER_MODE in [1,2]) else "")
   in2_ports = ((f"      adf::connect<>(in2[ssrIdx],mixer_graph.in2[ssrIdx]);\n") if (TP_MIXER_MODE == 2) else "")
+  in3_ports = ((f"      adf::connect<>(PhaseRTP[ssrIdx],mixer_graph.PhaseRTP[ssrIdx]);\n") if (TP_USE_PHASE_RELOAD == 1) else "")
   out_ports = (f"      adf::connect<>(mixer_graph.out[ssrIdx], out[ssrIdx]);\n")
 
-  return (in1_ports+in2_ports+out_ports) # concat strings
+  return (in1_ports+in2_ports+in3_ports+out_ports) # concat strings
 
 def generate_graph(graphname, args):
 
@@ -97,6 +127,7 @@ def generate_graph(graphname, args):
   TP_SSR = args["TP_SSR"]
   TP_RND = args["TP_RND"]
   TP_SAT = args["TP_SAT"]
+  TP_USE_PHASE_RELOAD = args["TP_USE_PHASE_RELOAD"]
   code = (
 f"""
 class {graphname} : public adf::graph {{
@@ -110,7 +141,9 @@ public:
     {TP_API}, // TP_API
     {TP_SSR}, // TP_SSR
     {TP_RND}, //TP_RND
-    {TP_SAT} //TP_SAT
+    {TP_SAT}, //TP_SAT
+    {TP_USE_PHASE_RELOAD} // TP_USE_PHASE_RELOAD
+
   > mixer_graph;
   {graphname}() : mixer_graph({args["phaseInc"]}, {args["initialPhaseOffset"]}) {{
     //kernels

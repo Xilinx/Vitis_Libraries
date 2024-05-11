@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ options:
     -r|--inRow=i               => Actual number of rows for InMatrix
     -c|--inCol=i               => Actual number of cols for InMatrix
     -p|--partition|--cascLen=i => Number of partitions / Cascade length for InMatrix
+    -s|--ssr=i
     [--splitRows]              => Optional. Specify if input data is to be partitioned over rows. Default behaviour assumes split over columns. 
     [--isTiled]                => Optional. Specify if input data is already tiled. Default behaviour assumes it is not tiled. 
     [-o|--outFile=s]           => Optional. output filepath (default is inFilePath/inFileName_<casc_index>.<inFileExt>)
@@ -57,6 +58,7 @@ my $outFile = "";
 my $inRow = "";
 my $inCol = "";
 my $cascLen = "";
+my $ssr = "";
 my $splitRows  = 0;
 my $verbose = 0;
 my $untile  = 0;
@@ -73,6 +75,7 @@ GetOptions (
             "r|inRow=i"             => \$inRow,
             "c|inCol=i"             => \$inCol,
             "p|partition|cascLen=i" => \$cascLen,
+            "s|ssr=i"               => \$ssr,
             "splitRows"             => \$splitRows,
             "untile"                => \$untile,
             "isTiled=i"             => \$isTiled,
@@ -306,6 +309,9 @@ print "Tiling Dimensions are $DIM_A_TILE x $DIM_AB_TILE x $DIM_B_TILE\n";
 my $tileRow = "";
 my $tileCol = "";
 my $dataType = "";
+my $ssrSplit = 1;
+my $ssrClone = 1;
+my $ssrJoin = 1;
 # default tiler gets provided dimensions, if cascade, we divide AB by casc len. 
 my $tileInRow = $inRow;
 my $tileInCol = $inCol;
@@ -313,7 +319,7 @@ if ( $cascLen eq "" ) {
     # using output
     $tileRow = $DIM_A_TILE;
     $tileCol = $DIM_B_TILE;
-
+    $ssrJoin = $ssr;
     # Need to find if output dataType is cin32, or cfloat
     if ($T_DATA_A eq "cfloat" or $T_DATA_B eq "cfloat") {
         $dataType = "cfloat"
@@ -327,6 +333,8 @@ if ( $cascLen eq "" ) {
         $dataType = "int32";
     } elsif ($T_DATA_A eq "int16" and $T_DATA_B eq "int32") {
         $dataType = "int32";
+    } elsif ($T_DATA_A eq "int16" and $T_DATA_B eq "cint16") {
+        $dataType = "cint16";
     } else {
         $dataType = $T_DATA_A;
     }
@@ -337,13 +345,15 @@ if ( $cascLen eq "" ) {
     $tileCol = $DIM_B_TILE;
     $dataType = $T_DATA_B;
     $tileInRow = ( $inRow / $cascLen );
-
+    $ssrClone = $ssr;
 } else { 
     # using A
     $tileRow = $DIM_A_TILE;
     $tileCol = $DIM_AB_TILE;
     $dataType = $T_DATA_A;
     $tileInCol = ( $inCol / $cascLen );
+    $tileInRow = ( $inRow / $ssr );
+    $ssrSplit = $ssr;
 }
 
 
@@ -364,16 +374,17 @@ if ($outFile ne "" ) {
 
 
 print "Reading $inFile. \n";
-print "isTiled is $isTiled\n";
+print "isTiled is $isTiled\n\n";
 
 my @resOutFiles;
-
 my @inText;
-if ($dataType eq "cint32" or $dataType eq "cfloat") {
-    doSamplePerLine($inFile);
-}
+
 if ( $cascLen eq "" ) { 
     # in this case, output is stil tiled and needs detiling. 
+    zip_files($inFile);
+    if ($dataType eq "cint32" or $dataType eq "cfloat") {
+        doSamplePerLine($inFile);
+    }
     if ( ! $isTiled ) { 
         if ($dataType eq "int16") {
             rename($inFile, $inFile . '.beforeOutputInt16LinePerSample');
@@ -388,12 +399,13 @@ if ( $cascLen eq "" ) {
                 or die "couldn't close OUT";
             close(IN)
                 or die "couldn't close IN";
-        }
-
+        }   
         tile_matrix($inFile);
     }
 } else { 
-    
+    if ($dataType eq "cint32" or $dataType eq "cfloat") {
+        doSamplePerLine($inFile);
+    }
     if ($dataType eq "int16") {
         rename($inFile, $inFile . '.beforeInt16LinePerSample');
         open(IN, '<' . $inFile . '.beforeInt16LinePerSample') or die $!;
@@ -412,13 +424,8 @@ if ( $cascLen eq "" ) {
     
     while(<$inFileh>) { 
         chomp;
-        #print "$_ \n";
-        #if ( $dataType eq "int16" ) { 
-        #    $_ =~ s/\s(-?[0-9]+)//g;
-        #}
         push @inText, $_;
     }
-
 
     close($inFileh)
         or die "couldn't close inFileh $inFileh";
@@ -447,115 +454,119 @@ if ($dataType eq "cint32" or $dataType eq "cfloat") {
     undoSamplePerLine($inFile);
 }
 
+if ($splitRows==1 and $ssrClone > 1) {
+
+    foreach my $subFile (@resOutFiles) {  
+        print ("Copying $subFile to ");
+        for (my $i = 1; $i < $ssrClone; $i++) {  
+            # print "ssr is $i\n";
+            my $cloneFile = $subFile;  
+            $cloneFile =~ s/_0_/_${i}_/; # replace "_0." with "_$i."  
+            system("cp $subFile $cloneFile"); # clone the file  
+            print "$cloneFile "
+        }  
+        print("\n");
+    }
+}
+
 sub partition_matrix { 
-
-    
-    
+    use integer;
     my @duplicateText = @inText;
-
-    my $colsPerCasc;
-    my $rowsPerCasc;
-    if ( $splitRows ) {
-        $rowsPerCasc = $inRow / $cascLen ; 
-        $colsPerCasc = $inCol;
-    } else { 
-        $colsPerCasc = $inCol / $cascLen ; 
-        $rowsPerCasc = $inRow;
-    }
-    my @cascades = (0...($cascLen - 1));
-    my @columns = (0...($colsPerCasc - 1));
-    my @rows = (0...($rowsPerCasc - 1));
-    my @batches = (0...((($#inText + 1) / ( $inRow * $inCol ))) - 1);
-
-    my $colElementDist;
-    my $colElementDistCasc;
-    my $rowElementDist;
-    my $rowElementDistCasc;
-    if ( $colMajor ) {
-        $rowElementDist = 1;
-        $rowElementDistCasc = 1;
-        $colElementDist = $inRow;
-        $colElementDistCasc = $rowsPerCasc;
-    } else { 
-        $rowElementDist = $inCol;
-        $rowElementDistCasc = $colsPerCasc;
-        $colElementDist = 1;
-        $colElementDistCasc = 1;
-    }
-
-    if ( $verbose ) { 
-        print "columns: ",join(", ", @columns), "\n";
-        print "rows: ",join(", ", @rows), "\n";
-        print "batches: ",join(", ", @batches), "\n";
-    }
+    my @numFiles = (0...(($cascLen * $ssrSplit) - 1));
 
     # create resultant outputfile names and handlers.
     my @outFileh;
-    #my @resOutFiles;
-    print "writing output files\n";
-    for my $file (@cascades) {
-        $resOutFiles[$file] = "${outFileDir}${outFileName}${file}${outFileExt}";
-        print "$resOutFiles[$file] \n";
-        open($outFileh[$file], ">", $resOutFiles[$file])
-           or die "cannot open $resOutFiles[$file]: $!";
+    my @ssrRange = (0...($ssrSplit - 1));
+    my @cascRange = (0...($cascLen - 1));
+    for my $cascIdx (@cascRange){
+        for my $ssrIdx (@ssrRange){
+            my $fileIdx = $cascLen * ($ssrIdx) + $cascIdx;
+            $resOutFiles[$fileIdx] = "${outFileDir}${outFileName}${ssrIdx}_${cascIdx}${outFileExt}";
+            print "$resOutFiles[$fileIdx] \n";
+            open($outFileh[$fileIdx], ">", $resOutFiles[$fileIdx])
+                or die "cannot open $resOutFiles[$fileIdx]: $!";
+      }
     }
+    # Partition for matrix A - split for ssr along rows, split for casc along cols
+    if (!$splitRows) {
+        my $rowNum = 0;
+        my $colNum = 0;
+        my $lineNum = 0;
+        my $rowsPerSSR = $inRow/$ssrSplit;
+        my $colsPerCasc = $inCol/$cascLen;
+        for my $sample (@inText) {
+            $lineNum = $lineNum + 1;
+            my $ssrIndex = $rowNum/$rowsPerSSR;
+            my $cascIndex = $colNum/$colsPerCasc;
+            my $fileIdx = $ssrIndex * ($cascLen) + $cascIndex;
+            # print "SSR=$ssrIndex casc=$cascIndex\n";
+            # print "lineNum = $lineNum\n";
+            # print "rowNum = $rowNum\n";
+            # print "colNum = $colNum\n";
+            # print "fileIdx = $fileIdx\n\n";
+            print {$outFileh[$fileIdx]} "$sample\n";
 
-    
-    my $currentFile;
-    my $inTextIndex;
-    my $colIndex;
-    my $rowIndex;
-    my @outputArray;
-    for my $batch (@batches){
-        if ( $colMajor ) { 
-            for my $col (@columns){ 
-                for my $row (@rows){
-                    for my $cascI ((0...($cascLen - 1))) {
-                        $currentFile = $outFileh[$cascI];
-                        if ( $splitRows ) { 
-                            $colIndex = $col;
-                            $rowIndex = ( $row + ( $cascI * $rowsPerCasc ) );
-                        } else {
-                            $colIndex = ( $col + ( $cascI * $colsPerCasc ) );
-                            $rowIndex = $row;
-                        }
-                        $inTextIndex = (($batch * $inRow * $inCol) + ($rowIndex * $rowElementDist) + ( $colIndex * $colElementDist ));
-                        print $currentFile "$inText[$inTextIndex]\n";
-                        if ( $verbose )  { 
-                            print "inText[$inTextIndex] = $inText[$inTextIndex]\n";
-                        }
-                    }
+            if ($colMajor) {
+                $rowNum = $rowNum + 1;
+                if ($rowNum == $inRow) {
+                    $colNum = $colNum + 1;
+                    $rowNum = 0;
                 }
-            }
-
-        } else { 
-            for my $row (@rows){
-                for my $col (@columns){ 
-                    for my $cascI ((0...($cascLen - 1))) {
-                        $currentFile = $outFileh[$cascI];
-                        if ( $splitRows ) { 
-                            $colIndex = $col;
-                            $rowIndex = ( $row + ( $cascI * $rowsPerCasc ) );
-                        } else {
-                            $colIndex = ( $col + ( $cascI * $colsPerCasc ) );
-                            $rowIndex = $row;
-                        }
-                        $inTextIndex = (($batch * $inRow * $inCol) + ($rowIndex * $rowElementDist) + ( $colIndex * $colElementDist ));
-                        print $currentFile "$inText[$inTextIndex]\n";
-                        if ( $verbose )  { 
-                            print "inText[$inTextIndex] = $inText[$inTextIndex]\n";
-                        }
-                    }
+                if ($colNum == $inCol) {
+                    $colNum = 0;
+                }
+            } else {
+                $colNum = $colNum + 1;
+                if ($colNum == ($inCol)) {
+                    $rowNum = $rowNum + 1;
+                    $colNum = 0;
+                }
+                if ($rowNum == ($inRow)) {
+                    $rowNum = 0;
                 }
             }
         }
+    } else {
+        # Partition matrix B - split along for cascade along columns - no split for ssr
+        my $rowNum = 0;
+        my $colNum = 0;
+        my $lineNum = 0;
+        my $rowsPerCasc = $inRow/$cascLen;
+        for my $sample (@inText) {
+            $lineNum = $lineNum + 1;
+            my $cascIndex = $rowNum/$rowsPerCasc;
+            my $fileIdx = $cascIndex;
+            # print "lineNum = $lineNum\n";
+            # print "rowNum = $rowNum\n";
+            # print "colNum = $colNum\n";
+            # print "fileIdx = $fileIdx\n\n";
+            print {$outFileh[$fileIdx]} "$sample\n";
+
+            if ($colMajor) {
+                $rowNum = $rowNum + 1;
+                if ($rowNum == $inRow) {
+                    $colNum = $colNum + 1;
+                    $rowNum = 0;
+                }
+                if ($colNum == $inCol) {
+                    $colNum = 0;
+                }
+            } else {
+                $colNum = $colNum + 1;
+                if ($colNum == ($inCol)) {
+                    $rowNum = $rowNum + 1;
+                    $colNum = 0;
+                }
+                if ($rowNum == ($inRow)) {
+                    $rowNum = 0;
+                }
+            }
+        }        
     }
+
 
     # Finally write out resultant data to each file. 
-    for my $file (@cascades) {
-        for my $i (@{$outputArray[$file]}) { 
-            print "$i \n";
-        }
+    for my $file (@numFiles) {
         close($outFileh[$file])
             or die "couldn't close outFileh $outFileh[$file]: $!";
         
@@ -736,6 +747,57 @@ sub tile_matrix {
     }
     print "Finished writing $resOutTileFile .\nEnd of tiling.\n";
 
+}
+
+sub zip_files {
+    my ($outFile) = @_ ; 
+    print("OUT file is $outFile\n");
+    my @ssrOutFiles = (0...(( $ssrJoin - 1)));
+    my $samplesPerLine = 1;
+    if ($dataType eq "int16") {
+        $samplesPerLine = 2;
+    }
+    my $linesPerSample = 1;
+    if ($dataType eq "cint32" || $dataType eq "cfloat") {
+        $linesPerSample = 2;
+    }
+    my $num_lines = $linesPerSample*($inRow*$inCol/$ssrJoin)/$samplesPerLine;
+
+    my @files = map { "./data/uut_output_$_\_0.txt"} (0...$ssrJoin-1);
+    print join(", ", @files);
+    # print("\nnum_lines =$num_lines\n");
+    my @filehandles;
+    # open all files  
+    for my $file (@files) {  
+        open my $fh, '<', $file or die "Can't open file $file: $!";  
+        push @filehandles, $fh;  
+    }  
+    
+    # # open output file  
+    open my $outfh, '>', $outFile or die "Can't open output file $outFile: $!";  
+    
+    # # read and write lines  
+    while (1) {  
+        my $eof_count = 0;  
+        for my $fh (@filehandles) {  
+            for (1..$num_lines) {  
+                my $line = <$fh>;  
+                if (defined $line) {  
+                    print $outfh $line;  
+                } else {  
+                    $eof_count++;  
+                    last;  
+                }  
+            }  
+        }  
+        last if $eof_count == scalar @filehandles; # exit loop if all files are at EOF  
+    }  
+    
+    # close all files  
+    for my $fh (@filehandles) {  
+        close $fh;  
+    }  
+    close $outfh; 
 }
 
 sub int16_twoSamplesPerLine { 

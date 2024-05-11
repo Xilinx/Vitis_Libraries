@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,7 @@ template <typename TT_DATA,
           unsigned int TP_SSR = 1, // ignored
           unsigned int TP_RND = 4,
           unsigned int TP_SAT = 1,
-          unsigned int TP_SFDR = 90
-
-          >
-
+          unsigned int TP_USE_PHASE_RELOAD = 0>
 class dds_mixer_ref_graph : public graph {
    private:
     template <class dir>
@@ -56,11 +53,13 @@ class dds_mixer_ref_graph : public graph {
     using input_port1 =
         typename std::conditional_t<(TP_MIXER_MODE == 1 || TP_MIXER_MODE == 2), port_array<input>, no_port>;
     using input_port2 = typename std::conditional_t<TP_MIXER_MODE == 2, port_array<input>, no_port>;
+    using rtp_port = typename std::conditional_t<(TP_USE_PHASE_RELOAD == 1), port<input>, no_port>;
 
    public:
     std::array<port<input>, 1> in1;
     std::array<port<input>, 1> in2;
     std::array<port<output>, 1> out;
+    std::array<rtp_port, TP_SSR> PhaseRTP;
 
     // DDS Kernel
     kernel m_ddsKernel;
@@ -73,10 +72,12 @@ class dds_mixer_ref_graph : public graph {
 
         // Create DDS_MIXER_REF kernel
         // IO_API is ignored because it's basically just a implementation detail
-        static constexpr unsigned int tp_num_luts = TP_SFDR <= 60 ? 1 : TP_SFDR <= 120 ? 2 : 3;
+        // static constexpr unsigned int tp_num_luts = TP_SFDR <= 60 ? 1 : TP_SFDR <= 120 ? 2 : 3;
+        static constexpr unsigned int tp_num_luts = 2;
         m_ddsKernel =
-            kernel::create_object<dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, USE_INBUILT_SINCOS,
-                                                tp_num_luts, TP_RND, TP_SAT> >(phaseInc, initialPhaseOffset);
+            kernel::create_object<dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_USE_PHASE_RELOAD,
+                                                USE_INBUILT_SINCOS, tp_num_luts, TP_RND, TP_SAT> >(phaseInc,
+                                                                                                   initialPhaseOffset);
 
         // Make connections
         // Size of window in Bytes.
@@ -89,6 +90,20 @@ class dds_mixer_ref_graph : public graph {
             constexpr(TP_MIXER_MODE == 2) {
                 connect<>(in2[0], m_ddsKernel.in[1]);
                 dimensions(m_ddsKernel.in[1]) = {TP_INPUT_WINDOW_VSIZE};
+            }
+        if
+            constexpr(TP_MIXER_MODE == 0 && TP_USE_PHASE_RELOAD == 1) {
+                connect<parameter>(PhaseRTP[0], async(m_ddsKernel.in[0]));
+            }
+
+        if
+            constexpr(TP_MIXER_MODE == 1 && TP_USE_PHASE_RELOAD == 1) {
+                connect<parameter>(PhaseRTP[0], async(m_ddsKernel.in[1]));
+            }
+
+        if
+            constexpr(TP_MIXER_MODE == 2 && TP_USE_PHASE_RELOAD == 1) {
+                connect<parameter>(PhaseRTP[0], async(m_ddsKernel.in[2]));
             }
         connect<>(m_ddsKernel.out[0], out[0]);
         dimensions(m_ddsKernel.out[0]) = {TP_INPUT_WINDOW_VSIZE};

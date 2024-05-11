@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ this file does not contain any vector types or intrinsics since it is required f
 and therefore must be suitable for the aie compiler graph-level compilation.
 */
 
+#include "device_defs.h"
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -55,14 +57,17 @@ constexpr int fnGetNumStages() {
     constexpr int kMaxStages = 10;
     int numStages = 0;
     int ptSize = T_PTSIZE;
+    // Vectorization in the final stage sets limits on factorization. e.g. radi4 stage on AIE1 outputs 16 samples, so
+    // if radix4 is used, the point size must be a multiple of 16. Else set radix4 stages to 0 and hope that radix 2
+    // will factorize.
+    if (RADIX == 4 && ptSize % __MRFFT_ATOM__ != 0) return 0;
+
     for (int i = 0; i < kMaxStages; i++) {
         if (ptSize % RADIX == 0) {
             ptSize /= RADIX;
             numStages++;
         }
     }
-    if (RADIX == 4 && numStages == 1)
-        return 0; // a single radix4 stage fails due to there being 4 outputs of a minimum vector size of 4.
     return numStages;
 }
 
@@ -71,13 +76,14 @@ constexpr int fnGetRadixFactor() {
     constexpr int kMaxStages = 10;
     int radixFactor = 1;
     int ptSize = T_PTSIZE;
+    if (RADIX == 4 && ptSize % __MRFFT_ATOM__ != 0) return 1;
+
     for (int i = 0; i < kMaxStages; i++) {
         if (ptSize % RADIX == 0) {
             ptSize /= RADIX;
             radixFactor *= RADIX;
         }
     }
-    if (RADIX == 4 && radixFactor == 4) return 1;
     return radixFactor;
 }
 

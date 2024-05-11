@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,18 +24,291 @@
 #define NOINLINE_DECL inline __attribute__((noinline))
 #endif
 
+#include "device_defs.h"
+
 namespace xf {
 namespace dsp {
 namespace aie {
 namespace blas {
 namespace matrix_mult {
 /*
-Asymmetrical Interpolation FIR traits.
+Matrix Multiply traits.
 This file contains sets of overloaded, templatized and specialized templatized functions which
 encapsulate properties of the intrinsics used by the main kernal class. Specifically,
 this file does not contain any vector types or intrinsics since it is required for construction
 and therefore must be suitable for the aie compiler graph-level compilation.
 */
+
+// The following struct returns the required accumulator for data combos.
+// Also for devices supporting different acc types. AIE-ML - acc64, cacc64 etc. AIE1 - acc48, acc80 etc.
+struct no_port {};
+template <typename T_A, typename T_B>
+#ifdef __SUPPORTS_ACC64__
+struct accType {
+    using type = cacc64;
+};
+template <>
+struct accType<int16, int16> {
+    using type = acc64;
+};
+template <>
+struct accType<int16, cint16> {
+    using type = cacc64;
+};
+template <>
+struct accType<int16, cint32> {
+    using type = cacc64;
+};
+template <>
+struct accType<int16, int32> {
+    using type = acc64;
+};
+template <>
+struct accType<cint16, int16> {
+    using type = cacc64;
+};
+template <>
+struct accType<cint16, cint16> {
+    using type = cacc64;
+};
+template <>
+struct accType<cint16, int32> {
+    using type = cacc64;
+};
+template <>
+struct accType<cint16, cint32> {
+    using type = cacc64;
+};
+template <>
+struct accType<int32, int16> {
+    using type = acc64;
+};
+template <>
+struct accType<int32, cint16> {
+    using type = cacc64;
+};
+template <>
+struct accType<int32, int32> {
+    using type = acc64;
+};
+template <>
+struct accType<int32, cint32> {
+    using type = cacc64;
+};
+template <>
+struct accType<cint32, int16> {
+    using type = cacc64;
+};
+template <>
+struct accType<cint32, cint16> {
+    using type = cacc64;
+};
+template <>
+struct accType<cint32, int32> {
+    using type = cacc64;
+};
+template <>
+struct accType<cint32, cint32> {
+    using type = cacc64;
+};
+#else  //__SUPPORTS_ACC48__
+struct accType {
+    using type = cacc48;
+};
+template <>
+struct accType<int16, int16> {
+    using type = acc48;
+};
+template <>
+struct accType<int16, cint16> {
+    using type = cacc48;
+};
+template <>
+struct accType<int16, cint32> {
+    using type = cacc80;
+};
+template <>
+struct accType<int16, int32> {
+    using type = acc80;
+};
+template <>
+struct accType<cint16, int16> {
+    using type = cacc48;
+};
+template <>
+struct accType<cint16, cint16> {
+    using type = cacc48;
+};
+template <>
+struct accType<cint16, int32> {
+    using type = cacc80;
+};
+template <>
+struct accType<cint16, cint32> {
+    using type = cacc80;
+};
+template <>
+struct accType<int32, int16> {
+    using type = acc80;
+};
+template <>
+struct accType<int32, cint16> {
+    using type = cacc80;
+};
+template <>
+struct accType<int32, int32> {
+    using type = acc80;
+};
+template <>
+struct accType<int32, cint32> {
+    using type = cacc80;
+};
+template <>
+struct accType<cint32, int16> {
+    using type = cacc80;
+};
+template <>
+struct accType<cint32, cint16> {
+    using type = cacc80;
+};
+template <>
+struct accType<cint32, int32> {
+    using type = cacc80;
+};
+template <>
+struct accType<cint32, cint32> {
+    using type = cacc80;
+};
+template <>
+struct accType<float, float> {
+    using type = accfloat;
+};
+template <>
+struct accType<cfloat, float> {
+    using type = caccfloat;
+};
+template <>
+struct accType<float, cfloat> {
+    using type = caccfloat;
+};
+template <>
+struct accType<cfloat, cfloat> {
+    using type = caccfloat;
+};
+#endif //__SUPPORTS_ACC64__
+
+template <typename T_D_A, typename T_D_B>
+using accType_t = typename accType<T_D_A, T_D_B>::type;
+
+// The following struct returns the output type for a given input data type combination
+template <typename T_A, typename T_B>
+struct outType {
+    using type = cint16;
+};
+template <>
+struct outType<int16, int16> {
+    using type = int16;
+};
+template <>
+struct outType<int16, cint16> {
+    using type = cint16;
+};
+template <>
+struct outType<int16, cint32> {
+    using type = cint32;
+};
+template <>
+struct outType<int16, int32> {
+    using type = int32;
+};
+
+template <>
+struct outType<cint16, int16> {
+    using type = cint16;
+};
+template <>
+struct outType<cint16, cint16> {
+    using type = cint16;
+};
+template <>
+struct outType<cint16, int32> {
+    using type = cint32;
+};
+template <>
+struct outType<cint16, cint32> {
+    using type = cint32;
+};
+
+template <>
+struct outType<int32, int16> {
+    using type = int32;
+};
+template <>
+struct outType<int32, cint16> {
+    using type = cint32;
+};
+template <>
+struct outType<int32, int32> {
+    using type = int32;
+};
+template <>
+struct outType<int32, cint32> {
+    using type = cint32;
+};
+
+template <>
+struct outType<cint32, int16> {
+    using type = cint32;
+};
+template <>
+struct outType<cint32, cint16> {
+    using type = cint32;
+};
+template <>
+struct outType<cint32, int32> {
+    using type = cint32;
+};
+template <>
+struct outType<cint32, cint32> {
+    using type = cint32;
+};
+
+template <>
+struct outType<float, float> {
+    using type = float;
+};
+template <>
+struct outType<cfloat, float> {
+    using type = cfloat;
+};
+template <>
+struct outType<float, cfloat> {
+    using type = cfloat;
+};
+template <>
+struct outType<cfloat, cfloat> {
+    using type = cfloat;
+};
+
+template <typename T_D_A, typename T_D_B>
+using outType_t = typename outType<T_D_A, T_D_B>::type;
+
+// Input and Output Interfaces - T_inputIF and T_outputIF
+template <bool T_CASC_IN, typename T_D_A, typename T_D_B>
+struct T_inputIF {
+    void* __restrict inWindowA;
+    void* __restrict inWindowB;
+    typename std::conditional<T_CASC_IN == CASC_IN_FALSE, no_port, input_stream<accType_t<T_D_A, T_D_B> > >::type*
+        inCascade;
+};
+
+// IF output type
+template <bool T_CASC_OUT, typename T_D_A, typename T_D_B>
+struct T_outputIF {
+    typename std::conditional<T_CASC_OUT == CASC_OUT_FALSE,
+                              outType_t<T_D_A, T_D_B>,
+                              output_stream<accType_t<T_D_A, T_D_B> > >::type* __restrict outWindow;
+};
 
 // The following is a set of type-specialized functions which return the number of accumulator registers
 // available in the processor. Since these may be 384 or 768 bit registers the number could vary by type.

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ class test_graph : public graph {
 
         namespace dsplib = xf::dsp::aie;
         dsplib::blas::matrix_vector_mul::UUT_GRAPH<DATA_A, DATA_B, DIM_A, DIM_B, SHIFT, ROUND_MODE, NUM_FRAMES,
-                                                   CASC_LEN, UUT_SSR, SAT_MODE>
+                                                   CASC_LEN, SAT_MODE, UUT_SSR, DIM_A_LEADING>
             matrix_vector_mulGraph;
 #ifdef USING_UUT
 

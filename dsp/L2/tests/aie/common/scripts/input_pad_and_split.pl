@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ options:
     --newFile=s
     [-t|--type=i]                                     => Data type for the file - note int16 has two samples per line.
     [-c|--cascLen=i]                                      => casc number - number of files to split over
+    [--ssr=i]
     [--numFrames=i]                                    => frames of data to be operated on within a window
     [-d | --dual]                                     => If using dual input/output streams, casc phases are split into io1 and io2 with a granularity determined by the data type.
     [-h|--help]                                      => Optional. prints this usage
@@ -54,6 +55,7 @@ my $newFile = "";
 my $type = "cint16";
 my $pointSize = 0;
 my $cascLen = 1;
+my $ssr = 1;
 my $numFrames = 1;
 my $variant = 1;
 my $dual = 0;
@@ -68,6 +70,7 @@ GetOptions (
     "p|pointSize=i" =>\$pointSize,
     "c|cascLen=i"  => \$cascLen,
     "numFrames=i"  => \$numFrames,
+    "ssr=i" => \$ssr,
     "variant=i"    => \$variant,
     "d|dual=i" => \$dual,
     "h|help" => \$help)
@@ -218,8 +221,8 @@ my $currentFrame = 1;
 while(my $line = <fileH>){
     print fileH_padded $line;
     # End of a frame once paddedPointSize lines has been reached
-    if ($lineNum % ($linesPerSample*$paddedPointSize) == 0) {
-        for(my $i = 0; $i < ($paddedWindowSize/$numFrames)-$paddedPointSize; $i++){
+    if ($lineNum % ($linesPerSample*$pointSize) == 0) {
+        for(my $i = 0; $i < ($paddedWindowSize/$numFrames)-$pointSize; $i++){
             if ($linesPerSample==1) {
                 print fileH_padded "0 0\n";
             } else {
@@ -230,14 +233,6 @@ while(my $line = <fileH>){
     }    
     $lineNum++;
 }
-
-
-
-
-
-
-
-
 # Set fileH to new padded file
 close(fileH)
     or die "couldn't close $file";
@@ -246,16 +241,13 @@ close(fileH_padded)
 open(fileH, "<", "$newFile")
     or die "cannot open $newFile : $!";
 
-
-
 ##########################################################
-
 
 # Open a bunch of files in an array of file handles with a specific filename
 for my $cascIdx (@cascRange){
     for my $dualIdx (@dualRange){
         my $fileIdx = $cascIdx*$dualFactor + $dualIdx;
-        $subFiles[$fileIdx] = "${newFileDir}${newFileName}_${cascIdx}_${dualIdx}${newFileExt}${outFileMod}";
+        $subFiles[$fileIdx] = "${newFileDir}${newFileName}_0_${cascIdx}${newFileExt}${outFileMod}";
         print "Writing to $subFiles[$fileIdx]\n";
         open($subFilesH[$fileIdx], ">", $subFiles[$fileIdx])
             or die "cannot open $subFiles[$fileIdx] : $!";
@@ -281,7 +273,6 @@ while(my $line = <fileH>){
     $lineNum = $lineNum+1;
 }
 
-
 # Rearrange tmp output files back to multiple samples per line.
 if  ($samplesPerLine > 1) {
 
@@ -298,7 +289,7 @@ if  ($samplesPerLine > 1) {
 
             print "Reading from $subFiles[$fileIdx]\n";
             # intendedfinal output file without outFileMod
-            $subFilesFinal[$fileIdx] = "${newFileDir}${newFileName}_$cascIdx}_${dualIdx}${newFileExt}";
+            $subFilesFinal[$fileIdx] = "${newFileDir}${newFileName}_0_$cascIdx${newFileExt}";
             print "Writing to $subFilesFinal[$fileIdx]\n";
 
             open($subFilesFinalH[$fileIdx], ">", $subFilesFinal[$fileIdx])
@@ -318,6 +309,29 @@ if  ($samplesPerLine > 1) {
         }
     }
 }
+# When input is a vector to be split over cascade, it is cloned for each ssr
+# print "ssr is $ssr\n";
+# if ($ssr > 1) {
+#     if  ($samplesPerLine > 1) {
+#         foreach my $subFile (@subFilesFinal) {  
+#             for (my $i = 1; $i < $ssr; $i++) {  
+#                 print "ssr is $i\n";
+#                 my $cloneFile = $subFile;  
+#                 $cloneFile =~ s/_0\_/_$i\_/; # replace "_0." with "_$i."  
+#                 system("cp $subFile $cloneFile"); # clone the file  
+#             }  
+#         }
+#     } else {
+#         foreach my $subFile (@subFiles) {  
+#             for (my $i = 1; $i < $ssr; $i++) {  
+#                 print "ssr is $i\n";
+#                 my $cloneFile = $subFile;  
+#                 $cloneFile =~ s/_0\_/_$i\_/; # replace "_0." with "_$i."  
+#                 system("cp $subFile $cloneFile"); # clone the file  
+#             }  
+#         }  
+#     }
+# }
 close(fileH)
 
 

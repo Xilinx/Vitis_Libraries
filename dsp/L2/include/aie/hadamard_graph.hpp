@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,31 +40,35 @@ namespace dsp {
 namespace aie {
 namespace hadamard {
 using namespace adf;
-
+/**
+ * @defgroup hadamard_graph Hadamard function
+ *
+ * hadamard
+**/
 //--------------------------------------------------------------------------------------------------
 // hadamard_graph template
 //--------------------------------------------------------------------------------------------------
 /**
- * @ingroup hadamard
+ * @ingroup hadamard_graph
  * @brief hadamard is
  *
  * These are the templates to configure the function.
- * @tparam TT_DATA_A describes the type of individual data samples input to the function.
+ * @tparam TT_DATA_A describes the type of individual data samples input to the function. \n
  *         This is a typename and must be one of the following: \n
  *         int16, int32, cint16, cint32, float, cfloat.
- * @tparam TT_DATA_B describes the type of individual data samples input to the function.
+ * @tparam TT_DATA_B describes the type of individual data samples input to the function. \n
  *         This is a typename and must be one of the following: \n
  *         int16, int32, cint16, cint32, float, cfloat.
  * @tparam TP_DIM describes the number of samples in the vectors A and B.
  * @tparam TP_NUM_FRAMES describes the number of vectors to be processed in each
  *         call to this function.
- * @tparam TP_SHIFT described the number of bits to downshift after the scaling by the window
- *         value.
+ * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
+ *         product terms before each output. TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_API described whether to use streams (1) or windows (0).
  * @tparam TP_SSR describes the number of kernels to use in parallel.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
- *         descriptive macros are recommended where
+ *         shift down stage of processing. \n
+ *         Although, TP_RND accepts unsigned integer values descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
  *         - rnd_sym_floor  = Truncate LSB, always round towards 0.
@@ -79,8 +83,8 @@ using namespace adf;
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
- * @tparam TP_SAT describes the selection of saturation to be applied during the
- *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
+ *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
  *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
  *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
@@ -103,11 +107,21 @@ class hadamard_graph : public graph {
     static constexpr int kMaxSSR = 16;
 
     // Defensive configuration legality checks
-    // static_assert(TP_NUM_FRAMES == 0, "ERROR: TP_NUM_FRAMES must be an integer equal or greater than 1");
-    static_assert(TP_DIM >= kPointSizeMin, "ERROR: TP_DIM must be at least 16");
-    static_assert(TP_DIM <= kPointSizeMax, "ERROR: TP_DIM must be at no more than 65536");
+
     static_assert(TP_SHIFT >= 0 && TP_SHIFT < 61, "ERROR: TP_SHIFT is out of the supported range (0 to 61)");
-    static_assert(TP_API == 0 || TP_API == 1, "ERROR: TP_API is not a supported value (0 or 1)");
+
+#ifdef __STREAMS_PER_TILE__ == 2
+    static_assert(TP_API == 0 || TP_API == 1, "ERROR: TP_API is not a supported value i.e.; (0 or 1)");
+#elif __STREAMS_PER_TILE__ == 1
+    static_assert(TP_API == 0, "ERROR: TP_API is not a supported value i.e.; (0)");
+#endif
+
+#ifdef __SUPPORTS_ACC64__
+    static_assert(!((std::is_same<TT_DATA_A, int32>::value) && (std::is_same<TT_DATA_B, cint16>::value)) &&
+                      !((std::is_same<TT_DATA_A, cint16>::value) && (std::is_same<TT_DATA_B, int32>::value)),
+                  "ERROR: Data type combination is not supported by AIE-ML.");
+#endif
+
     static_assert(TP_SSR >= 0 && TP_SSR <= kMaxSSR, "ERROR: TP_SSR is not in the supported range of 1 to 16");
     static_assert(TP_DIM % TP_SSR == 0, "ERROR: TP_DIM is not a multiple of TP_SSR");
 
@@ -119,8 +133,10 @@ class hadamard_graph : public graph {
     static constexpr int paddedDataSize = CEIL(DataSizePerSSR, kSamplesInVectOutData);
     static constexpr int kKernelPtSize = paddedDataSize;
     static constexpr int kKernelWindowVsize = (TP_NUM_FRAMES * kKernelPtSize);
-    static_assert(kKernelPtSize <= 4096, "ERROR: TP_DIM/TP_SSR must be at no more than 4096");
+
     static_assert(kKernelPtSize >= 16, "ERROR: TP_DIM/TP_SSR must be at least 16");
+    static_assert(kKernelWindowVsize <= (__DATA_MEM_BYTES__ / 2),
+                  "ERROR: TP_NUM_FRAMES*(TP_DIM/TP_SSR) must be at no more than data memory size.");
 
     /**
      * The input data to the function.

@@ -56,9 +56,17 @@ def fnNumLanes384b(TT_DATA, TT_COEFF, AIE_VARIANT=1):
             return 0
     if AIE_VARIANT == 2:
         if (
-            (TT_DATA == "int16" and TT_COEFF == "int16")
+            (TT_DATA == "int16" and TT_COEFF == "int16") or
+            (TT_DATA == "int16" and TT_COEFF == "int32")
         ):
             return 16
+        elif (
+            (TT_DATA == "cint32" and TT_COEFF == "int16") or
+            (TT_DATA == "cint32" and TT_COEFF == "int32") or
+            (TT_DATA == "cint32" and TT_COEFF == "cint16") or
+            (TT_DATA == "cint32" and TT_COEFF == "cint32")
+            ) :
+            return 4
         else:
             return 8
 
@@ -102,19 +110,32 @@ def fnNumLanes(TT_DATA, TT_COEFF, TP_API=0, AIE_VARIANT=1):
               return 0
     if AIE_VARIANT == 2:
         if (
-            (TT_DATA == "int16" and TT_COEFF == "int16")
+            (TT_DATA == "int16" and TT_COEFF == "int16") or
+            (TT_DATA == "int16" and TT_COEFF == "int32")
         ):
             return 32
+        elif (
+            (TT_DATA == "cint32" and TT_COEFF == "int16") or
+            (TT_DATA == "cint32" and TT_COEFF == "int32") or
+            (TT_DATA == "cint32" and TT_COEFF == "cint16") or
+            (TT_DATA == "cint32" and TT_COEFF == "cint32")
+            ) :
+            return 8
         else:
             return 16
 
 
 # function to return the number of columns for a tall-narrow atomic intrinsic for a type combo
-def fnNumCols(TT_DATA, TT_COEFF, TP_API=0):
-  if TP_API==0:
-    return (2 if fn_size_by_byte(TT_COEFF)==2 else 1)
-  else :
-    return fnNumCols384(TT_DATA, TT_COEFF)
+def fnNumCols(TT_DATA, TT_COEFF, TP_API=0, AIE_VARIANT=1):
+  if AIE_VARIANT == 2:
+      # AIE_ML intrinsic always calls for 4 columns
+      return 4
+  if AIE_VARIANT == 1:
+      # AIE1 calls differ with API
+      if TP_API==0:
+        return (2 if fn_size_by_byte(TT_COEFF)==2 else 1)
+      else :
+        return fnNumCols384(TT_DATA, TT_COEFF)
 
 # function to return the number of columns for a short-wide atomic intrinsic for a type combo
 def fnNumCols384(TT_DATA, TT_COEFF):
@@ -147,22 +168,39 @@ def fnNumCols384(TT_DATA, TT_COEFF):
 
 ### Common constraints based on traits
 
-def fn_windowsize_multiple_lanes(TT_DATA, TT_COEFF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=None, TP_SSR=1, AIE_VARIANT=1):
+def fn_windowsize_multiple_lanes(TT_DATA, TT_COEFF, WINDOW_VSIZE, TP_API, numLanes=None, TP_SSR=1, AIE_VARIANT=1):
     # Use the default nmber of lanes
+    inputTypeStr = "Input"
     num_lanes = fnNumLanes(TT_DATA, TT_COEFF, TP_API, AIE_VARIANT) if not numLanes else numLanes
     numLanesMultiple = num_lanes * TP_SSR
-    if (((TP_INPUT_WINDOW_VSIZE / TP_SSR) % num_lanes) != 0):
-      return isError(
-        f"Unsupported window size ({TP_INPUT_WINDOW_VSIZE}). For Input/Output and coefficient type combination :\n\t"\
-          f"{TT_DATA},{TT_COEFF} and taking into account SSR operation mode ({TP_SSR}), window size should be multiple of {numLanesMultiple}.\n"
-      )
+    if (((WINDOW_VSIZE / TP_SSR) % num_lanes) != 0):
+      errorMessage = f"Unsupported {inputTypeStr} buffer size ({WINDOW_VSIZE}), which must be a multiple of {numLanesMultiple}. \n\t"
+      if (TP_SSR > 1):
+        errorMessage += f"{inputTypeStr} Samples are split between {TP_SSR} polyphases, resulting in {inputTypeStr} buffer Size per polyphase equal to ({WINDOW_VSIZE / TP_SSR}). \n"
+      return isError(errorMessage)
     return isValid
 
-def fn_windowsize_divisible_by_param(TP_INPUT_WINDOW_VSIZE, TP_SSR):
+def fn_out_windowsize_multiple_lanes(TT_DATA, TT_COEFF, WINDOW_VSIZE, TP_API, numLanes=None, TP_SSR=1, TP_INTERPOLATE_FACTOR=1, TP_DECIMATE_FACTOR=1, AIE_VARIANT=1):
+    # Use the default nmber of lanes
+    inputTypeStr = "Output"
+    output_window_vsize = (WINDOW_VSIZE ) * TP_INTERPOLATE_FACTOR / TP_DECIMATE_FACTOR
+
+    num_lanes = fnNumLanes(TT_DATA, TT_COEFF, TP_API, AIE_VARIANT) if not numLanes else numLanes
+    numLanesMultiple = num_lanes * TP_SSR
+    if (((output_window_vsize / TP_SSR) % num_lanes) != 0):
+      errorMessage = f"Unsupported {inputTypeStr} buffer size ({output_window_vsize}), which must be a multiple of {numLanesMultiple}. \n\t"
+      if (TP_SSR > 1):
+        errorMessage += f"{inputTypeStr} Samples are split between {TP_SSR} polyphases, resulting in {inputTypeStr} buffer Size per polyphase equal to ({output_window_vsize / TP_SSR}). \n"
+      if (TP_INTERPOLATE_FACTOR > 1 or TP_DECIMATE_FACTOR > 1):
+        errorMessage += f"{inputTypeStr} buffer size ({output_window_vsize}) is determined by rate changing parameters, i.e. multiplying Input buffer size TP_INPUT_WINDOW_VSIZE {WINDOW_VSIZE} by TP_INTERPOLATE_FACTOR {TP_INTERPOLATE_FACTOR} and dividing by TP_DECIMATE_FACTOR {TP_DECIMATE_FACTOR}. \n"
+      return isError(errorMessage)
+    return isValid
+
+def fn_windowsize_divisible_by_param(WINDOW_VSIZE, TP_SSR):
     # Check if window_vsize is divisible by SSR factor
-    if ((TP_INPUT_WINDOW_VSIZE % TP_SSR) != 0):
+    if ((WINDOW_VSIZE % TP_SSR) != 0):
       return isError(
-        f"Unsupported window size ({TP_INPUT_WINDOW_VSIZE}). Input window vector size must be a multiple of: {TP_SSR}.\n"
+        f"Unsupported buffer size ({WINDOW_VSIZE}). Input buffer vector size must be a multiple of {TP_SSR}.\n"
       )
     return isValid
 
@@ -180,9 +218,9 @@ def fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_
 
   if TP_API == 0 :
     if inBufferSize > kMemoryModuleSize:
-      return isError(f"Input Window size ({inBufferSize}B) exceeds Memory Module size of 32kB.")
+      return isError(f"Input buffer size ({inBufferSize}B) exceeds Memory Module size of 32kB.")
     if outBufferSize > kMemoryModuleSize:
-      return isError(f"Output Window size ({outBufferSize}B) exceeds Memory Module size of 32kB.")
+      return isError(f"Output buffer size ({outBufferSize}B) exceeds Memory Module size of 32kB.")
 
   return isValid
 
@@ -205,22 +243,23 @@ def fnFirRangeRem( TP_FL,  TP_CL, TP_KP, TP_Rnd=1):
 
 
 def fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR=1, TP_Rnd=1):
-  TP_FIR_LEN = TP_FIR_LEN // TP_SSR
-  firLengthMin = 1
-  vld=True
-  # Check that the last and second last kernel has at least the minimum required taps.
-  if TP_CASC_LEN > 1:
-      vld = fnFirRangeRem(TP_FIR_LEN, TP_CASC_LEN, TP_CASC_LEN - 1) >= firLengthMin and \
-              fnFirRange(TP_FIR_LEN, TP_CASC_LEN, TP_CASC_LEN -2) >= firLengthMin
+    firLen = TP_FIR_LEN // TP_SSR
+    firLengthMin = 1
+    vld=True
+    # Check that the last and second last kernel has at least the minimum required taps.
+    if TP_CASC_LEN > 1:
+        vld = fnFirRangeRem(firLen, TP_CASC_LEN, TP_CASC_LEN - 1, TP_Rnd) >= firLengthMin and \
+                fnFirRange(firLen, TP_CASC_LEN, TP_CASC_LEN -2, TP_Rnd) >= firLengthMin
+    else:
+        vld = firLen >= firLengthMin
 
-  if not vld:
-    return isError(
-      f"Minimum fir length ({firLengthMin}) is enforced for each kernel in cascade chain. "\
-      "Consider reducing the number of cascade stages. "
-    )
+    if not vld:
+        return isError(
+        f"Requested Fir Length ({TP_FIR_LEN}) split over ({TP_CASC_LEN}) cascaded kernels and ({TP_SSR}) SSR polyphases results in at least one kernel configured with ({firLen}) number of taps that does not meet minimum ({firLengthMin}) requirement. "\
+        f"Please reduce cascade length ({TP_CASC_LEN}) and/or SSR ({TP_SSR}) parameter. "
+        )
 
-  return isValid
-
+    return isValid
 
 def fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_SSR=1, TP_API=0, symFactor = 1):
   # Coeff array needs storage on heap and unrolled MAC operation inflate Program Memory.
@@ -279,7 +318,7 @@ def get_output_window_size(TP_INPUT_WINDOW_VSIZE, TP_POLY_SSR, TP_API, TP_NUM_OU
 #### validate coeff reload ####
 def fn_validate_use_coeff_reload(TP_API, TP_USE_COEFF_RELOAD, TP_SSR):
     if TP_API == 0 and TP_USE_COEFF_RELOAD == 2:
-      return isError("Stream Header based Coefficient Reload is not supported with Window ports. Got TP_USE_COEFF_RELOAD  {TP_USE_COEFF_RELOAD}")
+      return isError(f"Stream Header based Coefficient Reload is not supported with Window ports. Got TP_USE_COEFF_RELOAD  {TP_USE_COEFF_RELOAD}")
 
     return isValid
 
@@ -318,7 +357,7 @@ def fn_validate_hw_dual_stream_ports(TP_API, TP_DUAL_IP, AIE_VARIANT):
     # AIE Variant does not
     if AIE_VARIANT == 2:
       if TP_API == 1 and TP_DUAL_IP == 1:
-        return isError("Dual input stream ports not supported on this device. Got TP_DUAL_IP {TP_DUAL_IP}")
+        return isError(f"Dual input stream ports not supported on this device. Got TP_DUAL_IP {TP_DUAL_IP}")
 
     return isValid
 
@@ -326,7 +365,7 @@ def fn_validate_dual_ip(TP_API, TP_DUAL_IP, AIE_VARIANT):
     # Any AIE Variant:
     # Dual Input IO buffers offer no advantage.
     if TP_API == 0 and TP_DUAL_IP == 1:
-        return isError("Dual input buffer ports not supported on this device. Got TP_DUAL_IP {TP_DUAL_IP}")
+        return isError(f"Dual input buffer ports not supported on this device. Got TP_DUAL_IP {TP_DUAL_IP}")
     # Check if hardware supports 2 stream ports.
     return fn_validate_hw_dual_stream_ports(TP_API, TP_DUAL_IP, AIE_VARIANT)
 
@@ -334,7 +373,7 @@ def fn_validate_sym_dual_ip(TP_API, TP_DUAL_IP, AIE_VARIANT):
     if AIE_VARIANT == 2:
       # AIE-ML does not support symmetric operation, which are performed by assymetric calls. No advantage of using 2 intput ports
       if TP_API == 0 and TP_DUAL_IP == 1:
-        return isError("Dual input buffer ports not supported on this device. Got TP_DUAL_IP {TP_DUAL_IP}")
+        return isError(f"Dual input buffer ports not supported on this device. Got TP_DUAL_IP {TP_DUAL_IP}")
 
     # Check if hardware supports 2 stream ports.
     return fn_validate_hw_dual_stream_ports(TP_API, TP_DUAL_IP, AIE_VARIANT)
@@ -345,14 +384,14 @@ def fn_validate_sr_dual_ip(TP_NUM_OUTPUTS, TP_API, TP_DUAL_IP, AIE_VARIANT=1):
     # IO Buffer (TP_API==0) unrestricted.
     if TP_API == 1 and TP_DUAL_IP == 1 and TP_NUM_OUTPUTS != 2:
         return isError(
-            "Dual input streams only supported when number of output streams is also 2. Got TP_DUAL_IP {TP_DUAL_IP} and TP_NUM_OUTPUTS {TP_NUM_OUTPUTS}"
+            f"Dual input streams only supported when number of output streams is also 2. Got TP_DUAL_IP {TP_DUAL_IP} and TP_NUM_OUTPUTS {TP_NUM_OUTPUTS}"
         )
     # Do generic check
     return fn_validate_dual_ip(TP_API, TP_DUAL_IP, AIE_VARIANT)
 
 def fn_validate_num_outputs(TP_API, TP_NUM_OUTPUTS, AIE_VARIANT):
     if TP_NUM_OUTPUTS == 2 and TP_API == 1 and AIE_VARIANT == 2:
-      return isError("Dual output stream ports not supported on this device.")
+      return isError(f"Dual output stream ports not supported on this device.")
     return isValid
 
 def fn_validate_hb_num_outputs(TP_PARA_POLY, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_API, AIE_VARIANT):

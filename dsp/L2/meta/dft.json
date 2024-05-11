@@ -44,7 +44,14 @@
             "type": "uint",
             "validator": {
                 "file": "dft.py",
-                "function": "validate_TP_POINT_SIZE"
+                "function": "validate_TP_POINT_SIZE",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_TWIDDLE",
+                    "TP_SSR",
+                    "TP_CASC_LEN"
+                ]
             }
         },
         {
@@ -53,12 +60,13 @@
             "type": "uint",
             "validator": {
                 "file": "dft.py",
-                "function": "validate_TP_CASC_LEN",
-                "args": [
-                    "TP_POINT_SIZE",
-                    "TP_NUM_FRAMES"
-                ]
+                "function": "validate_TP_CASC_LEN"
             }
+        },
+        {
+            "name": "TP_SSR",
+            "description": "The number of cascade chains operating in parallel.",
+            "type": "uint"
         },
         {
             "name": "TP_NUM_FRAMES",

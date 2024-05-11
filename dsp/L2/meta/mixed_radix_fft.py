@@ -67,17 +67,27 @@ def validate_TT_TWIDDLE(args):
 
 #----------------------------------------
 # Validate point size
-def fn_validate_point_size(TP_POINT_SIZE):
+def fn_validate_point_size(TP_POINT_SIZE,AIE_VARIANT):
+  if (TP_POINT_SIZE < TP_POINT_SIZE_min or TP_POINT_SIZE > TP_POINT_SIZE_max) :
+      return isError(f"Invalid Point Size ({TP_POINT_SIZE}). It must be in the range {TP_POINT_SIZE_min} to {TP_POINT_SIZE_max}.")
+
   r2_stages = fn_get_radix_stages(TP_POINT_SIZE,2)
   r3_stages = fn_get_radix_stages(TP_POINT_SIZE,3)
   r5_stages = fn_get_radix_stages(TP_POINT_SIZE,5)
 
-  if (TP_POINT_SIZE < TP_POINT_SIZE_min and TP_POINT_SIZE > TP_POINT_SIZE_max) :
-      return isError(f"Invalid Point Size ({TP_POINT_SIZE}). It must be in the range {TP_POINT_SIZE_min} to {TP_POINT_SIZE_max}.")
+  if AIE_VARIANT == 1: #AIE-1
+    vectorizationMin = 8
+  elif AIE_VARIANT == 2:
+    vectorizationMin = 16
+  else:
+    return isError(f"Unsupported AIE_VARIANT value detected ({AIE_VARIANT})")
 
-  if (TP_POINT_SIZE % 8 != 0) :
-      return isError(f"Invalid Point Size ({TP_POINT_SIZE}). It must be divisible by 8.")
+  if (TP_POINT_SIZE % vectorizationMin != 0) :
+      return isError(f"Invalid Point Size ({TP_POINT_SIZE}). It must be divisible by ({vectorizationMin}) for this AIE variant.")
 
+  r2_stages = fn_get_radix_stages(TP_POINT_SIZE,2)
+  r3_stages = fn_get_radix_stages(TP_POINT_SIZE,3)
+  r5_stages = fn_get_radix_stages(TP_POINT_SIZE,5)
   if (TP_POINT_SIZE != 2**r2_stages * 3**r3_stages * 5**r5_stages):
       return isError(f"Invalid Point Size ({TP_POINT_SIZE}). It must factorize completely to 2, 3 and 5")
 
@@ -86,7 +96,8 @@ def fn_validate_point_size(TP_POINT_SIZE):
 
 def validate_TP_POINT_SIZE(args):
   TP_POINT_SIZE = args["TP_POINT_SIZE"]
-  return fn_validate_point_size(TP_POINT_SIZE)
+  AIE_VARIANT   = args["AIE_VARIANT"]
+  return fn_validate_point_size(TP_POINT_SIZE, AIE_VARIANT)
 
 #----------------------------------------
 # Validate direction (fft_nifft)
@@ -118,16 +129,23 @@ def validate_TP_SHIFT(args):
 
 #----------------------------------------
 # Validate rounding
-def fn_validate_rnd(TP_RND):
-  return (
-    isValid if (TP_RND >= TP_RND_min or TP_RND <= TP_RND_max)
-    else (
-        isError(f"Invalid rounding mode ({TP_RND}, must be in the range {TP_RND_min} to {TP_RND_max}). The mixed radix FFT does not support floor and ceiling modes")
-    )
-  )
+def fn_validate_rnd(TP_RND, AIE_VARIANT=1):
+  if AIE_VARIANT == 1:
+    if TP_RND == k_rnd_mode_map_aie1["rnd_ceil"] or TP_RND == k_rnd_mode_map_aie1["rnd_floor"]:
+      return isError(f"Round mode of {TP_RND} is not supported for mixed radix FFT. For the targeted AIE device, supported values are \n2: rnd_pos_inf,\n3: rnd_neg_inf,\n4: rnd_sym_zero,\n5: rnd_sym_inf,\n6: rnd_conv_even,\n7: rnd_conv_odd")
+    else:
+      return fn_validate_roundMode(TP_RND, AIE_VARIANT)
+  elif AIE_VARIANT == 2:
+    if TP_RND == k_rnd_mode_map_aie2["rnd_ceil"] or TP_RND == k_rnd_mode_map_aie2["rnd_floor"] or TP_RND == k_rnd_mode_map_aie2["rnd_sym_floor"] or TP_RND == k_rnd_mode_map_aie2["rnd_sym_ceil"]:
+      return isError(f"Round mode of {TP_RND} is not supported for mixed radix FFT. For the targeted AIE device, supported values are \n 8: rnd_neg_inf,\n9: rnd_pos_inf,\n10: rnd_sym_zero,\n11: rnd_sym_inf,\n12: rnd_conv_even,\n13: rnd_conv_odd")
+    else:
+      fn_validate_roundMode(TP_RND, AIE_VARIANT)
+  return isValid
+
 def validate_TP_RND(args):
   TP_RND = args["TP_RND"]
-  return fn_validate_rnd(TP_RND)
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_validate_rnd(TP_RND, AIE_VARIANT)
 
 #----------------------------------------
 # Validate saturation
@@ -190,7 +208,7 @@ def fn_validate_aie_variant(AIE_VARIANT):
   return (
     isValid if (AIE_VARIANT>=AIE_VARIANT_min and AIE_VARIANT<=AIE_VARIANT_max)
     else (
-        isError(f"Invalid AIE variant. Must be in the range 1 (AIE1) to 2 (AIE-ML). Got {AIE_VARIANT}. ")
+        isError(f"Invalid AIE variant. Must be one of the following set:  1 (AIE1), or 2 (AIE-ML). Got {AIE_VARIANT}. ")
     )
   )
 def validate_AIE_VARIANT(args):
@@ -214,7 +232,15 @@ def info_ports(args):
   TP_POINT_SIZE = args["TP_POINT_SIZE"]
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
   TP_API = args["TP_API"]
-  numPorts = TP_API + 1
+  AIE_VARIANT = args["AIE_VARIANT"]
+
+  if TP_API == 0:
+    numPorts = 1
+  else:
+    if AIE_VARIANT == 1:
+      numPorts = 2
+    else:
+      numPorts = 1
 
   in_ports = get_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE//numPorts, numPorts, 0, TP_API)
   out_ports = get_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE//numPorts, numPorts, 0, TP_API)
@@ -235,6 +261,7 @@ def generate_graph(graphname, args):
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
   TP_CASC_LEN = args["TP_CASC_LEN"]
   TP_API = args["TP_API"]
+  AIE_VARIANT = args["AIE_VARIANT"]
 
 
   code  = (
@@ -293,4 +320,3 @@ public:
        "L1/tests/aie/inc",
        "L1/tests/aie/src"]
   return out
-

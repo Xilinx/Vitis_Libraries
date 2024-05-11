@@ -31,15 +31,35 @@ import fir_decimate_asym as dec_asym
 fn_decimate_asym_lanes = fnNumLanes384b
 
 # Max Symmetric Decimator FIR Decimate Factor.
-TP_SYM_DECIMATE_FACTOR_max = 3
 
-def fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
+TP_DECIMATE_FACTOR_min = 2
+TP_DECIMATE_FACTOR_max = 3
+TP_INPUT_WINDOW_VSIZE_min = 4
+TP_CASC_LEN_min = 1
+TP_CASC_LEN_max = 40
+TP_FIR_LEN_min = 4
+TP_FIR_LEN_max = 8192
 
-  if TP_INPUT_WINDOW_VSIZE < TP_INPUT_WINDOW_VSIZE_min:
-        return isError(f"Minimum value for Input window size is {TP_INPUT_WINDOW_VSIZE_min}, but got {TP_INPUT_WINDOW_VSIZE}.")
+def fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1, AIE_VARIANT=1):
+
+  res = fn_validate_min_value("TP_INPUT_WINDOW_VSIZE", TP_INPUT_WINDOW_VSIZE, TP_INPUT_WINDOW_VSIZE_min)
+  if (res["is_valid"] == False):
+    return res
+
+  repeatFactor = 1 # decomposed into multiple data registers
+  if AIE_VARIANT == 1:
+    if TP_API == 0:
+      repeatFactor = 4 # 256-bit loads traverse a 1024-bit data register
+    if TP_API == 1:
+      repeatFactor = 8 # 128-bit loads traverse a 1024-bit data register
+  if AIE_VARIANT == 2:
+    if TP_API == 0:
+      repeatFactor = 1 # decomposed into multiple data registers
+    if TP_API == 1:
+      repeatFactor = 4 # 256-bit loads traverse multiple 1024-bit data register
+
   # decimator uses 384b accs, but also checks for multiple of decimate factor. we don't use native stream
-  windowSizeMultiplier = (fn_decimate_asym_lanes(TT_DATA, TT_COEFF)*TP_DECIMATE_FACTOR) #if TP_API == 0 else (fn_decimate_asym_lanes(TT_DATA, TT_COEFF)*TP_DECIMATE_FACTOR*streamRptFactor)
-
+  windowSizeMultiplier = (fn_decimate_asym_lanes(TT_DATA, TT_COEFF, AIE_VARIANT)*TP_DECIMATE_FACTOR * repeatFactor) #if TP_API == 0 else (fn_decimate_asym_lanes(TT_DATA, TT_COEFF)*TP_DECIMATE_FACTOR*streamRptFactor)
   # Slightly cheating here by putting in numLanes as the multiplied value.
   checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEFF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=windowSizeMultiplier)
   # Force Max buffer check for symmetric FIRs in non-SSR mode.
@@ -61,16 +81,19 @@ def fn_multiple_decimation(TP_FIR_LEN,TP_DECIMATE_FACTOR, TP_CASC_LEN):
   return isValid
 
 
-def fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD):
-    if TP_FIR_LEN < TP_FIR_LEN_min or TP_FIR_LEN > TP_FIR_LEN_max :
-        return isError(f"Minimum and maximum value for Filter length is {TP_FIR_LEN_min} and {TP_FIR_LEN_max}, respectively, but got {TP_FIR_LEN}.")
-    minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
+def fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT):
+    res = fn_validate_minmax_value("TP_FIR_LEN", TP_FIR_LEN, TP_FIR_LEN_min, TP_FIR_LEN_max)
+    if (res["is_valid"] == False):
+        return res
+    minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_DECIMATE_FACTOR)
     symFactor   = 2
     symFactorSSR   = 1 if (TP_SSR != 1 ) else symFactor # SSR mode will discard the symmetry
     symApiSSR      = 0 if (TP_SSR == 1 ) else TP_API  # Force buffer checks when not in SSR mode.
     maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_SSR, symApiSSR, symFactorSSR)
     dataNeededCheck = isValid
-    if TP_SSR > 1:
+    if TP_SSR > 1 or AIE_VARIANT == 2:
+      # AIE-ML doesn't support symmtery.
+      # Also, can't decompose a symmetric FIR into SSR structure.
       dataNeededCheck = dec_asym.fn_data_needed_within_buffer_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN,TP_API, TP_SSR, TP_DECIMATE_FACTOR)
     firMultipleCheck = fn_multiple_decimation(TP_FIR_LEN,TP_DECIMATE_FACTOR, TP_CASC_LEN)
     for check in (minLenCheck,maxLenCheck,dataNeededCheck, firMultipleCheck):
@@ -93,8 +116,9 @@ def fn_max_decimate(TT_DATA, TT_COEFF, TP_DECIMATE_FACTOR):
 
 def fn_validate_decimate_factor(TT_DATA, TT_COEFF, TP_DECIMATE_FACTOR, TP_API):
 
-    if TP_DECIMATE_FACTOR < TP_DECIMATE_FACTOR_min or TP_DECIMATE_FACTOR > TP_SYM_DECIMATE_FACTOR_max :
-        return isError(f"Minimum and maximum value for Decimation factor is {TP_DECIMATE_FACTOR_min} and {TP_SYM_DECIMATE_FACTOR_max}, respectively, but got {TP_DECIMATE_FACTOR}.")
+    res = fn_validate_minmax_value("TP_DECIMATE_FACTOR", TP_DECIMATE_FACTOR, TP_DECIMATE_FACTOR_min, TP_DECIMATE_FACTOR_max)
+    if (res["is_valid"] == False):
+        return res
     maxDecimate = fn_max_decimate(TT_DATA, TT_COEFF, TP_DECIMATE_FACTOR )
 
     return maxDecimate
@@ -157,12 +181,11 @@ def validate_TP_INPUT_WINDOW_VSIZE(args):
   TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
   TP_API = args["TP_API"]
   TP_SSR = args["TP_SSR"]
-  return fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR)
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, AIE_VARIANT)
 
 def fn_validate_casc_len(TP_CASC_LEN):
-    if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max :
-        return isError(f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max}, respectively, but got {TP_CASC_LEN}.")
-    return isValid
+    return fn_validate_minmax_value("TP_CASC_LEN", TP_CASC_LEN, TP_CASC_LEN_min, TP_CASC_LEN_max)
 
 def validate_TP_FIR_LEN(args):
   TT_DATA = args["TT_DATA"]
@@ -173,8 +196,8 @@ def validate_TP_FIR_LEN(args):
   TP_SSR = args["TP_SSR"]
   TP_API = args["TP_API"]
   TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
-
-  return fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD)
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT)
 
 def validate_TP_DECIMATE_FACTOR(args):
   TT_DATA = args["TT_DATA"]
@@ -188,6 +211,13 @@ def validate_TP_DUAL_IP(args):
     TP_DUAL_IP = args["TP_DUAL_IP"]
     AIE_VARIANT = args["AIE_VARIANT"]
     return fn_validate_sym_dual_ip(TP_API, TP_DUAL_IP, AIE_VARIANT)
+
+def validate_TP_NUM_OUTPUTS(args):
+    TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
+    TP_API = args["TP_API"]
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_num_outputs(TP_API, TP_NUM_OUTPUTS, AIE_VARIANT)
+
 
 def validate_TP_SSR(args):
     TP_API = args["TP_API"]
@@ -247,8 +277,9 @@ def info_ports(args):
     TP_API = args["TP_API"]
     TP_DUAL_IP = args["TP_DUAL_IP"]
     TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
+    AIE_VARIANT = args["AIE_VARIANT"]
     TP_INTERPOLATE_FACTOR = 1
-
+    rtp_port_length = TP_FIR_LEN if AIE_VARIANT == 2 or TP_SSR > 1 else (TP_FIR_LEN+1)/2
     margin_size = sr_asym.fn_margin_size(TP_FIR_LEN, TT_DATA)
     num_in_ports = TP_SSR
     num_out_ports = TP_SSR
@@ -257,7 +288,7 @@ def info_ports(args):
 
     in_ports = get_port_info("in", "in", TT_DATA, in_win_size, num_in_ports, marginSize=margin_size, TP_API=TP_API)
     in2_ports = (get_port_info("in2", "in", TT_DATA, in_win_size, num_in_ports, marginSize=margin_size, TP_API=TP_API) if (TP_DUAL_IP == 1) else [])
-    coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEFF, TP_SSR, (TP_FIR_LEN+1)/2, "async") if (args["TP_USE_COEFF_RELOAD"] == 1) else [])
+    coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEFF, TP_SSR, rtp_port_length, "async") if (args["TP_USE_COEFF_RELOAD"] == 1) else [])
 
     out_ports = get_port_info("out", "out", TT_DATA, out_win_size, num_out_ports, TP_API=TP_API)
     out2_ports = (get_port_info("out2", "out", TT_DATA, out_win_size, num_out_ports, TP_API=TP_API) if (args["TP_NUM_OUTPUTS"] == 2) else [])
@@ -326,7 +357,7 @@ public:
     {TP_USE_COEFF_RELOAD}, //TP_USE_COEFF_RELOAD
     {TP_NUM_OUTPUTS}, //TP_NUM_OUTPUTS
     {TP_API}, //TP_API
-    {TP_SSR},
+    {TP_SSR}, //TP_SSR
     {TP_SAT} //TP_SAT
   > filter;
 

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ namespace dds_lut_example {
 #define MIXER_MODE 1
 #define SFDR 90
 #define USE_WINDOW_API 0
+#define USE_PHASE_RELOAD 0
 
 using namespace adf;
 

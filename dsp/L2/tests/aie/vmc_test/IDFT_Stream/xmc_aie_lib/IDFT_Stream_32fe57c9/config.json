@@ -1,0 +1,16 @@
+{
+    "spec": "vmc_stream_idft.json",
+    "outdir": "./xmc_aie_lib/IDFT_Stream_32fe57c9",
+    "parameters": {
+        "data_type": "cint16",
+        "twiddle_type": "cint16",
+        "point_size": 64,
+        "num_frames": 64,
+        "shift_val": 0,
+        "rnd_mode": 0,
+        "ssr": 1,
+        "sat_mode": 0,
+        "casc_length": 1,
+        "AIE_VARIANT": 1
+    }
+}

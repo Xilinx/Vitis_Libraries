@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,23 @@
 #define __HAS_SYM_PREADD__ 1
 #else
 #define __HAS_SYM_PREADD__ 0
+#endif
+
+//-----------------------------------------
+// Mixed radix FFT vectorization
+// The final stage of mixed radix FFT has to be radix4 for high performance. The butterfly has 4 legs
+// each of 4 (AIE1) or 8 (AIE-ML) meaning the atom size for optimal performance is defined as follows.
+// Failing this, lower performance, but function can be achieved using radix2 in place of radix4.
+#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#define __MRFFT_ATOM__ 16
+#else
+// Ideally this would NOT be an else. It is best if an unknown value of AIE_ARCH leaves MRFFT_ATOM
+// undefined, but curiously, 2 independent ifs malfunctions for AIE1.
+
+//#endif
+//#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
+//    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+#define __MRFFT_ATOM__ 32
 #endif
 
 //----------------------------------
@@ -180,6 +197,29 @@
 #define __SUPPORTS_DMA_FIFO__ 0
 #endif
 
+// TODO: Change such that it aligns with codebase.
+// conv or corr support
+#if (__AIE_ARCH__ == 10)
+#define _SUPPORTS_DEVICE_AIE_1_
+#define _SUPPORTS_FLOAT_CFLOAT_
+#endif
+
+#if (__AIE_ARCH__ == 20)
+#define _SUPPORTS_DEVICE_AIE_2_
+#define _SUPPORTS_BFLOAT16_
+#endif
+
+// data memory in bytes
+#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#define __DATA_MEM_BYTES__ 32768
+#endif
+
+#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
+    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+#define __DATA_MEM_BYTES__ 65536
+#endif
+
+//----------SATURATION and ROUNDING MODES-------------------
 // AIE1 and 2 offer 3 saturation modes
 #define __SATURATION_MODES__ 3
 

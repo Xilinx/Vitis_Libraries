@@ -1,6 +1,7 @@
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
-
-.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+..
+   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   
+   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _FFT_IFFT:
 
@@ -8,7 +9,7 @@
 FFT/iFFT
 ========
 
-The DSPLib contains one FFT/iFFT solution. This is a single channel, decimation in time (DIT) implementation. It has a configurable point size, data type, forward/reverse direction, scaling (as a shift), cascade length, static/dynamic point size, window size, interface API (stream/window), and parallelism factor. Table :ref:`FFT_IFFT_HEADER_FORMAT` lists the template parameters used to configure the top level graph of the fft_ifft_dit_1ch_graph class.
+The DSPLib contains one FFT/iFFT solution. This is a single channel, decimation in time (DIT) implementation. It has a configurable point size, data type, forward/reverse direction, scaling (as a shift), cascade length, static/dynamic point size, window size, interface API (stream/window), and parallelism factor.
 
 Entry Point
 ===========
@@ -19,10 +20,20 @@ The graph entry point is the following:
 
     xf::dsp::aie::fft::fft_ifft_dit_1ch_graph
 
+Device Support
+==============
+
+The fft_ifft_dit_1ch supports AIE1 and AIE-ML. All features are supported on these variants with the following differences:
+
+- ``TT_DATA`` and ``TT_TWIDDLE``. AIE-ML does not support cfloat type.
+- ``TT_TWIDDLE``: AIE1 supports cint32. AIE-ML does not.
+- ``TP_RND``: Supported round modes differ between AIE1 and AIE2 as for all library elements.
+- Number of ports: When configured for ``TP_API=1`` (stream IO), AIE1 will require 2 input ports (sample interleaved - even samples on the first port) and 2 output ports similarly interleaved for each lane of processing. The number of lanes is 2^TP_PARALLEL_FACTOR. AIE-ML accepts one stream only per kernel.
+
 Supported Types
 ===============
 
-The data type to the FFT is controlled by the ``TT_DATA`` template parameter. This can take one of three choices: cint16, cint32, or cfloat. This selection applies to both input data and output data. The template parameter ``TT_TWIDDLE`` can take one of two values, cint16 or cfloat, but currently, this value is forced by the choice of ``TT_DATA``, so ``TT_TWIDDLE`` must be set to cint16 for ``TT_DATA = cint16`` or ``cint32``, and ``TT_TWIDDLE`` must be set to cfloat when ``TT_DATA=cfloat``.
+The data type to the FFT is controlled by the ``TT_DATA`` template parameter. This can take one of three choices: cint16, cint32, or cfloat. This selection applies to both input data and output data. The template parameter ``TT_TWIDDLE`` can take one of three values, cint32, cint16 or cfloat. However, ``TT_DATA`` and ``TT_TWIDDLE`` must both be integer types or must both be cfloat.
 
 Template Parameters
 ===================
@@ -129,48 +140,75 @@ In the final stage, the final values are converted to ``TT_DATA`` using ``TP_SHI
 .. table:: Rounding and Saturation in FFT
    :align: center
 
-   +------------------------+----------------+-----------------+---------------------------------+
-   | Parameter Name         |    Type        |  Description    |    Range                        |
-   +========================+================+=================+=================================+
-   |    TP_RND              |    Unsigned    | Round mode      |    0 to 3 are not supported.    |
-   |                        |    int         |                 |    These modes perform floor or |
-   |                        |                |                 |    ceiling operations which lead|
-   |                        |                |                 |    to large errors on output    |
-   |                        |                |                 |                                 |
-   |                        |                |                 |    4 = ``rnd_sym_inf``          |
-   |                        |                |                 |    symmetrical                  |
-   |                        |                |                 |    to infinity                  |
-   |                        |                |                 |                                 |
-   |                        |                |                 |    5 = ``rnd_sym_zero``         |
-   |                        |                |                 |    symmetrical                  |
-   |                        |                |                 |    to zero                      |
-   |                        |                |                 |                                 |
-   |                        |                |                 |    6 = ``rnd_conv_even``        |
-   |                        |                |                 |    convergent                   |
-   |                        |                |                 |    to even                      |
-   |                        |                |                 |                                 |
-   |                        |                |                 |    7 = ``rnd_conv_odd``         |
-   |                        |                |                 |    convergent                   |
-   |                        |                |                 |    to odd                       |
-   +------------------------+----------------+-----------------+---------------------------------+
-   |    TP_SAT              |    Unsigned    | Saturation mode |    0 = ``unsaturated``          |
-   |                        |    int         |                 |                                 |
-   |                        |                |                 |    1 = ``asymmetric saturation``|
-   |                        |                |                 | i.e +2^(N-1)-1 to -2^(N-1)      |
-   |                        |                |                 | e.g. +32767 to -32768           |
-   |                        |                |                 |                                 |
-   |                        |                |                 |    3 = ``symmetric saturation`` |
-   |                        |                |                 | i.e +2^(N-1)-1 to -2^(N-1)+1    |
-   |                        |                |                 | e.g., +32767 to -32767          |
-   |                        |                |                 |                                 |
-   +------------------------+----------------+-----------------+---------------------------------+
+   +------------------------+----------------+-----------------+----------------------------------+
+   | Parameter Name         |    Type        |  Description    |    Range                         |
+   +========================+================+=================+==================================+
+   |    TP_RND              |    Unsigned    | Round mode      |    0 to 3 are not supported.     |
+   |                        |    int         |                 |    These modes perform floor or  |
+   |                        |                |                 |    ceiling operations which lea  |
+   |                        |                |                 |    to large errors on output     |
+   |                        |                |                 |                                  |
+   |                        |                |                 |    4 = ``rnd_sym_inf``           |
+   |                        |                |                 |    symmetrical                   |
+   |                        |                |                 |    to infinity (AIE1)            |
+   |                        |                |                 |                                  |
+   |                        |                |                 |    5 = ``rnd_sym_zero``          |
+   |                        |                |                 |    symmetrical                   |
+   |                        |                |                 |    to zero                       |
+   |                        |                |                 |                                  |
+   |                        |                |                 |    6 = ``rnd_conv_even``         |
+   |                        |                |                 |    convergent                    |
+   |                        |                |                 |    to even (AIE1)                |
+   |                        |                |                 |                                  |
+   |                        |                |                 |    12 = ``rnd_conv_even``        |
+   |                        |                |                 |    convergent                    |
+   |                        |                |                 |    to even (AIE-ML)              |
+   |                        |                |                 |                                  |
+   |                        |                |                 |    7 = ``rnd_conv_odd``          |
+   |                        |                |                 |    convergent                    |
+   |                        |                |                 |    to odd (AIE1)                 |
+   |                        |                |                 |                                  |
+   |                        |                |                 |    13 = ``rnd_conv_odd``         |
+   |                        |                |                 |    convergent                    |
+   |                        |                |                 |    to odd      (AIE1)            |
+   |                        |                |                 |                                  |
+   |                        |                |                 |    8= ``rnd_neg_inf``            |
+   |                        |                |                 |    to negative                   |
+   |                        |                |                 |    infinity    (AIE-ML)          |
+   |                        |                |                 |                                  |
+   |                        |                |                 |    9 = ``rnd_pos_inf``           |
+   |                        |                |                 |    to positive                   |
+   |                        |                |                 |    infinity    (AIE-ML)          |
+   |                        |                |                 |                                  |
+   |                        |                |                 |    10 = ``rnd_sym_zero``         |
+   |                        |                |                 |    to zero     (AIE-ML)          |
+   |                        |                |                 |                                  |
+   |                        |                |                 |    11 = ``rnd_sym_inf``          |
+   |                        |                |                 |    to infinity (AIE-ML)          |
+   +------------------------+----------------+-----------------+----------------------------------+
+   |    TP_SAT              |    Unsigned    | Saturation mode |    0 = ``unsaturated``           |
+   |                        |    int         |                 |                                  |
+   |                        |                |                 |    1 = ``asymmetric saturation`` |
+   |                        |                |                 |    i.e +2^(N-1)-1 to -2^(N-1)    |
+   |                        |                |                 |    e.g. +32767 to -32768         |
+   |                        |                |                 |                                  |
+   |                        |                |                 |    3 = ``symmetric saturation``  |
+   |                        |                |                 |    i.e +2^(N-1)-1 to -2^(N-1)+1  |
+   |                        |                |                 |    e.g., +32767 to -32767        |
+   |                        |                |                 |                                  |
+   +------------------------+----------------+-----------------+----------------------------------+
 
-Distortion caused by saturation will be possible for certain configurations of the FFT. For instance, with ``TT_DATA=cint32``, it is possible for the sample values within the FFT to grow beyond the range of int32 values due to bit growth in the FFT algorithm. Saturation is applied at each stage (rank). In the final stage when ``TP_SHIF``T is applied, saturation is also applied according to ``TP_SAT``. Similarly, if the FFT is configured for ``TT_DATA=cint16``, but insufficient scaling (TP_SHIFT) is applied, then sample values can exceed the range of int16 and so these too will be saturated in the final stage. For ``TT_DATA=cfloat``, the FFT performs no scaling, nor saturation. Any saturation effects will be due to the atomic float operations returning positive infinity, negative infinity, or NaN.
+Distortion caused by saturation will be possible for certain configurations of the FFT. For instance, with ``TT_DATA=cint32``, it is possible for the sample values within the FFT to grow beyond the range of int32 values due to bit growth in the FFT algorithm. Saturation is applied at each stage (rank). In the final stage when ``TP_SHIFT`` is applied, saturation is also applied according to ``TP_SAT``. Similarly, if the FFT is configured for ``TT_DATA=cint16``, but insufficient scaling (TP_SHIFT) is applied, then sample values can exceed the range of int16 and so these too will be saturated in the final stage. For ``TT_DATA=cfloat``, the FFT performs no scaling, nor saturation. Any saturation effects will be due to the atomic float operations returning positive infinity, negative infinity, or NaN.
 
 Cascade Feature
 ---------------
 
-The FFT is configured using the ``TP_CASC_LEN`` template parameter. This determines the number of kernels over which the FFT function (or subframe FFT in the case of TP_PARALLEL_POWER>0) is split. To be clear, this feature does not use the cascade ports of kernels to convey any data. IObuffers are used to convey data from one kernel to the next in the chain. The term cascade is used simply in the sense that the function is split into a series of operations which are executed by a series of kernels, each on a separate tile. The FFT function is only split at stage boundaries, so the ``TP_CASC_LEN`` value cannot exceed the number of stages for that FFT.
+The FFT is configured using the ``TP_CASC_LEN`` template parameter. This determines the number of kernels over which the FFT function (or subframe FFT in the case of ``TP_PARALLEL_POWER>0``) is split. To be clear, this feature does not use the cascade ports of kernels to convey any data. IObuffers are used to convey data from one kernel to the next in the chain. The term cascade is used simply in the sense that the function is split into a series of operations which are executed by a series of kernels, each on a separate tile. The FFT function is only split at stage boundaries, so the ``TP_CASC_LEN`` value cannot exceed the number of stages for that FFT.
+
+Twiddle mode
+------------
+
+For integer types of ``TT_TWIDDLE``, the twiddle values are stored internally in lookup tables as their true value shifted right until the sign bit (2s complement) is in the most significant position of the data type (int16 or int32). However, 2s complement is an asymmetric range, which means the twiddles close to point 1+j0 are saturated. This can lead to spectral leakage. The library unit therefore offers ``TP_TWIDDLE_MODE``, which, when set to 0 will have twiddle values as described above, but when set to 1 will have twiddle values of half this magnitude, so that saturation does not occur. This will have higher noise than for the other mode, but does not exhibit the spectral leakage.
 
 Constraints
 -----------
@@ -182,14 +220,14 @@ The FFT design has large memory requirements for data buffering and twiddle stor
 
     **Applying Design Constraints**
 
-Location and other constraints mcanay be applied in the parent graph which instances the FFT graph class. To apply a constraint, you will need to know the name of the kernel, which will include the hierarchial path to that kernel. The simplest way to derive names, including the hierarchial part, is to compile a design and open it in AMD Vitis |trade| (vitis_analyzer), using the graph view. The names of all kernels and memory buffers can be obtained from there. These names can then be back-annotated to the parent graph to apply the necessary constraint.
+Location and other constraints can be applied in the parent graph which instances the FFT graph class. To apply a constraint, you will need to know the name of the kernel, which will include the hierarchial path to that kernel. The simplest way to derive names, including the hierarchial part, is to compile a design and open it in AMD Vitis |trade| (vitis_analyzer), using the graph view. The names of all kernels and memory buffers can be obtained from there. These names can then be back-annotated to the parent graph to apply the necessary constraint.
 
-The FFT graph class is implemented as a recursion of the top level to implement the parallelism. The instance names of each pair of subgraphs in the recursion are FFTsubframe(0) and FFTsubframe(1). In the final level of recursion, the FFT graph will contain an instance of either FFTwinproc (for ``TP_API = 0``) or FFTstrproc (when ``TP_API=1``). Within this level there is an array of kernels called m_fftKernels which will have ``TP_CASC_LEN`` members. In the above diagram, widgets are shown in green and red. The widgets either receive two streams and interlace these streams to form an IObuffer of data on which the FFT operates, or take the iobuffer output from the FFT and deinterlace this into two streams. The widgets might be expressed as separate kernels (``TP_USE_WIDGETS``=1), and hence then placed on separate tiles, or might be expressed as functions internal to the FFT kernel (or combiner kernel) (``TP_USE_WIDGETS``=0) for improved performance compared to one tile hosting both the FFT kernel and associated widgets. See also :ref:`FFT_CONFIGURATION_NOTES`.
+The FFT graph class is implemented as a recursion of the top level to implement the parallelism. The instance names of each pair of subgraphs in the recursion are FFTsubframe(0) and FFTsubframe(1). In the final level of recursion, the FFT graph will contain an instance of either FFTwinproc (for ``TP_API = 0`` ) or FFTstrproc (when ``TP_API=1`` ). Within this level there is an array of kernels called m_fftKernels which will have ``TP_CASC_LEN`` members. In the above diagram, widgets are shown in green and red. The widgets either receive two streams and interlace these streams to form an IObuffer of data on which the FFT operates, or take the iobuffer output from the FFT and deinterlace this into two streams. The widgets might be expressed as separate kernels (``TP_USE_WIDGETS`` = 1), and hence then placed on separate tiles, or might be expressed as functions internal to the FFT kernel (or combiner kernel) (``TP_USE_WIDGETS`` = 0) for improved performance compared to one tile hosting both the FFT kernel and associated widgets. See also :ref:`FFT_CONFIGURATION_NOTES`.
 
 In release 2023.1, widget kernels which converted from dual streams to IObuffers and vice versa were blended with the parent FFT or combiner kernels they supported. This eliminated kernel-switch overheads and so improved performance versus the case where widgets were co-located with their parent FFT or combiner. However, this prevented you from splitting each trio of kernels over multiple tiles for even higher performance albeit at a trebling of the resource cost. In 2023.2, the choice of whether to express the widgets as standalone kernels, or to blend them with the FFT or combiner they serve, has been added as ``TP_USE_WIDGETS``. The following description applies to the configuration with widget kernels, but the principles of the recursive decomposition and the names of the FFT and FFT combiner kernels remain and apply in either case.
 The stream to window conversion kernels on input and output to the FFT subframes are at the same level as m_fftKernels and are called m_inWidgetKernel and m_outWidgetKernel respectively. Each level of recursion will also contain an array of radix2 combiner kernels and associated stream to window conversion kernels. These are seen as a column of kernels in the above figure. Their instance names are m_r2Comb[] for the radix2 combiners and m_combInKernel[] and m_combOutKernel[] for the input and output widget kernels respectively.
 
-Examples of constraints: For TP_PARALLEL_POWER=2, to set the runtime ratio of the third of four subframe FFTs, the constraint could look like this:
+Examples of constraints: For ``TP_PARALLEL_POWER=2``, to set the runtime ratio of the third of four subframe FFTs, the constraint could look like this:
 
 .. code-block::
 
@@ -211,19 +249,19 @@ When configured for ``TP_API=0``, i.e., IObuffer API, the FFT will default to us
 .. code-block::
 
     xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, CASC_LEN,
-                                                       DYN_PT_SIZE, WINDOW_VSIZE, API_IO, PARALLEL_POWER>
+                                                       DYN_PT_SIZE, WINDOW_VSIZE, API_IO, PARALLEL_POWER, TWIDDLE_MODE>
                                                        fftGraph;
     single_buffer(fftGraph.FFTwinproc.m_fftKernels[0].in[0]);
 
 
-Code Example Including Constraints
-==================================
+Code Example
+============
 
-The following code block shows example code of how to include an instance of the fft_ifft_dit_1ch graph in a super-graph and also how the constraints mgith be applied to kernels within the FFT graph. In this example, not all kernels within the fft_ifft_dit_1ch graph are subject to location constraints. It is sufficient for the mapper to find a solution in this case by constraining only the r2comb kernels.
+The following code block shows example code of how to include an instance of the fft_ifft_dit_1ch graph in a super-graph and also how the constraints might be applied to kernels within the FFT graph. In this example, not all kernels within the fft_ifft_dit_1ch graph are subject to location constraints. It is sufficient for the mapper to find a solution in this case by constraining only the r2comb kernels.
 
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_fft.hpp
     :language: cpp
-    :lines: 15-
+    :lines: 17-
 
 .. _FFT_CONFIGURATION_NOTES:
 
@@ -233,7 +271,7 @@ Configuration Notes
 This section is intended to provide guidance on how best to configure the FFT in some typical scenarios or when designing with one particular metric in mind, such as resource use or performance.
 
 Configuration for Performance Versus Resource
------------------------------------------
+---------------------------------------------
 
 Simple configurations of the FFT use a single kernel. Multiple kernels will be used when either ``TP_PARALLEL_POWER > 0`` or ``TP_CASC_LEN > 1`` or ``TP_USE_WIDGETS = 1`` (with stream IO or ``TP_PARALLEL_POWER>0``). All of these parameters exist to allow higher throughput, though ``TP_PARALLEL_POWER`` also allows larger point sizes that can be implemented in a single kernel. If a higher throughput is required than what can be achieved with a single kernel, then ``TP_CASC_LEN`` should be increased in preference to ``TP_PARALLEL_POWER``. This is because resource (number of kernels) will match ``TP_CASC_LEN``, whereas for ``TP_PARALLEL_POWER``, resource increases quadratically. It is recommended that ``TP_PARALLEL_POWER`` is only increased after ``TP_CASC_LEN`` has been increased but where throughput still needs to be increased.
 Of course, ``TP_PARALLEL_POWER`` might be required if the point size required is greater than a single kernel can be achieved. In this case, to keep resource minimized, increase ``TP_PARALLEL_POWER`` as required to support the point size in question, then increase ``TP_CASC_LEN`` to achieve the required throughput, before again increasing ``TP_PARALLEL_POWER`` if higher throughput is still required. ``TP_USE_WIDGETS`` can be used when either ``TP_API= 1`` (stream IO to the FFT) or ``TP_PARALLEL_POWER>0`` because for this, widgets are used with streams for the internal trellis connections. By default, ``TP_USE_WIDGETS=0`` which means that the FFT with stream input will convert the incoming stream(s) to an iobuffer as a function of the FFT kernel and similarly for the output iobuffer to streams conversion. Setting ``TP_USE_WIDGETS=1`` will mean that these conversion functions are separate kernels. The use of runtime<ratio> or location constraints can then be used to force these widget kernels to be placed on different tiles to their parent FFT kernel and so boost performance. The resource cost will rise accordingly. If the performance achieved using ``TP_CASC_LEN`` alone is close to that required (e.g., within about 20%), then ``TP_USE_WIDGETS`` might help reach the required performance with only a modest increase in resources and so should be used in preference to ``TP_PARALLEL_POWER``. Using ``TP_USE_WIDGETS`` in conjunction with ``TP_PARALLEL_POWER>0`` can lead to a significant increase in tile use (up to 3x). The maximum point size supported by a single kernel can be increased by use of the single_buffer constraint. This only applies when ``TP_API=0`` (windows) as the streaming implementation always uses single buffering.

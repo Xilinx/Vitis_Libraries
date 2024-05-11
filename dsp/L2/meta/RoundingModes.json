@@ -1,0 +1,40 @@
+{
+  "RoundingModesRoB": [
+{
+    "name": "k_rnd_mode_map_aie1",
+    "variant":"AIE",
+    "enum": [0, 1, 2, 3, 4, 5, 6, 7],
+    "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"]
+
+    },
+{
+      "name": "k_rnd_mode_map_aie2",
+      "variant": "AIE-ML",
+      "enum": [0, 1, 2, 3, 8, 9, 10, 11,12],
+      "enum_str": ["Floor", "Ceiling", "Round symmetrical to floor", "Round symmetrical to ceiling", "Round to negative infinity", "Round to positive infinity", "Round symmetrical to zero", "Round symmetrical to infinity", "Round convergent to even", "Round convergent to odd"]
+
+      }
+ ],
+"RoundingModesFFT": [
+
+{
+    "name": "k_rnd_mode_map_aie1",
+    "variant":"AIE",
+    "enum": [ 2, 3, 4, 5, 6, 7],
+    "enum_str": ["Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"]
+
+    },
+{
+      "name": "k_rnd_mode_map_aie2",
+      "variant": "AIE-ML",
+      "enum": [8, 9, 10, 11,12],
+      "enum_str": ["Round to negative infinity", "Round to positive infinity", "Round symmetrical to zero", "Round symmetrical to infinity", "Round convergent to even", "Round convergent to odd"]
+
+      }
+
+
+
+  ]
+}
+
+

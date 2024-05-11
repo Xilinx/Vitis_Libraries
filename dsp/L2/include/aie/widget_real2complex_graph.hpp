@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,10 +48,10 @@ using namespace adf;
  * @ingroup widget_graph
  *
  * These are the templates to configure the function.
- * @tparam TT_DATA describes the type of individual data samples input to the function.
+ * @tparam TT_DATA describes the type of individual data samples input to the function. \n
  *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
- * @tparam TT_OUT_DATA describes the type of individual data samples output from the function.
+ * @tparam TT_OUT_DATA describes the type of individual data samples output from the function. \n
  *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  *         TT_OUT_DATA must also be the real or complex counterpart of TT_DATA, e.g.
@@ -59,7 +59,7 @@ using namespace adf;
  *         TT_DATA = cint16 and TT_OUT_DATA = int16 is valid, but
  *         TT_DATA = int16 and TT_OUT_DATA = cint32 is not valid.
  * @tparam TP_WINDOW_VSIZE describes the number of samples in the window API
- *         used if either input or output is a window.
+ *         used if either input or output is a window. \n
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  **/
 template <typename TT_DATA, typename TT_OUT_DATA, unsigned int TP_WINDOW_VSIZE>

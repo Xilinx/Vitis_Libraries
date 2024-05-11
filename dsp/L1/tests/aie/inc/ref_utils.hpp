@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ inline int64_t rounding(int rndMode, int shift, int64_t accum) {
                     accum += round_const + 1;
                 }
                 break;
-            default:;
+            default:
                 // unsupported, so error
                 printf("Error: unrecognised value for ROUND_MODE\n");
                 break;

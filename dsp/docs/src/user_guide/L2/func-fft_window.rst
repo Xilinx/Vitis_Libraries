@@ -1,6 +1,7 @@
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
-
-.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+.. 
+   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   
+   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _FFT_Window:
 
@@ -18,6 +19,15 @@ The graph entry point is the following:
 .. code-block::
 
     xf::dsp::aie::fft::fft_window_graph
+
+Device Support
+==============
+
+The fft_window supports AIE1 and AIE-ML with the following exception(s):
+
+- TT_DATA supports cfloat on AIE1, but not on AIE-ML.
+- TT_COEFF supports float on AIE1, but not on AIE-ML.
+- Round modes available and the enumerated values of round modes differ between AIE1 and AIE-ML. See :ref:`COMPILING_AND_SIMULATING`.
 
 Supported Types
 ===============
@@ -59,7 +69,7 @@ When set to 0 (static point size), all data will be expected in frames of ``TP_P
 
 When set to 1 (dynamic point size), each _window_ must be preceded by a 256 bit header to describe the runtime parameters of that window. ``TP_WINDOW_VSIZE`` describes the number of samples in a window so it does not include this header.
 
-The format of the header is described in the follwowing table. When ``TP_DYN_PT_SIZE = 1``, ``TP_POINT_SIZE`` describes the maximum point size which can be input.
+The format of the header is described in the following table. When ``TP_DYN_PT_SIZE = 1``, ``TP_POINT_SIZE`` describes the maximum point size which can be input.
 
 .. _FFT_Window_HEADER_FORMAT:
 
@@ -124,7 +134,7 @@ Code Example
 ------------
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_fft_window.hpp
     :language: cpp
-    :lines: 15-
+    :lines: 17-
 
 .. |image1| image:: ./media/image1.png
 .. |image2| image:: ./media/image2.png

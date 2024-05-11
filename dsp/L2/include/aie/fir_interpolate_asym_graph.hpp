@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,8 @@ using namespace adf;
  *
  * These are the templates to configure the Asymmetric Interpolation FIR class.
  * @tparam TT_DATA describes the type of individual data samples input to and
- *         output from the filter function. This is a typename and must be one
- *         of the following: \n
+ *         output from the filter function. \n
+ *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  * @tparam TT_COEFF describes the type of individual coefficients of the filter
  *         taps. \n It must be one of the same set of types listed for TT_DATA
@@ -59,13 +59,14 @@ using namespace adf;
  * @tparam TP_FIR_LEN is an unsigned integer which describes the number of taps
  *         in the filter.
  * @tparam TP_INTERPOLATE_FACTOR is an unsigned integer which describes the
- *         interpolation factor of the filter. TP_INTERPOLATE_FACTOR must be in the
+ *         interpolation factor of the filter. \n
+ *         TP_INTERPOLATE_FACTOR must be in the
  *         range 1 to 16.
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
- *         descriptive macros are recommended where
+ *         shift down stage of processing. \n
+ *         Although, TP_RND accepts unsigned integer values descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
  *         - rnd_sym_floor  = Truncate LSB, always round towards 0.
@@ -84,17 +85,17 @@ using namespace adf;
  *         in a single iteration run.  \n
  *         When TP_API is set to 0, samples are buffered and stored in a ping-pong window buffer mapped onto Memory
  Group banks. \n
- *         As a results, maximum number of samples processed by the graph is limited by the size of Memory Group. \n
+ *         As a result, maximum number of samples processed by the graph is limited by the size of Memory Group. \n
  *         When TP_API is set to 1, samples are processed directly from the stream inputs and no buffering takes place.
  \n
  *         In such case, maximum number of samples processed by the graph is limited to 32-bit value (4.294B samples per
  iteration).  \n
  *         Note: For SSR configurations (TP_SSR>1), the input data must be split over multiple ports,
  *         where each successive sample is sent to a different input port in a round-robin fashion. \n
- *         As a results, each SSR input path will process a fraction of the frame defined by the TP_INPUT_WINDOW_VSIZE.
+ *         As a result, each SSR input path will process a fraction of the frame defined by the TP_INPUT_WINDOW_VSIZE.
  \n
  *         The number of values in the output window will be TP_INPUT_WINDOW_VSIZE
- *         multipled by TP_INTERPOLATE_FACTOR. \n
+ *         multiplied by TP_INTERPOLATE_FACTOR. \n
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  * @tparam TP_CASC_LEN describes the number of AIE processors to split the operation
  *         over. \n This allows resource to be traded for higher performance.
@@ -144,8 +145,8 @@ using namespace adf;
  *          TP_PARA_INTERP_POLY < TP_INTERPOLATE_FACTOR will result in the kernels in the polyphase branches operating
  as
  * independent interpolators. \n
- * @tparam TP_SAT describes the selection of saturation to be applied during the
- *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
+ *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
  *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
  *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
@@ -269,7 +270,7 @@ class fir_interpolate_asym_graph : public graph {
         //
         // Conservative assumptions need to be made here, as mapper may place multiple buffers in
         // each of the memory banks, that may introduce Memory conflicts.
-        // On top of that, the placement of input source wrt brodcast kernel inputs may introduce significant routing
+        // On top of that, the placement of input source wrt broadcast kernel inputs may introduce significant routing
         // delays.
         // which may have an adverse effect on the amount of FIFO storage available for filter design purposes.
         int fifoStep = (TP_CASC_LEN - kernelPos + 1) * (TP_INTERPOLATE_FACTOR);
@@ -388,7 +389,7 @@ class fir_interpolate_asym_graph : public graph {
     port_conditional_array<input, (TP_DUAL_IP == 1), TP_SSR> in2;
 
     /**
-     * The conditional array of input async ports used to pass run-time programmable (RTP) coeficients.
+     * The conditional array of input async ports used to pass run-time programmable (RTP) coefficients.
      * This port_conditional_array is (generated when TP_USE_COEFF_RELOAD == 1) an array of input ports, which size is
      *defined by TP_SSR.
      * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.

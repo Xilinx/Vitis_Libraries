@@ -1,5 +1,6 @@
 from fir_sr_sym import *
 from aie_common import *
+from aie_common_fir import *
 from vmc_fir_utils import *
 
 #### VMC validators ####
@@ -34,7 +35,8 @@ def vmc_validate_coeff(args):
     ssr = 1
     api = 0
     fir_length = args["fir_length"]
-    return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload)
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload,AIE_VARIANT)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]
@@ -56,6 +58,12 @@ def vmc_validate_out_ports(args):
     ssr = 1
     num_outputs = fn_get_num_outputs(args)
     return fn_validate_num_outputs(api, num_outputs, AIE_VARIANT)
+
+def vmc_validate_dual_ip(args):
+    api = 0
+    AIE_VARIANT = args["AIE_VARIANT"]
+    dual_ip = 1 if args["dual_ip"] else 0
+    return fn_validate_sym_dual_ip(api, dual_ip, AIE_VARIANT)
 
 def validate_sat_mode(args):
     sat_mode = args["sat_mode"]
@@ -83,6 +91,7 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_SSR"] = 1
     tmpargs["coeff"] = args["coeff"]
     tmpargs["TP_SAT"] = args["sat_mode"]
+    tmpargs["AIE_VARIANT"] = args["AIE_VARIANT"]
 
     return generate_graph(name, tmpargs)
 

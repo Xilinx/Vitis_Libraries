@@ -53,7 +53,7 @@ def validate_TP_API(args):
 def validate_TT_DATA(args):
   TT_DATA = args["TT_DATA"]
   TP_SFDR = args["TP_SFDR"]
-  
+
   if (TT_DATA == "cint16" and TP_SFDR > 96):
     return isError(f"SFDR > 96dB is not possible with 16-bit data types. Got {TP_SFDR}.")
   return isValid
@@ -61,6 +61,13 @@ def validate_TT_DATA(args):
 def validate_TP_SAT(args):
   TP_SAT = args["TP_SAT"]
   return fn_validate_satMode(TP_SAT)
+
+def validate_TP_USE_PHASE_RELOAD(args):
+  TP_USE_PHASE_RELOAD = args["TP_USE_PHASE_RELOAD"]
+  TP_SSR = args["TP_SSR"]
+  if (TP_USE_PHASE_RELOAD == 1 and TP_SSR !=1):
+    return isError("Phase Offset Update cannot be used for TP_SSR > 1!")
+  return isValid
 
   ######### Graph Generator ############
 
@@ -71,29 +78,36 @@ def info_ports(args):
   TP_SSR = args["TP_SSR"]
   TP_API = args["TP_API"]
   TP_MIXER_MODE = args["TP_MIXER_MODE"]
+  TP_USE_PHASE_RELOAD = args["TP_USE_PHASE_RELOAD"]
+
   in1_ports = (com.get_port_info("in1", "in", TT_DATA, (TP_INPUT_WINDOW_VSIZE/TP_SSR), TP_SSR, 0, TP_API) if (TP_MIXER_MODE in [1,2]) else [])
   in2_ports = (com.get_port_info("in2", "in", TT_DATA, (TP_INPUT_WINDOW_VSIZE/TP_SSR), TP_SSR, 0, TP_API) if (TP_MIXER_MODE == 2) else [])
+  in3_ports = (com.get_parameter_port_info("PhaseRTP", "in", "int32", None, TP_SSR, "async") if (TP_USE_PHASE_RELOAD == 1) else [])
   out_ports = com.get_port_info("out", "out", TT_DATA, (TP_INPUT_WINDOW_VSIZE/TP_SSR), TP_SSR, 0, TP_API)
 
-  return (in1_ports+in2_ports+out_ports) # concat lists
+  return (in1_ports+in2_ports+in3_ports+out_ports) # concat lists
 
 def gen_ports_code(args): 
   TP_SSR = args["TP_SSR"]
   TP_MIXER_MODE = args["TP_MIXER_MODE"]
+  TP_USE_PHASE_RELOAD = args["TP_USE_PHASE_RELOAD"]
   in1_ports = ((f"  std::array<adf::port<input>, {TP_SSR}> in1;\n") if (TP_MIXER_MODE in [1,2]) else "")
   in2_ports = ((f"  std::array<adf::port<input>, {TP_SSR}> in2;\n") if (TP_MIXER_MODE == 2) else "")
+  in3_ports = ((f"  std::array<adf::port<input>, {TP_SSR}> PhaseRTP;\n") if (TP_USE_PHASE_RELOAD == 1) else "")
   out_ports = (f"  std::array<adf::port<output>, {TP_SSR}> out;\n")
 
-  return (in1_ports+in2_ports+out_ports) # concat strings
+  return (in1_ports+in2_ports+in3_ports+out_ports) # concat strings
 
 def gen_ports_connections(args): 
   TP_SSR = args["TP_SSR"]
   TP_MIXER_MODE = args["TP_MIXER_MODE"]
-  in1_ports = ((f"      adf::connect<>(in1[ssrIdx],mixer_graph.in1[ssrIdx]);\n") if (TP_MIXER_MODE in [1,2]) else "")
-  in2_ports = ((f"      adf::connect<>(in2[ssrIdx],mixer_graph.in2[ssrIdx]);\n") if (TP_MIXER_MODE == 2) else "")
-  out_ports = (f"      adf::connect<>(mixer_graph.out[ssrIdx], out[ssrIdx]);\n")
+  TP_USE_PHASE_RELOAD = args["TP_USE_PHASE_RELOAD"]
+  in1_ports = ((f"     adf::connect<>(in1[ssrIdx],mixer_graph.in1[ssrIdx]);\n") if (TP_MIXER_MODE in [1,2]) else "")
+  in2_ports = ((f"     adf::connect<>(in2[ssrIdx],mixer_graph.in2[ssrIdx]);\n") if (TP_MIXER_MODE == 2) else "")
+  in3_ports = ((f"     adf::connect<>(PhaseRTP[ssrIdx],mixer_graph.PhaseRTP[ssrIdx]);\n") if (TP_USE_PHASE_RELOAD == 1) else "")
+  out_ports = (f"     adf::connect<>(mixer_graph.out[ssrIdx], out[ssrIdx]);\n")
 
-  return (in1_ports+in2_ports+out_ports) # concat strings
+  return (in1_ports+in2_ports+in3_ports+out_ports) # concat strings
 
 def generate_graph(graphname, args):
 
@@ -105,10 +119,12 @@ def generate_graph(graphname, args):
   TT_DATA = args["TT_DATA"]
   TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
   TP_MIXER_MODE = args["TP_MIXER_MODE"]
+  TP_SFDR = args["TP_SFDR"]
   TP_API = args["TP_API"]
   TP_SSR = args["TP_SSR"]
   TP_RND = args["TP_RND"]
   TP_SAT = args["TP_SAT"]
+  TP_USE_PHASE_RELOAD = args["TP_USE_PHASE_RELOAD"]
   code = (
 f"""
 class {graphname} : public adf::graph {{
@@ -122,7 +138,10 @@ public:
     {TP_API}, // TP_API
     {TP_SSR}, // TP_SSR
     {TP_RND}, //TP_RND
-    {TP_SAT} //TP_SAT
+    {TP_SAT}, //TP_SAT
+    {TP_SFDR}, //TP_SFDR
+    {TP_USE_PHASE_RELOAD} // TP_USE_PHASE_RELOAD
+
   > mixer_graph;
   {graphname}() : mixer_graph({args["phaseInc"]}, {args["initialPhaseOffset"]}) {{
     //kernels

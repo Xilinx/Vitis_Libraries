@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,28 +39,6 @@ namespace dsp {
 namespace aie {
 namespace fft {
 namespace dft {
-//-------------------------------------
-// app-specific constants
-static constexpr unsigned int kMaxColumns = 2;
-static constexpr unsigned int kUpdWSize = 32; // Upd_w size in Bytes (256bit) - const for all data/coeff types
-
-//-------------------------------
-// I/O types
-// template<typename T_D> struct T_inputIF   {};
-// template<> struct T_inputIF<int16 >  {input_window<int16 >* inWindow;};
-// template<> struct T_inputIF<int32 >  {input_window<int32 >* inWindow;};
-// template<> struct T_inputIF<cint16>  {input_window<cint16>* inWindow;};
-// template<> struct T_inputIF<cint32>  {input_window<cint32>* inWindow;};
-// template<> struct T_inputIF<float >  {input_window<float >* inWindow;};
-// template<> struct T_inputIF<cfloat>  {input_window<cfloat>* inWindow;};
-
-// template<typename T_D> struct T_outputIF   {};
-// template<> struct T_outputIF<int16 >  {output_window<int16 >* outWindow;};
-// template<> struct T_outputIF<int32 >  {output_window<int32 >* outWindow;};
-// template<> struct T_outputIF<cint16>  {output_window<cint16>* outWindow;};
-// template<> struct T_outputIF<cint32>  {output_window<cint32>* outWindow;};
-// template<> struct T_outputIF<float >  {output_window<float >* outWindow;};
-// template<> struct T_outputIF<cfloat>  {output_window<cfloat>* outWindow;};
 
 //---------------------------------------
 // Configuration Defensive check functions
@@ -176,29 +154,10 @@ INLINE_DECL constexpr bool fnCheckShiftFloat() {
            (TP_SHIFT == 0);
 };
 
-template <typename TT_DATA, unsigned int TP_POINT_SIZE, unsigned int TP_CASC_LEN>
-INLINE_DECL constexpr bool fnCheckCascLen2() {
-    return true;
-    // The worry here was that since cfloat 16pt requires special buffering, it will not yield to cascade, but
-    // all cascade configurations possible will not run into the issue of buffer overwrite involved.
-    return (TP_CASC_LEN == 1) || (!std::is_same<TT_DATA, cfloat>::value) || (TP_POINT_SIZE != 16);
-}
-
 // End of Defensive check functions
 
 //---------------------------------------------------
 // Functions
-
-// To reduce Data Memory required, the input window can be re-used as a temporary buffer of samples,
-// but only when the internal type size is the same as the input type size
-template <typename TT_DATA>
-INLINE_DECL constexpr bool fnUsePingPongIntBuffer() {
-    return false;
-}; // only cint16 requires second internal buffer
-template <>
-INLINE_DECL constexpr bool fnUsePingPongIntBuffer<cint16>() {
-    return true;
-};
 
 template <int T_X, int T_Y>
 INLINE_DECL constexpr int fnCeil() {
@@ -245,67 +204,6 @@ INLINE_DECL cfloat nullElem() {
     retVal.imag = 0.0;
     return retVal;
 };
-
-// Chop the coeffs
-template <typename TT_TWIDDLE, unsigned int TP_CASC_LEN, unsigned int kPaddedCoeffSize>
-static std::vector<TT_TWIDDLE> chopping_function(const std::vector<TT_TWIDDLE> coeff,
-                                                 unsigned int i,
-                                                 unsigned int kernelStepSize) {
-    std::vector<TT_TWIDDLE> subCoeff;
-    for (unsigned int j = 0; j < kernelStepSize * kPaddedCoeffSize; j++) {
-        unsigned int coeffIndex = j + i * kernelStepSize * kPaddedCoeffSize; // kernelStepSize*kPaddedCoeffSize
-        subCoeff.push_back(coeff.at(coeffIndex));
-    };
-    return subCoeff;
-}
-
-/**
- * @endcond
- */
-
-// Calculate dft range for cascaded kernel
-template <unsigned int TP_POINT_SIZE, unsigned int TP_CASC_LEN, int TP_Rnd = 1>
-unsigned int fnDftRange(int TP_KP) {
-    // TP_KP - Kernel Position
-    return ((TRUNC(TP_POINT_SIZE, TP_CASC_LEN) / TP_CASC_LEN) +
-            ((TP_POINT_SIZE - TRUNC(TP_POINT_SIZE, TP_CASC_LEN)) >= TP_Rnd * (TP_KP + 1) ? TP_Rnd : 0));
-}
-
-/**
- * @endcond
- */
-
-// Used by the final kernel
-template <unsigned int TP_POINT_SIZE, unsigned int TP_CASC_LEN, int TP_Rnd = 1>
-unsigned int fnDftRangeRem(int TP_KP) {
-    // TP_KP - Kernel Position
-    return ((TRUNC(TP_POINT_SIZE, TP_CASC_LEN) / TP_CASC_LEN) +
-            ((TP_POINT_SIZE - TRUNC(TP_POINT_SIZE, TP_CASC_LEN)) % TP_Rnd));
-}
-
-/**
- * @endcond
- */
-
-// Calculate dft range for cascaded kernel
-template <unsigned int TP_POINT_SIZE, unsigned int TP_CASC_LEN, int TP_Rnd = 1, unsigned int TP_KP>
-static constexpr unsigned int dftRange() {
-    // TP_KP - Kernel Position
-    return ((TRUNC(TP_POINT_SIZE, TP_CASC_LEN) / TP_CASC_LEN) +
-            ((TP_POINT_SIZE - TRUNC(TP_POINT_SIZE, TP_CASC_LEN)) >= TP_Rnd * (TP_KP + 1) ? TP_Rnd : 0));
-}
-
-/**
- * @endcond
- */
-
-// Used by the final kernel
-template <unsigned int TP_POINT_SIZE, unsigned int TP_CASC_LEN, int TP_Rnd = 1, unsigned int TP_KP>
-static constexpr unsigned int dftRangeRem() {
-    // TP_KP - Kernel Position
-    return ((TRUNC(TP_POINT_SIZE, TP_CASC_LEN) / TP_CASC_LEN) +
-            ((TP_POINT_SIZE - TRUNC(TP_POINT_SIZE, TP_CASC_LEN)) % TP_Rnd));
-}
 }
 }
 }

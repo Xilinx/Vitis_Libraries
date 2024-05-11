@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,6 @@ namespace dsp {
 namespace aie {
 namespace fft {
 namespace windowfn {
-
 //-----------------------------------------------------------------------------------------------------
 // FFT window kernel class
 template <typename TT_DATA,
@@ -92,7 +91,7 @@ class fft_window {
 
    public:
     // Constructor
-    fft_window(const std::array<TT_COEFF, TP_POINT_SIZE*(1 + TP_DYN_PT_SIZE)>& kernel_weights);
+    fft_window(const TT_COEFF (&kernel_weights)[TP_POINT_SIZE * (1 + TP_DYN_PT_SIZE)]);
 
     // Register Kernel Class
     static void registerKernelClass() {
@@ -143,7 +142,7 @@ class fft_window<TT_DATA,
 
    public:
     // Constructor
-    fft_window(const std::array<TT_COEFF, TP_POINT_SIZE*(1 + TP_DYN_PT_SIZE)>& kernel_weights);
+    fft_window(const TT_COEFF (&kernel_weights)[TP_POINT_SIZE * (1 + TP_DYN_PT_SIZE)]);
 
     // Register Kernel Class
     static void registerKernelClass() {

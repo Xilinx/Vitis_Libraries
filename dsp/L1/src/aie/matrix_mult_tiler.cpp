@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@
 #ifndef COL_MAJOR
 #define COL_MAJOR 1
 #endif
-
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -142,19 +141,17 @@ static void doTile(T_D* inPtr, T_D* outPtr) {
             ? (vectorSize / M <= inCol) ? loadSize * (loadsPerVector) / M : inCol
             : (loadSize >= inCol) ? inCol : (loadSize >= M) ? (loadsPerVector) : (loadsPerVector) / (M / loadSize);
 
-    const unsigned rowsPerVector =
-        (leadingDim == ROW_MAJOR) ? (vectorSize / M <= inCol) ? M : vectorSize / inCol : (loadSize >= M) ? loadSize : M;
-
+    const unsigned rowsPerVector = vectorSize / columnsPerVector;
     const unsigned colElementDist = (leadingDim == ROW_MAJOR) ? 1 : inRow;
     const unsigned rowElementDist = (leadingDim == ROW_MAJOR) ? inCol : 1;
     const unsigned rowTilesPerVector = std::max((rowsPerVector / M), (unsigned)1);
-
     static_assert(
         inRow * inCol >= vectorSize,
         "ERROR: Matrix is too small to implement tiling. A single matrix must consume at least 512 bits of memory.");
+    static_assert(((inRow * inCol) % minVBuffSizeforType == 0) || (leadingDim == 0),
+                  "ERROR: Column major matrices must be a multiple of 512-bits to implement tiling");
     const unsigned vectorsPerCol = inRow / rowsPerVector;
     const unsigned vectorsPerRow = inCol / columnsPerVector;
-
     for (unsigned rowPos = 0; rowPos < vectorsPerCol; ++rowPos)
         chess_loop_count((vectorsPerCol)) chess_prepare_for_pipelining {
             unsigned outI = rowPos * largeTile;
@@ -172,7 +169,7 @@ static void doTile(T_D* inPtr, T_D* outPtr) {
                         const unsigned loadPos =
                             (leadingDim == ROW_MAJOR)
                                 ? (loadSize >= inCol) ? i * loadSize : (i % M) * inCol + (i / M) * loadSize
-                                : (loadSize >= M) ? inRow * i
+                                : (loadSize >= M) ? (inRow * (i % inCol) + (i / inCol) * M)
                                                   : inRow * (i / (M / loadSize)) + (i % (M / loadSize)) * loadSize;
                         const unsigned pointerLoc = colIndex + rowIndex + loadPos;
 
@@ -184,7 +181,6 @@ static void doTile(T_D* inPtr, T_D* outPtr) {
                     // initialise to chunk
                     aie::vector<T_D, vectorSize> mychunk;
                     // If N is 2 & loadsize=4
-
                     if
                         constexpr(N < minGranularity || leadingDim == COL_MAJOR) {
                             mychunk = doShuffle(chunk, 0, offsets);
@@ -192,12 +188,11 @@ static void doTile(T_D* inPtr, T_D* outPtr) {
                     else {
                         mychunk = chunk;
                     }
-
                     const unsigned resultIndexBase =
                         vectorSize * (vectorsPerRow)*rowPos + (vectorSize / rowTilesPerVector) * colPos;
                     outI += vectorSize;
-
 // If we end up loading more rows than we need for a single tile in a vector, need to store this somewhere else
+
 #pragma unroll((rowTilesPerVector))
                     for (unsigned tile = 0; tile < rowTilesPerVector; ++tile) {
                         const unsigned resultIndexPos = resultIndexBase + tile * largeTile;
@@ -207,7 +202,6 @@ static void doTile(T_D* inPtr, T_D* outPtr) {
                 }
         }
 }
-
 template <unsigned M, unsigned N, unsigned inRow, unsigned inCol, unsigned leadingDim, typename T_D>
 static void shuffleTile(T_D* inPtr, T_D* outPtr) {
     constexpr unsigned minGranularity = (128 / 8) / sizeof(T_D);
@@ -217,39 +211,31 @@ static void shuffleTile(T_D* inPtr, T_D* outPtr) {
     // double vector size if tile doesn't fit in 512 buffer
     // constexpr unsigned vectorSize = (M*N >= minVBuffSizeforType) ? (2*minVBuffSizeforType) : minVBuffSizeforType;
     constexpr unsigned vectorSize = (minVBuffSizeforType < (M * N)) ? 2 * minVBuffSizeforType : minVBuffSizeforType;
-
     // static_assert(N >= minGranularity, "Granularity is awkward");
     static_assert(vectorSize <= (1024 / 8) / sizeof(T_D),
                   "ERROR: calculated vector size too large for vector register.");
     static_assert(!(N == 4 && leadingDim == COL_MAJOR && std::is_same_v<T_D, int16>),
                   "ERROR: Tiling is not supported for column major int16 matrix.");
-
     constexpr unsigned int sizeTileA = M * N;
     // Window size in terms of elements
     const unsigned windowSizeA = inRow * inCol;
     const unsigned largeTile = (M * N) * (inCol / N);
-
     const unsigned loadsPerVector = vectorSize / loadSize;
-
     const unsigned columnsPerVector =
         (leadingDim == ROW_MAJOR)
             ? (vectorSize / M <= inCol) ? loadSize * (loadsPerVector) / M : // vectorSize/loadSize
                   inCol
             : (loadSize >= inCol) ? inCol : (loadSize >= M) ? (loadsPerVector) : (loadsPerVector) / (M / loadSize);
-
     const unsigned rowsPerVector =
         (leadingDim == ROW_MAJOR) ? (vectorSize / M <= inCol) ? M : vectorSize / inCol : (loadSize >= M) ? loadSize : M;
-
     const unsigned colElementDist = (leadingDim == ROW_MAJOR) ? 1 : inRow;
     const unsigned rowElementDist = (leadingDim == ROW_MAJOR) ? inCol : 1;
     const unsigned rowTilesPerVector = std::max((rowsPerVector / M), (unsigned)1);
-
     static_assert(
         inRow * inCol >= vectorSize,
         "ERROR: Matrix is too small to implement tiling. A single matrix must consume at least 512 bits of memory.");
     const unsigned vectorsPerCol = inRow / rowsPerVector;
     const unsigned vectorsPerRow = inCol / columnsPerVector;
-
     using vTypeFull = aie::vector<T_D, vectorSize>;
     using vTypeHalf = aie::vector<T_D, vectorSize / 2>;
     using vTypeQuarter = aie::vector<T_D, vectorSize / 4>;
@@ -260,7 +246,6 @@ static void shuffleTile(T_D* inPtr, T_D* outPtr) {
     const unsigned tilesPerCol = rowsPerVector / M;
     const unsigned tilesPerRow = columnsPerVector / N;
     const unsigned tilesInVector = vectorSize / (N * M);
-
     for (unsigned rowPos = 0; rowPos < vectorsPerCol; ++rowPos)
         chess_loop_count((vectorsPerCol)) chess_prepare_for_pipelining {
             unsigned outI = rowPos * largeTile;
@@ -275,18 +260,15 @@ static void shuffleTile(T_D* inPtr, T_D* outPtr) {
 #pragma unroll((loadsPerVector))
                     for (unsigned i = 0; i < (loadsPerVector); ++i) {
                         // Todo: deal with the possibility that inCol < loadSize for COL_MAJOR
-                        unsigned loadPos = (leadingDim == ROW_MAJOR)
-                                               ? (loadSize >= inCol) ? i * loadSize :
-
-                                                                     (i % M) * inCol + (i / M) * loadSize
-                                               : (loadSize >= M)
-                                                     ? inRow * i
-                                                     : inRow * (i / (M / loadSize)) + (i % (M / loadSize)) * loadSize;
+                        unsigned loadPos =
+                            (leadingDim == ROW_MAJOR)
+                                ? (loadSize >= inCol) ? i * loadSize : (i % M) * inCol + (i / M) * loadSize
+                                : (loadSize >= M) ? inRow * i
+                                                  : inRow * (i / (M / loadSize)) + (i % (M / loadSize)) * loadSize;
                         unsigned pointerLoc = colIndex + rowIndex + loadPos;
                         readVal = aie::load_v<loadSize>(inPtr + pointerLoc);
                         chunk.insert(i, readVal);
                     }
-
                     // initialise to chunk
                     vTypeFull mychunk;
 

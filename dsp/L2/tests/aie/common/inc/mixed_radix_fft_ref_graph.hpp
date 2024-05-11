@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,9 +79,9 @@ class mixed_radix_fft_ref_graph : public graph {
         printf("Saturation mode      = %d \n", TP_SAT);
 
         // Create MIXED_RADIX_FFT class
-        m_mixed_radix_fftKernel =
-            kernel::create_object<dft_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
-                                          TP_WINDOW_VSIZE / TP_POINT_SIZE /*NUM_FRAMES*/, TP_RND, TP_SAT> >();
+        m_mixed_radix_fftKernel = kernel::create_object<
+            dft_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
+                    TP_WINDOW_VSIZE / TP_POINT_SIZE /*NUM_FRAMES*/, TP_RND, TP_SAT, 1 /*TP_SSR*/> >();
 
         // Make connections
         // Size of window in Bytes. Dynamic point size adds a 256 bit (32 byte) header. This is larger than required,

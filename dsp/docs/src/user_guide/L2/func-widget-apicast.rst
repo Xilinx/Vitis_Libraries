@@ -1,8 +1,9 @@
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+.. 
+   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   
+   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
-
-.. _WIDGETS:
+.. _WIDGET_API_CAST:
 
 ===============
 Widget API Cast
@@ -19,6 +20,12 @@ The graph entry point is the following:
 .. code-block::
 
     xf::dsp::aie::widget::api_cast::widget_api_cast_graph
+
+~~~~~~~~~~~~~~
+Device Support
+~~~~~~~~~~~~~~
+
+The widget API cast supports AIE1 and AIE-ML.
 
 ~~~~~~~~~~~~~~~
 Supported Types
@@ -57,7 +64,7 @@ The following code example shows how the widget_api_cast graph class can be used
 
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_widget_api_cast.hpp
     :language: cpp
-    :lines: 15-
+    :lines: 17-
 
 
 

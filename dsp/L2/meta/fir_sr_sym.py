@@ -27,6 +27,11 @@ import fir_sr_asym as sr_asym
 # and "err_message" if "is_valid" is False.
 #
 
+TP_INPUT_WINDOW_VSIZE_min = 4
+TP_CASC_LEN_min = 1
+TP_CASC_LEN_max = 40
+TP_FIR_LEN_min = 4
+TP_FIR_LEN_max = 8192
 
 # Logic derived from sr_sym_traits
 def fnNumLanesSym(TT_DATA, TT_COEFF):
@@ -50,10 +55,9 @@ def fn_validate_input_window_size(
     TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1
 ):
 
-    if TP_INPUT_WINDOW_VSIZE < TP_INPUT_WINDOW_VSIZE_min:
-        return isError(
-            f"Minimum value for Input size is {TP_INPUT_WINDOW_VSIZE_min}, but got {TP_INPUT_WINDOW_VSIZE}."
-        )
+    res = fn_validate_min_value("TP_INPUT_WINDOW_VSIZE", TP_INPUT_WINDOW_VSIZE, TP_INPUT_WINDOW_VSIZE_min)
+    if (res["is_valid"] == False):
+      return res
     checkMultipleLanes = fn_windowsize_multiple_lanes(
         TT_DATA,
         TT_COEFF,
@@ -88,10 +92,9 @@ def fn_validate_fir_len(
     TP_USE_COEFF_RELOAD,
     AIE_VARIANT=1,
 ):
-    if TP_FIR_LEN < TP_FIR_LEN_min or TP_FIR_LEN > TP_FIR_LEN_max:
-        return isError(
-            f"Minimum and maximum value for Filter length is {TP_FIR_LEN_min} and {TP_FIR_LEN_max},respectively, but got {TP_FIR_LEN}."
-        )
+    res = fn_validate_minmax_value("TP_FIR_LEN", TP_FIR_LEN, TP_FIR_LEN_min, TP_FIR_LEN_max)
+    if (res["is_valid"] == False):
+        return res
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
     symFactor   = 1 if (TP_API == 0 and (TT_DATA == "cfloat" or TT_DATA == "float")) else 2  # Avoid program memory limitations
     symFactorSSR   = 1 if (TP_SSR != 1 ) else symFactor # SSR mode will discard the symmetry
@@ -99,18 +102,14 @@ def fn_validate_fir_len(
     maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_SSR, symApiSSR, symFactorSSR)
     dataNeededCheck = isValid
     if ((TP_SSR > 1) or (AIE_VARIANT == 2)):
-      dataNeededCheck = sr_asym.fn_data_needed_within_buffer_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN,TP_API, TP_SSR )
+      dataNeededCheck = sr_asym.fn_data_needed_within_buffer_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_API, TP_SSR )
     for check in (minLenCheck,maxLenCheck, dataNeededCheck):
       if check["is_valid"] == False :
         return check
     return isValid
 
 def fn_validate_casc_len(TP_CASC_LEN):
-    if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max:
-        return isError(
-            f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max},respectively, but got {TP_CASC_LEN}."
-        )
-    return isValid
+    return fn_validate_minmax_value("TP_CASC_LEN", TP_CASC_LEN, TP_CASC_LEN_min, TP_CASC_LEN_max)
 
 
 #### validation APIs ####
@@ -247,14 +246,17 @@ def info_ports(args):
     TP_DECIMATE_FACTOR = 1
     TP_INTERPOLATE_FACTOR = 1
     TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
+    AIE_VARIANT = args["AIE_VARIANT"]
     margin_size = sr_asym.fn_margin_size(TP_FIR_LEN // TP_SSR, TT_DATA)
     num_in_ports = TP_SSR
     num_out_ports = TP_SSR
+    num_rtp_taps = TP_FIR_LEN if (AIE_VARIANT == 2) else ((TP_FIR_LEN + 1) / 2)
     in_win_size = get_input_window_size(TP_INPUT_WINDOW_VSIZE, num_in_ports, TP_API, TP_DUAL_IP)
     out_win_size = get_output_window_size(TP_INPUT_WINDOW_VSIZE, num_out_ports, TP_API, TP_NUM_OUTPUTS, TP_DECIMATE_FACTOR, TP_INTERPOLATE_FACTOR)
     in_ports = get_port_info( "in", "in", TT_DATA, in_win_size, num_in_ports, marginSize=margin_size, TP_API=args["TP_API"],)
     in2_ports = (get_port_info( "in2", "in", TT_DATA, in_win_size, num_in_ports, marginSize=margin_size, TP_API=args["TP_API"], ) if (args["TP_DUAL_IP"] == 1) else [])
-    coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEFF, TP_SSR, (TP_FIR_LEN + 1) / 2, "async") if (args["TP_USE_COEFF_RELOAD"] == 1) else [])
+
+    coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEFF, TP_SSR, num_rtp_taps, "async") if (args["TP_USE_COEFF_RELOAD"] == 1) else [])
 
     # decimate by 2 for halfband
     out_ports = get_port_info("out", "out", TT_DATA, out_win_size, num_out_ports, TP_API=args["TP_API"], )

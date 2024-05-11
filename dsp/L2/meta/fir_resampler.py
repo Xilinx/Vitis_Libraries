@@ -37,7 +37,16 @@ TP_DECIMATE_FACTOR_min = 1
 TP_DECIMATE_FACTOR_max = 16
 TP_INTERPOLATE_FACTOR_min = 1
 TP_INTERPOLATE_FACTOR_max = 16
-
+TP_INPUT_WINDOW_VSIZE_min = 4
+TP_SSR_min = 1
+TP_PARA_DECI_POLY_min = 1
+TP_PARA_INTERP_POLY_min = 1
+TP_CASC_LEN_min = 1
+TP_CASC_LEN_max = 40
+TP_FIR_LEN_min = 4
+TP_FIR_LEN_max = 8192
+TP_SHIFT_min=0
+TP_SHIFT_max=80
 
 def fn_check_samples_can_fit_streaming(
     TT_DATA,
@@ -129,10 +138,9 @@ def fn_validate_fir_len(
     TP_PARA_INTERP_POLY
 ):
     check_valid_decompose = poly.fn_validate_decomposer_TP_FIR_LEN(args)
-    if TP_FIR_LEN < TP_FIR_LEN_min or TP_FIR_LEN > TP_FIR_LEN_max:
-        return isError(
-            f"Minimum and maximum value for Filter length is {TP_FIR_LEN_min} and {TP_FIR_LEN_max},respectively, but got {TP_FIR_LEN}."
-        )
+    res = fn_validate_minmax_value("TP_FIR_LEN", TP_FIR_LEN, TP_FIR_LEN_min, TP_FIR_LEN_max)
+    if (res["is_valid"] == False):
+        return res
 
     minLenCheck = fn_min_fir_len_each_kernel(
         TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_Rnd=TP_INTERPOLATE_FACTOR
@@ -242,10 +250,9 @@ def fn_validate_input_window_size(
     TP_PARA_DECI_POLY=1,
     AIE_VARIANT=1,
 ):
-    if TP_INPUT_WINDOW_VSIZE < TP_INPUT_WINDOW_VSIZE_min:
-        return isError(
-            f"Minimum value for Input size is {TP_INPUT_WINDOW_VSIZE_min}, but got {TP_INPUT_WINDOW_VSIZE}."
-        )
+    res = fn_validate_min_value("TP_INPUT_WINDOW_VSIZE", TP_INPUT_WINDOW_VSIZE, TP_INPUT_WINDOW_VSIZE_min)
+    if (res["is_valid"] == False):
+      return res
     if TP_INPUT_WINDOW_VSIZE/(TP_PARA_DECI_POLY * TP_PARA_INTERP_POLY) < TP_INPUT_WINDOW_VSIZE_min:
         return isError(
             f"Minimum value for Input size is {TP_INPUT_WINDOW_VSIZE_min}, but got {TP_INPUT_WINDOW_VSIZE/(TP_PARA_DECI_POLY * TP_PARA_INTERP_POLY)} which resulted by decomposing requested Input size {TP_INPUT_WINDOW_VSIZE} into {(TP_PARA_DECI_POLY * TP_PARA_INTERP_POLY)} parallel polyphases ."
@@ -270,10 +277,6 @@ def fn_validate_input_window_size(
         # AIE-ML decpomposes to
         multipleToBeChecked = numLanes
 
-    outputWindowSize = (
-        (TP_INPUT_WINDOW_VSIZE ) * TP_INTERPOLATE_FACTOR / TP_DECIMATE_FACTOR
-    )
-
     inputWindowSize = (
         (TP_INPUT_WINDOW_VSIZE / TP_PARA_DECI_POLY)
     )
@@ -281,12 +284,13 @@ def fn_validate_input_window_size(
         print(f"INFO: Input Samples are equally split between Decimate Polyphases {TP_PARA_DECI_POLY}, resulting in Input Window Size per polyphase equal to ({inputWindowSize})." )
 
     checkInputDividedBySSR = fn_windowsize_multiple_lanes(
-        TT_DATA, TT_COEFF, inputWindowSize, TP_API, numLanes, TP_SSR, AIE_VARIANT
+        TT_DATA, TT_COEFF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes, TP_SSR * TP_PARA_DECI_POLY, AIE_VARIANT
     )
 
-    checkOutputMultipleLanes = fn_windowsize_multiple_lanes(
-        TT_DATA, TT_COEFF, outputWindowSize, TP_API, multipleToBeChecked, TP_SSR, AIE_VARIANT
+    checkOutputMultipleLanes = fn_out_windowsize_multiple_lanes(
+        TT_DATA, TT_COEFF, TP_INPUT_WINDOW_VSIZE, TP_API, multipleToBeChecked, TP_SSR, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, AIE_VARIANT
     )
+
 
     checkMaxBuffer = fn_max_windowsize_for_buffer(
         TT_DATA,
@@ -345,10 +349,9 @@ def fn_validate_input_window_size(
     return isValid
 
 def fn_validate_para_interp_poly(TP_INTERPOLATE_FACTOR, TP_PARA_INTERP_POLY):
-    if TP_PARA_INTERP_POLY < TP_PARA_INTERP_POLY_min:
-        return isError(
-            f"Minimum value for Interpolation poly phase is {TP_PARA_INTERP_POLY_min}, but got {TP_PARA_INTERP_POLY}."
-        )
+    res = fn_validate_min_value("TP_PARA_INTERP_POLY", TP_PARA_INTERP_POLY, TP_PARA_INTERP_POLY_min)
+    if (res["is_valid"] == False):
+      return res
     if TP_PARA_INTERP_POLY == TP_INTERPOLATE_FACTOR or TP_PARA_INTERP_POLY == 1:
         return isValid
     else:
@@ -358,10 +361,9 @@ def fn_validate_para_interp_poly(TP_INTERPOLATE_FACTOR, TP_PARA_INTERP_POLY):
 
 
 def fn_validate_para_deci_poly(TP_DECIMATE_FACTOR, TP_PARA_DECI_POLY):
-    if TP_PARA_DECI_POLY < TP_PARA_DECI_POLY_min:
-        return isError(
-            f"Minimum value for Decimation poly phase is {TP_PARA_DECI_POLY_min}, but got {TP_PARA_DECI_POLY}."
-        )
+    res = fn_validate_min_value("TP_PARA_DECI_POLY", TP_PARA_DECI_POLY, TP_PARA_DECI_POLY_min)
+    if (res["is_valid"] == False):
+      return res
     if TP_PARA_DECI_POLY == TP_DECIMATE_FACTOR or TP_PARA_DECI_POLY == 1:
         return isValid
     else:
@@ -371,11 +373,7 @@ def fn_validate_para_deci_poly(TP_DECIMATE_FACTOR, TP_PARA_DECI_POLY):
 
 
 def fn_validate_casc_len(TP_CASC_LEN):
-    if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max:
-        return isError(
-            f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max},respectively, but got {TP_CASC_LEN}."
-        )
-    return isValid
+    return fn_validate_minmax_value("TP_CASC_LEN", TP_CASC_LEN, TP_CASC_LEN_min, TP_CASC_LEN_max)
 
 
 #### validation APIs ####
@@ -397,8 +395,9 @@ def validate_TP_SHIFT(args):
     return fn_validate_shift_val(TT_DATA, TP_SHIFT)
 
 def fn_validate_shift_val(TT_DATA, TP_SHIFT):
-  if TP_SHIFT< TP_SHIFT_min or TP_SHIFT > TP_SHIFT_max:
-      return isError(f"Minimum and Maximum value for parameter Shift is {TP_SHIFT_min} and {TP_SHIFT_max},respectively, but got {TP_SHIFT}. ")
+  res = fn_validate_minmax_value("TP_SHIFT", TP_SHIFT, TP_SHIFT_min, TP_SHIFT_max)
+  if (res["is_valid"] == False):
+    return res
   return fn_float_no_shift(TT_DATA, TP_SHIFT)
 
 def validate_TP_RND(args):
@@ -507,13 +506,9 @@ def fn_validate_decimate_factor(
     TT_DATA, TT_COEFF, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, AIE_VARIANT
 ):
 
-    if (
-        TP_DECIMATE_FACTOR < TP_DECIMATE_FACTOR_min
-        or TP_DECIMATE_FACTOR > TP_DECIMATE_FACTOR_max
-    ):
-        return isError(
-            f"Minimum and maximum value for Decimator factor is {TP_DECIMATE_FACTOR_min} and {TP_DECIMATE_FACTOR_max},respectively, but got {TP_DECIMATE_FACTOR}."
-        )
+    res = fn_validate_minmax_value("TP_DECIMATE_FACTOR", TP_DECIMATE_FACTOR, TP_DECIMATE_FACTOR_min, TP_DECIMATE_FACTOR_max)
+    if (res["is_valid"] == False):
+        return res
     m_kNumSamplesForNLanes = 0
     m_kColumns = 0
     kXYBuffSize = 0
@@ -572,9 +567,9 @@ def fn_validate_resampler_ssr(TP_SSR, TP_API, TP_DECIMATE_FACTOR, TP_PARA_DECI_P
         return isError(f"Maximum value for SSR is {TP_SSR_max}, but got {TP_SSR}.")
     # SSR when design is not decomposed is inefficient. Use Parallel polyphases first.
     if TP_SSR > 1 and TP_INTERPOLATE_FACTOR != TP_PARA_INTERP_POLY:
-        return isError(f"SSR mode not available when design is not fully decomposed. Please use Parallel polyphase decomposition before increasing SSR.")
+        return isError(f"SSR mode not available when design is not fully decomposed. Please set TP_PARA_INTERP_POLY ({TP_PARA_INTERP_POLY}) to match TP_INTERPOLATE_FACTOR {TP_INTERPOLATE_FACTOR} before increasing TP_SSR {TP_SSR}.")
     if TP_SSR > 1 and TP_DECIMATE_FACTOR != TP_PARA_DECI_POLY:
-        return isError(f"SSR mode not available when design is not fully decomposed. Please use Parallel polyphase decomposition before increasing SSR.")
+        return isError(f"SSR mode not available when design is not fully decomposed. Please set TP_PARA_DECI_POLY ({TP_PARA_DECI_POLY}) to match TP_DECIMATE_FACTOR {TP_DECIMATE_FACTOR} before increasing TP_SSR {TP_SSR}.")
     # May be over-restrictive.
     if (TP_PARA_INTERP_POLY > 1 and TP_INTERPOLATE_FACTOR != TP_PARA_INTERP_POLY):
         return isError(f"SSR decomposition is only supported when interpolation process is fully decomposed into parallel polyphases, i.e. TP_INTERPOLATE_FACTOR {TP_INTERPOLATE_FACTOR} must match TP_PARA_INTERP_POLY {TP_PARA_INTERP_POLY}.")

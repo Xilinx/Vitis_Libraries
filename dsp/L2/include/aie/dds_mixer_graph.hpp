@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ the DDS_MIXER library element.
 #include <vector>
 #include <tuple>
 
+#include "graph_utils.hpp"
 #include "dds_mixer.hpp"
 
 namespace xf {
@@ -63,8 +64,8 @@ using namespace adf;
  * @ingroup dds_graph
  *
  * @tparam TT_DATA describes the type of individual data samples input to and
- *         output from the dds_mixer function. This is a typename and must be one
- *         of the following: \n
+ *         output from the dds_mixer function. \n
+ *         This is a typename and must be one of the following: \n
  *         cint16, cint32, cfloat. Note that for cint32, the internal DDS still works to int16 precision,
  *         so Mixer Mode 0 will be cast, though for Modes 1 and 2, data to be mixed will be cint32.
  * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples in the input/output buffer API
@@ -73,35 +74,42 @@ using namespace adf;
  *         The values supported are: \n
  *         0 (dds only mode), \n 1 (dds plus single data channel mixer),  \n
  *         2 (dds plus two data channel mixer for symmetrical carriers)
+ * @tparam TP_USE_PHASE_RELOAD allows the user to select if runtime phase offset
+ *         should be used. \n When defining the parameter:
+ *         - 0 = static phase initialization, defined in dds constructor,
+ *         - 1 = reloadable initial phase, passed as argument to runtime function. \n
+ *
+ *         Note: when used, async port: ``` port_conditional_array<input, (TP_USE_PHASE_RELOAD == 1), TP_SSR> initPhase;
+ *``` will be added to the DDS. \n
  * @tparam TP_API specifies if the input/output interface should be buffer-based or stream-based.  \n
  *         The values supported are 0 (buffer API) or 1 (stream API).
  * @tparam TP_SSR specifies the super sample rate, ie how much data input/output in parallel for a single channel.  \n
  *         There will be a TP_SSR number of kernels, with a TP_SSR number of each port used on the interface. \n
  *         A default value of 1 corresponds to the typical single kernel case.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
- *         descriptive macros are recommended where
- *         0: rnd_floor      = Truncate LSB, always round down (towards negative infinity).
- *         1: rnd_ceil       = Always round up (towards positive infinity).
- *         2: rnd_sym_floor  = Truncate LSB, always round towards 0.
- *         3: rnd_sym_ceil   = Always round up towards infinity.
- *         4: rnd_pos_inf    = Round halfway towards positive infinity.
- *         5: rnd_neg_inf    = Round halfway towards negative infinity.
- *         6: rnd_sym_inf    = Round halfway towards infinity (away from zero).
- *         7: rnd_sym_zero   = Round halfway towards zero (away from infinity).
- *         8: rnd_conv_even  = Round halfway towards nearest even number.
- *         9: rnd_conv_odd   = Round halfway towards nearest odd number. \n
+ *         shift down stage of processing. \n
+ *         Although, TP_RND accepts unsigned integer values descriptive macros are recommended where
+ *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
+ *         - rnd_ceil       = Always round up (towards positive infinity).
+ *         - rnd_sym_floor  = Truncate LSB, always round towards 0.
+ *         - rnd_sym_ceil   = Always round up towards infinity.
+ *         - rnd_pos_inf    = Round halfway towards positive infinity.
+ *         - rnd_neg_inf    = Round halfway towards negative infinity.
+ *         - rnd_sym_inf    = Round halfway towards infinity (away from zero).
+ *         - rnd_sym_zero   = Round halfway towards zero (away from infinity).
+ *         - rnd_conv_even  = Round halfway towards nearest even number.
+ *         - rnd_conv_odd   = Round halfway towards nearest odd number. \n
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
- * @tparam TP_SAT describes the selection of saturation to be applied during the
- *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
- *         0: none           = No saturation is performed and the value is truncated on the MSB side.
- *         1: saturate       = Default. Saturation rounds an n-bit signed value in the range [- ( 2^(n-1) ) : +2^(n-1) -
- *1 ].
- *         3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
- *range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
+ * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
+ *         TP_SAT accepts unsigned integer values, where:
+ *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
+ *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
+ *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
+ *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds
+ *         an n-bit signed value in the range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  **/
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
@@ -109,7 +117,8 @@ template <typename TT_DATA,
           unsigned int TP_API = IO_API::WINDOW,
           unsigned int TP_SSR = 1,
           unsigned int TP_RND = 4,
-          unsigned int TP_SAT = 1>
+          unsigned int TP_SAT = 1,
+          unsigned int TP_USE_PHASE_RELOAD = 0>
 class dds_mixer_graph : public graph {
    private:
    public:
@@ -117,6 +126,11 @@ class dds_mixer_graph : public graph {
     // type alias to determine if port type is window or stream
     static_assert(TP_INPUT_WINDOW_VSIZE % TP_SSR == 0,
                   "ERROR: Unsupported frame size. TP_INPUT_WINDOW_VSIZE must be divisible by TP_SSR");
+    static_assert(__SINCOS_IN_HW__ == 1,
+                  "ERROR: This device does not support this implementation of the DDS. Please use the dds_mixer_lut "
+                  "library element for this application.");
+    static_assert(!(TP_USE_PHASE_RELOAD == 1 && TP_SSR > 1),
+                  "ERROR: Phase Offset Update cannot be used for TP_SSR > 1!");
 
     template <typename direction>
     using portArray = std::array<port<direction>, TP_SSR>;
@@ -132,6 +146,7 @@ class dds_mixer_graph : public graph {
      * An output port of TT_DATA type. When in TP_API=WINDOW, the port is a window of TP_INPUT_WINDOW_VSIZE samples.
      **/
     portArray<output> out;
+    port_conditional_array<input, (TP_USE_PHASE_RELOAD == 1), TP_SSR> PhaseRTP;
 
     /**
      * kernel instance used to set constraints - getKernels function returns a pointer to this.
@@ -146,8 +161,15 @@ class dds_mixer_graph : public graph {
 
     static constexpr unsigned int KINPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_SSR;
     static constexpr unsigned int TP_NUM_LUTS = 1;
-    using kernelClass =
-        dds_mixer<TT_DATA, KINPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_INBUILT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>;
+    using kernelClass = dds_mixer<TT_DATA,
+                                  KINPUT_WINDOW_VSIZE,
+                                  TP_MIXER_MODE,
+                                  TP_USE_PHASE_RELOAD,
+                                  TP_API,
+                                  USE_INBUILT_SINCOS,
+                                  TP_NUM_LUTS,
+                                  TP_RND,
+                                  TP_SAT>;
 
     /**
      * @brief This is the constructor function for the dds_mixer graph.
@@ -160,6 +182,21 @@ class dds_mixer_graph : public graph {
         for (unsigned int ssrIdx = 0; ssrIdx < TP_SSR; ssrIdx++) {
             m_ddsKernel[ssrIdx] = kernel::create_object<kernelClass>(uint32_t(phaseInc * TP_SSR),
                                                                      uint32_t(initialPhaseOffset + phaseInc * ssrIdx));
+            if
+                constexpr(TP_MIXER_MODE == 0 && TP_USE_PHASE_RELOAD == 1) {
+                    connect<parameter>(PhaseRTP[ssrIdx], async(m_ddsKernel[ssrIdx].in[0]));
+                }
+
+            if
+                constexpr(TP_MIXER_MODE == 1 && TP_USE_PHASE_RELOAD == 1) {
+                    connect<parameter>(PhaseRTP[ssrIdx], async(m_ddsKernel[ssrIdx].in[1]));
+                }
+
+            if
+                constexpr(TP_MIXER_MODE == 2 && TP_USE_PHASE_RELOAD == 1) {
+                    connect<parameter>(PhaseRTP[ssrIdx], async(m_ddsKernel[ssrIdx].in[2]));
+                }
+
             if
                 constexpr(TP_MIXER_MODE == 1 || TP_MIXER_MODE == 2) {
                     if

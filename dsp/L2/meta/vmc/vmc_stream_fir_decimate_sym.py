@@ -24,7 +24,8 @@ def vmc_validate_input_window_size(args):
     api = 1
     ssr = args["ssr"]
     fir_length = args["fir_length"]
-    return fn_validate_input_window_size(data_type, coef_type, fir_length, decimate_factor, input_window_size, api, ssr)
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_input_window_size(data_type, coef_type, fir_length, decimate_factor, input_window_size, api, ssr, AIE_VARIANT)
 
 def vmc_validate_casc_length(args):
     casc_length = args["casc_length"]
@@ -44,7 +45,8 @@ def vmc_validate_coeff(args):
     ssr = args["ssr"]
     api = 1
     fir_length = args["fir_length"]
-    return fn_validate_fir_len(data_type, coef_type, fir_length, decimate_factor, casc_length, ssr, api, use_coeff_reload )
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_fir_len(data_type, coef_type, fir_length, decimate_factor, casc_length, ssr, api, use_coeff_reload, AIE_VARIANT )
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]
@@ -65,10 +67,16 @@ def vmc_validate_decimate_factor(args):
     return fn_validate_decimate_factor(data_type, coef_type, decimate_factor, api)
 
 def vmc_validate_dual_ip(args):
-    dual_ip = args["dual_ip"]
+    dual_ip = 1 if args["dual_ip"] else 0
     api = 1
     AIE_VARIANT = args["AIE_VARIANT"]
     return fn_validate_sym_dual_ip(api, dual_ip, AIE_VARIANT)
+
+def vmc_validate_num_outputs(args):
+    num_outputs = fn_get_num_outputs(args)
+    api = 1
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_num_outputs(api, num_outputs, AIE_VARIANT)
 
 def vmc_validate_rnd_mode(args):
     rnd_mode = args["rnd_mode"]
@@ -93,5 +101,6 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_SSR"] = args["ssr"]
     tmpargs["coeff"] = args["coeff"]
     tmpargs["TP_SAT"] = args["sat_mode"]
+    tmpargs["AIE_VARIANT"] = args["AIE_VARIANT"]
 
     return generate_graph(name, tmpargs)

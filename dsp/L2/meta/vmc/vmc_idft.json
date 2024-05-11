@@ -37,7 +37,7 @@
       "validator": {
         "file": "vmc_dft_common.py",
         "function": "vmc_validate_point_size",
-        "args": []
+        "args": ["AIE_VARIANT","data_type","twiddle_type","casc_length"]
       },
             "label": "IDFT size:",
             "tablabel": "Main",
@@ -47,10 +47,15 @@
       "key": "TP_NUM_FRAMES",
       "name": "num_frames",
       "description": "The number of frames to be processed per input window of data",
+      "validator": {
+        "file": "vmc_dft_common.py",
+        "function": "vmc_validate_num_frames",
+        "args": []
+      },      
       "default": 64,
-            "label": "Number of frames per window:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "label": "Number of frames per window:",
+      "tablabel": "Main",
+      "parameterType":"edit"
     },
     {
       "key": "TP_SHIFT",
@@ -101,12 +106,22 @@
        "validator": {
         "file": "vmc_dft_common.py",
         "function": "vmc_validate_casc_length",
-        "args": ["num_frames", "point_size"]
+        "args": []
       },
             "label": "Number of cascade stages:",
             "tablabel": "Main",
             "parameterType":"edit"
+    },
+	{
+	  "key": "AIE_VARIANT",
+	  "name": "AIE_VARIANT",
+      "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
+      "default": 1,
+	  "label": "AIE Variant:",
+      "tablabel": "Main",
+      "parameterType":"edit"
     }
+
   ],
   "generator": {
     "file": "vmc_idft.py",

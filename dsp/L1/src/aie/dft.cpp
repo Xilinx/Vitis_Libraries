@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ template <typename TT_DATA,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_KERNEL_POSITION,
           bool TP_CASC_IN,
@@ -60,6 +61,7 @@ INLINE_DECL void kernelDFTClass<TT_DATA,
                                 TP_FFT_NIFFT,
                                 TP_SHIFT,
                                 TP_CASC_LEN,
+                                TP_SSR,
                                 TP_NUM_FRAMES,
                                 TP_KERNEL_POSITION,
                                 TP_CASC_IN,
@@ -73,72 +75,97 @@ INLINE_DECL void kernelDFTClass<TT_DATA,
 
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVectData>;
     using outDataVect_t = ::aie::vector<T_outDataType, kSamplesInVectData>;
-    using coeffVect_t = ::aie::vector<TT_TWIDDLE, kSamplesInVectTwiddle>;
+    using coeffVect_t = ::aie::vector<TT_TWIDDLE, kSamplesInVectData>;
 
-    using accVect_t = ::aie::accum<typename tAccBaseType<T_outDataType, TT_TWIDDLE>::type, kSamplesInVectData>;
+    using accVect_t = ::aie::accum<typename accType<T_outDataType, TT_TWIDDLE>::type, kSamplesInVectData>;
 
     dataVect_t dataVect;
-    dataVect_t* inPointer;
+    dataVect_t* __restrict inPointer;
     outDataVect_t blankVect = ::aie::zeros<T_outDataType, kSamplesInVectData>(); // to initialise acc
     outDataVect_t outVect, outVect2;
-    coeffVect_t* coeffVectPtr;
+
+    coeffVect_t* __restrict coeffVectPtr;
+    coeffVectPtr = (coeffVect_t*)coeffPtr;
 
     coeffVect_t coeffVect, coeffVect2;
     accVect_t acc, acc2;
     dataVect_t* frameStart = (dataVect_t*)inInterface.inWindow;
-    outDataVect_t* outPtr = (dataVect_t*)outInterface.outWindow;
+    outDataVect_t* __restrict outPtr = (dataVect_t*)outInterface.outWindow;
 
+    TT_TWIDDLE* coeffCopy = coeffPtr;
     // Loop through each frame
-    for (int frame = 0; frame < TP_NUM_FRAMES; frame++) chess_prepare_for_pipelining chess_loop_count(TP_NUM_FRAMES) {
-            // pointer to a vector of coefficients
-            coeffVectPtr = (coeffVect_t*)(coeffPtr);
-            // #pragma unroll kPairsInCoeff
-            for (unsigned int vectCoeff = 0; vectCoeff < kPairsInCoeff; vectCoeff++)
-                chess_prepare_for_pipelining chess_loop_count(kPairsInCoeff) {
-                    // get acc data, or initialize if first or only kernel in cascade
-                    if
-                        constexpr(TP_CASC_IN == CASC_IN_TRUE) {
-                            acc = (accVect_t)readincr_v<kSamplesInVectData>(inInterface.inCascade);
-                            acc2 = (accVect_t)readincr_v<kSamplesInVectData>(inInterface.inCascade);
-                        }
-                    else {
-                        acc = (accVect_t)blankVect;  // Initialize if one kernel used or the first used
-                        acc2 = (accVect_t)blankVect; // Initialize if one kernel used or the first used
-                    }
+    for (int frame = 0; frame < TP_NUM_FRAMES; frame++) chess_prepare_for_pipelining chess_loop_range(TP_NUM_FRAMES, ) {
+            // pointer to a start of coefficients
+            coeffCopy = chess_copy(coeffCopy);
+            coeffVectPtr = ((coeffVect_t*)coeffCopy);
+            ////////////////////////// Parallel/interleaved MAC stage ////////////////////////////
+            // Loop thorugh parallel acc and MACs if present
 
-                    inPointer = frameStart;
-#pragma unroll(kSamplesInVectData)
-                    for (int point = 0; point < stepSize; point++) {
-                        if (point % (kSamplesInVectData) == 0) {
-                            dataVect = *inPointer++;
-                        }
-                        coeffVect = *coeffVectPtr++;
-                        acc = ::aie::mac(acc, dataVect[point % kSamplesInVectData], coeffVect);
-                        coeffVect2 = *coeffVectPtr++;
-                        acc2 = ::aie::mac(acc2, dataVect[point % kSamplesInVectData], coeffVect2);
+            for (unsigned int vectCoeff = 0; vectCoeff < kPairsInCoeff; vectCoeff++) {
+                // get acc data, or initialize if first or only kernel in cascade
+                if
+                    constexpr(TP_CASC_IN == CASC_IN_TRUE) {
+                        acc = (accVect_t)readincr_v<kSamplesInVectData>(inInterface.inCascade);
+                        acc2 = (accVect_t)readincr_v<kSamplesInVectData>(inInterface.inCascade);
                     }
-
-                    // output to outVect or to outCascade
-                    if
-                        constexpr(TP_CASC_OUT == CASC_OUT_FALSE) {
-                            if
-                                constexpr(std::is_same<TT_TWIDDLE, cfloat>()) {
-                                    outVect = acc.template to_vector<T_outDataType>();
-                                    outVect2 = acc2.template to_vector<T_outDataType>();
-                                }
-                            else {
-                                outVect = acc.template to_vector<T_outDataType>(shift);
-                                outVect2 = acc2.template to_vector<T_outDataType>(shift);
-                            }
-                            *outPtr++ = outVect;
-                            *outPtr++ = outVect2;
-                        }
-                    else {
-                        writeincr(outInterface.outCascade, acc);
-                        writeincr(outInterface.outCascade, acc2);
-                    }
+                else {
+                    acc = (accVect_t)blankVect; // Initialize if no cascade in
+                    acc2 = (accVect_t)blankVect;
                 }
-            // if number of vector columns isn't a multiple of 2, the final mac/acc is computed alone
+                // pointer to start of a frame
+                inPointer = frameStart;
+                // Loop through all elements in the unpadded vectors of a frame
+                if
+                    constexpr(kVecNoPad > 0) {
+                        // #pragma unroll (kVecNoPad)
+                        for (int vec = 0; vec < kVecNoPad; vec++) {
+                            dataVect = *inPointer++;
+#pragma unroll(kSamplesInVectData)
+                            for (int idx = 0; idx < kSamplesInVectData; idx++) {
+                                coeffVect = *coeffVectPtr++;
+                                acc = ::aie::mac(acc, dataVect[idx], coeffVect);
+
+                                coeffVect2 = *coeffVectPtr++;
+                                acc2 = ::aie::mac(acc2, dataVect[idx], coeffVect2);
+                            }
+                        }
+                    }
+                // Loop through only the non-padded elems in final padded vector of a frame
+                if
+                    constexpr(elemsInPaddedVec > 0) {
+                        dataVect = *inPointer++;
+#pragma unroll(elemsInPaddedVec)
+                        for (int jdx = 0; jdx < elemsInPaddedVec; jdx++) {
+                            coeffVect = *coeffVectPtr++;
+                            acc = ::aie::mac(acc, dataVect[jdx], coeffVect);
+
+                            coeffVect2 = *coeffVectPtr++;
+                            acc2 = ::aie::mac(acc2, dataVect[jdx], coeffVect2);
+                        }
+                    }
+                // output to outVect or to outCascade
+                if
+                    constexpr(TP_CASC_OUT == CASC_OUT_FALSE) {
+                        if
+                            constexpr(std::is_same<TT_TWIDDLE, cfloat>()) {
+                                outVect = acc.template to_vector<T_outDataType>();
+                                outVect2 = acc2.template to_vector<T_outDataType>();
+                            }
+                        else {
+                            outVect = acc.template to_vector<T_outDataType>(shift);
+                            outVect2 = acc2.template to_vector<T_outDataType>(shift);
+                        }
+                        *outPtr++ = outVect;
+                        *outPtr++ = outVect2;
+                    }
+                else {
+                    writeincr(outInterface.outCascade, acc);
+                    writeincr(outInterface.outCascade, acc2);
+                }
+            }
+
+            // ////////////////////////////// Singular MAC stage ///////////////////////////////////////
+            // // if number of vectors in a column isn't a multiple of 2, the final mac/acc is computed alone
             if
                 constexpr(singleAccRequired) {
                     // get acc data, or initialize if first or only kernel in cascade
@@ -147,18 +174,28 @@ INLINE_DECL void kernelDFTClass<TT_DATA,
                             acc = (accVect_t)readincr_v<kSamplesInVectData>(inInterface.inCascade);
                         }
                     else {
-                        acc = (accVect_t)blankVect; // Initialize if one kernel used or the first used
+                        acc = (accVect_t)blankVect;
                     }
 
                     inPointer = frameStart;
-#pragma unroll(stepSize)
-                    for (int point = 0; point < stepSize; point++) {
-                        if (point % kSamplesInVectData == 0) {
-                            dataVect = *inPointer++;
+                    // Loop through all elements in unpadded vectors of frame
+                    for (int vec = 0; vec < kVecNoPad; vec++) {
+                        dataVect = *inPointer++;
+#pragma unroll(kSamplesInVectData)
+                        for (int idx = 0; idx < kSamplesInVectData; idx++) {
+                            acc = ::aie::mac(acc, dataVect[idx], *coeffVectPtr++);
                         }
-                        coeffVect = *coeffVectPtr++;
-                        acc = ::aie::mac(acc, dataVect[point % kSamplesInVectData], coeffVect);
                     }
+                    // Loop through only the non-padded elems in final padded vector of frame
+                    if
+                        constexpr(elemsInPaddedVec > 0) {
+                            dataVect = *inPointer++;
+#pragma unroll(elemsInPaddedVec)
+                            for (int jdx = 0; jdx < elemsInPaddedVec; jdx++) {
+                                coeffVect = *coeffVectPtr++;
+                                acc = ::aie::mac(acc, dataVect[jdx], coeffVect);
+                            }
+                        }
                     // output to outVect or to outCascade
                     if
                         constexpr(TP_CASC_OUT == CASC_OUT_FALSE) {
@@ -175,9 +212,8 @@ INLINE_DECL void kernelDFTClass<TT_DATA,
                         writeincr(outInterface.outCascade, acc);
                     }
                 }
-
-            // Jump to data of next frame
-            frameStart += kVecInFrame;
+            // End of frame - just to next frame of input data
+            frameStart += kVecTotal;
         }
 }
 //-----------------------------------------------------------------------------------------------------
@@ -188,6 +224,7 @@ template <typename TT_DATA,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_KERNEL_POSITION,
           bool TP_CASC_IN,
@@ -200,6 +237,7 @@ NOINLINE_DECL void dft<TT_DATA,
                        TP_FFT_NIFFT,
                        TP_SHIFT,
                        TP_CASC_LEN,
+                       TP_SSR,
                        TP_NUM_FRAMES,
                        TP_KERNEL_POSITION,
                        TP_CASC_IN,
@@ -223,6 +261,7 @@ template <typename TT_DATA,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_RND,
@@ -233,6 +272,7 @@ NOINLINE_DECL void dft<TT_DATA,
                        TP_FFT_NIFFT,
                        TP_SHIFT,
                        TP_CASC_LEN,
+                       TP_SSR,
                        TP_NUM_FRAMES,
                        TP_KERNEL_POSITION,
                        CASC_IN_FALSE,
@@ -255,6 +295,7 @@ template <typename TT_DATA,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_RND,
@@ -265,6 +306,7 @@ NOINLINE_DECL void dft<TT_DATA,
                        TP_FFT_NIFFT,
                        TP_SHIFT,
                        TP_CASC_LEN,
+                       TP_SSR,
                        TP_NUM_FRAMES,
                        TP_KERNEL_POSITION,
                        CASC_IN_TRUE,
@@ -289,6 +331,7 @@ template <typename TT_DATA,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_RND,
@@ -299,6 +342,7 @@ NOINLINE_DECL void dft<TT_DATA,
                        TP_FFT_NIFFT,
                        TP_SHIFT,
                        TP_CASC_LEN,
+                       TP_SSR,
                        TP_NUM_FRAMES,
                        TP_KERNEL_POSITION,
                        CASC_IN_TRUE,

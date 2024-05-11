@@ -26,25 +26,36 @@ import json
 # and "err_message" if "is_valid" is False.
 #
 
+TP_INPUT_WINDOW_VSIZE_min = 4
+TP_CASC_LEN_min = 1
+TP_CASC_LEN_max = 40
+TP_FIR_LEN_min = 4
+TP_FIR_LEN_max = 8192
 
 def fnNumLanesStream(*args):
     return fnNumLanes(*args, TP_API=1)
 
 
-def fnNumColsStream(T_D, T_C):
+def fnNumColsStream(T_D, T_C, AIE_VARIANT):
 
-    # Slight rephrasing (vs traits) to avoid templates and enable runtime check.
-    if T_D == "cint16" or T_D == "int16" or (T_D == "int32" and T_C == "int32"):
-        return fnNumCols384(T_D, T_C)
-    else:
-        # int32,  int16
-        # cint32,  int16
-        # cint32,  int32
-        # cint32, cint16
-        # float,  float
-        # cfloat,  float
-        # cfloat, cfloat
-        return fnNumCols(T_D, T_C)
+    if AIE_VARIANT == 2:
+        # AIE_ML API always calls for 4 columns
+        return 4
+
+    if AIE_VARIANT == 1:
+
+        # Slight rephrasing (vs traits) to avoid templates and enable runtime check.
+        if T_D == "cint16" or T_D == "int16" or (T_D == "int32" and T_C == "int32"):
+            return fnNumCols384(T_D, T_C)
+        else:
+            # int32,  int16
+            # cint32,  int16
+            # cint32,  int32
+            # cint32, cint16
+            # float,  float
+            # cfloat,  float
+            # cfloat, cfloat
+            return fnNumCols(T_D, T_C)
 
 
 def fn_validate_input_window_size(
@@ -52,10 +63,9 @@ def fn_validate_input_window_size(
 ):
     # CAUTION: this constant overlaps many factors. The main need is a "strobe" concept that means we unroll until xbuff is back to starting conditions.
     streamRptFactor = 8
-    if TP_INPUT_WINDOW_VSIZE < TP_INPUT_WINDOW_VSIZE_min:
-        return isError(
-            f"Minimum value for Input size is {TP_INPUT_WINDOW_VSIZE_min}, but got {TP_INPUT_WINDOW_VSIZE}."
-        )
+    res = fn_validate_min_value("TP_INPUT_WINDOW_VSIZE", TP_INPUT_WINDOW_VSIZE, TP_INPUT_WINDOW_VSIZE_min)
+    if (res["is_valid"] == False):
+      return res
 
     # Need to take unrolloing into account
     windowSizeMultiplier = (
@@ -85,8 +95,8 @@ def fn_validate_input_window_size(
 #### validate cascade length ####
 
 # align to num cols coeffs for FIR cascade splitting for optimal mac efficiency
-def fnStreamFirRangeRound(T_D, T_C):
-    return fnNumColsStream(T_D, T_C)
+def fnStreamFirRangeRound(T_D, T_C, AIE_VARIANT):
+    return fnNumColsStream(T_D, T_C, AIE_VARIANT)
 
 
 # Calculate FIR range offset for cascaded kernel
@@ -103,7 +113,7 @@ def fnFirRangeOffset(TP_FL, TP_CL, TP_KP, TP_Rnd=1, TP_Sym=1):
     ) // TP_Sym
 
 
-def fnFirRangeRemAsym(TP_FL, TP_CL, TP_KP, TT_DATA, TT_COEFF, TP_API):
+def fnFirRangeRemAsym(TP_FL, TP_CL, TP_KP, TT_DATA, TT_COEFF, TP_API, AIE_VARIANT):
 
     # TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
     # this is for last in the cascade
@@ -111,12 +121,12 @@ def fnFirRangeRemAsym(TP_FL, TP_CL, TP_KP, TT_DATA, TT_COEFF, TP_API):
         TP_FL,
         TP_CL,
         TP_KP,
-        ((fnStreamFirRangeRound(TT_DATA, TT_COEFF)) if (TP_API == 1) else 1),
+        ((fnStreamFirRangeRound(TT_DATA, TT_COEFF, AIE_VARIANT)) if (TP_API == 1) else 1),
     )
 
 
 # Calculate ASYM FIR range for cascaded kernel
-def fnFirRangeAsym(TP_FL, TP_CL, TP_KP, TT_DATA, TT_COEFF, TP_API):
+def fnFirRangeAsym(TP_FL, TP_CL, TP_KP, TT_DATA, TT_COEFF, TP_API, AIE_VARIANT):
 
     # TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
     # make sure there's no runt filters ( lengths < 4)
@@ -126,18 +136,18 @@ def fnFirRangeAsym(TP_FL, TP_CL, TP_KP, TT_DATA, TT_COEFF, TP_API):
         TP_FL,
         TP_CL,
         TP_KP,
-        ((fnStreamFirRangeRound(TT_DATA, TT_COEFF)) if (TP_API == 1) else 1),
+        ((fnStreamFirRangeRound(TT_DATA, TT_COEFF, AIE_VARIANT)) if (TP_API == 1) else 1),
     )
 
 
 # Calculate ASYM FIR range offset for cascaded kernel
-def fnFirRangeOffsetAsym(TP_FL, TP_CL, TP_KP, TT_DATA, TT_COEFF, TP_API):
+def fnFirRangeOffsetAsym(TP_FL, TP_CL, TP_KP, TT_DATA, TT_COEFF, TP_API, AIE_VARIANT):
     # TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
     return fnFirRangeOffset(
         TP_FL,
         TP_CL,
         TP_KP,
-        ((fnStreamFirRangeRound(TT_DATA, TT_COEFF)) if (TP_API == 1) else 1),
+        ((fnStreamFirRangeRound(TT_DATA, TT_COEFF, AIE_VARIANT)) if (TP_API == 1) else 1),
     )
 
 
@@ -175,11 +185,11 @@ def fn_fir_len_divisible_ssr(
 
 # This logic is copied from the kernel class.
 def fn_get_data_needed(
-    TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TP_SSR, TP_API
+    TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TP_SSR, TP_API, AIE_VARIANT
 ):
     TT_DATA_BYTES = fn_size_by_byte(TT_DATA)
     m_kFirRangeOffset = fnFirRangeOffsetAsym(
-        TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TT_COEFF, TP_API
+        TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TT_COEFF, TP_API, AIE_VARIANT
     )
     # FIR Cascade Offset for this kernel position
     m_kFirMarginOffset = fnFirMargin(TP_FIR_LEN, TT_DATA) - TP_FIR_LEN + 1
@@ -194,11 +204,11 @@ def fn_get_data_needed(
 
     TP_FIR_RANGE_LEN = (
         fnFirRangeRemAsym(
-            TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TT_COEFF, TP_API
+            TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TT_COEFF, TP_API, AIE_VARIANT
         )
         if (TP_KERNEL_POSITION == (TP_CASC_LEN - 1))  # last Kernel gets remainder taps
         else fnFirRangeAsym(
-            TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TT_COEFF, TP_API
+            TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TT_COEFF, TP_API, AIE_VARIANT
         )
     )
 
@@ -220,55 +230,61 @@ def fn_get_data_needed(
 
 # For streaming FIRs, all the initial data needed for a single mac needs to fit in a single buffer.
 def fn_data_needed_within_buffer_size(
-    TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_API, TP_SSR=1
+    TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_API, TP_SSR=1, AIE_VARIANT =1
 ):
     m_kSamplesInBuff = (1024 // 8) // fn_size_by_byte(TT_DATA)
     # only do stuff for streaming
     if TP_API == 1:
-        for TP_KERNEL_POSITION in range(TP_CASC_LEN):
+        for TP_KP in range(TP_CASC_LEN):
             # Check every kernel's init data needed (different kernels need different DataBuffXOffset)
             m_kInitDataNeeded = fn_get_data_needed(
                 TT_DATA,
                 TT_COEFF,
                 TP_FIR_LEN // TP_SSR,
                 TP_CASC_LEN,
-                TP_KERNEL_POSITION,
+                TP_KP,
                 TP_SSR,
                 TP_API,
+                AIE_VARIANT
             )
             if m_kInitDataNeeded > m_kSamplesInBuff:
                 return isError(
-                    f"Kernel[{TP_KERNEL_POSITION}] requires more data ({m_kInitDataNeeded} samples) "
-                    f"to fit in a single buffer ({m_kSamplesInBuff} samples), due to the fir length per kernel- "
-                    f"influenced by fir length ({TP_FIR_LEN}), SSR ({TP_SSR}), cascade length ({TP_CASC_LEN}) and numLanes ({fnNumLanes(TT_DATA, TT_COEFF, TP_API)}).\n"
+                    f"Requested parameters: FIR length ({TP_FIR_LEN}), cascade length ({TP_CASC_LEN}) and SSR ({TP_SSR}) result in a kernel ({TP_KP}) that requires more data samples ({m_kInitDataNeeded}) than capacity of a data buffer ({m_kSamplesInBuff}) "
+                    f"Please increase the cascade length ({TP_CASC_LEN}) and/or SSR ({TP_SSR})."
                 )
 
     return isValid
 
 
+
 def fn_validate_fir_len(
-    TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD
+    TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT
 ):
-    if TP_FIR_LEN < TP_FIR_LEN_min or TP_FIR_LEN > TP_FIR_LEN_max:
+
+    lastKernelFirRangeLen = fnFirRangeRemAsym(
+        TP_FIR_LEN // TP_SSR, TP_CASC_LEN, (TP_CASC_LEN - 1), TT_DATA, TT_COEFF, TP_API, AIE_VARIANT)
+    firLengthMin = 1
+    # Check the last kernel only, as it is the shortest in any configuration.
+    if lastKernelFirRangeLen < firLengthMin:
         return isError(
-            f"Minimum and maximum value for Filter length is {TP_FIR_LEN_min} and {TP_FIR_LEN_max},respectively, but got {TP_FIR_LEN}."
+        f"Requested Fir Length ({TP_FIR_LEN}) split over ({TP_CASC_LEN}) cascaded kernels and ({TP_SSR}) SSR polyphases results in at least one kernel configured with ({lastKernelFirRangeLen}) number of taps that does not meet minimum ({firLengthMin}) requirement. "\
+        f"Please reduce cascade length ({TP_CASC_LEN}) and/or SSR ({TP_SSR}) parameter. "
         )
+
+    res = fn_validate_minmax_value("TP_FIR_LEN", TP_FIR_LEN, TP_FIR_LEN_min, TP_FIR_LEN_max)
+    if (res["is_valid"] == False):
+        return res
     divCheck = fn_fir_len_divisible_ssr(TP_FIR_LEN, TP_SSR)
-    minLenCheck = fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
     maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_SSR, TP_API, 1)  # last param refers to symmetry factor
-    dataNeededCheck = fn_data_needed_within_buffer_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_API, TP_SSR)
-    for check in (divCheck, minLenCheck, maxLenCheck, dataNeededCheck):
+    dataNeededCheck = fn_data_needed_within_buffer_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_API, TP_SSR, AIE_VARIANT)
+    for check in (divCheck, maxLenCheck, dataNeededCheck):
         if check["is_valid"] == False:
             return check
 
     return isValid
 
 def fn_validate_casc_len(TP_CASC_LEN):
-    if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max:
-        return isError(
-            f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max},respectively, but got {TP_CASC_LEN}."
-        )
-    return isValid
+    return fn_validate_minmax_value("TP_CASC_LEN", TP_CASC_LEN, TP_CASC_LEN_min, TP_CASC_LEN_max)
 
 
 #### validation APIs ####
@@ -343,9 +359,10 @@ def validate_TP_FIR_LEN(args):
     TP_SSR = args["TP_SSR"]
     TP_API = args["TP_API"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
+    AIE_VARIANT = args["AIE_VARIANT"]
 
     return fn_validate_fir_len(
-        TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD
+        TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT
     )
 
 

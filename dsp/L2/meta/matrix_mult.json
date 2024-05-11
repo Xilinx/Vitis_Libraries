@@ -37,9 +37,7 @@
             "validator": {
                 "file": "matrix_mult.py",
                 "function": "validate_TT_DATA_B",
-                "args": [
-                    "TT_DATA_A"
-                ]
+                "args": ["TT_DATA_A", "AIE_VARIANT"]
             }
         },
         {
@@ -51,7 +49,9 @@
                 "function": "validate_TP_DIM_A",
                 "args": [
                     "TT_DATA_A",
-                    "TT_DATA_B"
+                    "TT_DATA_B",
+                    "TP_SSR",
+                    "AIE_VARIANT"
                 ]
             }
         },
@@ -65,7 +65,8 @@
                 "args": [
                     "TT_DATA_A",
                     "TT_DATA_B",
-                    "TP_CASC_LEN"
+                    "TP_CASC_LEN",
+                    "AIE_VARIANT"
                 ]
             }
         },
@@ -78,7 +79,8 @@
                 "function": "validate_TP_DIM_B",
                 "args": [
                     "TT_DATA_A",
-                    "TT_DATA_B"
+                    "TT_DATA_B",
+                    "AIE_VARIANT"
                 ]
             }
         },
@@ -140,7 +142,8 @@
                     "TP_DIM_A",
                     "TP_DIM_AB",
                     "TP_CASC_LEN",
-                    "TP_DIM_A_LEADING"
+                    "TP_DIM_A_LEADING",
+                    "TP_SSR"
                 ]
             }
         },
@@ -157,6 +160,7 @@
                     "TP_DIM_AB",
                     "TP_DIM_B",
                     "TP_CASC_LEN",
+                    "TP_SSR",
                     "TP_DIM_B_LEADING"
                 ]
             }
@@ -173,7 +177,9 @@
                     "TT_DATA_B",
                     "TP_DIM_A",
                     "TP_DIM_B",
-                    "TP_DIM_OUT_LEADING"
+                    "TP_SSR",
+                    "TP_DIM_OUT_LEADING",
+                    "AIE_VARIANT"
                 ]
             }
         },
@@ -188,7 +194,10 @@
                 "args": [
                     "TT_DATA_A",
                     "TP_DIM_A",
-                    "TP_DIM_AB"
+                    "TP_DIM_AB",
+                    "TP_CASC_LEN",
+                    "TP_SSR",
+                    "AIE_VARIANT"
                 ]
             }
         },
@@ -206,7 +215,10 @@
                     "TP_INPUT_WINDOW_VSIZE_A",
                     "TP_DIM_A",
                     "TP_DIM_AB",
-                    "TP_DIM_B"
+                    "TP_DIM_B",
+                    "TP_CASC_LEN",
+                    "TP_SSR",
+                    "AIE_VARIANT"
                 ]
             }
         },
@@ -215,7 +227,20 @@
             "type": "uint",
             "description": "describes the number of AIE Tiles to split the GEMM operation into.",
             "minimum": 1
-        }
+        },
+        {
+            "name": "TP_SSR",
+            "type": "uint",
+            "description": "describes the number of parallel kernel chains to split the GEMM into. Split occurs along TP_DIM_A of Matrix A.",
+            "minimum": 1
+        },
+        {
+            "name": "AIE_VARIANT",
+            "type": "uint",
+            "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
+            "maximum": 2,
+            "minimum": 1
+          }
     ],
     "ports": {
         "file": "matrix_mult.py",

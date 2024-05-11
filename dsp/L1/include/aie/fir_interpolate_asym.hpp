@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -217,10 +217,7 @@ class kernelFilterClass {
     // interpolation factor. Hence an array of accumulators is needed for this set of lanes.
     static constexpr unsigned int m_kPermuteSupport = fnPermuteSupport();
     static constexpr unsigned int m_kNumAccRegs = fnAccRegsIntAsym<TT_DATA, TT_COEFF>();
-    static constexpr unsigned int m_kWinAccessByteSize =
-        m_kPermuteSupport == 1
-            ? 16
-            : 32; // Restrict window accesses to 256-bits when full set of permutes are not available.
+    static constexpr unsigned int m_kWinAccessByteSize = 32;
     static constexpr unsigned int m_kColumns =
         fnNumColsIntAsym<TT_DATA, TT_COEFF, TP_API>(); // number of mult-adds per lane for main intrinsic
     static constexpr unsigned int m_kLanes =

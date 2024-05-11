@@ -28,15 +28,21 @@ import fir_decimate_hb as deci_hb
 # and "err_message" if "is_valid" is False.
 #
 
+TP_INPUT_WINDOW_VSIZE_min = 4
+TP_SSR_min = 1
+TP_PARA_INTERP_POLY_min = 1
+TP_CASC_LEN_min = 1
+TP_CASC_LEN_max = 40
+TP_FIR_LEN_min = 4
+TP_FIR_LEN_max = 8192
+
+
 def fn_halfband_len(TP_FIR_LEN):
-  return isValid if ((TP_FIR_LEN + 1) % 4 == 0) else isError("Filter length must be 4N-1 where N is a positive integer. Got TP_FIR_LEN {TP_FIR_LEN}")
+  return isValid if ((TP_FIR_LEN + 1) % 4 == 0) else isError(f"Filter length must be 4N-1 where N is a positive integer. Got TP_FIR_LEN {TP_FIR_LEN}")
 
 def fn_data_needed_within_buffer_size_ml(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_SSR):
     firLenPerSSR = TP_FIR_LEN / TP_SSR
     kInterpolateFactor = 2
-    print(TP_FIR_LEN)
-    print(TP_CASC_LEN)
-    print(TP_SSR)
     for TP_KP in range(TP_CASC_LEN):
         m_kFirRangeLen = fnFirRangeRem(firLenPerSSR, TP_CASC_LEN, TP_KP, 2) if (TP_KP + 1 == TP_CASC_LEN) else fnFirRange(firLenPerSSR, TP_CASC_LEN, TP_KP, 2)
         m_kNumTaps = ((m_kFirRangeLen + 1) / 2) if (TP_KP == TP_CASC_LEN - 1) else (m_kFirRangeLen / 2)
@@ -52,16 +58,15 @@ def fn_data_needed_within_buffer_size_ml(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_SS
         m_kTotDataNeededPerOp = m_kArchFirLen + m_kDataLoadVsize - 1
         if m_kTotDataNeededPerOp > m_kSamplesInBuff:
             return isError(
-                f"Kernel[{TP_KP}] requires more data ({m_kTotDataNeededPerOp} samples) "
-                f"to fit in a single buffer ({m_kSamplesInBuff} samples), due to the fir length per kernel- "
-                f"influenced by fir length ({firLenPerSSR}), SSR ({TP_SSR}) and cascade length ({TP_CASC_LEN}).\n"
+                f"Requested parameters: FIR length ({TP_FIR_LEN}), cascade length ({TP_CASC_LEN}) and TP_SSR ({TP_SSR}) result in a kernel ({TP_KP}) that requires more data samples ({m_kTotDataNeededPerOp}) than capacity of a data buffer ({m_kSamplesInBuff}) "
+                f"Please increase the cascade length TP_CASC_LEN ({TP_CASC_LEN}) and/or TP_SSR ({TP_SSR})."
             )
-        else:
-            return isValid
+    return isValid
 
 def fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, TP_PARA_INTERP_POLY, AIE_VARIANT):
-    if TP_FIR_LEN < TP_FIR_LEN_min or TP_FIR_LEN > TP_FIR_LEN_max :
-        return isError(f"Minimum and maximum value for Filter length is {TP_FIR_LEN_min} and {TP_FIR_LEN_max},respectively, but got {TP_FIR_LEN}.")
+    res = fn_validate_minmax_value("TP_FIR_LEN", TP_FIR_LEN, TP_FIR_LEN_min, TP_FIR_LEN_max)
+    if (res["is_valid"] == False):
+        return res
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
 
     symFactor   = 4 # Symmetric, half-band
@@ -97,8 +102,9 @@ def fn_stream_api_poly(TP_PARA_INTERP_POLY, TP_API):
     return isError(f"TP_PARA_INTERP_POLY can be set to 2 only for streaming API. Got TP_PARA_INTERP_POLY {TP_PARA_INTERP_POLY}")
 
 def fn_validate_para_interp_poly(TP_API, TP_PARA_INTERP_POLY, TP_SSR):
-    if TP_PARA_INTERP_POLY < TP_PARA_INTERP_POLY_min :
-        return isError(f"Minimum value for Interpolation poly phase is {TP_PARA_INTERP_POLY_min}, but got {TP_PARA_INTERP_POLY}.")
+    res = fn_validate_min_value("TP_PARA_INTERP_POLY", TP_PARA_INTERP_POLY, TP_PARA_INTERP_POLY_min)
+    if (res["is_valid"] == False):
+      return res
     checkParaPolyVal = fn_parapoly_value(TP_PARA_INTERP_POLY)
     checkSSRPoly     = fn_ssr_for_para_poly(TP_PARA_INTERP_POLY, TP_SSR)
 
@@ -109,14 +115,10 @@ def fn_validate_para_interp_poly(TP_API, TP_PARA_INTERP_POLY, TP_SSR):
     return isValid
 
 def fn_validate_ssr(TP_API, TP_SSR):
-    if TP_SSR < TP_SSR_min:
-        return isError(f"Minimum value for SSR is {TP_SSR_min}, but got {TP_SSR}.")
-    return isValid
+    return fn_validate_min_value("TP_SSR", TP_SSR, TP_SSR_min)
 
 def fn_validate_casc_len(TP_CASC_LEN):
-    if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max :
-        return isError(f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max},respectively, but got {TP_CASC_LEN}.")
-    return isValid
+    return fn_validate_minmax_value("TP_CASC_LEN", TP_CASC_LEN, TP_CASC_LEN_min, TP_CASC_LEN_max)
 
 #### validation APIs ####
 
@@ -152,15 +154,16 @@ def validate_TP_SAT(args):
 def fn_validate_upshift_ct(TT_DATA, TP_UPSHIFT_CT, AIE_VARIANT):
   #implied restriction that TT_DATA restricts TT_COEFF, ie, we don't support int16,int32 or int16,cint32
   if (AIE_VARIANT == 2 and TP_UPSHIFT_CT == 1):
-    return isError("Upshift CT is not available on AIE-ML. Please set TP_UPSHIFT_CT to 0. Got TP_UPSHIFT_CT {TP_UPSHIFT_CT}")
+    return isError(f"Upshift CT is not available on AIE-ML. Please set TP_UPSHIFT_CT to 0. Got TP_UPSHIFT_CT {TP_UPSHIFT_CT}")
   if ((TT_DATA not in ["cint16", "int16"] ) and (TP_UPSHIFT_CT == 1)):
-    return isError("Upshift CT is only available for 16-bit integer combinations. Got TP_UPSHIFT_CT {TP_UPSHIFT_CT}")
+    return isError(f"Upshift CT is only available for 16-bit integer combinations. Got TP_UPSHIFT_CT {TP_UPSHIFT_CT}")
   return isValid
 
 def fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1, TP_PARA_INTERP_POLY=1):
     # interpolate halfband always uses 384b version of lanes. Some archs use repeat factors, like zig-zag, hence the factor of 2.
-    if TP_INPUT_WINDOW_VSIZE < TP_INPUT_WINDOW_VSIZE_min:
-        return isError(f"Minimum value for Input size is {TP_INPUT_WINDOW_VSIZE_min}, but got {TP_INPUT_WINDOW_VSIZE}.")
+    res = fn_validate_min_value("TP_INPUT_WINDOW_VSIZE", TP_INPUT_WINDOW_VSIZE, TP_INPUT_WINDOW_VSIZE_min)
+    if (res["is_valid"] == False):
+      return res
     checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEFF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=fnNumLanes384b(TT_DATA, TT_COEFF)*2)
     symApiSSR      = 0 if (TP_SSR == 1 and TP_PARA_INTERP_POLY == 1) else TP_API  # Force buffer checks when not in SSR mode.
     checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, symApiSSR, TP_SSR, TP_INTERPOLATE_FACTOR=2, TP_DECIMATE_FACTOR=1)
@@ -278,20 +281,28 @@ def info_ports(args):
     TP_PARA_INTERP_POLY = args["TP_PARA_INTERP_POLY"]
     TP_DUAL_IP = args["TP_DUAL_IP"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
+    AIE_VARIANT = args["AIE_VARIANT"]
     TP_DECIMATE_FACTOR = 1
     TP_INTERPOLATE_FACTOR = 2
     margin_size = sr_asym.fn_margin_size(TP_FIR_LEN//2, TT_DATA)
     num_in_ports = TP_SSR
     num_tot_out_ports = TP_SSR*TP_PARA_INTERP_POLY
     num_out_ports_per_poly = TP_SSR
+    num_rtp_taps = ((TP_FIR_LEN+1)/4+1)
+    if (TP_PARA_INTERP_POLY > 1):
+      num_rtp_taps = ((TP_FIR_LEN+1)/2) 
+    elif (AIE_VARIANT == 2) :
+      num_rtp_taps = ((TP_FIR_LEN+1)/2) + 1
+    else :
+      num_rtp_taps = ((TP_FIR_LEN+1)/4+1)
 
     in_win_size = get_input_window_size(TP_INPUT_WINDOW_VSIZE, num_in_ports, TP_API, TP_DUAL_IP)
     out_win_size = get_output_window_size(TP_INPUT_WINDOW_VSIZE, num_tot_out_ports, TP_API, TP_NUM_OUTPUTS, TP_DECIMATE_FACTOR, TP_INTERPOLATE_FACTOR)
 
     in_ports = get_port_info("in", "in", TT_DATA, in_win_size, num_in_ports, margin_size, TP_API=TP_API)
     in2_ports = (get_port_info("in2", "in", TT_DATA, in_win_size, num_in_ports, margin_size, TP_API=TP_API) if (TP_DUAL_IP == 1) else [])
-    coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEFF, TP_SSR, ((TP_FIR_LEN+1)/4+1), "async") if (TP_USE_COEFF_RELOAD == 1) else [])
-    coeffCT_ports = (get_parameter_port_info("coeffCT", "in", TT_COEFF, TP_SSR, ((TP_FIR_LEN+1)/4+1), "async") if (TP_USE_COEFF_RELOAD == 1 and TP_PARA_INTERP_POLY > 1) else [])
+    coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEFF, TP_SSR, num_rtp_taps, "async") if (TP_USE_COEFF_RELOAD == 1) else [])
+    coeffCT_ports = (get_parameter_port_info("coeffCT", "in", TT_COEFF, TP_SSR, 1, "async") if (TP_USE_COEFF_RELOAD == 1 and TP_PARA_INTERP_POLY > 1) else [])
 
     # interp by 2 for halfband
     out_ports = get_port_info("out", "out", TT_DATA, out_win_size, num_out_ports_per_poly, TP_API=TP_API)

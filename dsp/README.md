@@ -35,7 +35,7 @@ Vitis library is organized into L1, L2, and L3 folders, each relating to a diffe
 Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
 
     Copyright (C) 2019-2022, Xilinx, Inc.
-    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+    Copyright (C) 2022-2024Advanced Micro Devices, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -48,4 +48,3 @@ Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-

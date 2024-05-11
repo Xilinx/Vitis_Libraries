@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ namespace windowfn {
  *
  * @ingroup fft_window
  *
- * The FFT Window utilities contain helper funcitons to create windowing data structures.
+ * The FFT Window utilities contain helper functions to create windowing data structures.
  *
  */
 
@@ -255,8 +255,28 @@ void getKaiserWindow<float>(float* weights, const unsigned int pointSize, const 
  */
 
 /**
- * @}
+ * @ingroup fft_window_utils
+ * @brief getRotationVector is utility to populate the window with rotation value for the 2D-like implementation of FFT.
+ * @tparam T_C describes the type of weights in the FFT window.
+ * @param[out] weights a pointer to the area where Window will be created
+ * @param[in] pointSize size of the window to create
  */
+template <typename T_C>
+void getRotationMatrix(T_C* weights, const unsigned int pointSize) {
+    float temp;
+    float x;
+    float arg;
+    int rr, cc;
+    int sqrt_pt_size = sqrt(pointSize);
+    int scalingfactor = (1 << ((sizeof(T_C) / 2 * 8) - 1)) - 1;
+    for (int i = 0; i < pointSize; i++) {
+        x = (float)(i);
+        rr = i / sqrt_pt_size;
+        cc = i % sqrt_pt_size;
+        weights[i].real = ((float)(cos((-1 * cc * rr * 2 * M_PI) / pointSize))) * (float)scalingfactor;
+        weights[i].imag = ((float)(sin((-1 * cc * rr * 2 * M_PI) / pointSize))) * (float)scalingfactor;
+    }
+}
 }
 }
 }

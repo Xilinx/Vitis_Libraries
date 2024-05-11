@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,22 +24,27 @@ HELPER_ROOT_DIR ?= ./../../../../
 
 HELPER:= $(HELPER_CUR_DIR)/.HELPER
 
-ifeq ($(DATA_TYPE), cint32)
-	SAMPLES_IN_256_VECT 	  := 4
+ifeq ($(AIE_VARIANT), 2)
+	SAMPLES_IN_VECT		  := 8
+else ifeq ($(DATA_TYPE), cint32)
+	SAMPLES_IN_VECT 	  := 4
 else ifeq ($(DATA_TYPE), cfloat)
-	SAMPLES_IN_256_VECT 	  := 4
+	SAMPLES_IN_VECT 	  := 4
 else ifeq ($(DATA_TYPE), cint16)
-	SAMPLES_IN_256_VECT 	  := 8
+	SAMPLES_IN_VECT 	  := 8
 else
-	SAMPLES_IN_256_VECT 	  := 8
+	SAMPLES_IN_VECT 	  := 8
 endif
+SSR_SAMPLES 		:= $(shell echo $$(( 	$(SAMPLES_IN_VECT) * $(UUT_SSR)		)))
+IN_FRAME_SIZE 		:= $(shell echo $$((   (($(POINT_SIZE) + $(SAMPLES_IN_VECT) - 1) / $(SAMPLES_IN_VECT)) * $(SAMPLES_IN_VECT) )))
+OUT_FRAME_SIZE 		:= $(shell echo $$((   (($(POINT_SIZE) + $(SSR_SAMPLES) - 1) / $(SSR_SAMPLES)) * $(SSR_SAMPLES) )))
+	
+IN_WINDOW_VSIZE 	:= $(shell echo $$(( 	$(IN_FRAME_SIZE) * $(NUM_FRAMES)		)))
+OUT_WINDOW_VSIZE 	:= $(shell echo $$(( 	$(OUT_FRAME_SIZE) * $(NUM_FRAMES)		)))
+NO_PAD_WINDOW_VSIZE := $(shell echo $$(( 	$(POINT_SIZE) 	 * $(NUM_FRAMES)		)))
 
-PAD_POINT_SIZE 		:=  $(shell echo $$((   (($(POINT_SIZE) + $(SAMPLES_IN_256_VECT) - 1) / $(SAMPLES_IN_256_VECT)) * $(SAMPLES_IN_256_VECT) )))
-WINDOW_VSIZE 	:= $(shell echo $$(( 	$(PAD_POINT_SIZE) * $(NUM_FRAMES)		)))
-PARAM_MAP = DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) CASC_LEN $(CASC_LEN) NUM_FRAMES $(NUM_FRAMES) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) API_IO $(API_IO) AIE_VARIANT $(AIE_VARIANT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE)
+PARAM_MAP = DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) CASC_LEN $(CASC_LEN) NUM_FRAMES $(NUM_FRAMES) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) API_IO $(API_IO) AIE_VARIANT $(AIE_VARIANT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) UUT_SSR $(UUT_SSR)
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
-
-AIE_PART = XCVC1902-VSVD1760-1LP-E-S
 
 $(HELPER): create_config validate_config create_input sim_ref prep_x86_out
 	make cleanall
@@ -53,8 +58,8 @@ validate_config:
 
 create_input:
 	@echo starting create_input
-	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(REF_INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) 0 0 $(DATA_TYPE) $(API_IO) 1 0;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/input_pad_and_split.pl --variant $(AIE_VARIANT) --file $(REF_INPUT_FILE) --newFile $(LOC_INPUT_FILE) --type $(DATA_TYPE) --pointSize $(POINT_SIZE) --cascLen $(CASC_LEN) --numFrames $(NUM_FRAMES);\
+	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(REF_INPUT_FILE) $(NO_PAD_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) 0 0 $(DATA_TYPE) $(API_IO) 1 0;\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/input_pad_and_split.pl --variant $(AIE_VARIANT) --file $(REF_INPUT_FILE) --newFile $(LOC_INPUT_FILE) --type $(DATA_TYPE) --pointSize $(POINT_SIZE) --cascLen $(CASC_LEN) --numFrames $(NUM_FRAMES) --ssr $(UUT_SSR);\
 	echo Input ready
 
 sim_ref:
@@ -75,16 +80,16 @@ prep_aie_out:
 	done
 
 get_diff: prep_x86_out prep_aie_out
-	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w ${WINDOW_VSIZE};\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w ${WINDOW_VSIZE};\
+	@echo perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr ${UUT_SSR} --zip --dual 0 -k 0 -w ${OUT_WINDOW_VSIZE};\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr ${UUT_SSR} --zip --dual 0 -k 0 -w ${OUT_WINDOW_VSIZE};\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) PERCENT
 
 get_status:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
 
 get_qor:
-	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_PART)
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input_0_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output dftMain $(NITER)
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_fft_theoretical_min.tcl $(DATA_TYPE) $(TWIDDLE_TYPE) $(WINDOW_VSIZE) $(POINT_SIZE) $(CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL) 0 $(API_IO)
+	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input_0_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(NO_PAD_WINDOW_VSIZE) $(NITER)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(IN_WINDOW_VSIZE) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output dftMain $(NITER)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_fft_theoretical_min.tcl $(DATA_TYPE) $(TWIDDLE_TYPE) $(IN_WINDOW_VSIZE) $(POINT_SIZE) $(CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL) 0 $(API_IO)
 	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts

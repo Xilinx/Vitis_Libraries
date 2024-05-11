@@ -1,6 +1,7 @@
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
-
-.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+.. 
+   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   
+   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _L1_FFT_LABEL:
 
@@ -424,12 +425,11 @@ The current version of the 1-D SSR FFT naturally supports a streaming connection
     // IID: is a constant giving instance ID
 
 1-D SSR FFT Tests
-----------------------------------------------------------
-
+-----------------
 Different tests are provided for the fixed point and floating point 1-D SSR FFT. These tests can be run individually using the makefile, or they can all be lauched at the same time by using a provided script. All the 1-D SSR FFT tests are in the folder, ``REPO_PATH/dsp/L1/tests/hw/1dfft``
 
 Launching an Individual Test
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To launch an individual test, first it is required to set up the environment for launching the Vitis HLS Compiler which can be done as follows:
  

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,19 +77,18 @@ template <typename TT_DATA,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-NOINLINE_DECL
-fft_window<TT_DATA,
-           TT_COEFF,
-           TP_POINT_SIZE,
-           TP_WINDOW_VSIZE,
-           TP_SHIFT,
-           TP_API,
-           TP_SSR,
-           TP_DYN_PT_SIZE,
-           TP_RND,
-           TP_SAT>::fft_window(const std::array<TT_COEFF, TP_POINT_SIZE*(1 + TP_DYN_PT_SIZE)>& kernel_weights) {
+NOINLINE_DECL fft_window<TT_DATA,
+                         TT_COEFF,
+                         TP_POINT_SIZE,
+                         TP_WINDOW_VSIZE,
+                         TP_SHIFT,
+                         TP_API,
+                         TP_SSR,
+                         TP_DYN_PT_SIZE,
+                         TP_RND,
+                         TP_SAT>::fft_window(const TT_COEFF (&kernel_weights)[TP_POINT_SIZE * (1 + TP_DYN_PT_SIZE)]) {
     // copy the primary table raw/
-    memcpy(weights, &kernel_weights[0], TP_POINT_SIZE * (1 + TP_DYN_PT_SIZE) * sizeof(TT_COEFF));
+    memcpy(weights, &kernel_weights[0], (TP_POINT_SIZE * (1 + TP_DYN_PT_SIZE) * sizeof(TT_COEFF)));
     tableStarts[0] = 0;
     if
         constexpr(TP_DYN_PT_SIZE == 1) {
@@ -114,7 +113,8 @@ template <typename TT_DATA,
           unsigned int TP_SAT>
 NOINLINE_DECL
 fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE, TP_RND, TP_SAT>::
-    fft_window(const std::array<TT_COEFF, TP_POINT_SIZE*(1 + TP_DYN_PT_SIZE)>& kernel_weights) {
+    fft_window(const TT_COEFF (&kernel_weights)[TP_POINT_SIZE * (1 + TP_DYN_PT_SIZE)]) {
+    // fft_window(const std::array<TT_COEFF, TP_POINT_SIZE*(1 + TP_DYN_PT_SIZE)>& kernel_weights) {
     // The situation here is that samples arrive on stream 0 as samples 0, 2, 4, 6 and on
     // stream 1 as 1, 3, 5, 7, so we want window samples arranged as 0(msb), 2, 4, 6, 1, 3, 5, 7.
     // What this achieves is that the data samples do not need to be interleaved before
@@ -143,6 +143,7 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
         vecInPtSize = vecInPtSize >> 1;
     }
 #else
+
     // copy the primary table raw/
     memcpy(weights, &kernel_weights[0], TP_POINT_SIZE * (1 + TP_DYN_PT_SIZE) * sizeof(TT_COEFF));
     tableStarts[0] = 0;
@@ -183,7 +184,7 @@ NOINLINE_DECL void fft_window<TT_DATA,
                                                        output_buffer<TT_DATA>& __restrict outWindow) {
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
     using coeffVect_t = ::aie::vector<TT_COEFF, kSamplesInVect>;
-    using accVect_t = ::aie::accum<typename tAccBaseType<TT_DATA, TT_COEFF>::type, kSamplesInVect>;
+    using accVect_t = ::aie::accum<typename tAccBaseTypeMul<TT_DATA, TT_COEFF>::type, kSamplesInVect>;
     dataVect_t dataVect;
     coeffVect_t* coeffVectPtr;
     coeffVect_t coeffVect;

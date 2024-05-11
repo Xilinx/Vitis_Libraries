@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@
 using namespace adf;
 
 #ifdef __SUPPORTS_ACC64__
-using input_stream_cacc48 = input_stream_cacc64;
-using output_stream_cacc48 = output_stream_cacc64;
+using input_stream_cacc48 = input_cascade<cacc64>;
+using output_stream_cacc48 = output_cascade<cacc64>;
 #endif //__SUPPORTS_ACC64__
 
 struct empty {
@@ -288,6 +288,34 @@ struct tAccBaseType<float, float> {
 
 template <typename TT_DATA, typename TT_COEFF>
 using tAccBaseType_t = typename tAccBaseType<TT_DATA, TT_COEFF>::type;
+
+template <typename TT_DATA, typename TT_COEFF>
+struct tAccBaseTypeMul {
+    using type = cacc48;
+};
+#ifdef __SUPPORTS_ACC48__
+template <>
+struct tAccBaseTypeMul<cint32, cint16> {
+    using type = cacc48;
+};
+
+template <>
+struct tAccBaseTypeMul<cint32, int32> {
+    using type = cacc80;
+};
+
+template <>
+struct tAccBaseTypeMul<cfloat, float> {
+    using type = caccfloat;
+};
+#endif //__SUPPORTS_ACC48__
+
+#ifdef __SUPPORTS_ACC64__
+template <>
+struct tAccBaseTypeMul<cint32, cint16> {
+    using type = cacc64;
+};
+#endif //__SUPPORTS_ACC64__
 
 // function to return the size of the acc,
 template <typename TT_DATA, typename TT_COEFF>
@@ -1010,6 +1038,8 @@ struct T_outputIF<CASC_OUT_FALSE, T_D> {
     T_D* __restrict outWindowPtr;
     output_circular_buffer<T_D>* outWindow = NULL;
     output_circular_buffer<T_D>* outWindow2 = NULL;
+    output_stream_cacc48* outCascade;
+    output_async_buffer<T_D>* broadcastWindow;
     output_stream<T_D>* __restrict outStream;
     output_stream<T_D>* __restrict outStream2;
 };
@@ -1021,7 +1051,7 @@ struct T_outputIF<CASC_OUT_TRUE, T_D> {
         NULL; // internal buffer filled through cascade
     input_circular_buffer<T_D, extents<inherited_extent>, margin<kdummy> >* outWindow2 = NULL; // dummy
     output_stream_cacc48* outCascade;
-    output_async_buffer<T_D>* broadcastWindow; // broadcastWindow can just be ignored when it's the last kernel
+    output_async_buffer<T_D>* broadcastWindow;
     output_stream<T_D>* __restrict outStream;
     output_stream<T_D>* __restrict outStream2;
 };
@@ -1137,9 +1167,21 @@ INLINE_DECL constexpr unsigned int fnFirMargin() {
 };
 
 // function to return Margin length.
-template <size_t TP_FIR_LEN, typename TT_DATA, int TP_TDM_CHANNELS = 1>
+template <size_t TP_FIR_LEN,
+          typename TT_DATA,
+          int TP_TDM_CHANNELS = 1,
+          int TP_INPUT_WINDOW_VSIZE = 1,
+          int TP_ENABLE_INTERNAL_MARGIN = 0>
 INLINE_DECL constexpr unsigned int fnTDMFirMargin() {
-    return CEIL(((TP_FIR_LEN - 1) * (TP_TDM_CHANNELS)), (32 / sizeof(TT_DATA)));
+    // If window buffer containts multiple TDM frames it may be beneficial to use margin handling external to the
+    // kernel.
+    // If TP_FIR_LEN * TP_TDM_CHANNELS is greater than TP_INPUT_WINDOW_VSIZE, it is more beneficial to set external
+    // margin to 0, set an internal buffer and fill it with data samples.
+    if
+        constexpr(TP_ENABLE_INTERNAL_MARGIN == 1 && TP_FIR_LEN * TP_TDM_CHANNELS > TP_INPUT_WINDOW_VSIZE) { return 0; }
+    else {
+        return CEIL(((TP_FIR_LEN - 1) * (TP_TDM_CHANNELS)), (32 / sizeof(TT_DATA)));
+    }
 };
 
 // Truncation. This function rounds x down to the next multiple of y (which may be x)

@@ -1,0 +1,208 @@
+{
+    "schema": "vitis_library_api_spec_schema-1.0",
+    "api_name": "xf::dsp::aie::kronecker::kronecker_graph",
+    "display_name": "kronecker_graph",
+    "header_file_name": "kronecker_graph.hpp",
+    "search_paths": [
+        "L1/include/aie",
+        "L1/src/aie",
+        "L1/tests/aie/inc",
+        "L1/tests/aie/src",
+        "L2/include/aie",
+        "L2/tests/aie/common/inc"
+    ],
+    "parameters": [
+        {
+            "name": "TT_DATA_A",
+            "description": "The type of individual data samples input to port A.",
+            "type": "typename",
+            "enum": [
+                "cint16",
+                "cint32",
+                "int16",
+                "int32",
+                "cfloat",
+                "float"
+            ],
+            "validator": {
+                "file": "kronecker.py",
+                "function": "validate_TT_DATA_A",
+                "args": [
+                ]
+            }
+        },
+        {
+            "name": "TT_DATA_B",
+            "description": "The type of individual data samples input to port B.",
+            "type": "typename",
+            "enum": [
+                "cint16",
+                "cint32",
+                "int16",
+                "int32",
+                "cfloat",
+                "float"
+            ],
+            "validator": {
+                "file": "kronecker.py",
+                "function": "validate_TT_DATA_B",
+                "args": [
+                ]
+            }
+        },
+        {
+            "name": "TP_DIM_A_ROWS",
+            "description": "The number of inputs in port A and port B.",
+            "type": "uint",
+            "validator": {
+                "file": "kronecker.py",
+                "function": "validate_TP_DIM_A_ROWS",
+                "args": [
+                    "TT_DATA_A"
+                ]
+            }
+        },
+        {
+            "name": "TP_DIM_A_COLS",
+            "description": "The number of inputs in port A and port B.",
+            "type": "uint",
+            "validator": {
+                "file": "kronecker.py",
+                "function": "validate_TP_DIM_A_COLS",
+                "args": [
+                    "TT_DATA_A",
+                    "TP_API"
+                ]
+            }
+        },
+        {
+            "name": "TP_DIM_B_ROWS",
+            "description": "The number of inputs in port A and port B.",
+            "type": "uint",
+            "validator": {
+                "file": "kronecker.py",
+                "function": "validate_TP_DIM_B_ROWS",
+                "args": [
+                    "TT_DATA_B"
+                ]
+            }
+        },
+        {
+            "name": "TP_DIM_B_COLS",
+            "description": "The number of inputs in port A and port B.",
+            "type": "uint",
+            "validator": {
+                "file": "kronecker.py",
+                "function": "validate_TP_DIM_B_COLS",
+                "args": [
+                    "TT_DATA_B",
+                    "TP_API"
+                ]
+            }
+        },
+        {
+            "name": "TP_NUM_FRAMES",
+            "description": "The number of operations per call to the kernel",
+            "type": "uint",
+            "validator": {
+                "file": "kronecker.py",
+                "function": "validate_TP_NUM_FRAMES",
+                "args": [
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TP_DIM_A_ROWS",
+                    "TP_DIM_A_COLS",
+                    "TP_DIM_B_ROWS",
+                    "TP_DIM_B_COLS",
+                    "TP_API",
+                    "TP_SSR"
+                ]
+            }
+        },
+        {
+            "name": "TP_SHIFT",
+            "description": "The power of 2 shift down applied the product of sample and coefficient",
+            "type": "uint",
+            "validator": {
+                "file": "kronecker.py",
+                "function": "validate_TP_SHIFT",
+                "args": [
+                    "TT_DATA_A",
+                    "TT_DATA_B"
+                ]
+            },
+            "updater": {
+                "file": "kronecker.py",
+                "function": "update_TP_SHIFT",
+                "args": [
+                    "TT_DATA_A",
+                    "TT_DATA_B"
+                ]
+            }
+        },
+        {
+            "name": "TP_API",
+            "description": "The interface selection (windows/streams) of the function.",
+            "type": "uint",
+            "validator": {
+                "file": "kronecker.py",
+                "function": "validate_TP_API",
+                "args": [
+                ]
+            }
+        },
+        {
+            "name": "TP_SSR",
+            "description": "The number of kernels to be used in parallel to perform the function.",
+            "type": "uint",
+            "validator": {
+                "file": "kronecker.py",
+                "function": "validate_TP_SSR",
+                "args": [
+                    "TP_DIM_A_COLS"
+                ]
+            }
+        },
+        {
+            "name": "TP_RND",
+            "description": "The rounding to be applied during the shift down stage of processing.",
+            "type": "uint",
+            "validator": {
+                "file": "kronecker.py",
+                "function": "validate_TP_RND",
+                "args": [
+                ]
+            }
+        },
+        {
+            "name": "TP_SAT",
+            "description": "Saturation mode.",
+            "type": "uint",
+            "validator": {
+                "file": "kronecker.py",
+                "function": "validate_TP_SAT", 
+                "args": [
+                ]
+            }
+        },
+        {
+            "name": "AIE_VARIANT",
+            "type": "uint",
+            "description": "specifies the device type",
+            "validator": {
+                "file": "kronecker.py",
+                "function": "validate_AIE_VARIANT", 
+                "args": [
+                ]
+            }
+        }
+    ],
+    "ports": {
+        "file": "kronecker.py",
+        "function": "info_ports"
+    },
+    "generator": {
+        "file": "kronecker.py",
+        "function": "generate_graph"
+    }
+}
