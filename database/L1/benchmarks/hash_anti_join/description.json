@@ -70,12 +70,12 @@
             "accelerators": [
                 {
                     "location": "kernel/join_kernel.cpp",
-                    "frequency": 250,
+                    "frequency": 200,
                     "clflags": " -D KERNEL_NAME=join_kernel",
                     "name": "join_kernel"
                 }
             ],
-            "frequency": 250,
+            "frequency": 200,
             "name": "hash_anti_join"
         }
     ],

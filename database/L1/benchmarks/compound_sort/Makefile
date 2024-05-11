@@ -148,11 +148,11 @@ VPP_LDFLAGS_SortKernel += $(VPP_LDFLAGS_SortKernel_temp)
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 VPP_FLAGS_SortKernel +=  -D KERNEL_NAME=SortKernel
-VPP_FLAGS_SortKernel += --hls.clock 300000000:SortKernel
+VPP_FLAGS_SortKernel += --hls.clock 200000000:SortKernel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_SortKernel += --clock.defaultFreqHz 300000000
+VPP_LDFLAGS_SortKernel += --clock.defaultFreqHz 200000000
 else
-VPP_LDFLAGS_SortKernel += --kernel_frequency 300
+VPP_LDFLAGS_SortKernel += --kernel_frequency 200
 endif
 VPP_LDFLAGS_SortKernel_temp := --config $(CUR_DIR)/conn_u250.cfg
 VPP_LDFLAGS_SortKernel += $(VPP_LDFLAGS_SortKernel_temp)

@@ -152,11 +152,11 @@ VPP_LDFLAGS += --vivado.impl.jobs 16
 
 ######################### binary container global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
-VPP_FLAGS_gqeKernel += --hls.clock 300000000:gqeKernel
+VPP_FLAGS_gqeKernel += --hls.clock 200000000:gqeKernel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_gqe_join_v3 += --clock.defaultFreqHz 200000000
+VPP_LDFLAGS_gqe_join_v3 += --clock.defaultFreqHz 150000000
 else
-VPP_LDFLAGS_gqe_join_v3 += --kernel_frequency 200
+VPP_LDFLAGS_gqe_join_v3 += --kernel_frequency 150
 endif
 VPP_LDFLAGS_gqe_join_v3_temp := --config $(CUR_DIR)/conn_u50.cfg --config $(CUR_DIR)/opts_u50.cfg
 VPP_LDFLAGS_gqe_join_v3 += $(VPP_LDFLAGS_gqe_join_v3_temp)

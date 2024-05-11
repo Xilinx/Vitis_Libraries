@@ -52,5 +52,6 @@
             "hls_csim"
         ],
         "category": "canary"
-    }
+    },
+    "gui": true
 }

@@ -162,11 +162,11 @@ VPP_LDFLAGS_hash_anti_join += $(VPP_LDFLAGS_hash_anti_join_temp)
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
 VPP_FLAGS_join_kernel +=  -D KERNEL_NAME=join_kernel
-VPP_FLAGS_join_kernel += --hls.clock 250000000:join_kernel
+VPP_FLAGS_join_kernel += --hls.clock 200000000:join_kernel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_hash_anti_join += --clock.defaultFreqHz 250000000
+VPP_LDFLAGS_hash_anti_join += --clock.defaultFreqHz 200000000
 else
-VPP_LDFLAGS_hash_anti_join += --kernel_frequency 250
+VPP_LDFLAGS_hash_anti_join += --kernel_frequency 200
 endif
 VPP_LDFLAGS_hash_anti_join_temp := --config $(CUR_DIR)/conn_u50.cfg
 VPP_LDFLAGS_hash_anti_join += $(VPP_LDFLAGS_hash_anti_join_temp)

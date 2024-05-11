@@ -59,12 +59,12 @@
             "accelerators": [
                 {
                     "location": "kernel/kernel_sort_top.cpp",
-                    "frequency": 300,
+                    "frequency": 200,
                     "clflags": " -D KERNEL_NAME=SortKernel",
                     "name": "SortKernel"
                 }
             ],
-            "frequency": 300,
+            "frequency": 200,
             "name": "SortKernel"
         }
     ],

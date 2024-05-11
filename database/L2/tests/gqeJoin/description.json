@@ -5,24 +5,17 @@
     "gui": false,
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u55c"
+	"u50"
     ],
     "platform_blocklist": [
         "other"
     ],
     "platform_properties": {
-        "u55c": {
+	"u50": {
             "containers": [
                 {
                     "name": "gqe_join_v3",
-                    "ldclflags": "--config PROJECT/conn_u55c.cfg --config PROJECT/opts_u55c.cfg",
-                    "accelerators": [
-                        {
-                            "name": "gqeKernel",
-                            "frequency": 200
-                        }
-                    ],
-                    "frequency": 150
+                    "ldclflags": "--config PROJECT/conn_u50.cfg --config PROJECT/opts_u50.cfg"
                 }
             ]
         }
@@ -86,11 +79,11 @@
                 {
                     "name": "gqeKernel",
                     "location": "LIB_DIR/L2/src/hw/gqe_kernel_3_in_1.cpp",
-                    "frequency": 300,
+                    "frequency": 200,
                     "num_compute_units": 1
                 }
             ],
-            "frequency": 200
+            "frequency": 150
         }
     ],
     "testinfo": {
@@ -104,19 +97,16 @@
                 "max_memory_MB": {
                     "vitis_hw_build": 81920,
                     "vitis_hw_emu": 28672,
-                    "vitis_sw_emu": 10240,
                     "vitis_hw_run": 10240
                 },
                 "max_time_min": {
-                    "vitis_hw_build": 2400,
+                    "vitis_hw_build": 4800,
                     "vitis_hw_emu": 1200,
-                    "vitis_sw_emu": 60,
                     "vitis_hw_run": 10
                 }
             }
         ],
         "targets": [
-            "vitis_sw_emu",
             "vitis_hw_emu",
             "vitis_hw_build",
             "vitis_hw_run"
