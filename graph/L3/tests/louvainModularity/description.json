@@ -1,5 +1,5 @@
 {
-    "gui": false, 
+    "gui": false,
     "name": "Louvain Modularity L3 Test", 
     "description": "With L3 partition API for louvain, we could firstly partition a huge graph to some sub-graph with suitable size for cu processing, then launch cu on board Multi-thread concurrently and merge the result of louvain", 
     "flow": "system",
@@ -171,7 +171,7 @@
         }
     ], 
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
                 "index": 0, 

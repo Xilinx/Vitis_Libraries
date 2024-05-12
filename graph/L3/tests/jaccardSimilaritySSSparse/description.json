@@ -1,5 +1,5 @@
 {
-    "gui": false, 
+    "gui": false,
     "name": "Single Source Sparse Matrix Jaccard Similarity L3 Test", 
     "description": "An example for computing jaccard similarity of a single vector in an sparse graph", 
     "flow": "system", 
@@ -209,7 +209,7 @@
         }
     ], 
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
                 "index": 0, 

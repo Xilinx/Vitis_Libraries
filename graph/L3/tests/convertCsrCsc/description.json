@@ -1,5 +1,5 @@
 {
-    "gui": false, 
+    "gui": false,
     "name": "Convert CSC CSR L3 Test", 
     "description": "", 
     "flow": "system",
@@ -115,7 +115,7 @@
         }
     ], 
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
                 "index": 0, 

@@ -1,5 +1,5 @@
 {
-    "gui": false, 
+    "gui": false,
     "name": "All Pair Sparse Matrix K-Nearest Neighbors ", 
     "description": "An example for computing K-Nearest Neighbors of all pair vectors in a sparse graph", 
     "flow": "system", 
@@ -209,7 +209,7 @@
         }
     ], 
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
                 "index": 0, 

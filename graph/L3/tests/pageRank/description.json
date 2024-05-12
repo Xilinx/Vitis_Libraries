@@ -1,5 +1,5 @@
 {
-    "gui": false, 
+    "gui": false,
     "name": "PageRank L3 Test", 
     "description": "", 
     "flow": "system",
@@ -129,7 +129,7 @@
         }
     ], 
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
                 "index": 0, 

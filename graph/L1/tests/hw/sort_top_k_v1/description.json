@@ -53,5 +53,6 @@
             "vivado_impl"
         ],
         "category": "canary"
-    }
+    },
+    "gui": true
 }

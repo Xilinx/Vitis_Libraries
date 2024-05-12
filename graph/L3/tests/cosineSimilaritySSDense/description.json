@@ -1,5 +1,5 @@
 {
-    "gui": false, 
+    "gui": false,
     "name": "Single Source Dense Matrix Cosine Similarity L3 Test", 
     "description": "An example for computing cosine similarity of a single verctor in dense graph or matrix", 
     "flow": "system",
@@ -173,7 +173,7 @@
         }
     ], 
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
                 "index": 0, 

@@ -1,5 +1,5 @@
 {
-    "gui": false, 
+    "gui": false,
     "name": "Breadth First Search L3 Test", 
     "description": "Bread-first Search is an algorithm that traverse graph data structures. It starts from a source vertex and explores its neighbor vertices at the present depth level before moving on to the next depth level.", 
     "flow": "system",
@@ -127,7 +127,7 @@
         }
     ], 
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
                 "index": 0, 

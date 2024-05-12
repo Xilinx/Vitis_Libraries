@@ -1,5 +1,5 @@
 {
-    "gui": false, 
+    "gui": false,
     "name": "Xilinx Int Type Single Source Dense Matrix Cosine Similarity Benchmark L3 Test", 
     "description": "An examplefor computing cosine similarity of a single vector in an integer dense graph by using multiple FPGA cards as a reference benchmark", 
     "flow": "system",
@@ -227,7 +227,7 @@
         }
     ], 
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
                 "index": 0, 

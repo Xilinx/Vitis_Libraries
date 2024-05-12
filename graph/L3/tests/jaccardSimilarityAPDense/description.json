@@ -1,5 +1,5 @@
 {
-    "gui": false, 
+    "gui": false,
     "name": "All Pair Dense Matrix Jaccard Similarity L3 Test", 
     "description": "An example for computing jaccard similarity of all pair vectors in a dense graph", 
     "flow": "system",
@@ -173,7 +173,7 @@
         }
     ], 
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
                 "index": 0, 
