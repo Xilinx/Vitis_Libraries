@@ -87,5 +87,6 @@
                 "LIB_DIR/L2/include/"
             ]
         }
-    }
+    },
+    "gui": true
 }
