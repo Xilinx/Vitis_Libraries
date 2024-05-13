@@ -34,7 +34,7 @@ Benchmark
 
 The following results are based on:
      1) Dataset from UCI;
-         a) http://archive.ics.uci.edu/ml/datasets/NIPS+Conference+Papers+1987-2015
+         a) https://archive.ics.uci.edu/dataset/371/nips+conference+papers+1987+2015
          b) http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
          c) http://archive.ics.uci.edu/ml/datasets/US+Census+Data+%281990%29
      2) All data as double are processed;

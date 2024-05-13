@@ -154,7 +154,7 @@ K-Means Clustering Training
 
 Dataset:
 
- 1 - NIPS Conference Papers (http://archive.ics.uci.edu/ml/datasets/NIPS+Conference+Papers+1987-2015)
+ 1 - NIPS Conference Papers (https://archive.ics.uci.edu/dataset/371/nips+conference+papers+1987+2015)
 
  2 - Human Activity Recognition Using Smartphones Data Set (http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones)
 
