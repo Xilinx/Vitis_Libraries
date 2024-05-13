@@ -172,5 +172,6 @@
             "vitis_hw_build"
         ],
         "category": "canary"
-    }
+    },
+    "gui": true
 }
