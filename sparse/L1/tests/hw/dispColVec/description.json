@@ -61,5 +61,6 @@
             "${XF_PROJ_ROOT}/L1/tests/hw/dispColVec/uut_top.cpp"
         ]
     },
-    "topfunction": "uut_top"
+    "topfunction": "uut_top",
+    "gui": true
 }
