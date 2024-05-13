@@ -31,3 +31,6 @@ The 2021.1 release introduces L2 kernels for GEMM and GEMV. It also introduces L
 -------
 
 The example design of L3/benchmarks/gemm/memKernel are deprecated and removed.
+
+
+The helper function of "xfblasGetByAddress" has been removed, due to deprecate of xrt api of "xclUnmgdPread"
