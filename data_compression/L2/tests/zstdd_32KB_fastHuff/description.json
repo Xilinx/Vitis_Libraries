@@ -117,5 +117,6 @@
             "vitis_hw"
         ],
         "category": "canary"
-    }
+    },
+    "gui": true
 }

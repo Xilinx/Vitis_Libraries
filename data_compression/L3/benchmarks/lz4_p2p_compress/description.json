@@ -107,5 +107,6 @@
             "vitis_hw_emu"
         ],
         "category": "canary"
-    }
+    },
+    "gui": true
 }

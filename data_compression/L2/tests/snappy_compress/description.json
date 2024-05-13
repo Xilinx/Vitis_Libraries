@@ -91,7 +91,7 @@
     ],
     "testinfo": {
         "disable": false,
-	"stacksize": 16384,
+        "stacksize": 16384,
         "jobs": [
             {
                 "index": 0,
@@ -129,5 +129,6 @@
                 }
             ]
         }
-    }
+    },
+    "gui": true
 }

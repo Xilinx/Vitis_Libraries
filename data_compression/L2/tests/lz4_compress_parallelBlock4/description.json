@@ -123,5 +123,6 @@
     },
     "platform_properties": {
         "vck190": {}
-    }
+    },
+    "gui": true
 }

@@ -132,5 +132,6 @@
             "vitis_hw_run"
         ],
         "category": "canary"
-    }
+    },
+    "gui": true
 }
