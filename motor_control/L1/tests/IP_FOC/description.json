@@ -13,7 +13,7 @@
     "project": "test_ip_foc_ap_fixed",
     "solution": "sol1",
     "clock": "10",
-    "clock_uncertainty": 1.250000,
+    "clock_uncertainty": 1.25,
     "topfunction": "hls_foc_periodic_ap_fixed",
     "top": {
         "source": [
@@ -52,12 +52,13 @@
             }
         ],
         "targets": [
-	    "hls_csim",
-	    "hls_csynth",
-	    "hls_cosim",
+            "hls_csim",
+            "hls_csynth",
+            "hls_cosim",
             "vivado_syn",
             "vivado_impl"
         ],
         "category": "canary"
-    }
+    },
+    "gui": true
 }
