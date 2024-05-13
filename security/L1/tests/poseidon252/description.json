@@ -64,5 +64,6 @@
         ],
         "category": "canary"
     },
-    "clock_uncertainty": 1.05
+    "clock_uncertainty": 1.05,
+    "gui": true
 }
