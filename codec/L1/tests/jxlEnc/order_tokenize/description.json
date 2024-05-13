@@ -20,8 +20,7 @@
     },
     "testbench": {
         "source": [
-            "host/test_orderTokenize.cpp"                             
-
+            "host/test_orderTokenize.cpp"
         ],
         "cflags": "-I${XF_PROJ_ROOT}/L1/tests/jxlEnc/order_tokenize/kernel",
         "ldflags": "-pthread -std=c++11",
@@ -29,7 +28,7 @@
             "hls_csim": "-i ${XF_PROJ_ROOT}/L1/tests/jxlEnc/order_tokenize/data/orders.txt -g ${XF_PROJ_ROOT}/L1/tests/jxlEnc/order_tokenize/data/goldens.txt",
             "hls_cosim": "-i ${XF_PROJ_ROOT}/L1/tests/jxlEnc/order_tokenize/data/orders.txt -g ${XF_PROJ_ROOT}/L1/tests/jxlEnc/order_tokenize/data/goldens.txt"
         },
-        "stdmath": false 
+        "stdmath": false
     },
     "testinfo": {
         "disable": false,
@@ -63,5 +62,6 @@
             "vivado_impl"
         ],
         "category": "canary"
-    }
+    },
+    "gui": true
 }
