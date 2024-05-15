@@ -89,6 +89,7 @@ using namespace adf;
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
+ *
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph
  *         in a single iteration run.  \n
@@ -99,6 +100,7 @@ using namespace adf;
  *\n
  *         In such case, maximum number of samples processed by the graph is limited to 32-bit value (4.294B samples per
  *iteration).  \n
+ *
  *         Note: For SSR configurations (TP_SSR>1), the input data must be split over multiple ports,
  *         where each successive sample is sent to a different input port in a round-robin fashion. \n
  *         As a result, each SSR input path will process a fraction of the frame defined by the TP_INPUT_WINDOW_VSIZE.
@@ -107,6 +109,7 @@ using namespace adf;
  *         divided by TP_DECIMATE_FACTOR by virtue the decimation factor.
  *         TP_INPUT_WINDOW_VSIZE must be an integer multiple of TP_DECIMATE_FACTOR.
  *         The resulting output window size must be a multiple of 256bits. \n
+ *
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  * @tparam TP_CASC_LEN describes the number of AIE processors to split the operation
  *         over. \n This allows resource to be traded for higher performance.
@@ -116,11 +119,12 @@ using namespace adf;
  *         - 0 = static coefficients, defined in filter constructor,
  *         - 1 = reloadable coefficients, passed as argument to runtime function. \n
  *
- *         Note: when used, async port: ``` port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeff;
- *``` will be added to the FIR. \n
+ *         Note: when used, async port: ```port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeff;```
+ *         will be added to the FIR. \n
+ *
  *         Note: the size of the port array is equal to the total number of output paths  (TP_SSR).  \n
  *         Each port should contain the same taps array content, i.e. each additional port must be a duplicate of the
- *coefficient array. \n
+ *         coefficient array. \n
  * @tparam TP_NUM_OUTPUTS sets the number of ports over which the output is sent. \n
  *         This can be 1 or 2. It is set to 1 by default. \n
  *         Depending on TP_API, additional output ports functionality differs.
@@ -145,15 +149,15 @@ using namespace adf;
  * @tparam TP_API specifies if the input/output interface should be window-based or stream-based.  \n
  *         The values supported are 0 (window API) or 1 (stream API).
  * @tparam TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths,
- giving an overall higher throughput.   \n
+ *          giving an overall higher throughput.   \n
  *         An SSR of 1 means just one output leg, and is the backwards compatible option.
  * @tparam TP_PARA_DECI_POLY specifies the number of decimator polyphases that will be split up
- * and executed in a series of pipelined cascade stages, resulting in additional input paths. \n
+ *         and executed in a series of pipelined cascade stages, resulting in additional input paths. \n
  *         A TP_PARA_DECI_POLY of 1 means just one input leg, and is the backwards compatible option. \n
  *         TP_PARA_DECI_POLY = TP_DECIMATE_FACTOR will result in an decimate factor of polyphases,
- * operating as independent single rate filters connected by cascades.
+ *         operating as independent single rate filters connected by cascades.
  *         TP_PARA_DECI_POLY < TP_DECIMATE_FACTOR will result in the polyphase branches operating as
- * independent decimators connected by cascades.
+ *         independent decimators connected by cascades.
  *
  *         The number of AIEs used is given by TP_PARA_DECI_POLY * TP_SSR^2 * TP_CASC_LEN. \n
  *

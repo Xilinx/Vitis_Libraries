@@ -2,13 +2,13 @@
 
 clock=3.33
 flow_target=vivado
-syn.file=src/top_2d_fft_test.cpp
-syn.file_cflags=src/top_2d_fft_test.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/
+syn.file=${XF_PROJ_ROOT}/L1/examples/2Dfloat_impulse/src/top_2d_fft_test.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/examples/2Dfloat_impulse/src/top_2d_fft_test.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/
 syn.top=top_fft2d
-tb.file=src/main_2d_fft_test.cpp
-tb.file_cflags=src/main_2d_fft_test.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/
-tb.file=src/top_2d_fft_test.cpp
-tb.file_cflags=src/top_2d_fft_test.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/
+tb.file=${XF_PROJ_ROOT}/L1/examples/2Dfloat_impulse/src/main_2d_fft_test.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/2Dfloat_impulse/src/main_2d_fft_test.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/
+tb.file=${XF_PROJ_ROOT}/L1/examples/2Dfloat_impulse/src/top_2d_fft_test.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/2Dfloat_impulse/src/top_2d_fft_test.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/
 
 
 

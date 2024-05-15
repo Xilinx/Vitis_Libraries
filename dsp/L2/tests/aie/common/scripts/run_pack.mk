@@ -14,13 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# usage -> in the test directory of a specific function do:
-# 			make -f ../common/scripts/run_pack.mk all_pack PARAMS=<test from multi_params> TARGET=<x86sim or aiesim> PLATFORM=<vck190 or vek280> PARAMS_FILE=<name of multi_params file>
-#
-# 			If no TARGET or PLATFORM are specified, the script will gather these parameters from the PARAMS name if it contains x86sim / hw and vck190 / vek280 respectively
-#
-# default options are below
-# PLATFORM ?=vck190 # vck190 for AIE1, change to vek280 for AIE2
 PARAMS ?=test_0_tool_canary_aie
 PARAMS_FILE ?=multi_params.json
 RESULTS_DIR ?=./results/$(PARAMS)

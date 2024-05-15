@@ -87,7 +87,7 @@ class sample_delay_graph : public graph {
     input_port numSampleDelay;
 
     /**
-      * Output data.
+      * Output data
      **/
     output_port out;
 
@@ -97,19 +97,28 @@ class sample_delay_graph : public graph {
     kernel m_kernel;
 
     /**
-      * @brief Constructor function for the sample_delay graph.
+      * @brief Constructor function for the sample_delay graph. \n The constructor has two forms.
+      * If no constructor argument is supplied the initial sample delay will be set to 0, otherwise the
+      * constructor argument sets the initial sample delay.
       **/
+    // constructor arg
+    sample_delay_graph(unsigned int sampleDelayVal) {
+        m_kernel = kernel::create_object<sample_delay<TT_DATA, TP_WINDOW_VSIZE, TP_API, TP_MAX_DELAY> >(sampleDelayVal);
+        create_port_connections(TP_API);
+    };
+
+    /**
+ * @cond NOCOMMENTS
+ */
     // constructor
     sample_delay_graph() {
         m_kernel = kernel::create_object<sample_delay<TT_DATA, TP_WINDOW_VSIZE, TP_API, TP_MAX_DELAY> >();
         create_port_connections(TP_API);
     };
 
-    // constructor arg
-    sample_delay_graph(unsigned int sampleDelayVal) {
-        m_kernel = kernel::create_object<sample_delay<TT_DATA, TP_WINDOW_VSIZE, TP_API, TP_MAX_DELAY> >(sampleDelayVal);
-        create_port_connections(TP_API);
-    };
+    /**
+      * @endcond
+      */
 
     void create_port_connections(unsigned int api) {
         if (api == 1) { // axi stream

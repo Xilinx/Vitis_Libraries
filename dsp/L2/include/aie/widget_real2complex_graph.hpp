@@ -60,6 +60,7 @@ using namespace adf;
  *         TT_DATA = int16 and TT_OUT_DATA = cint32 is not valid.
  * @tparam TP_WINDOW_VSIZE describes the number of samples in the window API
  *         used if either input or output is a window. \n
+ *
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  **/
 template <typename TT_DATA, typename TT_OUT_DATA, unsigned int TP_WINDOW_VSIZE>

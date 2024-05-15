@@ -50,7 +50,7 @@ using namespace adf;
 //--------------------------------------------------------------------------------------------------
 /**
  * @ingroup hadamard_graph
- * @brief hadamard is
+ * @brief Hadamard product is element-wise multiplication of two vectors of same size.
  *
  * These are the templates to configure the function.
  * @tparam TT_DATA_A describes the type of individual data samples input to the function. \n
@@ -82,6 +82,7 @@ using namespace adf;
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
+ *
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
@@ -104,13 +105,16 @@ template <typename TT_DATA_A,
  **/
 class hadamard_graph : public graph {
    public:
+    /**
+    * @cond NOCOMMENTS
+    */
     static constexpr int kMaxSSR = 16;
 
     // Defensive configuration legality checks
 
     static_assert(TP_SHIFT >= 0 && TP_SHIFT < 61, "ERROR: TP_SHIFT is out of the supported range (0 to 61)");
 
-#ifdef __STREAMS_PER_TILE__ == 2
+#if __STREAMS_PER_TILE__ == 2
     static_assert(TP_API == 0 || TP_API == 1, "ERROR: TP_API is not a supported value i.e.; (0 or 1)");
 #elif __STREAMS_PER_TILE__ == 1
     static_assert(TP_API == 0, "ERROR: TP_API is not a supported value i.e.; (0)");
@@ -137,11 +141,17 @@ class hadamard_graph : public graph {
     static_assert(kKernelPtSize >= 16, "ERROR: TP_DIM/TP_SSR must be at least 16");
     static_assert(kKernelWindowVsize <= (__DATA_MEM_BYTES__ / 2),
                   "ERROR: TP_NUM_FRAMES*(TP_DIM/TP_SSR) must be at no more than data memory size.");
+    /**
+      * @endcond
+      */
 
     /**
-     * The input data to the function.
+     * The input A data to the function.
      **/
     port_array<input, TP_SSR> inA;
+    /**
+     * The input B data to the function.
+     **/
     port_array<input, TP_SSR> inB;
     /**
      * An API of TT_DATA type.
@@ -154,7 +164,7 @@ class hadamard_graph : public graph {
     kernel m_kernels[TP_SSR];
 
     /**
-     * Access function to get pointer to kernel (or first kernel in a chained configuration).
+     * Access function to get pointer to kernel.
      **/
 
     kernel* getKernels() { return m_kernels; };

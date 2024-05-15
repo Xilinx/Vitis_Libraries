@@ -350,6 +350,7 @@ class create_casc_kernel<1,
  *         multiplied by TP_INTERPOLATE_FACTOR and divided by TP_DECIMATE_FACTOR. \n
  *         In the instance this would lead to a fraction number of output samples,
  *         this would be rounded down. \n
+ *
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  * @tparam TP_CASC_LEN describes the number of AIE processors to split the operation
  *         over. \n This allows resource to be traded for higher performance.
@@ -359,8 +360,9 @@ class create_casc_kernel<1,
  *         - 0 = static coefficients, defined in filter constructor,
  *         - 1 = reloadable coefficients, passed as argument to runtime function. \n
  *
- *         Note: when used, optional port: ``` port<input> coeff; ``` will be added to the FIR. \n
+ *         Note: when used, optional port: ``` port<input> coeff;``` will be added to the FIR. \n
  * @tparam TP_NUM_OUTPUTS sets the number of ports to broadcast the output to. \n
+ *
  *         Note: when used, optional port: ``` port<output> out2; ``` will be added to the FIR. \n
 **/
 template <typename TT_DATA,

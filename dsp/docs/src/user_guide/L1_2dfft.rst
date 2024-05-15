@@ -1,4 +1,4 @@
-.. 
+..
    Copyright © 2019–2024 Advanced Micro Devices, Inc
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
@@ -9,7 +9,7 @@
    :caption: Table of Contents
    :maxdepth: 3
 
-   2-Dimensional(Matrix) SSR FFT L1 FPGA Module <L1_2dfft.rst>
+..    2-Dimensional(Matrix) SSR FFT L1 FPGA Module <L1_2dfft.rst>
 
 .. _L1_2DFFT_OVERVIEW:
 
@@ -86,7 +86,7 @@ Function: fft2d is the top-level L1 API which takes a number of template paramet
 
 +-----------------------+----------------------------------------------------------------------+
 |                       |                                                                      |
-|  Template Parameter   |                          Functionality                               |  
+|  Template Parameter   |                          Functionality                               |
 +=======================+======================================================================+
 |       t_memWidth      | Describes the width of the wide stream in complex<T_elemType> words  |
 +-----------------------+----------------------------------------------------------------------+

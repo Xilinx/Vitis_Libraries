@@ -18,6 +18,7 @@
 
 #include "test_dds.hpp"
 #include "test_fir.hpp"
+#include "test_fir_tdm.hpp"
 #include "test_fft.hpp"
 #include "test_matmul.hpp"
 #include "test_widget_api_cast.hpp"
@@ -59,6 +60,7 @@ using namespace adf;
 #define NUM_OP_DFT 2
 #define NUM_IP_MV 4
 #define NUM_OP_MV 2
+#define NUM_IP_FIR_TDM 1
 
 template <unsigned int elem_start, unsigned int num_ports, unsigned int NUM_IP_ALL, typename plioType>
 void createPLIOFileConnections(std::array<plioType, NUM_IP_ALL>& plioPorts,
@@ -79,16 +81,19 @@ class test_example : public graph {
    public:
     static constexpr unsigned int NUM_IP_ALL = NUM_IP_FIR + NUM_IP_DDS + NUM_IP_FFT + NUM_IP_MM + NUM_IP_WIDG_API +
                                                NUM_IP_WIDG_R2C + NUM_IP_FFTW + NUM_IP_DDS_LUT + NUM_IP_OT + NUM_IP_HAD +
-                                               NUM_IP_KMP + NUM_IP_CONV + NUM_IP_CORR + NUM_IP_DFT + NUM_IP_MV;
+                                               NUM_IP_KMP + NUM_IP_CONV + NUM_IP_CORR + NUM_IP_DFT + NUM_IP_MV +
+                                               NUM_IP_FIR_TDM;
     static constexpr unsigned int NUM_OP_ALL = NUM_IP_FIR + NUM_IP_DDS + NUM_IP_FFT + NUM_OP_MM + NUM_OP_WIDG_API +
                                                NUM_OP_WIDG_R2C + NUM_IP_FFTW + NUM_OP_DDS_LUT + NUM_OP_OT + NUM_OP_HAD +
-                                               NUM_OP_KMP + NUM_OP_CONV + NUM_OP_CORR + NUM_OP_DFT + NUM_OP_MV;
+                                               NUM_OP_KMP + NUM_OP_CONV + NUM_OP_CORR + NUM_OP_DFT + NUM_OP_MV +
+                                               NUM_IP_FIR_TDM;
 
     std::array<input_plio, NUM_IP_ALL> in;
     std::array<output_plio, NUM_OP_ALL> out;
 
     dds_example::test_dds uut_dds;
     fir_example::test_fir uut_fir;
+    fir_tdm_example::test_fir_tdm uut_fir_tdm;
     fft_example::test_fft uut_fft;
     mm_example::test_mm uut_mm;
     widg1_example::test_widg_api uut_widg_api;
@@ -121,6 +126,7 @@ class test_example : public graph {
         createPLIOFileConnections<21, NUM_IP_CORR, NUM_IP_ALL>(in, "input", "corr", "in");
         createPLIOFileConnections<23, NUM_IP_DFT, NUM_IP_ALL>(in, "input", "dft", "in");
         createPLIOFileConnections<25, NUM_IP_MV, NUM_IP_ALL>(in, "input", "mv", "in");
+        createPLIOFileConnections<29, NUM_IP_FIR_TDM, NUM_IP_ALL>(in, "input", "fir_tdm", "in");
 
         // create output file connections
         createPLIOFileConnections<0, NUM_IP_DDS, NUM_OP_ALL>(out, "output", "dds", "out");
@@ -138,6 +144,7 @@ class test_example : public graph {
         createPLIOFileConnections<15, NUM_OP_CORR, NUM_OP_ALL>(out, "output", "corr", "out");
         createPLIOFileConnections<16, NUM_OP_DFT, NUM_OP_ALL>(out, "output", "dft", "out");
         createPLIOFileConnections<18, NUM_OP_MV, NUM_OP_ALL>(out, "output", "mv", "out");
+        createPLIOFileConnections<20, NUM_IP_FIR_TDM, NUM_OP_ALL>(out, "output", "fir_tdm", "out");
 
         // wire up dds testbench
         connect<>(in[0].out[0], uut_dds.in);
@@ -154,9 +161,9 @@ class test_example : public graph {
         }
 
         // wire up matmul testbench
-        connect<>(in[6].out[0], uut_mm.inA);
-        connect<>(in[7].out[0], uut_mm.inB);
-        connect<>(uut_mm.out, out[6].in[0]);
+        connect<>(in[6].out[0], uut_mm.inA[0]);
+        connect<>(in[7].out[0], uut_mm.inB[0]);
+        connect<>(uut_mm.out[0], out[6].in[0]);
 
         // wire up widget_api_cast testbench
         connect<>(in[8].out[0], uut_widg_api.in[0]);
@@ -213,6 +220,10 @@ class test_example : public graph {
         connect<>(in[28].out[0], uut_mv.inB[1]);
         connect<>(uut_mv.out[0], out[18].in[0]);
         connect<>(uut_mv.out[1], out[19].in[0]);
+
+        // wire up fir tdm testbench
+        connect<>(in[29].out[0], uut_fir_tdm.in);
+        connect<>(uut_fir_tdm.out, out[20].in[0]);
     };
 };
 };

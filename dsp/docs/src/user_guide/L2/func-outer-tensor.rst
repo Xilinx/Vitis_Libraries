@@ -11,18 +11,11 @@ Outer Tensor Product
 
 This library element computes the Outer Tensor Product of two input vectors. If two vectors have dimensions n and m, then their outer tensor product is an n x m matrix.
 Element-wise multiplication of each element of input A by each element of input B is performed and assigned to the output.  If it is considered that input A is the column vector and input B is the row vector, then the matrix is output in a row-major fashion.
-The outer tensor product has configurable data types and vector dimensions for inputs A and B, along with configurable frame numbers, bit shifting, interfaces (stream/window) parallelism factors, and rounding and saturation.
+The outer tensor product has configurable data types and vector dimensions for inputs A and B, along with a configurable number of frames, scaling, interfaces (stream/window), parallelism factors, rounding and saturation.
 Template parameters are used to configure the top level graph of the outer_tensor_graph class.
 
-~~~~~~~~~~~~~~
-Device Support
-~~~~~~~~~~~~~~
-
-The Outer Tensor supports AIE1 only.
-
-~~~~~~~~~~~
 Entry Point
-~~~~~~~~~~~
+===========
 
 The graph entry point is the following:
 
@@ -30,15 +23,13 @@ The graph entry point is the following:
 
     xf::dsp::aie::outer_tensor::outer_tensor_graph
 
-~~~~~~~~~~~~~~
 Device Support
-~~~~~~~~~~~~~~
+==============
 
 The Outer Tensor Product library element supports AIE1.
 
-~~~~~~~~~~~~~~~
 Supported Types
-~~~~~~~~~~~~~~~
+===============
 The data type for input port A and B (inA and inB) is controlled by ``TT_DATA_A and TT_DATA_B`` respectively.
 Both inputs may take one of the 6 choices: int16, int32, cint16, cint32, float and cfloat. It must be kept in mind that depending on the input type combinations, output type will be determined by the tool.
 Please see table :ref:`OUTER_TENSOR_output_type` : for allowed input data type combinations and regarding output type.
@@ -93,29 +84,24 @@ Please see table :ref:`OUTER_TENSOR_output_type` : for allowed input data type c
    +------------------+------------------+------------------+
 
 
-~~~~~~~~~~~~~~~~~~~
 Template Parameters
-~~~~~~~~~~~~~~~~~~~
+===================
 
 To see details on the template parameters for the Outer Tensor Product, see :ref:`API_REFERENCE`.
 
 
-~~~~~~~~~~~~~~~~
-Access functions
-~~~~~~~~~~~~~~~~
+Access Functions
+================
 
 To see details on the access functions for the Outer Tensor Product, see :ref:`API_REFERENCE`.
 
-~~~~~
 Ports
-~~~~~
+=====
 
 To see details on the ports for the Outer Tensor Product, see :ref:`API_REFERENCE`. Note that the type of ports are determined by the configuration of template parameters.
 
-~~~~~~~~~~~~
 Design Notes
-~~~~~~~~~~~~
-The output throughput of the Outer Tensor is dependent on the data type of the output. Throughputs are 500 megasamples/second, 1000 megasamples/second and 2000 megasamples/second respectively for 8 byte, 4 byte, and 2 byte output types.
+============
 
 Super Sample Rate Operation
 ---------------------------
@@ -126,15 +112,15 @@ In the Outer Tensor Product, SSR operation is controlled by the template paramet
 Scaling
 -------
 Scaling in the Outer Tensor Product is controlled by the ``TP_SHIFT`` parameter which describes the number of bits to shift the output to the right. Only power-of-2 scaling is supported.
-Float and cfloat implementations do not support scaling. ``TP_SHIFT`` can be set to -1 to shift the output one bit to the left.
+Float and cfloat implementations do not support scaling.
 
 Saturation
 ----------
-Distortion caused by saturation will be possible for the Outer Tensor Product. Since the input values are input at construction time, no compile-time error can be issued for this hazard, so it is for the user to ensure that saturation does not occur.
+Distortion caused by saturation will be possible for the Outer Tensor Product. It is for the user to ensure that saturation does not occur.
 
 Constraints
 -----------
-The Outer Tensor Product does not contain any constraints. It is a single kernel design except when ``TP_SSR>1`` in which case the port connections force placement of the tiles on separate tiles.
+The Outer Tensor Product inputs for ``TP_DIM_A``, ``TP_DIM_B``, ``TP_NUM_FRAMES`` and ``TP_SSR`` must be powers of 2. ``TP_DIM_X * size_of(TT_DATA_X)`` must have a minimum value of 32 bytes (size of buffer on AIE). It is a single kernel design except when ``TP_SSR>1`` in which case the port connections force placement of the tiles on separate tiles.
 
 Code Example
 ------------

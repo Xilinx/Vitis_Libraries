@@ -47,7 +47,7 @@ using namespace adf;
  *
  * @ingroup fir_graphs
  *
- * These are the templates to configure the Asymmetric Single Rate FIR class.
+ * These are the templates to configure the TDM FIR class.
  * @tparam TT_DATA describes the type of individual data samples input to and
  *         output from the filter function. \n
  *         This is a typename and must be one of the following: \n
@@ -78,18 +78,24 @@ using namespace adf;
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
+ *
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph
  *         in a single iteration run.  \n
  *         Samples are buffered and stored in a ping-pong window buffer mapped onto Memory Group banks. \n
- *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
+ *
+ *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE. \n
+ *
+ *         Note: ``TP_INPUT_WINDOW_VSIZE`` must be an integer multiple of number
+ *         of TDM Channels ``TP_TDM_CHANNELS``. \n
  * @tparam TP_TDM_CHANNELS describes the number of TDM Channels processed by the FIR. \n
- *         Each kernel requires storage for all taps and all channels it is required to operate on,  \n
+ *         Each kernel requires storage for all taps and all channels it is required to operate on,
  *         i.e. requires storage for: ``TP_FIR_LEN * TP_TDM_CHANNELS``.  \n
+ *
  *         Note: For SSR configurations (TP_SSR>1), TDM Channels coefficients will be split over multiple paths,
  *         in a round-robin fashion. \n
  * @tparam TP_NUM_OUTPUTS sets the number of ports to broadcast the output to. \n
-
+ *
  *         Note: Dual output ports are not supported at this time.
  * @tparam TP_DUAL_IP allows 2 stream inputs to be connected to FIR, increasing available throughput. \n
  *
@@ -241,13 +247,6 @@ class fir_tdm_graph : public graph {
         // split the array so each kernel has a lane-worth of coeffs on each read/operation.
         unsigned int lanes = TP_SSR * fir_tdm_tl<ssr_params<0> >::getLanes();
 
-#define TDM_COEFF_SCHEME_1 1
-#define TDM_COEFF_SCHEME_2 2
-#define TDM_COEFF_SCHEME_3 3
-#define TDM_COEFF_SCHEME_4 4
-#define TDM_COEFF_SCHEME_5 5
-
-#define TDM_COEFF_SCHEME TDM_COEFF_SCHEME_4
         // Input:
         // 30, 31, 32, 33, 34, 35, 36, 37
         // 20, 21, 22, 22, 24, 25, 26, 27
@@ -269,22 +268,8 @@ class fir_tdm_graph : public graph {
         for (unsigned int channels = 0; channels < TP_TDM_CHANNELS / lanes; channels++) {
             for (unsigned int coeffNo = 0; coeffNo < TP_FIR_LEN; coeffNo++) {
                 for (unsigned int laneNo = 0; laneNo < lanes; laneNo++) {
-#if TDM_COEFF_SCHEME == TDM_COEFF_SCHEME_1
-                    int coeffIndex = (TP_FIR_LEN * TP_TDM_CHANNELS) - 1 - coeffNo - i * TP_FIR_LEN;
-#endif
-#if TDM_COEFF_SCHEME == TDM_COEFF_SCHEME_2
-                    int coeffIndex = coeffNo * TP_TDM_CHANNELS + i;
-#endif
-#if TDM_COEFF_SCHEME == TDM_COEFF_SCHEME_3
-                    int coeffIndex = (TP_FIR_LEN * TP_TDM_CHANNELS) - 1 - coeffNo * TP_TDM_CHANNELS - i;
-#endif
-#if TDM_COEFF_SCHEME == TDM_COEFF_SCHEME_4
                     int coeffIndex = (TP_FIR_LEN * TP_TDM_CHANNELS) - TP_TDM_CHANNELS - coeffNo * TP_TDM_CHANNELS +
                                      laneNo + channels * lanes;
-#endif
-#if TDM_COEFF_SCHEME == TDM_COEFF_SCHEME_5
-                    int coeffIndex = coeffNo + i * TP_FIR_LEN;
-#endif
                     revertedTaps.push_back(taps.at(coeffIndex));
                 }
             }

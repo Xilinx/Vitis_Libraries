@@ -1,4 +1,4 @@
-.. 
+..
    Copyright © 2019–2024 Advanced Micro Devices, Inc
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
@@ -13,9 +13,8 @@ This library element computes the Convolution or Correlation of two input vector
 The library element has configurable data types and vector dimensions for inputs F and G and the output, along with bit shifting, rounding and saturation.
 Template parameters are used to configure the top level graph of the conv_corr_graph class.
 
-~~~~~~~~~~~
 Entry Point
-~~~~~~~~~~~
+===========
 
 The graph entry point is the following:
 
@@ -23,44 +22,38 @@ The graph entry point is the following:
 
     xf::dsp::aie::conv_corr::conv_corr_graph
 
-~~~~~~~~~~~~~~
 Device Support
-~~~~~~~~~~~~~~
+==============
 
 The Convolution/Correlation library element supports AIE1 and AIE-ML for all features with the following differences.
 
 - Round modes available and the enumerated values of round modes differ between AIE1 and AIE-ML. See :ref:`COMPILING_AND_SIMULATING`.
 
-~~~~~~~~~~~~~~~
 Supported Types
-~~~~~~~~~~~~~~~
+===============
 The data type for input port F and G (inF and inG) is controlled by T_DATA_F and T_DATA_G respectively.
 Both inputs may take one of the 5 choices: int8, int16, int32, cint16, cint32. The output may take one of 4 choices: int16, int32, cint16, cint32.
 Please see table .. _OUTER_TENSOR_output_type: for allowed input data type combinations and regarding output type.
 
 
-~~~~~~~~~~~~~~~~~~~
 Template Parameters
-~~~~~~~~~~~~~~~~~~~
+===================
 
 To see details on the template parameters for Convolution / Correlation, see :ref:`API_REFERENCE`.
 
 
-~~~~~~~~~~~~~~~~
-Access functions
-~~~~~~~~~~~~~~~~
+Access Functions
+================
 
 To see details on the access functions for Convolution / Correlation, see :ref:`API_REFERENCE`.
 
-~~~~~
 Ports
-~~~~~
+=====
 
 To see details on the ports for Convolution / Correlation, see :ref:`API_REFERENCE`. Note that the type of ports are determined by the configuration of template parameters.
 
-~~~~~~~~~~~~
 Design Notes
-~~~~~~~~~~~~
+============
 
 Scaling
 -------

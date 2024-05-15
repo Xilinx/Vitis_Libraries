@@ -109,7 +109,7 @@ kronecker<TT_DATA_A,
 
 #pragma unroll(kSamplesInVectTempOut / kSamplesInVectOut)
                                 for (int n = 0; n < kSamplesInVectTempOut / kSamplesInVectOut; n++) {
-                                    *ptrOutWindow++ = outDataVecTemp.template extract<kSamplesInVectOut>((TP_SHIFT));
+                                    *ptrOutWindow++ = outDataVecTemp.template extract<kSamplesInVectOut>((n));
                                 }
                                 indexMatB++;
                             }

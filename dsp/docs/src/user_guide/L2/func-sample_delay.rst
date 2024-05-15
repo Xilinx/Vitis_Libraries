@@ -1,4 +1,4 @@
-.. 
+..
    Copyright © 2019–2024 Advanced Micro Devices, Inc
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
@@ -11,9 +11,8 @@ Sample Delay
 
 Sample Delay is a circular buffer based implementation of a delay filter for introducing a delay into a time series. See the design notes for insight into the implementation.
 
-~~~~~~~~~~~
 Entry Point
-~~~~~~~~~~~
+===========
 
 The graph entry point is the following:
 
@@ -21,39 +20,33 @@ The graph entry point is the following:
 
     xf::dsp::aie::sample_delay
 
-~~~~~~~~~~~~~~
 Device Support
-~~~~~~~~~~~~~~
+==============
 
 The Sample Delay supports both AIE1 and AIE-ML.
 
-~~~~~~~~~~~~~~~
 Supported Types
-~~~~~~~~~~~~~~~
+===============
 
 The sample_delay supports unit8, int8, int16, cint16, int32, cint32, float, and cfloat data types on the input.
 
-~~~~~~~~~~~~~~~~~~~
 Template Parameters
-~~~~~~~~~~~~~~~~~~~
+===================
 
 To see details on the template parameters for the sample_delay, see :ref:`API_REFERENCE`.
 
-~~~~~~~~~~~~~~~~
 Access Functions
-~~~~~~~~~~~~~~~~
+================
 
 To see details on the access functions for the sample_delay, see :ref:`API_REFERENCE`.
 
-~~~~~
 Ports
-~~~~~
+=====
 
 To see details on the ports for the sample_delay, see :ref:`API_REFERENCE`.
 
-~~~~~~~~~~~~
 Design Notes
-~~~~~~~~~~~~
+============
 
 Sample Delay introduces delay into the input data which is often a time series. The unit of delay is 'number of samples' which is passed on Run Time Parameter (RTP) port: sampleDelayValue. The legal range of sampleDelayValue is [0, MAX_DELAY-1].
 As far as the functionality is concerned, it is a delay filter, however, implementation employs a vectorized circular buffer. The delay passed on the sampleDelayValue RTP port is introduced by converting it into two address offsets: vector offset and element offset.

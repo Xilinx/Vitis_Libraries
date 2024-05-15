@@ -143,6 +143,8 @@ Increase the number of iterations the simulation runs for to achieve a stable st
 Library Element Configuration Parameters
 ----------------------------------------
 
+.. _COMMON_CONFIG_PARAMETERS:
+
 Common Configuration Parameters
 -------------------------------
 
@@ -153,6 +155,9 @@ Many library elements perform arithmetic and offer a scaling feature exposed as 
     +------------------------+----------------+----------------+--------------------------------------+
     |     **Name**           |    **Type**    |  **Default**   |   Description                        |
     +========================+================+================+======================================+
+    | SHIFT                  |    unsigned    |    8           | Acc results shift down value.        |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
     | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
     |                        |                |                |                                      |
     |                        |                |                +------------------+-------------------+
@@ -188,210 +193,12 @@ Many library elements perform arithmetic and offer a scaling feature exposed as 
     |                        |                |                |                                      |
     |                        |                |                | 3 - symmetric saturate               |
     +------------------------+----------------+----------------+--------------------------------------+
-
-* Note that the FFT and Mixed Radix FFT do not support floor nor ceiling modes. 
-
-.. _CONFIGURATION_PARAMETERS_DDS_MIXER:
-
-DDS/Mixer Configuration Parameters
-----------------------------------
-
-For the DDS/Mixer library element, use the following list of configurable parameters and default values:
-
-.. table:: DDS/Mixer Configuration Parameters
-
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | WINDOW_VSIZE           |    unsigned    |    256         | Input/Output window size.            |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | MIXER_MODE             |    unsigned    |    2           | The mode of operation of the         |
-    |                        |                |                | dds_mixer.                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: dds only                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 1: dds plus single data channel      |
-    |                        |                |                | mixer                                |
-    |                        |                |                |                                      |
-    |                        |                |                | 2: dds plus two data channel         |
-    |                        |                |                | mixer, for symmetrical carrier       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | P_API                  |    unsigned    |    0           | 0: window,                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 1: stream                            |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | UUT_SSR                |    unsigned    |    1           | Super Sample Rate  SSR parameter.    |
-    |                        |                |                | Defaults to 1.                       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
-    |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | INITIAL_DDS_OFFSET     |    unsigned    |    0           | Initial DDS offset.                  |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DDS_PHASE_INC          |    unsigned    | 0xD6555555     | DDS Phase Increment.                 |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: random                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: impulse                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 4: all ones                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 5: incrementing pattern              |
-    |                        |                |                |                                      |
-    |                        |                |                | 6: sym incrementing pattern          |
-    |                        |                |                |                                      |
-    |                        |                |                | 8: sine wave                         |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               | unsigned       | Saturation     | 0: 'none'                            |
-    |                        |                | mode           |                                      |
-    |                        |                |                | 1: 'saturate'                        |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: 'symmetric saturate'              |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | USE_PHASE_RELOAD       |    unsigned    | static         | 0: 'static phase'                    |
-    |                        |                | phase          |                                      |
-    |                        |                |                | 1: 'reload phase offset'             |
-    +------------------------+----------------+----------------+--------------------------------------+
-
-
-.. _CONFIGURATION_PARAMETERS_DFT:
-
-DFT Configuration Parameters
--------------------------------
-
-For the DFT library element, use the following list of configurable parameters and default values.
-
-.. table:: DFT Configuration Parameters
-
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | TWIDDLE_TYPE           |    typename    |    cint16      | Twiddle Type.                        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | POINT_SIZE             |    unsigned    |    16          | DFT point size.                      |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    8           | Acc results shift down value.        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | FFT_NIFFT              |    unsigned    |    0           | Forward (1) or reverse (0) transform.|
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NUM_FRAMES             |    unsigned    |    8           | The number of batches of input data  |
-    |                        |                |                | that will be processed per iteration.|
-    +------------------------+----------------+----------------+--------------------------------------+
-    | CASC_LEN               |    unsigned    |    1           | Cascade length.                      |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: window                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 1: stream                            |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | UUT_SSR                |    unsigned    |    1           | Super Sample Rate  SSR parameter.    |
-    |                        |                |                | Defaults to 1.                       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
     | NITER                  |    unsigned    |    8           | Number of iterations to execute.     |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
     |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g., 0.0025 for floats and cfloats. |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               | unsigned       | Saturation     | 0: 'none'                            |
-    |                        |                | mode           |                                      |
-    |                        |                |                | 1: 'saturate'                        |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: 'symmetric saturate'              |
-    +------------------------+----------------+----------------+--------------------------------------+
-
-.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
-
-.. _CONFIGURATION_PARAMETERS_FFT:
-
-FFT Configuration Parameters
--------------------------------
-
-For the FFT/iFFT library element, use the following list of configurable parameters and default values.
-
-.. table:: FFT Configuration Parameters
-
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | TWIDDLE_TYPE           |    typename    |    cint16      | Twiddle Type.                        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | POINT_SIZE             |    unsigned    |    1024        | FFT point size.                      |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    17          | Acc results shift down value.        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | FFT_NIFFT              |    unsigned    |    0           | Forward (1) or reverse (0) transform.|
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | WINDOW_VSIZE           |    unsigned    |    1024        | Input/Output window size.            |
-    |                        |                |                |                                      |
-    |                        |                |                | By default, set to: $(POINT_SIZE).   |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | CASC_LEN               |    unsigned    |    1           | Cascade length.                      |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DYN_PT_SIZE            |    unsigned    |    0           | Enable (1) Dynamic Point size        |
-    |                        |                |                | feature.                             |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: window                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 1: stream                            |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | PARALLEL_POWER         |    unsigned    |   0            | Parallelism, controlling             |
-    |                        |                |                | Super Sample Rate operation.         |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | Number of iterations to execute.     |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
-    |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g., 0.0025 for floats and cfloats. |
+    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE              |    unsigned    |    0           | Supported types:                     |
@@ -409,874 +216,21 @@ For the FFT/iFFT library element, use the following list of configurable paramet
     |                        |                |                | 8: sine wave                         |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               | unsigned       | Saturation     | 0: 'none'                            |
-    |                        |                | mode           |                                      |
-    |                        |                |                | 1: 'saturate'                        |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: 'symmetric saturate'              |
-    +------------------------+----------------+----------------+--------------------------------------+
-
-.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
-
-.. _CONFIGURATION_PARAMETERS_FFT_WINDOW:
-
-FFT Window Configuration Parameters
---------------------------------------
-
-For the FFT Window library element, use the following list of configurable parameters and default values.
-
-.. table:: FFT Window Configuration Parameters
-
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | COEFF_TYPE             |    typename    |    cint16      | Coeff Type.                          |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | POINT_SIZE             |    unsigned    |    1024        | FFT point size.                      |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    17          | Acc results shift down value.        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | WINDOW_VSIZE           |    unsigned    |    1024        | Input/Output window size.            |
-    |                        |                |                |                                      |
-    |                        |                |                | By default, set to: $(POINT_SIZE).   |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DYN_PT_SIZE            |    unsigned    |    0           | Enable (1) Dynamic Point size        |
-    |                        |                |                | feature.                             |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: window                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 1: stream                            |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | WINDOW_CHOICE          |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: Hamming                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 1: Hann                              |
-    |                        |                |                |                                      |
-    |                        |                |                | 2: Blackman                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: Kaiser                            |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | Number of iterations to execute.     |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
-    |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g., 0.0025 for floats and cfloats. |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               | unsigned       | Saturation     | 0: 'none'                            |
-    |                        |                | mode           |                                      |
-    |                        |                |                | 1: 'saturate'                        |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: 'symmetric saturate'              |
-    +------------------------+----------------+----------------+--------------------------------------+
-
-.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
-
-.. _CONFIGURATION_PARAMETERS_FILTERS:
-
-FIR Configuration Parameters
--------------------------------
-
-The following list consists of configurable parameters for FIR library elements with their default values.
-
-.. table:: FIR Configuration Parameters
-
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | COEFF_TYPE             |    typename    |    int16       | Coefficient Type.                    |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | FIR_LEN                |    unsigned    |    81          | FIR length.                          |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    16          | Acc results shift down value.        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | INPUT_WINDOW_VSIZE     |    unsigned    |    512         | Input window size.                   |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | CASC_LEN               |    unsigned    |    1           | Cascade length.                      |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | INTERPOLATE_FACTOR     |    unsigned    |    1           | Interpolation factor,                |
-    |                        |                |                | see note below.                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DECIMATE_FACTOR        |    unsigned    |    1           | Decimation factor,                   |
-    |                        |                |                | see note below.                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | TDM_CHANNELS           |    unsigned    |    1           | Number of TDM Channels.              |
-    |                        |                |                | Only used by TDM FIR,                |
-    |                        |                |                | see note below.                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DUAL_IP                |    unsigned    |    0           | Dual inputs used in FIRs,            |
-    |                        |                |                | see note below.                      |
+    | DATA_SEED              |    unsigned    |    1           | Seed used to generate random numbers |
+    |                        |                |                | for the inputs.                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | NUM_OUTPUTS            |    unsigned    |    1           | Number of output ports.              |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | USE_COEFF_RELOAD       |    unsigned    |    0           | Use two sets of reloadable           |
-    |                        |                |                | coefficients, where the second set   |
-    |                        |                |                | deliberately corrupts a single,      |
-    |                        |                |                | randomly selected coefficient.       |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | PORT_API               |    unsigned    |    0           | Graph's port API.                    |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: window                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 1: stream                            |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | UUT_SSR                |    unsigned    |    1           | Super Sample Rate  SSR parameter.    |
-    |                        |                |                | Defaults to 1.                       |
-    |                        |                |                | see note below                       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
-    |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: random                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: impulse                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 4: all ones                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 5: incrementing pattern              |
-    |                        |                |                |                                      |
-    |                        |                |                | 6: sym incrementing pattern          |
-    |                        |                |                |                                      |
-    |                        |                |                | 8: sine wave                         |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | COEFF_STIM_TYPE        |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: random                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: impulse                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 4: all ones                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 5: incrementing pattern              |
-    |                        |                |                |                                      |
-    |                        |                |                | 6: sym incrementing pattern          |
-    |                        |                |                |                                      |
-    |                        |                |                | 8: sine wave                         |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | USE_CUSTOM_CONSTRAINT  |    unsigned    |    0           | Overwrite default or non-existent.   |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: no action                         |
-    |                        |                |                |                                      |
-    |                        |                |                | 1: use the Graph's access functions  |
-    |                        |                |                | to set a location and                |
-    |                        |                |                | overwrite a fifo_depth constraint.   |
-    |                        |                |                | see also :ref:`FIR_CONSTRAINTS`      |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               | unsigned       | Saturation     | 0: 'none'                            |
-    |                        |                | mode           |                                      |
-    |                        |                |                | 1: 'saturate'                        |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: 'symmetric saturate'              |
-    +------------------------+----------------+----------------+--------------------------------------+
-
-.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
-
-.. note:: Not all dsplib elements support all of the above configurable parameters. Unsupported parameters which are not used have no impact on execution, e.g., the `INTERPOLATE_FACTOR` parameter is only supported by interpolation filters and will be ignored by other library elements.
-
-.. _CONFIGURATION_PARAMETERS_GEMM:
-
-Matrix Multiply Configuration Parameters
--------------------------------------------
-
-For the Matrix Multiply (GeMM) library element, use the following list of configurable parameters and default values.
-
-.. table:: Matrix Multiply Configuration Parameters
-
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | T_DATA_A               |    typename    |    cint16      | Input A Data Type.                   |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | T_DATA_B               |    typename    |    cint16      | Input B Data Type.                   |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | P_DIM_A                |    unsigned    |    16          | Input A Dimension.                   |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | P_DIM_AB               |    unsigned    |    16          | Input AB Common Dimension.           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | P_DIM_B                |    unsigned    |    16          | Input B Dimension.                   |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    20          | Acc results shift down value.        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | P_CASC_LEN             |    unsigned    |    1           | Cascade length.                      |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | P_DIM_A_LEADING        |    unsigned    |    0           | ROW_MAJOR = 0                        |
-    |                        |                |                |                                      |
-    |                        |                |                | COL_MAJOR = 1                        |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | P_DIM_B_LEADING        |    unsigned    |    1           | ROW_MAJOR = 0                        |
-    |                        |                |                |                                      |
-    |                        |                |                | COL_MAJOR = 1                        |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | P_DIM_OUT_LEADING      |    unsigned    |    0           | ROW_MAJOR = 0                        |
-    |                        |                |                |                                      |
-    |                        |                |                | COL_MAJOR = 1                        |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | P_ADD_TILING_A         |    unsigned    |    1           | no additional tiling kernel = 0      |
-    |                        |                |                |                                      |
-    |                        |                |                | add additional tiling kernel = 1     |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | P_ADD_TILING_B         |    unsigned    |    1           | no additional tiling kernel = 0      |
-    |                        |                |                |                                      |
-    |                        |                |                | add additional tiling kernel = 1     |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | P_ADD_DETILING_OUT     |    unsigned    |    1           | no additional detiling kernel = 0    |
-    |                        |                |                |                                      |
-    |                        |                |                | add additional detiling kernel = 1   |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
-    |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g., 0.0025 for floats and cfloats. |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE_A            |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: random                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: impulse                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 4: all ones                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 5: incrementing pattern              |
-    |                        |                |                |                                      |
-    |                        |                |                | 6: sym incrementing pattern          |
-    |                        |                |                |                                      |
-    |                        |                |                | 8: sine wave                         |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE_B            |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: random                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: impulse                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 4: all ones                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 5: incrementing pattern              |
-    |                        |                |                |                                      |
-    |                        |                |                | 6: sym incrementing pattern          |
-    |                        |                |                |                                      |
-    |                        |                |                | 8: sine wave                         |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | P_SAT_MODE             | Unsigned int   | Saturation     | 0: 'none'                            |
-    |                        |                | mode           |                                      |
-    |                        |                |                | 1: 'saturate'                        |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: 'symmetric saturate'              |
-    +------------------------+----------------+----------------+--------------------------------------+
-
-.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
-
-.. _CONFIGURATION_PARAMETERS_GEMV:
-
-Matrix Vector Multiply Configuration Parameters
------------------------------------------------
-
-For the Matrix Vector Multiply (GeMV) library element, use the following list of configurable parameters and default values.
-
-.. table:: Matrix Vector Multiply Configuration Parameters
-
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | DATA_A                 |    typename    |    cint16      | Input Matrix A Data Type.            |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DATA_B                 |    typename    |    cint16      | Input Vector B Data Type.            |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_A                  |    unsigned    |    16          | Input Matrix A Dimension             |
-    |                        |                |                | (number of matrix rows).             |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_B                  |    unsigned    |    16          | Input Vector B Dimension             |
-    |                        |                |                | (number of matrix columns).          |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    16          | Acc results shift down value.        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | CASC_LEN               |    unsigned    |    1           | Cascade length.                      |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NUM_FRAMES             |    unsigned    |    1           | The number of batches of input data  |
-    |                        |                |                | that will be processed per iteration.|
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
-    |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE_A            |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: random                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 3:  impulse                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 4: all ones                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 5: incrementing pattern              |
-    |                        |                |                |                                      |
-    |                        |                |                | 6: sym incrementing pattern          |
-    |                        |                |                |                                      |
-    |                        |                |                | 8: sine wave                         |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE_B            |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: random                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: impulse                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 4: all ones                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 5: incrementing pattern              |
-    |                        |                |                |                                      |
-    |                        |                |                | 6: sym incrementing pattern          |
-    |                        |                |                |                                      |
-    |                        |                |                | 8: sine wave                         |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               | unsigned       | Saturation     | 0: 'none'                            |
-    |                        |                | mode           |                                      |
-    |                        |                |                | 1: 'saturate'                        |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: 'symmetric saturate'              |
-    +------------------------+----------------+----------------+--------------------------------------+
-
-.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
-
-.. _CONFIGURATION_PARAMETERS_HADAMARD:
-
-Hadamard Product configuration parameters
------------------------------------------
-
-For the Hadamard Product library element, use the list of configurable parameters and default values is presented below.
-
-.. table:: Hadamard Product configuration parameters
-
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | DATA_A                 |    typename    |    cint16      | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DATA_B                 |    typename    |    cint16      | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIM                    |    unsigned    |    256         | Number of samples in the             |
-    |                        |                |                | vectors A and B.                     |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NUM_FRAMES             |    unsigned    |    1           | Number of vectors to be processed.   |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    6           | Acc results shift down value.        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
-    |                        |                |                |                                      |
-    |                        |                |                | 0 - window                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 1 - stream                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               |    unsigned    | Saturation     | 0: 'none'                            |
-    |                        |                | mode           |                                      |
-    |                        |                |                | 1: 'saturate'                        |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: 'symmetric saturate'              |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | Number of iterations to execute.     |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
-    |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE              |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
-    |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
-    |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
-    |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
-    +------------------------+----------------+----------------+--------------------------------------+
-
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
-
-.. _CONFIGURATION_PARAMETERS_MRFFT:
-
-Mixed Radix FFT Configuration Parameters
-----------------------------------------
-
-For the Mixed Radix library element, use the following list of configurable parameters and default values.
-
-.. table:: FFT Configuration Parameters
-
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | TWIDDLE_TYPE           |    typename    |    cint16      | Twiddle Type.                        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | POINT_SIZE             |    unsigned    |    48          | FFT point size.                      |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    6           | Acc results shift down value.        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | FFT_NIFFT              |    unsigned    |    0           | Forward (1) or reverse (0) transform.|
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | WINDOW_VSIZE           |    unsigned    |    48          | Input/Output window size.            |
-    |                        |                |                |                                      |
-    |                        |                |                | By default, set to: $(POINT_SIZE).   |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | CASC_LEN               |    unsigned    |    1           | Cascade length.                      |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: window                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 1: stream                            |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | Number of iterations to execute.     |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
-    |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE              |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: random                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: impulse                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 4: all ones                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 5: incrementing pattern              |
-    |                        |                |                |                                      |
-    |                        |                |                | 6: sym incrementing pattern          |
-    |                        |                |                |                                      |
-    |                        |                |                | 8: sine wave                         |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               | unsigned       | Saturation     | 0: 'none'                            |
-    |                        |                | mode           |                                      |
-    |                        |                |                | 1: 'saturate'                        |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: 'symmetric saturate'              |
-    +------------------------+----------------+----------------+--------------------------------------+
-
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
-
-.. _CONFIGURATION_PARAMETERS_KRONECKER:
-
-Kronecker configuration parameters
---------------------------------------
-
-For the Kronecker library element the list of configurable parameters and default values is presented below.
-
-.. table:: Kronecker configuration parameters
-
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | T_DATA_A               |    typename    |    int32       | Data type of input matrix A.         |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | T_DATA_B               |    typename    |    int32       | Data type of input matrix B.         |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_A_ROWS             |    unsigned    |    16          | Number of rows of input Matrix A.    |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_A_COLS             |    unsigned    |    8           | Number of columns of input Matrix A. |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_B_ROWS             |    unsigned    |    16          | Number of rows of input Matrix B.    |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_B_COLS             |    unsigned    |    8           | Number of columns of input Matrix B. |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NUM_FRAMES             |    unsigned    |    1           | Number of frames in a window.        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | API_IO                 |    unsigned    |    1           | Graph's port API.                    |
-    |                        |                |                |                                      |
-    |                        |                |                | 0 - in window / out window           |
-    |                        |                |                |                                      |
-    |                        |                |                | 1 - in window / out stream           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    0           | Acc results shift down value.        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | UUT_SSR                |    unsigned    |    1           | Super Sample Rate.                   |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
-    |                        |                |                |                                      |
-    |                        |                |                +------------------+-------------------+
-    |                        |                |                |     AIE          |    AIE-ML         |
-    |                        |                |                +------------------+-------------------+
-    |                        |                |                |                  |                   |
-    |                        |                |                | 0 - rnd_floor    | 0 - rnd_floor     |
-    |                        |                |                |                  |                   |
-    |                        |                |                | 1 - rnd_ceil     | 1 - rnd_ceil      |
-    |                        |                |                |                  |                   |
-    |                        |                |                | 2 - rnd_pos_inf  | 2 - rnd_sym_floor |
-    |                        |                |                |                  |                   |
-    |                        |                |                | 3 - rnd_neg_inf  | 3 - rnd_sym_ceil  |
-    |                        |                |                |                  |                   |
-    |                        |                |                | 4 - rnd_sym_inf  | 8 - rnd_neg_inf   |
-    |                        |                |                |                  |                   |
-    |                        |                |                | 5 - rnd_sym_zero | 9 - rnd_pos_inf   |
-    |                        |                |                |                  |                   |
-    |                        |                |                | 6 - rnd_conv_even| 10 - rnd_sym_zero |
-    |                        |                |                |                  |                   |
-    |                        |                |                | 7 - rnd_conv_odd | 11 - rnd_sym_inf  |
-    |                        |                |                |                  |                   |
-    |                        |                |                |                  | 12 - rnd_conv_even|
-    |                        |                |                |                  |                   |
-    |                        |                |                |                  | 13 - rnd_conv_odd |
-    |                        |                |                |                  |                   |
-    +------------------------+----------------+----------------+------------------+-------------------+
-    | SAT_MODE               |    unsigned    |    1           | Saturation mode.                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0 - none                             |
-    |                        |                |                |                                      |
-    |                        |                |                | 1 - saturate                         |
-    |                        |                |                |                                      |
-    |                        |                |                | 3 - symmetric saturate               |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | Number of iterations to run.         |
-    | Test Parameter         |                |                |                                      |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE              |    unsigned    |    0           | Input data.                          |
-    | Test Parameter         |                |                |                                      |
-    |                        |                |                | Supported stimulus types:            |
-    |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
-    |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
-    |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
-    |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
-
-
-.. _CONFIGURATION_PARAMETERS_OUTER_TENSOR:
-
-Outer Tensor configuration parameters
---------------------------------------
-
-For the Outer Tensor library element, use the following list of configurable parameters and default values.
-
-.. table:: Outer Tensor configuration parameters
-
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | T_DATA_A               |    typename    |    int32       | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | T_DATA_B               |    typename    |    int32       | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_SIZE_A             |    unsigned    |    16          | Dimension size of vector A           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_SIZE_B             |    unsigned    |    32          | Dimension size of vector B           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NUM_FRAMES             |    unsigned    |    1           | Number of frames in a window.        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    0           | Acc results shift down value.        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
-    |                        |                |                |                                      |
-    |                        |                |                | 0 - window                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 1 - stream                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | UUT_SSR                |    unsigned    |    1           | Super Sample Rate  SSR parameter.    |
-    |                        |                |                | Defaults to 1.                       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | Number of iterations to execute.     |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               |    unsigned    |    1           | 0: 'none'                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 1: 'saturate'                        |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: 'symmetric saturate'              |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE              |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: random                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: impulse                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 4: all ones                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 5: incrementing pattern              |
-    |                        |                |                |                                      |
-    |                        |                |                | 6: sym incrementing pattern          |
-    |                        |                |                |                                      |
-    |                        |                |                | 8: sine wave                         |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
-
-.. _CONFIGURATION_PARAMETERS_SAMPLE_DELAY:
-
-Sample Delay Configuration Parameters
--------------------------------------
-
-For the Sample Delay library elements, use the following list of configurable parameters and default values.
-
-.. table:: Sample Delay Configuration Parameters
-
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | WINDOW_VSIZE           |    unsigned    |    256         | Input/Output window size.            |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | PORT_API               |    unsigned    |    0           | 0 = window,                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 1 = stream                           |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DELAY_INI_VALUE        |    unsigned    |    10          | The delay to the input data.         |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | MAX_DELAY              |    unsigned    |   256          | The maximum threshold on the delay.  |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: random                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: impulse                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 4: all ones                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 5: incrementing pattern              |
-    |                        |                |                |                                      |
-    |                        |                |                | 6: sym incrementing pattern          |
-    |                        |                |                |                                      |
-    |                        |                |                | 8: sine wave                         |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-
-
-.. _CONFIGURATION_PARAMETERS_WIDGETS:
-
-Widgets Configuration Parameters
------------------------------------
-
-For the Widgets library elements, use the following list of configurable parameters and default values.
-
-.. table:: Widget API Casts Configuration Parameters
-
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | IN_API                 |    unsigned    |    0           | 0: window                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 1: stream                            |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | OUT_API                |    unsigned    |    0           | 0: window,                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 1: stream                            |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NUM_INPUTS             |    unsigned    |    1           | The number of input stream           |
-    |                        |                |                | interfaces.                          |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | WINDOW_VSIZE           |    unsigned    |    256         | Input/Output window size.            |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NUM_OUTPUT_CLONES      |    unsigned    |    1           | The number of output window          |
-    |                        |                |                | port copies                          |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | PATTERN                |    unsigned    |    0           | The pattern of interleave            |
-    |                        |                |                | by which samples from each           |
-    |                        |                |                | of two streams are arranged          |
-    |                        |                |                | into the destination window,         |
-    |                        |                |                | or from the input window             |
-    |                        |                |                | to dual output streams.              |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
-    |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g., 0.0025 for floats and cfloats. |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: random                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: impulse                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 4: all ones                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 5: incrementing pattern              |
-    |                        |                |                |                                      |
-    |                        |                |                | 6: sym incrementing pattern          |
-    |                        |                |                |                                      |
-    |                        |                |                | 8: sine wave                         |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-
-
-.. table:: Widget Real to Complex Configuration Parameters
-
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DATA_OUT_TYPE          |    typename    |    cint16      | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | WINDOW_VSIZE           |    unsigned    |    256         | Input/Output window size.            |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
-    |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g., 0.0025 for floats and cfloats. |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0: random                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: impulse                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 4: all ones                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 5: incrementing pattern              |
-    |                        |                |                |                                      |
-    |                        |                |                | 6: sym incrementing pattern          |
+    | AIE_VARIANT            |    unsigned    |    1           | AIE variant to use for metadata      |
+    |                        |                |                | validation.                          |
+    |                        |                |                | Ignored for compilation and          |
+    |                        |                |                | simulation purposes.                 |
     |                        |                |                |                                      |
-    |                        |                |                | 8: sine wave                         |
+    |                        |                |                | 1: AIE                               |
     |                        |                |                |                                      |
+    |                        |                |                | 2: AIE-ML                            |
     +------------------------+----------------+----------------+--------------------------------------+
-
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
-
 
 .. _CONFIGURATION_PARAMETERS_CONV_CORR:
 
@@ -1321,7 +275,7 @@ For the Convolution / Correlation library element the list of configurable param
     | G_LEN                  |    unsigned    |    32          | Dimension size of vector G.          |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    0           | Acc results shift down value.        |
+    | SHIFT                  |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
@@ -1331,48 +285,859 @@ For the Convolution / Correlation library element the list of configurable param
     |                        |                |                | 1 - stream                           |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    8           | Number of iterations to execute.     |
+    | NITER                  |    unsigned    |    8           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               |    unsigned    |    1           | 0: 'none'                            |
-    |                        |                |                |                                      |
-    |                        |                |                | 1: 'saturate'                        |
-    |                        |                |                |                                      |
-    |                        |                |                | 3: 'symmetric saturate'              |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE_F            |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
-    |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
-    |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
-    |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE_G            |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
-    |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
-    |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
-    |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
+    | STIM_TYPE_F            |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
+    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | STIM_TYPE_G            |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
+    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+.. _CONFIGURATION_PARAMETERS_DDS_MIXER:
+
+DDS/Mixer Configuration Parameters
+----------------------------------
+
+For the DDS/Mixer library element, use the following list of configurable parameters and default values:
+
+.. table:: DDS/Mixer Configuration Parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
+    | WINDOW_VSIZE           |    unsigned    |    256         | Input/Output window size.            |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | MIXER_MODE             |    unsigned    |    2           | The mode of operation of the         |
+    |                        |                |                | dds_mixer.                           |
+    |                        |                |                |                                      |
+    |                        |                |                | 0: dds only                          |
+    |                        |                |                |                                      |
+    |                        |                |                | 1: dds plus single data channel      |
+    |                        |                |                | mixer                                |
+    |                        |                |                |                                      |
+    |                        |                |                | 2: dds plus two data channel         |
+    |                        |                |                | mixer, for symmetrical carrier       |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | P_API                  |    unsigned    |    0           | 0: window,                           |
+    |                        |                |                |                                      |
+    |                        |                |                | 1: stream                            |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | UUT_SSR                |    unsigned    |    1           | Super Sample Rate  SSR parameter.    |
+    |                        |                |                | Defaults to 1.                       |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | INITIAL_DDS_OFFSET     |    unsigned    |    0           | Initial DDS offset.                  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DDS_PHASE_INC          |    unsigned    | 0xD6555555     | DDS Phase Increment.                 |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DATA_STIM_TYPE         |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
+    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | USE_PHASE_RELOAD       |    unsigned    | static         | 0: 'static phase'                    |
+    |                        |                | phase          |                                      |
+    |                        |                |                | 1: 'reload phase offset'             |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+Additionally, for the DDS/Mixer library element that uses LUTs, an additional template parameter is available:
+
++------+-----------+---------+---------------------------------------------------------------------------------------------+
+| Name |    Type   | Default |                                         Description                                         |
++======+===========+=========+=============================================================================================+
+| SFDR | unsigned  | 90      | specifies the expected Spurious Free Dynamic Range that the useR expects from the generated |
+|      |           |         | design.                                                                                     |
++------+-----------+---------+---------------------------------------------------------------------------------------------+
+
+.. _CONFIGURATION_PARAMETERS_DFT:
+
+DFT Configuration Parameters
+-------------------------------
+
+For the DFT library element, use the following list of configurable parameters and default values.
+
+.. table:: DFT Configuration Parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | TWIDDLE_TYPE           |    typename    |    cint16      | Twiddle Type.                        |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | POINT_SIZE             |    unsigned    |    16          | DFT point size.                      |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SHIFT                  |    unsigned    |    8           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | FFT_NIFFT              |    unsigned    |    0           | Forward (1) or reverse (0) transform.|
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NUM_FRAMES             |    unsigned    |    8           | The number of batches of input data  |
+    |                        |                |                | that will be processed per iteration.|
+    +------------------------+----------------+----------------+--------------------------------------+
+    | CASC_LEN               |    unsigned    |    1           | Cascade length.                      |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
+    |                        |                |                |                                      |
+    |                        |                |                | 0: window                            |
+    |                        |                |                |                                      |
+    |                        |                |                | 1: stream                            |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | UUT_SSR                |    unsigned    |    1           | Super Sample Rate  SSR parameter.    |
+    |                        |                |                | Defaults to 1.                       |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    8           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
+
+.. _CONFIGURATION_PARAMETERS_FFT:
+
+FFT Configuration Parameters
+-------------------------------
+
+For the FFT/iFFT library element, use the following list of configurable parameters and default values.
+
+.. table:: FFT Configuration Parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | TWIDDLE_TYPE           |    typename    |    cint16      | Twiddle Type.                        |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | POINT_SIZE             |    unsigned    |    1024        | FFT point size.                      |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SHIFT                  |    unsigned    |    17          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | FFT_NIFFT              |    unsigned    |    0           | Forward (1) or reverse (0) transform.|
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | WINDOW_VSIZE           |    unsigned    |    1024        | Input/Output window size.            |
+    |                        |                |                |                                      |
+    |                        |                |                | By default, set to: $(POINT_SIZE).   |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | CASC_LEN               |    unsigned    |    1           | Cascade length.                      |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DYN_PT_SIZE            |    unsigned    |    0           | Enable (1) Dynamic Point size        |
+    |                        |                |                | feature.                             |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
+    |                        |                |                |                                      |
+    |                        |                |                | 0: window                            |
+    |                        |                |                |                                      |
+    |                        |                |                | 1: stream                            |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | PARALLEL_POWER         |    unsigned    |   0            | Parallelism, controlling             |
+    |                        |                |                | Super Sample Rate operation.         |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    4           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
+
+.. _CONFIGURATION_PARAMETERS_FFT_WINDOW:
+
+FFT Window Configuration Parameters
+--------------------------------------
+
+For the FFT Window library element, use the following list of configurable parameters and default values.
+
+.. table:: FFT Window Configuration Parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | COEFF_TYPE             |    typename    |    cint16      | Coeff Type.                          |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | POINT_SIZE             |    unsigned    |    1024        | FFT point size.                      |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SHIFT                  |    unsigned    |    17          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | WINDOW_VSIZE           |    unsigned    |    1024        | Input/Output window size.            |
+    |                        |                |                |                                      |
+    |                        |                |                | By default, set to: $(POINT_SIZE).   |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DYN_PT_SIZE            |    unsigned    |    0           | Enable (1) Dynamic Point size        |
+    |                        |                |                | feature.                             |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
+    |                        |                |                |                                      |
+    |                        |                |                | 0: window                            |
+    |                        |                |                |                                      |
+    |                        |                |                | 1: stream                            |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | WINDOW_CHOICE          |    unsigned    |    0           | Supported types:                     |
+    |                        |                |                |                                      |
+    |                        |                |                | 0: Hamming                           |
+    |                        |                |                |                                      |
+    |                        |                |                | 1: Hann                              |
+    |                        |                |                |                                      |
+    |                        |                |                | 2: Blackman                          |
+    |                        |                |                |                                      |
+    |                        |                |                | 3: Kaiser                            |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    4           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+
+.. _CONFIGURATION_PARAMETERS_FILTERS:
+
+FIR Configuration Parameters
+-------------------------------
+
+The following list consists of configurable parameters for FIR library elements with their default values.
+
+.. table:: FIR Configuration Parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | COEFF_TYPE             |    typename    |    int16       | Coefficient Type.                    |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | FIR_LEN                |    unsigned    |    81          | FIR length.                          |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SHIFT                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | INPUT_WINDOW_VSIZE     |    unsigned    |    512         | Input window size.                   |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | CASC_LEN               |    unsigned    |    1           | Cascade length.                      |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | INTERPOLATE_FACTOR     |    unsigned    |    1           | Interpolation factor,                |
+    |                        |                |                | see note below.                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DECIMATE_FACTOR        |    unsigned    |    1           | Decimation factor,                   |
+    |                        |                |                | see note below.                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | TDM_CHANNELS           |    unsigned    |    1           | Number of TDM Channels.              |
+    |                        |                |                | Only used by TDM FIR,                |
+    |                        |                |                | see note below.                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DUAL_IP                |    unsigned    |    0           | Dual inputs used in FIRs,            |
+    |                        |                |                | see note below.                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NUM_OUTPUTS            |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | USE_COEFF_RELOAD       |    unsigned    |    0           | Use two sets of reloadable           |
+    |                        |                |                | coefficients, where the second set   |
+    |                        |                |                | deliberately corrupts a single,      |
+    |                        |                |                | randomly selected coefficient.       |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | PORT_API               |    unsigned    |    0           | Graph's port API.                    |
+    |                        |                |                |                                      |
+    |                        |                |                | 0: window                            |
+    |                        |                |                |                                      |
+    |                        |                |                | 1: stream                            |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | UUT_SSR                |    unsigned    |    1           | Super Sample Rate  SSR parameter.    |
+    |                        |                |                | Defaults to 1.                       |
+    |                        |                |                | see note below                       |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DATA_STIM_TYPE         |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
+    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | COEFF_STIM_TYPE        |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
+    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | USE_CUSTOM_CONSTRAINT  |    unsigned    |    0           | Overwrite default or non-existent.   |
+    |                        |                |                |                                      |
+    |                        |                |                | 0: no action                         |
+    |                        |                |                |                                      |
+    |                        |                |                | 1: use the Graph's access functions  |
+    |                        |                |                | to set a location and                |
+    |                        |                |                | overwrite a fifo_depth constraint.   |
+    |                        |                |                | see also :ref:`FIR_CONSTRAINTS`      |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
+
+.. note:: Not all dsplib elements support all of the above configurable parameters. Unsupported parameters which are not used have no impact on execution, e.g., the `INTERPOLATE_FACTOR` parameter is only supported by interpolation filters and will be ignored by other library elements.
+
+.. _CONFIGURATION_PARAMETERS_HADAMARD:
+
+Hadamard Product configuration parameters
+-----------------------------------------
+
+For the Hadamard Product library element, use the list of configurable parameters and default values is presented below.
+
+.. table:: Hadamard Product configuration parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | DATA_A                 |    typename    |    cint16      | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DATA_B                 |    typename    |    cint16      | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIM                    |    unsigned    |    256         | Number of samples in the             |
+    |                        |                |                | vectors A and B.                     |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NUM_FRAMES             |    unsigned    |    1           | Number of vectors to be processed.   |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SHIFT                  |    unsigned    |    6           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
+    |                        |                |                |                                      |
+    |                        |                |                | 0 - window                           |
+    |                        |                |                |                                      |
+    |                        |                |                | 1 - stream                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    4           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+
+.. _CONFIGURATION_PARAMETERS_KRONECKER:
+
+Kronecker configuration parameters
+--------------------------------------
+
+For the Kronecker library element the list of configurable parameters and default values is presented below.
+
+.. table:: Kronecker configuration parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | T_DATA_A               |    typename    |    int32       | Data type of input matrix A.         |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | T_DATA_B               |    typename    |    int32       | Data type of input matrix B.         |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIM_A_ROWS             |    unsigned    |    16          | Number of rows of input Matrix A.    |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIM_A_COLS             |    unsigned    |    8           | Number of columns of input Matrix A. |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIM_B_ROWS             |    unsigned    |    16          | Number of rows of input Matrix B.    |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIM_B_COLS             |    unsigned    |    8           | Number of columns of input Matrix B. |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NUM_FRAMES             |    unsigned    |    1           | Number of frames in a window.        |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | API_IO                 |    unsigned    |    1           | Graph's port API.                    |
+    |                        |                |                |                                      |
+    |                        |                |                | 0 - in window / out window           |
+    |                        |                |                |                                      |
+    |                        |                |                | 1 - in window / out stream           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SHIFT                  |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | UUT_SSR                |    unsigned    |    1           | Super Sample Rate.                   |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    4           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+
+.. _CONFIGURATION_PARAMETERS_GEMM:
+
+Matrix Multiply Configuration Parameters
+-------------------------------------------
+
+For the Matrix Multiply (GeMM) library element, use the following list of configurable parameters and default values.
+
+.. table:: Matrix Multiply Configuration Parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | T_DATA_A               |    typename    |    cint16      | Input A Data Type.                   |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | T_DATA_B               |    typename    |    cint16      | Input B Data Type.                   |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | P_DIM_A                |    unsigned    |    16          | Input A Dimension.                   |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | P_DIM_AB               |    unsigned    |    16          | Input AB Common Dimension.           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | P_DIM_B                |    unsigned    |    16          | Input B Dimension.                   |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SHIFT                  |    unsigned    |    20          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | P_CASC_LEN             |    unsigned    |    1           | Cascade length.                      |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | P_DIM_A_LEADING        |    unsigned    |    0           | ROW_MAJOR = 0                        |
+    |                        |                |                |                                      |
+    |                        |                |                | COL_MAJOR = 1                        |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | P_DIM_B_LEADING        |    unsigned    |    1           | ROW_MAJOR = 0                        |
+    |                        |                |                |                                      |
+    |                        |                |                | COL_MAJOR = 1                        |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | P_DIM_OUT_LEADING      |    unsigned    |    0           | ROW_MAJOR = 0                        |
+    |                        |                |                |                                      |
+    |                        |                |                | COL_MAJOR = 1                        |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | P_ADD_TILING_A         |    unsigned    |    1           | no additional tiling kernel = 0      |
+    |                        |                |                |                                      |
+    |                        |                |                | add additional tiling kernel = 1     |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | P_ADD_TILING_B         |    unsigned    |    1           | no additional tiling kernel = 0      |
+    |                        |                |                |                                      |
+    |                        |                |                | add additional tiling kernel = 1     |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | P_ADD_DETILING_OUT     |    unsigned    |    1           | no additional detiling kernel = 0    |
+    |                        |                |                |                                      |
+    |                        |                |                | add additional detiling kernel = 1   |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | STIM_TYPE_A            |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
+    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | STIM_TYPE_B            |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
+    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
+
+.. _CONFIGURATION_PARAMETERS_GEMV:
+
+Matrix Vector Multiply Configuration Parameters
+-----------------------------------------------
+
+For the Matrix Vector Multiply (GeMV) library element, use the following list of configurable parameters and default values.
+
+.. table:: Matrix Vector Multiply Configuration Parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | DATA_A                 |    typename    |    cint16      | Input Matrix A Data Type.            |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DATA_B                 |    typename    |    cint16      | Input Vector B Data Type.            |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIM_A                  |    unsigned    |    16          | Input Matrix A Dimension             |
+    |                        |                |                | (number of matrix rows).             |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIM_B                  |    unsigned    |    16          | Input Vector B Dimension             |
+    |                        |                |                | (number of matrix columns).          |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SHIFT                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | CASC_LEN               |    unsigned    |    1           | Cascade length.                      |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NUM_FRAMES             |    unsigned    |    1           | The number of batches of input data  |
+    |                        |                |                | that will be processed per iteration.|
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | STIM_TYPE_A            |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
+    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | STIM_TYPE_B            |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
+    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+
+.. _CONFIGURATION_PARAMETERS_MRFFT:
+
+Mixed Radix FFT Configuration Parameters
+----------------------------------------
+
+For the Mixed Radix library element, use the following list of configurable parameters and default values.
+
+.. table:: FFT Configuration Parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | TWIDDLE_TYPE           |    typename    |    cint16      | Twiddle Type.                        |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | POINT_SIZE             |    unsigned    |    48          | FFT point size.                      |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SHIFT                  |    unsigned    |    6           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | FFT_NIFFT              |    unsigned    |    0           | Forward (1) or reverse (0) transform.|
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | WINDOW_VSIZE           |    unsigned    |    48          | Input/Output window size.            |
+    |                        |                |                |                                      |
+    |                        |                |                | By default, set to: $(POINT_SIZE).   |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | CASC_LEN               |    unsigned    |    1           | Cascade length.                      |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
+    |                        |                |                |                                      |
+    |                        |                |                | 0: window                            |
+    |                        |                |                |                                      |
+    |                        |                |                | 1: stream                            |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    4           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
+
+
+.. _CONFIGURATION_PARAMETERS_OUTER_TENSOR:
+
+Outer Tensor configuration parameters
+--------------------------------------
+
+For the Outer Tensor library element, use the following list of configurable parameters and default values.
+
+.. table:: Outer Tensor configuration parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | T_DATA_A               |    typename    |    int32       | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | T_DATA_B               |    typename    |    int32       | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIM_SIZE_A             |    unsigned    |    16          | Dimension size of vector A           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIM_SIZE_B             |    unsigned    |    32          | Dimension size of vector B           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NUM_FRAMES             |    unsigned    |    1           | Number of frames in a window.        |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SHIFT                  |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
+    |                        |                |                |                                      |
+    |                        |                |                | 0 - window                           |
+    |                        |                |                |                                      |
+    |                        |                |                | 1 - stream                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | UUT_SSR                |    unsigned    |    1           | Super Sample Rate  SSR parameter.    |
+    |                        |                |                | Defaults to 1.                       |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    4           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+
+.. _CONFIGURATION_PARAMETERS_SAMPLE_DELAY:
+
+Sample Delay Configuration Parameters
+-------------------------------------
+
+For the Sample Delay library elements, use the following list of configurable parameters and default values.
+
+.. table:: Sample Delay Configuration Parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | WINDOW_VSIZE           |    unsigned    |    256         | Input/Output window size.            |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | PORT_API               |    unsigned    |    0           | 0 = window,                          |
+    |                        |                |                |                                      |
+    |                        |                |                | 1 = stream                           |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DELAY_INI_VALUE        |    unsigned    |    10          | The delay to the input data.         |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | MAX_DELAY              |    unsigned    |   256          | The maximum threshold on the delay.  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DATA_STIM_TYPE         |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
+    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+
+.. _CONFIGURATION_PARAMETERS_WIDGETS:
+
+Widgets Configuration Parameters
+-----------------------------------
+
+For the Widgets library elements, use the following list of configurable parameters and default values.
+
+.. table:: Widget API Casts Configuration Parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | IN_API                 |    unsigned    |    0           | 0: window                            |
+    |                        |                |                |                                      |
+    |                        |                |                | 1: stream                            |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | OUT_API                |    unsigned    |    0           | 0: window,                           |
+    |                        |                |                |                                      |
+    |                        |                |                | 1: stream                            |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NUM_INPUTS             |    unsigned    |    1           | The number of input stream           |
+    |                        |                |                | interfaces.                          |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | WINDOW_VSIZE           |    unsigned    |    256         | Input/Output window size.            |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NUM_OUTPUT_CLONES      |    unsigned    |    1           | The number of output window          |
+    |                        |                |                | port copies                          |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | PATTERN                |    unsigned    |    0           | The pattern of interleave            |
+    |                        |                |                | by which samples from each           |
+    |                        |                |                | of two streams are arranged          |
+    |                        |                |                | into the destination window,         |
+    |                        |                |                | or from the input window             |
+    |                        |                |                | to dual output streams.              |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DATA_STIM_TYPE         |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
+    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+
+.. table:: Widget Real to Complex Configuration Parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DATA_OUT_TYPE          |    typename    |    cint16      | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | WINDOW_VSIZE           |    unsigned    |    256         | Input/Output window size.            |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DATA_STIM_TYPE         |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
+    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+
 
 
 .. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.

@@ -13,9 +13,8 @@ This library element implements Hadamard Product of two input vectors. Element-w
 The Hadamard Product IP has configurable vector dimension, data type, window size, scaling (as a shift), interface api (stream/window) and parallelism factor.
 Template parameters are used to configure the top level graph of the hadamard_graph class.
 
-~~~~~~~~~~~
 Entry Point
-~~~~~~~~~~~
+===========
 
 The graph entry point is the following:
 
@@ -23,95 +22,92 @@ The graph entry point is the following:
 
     xf::dsp::aie::hadamard::hadamard_graph
 
-~~~~~~~~~~~~~~
 Device Support
-~~~~~~~~~~~~~~
+==============
 
 The Hadamard supports AIE1 and AIE-ML devices.
 - Round modes available and the enumerated values of round modes differ between AIE1 and AIE-ML. See :ref:`COMPILING_AND_SIMULATING`.
 
 
-~~~~~~~~~~~~~~~
 Supported Types
-~~~~~~~~~~~~~~~
+===============
 The data types of input ports A and B (inA and inB) are controlled by ``TT_DATA_A`` and ``TT_DATA_B`` respectively.
 Both inputs may take one of the 6 choices: int16, int32, cint16, cint32, float and cfloat. It must be kept in mind that depending on the input type combinations, output type will be determined by the IP.
-Please see table :ref:`HADAMARD_output_type`: for allowed input data type combinations and resultant output type.
+Please see table :ref:`HADAMARD_output_type`: for allowed input data type combinations and resultant output type. In addition, the vector size granularity is given for the data type combinations. ``TP_DIM`` should be a multiple of the listed vector size.
 
 .. _HADAMARD_output_type:
 
 .. table:: Hadamard Output Data Type
    :align: center
 
-+-------------------+-------------------+------------------+
-| Input Data Type A | Input Data Type B | Output Data Type |
-+===================+===================+==================+
-| int16             | int16             | int16            |
-+-------------------+-------------------+------------------+
-| int16             | int32             | int32            |
-+-------------------+-------------------+------------------+
-| int16             | cint16            | cint16           |
-+-------------------+-------------------+------------------+
-| int16             | cint32            | cint32           |
-+-------------------+-------------------+------------------+
-| int32             | int16             | int32            |
-+-------------------+-------------------+------------------+
-| int32             | int32             | int32            |
-+-------------------+-------------------+------------------+
-| int32             | cint16            | cint32 *         |
-+-------------------+-------------------+------------------+
-| int32             | cint32            | cint32           |
-+-------------------+-------------------+------------------+
-| cint16            | int16             | cint16           |
-+-------------------+-------------------+------------------+
-| cint16            | int32             | cint32 *         |
-+-------------------+-------------------+------------------+
-| cint16            | cint16            | cint16           |
-+-------------------+-------------------+------------------+
-| cint16            | cint32            | cint32           |
-+-------------------+-------------------+------------------+
-| cint32            | int16             | cint32           |
-+-------------------+-------------------+------------------+
-| cint32            | int32             | cint32           |
-+-------------------+-------------------+------------------+
-| cint32            | cint16            | cint32           |
-+-------------------+-------------------+------------------+
-| cint32            | cint32            | cint32           |
-+-------------------+-------------------+------------------+
-| float             | float             | float            |
-+-------------------+-------------------+------------------+
-| float             | cfloat            | cfloat           |
-+-------------------+-------------------+------------------+
-| cfloat            | cfloat            | cfloat           |
-+-------------------+-------------------+------------------+
+   +-------------------+-------------------+------------------+----------------------------+
+   | Input Data Type A | Input Data Type B | Output Data Type | Vector Size (window/stream)|      
+   +===================+===================+==================+============================+
+   | int16             | int16             | int16            |         16 / 8             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | int16             | int32             | int32            |          8 / 8             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | int16             | cint16            | cint16           |          8 / 8             |                  
+   +-------------------+-------------------+------------------+----------------------------+
+   | int16             | cint32            | cint32           |          8 / 8             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | int32             | int16             | int32            |          8 / 8             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | int32             | int32             | int32            |          8 / 4             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | int32             | cint16            | cint32 *         |          4 / 4             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | int32             | cint32            | cint32           |          4 / 4             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | cint16            | int16             | cint16           |          8 / 8             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | cint16            | int32             | cint32 *         |          4 / 4             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | cint16            | cint16            | cint16           |          8 / 4             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | cint16            | cint32            | cint32           |          4 / 4             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | cint32            | int16             | cint32           |          8 / 8             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | cint32            | int32             | cint32           |          4 / 4             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | cint32            | cint16            | cint32           |          4 / 4             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | cint32            | cint32            | cint32           |          4 / 2             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | float             | float             | float            |          8 / 4             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | float             | cfloat            | cfloat           |          4 / 4             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | cfloat            | float             | cfloat           |          4 / 4             |
+   +-------------------+-------------------+------------------+----------------------------+
+   | cfloat            | cfloat            | cfloat           |          4 / 2             |
+   +-------------------+-------------------+------------------+----------------------------+
 
 .. note:: * Type combination is not supported by AIE-ML device.
 
-~~~~~~~~~~~~~~~~~~~
 Template Parameters
-~~~~~~~~~~~~~~~~~~~
+===================
 
 To see details on the template parameters for the Hadamard Product, see :ref:`API_REFERENCE`.
 
 
-~~~~~~~~~~~~~~~~
-Access functions
-~~~~~~~~~~~~~~~~
+Access Functions
+================
 
 To see details on the access functions for the Hadamard Product, see :ref:`API_REFERENCE`.
 
-~~~~~
 Ports
-~~~~~
+=====
 
 To see details on the ports for the Hadamard Product, see :ref:`API_REFERENCE`.
 
-~~~~~~~~~~~~
 Design Notes
-~~~~~~~~~~~~
+============
 The performance of the IP heavily depends on the chosen data types. The data type combination determines the number of multiplications per clock cycle.
 
-For IO-buffer implementations; the output window size should be multiples of 32 bytes except for cint32-int16 and int16-cint32 combinations. For these two input combinations, the output window size should be multiples of 16 bytes. For stream implementations; the input window size should be multiples of 16 bytes. The IP performs a ceiling operation on the ``TP_DIM`` value to the nearest multiple of 32 bytes or 16 bytes depending on the implementation parameters.
+The IP performs a ceiling operation on the ``TP_DIM`` value to the nearest multiple of the vector size listed in :ref:`HADAMARD_output_type`:.
+
 
 Super Sample Rate Operation
 ---------------------------
@@ -132,7 +128,7 @@ No scaling is applied at any point when the input data types is float or cfloat.
 
 Saturation
 ----------
-Distortion caused by saturation will be possible for Hadamard Product. Since the input values are input at construction time, no compile-time error can be issued for this hazard, so it is for the user to ensure that saturation does not occur.
+Distortion caused by saturation will be possible for Hadamard Product. Since the input values are input at run-time, no compile-time error can be issued for this hazard, so it is for the user to ensure that saturation does not occur.
 
 Constraints
 -----------

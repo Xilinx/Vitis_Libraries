@@ -109,7 +109,7 @@ class test_graph : public graph {
         static constexpr int kMinLen = uut_g::getMinCascLen<FIR_LEN, PORT_API, DATA_TYPE, COEFF_TYPE, P_SSR>();
         printf("For this config the Minimum CASC_LEN is %d\n", kMinLen);
 #if (PORT_API == 1)
-        static constexpr int kOptLen = uut_g::getOptCascLen<FIR_LEN, DATA_TYPE, COEFF_TYPE, PORT_API, NUM_OUTPUTS>();
+        static constexpr int kOptLen = uut_g::getOptCascLen<FIR_LEN, DATA_TYPE, COEFF_TYPE, NUM_OUTPUTS, P_SSR>();
         printf("For this config the Optimal CASC_LEN is %d\n", kOptLen);
 #endif
 #endif

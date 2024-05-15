@@ -157,11 +157,6 @@ def fn_validate_input_dimension(TT_DATA, TP_LEN, port):
         return isValid
     return isError(f"ERROR: {port} should be greater than or equal to minimum length ({TT_DATA} - min: {min_samples}, max: {max_samples}).")
 
-def fn_validate_shift_val(TP_SHIFT):
-  if TP_SHIFT < TP_SHIFT_min or TP_SHIFT > TP_SHIFT_max :
-    return isError(f"Minimum and maximum value for Shift is {TP_SHIFT_min} and {TP_SHIFT_max} respectively, but got {TP_SHIFT}.")
-  return isValid
-  
 def fn_validate_api_val(TP_API):
   if TP_API != API_WINDOW and TP_API != API_STREAM:
     return isError(f"TP_API must be 0 (windowed) or streaming (1) but got {TP_API}.")
@@ -216,7 +211,8 @@ def validate_TP_G_LEN(args):
 
 def validate_TP_SHIFT(args):
     TP_SHIFT = args["TP_SHIFT"]
-    return fn_validate_shift_val(TP_SHIFT)
+    TT_DATA_OUT = args["TT_DATA_OUT"]
+    return com.fn_validate_shift(TT_DATA_OUT, TP_SHIFT)
 
 def validate_TP_API(args):
     TP_API = args["TP_API"]

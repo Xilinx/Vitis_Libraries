@@ -1,51 +1,103 @@
-Library Element,AIE_VARIANT,DATA_A,DATA_B,DIM_A,DIM_B,NUM_FRAMES,WINDOW_VSIZE_A,WINDOW_VSIZE_B,CASC_LEN,Latency,Throughput,NUM_BANKS,NUM_AIE,DATA_MEMORY,PROGRAM_MEMORY
-matrix_vector_mul,1,cfloat,cfloat,16,32,1,512,32,1,1658 ns,500 MSa/s,7,1,11432,1920
-matrix_vector_mul,1,cfloat,cfloat,16,32,4,2048,128,1,6323 ns,500 MSa/s,9,1,38312,1972
-matrix_vector_mul,1,cfloat,cfloat,32,32,1,1024,32,2,1765 ns,1000 MSa/s,12,2,22351,1824 1944
-matrix_vector_mul,1,cfloat,cfloat,32,32,1,1024,32,4,1070 ns,2000 MSa/s,22,4,27293,1780 1800 1800 1896
-matrix_vector_mul,1,cfloat,cfloat,4,512,1,2048,512,1,6103 ns,500 MSa/s,9,1,43496,1844
-matrix_vector_mul,1,cfloat,cfloat,512,4,1,2048,4,1,5999 ns,500 MSa/s,9,1,43496,1930
-matrix_vector_mul,1,cfloat,float,16,32,1,512,32,1,1439 ns,500 MSa/s,7,1,11176,1920
-matrix_vector_mul,1,cint16,cint16,16,32,1,512,32,1,704 ns,1000 MSa/s,7,1,6697,2000
-matrix_vector_mul,1,cint16,cint16,16,32,4,2048,128,1,2526 ns,1000 MSa/s,7,1,20137,2064
-matrix_vector_mul,1,cint16,cint16,32,64,1,2048,64,1,2431 ns,1000 MSa/s,7,1,19369,1996
-matrix_vector_mul,1,cint16,cint16,32,64,1,2048,64,2,1325 ns,2000 MSa/s,12,2,21584,1902 2028
-matrix_vector_mul,1,cint16,cint16,512,8,1,4096,8,1,4664 ns,1000 MSa/s,9,1,39145,1966
-matrix_vector_mul,1,cint16,cint16,8,512,1,4096,512,1,4659 ns,1000 MSa/s,9,1,39145,1936
-matrix_vector_mul,1,cint16,cint32,16,32,1,512,32,1,815 ns,1000 MSa/s,7,1,7081,1900
-matrix_vector_mul,1,cint16,int16,16,32,1,512,32,1,840 ns,1000 MSa/s,7,1,6569,2690
-matrix_vector_mul,1,cint16,int32,16,32,1,512,32,1,761 ns,1000 MSa/s,7,1,6825,2096
-matrix_vector_mul,1,cint32,cint16,16,32,1,512,32,1,1930 ns,500 MSa/s,7,1,10922,2564
-matrix_vector_mul,1,cint32,cint32,16,32,1,512,32,1,1734 ns,500 MSa/s,7,1,11178,1930
-matrix_vector_mul,1,cint32,cint32,16,32,4,2048,128,1,6640 ns,500 MSa/s,9,1,38058,1982
-matrix_vector_mul,1,cint32,cint32,32,32,1,1024,32,2,1852 ns,1000 MSa/s,12,2,21842,1820 1986
-matrix_vector_mul,1,cint32,cint32,32,32,1,1024,32,4,1116 ns,2000 MSa/s,22,4,26274,1824 1862 1862 1956
-matrix_vector_mul,1,cint32,cint32,4,512,1,2048,512,1,6437 ns,500 MSa/s,9,1,43242,1914
-matrix_vector_mul,1,cint32,cint32,512,4,1,2048,4,1,6117 ns,500 MSa/s,9,1,43242,1974
-matrix_vector_mul,1,cint32,int32,16,32,1,512,32,1,1295 ns,500 MSa/s,7,1,10921,1980
-matrix_vector_mul,1,float,cfloat,16,32,1,512,32,1,1256 ns,964 MSa/s,7,1,7336,2176
-matrix_vector_mul,1,float,float,16,32,1,512,32,1,775 ns,1000 MSa/s,7,1,6952,1912
-matrix_vector_mul,1,float,float,16,32,4,2048,128,1,2806 ns,1000 MSa/s,7,1,20392,1954
-matrix_vector_mul,1,float,float,32,64,1,2048,64,1,2728 ns,1000 MSa/s,7,1,19624,1920
-matrix_vector_mul,1,float,float,32,64,1,2048,64,2,1504 ns,2000 MSa/s,12,2,22095,1824 1944
-matrix_vector_mul,1,float,float,32,64,1,2048,64,4,915 ns,4000 MSa/s,22,4,27037,1812 1820 1820 1932
-matrix_vector_mul,1,float,float,512,8,1,4096,8,1,5117 ns,1000 MSa/s,9,1,39400,2122
-matrix_vector_mul,1,float,float,8,512,1,4096,512,1,5265 ns,1000 MSa/s,9,1,39400,1844
-matrix_vector_mul,1,int16,cint16,16,32,1,512,32,1,463 ns,2000 MSa/s,7,1,4649,2162
-matrix_vector_mul,1,int16,int16,16,32,1,512,32,1,428 ns,2000 MSa/s,7,1,4457,2344
-matrix_vector_mul,1,int16,int16,16,32,4,2048,128,1,1417 ns,2000 MSa/s,7,1,11177,2362
-matrix_vector_mul,1,int16,int16,16,512,1,8192,512,1,5103 ns,2000 MSa/s,9,1,37097,2344
-matrix_vector_mul,1,int16,int16,512,16,1,8192,16,1,4681 ns,2000 MSa/s,9,1,37097,2346
-matrix_vector_mul,1,int16,int16,64,128,1,8192,128,1,5159 ns,2000 MSa/s,9,1,35753,2384
-matrix_vector_mul,1,int16,int16,64,128,1,8192,128,2,2784 ns,4000 MSa/s,11,2,37968,2290 2400
-matrix_vector_mul,1,int16,int16,64,128,1,8192,128,4,1621 ns,8000 MSa/s,22,4,42398,2294 2310 2310 2404
-matrix_vector_mul,1,int16,int32,16,32,1,512,32,1,426 ns,2000 MSa/s,7,1,4648,2032
-matrix_vector_mul,1,int32,cint32,16,32,1,512,32,1,815 ns,1000 MSa/s,7,1,7081,1900
-matrix_vector_mul,1,int32,int16,16,32,1,512,32,1,765 ns,1000 MSa/s,7,1,6569,2400
-matrix_vector_mul,1,int32,int32,16,32,1,512,32,1,704 ns,1000 MSa/s,7,1,6697,2000
-matrix_vector_mul,1,int32,int32,16,32,4,2048,128,1,2526 ns,1000 MSa/s,7,1,20137,2064
-matrix_vector_mul,1,int32,int32,32,64,1,2048,64,1,2431 ns,1000 MSa/s,7,1,19369,1996
-matrix_vector_mul,1,int32,int32,32,64,1,2048,64,2,1325 ns,2000 MSa/s,12,2,21584,1902 2028
-matrix_vector_mul,1,int32,int32,32,64,1,2048,64,4,801 ns,4000 MSa/s,22,4,26014,1778 1794 1794 1904
-matrix_vector_mul,1,int32,int32,512,8,1,4096,8,1,4664 ns,1000 MSa/s,9,1,39145,1966
-matrix_vector_mul,1,int32,int32,8,512,1,4096,512,1,4659 ns,1000 MSa/s,9,1,39145,1936
+Library Element,DATA_A,DATA_B,DIM_A,DIM_B,DIM_A_LEADING,NUM_FRAMES,CASC_LEN,UUT_SSR,AIE_VARIANT,Dynamic Power,Latency,Throughput,NUM_BANKS,NUM_AIE,DATA_MEMORY,PROGRAM_MEMORY
+matrix_vector_mul,cfloat,cfloat,16,32,1,1,1,1,1,0.72 W,1568 ns,500 MSa/s,7,1,11176,2526
+matrix_vector_mul,int16,int16,64,128,1,1,1,1,1,0.74 W,5061 ns,2000 MSa/s,9,1,35753,2384
+matrix_vector_mul,int16,int16,512,16,1,1,1,1,1,0.749 W,5044 ns,2000 MSa/s,9,1,37097,2752
+matrix_vector_mul,int16,int16,16,512,1,1,1,1,1,0.742 W,5011 ns,2000 MSa/s,9,1,37097,2328
+matrix_vector_mul,int16,int16,16,32,1,4,1,1,1,0.715 W,1372 ns,2000 MSa/s,7,1,11177,2362
+matrix_vector_mul,int16,int16,16,32,1,1,1,1,1,0.708 W,402 ns,2000 MSa/s,7,1,4457,2328
+matrix_vector_mul,int16,cint16,16,32,1,1,1,1,1,0.711 W,411 ns,2000 MSa/s,7,1,4650,2036
+matrix_vector_mul,float,float,8,512,1,1,1,1,1,0.741 W,4992 ns,1000 MSa/s,9,1,39144,1602
+matrix_vector_mul,float,float,64,16,1,1,2,4,1,1.153 W,251 ns,8000 MSa/s,44,8,27516,1506 1586 1506 1586 1506 1586 1506 1586
+matrix_vector_mul,float,float,64,16,0,1,2,4,2,1.671 W,1823 ns,1935 MSa/s,44,8,29344,2608 2688 2608 2688 2608 2688 2608 2688
+matrix_vector_mul,float,float,512,8,1,1,1,1,1,0.742 W,4841 ns,1000 MSa/s,9,1,39144,1698
+matrix_vector_mul,float,float,48,16,1,8,1,3,2,1.072 W,11475 ns,1370 MSa/s,18,3,62631,2336 2336 2336
+matrix_vector_mul,float,float,32,64,1,1,4,1,1,0.897 W,787 ns,4000 MSa/s,22,4,26013,1986 2000 2000 2070
+matrix_vector_mul,float,float,32,64,1,1,2,1,1,0.784 W,1391 ns,2000 MSa/s,12,2,21583,2560 2676
+matrix_vector_mul,float,float,32,64,1,1,1,1,1,0.718 W,2564 ns,1000 MSa/s,7,1,19368,1618
+matrix_vector_mul,float,float,32,32,0,1,1,1,2,0.536 W,5591 ns,469 MSa/s,6,1,11149,2272
+matrix_vector_mul,float,float,16,32,1,4,1,1,1,0.72 W,2594 ns,1000 MSa/s,7,1,20136,2646
+matrix_vector_mul,float,float,16,32,1,1,1,1,1,0.712 W,704 ns,1000 MSa/s,7,1,6696,2606
+matrix_vector_mul,float,float,16,32,0,1,1,1,1,0.717 W,705 ns,1000 MSa/s,7,1,6696,2606
+matrix_vector_mul,float,cfloat,64,16,1,1,2,4,1,1.16 W,481 ns,6826 MSa/s,45,8,28616,2096 2192 2096 2192 2096 2192 2096 2192
+matrix_vector_mul,float,cfloat,16,32,1,1,1,1,1,0.714 W,998 ns,1000 MSa/s,7,1,7081,1728
+matrix_vector_mul,cint32,int32,64,16,1,1,2,4,2,1.68 W,849 ns,3424 MSa/s,46,8,36600,1728 1808 1728 1808 1728 1808 1728 1808
+matrix_vector_mul,int16,int16,64,128,1,1,2,1,1,0.79 W,2711 ns,4000 MSa/s,11,2,37968,2306 2384
+matrix_vector_mul,int16,int16,64,128,1,1,4,1,1,0.91 W,1558 ns,8000 MSa/s,22,4,42398,2312 2296 2296 2390
+matrix_vector_mul,int16,int32,16,32,1,1,1,1,1,0.709 W,401 ns,2000 MSa/s,7,1,4648,2390
+matrix_vector_mul,int32,cint32,16,32,1,1,1,1,1,0.714 W,723 ns,1000 MSa/s,7,1,7082,3006
+matrix_vector_mul,int32,int32,64,16,1,1,2,4,1,1.159 W,238 ns,8000 MSa/s,44,8,27520,1474 1586 1474 1586 1474 1586 1474 1586
+matrix_vector_mul,int32,int32,512,8,1,1,1,1,1,0.741 W,4588 ns,1000 MSa/s,9,1,39145,1666
+matrix_vector_mul,int32,int32,48,16,1,8,1,3,2,0.992 W,3591 ns,3000 MSa/s,19,3,61875,2048 2048 2048
+matrix_vector_mul,int32,int32,48,16,1,1,1,3,1,0.863 W,379 ns,3000 MSa/s,19,3,13563,1932 1932 1932
+matrix_vector_mul,int32,int32,32,64,1,1,4,1,1,0.9 W,730 ns,4000 MSa/s,22,4,26014,1856 1856 1856 1940
+matrix_vector_mul,int32,int32,32,64,1,1,2,1,1,0.784 W,1253 ns,2000 MSa/s,12,2,21584,2286 2340
+matrix_vector_mul,int32,int32,32,64,1,1,1,1,1,0.719 W,2365 ns,1000 MSa/s,7,1,19369,1586
+matrix_vector_mul,int32,int32,32,32,1,1,4,2,2,1.602 W,764 ns,5626 MSa/s,42,8,27028,1712 1712 1712 1808 1712 1712 1712 1808
+matrix_vector_mul,int32,int32,32,32,1,1,4,2,1,1.105 W,269 ns,8000 MSa/s,39,8,27260,1474 1506 1506 1586 1474 1506 1506 1586
+matrix_vector_mul,int32,int32,32,32,1,1,1,1,2,0.513 W,1729 ns,1000 MSa/s,6,1,10897,2032
+matrix_vector_mul,cint32,int32,64,16,1,1,2,4,1,1.175 W,382 ns,4000 MSa/s,44,8,36800,1522 1650 1522 1650 1522 1650 1522 1650
+matrix_vector_mul,int32,int32,32,32,0,1,4,2,1,1.116 W,270 ns,8000 MSa/s,39,8,27260,1474 1506 1506 1586 1474 1506 1506 1586
+matrix_vector_mul,int32,int32,16,32,1,4,1,1,1,0.719 W,2398 ns,1000 MSa/s,7,1,20137,2456
+matrix_vector_mul,int32,int32,16,32,1,1,1,1,1,0.712 W,657 ns,1000 MSa/s,7,1,6697,2378
+matrix_vector_mul,int32,int16,16,32,1,1,1,1,1,0.712 W,732 ns,1000 MSa/s,7,1,6569,2382
+matrix_vector_mul,int32,int16,16,32,0,1,1,1,1,0.717 W,733 ns,1000 MSa/s,7,1,6569,2382
+matrix_vector_mul,int32,cint32,64,16,1,1,2,4,2,1.609 W,549 ns,6282 MSa/s,39,8,28408,1632 1728 1632 1728 1632 1728 1632 1728
+matrix_vector_mul,int32,cint32,64,16,1,1,2,4,1,1.17 W,277 ns,8000 MSa/s,45,8,28616,1828 1930 1828 1930 1828 1930 1828 1930
+matrix_vector_mul,int32,cint32,48,16,1,8,1,3,2,1.009 W,3721 ns,3000 MSa/s,20,3,68022,1824 1824 1824
+matrix_vector_mul,int32,cint32,48,16,1,1,1,3,1,0.876 W,416 ns,3000 MSa/s,19,3,14334,2286 2286 2286
+matrix_vector_mul,int32,cint32,32,32,1,1,4,2,2,1.617 W,674 ns,7111 MSa/s,42,8,27868,1632 1616 1616 1728 1632 1616 1616 1728
+matrix_vector_mul,int32,cint32,32,32,1,1,4,2,1,1.114 W,328 ns,8000 MSa/s,39,8,28100,1828 1836 1836 1930 1828 1836 1836 1930
+matrix_vector_mul,int32,int32,32,32,0,1,1,1,2,0.514 W,1731 ns,1000 MSa/s,6,1,10897,2032
+matrix_vector_mul,cint32,int32,48,16,1,8,1,3,2,1.036 W,7199 ns,1500 MSa/s,24,3,114102,2128 2128 2128
+matrix_vector_mul,cint32,int32,48,16,1,1,1,3,1,0.873 W,657 ns,1500 MSa/s,19,3,20091,1924 1924 1924
+matrix_vector_mul,cint32,int32,32,32,1,1,4,2,2,1.668 W,960 ns,3436 MSa/s,42,8,36060,1728 1712 1712 1808 1728 1712 1712 1808
+matrix_vector_mul,cint16,cint16,48,16,0,1,1,3,1,0.873 W,380 ns,3000 MSa/s,19,3,13563,1932 1932 1932
+matrix_vector_mul,cint16,cint16,32,64,1,1,4,1,1,0.901 W,730 ns,4000 MSa/s,22,4,26014,1856 1856 1856 1940
+matrix_vector_mul,cint16,cint16,32,64,1,1,2,1,1,0.782 W,1253 ns,2000 MSa/s,12,2,21584,2286 2340
+matrix_vector_mul,cint16,cint16,32,64,1,1,1,1,1,0.72 W,2365 ns,1000 MSa/s,7,1,19369,1586
+matrix_vector_mul,cint16,cint16,32,32,1,1,4,2,2,1.553 W,358 ns,8000 MSa/s,42,8,27028,1424 1440 1440 1536 1424 1440 1440 1536
+matrix_vector_mul,cint16,cint16,32,32,1,1,4,2,1,1.117 W,269 ns,8000 MSa/s,39,8,27260,1474 1506 1506 1586 1474 1506 1506 1586
+matrix_vector_mul,cint16,cint16,32,32,1,1,1,1,2,0.478 W,1361 ns,1000 MSa/s,6,1,10897,1616
+matrix_vector_mul,cint16,cint16,32,32,0,1,4,2,2,1.558 W,360 ns,8000 MSa/s,42,8,27028,1424 1440 1440 1536 1424 1440 1440 1536
+matrix_vector_mul,cint16,cint16,32,32,0,1,1,1,2,0.478 W,1362 ns,1000 MSa/s,6,1,10897,1616
+matrix_vector_mul,cint16,cint16,16,32,1,4,1,1,1,0.719 W,2398 ns,1000 MSa/s,7,1,20137,2456
+matrix_vector_mul,cint16,cint16,48,16,1,8,1,3,2,0.884 W,2766 ns,3000 MSa/s,19,3,61875,1872 1872 1872
+matrix_vector_mul,cint16,cint16,16,32,1,1,1,1,1,0.709 W,657 ns,1000 MSa/s,7,1,6697,2378
+matrix_vector_mul,cfloat,float,16,32,1,1,1,1,1,0.716 W,1321 ns,500 MSa/s,7,1,10920,2630
+matrix_vector_mul,cfloat,cfloat,64,16,1,1,2,4,1,1.179 W,472 ns,4000 MSa/s,45,8,37308,1698 1762 1698 1762 1698 1762 1698 1762
+matrix_vector_mul,cfloat,cfloat,64,16,1,1,1,4,2,1.168 W,6929 ns,416 MSa/s,27,4,28212,2432 2432 2432 2432
+matrix_vector_mul,cfloat,cfloat,512,4,1,1,1,1,1,0.748 W,5304 ns,500 MSa/s,9,1,43240,1682
+matrix_vector_mul,cfloat,cfloat,48,16,1,8,1,3,2,1.095 W,54082 ns,317 MSa/s,26,3,117927,2464 2464 2464
+matrix_vector_mul,cfloat,cfloat,4,512,1,1,1,1,1,0.749 W,5812 ns,500 MSa/s,9,1,43240,1570
+matrix_vector_mul,cfloat,cfloat,32,32,1,1,1,1,2,0.551 W,26752 ns,106 MSa/s,7,1,19853,2432
+matrix_vector_mul,cfloat,cfloat,32,32,1,1,4,1,1,0.91 W,909 ns,2000 MSa/s,22,4,26269,1666 1666 1666 1762
+matrix_vector_mul,cfloat,cfloat,32,32,1,1,2,1,1,0.787 W,1588 ns,1000 MSa/s,12,2,21839,2400 2500
+matrix_vector_mul,cfloat,cfloat,16,32,1,4,1,1,1,0.746 W,6048 ns,500 MSa/s,9,1,38056,2610
+matrix_vector_mul,cfloat,float,64,16,1,1,2,4,1,1.184 W,399 ns,4000 MSa/s,44,8,36796,1554 1666 1554 1666 1554 1666 1554 1666
+matrix_vector_mul,int32,int32,64,16,1,1,2,4,2,1.621 W,647 ns,5626 MSa/s,46,8,27312,1712 1808 1712 1808 1712 1808 1712 1808
+matrix_vector_mul,cint16,cint16,512,8,1,1,1,1,1,0.743 W,4588 ns,1000 MSa/s,9,1,39145,1666
+matrix_vector_mul,cint16,cint16,64,16,1,1,2,4,2,1.564 W,281 ns,8000 MSa/s,46,8,27312,1424 1536 1424 1536 1424 1536 1424 1536
+matrix_vector_mul,cint32,int32,32,32,1,1,4,2,1,1.133 W,424 ns,4000 MSa/s,41,8,36284,1522 1426 1426 1650 1522 1426 1426 1650
+matrix_vector_mul,cint32,int32,32,32,1,1,1,1,2,0.525 W,3504 ns,500 MSa/s,7,1,19346,2448
+matrix_vector_mul,cint32,int32,16,32,1,1,1,1,1,0.716 W,1219 ns,500 MSa/s,7,1,10921,2354
+matrix_vector_mul,cint32,cint32,64,16,1,1,2,4,2,1.605 W,466 ns,4000 MSa/s,46,8,37104,1648 1680 1648 1680 1648 1680 1648 1680
+matrix_vector_mul,cint32,cint32,64,16,1,1,2,4,1,1.189 W,526 ns,4000 MSa/s,45,8,37320,2034 2162 2034 2162 2034 2162 2034 2162
+matrix_vector_mul,cint32,cint32,512,4,1,1,1,1,1,0.749 W,5933 ns,500 MSa/s,9,1,43242,1792
+matrix_vector_mul,cint32,cint32,48,16,1,8,1,3,2,0.94 W,6658 ns,1500 MSa/s,26,3,117171,1664 1664 1664
+matrix_vector_mul,cint32,cint32,48,16,1,1,1,3,1,0.883 W,814 ns,1500 MSa/s,20,3,20478,2662 2662 2662
+matrix_vector_mul,cint32,cint32,4,512,1,1,1,1,1,0.748 W,5830 ns,500 MSa/s,9,1,43242,1764
+matrix_vector_mul,cint32,cint32,32,32,1,1,4,2,2,1.609 W,514 ns,4000 MSa/s,42,8,36564,1648 1600 1600 1680 1648 1600 1600 1680
+matrix_vector_mul,cint16,cint16,64,16,1,1,2,4,1,1.159 W,238 ns,8000 MSa/s,44,8,27520,1474 1586 1474 1586 1474 1586 1474 1586
+matrix_vector_mul,cint32,cint32,32,32,1,1,4,2,1,1.152 W,627 ns,4000 MSa/s,41,8,36804,2034 2198 2198 2162 2034 2198 2198 2162
+matrix_vector_mul,cint32,cint32,32,32,1,1,4,1,1,0.915 W,1007 ns,2000 MSa/s,22,4,26274,2050 2198 2198 2162
+matrix_vector_mul,cint32,cint32,32,32,1,1,2,1,1,0.79 W,1675 ns,1000 MSa/s,12,2,21842,2580 2752
+matrix_vector_mul,cint32,cint32,16,32,1,4,1,1,1,0.748 W,5899 ns,500 MSa/s,9,1,38058,1836
+matrix_vector_mul,cint32,cint32,16,32,1,1,1,1,1,0.72 W,1535 ns,500 MSa/s,7,1,11178,1800
+matrix_vector_mul,cint32,cint16,16,32,1,1,1,1,1,0.724 W,1808 ns,500 MSa/s,7,1,10922,2478
+matrix_vector_mul,cint16,int32,16,32,1,1,1,1,1,0.715 W,712 ns,1000 MSa/s,7,1,6825,2454
+matrix_vector_mul,cint16,int16,16,32,1,1,1,1,1,0.712 W,660 ns,1000 MSa/s,7,1,6569,2436
+matrix_vector_mul,cint16,int16,16,32,0,1,1,1,1,0.718 W,661 ns,1000 MSa/s,7,1,6569,2436
+matrix_vector_mul,cint16,cint32,16,32,1,1,1,1,1,0.714 W,723 ns,1000 MSa/s,7,1,7082,3006
+matrix_vector_mul,cint16,cint16,8,512,1,1,1,1,1,0.742 W,4588 ns,1000 MSa/s,9,1,39145,1538
+matrix_vector_mul,cint32,cint32,32,32,1,1,1,1,2,0.495 W,3253 ns,500 MSa/s,6,1,19601,1632
+matrix_vector_mul,int32,int32,8,512,1,1,1,1,1,0.74 W,4588 ns,1000 MSa/s,9,1,39145,1538

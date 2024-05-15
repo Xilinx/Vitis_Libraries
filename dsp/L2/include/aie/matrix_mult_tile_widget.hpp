@@ -33,23 +33,27 @@ namespace blas {
 namespace matrix_mult {
 
 using namespace adf;
-
 /**
- * @brief ConditionalWidget conditionally instances a kernel of a defined type.
- * In addition, ConditionalWidget will connect graph's input and output ports to kernel's ports. Ports must be of window
- *type.
- * When disabled, no kernel will be created and input wil be directly connected to output.
- *
- * These are the templates to configure the ConditionalWidget graph class.
- *
- * @ingroup gemm_graph
- *
- * @tparam addWidget conditionally add a widget kernel.  \n
- *         When set to 1, kernel of: ``class widgetClass`` will be created.
- * @tparam windowSize describes the size of the window the ``widgetClass`` is to operate on.
- * @tparam widgetClass defines the class to be created.
- *
-**/
+  * @cond NOCOMMENTS
+  */
+
+// /**
+//  * @brief ConditionalWidget conditionally instances a kernel of a defined type.
+//  * In addition, ConditionalWidget will connect graph's input and output ports to kernel's ports. Ports must be of
+//  window
+//  *type.
+//  * When disabled, no kernel will be created and input wil be directly connected to output.
+//  *
+//  * These are the templates to configure the ConditionalWidget graph class.
+//  *
+//  * @ingroup gemm_graph
+//  *
+//  * @tparam addWidget conditionally add a widget kernel.  \n
+//  *         When set to 1, kernel of: ``class widgetClass`` will be created.
+//  * @tparam windowSize describes the size of the window the ``widgetClass`` is to operate on.
+//  * @tparam widgetClass defines the class to be created.
+//  *
+// **/
 template <unsigned int addWidget, unsigned int windowSize, class widgetClass>
 class ConditionalWidget {
    public:
@@ -70,6 +74,9 @@ class ConditionalWidget {
         return widget;
     }
 };
+/**
+  * @endcond
+  */
 }
 }
 }

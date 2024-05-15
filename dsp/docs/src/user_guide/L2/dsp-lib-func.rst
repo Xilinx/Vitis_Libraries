@@ -16,6 +16,7 @@ The DSPLib consists of the following DSP elements:
 .. toctree::
    :maxdepth: 2
 
+   Convolution / Correlation <func-conv-corr.rst>
    DDS / Mixer <func-dds.rst>
    DFT <func-dft.rst>
    Example of FFT spanning AIE and PL <example-2d-fft.rst>
@@ -32,7 +33,6 @@ The DSPLib consists of the following DSP elements:
    Sample Delay <func-sample_delay.rst>
    Widget API Cast <func-widget-apicast.rst>
    Widget Real to Complex <func-widget-real2comp.rst>
-   Convolution / Correlation <func-conv-corr.rst>
 
 .. |image1| image:: ./media/image1.png
 .. |image2| image:: ./media/image2.png

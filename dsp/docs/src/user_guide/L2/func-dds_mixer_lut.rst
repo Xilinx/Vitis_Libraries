@@ -57,7 +57,7 @@ When configured as a DDS (``TP_MIXER_MODE=0``), the output of the DDS is intende
 SFDR
 ----
 
-Spurious Free Dynamic Range is a parameter used to characterize signal generators. It measures the ratio between the amplitude of the fundamental frequency of the signal generator to the amplitude of the strongest spur. The dds_mixer_lut generates slightly different designs based on the SFDR you request. The different implementations offer tradeoffs between the SFDR of the waveform generated and the throughput. Three different implementations are available, for SFDR less than 60 dB, less than 120 dB, and for less than 180 dB. With the cint16 data type, the maximum SFDR is 120 dB.
+Spurious Free Dynamic Range is a parameter used to characterize signal generators. It measures the ratio between the amplitude of the fundamental frequency of the signal generator to the amplitude of the strongest spur. The dds_mixer_lut generates slightly different designs based on the SFDR you request. The different implementations offer tradeoffs between the SFDR of the waveform generated and the throughput. Three different implementations are available, for SFDR less than 60 dB, less than 120 dB, and for less than 180 dB. With the cint16 data type, the maximum SFDR is restricted to 96 dB by the bit-width of the data type. So, only two different implementations are available.
 
 Super Sample Rate Operation
 ---------------------------

@@ -1,29 +1,29 @@
-Library Element,AIE_VARIANT,DATA_TYPE,IN_API,OUT_API,NUM_INPUTS,WINDOW_VSIZE,NUM_OUTPUT_CLONES,PATTERN,HEADER_BYTES,Latency,Throughput,NUM_BANKS,NUM_AIE,DATA_MEMORY,PROGRAM_MEMORY,DATA_OUT_TYPE
-widget_api_cast,1,cfloat,0.0,0.0,1.0,256,1.0,0.0,0.0,693 ns,500 MSa/s,5,1,9081,1414,
-widget_api_cast,1,cfloat,0.0,1.0,1.0,256,2.0,0.0,0.0,619 ns,500 MSa/s,3,1,4985,1340,
-widget_api_cast,1,cfloat,1.0,0.0,2.0,256,3.0,0.0,0.0,849 ns,500 MSa/s,7,1,13179,1686,
-widget_api_cast,1,cint16,0.0,0.0,1.0,256,1.0,0.0,0.0,409 ns,1000 MSa/s,5,1,4729,1414,
-widget_api_cast,1,cint16,0.0,0.0,1.0,256,2.0,0.0,0.0,454 ns,1000 MSa/s,7,1,6777,1510,
-widget_api_cast,1,cint16,0.0,0.0,1.0,256,3.0,0.0,0.0,489 ns,1000 MSa/s,9,1,8825,1622,
-widget_api_cast,1,cint16,0.0,1.0,1.0,256,1.0,0.0,0.0,423 ns,924 MSa/s,3,1,2681,1292,
-widget_api_cast,1,cint16,1.0,0.0,1.0,256,1.0,0.0,0.0,375 ns,930 MSa/s,3,1,2682,1298,
-widget_api_cast,1,cint16,1.0,0.0,1.0,256,2.0,0.0,0.0,391 ns,870 MSa/s,5,1,4730,1442,
-widget_api_cast,1,cint16,1.0,0.0,1.0,256,3.0,0.0,0.0,404 ns,833 MSa/s,7,1,6778,1604,
-widget_api_cast,1,cint16,1.0,0.0,2.0,256,1.0,0.0,0.0,485 ns,1000 MSa/s,3,1,2683,1346,
-widget_api_cast,1,cint32,0.0,1.0,1.0,256,2.0,0.0,0.0,619 ns,500 MSa/s,3,1,4729,1340,
-widget_api_cast,1,cint32,1.0,0.0,1.0,256,4.0,0.0,0.0,671 ns,445 MSa/s,9,1,17018,1750,
-widget_api_cast,1,cint32,1.0,0.0,2.0,256,4.0,0.0,0.0,837 ns,500 MSa/s,9,1,17019,1734,
-widget_api_cast,1,int32,0.0,1.0,1.0,256,2.0,0.0,0.0,363 ns,1000 MSa/s,3,1,2681,1340,
-widget_api_cast,1,int32,1.0,0.0,2.0,256,2.0,0.0,0.0,472 ns,1003 MSa/s,5,1,4731,1474,
-widget_real2complex,1,cfloat,,,,1024,,,,2355 ns,500 MSa/s,5,1,25364,1482,float
-widget_real2complex,1,cfloat,,,,256,,,,652 ns,500 MSa/s,5,1,6932,1482,float
-widget_real2complex,1,cint16,,,,1024,,,,1220 ns,1000 MSa/s,5,1,13076,1498,int16
-widget_real2complex,1,cint16,,,,256,,,,368 ns,1000 MSa/s,5,1,3860,1498,int16
-widget_real2complex,1,cint32,,,,1024,,,,2355 ns,500 MSa/s,5,1,25364,1482,int32
-widget_real2complex,1,cint32,,,,256,,,,652 ns,500 MSa/s,5,1,6932,1482,int32
-widget_real2complex,1,float,,,,1024,,,,5870 ns,500 MSa/s,5,1,25364,1476,cfloat
-widget_real2complex,1,float,,,,256,,,,1496 ns,499 MSa/s,5,1,6932,1476,cfloat
-widget_real2complex,1,int16,,,,1024,,,,3397 ns,1000 MSa/s,5,1,13076,1502,cint16
-widget_real2complex,1,int16,,,,256,,,,876 ns,1000 MSa/s,5,1,3860,1502,cint16
-widget_real2complex,1,int32,,,,1024,,,,5870 ns,500 MSa/s,5,1,25364,1476,cint32
-widget_real2complex,1,int32,,,,256,,,,1496 ns,499 MSa/s,5,1,6932,1476,cint32
+Library Element,AIE_VARIANT,DATA_TYPE,IN_API,OUT_API,NUM_INPUTS,WINDOW_VSIZE,NUM_OUTPUT_CLONES,PATTERN,Dynamic Power,Latency,Throughput,NUM_BANKS,NUM_AIE,DATA_MEMORY,PROGRAM_MEMORY,DATA_OUT_TYPE
+widget_api_cast,1,cfloat,0.0,0.0,1.0,256,1.0,0.0,0.209 W,671 ns,500 MSa/s,5,1,9349,1402,
+widget_api_cast,1,int32,1.0,0.0,2.0,256,2.0,0.0,0.215 W,-1 ns,-1 MSa/s,5,1,5255,1544,
+widget_api_cast,1,int32,0.0,1.0,1.0,256,2.0,0.0,0.212 W,347 ns,1000 MSa/s,3,1,3205,1358,
+widget_api_cast,1,cint32,1.0,0.0,1.0,256,4.0,0.0,0.217 W,648 ns,456 MSa/s,9,1,17542,1722,
+widget_api_cast,1,cint32,0.0,1.0,1.0,256,2.0,0.0,0.212 W,603 ns,500 MSa/s,3,1,5253,1358,
+widget_api_cast,1,cint16,1.0,0.0,2.0,256,1.0,0.0,0.212 W,-1 ns,-1 MSa/s,3,1,3207,1398,
+widget_api_cast,1,cint16,1.0,0.0,1.0,256,3.0,0.0,0.215 W,378 ns,873 MSa/s,7,1,7302,1592,
+widget_api_cast,1,cint16,1.0,0.0,1.0,256,2.0,0.0,0.212 W,367 ns,907 MSa/s,5,1,5254,1462,
+widget_api_cast,1,cint32,1.0,0.0,2.0,256,4.0,0.0,0.22 W,-1 ns,-1 MSa/s,9,1,17543,1818,
+widget_api_cast,1,cint16,0.0,1.0,1.0,256,1.0,0.0,0.209 W,396 ns,958 MSa/s,3,1,3205,1324,
+widget_api_cast,1,cint16,0.0,0.0,1.0,256,3.0,0.0,0.215 W,462 ns,1000 MSa/s,9,1,9349,1610,
+widget_api_cast,1,cint16,0.0,0.0,1.0,256,2.0,0.0,0.212 W,426 ns,1000 MSa/s,7,1,7301,1498,
+widget_api_cast,1,cint16,0.0,0.0,1.0,256,1.0,0.0,0.209 W,390 ns,1000 MSa/s,5,1,5253,1402,
+widget_api_cast,1,cfloat,1.0,0.0,2.0,256,3.0,0.0,0.217 W,-1 ns,-1 MSa/s,7,1,13447,1674,
+widget_api_cast,1,cfloat,0.0,1.0,1.0,256,2.0,0.0,0.212 W,603 ns,500 MSa/s,3,1,5253,1358,
+widget_api_cast,1,cint16,1.0,0.0,1.0,256,1.0,0.0,0.209 W,356 ns,955 MSa/s,3,1,3206,1350,
+widget_real2complex,1,int16,,,,256,,,0.709 W,882 ns,1000 MSa/s,5,1,4263,1490,cint16
+widget_real2complex,1,int16,,,,1024,,,0.72 W,3415 ns,1000 MSa/s,5,1,13479,1490,cint16
+widget_real2complex,1,float,,,,256,,,0.715 W,1523 ns,500 MSa/s,5,1,7335,1464,cfloat
+widget_real2complex,1,float,,,,1024,,,0.723 W,5978 ns,500 MSa/s,5,1,25767,1464,cfloat
+widget_real2complex,1,cint32,,,,256,,,0.714 W,633 ns,500 MSa/s,5,1,7302,1470,int32
+widget_real2complex,1,cint16,,,,1024,,,0.719 W,1196 ns,1000 MSa/s,5,1,13446,1486,int16
+widget_real2complex,1,cint16,,,,256,,,0.708 W,352 ns,1000 MSa/s,5,1,4230,1486,int16
+widget_real2complex,1,cfloat,,,,256,,,0.714 W,633 ns,500 MSa/s,5,1,7302,1470,float
+widget_real2complex,1,cfloat,,,,1024,,,0.723 W,2323 ns,500 MSa/s,5,1,25734,1470,float
+widget_real2complex,1,int32,,,,1024,,,0.723 W,5978 ns,500 MSa/s,5,1,25767,1464,cint32
+widget_real2complex,1,cint32,,,,1024,,,0.724 W,2323 ns,500 MSa/s,5,1,25734,1470,int32
+widget_real2complex,1,int32,,,,256,,,0.714 W,1523 ns,500 MSa/s,5,1,7335,1464,cint32

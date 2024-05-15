@@ -798,8 +798,8 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../L1/include/hw/xf_fft/fixed/ \
-                         ../L1/include/hw/xf_fft/float/ \
+INPUT                  = ../L1/include/hw/vitis_fft/fixed/ \
+                         ../L1/include/hw/vitis_fft/float/ \
                          ../L2/include/aie/
 
 # This tag can be used to specify the character encoding of the source files

@@ -87,7 +87,7 @@
             "validator": {
                 "file": "conv_corr.py",
                 "function": "validate_TP_SHIFT",
-                "args": []
+                "args": ["TT_DATA_OUT"]
             }
         },
         {

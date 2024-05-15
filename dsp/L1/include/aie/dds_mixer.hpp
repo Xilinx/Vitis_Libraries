@@ -430,7 +430,7 @@ class dds_mixer<TT_DATA,
                                                      TP_SAT> {
    public:
     static constexpr unsigned int TP_MIXER_MODE = MIXER_MODE_2;
-    static constexpr unsigned int TP_API = STREAM_API; // we are om a specialization
+    static constexpr unsigned int TP_API = STREAM_API; // we are on a specialization
     // Help the compiler deal with dependant names
     using baseClass = kernelDdsMixerClass<TT_DATA,
                                           TP_INPUT_WINDOW_VSIZE,
@@ -797,8 +797,8 @@ class dds_mixer<TT_DATA,
                                                      TP_SAT> {
    public:
     static constexpr unsigned int TP_MIXER_MODE = MIXER_MODE_2;
-    static constexpr unsigned int TP_API = STREAM_API;                         // we are om a specialization
-    static constexpr unsigned int TP_USE_PHASE_RELOAD = USE_PHASE_RELOAD_TRUE; // we are om a specialization
+    static constexpr unsigned int TP_API = STREAM_API;                         // we are on a specialization
+    static constexpr unsigned int TP_USE_PHASE_RELOAD = USE_PHASE_RELOAD_TRUE; // we are on a specialization
     // Help the compiler deal with dependant names
     using baseClass = kernelDdsMixerClass<TT_DATA,
                                           TP_INPUT_WINDOW_VSIZE,

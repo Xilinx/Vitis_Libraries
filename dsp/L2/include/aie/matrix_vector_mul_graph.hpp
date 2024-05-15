@@ -214,6 +214,7 @@ class create_casc_kernel<1,
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
+ *
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_NUM_FRAMES describes the number of batches of input data that will be processed per iteration. \n
  * @tparam TP_CASC_LEN describes the number of AIE kernels the matrix-vector multiplication will be divided into in
@@ -229,19 +230,19 @@ class create_casc_kernel<1,
  *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds
  *         an n-bit signed value in the range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  * @tparam TP_SSR describes the number of kernels (or cascaded kernel chains) that will compute the matrix-vector
- *multiplication in parallel.
+ *         multiplication in parallel.
  *         Each SSR rank will receive an equal sized split (along the unique dimension) of Matrix A data. \n
- *         There is no splitting of the vector data when TP_SSR > 1 (only split when TP_CASC_LEN > 1). The Vector B
- *inputs across a
- *         chain of cascaded kernels will be the same across all SSR ranks \n.
+ *         There is no splitting of the vector data when TP_SSR > 1 (only split when TP_CASC_LEN > 1).
+ *         The Vector B inputs across a
+ *         chain of cascaded kernels will be the same across all SSR ranks.
  * @tparam TP_DIM_A_LEADING describes the leading dimension of the Matrix A data.
  *         If TP_DIM_A_LEADING=1, the columns of the matrix are contiguous in memory. This is the only supported order
- *of Matrix A input data when doing the computation \n.
+ *         of Matrix A input data when doing the computation. \n
  *         However, if TP_DIM_A_LEADING=0, the rows of the matrix input are contiguous in memory and will be transposed
- *at the input ports for each kernel using DMA Buffer Descriptors.
+ *         at the input ports for each kernel using DMA Buffer Descriptors.
  *         This feature is currently only supported when TT_DATA_A is cint16, int32 or float, and NUM_FRAMES=1. \n
  *         If TT_DATA_A is int16, cint32 or cfloat or NUM_FRAMES > 1, the input matrix data must be transposed outwith
- *the graph port connection to a column major order, and TP_DIM_A_LEADING must be set to 1. \n
+ *         the graph port connection to a column major order, and TP_DIM_A_LEADING must be set to 1. \n
  **/
 template <typename TT_DATA_A,
           typename TT_DATA_B,

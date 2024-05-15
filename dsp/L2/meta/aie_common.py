@@ -169,7 +169,7 @@ def fn_validate_coeff_type(TT_DATA, TT_COEFF):
 ### Validate Shift ###
 def fn_float_no_shift(TT_DATA, TP_SHIFT):
     if fn_is_floating_point(TT_DATA) and (TP_SHIFT > 0):
-      return isError(f"Shift cannot be performed for 'cfloat' data type, so must be set to 0. Got {TP_SHIFT}.")
+      return isError(f"Shift cannot be performed for '{TT_DATA}' data type, so must be set to 0. Got {TP_SHIFT}.")
     return isValid
 
 # most library element only need to check this to validate shift

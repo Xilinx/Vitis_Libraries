@@ -11,9 +11,8 @@ Mixed Radix FFT
 
 This library element implements an FFT or Inverse FFT of a point size which is not a power of 2 but is a product of a power of 2, a power of 3, and a power of 5.
 
-~~~~~~~~~~~
 Entry Point
-~~~~~~~~~~~
+===========
 
 The graph entry point is the following:
 
@@ -21,45 +20,39 @@ The graph entry point is the following:
 
     xf::dsp::aie::fft::mixed_radix_fft_graph
 
-~~~~~~~~~~~~~~~
 Device Support
-~~~~~~~~~~~~~~~
+==============
 The mixed_radix_fft supports AIE1 and AIE_ML. All features are supported on these variants with minor differences as follows:
 
 - ``TP_POINT_SIZE``: The width of vectors used for calculations differs by AIE variant. The point size ``TP_POINT_SIZE`` must be a multiple of the number of samples processed in an atomic vectorized butterfly operation. This is 16 for AIE1 and 32 for AIE-ML.
 - ``TP_RND``: Supported round modes differ between AIE1 and AIE2 as for all library elements.
 - Number of ports: When configured for ``TP_API=1`` (stream IO), AIE1 will require 2 input ports (sample interleaved - even samples on the first port) and 2 output ports similarly interleaved. AIE-ML accepts one stream only.
 
-~~~~~~~~~~~~~~~
 Supported Types
-~~~~~~~~~~~~~~~
+===============
 
 The data type to the mixed radix FFT is controlled by the ``TT_DATA`` template parameter. This can take one of two choices: cint16 or cint32. ``TT_DATA`` determined the data type of both the input data and output data.
 The ``TT_TWIDDLE`` template parameter is constrained by ``TT_DATA`` and so currently must be set to cint16.
 
-~~~~~~~~~~~~~~~~~~~
 Template Parameters
-~~~~~~~~~~~~~~~~~~~
+===================
 
 To see details on the template parameters for the Mixed Radix FFT, see :ref:`API_REFERENCE`.
 
-~~~~~~~~~~~~~~~~
 Access Functions
-~~~~~~~~~~~~~~~~
+================
 
 To see details on the access functions for the Mixed Radix FFT, see :ref:`API_REFERENCE`.
 
-~~~~~
 Ports
-~~~~~
+=====
 
 To see details on the ports for the Mixed Radix FFT, see :ref:`API_REFERENCE`.
 
 .. note:: The number and type of ports are determined by the configuration of template parameters.
 
-~~~~~~~~~~~~
 Design Notes
-~~~~~~~~~~~~
+============
 
 The Mixed Radix FFT performs an FFT or inverse FFT on a frame of data of point size N where N = 2^A * 3^B * 5^C. The minimum value of A is 4, which means all supported point sizes are a multiple of 16. The maximum point size is determined by the amount of memory available to an AIE tile, so it will be in the region of 2048 for cint32. Point size support is currently limited to 3300.
 
@@ -163,9 +156,8 @@ Code Example
     :language: cpp
     :lines: 17-
 
-~~~~~~~~~~~~~~~~~~~
 Configuration Notes
-~~~~~~~~~~~~~~~~~~~
+===================
 
 This section is intended to provide guidance on how best to configure the FFT in some typical scenarios, or when designing with one particular metric in mind, such as resource use or performance.
 

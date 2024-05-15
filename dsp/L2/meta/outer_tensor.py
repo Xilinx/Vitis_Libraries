@@ -127,36 +127,6 @@ def fn_validate_out_dim_size(TP_DIM_A, TP_DIM_B, TT_DATA_A, TT_DATA_B, TP_NUM_FR
   return isValid
 # Runs a legality check on the output dimension. Will need changed once interactive GUIs introduced.
 
-def fn_validate_shift_val(TP_SHIFT, TT_DATA_A, TT_DATA_B):
-  TT_OUT=fn_det_out_type(TT_DATA_A, TT_DATA_B)
-  if TP_SHIFT > TP_SHIFT_max :
-    return isError(f"Maximum value for Shift is {TP_SHIFT_max}, but got {TP_SHIFT}.")
-  
-  if (TT_OUT=="cfloat" or TT_OUT=="float" ):
-    if (TP_SHIFT==0) :
-      return isValid
-    return isError("Shift must be 0 for float/cfloat data type")
-    
-  if (TT_OUT=="cint32"):
-    if (TP_SHIFT>=0 and TP_SHIFT<=60) :
-      return isValid
-    return isError("Shift must be in range 0 to 61 for cint32 out data type")
-    
-  if (TT_OUT=="cint16"):
-    if (TP_SHIFT>=0 and TP_SHIFT<=31) :
-      return isValid
-    return isError("Shift must be in range 0 to 31 for cint16 out data type")
-    
-  if (TT_OUT=="int16"):
-    if (TP_SHIFT>=0 and TP_SHIFT<=31) :
-      return isValid
-    return isError("Shift must be in range 0 to 15 for int16 out data type")
-    
-  if (TT_OUT=="int32"):
-    if (TP_SHIFT>=0 and TP_SHIFT<=60) :
-      return isValid
-    return isError("Shift must be in range 0 to 31 for int32 out data type")
-  
 def fn_validate_api_val(TP_API):
   if TP_API != 0 and TP_API != 1:
     return isError("TP_API must be 0 (windowed) or streaming (1)")
@@ -170,12 +140,6 @@ def fn_validate_ssr(TP_SSR):
     if check["is_valid"] == False:
       return check
   return isValid
-
-def fn_validate_aie_variant(AIE_VARIANT):
-  if ((AIE_VARIANT==1) or (AIE_VARIANT==2)):
-    return isValid
-  else:
-    return isError("AIE_VARIANT must be set to 0 (AIE) or 1 (AIE-ML)")
 
 #### validation APIs ####
 def validate_TT_DATA_A(args):
@@ -211,7 +175,8 @@ def validate_TP_SHIFT(args):
     TP_SHIFT = args["TP_SHIFT"]
     TT_DATA_A = args["TT_DATA_A"]
     TT_DATA_B = args["TT_DATA_B"]
-    return fn_validate_shift_val(TP_SHIFT, TT_DATA_A, TT_DATA_B)
+    TT_OUT=fn_det_out_type(TT_DATA_A, TT_DATA_B)
+    return fn_validate_shift(TT_OUT, TP_SHIFT)
 
 def validate_TP_API(args):
     TP_API = args["TP_API"]

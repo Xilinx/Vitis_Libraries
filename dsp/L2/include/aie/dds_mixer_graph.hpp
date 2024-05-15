@@ -79,7 +79,7 @@ using namespace adf;
  *         - 0 = static phase initialization, defined in dds constructor,
  *         - 1 = reloadable initial phase, passed as argument to runtime function. \n
  *
- *         Note: when used, async port: ``` port_conditional_array<input, (TP_USE_PHASE_RELOAD == 1), TP_SSR> initPhase;
+ *         Note: when used, async port: ```port_conditional_array<input, (TP_USE_PHASE_RELOAD == 1), TP_SSR> initPhase;
  *``` will be added to the DDS. \n
  * @tparam TP_API specifies if the input/output interface should be buffer-based or stream-based.  \n
  *         The values supported are 0 (buffer API) or 1 (stream API).
@@ -102,6 +102,7 @@ using namespace adf;
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
+ *
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:

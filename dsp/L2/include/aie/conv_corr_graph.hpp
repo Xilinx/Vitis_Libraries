@@ -94,6 +94,7 @@ namespace conv_corr {
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
+ *
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
@@ -119,6 +120,9 @@ template <typename TT_DATA_F,
 
 class conv_corr_graph : public graph {
    public:
+    /**
+     * @cond NOCOMMENTS
+     */
     // Parameter value defensive and legality checks
 
     // defensive check for Input data types
@@ -175,11 +179,16 @@ class conv_corr_graph : public graph {
     // defensive check for SATURATION Mode which should be in the range i.e. SAT_MODE_MIN <TP_SAT< SAT_MODE_MAX
     static_assert(TP_SAT >= SAT_MODE_MIN && TP_SAT <= SAT_MODE_MAX, "ERROR: TP_SAT is out of supported range");
     static_assert(TP_SAT != 2, "ERROR: TP_SAT is invalid. Valid values of TP_SAT are 0, 1, and 3");
-
     /**
-        * The input data to the function.
+    * @endcond
+    */
+    /**
+        * The input F data to the function.
     **/
     input_port inWindowF;
+    /**
+        * The input G data to the function.
+    **/
     input_port inWindowG;
     /**
         * An API of TT_DATA type.

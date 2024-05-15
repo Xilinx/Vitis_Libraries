@@ -1,32 +1,42 @@
-Library Element,AIE_VARIANT,DATA_TYPE,TWIDDLE_TYPE,POINT_SIZE,FFT_NIFFT,WINDOW_VSIZE,CASC_LEN,API_IO,NITER,STIM_TYPE,UUT_TARGET,Latency,Throughput,NUM_BANKS,NUM_AIE,DATA_MEMORY,PROGRAM_MEMORY
-mixed_radix_fft,1,cint16,cint16,1024,1,1024,1,0,8,0,hw,3492 ns,690 MSa/s,9,1,39830,5286
-mixed_radix_fft,1,cint16,cint16,1200,0,1200,2,0,8,0,hw,5129 ns,640 MSa/s,20,2,67579,2934 3938
-mixed_radix_fft,1,cint16,cint16,1200,0,1200,3,0,8,0,hw,4358 ns,812 MSa/s,31,3,88992,3238 2086 2926
-mixed_radix_fft,1,cint16,cint16,1200,0,1200,4,0,8,0,hw,4388 ns,815 MSa/s,42,4,110405,3238 2086 2154 1996
-mixed_radix_fft,1,cint16,cint16,1200,0,1200,5,0,8,0,hw,3840 ns,1000 MSa/s,51,5,131818,1996 2154 2284 2298 2086
-mixed_radix_fft,1,cint16,cint16,1200,0,1200,1,0,8,0,hw,6335 ns,481 MSa/s,11,1,46166,5664
-mixed_radix_fft,1,cint16,cint16,128,0,128,1,0,8,0,hw,888 ns,405 MSa/s,9,1,7575,4150
-mixed_radix_fft,1,cint16,cint16,1296,0,1296,1,0,8,0,hw,5895 ns,545 MSa/s,11,1,49623,5792
-mixed_radix_fft,1,cint16,cint16,144,0,144,1,0,8,0,hw,1021 ns,392 MSa/s,9,1,8151,4432
-mixed_radix_fft,1,cint16,cint16,144,0,144,1,1,8,0,hw,958 ns,270 MSa/s,5,1,7007,5146
-mixed_radix_fft,1,cint16,cint16,16,0,192,2,1,8,0,hw,2461 ns,256 MSa/s,10,2,10115,1970 2088
-mixed_radix_fft,1,cint16,cint16,2000,0,2000,1,0,8,0,hw,11913 ns,434 MSa/s,12,1,74966,5936
-mixed_radix_fft,1,cint16,cint16,2048,0,2048,1,0,8,0,hw,7233 ns,666 MSa/s,12,1,76695,5862
-mixed_radix_fft,1,cint16,cint16,240,0,2400,1,0,8,0,hw,12738 ns,477 MSa/s,13,1,46166,4916
-mixed_radix_fft,1,cint16,cint16,240,0,240,1,0,8,0,hw,1392 ns,459 MSa/s,9,1,11606,4656
-mixed_radix_fft,1,cint16,cint16,240,0,480,1,0,8,0,hw,2769 ns,452 MSa/s,9,1,15446,4900
-mixed_radix_fft,1,cint16,cint16,240,0,480,3,1,8,0,hw,2482 ns,437 MSa/s,15,3,31400,3568 2210 2446
-mixed_radix_fft,1,cint16,cint16,240,0,720,1,0,8,0,hw,4014 ns,462 MSa/s,9,1,19286,4900
-mixed_radix_fft,1,cint16,cint16,240,0,960,1,0,8,0,hw,5252 ns,468 MSa/s,9,1,23126,4900
-mixed_radix_fft,1,cint16,cint16,24,0,24,1,0,8,0,hw,1030 ns,115 MSa/s,9,1,3831,2502
-mixed_radix_fft,1,cint16,cint16,256,1,256,1,0,8,0,hw,1217 ns,545 MSa/s,9,1,12182,4502
-mixed_radix_fft,1,cint16,cint16,32,0,32,1,0,8,0,hw,751 ns,171 MSa/s,9,1,4119,2456
-mixed_radix_fft,1,cint16,cint16,400,0,400,1,0,8,0,hw,2225 ns,468 MSa/s,9,1,17366,4880
-mixed_radix_fft,1,cint16,cint16,40,0,40,1,0,8,0,hw,1005 ns,156 MSa/s,9,1,4406,2842
-mixed_radix_fft,1,cint16,cint16,432,1,432,1,0,8,0,hw,2118 ns,521 MSa/s,9,1,18519,5120
-mixed_radix_fft,1,cint16,cint16,48,0,192,3,1,8,0,hw,1389 ns,446 MSa/s,16,3,16041,2382 1944 2128
-mixed_radix_fft,1,cint16,cint16,48,1,48,1,0,8,0,hw,847 ns,219 MSa/s,9,1,4695,2948
-mixed_radix_fft,1,cint16,cint16,512,0,512,1,0,8,0,hw,2034 ns,618 MSa/s,9,1,21399,4966
-mixed_radix_fft,1,cint16,cint16,64,1,64,1,0,8,0,hw,720 ns,267 MSa/s,9,1,5270,3150
-mixed_radix_fft,1,cint16,cint16,720,0,720,1,0,8,0,hw,3460 ns,524 MSa/s,9,1,28886,5312
-mixed_radix_fft,1,cint16,cint16,80,0,80,1,0,8,0,hw,803 ns,293 MSa/s,9,1,5846,3706
+Library Element,DATA_TYPE,TWIDDLE_TYPE,POINT_SIZE,FFT_NIFFT,WINDOW_VSIZE,CASC_LEN,API_IO,AIE_VARIANT,Dynamic Power,Latency,Throughput,NUM_BANKS,NUM_AIE,DATA_MEMORY,PROGRAM_MEMORY
+mixed_radix_fft,cint16,cint16,1024,1,1024,1,0,1,0.843 W,3117 ns,752 MSa/s,9,1,38682,5318
+mixed_radix_fft,cint16,cint16,256,1,256,1,0,1,0.765 W,1094 ns,593 MSa/s,9,1,11034,4518
+mixed_radix_fft,cint16,cint16,2592,1,2592,1,0,2,0.247 W,17940 ns,379 MSa/s,17,1,95138,4912
+mixed_radix_fft,cint16,cint16,288,1,288,1,0,2,0.496 W,2022 ns,387 MSa/s,6,1,12194,3744
+mixed_radix_fft,cint16,cint16,32,0,32,1,0,1,0.724 W,677 ns,188 MSa/s,9,1,2971,2414
+mixed_radix_fft,cint16,cint16,400,0,400,1,0,1,0.834 W,1998 ns,513 MSa/s,9,1,16218,4822
+mixed_radix_fft,cint16,cint16,40,0,40,1,0,1,0.728 W,910 ns,171 MSa/s,9,1,3258,2910
+mixed_radix_fft,cint16,cint16,432,1,432,1,0,1,0.784 W,2660 ns,427 MSa/s,9,1,17371,4816
+mixed_radix_fft,cint16,cint16,48,0,48,1,0,2,0.468 W,884 ns,209 MSa/s,7,1,3554,2528
+mixed_radix_fft,cint16,cint16,48,0,192,3,1,1,0.867 W,1274 ns,553 MSa/s,15,3,12597,2090 1936 2744
+mixed_radix_fft,cint16,cint16,48,1,48,1,0,1,0.728 W,599 ns,244 MSa/s,9,1,3547,2850
+mixed_radix_fft,cint16,cint16,512,0,512,1,0,1,0.797 W,1827 ns,673 MSa/s,9,1,20251,4950
+mixed_radix_fft,cint16,cint16,64,1,64,1,0,1,0.728 W,650 ns,292 MSa/s,9,1,4122,3180
+mixed_radix_fft,cint16,cint16,720,0,720,1,0,1,0.825 W,3112 ns,571 MSa/s,9,1,27738,5318
+mixed_radix_fft,cint16,cint16,800,0,800,1,0,2,0.544 W,4999 ns,418 MSa/s,7,1,30626,4352
+mixed_radix_fft,cint16,cint16,80,0,80,1,0,2,0.477 W,845 ns,279 MSa/s,8,1,4706,3136
+mixed_radix_fft,cint16,cint16,80,0,80,1,0,1,0.736 W,711 ns,327 MSa/s,9,1,4698,3622
+mixed_radix_fft,cint16,cint16,864,0,864,1,0,2,0.527 W,6382 ns,361 MSa/s,9,1,32930,4416
+mixed_radix_fft,cint16,cint16,24,0,24,1,0,1,0.724 W,760 ns,128 MSa/s,9,1,2683,2502
+mixed_radix_fft,cint16,cint16,96,0,96,1,0,2,0.478 W,796 ns,349 MSa/s,8,1,5282,3168
+mixed_radix_fft,cint16,cint16,240,0,960,1,0,1,0.799 W,4700 ns,513 MSa/s,9,1,21978,4832
+mixed_radix_fft,cint16,cint16,240,0,480,3,1,1,0.919 W,1975 ns,549 MSa/s,15,3,27956,2414 2214 3500
+mixed_radix_fft,cint16,cint16,1200,0,1200,1,1,1,0.833 W,5783 ns,345 MSa/s,9,1,35426,6332
+mixed_radix_fft,cint16,cint16,1200,0,1200,2,0,1,0.912 W,4591 ns,698 MSa/s,20,2,65283,2934 3884
+mixed_radix_fft,cint16,cint16,1200,0,1200,3,0,1,0.97 W,3910 ns,886 MSa/s,31,3,85548,3228 2086 2878
+mixed_radix_fft,cint16,cint16,1200,0,1200,4,0,1,1.079 W,3935 ns,883 MSa/s,42,4,105813,3228 2086 2158 1994
+mixed_radix_fft,cint16,cint16,1200,0,1200,5,0,1,1.126 W,3621 ns,1000 MSa/s,48,5,126078,1994 2260 2086 2158 2300
+mixed_radix_fft,cint16,cint16,1200,0,1200,1,0,1,0.838 W,5706 ns,525 MSa/s,11,1,45018,5632
+mixed_radix_fft,cint16,cint16,128,0,128,1,0,1,0.745 W,804 ns,439 MSa/s,9,1,6427,4102
+mixed_radix_fft,cint16,cint16,1296,0,1296,1,0,1,0.836 W,7618 ns,438 MSa/s,11,1,48475,5520
+mixed_radix_fft,cint16,cint16,144,0,144,1,0,1,0.746 W,1156 ns,347 MSa/s,9,1,7003,4128
+mixed_radix_fft,cint16,cint16,144,0,144,1,1,1,0.735 W,1026 ns,255 MSa/s,7,1,5859,4828
+mixed_radix_fft,cint16,cint16,160,0,160,1,0,2,0.488 W,1048 ns,419 MSa/s,8,1,7586,3520
+mixed_radix_fft,cint16,cint16,16,0,192,2,1,1,0.777 W,2205 ns,298 MSa/s,11,2,7819,1942 2032
+mixed_radix_fft,cint16,cint16,2000,0,2000,1,0,1,0.845 W,10778 ns,472 MSa/s,12,1,73818,5878
+mixed_radix_fft,cint16,cint16,2048,0,2048,1,0,1,0.882 W,6478 ns,725 MSa/s,12,1,75547,5782
+mixed_radix_fft,cint16,cint16,240,0,2400,1,0,1,0.837 W,11354 ns,525 MSa/s,13,1,45018,4832
+mixed_radix_fft,cint16,cint16,240,0,240,1,0,1,0.824 W,1249 ns,503 MSa/s,9,1,10458,4582
+mixed_radix_fft,cint16,cint16,240,0,480,1,0,1,0.828 W,2480 ns,496 MSa/s,9,1,14298,4832
+mixed_radix_fft,cint16,cint16,240,0,720,1,0,1,0.792 W,3592 ns,507 MSa/s,9,1,18138,4832
+mixed_radix_fft,cint16,cint16,96,1,96,1,0,1,0.74 W,798 ns,344 MSa/s,9,1,5275,3884

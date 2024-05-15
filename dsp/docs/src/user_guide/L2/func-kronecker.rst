@@ -10,9 +10,8 @@ Kronecker Matrix Product
 ========================
 
 
-~~~~~~~~~~~
 Entry Point
-~~~~~~~~~~~
+===========
 
 The graph entry point is the following:
 
@@ -20,15 +19,13 @@ The graph entry point is the following:
 
     xf::dsp::aie::kronecker::kronecker_graph
 
-~~~~~~~~~~~~~~
 Device Support
-~~~~~~~~~~~~~~
+==============
 
 The Kronecker supports AIE1 only.
 
-~~~~~~~~~~~~~~~
 Supported Types
-~~~~~~~~~~~~~~~
+===============
 
 Please see table :ref:`KRONECKER_output_type`: for allowed input data type combinations and corresponding output type.
 
@@ -81,29 +78,40 @@ Please see table :ref:`KRONECKER_output_type`: for allowed input data type combi
    | cfloat           | cfloat           | cfloat           | 4           |
    +------------------+------------------+------------------+-------------+
 
-~~~~~~~~~~~~~~~~~~~
 Template Parameters
-~~~~~~~~~~~~~~~~~~~
+===================
 
 To see details on the template parameters for the Kronecker Matrix Product, see :ref:`API_REFERENCE`.
 
-~~~~~
 Ports
-~~~~~
+=====
 
 To see details on the ports for the Kronecker Matrix Product, see :ref:`API_REFERENCE`. Note that the type of ports are determined by the configuration of template parameters.
 
-~~~~~~~~~~~~
 Design Notes
-~~~~~~~~~~~~
-1. It accepts input matrices in COLUMN major order.
-2. The leading dimension of the input matrices have to be an integer multiple of vector size, where:
-   a. The leading dimension in a COLUMN major order is ROWS.
-   b. The vector size is data type dependent. Please see table :ref:`KRONECKER_output_type`: for the vector size.
-3. Super Sample Rate (SSR) mode enables running multiple instances of a kernel in parallel where each instance runs on a separate tile. The input data is split and distributed to the parallel kernel instances. The SSR operation is controlled by parameter ``TP_SSR``.
-   a. Input matrix A is split and distributed to parallel kernels. The split is based on the COLUMNS and thus ``TP_DIM_A_COLS`` must be divisible by ``TP_SSR``.
-   b. Input matrix B is not split and a copy of it, is passed to each parallel kernel.
-4. Scaling is controlled by the ``TP_SHIFT`` parameter which describes the number of bits to shift the output to the right. Only power-of-2 scaling is supported. Float and cfloat implementations do not support scaling. ``TP_SHIFT`` can be set to -1 to shift the output one bit to the left.
+============
+The performance of the IP heavily depends on the chosen data types. The data type combination determines the number of multiplications per clock cycle.
+
+Inputs
+------
+
+It accepts input matrices in COLUMN major order. The leading dimension of the input matrices have to be an integer multiple of vector size, where:
+
+   #. The leading dimension in a COLUMN major order is ROWS.
+   #. The vector size is data type dependent. Please see table :ref:`KRONECKER_output_type` for the vector size.
+
+Super Sample Rate (SSR)
+-----------------------
+ 
+The SSR operation is controlled by parameter ``TP_SSR`` and SSR enables running multiple instances of a kernel in parallel where each instance runs on a separate tile. The input data is split and distributed to the parallel kernel instances.
+
+   #. Input matrix A is split and distributed to parallel kernels. The split is based on the COLUMNS and thus ``TP_DIM_A_COLS`` must be divisible by ``TP_SSR``.
+   #. Input matrix B is not split and a copy of it is passed to each parallel kernel.
+
+Scaling 
+-------
+
+Scaling is controlled by the ``TP_SHIFT`` parameter which describes the number of bits to shift the output to the right. Only power-of-2 scaling is supported. Float and cfloat implementations do not support scaling.
 
 Constraints
 -----------

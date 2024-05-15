@@ -118,6 +118,7 @@ class ct_kernels {
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
+ *
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph
  *         in a single iteration run.  \n
@@ -129,12 +130,14 @@ class ct_kernels {
  *buffering takes place. \n
  *         In such case, maximum number of samples processed by the graph is limited to 32-bit value (4.294B samples per
  *iteration).  \n
+ *
  *         Note: For SSR configurations (TP_SSR>1), the input data must be split over multiple ports,
  *         where each successive sample is sent to a different input port in a round-robin fashion. \n
  *         As a result, each SSR input path will process a fraction of the frame defined by the TP_INPUT_WINDOW_VSIZE.
  *\n
  *         The number of values in the output window will be TP_INPUT_WINDOW_VSIZE
  *         multiplied by 2 by virtue the halfband interpolation factor. \n
+ *
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  * @tparam TP_CASC_LEN describes the number of AIE processors to split the operation
  *         over. \n This allows resource to be traded for higher performance.
@@ -157,11 +160,13 @@ class ct_kernels {
  *         - 0 = static coefficients, defined in filter constructor,
  *         - 1 = reloadable coefficients, passed as argument to runtime function. \n
  *
- *         Note: when used, async port: ``` port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeff; ```
- *will be added to the FIR. \n
+ *         Note: when used, async port: ```port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeff;```
+ *         will be added to the FIR. \n
+ *
  *         Note: the size of the port array is equal to the total number of output paths  (TP_SSR).  \n
  *         Each port should contain the same taps array content, i.e. each additional port must be a duplicate of the
- *coefficient array. \n
+ *         coefficient array. \n
+ *
  *         Note: when TP_USE_COEFF_RELOAD = 1 and  TP_PARA_INTERP_POLY = 2, optional port: ```
  *port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeffCT; ``` will be added to the FIR. \n
  * @tparam TP_NUM_OUTPUTS sets the number of ports over which the output is sent. \n
@@ -180,8 +185,11 @@ class ct_kernels {
  * @tparam TP_UPSHIFT_CT upshift unit center tap. \n
  *         When TP_UPSHIFT_CT is set to 0, center tap coefficient will be treated as any other coefficient. \n
  *         When TP_UPSHIFT_CT is set to 1, provided center tap's value will be used to upshift data sample. \n
+ *
  *         Note: when complex coefficient's are used, center tap's real part will be used for the upshift. \n
+ *
  *         Note: Upshift UCT is only supported with 16-bit coefficient types, i.e. int16 and cint16. \n
+ *
  *         Note: When Upshift is enabled, center tap value must be in the range 0 to 47.
  * @tparam TP_API specifies if the input/output interface should be window-based or stream-based.  \n
  *         The values supported are 0 (window API) or 1 (stream API).

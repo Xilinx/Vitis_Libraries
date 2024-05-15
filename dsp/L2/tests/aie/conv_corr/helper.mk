@@ -61,9 +61,6 @@ prep_aie_out:
 get_diff: 
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl $(UUT_SIM_FILE) $(REF_SIM_FILE) ./logs/diff.txt
 
-get_theoretical_min:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_wgt_theoretical_min.tcl $(DATA_F) $(F_LEN) $(STATUS_FILE) $(UUT_KERNEL) $(IN_API) $(OUT_API) $(NUM_OUTPUT_CLONES) $(NUM_INPUTS)
-
 create_config:
 	echo $(STATUS_FILE)
 	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP)

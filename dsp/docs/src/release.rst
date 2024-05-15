@@ -79,6 +79,36 @@ This element adds an implementation of the  Kronecker Matrix Product.
 
 Supports AIE devices.
 
+*  **Example design of FFT on AIE and PL**
+
+This element illustrates the implementation of the Fast Fourier transform that spans across the AIE and Programmable Logic.
+
+Supports AIE and AIE-ML devices.
+
+*  **Matrix-Vector Multiplication**
+
+Added support for AIE-ML devices. 
+
+Added Super Sample Rate (SSR) feature. Allows the matrix-vector multiplication to be computed using parallel paths for increased throughput.
+
+*  **Matrix Multiplication**
+
+Added Super Sample Rate (SSR) feature. Allows the matrix multiplication to be computed using parallel paths for increased throughput.
+
+*  **DFT**
+
+Added Super Sample Rate (SSR) feature. Allows the Discrete Fourier Transform (DFT) to be computed using parallel paths for increased throughput.
+
+*  **FFT IFFT**
+
+This element now supports cint32 type twiddles for integer data types. This element also now supports a new parameter 
+TP_TWIDDLE_MODE.
+
+* **Mixed-Radix FFT**
+
+This element now supports AIE-ML devices.
+
+
 2023.2
 ======
 

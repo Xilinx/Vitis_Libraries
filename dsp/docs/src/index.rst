@@ -1,4 +1,4 @@
-.. 
+..
    Copyright © 2019–2024 Advanced Micro Devices, Inc
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
@@ -72,20 +72,20 @@ The Vitis AIE DSP Library provides a SSR FFT implementation targeting AIE, as we
    :caption: API Reference
 
    API Reference Overview <user_guide/L2/api-reference.rst>
+   Convolution / Correlation <rst/group_conv_corr_graph.rst>
    DDS Mixer <rst/group_dds_graph.rst>
    DFT <rst/group_dft_graph.rst>
-   Graph utils <rst/group_graph_utils.rst>
-   Hadamard Product <rst/group_hadamard_graph.rst>
    FFT IFFT <rst/group_fft_graphs.rst>
    FFT Window <rst/group_fft_window.rst>
    FIRs <rst/group_fir_graphs.rst>
-   Kronecker <rst/group_kronecker_graph.rst>
    GeMM <rst/group_gemm_graph.rst>
    GeMV <rst/group_matrix_vector_mul_graph.rst>
+   Graph utils <rst/group_graph_utils.rst>
+   Hadamard Product <rst/group_hadamard_graph.rst>
+   Kronecker <rst/group_kronecker_graph.rst>
    Outer Tensor <rst/group_outer_tensor_graph.rst>
    Sample Delay <rst/group_sample_delay_graph.rst>
    Widgets <rst/group_widget_graph.rst>
-   Convolution / Correlation <rst/group_conv_corr_graph.rst>
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:

@@ -71,6 +71,7 @@ using namespace adf;
  *         When 2 inputs are configured, whe data will be read sequentially from each.
  * @tparam TP_WINDOW_VSIZE describes the number of samples in the window API
  *         used if either input or output is a window. \n
+ *
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  * @tparam TP_NUM_OUTPUT_CLONES sets the number of output ports to write the input
  *         data to. Note that while input data from multiple ports is independent,

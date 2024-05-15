@@ -81,6 +81,7 @@ using namespace adf;
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
+ *
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
@@ -102,6 +103,9 @@ template <typename TT_DATA_A,
           unsigned int TP_SAT = 1>
 class outer_tensor_graph : public graph {
    public:
+    /**
+     * @cond NOCOMMENTS
+     */
     static constexpr int bufferSizeBytes = 32;
     static constexpr int pingPongSize = 32768 / 2;
     static constexpr int kMaxSSR = 16;
@@ -135,18 +139,28 @@ class outer_tensor_graph : public graph {
     static constexpr unsigned int kKernelBSize = CEIL(TP_DIM_B, outer_tensor_template::vecSampleNumB);
     static constexpr unsigned int kKernelOutSize =
         TP_DIM_A * CEIL(TP_DIM_B, outer_tensor_template::vecSampleNumOut) / TP_SSR;
-
-    // The input data to the function.
+    /**
+    * @endcond
+    */
+    /**
+        * The input A data to the function.
+    **/
     port_array<input, TP_SSR> inA;
+    /**
+        * The input B data to the function.
+    **/
     port_array<input, TP_SSR> inB;
-
-    // An API of TT_DATA type.
+    /**
+        * An API of TT_DATA type.
+    **/
     port_array<output, TP_SSR> out;
-
-    // The array of kernels that will be created and mapped onto AIE tiles.
+    /**
+        * The array of kernels that will be created and mapped onto AIE tiles.
+    **/
     kernel m_kernels[TP_SSR];
-
-    // Access function to get pointer to kernel (or first kernel in a chained configuration).
+    /**
+        * Access function to get pointer to kernel (or first kernel in a chained configuration).
+    **/
     kernel* getKernels() { return m_kernels; };
 
     /**

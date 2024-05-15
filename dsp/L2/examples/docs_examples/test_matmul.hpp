@@ -36,12 +36,13 @@ namespace mm_example {
 #define P_INPUT_WINDOW_VSIZE_A 512
 #define P_INPUT_WINDOW_VSIZE_B 512
 #define P_CASC_LEN 1
+#define P_SSR 1
 
 class test_mm : public adf::graph {
    public:
-    port<input> inA;
-    port<input> inB;
-    port<output> out;
+    xf::dsp::aie::port_array<input, P_SSR * P_CASC_LEN> inA;
+    xf::dsp::aie::port_array<input, P_SSR * P_CASC_LEN> inB;
+    xf::dsp::aie::port_array<output, P_SSR> out;
     xf::dsp::aie::blas::matrix_mult::matrix_mult_graph<T_DATA_A,
                                                        T_DATA_B,
                                                        P_DIM_A,
@@ -57,19 +58,23 @@ class test_mm : public adf::graph {
                                                        P_ADD_DETILING_OUT,
                                                        P_INPUT_WINDOW_VSIZE_A,
                                                        P_INPUT_WINDOW_VSIZE_B,
-                                                       P_CASC_LEN>
+                                                       P_CASC_LEN,
+                                                       P_SSR>
         matrixMult;
     test_mm() {
-        connect<>(inA, matrixMult.inA[0]);
-        connect<>(inB, matrixMult.inB[0]);
-        connect<>(matrixMult.out[0], out);
         kernel* kernels = matrixMult.getKernels();
-        for (int i = 0; i < P_CASC_LEN; i++) {
-            runtime<ratio>(kernels[i]) = 0.7;
-            runtime<ratio>(matrixMult.tilerA[i]) = 0.5;
-            runtime<ratio>(matrixMult.tilerA[i]) = 0.5;
+        for (int ssrIdx = 0; ssrIdx < P_SSR; ssrIdx++) {
+            for (int cascIdx = 0; cascIdx < P_CASC_LEN; cascIdx++) {
+                // Set runtime ratio for each kernel
+                runtime<ratio>(kernels[ssrIdx * P_CASC_LEN + cascIdx]) = 0.7;
+
+                // Connect input A and B data
+                connect<>(inA[ssrIdx * P_CASC_LEN + cascIdx], matrixMult.inA[ssrIdx * P_CASC_LEN + cascIdx]);
+                connect<>(inB[ssrIdx * P_CASC_LEN + cascIdx], matrixMult.inB[ssrIdx * P_CASC_LEN + cascIdx]);
+            }
+            // Connect output data
+            connect<>(matrixMult.out[ssrIdx], out[ssrIdx]);
         }
-        runtime<ratio>(matrixMult.untiler[0]) = 0.5;
     };
 };
 };

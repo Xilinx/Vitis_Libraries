@@ -1,27 +1,27 @@
-Library Element,AIE_VARIANT,DATA_TYPE,INPUT_WINDOW_VSIZE,PORT_API,Latency,Throughput,NUM_BANKS,NUM_AIE,DATA_MEMORY,PROGRAM_MEMORY
-sample_delay,1,cfloat,1024,1,170 ns,477 MSa/s,4,1,2995,1894
-sample_delay,1,cfloat,256,0,862 ns,500 MSa/s,8,1,13229,2546
-sample_delay,1,cint16,1024,1,168 ns,914 MSa/s,4,1,1715,1878
-sample_delay,1,cint16,256,0,574 ns,1000 MSa/s,8,1,6829,2290
-sample_delay,1,cint32,1024,1,170 ns,477 MSa/s,4,1,2739,1894
-sample_delay,1,cint32,256,0,862 ns,500 MSa/s,8,1,12973,2546
-sample_delay,1,int16,1024,1,343 ns,469 MSa/s,4,1,1203,2156
-sample_delay,1,int16,256,0,1230 ns,593 MSa/s,8,1,3757,2450
-sample_delay,1,int32,1024,1,168 ns,914 MSa/s,4,1,1715,1878
-sample_delay,1,int32,256,0,574 ns,1000 MSa/s,8,1,6829,2290
-sample_delay,1,int8,1024,1,387 ns,761 MSa/s,4,1,947,2156
-sample_delay,1,int8,256,0,815 ns,937 MSa/s,8,1,2221,2402
-sample_delay,1,uint8,1024,1,387 ns,761 MSa/s,4,1,947,2156
-sample_delay,1,uint8,256,0,815 ns,937 MSa/s,8,1,2221,2402
-sample_delay,2,cint16,1024,1,313 ns,340 MSa/s,4,1,1713,2000
-sample_delay,2,cint16,256,0,575 ns,1000 MSa/s,6,1,6828,1968
-sample_delay,2,cint32,1024,1,312 ns,180 MSa/s,4,1,2737,2016
-sample_delay,2,cint32,256,0,913 ns,500 MSa/s,6,1,12972,2176
-sample_delay,2,int16,1024,1,310 ns,658 MSa/s,4,1,1201,1984
-sample_delay,2,int16,256,0,504 ns,1376 MSa/s,6,1,3756,1872
-sample_delay,2,int32,1024,1,313 ns,340 MSa/s,4,1,1713,2000
-sample_delay,2,int32,256,0,575 ns,1000 MSa/s,6,1,6828,1968
-sample_delay,2,int8,1024,1,309 ns,1229 MSa/s,4,1,945,1968
-sample_delay,2,int8,256,0,452 ns,1718 MSa/s,6,1,2220,1776
-sample_delay,2,uint8,1024,1,309 ns,1229 MSa/s,4,1,945,1968
-sample_delay,2,uint8,256,0,452 ns,1718 MSa/s,6,1,2220,1776
+Library Element,DATA_TYPE,WINDOW_VSIZE,PORT_API,AIE_VARIANT,Dynamic Power,Latency,Throughput,NUM_BANKS,NUM_AIE,DATA_MEMORY,PROGRAM_MEMORY
+sample_delay,cfloat,256,0,1,0.725 W,823 ns,500 MSa/s,8,1,13741,2516
+sample_delay,int8,256,1,2,0.256 W,294 ns,944 MSa/s,4,1,1457,2016
+sample_delay,int8,256,0,2,0.256 W,392 ns,1984 MSa/s,6,1,2732,1808
+sample_delay,int32,256,1,2,0.256 W,298 ns,315 MSa/s,4,1,2225,2048
+sample_delay,int32,256,0,2,0.256 W,561 ns,1000 MSa/s,4,1,7340,1984
+sample_delay,int16,256,1,2,0.256 W,295 ns,567 MSa/s,4,1,1713,2032
+sample_delay,int16,256,0,2,0.256 W,423 ns,1590 MSa/s,6,1,4268,1888
+sample_delay,cint32,256,1,2,0.256 W,296 ns,172 MSa/s,4,1,3249,2064
+sample_delay,cint32,256,0,2,0.256 W,875 ns,500 MSa/s,6,1,13484,2192
+sample_delay,cint16,256,1,2,0.256 W,298 ns,315 MSa/s,4,1,2225,2048
+sample_delay,cint16,256,0,2,0.256 W,561 ns,1000 MSa/s,4,1,7340,1984
+sample_delay,uint8,256,1,1,0.72 W,359 ns,643 MSa/s,4,1,1459,2118
+sample_delay,uint8,256,0,1,0.705 W,707 ns,1071 MSa/s,8,1,2733,2326
+sample_delay,int8,256,1,1,0.721 W,359 ns,643 MSa/s,4,1,1459,2118
+sample_delay,int8,256,0,1,0.706 W,707 ns,1071 MSa/s,8,1,2733,2326
+sample_delay,int32,256,1,1,0.724 W,155 ns,746 MSa/s,4,1,2227,1868
+sample_delay,int32,256,0,1,0.725 W,520 ns,1000 MSa/s,8,1,7341,2244
+sample_delay,int16,256,1,1,0.721 W,319 ns,430 MSa/s,4,1,1715,2086
+sample_delay,int16,256,0,1,0.71 W,1053 ns,680 MSa/s,8,1,4269,2390
+sample_delay,cint32,256,1,1,0.733 W,156 ns,427 MSa/s,4,1,3251,1884
+sample_delay,cint32,256,0,1,0.726 W,823 ns,500 MSa/s,8,1,13485,2516
+sample_delay,cint16,256,1,1,0.729 W,155 ns,746 MSa/s,4,1,2227,1868
+sample_delay,cint16,256,0,1,0.723 W,520 ns,1000 MSa/s,8,1,7341,2244
+sample_delay,cfloat,256,1,1,0.731 W,156 ns,427 MSa/s,4,1,3507,1884
+sample_delay,uint8,256,0,2,0.256 W,392 ns,1984 MSa/s,6,1,2732,1808
+sample_delay,uint8,256,1,2,0.256 W,294 ns,944 MSa/s,4,1,1457,2016

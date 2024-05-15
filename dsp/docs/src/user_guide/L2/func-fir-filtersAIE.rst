@@ -279,16 +279,6 @@ In this scenario, two exact copies of output data will be produced in two indepe
 
 For example, a single-rate FIR with a `512` input sample buffer will produce two output buffers, where each buffer is `512` samples.
 
-Stream Input for Asymmetric FIRs
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Stream input allows data samples to be written directly from the input stream to one of the Input Vector Registers without the requirement for a ping-pong window buffer.
-As a result, memory requirements and latency are reduced.
-
-To maximize the throughput, FIRs can be configured with two input stream ports. Although this might not improve performance if the throughput is limited by other factors, i.e., the output stream bandwidth or the vector processor.
-Set ``TP_DUAL_IP`` to 1 to create a FIR instance with two input stream ports.
-In such a case, the input data will be merged from the two ports in 128 bit chunks, onto one data stream internally, e.g.:
-
 .. _MAX_WINDOW_SIZE:
 
 Maximum Window Size
@@ -491,7 +481,7 @@ More details are provided in the :ref:`API_REFERENCE`.
 Optimum Cascade Length
 ----------------------
 
-| For FIR variants configured to use streaming interfaces, i.e., ``TP_API=1``, the optimum ``TP_CASC_LEN`` for a given configuration of the other parameters is a complicated equation. Here, the optimum value of ``TP_CASC_LEN`` refers to the least number of kernels that the overall calculations can be divided, when the interface bandwidth limits the maximum performance.
+| For FIR variants configured to use streaming interfaces, i.e., ``TP_API = 1``, the optimum ``TP_CASC_LEN`` for a given configuration of the other parameters is a complicated equation. Here, the optimum value of ``TP_CASC_LEN`` refers to the least number of kernels that the overall calculations can be divided, when the interface bandwidth limits the maximum performance.
 | To aid in this determination, utility functions have been created for FIR variants in their respective graph files.
 | As an example, the function signature for the single rate asymmetric filter is shown below:
 
@@ -600,7 +590,7 @@ Therefore, the maximum throughput achievable for a given data type, e.g., cint16
 
 * maximum theoretical sample rate at input: ``THROUGHPUT_IN  = NUM_INPUT_PORTS x 1 GSa/s``,
 
-* maximum theoretical sample rate at output = ``THROUGHPUT_OUT  = NUM_OUTPUT_PORTS x 1 GSa/s``.
+* maximum theoretical sample rate at output: ``THROUGHPUT_OUT  = NUM_OUTPUT_PORTS x 1 GSa/s``.
 
 
 **AIE Tile Utilization Ratio**
@@ -639,7 +629,7 @@ The ``TP_SSR`` parameter allows a trade of performance for resource use in the f
 When used, a number of ``TP_SSR`` input phases and a number of ``TP_SSR`` output paths will be created.
 An array of ``TP_SSR^2`` FIR sub-graphs will be created to connect the input phases and output paths.
 
-Input data samples are distributed across the input phases in a round-robin, sample-by-sample mechanism where each input phase processes a fraction of the input samples, i.e.,``TP_INPUT_WINDOW_VSIZE / TP_SSR``. More details in: :ref:`SSR_PORT_MAPPING`.
+Input data samples are distributed across the input phases in a round-robin, sample-by-sample mechanism where each input phase processes a fraction of the input samples, i.e. ``TP_INPUT_WINDOW_VSIZE / TP_SSR``. More details in: :ref:`SSR_PORT_MAPPING`.
 
 Coefficients are distributed in such way that each output path consists of all the FIRs coefficients, but each FIR sub-graph in any given output path is only configured to operate on a fraction of the FIR length, i.e., operates on ``TP_FIR_LEN / TP_SSR`` number of coefficients.
 
@@ -647,14 +637,14 @@ As a result, each FIR sub-graph operates on a fraction of coefficients and a fra
 
 In addition, each FIR sub-graph can be further split into multiple FIR kernels with the use of a cascade interface, which is driven by the ``TP_CASC_LEN`` template parameter.
 
-For example, a FIR with ``TP_SSR=4`` and ``TP_CASC_LEN=2`` will create a kernel structure presented as follows, in :ref:`FIGURE_FIR_SSR`.
+For example, a FIR with ``TP_SSR = 4`` and ``TP_CASC_LEN = 2`` will create a kernel structure presented as follows, in :ref:`FIGURE_FIR_SSR`.
 
 .. _FIGURE_FIR_SSR:
 
 .. figure:: ./media/SSR_FIR_6_5in.png
 
 
-   **Internal structure of FIR with TP_SSR=4 and TP_CASC_LEN=2**
+   **Internal structure of FIR with TP_SSR = 4 and TP_CASC_LEN = 2**
 
 Super Sample Rate - Coefficient and Data Distribution - Resampling Limitations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -670,7 +660,7 @@ Super Sample Rate - Sample to Port Mapping
 
 When a Super Sample Rate operation is used, data is input and output using multiple ports. These multiple ports on input or output, act as one channel.
 
-The input data channel must be split over multiple ports where each successive input sample is sent to a different input port in a round-robin fashion, i.e., sample 0 goes to input port :code:`in[0]`, sample 1 to :code:`in[1]`, etc. up to N-1 where N=TP_SSR, then sample N goes to :code:`in[0]`, sample N+1 goes to :code:`in[1]` and so on. Output samples are output from the multiple output ports in the same fashion.
+The input data channel must be split over multiple ports where each successive input sample is sent to a different input port in a round-robin fashion, i.e., sample 0 goes to input port :code:`in[0]`, sample 1 to :code:`in[1]`, etc. up to ``N-1`` where ``N = TP_SSR``, then sample N goes to :code:`in[0]`, sample N+1 goes to :code:`in[1]` and so on. Output samples are output from the multiple output ports in the same fashion.
 
 In addition, where ``TP_DUAL_IP`` is also enabled, there will be two sets of SSR input ports, :code:`in` and :code:`in2`, where data must be organized in a 128-bit interleaved pattern.
 Allocate samples to ports 0 to N-1 of port :code:`in` in the round-robin fashion above until each port has 128-bits of data, then allocate the next samples in a round-robin fashion to ports 0 through N-1 of port :code:`in2` until these have 128-bits of data, then return to allocating samples to ports 0 through N-1 of :code:`in`, and repeat.
@@ -827,7 +817,7 @@ When configured for a SSR operation, the FIR has a two-dimensional array (paths 
 
    Kernel Index = Kernel Path * TP_SSR * TP_CASC_LEN + Kernel Phase * TP_CASC_LEN + Kernel Cascade index
 
-For example, in a design with ``TP_CASC_LEN=2`` and ``TP_SSR=3``, the first kernel of the last path would have an index 12.
+For example, in a design with ``TP_CASC_LEN = 2`` and ``TP_SSR = 3``, the first kernel of the last path would have an index 12.
 
 The nets returned by the `getInNet()` function can be assigned custom fifo_depths values to override the defaults.
 

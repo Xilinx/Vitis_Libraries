@@ -1,4 +1,4 @@
-.. 
+..
    Copyright © 2019–2024 Advanced Micro Devices, Inc
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
@@ -9,7 +9,7 @@
    :caption: Table of Contents
    :maxdepth: 3
 
-   1-Dimensional(Line) SSR FFT L1 FPGA Module <L1.rst>
+..    1-Dimensional(Line) SSR FFT L1 FPGA Module <L1.rst>
 
 .. _L1_1DFFT_OVERVIEW:
 
@@ -432,7 +432,7 @@ Launching an Individual Test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To launch an individual test, first it is required to set up the environment for launching the Vitis HLS Compiler which can be done as follows:
- 
+
 Set up the environment variable **TA_PATH** to point to the installation path of your Vitis installation , and run following commands to set up the environment:
 
 .. code-block:: bash
@@ -442,3 +442,8 @@ Set up the environment variable **TA_PATH** to point to the installation path of
    source ${XILINX_VIVADO}/settings64.sh
 
 Once the environment settings are done, an individual test can be launched by going to test folder (any folder inside sub-directory at any level of ``REPO_PATH/dsp/L1/test/hw/1dfft`` that has a Makefile is a test) and running the make command: ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1``. You can choose the part number as required, and by settting CSIM/CSYNTH/COSIM=0, choose what to build and run with make target.
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

@@ -89,6 +89,7 @@ using namespace adf;
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
+ *
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_DIM_A_LEADING describes the scheme in which the data should be stored
  *         in memory. ROW_MAJOR = 0, COL_MAJOR = 1. Note, a COL_MAJOR matrix can be
@@ -110,24 +111,14 @@ using namespace adf;
  *          option to 0 indicates that the re-arrangement will be done externally to
  *          the AIE matrix multiply graph.
  * @tparam TP_INPUT_WINDOW_VSIZE_A describes the number of samples in the window API
- *         used for input to Matrix A. \n It must be of size TP_DIM_A*TP_DIM_AB*N.
- *         Typical use has N=1, however N>1 can be utilized to minimize overhead of
- *         window API. \n This parameter is optional and has a default value of
- *         TP_DIM_A*TP_DIM_AB (N=1).
+ *         used for input to Matrix A. \n It must be of size TP_DIM_A*TP_DIM_AB.
  * @tparam TP_INPUT_WINDOW_VSIZE_B describes the number of samples in the window API
- *         used for input to Matrix B. \n It must be of size TP_DIM_B*TP_DIM_AB*M.
- *         Typical use has M=1, however M>1 can be utilized to minimize overhead of
- *         window API. \n This parameter is optional and has a default value of
- *         TP_DIM_B*TP_DIM_AB (M=1). \n
- *         Note, the output window will be of size:
- *           (TP_INPUT_WINDOW_VSIZE_A/TP_DIM_AB * TP_INPUT_WINDOW_VSIZE_B/TP_DIM_AB).
- *          When N and M is 1, output window size will be TP_DIM_A * TP_DIM_B.
+ *         used for input to Matrix B. \n It must be of size TP_DIM_B*TP_DIM_AB
+ *         Note, the output window will be of size TP_DIM_A * TP_DIM_B.
  * @tparam TP_CASC_LEN describes the number of AIE kernels the matrix multiplication will be divided into in series. \n
  *         TP_CASC_LEN splits the operation over shared dimension TP_DIM_AB, where each kernel
  *         utilizes the cascade stream to pass partial accumulation results to
  *         the next kernel. In effect, dot(A,B) + C. \n
- *         Note, it is also possible to tile the operation over multiple AIE tiles
- *         by instantiating multiple GEMM graphs with smaller dimensions.
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
@@ -136,11 +127,11 @@ using namespace adf;
  *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds
  *         an n-bit signed value in the range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  * @tparam TP_SSR describes the number of kernels (or cascaded kernel chains) that will compute the matrix
- *multiplication in parallel.
+ *         multiplication in parallel.
  *         Each SSR rank will receive an equal sized split (along the unique dimension) of Matrix A data. \n
- *         There is no splitting of the Matrix B data when TP_SSR > 1 (only split when TP_CASC_LEN > 1). The Matrix B
- *inputs across a
- *         chain of cascaded kernels will be the same across all SSR ranks \n.
+ *         There is no splitting of the Matrix B data when TP_SSR > 1 (only split when TP_CASC_LEN > 1).
+ *         The Matrix B inputs across a
+ *         chain of cascaded kernels will be the same across all SSR ranks
 **/
 
 template <typename TT_DATA_A,
@@ -223,9 +214,7 @@ class matrix_mult_graph : public graph {
      * @cond NOCOMMENTS
      */
     struct no_kernel {};
-    /**
-     * @endcond
-     */
+
     // TODO: Have the first or last kernel take the remainder. ie DIM_AB=15 and CASC =2; should be one kernel of 8 and
     // one kernel of 6, where we round by tilingScheme.ABtile.
     static_assert(TP_DIM_AB % TP_CASC_LEN == 0, "TP_DIM_AB needs to be a multiple of TP_CASC_LEN");
@@ -287,6 +276,9 @@ class matrix_mult_graph : public graph {
     static constexpr bool isRedundantTilerOut =
         ((dimBPerKernel <= tilingScheme.Btile) && (TP_DIM_OUT_LEADING == ROW_MAJOR));
 
+    /**
+     * @endcond
+     */
     /**
      * @brief This is the constructor function for the Matrix Multiply graph.
      **/

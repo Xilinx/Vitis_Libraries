@@ -1,0 +1,68 @@
+Library Element,AIE_VARIANT,T_DATA_A,T_DATA_B,DIM_SIZE_A,DIM_SIZE_B,NUM_FRAMES,UUT_SSR,API_IO,Dynamic Power,Latency,Throughput,NUM_BANKS,NUM_AIE,DATA_MEMORY,PROGRAM_MEMORY
+outer_tensor,1,cfloat,cfloat,32,32,1,1,0,0.741 W,7548 ns,500 MSa/s,7,1,20103,3232
+outer_tensor,1,cint32,int32,32,32,1,1,0,0.732 W,7890 ns,500 MSa/s,7,1,19848,2572
+outer_tensor,1,float,cfloat,32,32,1,1,0,0.737 W,9978 ns,500 MSa/s,7,1,19847,2530
+outer_tensor,1,float,float,32,32,1,1,0,0.726 W,4952 ns,1000 MSa/s,7,1,11399,2346
+outer_tensor,1,int16,cint16,32,32,1,1,0,0.727 W,6000 ns,1000 MSa/s,7,1,11304,2248
+outer_tensor,1,int16,cint32,16,16,4,1,0,0.73 W,9975 ns,500 MSa/s,7,1,22440,2932
+outer_tensor,1,int16,cint32,32,32,1,1,0,0.731 W,11979 ns,500 MSa/s,8,1,25896,3368
+outer_tensor,1,int16,int16,16,16,32,1,0,0.749 W,15335 ns,2000 MSa/s,9,1,38536,2318
+outer_tensor,1,int16,int16,16,16,8,1,0,0.727 W,3852 ns,2000 MSa/s,7,1,10888,2318
+outer_tensor,1,int16,int16,32,32,1,1,0,0.722 W,2996 ns,2000 MSa/s,7,1,7048,2598
+outer_tensor,1,int16,int32,32,32,1,1,0,0.727 W,6000 ns,1000 MSa/s,7,1,11272,2264
+outer_tensor,1,int32,cint16,32,32,1,1,0,0.727 W,9938 ns,500 MSa/s,7,1,19592,2572
+outer_tensor,1,int32,cint32,32,32,1,1,0,0.732 W,9938 ns,500 MSa/s,7,1,19848,2572
+outer_tensor,1,int32,int16,32,32,1,1,0,0.726 W,4960 ns,1000 MSa/s,7,1,11272,2264
+outer_tensor,1,int32,int32,16,16,2,1,0,0.723 W,2452 ns,1000 MSa/s,7,1,6280,1862
+outer_tensor,1,cint32,int32,16,16,4,1,0,0.731 W,7818 ns,500 MSa/s,7,1,19592,1942
+outer_tensor,1,int32,int32,16,16,2,1,0,0.723 W,2452 ns,1000 MSa/s,7,1,6280,1862
+outer_tensor,1,int32,int32,16,16,2,1,0,0.722 W,2452 ns,1000 MSa/s,7,1,6280,1862
+outer_tensor,1,int32,int32,16,16,2,1,0,0.721 W,2452 ns,1000 MSa/s,7,1,6280,1862
+outer_tensor,1,int32,int32,16,16,2,1,0,0.722 W,2452 ns,1000 MSa/s,7,1,6280,1862
+outer_tensor,1,int32,int32,16,16,2,1,0,0.723 W,2452 ns,1000 MSa/s,7,1,6280,1862
+outer_tensor,1,int32,int32,16,16,2,1,0,0.721 W,2452 ns,1000 MSa/s,7,1,6280,1862
+outer_tensor,1,int32,int32,32,32,1,1,0,0.726 W,4960 ns,1000 MSa/s,7,1,11400,2248
+outer_tensor,1,int32,int32,32,32,4,1,0,0.75 W,15758 ns,1000 MSa/s,9,1,37512,2270
+outer_tensor,1,int32,int32,32,32,4,1,0,0.75 W,15759 ns,1000 MSa/s,9,1,37512,2254
+outer_tensor,1,int32,int32,32,32,4,1,0,0.75 W,15758 ns,1000 MSa/s,9,1,37512,2270
+outer_tensor,1,int32,int32,32,32,4,1,0,0.749 W,15759 ns,1000 MSa/s,9,1,37512,2254
+outer_tensor,1,int32,int32,32,32,4,1,0,0.75 W,15759 ns,1000 MSa/s,9,1,37512,2270
+outer_tensor,1,int32,int32,32,32,4,1,0,0.748 W,15759 ns,1000 MSa/s,9,1,37512,2270
+outer_tensor,1,int32,int32,32,32,4,1,0,0.75 W,15759 ns,1000 MSa/s,9,1,37512,2270
+outer_tensor,1,int32,int32,32,32,4,1,0,0.75 W,15759 ns,1000 MSa/s,9,1,37512,2270
+outer_tensor,1,int32,int32,16,16,2,1,0,0.722 W,2452 ns,1000 MSa/s,7,1,6280,1862
+outer_tensor,1,int32,int32,32,32,4,1,0,0.75 W,15759 ns,1000 MSa/s,9,1,37512,2270
+outer_tensor,1,cint32,int16,32,32,1,1,0,0.732 W,7672 ns,500 MSa/s,7,1,18729,2654
+outer_tensor,1,cint32,cint32,8,4,8,2,0,0.846 W,937 ns,1000 MSa/s,14,2,7698,1722 1722
+outer_tensor,1,cfloat,float,32,32,1,1,0,0.737 W,7930 ns,500 MSa/s,7,1,19847,2530
+outer_tensor,1,cint16,cint16,16,16,16,1,0,0.748 W,15536 ns,1000 MSa/s,9,1,38536,1862
+outer_tensor,1,cint16,cint16,16,16,2,1,0,0.722 W,2452 ns,1000 MSa/s,7,1,6280,1862
+outer_tensor,1,cint16,cint16,32,32,1,1,0,0.726 W,4960 ns,1000 MSa/s,7,1,11400,2248
+outer_tensor,1,cint16,cint32,32,32,1,1,0,0.732 W,9932 ns,500 MSa/s,7,1,19848,2452
+outer_tensor,1,cint16,int16,16,16,8,1,0,0.729 W,7727 ns,1000 MSa/s,7,1,19624,1928
+outer_tensor,1,cint16,int16,32,32,1,1,0,0.726 W,4940 ns,1000 MSa/s,7,1,11304,2324
+outer_tensor,1,cint16,int32,16,16,2,1,0,0.726 W,4951 ns,500 MSa/s,7,1,10376,1958
+outer_tensor,1,cint16,int32,32,32,1,1,0,0.732 W,9938 ns,500 MSa/s,7,1,19592,2572
+outer_tensor,1,cint32,cint16,16,16,4,1,0,0.73 W,7821 ns,500 MSa/s,7,1,19592,1886
+outer_tensor,1,cint32,cint16,32,32,1,1,0,0.732 W,7884 ns,500 MSa/s,7,1,19848,2452
+outer_tensor,1,cint32,cint32,128,16,8,1,1,0.73 W,63698 ns,499 MSa/s,5,1,19593,2158
+outer_tensor,1,cint32,cint32,128,16,8,16,1,1.803 W,4212 ns,7746 MSa/s,69,16,69776,2180 2180 2180 2180 2180 2180 2180 2180 2180 2180 2180 2180 2180 2180 2180 2180
+outer_tensor,1,cint32,cint32,16,128,8,1,1,0.723 W,65489 ns,499 MSa/s,5,1,19593,2158
+outer_tensor,1,cint32,int16,16,16,4,1,0,0.728 W,7583 ns,500 MSa/s,7,1,18857,2058
+outer_tensor,1,cint32,cint32,16,16,2,1,0,0.732 W,3838 ns,500 MSa/s,7,1,10889,2152
+outer_tensor,1,cint32,cint32,16,16,8,4,0,1.033 W,3860 ns,2000 MSa/s,25,4,50724,2160 2160 2160 2160
+outer_tensor,1,cint32,cint32,16,16,8,1,1,0.729 W,8145 ns,493 MSa/s,5,1,5257,2158
+outer_tensor,1,cint32,cint32,16,16,8,2,1,0.811 W,4212 ns,968 MSa/s,10,2,8466,2180 2180
+outer_tensor,1,cint32,cint32,16,256,8,1,1,0.721 W,131028 ns,499 MSa/s,7,1,35977,2174
+outer_tensor,1,cint32,cint32,16,32,8,1,1,0.726 W,16337 ns,496 MSa/s,5,1,7305,2158
+outer_tensor,1,cint32,cint32,16,64,8,1,1,0.724 W,32721 ns,498 MSa/s,5,1,11401,2158
+outer_tensor,1,cint32,cint32,256,16,8,1,1,0.729 W,127191 ns,499 MSa/s,7,1,35977,2158
+outer_tensor,1,cint32,cint32,32,16,8,1,1,0.729 W,16081 ns,496 MSa/s,5,1,7305,2158
+outer_tensor,1,cint32,cint32,32,16,8,4,1,0.978 W,4212 ns,1936 MSa/s,18,4,16932,2180 2180 2180 2180
+outer_tensor,1,cint32,cint32,32,32,1,1,0,0.739 W,7695 ns,500 MSa/s,7,1,20105,3044
+outer_tensor,1,cint32,cint32,4,4,2,1,0,0.711 W,431 ns,380 MSa/s,7,1,1673,1618
+outer_tensor,1,cint32,cint32,4,4,2,1,1,0.709 W,493 ns,288 MSa/s,5,1,1417,1742
+outer_tensor,1,cint32,cint32,64,16,8,1,1,0.729 W,31954 ns,498 MSa/s,5,1,11401,2158
+outer_tensor,1,cint32,cint32,64,16,8,8,1,1.262 W,4212 ns,3873 MSa/s,36,8,34376,2180 2180 2180 2180 2180 2180 2180 2180
+outer_tensor,1,cint32,cint32,16,16,8,2,0,0.835 W,7575 ns,1000 MSa/s,14,2,41234,2180 2180
+outer_tensor,1,int32,int32,32,32,4,1,0,0.75 W,15759 ns,1000 MSa/s,9,1,37512,2270
