@@ -36,6 +36,22 @@ Template Parameters
 
 To see details on the template parameters for the Matrix Vector Multiply, see :ref:`API_REFERENCE`.
 
+Access Functions
+================
+
+To see details on the access functions for the Matrix-Vector Multiply, see :ref:`API_REFERENCE`.
+
+Ports
+=====
+
+To see details on the ports for the Matrix-Vector Multiply, see :ref:`API_REFERENCE`.
+
+Design Notes
+============
+
+The matrix-vector multiplication kernel requires the matrix data in a column-major format where the columns are stored contiguously in memory and ``TP_DIM_A_LEADING = 1``.
+Setting ``TP_DIM_A_LEADING`` to 0, indicates to the graph that the data is in a row-major format and DMA buffer descriptors will be to set the write access of the kernel input so that a transpose can be achieved. This feature is currently only compatible with int32, cint16 and float data types for a single frame per buffer ``NUM_FRAMES = 1``. If multiple frames are required or the data type is int16, cint32 or cfloat, the matrix data must be transposed to a column-major format with the template parameter ``TP_DIM_A_LEADING`` being set to 1.
+
 Maximum matrix dimensions per kernel
 ------------------------------------
 
@@ -52,22 +68,6 @@ A matrix_vector_mul design needs to allocate memory for the following:
 Furthermore, if these buffers are ping-pong buffers, their memory requirement doubles in size. This can be reduced by using the single_buffer constraint on the buffer.
 
 The cascading and SSR feature of the Matrix-Vector Multiply can be used if the size of the matrix and vector exceeds the maximum memory of a single kernel. This works as the matrix and vector data will be split across multiple kernels resulting in a reduced per-kernel memory usage.
-
-Access Functions
-================
-
-To see details on the access functions for the Matrix-Vector Multiply, see :ref:`API_REFERENCE`.
-
-Ports
-=====
-
-To see details on the ports for the Matrix-Vector Multiply, see :ref:`API_REFERENCE`.
-
-Design Notes
-============
-
-The matrix-vector multiplication kernel requires the matrix data in a column-major format where the columns are stored contiguously in memory and ``TP_DIM_A_LEADING = 1``.
-Setting ``TP_DIM_A_LEADING`` to 0, indicates to the graph that the data is in a row-major format and DMA buffer descriptors will be to set the write access of the kernel input so that a transpose can be achieved. This feature is currently only compatible with int32, cint16 and float data types for a single frame per buffer ``NUM_FRAMES = 1``. If multiple frames are required or the data type is int16, cint32 or cfloat, the matrix data must be transposed to a column-major format with the template parameter ``TP_DIM_A_LEADING`` being set to 1.
 
 Cascaded Kernels
 ----------------
@@ -107,8 +107,8 @@ In the entry level graph, the following names are used to identify the various k
 
 'm_mat_vec_mulKernels': This is an array of kernel pointers returned by getKernels which point to the kernels in the SSR and cascade array. These are the kernels perform the matrix-vector multiply operations.
 
-The index of the kernel increments along the cascade chain first. 
-For example, a GEMV design with an ``TP_SSR > 1`` and ``TP_CASC_LEN > 1`` where ssrIdx specifies the rank of SSR and cascIdx specifies the position of the kernel along the cascade chain, the index of the kernel can be found by ``(ssrIdx * TP_CASC_LEN) + cascIdx``. 
+The index of the kernel increments along the cascade chain first.
+For example, a GEMV design with an ``TP_SSR > 1`` and ``TP_CASC_LEN > 1`` where ssrIdx specifies the rank of SSR and cascIdx specifies the position of the kernel along the cascade chain, the index of the kernel can be found by ``(ssrIdx * TP_CASC_LEN) + cascIdx``.
 
 
 Code Example

@@ -100,18 +100,18 @@ Managing Bit Growth in SSR FFT Stages
 The bit growth management is required for the fixed point implementation only. The SSR FFT supports three different modes to manage bit growth between SSR FFT stages. These three modes can be used to allow bit growth in every stage, or use scaling in every stage without any bit growth or allow bit growth until 27 bits and then start using scaling. The detailed description for the different modes are as follows:
 
 SSR_FFT_GROW_TO_MAX_WIDTH
--------------------------------------------------
+-------------------------
 
-When the scaling_mode constant in the parameter structure is set to SSR_FFT_GROW_TO_MAX_WIDTH, it specifies growth from stage to stage, starting from the first stage to a specified max bit width. The output bit width grows until 27 bits and then saturates. The output bit width grows by log2(R) bits in every stage, and then maxes outs at 27 bits to keep the butterﬂy operation mapping to DSPs. This option is useful
+When the scaling_mode constant in the parameter structure is set to SSR_FFT_GROW_TO_MAX_WIDTH, it specifies growth from stage to stage, starting from the first stage to a specified max bit width. The output bit width grows until 27 bits and then saturates. The output bit width grows by log2(R) bits in every stage, and then maxes outs at 27 bits to keep the butterfly operation mapping to DSPs. This option is useful
 when the initial input bit width is less than 27 bits.
 
 SSR_FFT_SCALE
-----------------------
+-------------
 
 When the scaling_mode constant in the parameter structure is set to SSR_FFT_SCALE, it enables scaling of outputs in every stage. The output is scaled in every stage and loses precision. An FFT with size L and Radix=SSR=R has logR(L) stages. This option is useful when the input bit width is already close to 27 bits and it is required that the output does not grow beyond 27 bits so that multiplication can be mapped to DSPs.
 
 SSR_FFT_NO_SCALE
---------------------------
+----------------
 
 When the scaling_mode constant in the parameter structure is set to SSR_FFT_NO_SCALE, the bit growth is allowed in every stage and the output grows unbounded by log2(R) in every stage. This setting can be useful when high precision is required. However, if the output bit width grows beyond 27 bits, the multiplication might not map to only DSPs but also start using FPGA fabric logic in combination. This can reduce the
 clock speed and increase the resource utilization.
@@ -193,7 +193,7 @@ Choosing the Best Scaling Mode
 
 After the choice for input bit width and twiddle factors is made with no scaling, which gives an acceptable SNR or root mean square (RMS) error at the output of fixed point 1-D SSR FFT, you can
 start to experiment with the choice of scaling modes. Three different scaling modes are available with 1-D SSR FFT. The recommended strategy is to start with **SSR_FFT_NO_SCALING**. If there is an
-acceptable SNR/RMS error at the output, switch to **SSR_FFT_GROW_TO_MAX_WIDTHi**. If there is still an acceptable SNR/RMS error, switch to **SSR_FFT_SCALE**, and observe the SNR/RMS again if it
+acceptable SNR/RMS error at the output, switch to **SSR_FFT_GROW_TO_MAX_WIDTH**. If there is still an acceptable SNR/RMS error, switch to **SSR_FFT_SCALE**, and observe the SNR/RMS again if it
 is acceptable, keep using **SSR_FFT_SCALE**, otherwise revert back to another mode which gives an acceptable SNR/RMS error at the output.
 
 SSR_FFT_NO_SCALING
@@ -202,12 +202,14 @@ SSR_FFT_NO_SCALING
 This is the recommended mode to start with. It performs no scaling, but the output bit width grows in every stage by log2(R=SSR). For example, if the size of FFT is N=64 and SSR=R=4 is selected, then 1-D SSR FFT has log4 (64) = 3 stages. If the input bit width is W, the output bit width is W+3*2=W+6. Therefore, the output would have grown by logR(N)*log2(R) bits. SSR_FFT_NO_SCALING preserves the accuracy of the computation but at maximum hardware cost. The 1-D SSR FFT computation is done in stages with one stage feeding the next stage, so essentially it is a pipeline of stages. One of the downfalls of uncontrolled bit growth is that at some point, in a certain stage when output widths of one stage increase beyond a limit where multiplication operation cannot map to DSP blocks on the FPGA, the design performance in terms of speed might fall considerably. For example, for a given design with logR(N) * log2(R) + Input Bit Width(IL+FL) > max(DSP
 Block Multiplier Inputs), you might consider using one of the other two available scaling schemes. For DSP48 blocks with 18x27 multipliers, the condition will be logR(N) * log2(R) + Input Bit Width > 27.
 
+.. _SCALING_MODE_SSR_FFT_GROW_TO_MAX_WIDTH:
 SSR_FFT_GROW_TO_MAX_WIDTH
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In this mode, a hybrid approach is used. Initially, the bit growth is allowed if there is any room for growth. If in the starting FFT stages, the output bit-widths are smaller than what can be mapped
-to the DSP blocks, it allows the bit growth. When the bit width grows beyond what can be mapped to zthe DSP blocks, it will start scaling the output.
+to the DSP blocks, it allows the bit growth. When the bit width grows beyond what can be mapped to the DSP blocks, it will start scaling the output.
 
+.. _SCALING_MODE_SSR_FFT_SCALE:
 SSR_FFT_SCALE
 ^^^^^^^^^^^^^
 

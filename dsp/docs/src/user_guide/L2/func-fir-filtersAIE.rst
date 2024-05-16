@@ -149,6 +149,12 @@ Please refer to `UG1079 Run-Time Parameter Support Summary <https://docs.xilinx.
 
 .. note:: Graph's `update()` method must be called after graph has been initialized, but before kernel starts operation on data samples.
 
+.. note:: SSR configurations don't offer support for symmetry. Therefore, RTP array size should be determined using: :ref:`RTP_ARRAY_SIZE_FOR_SSR_CASES`.
+
+.. note:: AIE-ML device does not offer HW support for symmetry. Therefore, RTP array size should be determined using:  :ref:`RTP_ARRAY_SIZE_FOR_SSR_CASES`.
+
+.. _RTP_ARRAY_SIZE_FOR_NON_SSR_CASES:
+
 Reloadable Coefficients - Array Size for Non-SSR Cases
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -177,6 +183,8 @@ Array size of an argument passed to the graph's `update()` method depends on the
 | ``{1, 0, 2, 5, 2, 0, 1}``,
 | three non-zero tap values, including the center tap, are expected, i.e., the constructor expects an argument:
 | ``int16 tapsIn[3] =  {1, 2, 5}``.
+
+.. _RTP_ARRAY_SIZE_FOR_SSR_CASES:
 
 Reloadable Coefficients - Array Dimensions for SSR Cases
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

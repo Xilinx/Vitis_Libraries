@@ -300,6 +300,7 @@ The following section gives examples for 2-D floating and fixed point SSR FFTs.
 
 The following section briefly describes how an example project using a Vitis SSR FFT can be built that uses a 2-D fixed point SSR FFT. The source code files are listed which can be used to build HLS project by adding an include path that points to a local copy of the Vitis FFT library.
 
+.. _2D_FIXED_TOP_LEVEL_DEFINITION:
 Top Level Definition and main Function
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -485,8 +486,9 @@ The example discussed above is also provided as an example test and is available
 
 The following section briefly describes how an example project using Vitis SSR FFT can be built that uses 2-D SSR FFT. The source code files are listed which can be used to build HLS project by adding include path that points to a local copy of the Vitis FFT library.
 
+.. _2D_FLOAT_TOP_LEVEL_DEFINITION:
 Top Level Definition and main Function
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The following section lists a complete example test that uses the 2-D SSR FFT L1 module. The header file named ``top_2d_fft_test.hpp`` listed below provides definitions of most of the template parameters and data types used in test and also the declaration of top level function ``top_fft2d`` that will be synthesized.
 

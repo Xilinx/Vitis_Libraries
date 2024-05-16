@@ -31,7 +31,7 @@ Please see table :ref:`KRONECKER_output_type`: for allowed input data type combi
 
 .. _KRONECKER_output_type:
 
-.. table:: Output Data Type
+.. table:: Supported Combinations of Input/Output data types
    :align: center
 
    +------------------+------------------+------------------+-------------+
@@ -102,13 +102,13 @@ It accepts input matrices in COLUMN major order. The leading dimension of the in
 
 Super Sample Rate (SSR)
 -----------------------
- 
+
 The SSR operation is controlled by parameter ``TP_SSR`` and SSR enables running multiple instances of a kernel in parallel where each instance runs on a separate tile. The input data is split and distributed to the parallel kernel instances.
 
    #. Input matrix A is split and distributed to parallel kernels. The split is based on the COLUMNS and thus ``TP_DIM_A_COLS`` must be divisible by ``TP_SSR``.
    #. Input matrix B is not split and a copy of it is passed to each parallel kernel.
 
-Scaling 
+Scaling
 -------
 
 Scaling is controlled by the ``TP_SHIFT`` parameter which describes the number of bits to shift the output to the right. Only power-of-2 scaling is supported. Float and cfloat implementations do not support scaling.
@@ -118,7 +118,7 @@ Constraints
 The Kronecker Matrix Product does not contain any constraints. It is a single kernel design except when ``TP_SSR > 1`` in which case the port connections force placement of the kernels on separate tiles.
 
 Code Example
-------------
+============
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_kronecker.hpp
     :language: cpp
     :lines: 15-

@@ -26,7 +26,7 @@ The DDS/Mixer is supported on AIE1 only. For other devices, please use the DDS/M
 Supported Types
 ===============
 
-The DDS/Mixer supports input types of cint16, cint32, and cfloat as selected by ``TT_DATA``. Input is only required when ``TP_MIXER_MODE`` is set to 1 (simple mixer) or 2 (dual conjugate mixer). The output type is also set by ``TT_DATA``. When `TP_MIXER_MODE` is set to 0 (DDS mode), ``TT_DATA`` types of cint16 or cfloat only are supported.
+The DDS/Mixer supports input types of cint16, cint32, and cfloat as selected by ``TT_DATA``. Input is only required when ``TP_MIXER_MODE`` is set to 1 (simple mixer) or 2 (dual conjugate mixer). The output type is also set by ``TT_DATA``. When ``TP_MIXER_MODE`` is set to 0 (DDS mode), ``TT_DATA`` types of cint16 or cfloat only are supported.
 
 Template Parameters
 ===================
@@ -49,7 +49,7 @@ Design Notes
 Scaling
 -------
 
-When configured as a DDS (TP_MIXER_MODE=0), the output of the DDS is intended to be the components of a unit vector. For ``TT_DATA = cfloat``, this means that the outputs will be in the range -1.0 to +1.0. For ``TT_DATA = cint16``, the output is scaled by 2 to the power 15 such that the binary point follows the most significant bit of the output. Therefore, if the DDS output is used to multiply/mix, you must account for this 15 bit shift.
+When configured as a DDS (``TP_MIXER_MODE=0``), the output of the DDS is intended to be the components of a unit vector. For ``TT_DATA = cfloat``, this means that the outputs will be in the range -1.0 to +1.0. For ``TT_DATA = cint16``, the output is scaled by 2 to the power 15 such that the binary point follows the most significant bit of the output. Therefore, if the DDS output is used to multiply/mix, you must account for this 15 bit shift.
 
 .. _DDS_SSR:
 

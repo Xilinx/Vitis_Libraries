@@ -34,31 +34,6 @@ Template Parameters
 
 To see details on the template parameters for the Matrix Multiply, see :ref:`API_REFERENCE`.
 
-Maximum matrix dimensions per kernel
-------------------------------------
-
-The maximum memory accessible by an AIE kernel is 32 kB x 4 for AIE. The maximum matrix dimensions per kernel is limited by the memory requirements and how much memory is available.
-A matrix_mult design needs to allocate memory for the following:
-
-* Window Size A: Input matrix A of size ``(TP_DIM_A / TP_SSR) x (TP_DIM_AB / TP_CASC_LEN) x sizeof(TT_DATA_A)``.
-
-* Window Size B: Input matrix B of size ``TP_DIM_B x (TP_DIM_AB / TP_CASC_LEN) x sizeof(TT_DATA_B)``.
-
-* Window Size Out: Output matrix of size ``(TP_DIM_A / TP_SSR) x TP_DIM_B x sizeof(TT_DATA_OUT)``.
-
-Optionally, depending on whether you use the tiling/detiling feature of the element, you need:
-
-* If Matrix A needs to be tiled: Add memory of Window Size A.
-
-* If Matrix B needs to be tiled: Add memory of Window Size B.
-
-* If Output matrix needs to be detiled: Add memory of Window Size Out.
-
-Further, if these buffers are ping-pong buffers, their memory requirement doubles in size. You can reduce this factor by using the single_buffer constraint on the buffer.
-Apart from these, the program also needs some system memory to run which has been empirically observed to occupy around 2.5 kB.
-
-If the memory requirements are too large for a single kernel, increase the value of ``TP_CASC_LEN`` to split the dimension ``TP_DIM_AB`` over multiple kernels, or the value of ``TP_SSR`` to split the ``TP_DIM_A`` dimension of Matrix A.
-
 Access Functions
 ================
 
@@ -74,9 +49,10 @@ Design Notes
 
 Tiling
 ------
-In order to maximize performance, the GEMM unit requires that the input matrix data is arranged into a specific tiling pattern, where each sub-tile within the matrix is contiguous in memory. 
-Tiler and detiler widgets are offered which can be configuraed to arrange the input matrix data into this tiling pattern, and also convert the tiled output data to a specified row or column major format, but this may introduce a notable performance and rescource overhead. 
-For optimal performance of the GEMM unit, it is recommended that the user supplies the input data, and accepts the output data, in the required tiled arrangement. 
+
+In order to maximize performance, the GEMM unit requires that the input matrix data is arranged into a specific tiling pattern, where each sub-tile within the matrix is contiguous in memory.
+Tiler and detiler widgets are offered which can be configured to arrange the input matrix data into this tiling pattern, and also convert the tiled output data to a specified row or column major format, but this may introduce a notable performance and rescource overhead.
+For optimal performance of the GEMM unit, it is recommended that the user supplies the input data, and accepts the output data, in the required tiled arrangement.
 
 The following table demonstrates how a 16x16 input matrix should be rearranged into a 4x4 tiling pattern.
 
@@ -123,7 +99,16 @@ The following table demonstrates how a 16x16 input matrix should be rearranged i
 
 This is stored contiguously in memory like:
 
-0, 1, 2, 3, 16, 17, 18, 19, 32, 33, 34, 35, 48, 49, 50, 51, 4, 5, 6, 7, 20, 21, 22, 23, 36, 37, 38, 39, 52, 53, 54, 55, 8, 9, 10, 11, 24, 25, 26, 27, 40, 41, 42, 43, 56, 57, 58, 59, 12, 13, 14, 15, 28, 29, 30, 31, 44, 45, 46, 47, 60, 61, 62, 63, 64, 65, 66, 67, 80, 81, 82, 83, 96, 97, 98, 99, 112, 113, 114, 115, ... , 204, 205, 206, 207, 220, 221, 222, 223, 236, 237, 238, 239, 252, 253, 254, 255
+
+.. code-block::
+
+     0,   1,   2,   3,  16,  17,  18,  19,  32,  33,  34,  35,  48,  49,  50,  51,
+     4,   5,   6,   7,  20,  21,  22,  23,  36,  37,  38,  39,  52,  53,  54,  55,
+     8,   9,  10,  11,  24,  25,  26,  27,  40,  41,  42,  43,  56,  57,  58,  59,
+    12,  13,  14,  15,  28,  29,  30,  31,  44,  45,  46,  47,  60,  61,  62,  63,
+    64,  65,  66,  67,  80,  81,  82,  83,  96,  97,  98,  99, 112, 113, 114, 115,
+   ... ,
+   204, 205, 206, 207, 220, 221, 222, 223, 236, 237, 238, 239, 252, 253, 254, 255
 
 The following table demonstrates how a 16x16 input matrix should be rearranged into a 4x2 tiling pattern.
 
@@ -168,7 +153,11 @@ The following table demonstrates how a 16x16 input matrix should be rearranged i
 
 This is stored contiguously in memory like:
 
-0, 1, 16, 17, 32, 33, 48, 49, 2, 3, 18, 19, 34, 35, 50, 51, ..., 206, 207, 222, 223, 238, 239, 254, 255
+.. code-block::
+
+   0, 1, 16, 17, 32, 33, 48, 49, 2, 3, 18, 19, 34, 35, 50, 51,
+   ...,
+   206, 207, 222, 223, 238, 239, 254, 255
 
 Multiplying a 16x16 matrix (with 4x4 tiling) with a 16x16 matrix (with 4x2 tiling) will result in a 16x16 matrix with 4x2 tiling.
 
@@ -265,6 +254,31 @@ When used with ``TP_DIM_A_LEADING``, ``TP_DIM_B_LEADING``, or ``TP_DIM_OUT_LEADI
 If the additional kernels are not selected, then the matrix multiply kernels assume incoming data is in the correct format, as specified above.
 
 The tiling imposes a restriction that the matrix dimensions need to be multiples of the tile dimensions. If you require dimensions that do not satisfy these requirements, pad the matrices up to the closet multiple of the tile dimensions in table :ref:`table-tile-pattern-AIE` or :ref:`table-tile-pattern-AIE-ML` with zeroes for AIE and AIE-ML respectively.
+
+Maximum matrix dimensions per kernel
+------------------------------------
+
+The maximum memory accessible by an AIE kernel is 32 kB x 4 for AIE. The maximum matrix dimensions per kernel is limited by the memory requirements and how much memory is available.
+A matrix_mult design needs to allocate memory for the following:
+
+* Window Size A: Input matrix A of size ``(TP_DIM_A / TP_SSR) x (TP_DIM_AB / TP_CASC_LEN) x sizeof(TT_DATA_A)``.
+
+* Window Size B: Input matrix B of size ``TP_DIM_B x (TP_DIM_AB / TP_CASC_LEN) x sizeof(TT_DATA_B)``.
+
+* Window Size Out: Output matrix of size ``(TP_DIM_A / TP_SSR) x TP_DIM_B x sizeof(TT_DATA_OUT)``.
+
+Optionally, depending on whether you use the tiling/detiling feature of the element, you need:
+
+* If Matrix A needs to be tiled: Add memory of Window Size A.
+
+* If Matrix B needs to be tiled: Add memory of Window Size B.
+
+* If Output matrix needs to be detiled: Add memory of Window Size Out.
+
+Further, if these buffers are ping-pong buffers, their memory requirement doubles in size. You can reduce this factor by using the single_buffer constraint on the buffer.
+Apart from these, the program also needs some system memory to run which has been empirically observed to occupy around 2.5 kB.
+
+If the memory requirements are too large for a single kernel, increase the value of ``TP_CASC_LEN`` to split the dimension ``TP_DIM_AB`` over multiple kernels, or the value of ``TP_SSR`` to split the ``TP_DIM_A`` dimension of Matrix A.
 
 Cascaded Kernels
 ----------------
@@ -513,13 +527,10 @@ A Matrix-Multiplication solution can consist of a ``TP_SSR`` number of cascaded 
 
 The tiling kernels' function is to convert between the arrangement of matrix elements in memory to a form of arrangement optimized for vector multiply, or vice versa. In the entry level graph, the following names are used to identify the various kernels as follows:
 
-'m_MatmultKernels' - This is the array of kernel pointers returned by getKernels which point to the cascade ``TP_CASC_LEN`` of matrix multiply kernels. These kernels perform the matrix multiply operations.
-
-'untiler' - This is an array of ``TP_SSR`` kernels on the output of the each Matrix Multiply SSR path. It performs the transformation from a tiled format to the true output format.
-
-'tilerA' - This is an array of ``TP_CASC_LEN * TP_SSR`` kernels which connect 1:1 with the A input port of the matrix multiply kernels.
-
-'tilerB' - This is an array of ``TP_CASC_LEN * TP_SSR`` kernels which connect 1:1 with the B input port of the matrix multiply kernels.
+- 'm_MatmultKernels' - This is the array of kernel pointers returned by getKernels which point to the cascade ``TP_CASC_LEN`` of matrix multiply kernels. These kernels perform the matrix multiply operations.
+- 'untiler' - This is an array of ``TP_SSR`` kernels on the output of the each Matrix Multiply SSR path. It performs the transformation from a tiled format to the true output format.
+- 'tilerA' - This is an array of ``TP_CASC_LEN * TP_SSR`` kernels which connect 1:1 with the A input port of the matrix multiply kernels.
+- 'tilerB' - This is an array of ``TP_CASC_LEN * TP_SSR`` kernels which connect 1:1 with the B input port of the matrix multiply kernels.
 
 .. note:: For some combinations of the template parameters, the log will give out an error message "ERROR: shouldn't be here". This combination of factors is not supported by the AIE Compiler. A possible workaround is to pad up the matrices with zeroes so that their dimensions become the closest multiple of 8 for cint32 data types, 16 for cint16/int16 data types, and 32 for int16 data types.
 

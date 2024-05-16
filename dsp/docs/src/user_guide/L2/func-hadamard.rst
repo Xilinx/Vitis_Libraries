@@ -37,17 +37,17 @@ Please see table :ref:`HADAMARD_output_type`: for allowed input data type combin
 
 .. _HADAMARD_output_type:
 
-.. table:: Hadamard Output Data Type
+.. table:: Hadamard Supported Combinations of Input/Output data types
    :align: center
 
    +-------------------+-------------------+------------------+----------------------------+
-   | Input Data Type A | Input Data Type B | Output Data Type | Vector Size (window/stream)|      
+   | Input Data Type A | Input Data Type B | Output Data Type | Vector Size (window/stream)|
    +===================+===================+==================+============================+
    | int16             | int16             | int16            |         16 / 8             |
    +-------------------+-------------------+------------------+----------------------------+
    | int16             | int32             | int32            |          8 / 8             |
    +-------------------+-------------------+------------------+----------------------------+
-   | int16             | cint16            | cint16           |          8 / 8             |                  
+   | int16             | cint16            | cint16           |          8 / 8             |
    +-------------------+-------------------+------------------+----------------------------+
    | int16             | cint32            | cint32           |          8 / 8             |
    +-------------------+-------------------+------------------+----------------------------+
@@ -135,7 +135,7 @@ Constraints
 The Hadamard Product does not contain any constraints. It is a single kernel design except when ``TP_SSR>1`` in which case the port connections force placement of the tiles on separate tiles.
 
 Code Example
-------------
+============
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_hadamard.hpp
     :language: cpp
     :lines: 15-

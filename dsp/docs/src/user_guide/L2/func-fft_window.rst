@@ -1,4 +1,4 @@
-.. 
+..
    Copyright © 2019–2024 Advanced Micro Devices, Inc
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
@@ -25,8 +25,8 @@ Device Support
 
 The fft_window supports AIE1 and AIE-ML with the following exception(s):
 
-- TT_DATA supports cfloat on AIE1, but not on AIE-ML.
-- TT_COEFF supports float on AIE1, but not on AIE-ML.
+- ``TT_DATA`` supports cfloat on AIE1, but not on AIE-ML.
+- ``TT_COEFF`` supports float on AIE1, but not on AIE-ML.
 - Round modes available and the enumerated values of round modes differ between AIE1 and AIE-ML. See :ref:`COMPILING_AND_SIMULATING`.
 
 Supported Types
@@ -131,7 +131,7 @@ Constraints
 The FFT window does not contain any constraints. It is a single kernel design except when ``TP_SSR > 1`` in which case the port connections force placement of the tiles on separate tiles.
 
 Code Example
-------------
+============
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_fft_window.hpp
     :language: cpp
     :lines: 17-

@@ -31,9 +31,44 @@ The Convolution/Correlation library element supports AIE1 and AIE-ML for all fea
 
 Supported Types
 ===============
+
 The data type for input port F and G (inF and inG) is controlled by T_DATA_F and T_DATA_G respectively.
 Both inputs may take one of the 5 choices: int8, int16, int32, cint16, cint32. The output may take one of 4 choices: int16, int32, cint16, cint32.
-Please see table .. _OUTER_TENSOR_output_type: for allowed input data type combinations and regarding output type.
+Please see table :ref:`CONV_CORR_combos` for valid input/output data type combinations.
+
+.. _CONV_CORR_combos:
+
+.. table:: Supported Combinations of Input/Output data types
+   :align: center
+
+   +------------------+------------------+------------------+------------------+------------------+
+   | InputF Data Type | InputG Data Type | Output Data Type | AIE Valid        | AIE-ML Valid     |
+   +==================+==================+==================+==================+==================+
+   | int8             | int8             | int16            | yes              | yes              |
+   +------------------+------------------+------------------+------------------+------------------+
+   | int16            | int8             | int16            | yes              | yes              |
+   +------------------+------------------+------------------+------------------+------------------+
+   | int16            | int16            | int32            | yes              | yes              |
+   +------------------+------------------+------------------+------------------+------------------+
+   | int32            | int16            | int32            | yes              | yes              |
+   +------------------+------------------+------------------+------------------+------------------+
+   | cint16           | int16            | cint16           | yes              | yes              |
+   +------------------+------------------+------------------+------------------+------------------+
+   | cint16           | int16            | cint32           | yes              | yes              |
+   +------------------+------------------+------------------+------------------+------------------+
+   | cint16           | int32            | cint32           | yes              | yes              |
+   +------------------+------------------+------------------+------------------+------------------+
+   | cint16           | cint16           | cint32           | yes              | yes              |
+   +------------------+------------------+------------------+------------------+------------------+
+   | cint32           | int16            | cint32           | yes              | yes              |
+   +------------------+------------------+------------------+------------------+------------------+
+   | cint32           | cint16           | cint32           | yes              | yes              |
+   +------------------+------------------+------------------+------------------+------------------+
+   | float            | float            | float            | yes              | yes              |
+   +------------------+------------------+------------------+------------------+------------------+
+   | bfloat16         | bfloat16         | float            | no               | yes              |
+   +------------------+------------------+------------------+------------------+------------------+
+
 
 
 Template Parameters
@@ -50,7 +85,7 @@ To see details on the access functions for Convolution / Correlation, see :ref:`
 Ports
 =====
 
-To see details on the ports for Convolution / Correlation, see :ref:`API_REFERENCE`. Note that the type of ports are determined by the configuration of template parameters.
+To see details on the ports for Convolution / Correlation, see :ref:`API_REFERENCE`.
 
 Design Notes
 ============
@@ -66,10 +101,18 @@ Distortion caused by saturation will be possible for Convolution / Correlation. 
 
 
 Code Example
-------------
+============
+
+
+Convolution
+-----------
+
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_conv.hpp
     :language: cpp
     :lines: 17-
+
+Correlation
+-----------
 
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_corr.hpp
     :language: cpp

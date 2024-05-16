@@ -36,7 +36,7 @@ Please see table :ref:`OUTER_TENSOR_output_type` : for allowed input data type c
 
 .. _OUTER_TENSOR_output_type:
 
-.. table:: Output Data Type
+.. table:: Supported Combinations of Input/Output data types
    :align: center
 
    +------------------+------------------+------------------+
@@ -123,7 +123,7 @@ Constraints
 The Outer Tensor Product inputs for ``TP_DIM_A``, ``TP_DIM_B``, ``TP_NUM_FRAMES`` and ``TP_SSR`` must be powers of 2. ``TP_DIM_X * size_of(TT_DATA_X)`` must have a minimum value of 32 bytes (size of buffer on AIE). It is a single kernel design except when ``TP_SSR>1`` in which case the port connections force placement of the tiles on separate tiles.
 
 Code Example
-------------
+============
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_outer_tensor.hpp
     :language: cpp
     :lines: 17-

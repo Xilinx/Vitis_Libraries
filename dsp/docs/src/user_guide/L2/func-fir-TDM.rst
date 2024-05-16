@@ -112,14 +112,14 @@ Coefficient vector must be created in a form that lists set of taps for each cha
 
 .. code-block::
 
-std::vector<TT_COEFF> coeffVector = {
-                              CN-1.0, CN-1.1, CN-1.2, CN-1.2, ..., CN-1.M-2, CN-1.M-1,
-                              CN-2.0, CN-2.1, CN-2.2, CN-2.2, ..., CN-2.M-2, CN-2.M-1,
-                              ...
-                              C2.0, C2.1, C2.2, C2.2, ..., C2.M-2, C2.M-1,
-                              C1.0, C1.1, C1.2, C1.2, ..., C1.M-2, C1.M-1,
-                              CN0.0, C0.1, C0.2, C0.2, ..., C0.M-2, C0.M-1,
-                              };
+   std::vector<TT_COEFF> coeffVector = {
+                                 CN-1.0, CN-1.1, CN-1.2, CN-1.2, ..., CN-1.M-2, CN-1.M-1,
+                                 CN-2.0, CN-2.1, CN-2.2, CN-2.2, ..., CN-2.M-2, CN-2.M-1,
+                                 ...
+                                 C2.0, C2.1, C2.2, C2.2, ..., C2.M-2, C2.M-1,
+                                 C1.0, C1.1, C1.2, C1.2, ..., C1.M-2, C1.M-1,
+                                 CN0.0, C0.1, C0.2, C0.2, ..., C0.M-2, C0.M-1,
+                                 };
 
 where:
 
@@ -219,13 +219,13 @@ Input Data Samples must be stored in the Input Buffer in a form that lists set o
 
 .. code-block::
 
-std::vector<TT_DATA> dataVector = {
-                              D0.0, D0.1, D0.2, D0.2, ..., D0.M-2, D0.M-1,
-                              D1.0, D1.1, D1.2, D1.2, ..., D1.M-2, D1.M-1,
-                              ...
-                              DF-2.0, DF-2.1, DF-2.2, DF-2.2, ..., DF-2.M-2, DF-2.M-1,
-                              DF-1.0, DF-1.1, DF-1.2, DF-1.2, ..., DF-1.M-2, DF-1.M-1,
-                              };
+   std::vector<TT_DATA> dataVector = {
+                                 D0.0, D0.1, D0.2, D0.2, ..., D0.M-2, D0.M-1,
+                                 D1.0, D1.1, D1.2, D1.2, ..., D1.M-2, D1.M-1,
+                                 ...
+                                 DF-2.0, DF-2.1, DF-2.2, DF-2.2, ..., DF-2.M-2, DF-2.M-1,
+                                 DF-1.0, DF-1.1, DF-1.2, DF-1.2, ..., DF-1.M-2, DF-1.M-1,
+                                 };
 
 where:
 
@@ -259,7 +259,7 @@ As a result, each SSR path will operate on a fraction of the workload, i.e. each
 Input data samples are distributed across the input paths in a round-robin, sample-by-sample mechanism where each input path processes a fraction of the input samples, i.e. ``TP_INPUT_WINDOW_VSIZE / TP_SSR``. More details in: :ref:`FIR_TDM_SSR_PORT_MAPPING`.
 
 
-.. _SSR_OPERATION_RESOURCE_UTILIZATION:
+.. _FIR_TDM_SSR_OPERATION_RESOURCE_UTILIZATION:
 
 Super Sample Rate - Resource Utilization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -273,7 +273,7 @@ The number of AIE tiles used by a FIR will be given by the formula:
 TDM FIR graph will split the requested FIR workload among the FIR kernels equally, which can mean that each kernel is tasked with a comparatively low computational effort.
 
 
-.. _SSR_OPERATION_PORT_UTILIZATION:
+.. _FIR_TDM_SSR_OPERATION_PORT_UTILIZATION:
 
 Super Sample Rate - Port Utilization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
