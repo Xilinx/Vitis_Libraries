@@ -57,5 +57,6 @@
             "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/propagate/tests/RTM_x28_y36_z20_t_p2/../../propagate.cpp"
         ]
     },
-    "topfunction": "top"
+    "topfunction": "top",
+    "gui": true
 }

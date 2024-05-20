@@ -57,5 +57,6 @@
             "${XF_PROJ_ROOT}/L1/tests/hw/rtm2d/forward/tests/data_h128_w128_t10_pe2/../../forward.cpp"
         ]
     },
-    "topfunction": "top"
+    "topfunction": "top",
+    "gui": true
 }

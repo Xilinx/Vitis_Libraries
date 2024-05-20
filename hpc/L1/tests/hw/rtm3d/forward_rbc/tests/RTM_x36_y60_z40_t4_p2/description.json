@@ -63,5 +63,6 @@
             "${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_rbc/tests/RTM_x36_y60_z40_t4_p2/../../forward.cpp"
         ]
     },
-    "topfunction": "top"
+    "topfunction": "top",
+    "gui": true
 }

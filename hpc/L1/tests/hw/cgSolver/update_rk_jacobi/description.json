@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx HPC CG Test",
+    "name": "Xilinx_HPC_CG_Update_RK_Jacobi_Test",
     "clock": "3.3333",
     "description": "Xilinx HPC CG Update Vector Values",
     "flow": "hls",
@@ -54,5 +54,6 @@
             "vivado_syn",
             "vivado_impl"
         ]
-    }
+    },
+    "gui": true
 }
