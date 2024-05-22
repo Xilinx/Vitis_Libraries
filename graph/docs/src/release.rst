@@ -13,6 +13,13 @@ Release Note
 
 An AMD Vitis |trade| Graph Library is an open-sourced Vitis library written in C++ for accelerating graph applications in a variety of use cases. It now covers a level of acceleration: the module level (L1), the pre-defined kernel level (L2) and the asynchronous software level (L3).
 
+2024.1
+------
+There are some known issues for this release.
+
+- Louvain Modularity cases meet routing failure when build with 2024.1 tool. Last known working version is 2023.2.
+
+
 2022.2
 ----
 - Add a new algorithm for merging vertices belong to same community.
