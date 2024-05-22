@@ -14,7 +14,7 @@ Release Note
 2024.1
 ------
 
-- The following cases are removed due to Vitis System Compiler deprecation.
+- The following cases are deprecated and removed.
 
   - L2/tests/knn_sc
   - L3/tests/gunzip_csv_sc_test
