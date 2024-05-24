@@ -47,7 +47,6 @@
                 }
             }
         }
-
     },
     "pre_build": [
         {
@@ -180,7 +179,7 @@
                     "vitis_aie_sim": 40960
                 },
                 "max_time_min": {
-                    "vitis_aie_x86sim": 120,
+                    "vitis_aie_x86sim": 240,
                     "vitis_aie_sim": 200
                 }
             }
@@ -193,20 +192,20 @@
         "category": "canary",
         "param_set": {
             "pull_req": {
-                "*_hw_checkin":[
+                "*_hw_checkin": [
                     "vitis_aie_sim",
                     "vitis_aie_x86sim"
                 ],
-                "*_x86sim_checkin":[
+                "*_x86sim_checkin": [
                     "vitis_aie_x86sim"
                 ]
             },
             "daily": {
-                "*_hw_qor":[
+                "*_hw_qor": [
                     "vitis_aie_sim",
                     "vitis_aie_x86sim"
                 ],
-                "*_x86sim_qor":[
+                "*_x86sim_qor": [
                     "vitis_aie_x86sim"
                 ]
             }

@@ -22,10 +22,10 @@ WORK_DIR=Work
 
 echo -n "    NUM_BANKS: "                                       >> $STATUS_FILE;\
 $PATHTOSCRIPTS/get_num_banks.sh $WORK_DIR dummy                 >> $STATUS_FILE;\
-echo -n "    NUM_AIE: "                                          >> $STATUS_FILE;\
+echo -n "    NUM_AIE: "                                         >> $STATUS_FILE;\
 $PATHTOSCRIPTS/get_num_me.sh $WORK_DIR 1                        >> $STATUS_FILE;\
 echo -n "    DATA_MEMORY: "                                     >> $STATUS_FILE;\
-$PATHTOSCRIPTS/get_data_memory.sh $WORK_DIR dummy               >> $STATUS_FILE;\
+$PATHTOSCRIPTS/get_data_memory.sh $WORK_DIR                     >> $STATUS_FILE;\
 echo -n "    PROGRAM_MEMORY: "                                  >> $STATUS_FILE;\
 # Get the isolated (\b) numbers (\d) before "  total" using perl-like regex
 max_prgmem=`ls $WORK_DIR/aie/*_*/Release/*_*.map|xargs grep -A 10 "Section summary for memory 'PM':"| grep -Po "\b\d+\b(?=\s+Total)"`;\
