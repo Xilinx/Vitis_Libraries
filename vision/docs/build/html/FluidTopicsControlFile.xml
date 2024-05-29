@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<controlFile>
+  <resources>
+    <resource lang="en-US">
+            <originId>Vitis_Libraries_xf_opencv_</originId>
+	  <metas>
+        <meta key="ft:title">
+          <value>Vitis Libraries:xf_opencv</value>
+        </meta>
+        <meta key="ft:locale">
+          <value>en-US</value>
+        </meta>
+        <meta key="ft:clusterId">
+          <value>xf_opencv</value>
+        </meta>
+        <meta key="Doc Version">
+          <value> English</value>
+        </meta>
+		<meta key="Document Type">
+          <value>Reference Guide</value>
+        </meta>
+        <meta key="Release Date">
+          <value>2024-05-28</value>
+        </meta>
+        <meta key="Access level">
+          <value>Public</value>
+        </meta>
+        <meta key="ft:description">
+          <value>This is an open-sourced Vitis library written in C++ and released under Apache 2.0 license.</value>
+        </meta>
+        <meta key="pdfpropertykeywords">
+          <value>Vitis</value>
+        </meta>
+        <meta key="url">
+          <value>xf_opencv</value>
+        </meta>
+        <meta key="isLatest">
+          <value>true</value>
+        </meta>
+        <meta key="Product">
+          <value>vitis-</value>
+        </meta>
+        <meta key="Group">
+          <value>test</value>
+        </meta>                        
+        <meta key="Source">
+          <value>Github</value>
+        </meta>                        
+     </metas>
+    </resource>
+  </resources>
+</controlFile>

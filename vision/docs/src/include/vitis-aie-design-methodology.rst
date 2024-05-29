@@ -33,7 +33,7 @@ Kernels are computation functions that form the fundamental building blocks of t
     #define PARALLEL_FACTOR_16b 16 // Parallelization factor for 16b operations (16x mults)
     #define SRS_SHIFT 10           // SRS shift used can be increased if input data likewise adjusted)
 
-    void filter2D(input_window_int16* input, const int16_t (&coeff)[16], output_window_int16* output);
+    void filter2D(adf::input_buffer<int16>& input, const int16_t (&coeff)[16], adf::output_buffer<int16>& output);
 
     #endif
 
@@ -41,14 +41,14 @@ Kernels are computation functions that form the fundamental building blocks of t
 
 .. code:: c
 
-    #include "imgproc/xf_filter2d_16b_aie.hpp"
+    #include "imgproc/xf_filter2d_16b_aieml.hpp"
     #include "kernels.h"
 
-    void filter2D(input_window_int16* input, const int16_t (&coeff)[16], output_window_int16* output) {
-            xf::cv::aie::filter2D_k3_border(input, coeff, output);
+    void filter2D(adf::input_buffer<int16>& input, const int16_t (&coeff)[16], adf::output_buffer<int16>& output) {
+            xf::cv::aie::filter2D(input, coeff, output);
     };
 
-.. _Window and Streaming Data API: https://docs.xilinx.com/r/en-US/ug1076-ai-engine-environment/Window-and-Streaming-Data-API
+.. _Buffer and Streaming Data API: https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Buffer-vs.-Stream-in-Data-Communication
 
 Data Flow Graph Construction
 =================================
@@ -110,9 +110,9 @@ Once AIE kernels have been prepared, next step is to create a Data Flow Graph cl
    
           myGraph() {
               k1 = kernel::create(filter2D);
-              adf::connect<window<TILE_WINDOW_SIZE> >(inptr, k1.in[0]);
+              adf::connect(inptr, k1.in[0]);
               adf::connect<parameter>(kernelCoefficients, async(k1.in[1]));
-              adf::connect<window<TILE_WINDOW_SIZE> >(k1.out[0], outptr);
+              adf::connect(k1.out[0], outptr);
           }
       };
 
@@ -130,45 +130,25 @@ Once AIE kernels have been prepared, next step is to create a Data Flow Graph cl
      
           myGraph() {
               k1 = kernel::create(filter2D);
-              adf::connect<window<TILE_WINDOW_SIZE> >(inptr, k1.in[0]);
+              adf::connect(inptr, k1.in[0]);
               adf::connect<parameter>(kernelCoefficients, async(k1.in[1]));
-              adf::connect<window<TILE_WINDOW_SIZE> >(k1.out[0], outptr);
+              adf::connect(k1.out[0], outptr);
               source(k1) = "xf_filter2d.cc";
               // Initial mapping
               runtime<ratio>(k1) = 0.5;
           }
       };
 
-.. _Run time parameters: https://docs.xilinx.com/r/en-US/ug1076-ai-engine-environment/Run-Time-Graph-Control-API
-.. _Window: https://docs.xilinx.com/r/en-US/ug1076-ai-engine-environment/Window-and-Streaming-Data-API
-.. _Stream: https://docs.xilinx.com/r/en-US/ug1076-ai-engine-environment/Window-and-Streaming-Data-API
+.. _Run time parameters: https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Run-Time-Graph-Control-API
+.. _Stream: https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Buffer-vs.-Stream-in-Data-Communication
 
 
 Setting up Platform Ports
 =============================
 
-The next step is to create a ``graph.cpp`` file with platform ports and virtual platform specification. A virtual platform specification helps to connect the data flow graph written with external I/O mechanisms specific to the chosen target for testing or eventual deployment. The platform could be specified for a simulation, emulation, or an actual hardware execution target.
+The next step is to create a ``graph.cpp`` file with platform ports and virtual platform specification. A virtual platform specification helps to connect the data flow graph written with external I/O mechanisms specific to the chosen target for testing or eventual deployment. 
 
-.. code:: c
-
-   simulation::platform<inputs, outputs> platform_name(port_attribute_list);
-
-There are three types of platform ports attributes which describe how data is transferred to / from AIE cores.
-
-.. _fileio_aie:
-
-FileIO
----------
-
-By default, a platform port attribute is a string name used to construct an attribute of type FileIO. The string specifies the name of an input or output file relative to the current directory that will source or sink the platform data. The explicit form is specified in the following example using a FileIO constructor.
-
-.. code:: c
-
-   FileIO* in = new FileIO(input_file_name);
-   FileIO* out = new FileIO(output_file_name);
-   simulation::platform<1,1> plat(in,out);
-
-FileIO ports are solely for the purpose of application simulation in the absence of an actual hardware platform. They are provided for convenience to test a data flow graph in isolation before it is connected to a real platform. An actual hardware platform exports either stream or memory ports.
+There are two types of platform ports attributes which describe how data is transferred to / from AIE cores.
 
 .. _plio_aie:
 
@@ -180,18 +160,16 @@ A PLIO port attribute is used to make external stream connections that cross the
 .. code:: c
 
    //Virtual platform ports
-   PLIO* in1 = new PLIO("DataIn1", adf::plio_64_bits, "data/input.txt");
-   PLIO* out1 = new PLIO("DataOut1", adf::plio_64_bits, "data/output.txt");
-   simulation::platform<1, 1> platform(in1,out1);
-
-   //Graph object
-   myGraph filter_graph;
+   inptr = input_plio::create("DataIn1", adf::plio_128_bits, "data/input_128x16.txt");
+   outptr = output_plio::create("DataOut1", adf::plio_128_bits, "data/output.txt");
 
    //Virtual platform connectivity
-   connect<> net0(platform.src[0], filter_graph.inptr);
-   connect<> net1(filter_graph.outptr, platform.sink[0]);
+   connect<>(inptr.out[0], k1.in[0]);
+   connect<parameter>(kernelCoefficients, async(k1.in[1]));
+   connect<>(k1.out[0], outptr.in[0]);
 
-.. _PLIO Attributes: https://docs.xilinx.com/r/2021.2-English/ug1076-ai-engine-environment/PLIO-Attributes
+
+.. _PLIO Attributes: https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Configuring-input_plio/output_plio
 
 .. _gmio_aie:
 
@@ -204,14 +182,12 @@ A GMIO port attribute is used to make external memory-mapped connections to or f
 
    GMIO gmioIn1("gmioIn1", 64, 1000);
    GMIO gmioOut("gmioOut", 64, 1000);
-   simulation::platform<1, 1> platform(&gmioIn1, &gmioOut);
 
-   myGraph filter_graph;
+   connect<>(inptr.out[0], k1.in[0]);
+   connect<parameter>(kernelCoefficients, async(k1.in[1]));
+   connect<>(k1.out[0], outptr.in[0]);
 
-   connect<> net0(platform.src[0], filter_graph.in1);
-   connect<> net1(filter_graph.out1, platform.sink[0]);
-
-.. _GMIO Attributes: https://docs.xilinx.com/r/2021.2-English/ug1076-ai-engine-environment/GMIO-Attributes
+.. _GMIO Attributes: https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Configuring-input_gmio/output_gmio
 
 Host Code Integration
 =========================
@@ -226,16 +202,13 @@ In this mode the top level application can be written inside ``graph.cpp`` file.
 .. code:: c
 
    // Virtual platform ports
-   PLIO* in1 = new PLIO("DataIn1", adf::plio_64_bits, "data/input.txt");
-   PLIO* out1 = new PLIO("DataOut1", adf::plio_64_bits, "data/output.txt");
-   simulation::platform<1, 1> platform(in1, out1);
-
-   // Graph object
-   myGraph filter_graph;
+   inptr = input_plio::create("DataIn1", adf::plio_128_bits, "data/input_128x16.txt");
+   outptr = output_plio::create("DataOut1", adf::plio_128_bits, "data/output.txt");
 
    // Virtual platform connectivity
-   connect<> net0(platform.src[0], filter_graph.inptr);
-   connect<> net1(filter_graph.outptr, platform.sink[0]);
+   connect<>(inptr.out[0], k1.in[0]);
+   connect<parameter>(kernelCoefficients, async(k1.in[1]));
+   connect<>(k1.out[0], outptr.in[0]);
 
    #define SRS_SHIFT 10
    float kData[9] = {0.0625, 0.1250, 0.0625, 0.125, 0.25, 0.125, 0.0625, 0.125, 0.0625};
@@ -283,7 +256,7 @@ In case GMIO based ports are used.
    }
    #endif
 
-.. _Creating a Data Flow Graph (Including Kernels): https://docs.xilinx.com/r/en-US/ug1076-ai-engine-environment/Creating-a-Data-Flow-Graph-Including-Kernels
+.. _Creating a Data Flow Graph (Including Kernels): https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Creating-a-Data-Flow-Graph-Including-Kernels
 
 HW Emulation / HW Run
 ----------------------------
@@ -295,46 +268,38 @@ For x86Simulation, the AIE simulation and top level application had simple ADF A
 
    1.// Open device, load xclbin, and get uuid
        
-   auto dhdl = xrtDeviceOpen(0);//device index=0
+   xF::deviceInit(xclBinName);
 
-   xrtDeviceLoadXclbinFile(dhdl,xclbinFilename);
-   xuid_t uuid;
-   xrtDeviceGetXclbinUUID(dhdl, uuid);
-   adf::registerXRT(dhdl, uuid);
+   2. Allocate output buffer objects and map to host memory
 
-   1. Allocate output buffer objects and map to host memory
+   void* srcData = nullptr;
+   xrt::bo dst_hndl = xrt::bo(xF::gpDhdl, (srcImageR.total() * srcImageR.elemSize()), 0, 0);
+   srcData = src_hndl.map();
+   memcpy(srcData, srcImageR.data, (srcImageR.total() * srcImageR.elemSize()));
 
-   xrtBufferHandle out_bohdl = xrtBOAlloc(dhdl, output_size_in_bytes, 0, /*BANK=*/0);
-   std::complex<short> *host_out = (std::complex<short>*)xrtBOMap(out_bohdl);
+   3. Get kernel and run handles, set arguments for kernel, and launch kernel.
+   xrt::kernel s2mm_khdl = xrt::kernel(xF::gpDhdl, xF::xclbin_uuid, "s2mm"); // Open kernel handle
+   xrt::run s2mm_rhdl = s2mm_khdl(out_bohdl, nullptr, OUTPUT_SIZE); // set kernel arg
 
-   1. Get kernel and run handles, set arguments for kernel, and launch kernel.
-   xrtKernelHandle s2mm_khdl = xrtPLKernelOpen(dhdl, top->m_header.uuid, "s2mm"); // Open kernel handle
-   xrtRunHandle s2mm_rhdl = xrtRunOpen(s2mm_khdl); 
-   xrtRunSetArg(s2mm_rhdl, 0, out_bohdl); // set kernel arg
-   xrtRunSetArg(s2mm_rhdl, 2, OUTPUT_SIZE); // set kernel arg
-   xrtRunStart(s2mm_rhdl); //launch s2mm kernel
+   // Update graph parameters (RTP) and so on
+   auto gHndl = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "filter_graph");
+   gHndl.reset();
+   gHndl.update("filter_graph.k1.in[1]", float2fixed_coeff<10, 16>(kData));
+   gHndl.run(1);
+   gHndl.wait();
 
-   // ADF API:run, update graph parameters (RTP) and so on
-   gr.init();
-   gr.update(gr.size, 1024);//update RTP
-   gr.run(16);//start AIE kernel
-   gr.wait();
+   4. Wait for kernel completion.
+   s2mm_rhdl.wait();
 
-   1. Wait for kernel completion.
-   auto state = xrtRunWait(s2mm_rhdl);
+   5. Sync output device buffer objects to host memory.
 
-   1. Sync output device buffer objects to host memory.
-
-   xrtBOSync(out_bohdl, XCL_BO_SYNC_BO_FROM_PLATFORM , output_size_in_bytes,/*OFFSET=*/ 0);
+   dst_hndl.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
 
    //6. post-processing on host memory - "host_out
 
 :ref:`Vitis Vision AIE library functions <aie_library_functions>` provide optimal vector implementations of various computer vision algorithms. These functions are expected to process high resolution images. However because local memory in AIE core modules is limited, entire images can't be fit into it. Also accessing DDR for reading / writing image data will be highly inefficient both for performance and power. To overcome this limitation, host code is expected to split the high resolution image into smaller tiles which fit in the AIE Engine local memory in ping-pong fashion. Splitting high resolution images into smaller tiles is a complex operation as it need to be aware of overlap regions and borders. Also the tile size is expected to be aligned with vectorization factor of the kernel.
 
 To facilitate this the Vitis Vision Library provides data movers which perform smart tiling / stitching of high resolution images which can meet all the above requirements. There are two versions made available which can provide data movement capabilities both using PLIO and GMIO interfaces. A high-level class abstraction is provided with a simple API interface to facilitate data transfers. The class abstraction allows for seamless transition between the PLIO - GMIO methods of data transfers.
-
-.. Important::
-   **For HW emulation / HW run it is imperative to include a graph.cpp inside the host.cpp. This is because the platform port specification and the ADF graph object instance is declared in graph.cpp.**
 
 .. _xfcvdatamovers_aie:
 
@@ -414,8 +379,8 @@ Once the objects are constructed, simple API calls can be made to initiate the d
 .. code:: c
 
    //For PLIO
-   auto tiles_sz = tiler.host2aie_nb(src_hndl, srcImageR.size());
-   stitcher.aie2host_nb(dst_hndl, dst.size(), tiles_sz);
+   auto tiles_sz = tiler.host2aie_nb(&src_hndl, srcImageR.size());
+   stitcher.aie2host_nb(&dst_hndl, dst.size(), tiles_sz);
 
    //For GMIO
    auto tiles_sz = tiler.host2aie_nb(srcData.data(), srcImageR.size(), {"gmioIn[0]"});
@@ -431,15 +396,12 @@ Using ``tile_sz``, you can run the graph the appropriate number of times.
 
 .. code:: c
 
-   filter_graph.run(tiles_sz[0] * tiles_sz[1]);
+   filter_graph_hndl.run(tiles_sz[0] * tiles_sz[1]);
 
 After the runs are started, you need to wait for all transactions to complete.
 
 .. code:: c
 
-   filter_graph.wait();
+   filter_graph_hndl.wait();
    tiler.wait();
    stitcher.wait();
-
-.. note::
-   the current implementation of xfcvDataMovers support only one core. Multi-core support is planned for future releases.

@@ -36,49 +36,53 @@ class Transpose1D {
     void xf_transpose_4ch(uint8_t* frame, int16 height, int16 width, uint8_t* output);
 };
 
-__attribute__((noinline)) void Transpose1D::xf_transpose_1ch(uint8_t* in_ptr, int16 height, int16 width, uint8_t* out_ptr) {
+__attribute__((noinline)) void Transpose1D::xf_transpose_1ch(uint8_t* in_ptr,
+                                                             int16 height,
+                                                             int16 width,
+                                                             uint8_t* out_ptr) {
     const int16 image_width = width;
     const int16 image_height = height;
-   
-    for (int wd = 0; wd < image_width / 4; wd++) chess_prepare_for_pipelining{
-        ::aie::vector<uint8_t, 16> VEC0; //size of image height - ideally
-        ::aie::vector<uint8_t, 16> VEC1;
-        ::aie::vector<uint8_t, 16> VEC2;
-        ::aie::vector<uint8_t, 16> VEC3;
-        for (int ht = 0; ht < image_height / 16; ht++)chess_prepare_for_pipelining {
-            auto vec0 = ::aie::load_v<32>(in_ptr);
-            in_ptr += 32;
-            auto vec1 = ::aie::load_v<32>(in_ptr);
-            in_ptr += 32;
-            auto [v_01, v_23] = ::aie::interleave_unzip(vec0, vec1, 2);
-            VEC0.insert(ht, ::aie::filter_even(v_01, 1));
-            VEC1.insert(ht, ::aie::filter_odd(v_01, 1));
-            VEC2.insert(ht, ::aie::filter_even(v_23, 1));
-            VEC3.insert(ht, ::aie::filter_odd(v_23, 1));
+
+    for (int wd = 0; wd < image_width / 4; wd++) chess_prepare_for_pipelining {
+            ::aie::vector<uint8_t, 16> VEC0; // size of image height - ideally
+            ::aie::vector<uint8_t, 16> VEC1;
+            ::aie::vector<uint8_t, 16> VEC2;
+            ::aie::vector<uint8_t, 16> VEC3;
+            for (int ht = 0; ht < image_height / 16; ht++) chess_prepare_for_pipelining {
+                    auto vec0 = ::aie::load_v<32>(in_ptr);
+                    in_ptr += 32;
+                    auto vec1 = ::aie::load_v<32>(in_ptr);
+                    in_ptr += 32;
+                    auto[v_01, v_23] = ::aie::interleave_unzip(vec0, vec1, 2);
+                    VEC0.insert(ht, ::aie::filter_even(v_01, 1));
+                    VEC1.insert(ht, ::aie::filter_odd(v_01, 1));
+                    VEC2.insert(ht, ::aie::filter_even(v_23, 1));
+                    VEC3.insert(ht, ::aie::filter_odd(v_23, 1));
+                }
+            ::aie::store_v(out_ptr, VEC0);
+            out_ptr += image_height;
+            ::aie::store_v(out_ptr, VEC1);
+            out_ptr += image_height;
+            ::aie::store_v(out_ptr, VEC2);
+            out_ptr += image_height;
+            ::aie::store_v(out_ptr, VEC3);
+            out_ptr += image_height;
         }
-        ::aie::store_v(out_ptr,VEC0);
-        out_ptr += image_height;
-        ::aie::store_v(out_ptr,VEC1);
-        out_ptr += image_height;
-        ::aie::store_v(out_ptr,VEC2);
-        out_ptr += image_height;
-        ::aie::store_v(out_ptr,VEC3);
-        out_ptr += image_height;
-    }
-
-
 }
 
-__attribute__((noinline)) void Transpose1D::xf_transpose_4ch(uint8_t* in_ptr, int16 height, int16 width, uint8_t* out_ptr) {
+__attribute__((noinline)) void Transpose1D::xf_transpose_4ch(uint8_t* in_ptr,
+                                                             int16 height,
+                                                             int16 width,
+                                                             uint8_t* out_ptr) {
     const int16 image_width = width;
     const int16 image_height = height;
-   
-    for (int wd = 0; wd < image_width*image_height*4 / 32; wd++) chess_prepare_for_pipelining{
-        auto vec0 = ::aie::load_v<32>(in_ptr);
-        in_ptr += 32; 
-        ::aie::store_v(out_ptr,vec0);        
-        out_ptr += 32;       
-    }
+
+    for (int wd = 0; wd < image_width * image_height * 4 / 32; wd++) chess_prepare_for_pipelining {
+            auto vec0 = ::aie::load_v<32>(in_ptr);
+            in_ptr += 32;
+            ::aie::store_v(out_ptr, vec0);
+            out_ptr += 32;
+        }
 }
 
 void Transpose1D::runImpl(uint8_t* frame, int16 height, int16 width, uint8_t* output) {

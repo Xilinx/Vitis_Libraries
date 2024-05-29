@@ -18,7 +18,4 @@
 #include <adf/stream/types.h>
 #include <adf/io_buffer/io_buffer.h>
 
-void rgba2grey(
-            adf::input_buffer<uint8_t>& in,
-            adf::output_buffer<uint8_t>& out
-            );
+void rgba2grey(adf::input_buffer<uint8_t>& in, adf::output_buffer<uint8_t>& out);

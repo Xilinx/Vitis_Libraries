@@ -182,6 +182,7 @@ class DemosaicRGBA : public DemosaicBaseImpl<INPUT_TILE_ELEMENTS> {
           mBChannel(bch) {}
 
     void runImpl(adf::input_buffer<uint8>& in, adf::output_buffer<uint8>& out);
+    void runImpl_ptr(uint8_t* in, uint8_t* out);
 };
 
 } // aie

@@ -16,7 +16,7 @@ Vitis Vision Library
 ##############################
 
 The AMD Vitis™ Vision library is a set of FPGA and AI Engine device optimized functions, intended for application
-developers using AMD Zynq™ 7000 SoC, AMD Zynq UltraScale+™ MPSoC, AMD Versal Adaptive SoC VCK190, and PCIE-based AMD Alveo™ U200 and U50 devices. 
+developers using AMD Zynq™ 7000 SoC, AMD Zynq UltraScale+™ MPSoC, AMD Versal Adaptive SoC VEK280, and PCIE-based AMD Alveo™ U200 and U50 devices. 
 The Vitis vision library provides a software interface for computer vision functions accelerated on FPGA and AI Engine devices. 
 
 .. note:: 

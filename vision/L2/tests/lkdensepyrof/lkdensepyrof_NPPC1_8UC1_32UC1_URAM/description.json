@@ -54,20 +54,27 @@
                     ]
                 }
             },
+            "v++": {
+                "linker": {
+                    "ldclflags": [
+                        "--vivado.impl.strategies Performance_Explore"
+                    ]
+                }
+            },
             "containers": [
                 {
                     "name": "krnl_pyr_dense_optical_flow",
                     "accelerators": [
                         {
                             "name": "pyr_dense_optical_flow_accel",
-                            "frequency": 150.0
+                            "frequency": 100.0
                         },
                         {
                             "name": "pyr_down_accel",
-                            "frequency": 150.0
+                            "frequency": 100.0
                         }
                     ],
-                    "frequency": 150.0
+                    "frequency": 100.0
                 }
             ]
         }

@@ -1,12 +1,12 @@
 {
     "name": "Xilinx threshold AIE Test", 
     "description": "threshold AIE function example", 
-    "flow": "versal", 
+    "flow": "system", 
     "platform_allowlist": [
-        "vek280",
-        "vck190"
+        "vek280"
     ], 
     "platform_blocklist": [
+        "vck190",
         "vck5000",
         "v70"
     ], 

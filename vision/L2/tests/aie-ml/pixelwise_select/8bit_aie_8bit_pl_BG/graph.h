@@ -28,7 +28,6 @@ class pixelwiseSelectGraph : public adf::graph {
     kernel k1;
 
    public:
- 
     input_plio in_f, in_m, in_b;
     output_plio out;
 

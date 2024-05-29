@@ -18,10 +18,7 @@
 #include "config.h"
 #include "imgproc/xf_rgba2gray_aie2.hpp"
 
-void rgba2grey(
-            adf::input_buffer<uint8_t>& in,
-            adf::output_buffer<uint8_t>& out
-            ){
+void rgba2grey(adf::input_buffer<uint8_t>& in, adf::output_buffer<uint8_t>& out) {
     xf::cv::aie::Rgba2Gray k = xf::cv::aie::Rgba2Gray();
     k.runImpl(in, out);
 };

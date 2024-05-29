@@ -18,9 +18,8 @@
 #include "imgproc/xf_pixelwise_select_aie2.hpp"
 
 void pixelwiseSelect(adf::input_buffer<uint8_t>& frame,
-                    adf::input_buffer<uint8_t>& mask,
-                    adf::output_buffer<uint8_t>& output) {
-    
+                     adf::input_buffer<uint8_t>& mask,
+                     adf::output_buffer<uint8_t>& output) {
     xf::cv::aie::PixelwiseSelect ps = xf::cv::aie::PixelwiseSelect();
     ps.runImpl(frame, mask, output);
 };

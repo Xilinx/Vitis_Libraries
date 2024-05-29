@@ -34,10 +34,10 @@ auto float2fixed_coeff(float data[9]) {
     // k6 k7 0 k8 0
     std::array<int16_t, VECTOR_SIZE> ret;
     ret.fill(0);
-    for (int i = 0, j = 0; i < 3; i++, j+=3) {
+    for (int i = 0, j = 0; i < 3; i++, j += 3) {
         ret[4 * i + 0] = data[j] * (1 << SHIFT);
-        ret[4 * i + 1] = data[j+1] * (1 << SHIFT);
-        ret[4 * i + 2] = data[j+2] * (1 << SHIFT);
+        ret[4 * i + 1] = data[j + 1] * (1 << SHIFT);
+        ret[4 * i + 2] = data[j + 2] * (1 << SHIFT);
         ret[4 * i + 3] = 0;
     }
     return ret;
@@ -56,7 +56,7 @@ static constexpr int ELEM_WITH_METADATA = TILE_ELEMENTS + (xf::cv::aie::METADATA
 /* Graph specific configuration */
 static constexpr int VECTORIZATION_FACTOR = 16;
 
-static constexpr int PARAM_DATA = 16;// * sizeof(short int);
+static constexpr int PARAM_DATA = 16; // * sizeof(short int);
 
 static constexpr int __X86_DEVICE__ = 0;
 

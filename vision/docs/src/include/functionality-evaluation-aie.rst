@@ -1,5 +1,5 @@
 .. 
-   Copyright 2023 Advanced Micro Devices, Inc
+   Copyright 2024 Advanced Micro Devices, Inc
   
 .. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -14,7 +14,7 @@ commands to setup the basic environment:
 x86 Simulation
 ===============
 
-Refer to the `x86 Functional Simulation`_ section in Vitis Unified Software Development Platform 2023.2 Documentation. For host code development, refer to `Programming the PS Host Application`_ section
+Refer to the `x86 Functional Simulation`_ section in Vitis Unified Software Development Platform 2024.1 Documentation. For host code development, refer to `Programming the PS Host Application`_ section
 
 .. _x86 Functional Simulation: https://docs.xilinx.com/r/en-US/ug1076-ai-engine-environment/Simulating-an-AI-Engine-Graph-Application
 .. _Programming the PS Host Application: https://docs.xilinx.com/r/en-US/ug1076-ai-engine-environment/Programming-the-PS-Host-Application
@@ -24,7 +24,7 @@ Refer to the `x86 Functional Simulation`_ section in Vitis Unified Software Deve
 AIE Simulation
 ===============
 
-Refer to the `AIE Simulation`_ section in Vitis Unified Software Development Platform 2023.2 Documentation. For host code development, refer to `Programming the PS Host Application`_ section.
+Refer to the `AIE Simulation`_ section in Vitis Unified Software Development Platform 2024.1 Documentation. For host code development, refer to `Programming the PS Host Application`_ section.
 
 .. _AIE Simulation: https://docs.xilinx.com/r/en-US/ug1076-ai-engine-environment/Simulating-an-AI-Engine-Graph-Application
 
@@ -33,7 +33,7 @@ Refer to the `AIE Simulation`_ section in Vitis Unified Software Development Pla
 HW Emulation
 =============
 
-Refer to the `Programming the PS Host Application`_ section in Vitis Unified Software Development Platform 2023.2 Documentation.
+Refer to the `Programming the PS Host Application`_ section in Vitis Unified Software Development Platform 2024.1 Documentation.
 
 .. _hw_testing:
 
@@ -47,6 +47,6 @@ After the build for hardware target completes, a ``sd_card.img`` file will be ge
 3. Use 'Teraterm' to connect to COM port and wait for the system to boot up.
 4. After the boot up is done, goto ``/media/sd-mmcblk0p1`` directory and run the executable file.
 
-Refer to the `hw_run`_ section in Vitis Unified Software Development Platform 2023.2 Documentation.
+Refer to the `hw_run`_ section in Vitis Unified Software Development Platform 2024.1 Documentation.
 
 .. _hw_run: https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Running-the-Application-Hardware-Build

@@ -22,7 +22,7 @@
 #include "config.h"
 #include "kernels.h"
 
-//static constexpr int ELEM_WITH_METADATA = TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / 2);
+// static constexpr int ELEM_WITH_METADATA = TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / 2);
 
 using namespace adf;
 
@@ -53,4 +53,3 @@ class myGraph : public adf::graph {
 };
 
 #endif
-

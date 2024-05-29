@@ -24,13 +24,12 @@ transposeGraph tr;
 // initialize and run the dataflow graph
 #if defined(__AIESIM__) || defined(__X86SIM__)
 int main(int argc, char** argv) {
-    
     tr.init();
     tr.update(tr.outputStride, IMG_HEIGHT);
     tr.run(1);
     tr.wait();
     tr.end();
-    
+
     return 0;
 }
 #endif

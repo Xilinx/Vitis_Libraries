@@ -49,7 +49,7 @@ CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
 # setting default value
-TARGET ?= aiesim 
+TARGET ?= aiesim
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
@@ -60,8 +60,8 @@ PLATFORM := vek280
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  vek280 vck190
-PLATFORM_BLOCKLIST +=  vck5000 v70
+PLATFORM_ALLOWLIST +=  vek280
+PLATFORM_BLOCKLIST +=  vck190 vck5000 v70
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -199,7 +199,7 @@ PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args
 endif
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw))
-HOST_ARGS := kernel.xclbin $(XFLIB_DIR)/data/4k.jpg 128 128
+HOST_ARGS := kernel.xclbin $(XFLIB_DIR)/data/4k.jpg
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif

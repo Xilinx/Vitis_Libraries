@@ -97,24 +97,23 @@ int main(int argc, char** argv) {
 
         // Allocate output buffer
         void* dstData = nullptr;
-        xrt::bo *ptr_dstHndl = new xrt::bo(xF::gpDhdl, (op_height * op_width * srcImageR.elemSize()), 0, 0);
+        xrt::bo* ptr_dstHndl = new xrt::bo(xF::gpDhdl, (op_height * op_width * srcImageR.elemSize()), 0, 0);
         dstData = ptr_dstHndl->map();
         cv::Mat dst(op_height, op_width, srcImageR.type(), dstData);
 
         xF::xfcvDataMovers<xF::TILER, int16_t, TILE_HEIGHT, TILE_WIDTH, VECTORIZATION_FACTOR> tiler(0, 0);
         xF::xfcvDataMovers<xF::STITCHER, int16_t, TILE_HEIGHT, TILE_WIDTH, VECTORIZATION_FACTOR> stitcher;
 
-
-	#if !__X86_DEVICE__
+#if !__X86_DEVICE__
         std::cout << "Graph init. This does nothing because CDO in boot PDI "
                      "already configures AIE.\n";
         auto gHndl = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "mygraph");
-		std::cout << "XRT graph opened" << std::endl;
-		gHndl.reset();
-		std::cout << "Graph reset done" << std::endl;
+        std::cout << "XRT graph opened" << std::endl;
+        gHndl.reset();
+        std::cout << "Graph reset done" << std::endl;
         gHndl.update("mygraph.k1.in[1]", thresh_val);
         gHndl.update("mygraph.k1.in[2]", max_val);
-	#endif
+#endif
 
         START_TIMER
         tiler.compute_metadata(srcImageR.size());
@@ -127,11 +126,11 @@ int main(int argc, char** argv) {
             START_TIMER
             auto tiles_sz = tiler.host2aie_nb(&src_hndl, srcImageR.size());
             stitcher.aie2host_nb(ptr_dstHndl, dst.size(), tiles_sz);
-            #if !__X86_DEVICE__
+#if !__X86_DEVICE__
             std::cout << "Graph running for " << (tiles_sz[0] * tiles_sz[1]) << " iterations.\n";
             gHndl.run(tiles_sz[0] * tiles_sz[1]);
             gHndl.wait();
-	    #endif
+#endif
 
             tiler.wait();
             stitcher.wait();
@@ -155,9 +154,9 @@ int main(int argc, char** argv) {
             }
             //}
         }
-        #if !__X86_DEVICE__
-	gHndl.end(0);
-	#endif
+#if !__X86_DEVICE__
+        gHndl.end(0);
+#endif
 
         std::cout << "Test passed" << std::endl;
         std::cout << "Average time to process frame : " << (((float)tt.count() * 0.001) / (float)iterations) << " ms"

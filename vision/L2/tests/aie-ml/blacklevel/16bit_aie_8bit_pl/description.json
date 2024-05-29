@@ -1,12 +1,12 @@
 {
     "name": "Xilinx blacklevel 16bit_aie_8bit_pl AIE2 Test", 
     "description": "blacklevel AIE function example", 
-    "flow": "versal", 
+    "flow": "system", 
     "platform_allowlist": [
-        "vek280",
-        "vck190"
+        "vek280"
     ], 
     "platform_blocklist": [
+        "vck190",
         "vck5000",
         "v70"
     ], 

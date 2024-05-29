@@ -40,11 +40,11 @@ class yuv2rgbaGraph : public adf::graph {
 
         // For 16-bit window size is 4096=2048*2, for 32-bit window size is 8192=2048*4
         // create nets to connect kernels and IO ports
-        
-	in1 = adf::input_plio::create("DataIn1", adf::plio_128_bits, "data/in_y.txt");
-	in2 = adf::input_plio::create("DataIn2",adf::plio_128_bits, "data/in_uv.txt");
-	out = adf::output_plio::create("DataOut1",adf::plio_128_bits, "data/output_RGBA_aie.txt");
-	
+
+        in1 = adf::input_plio::create("DataIn1", adf::plio_128_bits, "data/in_y.txt");
+        in2 = adf::input_plio::create("DataIn2", adf::plio_128_bits, "data/in_uv.txt");
+        out = adf::output_plio::create("DataOut1", adf::plio_128_bits, "data/output_RGBA_aie.txt");
+
         adf::connect<> net0(in1.out[0], k1.in[0]);
         adf::connect<> net1(in2.out[0], k1.in[1]);
         adf::connect<> net2(k1.out[0], out.in[0]);

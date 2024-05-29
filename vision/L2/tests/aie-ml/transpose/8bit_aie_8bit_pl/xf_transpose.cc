@@ -17,7 +17,8 @@
 #include "kernels.h"
 #include "imgproc/xf_transpose_1c.hpp"
 
-void transpose_api(adf::input_buffer<uint8_t>& input_metadata, adf::input_buffer<uint8_t>& input_data,
+void transpose_api(adf::input_buffer<uint8_t>& input_metadata,
+                   adf::input_buffer<uint8_t>& input_data,
                    adf::output_buffer<uint8_t>& output,
                    int outputStride) {
     xf::cv::aie::Transpose1D transpose = xf::cv::aie::Transpose1D();

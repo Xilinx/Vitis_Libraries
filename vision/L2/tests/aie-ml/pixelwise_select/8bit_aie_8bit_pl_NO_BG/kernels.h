@@ -19,5 +19,5 @@
 #include <adf/stream/types.h>
 
 void pixelwiseSelect(adf::input_buffer<uint8_t>& frame,
-                    adf::input_buffer<uint8_t>& mask,
-                    adf::output_buffer<uint8_t>& output);
+                     adf::input_buffer<uint8_t>& mask,
+                     adf::output_buffer<uint8_t>& output);

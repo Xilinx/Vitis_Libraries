@@ -97,29 +97,29 @@ int main(int argc, char** argv) {
         // Load image
         void* srcData1 = nullptr;
         void* srcData2 = nullptr;
-		std::cout << "Load image start" << std::endl;
-        
-	    xrt::bo dbl_hndl = xrt::bo(xF::gpDhdl, ( srcImageUV.total() * srcImageUV.elemSize() + srcImageY.total() * srcImageY.elemSize()),0,0 );
+        std::cout << "Load image start" << std::endl;
+
+        xrt::bo dbl_hndl = xrt::bo(
+            xF::gpDhdl, (srcImageUV.total() * srcImageUV.elemSize() + srcImageY.total() * srcImageY.elemSize()), 0, 0);
         xrt::bo sub_bo_hndl_1 = xrt::bo(dbl_hndl, srcImageY.total() * srcImageY.elemSize(), 0);
-        xrt::bo sub_bo_hndl_2 = xrt::bo(dbl_hndl, srcImageUV.total() * srcImageUV.elemSize(), srcImageY.total() * srcImageY.elemSize());
-		std::cout << "Load image dbl_hndl" << std::endl;
-
-
+        xrt::bo sub_bo_hndl_2 =
+            xrt::bo(dbl_hndl, srcImageUV.total() * srcImageUV.elemSize(), srcImageY.total() * srcImageY.elemSize());
+        std::cout << "Load image dbl_hndl" << std::endl;
 
         srcData1 = sub_bo_hndl_1.map();
         srcData2 = sub_bo_hndl_2.map();
-		std::cout << "Load image dbl_hndl1" << std::endl;
+        std::cout << "Load image dbl_hndl1" << std::endl;
 
         memcpy(srcData1, srcImageY.data, (srcImageY.total() * srcImageY.elemSize()));
         memcpy(srcData2, srcImageUV.data, (srcImageUV.total() * srcImageUV.elemSize()));
-		std::cout << "Load image dbl_hndl2" << std::endl;
-        
+        std::cout << "Load image dbl_hndl2" << std::endl;
+
         // Allocate output buffer
         void* dstData = nullptr;
-        xrt::bo *dst_hndl = new xrt::bo(xF::gpDhdl, (op_height * op_width * srcImageY.elemSize())*4, 0,0 );
+        xrt::bo* dst_hndl = new xrt::bo(xF::gpDhdl, (op_height * op_width * srcImageY.elemSize()) * 4, 0, 0);
         dstData = dst_hndl->map();
         cv::Mat dst(op_height, op_width, CV_8UC4, dstData);
-		std::cout << "Load image dbl_hndl3" << std::endl;
+        std::cout << "Load image dbl_hndl3" << std::endl;
 
         xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT, TILE_WIDTH, VECTORIZATION_FACTOR> tiler1(0, 0);
         xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT / 2, TILE_WIDTH / 2, VECTORIZATION_FACTOR> tiler2(0, 0);
@@ -127,15 +127,15 @@ int main(int argc, char** argv) {
         short int tile_width = TILE_WIDTH;
         short int tile_height = TILE_HEIGHT;
 
-        #if !__X86__
+#if !__X86_DEVICE__
         std::cout << "Graph init. This does nothing because CDO in boot PDI already configures AIE.\n";
         auto gHndl = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "mygraph");
         std::cout << "XRT graph opened" << std::endl;
-		gHndl.reset();
-		std::cout << "Graph reset done" << std::endl;
+        gHndl.reset();
+        std::cout << "Graph reset done" << std::endl;
         gHndl.update("mygraph.k1.in[2]", tile_width);
-		gHndl.update("mygraph.k1.in[3]", tile_height);
-		#endif
+        gHndl.update("mygraph.k1.in[3]", tile_height);
+#endif
 
         START_TIMER
         tiler1.compute_metadata(srcImageY.size());
@@ -150,15 +150,15 @@ int main(int argc, char** argv) {
             tiler2.host2aie_nb(&sub_bo_hndl_2, srcImageUV.size());
             stitcher.aie2host_nb(dst_hndl, dst.size(), tiles_sz);
             START_TIMER
-            #if !__X86__
+#if !__X86_DEVICE__
             std::cout << "Graph running for " << (tiles_sz[0] * tiles_sz[1]) << " iterations.\n";
-            for(int i=0; i< tiles_sz[0] * tiles_sz[1]; i++){
-				std::cout << "Running iteration : " << i << std::endl; 
-				gHndl.run(1);
-				gHndl.wait();
-				std::cout << "Done iteration : " << i << std::endl;
-			}
-            #endif
+            for (int i = 0; i < tiles_sz[0] * tiles_sz[1]; i++) {
+                std::cout << "Running iteration : " << i << std::endl;
+                gHndl.run(1);
+                gHndl.wait();
+                std::cout << "Done iteration : " << i << std::endl;
+            }
+#endif
             std::cout << "Graph run complete\n";
             tiler1.wait();
             std::cout << "Tiler1 done\n";
@@ -186,9 +186,9 @@ int main(int argc, char** argv) {
             std::cerr << "Test failed" << std::endl;
             exit(-1);
         }
-        #if !__X86__
-		gHndl.end(0);
-		#endif
+#if !__X86_DEVICE__
+        gHndl.end(0);
+#endif
         std::cout << "Test passed" << std::endl;
         std::cout << "Average time to process frame : " << (((float)tt.count() * 0.001) / (float)iterations) << " ms"
                   << std::endl;

@@ -23,7 +23,6 @@
 
 using namespace adf;
 
-
 /*
  * ADF graph to compute weighted moving average of
  * the last 8 samples in a stream of numbers

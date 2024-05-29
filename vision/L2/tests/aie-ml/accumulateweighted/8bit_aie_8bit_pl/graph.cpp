@@ -16,7 +16,6 @@
 
 #include "graph.h"
 
-
 myGraph accumw_graph;
 
 #if defined(__AIESIM__) || defined(__X86SIM__)

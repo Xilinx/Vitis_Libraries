@@ -163,16 +163,23 @@ LIBRARY_PATH := $(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 endif
 
 ########################## Kernel compiler global settings ##########################
+ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/tests/lkdensepyrof/lkdensepyrof_NPPC1_8UC1_32UC1_URAM -I $(XFLIB_DIR)/L1/include/
+VPP_LDFLAGS +=   --vivado.impl.strategies Performance_Explore
+
+else 
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/tests/lkdensepyrof/lkdensepyrof_NPPC1_8UC1_32UC1_URAM -I $(XFLIB_DIR)/L1/include/
+
+endif
 
 ######################### binary container global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-VPP_FLAGS_pyr_dense_optical_flow_accel += --hls.clock 150000000:pyr_dense_optical_flow_accel
-VPP_FLAGS_pyr_down_accel += --hls.clock 150000000:pyr_down_accel
+VPP_FLAGS_pyr_dense_optical_flow_accel += --hls.clock 100000000:pyr_dense_optical_flow_accel
+VPP_FLAGS_pyr_down_accel += --hls.clock 100000000:pyr_down_accel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_krnl_pyr_dense_optical_flow += --clock.defaultFreqHz 150000000
+VPP_LDFLAGS_krnl_pyr_dense_optical_flow += --clock.defaultFreqHz 100000000
 else
-VPP_LDFLAGS_krnl_pyr_dense_optical_flow += --kernel_frequency 150
+VPP_LDFLAGS_krnl_pyr_dense_optical_flow += --kernel_frequency 100
 endif
 
 else 

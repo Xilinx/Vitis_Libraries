@@ -18,7 +18,6 @@
 
 using namespace adf;
 // instantiate adf dataflow graph
-
 demosaicGraph<1> demo[CORES] = {{20, 0, 0}}; //, {22, 0, 1}, {24, 0, 2}, {26, 0, 3}};
 
 // initialize and run the dataflow graph

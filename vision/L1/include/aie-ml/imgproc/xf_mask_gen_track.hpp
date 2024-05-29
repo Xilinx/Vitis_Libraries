@@ -36,9 +36,8 @@ namespace aie {
 
 class MaskGenTrack {
    public:
-
     static uint32_t non_zero_count;
-    static uint32_t sum;           
+    static uint32_t sum;
 
     void runImplTracking(T* restrict _pred_depth,
                          T* restrict _pred_seg,
@@ -47,12 +46,10 @@ class MaskGenTrack {
                          const uint8 depth_max,
                          const uint16 tile_height,
                          const uint16 tile_width);
-
-
 };
 
-   uint32_t MaskGenTrack::non_zero_count = 0;
-   uint32_t MaskGenTrack::sum = 0;           
+uint32_t MaskGenTrack::non_zero_count = 0;
+uint32_t MaskGenTrack::sum = 0;
 
 __attribute__((noinline)) void MaskGenTrack::runImplTracking(T* restrict _pred_depth,
                                                              T* restrict _pred_seg,

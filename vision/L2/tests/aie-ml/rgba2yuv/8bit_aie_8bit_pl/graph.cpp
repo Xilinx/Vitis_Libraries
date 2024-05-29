@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     mygraph.init();
     uint16 tile_width = TILE_WIDTH;
     uint16 tile_height = TILE_HEIGHT;
-    
+
     mygraph.update(mygraph.tile_width, tile_width);
     mygraph.update(mygraph.tile_height, tile_height);
     mygraph.run(1);

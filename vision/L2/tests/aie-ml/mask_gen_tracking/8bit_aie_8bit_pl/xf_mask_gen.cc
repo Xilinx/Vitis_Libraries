@@ -23,19 +23,17 @@ void maskGen_api(adf::input_buffer<uint8_t>& input,
                  uint8_t depth_max,
                  uint16_t thres_f_new,
                  uint16_t thres_b_new) {
-
     uint8_t* img_in_ptr_1 = (uint8_t*)::aie::begin(input);
-    uint8_t* img_out_ptr  = (uint8_t*)::aie::begin(output);
+    uint8_t* img_out_ptr = (uint8_t*)::aie::begin(output);
 
-    const uint16 img_width  = xf::cv::aie::xfGetTileWidth(img_in_ptr_1);
+    const uint16 img_width = xf::cv::aie::xfGetTileWidth(img_in_ptr_1);
     const uint16 img_height = xf::cv::aie::xfGetTileHeight(img_in_ptr_1);
 
     xf::cv::aie::xfCopyMetaData(img_in_ptr_1, img_out_ptr);
 
     uint8_t* in_ptr_1 = (uint8_t*)xf::cv::aie::xfGetImgDataPtr(img_in_ptr_1);
-    uint8_t* out_ptr = (uint8_t*)xf::cv::aie::xfGetImgDataPtr(img_out_ptr); 
+    uint8_t* out_ptr = (uint8_t*)xf::cv::aie::xfGetImgDataPtr(img_out_ptr);
 
     xf::cv::aie::MaskGen maskGen = xf::cv::aie::MaskGen();
-    maskGen.runImplMaskGen(in_ptr_1, out_ptr, depth_min, depth_max, thres_f_new,
-                    thres_b_new, img_height, img_width);
+    maskGen.runImplMaskGen(in_ptr_1, out_ptr, depth_min, depth_max, thres_f_new, thres_b_new, img_height, img_width);
 }

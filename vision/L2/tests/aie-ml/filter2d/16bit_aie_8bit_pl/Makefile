@@ -60,8 +60,8 @@ PLATFORM := vek280
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  vek280 vck190
-PLATFORM_BLOCKLIST +=  vck5000 v70
+PLATFORM_ALLOWLIST +=  vek280
+PLATFORM_BLOCKLIST +=  vck190 vck5000 v70
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)

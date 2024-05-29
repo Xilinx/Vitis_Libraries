@@ -41,8 +41,8 @@ class maskGenTrackingGraph : public adf::graph {
 
     maskGenTrackingGraph() {
         k = kernel::create(maskGenTrack_api);
-        in1  =  input_plio::create( "DataIn0", adf::plio_128_bits, "data/pred_depth_1920x4.txt");
-        in2  =  input_plio::create( "DataIn1", adf::plio_128_bits, "data/pred_seg_1920x4.txt");
+        in1 = input_plio::create("DataIn0", adf::plio_128_bits, "data/pred_depth_1920x4.txt");
+        in2 = input_plio::create("DataIn1", adf::plio_128_bits, "data/pred_seg_1920x4.txt");
         out1 = output_plio::create("DataOut0", adf::plio_128_bits, "data/output_maskgen_track.txt");
 
         // create nets to connect kernels and IO ports
@@ -55,8 +55,8 @@ class maskGenTrackingGraph : public adf::graph {
         connect<parameter>(thres_b_new, async(k.in[5]));
         connect<parameter>(pred_seg_thresh, async(k.in[6]));
 
-        adf::dimensions(k.in[0])  = {ELEM_WITH_METADATA_IN};
-        adf::dimensions(k.in[1])  = {ELEM_WITH_METADATA_IN};
+        adf::dimensions(k.in[0]) = {ELEM_WITH_METADATA_IN};
+        adf::dimensions(k.in[1]) = {ELEM_WITH_METADATA_IN};
         adf::dimensions(k.out[0]) = {ELEM_WITH_METADATA_OUT};
 
         // specify kernel sources
@@ -80,7 +80,7 @@ class maskGenGraph : public adf::graph {
 
     maskGenGraph() {
         k = kernel::create(maskGen_api);
-        in1  =  input_plio::create( "DataIn2", adf::plio_128_bits, "data/pred_depth_1920x4.txt");
+        in1 = input_plio::create("DataIn2", adf::plio_128_bits, "data/pred_depth_1920x4.txt");
         out1 = output_plio::create("DataOut1", adf::plio_128_bits, "data/output_maskgen.txt");
 
         // create nets to connect kernels and IO ports
@@ -91,7 +91,7 @@ class maskGenGraph : public adf::graph {
         connect<parameter>(thres_f_new, async(k.in[3]));
         connect<parameter>(thres_b_new, async(k.in[4]));
 
-        adf::dimensions(k.in[0])  = {ELEM_WITH_METADATA_IN};
+        adf::dimensions(k.in[0]) = {ELEM_WITH_METADATA_IN};
         adf::dimensions(k.out[0]) = {ELEM_WITH_METADATA_IN};
 
         // specify kernel sources

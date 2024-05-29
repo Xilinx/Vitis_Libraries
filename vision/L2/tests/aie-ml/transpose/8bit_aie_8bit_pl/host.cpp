@@ -44,8 +44,6 @@ void opencv_ref(cv::Mat src, cv::Mat dst) {
     return;
 }
 
-
-
 int main(int argc, char** argv) {
     try {
         if (argc < 3) {
@@ -78,7 +76,7 @@ int main(int argc, char** argv) {
         std::cout << srcImageR.elemSize() << std::endl;
         std::cout << srcImageR.type() << std::endl;
         std::cout << "Image size (end)" << std::endl;
-        int op_width  = srcImageR.rows;
+        int op_width = srcImageR.rows;
         int op_height = srcImageR.cols;
 
         //////////////////////////////////////////
@@ -96,31 +94,31 @@ int main(int argc, char** argv) {
 
         // Load image
         void* srcData = nullptr;
-	    xrt::bo src_hndl = xrt::bo(xF::gpDhdl, (srcImageR.total() * srcImageR.elemSize()),0,0);
-	    srcData = src_hndl.map();
+        xrt::bo src_hndl = xrt::bo(xF::gpDhdl, (srcImageR.total() * srcImageR.elemSize()), 0, 0);
+        srcData = src_hndl.map();
         memcpy(srcData, srcImageR.data, (srcImageR.total() * srcImageR.elemSize()));
 
         // Allocate output buffer
         void* dstData = nullptr;
-	    xrt::bo *ptr_dstHndl = new xrt::bo(xF::gpDhdl, (op_height * op_width * srcImageR.elemSize()),0,0);
-	    dstData = ptr_dstHndl->map();
+        xrt::bo* ptr_dstHndl = new xrt::bo(xF::gpDhdl, (op_height * op_width * srcImageR.elemSize()), 0, 0);
+        dstData = ptr_dstHndl->map();
         cv::Mat dst(op_height, op_width, CV_8UC1, dstData);
 
         xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT, TILE_WIDTH, 16> tiler(0, 0);
         xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_WIDTH, TILE_HEIGHT, 16> stitcher;
 
-		#if !__X86__
-		    std::cout << "Graph init. This does nothing because CDO in boot PDI "
-                         "already configures AIE.\n";
-		    auto gHndl = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "tr");
-		    std::cout << "XRT graph opened" << std::endl;
-		    gHndl.reset();
-		#endif
+#if !__X86_DEVICE__
+        std::cout << "Graph init. This does nothing because CDO in boot PDI "
+                     "already configures AIE.\n";
+        auto gHndl = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "tr");
+        std::cout << "XRT graph opened" << std::endl;
+        gHndl.reset();
+#endif
 
         START_TIMER
         tiler.compute_metadata(srcImageR.size());
         STOP_TIMER("Meta data compute time")
-        
+
         gHndl.update("tr.k.in[2]", op_width);
 
         std::chrono::microseconds tt(0);
@@ -130,11 +128,11 @@ int main(int argc, char** argv) {
             START_TIMER
             auto tiles_sz = tiler.host2aie_nb(&src_hndl, srcImageR.size());
             stitcher.aie2host_nb(ptr_dstHndl, dst.size(), tiles_sz);
-			#if !__X86__
-                std::cout << "Graph running for " << (tiles_sz[0] * tiles_sz[1]) << " iterations.\n";
-                gHndl.run(tiles_sz[0] * tiles_sz[1]);
-                gHndl.wait();
-			#endif
+#if !__X86_DEVICE__
+            std::cout << "Graph running for " << (tiles_sz[0] * tiles_sz[1]) << " iterations.\n";
+            gHndl.run(tiles_sz[0] * tiles_sz[1]);
+            gHndl.wait();
+#endif
             tiler.wait();
             stitcher.wait();
             STOP_TIMER("resize function")
@@ -150,7 +148,6 @@ int main(int argc, char** argv) {
             cv::imwrite("aie.png", dst);
             cv::imwrite("diff.png", diff);
 
-
             float err_per;
             analyzeDiff(diff, 1, err_per);
             if (err_per > 0) {
@@ -165,9 +162,9 @@ int main(int argc, char** argv) {
         std::cout << "Average frames per second : " << (((float)1000000 / (float)tt.count()) * (float)iterations)
                   << " fps" << std::endl;
 
-		#if !__X86__
-		gHndl.end(0);
-		#endif
+#if !__X86_DEVICE__
+        gHndl.end(0);
+#endif
 
         return 0;
 

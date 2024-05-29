@@ -96,15 +96,15 @@ int main(int argc, char** argv) {
         xrt::bo src_hndl2 = xrt::bo(xF::gpDhdl, (srcImage2.total() * srcImage2.elemSize()), 0, 0);
         std::cout << "image xrtBufferHandle done.\n";
 
-        srcData1 =  src_hndl1.map();
-        srcData2 =  src_hndl2.map();
+        srcData1 = src_hndl1.map();
+        srcData2 = src_hndl2.map();
         memcpy(srcData1, srcImage1.data, (srcImage1.total() * srcImage1.elemSize()));
         memcpy(srcData2, srcImage2.data, (srcImage2.total() * srcImage2.elemSize()));
         std::cout << "memcpy  done.\n";
 
         // Allocate output buffer
         void* dstData = nullptr;
-        xrt::bo *ptr_dstHndl = new xrt::bo(xF::gpDhdl, (op_height * op_width *2), 0, 0); // '2' for unsigned short type
+        xrt::bo* ptr_dstHndl = new xrt::bo(xF::gpDhdl, (op_height * op_width * 2), 0, 0); // '2' for unsigned short type
         dstData = ptr_dstHndl->map();
         cv::Mat dst(op_height, op_width, CV_16UC1, dstData);
 
@@ -112,17 +112,16 @@ int main(int argc, char** argv) {
         xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT, TILE_WIDTH, VECTORIZATION_FACTOR> tiler2(0, 0);
         xF::xfcvDataMovers<xF::STITCHER, uint16_t, TILE_HEIGHT, TILE_WIDTH, VECTORIZATION_FACTOR> stitcher;
 
-
-	#if !__X86_DEVICE__
+#if !__X86_DEVICE__
         std::cout << "Graph init. This does nothing because CDO in boot PDI "
                      "already configures AIE.\n";
         auto gHndl = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "accumw_graph");
-	std::cout << "XRT graph opened" << std::endl;
-	gHndl.reset();
-	std::cout << "Graph reset done" << std::endl;
+        std::cout << "XRT graph opened" << std::endl;
+        gHndl.reset();
+        std::cout << "Graph reset done" << std::endl;
         gHndl.update("accumw_graph.k1.in[2]", alpha);
 
-	#endif
+#endif
 
         START_TIMER
         tiler1.compute_metadata(srcImage1.size());
@@ -134,11 +133,11 @@ int main(int argc, char** argv) {
         auto tiles_sz = tiler1.host2aie_nb(&src_hndl1, srcImage1.size());
         tiler2.host2aie_nb(&src_hndl2, srcImage2.size());
         stitcher.aie2host_nb(ptr_dstHndl, dst.size(), tiles_sz);
-        #if !__X86_DEVICE__
+#if !__X86_DEVICE__
         std::cout << "Graph running for " << (tiles_sz[0] * tiles_sz[1]) << " iterations.\n";
         gHndl.run(tiles_sz[0] * tiles_sz[1]);
         gHndl.wait();
-	#endif
+#endif
 
         tiler1.wait();
         tiler2.wait();
@@ -156,8 +155,8 @@ int main(int argc, char** argv) {
         cv::imwrite("ref.jpg", dstRefImage);
         cv::imwrite("aie.jpg", dst);
         cv::imwrite("aie_png.png", dst);
- 
-       cv::imwrite("diff.jpg", diff);
+
+        cv::imwrite("diff.jpg", diff);
 
         float err_per;
         analyzeDiff(diff, 1, err_per);
@@ -165,10 +164,10 @@ int main(int argc, char** argv) {
             std::cerr << "Test failed" << std::endl;
             exit(-1);
         }
-        //}
-        #if !__X86_DEVICE__
-	gHndl.end(0);
-	#endif
+//}
+#if !__X86_DEVICE__
+        gHndl.end(0);
+#endif
 
         std::cout << "Test passed" << std::endl;
         return 0;

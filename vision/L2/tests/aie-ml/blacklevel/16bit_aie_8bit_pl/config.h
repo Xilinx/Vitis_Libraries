@@ -31,6 +31,6 @@ static constexpr int TILE_WINDOW_SIZE = ((TILE_ELEMENTS * sizeof(DATA_TYPE)) + x
 /* Graph specific configuration */
 static constexpr int VECTORIZATION_FACTOR = 32;
 
-static constexpr int __X86__ = 0;
+static constexpr int __X86_DEVICE__ = 0;
 
 #endif //__CONFIG_H_

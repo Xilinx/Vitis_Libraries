@@ -28,9 +28,11 @@ New Features and Functions
 **PL additions/enhancements**:
 	
 	• Updates:
-		• Updated ISP Pipeline example in L1 to a new format
+		• Updated ISP Pipeline example in L1 to support runtime reconfiguration
 		• Added ISP Mono example in L1
-		• Other minor bug fixes.
+		• Updated runtime configurable support to color-correction-matrix function
+		• Updated bayer-pattern as runtime parameter for demosaicing, gaincontrol functions
+		• Added green-gain as runtime parameter for gaincontrol function
 		
 	• Lib Infra Changes:
 		
@@ -39,9 +41,32 @@ New Features and Functions
 **AIE additions/enhancements:** :
 
 	• New Functions:
-		• Added 15 new AIE-ML functions targeting versal devices	
+		• Added 22 new AIE-ML functions targeting Versal devices:
+			• AccumulateWeighted
+			• Blacklevel
+    			• Demosaic
+    			• Denorm_resize
+    			• Denormalize		
+    			• Filter2D
+    			• Gain Control
+    			• Hybrid ISP		
+			• Mask Generation
+    			• Mask Generation Tracking
+    			• Normalize
+    			• NMS
+    			• PixelWise Select
+    			• Resize
+    			• Resize Nomalize
+    			• RGBA2GRAY
+    			• RGBA2YUV
+    			• Transpose
+    			• TopK
+    			• Threshold		
+    			• YUV2RGBA
+    			• YUY2-Filter2d	
 	• Updates:
 		• Minor bug fixes
+		• Removed AIE1 functions
 
 .. _known-issues:
 
@@ -51,24 +76,3 @@ Known issues
 	• AMD Vitis™ GUI projects on RHEL83 and CEntOS82 may fail because of a lib conflict in the LD_LIBRARY_PATH setting. You need to remove ${env_var:LD_LIBRARY_PATH} from the project environment settings for the function to build successfully.
 	• rgbir2bayer, isppipeline_rgbir PL functions are not supplied with input images.
 	• lkdensepyroptflow fails to meet timing when URAM is enabled.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

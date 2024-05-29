@@ -28,7 +28,6 @@ THIS COPYRIGHT NOTICE AND DISCLAIMER MUST BE RETAINED AS PART OF THIS FILE AT AL
 #ifndef __AIE_NMS_NON_AA_
 #define __AIE_NMS_NON_AA_
 
-
 #include <adf.h>
 #include <aie_api/aie.hpp>
 #include <aie_api/utils.hpp>
@@ -196,7 +195,6 @@ __attribute__((noinline)) void rotateCoordImpl(
 
             output_vec = ::aie::add(c_y_i32, ::aie::sub(y_temp, x_temp));
             ::aie::store_unaligned_v(rc_ptr[1][3] + i * VEC_FACTOR, output_vec);
-
         }
 }
 
@@ -294,14 +292,14 @@ __attribute__((noinline)) void findInnessImpl(bfloat16 refBox_x[4][116],
                     ::aie::vector<bfloat16, VEC_FACTOR> tar_vec_y =
                         ::aie::load_unaligned_v<VEC_FACTOR>(&tarBox_y[i][load_idx]);
 
-                    ::aie::vector<bfloat16, VEC_FACTOR> cp1 =
-                        crossProduct<VEC_FACTOR>(ref_vec_x[0], ref_vec_y[0], ref_vec_x[1], ref_vec_y[1], tar_vec_x, tar_vec_y);
-                    ::aie::vector<bfloat16, VEC_FACTOR> cp2 =
-                        crossProduct<VEC_FACTOR>(ref_vec_x[1], ref_vec_y[1], ref_vec_x[2], ref_vec_y[2], tar_vec_x, tar_vec_y);
-                    ::aie::vector<bfloat16, VEC_FACTOR> cp3 =
-                        crossProduct<VEC_FACTOR>(ref_vec_x[2], ref_vec_y[2], ref_vec_x[3], ref_vec_y[3], tar_vec_x, tar_vec_y);
-                    ::aie::vector<bfloat16, VEC_FACTOR> cp4 =
-                        crossProduct<VEC_FACTOR>(ref_vec_x[3], ref_vec_y[3], ref_vec_x[0], ref_vec_y[0], tar_vec_x, tar_vec_y);
+                    ::aie::vector<bfloat16, VEC_FACTOR> cp1 = crossProduct<VEC_FACTOR>(
+                        ref_vec_x[0], ref_vec_y[0], ref_vec_x[1], ref_vec_y[1], tar_vec_x, tar_vec_y);
+                    ::aie::vector<bfloat16, VEC_FACTOR> cp2 = crossProduct<VEC_FACTOR>(
+                        ref_vec_x[1], ref_vec_y[1], ref_vec_x[2], ref_vec_y[2], tar_vec_x, tar_vec_y);
+                    ::aie::vector<bfloat16, VEC_FACTOR> cp3 = crossProduct<VEC_FACTOR>(
+                        ref_vec_x[2], ref_vec_y[2], ref_vec_x[3], ref_vec_y[3], tar_vec_x, tar_vec_y);
+                    ::aie::vector<bfloat16, VEC_FACTOR> cp4 = crossProduct<VEC_FACTOR>(
+                        ref_vec_x[3], ref_vec_y[3], ref_vec_x[0], ref_vec_y[0], tar_vec_x, tar_vec_y);
 
                     bfloat16 zero_val = 0;
 
@@ -424,8 +422,8 @@ __attribute__((noinline)) void findCrossImpl(bfloat16 refBox_x[4][116],
  * atan2_runImpl
  * ********************************************************/
 template <int NO_COEFFS, int VEC_FAC_SORT>
-__attribute__((always_inline))::aie::vector<bfloat16, VEC_FAC_SORT> atan2Impl(::aie::vector<bfloat16, VEC_FAC_SORT> x1,
-                                                                             ::aie::vector<bfloat16, VEC_FAC_SORT> y1) {
+__attribute__((always_inline))::aie::vector<bfloat16, VEC_FAC_SORT> atan2Impl(
+    ::aie::vector<bfloat16, VEC_FAC_SORT> x1, ::aie::vector<bfloat16, VEC_FAC_SORT> y1) {
     // Load input
     ::aie::vector<bfloat16, VEC_FAC_SORT> z1, z1_sq, z1_inv, z1_inv_sq, vacc, vacc_inv, vcoeff;
     ::aie::accum<accfloat, VEC_FAC_SORT> acc, acc_inv;
@@ -482,7 +480,6 @@ __attribute__((always_inline))::aie::vector<bfloat16, VEC_FAC_SORT> atan2Impl(::
 
     return vacc;
 }
-
 
 /**********************************************************
  * SortVertex
@@ -552,8 +549,7 @@ __attribute__((noinline)) void AopAndIouImpl(int start_index, uint8_t* box_valid
                 ::aie::vector<bfloat16, VEC_FACTOR> prev_x, curr_x;
                 ::aie::vector<bfloat16, VEC_FACTOR> prev_y, curr_y;
                 ::aie::accum<accfloat, VEC_FACTOR> acc_area;
-                acc_area =
-                    ::aie::sub(acc_area, acc_area); // TODO: init accumulator to zero
+                acc_area = ::aie::sub(acc_area, acc_area); // TODO: init accumulator to zero
 
                 prev_x = ::aie::load_unaligned_v<VEC_FACTOR>((bfloat16*)polygon_vertex[0][7] + load_idx);
                 prev_y = ::aie::load_unaligned_v<VEC_FACTOR>((bfloat16*)polygon_vertex[1][7] + load_idx);
@@ -605,15 +601,19 @@ __attribute__((noinline)) void AopAndIouImpl(int start_index, uint8_t* box_valid
 /**********************************************************
  * nmsNonAA
  * ********************************************************/
-template <int _N, int IN_TENSOR_LENGTH, int SUB_TENSOR_LENGTH, int IN_VALID_LENGTH, int OUT_VALID_LENGTH, int VEC_FACTOR>
+template <int _N,
+          int IN_TENSOR_LENGTH,
+          int SUB_TENSOR_LENGTH,
+          int IN_VALID_LENGTH,
+          int OUT_VALID_LENGTH,
+          int VEC_FACTOR>
 void nmsNonAA(adf::input_buffer<float, adf::extents<IN_TENSOR_LENGTH> >& __restrict input,
-               adf::input_buffer<uint8_t, adf::extents<IN_VALID_LENGTH> >& __restrict input_flag,
-               adf::output_buffer<uint8_t, adf::extents<OUT_VALID_LENGTH> >& __restrict output_flag) {
-
-    rotateCoordImpl<IN_TENSOR_LENGTH,SUB_TENSOR_LENGTH,VEC_FACTOR>(input);
+              adf::input_buffer<uint8_t, adf::extents<IN_VALID_LENGTH> >& __restrict input_flag,
+              adf::output_buffer<uint8_t, adf::extents<OUT_VALID_LENGTH> >& __restrict output_flag) {
+    rotateCoordImpl<IN_TENSOR_LENGTH, SUB_TENSOR_LENGTH, VEC_FACTOR>(input);
     uint8_t* restrict box_valid = (uint8_t*)::aie::begin(input_flag);
     uint8_t* restrict out_box_valid = (uint8_t*)::aie::begin(output_flag);
-    for (auto ref_idx = 0u; ref_idx < (_N-1); ref_idx++) { // 100-1
+    for (auto ref_idx = 0u; ref_idx < (_N - 1); ref_idx++) { // 100-1
         if (box_valid[ref_idx] == 1) {
             initMem<_N, VEC_FACTOR>();
             normCoordImpl<_N, VEC_FACTOR>(ref_idx);
@@ -624,9 +624,9 @@ void nmsNonAA(adf::input_buffer<float, adf::extents<IN_TENSOR_LENGTH> >& __restr
             AopAndIouImpl<_N, VEC_FACTOR>(ref_idx, box_valid);
         }
     }
-    
+
     for (auto i = 0; i < _N; i += VEC_FACTOR)
-    	::aie::store_unaligned_v(out_box_valid+i,::aie::load_unaligned_v<VEC_FACTOR>(box_valid+i));
+        ::aie::store_unaligned_v(out_box_valid + i, ::aie::load_unaligned_v<VEC_FACTOR>(box_valid + i));
 }
 
 } // aie
@@ -634,4 +634,3 @@ void nmsNonAA(adf::input_buffer<float, adf::extents<IN_TENSOR_LENGTH> >& __restr
 } // xf
 
 #endif //__AIE_NMS_NON_AA_
- 

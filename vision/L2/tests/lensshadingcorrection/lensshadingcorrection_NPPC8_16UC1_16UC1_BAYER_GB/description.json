@@ -60,10 +60,10 @@
                     "accelerators": [
                         {
                             "name": "lensshading_accel",
-                            "frequency": 150.0
+                            "frequency": 100.0
                         }
                     ],
-                    "frequency": 150.0
+                    "frequency": 100.0
                 }
             ]
         },

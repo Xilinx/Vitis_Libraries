@@ -24,15 +24,18 @@
 namespace xf {
 namespace cv {
 namespace aie {
-template< typename T, int N,typename OUT_T>
-void blackLevelCorrection(const T* restrict img_in,T* restrict img_out,int image_width, int image_height,const uint8_t& black_level,const uint16_t& mul_fact)
-{
-	
+template <typename T, int N, typename OUT_T>
+void blackLevelCorrection(const T* restrict img_in,
+                          T* restrict img_out,
+                          int image_width,
+                          int image_height,
+                          const uint8_t& black_level,
+                          const uint16_t& mul_fact) {
     int32_t const_val = mul_fact * (-black_level);
     ::aie::vector<int32_t, N> blk_val = ::aie::broadcast<int32_t, N>(const_val);
     ::aie::vector<T, N> in_data;
     ::aie::vector<T, N> temp_out1;
-    ::aie::accum<acc32, N> acc; 
+    ::aie::accum<acc32, N> acc;
     ::aie::accum<acc32, N> acc1;
     acc.from_vector(blk_val);
     set_sat();
@@ -47,14 +50,11 @@ void blackLevelCorrection(const T* restrict img_in,T* restrict img_out,int image
                 img_out += N;
             }
         }
-
 }
 void blackLevelCorrection_api(input_window_uint8* img_in,
-                     output_window_uint8* img_out,
-                     const uint8_t& black_level,
-                     const uint16_t& mul_fact) {
-
-
+                              output_window_uint8* img_out,
+                              const uint8_t& black_level,
+                              const uint16_t& mul_fact) {
     uint8_t* img_in_ptr = (uint8_t*)img_in->ptr;
     uint8_t* img_out_ptr = (uint8_t*)img_out->ptr;
 
@@ -66,9 +66,8 @@ void blackLevelCorrection_api(input_window_uint8* img_in,
 
     uint8_t* in_ptr = (uint8_t*)xfGetImgDataPtr(img_in_ptr);
     uint8_t* out_ptr = (uint8_t*)xfGetImgDataPtr(img_out_ptr);
-  
-    blackLevelCorrection<uint8_t, 32, uint8_t>(in_ptr, out_ptr, img_width, img_height, black_level, mul_fact);
 
+    blackLevelCorrection<uint8_t, 32, uint8_t>(in_ptr, out_ptr, img_width, img_height, black_level, mul_fact);
 }
 
 } // aie

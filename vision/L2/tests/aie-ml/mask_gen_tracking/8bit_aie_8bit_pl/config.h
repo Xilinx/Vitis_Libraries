@@ -30,12 +30,12 @@
 // tile dimensions are normally computed by tiler but we need to
 // hardcode these values to set the graph window sizes
 using DATA_TYPE = uint8_t;
-static constexpr int NUM_TILES =  1;
-static constexpr int IMAGE_WIDTH_IN  = 1920;
+static constexpr int NUM_TILES = 1;
+static constexpr int IMAGE_WIDTH_IN = 1920;
 static constexpr int IMAGE_HEIGHT_IN = 1080;
 
 static constexpr int TILE_WIDTH_IN = 480;
-static constexpr int TILE_HEIGHT_IN =  8;
+static constexpr int TILE_HEIGHT_IN = 8;
 
 static constexpr int TILE_WIDTH_OUT = 16;
 static constexpr int TILE_HEIGHT_OUT = 1;
@@ -49,5 +49,5 @@ static constexpr int TILE_ELEMENTS_OUT = (TILE_WIDTH_OUT * TILE_HEIGHT_OUT * CHA
 static constexpr int TILE_WINDOW_SIZE_OUT = (TILE_ELEMENTS_OUT * sizeof(DATA_TYPE)) + xf::cv::aie::METADATA_SIZE;
 static constexpr int ELEM_WITH_METADATA_OUT = TILE_ELEMENTS_OUT + (xf::cv::aie::METADATA_SIZE / sizeof(DATA_TYPE));
 
-static constexpr int __X86__ = 0;
+static constexpr int __X86_DEVICE__ = 0;
 #endif //__CONFIG_H_

@@ -32,15 +32,15 @@ class transposeGraph : public adf::graph {
    public:
     input_plio in1;
     output_plio out1;
-    
+
     port<input> outputStride;
 
     shared_buffer<DATA_TYPE> mtx_in1;
     transposeGraph() {
         k = kernel::create(transpose_api);
-       in1 = input_plio::create("DataIn0", adf::plio_128_bits, "data/input.txt");
+        in1 = input_plio::create("DataIn0", adf::plio_128_bits, "data/input.txt");
 
-       out1 = output_plio::create("DataOut0", adf::plio_128_bits, "data/output.txt");
+        out1 = output_plio::create("DataOut0", adf::plio_128_bits, "data/output.txt");
 
         mtx_in1 = shared_buffer<DATA_TYPE>::create({ELEM_WITH_METADATA}, 1, 2);
         num_buffers(mtx_in1) = 2;
@@ -55,10 +55,11 @@ class transposeGraph : public adf::graph {
 
         connect<>(mtx_in1.out[1], k.in[1]);
         adf::dimensions(k.in[1]) = {ELEM_WITH_METADATA - METADATA_SIZE};
-        read_access(mtx_in1.out[1]) = buffer_descriptor((ELEM_WITH_METADATA - METADATA_SIZE) / 4, METADATA_SIZE/4, {1, TILE_WIDTH*CHANNELS/4, 1 }, {1,TILE_HEIGHT});
+        read_access(mtx_in1.out[1]) = buffer_descriptor((ELEM_WITH_METADATA - METADATA_SIZE) / 4, METADATA_SIZE / 4,
+                                                        {1, TILE_WIDTH * CHANNELS / 4, 1}, {1, TILE_HEIGHT});
 
         connect<>(k.out[0], out1.in[0]);
-        
+
         connect<parameter>(outputStride, async(k.in[2]));
 
         adf::dimensions(k.out[0]) = {ELEM_WITH_METADATA};

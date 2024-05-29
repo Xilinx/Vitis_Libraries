@@ -5,10 +5,11 @@
     ],
     "flow": "system",
     "platform_allowlist": [
-        "vck190",
+        
         "aws-vu9p-f1"
     ],
     "platform_blocklist": [
+        "vck190",
         "u280",
         "u250",
         "zcu104"
@@ -27,44 +28,6 @@
                     ]
                 }
             }
-        },
-        "vck190": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include",
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/lib"
-                    ]
-                },
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
-                }
-            },
-            "containers": [
-                {
-                    "name": "krnl_ispstats",
-                    "accelerators": [
-                        {
-                            "name": "ispstats_accel",
-                            "frequency": 150.0
-                        }
-                    ],
-                    "frequency": 150.0
-                }
-            ]
         }
     },
     "gui": true,

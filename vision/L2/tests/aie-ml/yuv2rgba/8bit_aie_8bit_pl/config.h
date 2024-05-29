@@ -32,7 +32,7 @@ static constexpr int TILE_WINDOW_SIZE_RGBA = TILE_WINDOW_SIZE * 4;
 static constexpr int ELEM_WITH_METADATA_Y = TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / sizeof(DATA_TYPE));
 static constexpr int ELEM_WITH_METADATA_UV = (TILE_ELEMENTS / 2) + (xf::cv::aie::METADATA_SIZE / sizeof(DATA_TYPE));
 static constexpr int ELEM_WITH_METADATA_OUT = (4 * TILE_ELEMENTS) + (xf::cv::aie::METADATA_SIZE / sizeof(DATA_TYPE));
-
+static constexpr int __X86_DEVICE__ = 0;
 /* Graph specific configuration */
 static constexpr int VECTORIZATION_FACTOR = 32;
 

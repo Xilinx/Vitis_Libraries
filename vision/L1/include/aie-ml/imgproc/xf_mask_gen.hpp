@@ -36,9 +36,8 @@ namespace aie {
 
 class MaskGen {
    public:
-
     static uint32_t non_zero_count;
-    static uint32_t sum;           
+    static uint32_t sum;
 
     void runImplMaskGen(T* restrict _pred_depth,
                         T_OUT* restrict _mask_for_editing,
@@ -80,7 +79,6 @@ void MaskGen::MaskGenUtility(T* restrict _pred_depth,
     ::aie::store_v(_mask_for_edit + i, v1);
 }
 
-
 __attribute__((noinline)) void MaskGen::runImplMaskGen(T* restrict _pred_depth,
                                                        T_OUT* restrict _mask_for_editing,
                                                        const T depth_min,
@@ -100,7 +98,6 @@ __attribute__((noinline)) void MaskGen::runImplMaskGen(T* restrict _pred_depth,
             MaskGenUtility(_pred_depth, _mask_for_editing, pd_min, thresh_f_new, thresh_b_new, zeros, ones, i);
         }
 }
-
 
 } // namespace aie
 } // namespace cv

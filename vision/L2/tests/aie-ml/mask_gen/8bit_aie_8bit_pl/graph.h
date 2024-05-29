@@ -39,7 +39,7 @@ class maskGenGraph : public adf::graph {
 
     maskGenGraph() {
         k = kernel::create(maskGen_api);
-        in1  =  input_plio::create( "DataIn0", adf::plio_128_bits, "data/input.txt");
+        in1 = input_plio::create("DataIn0", adf::plio_128_bits, "data/input.txt");
         out1 = output_plio::create("DataOut0", adf::plio_128_bits, "data/output.txt");
 
         // create nets to connect kernels and IO ports
@@ -50,7 +50,7 @@ class maskGenGraph : public adf::graph {
         connect<parameter>(thres_f_new, async(k.in[3]));
         connect<parameter>(thres_b_new, async(k.in[4]));
 
-        adf::dimensions(k.in[0])  = {ELEM_WITH_METADATA};
+        adf::dimensions(k.in[0]) = {ELEM_WITH_METADATA};
         adf::dimensions(k.out[0]) = {ELEM_WITH_METADATA};
         // specify kernel sources
         source(k) = "xf_mask_gen.cc";

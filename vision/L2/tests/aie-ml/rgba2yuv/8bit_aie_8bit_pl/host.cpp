@@ -127,8 +127,8 @@ int main(int argc, char** argv) {
         // Allocate output buffer
         void* dstData1 = nullptr;
         void* dstData2 = nullptr;
-        xrt::bo *dst_hndl1 = new xrt::bo(xF::gpDhdl, (op_height * op_width), 0, 0); // '2' for unsigned short type
-        xrt::bo *dst_hndl2 = new xrt::bo(xF::gpDhdl, (op_height * op_width) / 2, 0, 0); // '2' for unsigned short type
+        xrt::bo* dst_hndl1 = new xrt::bo(xF::gpDhdl, (op_height * op_width), 0, 0);     // '2' for unsigned short type
+        xrt::bo* dst_hndl2 = new xrt::bo(xF::gpDhdl, (op_height * op_width) / 2, 0, 0); // '2' for unsigned short type
 
         dstData1 = dst_hndl1->map();
         dstData2 = dst_hndl2->map();
@@ -142,14 +142,14 @@ int main(int argc, char** argv) {
         std::cout << "Graph init. This does nothing because CDO in boot PDI already configures AIE.\n";
         uint16_t tile_width = TILE_WIDTH;
         uint16_t tile_height = TILE_HEIGHT;
-        #if !__X86__
+#if !__X86_DEVICE__
         auto gHndl = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "mygraph");
         std::cout << "XRT graph opened" << std::endl;
-		gHndl.reset();
-		std::cout << "Graph reset done" << std::endl;
+        gHndl.reset();
+        std::cout << "Graph reset done" << std::endl;
         gHndl.update("mygraph.k1.in[1]", tile_width);
-		gHndl.update("mygraph.k1.in[2]", tile_height);
-		#endif
+        gHndl.update("mygraph.k1.in[2]", tile_height);
+#endif
 
         // mygraph.update(mygraph.tile_width, tile_width);
         // mygraph.update(mygraph.tile_height, tile_height);
@@ -170,14 +170,14 @@ int main(int argc, char** argv) {
             std::cout << "Graph run(" << (tiles_sz[0] * tiles_sz[1]) << ")\n";
 
             START_TIMER
-            #if !__X86__
-			for(int i=0; i< tiles_sz[0] * tiles_sz[1]; i++){
-				std::cout << "Running iteration : " << i << std::endl; 
-				gHndl.run(1);
-				gHndl.wait();
-				std::cout << "Done iteration : " << i << std::endl;
-			}
-            #endif
+#if !__X86_DEVICE__
+            for (int i = 0; i < tiles_sz[0] * tiles_sz[1]; i++) {
+                std::cout << "Running iteration : " << i << std::endl;
+                gHndl.run(1);
+                gHndl.wait();
+                std::cout << "Done iteration : " << i << std::endl;
+            }
+#endif
             STOP_TIMER("Total time to process frame")
 
             std::cout << "Graph run complete\n";
@@ -214,9 +214,9 @@ int main(int argc, char** argv) {
         cv::imwrite("aie2.png", dst2);
         cv::imwrite("diff2.png", diff2);
 
-        #if !__X86__
-		gHndl.end(0);
-		#endif
+#if !__X86_DEVICE__
+        gHndl.end(0);
+#endif
         std::cout << "Test passed" << std::endl;
         std::cout << "Average time to process frame : " << (((float)tt.count() * 0.001) / (float)iterations) << " ms"
                   << std::endl;

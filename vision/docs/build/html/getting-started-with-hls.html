@@ -1,0 +1,922 @@
+﻿
+
+
+<!DOCTYPE HTML>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta content="Vision, Library, Vitis Vision Library, HLS, Getting Started, C-simulation, C-synthesis, co-simulation, cv, Tcl" name="keywords" />
+<meta content="Describes the methodology to create a kernel, corresponding host code and a suitable makefile to compile an Vitis Vision kernel for any of the supported platforms in Vitis." name="description" />
+<meta content="Document" name="xlnxdocumentclass" />
+<meta content="Tutorials" name="xlnxdocumenttype" />
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" href="https://static.cloud.coveo.com/searchui/v2.4382/css/CoveoFullSearch.css"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description"/>
+		<meta name="keywords"/>
+		<meta property="og:title" content=""/>
+		<meta property="og:description"/>
+		<!-- favicon -->
+		<link rel="icon" type="image/vnd.microsoft.icon" href="_static/favicon.ico"/>
+		<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="_static/favicon.ico"/>
+		<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" type="text/css"/>
+
+	<!-- OneTrust Cookies Consent Notice start for xilinx.github.io -->
+<script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js" data-document-language="true" type="text/javascript" charset="UTF-8" data-domain-script="37701bd4-e5c0-4ee3-9329-e7475d0b13a7" ></script>
+<script type="text/javascript">
+function OptanonWrapper() { }
+</script>
+<!-- OneTrust Cookies Consent Notice end for xilinx.github.io -->
+		<!-- Google Tag Manager -->
+	<script type="text/plain" class="optanon-category-C0002">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+	new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+	j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+	'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+	})(window,document,'script','dataLayer','GTM-5RHQV7');</script>
+	<!-- End Google Tag Manager -->
+	
+        <!-- Google Tag Manager -->
+        <noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-5RHQV7" height="0" width="0" style="display:none;visibility:hidden" class="optanon-category-C0002"></iframe></noscript>
+        <!-- End Google Tag Manager -->	
+
+  
+  
+  
+  
+
+  
+      <script type="text/javascript" src="_static/js/jquery.min.js"></script>
+	  <script type="text/javascript" src="_static/js/gtm.js"></script>
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+    <script type="text/javascript" src="_static/js/d3dd8c60ed.js"></script>
+    <script type="text/javascript" src="_static/js/common-ui-all.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="_static/js/CoveoJsSearch.Lazy.min.js"></script>
+    <script type="text/javascript" src="_static/js/linkid.js"></script>
+    <script type="text/javascript" src="_static/js/Searchbox.min.js"></script>
+    <script type="text/javascript" src="_static/js/header-footer.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/common-ui-all.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/header-footer.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/pro.min.css" media="all" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+	</head>
+	<body>
+		<div class="xilinx-bs3"/>
+		<div class="root responsivegrid">
+			<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 aem-Grid--large--16 aem-Grid--xlarge--16 aem-Grid--xxlarge--16 aem-Grid--xxxlarge--16 ">
+ <div class="xilinxExperienceFragments experiencefragment aem-GridColumn aem-GridColumn--default--12">
+
+    
+    
+
+    
+
+
+
+<div class="xf-content-height">
+    
+
+<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+    
+    <div class="header parbase aem-GridColumn aem-GridColumn--default--12"><noindex>
+	<header data-component="header" class="site-header">
+		<nav class="navbar navbar-default">
+			<div class="container-fluid main-nav">
+				<div class="row">
+					<div class="navbar-column col-xs-4 col-sm-5">
+						<ul class="nav navbar-nav hidden-xs">
+							<li>
+									<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+								</li>
+							<li>
+									<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+								</li>
+							<li>
+									<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+								</li>
+							</ul>
+							
+						<ul class="nav navbar-nav hidden-sm hidden-md hidden-lg">
+							<li>
+									<button data-target="#header-container-0" data-function="toggle">Solutions</button>
+								</li>
+							<li>
+									<button data-target="#header-container-1" data-function="toggle">Products</button>
+								</li>
+							<li>
+									<button data-target="#header-container-2" data-function="toggle">Company</button>
+								</li>
+							</ul>
+							
+						<div id="header-container-0" class="menu-container">
+								<div class="navbar-nav-container">
+									<ul class="nav navbar-nav">
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+												</li>
+										</ul>
+									<button data-function="close-menu">
+										<span class="fal fa-times" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							<div id="header-container-1" class="menu-container">
+								<div class="navbar-nav-container">
+									<ul class="nav navbar-nav">
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+												</li>
+										</ul>
+									<button data-function="close-menu">
+										<span class="fal fa-times" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							<div id="header-container-2" class="menu-container">
+								<div class="navbar-nav-container">
+									<ul class="nav navbar-nav">
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/applications.html&#39;;">Solutions</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/products/silicon-devices.html&#39;;">Products</button>
+												</li>
+										<li>
+												<button onclick="window.location.href=&#39;https://www.xilinx.com/about/company-overview.html&#39;;">Company</button>
+												</li>
+										</ul>
+									<button data-function="close-menu">
+										<span class="fal fa-times" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							</div>
+					<div class="logo-column col-xs-4 col-sm-2">
+						<div class="logo">
+							<a target="_blank" href="https://www.xilinx.com/">
+								<img src="https://github.com/Xilinx/Image-Collateral/blob/main/xilinx-header-logo.svg?raw=true" title="Xilinx Inc"/>
+							</a>
+						</div>
+					</div>
+
+				</div>
+			</div>
+			</nav></header></noindex></div>
+		
+	
+</div>
+
+    
+</div>
+</div>
+
+<div class="calloutBanner parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16"><div class="callout-banner">
+    Xilinx is now a part of <a target="_blank" href="https://www.amd.com/en/corporate/xilinx-acquisition">AMD</a> |  <a target="_blank" href="https://www.amd.com/en/corporate/privacy">Learn More</a>
+</div>
+</div>
+				<div class="parsys aem-GridColumn--xxxlarge--none aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+						<div class="container-fluid">
+							<div class="row">
+							<div class="col-xs-12">
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Vitis Vision Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2024.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+      
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+            
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Vitis Vision Library User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html#getting-started-with-vitis-vision">Getting Started with Vitis Vision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html#using-the-vitis-vision-library">Using the Vitis Vision Library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html#getting-started-with-hls">Getting Started with HLS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html#migrating-the-hls-video-library-to-vitis-vision">Migrating the HLS Video Library to Vitis vision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html#design-examples-using-the-vitis-vision-library">Design Examples Using the Vitis Vision Library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html#id7">Defect Detection Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html#isp-all-in-one-adas-pipeline">ISP all_in_one_adas Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html#isp-all-in-one-pipeline">ISP all_in_one Pipeline:</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Vitis Vision AIE Library User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview-aie.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview-aie.html#getting-started-with-vitis-vision-aie">Getting Started with Vitis Vision AIE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview-aie.html#vitis-aie-design-methodology">Vitis AIE Design Methodology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview-aie.html#evaluating-the-functionality">Evaluating the Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview-aie.html#design-example-using-vitis-vision-aie-library">Design example Using Vitis Vision AIE Library</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Vitis Vision Library API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html#vitis-vision-library-functions">Vitis Vision Library Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html#id45">Degamma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html#lens-shading-correction">Lens Shading Correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html#rgbir-to-standard-bayer-format">RGBIR  to Standard Bayer Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html#id83">Rotate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html#tvl1-optical-flow">TVL1 Optical Flow</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Vitis Vision AIE Library API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference-aie.html">Vitis Vision AIE Library API Reference</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Benchmark.html">Benchmark</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Release Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="releasenotesxfopencv.html">Release Notes</a></li>
+</ul>
+
+            
+			
+			<p class="caption"><span class="caption-text">This Page</span></p>
+				<ul class="current">
+				  <li class="toctree-l1"><a href="_sources/getting-started-with-hls.rst.txt"
+						rel="nofollow">Show Source</a></li>
+				</ul>
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Vitis Vision Library</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Getting Started with HLS</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/getting-started-with-hls.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="getting-started-with-hls">
+<h1>Getting Started with HLS<a class="headerlink" href="#getting-started-with-hls" title="Permalink to this headline">¶</a></h1>
+<p>The Vitis vision library can be used to build applications in Vitis HLS.
+This section of the document provides steps on how to run a single library component through
+the Vitis HLS 2023.1 flow which includes, C-simulation,
+C-synthesis, C/RTL co-simulation, and exporting the RTL as an IP.</p>
+<p>All the functions in the L1 folder of the Vitis Vision library can be built through Vitis HLS flow
+in the following two modes:</p>
+<ol class="arabic simple">
+<li>Command line Mode</li>
+<li>GUI Mode</li>
+</ol>
+<p class="rubric">Command Line Mode</p>
+<p>Each configuration of all functions in L1 are provided with a Makefile which can be run to create
+an HLS project.</p>
+<p>Open a terminal and run the following commands to set the environment and build:</p>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span>source &lt; path-to-Vitis-installation-directory &gt;/settings64.sh
+
+source &lt; part-to-XRT-installation-directory &gt;/setup.sh
+
+export PLATFORM=&lt; path-to-platform-directory &gt;/&lt; platform &gt;.xpfm
+
+export OPENCV_INCLUDE=&lt; path-to-opencv-include-folder &gt;
+
+export OPENCV_LIB=&lt; path-to-opencv-lib-folder &gt;
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:&lt; path-to-opencv-lib-folder &gt;
+
+make run TARGET=&lt; csim / csynth / cosim/ vivado-impl &gt;
+</pre></div>
+</div>
+<p class="rubric">GUI Mode</p>
+<p>Use the following steps to operate the HLS Standalone Mode using GUI:</p>
+<ol class="arabic simple">
+<li>Open a terminal and update the LD_LIBRARY_PATH to point to OpenCV lib folder.</li>
+<li>From the same terminal, open Vitis HLS in GUI mode and create a new project</li>
+<li>Specify the name of the project. For example - Dilation.</li>
+<li>Click Browse to enter a workspace folder used to store your projects.</li>
+<li>Click Next.</li>
+<li>Under the source files section, add the accel.cpp file which can be
+found in the examples folder. Also, fill the top function name (here
+it is dilation_accel).</li>
+<li>Click Next.</li>
+<li>Under the test bench section add tb.cpp.</li>
+<li>Click Next.</li>
+<li>Select the clock period to the required value (10ns in example).</li>
+<li>Select the suitable part. For example, <code class="docutils literal notranslate"><span class="pre">xczu9eg-ffvb1156-2-i</span></code>.</li>
+<li>Click Finish.</li>
+<li>Right click on the created project and select Project Settings.</li>
+<li>In the opened tab, select Simulation.</li>
+<li>Files added under the Test Bench section will be displayed. Select a
+file and click Edit CFLAGS.</li>
+<li>Enter
+<code class="docutils literal notranslate"><span class="pre">-I&lt;path-to-L1-include-directory&gt;</span> <span class="pre">-std=c++0x</span>
+<span class="pre">-I&lt;path-to-opencv-include-folder&gt;</span></code>.</li>
+<li>In the Linker Flags section, enter the opencv libs and path to the opencv libs
+<code class="docutils literal notranslate"><span class="pre">-L&lt;path-to-opencv-lib-folder&gt;</span> <span class="pre">-lopencv_core</span> <span class="pre">-lopencv_imgcodecs</span> <span class="pre">-lopencv_imgproc</span></code></li>
+<li>Select Synthesis and repeat the above step for all the displayed
+files. Do not add opencv include path here.</li>
+<li>Click OK.</li>
+<li>Run the C Simulation, select Clean Build and specify the required
+input arguments.</li>
+<li>Click OK.</li>
+<li>All the generated output files/images will be present in the
+solution1-&gt;csim-&gt;build.</li>
+<li>Run C synthesis.</li>
+<li>Run co-simulation by specifying the proper input arguments.</li>
+<li>The status of co-simulation can be observed on the console.</li>
+</ol>
+<p class="rubric">Constraints for Co-simulation</p>
+<p>There are a few limitations in performing co-simulation of the Vitis vision
+functions. They are:</p>
+<ol class="arabic simple">
+<li>Functions with multiple accelerators are not supported.</li>
+<li>Compiler and simulator are default in HLS (gcc, xsim).</li>
+<li>Since HLS does not support multi-kernel integration, the current flow
+also does not support multi-kernel integration. Hence, the Pyramidal
+Optical flow and Canny Edge Detection functions and examples are not
+supported in this flow.</li>
+<li>The maximum image size (HEIGHT and WIDTH) set in the <code class="docutils literal notranslate"><span class="pre">config.h</span></code> file should
+be equal to the actual input image size.</li>
+</ol>
+<div class="section" id="axi-video-interface-functions">
+<h2>AXI Video Interface Functions<a class="headerlink" href="#axi-video-interface-functions" title="Permalink to this headline">¶</a></h2>
+<p>Vitis vision has functions that will transform the xf::cv::Mat into an AMD
+Video Streaming interface and vice-versa. <code class="docutils literal notranslate"><span class="pre">xf::cv::AXIvideo2xfMat()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">xf::cv::xfMat2AXIVideo()</span></code> act as video interfaces to the IPs of the
+Vitis vision functions in the Vivado® IP integrator.
+<code class="docutils literal notranslate"><span class="pre">cvMat2AXIvideoxf&lt;NPC&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">AXIvideo2cvMatxf&lt;NPC&gt;</span></code>
+are used on the host side.</p>
+<p>An example function, <code class="docutils literal notranslate"><span class="pre">axiconv</span></code>, depicting the usage of these functions
+is provided in the L1/examples directory.</p>
+<table border="1" class="docutils" id="id1">
+<caption><span class="caption-text">Table. AXI Video Interface Functions</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="41%" />
+<col width="59%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Video Library Function</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>AXIvideo2xfMat</td>
+<td>Converts data from an AXI4 video stream
+representation to xf::cv::Mat format.</td>
+</tr>
+<tr class="row-odd"><td>xfMat2AXIvideo</td>
+<td>Converts data stored as xf::cv::Mat
+format to an AXI4 video stream.</td>
+</tr>
+<tr class="row-even"><td>cvMat2AXIvideoxf</td>
+<td>Converts data stored as cv::Mat format
+to an AXI4 video stream</td>
+</tr>
+<tr class="row-odd"><td>AXIvideo2cvMatxf</td>
+<td>Converts data from an AXI4 video stream
+representation to cv::Mat format.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="axivideo2xfmat">
+<h3>AXIvideo2xfMat<a class="headerlink" href="#axivideo2xfmat" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">AXIvideo2xfMat</span></code> function receives a sequence of images using the
+AXI4 Streaming Video and produces an <code class="docutils literal notranslate"><span class="pre">xf::cv::Mat</span></code> representation.</p>
+<p class="rubric">API Syntax</p>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="o">&lt;</span><span class="nb">int</span> <span class="n">W</span><span class="p">,</span><span class="nb">int</span> <span class="n">T</span><span class="p">,</span><span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span><span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span><span class="nb">int</span> <span class="n">XFCVDEPTH</span> <span class="o">=</span> <span class="n">_XFCVDEPTH_DEFAULT</span><span class="o">&gt;</span>
+<span class="nb">int</span> <span class="n">AXIvideo2xfMat</span><span class="p">(</span><span class="n">hls</span><span class="p">::</span><span class="n">stream</span><span class="o">&lt;</span> <span class="n">ap_axiu</span><span class="o">&lt;</span><span class="n">W</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;</span> <span class="o">&gt;&amp;</span> <span class="n">AXI_video_strm</span><span class="p">,</span> <span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span> <span class="n">COLS</span><span class="p">,</span> <span class="n">NPC</span><span class="p">,</span> <span class="n">XFCVDEPTH</span><span class="o">&gt;&amp;</span> <span class="n">img</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Parameter Descriptions</p>
+<p>The following table describes the template and the function parameters.</p>
+<table border="1" class="docutils" id="id2">
+<caption><span class="caption-text">Table: AXIvideo2cvMatxf Function Parameter Description</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Parameter</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>W</td>
+<td>Data width of AXI4-Stream.
+Recommended value is pixel depth.</td>
+</tr>
+<tr class="row-odd"><td>T</td>
+<td>Pixel type of the image. 1
+channel (XF_8UC1). Data width of
+pixel must be no greater than W.</td>
+</tr>
+<tr class="row-even"><td>ROWS</td>
+<td>Maximum height of input image.</td>
+</tr>
+<tr class="row-odd"><td>COLS</td>
+<td>Maximum width of input image.</td>
+</tr>
+<tr class="row-even"><td>NPC</td>
+<td>Number of pixels to be processed
+per cycle. Possible options are
+XF_NPPC1 and XF_NPPC8 for 1-pixel
+and 8-pixel operations
+respectively.</td>
+</tr>
+<tr class="row-odd"><td>XFCVDEPTH</td>
+<td>Depth of the Input image.</td>
+</tr>
+<tr class="row-even"><td>AXI_video_strm</td>
+<td>HLS stream of ap_axiu (axi
+protocol) type.</td>
+</tr>
+<tr class="row-odd"><td>img</td>
+<td>Input image.</td>
+</tr>
+</tbody>
+</table>
+<p>This function will return bit error of ERROR_IO_EOL_EARLY( 1 ) or
+ERROR_IO_EOL_LATE( 2 ) to indicate an unexpected line length, by
+detecting TLAST input.</p>
+<p>For more information about AXI interface see UG761.</p>
+</div>
+<div class="section" id="xfmat2axivideo">
+<h3>xfMat2AXIvideo<a class="headerlink" href="#xfmat2axivideo" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Mat2AXI</span></code> video function receives an xf::cv::Mat representation of a
+sequence of images and encodes it correctly using the AXI4 Streaming
+video protocol.</p>
+<p class="rubric">API Syntax</p>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="o">&lt;</span><span class="nb">int</span> <span class="n">W</span><span class="p">,</span> <span class="nb">int</span> <span class="n">T</span><span class="p">,</span> <span class="nb">int</span> <span class="n">ROWS</span><span class="p">,</span> <span class="nb">int</span> <span class="n">COLS</span><span class="p">,</span><span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span><span class="nb">int</span> <span class="n">XFCVDEPTH</span> <span class="o">=</span> <span class="n">_XFCVDEPTH_DEFAULT</span><span class="o">&gt;</span>
+<span class="nb">int</span> <span class="n">xfMat2AXIvideo</span><span class="p">(</span><span class="n">xf</span><span class="p">::</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="n">ROWS</span><span class="p">,</span> <span class="n">COLS</span><span class="p">,</span><span class="n">NPC</span><span class="p">,</span> <span class="n">XFCVDEPTH</span><span class="o">&gt;&amp;</span> <span class="n">img</span><span class="p">,</span><span class="n">hls</span><span class="p">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">ap_axiu</span><span class="o">&lt;</span><span class="n">W</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;</span> <span class="o">&gt;&amp;</span> <span class="n">AXI_video_strm</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Parameter Descriptions</p>
+<p>The following table describes the template and the function parameters.</p>
+<table border="1" class="docutils" id="id3">
+<caption><span class="caption-text">Table. xfMat2AXIvideo Function Parameter Description</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Parameter</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>W</td>
+<td>Data width of AXI4-Stream.
+Recommended value is pixel depth.</td>
+</tr>
+<tr class="row-odd"><td>T</td>
+<td>Pixel type of the image. 1
+channel (XF_8UC1). Data width of
+pixel must be no greater than W.</td>
+</tr>
+<tr class="row-even"><td>ROWS</td>
+<td>Maximum height of input image.</td>
+</tr>
+<tr class="row-odd"><td>COLS</td>
+<td>Maximum width of input image.</td>
+</tr>
+<tr class="row-even"><td>NPC</td>
+<td>Number of pixels to be processed
+per cycle. Possible options are
+XF_NPPC1 and XF_NPPC8 for 1-pixel
+and 8-pixel operations
+respectively.</td>
+</tr>
+<tr class="row-odd"><td>XFCVDEPTH</td>
+<td>Depth of the Output image.</td>
+</tr>
+<tr class="row-even"><td>AXI_video_strm</td>
+<td>HLS stream of ap_axiu (axi
+protocol) type.</td>
+</tr>
+<tr class="row-odd"><td>img</td>
+<td>Output image.</td>
+</tr>
+</tbody>
+</table>
+<p>This function returns the value 0.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The NPC values across all the functions in a data flow must follow the same value. If there is mismatch it throws a compilation error in HLS.</p>
+</div>
+</div>
+<div class="section" id="cvmat2axivideoxf">
+<h3>cvMat2AXIvideoxf<a class="headerlink" href="#cvmat2axivideoxf" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">cvMat2Axivideoxf</span></code> function receives image as cv::Mat
+representation and produces the AXI4 streaming video of image.</p>
+<p class="rubric">API Syntax</p>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="o">&lt;</span><span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span><span class="nb">int</span> <span class="n">W</span><span class="o">&gt;</span>
+<span class="n">void</span> <span class="n">cvMat2AXIvideoxf</span><span class="p">(</span><span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&amp;</span> <span class="n">cv_mat</span><span class="p">,</span> <span class="n">hls</span><span class="p">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">ap_axiu</span><span class="o">&lt;</span><span class="n">W</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;</span> <span class="o">&gt;&amp;</span> <span class="n">AXI_video_strm</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Parameter Descriptions</p>
+<p>The following table describes the template and the function parameters.</p>
+<table border="1" class="docutils" id="id4">
+<caption><span class="caption-text">Table: AXIvideo2cvMatxf Function Parameter Description</span><a class="headerlink" href="#id4" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Parameter</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>W</td>
+<td>Data width of AXI4-Stream.
+Recommended value is pixel depth.</td>
+</tr>
+<tr class="row-odd"><td>NPC</td>
+<td>Number of pixels to be processed
+per cycle. Possible options are
+XF_NPPC1 and XF_NPPC8 for 1-pixel
+and 8-pixel operations
+respectively.</td>
+</tr>
+<tr class="row-even"><td>AXI_video_strm</td>
+<td>HLS stream of ap_axiu (axi
+protocol) type.</td>
+</tr>
+<tr class="row-odd"><td>cv_mat</td>
+<td>Input image.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="axivideo2cvmatxf">
+<h3>AXIvideo2cvMatxf<a class="headerlink" href="#axivideo2cvmatxf" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Axivideo2cvMatxf</span></code> function receives image as AXI4 streaming video
+and produces the cv::Mat representation of image</p>
+<p class="rubric">API Syntax</p>
+<div class="code c highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="o">&lt;</span><span class="nb">int</span> <span class="n">NPC</span><span class="p">,</span><span class="nb">int</span> <span class="n">W</span><span class="o">&gt;</span>
+<span class="n">void</span> <span class="n">AXIvideo2cvMatxf</span><span class="p">(</span><span class="n">hls</span><span class="p">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">ap_axiu</span><span class="o">&lt;</span><span class="n">W</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;</span> <span class="o">&gt;&amp;</span> <span class="n">AXI_video_strm</span><span class="p">,</span> <span class="n">cv</span><span class="p">::</span><span class="n">Mat</span><span class="o">&amp;</span> <span class="n">cv_mat</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Parameter Descriptions</p>
+<p>The following table describes the template and the function parameters.</p>
+<table border="1" class="docutils" id="id5">
+<caption><span class="caption-text">Table: AXIvideo2cvMatxf Function Parameter Description</span><a class="headerlink" href="#id5" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Parameter</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>W</td>
+<td>Data width of AXI4-Stream.
+Recommended value is pixel depth.</td>
+</tr>
+<tr class="row-odd"><td>NPC</td>
+<td>Number of pixels to be processed
+per cycle. Possible options are
+XF_NPPC1 and XF_NPPC8 for 1-pixel
+and 8-pixel operations
+respectively.</td>
+</tr>
+<tr class="row-even"><td>AXI_video_strm</td>
+<td>HLS stream of ap_axiu (axi
+protocol) type.</td>
+</tr>
+<tr class="row-odd"><td>cv_mat</td>
+<td>Output image.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+<!-- Atalwar: Moved the footer code to layout.html to resolve conflict with the Xilinx template -->
+</footer>
+
+        </div>
+      </div>
+
+
+	  <!-- Sphinx Page Footer block -->
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="copyright">
+    <p class="footerinfo">
+      <span class="lastupdated">
+        Last updated on May 28, 2024.
+      </span>
+
+    </p>
+	<br>
+  </div>
+      </div>
+    </section>
+
+
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+   <script type="text/javascript">
+    jQuery(function() { Search.loadIndex("searchindex.js"); });
+  </script>
+
+  <script type="text/javascript" id="searchindexloader"></script>
+
+
+  
+  
+    
+  
+
+
+
+  <!--  Xilinx template footer block -->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="xilinxExperienceFragments experiencefragment aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+					<div class="xf-content-height">
+						<div class="aem-Grid aem-Grid--16 aem-Grid--default--16 ">
+							<div class="footer parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16">
+								<noindex>
+                  <!-- make footer fixed - NileshP -->
+                  <style>
+                        .footer {
+                        position: fixed;
+                        left: 0;
+                        bottom: 0;
+                        width: 100%;
+                        }
+                  </style>
+                  <!-- make footer fixed NileshP-->
+									<footer>
+										<div class="aem-Grid aem-Grid--16">
+											<div class="aem-GridColumn aem-GridColumn--xxxlarge--none aem-GridColumn--xsmall--16 aem-GridColumn--offset--xsmall--0 aem-GridColumn--xlarge--none aem-GridColumn--xxlarge--none aem-GridColumn--default--none aem-GridColumn--offset--large--1 aem-GridColumn--xlarge--12 aem-GridColumn--offset--default--0 aem-GridColumn--xxlarge--10 aem-GridColumn--offset--xlarge--2 aem-GridColumn--offset--xxlarge--3 aem-GridColumn--offset--xxxlarge--4 aem-GridColumn--xsmall--none aem-GridColumn--large--none aem-GridColumn aem-GridColumn--large--14 aem-GridColumn--xxxlarge--8 aem-GridColumn--default--16">
+												<div class="container-fluid sub-footer">
+													<div class="row">
+														<div class="footerSocial parbase">
+														
+															<div class="col-md-push-6 col-lg-push-6 col-md-6 col-lg-6">
+																<div class="lang-select dropup hidden-md hidden-lg">
+		<button data-toggle="dropdown">
+			<span class="fas fa-globe" aria-hidden="true"></span>
+			<span>
+				
+					English
+				</span>
+		<span class="far fa-angle-down" aria-hidden="true"></span>
+	</button>
+	<ul class="dropdown-menu">
+		<li>
+				<a target="_blank" href="https://japan.xilinx.com/" target="_self">
+					日本語
+				</a>
+			</li>
+		<li>
+				<a target="_blank" href="https://china.xilinx.com/" target="_self">
+					简体中文
+				</a>
+			</li>
+		</ul>
+	</div>
+																<ul class="list-inline pull-right social-menu">
+																	<li>
+																		<a target="_blank" href="https://www.linkedin.com/company/xilinx">
+																		<span class="linkedin icon"></span>
+																		<span class="sr-only">Connect on LinkedIn</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.twitter.com/XilinxInc">
+																		<span class="twitter icon"></span>
+																		<span class="sr-only">Follow us on Twitter</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.facebook.com/XilinxInc">
+																		<span class="facebook icon"></span>
+																		<span class="sr-only">Connect on Facebook</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.youtube.com/XilinxInc">
+																		<span class="youtube icon"></span>
+																		<span class="sr-only">Watch us on YouTube</span>
+																		</a>
+																	</li>
+																	<li>
+																		<a target="_blank" href="https://www.xilinx.com/registration/subscriber-signup.html">
+																		<span class="newsletter icon"></span>
+																		<span class="sr-only">Subscribe to Newsletter</span>
+																		</a>
+																	</li>
+																</ul>
+																	<div class="lang-select dropup hidden-xs hidden-sm">
+	<button data-toggle="dropdown">
+		<span class="fas fa-globe" aria-hidden="true"></span>
+		<span>
+			
+				English
+			</span>
+		<span class="far fa-angle-down" aria-hidden="true"></span>
+	</button>
+	<ul class="dropdown-menu">
+		<li>
+				<a target="_blank" href="https://japan.xilinx.com/" target="_self">
+					日本語
+				</a>
+			</li>
+		<li>
+				<a target="_blank" href="https://china.xilinx.com/" target="_self">
+					简体中文
+				</a>
+			</li>
+		</ul>
+	</div>
+															</div>
+														</div>
+														<div class="col-md-pull-5 col-lg-pull-5 col-md-5 col-lg-5">
+															<span class="copyright">©2022 Advanced Micro Devices, Inc</span>
+														</div>
+
+													</div>
+													                    <div class="movethisrowtoleft row">
+                        <div class="col-xs-24">
+                            <ul class="sub-menu">
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/copyright">Terms and Conditions</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/privacy">Privacy</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/cookies">Cookie Policy</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/trademarks">Trademarks</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/system/files/documents/statement-human-trafficking-forced-labor.pdf">Statement on Forced Labor</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/en/corporate/competition">Fair and Open Competition</a></li>
+                                <li><a target="_blank" href="https://www.amd.com/system/files/documents/amd-uk-tax-strategy.pdf">UK Tax Strategy</a></li>
+								<li><a target="_blank" href="https://docs.xilinx.com/v/u/9x6YvZKuWyhJId7y7RQQKA">Inclusive Terminology</a></li>
+                                <li><a href="#cookiessettings" class="ot-sdk-show-settings">Cookies Settings</a></li>
+                            </ul>
+                        </div>
+                    </div>
+												</div>
+											</div>
+										</div>
+									</footer>
+								</noindex>
+							</div>
+						</div>
+					</div>
+				</div>
+<div class="backToTop parbase aem-GridColumn--default--none aem-GridColumn aem-GridColumn--offset--default--0 aem-GridColumn--default--16"><noindex>
+    <span data-component="backToTopButton" class="backToTopButton loaded">
+        <ul>
+            <li>
+                <a href="https://www.author.xilinx.com/xx/rebrand/amd/en-amd-xilinx-header-footer.html#top" class="btn top">
+                    <span class="fas fa-angle-up" aria-hidden="true"></span>
+                </a>
+            </li>
+        </ul>
+    </span>
+</noindex></div>
+			</div>
+		</div>
+
+
+		<script>window.CQ = window.CQ || {}</script>
+		<script src="https://static.cloud.coveo.com/searchui/v2.4382/js/CoveoJsSearch.Lazy.min.js"></script>
+		<script>
+			var underscoreSetup = function () {
+			  _.templateSettings.interpolate = /\{\{=([^-][\S\s]+?)\}\}/g;
+			  _.templateSettings.evaluate = /\{\{([^-=][\S\s]+?)\}\}/g;
+			  _.templateSettings.escape = /\{\{-([^=][\S\s]+?)\}\}/g;
+			}
+
+			underscoreSetup();
+		</script>
+	</body>
+</html>

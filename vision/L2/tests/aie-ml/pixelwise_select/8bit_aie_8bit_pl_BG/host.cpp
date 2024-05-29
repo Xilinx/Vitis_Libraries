@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-//imports
+
+// imports
 #define PROFILE
 
 #include <adf/adf_api/XRTConfig.h>
@@ -35,19 +35,19 @@
  ******************************************************************************
  */
 
-//reference fn
-void pixelwise_select_ref(uint8_t* frame, uint8_t* mask, uint8_t* bg, uint8_t* out, int elements){
-    for(int i=0; i<elements; i++) out[i] = mask[i] ? frame[i] : bg[i];
+// reference fn
+void pixelwise_select_ref(uint8_t* frame, uint8_t* mask, uint8_t* bg, uint8_t* out, int elements) {
+    for (int i = 0; i < elements; i++) out[i] = mask[i] ? frame[i] : bg[i];
     return;
 }
 
-//main fn
-int main(int argc, char** argv){
+// main fn
+int main(int argc, char** argv) {
     // read run parameters-height, width, iteration, image path
     if (argc < 3) {
         std::stringstream errorMessage;
         errorMessage << argv[0] << " <xclbin> <inputImage>  "
-                                    "[width] [height] [iterations]";
+                                   "[width] [height] [iterations]";
         std::cerr << errorMessage.str();
         throw std::invalid_argument(errorMessage.str());
     }
@@ -55,23 +55,22 @@ int main(int argc, char** argv){
     // Initializa device
     const char* xclBinName = argv[1];
     xF::deviceInit(xclBinName);
-    
+
     // Read image
     cv::Mat srcImage;
     srcImage = cv::imread(argv[2], 0);
-    
+
     int width = srcImage.cols;
     if (argc >= 4) width = atoi(argv[3]);
-    
+
     int height = srcImage.rows;
     if (argc >= 5) height = atoi(argv[4]);
 
     int iterations = 1;
     if (argc >= 6) iterations = atoi(argv[5]);
-    
+
     // Resize image if need be
-    if ((width != srcImage.cols) || (height != srcImage.rows))
-            cv::resize(srcImage, srcImage, cv::Size(width, height));
+    if ((width != srcImage.cols) || (height != srcImage.rows)) cv::resize(srcImage, srcImage, cv::Size(width, height));
 
     std::cout << "Image size" << std::endl;
     std::cout << srcImage.rows << std::endl;
@@ -79,57 +78,57 @@ int main(int argc, char** argv){
     std::cout << srcImage.elemSize() << std::endl;
     std::cout << "Image size (end)" << std::endl;
 
-    //allocate input buffer and transfer data
+    // allocate input buffer and transfer data
 
-    //frame
+    // frame
     void* frameData = nullptr;
     xrt::bo frame_hndl = xrt::bo(xF::gpDhdl, (srcImage.total() * srcImage.elemSize()), 0, 0);
     frameData = frame_hndl.map();
     memcpy(frameData, srcImage.data, (srcImage.total() * srcImage.elemSize()));
 
-    //mask
+    // mask
     void* maskData = nullptr;
     xrt::bo mask_hndl = xrt::bo(xF::gpDhdl, (srcImage.total() * 1), 0, 0);
     maskData = mask_hndl.map();
     uint8_t* temp = (uint8_t*)maskData;
-    for(int i=0; i<srcImage.total(); i++) temp[i] = rand()%2;
+    for (int i = 0; i < srcImage.total(); i++) temp[i] = rand() % 2;
 
-    //background
+    // background
     void* bgData = nullptr;
     xrt::bo bg_hndl = xrt::bo(xF::gpDhdl, (srcImage.total() * srcImage.elemSize()), 0, 0);
     bgData = bg_hndl.map();
     uint8_t* temp_ = (uint8_t*)bgData;
-    for(int i=0; i<srcImage.total(); i++) temp_[i] = rand()%256;
+    for (int i = 0; i < srcImage.total(); i++) temp_[i] = rand() % 256;
 
-    //allocate output buffer and transfer data
+    // allocate output buffer and transfer data
     void* outData = nullptr;
-    xrt::bo *out_hndl = new xrt::bo(xF::gpDhdl, (srcImage.total() * srcImage.elemSize()), 0, 0);
+    xrt::bo* out_hndl = new xrt::bo(xF::gpDhdl, (srcImage.total() * srcImage.elemSize()), 0, 0);
     outData = out_hndl->map();
 
-    //declare tiler and sticher 
+    // declare tiler and sticher
     xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT, TILE_WIDTH, VECTORIZATION_FACTOR> frame_tiler(0, 0);
     xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT, TILE_WIDTH, VECTORIZATION_FACTOR> mask_tiler(0, 0);
     xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT, TILE_WIDTH, VECTORIZATION_FACTOR> bg_tiler(0, 0);
-    
+
     xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_HEIGHT, TILE_WIDTH, VECTORIZATION_FACTOR> stitcher;
 
-    //tiler compute metadata
-    //bl.init();
-    #if !__X86__
+// tiler compute metadata
+// bl.init();
+#if !__X86_DEVICE__
     std::cout << "Graph init. This does nothing because CDO in boot PDI "
-                    "already configures AIE.\n";
+                 "already configures AIE.\n";
     auto gHndl = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "ps");
     std::cout << "XRT graph opened" << std::endl;
     gHndl.reset();
     std::cout << "Graph reset done" << std::endl;
-    #endif
+#endif
     START_TIMER
     frame_tiler.compute_metadata(srcImage.size());
     mask_tiler.compute_metadata(srcImage.size());
     bg_tiler.compute_metadata(srcImage.size());
     STOP_TIMER("Meta data compute time")
 
-    //run graph for number of iterations
+    // run graph for number of iterations
     std::chrono::microseconds tt(0);
     for (int i = 0; i < iterations; i++) {
         START_TIMER
@@ -138,15 +137,15 @@ int main(int argc, char** argv){
         auto mask_tiles_sz = mask_tiler.host2aie_nb(&mask_hndl, srcImage.size());
         auto bg_tiles_sz = bg_tiler.host2aie_nb(&bg_hndl, srcImage.size());
         stitcher.aie2host_nb(out_hndl, srcImage.size(), frame_tiles_sz);
-        #if !__X86__
-        
-        for(int j=0; j<frame_tiles_sz[0]*frame_tiles_sz[1]; j++){
+#if !__X86_DEVICE__
+
+        for (int j = 0; j < frame_tiles_sz[0] * frame_tiles_sz[1]; j++) {
             // std::cout<<"Running graph for tile: " <<j;
             gHndl.run(1);
             gHndl.wait();
             // std::cout<<"    [DONE:"<<j<<"]"<<std::endl;
         }
-        #endif
+#endif
         frame_tiler.wait();
         mask_tiler.wait();
         bg_tiler.wait();
@@ -156,52 +155,39 @@ int main(int argc, char** argv){
         std::cout << "Data transfer complete (Stitcher)\n";
         tt += tdiff;
     }
-    #if !__X86__
-	gHndl.end(0);
-	#endif
+#if !__X86_DEVICE__
+    gHndl.end(0);
+#endif
     std::cout << "Test passed" << std::endl;
-        std::cout << "Average time to process frame : " << (((float)tt.count() * 0.001) / (float)iterations) << " ms"<< std::endl;
-        std::cout << "Average frames per second : " << (((float)1000000 / (float)tt.count()) * (float)iterations) << " fps" << std::endl;
-    //save the output 
+    std::cout << "Average time to process frame : " << (((float)tt.count() * 0.001) / (float)iterations) << " ms"
+              << std::endl;
+    std::cout << "Average frames per second : " << (((float)1000000 / (float)tt.count()) * (float)iterations) << " fps"
+              << std::endl;
+    // save the output
 
-    //run reference fn and compare output
+    // run reference fn and compare output
     uint8_t* outref = (uint8_t*)malloc(srcImage.total());
     pixelwise_select_ref((uint8_t*)frameData, (uint8_t*)maskData, (uint8_t*)bgData, outref, srcImage.total());
 
-    //Checking output
-    int err = 0; 
+    // Checking output
+    int err = 0;
     uint8_t* od = (uint8_t*)outData;
-    for(int i=0; i<srcImage.total(); i++){
-        if(outref[i]!=od[i]){
+    for (int i = 0; i < srcImage.total(); i++) {
+        if (outref[i] != od[i]) {
             err++;
-            std::cout 
-                <<i
-                <<"\t:"
-                <<"("
-                <<unsigned(((uint8_t*)frameData)[i])
-                <<","
-                <<unsigned(((uint8_t*)maskData)[i])
-                <<","
-                <<unsigned(((uint8_t*)bgData)[i])
-                <<")-->"
-                <<"("
-                <<unsigned(outref[i])
-                <<","
-                <<unsigned(od[i])
-                <<")"
-                << std::endl;
+            std::cout << i << "\t:"
+                      << "(" << unsigned(((uint8_t*)frameData)[i]) << "," << unsigned(((uint8_t*)maskData)[i]) << ","
+                      << unsigned(((uint8_t*)bgData)[i]) << ")-->"
+                      << "(" << unsigned(outref[i]) << "," << unsigned(od[i]) << ")" << std::endl;
         }
     }
 
-    if(err){
+    if (err) {
         std::cout << "Test failed" << std::endl;
         exit(-1);
     }
-    
-    
 
-    //print result
-    //TODO: print result
+    // print result
+    // TODO: print result
     std::cout << "Test passed" << std::endl;
-
 }

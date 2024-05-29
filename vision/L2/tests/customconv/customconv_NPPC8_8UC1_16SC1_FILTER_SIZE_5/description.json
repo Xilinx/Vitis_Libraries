@@ -52,7 +52,19 @@
                         "$(OPENCV_LIB)"
                     ]
                 }
-            }
+            },
+            "containers": [
+                {
+                    "name": "krnl_customconv",
+                    "accelerators": [
+                        {
+                            "name": "customconv",
+                            "frequency": 100.0
+                        }
+                    ],
+                    "frequency": 100.0
+                }
+            ]
         },
         "vck190": {
             "host": {

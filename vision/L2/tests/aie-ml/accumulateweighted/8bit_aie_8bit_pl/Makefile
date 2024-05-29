@@ -1,4 +1,4 @@
-# Copyright 2019-2022 Xilinx, Inc.
+# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -60,8 +60,8 @@ PLATFORM := vek280
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  vek280 vck190
-PLATFORM_BLOCKLIST +=  vck5000 v70
+PLATFORM_ALLOWLIST +=  vek280
+PLATFORM_BLOCKLIST +=  vck190 vck5000 v70
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)

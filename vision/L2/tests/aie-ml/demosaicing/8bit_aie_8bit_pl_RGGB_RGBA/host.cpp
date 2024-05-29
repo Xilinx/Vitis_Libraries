@@ -26,7 +26,6 @@
 #include <experimental/xrt_kernel.h>
 #include <experimental/xrt_graph.h>
 
-
 #include "config.h"
 
 enum XF_demosaicing { XF_BAYER_BG, XF_BAYER_GB, XF_BAYER_GR, XF_BAYER_RG };
@@ -303,29 +302,30 @@ int main(int argc, char** argv) {
 
         // Allocate output buffer
         void* dstData = nullptr;
-        xrt::bo *dst_hndl = new xrt::bo(xF::gpDhdl, (op_height * op_width * srcImageR.elemSize() * 4), 0, 0);
+        xrt::bo* dst_hndl = new xrt::bo(xF::gpDhdl, (op_height * op_width * srcImageR.elemSize() * 4), 0, 0);
         dstData = dst_hndl->map();
         cv::Mat dst(op_height, op_width, CV_8UC4, dstData);
 
         xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT, TILE_WIDTH, VECTORIZATION_FACTOR, CORES> tiler(2, 2);
         xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_HEIGHT, (TILE_WIDTH << 2), VECTORIZATION_FACTOR, CORES> stitcher;
 
-
-
-		#if !__X86__
+#if !__X86_DEVICE__
         std::cout << "Graph init. This does nothing because CDO in boot PDI "
                      "already configures AIE.\n";
-        std::vector<xrt::graph> gHndl; 
-        for (int i = 0; i < CORES; i++){
+        std::vector<xrt::graph> gHndl;
+        for (int i = 0; i < CORES; i++) {
             std::string graph_name = "demo[" + std::to_string(i) + "]";
             std::cout << graph_name << std::endl;
-            
-            gHndl.push_back(xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "demo[0]"));
+
+            gHndl.push_back(xrt::graph(xF::gpDhdl, xF::xclbin_uuid, graph_name));
             std::cout << "XRT graph opened" << std::endl;
             gHndl.back().reset();
             std::cout << "Graph reset done" << std::endl;
+
+            // auto gHndl = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "demo[0]");
+            // gHndl.reset();
         }
-		#endif
+#endif
         START_TIMER
         tiler.compute_metadata(srcImageR.size());
         STOP_TIMER("Meta data compute time")
@@ -337,17 +337,19 @@ int main(int argc, char** argv) {
             START_TIMER
             auto tiles_sz = tiler.host2aie_nb(&src_hndl, srcImageR.size());
             stitcher.aie2host_nb(dst_hndl, cv::Size((srcImageR.cols << 2), srcImageR.rows), tiles_sz);
-            #if !__X86__
+#if !__X86_DEVICE__
 
             for (int i = 0; i < CORES; i++) {
                 std::cout << "Graph run(" << (tiler.tilesPerCore(i)) << ")\n";
+                // gHndl.run(tiler.tilesPerCore(i));
                 gHndl[i].run(tiler.tilesPerCore(i));
             }
 
             for (int i = 0; i < CORES; i++) {
+                // gHndl.wait();
                 gHndl[i].wait();
             }
-            #endif
+#endif
             tiler.wait();
             std::cout << "Data transfer complete (Tiler)\n";
             stitcher.wait();
@@ -383,7 +385,31 @@ int main(int argc, char** argv) {
                     int out = (int)dstBGR[2].at<unsigned char>(i, j);
                     int diff = std::abs(ref - out);
                     if (diff > 1) {
-                        std::cout << "Diff : " << diff << " Ref : " << ref << " Out : " << out << " Loc : [" << i
+                        std::cout << "Diff_red : " << diff << " Ref : " << ref << " Out : " << out << " Loc : [" << i
+                                  << ", " << j << "]" << std::endl;
+                    }
+                }
+            }
+
+            for (int i = 0; i < dstRefBGR[1].rows; i++) {
+                for (int j = 0; j < dstRefBGR[1].cols; j++) {
+                    int ref = (int)dstRefBGR[1].at<unsigned char>(i, j);
+                    int out = (int)dstBGR[1].at<unsigned char>(i, j);
+                    int diff = std::abs(ref - out);
+                    if (diff > 1) {
+                        std::cout << "Diff_green : " << diff << " Ref : " << ref << " Out : " << out << " Loc : [" << i
+                                  << ", " << j << "]" << std::endl;
+                    }
+                }
+            }
+
+            for (int i = 0; i < dstRefBGR[0].rows; i++) {
+                for (int j = 0; j < dstRefBGR[0].cols; j++) {
+                    int ref = (int)dstRefBGR[0].at<unsigned char>(i, j);
+                    int out = (int)dstBGR[0].at<unsigned char>(i, j);
+                    int diff = std::abs(ref - out);
+                    if (diff > 1) {
+                        std::cout << "Diff_blue : " << diff << " Ref : " << ref << " Out : " << out << " Loc : [" << i
                                   << ", " << j << "]" << std::endl;
                     }
                 }
@@ -432,11 +458,12 @@ int main(int argc, char** argv) {
             }
             //}
         }
-        #if !__X86__
+#if !__X86_DEVICE__
         for (int i = 0; i < CORES; i++) {
+            // gHndl.end();
             gHndl[i].end();
         }
-		#endif
+#endif
         std::cout << "Test passed" << std::endl;
         std::cout << "Average time to process frame : " << (((float)tt.count() * 0.001) / (float)iterations) << " ms"
                   << std::endl;

@@ -35,5 +35,5 @@ static constexpr int TILE_ELEMENTS = (TILE_WIDTH * TILE_HEIGHT * CHANNELS);
 static constexpr int TILE_WINDOW_SIZE = (TILE_ELEMENTS * sizeof(DATA_TYPE)) + xf::cv::aie::METADATA_SIZE;
 static constexpr int ELEM_WITH_METADATA = TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / sizeof(DATA_TYPE));
 
-static constexpr int __X86__ = 0;
+static constexpr int __X86_DEVICE__ = 0;
 #endif //__CONFIG_H_

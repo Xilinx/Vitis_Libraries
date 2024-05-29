@@ -38,9 +38,15 @@ For more details on data flow graph creation, refer to `AI Engine Programming`_ 
 
      myGraph() {
         k1 = kernel::create(filter2D);
-        adf::connect<window<TILE_WINDOW_SIZE> >(inptr, k1.in[0]);
+	inptr = input_plio::create("DataIn1", adf::plio_128_bits, "data/input_128x16.txt");
+        outptr = output_plio::create("DataOut1", adf::plio_128_bits, "data/output.txt");
+	
+        adf::connect<>(inptr.out[0], k1.in[0]);
         adf::connect<parameter>(kernelCoefficients, async(k1.in[1]));
-        adf::connect<window<TILE_WINDOW_SIZE> >(k1.out[0], outptr);
+        adf::connect<>(k1.out[0], outptr.in[0]);
+	
+	adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
+        adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};
 
         source(k1) = "xf_filter2d.cc";
         // Initial mapping
@@ -58,19 +64,14 @@ mechanisms specific to the chosen target for testing or eventual deployment.
 
   #include "graph.h"
 
-  // Virtual platform ports
-  PLIO* in1 = new PLIO("DataIn1", adf::plio_64_bits, "data/input.txt");
-  PLIO* out1 = new PLIO("DataOut1", adf::plio_64_bits, "data/output.txt");
-  simulation::platform<1, 1> platform(in1, out1);
-
   // Graph object
-  myGraph filter_graph;
+     myGraph filter_graph;
 
-  // Virtual platform connectivity
-  connect<> net0(platform.src[0], filter_graph.inptr);
-  connect<> net1(filter_graph.outptr, platform.sink[0]);
-
-
+     filter_graph.init();
+     filter_graph.update(filter_graph.kernelCoefficients, float2fixed_coeff<10, 16>(kData).data(), 16);
+     filter_graph.run(1);
+     filter_graph.end();
+    
 #. PLIO
 
    A PLIO port attribute is used to make external stream connections that cross the AI Engine to programmable logic (PL) boundary. PLIO attributes are used to specify the port name, port bit width and the input/output file names.
@@ -79,8 +80,8 @@ mechanisms specific to the chosen target for testing or eventual deployment.
    .. code:: c
 
      //Platform ports
-     PLIO* in1 = new PLIO("DataIn1", adf::plio_64_bits, "data/input.txt");
-     PLIO* out1 = new PLIO("DataOut1", adf::plio_64_bits, "data/output.txt");
+	inptr = input_plio::create("DataIn1", adf::plio_128_bits, "data/input_128x16.txt");
+        outptr = output_plio::create("DataOut1", adf::plio_128_bits, "data/output.txt");
 
 
 #. GMIO
@@ -90,18 +91,9 @@ mechanisms specific to the chosen target for testing or eventual deployment.
    .. code:: c
 
       //Platform ports
-      GMIO gmioIn1("gmioIn1", 64, 1000);
-      GMIO gmioOut("gmioOut", 64, 1000);
+      in1 = input_gmio::create("IN", 256,1000);
+      out1 = output_gmio::create("OUT", 256, 1000);
    
-      //Virtual platform
-      simulation::platform<1, 1> platform(&gmioIn1, &gmioOut);
-   
-      //Graph object
-      myGraph filter_graph;
-   
-      //Platform ports
-      connect<> net0(platform.src[0], filter_graph.in1);
-      connect<> net1(filter_graph.out1, platform.sink[0]);
 
 Host code
 =========
@@ -131,14 +123,14 @@ Buffers for input and output data are created using the XRT APIs and data from i
 .. code:: c
 
         void* srcData = nullptr;
-        xrtBufferHandle src_hndl = xrtBOAlloc(xF::gpDhdl, (srcImageR.total() * srcImageR.elemSize()), 0, 0);
-        srcData = xrtBOMap(src_hndl);
+        xrt::bo src_hndl = xrt::bo(xF::gpDhdl, (srcImageR.total() * srcImageR.elemSize()), 0, 0);
+        srcData = src_hndl.map();
         memcpy(srcData, srcImageR.data, (srcImageR.total() * srcImageR.elemSize()));
-
+	
         // Allocate output buffer
         void* dstData = nullptr;
-        xrtBufferHandle dst_hndl = xrtBOAlloc(xF::gpDhdl, (op_height * op_width * srcImageR.elemSize()), 0, 0);
-        dstData = xrtBOMap(dst_hndl);
+        xrt::bo ptr_dstHndl = xrt::bo(xF::gpDhdl, (op_height * op_width * srcImageR.elemSize()), 0, 0);
+        dstData = ptr_dstHndl.map();
         cv::Mat dst(op_height, op_width, srcImageR.type(), dstData);
 
 ``xfcvDataMovers`` objects tiler and stitcher are created. For more details on ``xfcvDataMovers`` refer to :ref:`xfcvDataMovers <xfcvdatamovers_aie>`
@@ -152,8 +144,9 @@ ADF graph is initialized and the filter coefficients are updated.
 
 .. code:: c
 
-   filter_graph.init();
-   filter_graph.update(filter_graph.kernelCoefficients, float2fixed_coeff<10, 16>(kData).data(), 16);
+   	auto gHndl = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "filter_graph");
+        gHndl.reset();
+        gHndl.update("filter_graph.k1.in[1]", float2fixed_coeff<10, 16>(kData));
 
 Metadata containing the tile information is generated.
 
@@ -165,14 +158,12 @@ The data transfer to AIE via datamovers is initiated along with graph run. Furth
 
 .. code:: c
 
-    auto tiles_sz = tiler.host2aie_nb(src_hndl, srcImageR.size());
-    stitcher.aie2host_nb(dst_hndl, dst.size(), tiles_sz);
+    auto tiles_sz = tiler.host2aie_nb(&src_hndl, srcImageR.size());
+    stitcher.aie2host_nb(&dst_hndl, dst.size(), tiles_sz);
 
-    std::cout << "Graph run(" << (tiles_sz[0] * tiles_sz[1]) << ")\n";
+    gHndl.run(tiles_sz[0] * tiles_sz[1]);
+    gHndl.wait();
 
-    filter_graph.run(tiles_sz[0] * tiles_sz[1]);
-
-    filter_graph.wait();
     tiler.wait();
     stitcher.wait();
 
@@ -190,7 +181,7 @@ Run 'make help' to get the list of supported commands and flows. Running the fol
 
 	source < path-to-Vitis-installation-directory >/settings64.sh
 	export SYSROOT=< path-to-platform-sysroot >
-	export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >
-	make all TARGET=hw PLATFORM=< path-to-platform-directory >/< platform >.xpfm
+	export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
+	make all TARGET=hw 
 	
-.. include:: include/f2d-l3-pipeline.rst
+	.. include:: include/f2d-l3-pipeline.rst

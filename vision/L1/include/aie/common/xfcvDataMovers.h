@@ -96,19 +96,16 @@ static std::vector<char> gHeader;
 static const axlf* gpTop = nullptr;
 static xrt::uuid xclbin_uuid;
 
-
 static uint16_t gnTilerInstCount = 0;
 static uint16_t gnStitcherInstCount = 0;
 
-//void deviceInit(const char* xclBin) {
+// void deviceInit(const char* xclBin) {
 void deviceInit(std::string xclBin) {
-    //if (xclBin != nullptr) {
-	if (!(xclBin.empty())) {
-		
+    // if (xclBin != nullptr) {
+    if (!(xclBin.empty())) {
         if (!bool(gpDhdl)) {
-			
             assert(gpTop == nullptr);
-			
+
             gpDhdl = xrt::device(0);
             if (!bool(gpDhdl)) {
                 throw std::runtime_error("No valid device handle found. Make sure using right xclOpen index.");
@@ -121,16 +118,16 @@ void deviceInit(std::string xclBin) {
 
            gHeader.resize(size);
            stream.read(gHeader.data(), size);
-			
+
             gpTop = reinterpret_cast<const axlf*>(gHeader.data());*/
-			xclbin_uuid = gpDhdl.load_xclbin(xclBin);
-           // if (gpDhdl.load_xclbin(xclBin)) {
-           //     throw std::runtime_error("Xclbin loading failed");
-           // }
-		   //std::cout<<typeid(xclbin_uuid).name()<<std::endl;
-		   //auto dhdl = xrtDeviceOpenFromXcl(gpDhdl);
-		   //std::cout<<xclbin_uuid.to_string().c_str()<<std::endl;
-           //adf::registerXRT(dhdl, xclbin_uuid.get());//(const unsigned char*)xclbin_uuid.to_string().c_str());
+            xclbin_uuid = gpDhdl.load_xclbin(xclBin);
+            // if (gpDhdl.load_xclbin(xclBin)) {
+            //     throw std::runtime_error("Xclbin loading failed");
+            // }
+            // std::cout<<typeid(xclbin_uuid).name()<<std::endl;
+            // auto dhdl = xrtDeviceOpenFromXcl(gpDhdl);
+            // std::cout<<xclbin_uuid.to_string().c_str()<<std::endl;
+            // adf::registerXRT(dhdl, xclbin_uuid.get());//(const unsigned char*)xclbin_uuid.to_string().c_str());
         }
     }
 
@@ -138,10 +135,22 @@ void deviceInit(std::string xclBin) {
         throw std::runtime_error("No valid device handle found. Make sure using right xclOpen index.");
     }
 
-    //if (gpTop == nullptr) {
-      //  throw std::runtime_error("Xclbin loading failed");
-   // }
+    // if (gpTop == nullptr) {
+    //  throw std::runtime_error("Xclbin loading failed");
+    // }
 }
+
+struct xfcvDataMoverParams {
+    cv::Size mInputImgSize;
+    cv::Size mOutputImgSize;
+
+    xfcvDataMoverParams() : mInputImgSize(0, 0), mOutputImgSize(0, 0) {}
+
+    xfcvDataMoverParams(const cv::Size& inImgSize) : mInputImgSize(inImgSize), mOutputImgSize(inImgSize) {}
+
+    xfcvDataMoverParams(const cv::Size& inImgSize, const cv::Size& outImgSize)
+        : mInputImgSize(inImgSize), mOutputImgSize(outImgSize) {}
+};
 
 template <DataMoverKind KIND,
           typename DATA_TYPE,
@@ -159,7 +168,7 @@ class xfcvDataMovers {
     uint16_t mTileColsPerCore;
     uint16_t mTileRows;
     uint16_t mTileCols;
-bool mTilerRGBtoRGBA;
+    bool mTilerRGBtoRGBA;
     bool mStitcherRGBAtoRGB;
     bool mbUserHndl;
     uint16_t mBurstLength;
@@ -171,16 +180,16 @@ bool mTilerRGBtoRGBA;
     std::vector<EmulAxiData<PL_AXI_BITWIDTH> > mMetaDataVec;
 
     std::array<int, CORES> mMetadataSize;
-    //std::array<xrtBufferHandle, CORES> mMetadataBOHndl;
-    //xrtBufferHandle mImageBOHndl;
-	
-	std::array<xrt::bo, CORES> mMetadataBOHndl;
+    // std::array<xrtBufferHandle, CORES> mMetadataBOHndl;
+    // xrtBufferHandle mImageBOHndl;
+
+    std::array<xrt::bo, CORES> mMetadataBOHndl;
     xrt::bo mImageBOHndl;
 
     std::array<xrt::kernel, CORES> mPLKHandleArr;
     std::array<xrt::run, CORES> mPLRHandleArr;
-	
-	xrt::kernel krnl;
+
+    xrt::kernel krnl;
 
     long int imgSize() { return (mImageSize[0] * mImageSize[1] * mImageSize[2]); }
 
@@ -215,12 +224,12 @@ bool mTilerRGBtoRGBA;
             char* MetaDataVecP = (char*)mMetaDataVec.data();
             for (int i = 0; i < CORES; i++) {
                 assert(mMetadataBOHndl[i]);
-                //char* metadata_buffer = (char*)xrtBOMap(mMetadataBOHndl[i]); // C API
+                // char* metadata_buffer = (char*)xrtBOMap(mMetadataBOHndl[i]); // C API
                 char* metadata_buffer = (char*)(mMetadataBOHndl[i].map());
                 memcpy(metadata_buffer, MetaDataVecP, metadataSize(i));
                 MetaDataVecP += metadataSize(i);
-				mMetadataBOHndl[i].sync(XCL_BO_SYNC_BO_TO_DEVICE);
-				//std::cout << "Tiler copy done " << std::endl;
+                mMetadataBOHndl[i].sync(XCL_BO_SYNC_BO_TO_DEVICE);
+                // std::cout << "Tiler copy done " << std::endl;
             }
         } else {
             // Column wise partitioning
@@ -228,7 +237,7 @@ bool mTilerRGBtoRGBA;
             int c = 0;
             for (int i = 0; i < CORES; i++) {
                 assert(mMetadataBOHndl[i]);
-                //char* metadata_buffer = (char*)xrtBOMap(mMetadataBOHndl[i]);  //C API
+                // char* metadata_buffer = (char*)xrtBOMap(mMetadataBOHndl[i]);  //C API
                 char* metadata_buffer = (char*)(mMetadataBOHndl[i].map());
                 char* MetaDataVecP = ((char*)mMetaDataVec.data()) + (r * mTileCols + c) * metaDataSizePerTile();
 
@@ -254,14 +263,13 @@ bool mTilerRGBtoRGBA;
         if (mbUserHndl == false) {
             assert(mpImage);
             assert(mImageBOHndl);
-            //void* buffer = xrtBOMap(mImageBOHndl);  //C API
-			void* buffer = mImageBOHndl.map();
+            // void* buffer = xrtBOMap(mImageBOHndl);  //C API
+            void* buffer = mImageBOHndl.map();
             memcpy(buffer, mpImage->data, imgSize());
+        } else {
+            mImageBOHndl.sync(XCL_BO_SYNC_BO_TO_DEVICE);
+            // std::cout << "Tiler Sync Buffer " << std::endl;
         }
-		else{
-			mImageBOHndl.sync(XCL_BO_SYNC_BO_TO_DEVICE);
-			//std::cout << "Tiler Sync Buffer " << std::endl;
-		}
     }
     //}
 
@@ -271,25 +279,25 @@ bool mTilerRGBtoRGBA;
         // No meta-data
         assert(mImageBOHndl);
 
-        //void* buffer = xrtBOMap(mImageBOHndl);  //C API
+        // void* buffer = xrtBOMap(mImageBOHndl);  //C API
         void* buffer = mImageBOHndl.map();
         if (mbUserHndl == false) {
             assert(mpImage);
             memcpy(mpImage->data, buffer, imgSize());
         } else {
-            //xrtBOSync(mImageBOHndl, XCL_BO_SYNC_BO_TO_DEVICE, imgSize(), 0); // C API
-			mImageBOHndl.sync(XCL_BO_SYNC_BO_FROM_DEVICE, imgSize(), 0);
-			//std::cout << "Stitcher Sync Buffer " << std::endl;
+            // xrtBOSync(mImageBOHndl, XCL_BO_SYNC_BO_TO_DEVICE, imgSize(), 0); // C API
+            mImageBOHndl.sync(XCL_BO_SYNC_BO_FROM_DEVICE, imgSize(), 0);
+            // std::cout << "Stitcher Sync Buffer " << std::endl;
         }
     }
     //}
 
     void free_metadata_buffer(int core) {
-        //if (mMetadataBOHndl[core] != nullptr) {
-            //xrtBOFree(mMetadataBOHndl[core]); // C API
-			//~mMetadataBOHndl[core];
+        // if (mMetadataBOHndl[core] != nullptr) {
+        // xrtBOFree(mMetadataBOHndl[core]); // C API
+        //~mMetadataBOHndl[core];
         //}
-		//printf("free_metadata_buffer\n");
+        // printf("free_metadata_buffer\n");
         mMetadataBOHndl[core] = {};
         mMetadataSize[core] = 0;
     }
@@ -302,7 +310,7 @@ bool mTilerRGBtoRGBA;
 
     void alloc_metadata_buffer() {
         for (int i = 0; i < CORES; i++) {
-            if (!bool(mMetadataBOHndl[i])){// == nullptr) {
+            if (!bool(mMetadataBOHndl[i])) { // == nullptr) {
                 // Update size
                 mMetadataSize[i] = metaDataSizePerTile() * tilesPerCore(i);
 
@@ -310,26 +318,26 @@ bool mTilerRGBtoRGBA;
                 // assert(metadataSize(i) > 0);
                 std::cout << "Allocating metadata device buffer (Tiler), "
                           << " Size : " << metadataSize(i) << " bytes" << std::endl;
-                //mMetadataBOHndl[i] = xrt::bo(gpDhdl, metadataSize(i), mPLKHandleArr[i].group_id(3));
-				mMetadataBOHndl[i] = xrt::bo(gpDhdl, metadataSize(i), 0, 0);
+                // mMetadataBOHndl[i] = xrt::bo(gpDhdl, metadataSize(i), mPLKHandleArr[i].group_id(3));
+                mMetadataBOHndl[i] = xrt::bo(gpDhdl, metadataSize(i), 0, 0);
             }
         }
     }
 
     void free_buffer() {
         if (mbUserHndl == false) {
-            if (bool(mImageBOHndl)){// != nullptr) {
-                //xrtBOFree(mImageBOHndl);
+            if (bool(mImageBOHndl)) { // != nullptr) {
+                // xrtBOFree(mImageBOHndl);
                 //(mImageBOHndl);
                 mImageBOHndl = {};
             }
-	    //printf("free_buffer\n");
+            // printf("free_buffer\n");
             mImageBOHndl = {};
         }
     }
 
     void alloc_buffer() {
-        if (!bool(mImageBOHndl)){// == nullptr) {
+        if (!bool(mImageBOHndl)) { // == nullptr) {
             assert(imgSize() > 0);
             std::cout << "Allocating image device buffer (Tiler), "
                       << " Size : " << imgSize() << " bytes" << std::endl;
@@ -347,7 +355,7 @@ bool mTilerRGBtoRGBA;
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == STITCHER)>::type* = nullptr>
     std::string krnl_inst_name(int n) {
         std::ostringstream ss;
-        ss << "stitcher_top:{stitcher_top_"<< n << "}";
+        ss << "stitcher_top:{stitcher_top_" << n << "}";
         return ss.str();
     }
 
@@ -356,14 +364,14 @@ bool mTilerRGBtoRGBA;
             std::string name =
                 (KIND == TILER) ? krnl_inst_name(++gnTilerInstCount) : krnl_inst_name(++gnStitcherInstCount);
             std::cout << ">>>>:> Loading kernel " << name.c_str() << std::endl;
-			//std::cout << gpDhdl.load_xclbin.to_string().c_str()<<std::endl;
-			//std::cout << "device name:     " << gpDhdl.get_info<xrt::info::device::name>() << "\n";
-			//std::cout << "device bdf:      " << gpDhdl.get_info<xrt::info::device::bdf>() << "\n";
+            // std::cout << gpDhdl.load_xclbin.to_string().c_str()<<std::endl;
+            // std::cout << "device name:     " << gpDhdl.get_info<xrt::info::device::name>() << "\n";
+            // std::cout << "device bdf:      " << gpDhdl.get_info<xrt::info::device::bdf>() << "\n";
 
             mPLKHandleArr[i] = xrt::kernel(gpDhdl, xclbin_uuid, name.c_str());
-			//std::cout<<mPLKHandleArr[i].group_id(0)<<std::endl;
-			//mPLRHandleArr[i] = xrt::run(mPLKHandleArr[i]);
-			//std::cout<<bool(mPLRHandleArr[i])<<std::endl;
+            // std::cout<<mPLKHandleArr[i].group_id(0)<<std::endl;
+            // mPLRHandleArr[i] = xrt::run(mPLKHandleArr[i]);
+            // std::cout<<bool(mPLRHandleArr[i])<<std::endl;
         }
     }
 
@@ -374,19 +382,19 @@ bool mTilerRGBtoRGBA;
             uint16_t r = tileRowsPerCore(i);
             uint16_t c = tileColsPerCore(i);
             uint32_t NumTiles = r * c;
-			//printf("setArgs:\n");
-			
-			//std::cout<<mImageSize[1]<<" "<<NumTiles<<" "<<std::endl;
-			
-			
-			mPLRHandleArr[i] = mPLKHandleArr[i](mImageSize[1], NumTiles, mImageBOHndl, mMetadataBOHndl[i], mBurstLength, 0); // Add mTilerRGBtoRGBA inplace of 0
-			
-			/*mPLRHandleArr[i].set_arg(0, mImageSize[1]);
-			mPLRHandleArr[i].set_arg(1, NumTiles);
-			mPLRHandleArr[i].set_arg(2, mImageBOHndl);
-			mPLRHandleArr[i].set_arg(3, mMetadataBOHndl[i]);*/
-			//printf("setArgs....1:\n");
-			
+            // printf("setArgs:\n");
+
+            // std::cout<<mImageSize[1]<<" "<<NumTiles<<" "<<std::endl;
+
+            mPLRHandleArr[i] = mPLKHandleArr[i](mImageSize[1], NumTiles, mImageBOHndl, mMetadataBOHndl[i], mBurstLength,
+                                                mTilerRGBtoRGBA); // Add mTilerRGBtoRGBA inplace of 0
+
+            /*mPLRHandleArr[i].set_arg(0, mImageSize[1]);
+            mPLRHandleArr[i].set_arg(1, NumTiles);
+            mPLRHandleArr[i].set_arg(2, mImageBOHndl);
+            mPLRHandleArr[i].set_arg(3, mMetadataBOHndl[i]);*/
+            // printf("setArgs....1:\n");
+
             //(void)xrtRunSetArg(mPLRHandleArr[i], 0, mImageSize[1]); // Stride is same as Width
             //(void)xrtRunSetArg(mPLRHandleArr[i], 1, NumTiles);      // Number of Tiles
             //(void)xrtRunSetArg(mPLRHandleArr[i], 2, mImageBOHndl);
@@ -401,18 +409,16 @@ bool mTilerRGBtoRGBA;
             uint16_t r = tileRowsPerCore(i);
             uint16_t c = tileColsPerCore(i);
             uint32_t NumTiles = r * c;
-			
-			
-			
-			mPLRHandleArr[i] = mPLKHandleArr[i](mImageSize[1], NumTiles, mImageBOHndl, r, c, 0);
-			
-			/*mPLRHandleArr[i].set_arg(0, mImageSize[1]);
-			mPLRHandleArr[i].set_arg(1, NumTiles);
-			mPLRHandleArr[i].set_arg(2, mImageBOHndl);
-			mPLRHandleArr[i].set_arg(3, r);
-			mPLRHandleArr[i].set_arg(4, c);*/
-			
-			//mPLRHandleArr[i].wait();
+
+            mPLRHandleArr[i] = mPLKHandleArr[i](mImageSize[1], NumTiles, mImageBOHndl, r, c, mStitcherRGBAtoRGB);
+
+            /*mPLRHandleArr[i].set_arg(0, mImageSize[1]);
+            mPLRHandleArr[i].set_arg(1, NumTiles);
+            mPLRHandleArr[i].set_arg(2, mImageBOHndl);
+            mPLRHandleArr[i].set_arg(3, r);
+            mPLRHandleArr[i].set_arg(4, c);*/
+
+            // mPLRHandleArr[i].wait();
             //(void)xrtRunSetArg(mPLRHandleArr[i], 0, mImageSize[1]); // Width
             //(void)xrtRunSetArg(mPLRHandleArr[i], 1, NumTiles);      // Number of Tiles
             //(void)xrtRunSetArg(mPLRHandleArr[i], 2, mImageBOHndl);
@@ -422,19 +428,19 @@ bool mTilerRGBtoRGBA;
     }
 
    public:
-   void start() {
+    void start() {
         for (auto& r : mPLRHandleArr) {
-			r.start();
-            //xrtRunStart(r);
+            r.start();
+            // xrtRunStart(r);
         }
-   }
+    }
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == TILER)>::type* = nullptr>
     xfcvDataMovers(uint16_t overlapH, uint16_t overlapV, bool tilerRGBtoRGBA = false, int burst = 1) {
-		//printf("enter\n");
-       // if (gpDhdl == nullptr) {
+        // printf("enter\n");
+        // if (gpDhdl == nullptr) {
         //    throw std::runtime_error("No valid device handle found. Make sure using xF::deviceInit(...) is called.");
-       // }
+        // }
 
         mpImage = nullptr;
         mImageSize = {0, 0, 0};
@@ -442,7 +448,7 @@ bool mTilerRGBtoRGBA;
         // Initialize overlaps
         mOverlapH = overlapH;
         mOverlapV = overlapV;
-mTilerRGBtoRGBA = tilerRGBtoRGBA;
+        mTilerRGBtoRGBA = tilerRGBtoRGBA;
         mBurstLength = burst;
 
         mTileRowsPerCore = 0;
@@ -452,30 +458,30 @@ mTilerRGBtoRGBA = tilerRGBtoRGBA;
         mbUserHndl = false;
         for (int i = 0; i < CORES; i++) {
             mMetadataBOHndl[i] = {};
-			//std::cout<<bool(mMetadataBOHndl[i])<<std::endl;
+            // std::cout<<bool(mMetadataBOHndl[i])<<std::endl;
             mMetadataSize[i] = 0;
         }
-        mImageBOHndl={};
-		//std::cout<<bool(mImageBOHndl)<<std::endl;
-		//printf("start load kernel\n");
+        mImageBOHndl = {};
+        // std::cout<<bool(mImageBOHndl)<<std::endl;
+        // printf("start load kernel\n");
         // Load the PL kernel
         load_krnl();
-		//printf("done load kernel\n");
+        // printf("done load kernel\n");
     }
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == STITCHER)>::type* = nullptr>
     xfcvDataMovers(bool stitcherRGBAtoRGB = false, int burst = 1) {
-       // if (gpDhdl == nullptr) {
+        // if (gpDhdl == nullptr) {
         //    throw std::runtime_error("No valid device handle found. Make sure using xF::deviceInit(...) is called.");
-       // }
-		//printf("enter..stitcher\n");
+        // }
+        // printf("enter..stitcher\n");
         mpImage = nullptr;
         mImageSize = {0, 0, 0};
 
         // Initialize overlaps
         mOverlapH = 0;
         mOverlapV = 0;
-mStitcherRGBAtoRGB = stitcherRGBAtoRGB;
+        mStitcherRGBAtoRGB = stitcherRGBAtoRGB;
         mBurstLength = burst;
 
         mTileRowsPerCore = 0;
@@ -485,10 +491,10 @@ mStitcherRGBAtoRGB = stitcherRGBAtoRGB;
         mbUserHndl = false;
 
         for (int i = 0; i < CORES; i++) {
-            mMetadataBOHndl[i]={};//(nullptr);// = nullptr;
+            mMetadataBOHndl[i] = {}; //(nullptr);// = nullptr;
             mMetadataSize[i] = 0;
         }
-        mImageBOHndl={};
+        mImageBOHndl = {};
 
         // Load the PL kernel
         load_krnl();
@@ -505,15 +511,14 @@ mStitcherRGBAtoRGB = stitcherRGBAtoRGB;
         free_metadata_buffer();
 
         for (auto& r : mPLRHandleArr) {
-            //xrtRunClose(r);
+            // xrtRunClose(r);
         }
         for (auto& r : mPLKHandleArr) {
-            //xrtKernelClose(r);
-			
+            // xrtKernelClose(r);
         }
         if (bool(gpDhdl)) {
-           // xrtDeviceClose(gpDhdl);
-            //gpDhdl = {};
+            // xrtDeviceClose(gpDhdl);
+            // gpDhdl = {};
         }
     }
     //}
@@ -522,70 +527,74 @@ mStitcherRGBAtoRGB = stitcherRGBAtoRGB;
 
     // These functions will start the data transfer protocol {
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == TILER)>::type* = nullptr>
-    auto host2aie_nb(cv::Mat& img, xrt::bo imgHndl={}) {
+    auto host2aie_nb(cv::Mat& img, xrt::bo imgHndl = {}, const xfcvDataMoverParams& params = xfcvDataMoverParams()) {
         assert(sizeof(DATA_TYPE) >= img.elemSize());
-		
+
         auto old_metadata_buffer_size = metadataSize();
         int old_img_buffer_size = imgSize();
 
-        bool bRecompute = false;
-        if ((mImageSize[0] != img.rows) || (mImageSize[1] != img.cols)) {
-            bRecompute = true;
-        }
+        if (params.mOutputImgSize == cv::Size(0, 0)) {
+            bool bRecompute = false;
+            if ((mImageSize[0] != img.rows) || (mImageSize[1] != img.cols)) {
+                bRecompute = true;
+            }
 
-        mpImage = &img;
-        mImageSize = {(uint16_t)img.rows, (uint16_t)img.cols, (uint16_t)img.elemSize()};
-        if (bRecompute == true) {
-            // Pack metadata
-            compute_metadata(img.size());
+            mpImage = &img;
+            mImageSize = {(uint16_t)img.rows, (uint16_t)img.cols, (uint16_t)img.elemSize()};
+            if (bRecompute == true) {
+                // Pack metadata
+                compute_metadata(img.size());
+            }
         }
 
         auto new_metadata_buffer_size = metadataSize();
         int new_img_buffer_size = imgSize();
-		
+
         for (int i = 0; i < CORES; i++) {
             if (new_metadata_buffer_size[i] > old_metadata_buffer_size[i]) {
                 free_metadata_buffer(i);
             }
         }
-        if ((new_img_buffer_size > old_img_buffer_size) || bool(imgHndl)/*(imgHndl != nullptr)*/) {
-			//printf("free...\n");
+        if ((new_img_buffer_size > old_img_buffer_size) || bool(imgHndl) /*(imgHndl != nullptr)*/) {
+            // printf("free...\n");
             free_buffer();
         }
-        mbUserHndl = bool(imgHndl);// != nullptr);
-		
-		//std::cout<<mbUserHndl<<std::endl;
-        
+        mbUserHndl = bool(imgHndl); // != nullptr);
+
+        // std::cout<<mbUserHndl<<std::endl;
+
         if (mbUserHndl) mImageBOHndl = imgHndl;
-		
-		//std::cout << "Image address : " << imgHndl.map() << std::endl;
-		//std::cout << "Local Image address : " << mImageBOHndl.map() << std::endl;
-		
+
+        // std::cout << "Image address : " << imgHndl.map() << std::endl;
+        // std::cout << "Local Image address : " << mImageBOHndl.map() << std::endl;
+
         // Allocate buffer
         alloc_metadata_buffer();
-		//printf("host2aie_nb....7\n");
+        // printf("host2aie_nb....7\n");
         alloc_buffer();
         // Copy input data to device buffer
         copy();
-		//printf("host2aie_nb....8\n");
-		
-		//std::cout<<bool(mImageBOHndl)<<std::endl;
-		//std::cout<<bool(mMetadataBOHndl[0])<<std::endl;
+        // printf("host2aie_nb....8\n");
+
+        // std::cout<<bool(mImageBOHndl)<<std::endl;
+        // std::cout<<bool(mMetadataBOHndl[0])<<std::endl;
         // Set args
         setArgs();
-		//printf("host2aie_nb....9\n");
+        // printf("host2aie_nb....9\n");
         // Start the kernel
-        //start();
+        // start();
 
         std::array<uint16_t, 4> ret = {mTileRowsPerCore, mTileColsPerCore, mTileRows, mTileCols};
         return ret;
     }
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == TILER)>::type* = nullptr>
-    auto host2aie_nb(xrt::bo *imgHndl, const cv::Size& size) {
-		//printf("host2aie_nb\n");
+    auto host2aie_nb(xrt::bo* imgHndl,
+                     const cv::Size& size,
+                     const xfcvDataMoverParams& params = xfcvDataMoverParams()) {
+        // printf("host2aie_nb\n");
         cv::Mat img(size, CV_8UC1); // This image is redundant in case a handle is passed
-        return host2aie_nb(img, (*imgHndl));
+        return host2aie_nb(img, (*imgHndl), params);
     }
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == STITCHER)>::type* = nullptr>
@@ -614,13 +623,13 @@ mStitcherRGBAtoRGB = stitcherRGBAtoRGB;
 
         // Set args
         setArgs();
-		//printf("aie2host_nb...done\n");
+        // printf("aie2host_nb...done\n");
         // Start the kernel
-        //start();
+        // start();
     }
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == STITCHER)>::type* = nullptr>
-    void aie2host_nb(xrt::bo *imgHndl, const cv::Size& size, std::array<uint16_t, 4> tiles) {
+    void aie2host_nb(xrt::bo* imgHndl, const cv::Size& size, std::array<uint16_t, 4> tiles) {
         cv::Mat img(size, CV_8UC1); // This image is redundant in case a handle is passed
         aie2host_nb(img, tiles, (*imgHndl));
     }
@@ -628,12 +637,11 @@ mStitcherRGBAtoRGB = stitcherRGBAtoRGB;
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == TILER)>::type* = nullptr>
     void wait() {
-		//printf("tiler_wait...\n");
+        // printf("tiler_wait...\n");
         for (auto& r : mPLRHandleArr) {
-			
             (void)r.wait();
-			
-			//printf("tiler_wait...2\n");
+
+            // printf("tiler_wait...2\n");
         }
     }
 
@@ -710,10 +718,10 @@ void xfcvDataMovers<KIND,
                     USE_GMIO>::compute_metadata(const cv::Size& inImgSize, const cv::Size& outImgSize) {
     mMetaDataList.clear();
     mMetaDataVec.clear();
-    
+
     cv::Size inputImgSize = inImgSize;
     cv::Size outputImgSize = outImgSize;
-    
+
     // Set default output image size to input image size
     if (outputImgSize == cv::Size(0, 0)) {
         outputImgSize = inputImgSize;
@@ -721,19 +729,19 @@ void xfcvDataMovers<KIND,
 
     mImageSize[0] = (uint16_t)inputImgSize.height;
     mImageSize[1] = (uint16_t)inputImgSize.width;
-    
+
     bool isOutputResize = false;
     if (inputImgSize.height == outputImgSize.height && inputImgSize.width == outputImgSize.width) {
         smartTileTilerGenerateMetaDataWithSpecifiedTileSize({inputImgSize.height, inputImgSize.width}, mMetaDataList,
                                                             mTileRows, mTileCols, {TILE_HEIGHT_MAX, TILE_WIDTH_MAX},
-        {mOverlapH, mOverlapH}, {mOverlapV, mOverlapV},
+                                                            {mOverlapH, mOverlapH}, {mOverlapV, mOverlapV},
                                                             AIE_VECTORIZATION_FACTOR, true);
     } else {
         isOutputResize = true;
         smartTileTilerGenerateMetaDataWithSpecifiedTileSize({inputImgSize.height, inputImgSize.width},
                                                             {outputImgSize.height, outputImgSize.width}, mMetaDataList,
                                                             mTileRows, mTileCols, AIE_VECTORIZATION_FACTOR, true);
-}
+    }
 
     char sMesg[2048];
     sMesg[0] = '\0';
@@ -741,31 +749,31 @@ void xfcvDataMovers<KIND,
             TILE_HEIGHT_MAX, TILE_WIDTH_MAX, mMetaDataList[0].tileHeight(), mMetaDataList[0].tileWidth(), mTileRows,
             mTileCols);
     std::cout << sMesg << std::endl;
-    //std::cout << "Entering into compute_metadata..." << std::endl;
+    // std::cout << "Entering into compute_metadata..." << std::endl;
 
     mTileRowsPerCore = (mTileRows + CORES - 1) / CORES;
     mTileColsPerCore = mTileCols;
 
     int OutOffset, InOffset, OutpositionV, OutpositionH, OutWidth, OutHeight, ImageStride;
-    
+
     int InputImageStride = (int)inputImgSize.width;
     int OutputImageStride = (int)outputImgSize.width;
-    //std::cout << "Entering into compute_metadata...(for loop)" << std::endl;
+    // std::cout << "Entering into compute_metadata...(for loop)" << std::endl;
 
-int i = 0;
+    int i = 0;
     for (auto& metaData : mMetaDataList) {
-if (isOutputResize == false) {
-        OutpositionV = metaData.positionV() + metaData.overlapSizeV_top();
-        OutpositionH = metaData.positionH() + metaData.overlapSizeH_left();
-        OutWidth = (metaData.tileWidth() - (metaData.overlapSizeH_left() + metaData.overlapSizeH_right()));
-        OutHeight = (metaData.tileHeight() - (metaData.overlapSizeV_top() + metaData.overlapSizeV_bottom()));
-} else {
+        if (isOutputResize == false) {
+            OutpositionV = metaData.positionV() + metaData.overlapSizeV_top();
+            OutpositionH = metaData.positionH() + metaData.overlapSizeH_left();
+            OutWidth = (metaData.tileWidth() - (metaData.overlapSizeH_left() + metaData.overlapSizeH_right()));
+            OutHeight = (metaData.tileHeight() - (metaData.overlapSizeV_top() + metaData.overlapSizeV_bottom()));
+        } else {
             OutpositionV = i++;
             OutpositionH = 0;
             OutWidth = OutputImageStride;
             OutHeight = 1;
         }
-        
+
         OutOffset = ((OutpositionV * OutputImageStride) + OutpositionH);
         InOffset = ((metaData.positionV() * InputImageStride) + metaData.positionH());
 
@@ -805,8 +813,9 @@ if (isOutputResize == false) {
         // std::cout << "Entering into compute_metadata...(for loop done)" << std::endl;
     }
 
-    //std::cout << "Entering into compute_metadata... done" << std::endl;
+    // std::cout << "Entering into compute_metadata... done" << std::endl;
 }
+
 /*
 template <DataMoverKind KIND,
           typename DATA_TYPE,

@@ -1140,6 +1140,43 @@ __attribute__((noinline)) void DemosaicRGBA<_b, INPUT_TILE_ELEMENTS>::runImpl(ad
     xf_demosaic_rgba_pixel_packing(mRChannel, mGChannel, mBChannel, out_ptr, image_width, image_height, image_width);
 }
 
+template <BayerPattern _b, int INPUT_TILE_ELEMENTS>
+__attribute__((noinline)) void DemosaicRGBA<_b, INPUT_TILE_ELEMENTS>::runImpl_ptr(uint8_t* img_in, uint8_t* img_out) {
+    uint8_t* img_in_ptr = img_in;
+    uint8_t* img_out_ptr = img_out;
+
+    const int16_t overlapT = xfGetTileOVLP_VT(img_in_ptr);
+    const int16_t overlapB = xfGetTileOVLP_VB(img_in_ptr);
+
+    int16_t image_width = xfGetTileWidth(img_in_ptr);
+    int16_t image_height = xfGetTileHeight(img_in_ptr);
+    const int16_t stride_out = (image_width << 2);
+    RUNTIME_ASSERT(((overlapT % 2) == 0), "Top overlap is always expected to be multiple of 2 (i.e. 0/2/4)");
+    RUNTIME_ASSERT(((overlapB % 2) == 0), "Bottom overlap is always expected to be multiple of 2 (i.e. 0/2/4)");
+    RUNTIME_ASSERT((image_width == 128), "Incorrect tile width, expected tile width is 128");
+
+    xfCopyMetaData(img_in_ptr, img_out_ptr);
+    xfUnsignedSaturation(img_out_ptr);
+    xfSetRGBAMetaData((void*)img_out_ptr);
+
+    uint8_t* in_ptr = (uint8_t*)xfGetImgDataPtr(img_in_ptr);
+    uint8_t* out_ptr = (uint8_t*)xfGetImgDataPtr(img_out_ptr);
+
+    const int16_t posH = xfGetTilePosH(img_in_ptr);
+    const int16_t posV = xfGetTilePosV(img_in_ptr);
+
+    xf_demosaic_interleave_input(in_ptr, mInEven, mInOdd, image_width, image_height);
+
+    image_height = image_height - (overlapT + overlapB);
+    uint8_t* in_e = (uint8_t*)(mInEven + (overlapT >> 1) * image_width);
+    uint8_t* in_o = (uint8_t*)(mInOdd + (overlapT >> 1) * image_width);
+    out_ptr = (uint8_t*)(out_ptr + overlapT * stride_out);
+
+    this->template xf_demosaic_wrap<_b>(in_e, in_o, mRChannel, mGChannel, mBChannel, posH, posV, image_width,
+                                        image_height, image_width);
+    xf_demosaic_rgba_pixel_packing(mBChannel, mGChannel, mRChannel, out_ptr, image_width, image_height, image_width);
+}
+
 } // aie
 } // cv
 } // xf

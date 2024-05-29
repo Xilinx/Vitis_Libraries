@@ -32,6 +32,6 @@ static constexpr int ELEM_WITH_METADATA = TILE_ELEMENTS + (xf::cv::aie::METADATA
 /* Graph specific configuration */
 static constexpr int VECTORIZATION_FACTOR = 32;
 
-static constexpr int __X86__ = 0;
+static constexpr int __X86_DEVICE__ = 0;
 
 #endif //__CONFIG_H_

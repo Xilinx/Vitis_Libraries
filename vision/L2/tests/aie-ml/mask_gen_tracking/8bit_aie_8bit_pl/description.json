@@ -1,12 +1,12 @@
 {
-    "name": "Xilinx tracking and mask generation AIE-ML Test", 
+    "name": "Xilinx tracking and mask generation 8bit_aie_8bit_pl AIE2 Test", 
     "description": "tracking and mask generation AIE-ML function example", 
-    "flow": "versal", 
+    "flow": "system", 
     "platform_allowlist": [
-        "vek280",
-        "vck190"
+        "vek280"
     ], 
     "platform_blocklist": [
+        "vck190",
         "vck5000",
         "v70"
     ], 
@@ -300,8 +300,6 @@
             }
         ], 
         "targets": [
-            "vitis_aie_sim",
-            "vitis_aie_x86sim",
             "vitis_hw_emu", 
             "vitis_hw_build", 
             "vitis_hw_run"

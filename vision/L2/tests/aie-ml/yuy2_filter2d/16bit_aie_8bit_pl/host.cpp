@@ -113,12 +113,11 @@ int main(int argc, char** argv) {
         //////////////////////////////////////////
         cv::Mat srcImageR, temp1, temp2;
         temp1 = cv::imread(argv[2], 1);
-		if(temp1.data == NULL){
-			std::cout << "Image not read" << std::endl;
-		}
+        if (temp1.data == NULL) {
+            std::cout << "Image not read" << std::endl;
+        }
         cvtColor_RGB2YUY2(temp1, temp2);
         temp2.convertTo(srcImageR, CV_8UC2);
-
 
         int width = srcImageR.cols;
         if (argc >= 4) width = atoi(argv[3]);
@@ -137,25 +136,25 @@ int main(int argc, char** argv) {
         std::cout << "Channels : " << srcImageR.channels() << std::endl;
         std::cout << "Element size : " << srcImageR.elemSize() << std::endl;
         std::cout << "Total pixels : " << srcImageR.total() << std::endl;
-        std::cout <<  "Type : " << srcImageR.type() << std::endl;
+        std::cout << "Type : " << srcImageR.type() << std::endl;
         std::cout << "Image size (end)" << std::endl;
         int op_width = srcImageR.cols;
         int op_height = srcImageR.rows;
 
-	std::cout << "Load xclbin " << std::endl;
+        std::cout << "Load xclbin " << std::endl;
         // Initializa device
         xF::deviceInit(xclBinName);
 
         // Load image
         std::cout << "Loading image...\n";
         void* srcData = nullptr;
-        //xrtBufferHandle src_hndl = xrtBOAlloc(xF::gpDhdl, (srcImageR.total() * srcImageR.elemSize()), 0, 0);
-        //srcData = xrtBOMap(src_hndl);
-	xrt::bo src_hndl = xrt::bo(xF::gpDhdl, (srcImageR.total() * srcImageR.elemSize()),0,0 );
-		//xrt::bo src_hndl = xrt::bo(xF::gpDhdl, 524288, 0, 0 );
-	std::cout << "alloc bo \n";
-	srcData = src_hndl.map();
-	std::cout << "pointer map \n";
+        // xrtBufferHandle src_hndl = xrtBOAlloc(xF::gpDhdl, (srcImageR.total() * srcImageR.elemSize()), 0, 0);
+        // srcData = xrtBOMap(src_hndl);
+        xrt::bo src_hndl = xrt::bo(xF::gpDhdl, (srcImageR.total() * srcImageR.elemSize()), 0, 0);
+        // xrt::bo src_hndl = xrt::bo(xF::gpDhdl, 524288, 0, 0 );
+        std::cout << "alloc bo \n";
+        srcData = src_hndl.map();
+        std::cout << "pointer map \n";
         memcpy(srcData, srcImageR.data, (srcImageR.total() * srcImageR.elemSize()));
         std::cout << "[DONE]\n";
 
@@ -175,10 +174,10 @@ int main(int argc, char** argv) {
         // Allocate output buffer
         std::cout << "Creating  output buffer...";
         void* dstData = nullptr;
-	xrt::bo dst_hndl = xrt::bo(xF::gpDhdl, (srcImageR.total() * srcImageR.elemSize()), 0,0);
-	dstData = dst_hndl.map();
-        //xrtBufferHandle dst_hndl = xrtBOAlloc(xF::gpDhdl, (srcImageR.total() * srcImageR.elemSize()), 0, 0);
-        //dstData = xrtBOMap(dst_hndl);
+        xrt::bo dst_hndl = xrt::bo(xF::gpDhdl, (srcImageR.total() * srcImageR.elemSize()), 0, 0);
+        dstData = dst_hndl.map();
+        // xrtBufferHandle dst_hndl = xrtBOAlloc(xF::gpDhdl, (srcImageR.total() * srcImageR.elemSize()), 0, 0);
+        // dstData = xrtBOMap(dst_hndl);
         cv::Mat dst(op_height, op_width, srcImageR.type(), dstData);
         std::cout << "[DONE]\n";
 
@@ -186,13 +185,12 @@ int main(int argc, char** argv) {
         xF::xfcvDataMovers<xF::TILER, int16_t, TILE_HEIGHT, TILE_WIDTH, VECTORIZATION_FACTOR> tiler(1, 1);
         xF::xfcvDataMovers<xF::STITCHER, int16_t, TILE_HEIGHT, TILE_WIDTH, VECTORIZATION_FACTOR> stitcher;
 
-		
 #if !__X86_DEVICE__
-	auto gHndl = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "filter_graph");
-	gHndl.reset();
-	
-	gHndl.update("filter_graph.k1.in[1]", float2fixed_coeff<10,16>(kData));
-	
+        auto gHndl = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "filter_graph");
+        gHndl.reset();
+
+        gHndl.update("filter_graph.k1.in[1]", float2fixed_coeff<10, 16>(kData));
+
 #endif
 
         START_TIMER
@@ -207,14 +205,13 @@ int main(int argc, char** argv) {
             auto tiles_sz = tiler.host2aie_nb(&src_hndl, srcImageR.size());
             stitcher.aie2host_nb(&dst_hndl, dst.size(), tiles_sz);
 #if !__X86_DEVICE__
-	    std::cout << "Graph run(" << (tiles_sz[0] * tiles_sz[1]) << ")\n";
+            std::cout << "Graph run(" << (tiles_sz[0] * tiles_sz[1]) << ")\n";
             gHndl.run(tiles_sz[0] * tiles_sz[1]);
             gHndl.wait();
 #endif
 
             tiler.wait();
             stitcher.wait();
-
 
             STOP_TIMER("YUY2 Filter2D function")
             std::cout << "Data transfer complete (Stitcher)\n";
@@ -243,10 +240,10 @@ int main(int argc, char** argv) {
                 }
             }
         }
-        //filter_graph.end();
-	#if !__X86_DEVICE__
-	    gHndl.end();
-	#endif
+// filter_graph.end();
+#if !__X86_DEVICE__
+        gHndl.end();
+#endif
         err_data.close();
         std::cout << "Test passed" << std::endl;
         std::cout << "Average time to process frame : " << (((float)tt.count() * 0.001) / (float)iterations) << " ms"

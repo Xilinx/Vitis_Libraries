@@ -4,7 +4,7 @@ The AMD Vitis™ Vision library is a set of 90+ kernels, optimized for AMD FPGAs
 
 ## Hardware and Software Requirements
 
-The Vitis Vision library is designed to work with Zynq™, Zynq Ultrascale+™, VCK190, and Alveo™ FPGAs. The library has been verified on zcu102, zcu104, vck190, U50, and U200 boards.
+The Vitis Vision library is designed to work with Zynq™, Zynq Ultrascale+™, Versal™, and Alveo™ FPGAs. The library has been verified on zcu102, zcu104, vck190, U50, and U200 boards. AIE-ML functions are verified on VEK280 board.
 
 ### Prerequisites
 
@@ -121,7 +121,7 @@ The Vitis library is organized into L1, L2, and L3 folders to facilitate various
 * Hardware emulation to check RTL level simulation
 * Build and test on hardware
 
-For AI Engine development ``L2/tests/aie`` , ``L2/tests/aie-ml`` has Makefile(s) and sources executing the following tasks:
+For AI Engine development ``L1/include/aie-ml`` , ``L2/tests/aie-ml`` has sources and Makefiles executing the following tasks:
 
 * AIE simulation
 * X86 simulation
@@ -185,8 +185,11 @@ This library is written by developers at
 **PL additions/enhancements**:
 	
     • Updates:
-    	• Updated ISP Pipeline example in L1 to a new format
-    	• Added ISP Mono example in L1	
+    	• Updated ISP Pipeline example in L1 to support runtime reconfiguration
+    	• Added ISP Mono example in L1
+    	• Updated runtime configurable support to color-correction-matrix function
+    	• Updated bayer-pattern as runtime parameter for demosaicing, gaincontrol functions
+    	• Added green-gain as runtime parameter for gaincontrol function
 
     • Lib Infra Changes:
     	• Minor fixes to API JSON file	
@@ -194,9 +197,33 @@ This library is written by developers at
 **AIE additions/enhancements:** :
 
     • New Functions:
-    	• Added 15 new AIE-ML functions targeting versal devices
+	    • Added 22 new AIE-ML functions targeting Versal devices:
+		• AccumulateWeighted
+		• Blacklevel
+	    	• Demosaic
+	    	• Denorm_resize
+	    	• Denormalize		
+	    	• Filter2D
+	    	• Gain Control
+	    	• Hybrid ISP		
+		• Mask Generation
+	    	• Mask Generation Tracking
+	    	• Normalize
+	    	• NMS
+	    	• PixelWise Select
+	    	• Resize
+	    	• Resize Nomalize
+	    	• RGBA2GRAY
+	    	• RGBA2YUV
+	    	• Transpose
+	    	• TopK
+	    	• Threshold		
+	    	• YUV2RGBA
+	    	• YUY2-Filter2d
+
     • Updates:
     	• Minor bug fixes
+    	• Removed AIE1 functions
 
 **Known issues**
 

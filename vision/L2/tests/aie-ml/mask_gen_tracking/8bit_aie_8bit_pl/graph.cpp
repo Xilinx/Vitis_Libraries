@@ -26,10 +26,9 @@ maskGenGraph maskGen;
 // initialize and run the dataflow graph
 #if defined(__AIESIM__) || defined(__X86SIM__)
 int main(int argc, char** argv) {
-
     int BLOCK_SIZE_in_Bytes = (TILE_WIDTH_IN * TILE_HEIGHT_IN * sizeof(uint8_t));
     int BLOCK_SIZE_out_Bytes = (TILE_WIDTH_OUT * TILE_HEIGHT_OUT * sizeof(uint8_t));
-    int BLOCK_SIZE_out_Bytes_track = 8; 
+    int BLOCK_SIZE_out_Bytes_track = 8;
 
     uint8_t* inputDataPredDepth = (uint8_t*)malloc(NUM_TILES * BLOCK_SIZE_in_Bytes);
     uint8_t* inputDataPredSeg = (uint8_t*)malloc(NUM_TILES * BLOCK_SIZE_in_Bytes);
@@ -59,42 +58,42 @@ int main(int argc, char** argv) {
     printf("fg_thresh:%d\nbg_thresh:%d\n", fg_thresh, bg_thresh);
 
     maskGenTrack.init();
-    maskGenTrack.update(maskGenTrack.depth_min,       (uint8_t)_MIN);
-    maskGenTrack.update(maskGenTrack.depth_max,       (uint8_t)_MAX);
-    maskGenTrack.update(maskGenTrack.thres_f_new,     fg_thresh);
-    maskGenTrack.update(maskGenTrack.thres_b_new,     bg_thresh);
+    maskGenTrack.update(maskGenTrack.depth_min, (uint8_t)_MIN);
+    maskGenTrack.update(maskGenTrack.depth_max, (uint8_t)_MAX);
+    maskGenTrack.update(maskGenTrack.thres_f_new, fg_thresh);
+    maskGenTrack.update(maskGenTrack.thres_b_new, bg_thresh);
     maskGenTrack.update(maskGenTrack.pred_seg_thresh, (uint8_t)PRED_SEG_THRESH);
     maskGenTrack.run(NUM_TILES);
     maskGenTrack.wait();
     maskGenTrack.end();
 
-
     uint32_t sum_r, non_zero_r;
     uint8_t depth_or_ref;
     uint8_t fg_thresh_track_r, bg_thresh_track_r;
     maskgen_track_param_ref(inputDataPredDepth, inputDataPredSeg, (uint8)_MIN, (uint8)_MAX, (uint8)_FGTH, (uint8)_BGTH,
-                            (uint8)PRED_SEG_THRESH, (int)(TILE_HEIGHT_IN * NUM_TILES), (int)(TILE_WIDTH_IN), depth_or_ref, sum_r,
-                            non_zero_r, fg_thresh_track_r, bg_thresh_track_r);   
+                            (uint8)PRED_SEG_THRESH, (int)(TILE_HEIGHT_IN * NUM_TILES), (int)(TILE_WIDTH_IN),
+                            depth_or_ref, sum_r, non_zero_r, fg_thresh_track_r, bg_thresh_track_r);
 
-    printf("REF : non zero:%d\n sum:%d\n dep_or:%d\n", non_zero_r, sum_r, depth_or_ref); 
+    printf("REF : non zero:%d\n sum:%d\n dep_or:%d\n", non_zero_r, sum_r, depth_or_ref);
 
     uint8_t dep_or = scalar_tracking_comp_utility((uint8_t)_FGTH, (uint8_t)_BGTH, (uint8_t)_MIN, (uint8_t)_MAX,
                                                   non_zero_r, sum_r, fg_thresh, bg_thresh);
 
-    printf("AIE : dep_or:%d\n", dep_or); 
+    printf("AIE : dep_or:%d\n", dep_or);
     printf("fg_thresh:%d\nbg_thresh:%d\n", fg_thresh, bg_thresh);
 
     maskGen.init();
-    maskGen.update(maskGen.depth_min,       (uint8_t)_MIN);
-    maskGen.update(maskGen.depth_max,       (uint8_t)_MAX);
-    maskGen.update(maskGen.thres_f_new,     fg_thresh);
-    maskGen.update(maskGen.thres_b_new,     bg_thresh);
+    maskGen.update(maskGen.depth_min, (uint8_t)_MIN);
+    maskGen.update(maskGen.depth_max, (uint8_t)_MAX);
+    maskGen.update(maskGen.thres_f_new, fg_thresh);
+    maskGen.update(maskGen.thres_b_new, bg_thresh);
     maskGen.run(NUM_TILES);
     maskGen.wait();
     maskGen.end();
 
     maskgen_ref(inputDataPredDepth, maskRef, (bool)MASKGEN_TRACKING, (uint8)_MIN, (uint8)_MAX, (uint8)_FGTH,
-                (uint8)_BGTH, fg_thresh_track_r, bg_thresh_track_r, (int)(TILE_HEIGHT_IN * NUM_TILES), (int)IMAGE_WIDTH_IN);
+                (uint8)_BGTH, fg_thresh_track_r, bg_thresh_track_r, (int)(TILE_HEIGHT_IN * NUM_TILES),
+                (int)IMAGE_WIDTH_IN);
 
     std::ofstream fref("reference.txt");
 

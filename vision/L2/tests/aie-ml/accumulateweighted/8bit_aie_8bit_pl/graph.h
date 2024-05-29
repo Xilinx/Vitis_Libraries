@@ -35,8 +35,6 @@ class myGraph : public adf::graph {
     input_plio in2;
     output_plio out1;
 
- 
-
     myGraph() {
         k1 = kernel::create(accumulate_weighted<uint8_t, uint16_t, 16>);
 

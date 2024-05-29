@@ -36,6 +36,6 @@ static constexpr int ELEM_WITH_METADATA_RGBA = (4 * TILE_ELEMENTS) + (xf::cv::ai
 /* Graph specific configuration */
 static constexpr int VECTORIZATION_FACTOR = 32;
 
-static constexpr int __X86__ = 0;
+static constexpr int __X86_DEVICE__ = 0;
 
 #endif //__CONFIG_H_

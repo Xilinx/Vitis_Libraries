@@ -30,9 +30,9 @@
 
 #define PARALLEL_FACTOR_16b 16 // Parallelization factor for 16b operations (16x mults)
 #define SRS_SHIFT 10           // SRS shift used can be increased if input data likewise adjusted)
- alignas(::aie::vector_decl_align) int16_t y_buff[2048];
- alignas(::aie::vector_decl_align) int16_t uv_buff[2048];
- alignas(::aie::vector_decl_align) int16_t y_filtered_buff[2048];
+alignas(::aie::vector_decl_align) int16_t y_buff[2048];
+alignas(::aie::vector_decl_align) int16_t uv_buff[2048];
+alignas(::aie::vector_decl_align) int16_t y_filtered_buff[2048];
 
 namespace xf {
 namespace cv {
@@ -55,7 +55,6 @@ __attribute__((noinline)) void yuy2_filter2D(adf::input_buffer<int16_t>& img_in,
     int16_t* in_img_ptr = (int16_t*)xfGetImgDataPtr(img_in_ptr);
     int16_t* out_img_ptr = (int16_t*)xfGetImgDataPtr(img_out_ptr);
 
- 
     int16_t* restrict y_filtered_ptr = (int16_t*)y_filtered_buff;
     int16_t* restrict y_ptr = (int16_t*)y_buff;
     int16_t* restrict uv_ptr = (int16_t*)uv_buff;
@@ -68,7 +67,7 @@ __attribute__((noinline)) void yuy2_filter2D(adf::input_buffer<int16_t>& img_in,
                         posn = image_width * i + j; // posn in img
                         ::aie::vector<int16_t, 16> y_temp, uv_temp;
                         std::tie(y_temp, uv_temp) = ::aie::interleave_unzip(
-                        ::aie::load_v<16>(in_img_ptr + posn), ::aie::load_v<16>(in_img_ptr + posn + 16), 1);
+                            ::aie::load_v<16>(in_img_ptr + posn), ::aie::load_v<16>(in_img_ptr + posn + 16), 1);
                         ::aie::store_v(y_ptr + (posn / 2), y_temp);
                         ::aie::store_v(uv_ptr + (posn / 2), uv_temp);
                     }
@@ -76,8 +75,7 @@ __attribute__((noinline)) void yuy2_filter2D(adf::input_buffer<int16_t>& img_in,
     }
 
     // filter
-    filter2D_aieml((int16_t*)y_ptr, coeff, (int16_t*)y_filtered_ptr, image_width / 2, image_width / 2,
-                            image_height);
+    filter2D_aieml((int16_t*)y_ptr, coeff, (int16_t*)y_filtered_ptr, image_width / 2, image_width / 2, image_height);
 
     // zip
     {

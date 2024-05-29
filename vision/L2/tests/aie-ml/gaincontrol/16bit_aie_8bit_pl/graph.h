@@ -28,10 +28,8 @@ class gaincontrolGraph : public adf::graph {
     kernel k1;
 
    public:
-  
     port<input> rgain;
     port<input> bgain;
-    
 
     input_plio in1;
     output_plio out1;
@@ -40,9 +38,8 @@ class gaincontrolGraph : public adf::graph {
         // create kernels
         k1 = kernel::create(gaincontrol<XF_BAYER_RG>);
 
-	in1 = input_plio::create("DataIn0", adf::plio_128_bits, "data/input.txt");
+        in1 = input_plio::create("DataIn0", adf::plio_128_bits, "data/input.txt");
         out1 = output_plio::create("DataOut0", adf::plio_128_bits, "data/output.txt");
-
 
         // create nets to connect kernels and IO ports
         connect<window<TILE_WINDOW_SIZE> >(in1.out[0], k1.in[0]);

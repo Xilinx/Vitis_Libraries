@@ -20,7 +20,6 @@ using namespace adf;
 // instantiate adf dataflow graph
 gaincontrolGraph gc;
 
-
 // initialize and run the dataflow graph
 #if defined(__AIESIM__) || defined(__X86SIM__)
 

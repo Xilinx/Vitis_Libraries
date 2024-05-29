@@ -188,11 +188,11 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/tests/lensshadingcorrection/lensshadingcorrecti
 
 ######################### binary container global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-VPP_FLAGS_lensshading_accel += --hls.clock 150000000:lensshading_accel
+VPP_FLAGS_lensshading_accel += --hls.clock 100000000:lensshading_accel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_krnl_lensshading += --clock.defaultFreqHz 150000000
+VPP_LDFLAGS_krnl_lensshading += --clock.defaultFreqHz 100000000
 else
-VPP_LDFLAGS_krnl_lensshading += --kernel_frequency 150
+VPP_LDFLAGS_krnl_lensshading += --kernel_frequency 100
 endif
 
 else 

@@ -30,7 +30,7 @@ class DenormResizeRunner {
 
    public:
     DenormResizeRunner(int nFBitsIn, int nFBitsAlpha, int nFBitsBeta, int nFBitsOut)
-        :  mnFBitsIn(nFBitsIn), mnFBitsAlpha(nFBitsAlpha), mnFBitsBeta(nFBitsBeta), mnFBitsOut(nFBitsOut) {}
+        : mnFBitsIn(nFBitsIn), mnFBitsAlpha(nFBitsAlpha), mnFBitsBeta(nFBitsBeta), mnFBitsOut(nFBitsOut) {}
 
     void run(input_window<int8_t>* input,
              output_window<uint8_t>* output,

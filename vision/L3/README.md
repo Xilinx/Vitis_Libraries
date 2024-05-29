@@ -4,7 +4,7 @@ This directory contains full applications, formed by stitching a pipeline of Vit
 
 'examples' folder contains the OpenCL host code file and a C++ accel file that demonstrate the call of Vitis Vision functions to build for Vitis.
 
-'examples/build' folder has the configuration file that would help modify the default configuration of the function.
+'examples/config' folder has the configuration file that would help modify the default configuration of the function.
 
 'tests' folder has sub-folders named according to the function and the configuration it would run. Each individual folder has Makefiles and config files that would perform software emulation, hardware emulation and hardware build of the corresponding function in examples folder, based on the platform the user selects.
 

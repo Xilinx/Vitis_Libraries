@@ -24,18 +24,18 @@ maskGenGraph maskGen;
 #if defined(__AIESIM__) || defined(__X86SIM__)
 int main(int argc, char** argv) {
     uint16_t fg_thresh, bg_thresh;
-    
+
     scalar_comp_utility((uint8_t)_FGTH, (uint8_t)_BGTH, (uint8_t)_MIN, (uint8_t)_MAX, fg_thresh, bg_thresh);
 
     maskGen.init();
     maskGen.update(maskGen.depth_min, (uint8_t)_MIN);
     maskGen.update(maskGen.depth_max, (uint8_t)_MAX);
-    maskGen.update(maskGen.thres_f_new,   fg_thresh);
-    maskGen.update(maskGen.thres_b_new,   bg_thresh);
+    maskGen.update(maskGen.thres_f_new, fg_thresh);
+    maskGen.update(maskGen.thres_b_new, bg_thresh);
     maskGen.run(1);
     maskGen.wait();
     maskGen.end();
-    
+
     return 0;
 }
 #endif

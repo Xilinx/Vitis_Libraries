@@ -27,10 +27,10 @@ namespace aie {
 template <typename T, int N>
 __attribute__((noinline)) auto compute_gain_vector_even(const uint8_t& gain) {
     ::aie::vector<T, N> coeff;
- 	::aie::vector<uint8_t, 16> coeff0=::aie::broadcast<uint8_t, 16>(gain);
-	::aie::vector<uint8_t, 16> coeff1=::aie::broadcast<uint8_t, 16>((1 << 6));
-	auto [v1, v2]=::aie::interleave_zip(coeff0, coeff1, 1);
-	coeff=::aie::concat(v1, v2);
+    ::aie::vector<uint8_t, 16> coeff0 = ::aie::broadcast<uint8_t, 16>(gain);
+    ::aie::vector<uint8_t, 16> coeff1 = ::aie::broadcast<uint8_t, 16>((1 << 6));
+    auto[v1, v2] = ::aie::interleave_zip(coeff0, coeff1, 1);
+    coeff = ::aie::concat(v1, v2);
 
     return coeff;
 }
@@ -38,10 +38,10 @@ __attribute__((noinline)) auto compute_gain_vector_even(const uint8_t& gain) {
 template <typename T, int N>
 __attribute__((noinline)) auto compute_gain_vector_odd(const uint8_t& gain) {
     ::aie::vector<T, N> coeff;
-   ::aie::vector<uint8_t, 16> coeff0=::aie::broadcast<uint8_t, 16>((1 << 6));
-    ::aie::vector<uint8_t, 16> coeff1=::aie::broadcast<uint8_t, 16>(gain);
-    auto [v1, v2]=::aie::interleave_zip(coeff0, coeff1, 1);
-    coeff=::aie::concat(v1, v2);
+    ::aie::vector<uint8_t, 16> coeff0 = ::aie::broadcast<uint8_t, 16>((1 << 6));
+    ::aie::vector<uint8_t, 16> coeff1 = ::aie::broadcast<uint8_t, 16>(gain);
+    auto[v1, v2] = ::aie::interleave_zip(coeff0, coeff1, 1);
+    coeff = ::aie::concat(v1, v2);
 
     return coeff;
 }
@@ -111,17 +111,12 @@ inline void gaincontrol(const T* restrict img_in,
     auto it = ::aie::begin_vector<N>(img_in);
     auto out = ::aie::begin_vector<N>(img_out);
     set_sat();
-    for (int i = 0; i < image_height / 2; i++) chess_prepare_for_pipelining  {
+    for (int i = 0; i < image_height / 2; i++) chess_prepare_for_pipelining {
             for (int j = 0; j < image_width; j += N) // even rows
-                chess_prepare_for_pipelining  {
-                    *out++ = ::aie::mul(coeff0, *it++).template to_vector<T>(6);
-                }
+                chess_prepare_for_pipelining { *out++ = ::aie::mul(coeff0, *it++).template to_vector<T>(6); }
             for (int j = 0; j < image_width; j += N) // odd rows
-                chess_prepare_for_pipelining  {
-                    *out++ = ::aie::mul(coeff1, *it++).template to_vector<T>(6);
-                }
+                chess_prepare_for_pipelining { *out++ = ::aie::mul(coeff1, *it++).template to_vector<T>(6); }
         }
-
 }
 
 template <int code>
@@ -129,14 +124,12 @@ void gaincontrol_api(input_window_uint8* img_in,
                      output_window_uint8* img_out,
                      const uint8_t& rgain,
                      const uint8_t& bgain) {
-
     uint8_t* img_in_ptr = (uint8_t*)img_in->ptr;
     uint8_t* img_out_ptr = (uint8_t*)img_out->ptr;
 
     const int img_width = xfGetTileWidth(img_in_ptr);
     const int img_height = xfGetTileHeight(img_in_ptr);
 
- 
     const uint16_t posH = xfGetTilePosH(img_in_ptr);
     const uint16_t posV = xfGetTilePosV(img_in_ptr);
 
@@ -148,7 +141,7 @@ void gaincontrol_api(input_window_uint8* img_in,
 
     ::aie::vector<uint8_t, 32> coeff0;
     ::aie::vector<uint8_t, 32> coeff1;
-   
+
     if (posH % 2 == 0) {
         if (posV % 2 == 0) {
             ComputeGainVector<uint8_t, 32, code>::compute_gain_kernel_coeff(rgain, bgain, coeff0, coeff1);
@@ -163,7 +156,6 @@ void gaincontrol_api(input_window_uint8* img_in,
         }
     }
     gaincontrol<uint8_t, 32, code, uint8_t>(in_ptr, out_ptr, img_width, img_height, coeff0, coeff1);
-
 }
 
 } // aie

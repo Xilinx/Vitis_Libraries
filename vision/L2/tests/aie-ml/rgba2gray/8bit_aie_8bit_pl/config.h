@@ -26,12 +26,12 @@ using DATA_TYPE = uint8_t;
 static constexpr int TILE_WIDTH = 64;
 static constexpr int TILE_HEIGHT = 16;
 static constexpr int TILE_ELEMENTS = (TILE_WIDTH * TILE_HEIGHT);
-static constexpr int ELEM_WITH_METADATA_IN = 4*TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / sizeof(DATA_TYPE));
+static constexpr int ELEM_WITH_METADATA_IN = 4 * TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / sizeof(DATA_TYPE));
 static constexpr int ELEM_WITH_METADATA_OUT = TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / sizeof(DATA_TYPE));
 
 /* Graph specific configuration */
 static constexpr int VECTORIZATION_FACTOR = 32;
 
-static constexpr int __X86__ = 0;
+static constexpr int __X86_DEVICE__ = 0;
 
 #endif //__CONFIG_H_

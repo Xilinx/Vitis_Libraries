@@ -20,9 +20,9 @@
 #include "config.h"
 #include "kernels.h"
 #include <adf.h>
-extern int16_t y_buff[TILE_ELEMENTS/2];
-extern int16_t uv_buff[TILE_ELEMENTS/2];
-extern int16_t y_filtered_buff[TILE_ELEMENTS/2];
+extern int16_t y_buff[TILE_ELEMENTS / 2];
+extern int16_t uv_buff[TILE_ELEMENTS / 2];
+extern int16_t y_filtered_buff[TILE_ELEMENTS / 2];
 
 using namespace adf;
 
@@ -49,15 +49,15 @@ class myGraph : public adf::graph {
         source(k1) = "xf_yuy2_filter2d.cc";
 
         auto y_buff1 = parameter::array(y_buff);
-	auto uv_buff1 = parameter::array(uv_buff);
-	auto y_filtered_buff1 = parameter::array(y_filtered_buff);
-	connect<>(y_buff1,k1);
-	connect<>(uv_buff1,k1);
-	connect<>(y_filtered_buff1,k1);
-	location<kernel>(k1) = tile(15, 0);
-	location<parameter>(y_buff1)={ address(15,0,0x0000) };
-	location<parameter>(uv_buff1)={ address(15,0,0x5000) };
-	location<parameter>(y_filtered_buff1)={ address(15,0,0x8000) };
+        auto uv_buff1 = parameter::array(uv_buff);
+        auto y_filtered_buff1 = parameter::array(y_filtered_buff);
+        connect<>(y_buff1, k1);
+        connect<>(uv_buff1, k1);
+        connect<>(y_filtered_buff1, k1);
+        location<kernel>(k1) = tile(15, 0);
+        location<parameter>(y_buff1) = {address(15, 0, 0x0000)};
+        location<parameter>(uv_buff1) = {address(15, 0, 0x5000)};
+        location<parameter>(y_filtered_buff1) = {address(15, 0, 0x8000)};
 
         // Initial mapping
         runtime<ratio>(k1) = 0.5;
