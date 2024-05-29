@@ -120,7 +120,7 @@ else
 AIETARGET := x86sim
 endif
 
-AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --pl-freq=400 
+AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --pl-freq=300 
 AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
@@ -190,15 +190,15 @@ VPP_FLAGS +=  -I PS_host -I $(XFLIB_DIR)/L1/include
 endif
 
 ######################### binary container global settings ##########################
-VPP_FLAGS_mm2s1 += --hls.clock 400000000:mm2s1
-VPP_FLAGS_s2mm0 += --hls.clock 400000000:s2mm0
-VPP_FLAGS_s2mm1 += --hls.clock 400000000:s2mm1
-VPP_FLAGS_s2mm2 += --hls.clock 400000000:s2mm2
-VPP_FLAGS_s2mm3 += --hls.clock 400000000:s2mm3
+VPP_FLAGS_mm2s1 += --hls.clock 300000000:mm2s1
+VPP_FLAGS_s2mm0 += --hls.clock 300000000:s2mm0
+VPP_FLAGS_s2mm1 += --hls.clock 300000000:s2mm1
+VPP_FLAGS_s2mm2 += --hls.clock 300000000:s2mm2
+VPP_FLAGS_s2mm3 += --hls.clock 300000000:s2mm3
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_scanline += --clock.defaultFreqHz 400000000
+VPP_LDFLAGS_scanline += --clock.defaultFreqHz 300000000
 else
-VPP_LDFLAGS_scanline += --kernel_frequency 400
+VPP_LDFLAGS_scanline += --kernel_frequency 300
 endif
 
 ifneq ($(SD_CARD_NEEDED), on)

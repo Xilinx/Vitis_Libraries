@@ -12,6 +12,10 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+.. note:: Known Issue
+
+    * L3/tests/scanline_AllinAIE interrupted issue with sw_emu target. This will get fixed in the next release.
+
 AMD Vitis |trade| Ultrasound library provides not only toolbox-style implementation of different L1/L2/L3 APIs for ultrasound image processing, but also an all-in-AIE implementation of scanline imaging algorithm. You can directly use the function combinations based on toolbox APIs to customize algorithms, and can also start from or refer to the all-in-AIE scanline implementation to obtain the final design.
 
 2022.2
