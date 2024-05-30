@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
     x_loc[2] = 64;
     y_loc[2] = 64;
     ROI_height[2] = 300;
-    ROI_width[2] = 301;
+    ROI_width[2] = 300;
 
     for (int i = 0; i < NUM_ROI; i++) {
         out_img[i].create(ROI_height[i], ROI_width[i], in_img.type());

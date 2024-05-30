@@ -30,14 +30,19 @@ typedef ap_uint<64> ap_uint64_t;
 /*  set the height and weight  */
 #define HEIGHT 2160
 #define WIDTH 3840
+#define MEMORYMAPPED_ARCH 1 // 0 is stream ,1 is memorymapped
 
+#if MEMORYMAPPED_ARCH
 #define XF_CV_DEPTH_IN -1
 #define XF_CV_DEPTH_OUT -1
-
 #define XF_CV_DEPTH_OUT_1 -1
 #define XF_CV_DEPTH_OUT_2 -1
-
-#define MEMORYMAPPED_ARCH 1
+#else
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT 2
+#define XF_CV_DEPTH_OUT_1 2
+#define XF_CV_DEPTH_OUT_2 2
+#endif
 
 #define NUM_ROI 3
 
@@ -45,15 +50,14 @@ typedef ap_uint<64> ap_uint64_t;
 #define GRAY 1
 
 #define NPPCX XF_NPPC1
-
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC1
 
 #define INPUT_CH_TYPE 1
 #define OUTPUT_CH_TYPE 1
 
-#define INPUT_PTR_WIDTH 8
-#define OUTPUT_PTR_WIDTH 8
+#define INPUT_PTR_WIDTH 64
+#define OUTPUT_PTR_WIDTH 64
 
 #endif
 // end of _XF_CROP_CONFIG_H_

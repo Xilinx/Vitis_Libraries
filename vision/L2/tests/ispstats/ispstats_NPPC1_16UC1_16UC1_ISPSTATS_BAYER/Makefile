@@ -57,11 +57,11 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := aws-vu9p-f1
+PLATFORM := u200
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  aws-vu9p-f1
+PLATFORM_ALLOWLIST +=  u200 aws-vu9p-f1
 PLATFORM_BLOCKLIST +=  vck190 u280 u250 zcu104
 
 include ./utils.mk
@@ -98,7 +98,7 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 ########################## Setting up Host Variables ##########################
 
 #Inclue Required Host Source Files
-ifneq (,$(shell echo $(XPLATFORM) | awk '/aws-vu9p-f1/'))
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 HOST_SRCS += $(XFLIB_DIR)/L2/examples/ispstats/xf_ispstats_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/tests/ispstats/ispstats_NPPC1_16UC1_16UC1_ISPSTATS_BAYER -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include

@@ -8307,7 +8307,8 @@ The following table describes the template and the function parameters.
    +-----------------------+------------------------------------------------------+
    | roi                   | ROI is a ``xf::cv::Rect`` object that consists of the|
    |                       | top left corner of the rectangle along with the      |
-   |                       | height and width of the rectangle.                   |
+   |                       | height and width of the rectangle. The dimension     |
+   |                       | values of roi must be multiple of NPC                |
    +-----------------------+------------------------------------------------------+
 
 
