@@ -1,10 +1,13 @@
+
+.. _rotate:
+
 .. 
    Copyright 2023 Advanced Micro Devices, Inc
   
 .. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 Rotate
-########
+========
 
 .. rubric:: API Syntax
 

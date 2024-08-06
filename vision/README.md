@@ -46,7 +46,7 @@ The following steps can help install the basic libs required to compile and link
   -DBUILD_JPEG=ON -DWITH_JPEG=ON -DWITH_PNG=ON
   -DBUILD_EXAMPLES=OFF -DINSTALL_C_EXAMPLES=OFF
   -DINSTALL_PYTHON_EXAMPLES=OFF -DWITH_OPENEXR=OFF
-  -DBUILD_OPENEXR=OFF < path-to-source-directory > *
+  -DBUILD_OPENEXR=OFF < path-to-source-directory >*
 7. Run the command: ``make all -j8``
 8. Run the command: ``make install``
 
@@ -190,36 +190,39 @@ This library is written by developers at
     	• Updated runtime configurable support to color-correction-matrix function
     	• Updated bayer-pattern as runtime parameter for demosaicing, gaincontrol functions
     	• Added green-gain as runtime parameter for gaincontrol function
+    	• Fixed a bug in ISP Pipeline L1 example for 10 bit input	
 
     • Lib Infra Changes:
     	• Minor fixes to API JSON file	
+    	• Documentation format fix	
 
 **AIE additions/enhancements:** :
 
     • New Functions:
-	    • Added 22 new AIE-ML functions targeting Versal devices:
+	    • Added 23 new AIE-ML functions (PLIO & GMIO) targeting Versal devices:
 		• AccumulateWeighted
+		• AWB-Norm-CCM		
 		• Blacklevel
 	    	• Demosaic
-	    	• Denorm_resize
+	    	• Denorm_resize (no GMIO)
 	    	• Denormalize		
 	    	• Filter2D
 	    	• Gain Control
 	    	• Hybrid ISP		
 		• Mask Generation
-	    	• Mask Generation Tracking
+	    	• Mask Generation Tracking (no GMIO)
 	    	• Normalize
-	    	• NMS
+	    	• NMS (no PLIO)
 	    	• PixelWise Select
-	    	• Resize
-	    	• Resize Nomalize
+	    	• Resize (no GMIO)
+	    	• Resize Nomalize (no GMIO)
 	    	• RGBA2GRAY
 	    	• RGBA2YUV
 	    	• Transpose
 	    	• TopK
 	    	• Threshold		
 	    	• YUV2RGBA
-	    	• YUY2-Filter2d
+	    	• YUY2-Filter2d (no GMIO)
 
     • Updates:
     	• Minor bug fixes

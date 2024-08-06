@@ -177,7 +177,8 @@
         }
     }, 
     "data": [
-        "LIB_DIR/data/HD.jpg" 
+        "LIB_DIR/data/HD.jpg",
+        "LIB_DIR/data/4k.jpg"
     ], 
     "gui": false, 
     "launch": [
@@ -197,7 +198,7 @@
         {
             "name": "hw", 
             "target": "hw", 
-            "cmd_args": "kernel.xclbin LIB_DIR/data/HD.jpg"
+            "cmd_args": "kernel.xclbin LIB_DIR/data/4k.jpg"
         }
     ], 
 "v++": { 

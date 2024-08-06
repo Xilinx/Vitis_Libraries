@@ -6,7 +6,7 @@
 .. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 Defect Detection Pipeline
-###########################
+===========================
 
 The Defect Detection accelerated application is a machine vision application that automates detection of defects in mangoes and 
 sorting in high-speed factory pipelines by using computer vision library functions.
@@ -35,7 +35,7 @@ both forward and backward passes and gives the number of defect pixels.
 |image2|
 
 pass_2()
-==========
+---------------
 
 .. rubric:: API Syntax
 

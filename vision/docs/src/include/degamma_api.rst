@@ -1,10 +1,13 @@
+
+.. _degamma:
+
 .. 
    Copyright 2023 Advanced Micro Devices, Inc
   
 .. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 Degamma
-########
+=========
 
 .. rubric:: API Syntax
 

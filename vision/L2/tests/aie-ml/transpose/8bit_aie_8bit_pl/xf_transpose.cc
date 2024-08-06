@@ -22,5 +22,5 @@ void transpose_api(adf::input_buffer<uint8_t>& input_metadata,
                    adf::output_buffer<uint8_t>& output,
                    int outputStride) {
     xf::cv::aie::Transpose1D transpose = xf::cv::aie::Transpose1D();
-    transpose.runImpl(input_metadata, input_data, output, outputStride);
+    transpose.runImpl(input_metadata, input_data, output, outputStride, CHANNELS);
 }

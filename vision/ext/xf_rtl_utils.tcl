@@ -34,7 +34,7 @@ proc configDM {args} {
     }
 
     if {![info exists DDRDataWidth]} {
-        if {[dict get $PixelInfo($AIEPixelType) width] == 8} {
+        if {[dict get $PixelInfo($AIEPixelType) width] == [dict get $PixelInfo($HostPixelType) width]} {
             set DDRDataWidth 128
         } else {
             set DDRDataWidth 64

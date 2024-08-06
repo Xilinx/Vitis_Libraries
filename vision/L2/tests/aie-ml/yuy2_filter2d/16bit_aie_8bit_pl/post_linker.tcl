@@ -1,7 +1,10 @@
-set CurrentPath [pwd]
+global env
 
-set BasePath [regsub {\/L[123]\/.*$} [pwd] ""]
-set script [regsub {\/L[123]\/.*$} [pwd] ""]/ext/xf_rtl_utils.tcl
+if {[info exists ::env(XF_PROJ_ROOT)]} {
+    set script $env(XF_PROJ_ROOT)/ext/xf_rtl_utils.tcl 
+} else {
+    set script [regsub {\/L[123]\/.*$} [pwd] ""]/ext/xf_rtl_utils.tcl
+}
 
 source -notrace $script
 

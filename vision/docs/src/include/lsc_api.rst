@@ -1,10 +1,12 @@
+.. _lens_shading_correction:
+
 .. 
    Copyright 2023 Advanced Micro Devices, Inc
   
 .. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 Lens Shading Correction
-########################
+========================
 
 Vignetting/Lens shading refers to the fall-off pixel intensity from the centre towards the edges of the image.
 In this algorithm, vignette is corrected by considering the distance between the centre pixel and actual image pixel position. This distance is used to calculate intensity gain per pixel per channel which is used for the correction.

@@ -8716,8 +8716,11 @@ The following table describes the template and the function parameters.
 ..
    .. rubric:: Resource Utilization
 
+
 .. _degamma:
 .. include:: include/degamma_api.rst
+
+
 
 .. _demosaicing:
 

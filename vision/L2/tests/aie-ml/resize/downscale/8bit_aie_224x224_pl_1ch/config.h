@@ -23,8 +23,8 @@
 #include <cmath>
 
 using DATA_TYPE = uint8_t;
-static constexpr int IMAGE_WIDTH_IN = 1920;
-static constexpr int IMAGE_HEIGHT_IN = 1080;
+static constexpr int IMAGE_WIDTH_IN = 3840;
+static constexpr int IMAGE_HEIGHT_IN = 2160;
 static constexpr int IMAGE_WIDTH_OUT = 224;
 static constexpr int IMAGE_HEIGHT_OUT = 224;
 
