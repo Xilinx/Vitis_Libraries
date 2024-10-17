@@ -1,7 +1,7 @@
 @Library('pipeline-library')_
 
-VitisLibPipeline (branch: 'next', libname: 'xf_dsp', TARGETS: 'hls_csim:hls_csynth:hls_cosim:vitis_sw_emu:vitis_hw_emu:vitis_hw_build:vitis_aie_sim:vitis_aie_x86sim',
-                  upstream_dependencies: 'xf_utils_hw,next,../utils; xf_data_mover,next,../data_mover; dsplib_internal_scripts,main,../dsplib_internal_scripts',
+VitisLibPipeline (branch: 'main', libname: 'xf_dsp', TARGETS: 'hls_csim:hls_csynth:hls_cosim:vitis_sw_emu:vitis_hw_emu:vitis_hw_build:vitis_aie_sim:vitis_aie_x86sim',
+                  upstream_dependencies: 'xf_utils_hw,main,../utils; xf_data_mover,main,../data_mover; dsplib_internal_scripts,main,../dsplib_internal_scripts',
                   devtest: 'RunDeploy.sh', TOOLVERSION: '2024.1_stable_latest',
                   email: 'berry@amd.com',
                   post_launch: '../dsplib_internal_scripts/scripts/jenkins/post_launch_wrapper.sh |& tee -a reporting_log.txt')

@@ -1,32 +1,32 @@
 Library Element,AIE_VARIANT,DATA_TYPE,COEFF_TYPE,POINT_SIZE,WINDOW_VSIZE,DYN_PT_SIZE,UUT_SSR,API_IO,Dynamic Power,Latency,Throughput,NUM_BANKS,NUM_AIE,DATA_MEMORY,PROGRAM_MEMORY
-fft_window,1,cfloat,float,16,16,0,1,0,0.702 W,219 ns,285 MSa/s,5,1,3270,2046
-fft_window,1,cint16,int16,64,64,0,4,0,0.748 W,1120 ns,288 MSa/s,12,1,4144,4030
-fft_window,2,cint16,int16,64,64,0,1,0,0.463 W,200 ns,1000 MSa/s,5,1,3728,1920
-fft_window,1,cint16,int16,64,64,0,1,0,0.705 W,193 ns,941 MSa/s,5,1,3751,2124
-fft_window,2,cint16,int16,512,512,0,1,0,0.466 W,1097 ns,1000 MSa/s,5,1,13584,1936
-fft_window,1,cint16,int16,512,512,0,1,0,0.714 W,1080 ns,1000 MSa/s,5,1,13607,2090
-fft_window,1,cint16,int16,32,32,0,2,0,0.727 W,599 ns,271 MSa/s,7,1,3178,2824
-fft_window,2,cint16,int16,32,32,0,1,0,0.462 W,177 ns,761 MSa/s,5,1,3024,1824
-fft_window,1,cint16,int16,32,32,0,1,0,0.702 W,235 ns,533 MSa/s,5,1,3047,2080
-fft_window,1,cint16,int16,256,256,0,16,1,1.463 W,205 ns,8000 MSa/s,16,16,37744,1254 1254 1254 1254 1254 1254 1254 1254 1254 1254 1254 1254 1254 1254 1254 1254
-fft_window,1,cint16,int16,256,256,0,16,0,1.085 W,2712 ns,566 MSa/s,32,2,12152,6510 6510
-fft_window,2,cint16,int16,256,256,0,1,0,0.465 W,584 ns,1000 MSa/s,5,1,7952,1936
-fft_window,1,cint16,int16,256,256,0,1,0,0.71 W,568 ns,1000 MSa/s,5,1,7975,2106
-fft_window,1,cint16,int16,16,64,0,1,0,0.702 W,193 ns,941 MSa/s,5,1,3463,2298
-fft_window,1,cint32,int32,16,16,0,1,0,0.701 W,225 ns,271 MSa/s,5,1,3015,2036
-fft_window,1,cint16,int16,16,512,0,1,0,0.715 W,640 ns,1000 MSa/s,5,1,10631,2410
-fft_window,1,cint16,int16,16,32,0,1,0,0.701 W,229 ns,542 MSa/s,5,1,2951,2188
-fft_window,1,cint16,int16,16,256,0,1,0,0.71 W,535 ns,1000 MSa/s,5,1,6535,2410
-fft_window,1,cint16,int16,16,2048,0,1,0,0.727 W,2330 ns,1000 MSa/s,5,1,35207,2410
-fft_window,1,cint16,int16,16,16,0,1,1,0.688 W,206 ns,500 MSa/s,1,1,2359,1254
-fft_window,2,cint16,int16,16,16,0,1,0,0.462 W,241 ns,400 MSa/s,5,1,2672,1952
-fft_window,1,cint16,int16,16,16,0,1,0,0.7 W,296 ns,280 MSa/s,5,1,2695,2158
-fft_window,1,cint16,int16,16,128,0,1,0,0.706 W,313 ns,1000 MSa/s,5,1,4487,2410
-fft_window,1,cint16,int16,16,1024,0,1,0,0.72 W,1204 ns,1000 MSa/s,5,1,18823,2410
-fft_window,1,cint16,int16,128,128,0,8,0,0.882 W,2692 ns,285 MSa/s,16,1,6076,6516
-fft_window,2,cint16,int16,128,128,0,1,0,0.464 W,329 ns,1000 MSa/s,5,1,5136,1936
-fft_window,1,cint16,int16,128,128,0,1,0,0.706 W,312 ns,1000 MSa/s,5,1,5159,2106
-fft_window,2,cint16,int16,1024,1024,0,1,0,0.464 W,2124 ns,1000 MSa/s,5,1,24848,1952
-fft_window,1,cint16,int16,1024,1024,0,1,0,0.72 W,2100 ns,1000 MSa/s,6,1,24871,2098
-fft_window,1,cint16,int16,16,4096,0,1,0,0.75 W,4583 ns,1000 MSa/s,9,1,67975,2410
-fft_window,1,cint32,int32,256,1024,0,4,1,0.862 W,82 ns,3683 MSa/s,4,4,11996,1858 1858 1858 1858
+fft_window,AIE,cfloat,float,16,16,0,1,0,0.702 W,219 ns,285 MSa/s,5,1,3270,2046
+fft_window,AIE,cint16,int16,1024,1024,0,1,0,0.72 W,2100 ns,1000 MSa/s,6,1,24871,2098
+fft_window,AIE,cint16,int16,128,128,0,1,0,0.706 W,312 ns,1000 MSa/s,5,1,5159,2106
+fft_window,AIE,cint16,int16,128,128,0,8,0,0.882 W,2692 ns,285 MSa/s,16,1,6076,6516
+fft_window,AIE,cint16,int16,16,1024,0,1,0,0.72 W,1204 ns,1000 MSa/s,5,1,18823,2410
+fft_window,AIE,cint16,int16,16,128,0,1,0,0.706 W,313 ns,1000 MSa/s,5,1,4487,2410
+fft_window,AIE,cint16,int16,16,16,0,1,0,0.7 W,296 ns,280 MSa/s,5,1,2695,2158
+fft_window,AIE,cint16,int16,16,16,0,1,1,0.688 W,206 ns,500 MSa/s,1,1,2359,1254
+fft_window,AIE,cint16,int16,16,2048,0,1,0,0.727 W,2330 ns,1000 MSa/s,5,1,35207,2410
+fft_window,AIE,cint16,int16,16,256,0,1,0,0.71 W,535 ns,1000 MSa/s,5,1,6535,2410
+fft_window,AIE,cint16,int16,16,32,0,1,0,0.701 W,229 ns,542 MSa/s,5,1,2951,2188
+fft_window,AIE,cint16,int16,16,4096,0,1,0,0.75 W,4583 ns,1000 MSa/s,9,1,67975,2410
+fft_window,AIE,cint16,int16,16,512,0,1,0,0.715 W,640 ns,1000 MSa/s,5,1,10631,2410
+fft_window,AIE,cint16,int16,16,64,0,1,0,0.702 W,193 ns,941 MSa/s,5,1,3463,2298
+fft_window,AIE,cint16,int16,256,256,0,1,0,0.71 W,568 ns,1000 MSa/s,5,1,7975,2106
+fft_window,AIE,cint16,int16,256,256,0,16,0,1.085 W,2712 ns,566 MSa/s,32,2,12152,6510 6510
+fft_window,AIE,cint16,int16,256,256,0,16,1,1.463 W,205 ns,8000 MSa/s,16,16,37744,1254 1254 1254 1254 1254 1254 1254 1254 1254 1254 1254 1254 1254 1254 1254 1254
+fft_window,AIE,cint16,int16,32,32,0,1,0,0.702 W,235 ns,533 MSa/s,5,1,3047,2080
+fft_window,AIE,cint16,int16,32,32,0,2,0,0.727 W,599 ns,271 MSa/s,7,1,3178,2824
+fft_window,AIE,cint16,int16,512,512,0,1,0,0.714 W,1080 ns,1000 MSa/s,5,1,13607,2090
+fft_window,AIE,cint16,int16,64,64,0,1,0,0.705 W,193 ns,941 MSa/s,5,1,3751,2124
+fft_window,AIE,cint16,int16,64,64,0,4,0,0.748 W,1120 ns,288 MSa/s,12,1,4144,4030
+fft_window,AIE,cint32,int32,16,16,0,1,0,0.701 W,225 ns,271 MSa/s,5,1,3015,2036
+fft_window,AIE,cint32,int32,256,1024,0,4,1,0.862 W,82 ns,3683 MSa/s,4,4,11996,1858 1858 1858 1858
+fft_window,AIE-ML,cint16,int16,1024,1024,0,1,0,0.464 W,2124 ns,1000 MSa/s,5,1,24848,1952
+fft_window,AIE-ML,cint16,int16,128,128,0,1,0,0.464 W,329 ns,1000 MSa/s,5,1,5136,1936
+fft_window,AIE-ML,cint16,int16,16,16,0,1,0,0.462 W,241 ns,400 MSa/s,5,1,2672,1952
+fft_window,AIE-ML,cint16,int16,256,256,0,1,0,0.465 W,584 ns,1000 MSa/s,5,1,7952,1936
+fft_window,AIE-ML,cint16,int16,32,32,0,1,0,0.462 W,177 ns,761 MSa/s,5,1,3024,1824
+fft_window,AIE-ML,cint16,int16,512,512,0,1,0,0.466 W,1097 ns,1000 MSa/s,5,1,13584,1936
+fft_window,AIE-ML,cint16,int16,64,64,0,1,0,0.463 W,200 ns,1000 MSa/s,5,1,3728,1920

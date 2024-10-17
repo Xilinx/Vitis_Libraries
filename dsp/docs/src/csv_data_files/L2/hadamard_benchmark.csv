@@ -1,62 +1,62 @@
 Library Element,AIE_VARIANT,T_DATA_A,T_DATA_B,DIM_SIZE,NUM_FRAMES,UUT_SSR,API_IO,Dynamic Power,Latency,Throughput,NUM_BANKS,NUM_AIE,DATA_MEMORY,PROGRAM_MEMORY
-hadamard,1,cfloat,float,16,1,1,1,0.685 W,108 ns,285 MSa/s,1,1,1162,1342
-hadamard,1,float,float,2048,1,1,1,0.696 W,77 ns,961 MSa/s,1,1,1161,13792
-hadamard,2,float,float,25,1,1,0,0.482 W,462 ns,285 MSa/s,6,1,1932,1712
-hadamard,1,int16,cint16,256,1,1,0,0.725 W,699 ns,1000 MSa/s,7,1,6312,1986
-hadamard,2,int16,cint16,32,1,1,0,0.468 W,337 ns,592 MSa/s,7,1,1809,1360
-hadamard,1,int16,cint32,128,1,1,0,0.722 W,763 ns,500 MSa/s,7,1,5801,2044
-hadamard,2,int16,cint32,128,1,1,0,0.474 W,870 ns,447 MSa/s,7,1,5777,2336
-hadamard,2,int16,cint32,80,1,5,0,0.831 W,2970 ns,270 MSa/s,23,2,5221,1408 2112
-hadamard,1,int16,int16,1024,1,1,0,0.739 W,721 ns,2000 MSa/s,7,1,13480,3010
-hadamard,1,int16,int16,128,1,8,1,0.997 W,215 ns,3657 MSa/s,8,8,9552,1264 1264 1264 1264 1264 1264 1264 1264
-hadamard,1,int16,int16,16,1,1,0,0.704 W,523 ns,222 MSa/s,7,1,1384,1538
-hadamard,2,int16,int16,16,1,1,0,0.466 W,498 ns,326 MSa/s,6,1,1360,1296
-hadamard,1,int16,int16,16,8,1,0,0.707 W,248 ns,1523 MSa/s,7,1,2728,1670
-hadamard,2,int16,int16,16,8,1,0,0.469 W,168 ns,2000 MSa/s,6,1,2704,1424
-hadamard,2,int16,int16,32,1,2,0,0.567 W,989 ns,296 MSa/s,9,1,1553,1536
-hadamard,1,int16,int16,64,1,1,1,0.685 W,105 ns,1142 MSa/s,1,1,1194,1402
-hadamard,2,int16,int32,16,4,1,0,0.473 W,270 ns,1000 MSa/s,7,1,2448,1504
-hadamard,1,int32,cint16,16,1,1,0,0.707 W,383 ns,213 MSa/s,7,1,1672,1538
-hadamard,2,int32,cint32,256,1,16,0,1.907 W,2375 ns,752 MSa/s,62,4,14928,2240 2240 2240 2240
-hadamard,2,int32,cint32,64,1,4,0,0.7 W,2032 ns,190 MSa/s,15,1,3732,2240
-hadamard,1,int32,cint32,700,1,5,0,0.943 W,1106 ns,1736 MSa/s,23,2,30323,2026 3034
-hadamard,1,int32,int16,128,1,1,0,0.718 W,233 ns,1000 MSa/s,7,1,3720,1738
-hadamard,1,int32,int16,32,1,1,0,0.707 W,293 ns,432 MSa/s,7,1,1800,1548
-hadamard,2,int32,int16,40,1,1,0,0.471 W,220 ns,701 MSa/s,7,1,1968,1408
-hadamard,2,int32,int16,512,1,1,0,0.489 W,773 ns,1000 MSa/s,5,1,11408,2848
-hadamard,2,int32,int32,128,1,8,0,1.059 W,1742 ns,516 MSa/s,32,2,5414,2080 2080
-hadamard,1,int32,int32,16,16,1,1,0.691 W,71 ns,955 MSa/s,1,1,1162,1372
-hadamard,1,int32,int32,27,1,1,0,0.708 W,293 ns,432 MSa/s,7,1,1928,1538
-hadamard,2,float,float,2048,1,2,0,0.648 W,12902 ns,443 MSa/s,11,1,50317,15952
-hadamard,2,int32,int32,512,1,1,0,0.515 W,896 ns,1000 MSa/s,6,1,13456,3920
-hadamard,1,cint32,int32,256,1,1,1,0.689 W,92 ns,462 MSa/s,1,1,1163,4064
-hadamard,1,cint32,int16,64,1,1,0,0.715 W,261 ns,500 MSa/s,7,1,3497,1876
-hadamard,2,cint16,cint16,16,16,1,0,0.475 W,371 ns,1000 MSa/s,7,1,7312,1536
-hadamard,1,cint16,cint16,16,4,1,1,0.687 W,75 ns,800 MSa/s,1,1,1162,1372
-hadamard,1,cint16,cint16,32,1,1,0,0.707 W,293 ns,432 MSa/s,7,1,1928,1538
-hadamard,1,cint16,cint32,1024,1,1,0,0.743 W,5180 ns,500 MSa/s,7,1,42120,5728
-hadamard,2,cint16,cint32,1024,1,1,0,0.482 W,5195 ns,500 MSa/s,7,1,42128,4528
-hadamard,2,cint16,cint32,16,1,1,0,0.467 W,317 ns,313 MSa/s,7,1,1808,1312
-hadamard,1,cint16,cint32,16,2,1,0,0.711 W,306 ns,415 MSa/s,7,1,2440,1590
-hadamard,1,cint16,cint32,512,1,1,0,0.739 W,2620 ns,500 MSa/s,7,1,21640,3658
-hadamard,2,cint16,cint32,64,4,4,0,0.697 W,815 ns,941 MSa/s,15,1,11411,2208
-hadamard,1,cint16,int16,128,4,4,0,0.83 W,1008 ns,1458 MSa/s,16,1,11435,2688
-hadamard,1,cint16,int16,16,1,1,0,0.705 W,382 ns,216 MSa/s,7,1,1512,1516
-hadamard,1,cint16,int16,16,32,1,0,0.732 W,656 ns,1000 MSa/s,7,1,11432,1766
-hadamard,1,cint16,int16,16,64,1,0,0.739 W,1220 ns,1000 MSa/s,7,1,21672,1766
-hadamard,2,cint16,int16,256,1,16,0,1.856 W,1556 ns,1153 MSa/s,61,4,9808,2016 2016 2016 2016
-hadamard,1,cint16,int16,256,1,16,1,1.365 W,151 ns,5688 MSa/s,16,16,19120,1264 1264 1264 1264 1264 1264 1264 1264 1264 1264 1264 1264 1264 1264 1264 1264
-hadamard,1,cint16,int16,32,1,2,0,0.753 W,853 ns,225 MSa/s,9,1,1833,1820
-hadamard,1,cint16,int16,512,1,1,0,0.732 W,721 ns,1000 MSa/s,7,1,11432,2978
-hadamard,1,cint16,int32,16,1,1,0,0.706 W,383 ns,213 MSa/s,7,1,1672,1538
-hadamard,1,cint16,int32,16,128,1,1,0.693 W,134 ns,498 MSa/s,1,1,1162,1528
-hadamard,2,cint32,cint16,256,1,1,0,0.477 W,706 ns,500 MSa/s,5,1,11408,2080
-hadamard,1,cint32,cint32,16,128,1,1,0.702 W,71 ns,498 MSa/s,1,1,1162,1532
-hadamard,2,cint32,cint32,16,2,1,0,0.473 W,170 ns,500 MSa/s,6,1,2704,1456
-hadamard,1,cint32,cint32,256,1,16,0,1.274 W,1172 ns,876 MSa/s,64,4,16944,2540 2540 2540 2540
-hadamard,2,cint32,cint32,256,4,4,0,0.753 W,1597 ns,1542 MSa/s,16,1,50323,2752
-hadamard,1,cint32,cint32,256,4,4,1,0.839 W,74 ns,1935 MSa/s,4,4,4648,1846 1846 1846 1846
-hadamard,1,cint32,cint32,64,1,4,1,0.815 W,103 ns,1163 MSa/s,4,4,4648,1334 1334 1334 1334
-hadamard,1,cint32,int16,254,1,1,1,0.697 W,203 ns,348 MSa/s,1,1,1198,5378
-hadamard,2,cint32,int32,256,1,1,0,0.518 W,1345 ns,435 MSa/s,5,1,11409,5232
-hadamard,2,int32,int32,64,1,1,0,0.48 W,260 ns,771 MSa/s,6,1,2704,1616
+hadamard,AIE,cfloat,float,16,1,1,1,0.685 W,108 ns,285 MSa/s,1,1,1162,1342
+hadamard,AIE,cint16,cint16,16,4,1,1,0.687 W,75 ns,800 MSa/s,1,1,1162,1372
+hadamard,AIE,cint16,cint16,32,1,1,0,0.707 W,293 ns,432 MSa/s,7,1,1928,1538
+hadamard,AIE,cint16,cint32,1024,1,1,0,0.743 W,5180 ns,500 MSa/s,7,1,42120,5728
+hadamard,AIE,cint16,cint32,16,2,1,0,0.711 W,306 ns,415 MSa/s,7,1,2440,1590
+hadamard,AIE,cint16,cint32,512,1,1,0,0.739 W,2620 ns,500 MSa/s,7,1,21640,3658
+hadamard,AIE,cint16,int16,128,4,4,0,0.83 W,1008 ns,1458 MSa/s,16,1,11435,2688
+hadamard,AIE,cint16,int16,16,1,1,0,0.705 W,382 ns,216 MSa/s,7,1,1512,1516
+hadamard,AIE,cint16,int16,16,32,1,0,0.732 W,656 ns,1000 MSa/s,7,1,11432,1766
+hadamard,AIE,cint16,int16,16,64,1,0,0.739 W,1220 ns,1000 MSa/s,7,1,21672,1766
+hadamard,AIE,cint16,int16,256,1,16,1,1.365 W,151 ns,5688 MSa/s,16,16,19120,1264 1264 1264 1264 1264 1264 1264 1264 1264 1264 1264 1264 1264 1264 1264 1264
+hadamard,AIE,cint16,int16,32,1,2,0,0.753 W,853 ns,225 MSa/s,9,1,1833,1820
+hadamard,AIE,cint16,int16,512,1,1,0,0.732 W,721 ns,1000 MSa/s,7,1,11432,2978
+hadamard,AIE,cint16,int32,16,1,1,0,0.706 W,383 ns,213 MSa/s,7,1,1672,1538
+hadamard,AIE,cint16,int32,16,128,1,1,0.693 W,134 ns,498 MSa/s,1,1,1162,1528
+hadamard,AIE,cint32,cint32,16,128,1,1,0.702 W,71 ns,498 MSa/s,1,1,1162,1532
+hadamard,AIE,cint32,cint32,256,1,16,0,1.274 W,1172 ns,876 MSa/s,64,4,16944,2540 2540 2540 2540
+hadamard,AIE,cint32,cint32,256,4,4,1,0.839 W,74 ns,1935 MSa/s,4,4,4648,1846 1846 1846 1846
+hadamard,AIE,cint32,cint32,64,1,4,1,0.815 W,103 ns,1163 MSa/s,4,4,4648,1334 1334 1334 1334
+hadamard,AIE,cint32,int16,254,1,1,1,0.697 W,203 ns,348 MSa/s,1,1,1198,5378
+hadamard,AIE,cint32,int16,64,1,1,0,0.715 W,261 ns,500 MSa/s,7,1,3497,1876
+hadamard,AIE,cint32,int32,256,1,1,1,0.689 W,92 ns,462 MSa/s,1,1,1163,4064
+hadamard,AIE,float,float,2048,1,1,1,0.696 W,77 ns,961 MSa/s,1,1,1161,13792
+hadamard,AIE,int16,cint16,256,1,1,0,0.725 W,699 ns,1000 MSa/s,7,1,6312,1986
+hadamard,AIE,int16,cint32,128,1,1,0,0.722 W,763 ns,500 MSa/s,7,1,5801,2044
+hadamard,AIE,int16,int16,1024,1,1,0,0.739 W,721 ns,2000 MSa/s,7,1,13480,3010
+hadamard,AIE,int16,int16,128,1,8,1,0.997 W,215 ns,3657 MSa/s,8,8,9552,1264 1264 1264 1264 1264 1264 1264 1264
+hadamard,AIE,int16,int16,16,1,1,0,0.704 W,523 ns,222 MSa/s,7,1,1384,1538
+hadamard,AIE,int16,int16,16,8,1,0,0.707 W,248 ns,1523 MSa/s,7,1,2728,1670
+hadamard,AIE,int16,int16,64,1,1,1,0.685 W,105 ns,1142 MSa/s,1,1,1194,1402
+hadamard,AIE,int32,cint16,16,1,1,0,0.707 W,383 ns,213 MSa/s,7,1,1672,1538
+hadamard,AIE,int32,cint32,700,1,5,0,0.943 W,1106 ns,1736 MSa/s,23,2,30323,2026 3034
+hadamard,AIE,int32,int16,128,1,1,0,0.718 W,233 ns,1000 MSa/s,7,1,3720,1738
+hadamard,AIE,int32,int16,32,1,1,0,0.707 W,293 ns,432 MSa/s,7,1,1800,1548
+hadamard,AIE,int32,int32,16,16,1,1,0.691 W,71 ns,955 MSa/s,1,1,1162,1372
+hadamard,AIE,int32,int32,27,1,1,0,0.708 W,293 ns,432 MSa/s,7,1,1928,1538
+hadamard,AIE-ML,cint16,cint16,16,16,1,0,0.475 W,371 ns,1000 MSa/s,7,1,7312,1536
+hadamard,AIE-ML,cint16,cint32,1024,1,1,0,0.482 W,5195 ns,500 MSa/s,7,1,42128,4528
+hadamard,AIE-ML,cint16,cint32,16,1,1,0,0.467 W,317 ns,313 MSa/s,7,1,1808,1312
+hadamard,AIE-ML,cint16,cint32,64,4,4,0,0.697 W,815 ns,941 MSa/s,15,1,11411,2208
+hadamard,AIE-ML,cint16,int16,256,1,16,0,1.856 W,1556 ns,1153 MSa/s,61,4,9808,2016 2016 2016 2016
+hadamard,AIE-ML,cint32,cint16,256,1,1,0,0.477 W,706 ns,500 MSa/s,5,1,11408,2080
+hadamard,AIE-ML,cint32,cint32,16,2,1,0,0.473 W,170 ns,500 MSa/s,6,1,2704,1456
+hadamard,AIE-ML,cint32,cint32,256,4,4,0,0.753 W,1597 ns,1542 MSa/s,16,1,50323,2752
+hadamard,AIE-ML,cint32,int32,256,1,1,0,0.518 W,1345 ns,435 MSa/s,5,1,11409,5232
+hadamard,AIE-ML,float,float,2048,1,2,0,0.648 W,12902 ns,443 MSa/s,11,1,50317,15952
+hadamard,AIE-ML,float,float,25,1,1,0,0.482 W,462 ns,285 MSa/s,6,1,1932,1712
+hadamard,AIE-ML,int16,cint16,32,1,1,0,0.468 W,337 ns,592 MSa/s,7,1,1809,1360
+hadamard,AIE-ML,int16,cint32,128,1,1,0,0.474 W,870 ns,447 MSa/s,7,1,5777,2336
+hadamard,AIE-ML,int16,cint32,80,1,5,0,0.831 W,2970 ns,270 MSa/s,23,2,5221,1408 2112
+hadamard,AIE-ML,int16,int16,16,1,1,0,0.466 W,498 ns,326 MSa/s,6,1,1360,1296
+hadamard,AIE-ML,int16,int16,16,8,1,0,0.469 W,168 ns,2000 MSa/s,6,1,2704,1424
+hadamard,AIE-ML,int16,int16,32,1,2,0,0.567 W,989 ns,296 MSa/s,9,1,1553,1536
+hadamard,AIE-ML,int16,int32,16,4,1,0,0.473 W,270 ns,1000 MSa/s,7,1,2448,1504
+hadamard,AIE-ML,int32,cint32,256,1,16,0,1.907 W,2375 ns,752 MSa/s,62,4,14928,2240 2240 2240 2240
+hadamard,AIE-ML,int32,cint32,64,1,4,0,0.7 W,2032 ns,190 MSa/s,15,1,3732,2240
+hadamard,AIE-ML,int32,int16,40,1,1,0,0.471 W,220 ns,701 MSa/s,7,1,1968,1408
+hadamard,AIE-ML,int32,int16,512,1,1,0,0.489 W,773 ns,1000 MSa/s,5,1,11408,2848
+hadamard,AIE-ML,int32,int32,128,1,8,0,1.059 W,1742 ns,516 MSa/s,32,2,5414,2080 2080
+hadamard,AIE-ML,int32,int32,512,1,1,0,0.515 W,896 ns,1000 MSa/s,6,1,13456,3920
+hadamard,AIE-ML,int32,int32,64,1,1,0,0.48 W,260 ns,771 MSa/s,6,1,2704,1616
