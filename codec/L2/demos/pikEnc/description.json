@@ -1,14 +1,14 @@
 {
-    "gui": false, 
-    "name": "Xilinx PIK Encoder Demo", 
-    "description": "This example is based on Google's PIK, which was chosen as the base framework for JPEG XL. The pikEnc is based on the 'fast mode' of PIK which can provide better encoding efficnty than most of other still image encoding methods. The pikEnc is based on Xilinx HLS design methodology and optimized for FPGA arthitecture. It can proved higher throughput and lower latency compared to software-based solutions", 
-    "flow": "system", 
+    "gui": false,
+    "name": "Xilinx PIK Encoder Demo",
+    "description": "This example is based on Google's PIK, which was chosen as the base framework for JPEG XL. The pikEnc is based on the 'fast mode' of PIK which can provide better encoding efficnty than most of other still image encoding methods. The pikEnc is based on Xilinx HLS design methodology and optimized for FPGA arthitecture. It can proved higher throughput and lower latency compared to software-based solutions",
+    "flow": "system",
     "platform_allowlist": [
         "u250"
-    ], 
+    ],
     "platform_blocklist": [
         "zc"
-    ], 
+    ],
     "platform_properties": {
         "u250": {
             "v++": {
@@ -19,24 +19,18 @@
                 }
             }
         }
-    }, 
+    },
     "data": [
         "./data"
-    ], 
+    ],
     "launch": [
         {
-            "cmd_args": " --xclbin BUILD/pikEnc.xclbin images/small32x32.png test.pik --fast", 
+            "cmd_args": " --xclbin BUILD/pikEnc.xclbin images/small32x32.png test.pik --fast",
             "name": "generic launch for all flows"
         }
     ],
-    "post_launch": [
-        {
-            "launch_cmd": [
-            ]
-        }
-    ], 
     "host": {
-        "host_exe": "host.exe", 
+        "host_exe": "host.exe",
         "compiler": {
             "sources": [
                 "LIB_DIR/L2/demos/pikEnc/host/pik/cpik_main.cc",
@@ -114,10 +108,8 @@
                 "LIB_DIR/L2/demos/pikEnc/host/pik/color_management.cc",
                 "LIB_DIR/L2/demos/pikEnc/host/encode_order.cc",
                 "LIB_DIR/L2/demos/pikEnc/host/pik_codec_common.cc",
-                "LIB_DIR/L2/demos/pikEnc/host/host_dev.cc", 
+                "LIB_DIR/L2/demos/pikEnc/host/host_dev.cc",
                 "LIB_DIR/ext/xcl2/xcl2.cpp",
-
-
                 "LIB_DIR/L2/demos/pikEnc/host/third_party/lcms/src/cmsalpha.cpp",
                 "LIB_DIR/L2/demos/pikEnc/host/third_party/lcms/src/cmscam02.cpp",
                 "LIB_DIR/L2/demos/pikEnc/host/third_party/lcms/src/cmscgats.cpp",
@@ -151,8 +143,6 @@
                 "LIB_DIR/L2/demos/pikEnc/host/third_party/FiniteStateEntropy/lib/fse_decompress.cpp",
                 "LIB_DIR/L2/demos/pikEnc/host/third_party/FiniteStateEntropy/lib/huf_compress.cpp",
                 "LIB_DIR/L2/demos/pikEnc/host/third_party/FiniteStateEntropy/lib/huf_decompress.cpp",
-
-
                 "LIB_DIR/L2/demos/pikEnc/host/third_party/brotli/c/enc/backward_references.c",
                 "LIB_DIR/L2/demos/pikEnc/host/third_party/brotli/c/enc/backward_references_hq.c",
                 "LIB_DIR/L2/demos/pikEnc/host/third_party/brotli/c/enc/bit_cost.c",
@@ -178,67 +168,65 @@
                 "LIB_DIR/L2/demos/pikEnc/host/third_party/brotli/c/dec/huffman.c",
                 "LIB_DIR/L2/demos/pikEnc/host/third_party/brotli/c/dec/state.c",
                 "LIB_DIR/L2/demos/pikEnc/host/third_party/brotli/c/fuzz/decode_fuzzer.c"
-
-            ], 
+            ],
             "includepaths": [
                 "LIB_DIR/../utils/L1/include/",
-                "LIB_DIR/L2/include/hw/pikEnc/", 
-                "LIB_DIR/L2/include/hw/pikEnc/kernel3/", 
-                "LIB_DIR/L2/demos/pikEnc/host", 
-                "LIB_DIR/L2/demos/pikEnc/kernel", 
+                "LIB_DIR/L2/include/hw/pikEnc/",
+                "LIB_DIR/L2/include/hw/pikEnc/kernel3/",
+                "LIB_DIR/L2/demos/pikEnc/host",
+                "LIB_DIR/L2/demos/pikEnc/kernel",
                 "LIB_DIR/ext/xcl2",
-
-                "LIB_DIR/L2/demos/pikEnc/host/third_party/lcms/include", 
-                "LIB_DIR/L2/demos/pikEnc/host/third_party/brotli/c/include", 
+                "LIB_DIR/L2/demos/pikEnc/host/third_party/lcms/include",
+                "LIB_DIR/L2/demos/pikEnc/host/third_party/brotli/c/include",
                 "LIB_DIR/L2/demos/pikEnc/host/third_party/lodepng",
-                "LIB_DIR/L2/demos/pikEnc/host/third_party/FiniteStateEntropy/lib", 
+                "LIB_DIR/L2/demos/pikEnc/host/third_party/FiniteStateEntropy/lib",
                 "LIB_DIR/L2/demos/pikEnc/host/third_party"
-            ], 
+            ],
             "options": "-O3 "
         }
-    }, 
+    },
     "v++": {
         "compiler": {
             "includepaths": [
                 "LIB_DIR/../utils/L1/include/",
-                "LIB_DIR/L2/include/hw", 
-                "LIB_DIR/L2/include/hw/pikEnc", 
+                "LIB_DIR/L2/include/hw",
+                "LIB_DIR/L2/include/hw/pikEnc",
                 "LIB_DIR/L2/demos/pikEnc/kernel"
             ]
-        } 
-    }, 
+        }
+    },
     "containers": [
         {
             "name": "pikEnc",
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/demos/pikEnc/kernel/XAccPIKKernel1.cpp", 
-                    "frequency": 300.0, 
-                    "clflags": " -D KERNEL_NAME=pikEncKernel1Top", 
-                    "name": "pikEncKernel1Top", 
-                    "num_compute_units": 1, 
+                    "location": "LIB_DIR/L2/demos/pikEnc/kernel/XAccPIKKernel1.cpp",
+                    "frequency": 300.0,
+                    "clflags": " -D KERNEL_NAME=pikEncKernel1Top",
+                    "name": "pikEncKernel1Top",
+                    "num_compute_units": 1,
                     "compute_units": [
                         {
-                            "name": "pikEncKernel1Top", 
+                            "name": "pikEncKernel1Top",
                             "arguments": [
                                 {
-                                    "name": "gmem0_0", 
+                                    "name": "gmem0_0",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "gmem0_1", 
+                                    "name": "gmem0_1",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "gmem1_0", 
+                                    "name": "gmem1_0",
                                     "memory": "DDR[1]"
-                                }, 
+                                },
                                 {
-                                    "name": "gmem1_1", 
+                                    "name": "gmem1_1",
                                     "memory": "DDR[1]"
-                                }, 
+                                },
                                 {
-                                    "name": "gmem1_2", 
+                                    "name": "gmem1_2",
                                     "memory": "DDR[1]"
                                 }
                             ]
@@ -246,53 +234,53 @@
                     ]
                 },
                 {
-                    "location": "LIB_DIR/L2/demos/pikEnc/kernel/XAccPIKKernel2.cpp", 
-                    "frequency": 300.0, 
-                    "clflags":" -D KERNEL_NAME=pikEncKernel2Top --hls.pre_tcl $(CUR_DIR)/hls_pre.tcl",
-                    "name": "pikEncKernel2Top", 
-                    "num_compute_units": 1, 
+                    "location": "LIB_DIR/L2/demos/pikEnc/kernel/XAccPIKKernel2.cpp",
+                    "frequency": 300.0,
+                    "clflags": " -D KERNEL_NAME=pikEncKernel2Top --hls.pre_tcl $(CUR_DIR)/hls_pre.tcl",
+                    "name": "pikEncKernel2Top",
+                    "num_compute_units": 1,
                     "compute_units": [
                         {
-                            "name": "pikEncKernel2Top", 
+                            "name": "pikEncKernel2Top",
                             "arguments": [
                                 {
-                                    "name": "gmem0_0", 
-                                    "memory": "DDR[1]"
-                                }, 
-                                {
-                                    "name": "gmem0_1", 
+                                    "name": "gmem0_0",
                                     "memory": "DDR[1]"
                                 },
                                 {
-                                    "name": "gmem0_2", 
-                                    "memory": "DDR[1]"
-                                }, 
-                                {
-                                    "name": "gmem0_3", 
+                                    "name": "gmem0_1",
                                     "memory": "DDR[1]"
                                 },
                                 {
-                                    "name": "gmem1_0", 
-                                    "memory": "DDR[2]"
-                                }, 
+                                    "name": "gmem0_2",
+                                    "memory": "DDR[1]"
+                                },
                                 {
-                                    "name": "gmem1_1", 
-                                    "memory": "DDR[2]"
-                                }, 
+                                    "name": "gmem0_3",
+                                    "memory": "DDR[1]"
+                                },
                                 {
-                                    "name": "gmem1_2", 
+                                    "name": "gmem1_0",
                                     "memory": "DDR[2]"
                                 },
                                 {
-                                    "name": "gmem1_3", 
-                                    "memory": "DDR[2]"
-                                }, 
-                                {
-                                    "name": "gmem1_4", 
+                                    "name": "gmem1_1",
                                     "memory": "DDR[2]"
                                 },
                                 {
-                                    "name": "gmem1_5", 
+                                    "name": "gmem1_2",
+                                    "memory": "DDR[2]"
+                                },
+                                {
+                                    "name": "gmem1_3",
+                                    "memory": "DDR[2]"
+                                },
+                                {
+                                    "name": "gmem1_4",
+                                    "memory": "DDR[2]"
+                                },
+                                {
+                                    "name": "gmem1_5",
                                     "memory": "DDR[2]"
                                 }
                             ]
@@ -311,97 +299,95 @@
                         "LIB_DIR/L2/demos/pikEnc/kernel/kernel3/ctrl_tokenize.cpp",
                         "LIB_DIR/L2/demos/pikEnc/kernel/kernel3/build_cluster.cpp"
                     ],
-                    "frequency": 300.0, 
-                    "clflags": " -D KERNEL_NAME=pikEncKernel3Top --hls.pre_tcl $(CUR_DIR)/hls_pre.tcl", 
-                    "name": "pikEncKernel3Top", 
-                    "num_compute_units": 1, 
+                    "frequency": 300.0,
+                    "clflags": " -D KERNEL_NAME=pikEncKernel3Top --hls.pre_tcl $(CUR_DIR)/hls_pre.tcl",
+                    "name": "pikEncKernel3Top",
+                    "num_compute_units": 1,
                     "compute_units": [
                         {
-                            "name": "pikEncKernel3Top", 
+                            "name": "pikEncKernel3Top",
                             "arguments": [
                                 {
-                                    "name": "gmem0_0", 
-                                    "memory": "DDR[2]"
-                                }, 
-                                {
-                                    "name": "gmem0_1", 
+                                    "name": "gmem0_0",
                                     "memory": "DDR[2]"
                                 },
                                 {
-                                    "name": "gmem0_2", 
-                                    "memory": "DDR[2]"
-                                }, 
-                                {
-                                    "name": "gmem0_3", 
+                                    "name": "gmem0_1",
                                     "memory": "DDR[2]"
                                 },
                                 {
-                                    "name": "gmem0_4", 
+                                    "name": "gmem0_2",
                                     "memory": "DDR[2]"
                                 },
                                 {
-                                    "name": "gmem0_5", 
-                                    "memory": "DDR[2]"
-                                }, 
-                                {
-                                    "name": "gmem0_6", 
+                                    "name": "gmem0_3",
                                     "memory": "DDR[2]"
                                 },
                                 {
-                                    "name": "gmem1_0", 
-                                    "memory": "DDR[3]"
-                                }, 
+                                    "name": "gmem0_4",
+                                    "memory": "DDR[2]"
+                                },
                                 {
-                                    "name": "gmem1_1", 
+                                    "name": "gmem0_5",
+                                    "memory": "DDR[2]"
+                                },
+                                {
+                                    "name": "gmem0_6",
+                                    "memory": "DDR[2]"
+                                },
+                                {
+                                    "name": "gmem1_0",
                                     "memory": "DDR[3]"
                                 },
                                 {
-                                    "name": "gmem1_2", 
+                                    "name": "gmem1_1",
                                     "memory": "DDR[3]"
                                 },
                                 {
-                                    "name": "gmem1_3", 
+                                    "name": "gmem1_2",
                                     "memory": "DDR[3]"
-                                }, 
+                                },
                                 {
-                                    "name": "gmem1_4", 
+                                    "name": "gmem1_3",
                                     "memory": "DDR[3]"
-                                } 
+                                },
+                                {
+                                    "name": "gmem1_4",
+                                    "memory": "DDR[3]"
+                                }
                             ]
                         }
                     ]
                 }
-            ], 
-            "frequency": 180 
+            ],
+            "frequency": 180
         }
-    ], 
+    ],
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
+                "index": 0,
+                "dependency": [],
                 "max_memory_MB": {
-                    "vitis_hw_build": 81920, 
-                    "vitis_hw_emu": 40960, 
-                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_build": 81920,
+                    "vitis_hw_emu": 40960,
+                    "vitis_sw_emu": 10240,
                     "vitis_hw_run": 10240
-                }, 
+                },
                 "max_time_min": {
-                    "vitis_hw_build": 10080, 
-                    "vitis_hw_emu": 2400, 
-                    "vitis_sw_emu": 480, 
+                    "vitis_hw_build": 10080,
+                    "vitis_hw_emu": 2400,
+                    "vitis_sw_emu": 480,
                     "vitis_hw_run": 10
                 }
             }
-        ], 
+        ],
         "targets": [
-            "vitis_sw_emu", 
-            "vitis_hw_emu", 
+            "vitis_sw_emu",
+            "vitis_hw_emu",
             "vitis_hw"
-        ], 
+        ],
         "category": "canary"
     }
 }
