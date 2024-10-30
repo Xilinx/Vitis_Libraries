@@ -1,0 +1,783 @@
+{
+    "schema": "vitis_libraries_api_list_schema-1.0",
+        "api_list": [
+        {
+            "api_name": "xf::data_mover::bi_details::bi_dm",
+            "target_domain": "PL",
+            "spec": {
+                "schema": "vitis_library_api_spec_schema-1.0",
+                "api_name": "xf::data_mover::bi_details::bi_dm",
+                "display_name": "bi_dm",
+                "brief": "Bi-directional Data Mover",
+                "lifecycle_status": "production",
+                "header_file_name": [
+                    "xf_data_mover/bi_pl_4d_data_mover.hpp"
+                    ],
+                "search_paths": [
+                    "L1/include"
+                    ],
+                "source_file_name": "L1/tests/bi_dm_4d_handshake/tb.cpp",
+                "parameters": [
+                {
+                    "name": "WDATA",
+                    "type": "int",
+                    "description": "width of AXI-master/URAM/AXI-stream port"
+                },
+                {
+                    "name": "CACHE_DEPTH",
+                    "type": "int",
+                    "description": "depth of external URAM"
+                },
+                {
+                    "name": "LATENCY",
+                    "type": "int",
+                    "description": "latency of MAXI port"
+                },
+                {
+                    "name": "BURST_LEN",
+                    "type": "int",
+                    "description": "burst length of MAXI port"
+                },
+                {
+                    "name": "OUTSTANDING",
+                    "type": "int",
+                    "description": "write outstanding of MAXI port, should be less than 512"
+                }
+                ],
+                    "ports": [
+                    {
+                        "name": "i_axis_strm",
+                        "direction": "in",
+                        "type": "hls::stream<ap_axiu<WDATA, 0, 0, 0> >&"
+                    },
+                    {
+                        "name": "o_axis_strm",
+                        "direction": "out",
+                        "type": "hls::stream<ap_axiu<WDATA, 0, 0, 0> >&"
+                    },
+                    {
+                        "name": "i_maxi_port",
+                        "direction": "in",
+                        "type": "hls::burst_maxi<ap_uint<WDATA> >"
+                    },
+                    {
+                        "name": "o_maxi_port",
+                        "direction": "out",
+                        "type": "hls::burst_maxi<ap_uint<WDATA> >"
+                    },
+                    {
+                        "name": "pattern_0",
+                        "direction": "in",
+                        "type": "ap_uint<32>*"
+                    },
+                    {
+                        "name": "pattern_1",
+                        "direction": "in",
+                        "type": "ap_uint<32>*"
+                    },
+                    {
+                        "name": "pattern_2",
+                        "direction": "in",
+                        "type": "ap_uint<32>*"
+                    },
+                    {
+                        "name": "pattern_3",
+                        "direction": "in",
+                        "type": "ap_uint<32>*"
+                    },
+                    {
+                        "name": "pm_0",
+                        "direction": "in",
+                        "type": "ap_uint<32>*"
+                    },
+                    {
+                        "name": "pm_1",
+                        "direction": "in",
+                        "type": "ap_uint<32>*"
+                    },
+                    {
+                        "name": "pm_2",
+                        "direction": "in",
+                        "type": "ap_uint<32>*"
+                    },
+                    {
+                        "name": "pm_3",
+                        "direction": "in",
+                        "type": "ap_uint<32>*"
+                    }
+                ],
+                    "target_domain": "PL",
+                    "visible": true
+            }
+        },
+        {
+            "api_name": "xf::data_mover::checkStreamWithMaster",
+            "target_domain": "PL",
+            "spec": {
+                "schema": "vitis_library_api_spec_schema-1.0",
+                "api_name": "xf::data_mover::checkStreamWithMaster",
+                "display_name": "checkStreamWithMaster",
+                "brief": "Load from AXI master and stream, validate and save result to buffer.",
+                "lifecycle_status": "production",
+                "header_file_name": [
+                    "xf_data_mover/check_stream_with_master.hpp"
+                    ],
+                "search_paths": [
+                    "L1/include"
+                    ],
+                "source_file_name": "L1/tests/check_stream_with_master/test_check_stream_with_master.cpp",
+                "parameters": [
+                {
+                    "name": "WM",
+                    "type": "int",
+                    "description": "width of AXI master, the size is aligned with (WM/8)"
+                },
+                {
+                    "name": "WS",
+                    "type": "int",
+                    "description": "width of AXI master, the size is aligned with (WS/8)"
+                },
+                {
+                    "name": "BLEN",
+                    "type": "int",
+                    "description": "burst length when reading from AXI master",
+                    "enum": [
+                        "32"
+                        ]
+                }
+                ],
+                    "ports": [
+                    {
+                        "name": "s",
+                        "direction": "in",
+                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                    },
+                    {
+                        "name": "gm",
+                        "direction": "out",
+                        "type": "ap_uint<WM>*"
+                    },
+                    {
+                        "name": "ret",
+                        "direction": "out",
+                        "type": "hls::stream<CheckResult::type>&"
+                    },
+                    {
+                        "name": "sz",
+                        "direction": "in",
+                        "type": "uint64_t"
+                    }
+                ],
+                    "target_domain": "PL",
+                    "visible": true
+            }
+        },
+        {
+            "api_name": "xf::data_mover::read4D",
+            "target_domain": "PL",
+            "spec": {
+                "schema": "vitis_library_api_spec_schema-1.0",
+                "api_name": "xf::data_mover::read4D",
+                "display_name": "read4D",
+                "brief": "data_mover for reading multiple 4D cuboids.",
+                "lifecycle_status": "production",
+                "header_file_name": [
+                    "xf_data_mover/pl_data_mover.hpp"
+                    ],
+                "search_paths": [
+                    "L1/include"
+                    ],
+                "source_file_name": "L1/tests/cuboid_read_hls/tb.cpp",
+                "parameters": [
+                {
+                    "name": "WDATA",
+                    "type": "int",
+                    "description": "Bit width of data element"
+                },
+                {
+                    "name": "LATENCY",
+                    "type": "int",
+                    "description": "MAXI port latency"
+                },
+                {
+                    "name": "OUTSTANDING",
+                    "type": "int",
+                    "description": "MAXI port read/write outstanding"
+                },
+                {
+                    "name": "BURSTLEN",
+                    "type": "int",
+                    "description": "MAXI port read/write burst length"
+                }
+                ],
+                    "ports": [
+                    {
+                        "name": "descriptor_buffer",
+                        "direction": "in",
+                        "type": "hls::burst_maxi<ap_uint<64> >&"
+                    },
+                    {
+                        "name": "data",
+                        "direction": "in",
+                        "type": "hls::burst_maxi<ap_uint<WDATA> >&"
+                    },
+                    {
+                        "name": "w_data",
+                        "direction": "out",
+                        "type": "hls::stream<ap_axiu<WDATA, 0, 0, 0> >&"
+                    }
+                ],
+                    "target_domain": "PL",
+                    "visible": true
+            }
+        },
+        {
+            "api_name": "xf::data_mover::write4D",
+            "target_domain": "PL",
+            "spec": {
+                "schema": "vitis_library_api_spec_schema-1.0",
+                "api_name": "xf::data_mover::write4D",
+                "display_name": "write4D",
+                "brief": "data_mover for writing multiple 4D cuboids.",
+                "lifecycle_status": "production",
+                "header_file_name": [
+                    "xf_data_mover/pl_data_mover.hpp"
+                    ],
+                "search_paths": [
+                    "L1/include"
+                    ],
+                "source_file_name": "L1/tests/cuboid_write_hls/tb.cpp",
+                "parameters": [
+                {
+                    "name": "WDATA",
+                    "type": "int",
+                    "description": "Bit width of data element"
+                },
+                {
+                    "name": "LATENCY",
+                    "type": "int",
+                    "description": "MAXI port latency"
+                },
+                {
+                    "name": "OUTSTANDING",
+                    "type": "int",
+                    "description": "MAXI port read/write outstanding"
+                },
+                {
+                    "name": "BURSTLEN",
+                    "type": "int",
+                    "description": "MAXI port read/write burst length"
+                }
+                ],
+                    "ports": [
+                    {
+                        "name": "descriptor_buffer",
+                        "direction": "in",
+                        "type": "hls::burst_maxi<ap_uint<64> >&"
+                    },
+                    {
+                        "name": "w_data",
+                        "direction": "in",
+                        "type": "hls::stream<ap_axiu<WDATA, 0, 0, 0> >&"
+                    },
+                    {
+                        "name": "data",
+                        "direction": "out",
+                        "type": "hls::burst_maxi<ap_uint<WDATA> >&"
+                    }
+                ],
+                    "target_domain": "PL",
+                    "visible": true
+            }
+        },
+        {
+            "api_name": "xf::data_mover::loadMasterToStream",
+            "target_domain": "PL",
+            "spec": {
+                "schema": "vitis_library_api_spec_schema-1.0",
+                "api_name": "xf::data_mover::loadMasterToStream",
+                "display_name": "loadMasterToStream",
+                "brief": "Load from AXI master, and send data to stream.",
+                "lifecycle_status": "production",
+                "header_file_name": [
+                    "xf_data_mover/load_master_to_stream.hpp"
+                    ],
+                "search_paths": [
+                    "L1/include"
+                    ],
+                "source_file_name": "L1/tests/load_master_to_stream/test_load_master_to_stream.cpp",
+                "parameters": [
+                {
+                    "name": "WM",
+                    "type": "int",
+                    "description": "width of AXI master, expected that the size is aligned with (WM/8)"
+                },
+                {
+                    "name": "WS",
+                    "type": "int",
+                    "description": "width of AXI stream, expected that the size is aligned with (WS/8)"
+                },
+                {
+                    "name": "BLEN",
+                    "type": "int",
+                    "description": "burst length when reading from AXI master",
+                    "enum": [
+                        "32"
+                        ]
+                }
+                ],
+                    "ports": [
+                    {
+                        "name": "mm",
+                        "direction": "in",
+                        "type": "ap_uint<WM>*"
+                    },
+                    {
+                        "name": "s",
+                        "direction": "out",
+                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                    },
+                    {
+                        "name": "size",
+                        "direction": "in",
+                        "type": "uint64_t"
+                    },
+                    {
+                        "name": "vld_str",
+                        "direction": "out",
+                        "type": "hls::stream<ap_uint<1> >&"
+                    },
+                    {
+                        "name": "cntData",
+                        "direction": "out",
+                        "type": "uint64_t*"
+                    }
+                ],
+                    "target_domain": "PL",
+                    "visible": true
+            }
+        },
+        {
+            "api_name": "xf::data_mover::PreloadableBram",
+            "target_domain": "PL",
+            "spec": {
+                "schema": "vitis_library_api_spec_schema-1.0",
+                "api_name": "xf::data_mover::PreloadableBram",
+                "display_name": "PreloadableBram",
+                "brief": "Store constant stream to RAM.",
+                "lifecycle_status": "production",
+                "header_file_name": [
+                    "xf_data_mover/preloadable_ram.hpp"
+                    ],
+                "search_paths": [
+                    "L1/include"
+                    ],
+                "source_file_name": "L1/tests/preloadable_ram/bram/test_preloadable_ram.cpp",
+                "parameters": [
+                {
+                    "name": "WS",
+                    "type": "int",
+                    "description": " width of BRAM, same with width of AXI stream to AIE",
+                    "minimum": "32",
+                    "maximum": "128",
+                    "enum": [
+                        "128",
+                    "64",
+                    "32"
+                        ]
+                },
+                {
+                    "name": "DM",
+                    "type": "int",
+                    "description": "depth of BRAM"
+                }
+                ],
+                    "ports": [
+                    {
+                        "name": "is",
+                        "direction": "in",
+                        "type": "hls::stream<ConstData::type>&"
+                    },
+                    {
+                        "name": "os",
+                        "direction": "out",
+                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                    },
+                    {
+                        "name": "cs",
+                        "direction": "in",
+                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                    },
+                    {
+                        "name": "os",
+                        "direction": "out",
+                        "type": "hls::stream<xf::data_mover::CheckResult::type>&"
+                    },
+                    {
+                        "name": "sz",
+                        "direction": "in",
+                        "type": "const uint64_t"
+                    }
+                ],
+                    "target_domain": "PL",
+                    "visible": true
+            }
+        },
+        {
+            "api_name": "xf::data_mover::PreloadableUram",
+            "target_domain": "PL",
+            "spec": {
+                "schema": "vitis_library_api_spec_schema-1.0",
+                "api_name": "xf::data_mover::PreloadableUram",
+                "display_name": "PreloadableUram",
+                "brief": "Store constant stream to RAM.",
+                "lifecycle_status": "production",
+                "header_file_name": [
+                    "xf_data_mover/preloadable_ram.hpp"
+                    ],
+                "search_paths": [
+                    "L1/include"
+                    ],
+                "source_file_name": "L1/tests/preloadable_ram/uram/test_preloadable_ram.cpp",
+                "parameters": [
+                {
+                    "name": "WS",
+                    "type": "int",
+                    "description": " width of URAM, same with width of AXI stream to AIE",
+                    "minimum": "32",
+                    "maximum": "128",
+                    "enum": [
+                        "128",
+                    "64",
+                    "32"
+                        ]
+                },
+                {
+                    "name": "DM",
+                    "type": "int",
+                    "description": "depth of URAM"
+                }
+                ],
+                    "ports": [
+                    {
+                        "name": "is",
+                        "direction": "in",
+                        "type": "hls::stream<ConstData::type>&"
+                    },
+                    {
+                        "name": "os",
+                        "direction": "out",
+                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                    },
+                    {
+                        "name": "cs",
+                        "direction": "in",
+                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                    },
+                    {
+                        "name": "os",
+                        "direction": "ret",
+                        "type": "hls::stream<xf::data_mover::CheckResult::type>&"
+                    },
+                    {
+                        "name": "sz",
+                        "direction": "in",
+                        "type": "const uint64_t"
+                    }
+                ],
+                    "target_domain": "PL",
+                    "visible": true
+            }
+        },
+        {
+            "api_name": "xf::data_mover::readConst",
+            "target_domain": "PL",
+            "spec": {
+                "schema": "vitis_library_api_spec_schema-1.0",
+                "api_name": "xf::data_mover::readConst",
+                "display_name": "readConst",
+                "brief": "Read constant data from AXI master port to initilization stream.",
+                "lifecycle_status": "production",
+                "header_file_name": [
+                    "xf_data_mover/read_const.hpp"
+                    ],
+                "search_paths": [
+                    "L1/include"
+                    ],
+                "source_file_name": "L1/tests/read_const/test_read_const.cpp",
+                "parameters": [
+                {
+                    "name": "Tm",
+                    "type": "typename",
+                    "description": "the type of pointer"
+                },
+                {
+                    "name": "Ts",
+                    "type": "typename",
+                    "description": "the type of stream"
+                },
+                {
+                    "name": "Tz",
+                    "type": "typename",
+                    "description": "the type of size"
+                }
+                ],
+                    "ports": [
+                    {
+                        "name": "mm",
+                        "direction": "in",
+                        "type": "Tm&"
+                    },
+                    {
+                        "name": "cs",
+                        "direction": "out",
+                        "type": "Ts"
+                    },
+                    {
+                        "name": "sz",
+                        "direction": "in",
+                        "type": "Tz"
+                    }
+                ],
+                    "target_domain": "PL",
+                    "visible": true
+            }
+        },
+        {
+            "api_name": "xf::data_mover::uram_to_axis",
+            "target_domain": "PL",
+            "spec": {
+                "schema": "vitis_library_api_spec_schema-1.0",
+                "api_name": "xf::data_mover::uram_to_axis",
+                "display_name": "uram_to_axis",
+                "brief": "read data from URAM and forward to AXI-stream.",
+                "lifecycle_status": "production",
+                "header_file_name": [
+                    "xf_data_mover/dm_4d_uram.hpp"
+                    ],
+                "search_paths": [
+                    "L1/include"
+                    ],
+                "source_file_name": "L1/tests/2s_4d_read_uram/tb.cpp",
+                "parameters": [
+                {
+                    "name": "W",
+                    "type": "int",
+                    "description": "width of AXI-master/URAM/AXI-stream port"
+                },
+                {
+                    "name": "D",
+                    "type": "int",
+                    "description": "depth of external URAM"
+                }
+                ],
+                    "ports": [
+                    {
+                        "name": "waddr_strm",
+                        "direction": "in",
+                        "type": "hls::stream<ap_uint<32> >&"
+                    },
+                    {
+                        "name": "wdata_strm",
+                        "direction": "in",
+                        "type": "hls::stream<ap_uint<W> >&"
+                    },
+                    {
+                        "name": "pattern_buf",
+                        "direction": "in",
+                        "type": "ap_uint<32>*"
+                    },
+                    {
+                        "name": "pattern_id",
+                        "direction": "in",
+                        "type": "hls::stream<ap_uint<8> >&"
+                    },
+                    {
+                        "name": "o_ack",
+                        "direction": "out",
+                        "type": "hls::stream<ap_uint<8> >&"
+                    },
+                    {
+                        "name": "to_strm",
+                        "direction": "out",
+                        "type": "hls::stream<ap_axiu<W, 0, 0, 0> >&"
+                    }
+                ],
+                    "target_domain": "PL",
+                    "visible": true
+            }
+        },
+        {
+            "api_name": "xf::data_mover::StaticRom",
+            "target_domain": "PL",
+            "spec": {
+                "schema": "vitis_library_api_spec_schema-1.0",
+                "api_name": "xf::data_mover::StaticRom",
+                "display_name": "StaticRom",
+                "brief": "Send data from ROM to AXI stream.",
+                "lifecycle_status": "production",
+                "header_file_name": [
+                    "xf_data_mover/static_rom.hpp"
+                    ],
+                "search_paths": [
+                    "L1/include"
+                    ],
+                "source_file_name": "L1/tests/static_rom/test_static_rom.cpp",
+                "parameters": [
+                {
+                    "name": "WS",
+                    "type": "int",
+                    "description": "width of ROM, same with width of AXI stream to AIE",
+                    "minimum": "32",
+                    "maximum": "128",
+                    "enum": [
+                        "128",
+                    "64",
+                    "32"
+                        ]
+                },
+                {
+                    "name": "DM",
+                    "type": "int",
+                    "description": "depth of ROM"
+                }
+                ],
+                    "ports": [
+                    {
+                        "name": "os",
+                        "direction": "out",
+                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                    },
+                    {
+                        "name": "cs",
+                        "direction": "in",
+                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                    },
+                    {
+                        "name": "rs",
+                        "direction": "in",
+                        "type": "hls::stream<CheckResult::type>&"
+                    },
+                    {
+                        "name": "sz",
+                        "direction": "in",
+                        "type": "const uint64_t"
+                    }
+                ],
+                    "target_domain": "PL",
+                    "visible": true
+            }
+        },
+        {
+            "api_name": "xf::data_mover::storeStreamToMaster",
+            "target_domain": "PL",
+            "spec": {
+                "schema": "vitis_library_api_spec_schema-1.0",
+                "api_name": "xf::data_mover::storeStreamToMaster",
+                "display_name": "storeStreamToMaster",
+                "brief": "Read from AXI stream, and send data to AXI master.",
+                "lifecycle_status": "production",
+                "header_file_name": [
+                    "xf_data_mover/store_stream_to_master.hpp"
+                    ],
+                "search_paths": [
+                    "L1/include"
+                    ],
+                "source_file_name": "L1/tests/store_stream_to_master/test_store_stream_to_master.cpp",
+                "parameters": [
+                {
+                    "name": "WM",
+                    "type": "int",
+                    "description": "width of AXI master, expected that the size is aligned with (WM/8)"
+                },
+                {
+                    "name": "WS",
+                    "type": "int",
+                    "description": "width of AXI stream, expected that the size is aligned with (WS/8) "
+                },
+                {
+                    "name": "BLEN",
+                    "type": "int",
+                    "description": "burst length when writing to AXI master",
+                    "enum": [
+                        "32"
+                        ]
+                }
+                ],
+                    "ports": [
+                    {
+                        "name": "s",
+                        "direction": "in",
+                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                    },
+                    {
+                        "name": "mm",
+                        "direction": "in",
+                        "type": "ap_uint<WM>*"
+                    },
+                    {
+                        "name": "size",
+                        "direction": "in",
+                        "type": "uint64_t"
+                    },
+                    {
+                        "name": "vld_str",
+                        "direction": "out",
+                        "type": "hls::stream<ap_uint<1> >&"
+                    },
+                    {
+                        "name": "cntData",
+                        "direction": "out",
+                        "type": "uint64_t*"
+                    }
+                ],
+                    "target_domain": "PL",
+                    "visible": true
+            }
+        },
+        {
+            "api_name": "xf::data_mover::writeResult",
+            "target_domain": "PL",
+            "spec": {
+                "schema": "vitis_library_api_spec_schema-1.0",
+                "api_name": "xf::data_mover::writeResult",
+                "display_name": "writeResult",
+                "brief": "Write CheckResult to AXI master port.",
+                "lifecycle_status": "production",
+                "header_file_name": [
+                    "xf_data_mover/write_result.hpp"
+                    ],
+                "search_paths": [
+                    "L1/include"
+                    ],
+                "source_file_name": "L1/tests/write_result/test_write_result.cpp",
+                "parameters": [
+                {
+                    "name": "Ts",
+                    "type": "typename",
+                    "description": "the type of CheckResult stream."
+                },
+                {
+                    "name": "Tm",
+                    "type": "typename",
+                    "description": "the type of CheckResult pointer."
+                }
+                ],
+                    "ports": [
+                    {
+                        "name": "rs",
+                        "direction": "in",
+                        "type": "Ts*"
+                    },
+                    {
+                        "name": "rm",
+                        "direction": "out",
+                        "type": "Tm*"
+                    }
+                ],
+                    "target_domain": "PL",
+                    "visible": true
+            }
+        }
+    ]
+}

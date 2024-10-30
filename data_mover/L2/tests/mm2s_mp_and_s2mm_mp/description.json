@@ -1,105 +1,101 @@
 {
-  "name": "Geenrated mm2s_mp/s2mm_mp Kernel Test",
-  "description": [
-    "Generated configurable multi-port mm2s_mp/s2mm_mp kernel test, using parameters."
-  ],
-  "gui": false,
-  "flow": "system",
-  "platform_allowlist": [
-    "u200",
-    "vck190"
-  ],
-  "os": [
-    "centos7",
-    "ubuntu"
-  ],
-  "runtime": [
-    "OpenCL"
-  ],
-  "host": {
-    "host_exe": "test.exe",
-    "compiler": {
-      "sources": [
-        "sw/test.cpp",
-        "sw/config.hpp",
-        "system.cfg"
-      ],
-      "options": "-g"
-    }
-  },
-  "data": [
-    "data/input0.txt",
-    "data/golden.txt"
-  ],
-  "v++": {
-    "compiler": {
-      "includepaths": [
-        "LIB_DIR/L2/include",
-        "LIB_DIR/L1/include"
-      ]
-    },
-    "linker": {
-      "ldclflags": [
-        "--config PROJECT/system.cfg"
-      ]
-    }
-  },
-  "containers": [
-    {
-      "accelerators": [
-        {
-          "name": "mm2s_mp",
-          "location": "pl/mm2s_mp.cpp"
-        },
-        {
-          "name": "s2mm_mp",
-          "location": "pl/s2mm_mp.cpp"
+    "name": "Geenrated mm2s_mp/s2mm_mp Kernel Test",
+    "description": [
+        "Generated configurable multi-port mm2s_mp/s2mm_mp kernel test, using parameters."
+    ],
+    "gui": false,
+    "flow": "system",
+    "platform_allowlist": [
+        "u200",
+        "vck190"
+    ],
+    "runtime": [
+        "OpenCL"
+    ],
+    "host": {
+        "host_exe": "test.exe",
+        "compiler": {
+            "sources": [
+                "sw/test.cpp",
+                "sw/config.hpp",
+                "system.cfg"
+            ],
+            "options": "-g"
         }
-      ],
-      "name": "data_mover"
-    }
-  ],
-  "launch": [
-    {
-      "cmd_args": "BUILD/data_mover.xclbin",
-      "name": "generic launch for all flows"
-    }
-  ],
-  "generators": {
-    "pl/mm2s_mp.cpp": {
-      "spec": "LIB_DIR/L2/meta/mm2s_mp.json",
-      "api_name": "xf::data_mover::mm2s_mp"
     },
-    "pl/s2mm_mp.cpp": {
-      "spec": "LIB_DIR/L2/meta/s2mm_mp.json",
-      "api_name": "xf::data_mover::s2mm_mp"
-    },
-    "sw/config.hpp": {
-      "file": "PROJECT/test_gen.py",
-      "function": "write_config_hpp"
-    },
-    "system.cfg": {
-      "file": "PROJECT/test_gen.py",
-      "function": "write_system_cfg"
-    }
-  },
-  "parameter_file": "config_params.json",
-  "testinfo": {
-    "disable": false,
-    "jobs": [
-      {
-        "index": 0,
-        "dependency": [],
-        "env": "",
-        "cmd": "",
-        "max_memory_MB": 40960,
-        "max_time_min": 390
-      }
+    "data": [
+        "data/input0.txt",
+        "data/golden.txt"
     ],
-    "targets": [
-      "vitis_sw_emu",
-      "vitis_hw_emu"
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L1/include"
+            ]
+        },
+        "linker": {
+            "ldclflags": [
+                "--config PROJECT/system.cfg"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "name": "mm2s_mp",
+                    "location": "pl/mm2s_mp.cpp"
+                },
+                {
+                    "name": "s2mm_mp",
+                    "location": "pl/s2mm_mp.cpp"
+                }
+            ],
+            "name": "data_mover"
+        }
     ],
-    "category": "canary"
-  }
+    "launch": [
+        {
+            "cmd_args": "BUILD/data_mover.xclbin",
+            "name": "generic launch for all flows"
+        }
+    ],
+    "generators": {
+        "pl/mm2s_mp.cpp": {
+            "spec": "LIB_DIR/L2/meta/mm2s_mp.json",
+            "api_name": "xf::data_mover::mm2s_mp"
+        },
+        "pl/s2mm_mp.cpp": {
+            "spec": "LIB_DIR/L2/meta/s2mm_mp.json",
+            "api_name": "xf::data_mover::s2mm_mp"
+        },
+        "sw/config.hpp": {
+            "file": "PROJECT/test_gen.py",
+            "function": "write_config_hpp"
+        },
+        "system.cfg": {
+            "file": "PROJECT/test_gen.py",
+            "function": "write_system_cfg"
+        }
+    },
+    "parameter_file": "config_params.json",
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 40960,
+                "max_time_min": 390
+            }
+        ],
+        "targets": [
+            "vitis_sw_emu",
+            "vitis_hw_emu"
+        ],
+        "category": "canary"
+    }
 }

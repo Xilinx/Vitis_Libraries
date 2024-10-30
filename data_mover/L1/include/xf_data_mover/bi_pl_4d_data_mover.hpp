@@ -92,7 +92,7 @@ std::vector<std::thread> csim_threads;
 #define COMMA ,
 #define RUN_IN_THREAD(F, ...)                                \
     do {                                                     \
-        hls::stream_globals::incr_task_counter();            \
+        hls::stream_globals<false>::incr_task_counter();     \
         csim_threads.push_back(std::thread(F, __VA_ARGS__)); \
     } while (0)
 #define JOIN_THREADS()                           \

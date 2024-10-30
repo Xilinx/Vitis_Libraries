@@ -234,17 +234,18 @@ void cmdParser(hls::burst_maxi<ap_uint<64> > descriptor,
     ap_uint<64> cmd_nums = descriptor.read();
     ap_uint<64> cmd_buf_ptr = 1;
 
-    if (cmd_nums != 0) {
-        descriptor.read_request(cmd_buf_ptr, 9);
-    }
+    //if (cmd_nums != 0) {
+    //    descriptor.read_request(cmd_buf_ptr, 9);
+    //}
 
     for (int cmd_idx = 0; cmd_idx < cmd_nums; cmd_idx++) {
+        descriptor.read_request(cmd_buf_ptr, 9);
         ap_uint<64> cfg[9];
         for (int i = 0; i < 9; i++) {
             cfg[i] = descriptor.read();
         }
         cmd_buf_ptr += 9;
-        descriptor.read_request(cmd_buf_ptr, 9);
+        //descriptor.read_request(cmd_buf_ptr, 9);
 
         ap_uint<64>& offset = cfg[0];
         ap_uint<64>& i1 = cfg[1];

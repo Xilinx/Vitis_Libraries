@@ -1,37 +1,33 @@
 {
-    "name": "Bi-directional 4D Data Mover with HW handshake from AXI-Stream to AXIS-Stream Test", 
+    "name": "Bi-directional 4D Data Mover with HW handshake from AXI-Stream to AXIS-Stream Test",
     "description": [
         "Test multiple patterns for data read from one AXI-Stream port, and cached into URAM, then finally forwarded back to the other AXI-Stream port"
-    ], 
-    "gui": false, 
-    "flow": "system", 
+    ],
+    "gui": false,
+    "flow": "system",
     "platform_allowlist": [
         "u200",
         "vck190"
-    ], 
-    "os": [
-        "centos7", 
-        "ubuntu"
-    ], 
+    ],
     "runtime": [
         "OpenCL"
-    ], 
+    ],
     "host": {
-        "host_exe": "test.exe", 
+        "host_exe": "test.exe",
         "compiler": {
             "sources": [
                 "sw/test.cpp"
-            ], 
+            ],
             "includepaths": [
                 "sw"
-            ], 
+            ],
             "options": "-std=c++17 -g"
         }
-    }, 
+    },
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L1/include", 
+                "LIB_DIR/L1/include",
                 "LIB_DIR/L2/include"
             ],
             "clflags": [
@@ -43,30 +39,30 @@
                 "-g --config PROJECT/system.cfg"
             ]
         }
-    }, 
+    },
     "containers": [
         {
             "accelerators": [
                 {
                     "location": "pl/bi_dm_4d_hsk.cpp",
-                    "frequency": 300.0,
+                    "frequency": 300,
                     "name": "bi_dm_4d_hsk"
                 },
                 {
                     "location": "pl/s2mm_mp.cpp",
-                    "frequency": 300.0,
+                    "frequency": 300,
                     "name": "s2mm_mp"
                 },
                 {
                     "location": "pl/mm2s_mp.cpp",
-                    "frequency": 300.0,
+                    "frequency": 300,
                     "name": "mm2s_mp"
                 }
-            ], 
+            ],
             "frequency": 250,
             "name": "data_mover"
         }
-    ], 
+    ],
     "generators": {
         "pl/bi_dm_4d_hsk.cpp": {
             "spec": "LIB_DIR/L2/meta/bi_dm_4d_hsk.json",
@@ -88,35 +84,35 @@
     "parameter_file": "config_params.json",
     "launch": [
         {
-            "name": "generic launch for all flows", 
+            "name": "generic launch for all flows",
             "cmd_args": "BUILD/data_mover.xclbin"
         }
-    ], 
+    ],
     "testinfo": {
-        "disable": true, 
-        "stacksize": 16384, 
+        "disable": true,
+        "stacksize": 16384,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
                 "max_memory_MB": {
-                    "vitis_hw_build": 40960, 
-                    "vitis_hw_emu": 28672, 
+                    "vitis_hw_build": 40960,
+                    "vitis_hw_emu": 28672,
                     "vitis_sw_emu": 10240
-                }, 
+                },
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
-                    "vitis_hw_emu": 470, 
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 470,
                     "vitis_sw_emu": 60
                 }
             }
-        ], 
+        ],
         "targets": [
-            "vitis_hw_emu", 
+            "vitis_hw_emu",
             "vitis_hw_build"
-        ], 
+        ],
         "category": "canary"
     }
 }

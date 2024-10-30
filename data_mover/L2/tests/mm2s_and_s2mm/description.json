@@ -1,79 +1,75 @@
 {
-  "name": "MM2S/S2MM Kernel Test",
-  "description": [
-    "Fixed MM2S/S2MM kernel test, using parameters."
-  ],
-  "flow": "system",
-  "platform_allowlist": [
-    "u200",
-    "vck190"
-  ],
-  "os": [
-    "centos7",
-    "ubuntu"
-  ],
-  "runtime": [
-    "OpenCL"
-  ],
-  "host": {
-    "host_exe": "test.exe",
-    "compiler": {
-      "sources": [
-        "sw/test.cpp"
-      ],
-      "symbols":[
-          "_GLIBCXX_USE_CXX11_ABI=0"
-      ],
-      "options": "-g"
-    }
-  },
-  "v++": {
-      "compiler": {
-          "includepaths": [
-              "LIB_DIR/L2/include",
-              "LIB_DIR/L1/include"
-          ]
-      },
-      "linker": {
-          "ldclflags": [
-              "--config PROJECT/system.cfg"
-          ]
-      }
-  },
-  "containers": [
-      {
-          "accelerators": [
-              {
-                  "name": "mm2s",
-                  "location": "LIB_DIR/L2/src/hw/mm2s.cpp"
-              },
-              {
-                  "name": "s2mm",
-                  "location": "LIB_DIR/L2/src/hw/s2mm.cpp"
-              }
-          ],
-          "name": "data_mover"
-      }
-  ],
-  "launch": [
-      {
-          "cmd_args": "BUILD/data_mover.xclbin",
-          "name": "generic launch for all flows"
-      }
-  ],
-  "testinfo": {
-       "disable": false,
-       "jobs": [
-          {
-              "index": 0,
-              "dependency": [],
-              "env": "",
-              "cmd": "",
-              "max_memory_MB": 40960,
-              "max_time_min": 390
-          }
-       ],
-       "targets": [
+    "name": "MM2S/S2MM Kernel Test",
+    "description": [
+        "Fixed MM2S/S2MM kernel test, using parameters."
+    ],
+    "flow": "system",
+    "platform_allowlist": [
+        "u200",
+        "vck190"
+    ],
+    "runtime": [
+        "OpenCL"
+    ],
+    "host": {
+        "host_exe": "test.exe",
+        "compiler": {
+            "sources": [
+                "sw/test.cpp"
+            ],
+            "symbols": [
+                "_GLIBCXX_USE_CXX11_ABI=0"
+            ],
+            "options": "-g"
+        }
+    },
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L1/include"
+            ]
+        },
+        "linker": {
+            "ldclflags": [
+                "--config PROJECT/system.cfg"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "name": "mm2s",
+                    "location": "LIB_DIR/L2/src/hw/mm2s.cpp"
+                },
+                {
+                    "name": "s2mm",
+                    "location": "LIB_DIR/L2/src/hw/s2mm.cpp"
+                }
+            ],
+            "name": "data_mover"
+        }
+    ],
+    "launch": [
+        {
+            "cmd_args": "BUILD/data_mover.xclbin",
+            "name": "generic launch for all flows"
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 40960,
+                "max_time_min": 390
+            }
+        ],
+        "targets": [
             "vitis_sw_emu",
             "vitis_hw_emu"
         ],
