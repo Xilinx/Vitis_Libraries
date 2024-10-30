@@ -11,12 +11,10 @@
     "platform_blocklist": [
         "other"
     ],
-    "platform_properties": {},
     "launch": [
         {
             "name": "generic launch for sw_emu flows",
-            "target": "sw_emu",
-            "cmd_args": ""
+            "target": "sw_emu"
         }
     ],
     "host": {
@@ -68,8 +66,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_sw_emu": 10240
                 },
