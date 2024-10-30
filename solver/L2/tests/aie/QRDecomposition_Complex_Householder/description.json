@@ -1,32 +1,29 @@
 {
-    "name": "QR decomposition With Householder", 
+    "name": "QR decomposition With Householder",
     "description": [
         "QRD based on Householder Algorithm"
     ],
     "flow": "aie",
     "keywords": [
-        "aiecompiler", 
+        "aiecompiler",
         "aiesimulator",
         "stream_connect"
-    ], 
+    ],
     "key_concepts": [
-        "AI Engine", 
-        "Adaptive Data Flow", 
+        "AI Engine",
+        "Adaptive Data Flow",
         "Graph"
     ],
     "platform_allowlist": [
         "vck190"
     ],
-    "platform_blocklist": [
-
-    ],
     "os": [
         "Linux"
-    ], 
+    ],
     "runtime": [
         "OpenCL"
     ],
-    "pre_build" : [
+    "pre_build": [
         {
             "build_cmd": "cd tv && make tv -f tv.mk"
         }
@@ -49,15 +46,17 @@
                     "pl-freq": 1000,
                     "workdir": "./Work",
                     "name": "libadf.a",
-                    "aie_kernel_files":["./aie/aie_adder.cc"]
+                    "aie_kernel_files": [
+                        "./aie/aie_adder.cc"
+                    ]
                 }
             ]
         }
     ],
-    "match_makefile" : "true",
+    "match_makefile": "true",
     "contributors": [
         {
-            "url": "http://www.xilinx.com", 
+            "url": "http://www.xilinx.com",
             "group": "Xilinx"
         }
     ],
@@ -67,8 +66,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": 32768,
                 "max_time_min": 300
             }

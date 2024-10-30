@@ -26,8 +26,7 @@
                     ]
                 }
             }
-        },
-        "vck190": {}
+        }
     },
     "launch": [
         {
@@ -95,8 +94,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 40960,
                     "vitis_hw_emu": 28672,
