@@ -39,7 +39,6 @@ Benchmark
 Performance Summary for APIs
 ------------------------------
 
-Table 1 : Summary table for performance and resources of APIs
 
 .. table:: Table 1 Summary table for performance and resources of APIs
     :align: center

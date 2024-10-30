@@ -37,19 +37,19 @@ from Advanced Micro Devices, Inc.
 // Torque_decoup = Vq - speed * ((Ls * Id) + FAI_M)
 //--------------------------------------------------------------------------
 /**
- * @brief Decoupling Flux from the Vd and Torque from the Vq
- * @tparam T_IN	    	Type of the input data. ex. ap_fixed<32,16> is fit for Q16.16
- * @tparam T_MID        Type of the data in the middle of calculation.
- * @tparam T_MID2		Type of the data in the middle of calculation.
- * @tparam T_OUT		Type of the output data.
- * @param Vd_decoup     Direct component of the voltage decoupled
- * @param Vq_decoup     Quadrature component of the voltage decoupled
- * @param Id    		Direct component of the current
- * @param Iq    		Quadrature component of the current
- * @param Vd    		Direct component of the voltage to decouple
- * @param Vq     		Quadrature component of the voltage to decouple
- * @param RPM     		Speed, in RPM
- * @param RPM_to_speed  Constant factor for conversion
+ * brief Decoupling Flux from the Vd and Torque from the Vq
+ * tparam T_IN	    	Type of the input data. ex. ap_fixed<32,16> is fit for Q16.16
+ * tparam T_MID        Type of the data in the middle of calculation.
+ * tparam T_MID2		Type of the data in the middle of calculation.
+ * tparam T_OUT		Type of the output data.
+ * param Vd_decoup     Direct component of the voltage decoupled
+ * param Vq_decoup     Quadrature component of the voltage decoupled
+ * param Id    		Direct component of the current
+ * param Iq    		Quadrature component of the current
+ * param Vd    		Direct component of the voltage to decouple
+ * param Vq     		Quadrature component of the voltage to decouple
+ * param RPM     		Speed, in RPM
+ * param RPM_to_speed  Constant factor for conversion
  */
 template <class T_IN, class T_MID, class T_MID2, class T_OUT, int MAX_AD_SCL>
 void Decoupling_T_ap_fixed(
@@ -132,30 +132,10 @@ void Field_Weakening_T(
     // const T_MID MAX_CURRENT = MAX_AD_SCL>>1; // 0.88 from datasheet - 10%
     // T_MID Modulation, Modulation_sp, FW_PI_out;
     T_MID FW_PI_out;
-
-    // Modulation = hls::sqrt(Vd_decoup * Vd_decoup + Vq_decoup * Vq_decoup); // Modulation Index
-
     ap_fixed<48, 32> squareSum = Vd_decoup * Vd_decoup + Vq_decoup * Vq_decoup;
     float temp;
     temp = std::sqrt(squareSum.to_float());
     Modulation = temp;
-
-    //     ap_fixed< 32, 16> tmp_mul1;
-    // #pragma HLS BIND_OP variable=tmp_mul1 op=mul impl=dsp
-    //     tmp_mul1 = Vd_decoup * Vd_decoup;
-    //     ap_fixed< 32, 16> tmp_mul2;
-    // #pragma HLS BIND_OP variable=tmp_mul2 op=mul impl=dsp
-    //     tmp_mul2 = Vq_decoup * Vq_decoup;
-
-    //     ap_fixed< 32, 16> tmp_add1;
-    // #pragma HLS BIND_OP variable=tmp_add1 op=add impl=dsp
-    //     tmp_add1 = tmp_mul1 + tmp_mul2;
-
-    //     Modulation = sqrt_fixed_pipelineOff<32, 16> (tmp_add1);
-    //     //Modulation = hls::sqrt(tmp_mul1); // Modulation Index
-    // #pragma HLS BIND_OP variable=Modulation_sp op=mul impl=dsp
-    // #pragma HLS BIND_OP variable=Modulation_sp op=add impl=dsp
-
     Modulation_sp = (Max_SVM / ((Volt_sensord << 1) - V_reserve)); // Modulation Threshold
 
     // pid has move outside

@@ -76,7 +76,7 @@ namespace details
 
 	// global variables
 
-	static RangeDef <int> RANGE_pwm_freq
-	static RangeDef <int> RANGE_dead_cycles
-	static RangeDef <t_glb_foc2pwm> RANGE_dc_link_ref
+	static :ref:`RangeDef<doxid-struct_range_def>` <int> RANGE_pwm_freq
+	static :ref:`RangeDef<doxid-struct_range_def>` <int> RANGE_dead_cycles
+	static :ref:`RangeDef<doxid-struct_range_def>` <:ref:`t_glb_foc2pwm<doxid-common__vars_8hpp_1a6cf2787b026015774f62b378b2f11147>`> RANGE_dc_link_ref
 

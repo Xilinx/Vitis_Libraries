@@ -61,11 +61,9 @@
         "targets": [
             "hls_csim",
             "hls_csynth",
-            "hls_cosim",
             "vivado_syn",
             "vivado_impl"
         ],
         "category": "canary"
-    },
-    "gui": true
+    }
 }

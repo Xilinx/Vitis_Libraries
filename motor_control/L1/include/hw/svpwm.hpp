@@ -222,20 +222,19 @@ LOOP_SVPWM_RATIO:
     } while (!isEnd_cond);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // clang-format off
 /*
- * @brief This module is to generate output by channel
- * @tparam T_IN in<reg>: input data format
- * @param pwm_cycle in<reg>: Dead cycle, the value in test is pwm_args_dead_cycles cycles
- * @param pwm_cnt in<reg>: PWM duty cycles counter by each channel 
- * @param dead_cycles in<reg>: Dead cycle, the value in test is pwm_args_dead_cycles cycles
- * @param shift in<reg>: 0 (0 degree Phase Shift for output), 1 (120 degree Phase Shift for output)
- * @param len in<reg>: local registers to hold the duty cycles length
- * @param strm_length out<strm>: duty cycles on the target switch
- * @param strm_h_pwm out<strm>: duty cycles on upper switch of the channel
- * @param strm_l_pwm out<strm>: duty cycles on lower switch of the channel
- * @param strm_pwm_sync out<strm>: sync signals by channel to sample the ADCs
+ * brief This module is to generate output by channel
+ * tparam T_IN in<reg>: input data format
+ * param pwm_cycle in<reg>: Dead cycle, the value in test is pwm_args_dead_cycles cycles
+ * param pwm_cnt in<reg>: PWM duty cycles counter by each channel 
+ * param dead_cycles in<reg>: Dead cycle, the value in test is pwm_args_dead_cycles cycles
+ * param shift in<reg>: 0 (0 degree Phase Shift for output), 1 (120 degree Phase Shift for output)
+ * param len in<reg>: local registers to hold the duty cycles length
+ * param strm_length out<strm>: duty cycles on the target switch
+ * param strm_h_pwm out<strm>: duty cycles on upper switch of the channel
+ * param strm_l_pwm out<strm>: duty cycles on lower switch of the channel
+ * param strm_pwm_sync out<strm>: sync signals by channel to sample the ADCs
  */
 // clang-format on
 
@@ -627,7 +626,7 @@ LOOP_GEN_WAVE:
 
 // clang-format off
 /**
- * @brief hls_svpwm_duty: calculate the duty cycles from the input three-phase voltages.
+ * @brief The function hls_svpwm_duty calculates the duty cycles from the input three-phase voltages.
  * @tparam T_FOC_COM The data type for input voltages
  * @tparam T_RATIO_16b The data type for output duty cycles
  * @param strm_Va_cmd in<strm>: Every pwm_args_sample_ii cycles, one output of FOC can be consumed.
@@ -676,7 +675,7 @@ void hls_svpwm_duty_axi(hls::stream<T_FOC_COM>& strm_Va_cmd,
 
 // clang-format off
 /**
- * @brief hls_pwm_gen: generate the gating bitstream of each switch according to the duty cycles.
+ * @brief The function hls_pwm_gen generates the gating bitstream of each switch according to the duty cycles.
  * @tparam T_RATIO_16b The data type of input duty cycles.
  * @param strm_duty_ratio_a in<strm>: the duty ratio of switch bridge pair a, within every pwm cycle.
  * @param strm_duty_ratio_b in<strm>: the duty ratio of switch bridge pair b, within every pwm cycle.
@@ -731,26 +730,6 @@ void hls_pwm_gen_axi(hls::stream<T_RATIO_16b>& strm_duty_ratio_a,
         strm_h_a, strm_h_b, strm_h_c, strm_l_a, strm_l_b, strm_l_c, strm_sync_a, strm_sync_b, strm_sync_c,
         pwm_stt_pwm_cycle, pwm_stt_duty_ratio_a, pwm_stt_duty_ratio_b, pwm_stt_duty_ratio_c);
 
-    /*
-                hls::stream<details::gen_sampler_pkg<ap_ufixed<16,0>> > sampler_PassedPkg;
-                #pragma HLS STREAM depth = 2 variable = sampler_PassedPkg
-
-                #pragma HLS DATAFLOW
-                details::sampler_gen<T_RATIO_16b, ap_ufixed<16,0> >(
-                    strm_duty_ratio_a, strm_duty_ratio_b, strm_duty_ratio_c,
-                    sampler_PassedPkg,
-                    pwm_args_pwm_freq,
-                    pwm_args_dead_cycles,
-                    pwm_args_phase_shift,
-                    pwm_args_cnt_trip,
-                    pwm_args_sample_ii);
-
-                details::PWM_gen_wave(
-                    sampler_PassedPkg,
-                    strm_h_a, strm_h_b, strm_h_c,
-                    strm_l_a, strm_l_b, strm_l_c,
-                    strm_sync_a, strm_sync_b, strm_sync_c,
-                    pwm_stt_pwm_cycle);*/
 }
 } /*end of namespace motorcontrol*/
 } /*end of namespace xf*/

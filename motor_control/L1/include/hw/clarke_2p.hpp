@@ -38,13 +38,13 @@ from Advanced Micro Devices, Inc.
 // Vc_out = [-Valpha - sqrt(3)*Vbeta]/2
 //--------------------------------------------------------------------------
 /**
- * @brief Clarke Inverse 2 phase convertion in the form of an inline HLS function
- * @tparam T_IO	    Datatype of the input/output ap_fixed. ex. ap_fixed<32,16> is enough for Q16.16
- * @param va_out    Va as output of Clarke Inverse.
- * @param vb_out    Vb as output of Clarke Inverse.
- * @param vc_out    Vc as output of Clarke Inverse.
- * @param valpha_in Valpha as input of Clarke Inverse.
- * @param vbeta_in  Vbeta as input of Clarke Inverse.
+ * brief Clarke Inverse 2 phase convertion in the form of an inline HLS function
+ * tparam T_IO	    Datatype of the input/output ap_fixed. ex. ap_fixed<32,16> is enough for Q16.16
+ * param va_out    Va as output of Clarke Inverse.
+ * param vb_out    Vb as output of Clarke Inverse.
+ * param vc_out    Vc as output of Clarke Inverse.
+ * param valpha_in Valpha as input of Clarke Inverse.
+ * param vbeta_in  Vbeta as input of Clarke Inverse.
  */
 template <class T_IO>
 void Clarke_Inverse_2p_ap_fixed(T_IO& va_out,

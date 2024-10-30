@@ -1,0 +1,19 @@
+[hls]
+
+clock=10
+set_clock_uncertainty=1.25
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/tests/IP_VOLTAGE_MODULATION/src/voltage_modulation.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/IP_VOLTAGE_MODULATION/src/voltage_modulation.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/apc -I${XF_PROJ_ROOT}/L1/tests/IP_VOLTAGE_MODULATION/src
+syn.top= voltage_modulation_inst
+tb.file=${XF_PROJ_ROOT}/L1/tests/IP_VOLTAGE_MODULATION/src/main_voltage_modulation_main.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/IP_VOLTAGE_MODULATION/src/main_voltage_modulation_main.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/apc -I${XF_PROJ_ROOT}/L1/tests/IP_VOLTAGE_MODULATION/src
+
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

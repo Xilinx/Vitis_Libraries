@@ -38,22 +38,22 @@ from Advanced Micro Devices, Inc.
 // p = 1/256 * (kp*err + ki/256 * pi + kd/256 * pd)
 //--------------------------------------------------------------------------
 /**
- * @brief PI control in the form of an inline HLS function
- * @tparam T_IO	        Datatype of the input/output ap_fixed. ex. ap_fixed<32,16> is enough for Q16.16
- * @tparam T_ACC	    Datatype of the ap_fixed integral error. Range extension of T_IO is required when precise
+ * brief PI control in the form of an inline HLS function
+ * tparam T_IO	        Datatype of the input/output ap_fixed. ex. ap_fixed<32,16> is enough for Q16.16
+ * tparam T_ACC	    Datatype of the ap_fixed integral error. Range extension of T_IO is required when precise
  * control Area/resource.
- * @tparam T_ERR	    Datatype of the ap_fixed error. Range extension of T_IO is required when precise control
+ * tparam T_ERR	    Datatype of the ap_fixed error. Range extension of T_IO is required when precise control
  * Area/resource.
- * @tparam T_PID	    Datatype of the ap_fixed coefficient.
- * @param Res_out	    Result Output
- * @param I_err_prev	Reference to a variable storing the value of an integral error
- * @param Error_prev	    Reference to a variable storing the value of an error
- * @param in_Measured	Measured process value, input. Precision and range are relative to T_IO
- * @param Sp		    Setpoint. Precision and range are relative to T_IO
- * @param Kp		    Proportional coefficient. Precision and range are relative to T_PID
- * @param Ki		    Integral coefficient. Precision and range are relative to T_PID
- * @param Kd		    differential coefficient. Precision and range are relative to T_PID
- * @param mode_change	is mode_change ? 1 : 0
+ * tparam T_PID	    Datatype of the ap_fixed coefficient.
+ * param Res_out	    Result Output
+ * param I_err_prev	Reference to a variable storing the value of an integral error
+ * param Error_prev	    Reference to a variable storing the value of an error
+ * param in_Measured	Measured process value, input. Precision and range are relative to T_IO
+ * param Sp		    Setpoint. Precision and range are relative to T_IO
+ * param Kp		    Proportional coefficient. Precision and range are relative to T_PID
+ * param Ki		    Integral coefficient. Precision and range are relative to T_PID
+ * param Kd		    differential coefficient. Precision and range are relative to T_PID
+ * param mode_change	is mode_change ? 1 : 0
 */
 template <class T_IO, class T_ACC, class T_ERR, class T_PID>
 void PID_Control_ap_fixed(T_IO& Res_out,

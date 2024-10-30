@@ -1,0 +1,19 @@
+[hls]
+
+clock=10
+set_clock_uncertainty=1.25
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/tests/IP_SVPWM_STREAM/src/svpwm.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/IP_SVPWM_STREAM/src/svpwm.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/apc -I${XF_PROJ_ROOT}/L1/tests/IP_SVPWM_STREAM/src
+syn.top= SVPWM_Inst
+tb.file=${XF_PROJ_ROOT}/L1/tests/IP_SVPWM_STREAM/src/main_svpwm.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/IP_SVPWM_STREAM/src/main_svpwm.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/apc -I${XF_PROJ_ROOT}/L1/tests/IP_SVPWM_STREAM/src
+
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

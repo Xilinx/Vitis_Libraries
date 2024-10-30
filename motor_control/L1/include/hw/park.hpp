@@ -37,15 +37,15 @@ from Advanced Micro Devices, Inc.
 // Iq_out = Ibeta_in*cos(Theta_in) - Ialpha_in*sin(Theta_in)
 //--------------------------------------------------------------------------
 /**
- * @brief Park Direct convertion in the form of an inline HLS function
- * @tparam T_IO	        Datatype of the input/output ap_fixed. ex. ap_fixed<32,16> is enough for Q16.16
- * @tparam T_SINCOS	    Datatype of the sin/cos ap_fixed. ex. ap_fixed<W_sin, 1> is enough for Q16.16
- * @param id_out        Id as output of Park Direct.
- * @param iq_out        Iq as output of Park Direct.
- * @param ialpha_in     Ialpha as input of Park Direct.
- * @param ibeta_in      Ibeta as input of Park Direct, orthogonal component of Ialpha.
- * @param cos_theta_in  Value of cos(theta) as input of Park Direct.
- * @param sin_theta_in  Value of sin(theta) as input of Park Direct.
+ * brief Park Direct convertion in the form of an inline HLS function
+ * tparam T_IO	        Datatype of the input/output ap_fixed. ex. ap_fixed<32,16> is enough for Q16.16
+ * tparam T_SINCOS	    Datatype of the sin/cos ap_fixed. ex. ap_fixed<W_sin, 1> is enough for Q16.16
+ * param id_out        Id as output of Park Direct.
+ * param iq_out        Iq as output of Park Direct.
+ * param ialpha_in     Ialpha as input of Park Direct.
+ * param ibeta_in      Ibeta as input of Park Direct, orthogonal component of Ialpha.
+ * param cos_theta_in  Value of cos(theta) as input of Park Direct.
+ * param sin_theta_in  Value of sin(theta) as input of Park Direct.
  */
 template <class T_IO, class T_SINCOS>
 void Park_Direct_ap_fixed(

@@ -25,557 +25,431 @@ shall not be used in advertising or otherwise to promote the sale,
 use or other dealings in this Software without prior written authorization
 from Advanced Micro Devices, Inc.
 */
-#ifndef _QEI_HPP_
-#define _QEI_HPP_
+#ifndef _PID_CONTROL_HPP_
+#define _PID_CONTROL_HPP_
 
-#include <math.h>
 #include "ap_int.h"
-#include <iostream>
-#include <hls_stream.h>
-#include "common.hpp"
+#include "ap_fixed.h"
+#include "hls_stream.h"
+#include <array>
+#include <algorithm>
 
-//--------------------------------------------------------------------------
-// Argument
-//--------------------------------------------------------------------------
-
-enum Encoding_Mode { B_Leading_A = 0, A_Leading_B };
-enum Dirction_QEI { clockwise_n = 0, clockwise_p };
-struct AxiParameters_QEI { //
-    int qei_args_cpr;
-    int qei_args_ctrl;
-    int qei_stts_RPM_THETA_m;
-    int qei_stts_dir;
-    int qei_stts_err;
-    long qei_args_cnt_trip;
-};
-/// Constant values
-#define QEI_MAX_NO_EDGE_CYCLE (1 << 30)
-static RangeDef<ap_uint<32> > RANGE_qei_freq = {COMM_CLOCK_FREQ / 10, COMM_CLOCK_FREQ * 20,
-                                                COMM_CLOCK_FREQ}; // min max default
-static RangeDef<ap_uint<32> > RANGE_qei_cpr = {400, 40000, 1000}; // min max default
-
+#define COUNT_X1 0
+#define COUNT_X2 1
 namespace xf {
 namespace motorcontrol {
 namespace details {
+typedef ap_uint<1> bit;
 
-/*
- * @brief The QEI module uses digital noise filters to reject noise on the incoming quadrature phase signals and index
- * pulse.
- * @tparam T_bin ABI's pulse is a binary data type
- * @param A Input signals of a quadrature encoder Channel A.
- * @param B Input signals of a quadrature encoder Channel B. The A and B channels are coded ninety electrical degrees
- * out of phase.
- * @param I Input signals of a quadrature encoder Channel I. This I signal, produced once per complete revolution of the
- * quadrature encoder, is often used to locate a specific position during a 360° revolution.
- * @param trip_cnt input of trip count
- * @param finalABI The output of ABI by filtered
- */
-template <class T_bin>
-void filterIn(hls::stream<T_bin>& A,
-              hls::stream<T_bin>& B,
-              hls::stream<T_bin>& I,
-              long trip_cnt,
-              hls::stream<ap_uint<4> >& finalABI) {
-    const ap_uint<5> max_filtercount = 16;
-    ap_uint<5> filter_a = 0;
-    ap_uint<5> filter_b = 0;
-    ap_uint<5> filter_i = 0;
-    T_bin f_a = 0;
-    T_bin f_b = 0;
-    T_bin f_i = 0;
-    T_bin a;
-    T_bin b;
-    T_bin i;
-    T_bin ini_A = 0;
-    T_bin ini_B = 0;
-    T_bin ini_I = 0;
-    T_bin pre_a = 0;
-    T_bin pre_b = 0;
-    T_bin pre_i = 0;
+enum enc_pos_mode {
 
-LOOP_QEI_FILTER:
-    for (long k = 0; k < trip_cnt; k++) {
-#pragma HLS PIPELINE II = 1
-        auto read_a = A.read_nb(a);
-        auto read_b = B.read_nb(b);
-        auto read_i = I.read_nb(i);
-        bool is_end = trip_cnt == k + 1 ? true : false;
-        if (read_a) {
-            ini_A = a;
-            ini_B = b;
-            ini_I = i;
-        }
-        if (pre_a ^ ini_A) filter_a = 0;
-        if (pre_b ^ ini_B) filter_b = 0;
-        if (pre_i ^ ini_I) filter_i = 0;
-        pre_a = ini_A;
-        pre_b = ini_B;
-        pre_i = ini_I;
-        if (filter_a < max_filtercount) filter_a++;
-        if (filter_b < max_filtercount) filter_b++;
-        if (filter_i < max_filtercount) filter_i++;
-        if (filter_a == max_filtercount) f_a = ini_A;
-        if (filter_b == max_filtercount) f_b = ini_B;
-        if (filter_i == max_filtercount) f_i = ini_I;
-        ap_uint<4> f_ABI;
-        f_ABI[0] = (f_a);
-        f_ABI[1] = (f_b);
-        f_ABI[2] = (f_i);
-        f_ABI[3] = (is_end);
-        finalABI.write(f_ABI);
-    }
-}
+    DEGREES = 0,
+    RADIANS = 1
 
-/*
- * @brief The structure for ABI' edges information
- * @param edges The variable for saving ABI's status, if there is a change (0->1 or 1->0), edges value is 1, or is 0.
- * @param types The type for marking ABI's status including raining(0->1) or falling(1->0)
- * @param timeStep Record the number of cycles on qei system time
- */
-struct QEI_EdgeInfo {
-    ap_uint<3> edges; // 2:I,1:B,0:A
-    ap_uint<3> types; // 2:I,1:B,0:A, 1: rainsing , 0: falling
-    unsigned int timeStep;
-    void clone(QEI_EdgeInfo src) {
-        edges = src.edges;
-        types = src.types;
-        timeStep = src.timeStep;
-    }
 };
 
-/*
- * @brief By catching on the rising and falling edges of the pulse train,
- * we can mark the state and type of the pulse and filter out invalid signals.
- * @tparam T_bin ABI's pulse is a binary data type
- * @param strm_finalABI The input signals are filtered by filterIn
- * @param strm_cntEdge The output signals are marked and filtered by this module
- */
-template <class T_bin>
-void catchingEdge(hls::stream<ap_uint<4> >& strm_finalABI,
-                  hls::stream<QEI_EdgeInfo>& strm_cntEdge,
-                  hls::stream<T_bin>& strm_calc_end) {
-    const unsigned int max_timeStep = QEI_MAX_NO_EDGE_CYCLE;
-    unsigned int timeStep = 0; // increasing by MAX_PERIOD
-#pragma HLS BIND_OP variable = timeStep op = add impl = dsp
-    QEI_EdgeInfo edgeInfo;
-    ap_uint<4> f_ABI;
-    T_bin va, vb, vi, is_end;
-    T_bin va_pre, vb_pre, vi_pre;
-    f_ABI = strm_finalABI.read();
-    va = f_ABI[0];
-    vb = f_ABI[1];
-    vi = f_ABI[2];
-    is_end = f_ABI[3];
-    timeStep++;
-#ifndef __SYNTHESIS__
-    unsigned int k = 0;
-#endif
-LOOP_QEI_CATCH:
-    while (!is_end) {
-#pragma HLS PIPELINE II = 1
-        if (!strm_finalABI.empty()) {
-            va_pre = va;
-            vb_pre = vb;
-            vi_pre = vi;
-            f_ABI = strm_finalABI.read();
-            va = f_ABI[0];
-            vb = f_ABI[1];
-            vi = f_ABI[2];
-            is_end = f_ABI[3];
-            ap_uint<3> edges;
-            edgeInfo.edges[0] = va_pre ^ va;
-            edgeInfo.edges[1] = vb_pre ^ vb;
-            edgeInfo.edges[2] = vi_pre ^ vi;
-            edgeInfo.types[0] = va; // 0->1 : raising edge
-            edgeInfo.types[1] = vb;
-            edgeInfo.types[2] = vi;
-            edgeInfo.timeStep = timeStep;
-            if (edgeInfo.edges != 0) {
-                strm_cntEdge.write_nb(edgeInfo);
-                strm_calc_end.write(0);
+enum enc_count_mode {
+
+    X1 = 0,
+    X2 = 1,
+    X4 = 2
+
+};
+
+template <typename T_QEI_COUNTER, typename T_ANGLE, typename T_VELOCITY>
+class QEI {
+   public:
+    QEI() : posCount_(0), revCount_(0), QAp_(false), QBp_(false), QIp_(false), countDirection_(true) {}
+
+    void update(bool QAi, bool QBi, bool QIi, bool B_leading_A) {
+        // QAi and QBi are the inputs QAp and QBp are the previous inputs.
+        //  The following table represents the states and the action to the counter
+        // QAi QBi QAp QBp UP DW Er Action
+        // 1   1    1   0  1  0  0   Count up
+        // 1   0    0   0  1  0  0   Count up
+        // 0   1    1   1  1  0  0   Count up
+        // 0   0    0   1  1  0  0   Count up
+
+        // 1   1    0   1  0  1  0   Count down
+        // 1   0    1   1  0  1  0   Count down
+        // 0   1    0   0  0  1  0   Count down
+        // 0   0    1   0  0  1  0   Count down
+
+        // 1   1    0   0  0  0  1   Invalid state change; ignore
+        // 1   0    0   1  0  0  1   Invalid state change; ignore
+        // 0   1    1   0  0  0  1   Invalid state change; ignore
+        // 0   0    1   1  0  0  1   Invalid state change; ignore
+
+        // 1   0    1   0  0  0  0   No count or direction change
+        // 0   1    0   1  0  0  0   No count or direction change
+        // 0   0    0   0  0  0  0   No count or direction change
+        // 1   1    1   1  0  0  0   No count or direction change
+
+        // A Leading B Config:           0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15
+        static bool def_count_up[16] = {0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0};
+        static bool def_count_dw[16] = {0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0};
+        bool *count_up = def_count_up, *count_dw = def_count_dw;
+        if (B_leading_A) {
+            std::swap(count_up, count_dw);
+        }
+        static bool err_qei[16] = {0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0};
+        static bool idle_qei[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+
+        // status of the QEI
+        T_QEI_COUNTER pnt =
+            (T_QEI_COUNTER)QAi << 3 | (T_QEI_COUNTER)QBi << 2 | (T_QEI_COUNTER)QAp_ << 1 | (T_QEI_COUNTER)QBp_;
+
+        // Update position count (from 0 to CPR)
+        posCount_ = (!QIp_ & QIi) ? 0 : posCount_ + count_up[pnt] - count_dw[pnt];
+        // Update revolution count
+        revCount_ = (!QIp_ & QIi) ? (countDirection_ ? revCount_ + 1 : revCount_ - 1) : revCount_;
+        // Check whether the spinning direction is positive or negative
+        countDirection_ = (countDirection_ & !count_dw[pnt]) | count_up[pnt];
+
+        counting_a = (!QAp_ & QAi) | QAi;
+
+        if (counting_a) {
+            if (countDirection_) {
+                ++counter_divider_a;
+            } else {
+                --counter_divider_a;
             }
         }
-        if (timeStep < max_timeStep - 1)
-            timeStep++;
-        else
-            timeStep = 0;
-#ifndef __SYNTHESIS__
-        k++;
-#endif
-    } // while(1)
-    strm_calc_end.write(1);
-}
 
-/*
- * @brief Judging that both channel A and channel B have edges
- * @param edges_cur The current signals packet including ABI's edges, types, timeStep
- * @return If both A and B have edges is false, or is true
- */
-static bool isNormalEdges(QEI_EdgeInfo edges_cur) {
-#pragma HLS INLINE
-    const int i_a = 0;
-    const int i_b = 1;
-    if (edges_cur.edges[i_a] == 1 && edges_cur.edges[i_b] == 1)
-        return false;
-    else
-        return true;
-}
+        divide_enable_a = ((counter_divider_a != 0) && !counting_a) ? true : false;
 
-/*
- * @brief Judging that both channel A and channel B have no edges
- * @param edges_cur The current signals packet including ABI's edges, types, timeStep
- * @return If A and B have no edges is true, or is false
- */
-static bool isNoABEdge(QEI_EdgeInfo edges_cur) {
-#pragma HLS INLINE
-    const int i_a = 0;
-    const int i_b = 1;
-    if (edges_cur.edges[i_a] == 0 && edges_cur.edges[i_b] == 0)
-        return true;
-    else
-        return false;
-}
+        if (divide_enable_a) {
+            m_internal_velocity_a = RPM_factor_a / counter_divider_a;
+            divide_enable_a = false;
+            counter_divider_a = 0;
+        }
 
-/*
- * @brief Determine whether the pulse is a rising edge
- * @param idx Index of pulse type for A, B, I
- * @param edges_cur The current pulse packet including ABI's edges, types, timeStep
- * @return If the pulse is a rising edge is true, or is false
- */
-static bool isRaising(int idx, QEI_EdgeInfo edges_cur) {
-#pragma HLS INLINE
-    if (edges_cur.edges[idx] == 1 && edges_cur.types[idx] == 1)
-        return true;
-    else
-        return false;
-}
+        counting_b = (QAp_ & !QAi) | !QAi;
 
-/*
- * @brief Analyze the direction of a pulse based on its state change and type, and calculate the number of cycles
- * between the two pulses.
- * @param pre The previous status of pulse
- * @param cur The current status of pulse
- * @param mode The mode represents encoding mode, B leading A is represented by 0 and A leading B is represented by 1.
- * @param dir The direction of current pulse, clockwise is represented by 1 and counterclockwise is represented by 0.
- * @param ii_cycles The number of cycles between previous pulse and current pulse
- */
-static void processABedges(QEI_EdgeInfo pre, QEI_EdgeInfo cur, ap_uint<1>& mode, bool& dir, unsigned int& ii_cycles) {
-#pragma HLS INLINE
-    // PRE	CUR	Leader
-    // R	    R	PRE
-    // F	    F	PRE
-    // R	    F	CUR
-    // F	    R	CUR
-    const unsigned int max_timeStep = QEI_MAX_NO_EDGE_CYCLE;
-    const int i_a = 0;
-    const int i_b = 1;
-    int id_pre = pre.edges(1, 0) / 2;
-    int id_cur = cur.edges(1, 0) / 2;
-    if (pre.types[id_pre] == cur.types[id_cur]) {
-        // leader is pre
-        if (id_pre == 0) // A is leader
-            dir = 1 ^ mode;
-        else
-            dir = 0 ^ mode;
-    } else {
-        // leader is cur
-        if (id_cur == 0) // A is leader
-            dir = 1 ^ mode;
-        else
-            dir = 0 ^ mode;
-    }
-    int diff;
-#pragma HLS BIND_OP variable = diff op = add impl = dsp
-    diff = cur.timeStep - pre.timeStep;
-    if (diff < 0) diff += QEI_MAX_NO_EDGE_CYCLE;
-    ii_cycles = diff;
-}
+        if (counting_b) {
+            if (countDirection_) {
+                ++counter_divider_b;
+            } else {
+                --counter_divider_b;
+            }
+        }
 
-/*
- * @brief By counting the leading and trailing edges, the counter monitors the transition in its relationship
- to the state of the opposite channel, and can generate reliable position and speed.
- * @tparam T_bin ABI's pulse is a binary data type
- * @tparam T_err The type for qei's error status
- * @param strm_cntEdge The input stream with a structure including ABI' edges, types and timeStep
- * @param out_speed_angle The output stream with 32 bits saving speed and angle
- * @param out_dirstr The output stream for direction
- * @param out_errstr The output stream for error
- * @param axi_qei_cpr Read for user setting or written back by kernel
- * @param axi_qei_ctrl The lowest bit of this value indicates the encoding mode
- * @param axi_qei_rpm_theta_m Rpm and theta_m written back by kernel on axi_lite port
- * @param axi_qei_dir Dir written back by kernel on axi_lite port
- * @param axi_qei_err Err written back by kernel on axi_lite port
- */
-template <class T_bin, class T_err>
-void calcCounter(hls::stream<QEI_EdgeInfo>& strm_cntEdge,
-                 hls::stream<T_bin>& strm_calc_end,
-                 hls::stream<ap_uint<32> >& out_speed_angle,
-                 hls::stream<T_bin>& out_dirstr,
-                 hls::stream<T_err>& out_errstr,
-                 volatile int& axi_qei_cpr,
-                 // volatile int& axi_qei_freq,COMM_CLOCK_FREQ
-                 volatile int& axi_qei_ctrl,
-                 volatile int& axi_qei_rpm_theta_m,
-                 volatile int& axi_qei_dir,
-                 volatile int& axi_qei_err) {
-    axi_qei_rpm_theta_m = 0;
-    axi_qei_dir = 0;
-    axi_qei_err = 0;
+        divide_enable_b = ((counter_divider_b != 0) && !counting_b) ? true : false;
 
-    const int i_a = 0;
-    const int i_b = 1;
-    const int i_i = 2;
+        if (divide_enable_b) {
+            m_internal_velocity_b = RPM_factor_b / counter_divider_b;
+            divide_enable_b = false;
+            counter_divider_b = 0;
+        }
 
-    const unsigned int timeOut_noEdge = QEI_MAX_NO_EDGE_CYCLE;
-    unsigned int cnt_noEdge = 0;
-    unsigned short counter = 0;
-#pragma HLS BIND_OP variable = counter op = add impl = dsp
+        // update internal state variables
+        QAp_ = QAi;
+        QBp_ = QBi;
+        QIp_ = QIi;
+        m_error = err_qei[pnt];
+        m_velocity = (counting_a == true) ? m_internal_velocity_b : m_internal_velocity_a;
+        m_revCount_angle = (T_ANGLE)revCount_;
+        m_posCount_angle = (T_ANGLE)posCount_;
 
-    bool isPreValid = false;
-    bool isNoEdge = true;
-    QEI_EdgeInfo edges_cur;
-    QEI_EdgeInfo edges_pre;
+    } // End update
 
-    T_bin is_end = strm_calc_end.read();
-    bool dir = true; // clockwise
-    ap_uint<32> ctrl = axi_qei_ctrl;
-    ap_uint<1> mode = (ctrl > (ap_uint<32>)0);
-    mode = mode ^ 1; // inversing the behavior for default setting of  axi_qei_ctrl '0' means B leading A
-//#define DBG_CHIPSCOPE
-#ifdef DBG_CHIPSCOPE
-    unsigned short freqA = 0;
-    unsigned short freqB = 0;
-    unsigned short cnt_A = 0;
-    unsigned short cnt_B = 0;
-    unsigned int cnt_sec = 0;
-#endif // DBG_CHIPSCOPE
-#ifndef __SYNTHESIS__
-    QEI_EdgeInfo edges_pre2; // for printing
-    unsigned int k = 0;
-#endif
-LOOP_QEI_COUNTEDGE:
-    while (!is_end) {
-#pragma HLS PIPELINE off
-
-        ap_uint<32> cpr = axi_qei_cpr;
-        CheckRange(cpr, RANGE_qei_cpr);
-        axi_qei_cpr = cpr;
-        ap_uint<32> freq = COMM_CLOCK_FREQ;
-
-        unsigned int ii_cycles;
-        unsigned short speed_rpm;
-
-#ifdef DBG_CHIPSCOPE
-        const int ii_after_synthesis = 4;
-        const int div_factor =
-            100 *
-            ii_after_synthesis; // for simulation, div_factor can be larger value, for running on hardware, it can be 1
-        if (cnt_sec == freq / div_factor) { // if(cnt_sec == freq/ div_factor) can also be used with more area
-            cnt_sec = 0;
-            freqA = cnt_A; // just the rounded KHz of
-            freqB = cnt_B;
+    // return the counter for encoder position
+    T_QEI_COUNTER getCounter() const { return posCount_; }
+    // set the counter for encoder position
+    void setCounter(T_QEI_COUNTER val) { posCount_ = val; }
+    // return the number of revolution of the encoder
+    T_QEI_COUNTER getRevolutions() const { return revCount_; }
+    // set the number of revolution of the encoder
+    void setRevolutions(T_QEI_COUNTER val) { revCount_ = val; }
+    // return the spinning direction of the motor
+    /*bool getDirection() const {
+        return countDirection_;
+    }*/
+    T_QEI_COUNTER getDirection() const {
+        if (countDirection_) {
+            return 0;
         } else {
-            cnt_sec++;
+            return 1;
         }
-#endif // DBG_CHIPSCOPE
-        if (!strm_cntEdge.empty()) {
-            is_end = strm_calc_end.read();
-            isNoEdge = false;
-            edges_cur = strm_cntEdge.read();
-#ifdef DBG_CHIPSCOPE
-            if (isRaising(i_a, edges_cur)) {
-                if (cnt_sec == 0)
-                    cnt_A = 1;
-                else
-                    cnt_A++;
-            }
-            if (isRaising(i_b, edges_cur)) {
-                if (cnt_sec == 0)
-                    cnt_B = 1;
-                else
-                    cnt_B++;
-            }
-#endif // DBG_CHIPSCOPE
-
-            if (!isNormalEdges(edges_cur)) {
-                ;
-#ifdef DBG_CHIPSCOPE
-                axi_qei_dir = (freqA + freqB) << 1; // just to keep the registers after synthesis
-#endif
-            } else { // valid edge(s)
-                // interating counter
-                if (isRaising(i_i, edges_cur))
-                    counter = 0;
-                else if (edges_cur.edges & 3) { // 4X mode : using any type of edges of A or B
-                    if (dir)
-                        counter = counter < ((int)(cpr << 2) - 1) ? counter + 1 : 0;
-                    else
-                        counter = counter == 0 ? ((int)(cpr << 2) - 1) : counter - 1;
-                }
-                // No A or B edges
-                if (isNoABEdge(edges_cur)) continue;
-
-                if (isPreValid == true) {
-                    // iterating dir and getting interval between two edges
-                    processABedges(edges_pre, edges_cur, mode, dir, ii_cycles);
-                    ap_uint<36> tmp_rpm = freq;
-#pragma HLS BIND_OP variable = tmp_rpm op = mul impl = dsp
-                    tmp_rpm *= 15; // 60 / 4
-                    unsigned int div;
-#pragma HLS BIND_OP variable = div op = mul impl = dsp
-                    div = ii_cycles * cpr;
-#ifndef __SYNTHESIS__
-                    if (div == 0) printf("QEI_ERROR DIV=0\n");
-                    assert(div != 0);
-#endif
-                    tmp_rpm = tmp_rpm / div;
-
-                    if (dir == Dirction_QEI::clockwise_p)
-                        speed_rpm = tmp_rpm; // clockwise_p
-                    else
-                        speed_rpm = -tmp_rpm; // clockwise_n
-                    ap_uint<32> tmp;
-                    tmp.range(15, 0) = speed_rpm;
-                    tmp.range(31, 16) = counter >> 2; // 4X mode : using any type of edges of A or B
-                    axi_qei_rpm_theta_m = (int)tmp;
-                    // outputing
-                    if (!out_speed_angle.full()) out_speed_angle.write((int)tmp);
-                    if (!out_dirstr.full()) out_dirstr.write((T_bin)dir);
-                    if (!out_errstr.full()) out_errstr.write((T_err)0);
-                    axi_qei_dir = dir;
-                    axi_qei_err = 0;
-                }
-                isPreValid = true;
-#ifndef __SYNTHESIS__
-                edges_pre2.clone(edges_pre); // for printing
-#endif
-                edges_pre.clone(edges_cur);
-            } // Normal edge(s)
-            cnt_noEdge = 0;
-        } else { // no edge
-
-#ifdef DBG_CHIPSCOPE
-            if (cnt_sec == 0) {
-                cnt_A = 0;
-                cnt_B = 0;
-            }
-#endif // DBG_CHIPSCOPE
-
-            isNoEdge = true;
-            if (cnt_noEdge == timeOut_noEdge - 1) {
-                // debug tobe refine
-                axi_qei_dir = counter >> 2; /// 4X mode : using any type of edges of A or B
-                ap_uint<32> tmp_err;
-                tmp_err.range(3, 0) = (ap_uint<4>)3;
-                tmp_err.range(31, 4) = (ap_uint<28>)cnt_noEdge;
-
-                axi_qei_err = tmp_err;
-                // reseting
-                counter = 0;
-                cnt_noEdge = 0;
-                // outputing
-                if (!out_speed_angle.full()) out_speed_angle.write(0);
-                if (!out_dirstr.full()) out_dirstr.write((T_bin)dir);
-                if (!out_errstr.full()) out_errstr.write((T_err)3);
-
-            } else
-                cnt_noEdge++;
-        } // no edge
-//#define _DBG_QEI_WATCH_
-#ifndef __SYNTHESIS__
-
-#ifdef _DBG_QEI_WATCH_
-        int mode_noedge = timeOut_noEdge / 20;
-        if (k == 0)
-            printf(
-                "DBG_QEI_WATCH:\t k\t noEdge\t PreValid\t pre.edges\t pre.types\t pre.time\t cur.edges\t cur.types\t "
-                "cur.time\t counter\t speed_rpm\tii_cycles\tdir\terr \t preA\tcurA\tpreB\tcurB\tpreI\tcurI\n");
-#ifdef DBG_CHIPSCOPE
-        else if ((k != 1) && (cnt_noEdge % mode_noedge == 0 || isNoEdge == false || (cnt_sec == 0))) {
-#else
-        else if ((k != 1) && (cnt_noEdge % mode_noedge == 0 || isNoEdge == false)) {
-#endif
-            printf(
-                "DBG_QEI_WATCH:\t %d\t %d\t %d\t%x\t %x\t %d\t %x\t %x\t %d\t %d\t %d\t%d\t%d\t%d  \t %d\t %d\t "
-                "%d\t%d\t%d\t%d",
-                k, cnt_noEdge, isPreValid, edges_pre2.edges, edges_pre2.types, edges_pre2.timeStep, edges_cur.edges,
-                edges_cur.types, edges_cur.timeStep, counter, speed_rpm, ii_cycles, dir, axi_qei_err,
-                edges_pre2.edges & 1, edges_cur.edges & 1, (edges_pre2.edges >> 1) & 1, (edges_cur.edges >> 1) & 1,
-                (edges_pre2.edges >> 2) & 1, (edges_cur.edges >> 2) & 1);
-#ifdef DBG_CHIPSCOPE
-            printf("\t %d\t %d\t %d \t%d \t%d", cnt_sec, freqA, freqB, cnt_A, cnt_B);
-#endif //#ifdef DBG_CHIPSCOPE
-            printf("\n");
-        }
-#endif //_DBG_QEI_WATCH_
-#endif //__SYNTHESIS__
-
-#ifndef __SYNTHESIS__
-        k++;
-#endif
     }
-}
-} // details
+    // set the number of CPR
+    void setCPR(T_QEI_COUNTER val) { m_CPR = val; }
+    // set whteher to measure in degrees or radians
+    void setModeAngle(enc_pos_mode mode) { m_mode = mode; }
+    // set the divider to compute the position
+    void setAngleDivider(T_QEI_COUNTER divider) {
+        if (m_mode == enc_pos_mode::DEGREES) {
+            m_divider_degrees = (T_ANGLE)divider;
+        } else {
+            m_divider_radians = (T_ANGLE)divider;
+        }
+    }
+    // return the angle based on the mode set
+    T_ANGLE getAngle() {
+        if (m_mode == enc_pos_mode::DEGREES) {
+            return m_posCount_angle * m_divider_degrees;
+        } else {
+            return m_posCount_angle * m_divider_radians;
+        }
+    }
+    // return velocity computed
+    T_VELOCITY getRPMVelocity() { return m_velocity; }
+    // return if there is an error state
+    bool getErrorState() { return m_error; }
+
+   private:
+    T_QEI_COUNTER posCount_ = 0;
+    T_QEI_COUNTER m_pos_offset = 0;
+    T_QEI_COUNTER revCount_ = 0;
+    T_QEI_COUNTER m_CPR = 4000;
+    T_QEI_COUNTER m_counter_period = 0;
+
+    T_QEI_COUNTER RPM_factor_a = 1500000; // 60s*100MHz/CPR(4000)
+    T_QEI_COUNTER RPM_factor_b = 1500000; // 60s*100MHz/CPR(4000)
+    T_QEI_COUNTER counter_divider_a = 0, counter_divider_b = 0, internal_counter = 0;
+    T_QEI_COUNTER m_velocity = 0, m_internal_velocity_a = 0, m_internal_velocity_b = 0;
+    bool divide_enable_a = false;
+    bool counting_a = false;
+    bool divide_enable_b = false;
+    bool counting_b = false;
+
+    bool m_error = false;
+
+    T_ANGLE m_posCount_angle = 0;
+    T_ANGLE m_revCount_angle = 0;
+    bool QAp_;
+    bool QBp_;
+    bool QIp_;
+    bool countDirection_;
+    enc_pos_mode m_mode = enc_pos_mode::DEGREES;
+    T_ANGLE m_factor = 1.0;
+    T_ANGLE m_divider_degrees = 0.36;
+    T_ANGLE m_divider_radians = 0.00628;
+    T_ANGLE m_theta = 0.0;
+};
+
+template <typename deglitch_data_type>
+class deglitcher {
+   public:
+    // Constructor
+    deglitcher() {
+        filter = 0;          // Initialize filter count to 0
+        max_filtercount = 4; // Set the default maximum filter count
+    };
+
+    // Function to get filtered input
+    ap_uint<1> getdeglitched_input(ap_uint<1> noisy_in) {
+        // The filter count is reset if the input has changed, otherwise it is incremented up to max_filtercount
+        filter = (noisy_in_old ^ noisy_in) ? 0 : (filter < max_filtercount ? filter + 1 : max_filtercount);
+
+        // If the filter count has reached max_filtercount, the output becomes the new input value
+        // Otherwise, the output remains the same
+        deglitched_out_data = filter == max_filtercount ? noisy_in : deglitched_out_data;
+
+        // Store the current input for the next comparison
+        noisy_in_old = noisy_in;
+
+        // Return the filtered output
+        return deglitched_out_data;
+    }
+
+    // Function to set the maximum filter count
+    void set_max_filtercount(deglitch_data_type filter_ctr) { max_filtercount = filter_ctr; }
+
+   private:
+    // Store the previous input
+    ap_uint<1> noisy_in_old;
+
+    // Store the filtered output
+    ap_uint<1> deglitched_out_data;
+
+    // The current count of the filter
+    deglitch_data_type filter;
+
+    // The maximum count of the filter
+    deglitch_data_type max_filtercount;
+};
+
+} // namespace details
 
 /**
- * @brief Quadrature Encoder Interface(QEI) control demo top interface and paramters list
+ * @brief The function hls_qei_axi is Quadrature Encoder Interface(QEI) control demo top
  * @tparam T_bin The data type for ABI's signals
- * @tparam T_err The data type for qei's error status
  * @param strm_qei_A The input stream for A signals
  * @param strm_qei_B The input stream for B signals
  * @param strm_qei_I The input stream for I signals
  * @param strm_qei_RPM_THETA_m The output stream for rpm and theta_m
- * @param strm_qei_dir The output stream for direction value
- * @param strm_qei_err The output stream for error status value
+ * @param logger The output stream for status
  * @param qei_args_cpr Read for user setting or written back by kernel
  * @param qei_args_ctrl The lowest bit of this value indicates the encoding mode
  * @param qei_stts_RPM_THETA_m Rpm and theta_m written back by kernel on axi_lite port
  * @param qei_stts_dir Dir written back by kernel on axi_lite port
  * @param qei_stts_err Err written back by kernel on axi_lite port
- * @param qei_args_cnt_trip input of trip count
+ * @param qei_args_flt_size size of filter
+ * @param qei_args_cnt_trip input of trip count used when doing csim
+ * @param qei_debug_rpm output of rpm for debug
+ * @param qei_count_mode Reserved s_axilite interface
+ * @param qei_args_flt_size_i Reserved s_axilite interface
  */
-template <class T_bin, class T_err>
+template <class T_bin = ap_uint<1> >
 void hls_qei_axi(hls::stream<T_bin>& strm_qei_A,
                  hls::stream<T_bin>& strm_qei_B,
                  hls::stream<T_bin>& strm_qei_I,
                  hls::stream<ap_uint<32> >& strm_qei_RPM_THETA_m,
-                 hls::stream<T_bin>& strm_qei_dir,
-                 hls::stream<T_err>& strm_qei_err,
+                 hls::stream<ap_uint<256> >& logger,
                  volatile int& qei_args_cpr,
                  volatile int& qei_args_ctrl,
                  volatile int& qei_stts_RPM_THETA_m,
                  volatile int& qei_stts_dir,
                  volatile int& qei_stts_err,
-                 volatile long& qei_args_cnt_trip) {
-#pragma HLS DATAFLOW
+                 volatile int& qei_args_flt_size,
+                 volatile int& qei_args_cnt_trip,
+                 volatile int& qei_debug_rpm,
+                 volatile int& qei_count_mode,
+                 volatile int& qei_args_flt_size_i) {
+#pragma HLS INTERFACE ap_fifo port = strm_qei_A
+#pragma HLS INTERFACE ap_fifo port = strm_qei_B
+#pragma HLS INTERFACE ap_fifo port = strm_qei_I
+#pragma HLS INTERFACE ap_fifo port = logger
+#pragma HLS INTERFACE axis port = strm_qei_RPM_THETA_m
+#pragma HLS INTERFACE s_axilite port = qei_args_cpr offset = 0x10 bundle = qei_args
+#pragma HLS INTERFACE s_axilite port = qei_args_ctrl offset = 0x20 bundle = qei_args
+#pragma HLS INTERFACE s_axilite port = qei_stts_RPM_THETA_m offset = 0x28 bundle = qei_args
+#pragma HLS INTERFACE s_axilite port = qei_stts_dir offset = 0x38 bundle = qei_args
+#pragma HLS INTERFACE s_axilite port = qei_stts_err offset = 0x48 bundle = qei_args
+#pragma HLS interface s_axilite port = qei_args_flt_size bundle = qei_args
+#pragma HLS interface s_axilite port = qei_args_cnt_trip bundle = qei_args
+#pragma HLS interface s_axilite port = qei_debug_rpm bundle = qei_args
+#pragma HLS interface s_axilite port = qei_args_flt_size_i bundle = qei_args
+#pragma HLS interface s_axilite port = qei_count_mode bundle = qei_args
+#pragma HLS interface s_axilite port = return bundle = qei_args
 
-    hls::stream<T_bin> strm_qei_A_out("strm_qei_A_out");
-#pragma HLS STREAM depth = 16 variable = strm_qei_A_out
+    // values for module initialization
+    const unsigned int BIT_DEPTH = 32;
+    const unsigned int INT_WORD = 15;
+    const int CPR = qei_args_cpr;
+    const bool B_Leading_A =
+        not qei_args_ctrl; // qei_args_ctrl=b0 -> B is leading A when motor is in electrical phase rotation A->B->C
+    const details::enc_pos_mode mode_qei = details::enc_pos_mode::DEGREES;
+    const details::enc_count_mode mode_qei_count = details::enc_count_mode::X4;
 
-    hls::stream<T_bin> strm_qei_B_out("strm_qei_B_out");
-#pragma HLS STREAM depth = 16 variable = strm_qei_B_out
+    unsigned int cont = 0;
 
-    hls::stream<T_bin> strm_qei_I_out("strm_qei_I_out");
-#pragma HLS STREAM depth = 16 variable = strm_qei_I_out
+    bool has_finish_log = false;
 
-    hls::stream<T_bin> strm_gen_quit_end("strm_gen_quit_end");
-#pragma HLS STREAM depth = 16 variable = strm_gen_quit_end
+    details::deglitcher<unsigned int> filter_a;
+    details::deglitcher<unsigned int> filter_b;
+    details::deglitcher<unsigned int> filter_i;
+    // init QEI
+    details::QEI<int, ap_fixed<BIT_DEPTH, INT_WORD>, int> qei_interface_;
+    qei_interface_.setCPR(CPR);
+    qei_interface_.setModeAngle(mode_qei);
 
-    hls::stream<ap_uint<4> > strm_qei_finalABI("strm_qei_finalABI");
-#pragma HLS STREAM depth = 16 variable = strm_qei_finalABI
+    // Encoder frequency 360KHz, system clock 100MHz -> 100M/360K = 277,77
+    const unsigned int QEI_freq_ab = qei_args_flt_size;
+    const unsigned int QEI_freq_i = 8;
 
-    hls::stream<details::QEI_EdgeInfo> strm_cntEdge("strm_cntEdge");
-#pragma HLS STREAM depth = 16 variable = strm_cntEdge
+    filter_a.set_max_filtercount(QEI_freq_ab);
+    filter_b.set_max_filtercount(QEI_freq_ab);
+    filter_i.set_max_filtercount(QEI_freq_i);
 
-    hls::stream<T_bin> strm_calc_end("strm_calc_end");
-#pragma HLS STREAM depth = 16 variable = strm_calc_end
+    T_bin a_strm, a_filt, b_strm, b_filt, i_strm, i_filt;
 
-    details::filterIn<T_bin>(strm_qei_A, strm_qei_B, strm_qei_I, qei_args_cnt_trip, strm_qei_finalABI);
-    details::catchingEdge<T_bin>(strm_qei_finalABI, strm_cntEdge, strm_calc_end);
-    details::calcCounter<T_bin, T_err>(strm_cntEdge, strm_calc_end, strm_qei_RPM_THETA_m, strm_qei_dir, strm_qei_err,
-                                       qei_args_cpr, qei_args_ctrl, qei_stts_RPM_THETA_m, qei_stts_dir, qei_stts_err);
+    ap_int<32> angle_, RPM_pack;
+    int angle_counter, velocity_, index_counter;
+    // unsigned int packet_;
+    ap_uint<32> packet_;
+
+    ap_uint<256> logger_var;
+
+    bool has_read = false;
+#ifndef __SYNTHESIS__
+    // Simulation purposes
+    int cnt = qei_args_cnt_trip;
+#endif
+    while (1) {
+#ifndef __SYNTHESIS__
+        // Simulation purposes
+        cnt--;
+        if (cnt <= 0) {
+            break;
+        }
+#endif
+        // Take A - B - I signals from encoder
+        has_read = strm_qei_A.read_nb(a_strm);
+        if (!has_read) {
+            continue;
+        }
+        has_read = strm_qei_B.read_nb(b_strm);
+        if (!has_read) {
+            continue;
+        }
+        has_read = strm_qei_I.read_nb(i_strm);
+        if (!has_read) {
+            continue;
+        }
+        // Filter encoder inputs
+        a_filt = filter_a.getdeglitched_input(a_strm);
+        b_filt = filter_b.getdeglitched_input(b_strm);
+        i_filt = filter_i.getdeglitched_input(i_strm);
+
+        bool A_ = a_filt == (T_bin)0 ? false : true;
+        bool B_ = b_filt == (T_bin)0 ? false : true;
+        bool I_ = i_filt == (T_bin)0 ? false : true;
+        bool qei_args_ctrl;
+
+        // Update encoder Status
+        qei_interface_.update(A_, B_, I_, B_Leading_A);
+        // Get counter and velocity
+        angle_counter = qei_interface_.getCounter();
+        velocity_ = qei_interface_.getRPMVelocity();
+
+        if (angle_counter < 0) {
+            angle_counter = angle_counter + 4000;
+        }
+
+        switch (mode_qei_count) {
+            case details::enc_count_mode::X4:
+                velocity_ = velocity_ >> 4;
+                angle_counter = angle_counter >> 2;
+                break;
+
+            case details::enc_count_mode::X2:
+                velocity_ = velocity_ >> 2;
+                angle_counter = angle_counter >> 1;
+                break;
+
+            default:
+                break;
+        }
+
+        packet_(31, 16) = angle_counter;
+        packet_(15, 0) = velocity_;
+
+        strm_qei_RPM_THETA_m.write(packet_);
+
+        // LOGGER
+        logger_var.range(255, 224) = packet_.range(31, 0);
+        logger_var.range(223, 192) = b_filt.to_int();
+        logger_var.range(191, 160) = a_filt.to_int();
+        logger_var.range(159, 128) = I_;
+        logger_var.range(127, 96) = B_;
+        logger_var.range(95, 64) = A_;
+        logger_var.range(63, 32) = velocity_;
+        logger_var.range(31, 0) = angle_counter;
+
+        logger.write_nb(logger_var);
+        // LOGGER
+
+        // update status and error
+        qei_stts_RPM_THETA_m = packet_;
+        qei_debug_rpm = velocity_;
+        qei_stts_err = qei_interface_.getErrorState();
+        qei_stts_dir = qei_interface_.getDirection();
+    }
 }
-} // xf
-} // motorcontrol
+
+} // namespace motorcontrol
+} // namespace xf
 
 #endif // _QEI_HPP_

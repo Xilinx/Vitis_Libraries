@@ -42,14 +42,14 @@ from Advanced Micro Devices, Inc.
 //--------------------------------------------------------------------------
 
 /**
- * @brief Clarke Direct 3 phase convertion in the form of an inline HLS function
- * @tparam T_IO	    Datatype of the input/output ap_fixed. ex. ap_fixed<32,16> is enough for Q16.16
- * @param ialpha_out    Ialpha as output of Clarke Direct.
- * @param ibeta_out     Ibeta as output of Clarke Direct, orthogonal component of Ialpha.
- * @param ihomop_out    Ihomopolar as output of Clarke Direct, homopolar component of the system.
- * @param ia_in     Ia as input of Clarke Direct.
- * @param ib_in     Ib as input of Clarke Direct.
- * @param ib_in     Ib as input of Clarke Direct.
+ * brief Clarke Direct 3 phase convertion in the form of an inline HLS function
+ * tparam T_IO	    Datatype of the input/output ap_fixed. ex. ap_fixed<32,16> is enough for Q16.16
+ * param ialpha_out    Ialpha as output of Clarke Direct.
+ * param ibeta_out     Ibeta as output of Clarke Direct, orthogonal component of Ialpha.
+ * param ihomop_out    Ihomopolar as output of Clarke Direct, homopolar component of the system.
+ * param ia_in     Ia as input of Clarke Direct.
+ * param ib_in     Ib as input of Clarke Direct.
+ * param ib_in     Ib as input of Clarke Direct.
  */
 template <class T_IO>
 void Clarke_Direct_3p_ap_fixed(

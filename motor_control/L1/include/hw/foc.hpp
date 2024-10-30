@@ -181,7 +181,7 @@ extern RangeTracer ranger;
 #endif
 
 // clang-format off
-/// \brief Lookup table for the cosine function in the Q16.16 format.
+/// brief Lookup table for the cosine function in the Q16.16 format.
 /// CPR(COMM_MACRO_CPR) Number of encoder steps per one full revolution
 /// Important: Update this table when the encoder resolution has changed, i.e. when #CPR has changed.
 static short sin_table[COMM_MACRO_CPR] = {
@@ -951,7 +951,7 @@ void foc_core_ap_fixed(
 //--------------------------------------------------------------------------
 // clang-format off
 /**
- * @brief sensor based field-orientated control (FOC) in the form of a demo
+ * @brief The function hls_foc_strm_ap_fixed is sensor based field-orientated control (FOC)
  * @tparam VALUE_CPR        Number of encoder steps per one full revolution. ex. 1000
  * @tparam T_IO             Data type for input currents and output commands. ex. ap_fixed<24, 8>
  * @tparam MAX_IO           Maximum absolute value for input currents and output commands. ex. 24(V) 

@@ -111,7 +111,7 @@ hls_foc_strm_ap_fixed
 	    volatile long& trip_cnt
 	    )
 
-Sensor based field-orientated control (FOC) in the form of a demo.
+sensor based field-orientated control (FOC) in the form of a demo
 
 
 
@@ -123,17 +123,17 @@ Sensor based field-orientated control (FOC) in the form of a demo.
     *
         - VALUE_CPR
 
-        - Number of encoder steps per full revolution. For example, 1000.
+        - Number of encoder steps per one full revolution. ex. 1000
 
     *
         - T_IO
 
-        - Data type for input currents and output commands. For example, ap_fixed<24, 8>
+        - Data type for input currents and output commands. ex. ap_fixed<24, 8>
 
     *
         - MAX_IO
 
-        - Maximum absolute value for input currents and output commands. For example, 24(V)
+        - Maximum absolute value for input currents and output commands. ex. 24(V)
 
     *
         - W
@@ -143,7 +143,7 @@ Sensor based field-orientated control (FOC) in the form of a demo.
     *
         - I
 
-        - Integer part width of T_IO(inluding sign bit). For example, 8 for ap_fixed<24, 8>
+        - Integer part width of T_IO(inluding sign bit). ex. 8 for ap_fixed<24, 8>
 
     *
         - T_RPM_THETA_FOC
@@ -193,12 +193,12 @@ Sensor based field-orientated control (FOC) in the form of a demo.
     *
         - control_mode_args
 
-        - Input control mode of foc, enum FOC_Mode. Read every latency cycles of LOOP_FOC.
+        - Input control mode of foc, enum FOC_Mode. Read every latency cycles of LOOP_FOC
 
     *
         - control_fixperiod_args
 
-        - input control_fixperiod. Read every latency cycles of LOOP_FOC.
+        - input control_fixperiod. Read every latency cycles of LOOP_FOC
 
     *
         - flux_sp_args
@@ -381,6 +381,11 @@ Sensor based field-orientated control (FOC) in the form of a demo.
         - Output status to monitor Ihomopolar (output of Clarke_Direct)
 
     *
+        - fixed_angle_args
+
+        - Input Args for fixed angle value in CPR range by Q15Q16 format
+
+    *
         - trip_cnt
 
         - Input Args to set the trip count of foc loop
@@ -423,7 +428,7 @@ hls_svpwm_duty_axi
 	    volatile int& pwm_stt_Vc_cmd
 	    )
 
-hls_svpwm_duty: Calculate the duty cycles from the input three-phase voltages.
+hls_svpwm_duty: calculate the duty cycles from the input three-phase voltages.
 
 
 
@@ -505,17 +510,17 @@ hls_svpwm_duty: Calculate the duty cycles from the input three-phase voltages.
     *
         - pwm_stt_Va_cmd
 
-        - out<reg>: constantly monitoring the Va_cmd inside the kernel calculate_ratios.
+        - out<reg>: contantly monitoring the Va_cmd inside the kernel calculate_ratios.
 
     *
         - pwm_stt_Vb_cmd
 
-        - out<reg>: constantly monitoring the Vb_cmd inside the kernel calculate_ratios.
+        - out<reg>: contantly monitoring the Vb_cmd inside the kernel calculate_ratios.
 
     *
         - pwm_stt_Vc_cmd
 
-        - out<reg>: constantly monitoring the Vc_cmd inside the kernel calculate_ratios.
+        - out<reg>: contantly monitoring the Vc_cmd inside the kernel calculate_ratios.
 
 .. _doxid-namespacexf_1_1motorcontrol_1ae02d2bed8c0902b5dddaa201f147afbd:
 .. _cid-xf::motorcontrol::hls_pwm_gen_axi:

@@ -50,12 +50,12 @@ from Advanced Micro Devices, Inc.
 // Clip functions
 //--------------------------------------------------------------------------
 /*
-* @brief A WIDTH signed integer type.
-* @brief Clip the WIDTH-bit argument in the given range, in the form of an inline HLS function.
-* @param x Value to be clipped.
-* @param x_min Minimum limit for the value.
-* @param x_max Maximum limit for the value.
-* @return Value #x clipped into the range #x_min ... #x_max.
+* brief A WIDTH signed integer type.
+* brief Clip the WIDTH-bit argument in the given range, in the form of an inline HLS function.
+* param x Value to be clipped.
+* param x_min Minimum limit for the value.
+* param x_max Maximum limit for the value.
+* return Value #x clipped into the range #x_min ... #x_max.
 */
 template <class T>
 static T Clip_AP(const T x, const T x_min, const T x_max) {

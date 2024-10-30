@@ -36,6 +36,11 @@ Release Note
 
 Motor Control Library is an open-sourced library written in C/C++ for accelerating developments of motor control applications. It now covers four algorithm-level L1 APIs including FOC, SVPWM_DUTY, PWM_GEN, and QEI. Operator-level APIs, such as Clarke transform and its inverse transform, Park transform and its inverse transform, and PID are also implemented. The use of ap_fixed data types makes the code easy to understand and further develop. A virtual motor model is provided for doing the verifications of FOC solely in the AMD Vitis |trade| environment.
 
+2024.2
+-------
+
+In 2024.2 release, 12 new fine-grained function-level APIs are provided for lower level utilization. These APIs include angle_generation, Clarke_Direct, Clarke_Inverse, demuxer_pi, ps_iir_filter, muxer_pi, Park_Direct, Park_Inverse, PI_Control, PI_Control_stream, SVPWM and voltage_modulation.
+
 2023.2
 -------
 

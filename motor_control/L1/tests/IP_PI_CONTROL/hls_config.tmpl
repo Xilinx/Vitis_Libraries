@@ -1,0 +1,19 @@
+[hls]
+
+clock=10
+set_clock_uncertainty=1.25
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/tests/IP_PI_CONTROL/src/pi_control.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/IP_PI_CONTROL/src/pi_control.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/apc -I${XF_PROJ_ROOT}/L1/tests/IP_PI_CONTROL/src
+syn.top= PI_Control_Inst
+tb.file=${XF_PROJ_ROOT}/L1/tests/IP_PI_CONTROL/src/main_pi_control.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/IP_PI_CONTROL/src/main_pi_control.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/apc -I${XF_PROJ_ROOT}/L1/tests/IP_PI_CONTROL/src
+
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

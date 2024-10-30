@@ -1,0 +1,19 @@
+[hls]
+
+clock=10
+set_clock_uncertainty=1.25
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/tests/IP_MUXER/src/muxer_pi.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/IP_MUXER/src/muxer_pi.cpp,-DSIM_FINITE -I${XF_PROJ_ROOT}/L1/include/hw/apc -I${XF_PROJ_ROOT}/L1/tests/IP_MUXER/src
+syn.top= muxer_pi_inst
+tb.file=${XF_PROJ_ROOT}/L1/tests/IP_MUXER/src/muxer_pi_main.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/IP_MUXER/src/muxer_pi_main.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/apc -I${XF_PROJ_ROOT}/L1/tests/IP_MUXER/src
+
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+
