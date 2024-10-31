@@ -98,8 +98,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 61400,
                     "vitis_hw_emu": 28672,

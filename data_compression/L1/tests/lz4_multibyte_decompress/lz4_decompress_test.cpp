@@ -25,19 +25,26 @@
 #include <string>
 
 #include "lz4_decompress.hpp"
-
+#define PARALLEL_BYTES (8)
+#define PARALLEL_OUT_BYTES (8)
 #define MAX_OFFSET (64 * 1024)
 #define HISTORY_SIZE MAX_OFFSET
-#define OUTPUT_BYTES 8
-typedef ap_uint<OUTPUT_BYTES * 8> uintV_t;
-typedef ap_uint<(OUTPUT_BYTES * 8) + 8> uintS_t;
+#define INPUT_BYTES (8)
+#define OUTPUT_BYTES PARALLEL_OUT_BYTES
+typedef ap_uint<INPUT_BYTES * 8> uintV_t;
+typedef ap_uint<(OUTPUT_BYTES * 8) + OUTPUT_BYTES> uintS_t;
 
-void lz4DecompressEngineRun(hls::stream<ap_uint<OUTPUT_BYTES * 8> >& inStream,
-                            hls::stream<ap_uint<(OUTPUT_BYTES * 8) + 8> >& outStream,
+
+void lz4DecompressEngineRun(hls::stream<ap_uint<INPUT_BYTES * 8> >& inStream,
+                            hls::stream<ap_uint<(OUTPUT_BYTES * 8) + OUTPUT_BYTES> >& outStream,
                             const uint32_t input_size)
 
-{
-    xf::compression::lz4DecompressEngine<OUTPUT_BYTES, HISTORY_SIZE>(inStream, outStream, input_size);
+{   
+    bool error;
+    bool modeBlk=false;
+    //xf::compression::lz4DecompressEngine_NinMout<INPUT_BYTES, OUTPUT_BYTES, HISTORY_SIZE>(inStream, outStream, input_size, &error, modeBlk);
+    xf::compression::lz4DecompressEngine<INPUT_BYTES, HISTORY_SIZE>(inStream, outStream, input_size);
+
 }
 
 int main(int argc, char* argv[]) {
@@ -54,9 +61,9 @@ int main(int argc, char* argv[]) {
     outputFile.seekg(0, std::ios::end); // reaching to end of file
     uint32_t comp_length = (uint32_t)outputFile.tellg();
     outputFile.seekg(0, std::ios::beg);
-    for (int i = 0; i < comp_length; i += OUTPUT_BYTES) {
+    for (int i = 0; i < comp_length; i += INPUT_BYTES) {
         uintV_t x;
-        outputFile.read((char*)&x, OUTPUT_BYTES);
+        outputFile.read((char*)&x, INPUT_BYTES);
         inStream << x;
     }
 

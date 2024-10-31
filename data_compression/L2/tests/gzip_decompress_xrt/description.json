@@ -105,8 +105,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 40960,
                     "vitis_hw_emu": 28672,
@@ -129,15 +127,6 @@
         ],
         "category": "canary"
     },
-    "platform_properties": {
-        "vck190": {
-            "containers": [
-                {
-                    "name": "decompress",
-                    "ldclflags": "--config PROJECT/connectivity.cfg --clock.id 4:xilDecompress_1"
-                }
-            ]
-        }
-    },
+    "platform_properties": {},
     "gui": true
 }

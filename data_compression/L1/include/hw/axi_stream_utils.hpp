@@ -23,6 +23,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <ap_int.h>
+#include "hls_fence.h"
 
 namespace xf {
 namespace compression {
@@ -581,6 +582,8 @@ void streamDataK2dmMultiByteSize(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& out,
         // read nextValue
         inValue = dmInStream.read();
     }
+    
+    hls::fence({dmInStream}, {dmInSizeStream});
 
     outEoS << 1;
     out << inValue.data;

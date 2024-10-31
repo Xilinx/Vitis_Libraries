@@ -97,8 +97,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 40960,
                     "vitis_hw_emu": 28672,
@@ -120,9 +118,6 @@
             "vitis_hw_run"
         ],
         "category": "canary"
-    },
-    "platform_properties": {
-        "vck190": {}
     },
     "gui": true
 }
