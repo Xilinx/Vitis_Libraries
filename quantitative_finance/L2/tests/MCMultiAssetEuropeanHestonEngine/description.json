@@ -12,29 +12,10 @@
     ],
     "platform_properties": {
         "u250": {
-            "host": {
-                "compiler": {
-                    "symbols": []
-                }
-            },
             "v++": {
                 "compiler": {
                     "clflags": [
                         "--config PROJECT/conn_u250.cfg"
-                    ]
-                }
-            }
-        },
-        "u50": {
-            "host": {
-                "compiler": {
-                    "symbols": []
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u50.cfg"
                     ]
                 }
             }
@@ -140,8 +121,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 51200,
                     "vitis_hw_emu": 28672,

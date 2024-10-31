@@ -25,22 +25,6 @@
                     ]
                 }
             }
-        },
-        "u50": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_DDR"
-                    ]
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u50.cfg"
-                    ]
-                }
-            }
         }
     },
     "launch": [
@@ -97,8 +81,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 46080,
                     "vitis_hw_emu": 28672,

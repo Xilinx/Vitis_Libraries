@@ -18,15 +18,6 @@
                     ]
                 }
             }
-        },
-        "u50": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u50.cfg"
-                    ]
-                }
-            }
         }
     },
     "launch": [
@@ -95,8 +86,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 61440,
                     "vitis_hw_emu": 28672,

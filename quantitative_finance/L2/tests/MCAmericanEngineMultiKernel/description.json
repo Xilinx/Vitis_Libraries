@@ -12,36 +12,10 @@
     ],
     "platform_properties": {
         "u250": {
-            "host": {
-                "compiler": {
-                    "symbols": []
-                }
-            },
             "v++": {
                 "compiler": {
                     "clflags": [
                         "--config PROJECT/conn_u250.cfg"
-                    ]
-                }
-            },
-            "containers": [
-                {
-                    "ldclflags_mk": "--connectivity.nk MCAE_k0:1:MCAE_k0_1 --connectivity.nk MCAE_k1:1:MCAE_k1_1 --connectivity.nk MCAE_k2:1:MCAE_k2_1",
-                    "frequency": 300,
-                    "name": "MCAE_k"
-                }
-            ]
-        },
-        "u50": {
-            "host": {
-                "compiler": {
-                    "symbols": []
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u50.cfg"
                     ]
                 }
             },
@@ -78,8 +52,7 @@
                 "LIB_DIR/L2/tests/MCAmericanEngineMultiKernel/kernel",
                 "LIB_DIR/ext/xcl2"
             ],
-            "options": "-O3  -I$(XILINX_HLS)/include",
-            "symbols": []
+            "options": "-O3  -I$(XILINX_HLS)/include"
         },
         "linker": {
             "options": " -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel"
@@ -129,8 +102,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 81920,
                     "vitis_hw_emu": 20480,

@@ -12,11 +12,6 @@
     ],
     "platform_properties": {
         "u250": {
-            "host": {
-                "compiler": {
-                    "symbols": []
-                }
-            },
             "v++": {
                 "compiler": {
                     "clflags": [
@@ -49,8 +44,7 @@
                 "LIB_DIR/ext/xcl2",
                 "LIB_DIR/L2/benchmarks/MCEuropeanEngine/kernel"
             ],
-            "options": "-O3  -I$(XILINX_HLS)/include",
-            "symbols": []
+            "options": "-O3  -I$(XILINX_HLS)/include"
         },
         "linker": {
             "options": " -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel"
@@ -128,8 +122,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 81920,
                     "vitis_hw_emu": 30370,
