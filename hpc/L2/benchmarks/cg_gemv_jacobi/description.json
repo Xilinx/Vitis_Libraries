@@ -12,11 +12,6 @@
     ],
     "platform_properties": {
         "u50": {
-            "v++": {
-                "compiler": {
-                    "clflags": []
-                }
-            },
             "containers": [
                 {
                     "name": "cgSolver",
@@ -130,8 +125,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 81920
                 },
