@@ -1,0 +1,109 @@
+[
+    {
+        "lib": "blas", 
+        "dependsOn": [
+            "hpc"
+        ]
+    }, 
+    {
+        "lib": "codec", 
+        "dependsOn": [
+            "utils", 
+            "database", 
+            "quantitative_finance"
+        ]
+    }, 
+    {
+        "lib": "data_analytics", 
+        "dependsOn": [
+            "utils", 
+            "data_compression", 
+            "security", 
+            "graph", 
+            "database"
+        ]
+    }, 
+    {
+        "lib": "data_compression", 
+        "dependsOn": [
+            "security"
+        ]
+    }, 
+    {
+        "lib": "data_mover", 
+        "dependsOn": [
+            "utils"
+        ]
+    }, 
+    {
+        "lib": "database", 
+        "dependsOn": [
+            "utils"
+        ]
+    }, 
+    {
+        "lib": "dsp", 
+        "dependsOn": [
+            "utils", 
+            "data_mover"
+        ]
+    }, 
+    {
+        "lib": "graph", 
+        "dependsOn": [
+            "utils", 
+            "database", 
+            "quantitative_finance"
+        ]
+    }, 
+    {
+        "lib": "hpc", 
+        "dependsOn": [
+            "blas", 
+            "sparse"
+        ]
+    }, 
+    {
+        "lib": "motor_control", 
+        "dependsOn": []
+    }, 
+    {
+        "lib": "quantitative_finance", 
+        "dependsOn": [
+            "utils", 
+            "solver"
+        ]
+    }, 
+    {
+        "lib": "security", 
+        "dependsOn": [
+            "utils"
+        ]
+    }, 
+    {
+        "lib": "solver", 
+        "dependsOn": [
+            "utils", 
+            "dsp"
+        ]
+    }, 
+    {
+        "lib": "sparse", 
+        "dependsOn": [
+            "blas", 
+            "hpc"
+        ]
+    }, 
+    {
+        "lib": "ultrasound", 
+        "dependsOn": []
+    }, 
+    {
+        "lib": "utils", 
+        "dependsOn": []
+    }, 
+    {
+        "lib": "vision", 
+        "dependsOn": []
+    }
+]

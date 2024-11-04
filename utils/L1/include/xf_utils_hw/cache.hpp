@@ -183,9 +183,9 @@ class cache {
         while (!e) {
 #pragma HLS loop_tripcount min = 16500000 avg = 16500000 max = 16500000
 #pragma HLS pipeline II = 1
-#pragma HLS DEPENDENCE variable = valid type = inter direction = RAW distance=1 true
-#pragma HLS DEPENDENCE variable = onChipRam0 type = inter direction = RAW distance=1 true
-#pragma HLS DEPENDENCE variable = onChipAddr type = inter direction = RAW distance=1 true
+#pragma HLS DEPENDENCE variable = valid type = inter direction = RAW distance = 1 true
+#pragma HLS DEPENDENCE variable = onChipRam0 type = inter direction = RAW distance = 1 true
+#pragma HLS DEPENDENCE variable = onChipAddr type = inter direction = RAW distance = 1 true
 
             e = e_addrStrm.read();
             int index = addrStrm.read();
@@ -310,9 +310,9 @@ class cache {
         for (int i = 0; i < cnt; i++) {
 #pragma HLS loop_tripcount min = 16500000 avg = 16500000 max = 16500000
 #pragma HLS pipeline II = 1
-#pragma HLS DEPENDENCE variable = valid type = inter direction = RAW distance=1 true
-#pragma HLS DEPENDENCE variable = onChipRam0 type = inter direction = RAW distance=1 true
-#pragma HLS DEPENDENCE variable = onChipAddr type = inter direction = RAW distance=1 true
+#pragma HLS DEPENDENCE variable = valid type = inter direction = RAW distance = 1 true
+#pragma HLS DEPENDENCE variable = onChipRam0 type = inter direction = RAW distance = 1 true
+#pragma HLS DEPENDENCE variable = onChipAddr type = inter direction = RAW distance = 1 true
 
             int index = addrStrm.read();
             int k00 = index % dataOneLine;
@@ -444,10 +444,10 @@ class cache {
         for (int i = 0; i < cnt; ++i) {
 #pragma HLS loop_tripcount min = 16500000 avg = 16500000 max = 16500000
 #pragma HLS pipeline II = 1
-#pragma HLS DEPENDENCE variable = valid type = inter direction = RAW distance=1 true
-#pragma HLS DEPENDENCE variable = onChipRam0 type = inter direction = RAW distance=1 true
-#pragma HLS DEPENDENCE variable = onChipRam1 type = inter direction = RAW distance=1 true
-#pragma HLS DEPENDENCE variable = onChipAddr type = inter direction = RAW distance=1 true
+#pragma HLS DEPENDENCE variable = valid type = inter direction = RAW distance = 1 true
+#pragma HLS DEPENDENCE variable = onChipRam0 type = inter direction = RAW distance = 1 true
+#pragma HLS DEPENDENCE variable = onChipRam1 type = inter direction = RAW distance = 1 true
+#pragma HLS DEPENDENCE variable = onChipAddr type = inter direction = RAW distance = 1 true
             int index = addrStrm.read();
             int k00 = index % dataOneLine;
             int k01 = index / dataOneLine;
@@ -598,10 +598,10 @@ class cache {
         while (!e) {
 #pragma HLS loop_tripcount min = 16500000 avg = 16500000 max = 16500000
 #pragma HLS pipeline II = 1
-#pragma HLS DEPENDENCE variable = valid type = inter direction = RAW distance=1 true
-#pragma HLS DEPENDENCE variable = onChipRam0 type = inter direction = RAW distance=1 true
-#pragma HLS DEPENDENCE variable = onChipRam1 type = inter direction = RAW distance=1 true
-#pragma HLS DEPENDENCE variable = onChipAddr type = inter direction = RAW distance=1 true
+#pragma HLS DEPENDENCE variable = valid type = inter direction = RAW distance = 1 true
+#pragma HLS DEPENDENCE variable = onChipRam0 type = inter direction = RAW distance = 1 true
+#pragma HLS DEPENDENCE variable = onChipRam1 type = inter direction = RAW distance = 1 true
+#pragma HLS DEPENDENCE variable = onChipAddr type = inter direction = RAW distance = 1 true
             e = e_addrStrm.read();
 
             int index = addrStrm.read();
