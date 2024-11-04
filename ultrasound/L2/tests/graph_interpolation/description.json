@@ -5,15 +5,9 @@
     "platform_allowlist": [
         "vck190"
     ],
-    "platform_blocklist": [],
     "platform_properties": {
         "vck190": {
             "v++": {
-                "compiler": {
-                    "clflags": [
-                        ""
-                    ]
-                },
                 "package": {
                     "clflags": [
                         "--package.defer_aie_run"
@@ -38,7 +32,7 @@
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/tests/interpolator/aie_graph/graph.cpp",
+                    "location": "LIB_DIR/L2/tests/graph_interpolation/aie_graph/graph.cpp",
                     "workdir": "./Work",
                     "name": "libadf.a",
                     "config": "aie.cfg"
@@ -52,8 +46,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_aie_sim": 32768,
                     "vitis_aie_x86sim": 32768

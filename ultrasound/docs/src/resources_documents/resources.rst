@@ -17,4 +17,3 @@ Release Note
 3. `Vitis Software Platform <https://www.xilinx.com/products/design-tools/vitis/vitis-platform.html>`_
 4. `Vitis library <https://www.xilinx.com/products/design-tools/vitis/vitis-libraries.html>`_
 5. `Synthetic Aperture and Plane Wave Ultrasound Imaging with Versal ACAP <https://docs.xilinx.com/v/u/en-US/wp520-sa-pw-imaging>`_
-6. `Real Time Synthetic Aperture and Plane Wave Ultrasound Imaging with the Xilinx VERSAL™ SIMD-VLIW Architecture <https://ieeexplore.ieee.org/document/9251749>`_ 2020 IEEE International Ultrasonics Symposium (IUS), Las Vegas, NV, USA, 2020, pp. 1-4, doi: 10.1109/IUS46767.2020.9251749

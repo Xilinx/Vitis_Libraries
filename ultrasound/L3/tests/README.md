@@ -7,7 +7,7 @@
 source <Vitis_install_path>/Vitis/2022.2/settings64.sh
 source /opt/xilinx/xrt/setup.sh
 export PLATFORM_REPO_PATHS=<path to platforms>
-export DEVICE=xilinx_vck190_base_202220_1
+export PLATFORM=xilinx_vck190_base_202220_1
 # set up your SYSROOT, ROOTFS and K_IMAGE PATH
 export SYSROOT=<path to platforms>/sw/versal/xilinx-versal-common-v2022.2/sysroots/aarch64-xilinx-linux/
 export ROOTFS=<path to platforms>/sw/versal/xilinx-versal-common-v2022.2/rootfs.ext4

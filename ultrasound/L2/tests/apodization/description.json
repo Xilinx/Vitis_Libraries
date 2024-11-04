@@ -5,15 +5,9 @@
     "platform_allowlist": [
         "vck190"
     ],
-    "platform_blocklist": [],
     "platform_properties": {
         "vck190": {
             "v++": {
-                "compiler": {
-                    "clflags": [
-                        ""
-                    ]
-                },
                 "linker": {
                     "ldclflags": [
                         "--config PROJECT/system.cfg"
@@ -152,8 +146,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_aie_sim": 32768,
                     "vitis_aie_x86sim": 32768,

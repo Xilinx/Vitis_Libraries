@@ -6,18 +6,6 @@
     "platform_allowlist": [
         "vck190"
     ],
-    "platform_blocklist": [],
-    "platform_properties": {
-        "vck190": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        ""
-                    ]
-                }
-            }
-        }
-    },
     "data": [
         "LIB_DIR/L2/tests/absV/data"
     ],
@@ -25,7 +13,8 @@
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L1/include/",
-                "LIB_DIR/L1/include/absV"
+                "LIB_DIR/L1/include/absV",
+                "./"
             ]
         }
     },
@@ -50,8 +39,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": 32768,
                 "max_time_min": {
                     "vitis_aie_sim": 470,

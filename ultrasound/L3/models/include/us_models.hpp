@@ -76,9 +76,13 @@ class us_models {
         if (code_print || id < NUM_DATA_M) {
             char pre_dir_fn[256];
             sprintf(pre_dir_fn, "%s/%s", nm_dir, pre_fn);
-            char cmd_mkdir[256];
-            sprintf(cmd_mkdir, "mkdir %s", nm_dir);
-            system(cmd_mkdir);
+            char cmd_testdir[256];
+            sprintf(cmd_testdir, "test -d %s", nm_dir);
+            if (system(cmd_testdir) != 0) {
+                char cmd_mkdir[256];
+                sprintf(cmd_mkdir, "mkdir %s", nm_dir);
+                system(cmd_mkdir);
+            }
             int isMtx = code_print & PRINT_MTX;
             if (id < NUM_DATA_M && id == DATA_RFD)
                 this->dev1.save4aie(isMtx, pre_dir_fn, num_print_line, num_print_element, num_print_sample);

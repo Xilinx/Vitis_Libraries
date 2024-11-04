@@ -5,15 +5,9 @@
     "platform_allowlist": [
         "vck190"
     ],
-    "platform_blocklist": [],
     "platform_properties": {
         "vck190": {
             "v++": {
-                "compiler": {
-                    "clflags": [
-                        ""
-                    ]
-                },
                 "linker": {
                     "ldclflags": [
                         "--config PROJECT/system.cfg"
@@ -114,31 +108,26 @@
                 {
                     "location": "LIB_DIR/L3/tests/scanline_test/PL_kernels/mm2s1.cpp",
                     "frequency": 300.0,
-                    "cflags": " ",
                     "name": "mm2s1"
                 },
                 {
                     "location": "LIB_DIR/L3/tests/scanline_test/PL_kernels/s2mm0.cpp",
                     "frequency": 300.0,
-                    "cflags": " ",
                     "name": "s2mm0"
                 },
                 {
                     "location": "LIB_DIR/L3/tests/scanline_test/PL_kernels/s2mm1.cpp",
                     "frequency": 300.0,
-                    "cflags": " ",
                     "name": "s2mm1"
                 },
                 {
                     "location": "LIB_DIR/L3/tests/scanline_test/PL_kernels/s2mm2.cpp",
                     "frequency": 300.0,
-                    "cflags": " ",
                     "name": "s2mm2"
                 },
                 {
                     "location": "LIB_DIR/L3/tests/scanline_test/PL_kernels/s2mm3.cpp",
                     "frequency": 300.0,
-                    "cflags": " ",
                     "name": "s2mm3"
                 }
             ],
@@ -152,10 +141,8 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": 32768,
-                "max_time_min": 300
+                "max_time_min": 600
             }
         ],
         "targets": [
