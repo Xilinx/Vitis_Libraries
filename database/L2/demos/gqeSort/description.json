@@ -127,7 +127,6 @@
             }
         },
         "launch": {
-            "docker_cmd_args": "",
             "app_exe": "/opt/xilinx/apps/vt_database/sort/bin/vt_database_sort.exe",
             "app_args": "--accept-EULA --in ${DATA_DIR}/input.dat --out ${DATA_DIR}/output.dat"
         },
@@ -241,8 +240,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 81920,
                     "vitis_hw_emu": 28672,

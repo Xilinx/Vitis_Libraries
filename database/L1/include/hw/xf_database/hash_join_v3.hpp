@@ -947,7 +947,7 @@ void build_unit(ap_uint<32>& depth,
     bool last = i_e_strm.read();
 PRE_BUILD_LOOP:
     while (!last) {
-#pragma HLS PIPELINE II = 1 style = stp
+#pragma HLS PIPELINE II = 1
 #pragma HLS dependence variable = bit_vector0 inter false
 #pragma HLS dependence variable = bit_vector1 inter false
 
@@ -2375,7 +2375,7 @@ void build_unit(
     bool last = i_e_strm.read();
 PRE_BUILD_LOOP:
     while (!last) {
-#pragma HLS PIPELINE II = 1 style = stp
+#pragma HLS PIPELINE II = 1
 #pragma HLS dependence variable = bit_vector0 inter false
 #pragma HLS dependence variable = bit_vector1 inter false
 

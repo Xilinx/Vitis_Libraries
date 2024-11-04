@@ -5,18 +5,18 @@
     "gui": false,
     "platform_type": "pcie",
     "platform_allowlist": [
-	"u50"
+        "u50"
     ],
     "platform_blocklist": [
         "other"
     ],
     "platform_properties": {
-	 "u50": {
-             "containers": [
-                 {
-                     "ldclflags": "--config PROJECT/conn_u50.cfg --config PROJECT/opts_u50.cfg"
-                 }
-             ]
+        "u50": {
+            "containers": [
+                {
+                    "ldclflags": "--config PROJECT/conn_u50.cfg --config PROJECT/opts_u50.cfg"
+                }
+            ]
         }
     },
     "launch": [
@@ -105,8 +105,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 81920,
                     "vitis_hw_emu": 81920,

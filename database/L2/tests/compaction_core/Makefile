@@ -154,7 +154,7 @@ BINARY_CONTAINERS_PKG += $(BUILD_DIR)/compaction_test.xclbin
 endif
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
-$(TEMP_DIR)/CUCoreLoopTop.xo: $(XFLIB_DIR)/L2/src/hw/compaction_core.cc 
+$(TEMP_DIR)/CUCoreLoopTop.xo: $(XFLIB_DIR)/L2/src/hw/compaction_core_cc.cpp 
 	$(ECHO) "Compiling Kernel: CUCoreLoopTop"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_CUCoreLoopTop) $(VPP_FLAGS) -k CUCoreLoopTop -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
