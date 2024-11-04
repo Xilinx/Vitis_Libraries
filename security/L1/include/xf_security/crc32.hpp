@@ -2379,6 +2379,7 @@ void crc32(hls::stream<ap_uint<32> >& crcInitStrm,
            hls::stream<ap_uint<32> >& outStrm,
            hls::stream<bool>& endOutStrm) {
 #pragma HLS array_partition variable = internal::table16 dim = 1 block factor = W
+#pragma HLS bind_storage variable = internal::table16 type = rom_np impl = lutram
     bool e = endInPackLenStrm.read();
     while (!e) {
         ap_uint<5> inPackLen = inPackLenStrm.read();
@@ -2474,6 +2475,7 @@ void crc32(hls::stream<ap_uint<32> >& crcInitStrm,
            hls::stream<ap_uint<32> >& outStrm,
            hls::stream<bool>& endOutStrm) {
 #pragma HLS array_partition variable = internal::table64 dim = 1 block factor = W
+#pragma HLS bind_storage variable = internal::table64 type = rom_np impl = lutram
     bool e = endInStrm.read();
     while (!e) {
         ap_uint<32> len = inLenStrm.read();
@@ -2561,6 +2563,7 @@ void crc32(hls::stream<ap_uint<32> >& crcInitStrm,
            hls::stream<ap_uint<32> >& outStrm,
            hls::stream<bool>& endOutStrm) {
 #pragma HLS array_partition variable = internal::table64 dim = 1 block factor = W
+#pragma HLS bind_storage variable = internal::table64 type = rom_np impl = lutram
     bool e = endInPackLenStrm.read();
     while (!e) {
         ap_uint<7> inPackLen = inPackLenStrm.read();

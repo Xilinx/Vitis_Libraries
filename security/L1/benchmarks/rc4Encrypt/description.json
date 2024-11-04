@@ -3,7 +3,6 @@
     "name": "Xilinx RC4 Encryption Benchmark",
     "description": "RC4 Encryption Algorithm Benchmarking",
     "flow": "system",
-    "platform_type": "",
     "platform_allowlist": [
         "u250"
     ],
@@ -98,8 +97,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 81920,
                     "vitis_hw_emu": 28672,
