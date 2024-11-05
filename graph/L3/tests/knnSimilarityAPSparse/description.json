@@ -75,7 +75,7 @@
                 {
                     "location": "LIB_DIR/L2/tests/sparse_similarity/kernel/sparseSimilarityKernel.cpp", 
                     "frequency": 300.0, 
-                    "clflags": " -D KERNEL_NAME=sparseSimilarityKernel", 
+                    "clflags": " -D KERNEL_NAME=sparseSimilarityKernel --hls.pre_tcl $(CUR_DIR)/cfg_hls.tcl", 
                     "name": "sparseSimilarityKernel", 
                     "num_compute_units": 1, 
                     "compute_units": [

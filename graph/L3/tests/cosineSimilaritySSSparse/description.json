@@ -73,7 +73,7 @@
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/tests/sparse_similarity/kernel/sparseSimilarityKernel.cpp", 
+                    "location": "LIB_DIR/L2/tests/sparse_similarity/kernel/sparseSimilarityKernel.cpp --hls.pre_tcl $(CUR_DIR)/cfg_hls.tcl", 
                     "frequency": 300.0, 
                     "clflags": " -D KERNEL_NAME=sparseSimilarityKernel", 
                     "name": "sparseSimilarityKernel", 

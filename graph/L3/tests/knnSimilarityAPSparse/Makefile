@@ -149,6 +149,7 @@ endif
 ######################### binary container global settings ##########################
 VPP_FLAGS_sparseSimilarityKernel +=  -D KERNEL_NAME=sparseSimilarityKernel
 VPP_FLAGS_sparseSimilarityKernel += --hls.clock 300000000:sparseSimilarityKernel
+VPP_FLAGS_sparseSimilarityKernel += --hls.pre_tcl $(CUR_DIR)/cfg_hls.tcl
 ifneq ($(HOST_ARCH_temp), x86)
 VPP_LDFLAGS_sparseSimilarityKernel += --clock.defaultFreqHz 300000000
 else

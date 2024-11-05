@@ -57,7 +57,7 @@ void insert_sort_top(hls::stream<Data_Type>& din_strm,
 
 insert_loop:
     while (!end || residual_count) {
-#pragma HLS PIPELINE II = 1
+#pragma HLS PIPELINE II = 1 style = frp
 
         if (!end) {
             in_temp = kin_strm.read();

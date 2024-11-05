@@ -149,6 +149,7 @@ endif
 ######################### binary container global settings ##########################
 VPP_FLAGS_denseSimilarityKernel +=  -D KERNEL_NAME=denseSimilarityKernel
 VPP_FLAGS_denseSimilarityKernel += --hls.clock 300000000:denseSimilarityKernel
+VPP_FLAGS_denseSimilarityKernel += --hls.pre_tcl $(CUR_DIR)/cfg_hls.tcl
 ifneq ($(HOST_ARCH_temp), x86)
 VPP_LDFLAGS_denseSimilarityKernel += --clock.defaultFreqHz 300000000
 else

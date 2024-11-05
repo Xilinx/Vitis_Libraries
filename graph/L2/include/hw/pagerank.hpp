@@ -661,7 +661,7 @@ void preWrite32(int nrows,
 // clang-format off
 #pragma HLS loop_tripcount min = 3700000/16 avg = 3700000/16 max = 3700000/16
 // clang-format on
-#pragma HLS pipeline II = 1
+#pragma HLS pipeline II = 1 style = frp
         buffT tmpOffset = cscOffset.read();
         buffT tmpDgree = csrDegree.read();
         buffT pongTmp;
