@@ -13,16 +13,6 @@
     ],
     "platform_properties": {
         "u250": {
-            "host": {
-                "compiler": {
-                    "symbols": []
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": []
-                }
-            },
             "containers": [
                 {
                     "accelerators": [
@@ -94,8 +84,7 @@
             "libraries": [
                 "onig",
                 "xfcompile"
-            ],
-            "options": ""
+            ]
         }
     },
     "v++": {
@@ -127,8 +116,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 81920,
                     "vitis_hw_emu": 28672,

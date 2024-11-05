@@ -37,7 +37,7 @@ extern "C" {
 #define BIT_SET_SIZE (1024)     // max supported size of the bit map for op cclass
 #define INSTRUC_SIZE (32768)    // max supported size of the instruction table
 #define MESSAGE_SIZE (2048 / 8) // max supported length of the input string
-#define CAP_GRP_SIZE (32768)      // max supported size of the capturing groups
+#define CAP_GRP_SIZE (32768)    // max supported size of the capturing groups
 #define STACK_SIZE (16384)      // max supported internal stack for backtracking
 
 void dut(unsigned int bitset[BIT_SET_SIZE],

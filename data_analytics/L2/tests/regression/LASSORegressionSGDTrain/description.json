@@ -7,7 +7,6 @@
         "u250",
         "aws-vu9p-f1"
     ],
-    "platform_blocklist": [],
     "platform_properties": {
         "u250": {
             "host": {
@@ -94,8 +93,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 51200,
                     "vitis_hw_emu": 28672,

@@ -13,16 +13,6 @@
     ],
     "platform_properties": {
         "u250": {
-            "host": {
-                "compiler": {
-                    "symbols": []
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": []
-                }
-            },
             "containers": [
                 {
                     "ldclflags": "--config PROJECT/conn_u250.cfg",
@@ -31,16 +21,6 @@
             ]
         },
         "aws-vu9p-f1": {
-            "host": {
-                "compiler": {
-                    "symbols": []
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": []
-                }
-            },
             "containers": [
                 {
                     "ldclflags": "--config PROJECT/conn_aws_f1.cfg",
@@ -53,20 +33,17 @@
         {
             "name": "generic launch for sw_emu flows",
             "target": "sw_emu",
-            "cmd_args": " --xclbin BUILD/fuzzy_kernel.xclbin -i PROJECT/data/ -m 2 --accept-EULA",
-            "ld_library_path": []
+            "cmd_args": " --xclbin BUILD/fuzzy_kernel.xclbin -i PROJECT/data/ -m 2 --accept-EULA"
         },
         {
             "name": "generic launch for hw_emu flows",
             "target": "hw_emu",
-            "cmd_args": " --xclbin BUILD/fuzzy_kernel.xclbin -i PROJECT/data/ -m 2 --accept-EULA",
-            "ld_library_path": []
+            "cmd_args": " --xclbin BUILD/fuzzy_kernel.xclbin -i PROJECT/data/ -m 2 --accept-EULA"
         },
         {
             "name": "generic launch for hw flows",
             "target": "hw",
-            "cmd_args": " --xclbin BUILD/fuzzy_kernel.xclbin -i PROJECT/data/ -m 2 --accept-EULA",
-            "ld_library_path": []
+            "cmd_args": " --xclbin BUILD/fuzzy_kernel.xclbin -i PROJECT/data/ -m 2 --accept-EULA"
         }
     ],
     "data": [
@@ -88,11 +65,6 @@
                 "LIB_DIR/../utils/L1/include/xf_utils_sw/"
             ],
             "options": "-O3 -std=c++14"
-        },
-        "linker": {
-            "librarypaths": [],
-            "libraries": [],
-            "options": ""
         }
     },
     "v++": {
@@ -127,7 +99,6 @@
         "metadata": {
             "app_name": "Xilinx AML Auto",
             "owner": "sdausr",
-            "app_description": "",
             "internal": true,
             "multi_xrt": true
         },
@@ -160,7 +131,6 @@
             }
         },
         "launch": {
-            "docker_cmd_args": "",
             "app_exe": "/opt/xilinx/apps/vt_data_analytis/aml/bin/vt_data_analytis_aml.exe",
             "app_args": "--accept-EULA --demo"
         },
@@ -296,8 +266,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 81920,
                     "vitis_hw_emu": 28672,

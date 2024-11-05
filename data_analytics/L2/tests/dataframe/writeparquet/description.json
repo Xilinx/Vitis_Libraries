@@ -81,7 +81,6 @@
                 {
                     "location": "LIB_DIR/L2/src/dataframe/obj2parquet.cpp",
                     "frequency": 300.0,
-                    "clflags": "",
                     "name": "ObjToParquet",
                     "num_compute_units": 1,
                     "compute_units": [
@@ -116,8 +115,6 @@
             {
                 "index": 0,
                 "dependency": [],
-                "env": "",
-                "cmd": "",
                 "max_memory_MB": {
                     "vitis_hw_build": 40960,
                     "vitis_hw_emu": 61440,
