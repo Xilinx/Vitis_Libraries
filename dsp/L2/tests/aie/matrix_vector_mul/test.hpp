@@ -88,21 +88,21 @@ class test_graph : public graph {
                 filenameInMatrix.insert(filenameInMatrix.length() - 4,
                                         ("_" + std::to_string(ssr) + "_" + std::to_string(casc)));
                 inA[casc + ssr * CASC_LEN] = input_plio::create("PLIO_in_A" + std::to_string(casc + ssr * CASC_LEN),
-                                                                adf::plio_32_bits, filenameInMatrix);
+                                                                adf::plio_64_bits, filenameInMatrix);
                 connect<>(inA[casc + ssr * CASC_LEN].out[0], matrix_vector_mulGraph.inA[casc + ssr * CASC_LEN]);
 
                 std::string filenameInVector = QUOTE(INPUT_FILE_B);
                 filenameInVector.insert(filenameInVector.length() - 4,
                                         ("_" + std::to_string(ssr)) + "_" + std::to_string(casc));
                 inB[casc + ssr * CASC_LEN] = input_plio::create("PLIO_in_B" + std::to_string(casc + ssr * CASC_LEN),
-                                                                adf::plio_32_bits, filenameInVector);
+                                                                adf::plio_64_bits, filenameInVector);
                 connect<>(inB[casc + ssr * CASC_LEN].out[0], matrix_vector_mulGraph.inB[casc + ssr * CASC_LEN]);
             }
         }
         for (int ssrOut = 0; ssrOut < UUT_SSR; ssrOut++) {
             std::string filenameOut = QUOTE(OUTPUT_FILE);
             filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(ssrOut)));
-            out[ssrOut] = output_plio::create("PLIO_out_" + std::to_string(ssrOut), adf::plio_32_bits, filenameOut);
+            out[ssrOut] = output_plio::create("PLIO_out_" + std::to_string(ssrOut), adf::plio_64_bits, filenameOut);
             connect<>(matrix_vector_mulGraph.out[ssrOut], out[ssrOut].in[0]);
         }
 
@@ -110,14 +110,14 @@ class test_graph : public graph {
         std::string filenameInMatrix = QUOTE(INPUT_FILE_A);
         std::string filenameInVector = QUOTE(INPUT_FILE_B);
         // Make connections
-        inA[0] = input_plio::create("PLIO_in_A" + std::to_string(0), adf::plio_32_bits, filenameInMatrix);
-        inB[0] = input_plio::create("PLIO_in_B" + std::to_string(0), adf::plio_32_bits, filenameInVector);
+        inA[0] = input_plio::create("PLIO_in_A" + std::to_string(0), adf::plio_64_bits, filenameInMatrix);
+        inB[0] = input_plio::create("PLIO_in_B" + std::to_string(0), adf::plio_64_bits, filenameInVector);
         connect<>(inA[0].out[0], matrix_vector_mulGraph.inA[0]);
         connect<>(inB[0].out[0], matrix_vector_mulGraph.inB[0]);
 
         std::string filenameOut = QUOTE(OUTPUT_FILE);
         // filenameOut.insert(filenameOut.length()-4, ("_0_0"));
-        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_32_bits, filenameOut);
+        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_64_bits, filenameOut);
         connect<>(matrix_vector_mulGraph.out[0], out[0].in[0]);
 #endif
     };

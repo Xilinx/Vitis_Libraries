@@ -29,7 +29,6 @@ Coding conventions
 using namespace std;
 
 #include "device_defs.h"
-#define FFT_SHIFT15 15
 
 // if we use 1kb registers -> aie api uses 2x512b registers for 1024b so we need this for QoR
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
@@ -39,6 +38,7 @@ using namespace std;
 
 #include "mixed_radix_fft.hpp"
 #include "mixed_radix_fft_utils.hpp"
+#include "mixed_radix_twGen.hpp"
 #include "kernel_api_utils.hpp"
 
 namespace xf {
@@ -59,7 +59,8 @@ template <typename TT_IN_DATA,
           unsigned int TP_SAT,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK>
+          unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE>
 INLINE_DECL void kernel_MixedRadixFFTClass<TT_IN_DATA,
                                            TT_OUT_DATA,
                                            TT_TWIDDLE,
@@ -70,7 +71,8 @@ INLINE_DECL void kernel_MixedRadixFFTClass<TT_IN_DATA,
                                            TP_SAT,
                                            TP_WINDOW_VSIZE,
                                            TP_START_RANK,
-                                           TP_END_RANK>::singleFrame(TT_IN_DATA* inbuff, TT_OUT_DATA* outbuff) {
+                                           TP_END_RANK,
+                                           TP_DYN_PT_SIZE>::singleFrame(TT_IN_DATA* inbuff, TT_OUT_DATA* outbuff) {
     T_internalDataType* tmp_bufs[2] = {m_tmpBuff0, m_tmpBuff1}; // TODO tmp2 can sometimes be xbuff reused, similarly
                                                                 // for odd stages, obuff can be used in place of tmp1.
 
@@ -123,6 +125,8 @@ INLINE_DECL void kernel_MixedRadixFFTClass<TT_IN_DATA,
             inbuff, outbuff, tmp_bufs, pingPong, inv, m_twTable, m_twiddlePtrPtr);
 
     // Radix 3 stages
+    // printf("\n m_kR5factor * kR3 = %d ; kR3twbase + (kR3 - 1) * 0 = %d", m_kR5factor * kR3, kR3twbase + (kR3 - 1) *
+    // 0);
     if
         constexpr(m_kR3Stages > 0)
             opt_r3_stage<TT_IN_DATA, TT_OUT_DATA, T_internalDataType, TT_TWIDDLE, TP_START_RANK, TP_END_RANK,
@@ -232,12 +236,14 @@ INLINE_DECL void kernel_MixedRadixFFTClass<TT_IN_DATA,
     constexpr int kr4shift2 = m_kR5Stages + m_kR3Stages + m_kR2Stages + 2 == m_kTotalStages - 1 ? TP_SHIFT : 0;
     constexpr int kr4shift3 = m_kR5Stages + m_kR3Stages + m_kR2Stages + 3 == m_kTotalStages - 1 ? TP_SHIFT : 0;
     constexpr int kr4shift4 = m_kR5Stages + m_kR3Stages + m_kR2Stages + 4 == m_kTotalStages - 1 ? TP_SHIFT : 0;
+
     if
         constexpr(m_kR4Stages > 0)
             opt_r4_stage<TT_IN_DATA, TT_OUT_DATA, T_internalDataType, TT_TWIDDLE, TP_START_RANK, TP_END_RANK,
                          m_kR5Stages + m_kR3Stages + m_kR2Stages, TP_POINT_SIZE,
                          m_kR5factor * m_kR3factor * m_kR2factor * kR4, kr4shift0, kR4twbase + kR4twinc * 0>(
                 inbuff, outbuff, tmp_bufs, pingPong, inv, m_twTable, m_twiddlePtrPtr);
+
     if
         constexpr(m_kR4Stages > 1)
             opt_r4_stage<TT_IN_DATA, TT_OUT_DATA, T_internalDataType, TT_TWIDDLE, TP_START_RANK, TP_END_RANK,
@@ -262,7 +268,189 @@ INLINE_DECL void kernel_MixedRadixFFTClass<TT_IN_DATA,
                                                 m_kR5factor * m_kR3factor * m_kR2factor * k6R2 * kR4 * kR4, kr4shift4,
                                                 kR4twbase + kR4twinc * 4>(inbuff, outbuff, tmp_bufs, pingPong, inv,
                                                                           m_twTable, m_twiddlePtrPtr);
-}
+};
+
+// Dynamic specialization of base
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_IN_DATA,
+          typename TT_OUT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_START_RANK,
+          unsigned int TP_END_RANK>
+INLINE_DECL void kernel_MixedRadixFFTClass<TT_IN_DATA,
+                                           TT_OUT_DATA,
+                                           TT_TWIDDLE,
+                                           TP_POINT_SIZE,
+                                           TP_FFT_NIFFT,
+                                           TP_SHIFT,
+                                           TP_RND,
+                                           TP_SAT,
+                                           TP_WINDOW_VSIZE,
+                                           TP_START_RANK,
+                                           TP_END_RANK,
+                                           1>::dynamicSingleFrame(TT_IN_DATA* inbuff,
+                                                                  TT_TWIDDLE* twInBuff,
+                                                                  TT_OUT_DATA* outbuff,
+                                                                  std::array<T_ancillaryFields, kVectorSize>
+                                                                      headerData) { // TODO aie::vector?
+    T_internalDataType* tmp_bufs[2] = {m_tmpBuff0, m_tmpBuff1};
+
+    using twVect_t = ::aie::vector<TT_TWIDDLE, kVectorSize>;
+    using infoVect_t = ::aie::vector<T_ancillaryFields, kVectorSize>; // TODO T_info
+    twVect_t* twPtr = (twVect_t*)twInBuff; // for twiddle fields output - NOTE: twInBuff is the pointers to the data
+    infoVect_t* infoOutPtr = (infoVect_t*)twPtr;
+    twPtr = &twPtr[twiddleIdxStart];
+
+    infoVect_t* tw_table = infoOutPtr;
+    TT_TWIDDLE* twbuff = twInBuff; //[twiddleIdxStart]; because indices are to the "row" in the whole tw buffer
+    T_ancillaryFields* tw_ptrs = (T_ancillaryFields*)infoOutPtr +
+                                 indexIdxStart * kVectorSize; // TODO can only be int32 because TT_TWIDDLE is cint16
+
+    // Process headerData
+    infoVect_t headerRead = infoOutPtr[0];
+
+    int invInt = headerRead.get(0);
+    bool inv = (invInt == 1) ? false : true;
+
+    int nR2raw = headerRead.get(2);
+    int stagesR3 = headerRead.get(3);
+    int stagesR5 = headerRead.get(4);
+
+    int stagesR2;
+    int stagesR4;
+#if __FFT_R4_IMPL__ == \
+    0 // AIE1 - since spoofed radix 4 stages = two radix 2 stages, create twiddles as if it were radix 2 stages
+#if __ONLY_R2_STAGES__ == 1 // Only use radix 2 stages. Do not perform any radix 4 stages ever.
+    stagesR2 = nR2raw;
+    stagesR4 = 0;
+#elif __ONLY_R2_STAGES__ == 0
+    // TODO OPTIMISATION Do operation instead of conditionals
+    if (nR2raw >= 4) { // if pointsize is divisible by 16
+        // Re-calculate number of R2s, and calculate number of R4s
+        stagesR2 = (nR2raw & 1);
+        stagesR4 = nR2raw >> 1;
+    } else {
+        stagesR2 = nR2raw;
+        stagesR4 = 0;
+    }
+#endif // __ONLY_R2_STAGES__
+#else  // AIE-ML
+    stagesR2 = (nR2raw & 1);
+    stagesR4 = nR2raw >> 1;
+#endif // __FFT_R4_IMPL__
+
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
+
+    int totalStages = stagesR5 + stagesR3 + stagesR2 + stagesR4;
+    int pointsize = tw_table[factorsStagePtSizeIdxStart][0];
+    unsigned int pingPong = 0; // read from ping, write to pong, or vice versa.
+
+    int leg_counter = 0;
+    int stage_number = 0;
+
+    // Radix 5 stages
+    for (int stage = 0; stage < stagesR5; stage++) {
+        const unsigned int r = tw_table[factorsStepsizeIdxStart][stage_number];
+
+        opt_r5_dyn_stage<TT_IN_DATA, TT_OUT_DATA, T_internalDataType, TT_TWIDDLE, TP_SHIFT>(
+            inbuff, outbuff, tmp_bufs, pingPong, pointsize, r, inv, totalStages, stage_number, twbuff, tw_ptrs,
+            leg_counter); // base_index is index of index?
+
+        stage_number++;
+        leg_counter = leg_counter + (kR5 - 1);
+    }
+
+    // Radix 3 stages
+    for (int stage = 0; stage < stagesR3; stage++) {
+        const unsigned int r = tw_table[factorsStepsizeIdxStart][stage_number];
+
+        opt_r3_dyn_stage<TT_IN_DATA, TT_OUT_DATA, T_internalDataType, TT_TWIDDLE, TP_SHIFT>(
+            inbuff, outbuff, tmp_bufs, pingPong, pointsize, r, inv, totalStages, stage_number, twbuff, tw_ptrs,
+            leg_counter); // base_index is index of index?
+
+        stage_number++;
+        leg_counter = leg_counter + (kR3 - 1);
+    }
+
+    // Radix 2 stages
+    for (int stage = 0; stage < stagesR2; stage++) {
+        const unsigned int r = tw_table[factorsStepsizeIdxStart][stage_number];
+
+        opt_r2_dyn_stage<TT_IN_DATA, TT_OUT_DATA, T_internalDataType, TT_TWIDDLE, TP_SHIFT>(
+            inbuff, outbuff, tmp_bufs, pingPong, pointsize, r, inv, totalStages, stage_number, twbuff, tw_ptrs,
+            leg_counter); // base_index is index of index?
+
+        stage_number++;
+        leg_counter = leg_counter + (kR2 - 1);
+    }
+
+#if __ONLY_R2_STAGES__ == 0 // Do not only use radix 2 stages. Perform radix 4 stages.
+
+    constexpr int kR4twleginc = // the radix 4 stage takes 2 twiddle tables for AIE1 and 3 for AIE2
+#if __FFT_R4_IMPL__ == 0
+        2;
+#endif //__FFT_R4_IMPL__ == 0
+#if __FFT_R4_IMPL__ == 1
+    3;
+#endif //__FFT_R4_IMPL__ == 1
+
+    // TODO need radix 4 shifts?
+    // Radix 4 stages
+    for (int stage = 0; stage < stagesR4; stage++) {
+        const unsigned int r = tw_table[factorsStepsizeIdxStart][stage_number];
+
+        opt_r4_dyn_stage<TT_IN_DATA, TT_OUT_DATA, T_internalDataType, TT_TWIDDLE, TP_SHIFT>(
+            inbuff, outbuff, tmp_bufs, pingPong, pointsize, r, inv, totalStages, stage_number, twbuff, tw_ptrs,
+            leg_counter);
+
+        stage_number++;
+        leg_counter = leg_counter + kR4twleginc;
+    }
+#endif // __ONLY_R2_STAGES__
+};
+
+template <typename TT_IN_DATA,
+          typename TT_OUT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_START_RANK,
+          unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE>
+INLINE_DECL void
+kernel_MixedRadixFFTClass<TT_IN_DATA,
+                          TT_OUT_DATA,
+                          TT_TWIDDLE,
+                          TP_POINT_SIZE,
+                          TP_FFT_NIFFT,
+                          TP_SHIFT,
+                          TP_RND,
+                          TP_SAT,
+                          TP_WINDOW_VSIZE,
+                          TP_START_RANK,
+                          TP_END_RANK,
+                          TP_DYN_PT_SIZE>::kernelMixedRadixFFTmain(input_buffer<TT_IN_DATA>* inWindow,
+                                                                   output_buffer<TT_OUT_DATA>* outWindow) {
+    TT_IN_DATA* inbuff = (TT_IN_DATA*)inWindow->data();
+    TT_OUT_DATA* outbuff = (TT_OUT_DATA*)outWindow->data();
+
+    for (int frame = 0; frame < TP_WINDOW_VSIZE / TP_POINT_SIZE; frame++) {
+        singleFrame(inbuff, outbuff);
+        inbuff += TP_POINT_SIZE;
+        outbuff += TP_POINT_SIZE;
+    }
+};
 
 template <typename TT_IN_DATA,
           typename TT_OUT_DATA,
@@ -275,30 +463,77 @@ template <typename TT_IN_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK>
-INLINE_DECL void
-kernel_MixedRadixFFTClass<TT_IN_DATA,
-                          TT_OUT_DATA,
-                          TT_TWIDDLE,
-                          TP_POINT_SIZE,
-                          TP_FFT_NIFFT,
-                          TP_SHIFT,
-                          TP_RND,
-                          TP_SAT,
-                          TP_WINDOW_VSIZE,
-                          TP_START_RANK,
-                          TP_END_RANK>::kernelMixedRadixFFTmain(input_buffer<TT_IN_DATA>* inWindow,
-                                                                output_buffer<TT_OUT_DATA>* outWindow) {
+INLINE_DECL void kernel_MixedRadixFFTClass<TT_IN_DATA,
+                                           TT_OUT_DATA,
+                                           TT_TWIDDLE,
+                                           TP_POINT_SIZE,
+                                           TP_FFT_NIFFT,
+                                           TP_SHIFT,
+                                           TP_RND,
+                                           TP_SAT,
+                                           TP_WINDOW_VSIZE,
+                                           TP_START_RANK,
+                                           TP_END_RANK,
+                                           1>::kernelMixedRadixFFTmain(input_buffer<TT_IN_DATA>* inWindow,
+                                                                       input_buffer<TT_TWIDDLE>* twInWindow,
+                                                                       output_buffer<TT_OUT_DATA>* outWindow) {
     TT_IN_DATA* inbuff = (TT_IN_DATA*)inWindow->data();
     TT_OUT_DATA* outbuff = (TT_OUT_DATA*)outWindow->data();
 
-    for (int frame = 0; frame < TP_WINDOW_VSIZE / TP_POINT_SIZE; frame++) {
-        singleFrame(inbuff, outbuff);
-        inbuff += TP_POINT_SIZE;
-        outbuff += TP_POINT_SIZE;
+    TT_TWIDDLE* twbuff = (TT_TWIDDLE*)twInWindow->data(); // for ancillary fields output: header and factors and indices
+    using infoVect_t = std::array<T_ancillaryFields, kVectorSize>;
+    infoVect_t* infoOutPtr = (infoVect_t*)twbuff;
+
+    infoVect_t headerRead = infoOutPtr[0];
+
+    // Immediately read errorFlag and output zeros if error
+    int errorFlag = headerRead[7];
+    if (errorFlag == 1) {
+        for (int w = 0; w < TP_WINDOW_VSIZE; w++) {
+            *outbuff++ = {0, 0}; // TODO optimise
+        }
+    } else { // otherwise continue to read and process
+        for (int frame = 0; frame < TP_WINDOW_VSIZE / TP_POINT_SIZE; frame++) {
+            dynamicSingleFrame(inbuff, twbuff, outbuff, headerRead);
+            inbuff += TP_POINT_SIZE;
+            outbuff += TP_POINT_SIZE;
+        }
     }
-}
+};
+
 //-----------------------------------------------------------------------------------------------------
 // For a single kernel - iobuffer in and out, no cascades
+template <typename TT_IN_DATA,
+          typename TT_OUT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_START_RANK,
+          unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE>
+NOINLINE_DECL void
+mixed_radix_fft<TT_IN_DATA,
+                TT_OUT_DATA,
+                TT_TWIDDLE,
+                TP_POINT_SIZE,
+                TP_FFT_NIFFT,
+                TP_SHIFT,
+                TP_RND,
+                TP_SAT,
+                TP_WINDOW_VSIZE,
+                TP_START_RANK,
+                TP_END_RANK,
+                TP_DYN_PT_SIZE>::mixed_radix_fftMain(input_buffer<TT_IN_DATA>& __restrict inWindow,
+                                                     output_buffer<TT_OUT_DATA>& __restrict outWindow) {
+    this->kernelMixedRadixFFTmain((input_buffer<TT_IN_DATA>*)&inWindow, (output_buffer<TT_OUT_DATA>*)&outWindow);
+};
+
+//-----------------------------------------------------------------------------------------------------
+// For a single kernel - iobuffer in and out, no cascades DYNAMIC
 template <typename TT_IN_DATA,
           typename TT_OUT_DATA,
           typename TT_TWIDDLE,
@@ -320,9 +555,12 @@ NOINLINE_DECL void mixed_radix_fft<TT_IN_DATA,
                                    TP_SAT,
                                    TP_WINDOW_VSIZE,
                                    TP_START_RANK,
-                                   TP_END_RANK>::mixed_radix_fftMain(input_buffer<TT_IN_DATA>& __restrict inWindow,
-                                                                     output_buffer<TT_OUT_DATA>& __restrict outWindow) {
-    this->kernelMixedRadixFFTmain((input_buffer<TT_IN_DATA>*)&inWindow, (output_buffer<TT_OUT_DATA>*)&outWindow);
+                                   TP_END_RANK,
+                                   1>::mixed_radix_fftMain(input_buffer<TT_IN_DATA>& __restrict inWindow,
+                                                           input_buffer<TT_TWIDDLE>& __restrict twInWindow,
+                                                           output_buffer<TT_OUT_DATA>& __restrict outWindow) {
+    this->kernelMixedRadixFFTmain((input_buffer<TT_IN_DATA>*)&inWindow, (input_buffer<TT_TWIDDLE>*)&twInWindow,
+                                  (output_buffer<TT_OUT_DATA>*)&outWindow);
 };
 }
 }

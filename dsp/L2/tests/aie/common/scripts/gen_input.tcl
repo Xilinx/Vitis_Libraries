@@ -26,6 +26,8 @@ Supported dataStimType
     7 = cos/sin, non-modal, i.e. not a harmonic of window period, amplitude 10000
     8 = 45 degree spin
     9 = ALT_ZEROES_ONES
+    10 = 0 to 1, scaled up to max range
+    11 = random positive - floats between 0 and 1
 ";
 if { [lsearch $argv "-h"] != -1 } {
     puts $usage
@@ -48,6 +50,7 @@ set coeff_reload_mode 0;
 set tt_coeff "int16" ;# sensible default
 set coeffStimType 0 ;# FIR length
 set firLen 16 ;# FIR length
+set plioWidth 32
 if { $::argc > 2} {
     set filename [lindex $argv 0]
     set fileDirpath [file dirname $filename]
@@ -89,6 +92,9 @@ if { $::argc > 2} {
     if {[llength $argv] > 14 } {
         set firLen [lindex $argv 14]
     }
+    if {[llength $argv] > 15 } {
+        set plioWidth [lindex $argv 15]
+    }
     puts "filename          = $filename"
     puts "window_vsize      = $window_vsize"
     puts "iterations        = $iterations"
@@ -104,6 +110,7 @@ if { $::argc > 2} {
     puts "tt_coeff          = $tt_coeff"
     puts "coeffStimType     = $coeffStimType"
     puts "firLen            = $firLen"
+    puts "plioWidth            = $plioWidth"
     puts "------------------------------"
 
 }
@@ -264,6 +271,39 @@ proc generateSample {stimType sampleSeed sample_idx samples sampleType comp} {
         # Alternating set of zeros and ones.
         set nextSample [expr ($sample_idx % 2) ]
         # Hazard for cint32 type, which has double the amount of samples, so all real get even index and all imag get odd.
+    } elseif {$stimType == 10 } {
+        # Alternating set of zeros and ones.
+        if {($sampleType eq "float") || ($sampleType eq "bfloat16")} {
+            set integerType 0
+            if {($sampleType eq "bfloat16")} {
+                # set tcl_precision 4
+                set nextSample [expr {double(2 * $sample_idx + $comp)  / $samples}]
+            } else {
+                set tcl_precision 7
+                set nextSample [expr {double($sample_idx)  / $samples}]
+            }
+           
+        } else {
+            if {($sampleType eq "int16")} {
+                set nextSample [expr {((2 * $sample_idx + $comp) * 32768 / $samples) }]
+            } else {
+                set nextSample [expr {(($sample_idx) * 32768 / $samples) }]
+            }
+        }
+    } elseif {$stimType == 11 } {
+        if {($sampleType eq "float")  || ($sampleType eq "bfloat16")} {
+            set randSeed $sample_idx
+            set randSample [randInt $randSeed "int16"]
+            set integerType 0
+            set tcl_precision 17 
+            set nextSample [expr {abs($randSample)  / 32768.0}]
+        } else {
+            set randSample [randInt $sampleSeed $sampleType]
+            set nextSample [expr {abs($randSample)}]
+        }
+        # Hazard for cint32 type, which has double the amount of samples, so all real get even index and all imag get odd.
+        # set nextSample [expr {($sample_idx / $samples) * 32768} ]
+        # Hazard for cint32 type, which has double the amount of samples, so all real get even index and all imag get odd.
     } else {
         # Unsupported default to random
         set nextSample [randInt $sampleSeed $sampleType]
@@ -292,7 +332,7 @@ if {$using_plio_class == 1 && ($tt_data eq "cint32" || $tt_data eq "cfloat")} {
     set samplesPerFrame [expr ($samplesPerFrame) * 2]
 }
 set samplesPerLine 1
-if {($tt_data eq "int16" || $tt_data eq "uint16")} {
+if {($tt_data eq "int16" || $tt_data eq "uint16" || $tt_data eq "bfloat16")} {
     # int16s are organized in 2 samplesPerLine
     set samplesPerLine 2
 }
@@ -301,6 +341,7 @@ if {($tt_data eq "int8" || $tt_data eq "uint8" || $tt_data eq "cint8")} {
     # int8 values are organized in 4 samplesPerLine
     set samplesPerLine 4
 }
+set plioWidthRatio [expr ($plioWidth) / 32]
 
 #ADF::PLIO expects data in 32-bits per text line, which for cint16 and int16 is 2 samplesPerFrame/dataPartsPerLine per line
 set dataPartsPerLine 1
@@ -309,13 +350,18 @@ if {$using_plio_class == 0} {
         set dataPartsPerLine 2
     }
 } else { #PLIO
-    if {$tt_data eq "cint16" || $tt_data eq "int16" || $tt_data eq "uint16" } {
+    if {$tt_data eq "cint16" || $tt_data eq "int16" || $tt_data eq "uint16" || $tt_data eq "bfloat16" } {
         set dataPartsPerLine 2
     }
     if {$tt_data eq "cint8" || $tt_data eq "int8" || $tt_data eq "uint8"} {
         set dataPartsPerLine 4
     }
 }
+set dataPartsPerLine [expr $dataPartsPerLine * $plioWidthRatio]
+set samplesPerLine [expr $samplesPerLine * $plioWidthRatio]
+
+
+
 
 # Coeff parts may be different than the data type part, e.g. cint32 data and int16/cint16 coeffs.
 # However, coeffs are embedded in data stream, hence coeffParts is set to whatever dataPartsPerLine is.
@@ -352,22 +398,29 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
         if {$tt_data eq "cint16"} {
             set header_size 8
         }
+
         if {$dataPartsPerLine == 2} {
-        set blank_entry "0 0"
-        puts $output_file "$fft_nifft 0"
-        puts $output_file "$pt_size_pwr 0"
+            puts $output_file "$fft_nifft 0"
+            puts $output_file "$pt_size_pwr 0"
+        } elseif {$dataPartsPerLine == 4} {
+            puts $output_file "$fft_nifft 0 $pt_size_pwr 0"
         } else {
-        set blank_entry "0 \n0"
-        puts $output_file "$fft_nifft"
-        puts $output_file "0"
-        puts $output_file "$pt_size_pwr"
-        puts $output_file "0"
+            set blank_entry "0 \n0"
+            puts $output_file "$fft_nifft"
+            puts $output_file "0"
+            puts $output_file "$pt_size_pwr"
+            puts $output_file "0"
+        }
+        # 2 headers samlpes already written. 2 * (header_size - 2) parts still to write
+        for {set i 0} {$i < ( (2 * ($header_size - 2))) } {incr i} {
+            if {$i % $dataPartsPerLine eq ($dataPartsPerLine - 1)} {
+                puts $output_file  "0"
+            } else {
+                puts -nonewline $output_file  "0 "
+            }
         }
 
-        # pad. This loops starts at 2 because 2 samplesPerFrame have already been written
-        for {set i 2} {$i < $header_size} {incr i} {
-            puts $output_file $blank_entry
-        }
+
         set samplesPerFrame [expr (1 << $pt_size_pwr)]
         set padding 0
         if { $pt_size_pwr < $max_pt_size_pwr } {
@@ -380,123 +433,7 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
             #for complex numbers split over two lines the number of samplesPerFrame is doubled, but really this should be using $comp.
             #alas, $comp is used to insert newlines because it is mixed with samplesPerFrame per line. Tangle!
             set samplesPerFrame [expr ($samplesPerFrame) * 2]
-            set padding [expr ($padding) * 2]
         }
-    }
-
-#    puts "finished header"
-#    puts $framesInWindow
-#    puts $window_vsize
-#    puts $header_size
-#    puts $samplesPerFrame
-#    puts $padding
-#    puts $dataPartsPerLine
-#    puts $dataStimType
-
-    # Process FIR's Coefficient Reload Header
-    if {$fir_header == 1} {
-
-        if {[expr ($iter_nr % ($iterations / 2))] == 0} {
-            # Update twice per simulation
-            set newCoeffSet 1
-        } else {
-            set newCoeffSet 0
-        }
-
-        # Header size = 256-bit, i.e. 4 cint32/cfloat or 8 cint16/ int16 (int16 - 2 samples per line)
-        # Oddly, parts of the logic is embedded in blank entry...
-        if {$tt_data eq "int16" } {
-            # 16 samples, but 2 samples per line
-            set headerConfigSize 8
-        } elseif {$tt_data eq "cint16" || $tt_data eq "int32" ||$tt_data eq "float"} {
-            set headerConfigSize 8
-        } else {
-            set headerConfigSize 4
-        }
-
-        # Header size = 256-bit, i.e. 4 cint32/cfloat or 8 cint16/ int16 (int16 - 2 samples per line)
-        if {$tt_coeff eq "int16" } {
-            set coeffSamplesIn256Bits 16
-        } elseif {$tt_coeff eq "cint16" || $tt_coeff eq "int32" ||$tt_coeff eq "float"} {
-            set coeffSamplesIn256Bits 8
-        } else {
-            set coeffSamplesIn256Bits 4
-        }
-
-        if {$newCoeffSet == 1} {
-            # Set Header length at coefficient array length
-            #Ceiled up to 256-bits
-            set headerCoeffSize  [expr  ($firLen + ($coeffSamplesIn256Bits - $firLen % $coeffSamplesIn256Bits)% $coeffSamplesIn256Bits)]
-        } else {
-            set headerCoeffSize 0
-        }
-        # puts "headerCoeffSize: $headerCoeffSize"
-
-        # if {$dataPartsPerLine == 2} {
-        # set blank_entry "0 0 "
-        # puts $output_file "$headerCoeffSize 0 "
-        # } else {
-        # set blank_entry "0 \n0 "
-        # puts $output_file "$headerCoeffSize"
-        # puts $output_file "0 "
-        # }
-
-        set headerConfigSize 8
-        if {$dataPartsPerLine == 2} {
-        set blank_entry "0 0 "
-        puts $output_file "$headerCoeffSize 0 "
-        } else {
-        set blank_entry "0  "
-        puts $output_file "$headerCoeffSize"
-        }
-        # pad. other header entries are not yet used
-        for {set i 1} {$i < $headerConfigSize} {incr i} {
-            puts $output_file $blank_entry
-        }
-
-        # Generate Coefficient array
-        if {$newCoeffSet == 1} {
-            set coeffSamples $headerCoeffSize
-            #Generate x2 Coeff Array size for complex types, but store in file as per dataType (dataPartsPerLine) requirements
-            set coeffComplexSamplesMult 1
-            if {$tt_coeff eq "cint16" || $tt_coeff eq "cint32" || $tt_coeff eq "cfloat"} {
-                set coeffComplexSamplesMult 2
-                # set coeffSamples [expr ($headerCoeffSize) * 2]
-            }
-            set coeffSamplesPerDataSample 1
-            if {($tt_coeff eq "int16" && ($tt_data eq "int32" || $tt_data eq "cint32")) ||
-                ($tt_coeff eq "cint16" && ($tt_data eq "cint32"))} {
-                set coeffSamplesPerDataSample 2
-            }
-            # puts "coeffSamples: $coeffSamples"
-
-            for {set i 0} {$i < ($coeffSamples * $coeffComplexSamplesMult / $coeffSamplesPerDataSample / $dataPartsPerLine)} {incr i} {
-                for {set comp 0} {$comp < $dataPartsPerLine} {incr comp} {
-                    if { $i * $dataPartsPerLine < $firLen * $coeffComplexSamplesMult } {
-                        set nextCoeffSample [generateSample  $coeffStimType $nextCoeffSample $i $coeffSamples $tt_coeff $comp]
-                        set nextValueToStore $nextCoeffSample
-                        if {$coeffSamplesPerDataSample == 2} {
-                            set nextCoeffSample [generateSample  $coeffStimType $nextCoeffSample $i $coeffSamples $tt_coeff $comp]
-                            set nextValueToStore [expr ($nextValueToStore + ($nextCoeffSample << 16))]
-                        }
-                    } else {
-                        set nextValueToStore 0
-
-                    }
-                    # puts "Next to store: $nextValueToStore, hex:  [format "x%x"  $nextValueToStore]"
-
-                    if {$comp eq 0 && $dataPartsPerLine eq 2} {
-                        puts -nonewline $output_file "$nextValueToStore "
-                    } else {
-                        puts $output_file "$nextValueToStore "
-                    }
-                }
-            }
-
-            # pad. make sure header is always 256-bits
-            # No need. coeffSamples always aligned to 256-bits already.
-        }
-
     }
 
 #    puts "finished header"
@@ -523,14 +460,13 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
             }
         }
         #padding is only non-zero for dynamic point size, so no need to clause with dyn_pt_size
-        for {set sample_idx 0} {$sample_idx < [expr ($padding)]} {incr sample_idx} {
+        for {set part_idx 0} {$part_idx < [expr ($padding) * 2]} {incr part_idx} { #each pad has two parts
             set padsample -1
-            for {set comp 0} {$comp < $dataPartsPerLine} {incr comp} {
-                if {$comp eq 0 && $dataPartsPerLine eq 2} {
-                    puts -nonewline $output_file "$padsample "
-                } else {
-                    puts $output_file $padsample
-                }
+            # check if part_idx is at end of line
+            if {$part_idx % $dataPartsPerLine == $dataPartsPerLine - 1} {
+                puts $output_file $padsample
+            } else {
+                puts -nonewline $output_file "$padsample "
             }
         }
     }

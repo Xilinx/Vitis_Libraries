@@ -16,27 +16,21 @@ def vmc_validate_coeff_type(args):
     return {"is_valid": True}
 
 def vmc_validate_input_window_size(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
     input_window_size = args["input_window_size"]
     data_type = args["data_type"]
-    use_coeff_reload = args["use_coeff_reload"]
     coef_type = args["coef_type"]
-    coeff = args["coeff"]
     api = 0
     ssr = 1
     fir_length = args["fir_length"]
-    return fn_validate_input_window_size(data_type, coef_type, fir_length, input_window_size, api, ssr)
+    return fn_validate_input_window_size(AIE_VARIANT, data_type, coef_type, fir_length, input_window_size, api, ssr)
 
 def vmc_validate_coeff(args):
     use_coeff_reload = args["use_coeff_reload"]
-    coef_type = args["coef_type"]
-    coeff = args["coeff"]
     data_type = args["data_type"]
-    casc_length = args["casc_length"]
-    ssr = 1
     api = 0
     fir_length = args["fir_length"]
-    AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload,AIE_VARIANT)
+    return fn_validate_TP_FIR_LEN(data_type, use_coeff_reload, api, fir_length)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]
@@ -49,15 +43,20 @@ def vmc_validate_ssr(args):
     return fn_validate_ssr(ssr)
 
 def vmc_validate_casc_len(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    data_type = args["data_type"]
+    coef_type = args["coef_type"]
+    api = 0
+    ssr = 1
     casc_length = args["casc_length"]
-    return fn_validate_casc_len(casc_length);
+    fir_length = args["fir_length"]
+    return fn_validate_TP_CASC_LEN(AIE_VARIANT, data_type, coef_type, api, fir_length, ssr, casc_length)
 
 def vmc_validate_out_ports(args):
     api = 0
     AIE_VARIANT = args["AIE_VARIANT"]
-    ssr = 1
     num_outputs = fn_get_num_outputs(args)
-    return fn_validate_num_outputs(api, num_outputs, AIE_VARIANT)
+    return fn_validate_TP_NUM_OUTPUTS(AIE_VARIANT, api, num_outputs)
 
 def vmc_validate_dual_ip(args):
     api = 0

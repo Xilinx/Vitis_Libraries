@@ -45,7 +45,7 @@ PARAMS ?= test_0_tool_canary_aie
 PARAMS_FILE ?= multi_params.json 
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  vck190 vek280
+PLATFORM_ALLOWLIST += vck190 vek280
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk
@@ -57,7 +57,7 @@ BUILD_DIR = $(RESULT_DIR)
 endif
 BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(PLATFORM_NAME)
 
-include params.mk
+include $(XFLIB_DIR)/L2/tests/aie/common/scripts/params.mk
 
 RUN_DEPS :=
 
@@ -78,15 +78,21 @@ UUT_KERNEL ?= conv_corr
 REF_KERNEL ?= conv_corr_ref
 UUT_GRAPH ?= conv_corr_graph
 REF_GRAPH ?= conv_corr_ref_graph
-STACKSIZE_VAL ?= 2048
+STACKSIZE_VAL ?= 4096
 UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
-LOC_INPUT_FILE_F ?= ./data/input_F.txt
-LOC_INPUT_FILE_G ?= ./data/input_G.txt
+LOC_INPUT_FILE_F ?= ./data/inData_F.txt
+LOC_INPUT_FILE_G ?= ./data/inData_G.txt
 STIM_TYPE_F ?= STIM_TYPE_F
 STIM_TYPE_G ?= STIM_TYPE_G
+UUT_FILE_SUFFIX ?= $(UUT_KERNEL)_$(PARAMS)
+LOG_FILE ?= ./logs/log_$(UUT_FILE_SUFFIX).txt
+STATUS_LOG_FILE ?= ./logs/status_$(UUT_FILE_SUFFIX).txt
+STATUS_FILE ?= $(STATUS_LOG_FILE)
 UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=main:backend.mist2.xargs=-k120 --aie.xlopt=1 --aie.Xrouter=DMAFIFOsInFreeBankOnly --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off" --aie.stacksize=$(STACKSIZE_VAL)
 REF_TARGET_COMPILE_ARGS ?= 
+UUT_WORK_DIR ?= ./Work
+REF_WORK_DIR ?= ./Work
 PREPROC_ARGS ?= --aie.Xpreproc=-DINPUT_FILE_F=$(LOC_INPUT_FILE_F) --aie.Xpreproc=-DINPUT_FILE_G=$(LOC_INPUT_FILE_G)
 REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)
 UUT_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1
@@ -97,15 +103,21 @@ UUT_KERNEL ?= conv_corr
 REF_KERNEL ?= conv_corr_ref
 UUT_GRAPH ?= conv_corr_graph
 REF_GRAPH ?= conv_corr_ref_graph
-STACKSIZE_VAL ?= 2048
+STACKSIZE_VAL ?= 4096
 UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
-LOC_INPUT_FILE_F ?= ./data/input_F.txt
-LOC_INPUT_FILE_G ?= ./data/input_G.txt
+LOC_INPUT_FILE_F ?= ./data/inData_F.txt
+LOC_INPUT_FILE_G ?= ./data/inData_G.txt
 STIM_TYPE_F ?= STIM_TYPE_F
 STIM_TYPE_G ?= STIM_TYPE_G
+UUT_FILE_SUFFIX ?= $(UUT_KERNEL)_$(PARAMS)
+LOG_FILE ?= ./logs/log_$(UUT_FILE_SUFFIX).txt
+STATUS_LOG_FILE ?= ./logs/status_$(UUT_FILE_SUFFIX).txt
+STATUS_FILE ?= $(STATUS_LOG_FILE)
 UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=main:backend.mist2.xargs=-k120 --aie.xlopt=1 --aie.Xrouter=DMAFIFOsInFreeBankOnly --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off" --aie.stacksize=$(STACKSIZE_VAL)
 REF_TARGET_COMPILE_ARGS ?= 
+UUT_WORK_DIR ?= ./Work
+REF_WORK_DIR ?= ./Work
 PREPROC_ARGS ?= --aie.Xpreproc=-DINPUT_FILE_F=$(LOC_INPUT_FILE_F) --aie.Xpreproc=-DINPUT_FILE_G=$(LOC_INPUT_FILE_G)
 REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)
 UUT_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1
@@ -124,7 +136,7 @@ else
 AIE_CXXFLAGS += --platform=$(XPLATFORM)
 endif
 
-AIE_CXXFLAGS += --target=$(AIETARGET)    --aie.pl-freq 1000 
+AIE_CXXFLAGS += --target=$(AIETARGET)    --aie.pl-freq 625 
 AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
@@ -166,16 +178,15 @@ run: all
 #x86sim
 ifeq ($(TARGET), x86sim)
 	$(X86SIMULATOR) --pkg-dir=$(AIE_PKG_DIR) $(if $(filter-out REF,$(TAG)), --valgrind)    
-	$(if $(filter REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./data/ref_output.txt)
-	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk prep_x86_out HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)")
-	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_diff HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk prep_x86_out HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_diff HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)")
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)")
 	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./)
 endif
 #aiesim
 ifeq ($(TARGET), aiesim)
 	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile --graph-latency     $(AIESIMFLAGS) 
-	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk prep_aie_out HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)"
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk prep_aie_out HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)"
 	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_diff HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)"
 	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)"
 	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_latency HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)"

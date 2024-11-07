@@ -95,7 +95,7 @@ constexpr unsigned int fnGetR2OutAPI() {
 // Recusive classes for r2 combiner creation
 
 // Base specialization
-template <typename TT_DATA,
+template <typename TT_OUT_DATA,
           typename TT_TWIDDLE,
           unsigned int TP_POINT_SIZE,
           unsigned int TP_FFT_NIFFT,
@@ -131,19 +131,20 @@ class create_r2comb_kernels {
                        kernel (&m_r2Comb)[kParallelFactor],
                        kernel (&m_combOutKernel)[kParallelFactor]) {
         m_combInKernel[TP_INDEX] = kernel::create_object<
-            widget_api_cast_ref<TT_DATA, kInAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, kSampleIntlv, kHeaderBytes> >(
+            widget_api_cast_ref<TT_OUT_DATA, kInAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, kSampleIntlv, kHeaderBytes> >(
             TP_INDEX);
         m_r2Comb[TP_INDEX] = kernel::create_object<
-            fft_r2comb_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE,
-                           TP_PARALLEL_POWER, TP_ORIG_PAR_POWER, TP_RND, TP_SAT, TP_TWIDDLE_MODE> >(kTwIndex);
+            fft_r2comb_ref<TT_OUT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_DYN_PT_SIZE,
+                           TP_WINDOW_VSIZE, TP_PARALLEL_POWER, TP_ORIG_PAR_POWER, TP_RND, TP_SAT, TP_TWIDDLE_MODE> >(
+            kTwIndex);
         if (kOutAPI != kWindowAPI) { // if top level output is a window, not need for widget in last column
             m_combOutKernel[TP_INDEX] =
-                kernel::create_object<widget_api_cast_ref<TT_DATA, kWindowAPI, kOutAPI, 1, TP_WINDOW_VSIZE,
+                kernel::create_object<widget_api_cast_ref<TT_OUT_DATA, kWindowAPI, kOutAPI, 1, TP_WINDOW_VSIZE,
                                                           kOutputsPerLane, kSampleIntlv, kHeaderBytes> >(TP_INDEX);
         }
         if
             constexpr(TP_INDEX > 0) { // This avoids the need for an end-of-recursion specialization
-                create_r2comb_kernels<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_DYN_PT_SIZE,
+                create_r2comb_kernels<TT_OUT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_DYN_PT_SIZE,
                                       TP_WINDOW_VSIZE, TP_PARALLEL_POWER, (TP_INDEX - 1), TP_INDEX_BASE,
                                       TP_ORIG_PAR_POWER, TP_API, TP_RND, TP_SAT,
                                       TP_TWIDDLE_MODE>::create(m_combInKernel, m_r2Comb, m_combOutKernel);
@@ -168,7 +169,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER = 0,
           unsigned int TP_RND = 0,
           unsigned int TP_SAT = 1,
-          unsigned int TP_TWIDDLE_MODE = 0>
+          unsigned int TP_TWIDDLE_MODE = 0,
+          typename TT_OUT_DATA = TT_DATA>
 class fft_ifft_dit_1ch_mono_ref_graph : public graph {
    public:
     static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
@@ -196,7 +198,7 @@ class fft_ifft_dit_1ch_mono_ref_graph : public graph {
         // Create FIR class
         m_fftKernel = kernel::create_object<
             fft_ifft_dit_1ch_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_DYN_PT_SIZE,
-                                 TP_WINDOW_VSIZE, TP_ORIG_PAR_POWER, TP_RND, TP_SAT, TP_TWIDDLE_MODE> >();
+                                 TP_WINDOW_VSIZE, TP_ORIG_PAR_POWER, TP_RND, TP_SAT, TP_TWIDDLE_MODE, TT_OUT_DATA> >();
 
         // Make connections
         if (TP_IN_API == kWindowAPI) {
@@ -218,13 +220,14 @@ class fft_ifft_dit_1ch_mono_ref_graph : public graph {
 
         if (TP_OUT_API == kWindowAPI) {
             connect<>(m_fftKernel.out[0], out[0]);
-            dimensions(m_fftKernel.out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+            dimensions(m_fftKernel.out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
         } else {
-            m_outWidget = kernel::create_object<widget_api_cast_ref<TT_DATA, kWindowAPI, TP_OUT_API, 1, TP_WINDOW_VSIZE,
-                                                                    kNumOutputs, kSampleIntlv, kHeaderBytes> >(-1);
+            m_outWidget =
+                kernel::create_object<widget_api_cast_ref<TT_OUT_DATA, kWindowAPI, TP_OUT_API, 1, TP_WINDOW_VSIZE,
+                                                          kNumOutputs, kSampleIntlv, kHeaderBytes> >(-1);
             connect(m_fftKernel.out[0], m_outWidget.in[0]);
-            dimensions(m_fftKernel.out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
-            dimensions(m_outWidget.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+            dimensions(m_fftKernel.out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+            dimensions(m_outWidget.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
             if (kNumOutputs == 1) {
                 connect<stream>(m_outWidget.out[0], out[0]);
             } else {
@@ -269,7 +272,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 class fft_ifft_dit_1ch_mono_ref_graph<TT_DATA,
                                       TT_TWIDDLE,
                                       TP_POINT_SIZE,
@@ -283,7 +287,8 @@ class fft_ifft_dit_1ch_mono_ref_graph<TT_DATA,
                                       TP_ORIG_PAR_POWER,
                                       TP_RND,
                                       TP_SAT,
-                                      TP_TWIDDLE_MODE> : public graph {
+                                      TP_TWIDDLE_MODE,
+                                      TT_OUT_DATA> : public graph {
    public:
     port<input> in[1];
     port<output> out[1];
@@ -301,7 +306,7 @@ class fft_ifft_dit_1ch_mono_ref_graph<TT_DATA,
         // Create FIR class
         m_fftKernel = kernel::create_object<
             fft_ifft_dit_1ch_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_DYN_PT_SIZE,
-                                 TP_WINDOW_VSIZE, TP_ORIG_PAR_POWER, TP_RND, TP_SAT, TP_TWIDDLE_MODE> >();
+                                 TP_WINDOW_VSIZE, TP_ORIG_PAR_POWER, TP_RND, TP_SAT, TP_TWIDDLE_MODE, TT_OUT_DATA> >();
 
         // Make connections
         // Size of window in Bytes. Dynamic point size adds a 256 bit (32 byte) header. This is larger than required,
@@ -309,7 +314,7 @@ class fft_ifft_dit_1ch_mono_ref_graph<TT_DATA,
         connect(in[0], m_fftKernel.in[0]);
         dimensions(m_fftKernel.in[0]) = {TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kFftDynHeadBytes / sizeof(TT_DATA)};
         connect(m_fftKernel.out[0], out[0]);
-        dimensions(m_fftKernel.out[0]) = {TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kFftDynHeadBytes / sizeof(TT_DATA)};
+        dimensions(m_fftKernel.out[0]) = {TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kFftDynHeadBytes / sizeof(TT_OUT_DATA)};
 
         // Specify mapping constraints
         runtime<ratio>(m_fftKernel) = 0.4;
@@ -338,6 +343,7 @@ template <typename TT_DATA,
           unsigned int TP_RND = 0,
           unsigned int TP_SAT = 1,
           unsigned int TP_TWIDDLE_MODE = 0,
+          typename TT_OUT_DATA = TT_DATA,
           unsigned int TP_INDEX = 0,
           unsigned int TP_ORIG_PAR_POWER = TP_PARALLEL_POWER>
 class fft_ifft_dit_1ch_ref_graph : public graph {
@@ -383,6 +389,7 @@ class fft_ifft_dit_1ch_ref_graph : public graph {
                                TP_RND,
                                TP_SAT,
                                TP_TWIDDLE_MODE,
+                               TT_OUT_DATA,
                                TP_INDEX,
                                TP_ORIG_PAR_POWER>
         FFTsubframeA; // fractal or recursive decomposition
@@ -400,6 +407,7 @@ class fft_ifft_dit_1ch_ref_graph : public graph {
                                TP_RND,
                                TP_SAT,
                                TP_TWIDDLE_MODE,
+                               TT_OUT_DATA,
                                TP_INDEX + kParallelFactor / 2,
                                TP_ORIG_PAR_POWER>
         FFTsubframeB; // fractal or recursive decomposition
@@ -422,9 +430,10 @@ class fft_ifft_dit_1ch_ref_graph : public graph {
         printf("Sat mode             = %d \n", TP_SAT);
         printf("Twiddle mode         = %d \n", TP_TWIDDLE_MODE);
         // create kernels
-        create_r2comb_kernels<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, kR2Shift, TP_DYN_PT_SIZE, kWindowSize,
-                              TP_PARALLEL_POWER, kParallelFactor - 1, TP_INDEX, TP_ORIG_PAR_POWER, kR2OutAPI, TP_RND,
-                              TP_SAT, TP_TWIDDLE_MODE>::create(m_combInKernel, m_r2Comb, m_combOutKernel);
+        create_r2comb_kernels<TT_OUT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, kR2Shift, TP_DYN_PT_SIZE,
+                              kWindowSize, TP_PARALLEL_POWER, kParallelFactor - 1, TP_INDEX, TP_ORIG_PAR_POWER,
+                              kR2OutAPI, TP_RND, TP_SAT, TP_TWIDDLE_MODE>::create(m_combInKernel, m_r2Comb,
+                                                                                  m_combOutKernel);
 
         // make input connections
         if
@@ -464,14 +473,14 @@ class fft_ifft_dit_1ch_ref_graph : public graph {
         // widget to R2comb connections
         for (int i = 0; i < kParallelFactor; i++) {
             connect(m_combInKernel[i].out[0], m_r2Comb[i].in[0]);
-            dimensions(m_combInKernel[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
-            dimensions(m_r2Comb[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+            dimensions(m_combInKernel[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+            dimensions(m_r2Comb[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
 
             // for top level and window output, there is no output widget.
             if (TP_ORIG_PAR_POWER != TP_PARALLEL_POWER || TP_API == kStreamAPI) {
                 connect(m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
-                dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
-                dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+                dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
             }
         }
 
@@ -487,7 +496,7 @@ class fft_ifft_dit_1ch_ref_graph : public graph {
             } else {
                 for (int i = 0; i < kParallelFactor; i++) {
                     connect<>(m_r2Comb[i].out[0], out[i]);
-                    dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                    dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
                 }
             }
         } else { // not top level, so outputs are internal trellis connections
@@ -537,6 +546,7 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_SAT,
           unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA,
           unsigned int TP_INDEX,
           unsigned int TP_ORIG_PAR_POWER>
 class fft_ifft_dit_1ch_ref_graph<TT_DATA,
@@ -553,6 +563,7 @@ class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                  TP_RND,
                                  TP_SAT,
                                  TP_TWIDDLE_MODE,
+                                 TT_OUT_DATA,
                                  TP_INDEX,
                                  TP_ORIG_PAR_POWER> : public graph {
    public:
@@ -583,7 +594,8 @@ class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                     TP_ORIG_PAR_POWER,
                                     TP_RND,
                                     TP_SAT,
-                                    TP_TWIDDLE_MODE>
+                                    TP_TWIDDLE_MODE,
+                                    TT_OUT_DATA>
         FFTwinproc;
 
     fft_ifft_dit_1ch_ref_graph() {
@@ -611,6 +623,7 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_SAT,
           unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA,
           unsigned int TP_INDEX,
           unsigned int TP_ORIG_PAR_POWER>
 class fft_ifft_dit_1ch_ref_graph<TT_DATA,
@@ -627,6 +640,7 @@ class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                  TP_RND,
                                  TP_SAT,
                                  TP_TWIDDLE_MODE,
+                                 TT_OUT_DATA,
                                  TP_INDEX,
                                  TP_ORIG_PAR_POWER> : public graph {
    public:
@@ -655,7 +669,8 @@ class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                     TP_ORIG_PAR_POWER,
                                     TP_RND,
                                     TP_SAT,
-                                    TP_TWIDDLE_MODE>
+                                    TP_TWIDDLE_MODE,
+                                    TT_OUT_DATA>
         FFTstrproc;
 
     fft_ifft_dit_1ch_ref_graph() {

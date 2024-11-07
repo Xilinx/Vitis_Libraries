@@ -23,7 +23,7 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The widget real2complex supports AIE1 and AIE-ML.
+The widget real2complex supports AIE and AIE-ML devices.
 
 Supported Types
 ===============

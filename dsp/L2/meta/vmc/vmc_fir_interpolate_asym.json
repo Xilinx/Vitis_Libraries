@@ -11,6 +11,11 @@
       "name": "data_type",
       "description": "The type of individual data samples input to and output of the filter function",
       "default": "cint16",
+      "validator": {
+        "file": "vmc_fir_interpolate_asym.py",
+        "function": "vmc_validate_data_type",
+        "args": ["AIE_VARIANT"]
+      },
             "label": "Input/Output data type:",
             "tablabel": "Main",
             "parameterType":"popup"
@@ -29,7 +34,7 @@
             "tablabel": "Main",
             "parameterType":"popup"
     },
-    {
+    { "key" : "TP_USE_COEFF_RELOAD",
       "name": "use_coeff_reload",
       "description": "Allows the user to select of runtime coefficient reloading",
       "default": false,
@@ -64,7 +69,7 @@
       "validator": {
         "file": "vmc_fir_interpolate_asym.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "interpolate_factor","AIE_VARIANT"]
+        "args": ["use_coeff_reload", "coef_type", "fir_length"]
       },
           "label": "Filter coefficients:",
             "tablabel": "Main",
@@ -87,7 +92,7 @@
       "validator": {
         "file": "vmc_fir_interpolate_asym.py",
         "function": "vmc_validate_interpolate_factor",
-        "args": ["AIE_VARIANT"]
+        "args": ["AIE_VARIANT", "fir_length","coef_type", "coeff","use_coeff_reload"]
       },
             "label": "Interpolation factor:",
             "tablabel": "Main",
@@ -101,7 +106,7 @@
       "validator": {
         "file": "vmc_fir_interpolate_asym.py",
         "function": "vmc_validate_input_window_size",
-        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "interpolate_factor"]
+        "args": ["use_coeff_reload","data_type", "coef_type", "coeff", "interpolate_factor", "interp_poly", "fir_length"]
       },
             "label": "Input window size (Number of samples):",
             "tablabel": "Main",
@@ -115,7 +120,7 @@
        "validator": {
         "file": "vmc_fir_interpolate_asym.py",
         "function": "vmc_validate_shift_val",
-        "args": ["data_type"]
+        "args": ["AIE_VARIANT", "data_type"]
       },
             "label": "Scale output down by 2^:",
             "tablabel": "Main",
@@ -173,7 +178,7 @@
       "validator": {
         "file": "vmc_fir_interpolate_asym.py",
         "function": "vmc_validate_casc_length",
-        "args": ["use_coeff_reload", "fir_length"]
+        "args": ["AIE_VARIANT", "data_type", "coef_type", "use_coeff_reload", "coeff", "interpolate_factor", "interp_poly", "fir_length"]
       },
             "label": "Number of cascade stages:",
             "tablabel": "Main",

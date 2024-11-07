@@ -21,7 +21,7 @@
 FFT/iFFT DIT single channel reference model
 */
 
-#define _DSPLIB_FFT_R2_COMB_REF_DEBUG_
+//#define _DSPLIB_FFT_R2_COMB_REF_DEBUG_
 
 #include <adf.h>
 #include <limits>

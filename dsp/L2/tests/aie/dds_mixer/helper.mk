@@ -24,8 +24,8 @@
 # loss due to rounding. Further, there is a rounding error from their multiplication.
 
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
-DIFF_MODE          = PERCENT
-DIFF_TOLERANCE     = 0.01
+DIFF_MODE          = ABS
+DIFF_TOLERANCE     = 2
 CC_TOLERANCE       = 0
 PARAM_MAP = DATA_TYPE $(DATA_TYPE) \
 			MIXER_MODE $(MIXER_MODE) \
@@ -76,15 +76,15 @@ diff:
 	
 gen_input:
 	@echo helper.mk stage:  gen_input
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(DATA_STIM_TYPE) 0 0 $(DATA_TYPE) 0 1
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(DATA_STIM_TYPE) 0 0 $(DATA_TYPE) 0 1 0 0 0 0 0 64 
 
 ssr_split:
 	@echo helper.mk stage:  ssr_split
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(SPLIT_ZIP_FILE) --type $(DATA_TYPE) --ssr $(UUT_SSR) --split --dual 0 -k 0 -w $(INPUT_WINDOW_VSIZE)
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(SPLIT_ZIP_FILE) --type $(DATA_TYPE) --ssr $(UUT_SSR) --split --dual 0 -k 0 -w $(INPUT_WINDOW_VSIZE) --plioWidth 64
 
 ssr_zip:
 	@echo helper.mk stage:  ssr_split
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(SPLIT_ZIP_FILE) --type $(DATA_TYPE) --ssr $(UUT_SSR) --zip --dual 0 -k 0 -w $(INPUT_WINDOW_VSIZE)
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(SPLIT_ZIP_FILE) --type $(DATA_TYPE) --ssr $(UUT_SSR) --zip --dual 0 -k 0 -w $(INPUT_WINDOW_VSIZE) --plioWidth 64
 
 get_status:
 	@echo helper.mk stage:  get_status
@@ -97,10 +97,6 @@ get_latency:
 get_stats:
 	@echo helper.mk stage:  get_stats
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(INPUT_WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output dds $(NITER)
-
-get_theoretical_min:
-	@echo helper.mk stage:  get_theoretical_min
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_dds_theoretical_min.tcl $(DATA_TYPE) $(MIXER_MODE) $(INPUT_WINDOW_VSIZE) $(UUT_SSR) $(STATUS_FILE) $(UUT_KERNEL)
 
 harvest_mem:
 	@echo helper.mk stage:  harvest_mem

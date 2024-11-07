@@ -7,124 +7,113 @@
   },
   "parameters": [
       {
-      "key": "TT_DATA",
-      "name": "data_type",
-      "description": "The type of individual data samples input to and output of the filter function",
-      "default": "cint16",
-            "label": "Input/Output data type:",
+        "key": "TT_DATA",
+        "name": "data_type",
+        "description": "The type of individual data samples input to the filter function",
+        "default": "cint16",
+              "label": "Input data type:",
+              "tablabel": "Main",
+              "parameterType":"popup",
+        "validator": {
+              "file": "vmc_fir_tdm.py",
+              "function": "vmc_validate_tt_data",
+              "args": ["AIE_VARIANT"]
+                }
+      },
+      {
+        "key": "TT_OUT_DATA",
+        "name": "data_out_type",
+        "description": "The type of individual data samples output from the fft function",
+        "default": "cint16",
+        "validator": {
+          "file": "vmc_fir_tdm.py",
+          "function": "vmc_validate_data_out_type",
+          "args": ["data_type","AIE_VARIANT"]
+        },
+              "label": "Output data type:",
+              "tablabel": "Main",
+              "parameterType":"popup"
+      },
+      {
+        "key": "TT_COEFF",
+        "name": "coef_type",
+        "description": "The type of individual coefficients of the filter taps",
+        "default": "int16",
+        "validator": {
+          "file": "vmc_fir_tdm.py",
+          "function": "vmc_validate_coef_type",
+          "args": ["data_type", "AIE_VARIANT"]
+        },
+            "label": "Filter coefficients data type:",
             "tablabel": "Main",
             "parameterType":"popup"
-    },
+      },
       {
-      "key": "TT_COEFF",
-      "name": "coef_type",
-      "description": "The type of individual coefficients of the filter taps",
-      "default": "int16",
-      "validator": {
-        "file": "vmc_fir_tdm.py",
-        "function": "vmc_validate_coef_type",
-        "args": ["data_type"]
-      },
-          "label": "Filter coefficients data type:",
-          "tablabel": "Main",
-          "parameterType":"popup"
-    },
-    {
-      "key": "TP_NUM_OUTPUTS",
-      "name": "num_outputs",
-      "description": "The number of output ports. Windows API output an exact copy of the data. Stream API interleaves the output data with a 128-bit pattern.",
-      "default": false,
-      "validator": {
-        "file": "vmc_fir_tdm.py",
-        "function": "vmc_validate_out_ports",
-        "args": ["AIE_VARIANT"]
-      },
-      "type": "bool",
-          "label": "Provide second set of output ports",
-            "tablabel": "Main",
-            "parameterType":"checkbox"
-    },
-    {
-      "key": "TP_DUAL_IP",
-      "name": "dual_ip",
-      "description": "TP_DUAL_IP allows 2 stream inputs to be connected to FIR, increasing available throughput. When set to 0, single stream input will be connected to FIR kernel, when set to 1, both input stream ports will be used.",
-      "default": false,
-      "type": "bool",
-      "validator": {
-        "file": "vmc_fir_tdm.py",
-        "function": "vmc_validate_dual_ip",
-        "args": ["num_outputs","AIE_VARIANT"]
-      },
-          "label": "Provide second set of input ports",
-            "tablabel": "Main",
-            "parameterType":"checkbox"
-    },
-    {
-      "key":"TP_FIR_LEN",
-      "name": "fir_length",
-      "description": "Specify fir length for coefficient reloading",
-      "default": 32,
-      "validator": {
-        "file": "vmc_fir_tdm.py",
-        "function": "vmc_validate_fir_length",
-        "args": ["data_type", "coef_type"]
-      },
+        "key":"TP_FIR_LEN",
+        "name": "fir_length",
+        "description": "Specify fir length for coefficient reloading",
+        "default": 32,
+        "validator": {
+          "file": "vmc_fir_tdm.py",
+          "function": "vmc_validate_fir_length",
+          "args": ["data_type", "coef_type"]
+        },
           "label": "Filter length:",
-            "tablabel": "Main",
-            "parameterType":"edit"
-    },
-    {
-      "key":"coeff",
-      "name": "coeff",
-      "description": "The FIR filter tap coefficients.",
-      "element_type": "coef_type",
-      "default":"[1, zeros(1,15)]",
-      "label": "Filter coefficients:",
-      "tablabel": "Main",
-      "parameterType":"edit"
-    },
-    {
-      "key": "TP_SHIFT",
-      "name": "shift_val",
-      "description": "The power of 2 shift down applied to the accumulation of FIR before output",
-      "default": 0,
-      "validator": {
-        "file": "vmc_fir_tdm.py",
-        "function": "vmc_validate_shift_val",
-        "args": ["data_type"]
+              "tablabel": "Main",
+              "parameterType":"edit"
       },
-            "label": "Scale output down by 2^:",
-            "tablabel": "Main",
-            "parameterType":"edit"
-    },
-    {
-      "key": "TP_RND",
-      "name": "rnd_mode",
-      "description": "The rounding to be applied during the shift down stage of processing.",
-      "default": "Round to positive infinity",
-      "validator": {
-        "file": "vmc_fir_tdm.py",
-        "function": "vmc_validate_rnd_mode",
-        "args": ["AIE_VARIANT"]
+      {
+	"key": "coeff",
+        "name": "coeff",
+        "description": "The FIR filter tap coefficients.",
+        "element_type": "coef_type",
+        "default":"[1, zeros(1,15)]",
+        "label": "Filter coefficients:",
+        "tablabel": "Main",
+        "parameterType":"edit"
       },
+      {
+        "key": "TP_SHIFT",
+        "name": "shift_val",
+        "description": "The power of 2 shift down applied to the accumulation of FIR before output",
+        "default": 0,
+        "validator": {
+          "file": "vmc_fir_tdm.py",
+          "function": "vmc_validate_shift_val",
+          "args": ["AIE_VARIANT","data_type"]
+        },
+              "label": "Scale output down by 2^:",
+              "tablabel": "Main",
+              "parameterType":"edit"
+      },
+      {
+        "key": "TP_RND",
+        "name": "rnd_mode",
+        "description": "The rounding to be applied during the shift down stage of processing.",
+        "default": "Round to positive infinity",
+        "validator": {
+          "file": "vmc_fir_tdm.py",
+          "function": "vmc_validate_rnd_mode",
+          "args": ["AIE_VARIANT"]
+        },
             "label": "Rounding mode:",
             "tablabel": "Main",
             "parameterType":"popup"
-    },
-    {
-      "key":"TP_INPUT_WINDOW_VSIZE",
-      "name": "input_window_size",
-      "description": "The number of samples in the window API used for input to the filter function. The number of samples in the output window will depend on the FIR filter parameters",
-      "default": 256,
-      "validator": {
-        "file": "vmc_fir_tdm.py",
-        "function": "vmc_validate_input_window_size",
-        "args": ["data_type", "coef_type", "fir_length", "tdm_channels"]
       },
+      {
+        "key":"TP_INPUT_WINDOW_VSIZE",
+        "name": "input_window_size",
+        "description": "The number of samples in the window API used for input to the filter function. The number of samples in the output window will depend on the FIR filter parameters",
+        "default": 256,
+        "validator": {
+          "file": "vmc_fir_tdm.py",
+          "function": "vmc_validate_input_window_size",
+          "args": ["data_type", "coef_type", "data_out_type", "fir_length", "tdm_channels","AIE_VARIANT","ssr"]
+          },
           "label": "Input window size (Number of samples):",
-            "tablabel": "Main",
-            "parameterType":"edit"
-    },
+              "tablabel": "Main",
+              "parameterType":"edit"
+      },
     {
       "key": "TP_TDM_CHANNELS",
       "name": "tdm_channels",
@@ -133,12 +122,12 @@
       "validator": {
         "file": "vmc_fir_tdm.py",
         "function": "vmc_validate_tdm_channels",
-        "args": ["data_type", "coef_type", "fir_length"]
+        "args": ["data_type", "coef_type", "fir_length", "AIE_VARIANT"]
       },
             "label": "Number of TDM channels:",
             "tablabel": "Main",
             "parameterType":"edit"
-    },     
+    },
     {
       "key": "TP_SAT",
       "name": "sat_mode",
@@ -156,6 +145,34 @@
             "parameterType":"popup"
     },
     {
+      "key": "TP_CASC_LEN",
+      "name": "casc_length",
+      "description": "The length of cascaded kernels",
+      "default": 1,
+       "validator": {
+        "file": "vmc_fir_tdm.py",
+        "function": "vmc_validate_casc_length",
+        "args": ["data_type", "coef_type", "fir_length", "AIE_VARIANT"]
+      },
+            "label": "Number of cascade stages:",
+            "tablabel": "Main",
+            "parameterType":"edit"
+    },
+    {
+      "key" :"TP_SSR",
+      "name": "ssr",
+      "description": "Specify number of data input/output in parallel for a single channel.",
+      "default": 1,
+      "validator": {
+        "file": "vmc_fir_tdm.py",
+        "function": "vmc_validate_ssr",
+        "args": ["data_type", "coef_type", "tdm_channels","AIE_VARIANT"]
+      },
+            "label":"SSR: ",
+            "tablabel": "Main",
+            "parameterType":"edit"
+    },
+    {
 	  "key": "AIE_VARIANT",
 	  "name": "AIE_VARIANT",
       "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
@@ -170,6 +187,4 @@
     "file": "vmc_fir_tdm.py",
     "function": "vmc_generate_graph"
   }
-
-
 }

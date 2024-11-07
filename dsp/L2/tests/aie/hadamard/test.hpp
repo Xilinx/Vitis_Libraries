@@ -85,14 +85,14 @@ class test_graph : public graph {
             std::string filenameInB = QUOTE(INPUT_FILE_B);
             filenameInA.insert(filenameInA.length() - 4, ("_" + std::to_string(i) + "_0"));
             filenameInB.insert(filenameInB.length() - 4, ("_" + std::to_string(i) + "_0"));
-            inA[i] = input_plio::create("PLIO_inA_" + std::to_string(i), adf::plio_32_bits, filenameInA);
-            inB[i] = input_plio::create("PLIO_inB_" + std::to_string(i), adf::plio_32_bits, filenameInB);
+            inA[i] = input_plio::create("PLIO_inA_" + std::to_string(i), adf::plio_64_bits, filenameInA);
+            inB[i] = input_plio::create("PLIO_inB_" + std::to_string(i), adf::plio_64_bits, filenameInB);
             connect<>(inA[i].out[0], hadamardGraph.inA[i]);
             connect<>(inB[i].out[0], hadamardGraph.inB[i]);
 
             std::string filenameOut = QUOTE(OUTPUT_FILE);
             filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(i) + "_0"));
-            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_32_bits, filenameOut);
+            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_64_bits, filenameOut);
             connect<>(hadamardGraph.out[i], out[i].in[0]);
         }
 

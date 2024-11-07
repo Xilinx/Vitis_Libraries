@@ -84,7 +84,7 @@ namespace kronecker {
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
- *
+ *         \n
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
@@ -125,7 +125,7 @@ class kronecker_graph : public graph {
                                   TP_SHIFT,
                                   TP_RND,
                                   TP_SAT>;
-    using TT_OUT = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = typename kernelClass::out_t;
     static constexpr unsigned int vecSizeA =
         ((std::is_same<TT_DATA_A, int16>::value) && (std::is_same<TT_DATA_B, int16>::value))
             ? (128 / 8 / sizeof(TT_DATA_A))
@@ -134,7 +134,7 @@ class kronecker_graph : public graph {
         ((std::is_same<TT_DATA_A, int16>::value) && (std::is_same<TT_DATA_B, int16>::value))
             ? (128 / 8 / sizeof(TT_DATA_A))
             : (256 / 8 / sizeof(TT_DATA_B));
-    static constexpr unsigned int vecSizeOut = 256 / 8 / sizeof(TT_OUT);
+    static constexpr unsigned int vecSizeOut = 256 / 8 / sizeof(out_t);
     static constexpr unsigned int sizeMatA = TP_DIM_A_ROWS * (TP_DIM_A_COLS / TP_SSR);
     static constexpr unsigned int sizeMatB = TP_DIM_B_ROWS * TP_DIM_B_COLS;
     static constexpr unsigned int sizeMatOut = sizeMatA * sizeMatB;
@@ -146,7 +146,7 @@ class kronecker_graph : public graph {
   * @endcond
   */
 // Configuration legality checks
-#if __SUPPORTS_CFLOAT__ == 1
+#if (__SUPPORTS_CFLOAT__ == 1) || (__SUPPORTS_EMULATED_CFLOAT__ == 1)
     static_assert((std::is_same<TT_DATA_A, int16>::value) || (std::is_same<TT_DATA_A, int32>::value) ||
                       (std::is_same<TT_DATA_A, cint16>::value) || (std::is_same<TT_DATA_A, cint32>::value) ||
                       (std::is_same<TT_DATA_A, float>::value) || (std::is_same<TT_DATA_A, cfloat>::value),
@@ -157,16 +157,17 @@ class kronecker_graph : public graph {
                       (std::is_same<TT_DATA_A, cint16>::value) || (std::is_same<TT_DATA_A, cint32>::value) ||
                       (std::is_same<TT_DATA_A, float>::value),
                   "ERROR: TT_DATA_A is not supported");
-#endif //__SUPPORTS_CFLOAT__ ==
+#endif // (__SUPPORTS_CFLOAT__ == 1) || (__SUPPORTS_EMULATED_CFLOAT__ == 1)
 
     static_assert(TP_DIM_A_ROWS % vecSizeA == 0, "ERROR: TP_DIM_A_ROWS must be an integer multiple of vecSizeA");
     static_assert(TP_DIM_B_ROWS % vecSizeB == 0, "ERROR: TP_DIM_A_ROWS must be an integer multiple of vecSizeB");
     static_assert(TP_SSR > 0, "ERROR: Invalid SSR value, must be a value greater than 0.");
     static_assert(TP_DIM_A_COLS % TP_SSR == 0, "ERROR: Invalid SSR value. TP_DIM_A_COLS must be divisible by TP_SSR");
     static_assert(TP_API == 0 || TP_API == 1, "ERROR: TP_API is not a supported value (0 or 1)");
-    static_assert(TP_SHIFT >= 0 && TP_SHIFT < 61, "ERROR: TP_SHIFT is out of the supported range (0 to 61)");
-    static_assert(TP_SHIFT == 0 || !std::is_same<TT_DATA_A, float>::value,
-                  "ERROR: TP_SHIFT must be 0 for float operation");
+    static_assert(fnValidateShiftFloat<TP_SHIFT, TT_DATA_A>(), "ERROR: TP_SHIFT must be 0 for float types.");
+    static_assert(fnValidateShiftRange<TP_SHIFT>(), "ERROR: TP_SHIFT is out of the supported range.");
+    static_assert(fnValidateRoundMode<TP_RND>(), "ERROR: Illegal round mode.");
+    static_assert(fnValidateSatMode<TP_SAT>(), "ERROR: Illegal saturation mode.");
 
     /**
      * The input A data to the function.

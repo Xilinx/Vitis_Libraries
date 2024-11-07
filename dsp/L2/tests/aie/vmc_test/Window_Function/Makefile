@@ -43,7 +43,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 TARGET ?= aiesim
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  vck190
+PLATFORM_ALLOWLIST += vck190
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk

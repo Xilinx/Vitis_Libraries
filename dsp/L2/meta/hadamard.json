@@ -13,6 +13,23 @@
     ],
     "parameters": [
         {
+            "name": "AIE_VARIANT",
+            "description": "specifies the device type",
+            "type": "uint",
+            "updater": {
+                "file": "hadamard.py",
+                "function": "update_AIE_VARIANT",
+                "args": [
+                ]
+            },
+            "validator": {
+                "file": "hadamard.py",
+                "function": "validate_AIE_VARIANT",
+                "args": [
+                ]
+            }
+        },
+        {
             "name": "TT_DATA_A",
             "description": "The type of individual data samples input to port A.",
             "type": "typename",
@@ -24,12 +41,16 @@
                 "cfloat",
                 "float"
             ],
+            "updater": {
+                "file": "hadamard.py",
+                "function": "update_TT_DATA_A",
+                "args": [
+                ]
+            },
             "validator": {
                 "file": "hadamard.py",
                 "function": "validate_TT_DATA_A",
                 "args": [
-                    "TT_DATA_B",
-                    "AIE_VARIANT"
                 ]
             }
         },
@@ -45,71 +66,20 @@
                 "cfloat",
                 "float"
             ],
+            "updater": {
+                "file": "hadamard.py",
+                "function": "update_TT_DATA_B",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_A"
+                ]
+            },
             "validator": {
                 "file": "hadamard.py",
                 "function": "validate_TT_DATA_B",
                 "args": [
-                ]
-            }
-        },
-        {
-            "name": "TP_DIM",
-            "description": "The number of inputs in port A and port B.",
-            "type": "uint",
-            "validator": {
-                "file": "hadamard.py",
-                "function": "validate_TP_DIM",
-                "args": [
-                    "TP_API",
-                    "TT_DATA_A",
-                    "TT_DATA_B",
-                    "TP_SSR",
-                    "AIE_VARIANT"
-                ]
-            }
-        },
-        {
-            "name": "TP_NUM_FRAMES",
-            "description": "The number of samples per call to the kernel",
-            "type": "uint",
-            "validator": {
-                "file": "hadamard.py",
-                "function": "validate_TP_NUM_FRAMES",
-                "args": [
-                    "TP_API",
-                    "TP_DIM",
-                    "TP_SSR",
-                    "TT_DATA_A",
-                    "TT_DATA_B",
-                    "AIE_VARIANT"
-                ]
-            },
-            "updater": {
-                "file": "hadamard.py",
-                "function": "update_TP_NUM_FRAMES",
-                "args": [
-                    "TP_DIM"
-                ]
-            }
-        },
-        {
-            "name": "TP_SHIFT",
-            "description": "The power of 2 shift down applied the product of sample and coefficient",
-            "type": "uint",
-            "validator": {
-                "file": "hadamard.py",
-                "function": "validate_TP_SHIFT",
-                "args": [
-                    "TT_DATA_A",
-                    "TT_DATA_B"
-                ]
-            },
-            "updater": {
-                "file": "hadamard.py",
-                "function": "update_TP_SHIFT",
-                "args": [
-                    "TT_DATA_A",
-                    "TT_DATA_B"
+                    "AIE_VARIANT",
+                    "TT_DATA_A"
                 ]
             }
         },
@@ -120,6 +90,13 @@
             "validator": {
                 "file": "hadamard.py",
                 "function": "validate_TP_API",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            },
+            "updater": {
+                "file": "hadamard.py",
+                "function": "update_TP_API",
                 "args": [
                     "AIE_VARIANT"
                 ]
@@ -140,30 +117,119 @@
                 "file": "hadamard.py",
                 "function": "update_TP_SSR",
                 "args": [
-                    "TP_DIM"
+                ]
+            }
+        },
+        {
+            "name": "TP_DIM",
+            "description": "The number of inputs in port A and port B.",
+            "type": "uint",
+            "updater": {
+                "file": "hadamard.py",
+                "function": "update_TP_DIM",
+                "args": [
+                    "AIE_VARIANT",
+                    "TP_API",
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TP_SSR"
+                ]
+            },
+            "validator": {
+                "file": "hadamard.py",
+                "function": "validate_TP_DIM",
+                "args": [
+                    "AIE_VARIANT",
+                    "TP_API",
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TP_SSR"
+                ]
+            }
+        },
+        {
+            "name": "TP_NUM_FRAMES",
+            "description": "The number of samples per call to the kernel",
+            "type": "uint",
+            "updater": {
+                "file": "hadamard.py",
+                "function": "update_TP_NUM_FRAMES",
+                "args": [
+                    "AIE_VARIANT",
+                    "TP_API",
+                    "TP_DIM",
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TP_SSR"
+                ]
+            },
+            "validator": {
+                "file": "hadamard.py",
+                "function": "validate_TP_NUM_FRAMES",
+                "args": [
+                    "AIE_VARIANT",
+                    "TP_API",
+                    "TP_DIM",
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TP_SSR"
+                ]
+            }
+        },
+        {
+            "name": "TP_SHIFT",
+            "description": "The power of 2 shift down applied the product of sample and coefficient",
+            "type": "uint",
+            "validator": {
+                "file": "hadamard.py",
+                "function": "validate_TP_SHIFT",
+                "args": [
+                    "TT_DATA_B"
+                ]
+            },
+            "updater": {
+                "file": "hadamard.py",
+                "function": "update_TP_SHIFT",
+                "args": [
+                    "TT_DATA_B"
                 ]
             }
         },
         {
             "name": "TP_RND",
             "description": "The rounding to be applied during the shift down stage of processing.",
-            "type": "uint"
+            "type": "uint",
+            "validator": {
+                "file": "hadamard.py",
+                "function": "validate_TP_RND",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            },
+            "updater": {
+                "file": "hadamard.py",
+                "function": "update_TP_RND",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            }
         },
         {
             "name": "TP_SAT",
             "description": "Saturation mode.",
             "type": "uint",
+            "updater": {
+                "file": "hadamard.py",
+                "function": "update_TP_SAT", 
+                "args": [
+                ]
+            },
             "validator": {
                 "file": "hadamard.py",
                 "function": "validate_TP_SAT", 
                 "args": [
                 ]
             }
-        },
-        {
-            "name": "AIE_VARIANT",
-            "description": "specifies the device type",
-            "type": "uint"
         }
     ],
     "ports": {

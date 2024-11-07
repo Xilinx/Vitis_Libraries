@@ -1,0 +1,17 @@
+{
+    "spec": "vmc_mixer_lut.json",
+    "outdir": "./xmc_aie_lib/Mixer_LUT_ddab5496",
+    "parameters": {
+        "AIE_VARIANT": 1,
+        "data_type": "cint16",
+        "mixer_mode": 1,
+        "sfdr": 40,
+        "ssr": 1,
+        "input_window_size": 64,
+        "USE_PHASE_RELOAD": false,
+        "phase_increment": 0,
+        "initial_phase_offset": 0,
+        "rnd_mode": 0,
+        "sat_mode": 0
+    }
+}

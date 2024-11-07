@@ -13,6 +13,21 @@
     ],
     "parameters": [
         {
+            "name": "AIE_VARIANT",
+            "type": "uint",
+            "description": "specifies the device type",
+            "updater": {
+                "file": "matrix_vector_mul.py",
+                "function": "update_AIE_VARIANT",
+                "args": [                ]
+            },
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_AIE_VARIANT",
+                "args": [                ]
+            }
+        },
+        {
             "name": "TT_DATA_A",
             "type": "typename",
             "description": "describes the type of individual data samples input of Matrix A to the gemv function. This is a typename and must be one of the following:",
@@ -23,7 +38,17 @@
                 "cint32",
                 "float",
                 "cfloat"
-            ]
+            ],
+            "updater": {
+                "file": "matrix_vector_mul.py",
+                "function": "update_TT_DATA_A",
+                "args": [                ]
+            },
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TT_DATA_A",
+                "args": [                ]
+            }
         },
         {
             "name": "TT_DATA_B",
@@ -37,6 +62,13 @@
                 "float",
                 "cfloat"
             ],
+            "updater": {
+                "file": "matrix_vector_mul.py",
+                "function": "update_TT_DATA_B",
+                "args": [
+                    "TT_DATA_A"
+                ]
+            },
             "validator": {
                 "file": "matrix_vector_mul.py",
                 "function": "validate_TT_DATA_B",
@@ -49,26 +81,130 @@
             "name": "TP_DIM_A",
             "type": "uint",
             "description": "is an unsigned integer which describes the number of elements along the unique dimension (rows) of Matrix A.",
+            "updater": {
+                "file": "matrix_vector_mul.py",
+                "function": "update_TP_DIM_A",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_A",
+                    "TT_DATA_B"                ]
+            },
             "validator": {
                 "file": "matrix_vector_mul.py",
                 "function": "validate_TP_DIM_A",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A",
-                    "TP_SSR"
-                ]
+                    "TT_DATA_B"                ]
             }
         },
         {
             "name": "TP_DIM_B",
             "type": "uint",
             "description": "is an unsigned integer which describes the number of elements along vector B, this is a shared dimension with Matrix A.",
+            "updater": {
+                "file": "matrix_vector_mul.py",
+                "function": "update_TP_DIM_B",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_A",
+                    "TT_DATA_B",  
+                    "TP_DIM_A"  
+                ]
+            },
             "validator": {
                 "file": "matrix_vector_mul.py",
                 "function": "validate_TP_DIM_B",
                 "args": [
-                    "TT_DATA_B",
-                    "TP_CASC_LEN",
-                    "TP_SSR"
+                    "AIE_VARIANT",
+                    "TT_DATA_A",
+                    "TT_DATA_B",  
+                    "TP_DIM_A"  
+                ]
+            }
+        },
+        {
+            "name": "TP_NUM_FRAMES",
+            "type": "uint",
+            "description": "describes the number matrix-vector multiplications occuring per window of matrix/vector input data",
+            "minimum": 1,
+            "updater": {
+                "file": "matrix_vector_mul.py",
+                "function": "update_TP_NUM_FRAMES",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_A",
+                    "TT_DATA_B",  
+                    "TP_DIM_A",
+                    "TP_DIM_B"  
+                ]
+            },
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TP_NUM_FRAMES",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_A",
+                    "TT_DATA_B",  
+                    "TP_DIM_A",
+                    "TP_DIM_B"  
+                ]
+            }
+        },
+        {
+            "name": "TP_SSR",
+            "type": "uint",
+            "description": "The number of kernels to be used in parallel to perform the function.",
+            "minimum": 0,
+            "updater": {
+                "file": "matrix_vector_mul.py",
+                "function": "update_TP_SSR",
+                "args": [ "AIE_VARIANT", "TT_DATA_A", "TP_DIM_A", "TP_DIM_B", "TP_NUM_FRAMES"
+                ]
+            },
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TP_SSR",
+                "args": [ "AIE_VARIANT", "TT_DATA_A", "TP_DIM_A", "TP_DIM_B", "TP_NUM_FRAMES"
+                ]
+            }
+        },
+        {
+            "name": "TP_CASC_LEN",
+            "type": "uint",
+            "description": "describes the number of AIE Tiles to split the GEMV operation into.",
+            "minimum": 1,
+            "updater": {
+                "file": "matrix_vector_mul.py",
+                "function": "update_TP_CASC_LEN",
+                "args": [ "AIE_VARIANT", "TT_DATA_A", "TP_DIM_A", "TP_DIM_B", "TP_NUM_FRAMES", "TP_SSR"
+                ]
+            },
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TP_CASC_LEN",
+                "args": [ "AIE_VARIANT", "TT_DATA_A", "TP_DIM_A", "TP_DIM_B", "TP_NUM_FRAMES", "TP_SSR"
+                ]
+            }
+        },
+        {
+            "name": "TP_DIM_A_LEADING",
+            "description": "Describes which dimension of the Matrix A input data is contigious in memory. TP_DIM_A_LEADING=1 is column major, and TP_DIM_A_LEADING=0 is row major. Row major data will be transposed to column major data by the DMA buffer descriptors.",
+            "type": "uint",
+            "updater": {
+                "file": "matrix_vector_mul.py",
+                "function": "update_TP_DIM_A_LEADING",
+                "args": [
+                    "TP_NUM_FRAMES",
+                    "TT_DATA_A"
+                ]
+            },
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TP_DIM_A_LEADING",
+                "args": [
+                    "TP_NUM_FRAMES",
+                    "TT_DATA_A"
                 ]
             }
         },
@@ -78,6 +214,13 @@
             "description": "describes power of 2 shift down applied to the accumulation of product terms before each output. TP_SHIFT must be in the range 0 to 61.",
             "maximum": 80,
             "minimum": 0,
+            "updater": {
+                "file": "matrix_vector_mul.py",
+                "function": "update_TP_SHIFT",
+                "args": [
+                    "TT_DATA_A"
+                ]
+            },
             "validator": {
                 "file": "matrix_vector_mul.py",
                 "function": "validate_TP_SHIFT",
@@ -87,36 +230,18 @@
             }
         },
         {
-            "name": "TP_SSR",
-            "type": "uint",
-            "description": "The number of kernels to be used in parallel to perform the function.",
-            "maximum": 80,
-            "minimum": 0,
-            "validator": {
-                "file": "matrix_vector_mul.py",
-                "function": "validate_TP_SSR",
-                "args": [
-                ]
-            }
-        },
-        {
-            "name": "TP_CASC_LEN",
-            "type": "uint",
-            "description": "describes the number of AIE Tiles to split the GEMV operation into.",
-            "minimum": 1,
-            "validator": {
-                "file": "matrix_vector_mul.py",
-                "function": "validate_TP_CASC_LEN",
-                "args": [
-                ]
-            }
-        },
-        {
             "name": "TP_RND",
             "type": "uint",
             "description": "describes the selection of rounding to be applied during the shift down stage of processing. TP_RND must be in the range 0 to 7 where",
             "maximum": 7,
             "minimum": 0,
+            "updater": {
+                "file": "matrix_vector_mul.py",
+                "function": "update_TP_RND",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            },
             "validator": {
                 "file": "matrix_vector_mul.py",
                 "function": "validate_TP_RND",
@@ -129,44 +254,14 @@
             "name": "TP_SAT",
             "description": "Saturation mode.",
             "type": "uint",
+            "updater": {
+                "file": "matrix_vector_mul.py",
+                "function": "update_TP_SAT"
+            },
             "validator": {
                 "file": "matrix_vector_mul.py",
                 "function": "validate_TP_SAT"
             }
-        },
-        {
-            "name": "TP_NUM_FRAMES",
-            "type": "uint",
-            "description": "describes the number matrix-vector multiplications occuring per window of matrix/vector input data",
-            "minimum": 1,
-            "validator": {
-                "file": "matrix_vector_mul.py",
-                "function": "validate_TP_NUM_FRAMES",
-                "args": [
-                    "TP_DIM_A",
-                    "TP_DIM_B",
-                    "TP_CASC_LEN",
-                    "TP_SSR"
-                ]
-            }
-        },
-        {
-            "name": "TP_DIM_A_LEADING",
-            "description": "Describes which dimension of the Matrix A input data is contigious in memory. TP_DIM_A_LEADING=1 is column major, and TP_DIM_A_LEADING=0 is row major. Row major data will be transposed to column major data by the DMA buffer descriptors.",
-            "type": "uint",
-            "validator": {
-                "file": "matrix_vector_mul.py",
-                "function": "validate_TP_DIM_A_LEADING",
-                "args": [
-                    "TP_NUM_FRAMES",
-                    "TT_DATA_A"
-                ]
-            }
-        },
-        {
-            "name": "AIE_VARIANT",
-            "type": "uint",
-            "description": "specifies the device type"
         }
     ],
     "ports": {

@@ -25,20 +25,21 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The Convolution/Correlation library element supports AIE1 and AIE-ML for all features with the following differences.
+The Convolution/Correlation library element supports AIE and AIE-ML devices for all features with the following differences.
 
-- Round modes available and the enumerated values of round modes differ between AIE1 and AIE-ML. See :ref:`COMPILING_AND_SIMULATING`.
+- Round modes available and the enumerated values of round modes differ between AIE and AIE-ML devices. See :ref:`COMPILING_AND_SIMULATING`.
 
 Supported Types
 ===============
 
 The data type for input port F and G (inF and inG) is controlled by T_DATA_F and T_DATA_G respectively.
-Both inputs may take one of the 5 choices: int8, int16, int32, cint16, cint32. The output may take one of 4 choices: int16, int32, cint16, cint32.
+Both inputs may take one of the 7 choices: int8, int16, int32, cint16, cint32, float and bfloat16. 
+The output may take one of 5 choices: int16, int32, cint16, cint32, float.
 Please see table :ref:`CONV_CORR_combos` for valid input/output data type combinations.
 
 .. _CONV_CORR_combos:
 
-.. table:: Supported Combinations of Input/Output data types
+.. table:: IO-BUFFER INTERFACE : Supported Combinations of Input/Output data types
    :align: center
 
    +------------------+------------------+------------------+------------------+------------------+
@@ -69,6 +70,14 @@ Please see table :ref:`CONV_CORR_combos` for valid input/output data type combin
    | bfloat16         | bfloat16         | float            | no               | yes              |
    +------------------+------------------+------------------+------------------+------------------+
 
+.. table:: STREAM INTERFACE : Supported Combinations of Input/Output data types
+   :align: center
+
+   +------------------+------------------+------------------+------------------+------------------+
+   | InputF Data Type | InputG Data Type | Output Data Type | AIE Valid        | AIE-ML Valid     |
+   +==================+==================+==================+==================+==================+
+   | cint16           | cint16           | cint16           | yes              | no               |
+   +------------------+------------------+------------------+------------------+------------------+
 
 
 Template Parameters
@@ -89,11 +98,28 @@ To see details on the ports for Convolution / Correlation, see :ref:`API_REFEREN
 
 Design Notes
 ============
+The performance of the IP depends on the chosen data types combo :ref:`CONV_CORR_combos` . The number of multiplications per clock cycle will updated based on data type combo. 
+The Convolution/Correlation operation can be processed by both IO Buffer (TP_API = 0) and Stream Based (TP_API =1) which can controlled by the parameter named as ``TP_API`` 
+
+IO Buffer Interface
+-------------------
+The Convolution/Correlation operation via IO Buffer by both AIE and AIE-ML.
+
+IO Buffer interface can support all data type combos, see :ref:`CONV_CORR_combos` `table:: IO-BUFFER INTERFACE`
+
+Streaming Interface
+-------------------
+The Convolution/Correlation operation via streaming supported by AIE Engine only and there is no support in AIE-ML
+Input F Sig. is assumed to be streaming on AXI-Stream interface. As F is consumed on streams, selection of Length(F) can be higher to meet higher throughput.
+Input G Sig. is assumed to be window on I/O buffer interface and langth(G) can be smaller.
+
+Streaming interface can support only one data type combo, see :ref:`CONV_CORR_combos` `table:: STREAM INTERFACE`
+
 
 Scaling
 -------
-Scaling in Convolution / Correlation is controlled by the ``TP_SHIFT`` parameter which describes the number of bits to shift the output to the right. Only power-of-2 scaling is supported.
-Float and cfloat implementations do not support scaling. ``TP_SHIFT`` can be set to -1 to shift the output one bit to the left.
+Scaling in Convolution / Correlation is controlled by the ``TP_SHIFT`` parameter which describes the number of bits to shift the output to the right. 
+Float, cfloat and bfloat16 implementations do not support scaling. ``TP_SHIFT`` must be set to '0'.
 
 Saturation
 ----------
@@ -134,6 +160,4 @@ Correlation
    :ltrim:
 .. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
    :ltrim:
-
-
 

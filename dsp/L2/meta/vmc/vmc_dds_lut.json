@@ -1,0 +1,165 @@
+{
+  "low_level_file":"dds_mixer_lut.json",
+  "ip_name": "vmc_dds_lut",
+  "block_info": {
+    "label": "DDS LUT",
+    "description": "Direct Digital Synthesizer (DDS) LUT block targeted for AI Engines."
+  },
+  "parameters": [
+    {
+	  "key": "AIE_VARIANT",
+	  "name": "AIE_VARIANT",
+      "description": "Specifies the device type: 2-AIE-ML",
+      "default": 1,
+      "label": "AIE Variant:",
+      "tablabel": "Main",
+      "parameterType":"edit"
+    },
+    {
+      "key": "TT_DATA",
+      "name": "data_type",
+      "description": "The type of individual data samples output of the DDS function",
+      "default": "cint16",
+      "validator": {
+        "file": "vmc_dds_mixer_common.py",
+        "function": "vmc_validate_data_type",
+        "args": ["AIE_VARIANT"]
+      },
+          "label": "Output data type:",
+          "tablabel": "Main",
+          "parameterType":"popup"
+
+    },
+    {
+      "key": "TP_SFDR",
+      "name": "sfdr",
+      "description": "specifies the expected SFDR of dds output",
+      "default": 40,
+      "validator": {
+        "file": "vmc_dds_mixer_common.py",
+        "function": "vmc_validate_SFDR",
+        "args": ["data_type"]
+      },
+            "label": "SFDR:",
+            "tablabel": "Main",
+            "parameterType":"edit"
+    },
+    {
+      "key": "TP_SSR",
+      "name": "ssr",
+      "description": "Specify number of data input/output in parallel for a single channel.",
+      "default": 1,
+      "validator": {
+        "file": "vmc_dds_mixer_common.py",
+        "function": "vmc_validate_ssr",
+        "args": []
+      },
+            "label": "SSR: ",
+            "tablabel": "Main",
+            "parameterType":"edit"
+    },
+    {
+      "key": "TP_INPUT_WINDOW_VSIZE",
+      "name": "output_window_size",
+      "description": "describes the number of samples in the input/output window API or number of samples to process per iteration.",
+      "default": 64,
+      "validator": {
+        "file": "vmc_dds_lut.py",
+        "function": "vmc_validate_output_window_size",
+        "args": ["data_type", "ssr","AIE_VARIANT"]
+      },
+            "label": "Samples per frame:",
+            "tablabel": "Main",
+            "parameterType":"edit"
+    },
+    {
+      "key": "TP_USE_PHASE_RELOAD",
+	    "name": "USE_PHASE_RELOAD",
+            "description": "specifies if initial phase is to be implemented as a reloadable RTP port or not.",
+            "default": false,
+      	    "type": "bool",   
+	    "validator": {
+               "file": "vmc_dds_mixer_common.py",
+                "function": "validate_USE_PHASE_RELOAD",
+                "args": ["ssr"]
+		},
+	    "label": "Reload initial phase via input port",
+            "tablabel": "Main",
+            "parameterType":"checkbox"
+    },
+    {
+      "key": "phaseInc",
+      "name": "phase_increment",
+      "description": "The phase increment between samples.",
+      "default": 0,
+        "validator": {
+               "file": "vmc_dds_mixer_common.py",
+                "function": "vmc_validate_phase_increment",
+                "args": []
+		},
+          "label": "Phase increment:",
+          "tablabel": "Main",
+          "parameterType":"edit"
+
+     },
+     {
+      "key" : "initialPhaseOffset" ,
+      "name": "initial_phase_offset",
+      "description": "The initial phase offset.",
+      "default": 0,
+         "validator": {
+               "file": "vmc_dds_mixer_common.py",
+                "function": "vmc_validate_initial_phase_offset",
+                "args": []
+		},
+            "label": "Initial phase offset:",
+            "tablabel": "Main",
+            "parameterType":"edit"
+    },
+    {
+      "key": "TP_RND",
+      "name": "rnd_mode",
+      "description": "The rounding to be applied during the shift down stage of processing.",
+      "default": "Round to positive infinity",
+        "validator": {
+          "file": "vmc_dds_mixer_common.py",
+          "function": "vmc_validate_rnd_mode",
+          "args": ["AIE_VARIANT"]
+        },
+         "label": "Rounding mode:",
+            "tablabel": "Main",
+          "parameterType": "popup"
+    },
+    {
+      "key": "TP_SAT",
+      "name": "sat_mode",
+      "description": "Saturation mode.",
+    "enum": [0, 1, 3],
+    "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
+      "default": 0,
+      "validator": {
+          "file": "vmc_dds_mixer_common.py",
+          "function": "vmc_validate_sat_mode",
+          "args": []
+        },
+
+            "label": "Saturation mode:",
+            "tablabel": "Main",
+            "parameterType":"popup"
+    },
+    {
+      "name": "vmc_sample_time",
+      "description": "Sample time for the block output port(s)",
+      "default": -1,
+      "type": "double",
+          "label": "Sample time:",
+          "tablabel": "Main",
+          "parameterType":"edit"
+    }
+
+  ],
+  "generator": {
+    "file": "vmc_dds_lut.py",
+    "function": "vmc_generate_graph"
+  }
+}

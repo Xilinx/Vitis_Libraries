@@ -1,0 +1,16 @@
+digraph G {
+AIE_VARIANT -> casc_length;
+data_type -> casc_length;
+twiddle_type -> casc_length;
+point_size -> casc_length;
+ssr -> casc_length;
+AIE_VARIANT -> rnd_mode;
+data_type -> twiddle_type;
+AIE_VARIANT -> ssr;
+data_type -> ssr;
+point_size -> ssr;
+AIE_VARIANT -> num_frames;
+data_type -> num_frames;
+point_size -> num_frames;
+data_type -> shift_val;
+}

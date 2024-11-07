@@ -52,6 +52,8 @@ AMD documentation is organized around a set of standard design processes to help
 
    -  :ref:`FIR_TDM`
 
+   -  :ref:`FUNCTION_APPROXIMATION`
+
    -  :ref:`HADAMARD_PRODUCT`
 
    -  :ref:`KRONECKER_MATRIX_PRODUCT`

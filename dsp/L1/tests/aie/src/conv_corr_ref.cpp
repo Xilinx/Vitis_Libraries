@@ -21,6 +21,7 @@
 #include "aie_api/aie_adf.hpp"
 #include "conv_corr_ref_utils.hpp"
 #include "conv_corr_ref.hpp"
+#include "device_defs.h"
 
 namespace xf {
 namespace dsp {
@@ -39,7 +40,10 @@ template <typename TT_DATA_F,
           unsigned int TP_SHIFT,
           unsigned int TP_API,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_NUM_FRAMES,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_PHASES>
 void conv_corr_ref<TT_DATA_F,
                    TT_DATA_G,
                    TT_DATA_OUT,
@@ -50,15 +54,18 @@ void conv_corr_ref<TT_DATA_F,
                    TP_SHIFT,
                    TP_API,
                    TP_RND,
-                   TP_SAT>::conv_corrMain(input_buffer<TT_DATA_F>& inWindowF,
-                                          input_buffer<TT_DATA_G>& inWindowG,
-                                          output_buffer<TT_DATA_OUT>& outWindow) {
-    unsigned int loopCount = CEIL(m_kLoopCount, m_kLanes); // loop count to iterate on each sample.
-
-    TT_DATA_F inDataF;                  // input data of F Sig.
-    TT_DATA_G inDataG, buffG[TP_G_LEN]; // input data of G Sig.
-    TT_DATA_OUT outData;                // output data of conv/corr.
-    T_accRef<TT_DATA_OUT> accum;        // declaration of accumulator
+                   TP_SAT,
+                   TP_NUM_FRAMES,
+                   TP_CASC_LEN,
+                   TP_PHASES>::conv_corrMain(input_buffer<TT_DATA_F>& inWindowF,
+                                             input_buffer<TT_DATA_G>& inWindowG,
+                                             output_buffer<TT_DATA_OUT>& outWindow) {
+    unsigned int loopCount =
+        (TP_API == 0) ? CEIL(m_kLoopCount, m_kLanes) : TP_F_LEN; // loop count to iterate on each sample.
+    TT_DATA_F inDataF;                                           // input data of F Sig.
+    TT_DATA_G inDataG, buffG[TP_G_LEN * TP_NUM_FRAMES];          // input data of G Sig.
+    TT_DATA_OUT outData;                                         // output data of conv/corr.
+    T_accRef<TT_DATA_OUT> accum;                                 // declaration of accumulator
 
     // Pointers to fetch F and G data
     TT_DATA_F* inPtrF = (TT_DATA_F*)inWindowF.data();     // pointer to F data
@@ -67,40 +74,50 @@ void conv_corr_ref<TT_DATA_F,
 
     // Base pointers of F and G data
     TT_DATA_F* baseinPtrF = (TT_DATA_F*)inWindowF.data(); // base pointer which holds starting address of F data
+    TT_DATA_F* inPtrFperFrame = baseinPtrF;
 
-    if (TP_FUNCT_TYPE == 1) {
-        for (unsigned int i = 0; i < TP_G_LEN; i++) {
-            buffG[(TP_G_LEN - 1) - i] = *inPtrG++; // for convolution, G signal has to be reversed
-        }
-    } else {
-        for (unsigned int i = 0; i < TP_G_LEN; i++) {
-            buffG[i] = *inPtrG++; // for correlation , G signal will be as it is
+    for (int frameIndx = 0; frameIndx < TP_NUM_FRAMES; frameIndx++) {
+        if (TP_FUNCT_TYPE == 1) {
+            for (unsigned int i = 0; i < TP_G_LEN; i++) {
+                buffG[(frameIndx * TP_G_LEN) + ((TP_G_LEN - 1) - i)] =
+                    *inPtrG++; // for convolution, G signal has to be reversed
+            }
+        } else {
+            for (unsigned int i = 0; i < TP_G_LEN; i++) {
+                inDataG = *inPtrG++;
+                buffG[((frameIndx * TP_G_LEN) + i)] =
+                    conjugate<TT_DATA_G>(inDataG); // for correlation , G signal has to be conjugate
+            }
         }
     }
 
     // Convolution/correlation computation
-    for (unsigned int i = 0; i < loopCount; i++) {
-        accum =
-            null_accRef<TT_DATA_OUT>(); // reset accumulator at the start of new multiply accumulation of each output
-        inPtrF = baseinPtrF++;          // update pointer of F data
-        inPtrG = &buffG[0];             // update pointer of G data
+    for (int frame = 0; frame < TP_NUM_FRAMES; frame++) {
+        baseinPtrF = (inPtrFperFrame + (frame * m_kPaddedDataLength));
 
-        // Inner Loop to do multiply and accum
-        for (unsigned int j = 0; j < TP_G_LEN; j++) {
-            inDataF = *inPtrF++; // Fetch F sample
-            inDataG = *inPtrG++; // Fetch G Sample
+        for (unsigned int i = 0; i < loopCount; i++) {
+            accum = null_accRef<TT_DATA_OUT>();  // reset accumulator at the start of new multiply accumulation of each
+                                                 // output
+            inPtrF = baseinPtrF++;               // update pointer of F data
+            inPtrG = &buffG[(frame * TP_G_LEN)]; // update pointer of G data
 
-            // Multiply and accumulate the result.
-            multiplyAccum<TT_DATA_F, TT_DATA_G, TT_DATA_OUT>(accum, inDataF, inDataG);
-        }
+            // Inner Loop to do multiply and accum
+            for (unsigned int j = 0; j < TP_G_LEN; j++) {
+                inDataF = *inPtrF++; // Fetch F sample
+                inDataG = *inPtrG++; // Fetch G Sample
 
-        roundAcc(TP_RND, TP_SHIFT, accum);     // apply rounding if any bit errors
-        saturateAcc(accum, TP_SAT);            // apply saturation if any overflow of data occurs.
-        outData = castAcc<TT_DATA_OUT>(accum); // writing output results to vector from accumulator
-        *outPtr++ = outData;                   // Store the results to io buffer of out.
+                // Multiply and accumulate the result.
+                multiplyAccum<TT_DATA_F, TT_DATA_G, TT_DATA_OUT>(accum, inDataF, inDataG);
+            }
 
-    } // End of Loop {
-};    // End of conv_corr_ref() {
+            roundAcc(TP_RND, TP_SHIFT, accum);     // apply rounding if any bit errors
+            saturateAcc(accum, TP_SAT);            // apply saturation if any overflow of data occurs.
+            outData = castAcc<TT_DATA_OUT>(accum); // writing output results to vector from accumulator
+            *outPtr++ = outData;                   // Store the results to io buffer of out.
+
+        } // End of Loop {
+    }     // End of Frames
+};        // End of conv_corr_ref() {
 
 } //  End of namespace conv_corr {
 } //  End of namespace aie {

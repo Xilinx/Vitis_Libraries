@@ -1,0 +1,9 @@
+{
+    "test_0_tool_canary_aie": {
+        "DATA_TYPE": "int32",
+        "WINDOW_VSIZE": "128",
+        "IDX": "1",
+        "AIE_VARIANT": "2",
+        "NITER": "1"
+    }
+}

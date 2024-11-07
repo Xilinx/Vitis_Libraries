@@ -16,6 +16,10 @@
             "name": "AIE_VARIANT",
             "type": "uint",
             "description": "specifies the device type",
+            "updater": {
+                "file": "mixed_radix_fft.py",
+                "function": "update_AIE_VARIANT"
+            },
             "validator": {
                 "file": "mixed_radix_fft.py",
                 "function": "validate_AIE_VARIANT"
@@ -27,16 +31,40 @@
             "type": "typename",
             "enum": [
                 "cint16",
-                "cint32"
-            ]
+                "cint32",
+                "cfloat"
+            ],
+            "updater": {
+                "file": "mixed_radix_fft.py",
+                "function": "update_TT_DATA",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            },
+            "validator": {
+                "file": "mixed_radix_fft.py",
+                "function": "validate_TT_DATA",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            }
         },
         {
             "name": "TT_TWIDDLE",
             "description": "The type of twiddle factors of the transform",
             "type": "typename",
             "enum": [
-                "cint16"
+                "cint16",
+                "cint32",
+                "cfloat"
             ],
+            "updater": {
+                "file": "mixed_radix_fft.py",
+                "function": "update_TT_TWIDDLE",
+                "args": [
+                    "TT_DATA"
+                ]
+            },
             "validator": {
                 "file": "mixed_radix_fft.py",
                 "function": "validate_TT_TWIDDLE",
@@ -46,14 +74,40 @@
             }
         },
         {
+            "name": "TP_DYN_PT_SIZE",
+            "description": "Selects whether the point size can change at run-time, 0 = static (cannot change), 1 = dynamic (can change)",
+            "type": "uint",
+            "updater": {
+                "file": "mixed_radix_fft.py",
+                "function": "update_TP_DYN_PT_SIZE",
+                "args": []
+            },
+            "validator": {
+                "file": "mixed_radix_fft.py",
+                "function": "validate_TP_DYN_PT_SIZE",
+                "args": []
+            }
+        },
+        {
             "name": "TP_POINT_SIZE",
             "description": "The number of samples in the transform.",
             "type": "uint",
+            "updater": {
+                "file": "mixed_radix_fft.py",
+                "function": "update_TP_POINT_SIZE",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_DYN_PT_SIZE"
+                ]
+            },
             "validator": {
                 "file": "mixed_radix_fft.py",
                 "function": "validate_TP_POINT_SIZE",
                 "args": [
-                    "AIE_VARIANT"
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_DYN_PT_SIZE"
                 ]
             }
         },
@@ -61,15 +115,83 @@
             "name": "TP_FFT_NIFFT",
             "description": "Selects whether the transform to perform is an FFT (1) or IFFT (0)",
             "type": "uint",
+            "updater": {
+                "file": "mixed_radix_fft.py",
+                "function": "update_TP_FFT_NIFFT"
+            },
             "validator": {
                 "file": "mixed_radix_fft.py",
                 "function": "validate_TP_FFT_NIFFT"
             }
         },
         {
+            "name": "TP_WINDOW_VSIZE",
+            "description": "The number of samples to be processed in each call of the function.",
+            "type": "uint",
+            "updater": {
+                "file": "mixed_radix_fft.py",
+                "function": "update_TP_WINDOW_VSIZE",
+                "args": [
+                    "TP_POINT_SIZE",
+                    "TT_DATA",
+                    "AIE_VARIANT"
+                ]
+            },
+            "validator": {
+                "file": "mixed_radix_fft.py",
+                "function": "validate_TP_WINDOW_VSIZE",
+                "args": [
+                    "TP_POINT_SIZE",
+                    "TT_DATA",
+                    "AIE_VARIANT"
+                ]
+            }
+        },
+        {
+            "name": "TP_CASC_LEN",
+            "description": "The number of kernels in series used to perform the FFT.",
+            "type": "uint",
+            "updater": {
+                "file": "mixed_radix_fft.py",
+                "function": "update_TP_CASC_LEN",
+                "args": [
+                    "TP_POINT_SIZE", "TP_DYN_PT_SIZE"
+                ]
+            },
+            "validator": {
+                "file": "mixed_radix_fft.py",
+                "function": "validate_TP_CASC_LEN",
+                "args": [
+                    "TP_POINT_SIZE", "TP_DYN_PT_SIZE"
+                ]
+            }
+        },
+        {
+            "name": "TP_API",
+            "description": "The choice of port type, 0 = iobuffers, 1 = streams",
+            "type": "uint",
+            "updater": {
+                "file": "mixed_radix_fft.py",
+                "function": "update_TP_API",
+                "args": ["TP_DYN_PT_SIZE"]
+            },
+            "validator": {
+                "file": "mixed_radix_fft.py",
+                "function": "validate_TP_API",
+                "args": ["TP_DYN_PT_SIZE"]
+            }
+        },
+        {
             "name": "TP_SHIFT",
             "description": "The power of 2 shift down applied to the accumulation of FIR before output",
             "type": "uint",
+            "updater": {
+                "file": "mixed_radix_fft.py",
+                "function": "update_TP_SHIFT",
+                "args": [
+                    "TT_DATA"
+                ]
+            },
             "validator": {
                 "file": "mixed_radix_fft.py",
                 "function": "validate_TP_SHIFT",
@@ -82,6 +204,13 @@
             "name": "TP_RND",
             "description": "The rounding to be applied during the shift down stage of processing.",
             "type": "uint",
+            "updater": {
+                "file": "mixed_radix_fft.py",
+                "function": "update_TP_RND",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            },
             "validator": {
                 "file": "mixed_radix_fft.py",
                 "function": "validate_TP_RND",
@@ -94,45 +223,13 @@
             "name": "TP_SAT",
             "description": "The saturation to be applied during the shift down stage of processing.",
             "type": "uint",
+            "updater": {
+                "file": "mixed_radix_fft.py",
+                "function": "update_TP_SAT"
+            },
             "validator": {
                 "file": "mixed_radix_fft.py",
                 "function": "validate_TP_SAT"
-            }
-        },
-        {
-            "name": "TP_WINDOW_VSIZE",
-            "description": "The number of samples to be processed in each call of the function.",
-            "type": "uint",
-            "validator": {
-                "file": "mixed_radix_fft.py",
-                "function": "validate_TP_WINDOW_VSIZE",
-                "args": [
-                    "TP_POINT_SIZE"
-                ]
-            }
-        },
-        {
-            "name": "TP_CASC_LEN",
-            "description": "The number of kernels in series used to perform the FFT.",
-            "type": "uint",
-            "validator": {
-                "file": "mixed_radix_fft.py",
-                "function": "validate_TP_CASC_LEN",
-                "args": [
-                    "TP_POINT_SIZE"
-                ]
-            }
-        },
-        {
-            "name": "TP_API",
-            "description": "The choice of port type, 0 = iobuffers, 1 = streams",
-            "type": "uint",
-            "validator": {
-                "file": "mixed_radix_fft.py",
-                "function": "validate_TP_API",
-                "args": [
-                    "TP_POINT_SIZE"
-                ]
             }
         }
     ],

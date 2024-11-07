@@ -72,6 +72,7 @@ INLINE_DECL void set_rnd_mode() {
     if
         constexpr(rndMode == rnd_sym_ceil) { ::aie::set_rounding(::aie::rounding_mode::symmetric_ceil); }
 #endif
+    // ! If this function receives an invalid round mode, it will not be caught here and will fail silently.
 }
 
 // saturation modes
@@ -88,6 +89,7 @@ INLINE_DECL void set_sat_mode() {
     // 2^(n-1) -1 ) : +2^(n-1) - 1 ]. For example if n=8, the range would be [-127:127]
     if
         constexpr(satMode == 3) { ::aie::set_saturation(::aie::saturation_mode::symmetric); }
+    // ! If this function receives an invalid saturation mode, it will not be caught here and will fail silently.
 }
 
 #ifdef __X86SIM__

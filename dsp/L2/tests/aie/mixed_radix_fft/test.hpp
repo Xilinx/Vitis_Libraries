@@ -26,9 +26,10 @@ mixed_radix_fft graph class.
 #include <vector>
 #include "utils.hpp"
 
-//#include "uut_static_config.h"
+#include "uut_static_config.h"
 #include "uut_config.h"
 #include "test_stim.hpp"
+#include "graph_utils.hpp"
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
@@ -60,6 +61,10 @@ class test_graph : public graph {
         API_IO == 0 ? 1 : kStreamsPerTile; // two ports per kernel for stream(AIE1), 1 port per kernel for windows.
     std::array<input_plio, kAPIFactor> in;
     std::array<output_plio, kAPIFactor> out;
+    std::array<input_plio, DYN_PT_SIZE> inHdr;
+    std::array<output_plio, DYN_PT_SIZE> outHdr;
+    //    port_conditional_array<input, DYN_PT_SIZE == 1, 1> inHdr;
+    //    port_conditional_array<output, DYN_PT_SIZE == 1, 1> outHdr;
 
     // Constructor
     test_graph() {
@@ -82,6 +87,7 @@ class test_graph : public graph {
         printf("Window size           = %d \n", WINDOW_VSIZE);
         printf("Number of kernels     = %d \n", CASC_LEN);
         printf("API_IO                = %d \n", API_IO);
+        printf("DYN_TP_SIZE           = %d \n", DYN_PT_SIZE);
         printf("PARAMETERS OF TEST:\n-------------------\n");
         printf("STIM_TYPE            = %d \n", STIM_TYPE);
         printf("NITER                = %d \n", NITER);
@@ -89,20 +95,37 @@ class test_graph : public graph {
         printf("========================\n");
 
         xf::dsp::aie::fft::mixed_radix_fft::UUT_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, ROUND_MODE,
-                                                      SAT_MODE, WINDOW_VSIZE, CASC_LEN, API_IO>
+                                                      SAT_MODE, WINDOW_VSIZE, CASC_LEN, API_IO, DYN_PT_SIZE>
             mixed_radix_fftGraph;
 
         for (int i = 0; i < kAPIFactor; i++) {
             std::string filenameIn = QUOTE(INPUT_FILE);
             filenameIn.insert(filenameIn.length() - 4, ("_" + std::to_string(i) + "_0"));
-            in[i] = input_plio::create("PLIO_in_" + std::to_string(i), adf::plio_32_bits, filenameIn);
+            in[i] = input_plio::create("PLIO_in_" + std::to_string(i), adf::plio_64_bits, filenameIn);
             connect<>(in[i].out[0], mixed_radix_fftGraph.in[i]);
 
             std::string filenameOut = QUOTE(OUTPUT_FILE);
             filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(i) + "_0"));
-            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_32_bits, filenameOut);
+            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_64_bits, filenameOut);
             connect<>(mixed_radix_fftGraph.out[i], out[i].in[0]);
         }
+#if DYN_PT_SIZE == 1
+        std::string filenameHdrIn = QUOTE(INPUT_HEADER_FILE);
+        // printf("filenameHdrIn");
+        // filenameHdrIn.insert(filenameHdrIn.length() - 4, ("_" + std::to_string(0) + "_0"));
+        inHdr[0] = input_plio::create("PLIO_in_" + std::to_string(kAPIFactor), adf::plio_32_bits, filenameHdrIn);
+        // printf("\n done input_plio \n");
+        connect<>(inHdr[0].out[0], mixed_radix_fftGraph.headerIn[0]);
+        // printf("connected \n");
+
+        std::string filenameHdrOut = QUOTE(OUTPUT_HEADER_FILE);
+        // printf("filenameHdrOut");
+        // filenameHdrOut.insert(filenameHdrOut.length() - 4, ("_" + std::to_string(0) + "_0"));
+        outHdr[0] = output_plio::create("PLIO_out_" + std::to_string(kAPIFactor), adf::plio_32_bits, filenameHdrOut);
+        // printf("\n done input_plio \n");
+        connect<>(mixed_radix_fftGraph.headerOut[0], outHdr[0].in[0]);
+// printf("connected \n");
+#endif // DYN_PT_SIZE == 1
     };
 };
 }

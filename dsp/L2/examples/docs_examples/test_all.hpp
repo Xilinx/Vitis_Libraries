@@ -32,6 +32,7 @@
 #include "test_corr.hpp"
 #include "test_dft.hpp"
 #include "test_matvec.hpp"
+#include "test_bitonic_sort.hpp"
 
 using namespace adf;
 #define NUM_IP_FIR 1
@@ -61,6 +62,8 @@ using namespace adf;
 #define NUM_IP_MV 4
 #define NUM_OP_MV 2
 #define NUM_IP_FIR_TDM 1
+#define NUM_IP_BS 1
+#define NUM_OP_BS 1
 
 template <unsigned int elem_start, unsigned int num_ports, unsigned int NUM_IP_ALL, typename plioType>
 void createPLIOFileConnections(std::array<plioType, NUM_IP_ALL>& plioPorts,
@@ -82,11 +85,11 @@ class test_example : public graph {
     static constexpr unsigned int NUM_IP_ALL = NUM_IP_FIR + NUM_IP_DDS + NUM_IP_FFT + NUM_IP_MM + NUM_IP_WIDG_API +
                                                NUM_IP_WIDG_R2C + NUM_IP_FFTW + NUM_IP_DDS_LUT + NUM_IP_OT + NUM_IP_HAD +
                                                NUM_IP_KMP + NUM_IP_CONV + NUM_IP_CORR + NUM_IP_DFT + NUM_IP_MV +
-                                               NUM_IP_FIR_TDM;
+                                               NUM_IP_FIR_TDM + NUM_IP_BS;
     static constexpr unsigned int NUM_OP_ALL = NUM_IP_FIR + NUM_IP_DDS + NUM_IP_FFT + NUM_OP_MM + NUM_OP_WIDG_API +
                                                NUM_OP_WIDG_R2C + NUM_IP_FFTW + NUM_OP_DDS_LUT + NUM_OP_OT + NUM_OP_HAD +
                                                NUM_OP_KMP + NUM_OP_CONV + NUM_OP_CORR + NUM_OP_DFT + NUM_OP_MV +
-                                               NUM_IP_FIR_TDM;
+                                               NUM_IP_FIR_TDM + NUM_OP_BS;
 
     std::array<input_plio, NUM_IP_ALL> in;
     std::array<output_plio, NUM_OP_ALL> out;
@@ -107,6 +110,7 @@ class test_example : public graph {
     corr_example::test_corr uut_corr;
     dft_example::test_dft uut_dft;
     mv_example::test_mv uut_mv;
+    bitonic_sort_example::test_bitonic_sort uut_bitonic_sort;
 
     test_example() {
         // create input file connections - first template argument indicates first index of plio port for this library
@@ -127,6 +131,7 @@ class test_example : public graph {
         createPLIOFileConnections<23, NUM_IP_DFT, NUM_IP_ALL>(in, "input", "dft", "in");
         createPLIOFileConnections<25, NUM_IP_MV, NUM_IP_ALL>(in, "input", "mv", "in");
         createPLIOFileConnections<29, NUM_IP_FIR_TDM, NUM_IP_ALL>(in, "input", "fir_tdm", "in");
+        createPLIOFileConnections<30, NUM_IP_BS, NUM_IP_ALL>(in, "input", "bitonic_sort", "in");
 
         // create output file connections
         createPLIOFileConnections<0, NUM_IP_DDS, NUM_OP_ALL>(out, "output", "dds", "out");
@@ -145,6 +150,7 @@ class test_example : public graph {
         createPLIOFileConnections<16, NUM_OP_DFT, NUM_OP_ALL>(out, "output", "dft", "out");
         createPLIOFileConnections<18, NUM_OP_MV, NUM_OP_ALL>(out, "output", "mv", "out");
         createPLIOFileConnections<20, NUM_IP_FIR_TDM, NUM_OP_ALL>(out, "output", "fir_tdm", "out");
+        createPLIOFileConnections<21, NUM_OP_BS, NUM_OP_ALL>(out, "output", "bitonic_sort", "out");
 
         // wire up dds testbench
         connect<>(in[0].out[0], uut_dds.in);
@@ -198,14 +204,14 @@ class test_example : public graph {
         connect<>(uut_kronecker.out, out[13].in[0]);
 
         // wire up convolution
-        connect<>(in[19].out[0], uut_conv.inF);
-        connect<>(in[20].out[0], uut_conv.inG);
-        connect<>(uut_conv.out, out[14].in[0]);
+        connect<>(in[19].out[0], uut_conv.inF[0]);
+        connect<>(in[20].out[0], uut_conv.inG[0]);
+        connect<>(uut_conv.out[0], out[14].in[0]);
 
         // wire up correlation
-        connect<>(in[21].out[0], uut_corr.inF);
-        connect<>(in[22].out[0], uut_corr.inG);
-        connect<>(uut_corr.out, out[15].in[0]);
+        connect<>(in[21].out[0], uut_corr.inF[0]);
+        connect<>(in[22].out[0], uut_corr.inG[0]);
+        connect<>(uut_corr.out[0], out[15].in[0]);
 
         // wire up dft
         connect<>(in[23].out[0], uut_dft.in[0]);
@@ -224,6 +230,10 @@ class test_example : public graph {
         // wire up fir tdm testbench
         connect<>(in[29].out[0], uut_fir_tdm.in);
         connect<>(uut_fir_tdm.out, out[20].in[0]);
+
+        // wire up bitonic sort testbench
+        connect<>(in[30].out[0], uut_bitonic_sort.in);
+        connect<>(uut_bitonic_sort.out, out[21].in[0]);
     };
 };
 };

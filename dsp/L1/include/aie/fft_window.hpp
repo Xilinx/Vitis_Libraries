@@ -48,13 +48,6 @@ using namespace adf;
 
 //#define _DSPLIB_FFT_WINDOW_HPP_DEBUG_
 
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
-
 #include "fft_window_traits.hpp" //for fnPointSizePwr
 
 namespace xf {
@@ -85,7 +78,8 @@ class fft_window {
     // size of weights array is obvious for static case. For dynamic case, we need the static table, plus tables which
     // are 1/2 that size,
     // 1/4 that size, 1/8.... which converges a size twice that of the static case.
-    alignas(32) TT_COEFF weights[kCoeffsTableSize]; // A shorthand way of saying N for static, 2N for dynamic
+    alignas(__ALIGN_BYTE_SIZE__)
+        TT_COEFF weights[kCoeffsTableSize]; // A shorthand way of saying N for static, 2N for dynamic
     // TT_COEFF* weights;
     int tableStarts[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -137,7 +131,7 @@ class fft_window<TT_DATA,
     // size of weights array is obvious for static case. For dynamic case, we need the static table, plus tables which
     // are 1/2 that size,
     // 1/4 that size, 1/8.... which converges a size twice that of the static case.
-    alignas(32) TT_COEFF weights[kCoeffsTableSize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF weights[kCoeffsTableSize];
     int tableStarts[kPtSizePwr];
 
    public:

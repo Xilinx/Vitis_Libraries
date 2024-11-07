@@ -21,9 +21,9 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The DDS/Mixer LUT library element supports both AIE1 and AIE-ML with the following differences:
+The DDS/Mixer LUT library element supports both AIE and AIE-ML devices with the following differences:
 
-- Round modes available and the enumerated values of round modes differ between AIE1 and AIE-ML. See :ref:`COMPILING_AND_SIMULATING`.
+- Round modes available and the enumerated values of round modes differ between AIE and AIE-ML devices. See :ref:`COMPILING_AND_SIMULATING`.
 
 Supported Types
 ===============

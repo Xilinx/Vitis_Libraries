@@ -21,20 +21,20 @@ The file captures the definition of the 'L2' graph level class for
 the DDS_MIXER library element.
 */
 
-//#include "device_defs.h"
 #include <adf.h>
 #include <vector>
 #include <tuple>
 
+#include "device_defs.h"
 #include "graph_utils.hpp"
 #include "dds_mixer.hpp"
 
-alignas(32) extern const cint32_t sincosLUTCoarse32[1024];
-alignas(32) extern const cint32_t sincosLUTFine32[1024];
+alignas(__ALIGN_BYTE_SIZE__) extern const cint32_t sincosLUTCoarse32[1024];
+alignas(__ALIGN_BYTE_SIZE__) extern const cint32_t sincosLUTFine32[1024];
 #if __SUPPORTS_CFLOAT__ == 1
-alignas(32) extern const cfloat sincosLUTFloat1[1024];
-alignas(32) extern const cfloat sincosLUTFloat2[1024];
-alignas(32) extern const cfloat sincosLUTFloat3[1024];
+alignas(__ALIGN_BYTE_SIZE__) extern const cfloat sincosLUTFloat1[1024];
+alignas(__ALIGN_BYTE_SIZE__) extern const cfloat sincosLUTFloat2[1024];
+alignas(__ALIGN_BYTE_SIZE__) extern const cfloat sincosLUTFloat3[1024];
 #endif
 
 namespace xf {
@@ -97,7 +97,7 @@ using namespace adf;
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
- *
+ *         \n
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
@@ -110,7 +110,7 @@ using namespace adf;
  *         should be used. \n When defining the parameter:
  *         - 0 = static phase initialization, defined in dds constructor,
  *         - 1 = reloadable initial phase, passed as argument to runtime function. \n
- *
+ *         \n
  *         Note: when used, async port: ```port_conditional_array<input, (TP_USE_PHASE_RELOAD == 1), TP_SSR> initPhase;
  *``` will be added to the DDS. \n
  * @tparam TP_SFDR specifies the expected Spurious Free Dynamic Range that the useR expects from the generated  \n

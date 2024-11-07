@@ -1,0 +1,15 @@
+[hls]
+
+clock=3.20
+flow_target=vitis
+syn.file=${XF_PROJ_ROOT}/L1/src/hw/ifft_front_transpose/ifft_front_transpose.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/src/hw/ifft_front_transpose/ifft_front_transpose.cpp, -I${XF_PROJ_ROOT}/L1/src -DSSR=5 -DPOINT_SIZE=4096
+syn.top=ifft_front_transpose_wrapper
+tb.file=test_ifft_front_transpose.cpp
+tb.file_cflags=test_ifft_front_transpose.cpp,-I${XF_PROJ_ROOT}/L1/src/hw/ifft_front_transpose -DSSR=5 -DPOINT_SIZE=4096
+syn.debug.enable=1
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog

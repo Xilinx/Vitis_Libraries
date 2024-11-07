@@ -66,7 +66,7 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN = TP_FIR_LEN,
           unsigned int TP_KERNEL_POSITION = 0,
           unsigned int TP_CASC_LEN = 1,
-          unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_USE_COEFF_RELOAD = 0,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_API = 0,
@@ -172,7 +172,7 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN = TP_FIR_LEN,
           unsigned int TP_KERNEL_POSITION = 0,
           unsigned int TP_CASC_LEN = 1,
-          unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_USE_COEFF_RELOAD = 0,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_API = 0,
@@ -294,7 +294,8 @@ class kernelFilterClass {
 
     // Note, both of these are non-static, so all kernels update this variable in their own class instance separately -
     // so all kernels do initial stuff.
-    alignas(32) int delay[(1024 / 8) / sizeof(int)] = {0}; // 1024b buffer to retain margin data between calls
+    alignas(__ALIGN_BYTE_SIZE__) int delay[(1024 / 8) / sizeof(int)] = {
+        0}; // 1024b buffer to retain margin data between calls
     int doInit = (streamInitNullAccs == 0) ? 0 : 1;
 
     struct ssr_params : public fir_params_defaults {
@@ -322,7 +323,7 @@ class kernelFilterClass {
     // the MAC intrinsic used to eliminate the accidental inclusion of terms beyond the FIR length.
     // Since this zero padding cannot be applied to the class-external coefficient array
     // the supplied taps are copied to an internal array, m_internalTaps, which can be padded.
-    alignas(32) TT_COEFF m_internalTaps[CEIL(TP_FIR_RANGE_LEN, m_kCoeffLoadSize)];
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF m_internalTaps[CEIL(TP_FIR_RANGE_LEN, m_kCoeffLoadSize)];
 
     static constexpr kernelPositionState m_kKernelPosEnum = getKernelPositionState(TP_KERNEL_POSITION, TP_CASC_LEN);
     static_assert(m_kKernelPosEnum != error_kernel, "Error with TP_KERNEL_POSITION and TP_CASC_LEN");
@@ -350,7 +351,7 @@ class kernelFilterClass {
     void filterStream(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                       T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
 
-    alignas(32) TT_COEFF
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF
         m_rawInTaps[CEIL(TP_COEFF_PHASES_LEN, m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
     bool isUpdateRequired = false;                                // Are coefficients sets equal?
 
@@ -437,7 +438,7 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_USE_COEFF_RELOAD, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_DUAL_IP,
           unsigned int TP_API,

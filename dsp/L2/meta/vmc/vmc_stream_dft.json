@@ -36,8 +36,8 @@
       "default": 64,
       "validator": {
         "file": "vmc_dft_common.py",
-        "function": "vmc_validate_ssr_point_size",
-        "args": ["AIE_VARIANT","data_type","twiddle_type","casc_length","ssr"]
+        "function": "vmc_validate_point_size",
+        "args": []
       },
             "label": "DFT size:",
             "tablabel": "Main",
@@ -50,7 +50,7 @@
       "validator": {
         "file": "vmc_dft_common.py",
         "function": "vmc_validate_num_frames",
-        "args": []
+        "args": ["AIE_VARIANT", "data_type", "point_size"]
       },      
       "default": 64,
       "label": "Number of frames per window:",
@@ -75,6 +75,11 @@
       "key": "TP_RND",
       "name": "rnd_mode",
       "description": "The rounding to be applied during the shift down stage of processing.",
+      "validator": {
+        "file": "vmc_dft_common.py",
+        "function": "vmc_validate_TP_RND",
+        "args": ["AIE_VARIANT"]
+      },
       "default": "Round symmetrical to infinity",
           "label": "Rounding mode:",
             "tablabel": "Main",
@@ -88,7 +93,7 @@
        "validator": {
         "file": "vmc_dft_common.py",
         "function": "vmc_validate_ssr",
-        "args": []
+        "args": ["AIE_VARIANT", "data_type", "point_size"]
       },
             "label": "SSR:",
             "tablabel": "Main",
@@ -118,7 +123,7 @@
        "validator": {
         "file": "vmc_dft_common.py",
         "function": "vmc_validate_casc_length",
-        "args": []
+        "args": ["AIE_VARIANT", "data_type", "twiddle_type", "point_size","ssr"]
       },
             "label": "Number of cascade stages:",
             "tablabel": "Main",

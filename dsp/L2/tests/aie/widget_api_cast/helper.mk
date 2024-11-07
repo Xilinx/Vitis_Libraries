@@ -29,13 +29,13 @@ STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 SPLIT_ZIP_FILE ?=
 
 gen_input:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(DATA_STIM_TYPE) 0 0 $(DATA_TYPE) $(IN_API) 1
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(DATA_STIM_TYPE) 0 0 $(DATA_TYPE) $(IN_API) 1 0 0 0 0 0 64 
 
 ssr_split:
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k 0 -w $(WINDOW_VSIZE)
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k 0 -w $(WINDOW_VSIZE) --plioWidth 64
 
 ssr_zip:
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(SPLIT_ZIP_FILE) --type $(DATA_TYPE) --ssr $(NUM_OUTPUT_CLONES) --zip --dual 0 -k 0 -w $(WINDOW_VSIZE)
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(SPLIT_ZIP_FILE) --type $(DATA_TYPE) --ssr $(NUM_OUTPUT_CLONES) --zip --dual 0 -k 0 -w $(WINDOW_VSIZE) --plioWidth 64
 	
 get_status:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
@@ -46,9 +46,6 @@ get_latency:
 
 get_stats:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output transferData $(NITER)
-
-get_theoretical_min:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_wgt_theoretical_min.tcl $(DATA_TYPE) $(WINDOW_VSIZE) $(STATUS_FILE) $(UUT_KERNEL) $(IN_API) $(OUT_API) $(NUM_OUTPUT_CLONES) $(NUM_INPUTS)
 
 harvest_mem:
 	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts

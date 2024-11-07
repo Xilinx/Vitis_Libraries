@@ -37,10 +37,11 @@ namespace aie {
 namespace testcase {
 using namespace adf;
 
-template <unsigned int ssr, unsigned int dual, typename plioType>
+template <unsigned int ssr, unsigned int dual, typename plioType, unsigned int myPlioWidth = 64>
 void createPLIOFileConnections(std::array<plioType, ssr*(dual + 1)>& plioPorts,
                                std::string filename,
                                std::string plioDescriptor = "in") {
+    plio_type plioAlias = (myPlioWidth == 64) ? adf::plio_64_bits : adf::plio_32_bits;
     for (unsigned int ssrIdx = 0; ssrIdx < ssr; ++ssrIdx) {
         for (unsigned int dualIdx = 0; dualIdx < (dual + 1); ++dualIdx) {
             std::string filenameInternal = filename;
@@ -49,7 +50,7 @@ void createPLIOFileConnections(std::array<plioType, ssr*(dual + 1)>& plioPorts,
                                     ("_" + std::to_string(ssrIdx) + "_" + std::to_string(dualIdx)));
             plioPorts[ssrIdx * (dual + 1) + dualIdx] = plioType::create(
                 "PLIO_" + plioDescriptor + "_" + std::to_string(ssrIdx) + "_" + std::to_string(dualIdx),
-                adf::plio_32_bits, filenameInternal);
+                (myPlioWidth == 64) ? adf::plio_64_bits : adf::plio_32_bits, filenameInternal);
         }
     }
 }

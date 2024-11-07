@@ -5,6 +5,7 @@ import json
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):
     tmpargs = {}
+    tmpargs["AIE_VARIANT"] = args["AIE_VARIANT"]
     tmpargs["TT_DATA"] = args["data_type"]
     tmpargs["TT_TWIDDLE"] = args["twiddle_type"]
     tmpargs["TP_POINT_SIZE"] = args["point_size"]

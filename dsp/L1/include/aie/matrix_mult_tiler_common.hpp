@@ -28,12 +28,6 @@
 #endif
 #include "aie_api/aie_adf.hpp"
 #include "device_defs.h"
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
 #ifndef ROW_MAJOR
 #define ROW_MAJOR 0
 #endif

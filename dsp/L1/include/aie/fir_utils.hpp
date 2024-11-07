@@ -19,13 +19,6 @@
 #ifndef _DSPLIB_FIR_UTILS_HPP_
 #define _DSPLIB_FIR_UTILS_HPP_
 
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
-
 /* This file exists to hold utility functions for kernels in general, not specific
    to one library element. Also, the functions in this file do not use vector types
    or intrinsics so are fit for use by aiecompiler and kernel constructors.
@@ -77,7 +70,11 @@ struct empty {
 // e.g. CEIL(10,8) = 16, TRUNC(10, 8) = 8
 #define CEIL(x, y) (((x + y - 1) / y) * y)
 #define TRUNC(x, y) (((x) / y) * y)
-#define FLOOR(X, Y) X >= 0 ? (int)((int)(X) / (int)(Y)) : (int)((int)((X) - (Y) + 1) / (int)(Y));
+#define FLOOR(X, Y) X >= 0 ? (int)((int)(X) / (int)(Y)) : (int)((int)((X) - (Y) + 1) / (int)(Y))
+#define ABSDIFF(x, y) ((x) > (y) ? (x - y) : (y - x))
+#define ABS(x) ((x) > 0 ? (x) : -(x))
+#define MIN(x, y) ((x) > (y) ? (y) : (x))
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
 
 // Pragma unroll complains if you try to unroll(0);
 // It's safe to just unroll(1) in this circumstance.
@@ -308,6 +305,16 @@ template <>
 struct tAccBaseTypeMul<cfloat, float> {
     using type = caccfloat;
 };
+
+template <>
+struct tAccBaseTypeMul<cfloat, cfloat> {
+    using type = caccfloat;
+};
+
+template <>
+struct tAccBaseTypeMul<cint32, cint32> {
+    using type = cacc80;
+};
 #endif //__SUPPORTS_ACC48__
 
 #ifdef __SUPPORTS_ACC64__
@@ -315,6 +322,12 @@ template <>
 struct tAccBaseTypeMul<cint32, cint16> {
     using type = cacc64;
 };
+
+template <>
+struct tAccBaseTypeMul<cfloat, cfloat> {
+    using type = caccfloat;
+};
+
 #endif //__SUPPORTS_ACC64__
 
 // function to return the size of the acc,
@@ -604,11 +617,14 @@ template <>
 INLINE_DECL constexpr unsigned int fnNumLanes<int16, int16>() {
     return 32;
 }; //
-// template<> INLINE_DECL constexpr unsigned int fnNumLanes<cint16, cint32>() { return  8;};//
 template <>
 INLINE_DECL constexpr unsigned int fnNumLanes<int16, int32>() {
     return 32;
 }; //
+template <>
+INLINE_DECL constexpr unsigned int fnNumLanes<cint16, cint32>() {
+    return 16; // 8 - API min native length is 8, 16 lanes offers better performance.
+};             //
 template <>
 INLINE_DECL constexpr unsigned int fnNumLanes<cint32, int16>() {
     return 8;
@@ -1020,6 +1036,7 @@ INLINE_DECL constexpr unsigned int fnUnsupportedTypeCombo<int16, int16>() {
 template <bool T_CASC_IN, typename T_D, unsigned int T_DUAL_IP = 0>
 struct T_inputIF {
     static constexpr int kdummy = 16;
+    T_D* __restrict inTapsPtr;
     T_D* __restrict inWindow;
     input_async_buffer<T_D>* inWindowLin = NULL;
     input_circular_buffer<T_D, extents<inherited_extent>, margin<kdummy> >* inWindowCirc =
@@ -1089,30 +1106,6 @@ constexpr kernelPositionState getKernelPositionState(unsigned int kernelPosition
 };
 
 //----------------------------------------------------------------------
-// isComplex
-template <typename T>
-constexpr bool isComplex() {
-#if __SUPPORTS_CFLOAT__ == 1
-    return (std::is_same<T, cint16>::value || std::is_same<T, cint32>::value || std::is_same<T, cfloat>::value) ? true
-                                                                                                                : false;
-#endif
-#if __SUPPORTS_CFLOAT__ == 0
-    return (std::is_same<T, cint16>::value || std::is_same<T, cint32>::value) ? true : false;
-#endif
-};
-
-// isFloat
-template <typename T>
-constexpr bool isFloat() {
-#if __SUPPORTS_CFLOAT__ == 1
-    return (std::is_same<T, float>::value || std::is_same<T, cfloat>::value) ? true : false;
-#endif
-#if __SUPPORTS_CFLOAT__ == 0
-    return (std::is_same<T, float>::value) ? true : false;
-#endif
-};
-
-//----------------------------------------------------------------------
 // nullElem
 template <typename T_RDATA>
 INLINE_DECL T_RDATA nullElem() {
@@ -1177,8 +1170,15 @@ INLINE_DECL constexpr unsigned int fnTDMFirMargin() {
     // kernel.
     // If TP_FIR_LEN * TP_TDM_CHANNELS is greater than TP_INPUT_WINDOW_VSIZE, it is more beneficial to set external
     // margin to 0, set an internal buffer and fill it with data samples.
+    // if
+    //     constexpr(TP_ENABLE_INTERNAL_MARGIN == 1 && TP_FIR_LEN * TP_TDM_CHANNELS > TP_INPUT_WINDOW_VSIZE) { return 0;
+    //     }
+    // A massive benefit of using internal margin buffer is saving on the ping-pong size.
+    // With the margin extracted out of ping-pong input buffer,
+    // the design can service much greater number of channels per kernel.
+    // Therefore, use the internal margin whenever possible.
     if
-        constexpr(TP_ENABLE_INTERNAL_MARGIN == 1 && TP_FIR_LEN * TP_TDM_CHANNELS > TP_INPUT_WINDOW_VSIZE) { return 0; }
+        constexpr(TP_ENABLE_INTERNAL_MARGIN == 1) { return 0; }
     else {
         return CEIL(((TP_FIR_LEN - 1) * (TP_TDM_CHANNELS)), (32 / sizeof(TT_DATA)));
     }

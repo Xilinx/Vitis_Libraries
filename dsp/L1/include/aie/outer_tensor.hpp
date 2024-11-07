@@ -78,8 +78,8 @@ class outer_tensor {
     static constexpr unsigned int vecNumB = CEIL(TP_DIM_B, vecSampleNumB) / vecSampleNumB;
     static constexpr unsigned int outDim = TP_DIM_A * TP_DIM_B;
     static constexpr unsigned int vecNumOut = outDim / vecSampleNumOut;
-    using TT_OUT = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
-    using TT_ACC = typename tOuterTensorACC<TT_DATA_A, TT_DATA_B>::type;
+    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using acc_t = accTypeMult_t<TT_DATA_A, TT_DATA_B>;
 
     // Constructor
     outer_tensor(){};
@@ -90,7 +90,7 @@ class outer_tensor {
     // Main function
     void outer_tensor_main(input_buffer<TT_DATA_A>& __restrict inWindowA,
                            input_buffer<TT_DATA_B>& __restrict inWindowB,
-                           output_buffer<TT_OUT>& __restrict outWindow);
+                           output_buffer<out_t>& __restrict outWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -117,8 +117,8 @@ class outer_tensor<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_S
     static constexpr unsigned int vecNumB = CEIL(TP_DIM_B, vecSampleNumB) / vecSampleNumB;
     static constexpr unsigned int outDim = TP_DIM_A * TP_DIM_B;
     static constexpr unsigned int vecNumOut = outDim / vecSampleNumOut;
-    using TT_OUT = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
-    using TT_ACC = typename tOuterTensorACC<TT_DATA_A, TT_DATA_B>::type;
+    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using acc_t = accTypeMult_t<TT_DATA_A, TT_DATA_B>;
 
     // Constructor
     outer_tensor(){};
@@ -129,7 +129,7 @@ class outer_tensor<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_S
     // Main function
     void outer_tensor_main(input_buffer<TT_DATA_A>& __restrict inWindowA,
                            input_buffer<TT_DATA_B>& __restrict inWindowB,
-                           output_stream<TT_OUT>* __restrict outStream);
+                           output_stream<out_t>* __restrict outStream);
 };
 }
 }

@@ -76,7 +76,7 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION = 0,
           unsigned int TP_CASC_LEN = 1,
           unsigned int TP_DUAL_IP = 0,
-          unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_USE_COEFF_RELOAD = 0,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_API = 0,
           unsigned int TP_SAT = 1>
@@ -176,11 +176,13 @@ class kernelFilterClass {
     // the MAC intrinsic used to eliminate the accidental inclusion of terms beyond the FIR length.
     // Since this zero padding cannot be applied to the class-external coefficient array
     // the supplied taps are copied to an internal array, m_internalTaps, which can be padded.
-    alignas(32) TT_COEFF m_internalTaps[CEIL((TP_FIR_RANGE_LEN + 1) / kSymmetryFactor, m_kCoeffLoadSize)];
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF
+        m_internalTaps[CEIL((TP_FIR_RANGE_LEN + 1) / kSymmetryFactor, m_kCoeffLoadSize)];
 
-    alignas(32) TT_COEFF m_oldInTaps[CEIL((TP_FIR_LEN + 1) / kSymmetryFactor,
-                                          m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
-    bool m_coeffnEq;                                          // Are coefficients sets equal?
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF
+        m_oldInTaps[CEIL((TP_FIR_LEN + 1) / kSymmetryFactor,
+                         m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
+    bool m_coeffnEq;                         // Are coefficients sets equal?
 
     void filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                           T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
@@ -312,7 +314,7 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION = 0,
           unsigned int TP_CASC_LEN = 1,
           unsigned int TP_DUAL_IP = 0,
-          unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_USE_COEFF_RELOAD = 0,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_API = 0,
           unsigned int TP_SAT = 1>

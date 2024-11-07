@@ -20,61 +20,15 @@
 #include <adf.h>
 #include <vector>
 #include "fir_utils.hpp"
+#include "fft_ifft_dit_1ch_traits.hpp"
 using namespace adf;
+using namespace xf::dsp::aie::fft::dit_1ch;
 
 namespace xf {
 namespace dsp {
 namespace aie {
 namespace fft {
-namespace ifft_2d_aie_pl {
-
-template <unsigned int TP_POINT_SIZE>
-INLINE_DECL constexpr unsigned int fnSqrt() {
-    unsigned int sqrtVal =
-        TP_POINT_SIZE == 65536
-            ? 256
-            : TP_POINT_SIZE == 16384
-                  ? 128
-                  : TP_POINT_SIZE == 4096
-                        ? 64
-                        : TP_POINT_SIZE == 1024
-                              ? 32
-                              : TP_POINT_SIZE == 256 ? 16 : TP_POINT_SIZE == 64 ? 8 : TP_POINT_SIZE == 16 ? 4 : 0;
-    return sqrtVal;
-}
-
-template <unsigned int TP_POINT_SIZE>
-constexpr unsigned int fnLog2() {
-    if
-        constexpr(TP_POINT_SIZE == 65536) { return 16; }
-    else if
-        constexpr(TP_POINT_SIZE == 32768) { return 15; }
-    else if
-        constexpr(TP_POINT_SIZE == 16384) { return 14; }
-    else if
-        constexpr(TP_POINT_SIZE == 8192) { return 13; }
-    else if
-        constexpr(TP_POINT_SIZE == 4096) { return 12; }
-    else if
-        constexpr(TP_POINT_SIZE == 2048) { return 11; }
-    else if
-        constexpr(TP_POINT_SIZE == 1024) { return 10; }
-    else if
-        constexpr(TP_POINT_SIZE == 512) { return 9; }
-    else if
-        constexpr(TP_POINT_SIZE == 256) { return 8; }
-    else if
-        constexpr(TP_POINT_SIZE == 128) { return 7; }
-    else if
-        constexpr(TP_POINT_SIZE == 64) { return 6; }
-    else if
-        constexpr(TP_POINT_SIZE == 32) { return 5; }
-    else if
-        constexpr(TP_POINT_SIZE == 16) { return 4; }
-    else {
-        return 0;
-    }
-}
+namespace twidRot {
 
 template <unsigned int TP_POINT_SIZE>
 constexpr unsigned int fnPtSizeD1() {
@@ -82,47 +36,70 @@ constexpr unsigned int fnPtSizeD1() {
         TP_POINT_SIZE == 65536
             ? 256
             : TP_POINT_SIZE == 32768
-                  ? 256
+                  ? 128
                   : TP_POINT_SIZE == 16384
                         ? 128
                         : TP_POINT_SIZE == 8192
-                              ? 128
+                              ? 64
                               : TP_POINT_SIZE == 4096
                                     ? 64
                                     : TP_POINT_SIZE == 2048
-                                          ? 64
+                                          ? 32
                                           : TP_POINT_SIZE == 1024
                                                 ? 32
                                                 : TP_POINT_SIZE == 512
-                                                      ? 32
+                                                      ? 16
                                                       : TP_POINT_SIZE == 256
                                                             ? 16
                                                             : TP_POINT_SIZE == 128
-                                                                  ? 16
+                                                                  ? 8
                                                                   : TP_POINT_SIZE == 64
                                                                         ? 8
                                                                         : TP_POINT_SIZE == 32
-                                                                              ? 8
+                                                                              ? 4
                                                                               : TP_POINT_SIZE == 16 ? 4 : 0;
     return sqrtVal;
 }
 
 template <typename TT_DATA,
           typename TT_TWIDDLE,
+          unsigned int TP_WINDOW_SIZE,
           unsigned int TP_PT_SIZE_D1,
           unsigned int TP_PT_SIZE_D2,
           unsigned int TP_SSR,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_PHASE>
 class twiddleRotator {
-    int count = 0;
+    static constexpr unsigned int m_kSampleRatioPLAIE = 2;
+    static constexpr unsigned int m_kNumDataLanes = fnNumLanes<TT_DATA, TT_TWIDDLE>();
+    static constexpr unsigned int m_kNumPadSamples =
+        fnCeil<TP_PT_SIZE_D1, TP_SSR * m_kSampleRatioPLAIE>() - TP_PT_SIZE_D1;
+    static constexpr unsigned int m_kPtSizeD2Ceil = fnCeil<TP_PT_SIZE_D2, TP_SSR>();
+    static constexpr unsigned int m_kShift = sizeof(TT_TWIDDLE) / 2 * 8 - 1;
+    static constexpr unsigned int m_kNumTwLanes = fnNumLanes<TT_TWIDDLE, TT_TWIDDLE>();
+    static constexpr unsigned int m_kTwFanSize =
+        (TP_PT_SIZE_D1 * TP_PT_SIZE_D2) / TP_SSR * sizeof(TT_TWIDDLE) <= 32768 ? 1 : m_kNumTwLanes;
+    static constexpr unsigned int m_kRptFactor = 4;
+    static constexpr unsigned int m_ktwRotSize = m_kPtSizeD2Ceil / TP_SSR * m_kTwFanSize;
+    static constexpr unsigned int m_ktwMainSize = m_kPtSizeD2Ceil / TP_SSR * TP_PT_SIZE_D1 / m_kTwFanSize;
+
+    unsigned twMainPtr = 0;
+    TT_TWIDDLE (&m_kTwRot)[m_ktwRotSize];
+    TT_TWIDDLE (&m_kTwMain)[m_ktwMainSize];
+    TT_TWIDDLE* twidPtr = m_kTwRot;
 
    public:
     // Constructor
-    twiddleRotator() {}
+    twiddleRotator(TT_TWIDDLE (&twRot)[(m_kPtSizeD2Ceil / TP_SSR) * m_kTwFanSize],
+                   TT_TWIDDLE (&twMain)[m_kPtSizeD2Ceil / TP_SSR * TP_PT_SIZE_D1 / m_kTwFanSize])
+        : m_kTwRot(twRot), m_kTwMain(twMain) {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(twiddleRotator::twiddleRotation); }
+    static void registerKernelClass() {
+        REGISTER_PARAMETER(m_kTwRot);
+        REGISTER_PARAMETER(m_kTwMain);
+        REGISTER_FUNCTION(twiddleRotator::twiddleRotation);
+    }
 
     // Main function
     void twiddleRotation(input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_DATA>& __restrict outWindow);

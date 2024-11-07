@@ -28,12 +28,12 @@ namespace dsp {
 namespace aie {
 namespace hadamard {
 template <typename T_A, typename T_B>
-out_mul_type<T_A, T_B> scalar_mult(T_A a, T_B b, const int shift, unsigned int t_rnd, unsigned int t_sat) {
-    using TT_OUT = out_mul_type<T_A, T_B>;
-    TT_OUT ret_val;
+outTypeMult_t<T_A, T_B> scalar_mult(T_A a, T_B b, const int shift, unsigned int t_rnd, unsigned int t_sat) {
+    using out_t = outTypeMult_t<T_A, T_B>;
+    out_t ret_val;
     T_accRef<T_A> aAcc;
     T_accRef<T_B> bAcc;
-    T_accRef<TT_OUT> outAcc;
+    T_accRef<out_t> outAcc;
 
     aAcc = val_accRef(a);
     bAcc = val_accRef(b);
@@ -127,18 +127,18 @@ template <typename TT_DATA_A,
 void hadamard_ref<TT_DATA_A, TT_DATA_B, TP_DIM, TP_NUM_FRAMES, TP_SHIFT, TP_API, TP_SSR, TP_RND, TP_SAT>::hadamard_main(
     input_buffer<TT_DATA_A>& inWindowA,
     input_buffer<TT_DATA_B>& inWindowB,
-    output_buffer<out_mul_type<TT_DATA_A, TT_DATA_B> >& outWindow0) {
-    using TT_OUT = out_mul_type<TT_DATA_A, TT_DATA_B>;
+    output_buffer<outTypeMult_t<TT_DATA_A, TT_DATA_B> >& outWindow0) {
+    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
     TT_DATA_A dA_in;
     TT_DATA_B dB_in;
-    TT_OUT d_out;
+    out_t d_out;
 
     unsigned int ptSize = CEIL(TP_DIM, kSamplesInVectOutData); // default to static point size value. May be overwritten
                                                                // if dynamic point size selected.
 
     TT_DATA_A* inPtrA = (TT_DATA_A*)inWindowA.data();
     TT_DATA_B* inPtrB = (TT_DATA_B*)inWindowB.data();
-    TT_OUT* outPtr = (TT_OUT*)outWindow0.data();
+    out_t* outPtr = (out_t*)outWindow0.data();
 
     for (int frame = 0; frame < TP_NUM_FRAMES; frame++) {
         for (unsigned int i = 0; i < ptSize; i++) {

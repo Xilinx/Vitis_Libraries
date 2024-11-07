@@ -54,6 +54,23 @@ struct tTDMAccBaseType<int16, int32> {
 };
 #endif
 
+// Overloaded function to write to cascade output.
+template <typename TT_DATA, typename TT_COEFF, unsigned int accSamples, typename TT_OUT_DATA = TT_DATA>
+INLINE_DECL void writeCascade(T_outputIF<CASC_OUT_TRUE, TT_OUT_DATA> outInterface,
+                              ::aie::accum<typename tTDMAccBaseType<TT_DATA, TT_COEFF>::type, accSamples> acc) {
+    using accTag = tTDMAccBaseType<TT_DATA, TT_COEFF>::type;
+    writeincr<accTag, acc.size()>((output_cascade<accTag>*)outInterface.outCascade, acc);
+}
+
+// Overloaded function to read from cascade input.
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DUAL_IP, unsigned int accSamples>
+INLINE_DECL::aie::accum<typename tTDMAccBaseType<TT_DATA, TT_COEFF>::type, accSamples> readCascade(
+    T_inputIF<true, TT_DATA, TP_DUAL_IP> inInterface,
+    ::aie::accum<typename tTDMAccBaseType<TT_DATA, TT_COEFF>::type, accSamples> acc) {
+    using accTag = tTDMAccBaseType<TT_DATA, TT_COEFF>::type;
+    return readincr_v<acc.size(), accTag>((input_cascade<accTag>*)inInterface.inCascade);
+};
+
 template <typename TT_DATA, typename TT_COEFF, unsigned int samples, unsigned int accSamples>
 INLINE_DECL::aie::accum<typename tTDMAccBaseType<TT_DATA, TT_COEFF>::type, accSamples> mulTdm(
     ::aie::accum<typename tTDMAccBaseType<TT_DATA, TT_COEFF>::type, accSamples> acc,
@@ -104,6 +121,65 @@ INLINE_DECL::aie::accum<typename tTDMAccBaseType<cint16, int16>::type, 8> macTdm
     const unsigned int ystart = 0;
     const unsigned int xoffsets = 0x76543210;
     const unsigned int xstep = 8;
+    const unsigned int zstart = 0;
+    const unsigned int zoffsets = 0x76543210;
+    const unsigned int zstep = 8;
+
+    // return mac8(acc, xbuff, xstart, xoffsets, ystart, xstep, zbuff, zstart, zoffsets, zstep);
+    return mac8(acc, xbuff, xstart, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
+}
+#endif
+
+template <typename TT_DATA, typename TT_COEFF, unsigned int samples, unsigned int accSamples>
+INLINE_DECL::aie::accum<typename tTDMAccBaseType<TT_DATA, TT_COEFF>::type, accSamples> mulTdm2(
+    ::aie::accum<typename tTDMAccBaseType<TT_DATA, TT_COEFF>::type, accSamples> acc,
+    ::aie::vector<TT_DATA, samples> dataVect,
+    ::aie::vector<TT_COEFF, samples> coeffVect) {
+    return mulTdm(acc, dataVect, coeffVect);
+}
+
+template <typename TT_DATA, typename TT_COEFF, unsigned int samples, unsigned int accSamples>
+INLINE_DECL::aie::accum<typename tTDMAccBaseType<TT_DATA, TT_COEFF>::type, accSamples> macTdm2(
+    ::aie::accum<typename tTDMAccBaseType<TT_DATA, TT_COEFF>::type, accSamples> acc,
+    ::aie::vector<TT_DATA, samples> dataVect,
+    ::aie::vector<TT_COEFF, samples> coeffVect) {
+    return macTdm(acc, dataVect, coeffVect);
+    // return acc;
+}
+
+#if __HAS_ACCUM_PERMUTES__ == 1
+
+// AIE1 has funky permutes that allow for more efficient call
+template <>
+INLINE_DECL::aie::accum<typename tTDMAccBaseType<cint16, int16>::type, 8> mulTdm2(
+    ::aie::accum<typename tTDMAccBaseType<cint16, int16>::type, 8> acc,
+    ::aie::vector<cint16, 16> dataVect,
+    ::aie::vector<int16, 16> coeffVect) {
+    ::aie::vector<cint16, 32> xbuff = ::aie::concat(dataVect, ::aie::zeros<cint16, 16>());
+    ::aie::vector<int16, 16> zbuff = coeffVect;
+    const unsigned int xstart = 8;
+    const unsigned int ystart = 0;
+    const unsigned int xoffsets = 0x76543210;
+    const int xstep = -8;
+    const unsigned int zstart = 0;
+    const unsigned int zoffsets = 0x76543210;
+    const unsigned int zstep = 8;
+
+    // return mul8(xbuff, xstart, xoffsets, ystart, xstep, zbuff, zstart, zoffsets, zstep);
+    return mul8(xbuff, xstart, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
+}
+
+template <>
+INLINE_DECL::aie::accum<typename tTDMAccBaseType<cint16, int16>::type, 8> macTdm2(
+    ::aie::accum<typename tTDMAccBaseType<cint16, int16>::type, 8> acc,
+    ::aie::vector<cint16, 16> dataVect,
+    ::aie::vector<int16, 16> coeffVect) {
+    ::aie::vector<cint16, 32> xbuff = ::aie::concat(dataVect, ::aie::zeros<cint16, 16>());
+    ::aie::vector<int16, 16> zbuff = coeffVect;
+    const unsigned int xstart = 8;
+    const unsigned int ystart = 0;
+    const unsigned int xoffsets = 0x76543210;
+    const int xstep = -8;
     const unsigned int zstart = 0;
     const unsigned int zoffsets = 0x76543210;
     const unsigned int zstep = 8;

@@ -13,6 +13,7 @@ def vmc_validate_coeff_type(args):
         if check["is_valid"] == False :
             return check
     return {"is_valid": True}
+
 def vmc_validate_input_window_size(args):
     input_window_size = args["input_window_size"]
     data_type = args["data_type"]
@@ -25,8 +26,14 @@ def vmc_validate_input_window_size(args):
     return fn_validate_input_window_size(data_type, coef_type, fir_length, input_window_size, api, ssr)
 
 def vmc_validate_casc_len(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    data_type = args["data_type"]
+    coef_type = args["coef_type"]
     casc_length = args["casc_length"]
-    return fn_validate_casc_len(casc_length);
+    fir_length = fn_get_fir_length(args)
+    ssr = 1
+    api = 0
+    return fn_validate_TP_CASC_LEN(AIE_VARIANT, data_type, coef_type, api, fir_length, ssr, casc_length)
 
 def validate_sat_mode(args):
     sat_mode = args["sat_mode"]
@@ -35,21 +42,14 @@ def validate_sat_mode(args):
 def vmc_validate_out_ports(args):
     api = 0
     AIE_VARIANT = args["AIE_VARIANT"]
-    ssr = 1
     num_outputs = fn_get_num_outputs(args)
-    return fn_validate_num_outputs(api, num_outputs, AIE_VARIANT)
+    return fn_validate_TP_NUM_OUTPUTS(AIE_VARIANT, api, num_outputs)
 
 def vmc_validate_coeff(args):
-    use_coeff_reload = args["use_coeff_reload"]
     coef_type = args["coef_type"]
-    coeff = args["coeff"]
     data_type = args["data_type"]
-    casc_length = args["casc_length"]
-    AIE_VARIANT = args["AIE_VARIANT"]
-    ssr = 1
-    api = 0
     fir_length = fn_get_fir_length(args)
-    return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload, AIE_VARIANT)
+    return fn_validate_TP_FIR_LEN(data_type, coef_type, fir_length)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]

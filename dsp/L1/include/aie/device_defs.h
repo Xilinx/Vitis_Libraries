@@ -17,6 +17,15 @@
 #ifndef __DEVICE_DEFS__
 #define __DEVICE_DEFS__
 
+#ifndef INLINE_DECL
+#define INLINE_DECL inline __attribute__((always_inline))
+#endif
+#ifndef NOINLINE_DECL
+#define NOINLINE_DECL inline __attribute__((noinline))
+#endif
+
+#include <type_traits>
+
 // The following include is the tools device traits library. The device_defs.h file is a stop-gap means to derive device
 // traits before
 // the tools library existed
@@ -57,13 +66,33 @@
 #endif
 
 //----------------------------------
-// FFT cfloat support
+// FFT vectorization.
+#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIEARCH__ == 20) || (__AIEARCH__ == 21)
+#define __FFT_MIN_VECTORIZATION__ 32
+#elif (__AIE_ARCH__ == 22) || (__AIEARCH__ == 22)
+#define __FFT_MIN_VECTORIZATION__ 64
+#else
+#define __FFT_MIN_VECTORIZATION__ 16
+#endif
+
+//----------------------------------
+// FFT cfloat support (native)
 #if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
 #define __SUPPORTS_CFLOAT__ 1
 // #warning Supports cfloats
 
 #else
 #define __SUPPORTS_CFLOAT__ 0
+// #warning AIE Architecture does not supports cfloats
+#endif
+
+// cfloat support (emulated)
+#if (__AIE_ARCH__ == 20) || (__AIEARCH__ == 20)
+#define __SUPPORTS_EMULATED_CFLOAT__ 1
+// #warning Supports emulated cfloats
+
+#else
+#define __SUPPORTS_EMULATED_CFLOAT__ 0
 // #warning AIE Architecture does not supports cfloats
 #endif
 
@@ -185,10 +214,28 @@
 #define __MIN_REGSIZE__ 256
 #endif
 
+#define __MIN_READ_WRITE__ __MIN_REGSIZE__
+
+#if (__AIE_ARCH__ == 10) || (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIEARCH__ == 10) || \
+    (__AIEARCH__ == 20) || (__AIEARCH__ == 21)
+#define __MAX_READ_WRITE__ 256
+#elif (__AIE_ARCH__ == 22) || (__AIEARCH__ == 22)
+#define __MAX_READ_WRITE__ 512
+#endif
+
 #if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
 #define __HAS_ACCUM_PERMUTES__ 1
 #else
 #define __HAS_ACCUM_PERMUTES__ 0
+#endif
+
+#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10) || (__AIE_ARCH__ == 20) || (__AIEARCH__ == 20) || \
+    (__AIE_ARCH__ == 21) || (__AIEARCH__ == 21)
+#define __ALIGN_BYTE_SIZE__ 32
+#elif (__AIE_ARCH__ == 22) || (__AIEARCH__ == 22)
+#define __ALIGN_BYTE_SIZE__ 64
+#else
+#define __ALIGN_BYTE_SIZE__ 32
 #endif
 
 #if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
@@ -197,26 +244,44 @@
 #define __SUPPORTS_DMA_FIFO__ 0
 #endif
 
-// TODO: Change such that it aligns with codebase.
-// conv or corr support
-#if (__AIE_ARCH__ == 10)
-#define _SUPPORTS_DEVICE_AIE_1_
-#define _SUPPORTS_FLOAT_CFLOAT_
+//----------------------------------
+// Comprehensive addressing for shuffles in AIE1 but not AIE2
+#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#define __SUPPORTS_COMPREHENSIVE_SHUFFLES__ 1
+#elif (__AIE_ARCH__ == 20) || (__AIEARCH__ == 20)
+#define __SUPPORTS_COMPREHENSIVE_SHUFFLES__ 0
+#else
+#define __SUPPORTS_COMPREHENSIVE_SHUFFLES__ 0
 #endif
 
-#if (__AIE_ARCH__ == 20)
-#define _SUPPORTS_DEVICE_AIE_2_
+// TODO: Change such that it aligns with codebase (more than one underscore)
+// conv or corr support
+#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#define _SUPPORTS_FLOAT_CFLOAT_
+#endif
+#if (__AIE_ARCH__ == 20) || (__AIEARCH__ == 20)
 #define _SUPPORTS_BFLOAT16_
 #endif
 
 // data memory in bytes
 #if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
 #define __DATA_MEM_BYTES__ 32768
-#endif
-
-#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
     (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
 #define __DATA_MEM_BYTES__ 65536
+#endif
+
+//------------------SHIFTING--------------------------
+#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#define __MAX_SHIFT__ 62
+// ! Possible AIE compiler bug. If compiling aiesim AIE1, then this macro is not set if no else clause, resulting in a..
+// ! 'not defined in this scope' bug in the fnValidateShiftRange function further down this file. This means that..
+// ! right now effectively all __MAX_SHIFT__s are set to 59 to circumvent compilation fail, regardless of device.
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
+    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+#define __MAX_SHIFT__ 59
+#else
+#define __MAX_SHIFT__ 62
 #endif
 
 //----------SATURATION and ROUNDING MODES-------------------
@@ -241,7 +306,7 @@
 
 #if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
     (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
-// AIE-ML variants offers additional rounding modes, restricting some values for future use.
+// AIE-ML variants offers 3 additional rounding modes, restricting some values for future use.
 #define __ROUNDING_MODES__ 13
 #define __SUPPORTS_ML_ROUND_MODES__
 
@@ -334,5 +399,122 @@
 #endif
 
 #endif
+
+// UTILITY FUNCTIONS COMMONLY USED THROUGHOUT CODEBASE
+//----------------------------------------------------------------------
+template <typename T>
+INLINE_DECL constexpr bool isComplex() {
+    if
+        constexpr(std::is_same<T, cint16>::value) { return true; }
+    else if
+        constexpr(std::is_same<T, cint32>::value) { return true; }
+    else if
+        constexpr(std::is_same<T, cfloat>::value) { return true; }
+#ifdef _SUPPORTS_BFLOAT16_
+    else if
+        constexpr(std::is_same<T, cbfloat16>::value) { return true; }
+#endif // _SUPPORTS_BFLOAT16_
+    else {
+        return false;
+    }
+};
+
+template <typename T>
+INLINE_DECL constexpr bool isFloat() {
+    if
+        constexpr(std::is_same<T, float>::value) { return true; }
+    else if
+        constexpr(std::is_same<T, cfloat>::value) { return true; }
+#ifdef _SUPPORTS_BFLOAT16_
+    else if
+        constexpr(std::is_same<T, bfloat16>::value) { return true; }
+    else if
+        constexpr(std::is_same<T, cbfloat16>::value) { return true; }
+#endif // _SUPPORTS_BFLOAT16_
+    else {
+        return false;
+    }
+};
+
+template <unsigned int shift, typename T>
+INLINE_DECL constexpr bool fnValidateShiftFloat() {
+    if
+        constexpr(!isFloat<T>()) { return true; } // if not float type return true.
+    else if
+        constexpr(shift == 0) { return true; } // else if shift is 0 return true
+    else {
+        return false;
+    }
+};
+
+template <unsigned int shift>
+INLINE_DECL constexpr bool fnValidateShiftRange() {
+    return (shift <= __MAX_SHIFT__) ? true : false;
+};
+
+#ifdef __SUPPORTS_ML_ROUND_MODES__
+template <unsigned int roundMode>
+INLINE_DECL constexpr bool fnValidateRoundMode() {
+    if
+        constexpr(roundMode == rnd_floor) { return true; }
+    else if
+        constexpr(roundMode == rnd_ceil) { return true; }
+    else if
+        constexpr(roundMode == rnd_sym_floor) { return true; }
+    else if
+        constexpr(roundMode == rnd_sym_ceil) { return true; }
+    else if
+        constexpr(roundMode == rnd_neg_inf) { return true; }
+    else if
+        constexpr(roundMode == rnd_pos_inf) { return true; }
+    else if
+        constexpr(roundMode == rnd_sym_zero) { return true; }
+    else if
+        constexpr(roundMode == rnd_sym_inf) { return true; }
+    else if
+        constexpr(roundMode == rnd_conv_even) { return true; }
+    else if
+        constexpr(roundMode == rnd_conv_odd) { return true; }
+    else {
+        return false;
+    }
+};
+#else
+template <unsigned int roundMode>
+INLINE_DECL constexpr bool fnValidateRoundMode() {
+    if
+        constexpr(roundMode == rnd_floor) { return true; }
+    else if
+        constexpr(roundMode == rnd_ceil) { return true; }
+    else if
+        constexpr(roundMode == rnd_pos_inf) { return true; }
+    else if
+        constexpr(roundMode == rnd_neg_inf) { return true; }
+    else if
+        constexpr(roundMode == rnd_sym_inf) { return true; }
+    else if
+        constexpr(roundMode == rnd_sym_zero) { return true; }
+    else if
+        constexpr(roundMode == rnd_conv_even) { return true; }
+    else if
+        constexpr(roundMode == rnd_conv_odd) { return true; }
+    else {
+        return false;
+    }
+};
+#endif // __SUPPORTS_ML_ROUND_MODES__
+
+template <unsigned int satMode>
+INLINE_DECL constexpr bool fnValidateSatMode() {
+    if
+        constexpr(satMode == s_none) { return true; }
+    else if
+        constexpr(satMode == s_saturate) { return true; }
+    else if
+        constexpr(satMode == s_symmetric) { return true; }
+    else {
+        return false;
+    }
+};
 
 #endif // __DEVICE_DEFS__

@@ -18,7 +18,7 @@
 #include "fir_decimate_asym_ref.hpp"
 #include "fir_ref_utils.hpp"
 #include "fir_ref_coeff_header.hpp"
-#define _DSPLIB_FIR_DECIMATE_ASYM_REF_DEBUG_
+// #define _DSPLIB_FIR_DECIMATE_ASYM_REF_DEBUG_
 
 /*
 Decimator Asymmetric FIR filter reference model

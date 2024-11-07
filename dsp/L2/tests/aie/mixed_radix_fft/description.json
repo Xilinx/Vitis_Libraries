@@ -50,26 +50,26 @@
             "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")"
         },
         {
-            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_KERNEL=$(UUT_KERNEL)\")"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) INPUT_HEADER_FILE=$(INPUT_HEADER_FILE) UUT_KERNEL=$(UUT_KERNEL)\")"
         }
     ],
     "post_launch": [
         {
             "target": "aiesim",
             "launch_cmd": [
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk prep_aie_out HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_latency HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_stats HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) \"",
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_theoretical_min HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk harvest_mem HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./",
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk cleanup HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\""
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
             ]
         },
         {
             "target": "x86sim",
             "launch_cmd": [
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk prep_x86_out HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\")",
                 "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\")",
                 "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\")",
                 "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
@@ -107,15 +107,18 @@
                     "REF_KERNEL": "mixed_radix_fft_ref",
                     "UUT_GRAPH": "mixed_radix_fft_graph",
                     "REF_GRAPH": "mixed_radix_fft_ref_graph",
-                    "STACKSIZE_VAL": "900",
+                    "STACKSIZE_VAL": "1024",
                     "UUT_SIM_FILE": "./data/uut_output.txt",
                     "REF_SIM_FILE": "./data/ref_output.txt",
+                    "REF_SIM_HEADER_FILE": "./data/ref_header_output.txt",
                     "INPUT_FILE": "./data/input.txt",
+                    "INPUT_HEADER_FILE": "./data/mrfft_header_input.txt",
+                    "OUTPUT_HEADER_FILE": "./data/mrfft_header_output.txt",
                     "UUT_TARGET_COMPILE_ARGS": "--aie.Xchess=llvm.xargs=\"-std=c++2a\" --aie.Xchess=main:backend.mist2.xargs=\"+NOdra\" --aie.Xchess=main:backend.mist2.pnll=\"off\" --aie.stacksize=$(STACKSIZE_VAL) --aie.Xmapper=disablecorememcolocate",
                     "REF_TARGET_COMPILE_ARGS": "",
-                    "PREPROC_ARGS": "--aie.Xpreproc=-DINPUT_FILE=$(INPUT_FILE)",
-                    "REF_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) ",
-                    "UUT_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1"
+                    "PREPROC_ARGS": "--aie.Xpreproc=-DINPUT_FILE=$(INPUT_FILE) --aie.Xpreproc=-DINPUT_HEADER_FILE=$(INPUT_HEADER_FILE)",
+                    "REF_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) --aie.Xpreproc=-DOUTPUT_HEADER_FILE=$(REF_SIM_HEADER_FILE) $(PREPROC_ARGS) ",
+                    "UUT_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_HEADER_FILE=$(OUTPUT_HEADER_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1"
                 }
             }
         }
@@ -127,9 +130,10 @@
                     "location": "test.cpp",
                     "files": [
                         "LIB_DIR/L1/src/aie/mixed_radix_fft.cpp",
+                        "LIB_DIR/L1/src/aie/mixed_radix_twGen.cpp",
                         "uut_config.h"
                     ],
-                    "pl-freq": 1000,
+                    "pl-freq": 625,
                     "workdir": "./Work",
                     "options": "",
                     "name": "libadf.a"
@@ -143,7 +147,12 @@
             "function": "generate_testbench"
         }
     },
-    "config_make": "params.mk",
+    "config_make": "LIB_DIR/L2/tests/aie/common/scripts/params.mk",
+    "associated_files": [
+        "LIB_DIR/L2/tests/aie/common/scripts",
+        "LIB_DIR/L2/meta/*common*",
+        "LIB_DIR/L2/meta/mixed_radix*"
+    ],
     "parameter_file": "multi_params.json",
     "testinfo": {
         "disable": false,
@@ -154,11 +163,11 @@
                 "env": "",
                 "cmd": "",
                 "max_memory_MB": {
-                    "vitis_aie_x86sim": 32768,
+                    "vitis_aie_x86sim": 8192,
                     "vitis_aie_sim": 40960
                 },
                 "max_time_min": {
-                    "vitis_aie_x86sim": 60,
+                    "vitis_aie_x86sim": 180,
                     "vitis_aie_sim": 200
                 }
             }

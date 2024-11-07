@@ -43,7 +43,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 TARGET ?= aiesim
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  vck190
+PLATFORM_ALLOWLIST += vck190
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk
@@ -67,7 +67,7 @@ AIE_PKG_DIR ?= Work
 # Setting customized_params in aiecompiler
 
     
-GRAPHNAME ?= Mixer_ca330474
+GRAPHNAME ?= Mixer_f089c645
 VMC_GRAPHDIR ?= xmc_aie_lib/$(GRAPHNAME)
 VMC_KERNEL ?= vmc_mixer
 

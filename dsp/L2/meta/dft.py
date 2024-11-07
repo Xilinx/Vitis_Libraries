@@ -1,9 +1,6 @@
-
-
 from aie_common import *
+import math
 import json
-import sys
-
 # static_assert(fnCheckDataType<TT_DATA>() ,"ERROR: TT_IN_DATA is not a supported type");
 # static_assert(fnCheckTwiddleType<TT_TWIDDLE>(), "ERROR: TT_TWIDDLE is not a supported type");
 # static_assert(fnCheckDataTwiddleType<TT_DATA,TT_TWIDDLE>(), "ERROR: TT_TWIDDLE is incompatible with data type");
@@ -13,156 +10,432 @@ import sys
 # static_assert(fnCheckShiftFloat<TT_DATA,TP_SHIFT>(), "ERROR: TP_SHIFT is ignored for data type cfloat so must be set to 0");
 
 #Range for params
-TP_POINT_SIZE_min = 8
+TP_POINT_SIZE_min = 4
 TP_POINT_SIZE_max = 128
-TP_NUM_FRAMES_min = 1
-TP_NUM_FRAMES_max = 100
-TP_CASC_LEN_min = 1
-TP_CASC_LEN_max = 16
-TP_SSR_min = 1
-TP_SSR_max = 16
-TP_SHIFT_min=0
-TP_SHIFT_max=60
+# TP_NUM_FRAMES_max_static = 64
+# TP_CASC_LEN_min = 1
+# TP_CASC_LEN_max = 16
+TP_SSR_min_static = 1
+TP_SSR_max_static = 16
 
-# Validate Twiddle type 
-def fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE):
-  validTypeCombos = [
-      ("cint16", "cint16"),
-      ("cint32", "cint16"),
-      ("cfloat", "cfloat")
-    ]
-  return (
-    isValid if ((TT_DATA,TT_TWIDDLE) in validTypeCombos)
-    else (
-    isError(f"Invalid Data/Twiddle type combination ({TT_DATA},{TT_TWIDDLE}). Valid combinations are cint16/cint16, cint32/cint16 or cfloat/cfloat")
-    )
-  )
+PING_PONG_BUFFER_AIE1=16384
+PING_PONG_BUFFER_AIE2=32768
+
+# TP_SHIFT_min=0
+# TP_SHIFT_max=60
+# Function to number of lanes in a vector. AIE_VARIANT=2 uses 512-bits vector for cint32 and cfloat data
+def fn_samples_in_dft_vector(AIE_VARIANT, TT_DATA):
+  if AIE_VARIANT == 2:
+    kSamplesDataVector = 8 # optimized at 512-bits for cint32, cfloat but 256-bits for cint16
+  else:
+    kSamplesDataVector = 256 / 8 / fn_size_by_byte(TT_DATA)
+  return kSamplesDataVector
+
+#######################################################
+########### AIE_VARIANT Updater and Validator #########
+#######################################################
+def update_AIE_VARIANT(args):
+  return fn_update_AIE_VARIANT()
+
+def fn_update_AIE_VARIANT():
+  legal_set_AIE_VARIANT = [1,2]
+  
+  param_dict ={}
+  param_dict.update({"name" : "AIE_VARIANT"})
+  param_dict.update({"enum" : legal_set_AIE_VARIANT})
+  return param_dict
+
+def validate_AIE_VARIANT(args):
+  AIE_VARIANT=args["AIE_VARIANT"]
+  return (fn_validate_AIE_VARIANT(AIE_VARIANT))
+
+def fn_validate_AIE_VARIANT(AIE_VARIANT):
+  param_dict = fn_update_AIE_VARIANT()
+  legal_set_AIE_VARIANT = param_dict["enum"]
+  return(validate_legal_set(legal_set_AIE_VARIANT, "AIE_VARIANT", AIE_VARIANT))
+
+#######################################################
+########### TT_DATA Updater and Validato###############
+#######################################################
+def update_TT_DATA(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_update_tt_data(AIE_VARIANT)
+
+def fn_update_tt_data(AIE_VARIANT):
+  if AIE_VARIANT == 1:
+    legal_set_TT_DATA = ["cint16" , "cint32" , "cfloat"]
+  elif AIE_VARIANT == 2:
+    legal_set_TT_DATA = ["cint16" , "cint32"]
+    
+  param_dict ={}
+  param_dict.update({"name" : "TT_DATA"})
+  param_dict.update({"enum" : legal_set_TT_DATA})
+
+  return param_dict
+
+def validate_TT_DATA(args):
+  TT_DATA = args["TT_DATA"]
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return (fn_validate_TT_DATA(AIE_VARIANT, TT_DATA))
+
+def fn_validate_TT_DATA(AIE_VARIANT, TT_DATA):
+  param_dict = fn_update_tt_data(AIE_VARIANT)
+  legal_set_TT_DATA = param_dict["enum"]
+  return(validate_legal_set(legal_set_TT_DATA, "TT_DATA", TT_DATA))
+
+#######################################################
+########### TT_TWIDDLE Updater and Validator ###########
+#######################################################
+def update_TT_TWIDDLE(args):
+  TT_DATA = args["TT_DATA"]
+  return fn_update_tt_twiddle(TT_DATA)
+
+def fn_update_tt_twiddle(TT_DATA):
+  if (TT_DATA == "cint16" or TT_DATA == "cint32"):
+    legal_set_TT_TWIDDLE = ["cint16"]
+
+  elif TT_DATA == "cfloat":
+    legal_set_TT_TWIDDLE = ["cfloat"]
+
+  param_dict={}
+  param_dict.update({"name" : "TT_TWIDDLE"})
+  param_dict.update({"enum" : legal_set_TT_TWIDDLE})  
+  return param_dict
+
 def validate_TT_TWIDDLE(args):
   TT_DATA = args["TT_DATA"]
   TT_TWIDDLE = args["TT_TWIDDLE"]
-  return fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE)
+  return (fn_validate_TT_TWIDDLE(TT_DATA, TT_TWIDDLE))
 
-# Validate point size
-def fn_validate_point_size(AIE_VARIANT, TP_POINT_SIZE, TT_DATA, TT_TWIDDLE, TP_SSR, TP_CASC_LEN):
+def fn_validate_TT_TWIDDLE(TT_DATA, TT_TWIDDLE):
+  param_dict = fn_update_tt_twiddle(TT_DATA)
+  legal_set_TT_TWIDDLE = param_dict["enum"]
+  return(validate_legal_set(legal_set_TT_TWIDDLE, "TT_TWIDDLE", TT_TWIDDLE))
+
+#######################################################
+########### TP_POINT_SIZE Updater and Validator ###########
+#######################################################
+def update_TP_POINT_SIZE(args):
+
+  return fn_update_tp_point_size()
+
+def fn_update_tp_point_size():
+  maxPtSize = TP_POINT_SIZE_max
+
+  param_dict={}
+  param_dict.update({"name" : "TP_POINT_SIZE"})
+  param_dict.update({"minimum" : TP_POINT_SIZE_min})
+  param_dict.update({"maximum" : maxPtSize})
+
+  return param_dict
+
+
+def validate_TP_POINT_SIZE(args):
+  TP_POINT_SIZE = args["TP_POINT_SIZE"]
+  return (fn_validate_TP_POINT_SIZE(TP_POINT_SIZE))
+
+def fn_validate_TP_POINT_SIZE(TP_POINT_SIZE):
+  param_dict = fn_update_tp_point_size()
+  range_TP_POINT_SIZE = [param_dict["minimum"] ,param_dict["maximum"]]
+  return(validate_range(range_TP_POINT_SIZE, "TP_POINT_SIZE", TP_POINT_SIZE))
+
+
+#######################################################
+########### TP_SSR Updater and Validator ##############
+#######################################################
+def update_TP_SSR(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  TP_POINT_SIZE = args["TP_POINT_SIZE"]
+  return fn_update_tp_ssr(AIE_VARIANT, TT_DATA, TP_POINT_SIZE)
+
+def fn_update_tp_ssr(AIE_VARIANT, TT_DATA, TP_POINT_SIZE):
+  kSamplesDataVector = fn_samples_in_dft_vector(AIE_VARIANT, TT_DATA)
+  TP_SSR_min = TP_SSR_min_static
+  # Data can be padded to a maximum of 2 * TP_POINT_SIZE to achieve maximum ssr
+  TP_SSR_max = min(TP_SSR_max_static, int(2 * TP_POINT_SIZE / kSamplesDataVector))
+  param_dict={}
+  param_dict.update({"name" : "TP_SSR"})
+  param_dict.update({"minimum" : TP_SSR_min})
+  param_dict.update({"maximum" : TP_SSR_max})
+  
+  return param_dict
+
+def validate_TP_SSR(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  TP_POINT_SIZE = args["TP_POINT_SIZE"]
+  TP_SSR = args["TP_SSR"]
+  return(fn_validate_TP_SSR(AIE_VARIANT, TT_DATA, TP_POINT_SIZE,TP_SSR))
+
+def fn_validate_TP_SSR(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_SSR):
+  param_dict = fn_update_tp_ssr(AIE_VARIANT, TT_DATA, TP_POINT_SIZE)
+  range_TP_SSR = [param_dict["minimum"] ,param_dict["maximum"]]
+  return(validate_range(range_TP_SSR, "TP_SSR", TP_SSR))
+
+#######################################################
+########### TP_CASC_LEN Updater and Validator ###########
+#######################################################
+def update_TP_CASC_LEN(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  TT_TWIDDLE = args["TT_TWIDDLE"]
+  TP_POINT_SIZE = args["TP_POINT_SIZE"]
+  TP_SSR = args["TP_SSR"]
+  return fn_update_tp_casc_len(AIE_VARIANT, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_SSR)
+
+def fn_update_tp_casc_len(AIE_VARIANT, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_SSR):
+  [TP_CASC_LEN_min, TP_CASC_LEN_max] = fn_calc_casc_len_range(AIE_VARIANT, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_SSR)
+  param_dict={}
+  param_dict.update({"name" : "TP_CASC_LEN"})
+  param_dict.update({"minimum" : TP_CASC_LEN_min})
+  param_dict.update({"maximum" : TP_CASC_LEN_max})
+  
+  return param_dict
+
+def fn_calc_casc_len_range(AIE_VARIANT, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_SSR):
   if AIE_VARIANT == 1:
     maxDataMemBytes = 32768; #Bytes
   if AIE_VARIANT == 2:
     maxDataMemBytes = 65536; #Bytes
-  COEFF_COL_DIM = CEIL(TP_POINT_SIZE, fn_size_by_byte(TT_TWIDDLE)) / TP_SSR 
-  COEFF_ROW_DIM = round(TP_POINT_SIZE / TP_CASC_LEN)
-  KERNEL_COEFF_SIZE = COEFF_COL_DIM * COEFF_ROW_DIM * fn_size_by_byte(TT_TWIDDLE)
-  res = fn_validate_minmax_value("TP_POINT_SIZE", TP_POINT_SIZE, TP_POINT_SIZE_min, TP_POINT_SIZE_max)
+  
+  # The column dimension of the coefficients are padded 
+  COEFF_COL_DIM = CEIL(TP_POINT_SIZE, fn_size_by_byte(TT_TWIDDLE)) / TP_SSR
+  # Total size of coefficient array for each SSR rank. 
+  # This is used to find the minimum CASC_LEN (min number of kernel memories required to store coefficients)
+  COEFF_SIZE_PER_SSR = TP_POINT_SIZE * COEFF_COL_DIM
+  CASC_LEN_min = math.ceil(fn_size_by_byte(TT_TWIDDLE) * COEFF_SIZE_PER_SSR / maxDataMemBytes)
 
-  kSamplesDataVector = 256/8/fn_size_by_byte(TT_DATA)
-  paddedPointSize = CEIL(CEIL(TP_POINT_SIZE, kSamplesDataVector), kSamplesDataVector * TP_CASC_LEN)
-  kSamplesTwiddleVector = 256/8/fn_size_by_byte(TT_TWIDDLE)
-  twiddleColSize = CEIL(TP_POINT_SIZE, kSamplesTwiddleVector)
+  kSamplesDataVector = fn_samples_in_dft_vector(AIE_VARIANT, TT_DATA)
+  TP_CASC_LEN_min = int(CASC_LEN_min)
+  # Data can be padded to a maximum of 2 * TP_POINT_SIZE to achieve maximum casc_len
+  TP_CASC_LEN_max = int(2 * TP_POINT_SIZE/(kSamplesDataVector)) 
 
-  if (res["is_valid"] == False):  
-    return res
-  else:
-    if (KERNEL_COEFF_SIZE > maxDataMemBytes):
-      return(
-        isError(f"""Invalid POINT_SIZE ({TP_POINT_SIZE}). 
-                The coefficient/twiddles require {KERNEL_COEFF_SIZE}B per kernel for this POINT_SIZE which exceeds the maximum allowed data memory per kernel ({maxDataMemBytes}B). 
-                The memory required for the coeffecients per kernel is (CEIL(TP_POINT_SIZE{TP_POINT_SIZE}, sizeof(TT_TWIDDLE{TT_TWIDDLE})) / TP_SSR {TP_SSR}) * (TP_POINT_SIZE{TP_POINT_SIZE} / TP_CASC_LEN{TP_CASC_LEN}).  
-                Increase the value of TP_CASC_LEN{TP_CASC_LEN} or TP_SSR{TP_SSR} to split the coefficeients across multiple kernels.""")
-                )
-    # if (paddedPointSize % (TP_CASC_LEN * kSamplesDataVector) != 0):
-    #   return (
-    #     isError(f""""Invalid TP_POINT_SIZE ({TP_POINT_SIZE}) and CASC_LEN ({TP_CASC_LEN}) combination. 
-    #             TP_POINT_SIZE ({TP_POINT_SIZE}) should zero-padded to be an integer multiple of TP_CASC_LEN ({TP_CASC_LEN}) and vector size. Vector size for {TT_DATA} is {kSamplesDataVector} . 
-    #             The resulting zero-padded POINT_SIZE->({paddedPointSize}) must be a multiple of TP_CASC_LEN * 256/8/sizeof(TT_DATA)->({TP_CASC_LEN * kSamplesDataVector}) """)
-    #             )
-    # if (twiddleColSize % (TP_SSR * kSamplesTwiddleVector) != 0):
-    #   return (
-    #   isError(f"""Invalid TP_POINT_SIZE ({TP_POINT_SIZE}) and TP_SSR ({TP_SSR}) combination. 
-    #           The matrix of coefficients/twiddles are created with a column dimension of TP_POINT_SIZE zero-padded to a multiple 256/8/sizeof(TT_TWIDDLE) -> ({twiddleColSize}). 
-    #           This must be a multiple of TP_SSR * 256/8/sizeof(TT_TWIDDLE) -> ({TP_SSR * kSamplesTwiddleVector})""")
-    #   )
-    return isValid
-    
-def validate_TP_POINT_SIZE(args):
-  AIE_VARIANT = args["AIE_VARIANT"]
-  TP_POINT_SIZE = args["TP_POINT_SIZE"]
-  TT_DATA = args["TT_DATA"]
-  TT_TWIDDLE = args["TT_TWIDDLE"]
-  TP_SSR = args["TP_SSR"]
-  TP_CASC_LEN = args["TP_CASC_LEN"]
-  return fn_validate_point_size(AIE_VARIANT, TP_POINT_SIZE, TT_DATA, TT_TWIDDLE, TP_SSR, TP_CASC_LEN)
-
-# Validate SHIFT
-def validate_TP_SHIFT(args):
-  TP_SHIFT = args["TP_SHIFT"]
-  TT_DATA = args["TT_DATA"]
-  return fn_validate_shift_val(TT_DATA, TP_SHIFT)
-
-def fn_validate_shift_val(TT_DATA, TP_SHIFT):
-  res = fn_validate_minmax_value("TP_SHIFT", TP_SHIFT, TP_SHIFT_min, TP_SHIFT_max)
-  if (res["is_valid"] == False):  
-    return res
-  return fn_float_no_shift(TT_DATA, TP_SHIFT)
-
-# Validate CASC_LEN
-def fn_validate_casc_len(TP_CASC_LEN):
-  return fn_validate_minmax_value("TP_CASC_LEN", TP_CASC_LEN, TP_CASC_LEN_min, TP_CASC_LEN_max)
+  return [TP_CASC_LEN_min, TP_CASC_LEN_max]
 
 def validate_TP_CASC_LEN(args):
-  TP_CASC_LEN = args["TP_CASC_LEN"]
-  return fn_validate_casc_len(TP_CASC_LEN)
-
-# Validate TP_SSR
-def fn_validate_ssr(TP_SSR):
-  return fn_validate_minmax_value("TP_SSR", TP_SSR, TP_SSR_min, TP_SSR_max)
-
-def validate_TP_SSR(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  TT_TWIDDLE = args["TT_TWIDDLE"]
+  TP_POINT_SIZE = args["TP_POINT_SIZE"]
   TP_SSR = args["TP_SSR"]
-  return fn_validate_ssr(TP_SSR)
+  TP_CASC_LEN = args["TP_CASC_LEN"]
+  return (fn_validate_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_SSR, TP_CASC_LEN))
 
-# TP_SAT
-def validate_TP_SAT(args):
-  TP_SAT = args["TP_SAT"]
-  return fn_validate_satMode(TP_SAT)
+def fn_validate_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_SSR, TP_CASC_LEN):
+  param_dict = fn_update_tp_casc_len(AIE_VARIANT, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_SSR)
+  range_TP_CASC_LEN = [param_dict["minimum"] ,param_dict["maximum"]]
+  return(validate_range(range_TP_CASC_LEN, "TP_CASC_LEN", TP_CASC_LEN))
 
-# NUM_FRAMES
-def fn_validate_numFrames(TP_NUM_FRAMES):
-  return fn_validate_minmax_value("TP_NUM_FRAMES", TP_NUM_FRAMES, TP_NUM_FRAMES_min, TP_NUM_FRAMES_max)
+#######################################################
+########### TP_NUM_FRAMES Updater and Validator ###########
+#######################################################
+
+def update_TP_NUM_FRAMES(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  TP_POINT_SIZE = args["TP_POINT_SIZE"]
+  return fn_update_tp_numFrames(AIE_VARIANT, TT_DATA, TP_POINT_SIZE)
+
+def fn_update_tp_numFrames(AIE_VARIANT, TT_DATA, TP_POINT_SIZE):
+  if (AIE_VARIANT==1):
+    TP_NUM_FRAMES_max= int(PING_PONG_BUFFER_AIE1/(fn_size_by_byte(TT_DATA)*TP_POINT_SIZE))
+  elif(AIE_VARIANT==2):
+    TP_NUM_FRAMES_max= int(PING_PONG_BUFFER_AIE2/(fn_size_by_byte(TT_DATA)*TP_POINT_SIZE))
+
+  param_dict={}
+  param_dict.update({"name" : "TP_NUM_FRAMES"})
+  param_dict.update({"minimum" : 1})
+  param_dict.update({"maximum" : TP_NUM_FRAMES_max})
+
+  return param_dict
 
 def validate_TP_NUM_FRAMES(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  TP_POINT_SIZE = args["TP_POINT_SIZE"]
   TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
-  return fn_validate_numFrames(TP_NUM_FRAMES)
+  return (fn_validate_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_NUM_FRAMES))
 
-  ######### Finished Validation ###########
+def fn_validate_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_NUM_FRAMES):
+  param_dict = fn_update_tp_numFrames(AIE_VARIANT, TT_DATA, TP_POINT_SIZE)
+  range_TP_NUM_FRAMES = [param_dict["minimum"] ,param_dict["maximum"]]
+  return(validate_range(range_TP_NUM_FRAMES, "TP_NUM_FRAMES", TP_NUM_FRAMES))
 
-  ######### Updators ###########
+#######################################################
+########### TP_SHIFT Updater and Validator ###########
+#######################################################
+def update_TP_SHIFT(args):
+  TT_DATA = args["TT_DATA"]
+  return fn_update_tp_shift(TT_DATA)
 
-  ######### Graph Generator ############
+def fn_update_tp_shift(TT_DATA):  
+  if (TT_DATA=="float") or (TT_DATA=="cfloat"):
+    min_tp_shift = 0
+    max_tp_shift= 0
+  else:
+    min_tp_shift = 0
+    max_tp_shift= 60
+
+  param_dict={}
+  param_dict.update({"name" : "TP_SHIFT"})
+  param_dict.update({"minimum" : min_tp_shift})
+  param_dict.update({"maximum" : max_tp_shift})
+
+  return param_dict
+
+def validate_TP_SHIFT(args):
+  TT_DATA = args["TT_DATA"]
+  TP_SHIFT = args["TP_SHIFT"]
+  return (fn_validate_TP_SHIFT(TT_DATA, TP_SHIFT))
+
+def fn_validate_TP_SHIFT(TT_DATA, TP_SHIFT):
+  param_dict = fn_update_tp_shift(TT_DATA)
+  range_TP_SHIFT = [param_dict["minimum"] ,param_dict["maximum"]]
+  return(validate_range(range_TP_SHIFT, "TP_SHIFT", TP_SHIFT))
+
+#######################################################
+########### TP_RND Updater and Validator ###########
+#######################################################
+def update_TP_RND(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_update_tp_rnd(AIE_VARIANT)
+
+def fn_update_tp_rnd(AIE_VARIANT):
+
+  legal_set_TP_RND = fn_get_legalSet_roundMode(AIE_VARIANT)
+  param_dict={}
+  param_dict.update({"name" : "TP_RND"})
+  param_dict.update({"enum" : legal_set_TP_RND})
+
+  return param_dict
+
+def validate_TP_RND(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TP_RND = args["TP_RND"]
+  return (fn_validate_TP_RND(AIE_VARIANT, TP_RND))
+
+def fn_validate_TP_RND(AIE_VARIANT, TP_RND):
+  legal_set_TP_RND = fn_get_legalSet_roundMode(AIE_VARIANT)
+  return(validate_legal_set(legal_set_TP_RND, "TP_RND", TP_RND))
+
+#######################################################
+########### TP_SAT Updater and Validator ###########
+#######################################################
+def update_TP_SAT(args):
+  return fn_update_tp_sat()
+
+def fn_update_tp_sat():
+  legal_set = [0,1,3]
+
+  param_dict={}
+  param_dict.update({"name" : "TP_SAT"})
+  param_dict.update({"enum" : legal_set})
+  return param_dict
+
+def validate_TP_SAT(args):
+  TP_SAT = args["TP_SAT"]
+  return (fn_validate_TP_SAT(TP_SAT))
+
+def fn_validate_TP_SAT(TP_SAT):
+  param_dict=fn_update_tp_sat()
+  legal_set_TP_SAT = param_dict["enum"]
+  return (validate_legal_set(legal_set_TP_SAT, "TP_SAT", TP_SAT))
+
+#######################################################
+########### TP_API Updater and Validator ###########
+#######################################################
+def update_TP_API(args):
+  return fn_update_tp_api()
+
+def fn_update_tp_api():
+  legal_set_TP_API = [0]
+
+  param_dict={}
+  param_dict.update({"name" : "TP_API"})
+  param_dict.update({"enum" : legal_set_TP_API})
+  return param_dict
+
+def validate_TP_API(args):
+  TP_API = args["TP_API"]
+  return(fn_validate_TP_API(TP_API))
+
+def fn_validate_TP_API(TP_API):
+  param_dict=fn_update_tp_api()
+  legal_set_TP_API = param_dict["enum"]
+  return(validate_legal_set(legal_set_TP_API, "TP_API", TP_API))
+
+#######################################################
+########### TP_API Updater and Validator ###########
+#######################################################
+def update_TP_FFT_NIFFT(args):
+  return fn_update_tp_fft_nifft()
+
+
+def fn_update_tp_fft_nifft():
+  legal_set_TP_FFT_NIFFT = [0, 1]
+
+  param_dict={}
+  param_dict.update({"name" : "TP_FFT_NIFFT"})
+  param_dict.update({"enum" : legal_set_TP_FFT_NIFFT})
+  return param_dict
+  
+def validate_TP_FFT_NIFFT(args):
+  TP_FFT_NIFFT = args["TP_FFT_NIFFT"]
+  return (fn_validate_TP_FFT_NIFFT(TP_FFT_NIFFT))
+
+def fn_validate_TP_FFT_NIFFT(TP_FFT_NIFFT):
+  param_dict = fn_update_tp_fft_nifft()
+  legal_set_TP_FFT_NIFFT = param_dict["enum"]
+  return(validate_legal_set(legal_set_TP_FFT_NIFFT, "TP_FFT_NIFFT", TP_FFT_NIFFT))
+
+########## Functions ##########
 
 # Used by higher layer software to figure out how to connect blocks together.
-def get_window_sizes(TT_DATA,TP_POINT_SIZE,TP_NUM_FRAMES,TP_CASC_LEN,TP_SSR):
-  kSamplesInVect = 256/8/fn_size_by_byte(TT_DATA)
-  OUT_WINDOW_VSIZE = (CEIL(TP_POINT_SIZE, (kSamplesInVect * TP_SSR)) / TP_SSR) * TP_NUM_FRAMES
-  IN_WINDOW_VSIZE = (CEIL(TP_POINT_SIZE, (kSamplesInVect * TP_CASC_LEN)) / TP_CASC_LEN) * TP_NUM_FRAMES
-
-
+def get_window_sizes(AIE_VARIANT, TT_DATA,TP_POINT_SIZE,TP_NUM_FRAMES,TP_CASC_LEN,TP_SSR):
+  kSamplesDataVector = fn_samples_in_dft_vector(AIE_VARIANT, TT_DATA)
+  OUT_WINDOW_VSIZE = (CEIL(TP_POINT_SIZE, (kSamplesDataVector * TP_SSR)) / TP_SSR) * TP_NUM_FRAMES
+  IN_WINDOW_VSIZE = (CEIL(TP_POINT_SIZE, (kSamplesDataVector * TP_CASC_LEN)) / TP_CASC_LEN) * TP_NUM_FRAMES
   return IN_WINDOW_VSIZE, OUT_WINDOW_VSIZE
 
+
+  ######### Graph Generator ############
 def info_ports(args):
   """Standard function creating a static dictionary of information
   for upper software to correctly connect the IP.
   Some IP has dynamic number of ports according to parameter set,
   so port information has to be implemented as a function"""
+  AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA = args["TT_DATA"]
   TP_POINT_SIZE = args["TP_POINT_SIZE"]
   TP_CASC_LEN = args["TP_CASC_LEN"]
   TP_SSR = args["TP_SSR"]
-  TP_NUM_FRAMES = args["TP_NUM_FRAMES"]  
-  
-  IN_WINDOW_VSIZE, OUT_WINDOW_VSIZE = get_window_sizes(TT_DATA,TP_POINT_SIZE,TP_NUM_FRAMES,TP_CASC_LEN,TP_SSR)
+  TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
+
+  IN_WINDOW_VSIZE, OUT_WINDOW_VSIZE = get_window_sizes(AIE_VARIANT,TT_DATA,TP_POINT_SIZE,TP_NUM_FRAMES,TP_CASC_LEN,TP_SSR)
 
   in_ports = get_port_info("in", "in", TT_DATA, IN_WINDOW_VSIZE, TP_CASC_LEN * TP_SSR, 0)
   out_ports = get_port_info("out", "out", TT_DATA, OUT_WINDOW_VSIZE, TP_SSR, 0)
   return in_ports + out_ports
+
+  ######### Parameter Range Generator ############
+def info_params(args):
+  """Standard function creating a static dictionary of information
+  for upper software to correctly update the IP GUI.
+  """
+  info_TT_DATA=[update_TT_DATA(args)]
+  info_TT_TWIDDLE=[update_TT_TWIDDLE(args)]
+  info_TP_CASC_LEN=[update_TP_CASC_LEN(args)]
+  info_TP_SSR=[update_TP_SSR(args)]
+  info_TP_POINT_SIZE=[update_TP_POINT_SIZE(args)]
+  info_TP_NUM_FRAMES=[update_TP_NUM_FRAMES(args)]
+  info_TP_SHIFT=[update_TP_SHIFT(args)]
+  info_TP_RND=[update_TP_RND(args)]
+  info_TP_SAT=[update_TP_SAT(args)]
+  info_TP_API=[update_TP_API(args)]
+  info_TP_FFT_NIFFT=[update_TP_FFT_NIFFT(args)]
+
+  return (info_TT_DATA+info_TT_TWIDDLE+info_TP_CASC_LEN+info_TP_SSR+info_TP_POINT_SIZE+info_TP_NUM_FRAMES+info_TP_SHIFT+info_TP_RND+info_TP_SAT+info_TP_API+info_TP_FFT_NIFFT)
 
 def generate_graph(graphname, args):
 
@@ -186,7 +459,7 @@ class {graphname} : public adf::graph {{
 public:
   // ports
   //template <typename dir>
-  
+
   std::array<adf::port<input>, {TP_SSR} * {TP_CASC_LEN}> in;
   std::array<adf::port<output>, {TP_SSR}> out;
 
@@ -230,3 +503,18 @@ public:
   ]
   return out
 
+#GUI config generator output
+#_aie refers to AIE IP (L2 graph top level)
+def update_params(args):
+  out = {}
+  out["headerfile"] = "dft_graph.hpp"
+  out["searchpaths"] = [
+       "L2/include/aie",
+       "L2/tests/aie/common/inc",
+       "L1/include/aie",
+       "L1/src/aie",
+       "L1/tests/aie/inc",
+       "L1/tests/aie/src"
+  ]
+  out["parameters"] = info_params(args)
+  return out

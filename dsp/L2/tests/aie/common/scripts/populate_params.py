@@ -45,7 +45,7 @@ print(default_params_path)
 print(multi_params_path)
 # if run_type == "checkin":
 #     run_type = "daily"
-f = open(default_params_path, ) 
+f = open(default_params_path, )
 json_list=json.load(f)
 default_params=json_list["test_0_tool_canary_aie"]
 new_json_file={}
@@ -61,26 +61,26 @@ if jenkins or clear_json_file:
 
 
 
-def dds_hex_to_dec(my_dict):  
-    hex_pattern = re.compile("^0x[0-9a-fA-F]+$")  
-    for key, value in my_dict.items():  
-        if "DDS" in key and isinstance(value, str) and hex_pattern.match(value):  
-            try:  
-                my_dict[key] = str(int(value, 16))  
-            except ValueError:  
-                print(f"Value {value} at key {key} is not a valid hexadecimal number.")  
+def dds_hex_to_dec(my_dict):
+    hex_pattern = re.compile("^0x[0-9a-fA-F]+$")
+    for key, value in my_dict.items():
+        if "DDS" in key and isinstance(value, str) and hex_pattern.match(value):
+            try:
+                my_dict[key] = str(int(value, 16))
+            except ValueError:
+                print(f"Value {value} at key {key} is not a valid hexadecimal number.")
     return my_dict
 
 def set_float_defaults(my_dict, def_dict):
-    if any("float" in str(value) for value in my_dict.values()):  
+    if any("float" in str(value) for value in my_dict.values()):
         if "DIFF_TOLERANCE" not in my_dict:
             my_dict["DIFF_TOLERANCE"] = "0.1"
-        # check if def_dict contains the key "SHIFT" or "P_SHIFT"  
-        if "SHIFT" in def_dict:  
-            my_dict["SHIFT"] = "0"  
+        # check if def_dict contains the key "SHIFT" or "P_SHIFT"
+        if "SHIFT" in def_dict:
+            my_dict["SHIFT"] = "0"
         elif "P_SHIFT" in def_dict:  # P_SHIFT is the template parameter for matrix_mult
-            my_dict["P_SHIFT"] = "0" 
-    return my_dict 
+            my_dict["P_SHIFT"] = "0"
+    return my_dict
 
 def set_dynamic_defaults(my_dict, def_dict, path):
     # set matrix_mult WINDOW_VSIZES to matrix dimensions when not already set in make command
@@ -92,7 +92,7 @@ def set_dynamic_defaults(my_dict, def_dict, path):
         if "P_INPUT_WINDOW_VSIZE_B" not in tmp_dict:
             dim_ab = my_dict.get('P_DIM_AB', def_dict.get('P_DIM_AB'))
             dim_b = my_dict.get('P_DIM_B', def_dict.get('P_DIM_B'))
-            my_dict['P_INPUT_WINDOW_VSIZE_B'] = str(int(dim_ab) * int(dim_b))   
+            my_dict['P_INPUT_WINDOW_VSIZE_B'] = str(int(dim_ab) * int(dim_b))
 
     # set WINDOW_VSIZE to POINT_SIZE when not already set in make command
     if "POINT_SIZE" in def_dict and "WINDOW_VSIZE" in def_dict and "WINDOW_VSIZE" not in my_dict:
@@ -115,14 +115,14 @@ for command in sys.argv:
             # tmp_dict for each make command contains specified parameters and values
             if "=" in string:
                 key, value = re.split("=", string)
-                if "AIE_VARIANT" in key and value == "2":
+                if "AIE_VARIANT" in key and value == "2" or "PART" in key and value == "xcve2802-vsvh1760-2MP-e-S":
                     device = "aie2"
-                    tmp_dict[key] = "2"
-                elif "UUT_TARGET" in key and value == "x86sim":
-                    TARGET = value 
-                else:      
                     tmp_dict[key] = value
-        
+                elif "TARGET" in key:
+                    TARGET = value
+                else:
+                    tmp_dict[key] = value
+
         # convert hex numbers in dds_mixers to decimal
         tmp_dict = dds_hex_to_dec(tmp_dict)
         # sets SHIFT and DIFF_TOLERANCE for float tests
@@ -132,35 +132,35 @@ for command in sys.argv:
 
         for key in default_params:
             if key in tmp_dict:
-                if "." not in tmp_dict[key]:
+                if "." not in tmp_dict[key] and "PART" not in key:
                     tcase_name=tcase_name+str(tmp_dict[key])+"_"
                 continue
             else:
                 tmp_dict[key] = default_params[key]
-                if "." not in tmp_dict[key]:
+                if "." not in tmp_dict[key] and "PART" not in key:
                     tcase_name=tcase_name+str(tmp_dict[key])+"_"
-        
+
         if "DUMP_VCD" in tmp_dict and tmp_dict["DUMP_VCD"] == "1" :
             tcase_name+="VCD_"
 
         tcase_name+=device+"_"
         tcase_name+=TARGET+"_"
-        tcase_name+=run_type        
+        tcase_name+=run_type
         #print(tcase_name)
         if jenkins == False:
             new_json_file[tcase_name] = tmp_dict
         elif jenkins == True:
             json_list[tcase_name] = tmp_dict
         list_case_names.append(tcase_name)
-        
+
 # Serializing json
 if jenkins == False:
     json_object = json.dumps(new_json_file, indent=4)
 else:
     json_object = json.dumps(json_list, indent=4)
-     
+
 # Writing to multi_params.json
 with open(multi_params_path, "w") as outfile:
     outfile.write(json_object)
- 
+
 print(list_case_names)

@@ -31,11 +31,11 @@ namespace kronecker {
 // Generic implementation of a multiplier
 template <typename T_A, typename T_B>
 outTypeMult_t<T_A, T_B> scalar_mult(T_A a, T_B b, const int shift, unsigned int t_rnd, unsigned int t_sat) {
-    using TT_OUT = outTypeMult_t<T_A, T_B>;
-    TT_OUT ret_val;
+    using out_t = outTypeMult_t<T_A, T_B>;
+    out_t ret_val;
     T_accRef<T_A> aAcc;
     T_accRef<T_B> bAcc;
-    T_accRef<TT_OUT> outAcc;
+    T_accRef<out_t> outAcc;
     aAcc = val_accRef(a);
     bAcc = val_accRef(b);
     outAcc.real = ((int64)aAcc.real * (int64)bAcc.real) - ((int64)aAcc.imag * (int64)bAcc.imag);
@@ -130,13 +130,13 @@ void kronecker_ref<TT_DATA_A,
                    TP_RND,
                    TP_SAT>::kronecker_main(input_buffer<TT_DATA_A>& inWindow0,
                                            input_buffer<TT_DATA_B>& inWindow1,
-                                           output_buffer<TT_OUT>& outWindow0) {
+                                           output_buffer<out_t>& outWindow0) {
     TT_DATA_A* ptrInWindow0 = (TT_DATA_A*)inWindow0.data();
     TT_DATA_B* ptrInWindow1 = (TT_DATA_B*)inWindow1.data();
-    TT_OUT* ptrOutWindow0 = (TT_OUT*)outWindow0.data();
+    out_t* ptrOutWindow0 = (out_t*)outWindow0.data();
     TT_DATA_A inDataA;
     TT_DATA_B inDataB;
-    TT_OUT outData;
+    out_t outData;
 
     for (int frameIndex = 0; frameIndex < TP_NUM_FRAMES; frameIndex++) {
         for (int i = 0; i < TP_DIM_A_COLS; i++) {

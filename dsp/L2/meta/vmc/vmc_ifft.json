@@ -9,9 +9,18 @@
       {
       "key": "TT_DATA",
       "name": "data_type",
-      "description": "The type of individual data samples input to and output of the fft function",
+      "description": "The type of individual data samples input to the fft function",
       "default": "cint16",
-            "label": "Input/Output data type:",
+            "label": "Input data type:",
+            "tablabel": "Main",
+            "parameterType":"popup"
+    },
+      {
+      "key": "TT_OUT_DATA",
+      "name": "data_out_type",
+      "description": "The type of individual data samples output from the fft function",
+      "default": "cint16",
+            "label": "Output data type:",
             "tablabel": "Main",
             "parameterType":"popup"
     },
@@ -35,9 +44,9 @@
       "description": "The number of samples in the transform",
       "default": 64,
       "validator": {
-        "file": "vmc_ifft.py",
+        "file": "vmc_fft_common.py",
         "function": "vmc_validate_point_size_window",
-        "args": ["data_type", "AIE_VARIANT"]
+        "args": ["data_type", "ssr", "AIE_VARIANT"]
       },
             "label": "IFFT size:",
             "tablabel": "Main",
@@ -49,7 +58,7 @@
       "description": "The number of samples in the input window",
       "default": 64,
       "validator": {
-        "file": "vmc_ifft.py",
+        "file": "vmc_fft_common.py",
         "function": "vmc_validate_input_window_size",
         "args": ["point_size"]
       },
@@ -63,7 +72,7 @@
       "description": "The power of 2 shift down applied to the accumulation of FIR before output",
       "default": 0,
       "validator": {
-        "file": "vmc_ifft.py",
+        "file": "vmc_fft_common.py",
         "function": "vmc_validate_shift_val",
         "args": ["data_type", "point_size"]
       },
@@ -102,6 +111,20 @@
             "parameterType":"popup"
     },
     {
+      "name": "ssr",
+      "description": "The number of input channels for SSR. The specified value should be of the form 2^N",
+      "default": 1,
+      "type": "uint",
+      "validator": {
+        "file": "vmc_fft_common.py",
+        "function": "vmc_validate_ssr_window",
+        "args": ["AIE_VARIANT"]
+      },
+           "label": "SSR: ",
+            "tablabel": "Main",
+            "parameterType":"edit"
+    },
+    {
       "key": "TP_TWIDDLE_MODE",
       "name": "twiddle_mode",
       "description": "Twiddle amplitude mode.",
@@ -130,9 +153,9 @@
       "description": "The length of cascaded kernels",
       "default": 1,
        "validator": {
-        "file": "vmc_ifft.py",
+        "file": "vmc_fft_common.py",
         "function": "vmc_validate_casc_length_window",
-        "args": ["data_type", "point_size", "AIE_VARIANT"]
+        "args": ["data_type", "point_size", "ssr", "AIE_VARIANT"]
       },
             "label": "Number of cascade stages:",
             "tablabel": "Main",

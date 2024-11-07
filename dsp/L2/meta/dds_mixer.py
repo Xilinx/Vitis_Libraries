@@ -1,5 +1,6 @@
 import aie_common as com
-from aie_common import isError,isValid, fn_validate_satMode, fn_validate_min_value, fn_validate_max_value, fn_validate_minmax_value
+from aie_common import*
+
 #dds_mixer.hpp:74:    static_assert(TP_MIXER_MODE <= 2, "ERROR: DDS Mixer Mode must be 0, 1 or 2. ");
 #dds_mixer.hpp:75:    static_assert(fnEnumType<TT_DATA>() != enumUnknownType,
 #dds_mixer.hpp:77:    static_assert((TP_INPUT_WINDOW_VSIZE % m_kNumLanes) == 0,
@@ -9,24 +10,32 @@ from aie_common import isError,isValid, fn_validate_satMode, fn_validate_min_val
 #dds_mixer.hpp:132:    static_assert((TP_INPUT_WINDOW_VSIZE % m_kNumLanes) == 0,
 #graph:78:    static_assert(TP_SSR > 0, "ERROR: Invalid SSR value, must be a value greater than 0.\n");
 
-TP_SSR_min = 1
-TP_INPUT_WINDOW_VSIZE_min = 4
+TP_SSR_min=1
+TP_SSR_max=32
+TP_INPUT_WINDOW_VSIZE_min=8
+TP_INPUT_WINDOW_VSIZE_max_cpp=2**31
 
-def fn_get_dds_lanes(TT_DATA):
-  type_lane_dict = {
-    "cint16" : 8,
-    "cint32" : 4,
-    "cfloat" : 4
-  }
-  return type_lane_dict[TT_DATA]
+PING_PONG_BUFFER_AIE1=16384
+uint32_min=0
+uint32_max=2**32 -1 
+#######################################################
+########### AIE_VARIANT Updater and Validator #########
+#######################################################
+def update_AIE_VARIANT(args):
+  return fn_update_AIE_VAR()
 
-def fn_validate_tt_data(TT_DATA,TP_MIXER_MODE):
-    if (TP_MIXER_MODE == 0) and (TT_DATA == "cint32" ):
-        return isError(f"MIXER_MODE_{TP_MIXER_MODE} does not support requested data type TT_DATA {TT_DATA} ")
-    return isValid
+def  fn_update_AIE_VAR():
+  legal_set_AIE_VAR = [1]
 
-def fn_validate_ssr(TP_SSR):
-    return fn_validate_min_value("TP_SSR", TP_SSR, TP_SSR_min)
+  param_dict ={}
+  param_dict.update({"name" : "AIE_VARIANT"})
+  param_dict.update({"enum" : legal_set_AIE_VAR})
+
+  return param_dict
+
+def validate_AIE_VARIANT(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_validate_aieVar(AIE_VARIANT)
 
 def fn_validate_aieVar(AIE_VARIANT):
     if AIE_VARIANT == 1:
@@ -36,43 +45,288 @@ def fn_validate_aieVar(AIE_VARIANT):
 def fn_validate_aieVarVMC(AIE_VARIANT):
     if AIE_VARIANT == 1:
       return isValid
-    return isError(f"This library block is not supported on AIE-ML devices.")
+    return isError(f"This library block is not supported on AIE-ML devices. Please use the DDS LUT/DDS LUT Stream/Mixer LUT/Mixer LUT Stream block instead.")
+
+#######################################################
+########### TT_DATA Updater and Validator #############
+#######################################################
+def update_TT_DATA(args):
+    return fn_update_TT_DATA()
+
+def fn_update_TT_DATA():
+    legal_set_TT_DATA = ["cint32", "cint16", "cfloat"]
+
+    param_dict={
+       "name" : "TT_DATA",
+       "enum" : legal_set_TT_DATA
+    }
+    return param_dict
 
 def validate_TT_DATA(args):
     TT_DATA = args["TT_DATA"]
-    TP_MIXER_MODE = args["TP_MIXER_MODE"]
-    return fn_validate_tt_data(TT_DATA,TP_MIXER_MODE)
+    return fn_validate_tt_data(TT_DATA)
 
-def validate_TP_WINDOW_VSIZE(args):
-  TP_INPUT_WINDOW_VSIZE= args["TP_INPUT_WINDOW_VSIZE"]
-  res = fn_validate_min_value("TP_INPUT_WINDOW_VSIZE", TP_INPUT_WINDOW_VSIZE, TP_INPUT_WINDOW_VSIZE_min)
-  if (res["is_valid"] == False):
-    return res
-  TT_DATA= args["TT_DATA"]
-  lanes = fn_get_dds_lanes(TT_DATA)
-  if (TP_INPUT_WINDOW_VSIZE % lanes != 0):
-      return isError(f"Window size ({TP_INPUT_WINDOW_VSIZE}) must be a multiple of number of lanes ({lanes})")
+def fn_validate_tt_data(TT_DATA):
+    param_dict=fn_update_TT_DATA()
+    legal_set_TT_DATA = param_dict["enum"]
+    return(validate_legal_set(legal_set_TT_DATA, "TT_DATA", TT_DATA))
 
-  return isValid
+#######################################################
+########### TP_MIXER_MODE Updater and Validator #######
+#######################################################
+def update_TP_MIXER_MODE(args):
+  TT_DATA=args["TT_DATA"]
+  return fn_update_TP_MIXER_MODE(TT_DATA)
+
+def fn_update_TP_MIXER_MODE(TT_DATA):
+  if TT_DATA=="cint32": legal_set_TP_MIXER_MODE=[1,2]
+  else: legal_set_TP_MIXER_MODE=[0,1,2]
+
+  param_dict={
+     "name" : "TP_MIXER_MODE",
+     "enum" : legal_set_TP_MIXER_MODE
+  }
+  return param_dict
+
+def validate_TP_MIXER_MODE(args):
+  TT_DATA=args["TT_DATA"]
+  TP_MIXER_MODE = args["TP_MIXER_MODE"]
+  return(fn_validate_TP_MIXER_MODE(TT_DATA, TP_MIXER_MODE))
+
+def fn_validate_TP_MIXER_MODE(TT_DATA, TP_MIXER_MODE):
+  param_dict=fn_update_TP_MIXER_MODE(TT_DATA)
+  legal_set_TP_MIXER_MODE=param_dict["enum"]
+  return(validate_legal_set(legal_set_TP_MIXER_MODE, "TP_MIXER_MODE", TP_MIXER_MODE))
+
+#######################################################
+########### TP_SSR Updater and Validator ##############
+#######################################################
+def update_TP_SSR(args):
+    return fn_update_TP_SSR()
+
+def fn_update_TP_SSR():
+    param_dict = {
+       "name"     : "TP_SSR",
+       "minimum"  : TP_SSR_min,
+       "maximum"  : TP_SSR_max
+    }
+    return param_dict
 
 def validate_TP_SSR(args):
-    TP_SSR = args["TP_SSR"]
+    TP_SSR=args["TP_SSR"]
     return fn_validate_ssr(TP_SSR)
+
+def fn_validate_ssr(TP_SSR):
+    range_TP_SSR=[TP_SSR_min, TP_SSR_max]
+    return (validate_range(range_TP_SSR, "TP_SSR", TP_SSR))
+
+#######################################################
+############ TP_API Updater and Validator #############
+#######################################################
+def update_TP_API(args):
+    return fn_update_TP_API()
+
+def fn_update_TP_API():
+    legal_set_TP_API = [0,1]
+    param_dict = {
+       "name"     : "TP_API",
+       "enum"     : legal_set_TP_API
+    }
+    return param_dict
+
+def validate_TP_API(args):
+    TP_API=args["TP_API"]
+    legal_set_TP_API = [0,1]
+    return (validate_legal_set(legal_set_TP_API, "TP_API", TP_API))
+
+#######################################################
+#### TP_INPUT_WINDOW_VSIZE Updater and Validator ######
+#######################################################
+
+def update_TP_INPUT_WINDOW_VSIZE(args):
+    TT_DATA = args["TT_DATA"]
+    TP_SSR = args["TP_SSR"]
+    TP_API = args["TP_API"]
+
+    if args["TP_INPUT_WINDOW_VSIZE"] :
+      TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
+    else:
+      TP_INPUT_WINDOW_VSIZE = 0
+    return fn_update_TP_INPUT_WINDOW_VSIZE(TT_DATA, TP_SSR, TP_API,TP_INPUT_WINDOW_VSIZE)
+
+def fn_update_TP_INPUT_WINDOW_VSIZE(TT_DATA, TP_SSR, TP_API, TP_INPUT_WINDOW_VSIZE):
+    lanes = fn_get_dds_lanes(TT_DATA)
+
+    if TP_API==0:
+      TP_INPUT_WINDOW_VSIZE_max = int((PING_PONG_BUFFER_AIE1* TP_SSR)/fn_size_by_byte(TT_DATA))
+    else: 
+      TP_INPUT_WINDOW_VSIZE_max = TP_INPUT_WINDOW_VSIZE_max_cpp
+
+    param_dict = {
+      "name"     : "TP_WINDOW_VSIZE",
+      "minimum"  :  int(CEIL(TP_INPUT_WINDOW_VSIZE_min , (lanes * TP_SSR))),
+      "maximum"  : TP_INPUT_WINDOW_VSIZE_max
+    }
+
+    if TP_INPUT_WINDOW_VSIZE !=0:
+      
+      if (TP_INPUT_WINDOW_VSIZE % (lanes*TP_SSR) != 0):
+        TP_INPUT_WINDOW_VSIZE_act=int(round(TP_INPUT_WINDOW_VSIZE / (lanes * TP_SSR)) * (lanes * TP_SSR))
+
+        if TP_INPUT_WINDOW_VSIZE_act==0:
+          TP_INPUT_WINDOW_VSIZE_act=int(CEIL(TP_INPUT_WINDOW_VSIZE , (lanes * TP_SSR)))
+          
+        if param_dict["maximum"]< TP_INPUT_WINDOW_VSIZE_act:
+          TP_INPUT_WINDOW_VSIZE_act=int(FLOOR(param_dict["maximum"] , (lanes * TP_SSR)))
+        param_dict.update({"actual":TP_INPUT_WINDOW_VSIZE_act})    
+      
+    return param_dict
+
+def validate_TP_INPUT_WINDOW_VSIZE(args):
+  TT_DATA = args["TT_DATA"]
+  TP_SSR = args["TP_SSR"]
+  TP_API = args["TP_API"]
+  TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
+  return (fn_validate_TP_INPUT_WINDOW_VSIZE(TT_DATA, TP_SSR, TP_API, TP_INPUT_WINDOW_VSIZE))
+
+def fn_validate_TP_INPUT_WINDOW_VSIZE(TT_DATA, TP_SSR, TP_API, TP_INPUT_WINDOW_VSIZE):
+  param_dict=fn_update_TP_INPUT_WINDOW_VSIZE(TT_DATA, TP_SSR, TP_API, TP_INPUT_WINDOW_VSIZE)
+  lanes = fn_get_dds_lanes(TT_DATA)
+  
+  if (TP_INPUT_WINDOW_VSIZE % (lanes*TP_SSR) != 0):
+    return isError(f"Window size ({TP_INPUT_WINDOW_VSIZE}) must be a multiple of ({lanes*TP_SSR})")
+  else:
+    legal_range_TP_INPUT_WINDOW_VSIZE=[param_dict["minimum"], param_dict["maximum"]]
+    return(validate_range(legal_range_TP_INPUT_WINDOW_VSIZE, "TP_INPUT_WINDOW_VSIZE", TP_INPUT_WINDOW_VSIZE))
+
+  
+def fn_get_dds_lanes(TT_DATA):
+  type_lane_dict = {
+    "cint16" : 8,
+    "cint32" : 4,
+    "cfloat" : 4
+  }
+  return type_lane_dict[TT_DATA]
+
+#######################################################
+###### TP_USE_PHASE_RELOAD Updater and Validator ######
+#######################################################
+def update_TP_USE_PHASE_RELOAD(args):
+    TP_SSR=args["TP_SSR"]
+    return fn_update_TP_USE_PHASE_RELOAD(TP_SSR)
+
+def fn_update_TP_USE_PHASE_RELOAD(TP_SSR):
+    if TP_SSR==1:
+      legal_set_TP_USE_PHASE_RELOAD = [0, 1]
+    else:
+      legal_set_TP_USE_PHASE_RELOAD = [0]
+    param_dict = {
+       "name"     : "TP_USE_PHASE_RELOAD",
+       "enum"     : legal_set_TP_USE_PHASE_RELOAD
+    }
+    return param_dict
+
+def validate_TP_USE_PHASE_RELOAD(args):
+    TP_SSR=args["TP_SSR"]
+    TP_USE_PHASE_RELOAD=args["TP_USE_PHASE_RELOAD"]
+    return fn_validate_TP_USE_PHASE_RELOAD(TP_SSR, TP_USE_PHASE_RELOAD)
+
+def fn_validate_TP_USE_PHASE_RELOAD(TP_SSR, TP_USE_PHASE_RELOAD):
+    param_dict=fn_update_TP_USE_PHASE_RELOAD(TP_SSR)
+    legal_set_TP_USE_PHASE_RELOAD=param_dict["enum"]
+    return (validate_legal_set(legal_set_TP_USE_PHASE_RELOAD, "TP_USE_PHASE_RELOAD", TP_USE_PHASE_RELOAD))
+
+#######################################################
+############ phaseInc Updater and Validator ###########
+#######################################################
+def update_phaseInc(args):
+  return fn_update_phaseInc()
+
+def fn_update_phaseInc():
+   param_dict={
+      "name":"phaseInc",
+      "minimum":uint32_min,
+      "maximum":uint32_max
+   }
+   return param_dict
+
+def validate_phaseInc(args):
+  phaseInc=args["phaseInc"]
+  return fn_validate_phaseInc(phaseInc)
+
+def fn_validate_phaseInc(phaseInc):
+  range_phaseInc=[uint32_min, uint32_max]
+  return (validate_range(range_phaseInc, "phaseInc", phaseInc))
+
+#######################################################
+####### initialPhaseOffset Updater and Validator ######
+#######################################################
+def update_initialPhaseOffset(args):
+  return fn_update_initialPhaseOffset()
+
+def fn_update_initialPhaseOffset():
+   param_dict={
+      "name":"initialPhaseOffset",
+      "minimum":uint32_min,
+      "maximum":uint32_max
+   }
+   return param_dict
+
+def validate_initialPhaseOffset(args):
+  initialPhaseOffset=args["initialPhaseOffset"]
+  return fn_validate_initialPhaseOffset(initialPhaseOffset)
+
+def fn_validate_initialPhaseOffset(initialPhaseOffset):
+  range_initialPhaseOffset=[uint32_min, uint32_max]
+  return (validate_range(range_initialPhaseOffset, "initialPhaseOffset", initialPhaseOffset))
+
+#######################################################
+############## TP_RND Updater and Validator ###########
+#######################################################
+def update_TP_RND(args):
+  AIE_VARIANT=args["AIE_VARIANT"]
+  return fn_update_tp_rnd(AIE_VARIANT)
+
+def fn_update_tp_rnd(AIE_VARIANT):
+  legal_set_TP_RND= fn_get_legalSet_roundMode(AIE_VARIANT)
+
+  param_dict={}
+  param_dict.update({"name" : "TP_RND"})
+  param_dict.update({"enum" : legal_set_TP_RND})
+
+  return param_dict
+
+def validate_TP_RND(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TP_RND = args["TP_RND"]
+  param_dict = fn_update_tp_rnd(AIE_VARIANT)
+  legal_set_TP_RND = param_dict["enum"]
+  return(validate_legal_set(legal_set_TP_RND, "TP_RND", TP_RND))
+
+#######################################################
+############## TP_SAT Updater and Validator ###########
+#######################################################
+def update_TP_SAT(args):
+  TP_MIXER_MODE = args["TP_MIXER_MODE"]
+  return fn_update_tp_sat(TP_MIXER_MODE)
+
+def fn_update_tp_sat(TP_MIXER_MODE):
+  legal_set = [0,1,3]
+  if TP_MIXER_MODE == 2:
+    legal_set = [1, 3]
+
+  param_dict={}
+  param_dict.update({"name" : "TP_SAT"})
+  param_dict.update({"enum" : legal_set})
+  return param_dict
 
 def validate_TP_SAT(args):
   TP_SAT = args["TP_SAT"]
-  return fn_validate_satMode(TP_SAT)
+  TP_MIXER_MODE = args["TP_MIXER_MODE"]
+  param_dict = fn_update_tp_sat(TP_MIXER_MODE)
+  legal_set_TP_SAT = param_dict["enum"]
+  return(validate_legal_set(legal_set_TP_SAT, "TP_SAT", TP_SAT))
 
-def validate_AIE_VARIANT(args):
-  AIE_VARIANT = args["AIE_VARIANT"]
-  return fn_validate_aieVar(AIE_VARIANT)
-
-def validate_TP_USE_PHASE_RELOAD(args):
-  TP_USE_PHASE_RELOAD = args["TP_USE_PHASE_RELOAD"]
-  TP_SSR = args["TP_SSR"]
-  if (TP_USE_PHASE_RELOAD == 1 and TP_SSR !=1):
-    return isError("Phase Offset Update cannot be used for TP_SSR > 1!")
-  return isValid
 
   ######### Graph Generator ############
 
@@ -86,7 +340,7 @@ def info_ports(args):
   TP_USE_PHASE_RELOAD = args["TP_USE_PHASE_RELOAD"]
   in1_ports = (com.get_port_info("in1", "in", TT_DATA, (TP_INPUT_WINDOW_VSIZE/TP_SSR), TP_SSR, 0, TP_API) if (TP_MIXER_MODE in [1,2]) else [])
   in2_ports = (com.get_port_info("in2", "in", TT_DATA, (TP_INPUT_WINDOW_VSIZE/TP_SSR), TP_SSR, 0, TP_API) if (TP_MIXER_MODE == 2) else [])
-  in3_ports = (com.get_parameter_port_info("PhaseRTP", "in", "int32", None, TP_SSR, "async") if (TP_USE_PHASE_RELOAD == 1) else [])
+  in3_ports = (com.get_parameter_port_info("PhaseRTP", "in", "int32", TP_SSR, 1, "async") if (TP_USE_PHASE_RELOAD == 1) else [])
   out_ports = com.get_port_info("out", "out", TT_DATA, (TP_INPUT_WINDOW_VSIZE/TP_SSR), TP_SSR, 0, TP_API)
 
   return (in1_ports+in2_ports+in3_ports+out_ports) # concat strings

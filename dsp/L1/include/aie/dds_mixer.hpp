@@ -100,7 +100,7 @@ class kernelDdsMixerClass {
     unsigned int m_perCyclePhaseInc;
     unsigned int m_phaseValpre = 0;
 
-    alignas(32) T_DDS_TYPE m_phRot[m_kNumLanes];
+    alignas(__ALIGN_BYTE_SIZE__) T_DDS_TYPE m_phRot[m_kNumLanes];
 
     // Constructor - use aie_api so definition within kernel scope
     kernelDdsMixerClass(unsigned int phaseInc);
@@ -152,7 +152,7 @@ class kernelDdsMixerClass<TT_DATA,
     static constexpr unsigned int m_kMixerShift = sizeof(TT_DATA) / 2 * 8;
     static constexpr unsigned int m_kLUTRes = 10;
     static constexpr unsigned int m_kLUTMask = ((1 << m_kLUTRes) - 1) << (32 - m_kLUTRes);
-    alignas(32) cint32* sincosLUT[TP_NUM_LUTS];
+    alignas(__ALIGN_BYTE_SIZE__) cint32* sincosLUT[TP_NUM_LUTS];
 
     static constexpr unsigned int m_kLoopCount = (TP_INPUT_WINDOW_VSIZE / m_kDOutEachLoop);
     static constexpr unsigned int m_kNumMixerInputs =
@@ -167,15 +167,14 @@ class kernelDdsMixerClass<TT_DATA,
                   "ERROR: DDS Mixer TT_DATA is not a supported type (Must be cint16).");
     static_assert((TP_INPUT_WINDOW_VSIZE % m_kDOutEachLoop) == 0,
                   "ERROR: DDS Mixer TP_INPUT_WINDOW_VSIZE must be a multiple of data output in each loop. For AIE1, "
-                  "this has to be 64 for cint16, 16 for cint32. For AIE2, this has to be 256 for cint16 and 64 for "
-                  "cint32.");
+                  "this has to be 64 for cint16, 16 for cint32. For AIE2, this has to be 64 for cint16 and cint32.");
 
     unsigned int m_phaseIndex = 0;
     unsigned int m_perCyclePhaseInc;
     unsigned int m_phaseValpre = 0;
 
-    alignas(32) TT_DATA m_phRotSmall[m_kNumLanes];
-    alignas(32) TT_DATA m_phRotBig[m_kNumLanes];
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA m_phRotSmall[m_kNumLanes];
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA m_phRotBig[m_kNumLanes];
 
     // Constructor - use aie_api so definition within kernel scope
     kernelDdsMixerClass(unsigned int phaseInc);
@@ -245,7 +244,7 @@ class kernelDdsMixerClass<cfloat,
     unsigned int m_perCyclePhaseInc;
     unsigned int m_phaseValpre = 0;
 
-    alignas(32) TT_DATA m_phRot[m_kNumLanes];
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA m_phRot[m_kNumLanes];
 
     // Constructor - use aie_api so definition within kernel scope
     kernelDdsMixerClass(unsigned int phaseInc);
@@ -304,8 +303,7 @@ class kernelDdsMixerClass<cfloat,
                   "ERROR: DDS Mixer TT_DATA is not a supported type (Must be cint16).");
     static_assert((TP_INPUT_WINDOW_VSIZE % m_kDOutEachLoop) == 0,
                   "ERROR: DDS Mixer TP_INPUT_WINDOW_VSIZE must be a multiple of data output in each loop. For AIE1, "
-                  "this has to be 64 for cint16, 16 for cint32. For AIE2, this has to be 256 for cint16 and 64 for "
-                  "cint32.");
+                  "this has to be 64 for cint16, 16 for cint32. For AIE2, this has to be 64 for cint16 and cint32.");
 
     using T_inType = typename std::conditional<(TP_API == WINDOW), input_buffer<TT_DATA>, input_stream<TT_DATA> >::type;
     using T_outType =
@@ -320,9 +318,9 @@ class kernelDdsMixerClass<cfloat,
 
     static constexpr unsigned int m_kLUTRes = 10;
     static constexpr unsigned int m_kLUTMask = ((1 << m_kLUTRes) - 1) << (32 - m_kLUTRes);
-    alignas(32) cfloat* sincosLUT[TP_NUM_LUTS];
-    alignas(32) TT_DATA m_phRotSmall[m_kNumLanes];
-    alignas(32) TT_DATA m_phRotBig[m_kNumLanes];
+    alignas(__ALIGN_BYTE_SIZE__) cfloat* sincosLUT[TP_NUM_LUTS];
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA m_phRotSmall[m_kNumLanes];
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA m_phRotBig[m_kNumLanes];
 
     // Constructor - use aie_api so definition within kernel scope
     kernelDdsMixerClass(unsigned int phaseInc);

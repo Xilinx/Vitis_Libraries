@@ -10,6 +10,19 @@
     ],
     "parameters": [
         {
+            "name": "AIE_VARIANT",
+            "type": "uint",
+            "description": "specifies the device type",
+            "updater": {
+                "file": "sample_delay.py",
+                "function": "update_AIE_VARIANT"
+            },
+            "validator": {
+                "file": "sample_delay.py",
+                "function": "validate_AIE_VARIANT"
+            }
+        },
+        {
             "name": "TT_DATA",
             "type": "typename",
             "description": "Data type of individual I/O data samples. This is a typename and must be one of the following:",
@@ -22,37 +35,58 @@
                 "float",
                 "cfloat",
                 "uint8"
-            ]
-        },
-        {
-            "name": "TP_WINDOW_VSIZE",
-            "type": "uint",
-            "description": "Size of I/O window in IOBUFF interface. Not used when the IO interface is AXI-4 streams",
+            ],
+            "updater": {
+                "file": "sample_delay.py",
+                "function": "update_TT_DATA"
+            },
             "validator": {
-            "file": "sample_delay.py",
-            "function": "validate_TP_WINDOW_VSIZE",
-            "args": ["TT_DATA", "TP_MAX_DELAY","TP_API"]
+                "file": "sample_delay.py",
+                "function": "validate_TT_DATA"
             }
         },
         {
             "name": "TP_API",
             "description": "The form of IO interface: 0 for IOBUFF, 1 for AXI-4 streams",
-            "type": "uint"
+            "type": "uint",
+            "updater": {
+                "file": "sample_delay.py",
+                "function": "update_TP_API"
+            },
+            "validator": {
+                "file": "sample_delay.py",
+                "function": "validate_TP_API"
+            }
         },
         {
             "name": "TP_MAX_DELAY",
             "type": "uint",
             "description": "Upper bound of the the requested sample delay on RTP port",
-            "validator": {
+            "updater": {
             "file": "sample_delay.py",
-            "function": "validate_TP_MAX_DELAY",
-            "args": ["TT_DATA", "TP_API"]
-            }
+            "function": "update_TP_MAX_DELAY",
+            "args": ["AIE_VARIANT", "TT_DATA", "TP_API"]
+            },
+            "validator": {
+                "file": "sample_delay.py",
+                "function": "validate_TP_MAX_DELAY",
+                "args": ["AIE_VARIANT", "TT_DATA", "TP_API"]
+                }
         },
         {
-            "name": "AIE_VARIANT",
+            "name": "TP_WINDOW_VSIZE",
             "type": "uint",
-            "description": "specifies the device type"
+            "description": "Size of I/O window in IOBUFF interface. Not used when the IO interface is AXI-4 streams",
+            "updater": {
+            "file": "sample_delay.py",
+            "function": "update_TP_WINDOW_VSIZE",
+            "args": ["AIE_VARIANT", "TT_DATA", "TP_API", "TP_MAX_DELAY"]
+            },
+            "validator": {
+                "file": "sample_delay.py",
+                "function": "validate_TP_WINDOW_VSIZE",
+                "args": ["AIE_VARIANT", "TT_DATA", "TP_API", "TP_MAX_DELAY"]
+                }
         }
     ],
     "ports": {

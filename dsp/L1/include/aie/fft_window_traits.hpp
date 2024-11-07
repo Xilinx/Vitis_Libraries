@@ -24,12 +24,7 @@ this file does not contain any vector types or intrinsics since it is required f
 and therefore must be suitable for the aie compiler graph-level compilation.
 */
 
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
+#include "device_defs.h"
 
 namespace xf {
 namespace dsp {

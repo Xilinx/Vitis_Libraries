@@ -63,6 +63,7 @@
         {
             "target": "aiesim",
             "launch_cmd": [
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk prep_aie_out HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_qor HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\"",
@@ -72,6 +73,7 @@
         {
             "target": "x86sim",
             "launch_cmd": [
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk prep_x86_out HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR LOC_INPUT_FILE=$(LOC_INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\")",
                 "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR LOC_INPUT_FILE=$(LOC_INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\")",
                 "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR LOC_INPUT_FILE=$(LOC_INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\")",
                 "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
@@ -132,7 +134,7 @@
                         "LIB_DIR/L1/src/aie/dft.cpp",
                         "uut_config.h"
                     ],
-                    "pl-freq": 1000,
+                    "pl-freq": 625,
                     "workdir": "./Work",
                     "options": "",
                     "name": "libadf.a"
@@ -146,7 +148,12 @@
             "function": "generate_testbench"
         }
     },
-    "config_make": "params.mk",
+    "config_make": "LIB_DIR/L2/tests/aie/common/scripts/params.mk",
+    "associated_files": [
+        "LIB_DIR/L2/tests/aie/common/scripts",
+        "LIB_DIR/L2/meta/*common*",
+        "LIB_DIR/L2/meta/dft*"
+    ],
     "parameter_file": "multi_params.json",
     "testinfo": {
         "disable": false,
@@ -157,11 +164,11 @@
                 "env": "",
                 "cmd": "",
                 "max_memory_MB": {
-                    "vitis_aie_x86sim": 32768,
-                    "vitis_aie_sim": 40960
+                    "vitis_aie_x86sim": 8192,
+                    "vitis_aie_sim": 51200
                 },
                 "max_time_min": {
-                    "vitis_aie_x86sim": 240,
+                    "vitis_aie_x86sim": 180,
                     "vitis_aie_sim": 200
                 }
             }

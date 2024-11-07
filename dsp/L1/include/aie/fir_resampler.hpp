@@ -325,7 +325,7 @@ class kernelFilterClass {
 
     // Coefficient Load Size - number of samples in 256-bits
     static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
-    alignas(32) TT_COEFF
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF
         m_oldInTaps[CEIL(TP_FIR_LEN, m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
     bool m_coeffnEq;                                     // Are coefficients sets equal?
 
@@ -411,7 +411,7 @@ class kernelFilterClass {
                   "ERROR: TP_DECIMATE_FACTOR is out of supported range.");
 
     static constexpr int delaySize = TP_API == 0 ? 1 : m_kPermuteSupport == 1 ? 32 : 32 * TP_DECIMATE_FACTOR;
-    alignas(32) int delay[delaySize] = {0};
+    alignas(__ALIGN_BYTE_SIZE__) int delay[delaySize] = {0};
 
     // Do init. Send empty/null accummulators through cascade interface before reading stream data, in order to skew (on
     // MACs computing output samples) kernel operation to reduce pressure on input stream buffering (DMA FIFOs).
@@ -422,13 +422,14 @@ class kernelFilterClass {
     // Since this zero padding cannot be applied to the class-external coefficient array
     // the supplied taps are copied to an internal array, m_internalTaps2, which can be padded.
     using tapsArray = TT_COEFF[m_kPolyphaseCoeffAlias][m_kNumOps][m_kColumns][m_kLanes];
-    alignas(32) tapsArray m_internalTaps; // Filter taps/coefficients
-    // alignas(32) TT_COEFF  m_internalTaps2[m_kPolyphaseCoeffAlias*m_kNumOps*m_kColumns*m_kLanes]; // Filter
+    alignas(__ALIGN_BYTE_SIZE__) tapsArray m_internalTaps; // Filter taps/coefficients
+    // alignas(__ALIGN_BYTE_SIZE__)  TT_COEFF  m_internalTaps2[m_kPolyphaseCoeffAlias*m_kNumOps*m_kColumns*m_kLanes]; //
+    // Filter
     // taps/coefficients
     static constexpr int tapsArraySize = CEIL(CEIL(TP_FIR_RANGE_LEN, TP_INTERPOLATE_FACTOR) / TP_INTERPOLATE_FACTOR,
                                               (256 / 8 / sizeof(TT_COEFF))); // ceil'ed to 256-bits
     static constexpr int kParallelPhases = TP_INTERPOLATE_FACTOR * TP_DECIMATE_FACTOR;
-    alignas(32) TT_COEFF m_internalTaps2[kParallelPhases][tapsArraySize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF m_internalTaps2[kParallelPhases][tapsArraySize];
 
     // Filter kernel architecture
     void filterBasic(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
@@ -626,7 +627,7 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_USE_COEFF_RELOAD, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_DUAL_IP,
           unsigned int TP_API,

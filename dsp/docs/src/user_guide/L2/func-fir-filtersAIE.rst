@@ -9,7 +9,7 @@
 Filters
 =======
 
-The DSPLib contains several variants of finite impulse response (FIR) filters. These include single-rate FIRs, half-band interpolation/decimation FIRs, as well as integer and fractional interpolation/decimation FIRs for AI Engine (AIE) and AIE_ML devices.
+The DSPLib contains several variants of finite impulse response (FIR) filters. These include single-rate FIRs, half-band interpolation/decimation FIRs, as well as integer and fractional interpolation/decimation FIRs.
 
 .. _FILTER_ENTRY:
 
@@ -49,6 +49,14 @@ Additionally, each FIR filter has been placed in its unique FIR type namespace. 
    +----------------------------------+-----------------------------------------------------------+
    | Decimation, symmetric            | dsplib::fir::decimate_sym::fir_decimate_sym_graph         |
    +----------------------------------+-----------------------------------------------------------+
+
+Device Support
+==============
+
+The FIR filters support both AIE and AIE-ML devices for all features with the following exceptions:
+
+- The ``cfloat`` data type is not supported on AIE-ML device
+- Round modes available and the enumerated values of round modes differ between AIE and AIE-ML devices. See :ref:`COMPILING_AND_SIMULATING`.
 
 Supported Types
 ===============
@@ -838,7 +846,7 @@ The following code example shows how a FIR graph class might be used within a us
 
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_fir.hpp
     :language: cpp
-    :lines: 15-
+    :lines: 17-
 
 
 .. _FIR_CONFIGURATION_NOTES:

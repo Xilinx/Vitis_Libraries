@@ -94,9 +94,9 @@ class test_graph : public graph {
             // filenameIn_B.insert(filenameIn_B.length()-4, ("_"+std::to_string(i)+"_0"));
             filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(i)));
             // plio objects
-            inA[i] = input_plio::create("PLIO_in_A" + std::to_string(i), adf::plio_32_bits, filenameIn_A);
-            inB[i] = input_plio::create("PLIO_in_B" + std::to_string(i), adf::plio_32_bits, filenameIn_B);
-            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_32_bits, filenameOut);
+            inA[i] = input_plio::create("PLIO_in_A" + std::to_string(i), adf::plio_64_bits, filenameIn_A);
+            inB[i] = input_plio::create("PLIO_in_B" + std::to_string(i), adf::plio_64_bits, filenameIn_B);
+            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_64_bits, filenameOut);
             // connections
             connect<>(inA[i].out[0], kroneckerGraph.inA[i]);
             connect<>(inB[i].out[0], kroneckerGraph.inB[i]);
@@ -108,9 +108,9 @@ class test_graph : public graph {
         std::string filenameIn_B = QUOTE(INPUT_FILE_B);
         std::string filenameOut = QUOTE(OUTPUT_FILE);
         // plio objects
-        inA[0] = input_plio::create("PLIO_in_A" + std::to_string(0), adf::plio_32_bits, filenameIn_A);
-        inB[0] = input_plio::create("PLIO_in_B" + std::to_string(0), adf::plio_32_bits, filenameIn_B);
-        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_32_bits, filenameOut);
+        inA[0] = input_plio::create("PLIO_in_A" + std::to_string(0), adf::plio_64_bits, filenameIn_A);
+        inB[0] = input_plio::create("PLIO_in_B" + std::to_string(0), adf::plio_64_bits, filenameIn_B);
+        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_64_bits, filenameOut);
         // connections
         connect<>(inA[0].out[0], kroneckerGraph.inA[0]);
         connect<>(inB[0].out[0], kroneckerGraph.inB[0]);

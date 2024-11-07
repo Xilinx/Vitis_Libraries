@@ -12,7 +12,7 @@
       "description": "The type of individual data samples output of the DDS function",
       "default": "cint16",
       "validator": {
-        "file": "vmc_stream_dds.py",
+        "file": "vmc_dds.py",
         "function": "vmc_validate_data_type",
         "args": []
       },
@@ -36,6 +36,20 @@
             "parameterType":"edit"
     },
     {
+      "key": "TP_SSR",
+      "name": "ssr",
+      "description": "Specify number of data input/output in parallel for a single channel.",
+      "default": 1,
+      "validator": {
+        "file": "vmc_dds.py",
+        "function": "vmc_validate_ssr",
+        "args": []
+      },
+            "label": "SSR: ",
+            "tablabel": "Main",
+            "parameterType":"edit"
+    },
+    {
       "key": "TP_USE_PHASE_RELOAD",
 	    "name": "USE_PHASE_RELOAD",
             "description": "specifies if initial phase is to be implemented as a reloadable RTP port or not.",
@@ -44,7 +58,7 @@
 	    "validator": {
                "file": "vmc_dds.py",
                 "function": "validate_USE_PHASE_RELOAD",
-                "args": []
+                "args": ["ssr"]
 		},
 	    "label": "Reload initial phase via input port",
             "tablabel": "Main",
@@ -77,7 +91,7 @@
     "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
       "default": 0,
       "validator": {
-          "file": "vmc_fft_common.py",
+          "file": "vmc_dds.py",
           "function": "vmc_validate_sat_mode",
           "args": []
         },

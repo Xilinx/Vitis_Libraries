@@ -3,6 +3,7 @@
     "outdir": "./xmc_aie_lib/IFFT_Stream_01c57c86",
     "parameters": {
         "data_type": "cint16",
+        "data_out_type": "cint16",
         "twiddle_type": "cint16",
         "point_size": 64,
         "input_window_size": 64,

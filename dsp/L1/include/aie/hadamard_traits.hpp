@@ -24,16 +24,10 @@ this file does not contain any vector types or intrinsics since it is required f
 and therefore must be suitable for the aie compiler graph-level compilation.
 */
 
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
-
+#include "device_defs.h"
 #include "fir_utils.hpp"
-#include "mul_out_type.hpp"
-#include "mul_acc_type.hpp"
+#include "single_mul_out_types.hpp"
+#include "single_mul_acc_types.hpp"
 
 namespace xf {
 namespace dsp {
@@ -45,10 +39,10 @@ static constexpr unsigned int kPointSizeMin = 16;
 // determine the output type depending on the input type combinations
 template <typename TT_A, typename TT_B>
 struct vectByte {
-    unsigned val_byteA = sizeof(out_mul_type<TT_A, TT_B>);
-    unsigned val_byteB = sizeof(out_mul_type<TT_A, TT_B>);
-    unsigned val_byteOut = sizeof(out_mul_type<TT_A, TT_B>);
-    unsigned val_byteBuffWin = sizeof(out_mul_type<TT_A, TT_B>);
+    unsigned val_byteA = sizeof(outTypeMult_t<TT_A, TT_B>);
+    unsigned val_byteB = sizeof(outTypeMult_t<TT_A, TT_B>);
+    unsigned val_byteOut = sizeof(outTypeMult_t<TT_A, TT_B>);
+    unsigned val_byteBuffWin = sizeof(outTypeMult_t<TT_A, TT_B>);
     unsigned val_byteBuffStream = ::std::min(sizeof(TT_A), sizeof(TT_B));
     unsigned int kCaptureDataA = 1;
     unsigned int kCaptureDataB = 1;

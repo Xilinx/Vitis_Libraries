@@ -56,12 +56,12 @@ NOINLINE_DECL void
 outer_tensor<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SHIFT, TP_API, TP_SSR, TP_RND, TP_SAT>::
     outer_tensor_main(input_buffer<TT_DATA_A>& __restrict inWindowA,
                       input_buffer<TT_DATA_B>& __restrict inWindowB,
-                      output_buffer<TT_OUT>& __restrict outWindow) {
+                      output_buffer<out_t>& __restrict outWindow) {
     using dataVectA_t = ::aie::vector<TT_DATA_A, vecSampleNumA>;
     using dataVectB_t = ::aie::vector<TT_DATA_B, vecSampleNumB>;
-    using dataAcc_t = ::aie::accum<TT_ACC, vecSampleNumAcc>;
-    using dataVectTempOut_t = ::aie::vector<TT_OUT, vecSampleNumTempOut>;
-    using dataVectOut_t = ::aie::vector<TT_OUT, vecSampleNumOut>;
+    using dataAcc_t = ::aie::accum<acc_t, vecSampleNumAcc>;
+    using dataVectTempOut_t = ::aie::vector<out_t, vecSampleNumTempOut>;
+    using dataVectOut_t = ::aie::vector<out_t, vecSampleNumOut>;
 
     dataVectA_t* inAPtr = (dataVectA_t*)inWindowA.data();
     dataVectB_t* inBPtr = (dataVectB_t*)inWindowB.data();
@@ -82,7 +82,7 @@ outer_tensor<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SHIFT, 
 #pragma unroll(vecNumB)
                         for (int k = 0; k < vecNumB; k++) {
                             vectBBuff = inBPtr[k];
-                            acc = ::aie::mul(vectABuff[j], vectBBuff);
+                            acc = ::aie::mul<acc_t>(vectABuff[j], vectBBuff);
                             vectTempBuff = acc.template to_vector<outTypeMult_t<TT_DATA_A, TT_DATA_B> >(TP_SHIFT);
 #pragma unroll(vecSampleNumTempOut / vecSampleNumOut)
                             for (int n = 0; n < vecSampleNumTempOut / vecSampleNumOut; n++) {
@@ -112,12 +112,12 @@ NOINLINE_DECL void
 outer_tensor<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SHIFT, 1, TP_SSR, TP_RND, TP_SAT>::
     outer_tensor_main(input_buffer<TT_DATA_A>& __restrict inWindowA,
                       input_buffer<TT_DATA_B>& __restrict inWindowB,
-                      output_stream<TT_OUT>* __restrict outStream0) {
+                      output_stream<out_t>* __restrict outStream0) {
     using dataVectA_t = ::aie::vector<TT_DATA_A, vecSampleNumA>;
     using dataVectB_t = ::aie::vector<TT_DATA_B, vecSampleNumB>;
-    using dataAcc_t = ::aie::accum<TT_ACC, vecSampleNumAcc>;
-    using dataVectTempOut_t = ::aie::vector<TT_OUT, vecSampleNumTempOut>;
-    using dataVectOut_t = ::aie::vector<TT_OUT, vecSampleNumOut>;
+    using dataAcc_t = ::aie::accum<acc_t, vecSampleNumAcc>;
+    using dataVectTempOut_t = ::aie::vector<out_t, vecSampleNumTempOut>;
+    using dataVectOut_t = ::aie::vector<out_t, vecSampleNumOut>;
 
     dataVectA_t* inAPtr = (dataVectA_t*)inWindowA.data();
     dataVectB_t* inBPtr = (dataVectB_t*)inWindowB.data();
@@ -135,11 +135,11 @@ outer_tensor<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SHIFT, 
                     for (int j = 0; j < vecSampleNumA; j++) {
                         for (int k = 0; k < vecNumB; k++) chess_prepare_for_pipelining chess_loop_count(vecNumB) {
                                 vectBBuff = inBPtr[k];
-                                acc = ::aie::mul(vectABuff[j], vectBBuff);
+                                acc = ::aie::mul<acc_t>(vectABuff[j], vectBBuff);
                                 vectTempBuff = acc.template to_vector<outTypeMult_t<TT_DATA_A, TT_DATA_B> >(TP_SHIFT);
 #pragma unroll(vecSampleNumTempOut / vecSampleNumOut)
                                 for (int n = 0; n < vecSampleNumTempOut / vecSampleNumOut; n++) {
-                                    writeincr<aie_stream_resource_out::a, TT_OUT, vecSampleNumOut>(
+                                    writeincr<aie_stream_resource_out::a, out_t, vecSampleNumOut>(
                                         outStream0, vectTempBuff.template extract<vecSampleNumOut>(n));
                                 }
                             }

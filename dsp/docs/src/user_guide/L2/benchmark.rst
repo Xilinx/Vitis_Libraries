@@ -12,17 +12,18 @@ Benchmark/QoR
 This section provides the L2 performance benchmarks and Quality of Results (QoR) for the AI Engine (AIE) digital signal processing (DSP) library elements with various configurations. The results are extracted from a hardware emulation based simulations.
 
 The device used for AIE benchmarking is the xcvc1902-vsva2197-2MP-e-S, and the device used for AIE-ML is the xcve2802-vsvh1760-2MP-e-S.
+The benchmark results are obtained using these devices wth an AIE clock frequency of 1.25 GHz and 64-bit PLIOs at 625 MHz.
 
 The metrics reported for each case are:
 
-- Latency               - The time delay between the first input sample and the first output sample. If there are multiple ports, the latency is recorded from the first input and first output port.
-- Throughput            - Input throughput calculated based on the number of samples per iteration and the time between each consecutive iteration.
-- NUM_BANKS             - Number of memory banks used by the design.
-- NUM_AIE               - Number of AIE tiles used by the design.
-- DATA_MEMORY           - Total data memory in bytes used by the design.
-- PROGRAM_MEMORY        - Program memory in bytes used by each kernel.
+- **Latency**: The time delay between the first input sample and the first output sample. If there are multiple ports, the latency is recorded from the first input and first output port.
+- **Throughput**: Input throughput calculated based on the number of samples per iteration and the time between each consecutive iteration.
+- **NUM_BANKS**: Number of memory banks used by the design.
+- **NUM_AIE**: Number of AIE tiles used by the design.
+- **DATA_MEMORY**: Total data memory in bytes used by the design.
+- **PROGRAM_MEMORY**: Program memory in bytes used by each kernel.
 
-The AIE_VARIANT parameter refers to the type of AI Engine that is used for each particular case in the benchmark results. A value of 1 denotes the AIE, and a value of 2 denotes the AIE-ML.
+The AIE_VARIANT parameter refers to the type of AI Engine that is used for each particular case in the benchmark results, this may be AIE or AIE-ML.
 
 The PROGRAM_MEMORY metrics are harvested for each kernel the design consists of. For example, a finite impulse response (FIR) configured to be implemented on two tiles (CASC_LEN=2) will have two sets of figures displayed in the following table (space delimited).
 
@@ -41,7 +42,20 @@ The latency and throughput values, as reported for each library element in the f
 
 In the case where there are multiple input ports and/or multiple output ports, the timestamps from the first of these ports are used as these are the ports that contain the first timestamped sample of each iteration.
 
-Furthermore, if there are no input ports included in the design (such as DDS only mode), then the throughput will be measured using the timestamped data on the output port. In such a case, the latency figures can be marked as invalid with value reported as ``-1``.
+Furthermore, if there are no input ports included in the design (such as DDS only mode), then the throughput will be measured using the timestamped data on the output port. In such a case, the latency figures can be marked as invalid with the value reported as ``-1``.
+
+Bitonic Sort
+============
+
+The following table gives results for the Bitonic Sort with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_BITONIC_SORT`.
+
+:download:`bitonic_sort_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/bitonic_sort_benchmark.csv>`
+
+.. csv-table:: Bitonic Sort benchmark
+   :file: ../../csv_data_files/L2/bitonic_sort_benchmark.csv
+   :align: center
+   :header-rows: 1
+   :widths: auto
 
 Convolution / Correlation
 =========================
@@ -130,6 +144,19 @@ The following table gives results for TDM FIR filter with a wide variety of supp
 
 .. csv-table:: FIR benchmark
    :file: ../../csv_data_files/L2/fir_tdm_benchmark.csv
+   :align: center
+   :header-rows: 1
+   :widths: auto
+
+Function Approximation
+======================
+
+The following table gives results for the Function Approximation with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FUNC_APPROX`
+
+:download:`func_approx_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.1/dsp/docs/src/csv_data_files/L2/func_approx_benchmark.csv>`
+
+.. csv-table:: Function Approximation benchmark
+   :file: ../../csv_data_files/L2/func_approx_benchmark.csv
    :align: center
    :header-rows: 1
    :widths: auto

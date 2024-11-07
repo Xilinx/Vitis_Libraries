@@ -23,7 +23,7 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The DFT supports both AIE1 and AIE-ML for all features with the following exception
+The DFT supports both AIE and AIE-ML devices for all features with the following exception
 
 - cfloat is not supported for ``TT_DATA`` on AIE-ML.
 
@@ -69,7 +69,7 @@ The ``TP_NUM_FRAMES`` template parameter can be used to drive the kernel to oper
 Cascaded Kernels
 ----------------
 
-The DFT library element is able to split the workload into multiple kernels connected in a chain with the use of the ``TP_CASC_LEN`` template parameter. The required computation, as well as input data buffer and twiddle values, will be split and distributed between the number of kernels determined by ``TP_CASC_LEN``. Using multiple kernels, support for ``TP_POINT_SIZE`` is extended beyond what can be stored on a single kernel. The data must be split in a "card-dealing" manner across the kernels in cascade. This is necessary as the generated twiddles for the DFT are also split this way. 
+The DFT library element is able to split the workload into multiple kernels connected in a chain with the use of the ``TP_CASC_LEN`` template parameter. The required computation, as well as input data buffer and twiddle values, will be split and distributed between the number of kernels determined by ``TP_CASC_LEN``. Using multiple kernels, support for ``TP_POINT_SIZE`` is extended beyond what can be stored on a single kernel. The data must be split in a "card-dealing" manner across the kernels in cascade. This is necessary as the generated twiddles for the DFT are also split this way.
 
 SSR
 ---

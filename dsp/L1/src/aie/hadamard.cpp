@@ -78,7 +78,7 @@ NOINLINE_DECL void
 hadamard<TT_DATA_A, TT_DATA_B, TP_DIM, TP_NUM_FRAMES, TP_SHIFT, TP_API, TP_SSR, TP_RND, TP_SAT>::hadamard_main(
     input_buffer<TT_DATA_A>& __restrict inWindowA,
     input_buffer<TT_DATA_B>& __restrict inWindowB,
-    output_buffer<TT_OUT>& __restrict outWindow) {
+    output_buffer<out_t>& __restrict outWindow) {
     static constexpr unsigned int vecSampleNumA = 256 / 8 / vectByte<TT_DATA_A, TT_DATA_B>().val_byteA;
     static constexpr unsigned int vecSampleNumB = 256 / 8 / vectByte<TT_DATA_A, TT_DATA_B>().val_byteB;
     static constexpr unsigned int vecSampleNumOut = 256 / 8 / vectByte<TT_DATA_A, TT_DATA_B>().val_byteOut;
@@ -91,7 +91,7 @@ hadamard<TT_DATA_A, TT_DATA_B, TP_DIM, TP_NUM_FRAMES, TP_SHIFT, TP_API, TP_SSR, 
 
     using dataVectA_t = ::aie::vector<TT_DATA_A, vecSampleNumA>;
     using dataVectB_t = ::aie::vector<TT_DATA_B, vecSampleNumB>;
-    using dataVectOut_t = ::aie::vector<TT_OUT, vecSampleNumOut>;
+    using dataVectOut_t = ::aie::vector<out_t, vecSampleNumOut>;
 
     dataVectA_t* inAPtr = (dataVectA_t*)inWindowA.data();
     dataVectB_t* inBPtr = (dataVectB_t*)inWindowB.data();
@@ -101,10 +101,10 @@ hadamard<TT_DATA_A, TT_DATA_B, TP_DIM, TP_NUM_FRAMES, TP_SHIFT, TP_API, TP_SSR, 
     dataVectB_t vectB;
     dataVectOut_t vectOut;
 
-    ::aie::accum<ACC_TYPE, vecSampleNumBuff> acc;
+    ::aie::accum<acc_t, vecSampleNumBuff> acc;
     ::aie::vector<TT_DATA_A, vecSampleNumBuff> vectAbuff;
     ::aie::vector<TT_DATA_B, vecSampleNumBuff> vectBbuff;
-    ::aie::vector<TT_OUT, vecSampleNumBuff> vectOutbuff;
+    ::aie::vector<out_t, vecSampleNumBuff> vectOutbuff;
 
     set_rnd_mode<TP_RND>();
     set_sat_mode<TP_SAT>();
@@ -124,8 +124,8 @@ hadamard<TT_DATA_A, TT_DATA_B, TP_DIM, TP_NUM_FRAMES, TP_SHIFT, TP_API, TP_SSR, 
                     vectBbuff.insert(sampleB, vectB);
                 }
 
-                acc = ::aie::mul<ACC_TYPE>(vectAbuff, vectBbuff);
-                vectOutbuff = acc.template to_vector<TT_OUT>(TP_SHIFT);
+                acc = ::aie::mul<acc_t>(vectAbuff, vectBbuff);
+                vectOutbuff = acc.template to_vector<out_t>(TP_SHIFT);
                 for (int sampleOut = 0; sampleOut < kCaptureDataOut; sampleOut++) {
                     *outPtr++ = vectOutbuff.template extract<vecSampleNumOut>(sampleOut);
                 }
@@ -146,11 +146,11 @@ NOINLINE_DECL void
 hadamard<TT_DATA_A, TT_DATA_B, TP_DIM, TP_NUM_FRAMES, TP_SHIFT, 1, TP_SSR, TP_RND, TP_SAT>::hadamard_main(
     input_stream<TT_DATA_A>* __restrict inStreamA,
     input_stream<TT_DATA_B>* __restrict inStreamB,
-    output_stream<TT_OUT>* __restrict outStream0) {
-    using accVect_t = ::aie::accum<ACC_TYPE, kSamplesInVect>;
+    output_stream<out_t>* __restrict outStream0) {
+    using accVect_t = ::aie::accum<acc_t, kSamplesInVect>;
     using dataVectA_t = ::aie::vector<TT_DATA_A, kSamplesInVect>;
     using dataVectB_t = ::aie::vector<TT_DATA_B, kSamplesInVect>;
-    using dataOutVect_t = ::aie::vector<TT_OUT, kSamplesInVect>;
+    using dataOutVect_t = ::aie::vector<out_t, kSamplesInVect>;
     dataOutVect_t outVect;
     dataVectA_t dataVectA;
     dataVectB_t dataVectB;
@@ -165,9 +165,9 @@ hadamard<TT_DATA_A, TT_DATA_B, TP_DIM, TP_NUM_FRAMES, TP_SHIFT, 1, TP_SSR, TP_RN
                 dataVectA = readincr_v<kSamplesInVect, aie_stream_resource_in::a>(inStreamA);
                 dataVectB = readincr_v<kSamplesInVect, aie_stream_resource_in::b>(inStreamB);
 
-                acc = ::aie::mul<ACC_TYPE>(dataVectA, dataVectB);
-                outVect = acc.template to_vector<TT_OUT>((TP_SHIFT));
-                writeincr<aie_stream_resource_out::a, TT_OUT, kSamplesInVect>(outStream0, outVect);
+                acc = ::aie::mul<acc_t>(dataVectA, dataVectB);
+                outVect = acc.template to_vector<out_t>((TP_SHIFT));
+                writeincr<aie_stream_resource_out::a, out_t, kSamplesInVect>(outStream0, outVect);
             }
         }
 };

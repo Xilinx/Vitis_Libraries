@@ -349,11 +349,15 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
     constexpr bool hasOutWindow2 = (TP_NUM_OUTPUTS == 2 && TP_API == 0 && TP_CASC_OUT == false);
     auto outItr = cond_begin_vector_random_or_scalar_circular<hasOutWindow, m_kVOutSize>(*outInterface.outWindow);
     auto outItr2 = cond_begin_vector_random_or_scalar_circular<hasOutWindow2, m_kVOutSize>(*outInterface.outWindow2);
+    TT_DATA* frameStart = (TT_DATA*)inInterface.inWindow;
+    TT_DATA* __restrict inPointer;
+    using outDataVect_t = ::aie::vector<TT_DATA, outVal.getLanes()>;
+    outDataVect_t* __restrict outPtr = (outDataVect_t*)outInterface.outWindowPtr;
 
     // Move data pointer away from data consumed by previous cascades
     // Move only by  multiples of 128bit. Cascade phase remainder goes to m_kDataBuffXOffset
-    // window_incr(inInterface.inWindow,(TRUNC((m_kFirInitOffset),(16/sizeof(TT_DATA)))));
-    inItr += TRUNC((m_kFirInitOffset), m_kOffsetResolution);
+    // inItr += TRUNC((m_kFirInitOffset), m_kOffsetResolution);
+    inPointer = frameStart + (TRUNC((m_kFirInitOffset), m_kOffsetResolution));
 
     TT_COEFF* m_internalTapsCopy = m_internalTaps;
 
@@ -373,8 +377,7 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
 
 #pragma unroll(m_kInitialLoads)
             for (int initLoads = 0; initLoads < m_kInitialLoads; ++initLoads) {
-                upd_win_incr_256b<TT_DATA>(sbuff, numDataLoads,
-                                           inItr); // Update sbuff with data from input window. 00++|____|____|____
+                upd_win_incr_256b<TT_DATA>(sbuff, numDataLoads, inPointer);
                 dataLoaded += m_kDataLoadVsize;
                 numDataLoads++;
             }
@@ -386,7 +389,7 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
             for (int op = m_kColumns; op < m_kFirLenCeilCols; op += m_kColumns) {
                 dataNeeded += m_kColumns;
                 if (dataNeeded > dataLoaded) {
-                    upd_win_incr_256b<TT_DATA>(sbuff, numDataLoads % m_kDataLoadsInReg, inItr);
+                    upd_win_incr_256b<TT_DATA>(sbuff, numDataLoads % m_kDataLoadsInReg, inPointer);
                     dataLoaded += m_kDataLoadVsize;
                     numDataLoads++;
                 }
@@ -396,14 +399,15 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                 acc = macSrAsym(acc, sbuff, (op + m_kDataBuffXOffset), coe0, (op % m_kCoeffRegVsize));
             }
 
-            inItr -= m_kDataLoadVsize * numDataLoads - m_kVOutSize;
+            // inItr -= m_kDataLoadVsize * numDataLoads - m_kVOutSize;
+            inPointer -= m_kDataLoadVsize * numDataLoads - m_kVOutSize;
 
             // Write cascade. Do nothing if cascade not present.
             writeCascade<TT_DATA, TT_COEFF>(outInterface, acc);
 
             outVal = shiftAndSaturate(acc, TP_SHIFT);
             // Write to output window
-            writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, dataLoadPhase++ % 2, outItr);
+            writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, dataLoadPhase++ % 2, outPtr);
             if
                 constexpr(TP_NUM_OUTPUTS == 2 && TP_API == 0 && TP_KERNEL_POSITION == TP_CASC_LEN - 1)
                     writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, dataLoadPhase++ % 2,
@@ -701,14 +705,19 @@ void kernelFilterClass<TT_DATA,
     constexpr bool hasOutWindow2 = (TP_NUM_OUTPUTS == 2 && TP_API == 0 && TP_CASC_OUT == false);
     auto outItr = cond_begin_vector_random_or_scalar_circular<hasOutWindow, m_kVOutSize>(*outInterface.outWindow);
     auto outItr2 = cond_begin_vector_random_or_scalar_circular<hasOutWindow2, m_kVOutSize>(*outInterface.outWindow2);
+    TT_DATA* frameStart = (TT_DATA*)inInterface.inWindow;
+    TT_DATA* __restrict inPointer;
+    using outDataVect_t = ::aie::vector<TT_DATA, outVal.getLanes()>;
+    outDataVect_t* __restrict outPtr = (outDataVect_t*)outInterface.outWindowPtr;
 
     // Move data pointer away from data consumed by previous cascades
     // Move only by  multiples of 128bit. Cascade phase remainder goes to m_kDataBuffXOffset
-    inItr += (TRUNC((m_kFirInitOffset), m_kOffsetResolution));
+    // inItr += (TRUNC((m_kFirInitOffset), m_kOffsetResolution));
+    inPointer = frameStart + (TRUNC((m_kFirInitOffset), m_kOffsetResolution));
     int numLoads = 0;
 #pragma unroll GUARD_ZERO(m_kInitialLoads - m_kPerLoopLoads)
     for (int initLoads = 0; initLoads < m_kInitialLoads - m_kPerLoopLoads; ++initLoads) {
-        upd_win_incr_256b<TT_DATA>(sbuff, initLoads % m_kDataLoadsInReg, inItr);
+        upd_win_incr_256b<TT_DATA>(sbuff, initLoads % m_kDataLoadsInReg, inPointer);
         numLoads++;
     }
 
@@ -722,7 +731,7 @@ void kernelFilterClass<TT_DATA,
             for (unsigned strobe = 0; strobe < m_kIncLoadsRptFactor; strobe++) {
                 if (dataNeeded >= dataLoaded) {
                     upd_win_incr_256b<TT_DATA>(
-                        sbuff, ((m_kInitialLoads - m_kPerLoopLoads) + numDataLoads) % m_kDataLoadsInReg, inItr);
+                        sbuff, ((m_kInitialLoads - m_kPerLoopLoads) + numDataLoads) % m_kDataLoadsInReg, inPointer);
                     numDataLoads++;
                     dataLoaded += m_kDataLoadVsize;
                     numLoads++;
@@ -730,7 +739,8 @@ void kernelFilterClass<TT_DATA,
                     if
                         constexpr(m_kLanes > m_kDataLoadVsize) {
                             upd_win_incr_256b<TT_DATA>(
-                                sbuff, ((m_kInitialLoads - m_kPerLoopLoads) + numDataLoads) % m_kDataLoadsInReg, inItr);
+                                sbuff, ((m_kInitialLoads - m_kPerLoopLoads) + numDataLoads) % m_kDataLoadsInReg,
+                                inPointer);
                             numDataLoads++;
                             dataLoaded += m_kDataLoadVsize;
                             numLoads++;
@@ -758,7 +768,7 @@ void kernelFilterClass<TT_DATA,
 
                 outVal = shiftAndSaturate(acc, TP_SHIFT);
                 writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, dataLoadPhase++ % 2,
-                                                                       outItr);
+                                                                       outPtr);
                 if
                     constexpr(TP_NUM_OUTPUTS == 2 && TP_API == 0 && TP_KERNEL_POSITION == TP_CASC_LEN - 1)
                         writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal,
@@ -1032,7 +1042,9 @@ void fir_sr_asym<TT_DATA,
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     constexpr int kdummy = 16;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
+    outInterface.outWindowPtr = outWindow.data();
     outInterface.outWindow = (output_circular_buffer<TT_DATA>*)&outWindow;
     this->filterKernel(inInterface, outInterface);
 };
@@ -1087,7 +1099,9 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
+    outInterface.outWindowPtr = outWindow.data();
     outInterface.outWindow = (output_circular_buffer<TT_DATA>*)&outWindow;
     this->filterKernel(inInterface, outInterface);
 };
@@ -1143,7 +1157,9 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
+    outInterface.outWindowPtr = outWindow.data();
     outInterface.outWindow = (output_circular_buffer<TT_DATA>*)&outWindow;
     outInterface.outWindow2 = (output_circular_buffer<TT_DATA>*)&outWindow2;
     this->filterKernel(inInterface, outInterface);
@@ -1196,8 +1212,10 @@ void fir_sr_asym<TT_DATA,
                                                     output_circular_buffer<TT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
     inInterface.inCascade = inCascade;
+    outInterface.outWindowPtr = outWindow.data();
     outInterface.outWindow = (output_circular_buffer<TT_DATA>*)&outWindow;
     this->filterKernel(inInterface, outInterface);
 };
@@ -1249,8 +1267,10 @@ void fir_sr_asym<TT_DATA,
                                                   output_circular_buffer<TT_DATA>& __restrict outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
     inInterface.inCascade = inCascade;
+    outInterface.outWindowPtr = outWindow.data();
     outInterface.outWindow = (output_circular_buffer<TT_DATA>*)&outWindow;
     outInterface.outWindow2 = (output_circular_buffer<TT_DATA>*)&outWindow2;
     this->filterKernel(inInterface, outInterface);
@@ -1308,6 +1328,7 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
     outInterface.outCascade = outCascade;
     outInterface.broadcastWindow = (output_async_buffer<TT_DATA>*)&broadcastWindow;
@@ -1366,6 +1387,7 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
     outInterface.outCascade = outCascade;
     this->filterKernel(inInterface, outInterface);
@@ -1419,6 +1441,7 @@ void fir_sr_asym<TT_DATA,
                                              output_async_buffer<TT_DATA>& __restrict broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
     inInterface.inCascade = inCascade;
     outInterface.outCascade = outCascade;
@@ -1469,6 +1492,7 @@ void fir_sr_asym<TT_DATA,
                                                     output_stream_cacc48* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
     inInterface.inCascade = inCascade;
     outInterface.outCascade = outCascade;
@@ -1521,6 +1545,7 @@ void fir_sr_asym<TT_DATA,
                                                              output_stream_cacc48* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
     inInterface.inCascade = inCascade;
     outInterface.outCascade = outCascade;
@@ -1576,8 +1601,10 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
     inInterface.inCascade = inCascade;
+    outInterface.outWindowPtr = outWindow.data();
     outInterface.outWindow = (output_circular_buffer<TT_DATA>*)&outWindow;
     this->filterKernel(inInterface, outInterface);
 };
@@ -1632,6 +1659,7 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
     inInterface.inCascade = inCascade;
     outInterface.outCascade = outCascade;
@@ -1688,6 +1716,7 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
     inInterface.inCascade = inCascade;
     outInterface.outCascade = outCascade;
@@ -1742,6 +1771,7 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
     outInterface.outCascade = outCascade;
     this->filterKernel(inInterface, outInterface);
@@ -1800,7 +1830,9 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
+    outInterface.outWindowPtr = outWindow.data();
     outInterface.outWindow = (output_circular_buffer<TT_DATA>*)&outWindow;
     this->filterKernel(inInterface, outInterface, inTaps);
 };
@@ -1858,7 +1890,9 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
+    outInterface.outWindowPtr = outWindow.data();
     outInterface.outWindow = (output_circular_buffer<TT_DATA>*)&outWindow;
     outInterface.outWindow2 = (output_circular_buffer<TT_DATA>*)&outWindow2;
     this->filterKernel(inInterface, outInterface, inTaps);
@@ -1911,8 +1945,10 @@ void fir_sr_asym<TT_DATA,
                                                     output_circular_buffer<TT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
     inInterface.inCascade = inCascade;
+    outInterface.outWindowPtr = outWindow.data();
     outInterface.outWindow = (output_circular_buffer<TT_DATA>*)&outWindow;
     this->filterKernelRtp(inInterface, outInterface);
 };
@@ -1964,8 +2000,10 @@ void fir_sr_asym<TT_DATA,
                                                   output_circular_buffer<TT_DATA>& __restrict outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
     inInterface.inCascade = inCascade;
+    outInterface.outWindowPtr = outWindow.data();
     outInterface.outWindow = (output_circular_buffer<TT_DATA>*)&outWindow;
     outInterface.outWindow2 = (output_circular_buffer<TT_DATA>*)&outWindow2;
     this->filterKernelRtp(inInterface, outInterface);
@@ -2024,6 +2062,7 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
     outInterface.outCascade = outCascade;
     outInterface.broadcastWindow = (output_async_buffer<TT_DATA>*)&broadcastWindow;
@@ -2083,6 +2122,7 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
     outInterface.outCascade = outCascade;
     this->filterKernel(inInterface, outInterface, inTaps);
@@ -2137,6 +2177,7 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
     inInterface.inCascade = inCascade;
     outInterface.outCascade = outCascade;
@@ -2192,6 +2233,7 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
     inInterface.inCascade = inCascade;
     outInterface.outCascade = outCascade;
@@ -2251,8 +2293,10 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<TP_CASC_IN, TT_DATA> inInterface;
     T_outputIF<TP_CASC_OUT, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
     inInterface.inCascade = inCascade;
+    outInterface.outWindowPtr = outWindow.data();
     outInterface.outWindow = (output_circular_buffer<TT_DATA>*)&outWindow;
     this->filterKernelRtp(inInterface, outInterface);
 };
@@ -2307,6 +2351,7 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<TP_CASC_IN, TT_DATA> inInterface;
     T_outputIF<TP_CASC_OUT, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
     inInterface.inCascade = inCascade;
     outInterface.outCascade = outCascade;
@@ -2363,6 +2408,7 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<TP_CASC_IN, TT_DATA> inInterface;
     T_outputIF<TP_CASC_OUT, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
     inInterface.inCascade = inCascade;
     outInterface.outCascade = outCascade;
@@ -2412,6 +2458,7 @@ void fir_sr_asym<TT_DATA,
                                                     output_stream_cacc48* outCascade) {
     T_inputIF<TP_CASC_IN, TT_DATA> inInterface;
     T_outputIF<TP_CASC_OUT, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
     inInterface.inCascade = inCascade;
     outInterface.outCascade = outCascade;
@@ -2467,6 +2514,7 @@ void fir_sr_asym<TT_DATA,
     constexpr int kdummy = 16;
     T_inputIF<TP_CASC_IN, TT_DATA> inInterface;
     T_outputIF<TP_CASC_OUT, TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
     outInterface.outCascade = outCascade;
     this->filterKernel(inInterface, outInterface, inTaps);

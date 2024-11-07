@@ -68,7 +68,9 @@ class test_graph : public graph {
                                               NUM_OUTPUTS,
                                               DUAL_IP,
                                               P_SSR, // Note P_SSR forced to 1 for REF
-                                              SAT_MODE>;
+                                              SAT_MODE,
+                                              CASC_LEN,
+                                              DATA_OUT_TYPE>;
 
     std::vector<COEFF_TYPE> m_taps_v;
 

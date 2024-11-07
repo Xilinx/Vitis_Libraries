@@ -60,7 +60,7 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION = 0,
           unsigned int TP_CASC_LEN = 1,
           unsigned int TP_DUAL_IP = 0,
-          unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_USE_COEFF_RELOAD = 0,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_API = 0,
           unsigned int TP_SAT = 1>
@@ -152,7 +152,7 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION = 0,
           unsigned int TP_CASC_LEN = 1,
           unsigned int TP_DUAL_IP = 0,
-          unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_USE_COEFF_RELOAD = 0,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_API = 0,
           unsigned int TP_SAT = 1>
@@ -242,8 +242,9 @@ class kernelFilterClass {
             : (TP_KERNEL_POSITION == TP_CASC_LEN / 2)
                   ? true
                   : false; // the center kernel calculates the center tap and passes it on to the cascade
-    alignas(32) TT_COEFF m_internalTaps[CEIL(m_kNumAsymPh1Taps, m_kCoeffRegVsize)]; // Filter taps/coefficients
-    alignas(32) TT_COEFF m_phaseTwoTap[m_kCoeffRegVsize] = {
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF
+        m_internalTaps[CEIL(m_kNumAsymPh1Taps, m_kCoeffRegVsize)]; // Filter taps/coefficients
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF m_phaseTwoTap[m_kCoeffRegVsize] = {
         nullElem<TT_COEFF>()}; // note, the array is initializeed, causing extra instructions during initialiation.
 
     // stream variables
@@ -259,15 +260,19 @@ class kernelFilterClass {
         (m_kSamplesInDataBuff - m_kNumCTZeroes + streamInitNullAccs * m_kLanes) % m_kSamplesInDataBuff;
     static constexpr unsigned int mainLoopLowPhOffset = lowPhOffset + streamInitAccs * m_kLanes;
     static constexpr unsigned int samplesNeededInBuff = m_kDataLoadVsize + m_kNumAsymPh1Taps + cascOffset - 1;
-    alignas(32) int storePh1Data[(1024 / 8) / sizeof(int)] = {0}; // 1024b buffer to retain margin data between calls
-    alignas(32) int storePh2Data[(1024 / 8) / sizeof(int)] = {0}; // 1024b buffer to retain margin data between calls
-    alignas(32) int delay[(1024 / 8) / sizeof(int)] = {0};        // 1024b buffer to retain margin data between calls
+    alignas(__ALIGN_BYTE_SIZE__) int storePh1Data[(1024 / 8) / sizeof(int)] = {
+        0}; // 1024b buffer to retain margin data between calls
+    alignas(__ALIGN_BYTE_SIZE__) int storePh2Data[(1024 / 8) / sizeof(int)] = {
+        0}; // 1024b buffer to retain margin data between calls
+    alignas(__ALIGN_BYTE_SIZE__) int delay[(1024 / 8) / sizeof(int)] = {
+        0}; // 1024b buffer to retain margin data between calls
     int doInit = 1;
     // Constants for coefficient reload
     static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
-    alignas(32) TT_COEFF m_oldInTaps[CEIL((TP_FIR_LEN + 1) / 4 + 1,
-                                          m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
-    bool m_coeffnEq;                                          // Are coefficients sets equal?
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF
+        m_oldInTaps[CEIL((TP_FIR_LEN + 1) / 4 + 1,
+                         m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
+    bool m_coeffnEq;                         // Are coefficients sets equal?
     void filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                           T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
     // FIR filter function variant utilizing single 1024-bit buffer.
@@ -360,7 +365,7 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_USE_COEFF_RELOAD, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_API,
           unsigned int TP_SAT>

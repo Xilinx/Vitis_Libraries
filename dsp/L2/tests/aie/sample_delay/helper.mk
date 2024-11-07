@@ -38,14 +38,14 @@ STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 HELPER_CUR_DIR ?= .
 
 gen_input:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(SSR_INPUT_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(DATA_STIM_TYPE) $(DUMMY_DYN_PT_SIZE) $(DUMMY_MAX_PT_SIZE) $(DATA_TYPE) $(PORT_API) $(USE_PLIO)  $(DUMMY_FFT_PARAM) $(USE_COEFF_RELOAD) $(DUMMY_COEFF_TYPE) $(DUMMY_COEFF_STIM_TYPE) $(DUMMY_FIR_LEN)
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(UUT_SSR) --split --dual $(DUAL_INPUT_SAMPLES) -k $(DUMMY_COEFF_RELOAD_HEADER_MODE) -w ${SSR_INPUT_WINDOW_VSIZE} -c $(DUMMY_COEFF_TYPE) -fl $(DUMMY_FIR_LEN);\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(SSR_INPUT_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(DATA_STIM_TYPE) $(DUMMY_DYN_PT_SIZE) $(DUMMY_MAX_PT_SIZE) $(DATA_TYPE) $(PORT_API) $(USE_PLIO)  $(DUMMY_FFT_PARAM) $(USE_COEFF_RELOAD) $(DUMMY_COEFF_TYPE) $(DUMMY_COEFF_STIM_TYPE) $(DUMMY_FIR_LEN) 64
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(UUT_SSR) --split --dual $(DUAL_INPUT_SAMPLES) -k $(DUMMY_COEFF_RELOAD_HEADER_MODE) -w ${SSR_INPUT_WINDOW_VSIZE} -c $(DUMMY_COEFF_TYPE) -fl $(DUMMY_FIR_LEN) --plioWidth 64;\
 
 create_config:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP)
 
 ssr_zip:
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(SPLIT_ZIP_FILE) --type $(DATA_TYPE) --ssr $(UUT_SSR) --zip --dual $(DUAL_OUTPUT_SAMPLES) -k 0 -w $(SSR_OUTPUT_WINDOW_VSIZE)
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(SPLIT_ZIP_FILE) --type $(DATA_TYPE) --ssr $(UUT_SSR) --zip --dual $(DUAL_OUTPUT_SAMPLES) -k 0 -w $(SSR_OUTPUT_WINDOW_VSIZE) --plioWidth 64
 
 get_status:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)

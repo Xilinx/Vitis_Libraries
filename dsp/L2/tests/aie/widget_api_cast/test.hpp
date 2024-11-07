@@ -97,13 +97,13 @@ class test_graph : public graph {
         for (int i = 0; i < NUM_INPUTS; i++) {
             std::string filenameIn = QUOTE(INPUT_FILE);
             filenameIn.insert(filenameIn.length() - 4, ("_" + std::to_string(i) + "_0"));
-            in[i] = input_plio::create("PLIO_in_" + std::to_string(i), adf::plio_32_bits, filenameIn);
+            in[i] = input_plio::create("PLIO_in_" + std::to_string(i), adf::plio_64_bits, filenameIn);
             connect<>(in[i].out[0], widgetGraph.in[i]);
         }
         for (int i = 0; i < NUM_OUTPUT_CLONES; i++) {
             std::string filenameOut = QUOTE(OUTPUT_FILE);
             filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(i) + "_0"));
-            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_32_bits, filenameOut);
+            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_64_bits, filenameOut);
             connect<>(widgetGraph.out[i], out[i].in[0]);
         }
 

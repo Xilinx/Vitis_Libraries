@@ -9,6 +9,9 @@
     ],
     "platform_properties": {
         "vck190": {
+            "param_set": [
+                "*_aie1_*"
+            ],
             "v++": {
                 "compiler": {
                     "clflags": []
@@ -18,10 +21,7 @@
                         "--config PROJECT/system.cfg"
                     ]
                 }
-            },
-            "param_set": [
-                "*_aie1_*"
-            ]
+            }
         },
         "vek280": {
             "param_set": [
@@ -65,7 +65,6 @@
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f $(CUR_DIR)/helper.mk get_latency HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) \"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f $(CUR_DIR)/helper.mk get_stats HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) \"",
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_qor HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\"",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
             ]
         },
@@ -136,7 +135,7 @@
                         "LIB_DIR/L1/src/aie/outer_tensor.cpp",
                         "uut_config.h"
                     ],
-                    "pl-freq": 1000,
+                    "pl-freq": 625,
                     "workdir": "./Work",
                     "options": "",
                     "name": "libadf.a"
@@ -150,7 +149,12 @@
             "function": "generate_testbench"
         }
     },
-    "config_make": "params.mk",
+    "config_make": "LIB_DIR/L2/tests/aie/common/scripts/params.mk",
+    "associated_files": [
+        "LIB_DIR/L2/tests/aie/common/scripts",
+        "LIB_DIR/L2/meta/*common*",
+        "LIB_DIR/L2/meta/outer_tensor*"
+    ],
     "parameter_file": "multi_params.json",
     "testinfo": {
         "disable": false,
@@ -160,9 +164,12 @@
                 "dependency": [],
                 "env": "",
                 "cmd": "",
-                "max_memory_MB": 32768,
+                "max_memory_MB": {
+                    "vitis_aie_x86sim": 8192,
+                    "vitis_aie_sim": 40960
+                },
                 "max_time_min": {
-                    "vitis_aie_x86sim": 60,
+                    "vitis_aie_x86sim": 180,
                     "vitis_aie_sim": 200
                 }
             }

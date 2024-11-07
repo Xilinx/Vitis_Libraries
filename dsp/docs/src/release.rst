@@ -13,6 +13,33 @@ Release Notes
    :hidden:
    :maxdepth: 1
 
+2024.2
+======
+
+The following features have been added to the library in this release.
+
+*  **FFT** - New features and optimizations.
+
+In this release a new parameter has been added to the FFT: `TT_OUT_DATA`. This parameter allows the output data type 
+to differ from the input data type. e.g. to allow TT_DATA (input) to be cint16 with TT_OUT_DATA to be cint32.
+Also, various optimizations have been implemented to reduce the memory resource used by some configurations of the FFT.
+
+*  **Bitonic Sort** - New library element.
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and class name**                                                |
++=======================================+=============================================================================+
+| Bitonic Sort                          |  xf::dsp::aie::bitonic_sort                                                 |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This element adds an implementation of the bitonic sorting algorithm.
+
+Supports AIE and AIE-ML devices.
+
+*  **Config Helper** - Console Interface script for configuring DSPLIB IPs.
+
+Config Helper works in conjuction with the DSPLIB metadata for helping users to build legal configurations and generate resulting graphs for DSPLIB AIE-IPs.
+
 2024.1
 ======
 

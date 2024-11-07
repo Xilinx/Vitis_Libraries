@@ -7,13 +7,13 @@
     },
     "parameters": [
     {
-	  "key": "AIE_VARIANT",
-	  "name": "AIE_VARIANT",
-      "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
-      "default": 1,
-	  "label": "AIE Variant:",
-      "tablabel": "Main",
-      "parameterType":"edit"
+        "key": "AIE_VARIANT",
+        "name": "AIE_VARIANT",
+        "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
+        "default": 1,
+        "label": "AIE Variant:",
+        "tablabel": "Main",
+        "parameterType":"edit"
     },
     {
         "key": "TT_DATA",
@@ -46,7 +46,7 @@
         "validator": {
         "file": "vmc_stream_mixed_radix_fft.py",
         "function": "vmc_validate_point_size",
-        "args": ["AIE_VARIANT"]
+        "args": ["AIE_VARIANT", "data_type", "dyn_pt_size"]
         },
         "label": "FFT size:",
         "tablabel": "Main",
@@ -60,9 +60,37 @@
         "validator": {
         "file": "vmc_stream_mixed_radix_fft.py",
         "function": "vmc_validate_input_window_size",
-        "args": ["point_size"]
+        "args": ["AIE_VARIANT", "data_type", "point_size"]
         },
-        "label": "Input frame size (Number of samples):",
+        "label": "Input window size (Number of samples):",
+        "tablabel": "Main",
+        "parameterType":"edit"
+    },
+    {
+        "key": "TP_DYN_PT_SIZE",
+        "name": "dyn_pt_size",
+        "description": "Indicator of whether to use dynamic (1) or static (0) point size",
+        "default": 0,
+        "validator": {
+        "file": "vmc_stream_mixed_radix_fft.py",
+        "function": "vmc_validate_dyn_pt_size",
+        "args": []
+        },
+        "label": "Dynamic (1) or static (0) point size:",
+        "tablabel": "Main",
+        "parameterType":"edit"
+    },
+    {
+        "key": "TP_CASC_LEN",
+        "name": "casc_length",
+        "description": "The length of cascaded kernels",
+        "default": 1,
+        "validator": {
+        "file": "vmc_stream_mixed_radix_fft.py",
+        "function": "vmc_validate_casc_length",
+        "args": ["point_size", "dyn_pt_size"]
+        },
+        "label": "Number of cascade stages:",
         "tablabel": "Main",
         "parameterType":"edit"
     },
@@ -86,8 +114,8 @@
         "description": "The rounding to be applied during the shift down stage of processing.",
         "default": "Round symmetrical to infinity",
         "validator": {
-                "file": "vmc_stream_mixed_radix_fft.py",
-                "function": "vmc_validate_TP_RND",
+        "file": "vmc_stream_mixed_radix_fft.py",
+        "function": "vmc_validate_rnd_mode",
         "args": ["AIE_VARIANT"]
         },
         "label": "Rounding mode:",
@@ -109,20 +137,6 @@
         "label": "Saturation mode:",
         "tablabel": "Main",
         "parameterType":"popup"
-    },
-    {
-        "key": "TP_CASC_LEN",
-        "name": "casc_length",
-        "description": "The length of cascaded kernels",
-        "default": 1,
-        "validator": {
-        "file": "vmc_stream_mixed_radix_fft.py",
-        "function": "vmc_validate_casc_length",
-        "args": ["point_size"]
-        },
-        "label": "Number of cascade stages:",
-        "tablabel": "Main",
-        "parameterType":"edit"
     }
 
     ],

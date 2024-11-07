@@ -12,33 +12,33 @@ def vmc_validate_coeff_type(args):
 def vmc_validate_input_window_size(args):
     input_window_size = args["input_window_size"]
     data_type = args["data_type"]
-    use_coeff_reload = args["use_coeff_reload"]
     coef_type = args["coef_type"]
-    coeff = args["coeff"]
     api = 0
     ssr = 1
     if input_window_size < 4:
         return isError(f"Minimum value for parameter Input window size is 4, but got {input_window_size}.")
     fir_length = fn_get_fir_length_hb(args)
-    return deci_hb.fn_validate_input_window_size(data_type, coef_type, fir_length, input_window_size, api, ssr)
+    return fn_validate_input_window_size(data_type, coef_type, fir_length, input_window_size, api, ssr)
 
 def vmc_validate_casc_length(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    data_type = args["data_type"]
+    coef_type = args["coef_type"]
+    api = 0
     casc_length = args["casc_length"]
-    return fn_validate_casc_len(casc_length);
-
+    fir_length = fn_get_fir_length_hb(args)
+    use_coeff_reload = args["use_coeff_reload"]
+    interp_poly = args["interp_poly"]
+    ssr = 1
+    return fn_validate_TP_CASC_LEN(AIE_VARIANT, data_type, coef_type, api, fir_length, use_coeff_reload, interp_poly, ssr, casc_length)
 
 def vmc_validate_coeff(args):
     use_coeff_reload = args["use_coeff_reload"]
-    coef_type = args["coef_type"]
-    coeff = args["coeff"]
     data_type = args["data_type"]
-    casc_length = args["casc_length"]
-    ssr = 1
-    interp_poly = args["interp_poly"]
     api = 0
     fir_length = fn_get_fir_length_hb(args)
-    AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload, interp_poly, AIE_VARIANT)
+    return fn_validate_TP_FIR_LEN(data_type, api, use_coeff_reload, fir_length)
+
 
 def validate_sat_mode(args):
     sat_mode = args["sat_mode"]
@@ -56,16 +56,14 @@ def vmc_validate_upshift_ct(args):
     return fn_validate_upshift_ct(data_type, upshift_ct, AIE_VARIANT)
 
 def vmc_validate_interp_poly(args):
-        interp_poly = args["interp_poly"]
-        ssr = 1
-        api = 0
-        ret = fn_validate_para_interp_poly(api, interp_poly, ssr)
-        if ret["is_valid"] == False:
-          err_msg = ret["err_message"]
-          err_msg = err_msg.replace("TP_PARA_INTERP_POLY", "'Interpolate polyphase'")
-          return {"is_valid": False, "err_message": err_msg}
-        else:
-          return {"is_valid": True}
+    interp_poly = args["interp_poly"]
+    ret = fn_validate_TP_PARA_INTERP_POLY(interp_poly)
+    if ret["is_valid"] == False:
+        err_msg = ret["err_message"]
+        err_msg = err_msg.replace("TP_PARA_INTERP_POLY", "'Interpolate polyphase'")
+        return {"is_valid": False, "err_message": err_msg}
+    else:
+        return {"is_valid": True}
 
 def vmc_validate_ssr(args):
     ssr = 1

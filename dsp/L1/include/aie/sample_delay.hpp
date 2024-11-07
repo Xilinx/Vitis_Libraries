@@ -32,18 +32,12 @@
 */
 
 #include <adf.h>
+#include "device_defs.h"
 #include "aie_api/aie_adf.hpp"
 #include "aie_api/aie.hpp"
 //#include "kernel_api_utils.hpp"
 //#include "sample_delay_traits.hpp"
 //#include <vector>
-
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
 
 using namespace adf;
 namespace xf {
@@ -119,8 +113,7 @@ class sample_delay<TT_DATA, TP_WINDOW_VSIZE, 1, TP_MAX_DELAY>
     static constexpr int perfBuffSize = 0;
     static constexpr int miniCacheSize = (TP_MAX_DELAY + perfBuffSize);
     ptrdiff_t cacheMrgn = TP_MAX_DELAY;
-    // alignas(::aie::vector_decl_align) TT_DATA miniCache[miniCacheSize] = {};
-    alignas(32) TT_DATA miniCache[miniCacheSize] = {};
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA miniCache[miniCacheSize] = {};
 
    public:
     // Constructor

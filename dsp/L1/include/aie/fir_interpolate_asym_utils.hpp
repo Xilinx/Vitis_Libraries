@@ -17,13 +17,7 @@
 #ifndef _DSPLIB_FIR_INTERPOLATE_ASYM_UTILS_HPP_
 #define _DSPLIB_FIR_INTERPOLATE_ASYM_UTILS_HPP_
 
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
-
+#include "device_defs.h"
 namespace xf {
 namespace dsp {
 namespace aie {

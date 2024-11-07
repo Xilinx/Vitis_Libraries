@@ -43,7 +43,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 TARGET ?= aiesim
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  vck190
+PLATFORM_ALLOWLIST += vck190
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk
@@ -67,7 +67,7 @@ AIE_PKG_DIR ?= Work
 # Setting customized_params in aiecompiler
 
     
-GRAPHNAME ?= FIR_TDM_Stream_d942dd75
+GRAPHNAME ?= FIR_TDM_Stream_e12d2f03
 VMC_GRAPHDIR ?= xmc_aie_lib/$(GRAPHNAME)
 VMC_KERNEL ?= vmc_stream_fir_tdm
 

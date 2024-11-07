@@ -14,39 +14,42 @@ def vmc_validate_coeff_type(args):
     return {"is_valid": True}
 
 def vmc_validate_input_window_size(args):
-    input_window_size = args["input_window_size"]
-    data_type = args["data_type"]
-    use_coeff_reload = args["use_coeff_reload"]
-    coef_type = args["coef_type"]
-    coeff = args["coeff"]
-    decimate_factor = args["decimate_factor"]
-    api = 1
-    ssr = args["ssr"]
-    deci_poly = args["deci_poly"]
-    fir_length = fn_get_fir_length(args)
-    return fn_validate_input_window_size(data_type, coef_type, fir_length, decimate_factor, input_window_size, api, ssr)
+    vmc_args = dict(args)
+    vmc_args={
+        "AIE_VARIANT"           : args["AIE_VARIANT"],
+        "TP_INPUT_WINDOW_VSIZE" : args["input_window_size"],
+        "TT_DATA"               : args["data_type"],
+        "TT_COEFF"              : args["coef_type"],
+        "TP_USE_COEFF_RELOAD"   : args["use_coeff_reload"],
+        "coeff"                 : args["coeff"],
+        "TP_DECIMATE_FACTOR"    : args["decimate_factor"],
+        "TP_API"                : 0,
+        "TP_SSR"                : args["ssr"],
+        "TP_FIR_LEN"            : fn_get_fir_length(args) }
+    return validate_TP_INPUT_WINDOW_VSIZE(vmc_args)
 
 def vmc_validate_casc_length(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    data_type = args["data_type"]
+    coef_type = args["coef_type"]
+    api=1
+    fir_len = fn_get_fir_length(args)
+    use_coeff_reload = args["use_coeff_reload"]
+    ssr=args["ssr"]
     casc_length = args["casc_length"]
-    return fn_validate_casc_len(casc_length);
+    decimate_factor = args["decimate_factor"]
+    return fn_validate_TP_CASC_LEN(AIE_VARIANT, data_type, coef_type, api, fir_len, use_coeff_reload, ssr, casc_length, decimate_factor)
+
 
 def validate_sat_mode(args):
     sat_mode = args["sat_mode"]
     return fn_validate_satMode(sat_mode);
 
 def vmc_validate_coeff(args):
-    use_coeff_reload = args["use_coeff_reload"]
+    fir_len = fn_get_fir_length(args)
     coef_type = args["coef_type"]
     coeff = args["coeff"]
-    data_type = args["data_type"]
-    casc_length = args["casc_length"]
-    AIE_VARIANT = args["AIE_VARIANT"]
-    decimate_factor = args["decimate_factor"]
-    ssr = args["ssr"]
-    deci_poly = args["deci_poly"]
-    api = 1
-    fir_length = fn_get_fir_length(args)
-    return fn_validate_fir_len(data_type, coef_type, fir_length, decimate_factor, casc_length, ssr, api, use_coeff_reload, AIE_VARIANT)
+    return fn_validate_coeff(coef_type, fir_len, coeff)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]
@@ -54,24 +57,30 @@ def vmc_validate_shift_val(args):
     return fn_validate_shift(data_type, shift_val)
 
 def vmc_validate_decimate_factor(args):
+    decimate_factor = args["decimate_factor"]
+    AIE_VARIANT = args["AIE_VARIANT"]
+    fir_len = fn_get_fir_length(args)
+    return fn_validate_TP_DECIMATE_FACTOR(AIE_VARIANT, fir_len, decimate_factor)
+
+def vmc_validate_decimate_poly(args):
     data_type = args["data_type"]
     coef_type = args["coef_type"]
     decimate_factor = args["decimate_factor"]
     api = 1
-    AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_validate_decimate_factor(data_type, coef_type, decimate_factor, api, AIE_VARIANT)
-
-def vmc_validate_decimate_poly(args):
-    TP_PARA_DECI_POLY = args["deci_poly"]
-    return fn_validate_deci_poly(TP_PARA_DECI_POLY);
-
-def vmc_validate_ssr(args):
-    ssr = args["ssr"]
-    api = 1
     deci_poly = args["deci_poly"]
     AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_TP_PARA_DECI_POLY(data_type, coef_type, decimate_factor, api, AIE_VARIANT, deci_poly)
+
+def vmc_validate_ssr(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    data_type = args["data_type"]
+    coef_type = args["coef_type"]
+    api=1
+    fir_len = fn_get_fir_length(args)
+    use_coeff_reload = args["use_coeff_reload"]
+    ssr=args["ssr"]
     decimate_factor = args["decimate_factor"]
-    return fn_validate_deci_ssr(ssr, api, decimate_factor, deci_poly, AIE_VARIANT)
+    return fn_validate_TP_SSR(AIE_VARIANT, data_type, coef_type, api, fir_len, use_coeff_reload, decimate_factor, ssr)
 
 def vmc_validate_input_ports(args):
     dual_ip = 1 if args["dual_ip"] else 0

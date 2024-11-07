@@ -17,13 +17,14 @@
 #ifndef _DSPLIB_FIR_REF_UTILS_HPP_
 #define _DSPLIB_FIR_REF_UTILS_HPP_
 
+#include "device_defs.h"
+
 /*
 Reference model utilities.
 This file contains sets of overloaded, templatized and specialized templatized
 functions for use by the reference model classes.
 */
 
-#include "device_defs.h"
 #define CASC_IN_TRUE true
 #define CASC_IN_FALSE false
 #define CASC_OUT_TRUE true
@@ -44,30 +45,6 @@ functions for use by the reference model classes.
 
 // Round up to y
 #define CEIL(x, y) (((x + y - 1) / y) * y)
-
-//----------------------------------------------------------------------
-// isComplex
-template <typename T>
-constexpr bool isComplex() {
-    // #if __SUPPORTS_CFLOAT__ == 1
-    return (std::is_same<T, cint16>::value || std::is_same<T, cint32>::value || std::is_same<T, cfloat>::value) ? true
-                                                                                                                : false;
-    // #endif
-    // #if __SUPPORTS_CFLOAT__ == 0
-    //     return (std::is_same<T, cint16>::value || std::is_same<T, cint32>::value) ? true : false;
-    // #endif
-};
-
-// isFloat
-template <typename T>
-constexpr bool isFloat() {
-    // #if __SUPPORTS_CFLOAT__ == 1
-    return (std::is_same<T, float>::value || std::is_same<T, cfloat>::value) ? true : false;
-    // #endif
-    // #if __SUPPORTS_CFLOAT__ == 0
-    //     return (std::is_same<T, float>::value) ? true : false;
-    // #endif
-};
 
 static const int C_PMAX16 = std::numeric_limits<short int>::max();
 static const int C_NMAX16 = std::numeric_limits<short int>::min();
@@ -380,6 +357,12 @@ template <>
 inline float castAcc(T_accRef<float> acc) {
     return (float)acc.real;
 };
+#ifdef _SUPPORTS_BFLOAT16_
+template <>
+inline bfloat16 castAcc(T_accRef<bfloat16> acc) {
+    return (bfloat16)acc.real;
+};
+#endif
 template <>
 inline cint16_t castAcc(T_accRef<cint16_t> acc) {
     cint16_t cacc16;
@@ -428,6 +411,10 @@ inline void multiplyAcc(T_accRef<cint16_t>& accum, cint16_t data, cint16_t coeff
     accum.imag += (int64_t)coeff.real * (int64_t)data.imag + (int64_t)coeff.imag * (int64_t)data.real;
 };
 template <>
+inline void multiplyAcc(T_accRef<int32_t>& accum, int16_t data, int16_t coeff) {
+    accum.real += (int64_t)data * coeff;
+};
+template <>
 inline void multiplyAcc(T_accRef<int32_t>& accum, int32_t data, int16_t coeff) {
     accum.real += (int64_t)data * coeff;
 };
@@ -445,6 +432,11 @@ inline void multiplyAcc(T_accRef<int32_t>& accum, int32_t data, int32_t coeff) {
 };
 template <>
 inline void multiplyAcc(T_accRef<cint16_t>& accum, cint16_t data, int32_t coeff) {
+    accum.real += (int64_t)data.real * (int64_t)coeff;
+    accum.imag += (int64_t)data.imag * (int64_t)coeff;
+};
+template <>
+inline void multiplyAcc(T_accRef<cint32_t>& accum, cint16_t data, int16_t coeff) {
     accum.real += (int64_t)data.real * (int64_t)coeff;
     accum.imag += (int64_t)data.imag * (int64_t)coeff;
 };
@@ -485,6 +477,11 @@ inline void multiplyAcc(T_accRef<cint32_t>& accum, cint32_t data, cint16_t coeff
 };
 template <>
 inline void multiplyAcc(T_accRef<cint16_t>& accum, cint16_t data, cint32_t coeff) {
+    accum.real += (int64_t)coeff.real * (int64_t)data.real - (int64_t)coeff.imag * (int64_t)data.imag;
+    accum.imag += (int64_t)coeff.real * (int64_t)data.imag + (int64_t)coeff.imag * (int64_t)data.real;
+};
+template <>
+inline void multiplyAcc(T_accRef<cint32_t>& accum, cint16_t data, cint16_t coeff) {
     accum.real += (int64_t)coeff.real * (int64_t)data.real - (int64_t)coeff.imag * (int64_t)data.imag;
     accum.imag += (int64_t)coeff.real * (int64_t)data.imag + (int64_t)coeff.imag * (int64_t)data.real;
 };
@@ -608,5 +605,47 @@ inline cfloat nullElem() {
     return retVal;
 };
 // #endif
+
+template <typename TT>
+struct realType {
+    using type = int16;
+};
+template <>
+struct realType<cint32> {
+    using type = int32;
+};
+template <>
+struct realType<cfloat> {
+    using type = float;
+};
+#ifdef _SUPPORTS_BFLOAT16_
+template <>
+struct realType<cbfloat16> {
+    using type = bfloat16;
+};
+#endif // _SUPPORTS_BFLOAT16_
+template <typename TT>
+using realType_t = typename realType<TT>::type;
+
+template <typename TT>
+struct complexType {
+    using type = cint16;
+};
+template <>
+struct complexType<int32> {
+    using type = cint32;
+};
+template <>
+struct complexType<float> {
+    using type = cfloat;
+};
+#ifdef _SUPPORTS_BFLOAT16_
+template <>
+struct complexType<bfloat16> {
+    using type = cbfloat16;
+};
+#endif // _SUPPORTS_BFLOAT16_
+template <typename TT>
+using complexType_t = typename complexType<TT>::type;
 
 #endif // ifdef _DSPLIB_FIR_REF_UTILS_HPP_

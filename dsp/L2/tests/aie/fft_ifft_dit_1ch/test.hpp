@@ -83,6 +83,9 @@ class test_graph : public graph {
         printf("Data type            = ");
         printf(QUOTE(DATA_TYPE));
         printf("\n");
+        printf("Data out type        = ");
+        printf(QUOTE(DATA_OUT_TYPE));
+        printf("\n");
         printf("TWIDDLE type         = ");
         printf(QUOTE(TWIDDLE_TYPE));
         printf("\n");
@@ -95,7 +98,7 @@ class test_graph : public graph {
         // FIR sub-graph
         xf::dsp::aie::fft::dit_1ch::UUT_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, CASC_LEN,
                                               DYN_PT_SIZE, WINDOW_VSIZE, API_IO, PARALLEL_POWER, USE_WIDGETS,
-                                              ROUND_MODE, SAT_MODE, TWIDDLE_MODE>
+                                              ROUND_MODE, SAT_MODE, TWIDDLE_MODE, DATA_OUT_TYPE>
             fftGraph;
         for (int i = 0; i < (kPortsPerTile << PARALLEL_POWER); i++) {
             std::string filenameOut = QUOTE(OUTPUT_FILE);
@@ -108,10 +111,10 @@ class test_graph : public graph {
             filenameIn.insert(filenameIn.length() - 4, ("_" + std::to_string(i) + "_0"));
 
             // Make connections
-            in[i] = input_plio::create("PLIO_in_" + std::to_string(i), adf::plio_32_bits, filenameIn);
+            in[i] = input_plio::create("PLIO_in_" + std::to_string(i), adf::plio_64_bits, filenameIn);
             connect<>(in[i].out[0], fftGraph.in[i]);
 
-            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_32_bits, filenameOut);
+            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_64_bits, filenameOut);
             connect<>(fftGraph.out[i], out[i].in[0]);
 
 // apply location constraints for TP_POINT_SIZE=64k

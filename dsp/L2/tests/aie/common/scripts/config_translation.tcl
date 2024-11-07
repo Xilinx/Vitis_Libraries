@@ -17,6 +17,8 @@
 proc get_param_map {libElement} {
     set param_map {
         "DATA_TYPE" "TT_DATA"
+        "DATA_TYPE_D1" "TT_DATA_D1"
+        "DATA_TYPE_D2" "TT_DATA_D2"
         "COEFF_TYPE" "TT_COEFF"
         "FIR_LEN" "TP_FIR_LEN"
         "SHIFT" "TP_SHIFT"
@@ -36,6 +38,8 @@ proc get_param_map {libElement} {
         "UPSHIFT_CT" "TP_UPSHIFT_CT"
         "TWIDDLE_TYPE" "TT_TWIDDLE"
         "POINT_SIZE" "TP_POINT_SIZE"
+        "POINT_SIZE_D1" "TP_POINT_SIZE_D1"
+        "POINT_SIZE_D2" "TP_POINT_SIZE_D2"
         "DIM_SIZE" "TP_DIM"
         "FFT_NIFFT" "TP_FFT_NIFFT"
         "DYN_PT_SIZE" "TP_DYN_PT_SIZE"
@@ -73,6 +77,8 @@ proc get_param_map {libElement} {
         "DDS_PHASE_INC" "phaseInc"
         "INITIAL_DDS_OFFSET" "initialPhaseOffset"
         "UUT_WINDOW_VSIZE" "TP_INPUT_WINDOW_VSIZE"
+        "WINDOW_VSIZE_D1" "TP_WINDOW_VSIZE_D1"
+        "WINDOW_VSIZE_D2" "TP_WINDOW_VSIZE_D2"
         "SFDR" "TP_SFDR"
         "SAT_MODE" "TP_SAT"
         "P_SAT_MODE" "TP_SAT"
@@ -102,7 +108,12 @@ proc get_param_map {libElement} {
         "RND" "TP_RND"
         "SAT" "TP_SAT"        
         "DIM_A_LEADING" "TP_DIM_A_LEADING"
-
+        "ASCENDING" "TP_ASCENDING"
+        "FUNC_CHOICE" "TP_FUNC_CHOICE"
+        "COARSE_BITS" "TP_COARSE_BITS"
+        "FINE_BITS" "TP_FINE_BITS"
+        "DOMAIN_MODE" "TP_DOMAIN_MODE"
+	      "PHASES" "TP_PHASES"
     }
     return $param_map
 }

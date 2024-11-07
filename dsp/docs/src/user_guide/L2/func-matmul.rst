@@ -22,6 +22,11 @@ The graph entry point is the following:
 
     xf::dsp::aie::blas::matrix_mult::matrix_mult_graph
 
+Device Support
+==============
+The Matrix Multiply supports AIE and AIE-ML devices.
+
+
 Supported Types
 ===============
 
@@ -253,7 +258,7 @@ When used with ``TP_DIM_A_LEADING``, ``TP_DIM_B_LEADING``, or ``TP_DIM_OUT_LEADI
 
 If the additional kernels are not selected, then the matrix multiply kernels assume incoming data is in the correct format, as specified above.
 
-The tiling imposes a restriction that the matrix dimensions need to be multiples of the tile dimensions. If you require dimensions that do not satisfy these requirements, pad the matrices up to the closet multiple of the tile dimensions in table :ref:`table-tile-pattern-AIE` or :ref:`table-tile-pattern-AIE-ML` with zeroes for AIE and AIE-ML respectively.
+The tiling imposes a restriction that the matrix dimensions need to be multiples of the tile dimensions. If you require dimensions that do not satisfy these requirements, pad the matrices up to the closet multiple of the tile dimensions in table :ref:`table-tile-pattern-AIE` or :ref:`table-tile-pattern-AIE-ML` with zeroes for AIE and AIE-ML devices respectively.
 
 Maximum matrix dimensions per kernel
 ------------------------------------

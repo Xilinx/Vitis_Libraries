@@ -58,8 +58,8 @@ validate_config:
 
 create_input:
 	@echo starting create_input
-	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(REF_INPUT_FILE) $(NO_PAD_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) 0 0 $(DATA_TYPE) $(API_IO) 1 0;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/input_pad_and_split.pl --variant $(AIE_VARIANT) --file $(REF_INPUT_FILE) --newFile $(LOC_INPUT_FILE) --type $(DATA_TYPE) --pointSize $(POINT_SIZE) --cascLen $(CASC_LEN) --numFrames $(NUM_FRAMES) --ssr $(UUT_SSR);\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(REF_INPUT_FILE) $(NO_PAD_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) 0 0 $(DATA_TYPE) $(API_IO) 1 0 0 0 0 0
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/input_pad_and_split.pl --variant $(AIE_VARIANT) --file $(REF_INPUT_FILE) --newFile $(LOC_INPUT_FILE) --type $(DATA_TYPE) --pointSize $(POINT_SIZE) --cascLen $(CASC_LEN) --numFrames $(NUM_FRAMES) --ssr $(UUT_SSR) --plioWidth 64
 	echo Input ready
 
 sim_ref:
@@ -79,9 +79,9 @@ prep_aie_out:
 		grep -ve '[XT]' $(HELPER_CUR_DIR)/aiesimulator_output/data/$$n > $(HELPER_CUR_DIR)/data/$$n;\
 	done
 
-get_diff: prep_x86_out prep_aie_out
-	@echo perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr ${UUT_SSR} --zip --dual 0 -k 0 -w ${OUT_WINDOW_VSIZE};\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr ${UUT_SSR} --zip --dual 0 -k 0 -w ${OUT_WINDOW_VSIZE};\
+get_diff:
+	@echo perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr ${UUT_SSR} --zip --dual 0 -k 0 -w ${OUT_WINDOW_VSIZE} --pldioWidth 64;\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr ${UUT_SSR} --zip --dual 0 -k 0 -w ${OUT_WINDOW_VSIZE} --plioWidth 64;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) PERCENT
 
 get_status:
@@ -91,5 +91,4 @@ get_qor:
 	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input_0_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(NO_PAD_WINDOW_VSIZE) $(NITER)
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(IN_WINDOW_VSIZE) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output dftMain $(NITER)
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_fft_theoretical_min.tcl $(DATA_TYPE) $(TWIDDLE_TYPE) $(IN_WINDOW_VSIZE) $(POINT_SIZE) $(CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL) 0 $(API_IO)
 	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts

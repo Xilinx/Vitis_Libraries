@@ -15,6 +15,7 @@ def vmc_validate_coeff_type(args):
     return {"is_valid": True}
 
 def vmc_validate_input_window_size(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
     input_window_size = args["input_window_size"]
     data_type = args["data_type"]
     use_coeff_reload = args["use_coeff_reload"]
@@ -23,11 +24,19 @@ def vmc_validate_input_window_size(args):
     api = 0
     ssr = 1
     fir_length = fn_get_fir_length_hb(args)
-    return fn_validate_input_window_size(data_type, coef_type, fir_length, input_window_size, api, ssr)
+    return fn_validate_input_window_size(AIE_VARIANT, data_type, coef_type, fir_length, input_window_size, api, ssr)
 
 def vmc_validate_casc_length(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    data_type = args["data_type"]
     casc_length = args["casc_length"]
-    return fn_validate_casc_len(casc_length);
+    coef_type = args["coef_type"]
+    api=0
+    fir_length = fn_get_fir_length_hb(args)
+    use_coeff_reload = args["use_coeff_reload"]
+    deci_poly = args["deci_poly"]
+    ssr=1
+    return fn_validate_TP_CASC_LEN(AIE_VARIANT, data_type, coef_type, api, fir_length, use_coeff_reload, deci_poly, ssr, casc_length)
 
 def validate_sat_mode(args):
     sat_mode = args["sat_mode"]
@@ -35,16 +44,10 @@ def validate_sat_mode(args):
 
 def vmc_validate_coeff(args):
     use_coeff_reload = args["use_coeff_reload"]
-    coef_type = args["coef_type"]
-    coeff = args["coeff"]
     data_type = args["data_type"]
-    casc_length = args["casc_length"]
-    ssr = 1
     api = 0
-    deci_poly = args["deci_poly"]
-    AIE_VARIANT = args["AIE_VARIANT"]
     fir_length = fn_get_fir_length_hb(args)
-    return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload, deci_poly, AIE_VARIANT)
+    return fn_validate_TP_FIR_LEN(data_type, api, use_coeff_reload, fir_length)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]
@@ -52,15 +55,19 @@ def vmc_validate_shift_val(args):
     return fn_validate_shift(data_type, shift_val)
 
 def vmc_validate_ssr(args):
-    ssr = 1
-    api = 0
-    return fn_validate_hb_ssr(api, ssr)
+    AIE_VARIANT = args["AIE_VARIANT"]
+    data_type = args["data_type"]
+    coef_type = args["coef_type"]
+    api=0
+    fir_length = fn_get_fir_length_hb(args)
+    use_coeff_reload = args["use_coeff_reload"]
+    deci_poly = args["deci_poly"]
+    ssr=1
+    return fn_validate_TP_SSR(AIE_VARIANT, data_type, coef_type, api, fir_length, use_coeff_reload, deci_poly, ssr)
 
 def vmc_validate_deci_poly(args):
      deci_poly = args["deci_poly"]
-     ssr = 1
-     api = 0
-     ret = fn_validate_para_deci_poly(api, deci_poly, ssr)
+     ret=fn_validate_TP_PARA_DECI_POLY(deci_poly)
      if ret["is_valid"] == False:
        err_msg = ret["err_message"]
        err_msg = err_msg.replace("TP_PARA_DECI_POLY", "'Decimate polyphase'")

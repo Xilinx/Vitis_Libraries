@@ -1,0 +1,204 @@
+{
+    "name": "Xilinx DSPLIB fft_dit_2ch_real",
+    "description": "",
+    "gui": false,
+    "flow": "aie",
+    "platform_allowlist": [
+        "vek280"
+    ],
+    "platform_properties": {
+        "vek280": {
+            "param_set": [
+                "*_aie2_*"
+            ],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            },
+            "aiecompiler": {
+                "compiler": {
+                    "customized_params": {
+                        "default": {
+                            "FIFO_THRESHOLD": " "
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "pre_build": [
+        {
+            "build_cmd": " mkdir -p logs"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk create_config   HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk validate_config HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR\")"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk create_input    HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) DATA_SEED=$(DATA_SEED)\")"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk sim_ref         HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR \")"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk prep_x86_out    HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR \")"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), make cleanall)"
+        }
+    ],
+    "post_launch": [
+        {
+            "target": "aiesim",
+            "launch_cmd": [
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk prep_aie_out HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_latency HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_stats HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) \"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk harvest_mem HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
+            ]
+        },
+        {
+            "target": "x86sim",
+            "launch_cmd": [
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk prep_x86_out HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\")",
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\")",
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\")",
+                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
+            ]
+        }
+    ],
+    "launch": [
+        {
+            "name": "aiesim-launch",
+            "target": "aiesim",
+            "sim_options": "--graph-latency"
+        },
+        {
+            "name": "x86sim-launch",
+            "target": "x86sim",
+            "sim_options": "$(if $(filter-out REF,$(TAG)), --valgrind)"
+        }
+    ],
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L1/src/aie",
+                "LIB_DIR/L1/tests/aie/inc",
+                "LIB_DIR/L1/tests/aie/src",
+                "LIB_DIR/L2/include/aie",
+                "LIB_DIR/L2/tests/aie/common/inc",
+                "./"
+            ],
+            "customized_params": {
+                "params": "--aie.verbose  $($(TAG)_TARGET_COMPILE_ARGS)  $($(TAG)_PREPROC_ARGS)",
+                "default": {
+                    "TAG": "UUT",
+                    "UUT_KERNEL": "fft_dit_2ch_real",
+                    "REF_KERNEL": "fft_dit_2ch_real_ref",
+                    "UUT_GRAPH": "fft_dit_2ch_real_graph",
+                    "REF_GRAPH": "fft_dit_2ch_real_ref_graph",
+                    "STACKSIZE_VAL": "600",
+                    "UUT_SIM_FILE": "./data/uut_output.txt",
+                    "REF_SIM_FILE": "./data/ref_output.txt",
+                    "INPUT_FILE": "./data/input.txt",
+                    "UUT_TARGET_COMPILE_ARGS": " $(FIFO_THRESHOLD) --aie.Xchess=llvm.xargs=\"-std=c++2a\" --aie.Xchess=main:backend.mist2.xargs=\"+NOdra\" --aie.Xchess=main:backend.mist2.pnll=\"off\" --aie.stacksize=$(STACKSIZE_VAL)",
+                    "REF_TARGET_COMPILE_ARGS": "",
+                    "PREPROC_ARGS": "--aie.Xpreproc=-DINPUT_FILE=$(INPUT_FILE)",
+                    "REF_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) ",
+                    "UUT_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1"
+                }
+            }
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "test.cpp",
+                    "files": [
+                        "LIB_DIR/L1/src/aie/fft_ifft_dit_1ch.cpp",
+                        "LIB_DIR/L1/src/aie/widget_2ch_real_fft.cpp",
+                        "uut_config.h"
+                    ],
+                    "pl-freq": 625,
+                    "workdir": "./Work",
+                    "options": "",
+                    "name": "libadf.a"
+                }
+            ]
+        }
+    ],
+    "generators": {
+        "uut_config.h": {
+            "file": "LIB_DIR/L2/tests/aie/common/scripts/tb_gen.py",
+            "function": "generate_testbench"
+        }
+    },
+    "config_make": "LIB_DIR/L2/tests/aie/common/scripts/params.mk",
+    "associated_files": [
+        "LIB_DIR/L2/tests/aie/common/scripts",
+        "LIB_DIR/L2/meta/*common*",
+        "LIB_DIR/L2/meta/fft_ifft*"
+    ],
+    "parameter_file": "multi_params.json",
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": {
+                    "vitis_aie_x86sim": 8192,
+                    "vitis_aie_sim": 40960
+                },
+                "max_time_min": {
+                    "vitis_aie_x86sim": 180,
+                    "vitis_aie_sim": 200
+                }
+            }
+        ],
+        "customized_params": "multi_params.json",
+        "targets": [
+            "vitis_aie_sim",
+            "vitis_aie_x86sim"
+        ],
+        "category": "canary",
+        "param_set": {
+            "pull_req": {
+                "*_hw_checkin": [
+                    "vitis_aie_sim",
+                    "vitis_aie_x86sim"
+                ],
+                "*_x86sim_checkin": [
+                    "vitis_aie_x86sim"
+                ]
+            },
+            "daily": {
+                "*_hw_qor": [
+                    "vitis_aie_sim",
+                    "vitis_aie_x86sim"
+                ],
+                "*_x86sim_qor": [
+                    "vitis_aie_x86sim"
+                ]
+            }
+        }
+    }
+}

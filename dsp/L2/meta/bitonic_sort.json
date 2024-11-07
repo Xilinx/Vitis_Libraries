@@ -1,0 +1,138 @@
+{
+    "schema": "vitis_library_api_spec_schema-1.0",
+    "api_name": "xf::dsp::aie::bitonic_sort::bitonic_sort_graph",
+    "display_name": "bitonic_sort_graph",
+    "header_file_name": "bitonic_sort_graph.hpp",
+    "search_paths": [
+        "L1/include/aie",
+        "L1/src/aie",
+        "L1/tests/aie/inc",
+        "L1/tests/aie/src",
+        "L2/include/aie",
+        "L2/tests/aie/common/inc"
+    ],
+    "parameters": [
+        {
+            "name": "AIE_VARIANT",
+            "type": "uint",
+            "description": "specifies the device type",
+            "updater": {
+                "file": "bitonic_sort.py",
+                "function": "update_AIE_VARIANT", 
+                "args": [
+                ]
+            },
+            "validator": {
+                "file": "bitonic_sort.py",
+                "function": "validate_AIE_VARIANT", 
+                "args": [
+                ]
+            }
+        },
+        {
+            "name": "TT_DATA",
+            "description": "The type of individual data samples input to port.",
+            "type": "typename",
+            "enum": [
+                "uint16",
+                "int16",
+                "int32",
+                "float"
+            ],
+            "updater": {
+                "file": "bitonic_sort.py",
+                "function": "update_TT_DATA",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            },
+            "validator": {
+                "file": "bitonic_sort.py",
+                "function": "validate_TT_DATA",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            }
+        },
+        {
+            "name": "TP_DIM",
+            "description": "The number of inputs in port.",
+            "type": "uint",
+            "updater": {
+                "file": "bitonic_sort.py",
+                "function": "update_TP_DIM",
+                "args": [
+                    "AIE_VARIANT", "TT_DATA"
+                ]
+            },
+            "validator": {
+                "file": "bitonic_sort.py",
+                "function": "validate_TP_DIM",
+                "args": [
+                    "AIE_VARIANT", "TT_DATA"
+                ]
+            }
+        },
+        {
+            "name": "TP_NUM_FRAMES",
+            "description": "The number of operations per call to the kernel",
+            "type": "uint",
+            "updater": {
+                "file": "bitonic_sort.py",
+                "function": "update_TP_NUM_FRAMES",
+                "args": [ "AIE_VARIANT", "TT_DATA", "TP_DIM"
+                ]
+            },
+            "validator": {
+                "file": "bitonic_sort.py",
+                "function": "validate_TP_NUM_FRAMES",
+                "args": [ "AIE_VARIANT", "TT_DATA", "TP_DIM"
+                ]
+            }
+        },
+        {
+            "name": "TP_CASC_LEN",
+            "description": "The number of kernels to be used to split up and cascade the function.",
+            "type": "uint",
+            "updater": {
+                "file": "bitonic_sort.py",
+                "function": "update_TP_CASC_LEN",
+                "args": [
+                    "TP_DIM"
+                ]
+            },
+            "validator": {
+                "file": "bitonic_sort.py",
+                "function": "validate_TP_CASC_LEN",
+                "args": [
+                    "TP_DIM"
+                ]
+            }
+        },
+        {
+            "name": "TP_ASCENDING",
+            "description": "The direction of sort (descending/ascending).",
+            "type": "uint",
+            "updater": {
+                "file": "bitonic_sort.py",
+                "function": "update_TP_ASCENDING",
+                "args": [
+                ]
+            },
+            "validator": {
+                "file": "bitonic_sort.py",
+                "function": "validate_TP_ASCENDING",
+                "args": [
+                ]
+            }
+        }
+    ],
+    "ports": {
+        "file": "bitonic_sort.py",
+        "function": "info_ports"
+    },
+    "generator": {
+        "file": "bitonic_sort.py",
+        "function": "generate_graph"
+    }
+}

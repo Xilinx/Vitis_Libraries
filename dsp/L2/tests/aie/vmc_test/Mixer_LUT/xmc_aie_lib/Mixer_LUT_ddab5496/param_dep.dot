@@ -1,0 +1,9 @@
+digraph G {
+AIE_VARIANT -> rnd_mode;
+data_type -> input_window_size;
+AIE_VARIANT -> input_window_size;
+ssr -> input_window_size;
+ssr -> USE_PHASE_RELOAD;
+AIE_VARIANT -> mixer_mode;
+data_type -> sfdr;
+}

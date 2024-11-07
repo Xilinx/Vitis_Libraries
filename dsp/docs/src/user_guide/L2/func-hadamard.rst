@@ -25,8 +25,9 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The Hadamard supports AIE1 and AIE-ML devices.
-- Round modes available and the enumerated values of round modes differ between AIE1 and AIE-ML. See :ref:`COMPILING_AND_SIMULATING`.
+The Hadamard supports AIE and AIE-ML devices.
+
+- Round modes available and the enumerated values of round modes differ between AIE and AIE-ML devices. See :ref:`COMPILING_AND_SIMULATING`.
 
 
 Supported Types
@@ -138,7 +139,7 @@ Code Example
 ============
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_hadamard.hpp
     :language: cpp
-    :lines: 15-
+    :lines: 17-
 
 .. |image1| image:: ./media/image1.png
 .. |image2| image:: ./media/image2.png

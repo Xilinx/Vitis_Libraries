@@ -2,8 +2,10 @@
 
 from aie_common import *
 from aie_common_fir import *
-import json
+from aie_common_fir_updaters import *
+
 import fir_sr_asym as sr_asym
+import fir_decimate_asym as deci_asym
 import fir_polyphase_decomposer as poly
 
 import importlib
@@ -21,27 +23,456 @@ current_uut_kernel = Path(__file__).stem
 # Name function arguments as template parameters, when possible
 # so the code matches easier with API definition.
 
-
-# Example of validator.
-#
-# The parameter itself will be passed as first argument for validator functions.
-# These functions can have extra parameters as arguments, as specified as last part of in `validator`.
-# These extra parameters must appear before current one in "parameters" section.
-#
-# A validator function returns a dictionary, with required boolean key "is_valid",
-# and "err_message" if "is_valid" is False.
-#
+TP_INTERPOLATE_FACTOR_min = 1
+TP_INTERPOLATE_FACTOR_max_aie1 = 16
+TP_INTERPOLATE_FACTOR_max_aie2 = 8
 
 TP_INPUT_WINDOW_VSIZE_min = 4
 TP_PARA_INTERP_POLY_min = 1
 TP_CASC_LEN_min = 1
 TP_CASC_LEN_max = 40
+TP_SSR_min = 1
+TP_SSR_max = 16
 TP_FIR_LEN_min = 4
 TP_FIR_LEN_max = 8192
+offset_32bits=8
+
+#######################################################
+########### AIE_VARIANT Updater and Validator #########
+#######################################################
+def update_AIE_VARIANT(args):
+  return fn_update_AIE_VARIANT()
+
+def fn_update_AIE_VARIANT():
+  legal_set_AIE_VARIANT = [1, 2]
+  
+  param_dict ={}
+  param_dict.update({"name" : "AIE_VARIANT"})
+  param_dict.update({"enum" : legal_set_AIE_VARIANT})
+  return param_dict
+
+def validate_AIE_VARIANT(args):
+  AIE_VARIANT=args["AIE_VARIANT"]
+  return (fn_validate_AIE_VARIANT(AIE_VARIANT))
+
+def fn_validate_AIE_VARIANT(AIE_VARIANT):
+  param_dict = fn_update_AIE_VARIANT()
+  legal_set_AIE_VARIANT = param_dict["enum"]
+  return(validate_legal_set(legal_set_AIE_VARIANT, "AIE_VARIANT", AIE_VARIANT))
+
+#######################################################
+########### TT_DATA Updater and Validator #############
+#######################################################
+def update_TT_DATA(args):
+  AIE_VARIANT=args["AIE_VARIANT"]
+  return fn_update_tt_data(AIE_VARIANT)
+   
+def validate_TT_DATA(args):
+  AIE_VARIANT=args["AIE_VARIANT"]
+  TT_DATA=args["TT_DATA"]
+  return (fn_validate_TT_DATA(AIE_VARIANT, TT_DATA))
+
+def fn_validate_TT_DATA(AIE_VARIANT, TT_DATA):
+  param_dict = fn_update_tt_data(AIE_VARIANT)
+  legal_set_TT_DATA = param_dict["enum"]
+  return(validate_legal_set(legal_set_TT_DATA, "TT_DATA", TT_DATA))
+
+#######################################################
+########### TT_COEFF Updater and Validator ############
+#######################################################
+def update_TT_COEFF(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TT_DATA = args["TT_DATA"]
+    return fn_update_TT_COEFF(AIE_VARIANT, TT_DATA)
+
+def fn_update_TT_COEFF(AIE_VARIANT, TT_DATA):
+    param_dict=fn_update_tt_coeff(AIE_VARIANT, TT_DATA)
+    legal_set_coeff=param_dict["enum"]
+   
+    if AIE_VARIANT==1:
+      remove_set=[]
+      for coeff in legal_set_coeff:
+        numLanes=fnNumLanes(TT_DATA, coeff, 0, AIE_VARIANT)
+        if (numLanes > offset_32bits):
+          remove_set.append(coeff)
+      legal_set_coeff=remove_from_set(remove_set, legal_set_coeff.copy())
+    param_dict.update({"enum": legal_set_coeff})
+    return param_dict
+
+def validate_TT_COEFF(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TT_DATA = args["TT_DATA"]
+    TT_COEFF=args["TT_COEFF"]
+    return (fn_validate_TT_COEFF(AIE_VARIANT, TT_DATA, TT_COEFF))
+
+def fn_validate_TT_COEFF(AIE_VARIANT, TT_DATA, TT_COEFF):
+    param_dict = fn_update_TT_COEFF(AIE_VARIANT, TT_DATA)
+    legal_set_TT_COEFF = param_dict["enum"]
+    return(validate_legal_set(legal_set_TT_COEFF, "TT_COEFF", TT_COEFF))
+
+#######################################################
+############# TP_API Updater and Validator ############
+#######################################################
+def update_TP_API(args):
+    return fn_update_binary("TP_API")
+
+def validate_TP_API(args):
+    TP_API=args["TP_API"]
+    return fn_validate_TP_API(TP_API)
+
+def fn_validate_TP_API(TP_API):
+    return(validate_legal_set([0,1], "TP_API", TP_API))
+
+#######################################################
+###### TP_USE_COEFF_RELOAD Updater and Validator ######
+#######################################################
+def update_TP_USE_COEFF_RELOAD(args):
+    return fn_update_binary("TP_USE_COEFF_RELOAD")
+
+def validate_TP_USE_COEFF_RELOAD(args):
+    TP_USE_COEFF_RELOAD=args["TP_USE_COEFF_RELOAD"]
+    return fn_validate_TP_USE_COEFF_RELOAD(TP_USE_COEFF_RELOAD)
+
+def fn_validate_TP_USE_COEFF_RELOAD(TP_USE_COEFF_RELOAD):
+    return(validate_legal_set([0,1], "TP_USE_COEFF_RELOAD", TP_USE_COEFF_RELOAD))
 
 
-def fn_fir_len_multiple_interp(TP_FIR_LEN, TP_INTERPOLATE_FACTOR):
-  return isError(f"Filter length ({TP_FIR_LEN}) must be an integer multiple of interpolate factor ({TP_INTERPOLATE_FACTOR}).") if TP_FIR_LEN % TP_INTERPOLATE_FACTOR != 0 else isValid
+#######################################################
+############ TP_FIR_LEN Updater and Validator #########
+#######################################################
+
+def update_TP_FIR_LEN(args):
+  TT_DATA = args["TT_DATA"]
+  TT_COEFF = args["TT_COEFF"]
+  TP_API = args["TP_API"]
+  TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
+  AIE_VARIANT = args["AIE_VARIANT"]
+  if args["TP_FIR_LEN"]: TP_FIR_LEN=args["TP_FIR_LEN"]
+  else: TP_FIR_LEN=0
+  return fn_update_TP_FIR_LEN(TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN)
+
+def fn_update_TP_FIR_LEN(TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN):
+  coeffSizeMult = 1
+  if AIE_VARIANT == 1:
+    coeffSizeMult = 1 if TP_API == 0 else TP_INTERPOLATE_FACTOR_max_aie1
+  if AIE_VARIANT == 2:
+    coeffSizeMult = TP_INTERPOLATE_FACTOR_max_aie2
+
+  TP_FIR_LEN_max_int1=fn_max_fir_len_each_kernel_update(TT_DATA, TP_CASC_LEN_max, TP_USE_COEFF_RELOAD, TP_SSR_max, TP_API, coeffSizeMult)
+  TP_FIR_LEN_max_int2=fn_max_fir_len_overall(TT_DATA, TT_COEFF)
+  TP_FIR_LEN_max_int3=min(TP_FIR_LEN_max_int1, TP_FIR_LEN_max_int2, TP_FIR_LEN_max)
+
+  param_dict={
+     "name"    : "TP_FIR_LEN",
+     "minimum" : TP_FIR_LEN_min,
+     "maximum" : TP_FIR_LEN_max_int3
+  }
+
+  if TP_FIR_LEN !=0:
+    if AIE_VARIANT == 2:
+      TP_INTERPOLATE_FACTOR_max=TP_INTERPOLATE_FACTOR_max_aie2
+    else:
+      TP_INTERPOLATE_FACTOR_max=TP_INTERPOLATE_FACTOR_max_aie1
+    legal_set_TP_INTERPOLATE_FACTOR=list(range(TP_INTERPOLATE_FACTOR_min, TP_INTERPOLATE_FACTOR_max+1))
+
+    for interp_fact in legal_set_TP_INTERPOLATE_FACTOR:
+      if TP_FIR_LEN % interp_fact == 0:
+        return param_dict    
+      
+    TP_FIR_LEN_act=round(TP_FIR_LEN/TP_INTERPOLATE_FACTOR_min) * TP_INTERPOLATE_FACTOR_min
+    if TP_FIR_LEN_act < param_dict["minimum"]:
+        TP_FIR_LEN_act = param_dict["minimum"]
+
+    if (TP_FIR_LEN_act > param_dict["maximum"]):
+        TP_FIR_LEN_act = int(FLOOR(param_dict["maximum"], TP_INTERPOLATE_FACTOR_min))
+    param_dict.update({"actual" : int(TP_FIR_LEN_act)})
+  
+  return param_dict
+
+def validate_TP_FIR_LEN(args):
+  TT_DATA = args["TT_DATA"]
+  TT_COEFF = args["TT_COEFF"]
+  TP_API = args["TP_API"]
+  TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TP_FIR_LEN=args["TP_FIR_LEN"]
+  return fn_validate_TP_FIR_LEN(TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN)
+  
+def fn_validate_TP_FIR_LEN(TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN): 
+  if AIE_VARIANT == 2:
+    TP_INTERPOLATE_FACTOR_max=TP_INTERPOLATE_FACTOR_max_aie2
+  else:
+    TP_INTERPOLATE_FACTOR_max=TP_INTERPOLATE_FACTOR_max_aie1
+  legal_set_TP_INTERPOLATE_FACTOR=list(range(TP_INTERPOLATE_FACTOR_min, TP_INTERPOLATE_FACTOR_max+1))
+
+  for interp_fact in legal_set_TP_INTERPOLATE_FACTOR:
+    if TP_FIR_LEN % interp_fact == 0:
+      param_dict=fn_update_TP_FIR_LEN(TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN)
+      range_TP_FIR_LEN=[param_dict["minimum"], param_dict["maximum"]]
+      return (validate_range(range_TP_FIR_LEN, "TP_FIR_LEN", TP_FIR_LEN))
+  return isError(f"TP_FIR_LEN should be a multiple of one of the possible TP_INTERPOLATE_FACTOR within the range : {[TP_INTERPOLATE_FACTOR_min, TP_INTERPOLATE_FACTOR_max]}")
+
+def fn_max_fir_len_overall(TT_DATA, TT_COEFF):
+  maxTaps = {
+    ( "int16",  "int16") : 4096,
+    ("cint16",  "int16") : 4096,
+    ("cint16", "cint16") : 2048,
+    ( "int32",  "int16") : 4096,
+    ( "int32",  "int32") : 2048,
+    ( "int16",  "int32") : 2048,
+    ("cint16",  "int32") : 2048,
+    ("cint16", "cint32") : 1024,
+    ("cint32",  "int16") : 2048,
+    ("cint32", "cint16") : 2048,
+    ("cint32",  "int32") : 2048,
+    ("cint32", "cint32") : 1024,
+    ( "float",  "float") : 2048,
+    ("cfloat",  "float") : 2048,
+    ("cfloat", "cfloat") : 1024
+  }
+
+  TP_FIR_LEN_max_overall= maxTaps[(TT_DATA, TT_COEFF)]
+  return TP_FIR_LEN_max_overall
+
+#######################################################
+##### TP_INTERPOLATE_FACTOR Updater and Validator #####
+#######################################################
+def update_TP_INTERPOLATE_FACTOR(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TP_FIR_LEN = args["TP_FIR_LEN"]
+  return fn_update_TP_INTERPOLATE_FACTOR(AIE_VARIANT, TP_FIR_LEN)
+
+def fn_update_TP_INTERPOLATE_FACTOR(AIE_VARIANT, TP_FIR_LEN):
+  if AIE_VARIANT == 2:
+    TP_INTERPOLATE_FACTOR_max=TP_INTERPOLATE_FACTOR_max_aie2
+  else:
+    TP_INTERPOLATE_FACTOR_max=TP_INTERPOLATE_FACTOR_max_aie1
+
+  legal_set_interp_factor=list(range(TP_INTERPOLATE_FACTOR_min, TP_INTERPOLATE_FACTOR_max+1))
+
+  remove_set=[]
+  for interp_fac in legal_set_interp_factor.copy():
+    if TP_FIR_LEN % interp_fac != 0:
+      remove_set.append(interp_fac)
+  legal_set_interp_factor_1=remove_from_set(remove_set, legal_set_interp_factor.copy())
+
+  param_dict={
+     "name"    : "TP_INTERPOLATE_FACTOR"}
+  if legal_set_interp_factor ==legal_set_interp_factor_1:
+    param_dict.update({"minimum" : TP_INTERPOLATE_FACTOR_min,
+                       "maximum" : TP_INTERPOLATE_FACTOR_max})  
+  else: 
+    param_dict.update({"enum" : legal_set_interp_factor_1})  
+  return param_dict
+
+def validate_TP_INTERPOLATE_FACTOR(args):
+  TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TP_FIR_LEN = args["TP_FIR_LEN"]
+
+  return fn_validate_TP_INTERPOLATE_FACTOR(TP_FIR_LEN, TP_INTERPOLATE_FACTOR, AIE_VARIANT)
+
+def fn_validate_TP_INTERPOLATE_FACTOR(TP_FIR_LEN, TP_INTERPOLATE_FACTOR, AIE_VARIANT):
+  param_dict=fn_update_TP_INTERPOLATE_FACTOR(AIE_VARIANT, TP_FIR_LEN)
+  if "enum" in param_dict:
+    return validate_legal_set(param_dict["enum"], "TP_INTERPOLATE_FACTOR", TP_INTERPOLATE_FACTOR)
+  else:
+    range_TP_INTERPOLATE_FACTOR=[param_dict["minimum"], param_dict["maximum"]]
+    return validate_range(range_TP_INTERPOLATE_FACTOR, "TP_INTERPOLATE_FACTOR", TP_INTERPOLATE_FACTOR)
+
+#######################################################
+###### TP_PARA_INTERP_POLY Updater and Validator ######
+#######################################################
+def update_TP_PARA_INTERP_POLY(args):
+  TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
+  return fn_update_TP_PARA_INTERP_POLY(TP_INTERPOLATE_FACTOR)
+
+def fn_update_TP_PARA_INTERP_POLY(TP_INTERPOLATE_FACTOR):
+  legal_set_TP_PARA_INTERP_POLY=find_divisors(TP_INTERPOLATE_FACTOR, TP_INTERPOLATE_FACTOR)
+  param_dict={
+     "name" : "TP_PARA_INTERP_POLY",
+     "enum" : legal_set_TP_PARA_INTERP_POLY
+    }
+  return param_dict
+
+def validate_TP_PARA_INTERP_POLY(args):
+  TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
+  TP_PARA_INTERP_POLY = args["TP_PARA_INTERP_POLY"]
+  return fn_validate_TP_PARA_INTERP_POLY(TP_INTERPOLATE_FACTOR, TP_PARA_INTERP_POLY)
+
+def fn_validate_TP_PARA_INTERP_POLY(TP_INTERPOLATE_FACTOR, TP_PARA_INTERP_POLY):
+  param_dict=fn_update_TP_PARA_INTERP_POLY(TP_INTERPOLATE_FACTOR)
+  return(validate_legal_set(param_dict["enum"], "TP_PARA_INTERP_POLY", TP_PARA_INTERP_POLY))
+
+#######################################################
+############# TP_DUAL_IP Updater and Validator ########
+#######################################################
+def update_TP_DUAL_IP(args):
+  AIE_VARIANT   = args["AIE_VARIANT"]
+  TP_API   = args["TP_API"]
+  return fn_update_interp_dual_ip(AIE_VARIANT, TP_API)
+
+def validate_TP_DUAL_IP(args):
+  AIE_VARIANT= args["AIE_VARIANT"]
+  TP_API     = args["TP_API"]
+  TP_DUAL_IP = args["TP_DUAL_IP"]
+  return fn_validate_TP_DUAL_IP(AIE_VARIANT, TP_API, TP_DUAL_IP)
+
+def fn_validate_TP_DUAL_IP(AIE_VARIANT, TP_API, TP_DUAL_IP):
+  param_dict=fn_update_interp_dual_ip(AIE_VARIANT, TP_API)
+  return (validate_legal_set(param_dict["enum"], "TP_DUAL_IP", TP_DUAL_IP))
+
+#######################################################
+####### TP_NUM_OUTPUTS Updater and Validator ##########
+#######################################################
+def update_TP_NUM_OUTPUTS(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TP_API = args["TP_API"]
+    return(fn_update_interp_num_outs(TP_API, AIE_VARIANT))
+
+def validate_TP_NUM_OUTPUTS(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TP_API = args["TP_API"]
+    TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
+    return fn_validate_TP_NUM_OUTPUTS(AIE_VARIANT, TP_API, TP_NUM_OUTPUTS)
+
+def fn_validate_TP_NUM_OUTPUTS(AIE_VARIANT, TP_API, TP_NUM_OUTPUTS):
+    param_dict=fn_update_interp_num_outs(TP_API, AIE_VARIANT)
+    return (validate_legal_set(param_dict["enum"], "TP_NUM_OUTPUTS", TP_NUM_OUTPUTS))
+
+#######################################################
+############## TP_SSR Updater and Validator ###########
+#######################################################
+def update_TP_SSR(args):
+  nargs, uut_kernel = poly.get_modified_args_from_polyphase_decomposer(args, current_uut_kernel)
+  # if we've decomposed to another type of kernel, then import that kernel and use that validate function
+  if uut_kernel != current_uut_kernel:
+    other_kernel = importlib.import_module(uut_kernel)
+    return other_kernel.update_TP_SSR(nargs)
+  else:
+    AIE_VARIANT=args["AIE_VARIANT"]
+    TP_API=args["TP_API"]
+    TP_FIR_LEN=args["TP_FIR_LEN"]
+    TP_INTERPOLATE_FACTOR=args["TP_INTERPOLATE_FACTOR"]
+    TP_PARA_INTERP_POLY=args["TP_PARA_INTERP_POLY"]
+    return fn_update_TP_SSR(AIE_VARIANT, TP_API, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_PARA_INTERP_POLY)
+
+def fn_update_TP_SSR(AIE_VARIANT, TP_API, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_PARA_INTERP_POLY):
+  legal_set_TP_SSR=find_divisors(TP_FIR_LEN, TP_SSR_max)
+
+  if (AIE_VARIANT == 2 and (TP_INTERPOLATE_FACTOR != TP_PARA_INTERP_POLY)) or (TP_API==0):
+    legal_set_TP_SSR=[1]
+ 
+  param_dict={"name" : "TP_SSR",
+              "enum" : legal_set_TP_SSR}
+
+  return param_dict
+
+def validate_TP_SSR(args):
+  nargs, uut_kernel = poly.get_modified_args_from_polyphase_decomposer(args, current_uut_kernel)
+  # if we've decomposed to another type of kernel, then import that kernel and use that validate function
+  if uut_kernel != current_uut_kernel:
+    other_kernel = importlib.import_module(uut_kernel)
+    return other_kernel.validate_TP_SSR(nargs)
+  else:
+    AIE_VARIANT=args["AIE_VARIANT"]
+    TP_API=args["TP_API"]
+    TP_FIR_LEN=args["TP_FIR_LEN"]
+    TP_INTERPOLATE_FACTOR=args["TP_INTERPOLATE_FACTOR"]
+    TP_PARA_INTERP_POLY=args["TP_PARA_INTERP_POLY"]
+    TP_SSR=args["TP_SSR"]
+    return fn_validate_TP_SSR(AIE_VARIANT, TP_API, TP_FIR_LEN, TP_SSR, TP_INTERPOLATE_FACTOR, TP_PARA_INTERP_POLY)
+
+def fn_validate_TP_SSR(AIE_VARIANT, TP_API, TP_FIR_LEN, TP_SSR, TP_INTERPOLATE_FACTOR, TP_PARA_INTERP_POLY):
+  param_dict=fn_update_TP_SSR(AIE_VARIANT, TP_API, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_PARA_INTERP_POLY)
+  return (validate_legal_set(param_dict["enum"], "TP_SSR", TP_SSR))
+
+#######################################################
+########### TP_CASC_LEN Updater and Validator #########
+#######################################################
+def update_TP_CASC_LEN(args):
+  nargs, uut_kernel = poly.get_modified_args_from_polyphase_decomposer(args, current_uut_kernel)
+  # if we've decomposed to another type of kernel, then import that kernel and use that validate function
+  if uut_kernel != current_uut_kernel:
+    other_kernel = importlib.import_module(uut_kernel)
+    return other_kernel.update_TP_CASC_LEN(nargs)
+  else:
+    AIE_VARIANT=args["AIE_VARIANT"]
+    TT_DATA=args["TT_DATA"]
+    TT_COEFF=args["TT_COEFF"]
+    TP_API=args["TP_API"]
+    TP_USE_COEFF_RELOAD=args["TP_USE_COEFF_RELOAD"]
+    TP_API=args["TP_API"]
+    TP_FIR_LEN=args["TP_FIR_LEN"]
+    TP_SSR=args["TP_SSR"]
+    TP_INTERPOLATE_FACTOR=args["TP_INTERPOLATE_FACTOR"]
+    TP_DUAL_IP=args["TP_DUAL_IP"]
+    return fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN, TP_SSR, TP_INTERPOLATE_FACTOR, TP_DUAL_IP)
+
+def fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN, TP_SSR, TP_INTERPOLATE_FACTOR, TP_DUAL_IP):
+  legal_set_casc1=list(range(TP_CASC_LEN_min, TP_CASC_LEN_max+1))
+  legal_set_casc2=fn_eliminate_casc_len_min_fir_len_each_kernel(legal_set_casc1.copy(), TP_FIR_LEN, TP_SSR, TP_INTERPOLATE_FACTOR)
+  
+  coeffSizeMult = 1
+  if AIE_VARIANT == 1:
+    coeffSizeMult = 1 if TP_API == 0 else TP_INTERPOLATE_FACTOR
+  if AIE_VARIANT == 2:
+    coeffSizeMult = TP_INTERPOLATE_FACTOR
+
+  legal_set_casc3=fn_eliminate_casc_len_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_SSR, TP_API, coeffSizeMult, legal_set_casc2.copy())
+
+  legal_set_casc4=fn_eliminate_casc_len_check_samples_can_fit_streaming(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DUAL_IP, TP_API, TP_SSR, legal_set_casc3.copy())
+
+  param_dict={
+      "name" :  "TP_CASC_LEN" }
+
+  if legal_set_casc1==legal_set_casc4:
+      param_dict.update({"minimum" : TP_CASC_LEN_min})
+      param_dict.update({"maximum" : TP_CASC_LEN_max})
+  else:
+      param_dict.update({"enum" : legal_set_casc4})
+
+  return param_dict
+  
+def validate_TP_CASC_LEN(args):
+  nargs, uut_kernel = poly.get_modified_args_from_polyphase_decomposer(args, current_uut_kernel)
+  # if we've decomposed to another type of kernel, then import that kernel and use that validate function
+  if uut_kernel != current_uut_kernel:
+    other_kernel = importlib.import_module(uut_kernel)
+    return other_kernel.validate_TP_CASC_LEN(nargs)
+  else:
+    AIE_VARIANT=args["AIE_VARIANT"]
+    TT_DATA=args["TT_DATA"]
+    TT_COEFF=args["TT_COEFF"]
+    TP_API=args["TP_API"]
+    TP_USE_COEFF_RELOAD=args["TP_USE_COEFF_RELOAD"]
+    TP_API=args["TP_API"]
+    TP_FIR_LEN=args["TP_FIR_LEN"]
+    TP_SSR=args["TP_SSR"]
+    TP_INTERPOLATE_FACTOR=args["TP_INTERPOLATE_FACTOR"]
+    TP_DUAL_IP=args["TP_DUAL_IP"]
+    TP_CASC_LEN=args["TP_CASC_LEN"]
+    return fn_validate_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN, TP_SSR, TP_INTERPOLATE_FACTOR, TP_DUAL_IP, TP_CASC_LEN)
+
+def fn_validate_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN, TP_SSR, TP_INTERPOLATE_FACTOR, TP_DUAL_IP, TP_CASC_LEN):
+  param_dict=fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN, TP_SSR, TP_INTERPOLATE_FACTOR, TP_DUAL_IP)
+  if "enum" in param_dict:
+      return (validate_legal_set(param_dict["enum"], "TP_CASC_LEN", TP_CASC_LEN))
+  else:
+      range_casc_len=[param_dict["minimum"], param_dict["maximum"]]
+      return(validate_range(range_casc_len, "TP_CASC_LEN", TP_CASC_LEN))
+
+def fn_eliminate_casc_len_check_samples_can_fit_streaming(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DUAL_IP, TP_API, TP_SSR, legal_set_casc_len):
+  legal_set_casc_len_int=legal_set_casc_len.copy()
+
+  remove_list=[]
+  for casc_len in legal_set_casc_len_int.copy():
+    streamingVectorRegisterCheck = fn_check_samples_can_fit_streaming(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, casc_len, TP_DUAL_IP, TP_API, TP_SSR)
+    if streamingVectorRegisterCheck != isValid:
+      remove_list.append(casc_len)
+
+  legal_set_casc_len_int=remove_from_set(remove_list, legal_set_casc_len_int.copy())
+  return legal_set_casc_len_int
 
 def fn_check_samples_can_fit_streaming(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_CASC_LEN, TP_DUAL_IP, TP_API, TP_SSR):
   m_kNumColumns = 2 if fn_size_by_byte(TT_COEFF) == 2 else 1
@@ -68,139 +499,64 @@ def fn_check_samples_can_fit_streaming(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPO
 
   return isValid
 
-# Values are derived from experimentation and are a factor of program memory limits, memory module sizes etc.
-def fn_max_fir_len_overall(TT_DATA, TT_COEFF, TP_FIR_LEN):
-  maxTaps = {
-    ( "int16",  "int16") : 4096,
-    ("cint16",  "int16") : 4096,
-    ("cint16", "cint16") : 2048,
-    ( "int32",  "int16") : 4096,
-    ( "int32",  "int32") : 2048,
-    ( "int16",  "int32") : 2048,
-    ("cint16",  "int32") : 2048,
-    ("cint16", "cint32") : 1024,
-    ("cint32",  "int16") : 2048,
-    ("cint32", "cint16") : 2048,
-    ("cint32",  "int32") : 2048,
-    ("cint32", "cint32") : 1024,
-    ( "float",  "float") : 2048,
-    ("cfloat",  "float") : 2048,
-    ("cfloat", "cfloat") : 1024
-  }
-  return (
-    isError(f"Max supported filter length (filter length = {TP_FIR_LEN} > Max = {maxTaps[(TT_DATA, TT_COEFF)]}) exceeded for data type and coefficient type combination {TT_DATA},{TT_COEFF}.")
-      if TP_FIR_LEN > maxTaps[(TT_DATA, TT_COEFF)]
-      else isValid
-  )
+#######################################################
+##### TP_INPUT_WINDOW_VSIZE Updater and Validator #####
+#######################################################
+def update_TP_INPUT_WINDOW_VSIZE(args):
 
-def fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, TP_DUAL_IP, AIE_VARIANT):
-    res = fn_validate_minmax_value("TP_FIR_LEN", TP_FIR_LEN, TP_FIR_LEN_min, TP_FIR_LEN_max)
-    if (res["is_valid"] == False):
-        return res
-    minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_Rnd=TP_INTERPOLATE_FACTOR)
+  factor_TP_INPUT_WINDOW_VSIZE=poly.fn_factor_decomposer_TP_INPUT_WINDOW_VSIZE(args)
+  args, uut_kernel = poly.get_modified_args_from_polyphase_decomposer(args, current_uut_kernel)
 
-    coeffSizeMult = 1
-    if AIE_VARIANT == 1:
-      coeffSizeMult = 1 if TP_API == 0 else TP_INTERPOLATE_FACTOR
-    if AIE_VARIANT == 2:
-      coeffSizeMult = TP_INTERPOLATE_FACTOR
-
-    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_SSR, TP_API, coeffSizeMult)
-
-    maxLenOverallCheck = fn_max_fir_len_overall(TT_DATA, TT_COEFF, TP_FIR_LEN)
-
-    multipleInterpolationRateCheck = fn_fir_len_multiple_interp(TP_FIR_LEN, TP_INTERPOLATE_FACTOR)
-
-    streamingVectorRegisterCheck = fn_check_samples_can_fit_streaming(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_CASC_LEN, TP_DUAL_IP, TP_API, TP_SSR)
-
-    for check in (minLenCheck,maxLenCheck,maxLenOverallCheck, multipleInterpolationRateCheck, streamingVectorRegisterCheck):
-      if check["is_valid"] == False :
-        return check
-
-    return isValid
-
-def fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN,TP_INTERPOLATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
-    # CAUTION: this constant overlaps many factors. The main need is a "strobe" concept that means we unroll until xbuff is back to starting conditions.
-    streamRptFactor = 4
-    res = fn_validate_min_value("TP_INPUT_WINDOW_VSIZE", TP_INPUT_WINDOW_VSIZE, TP_INPUT_WINDOW_VSIZE_min)
-    if (res["is_valid"] == False):
-      return res
-    # Need to take unrolloing into account
-    windowSizeMultiplier = (fnNumLanes(TT_DATA, TT_COEFF, TP_API)) if TP_API == 0 else (fnNumLanes(TT_DATA, TT_COEFF, TP_API)*streamRptFactor)
-    # interpolate asym uses common lanes, but doesn't use shorter acc for streaming arch.. why?
-    checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEFF, TP_INPUT_WINDOW_VSIZE, TP_API, windowSizeMultiplier, TP_SSR)
-    checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_INTERPOLATE_FACTOR)
-    # Input samples are round-robin split to each SSR input paths, so total frame size must be divisable by SSR factor.
-    checkIfDivisableBySSR = fn_windowsize_divisible_by_param(TP_INPUT_WINDOW_VSIZE, TP_SSR)
-
-    for check in (checkMultipleLanes,checkMaxBuffer,checkIfDivisableBySSR):
-      if check["is_valid"] == False :
-        return check
-
-    return isValid
-
-def fn_validate_interp_dual_ip(TP_NUM_OUTPUTS, TP_API, TP_DUAL_IP, AIE_VARIANT=1):
-    # Equivalent to:
-    return fn_validate_sr_dual_ip(TP_NUM_OUTPUTS, TP_API, TP_DUAL_IP, AIE_VARIANT)
-
-def validate_TP_INTERPOLATE_FACTOR(args):
-    TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
-    AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_validate_interpolate_factor(TP_INTERPOLATE_FACTOR, AIE_VARIANT)
-
-def fn_validate_para_interp_poly(TP_INTERPOLATE_FACTOR, TP_PARA_INTERP_POLY):
-    res = fn_validate_min_value("TP_PARA_INTERP_POLY", TP_PARA_INTERP_POLY, TP_PARA_INTERP_POLY_min)
-    if (res["is_valid"] == False):
-      return res
-    if TP_INTERPOLATE_FACTOR % TP_PARA_INTERP_POLY != 0:
-        return isError(
-            f"TP_PARA_INTERP_POLY must be a number that is exactly divisible by TP_INTERPOLATE_FACTOR. Got TP_PARA_INTERP_POLY {TP_PARA_INTERP_POLY} and TP_INTERPOLATE_FACTOR {TP_INTERPOLATE_FACTOR}."
-        )
-    return isValid
-
-#### validation APIs ####
-def validate_TT_COEFF(args):
+  param_dict={}
+  if uut_kernel != current_uut_kernel:
+    other_kernel = importlib.import_module(uut_kernel)
+    param_dict.update(other_kernel.update_TP_INPUT_WINDOW_VSIZE(args))
+    if args["TP_INPUT_WINDOW_VSIZE"]: TP_INPUT_WINDOW_VSIZE=args["TP_INPUT_WINDOW_VSIZE"]
+    else: TP_INPUT_WINDOW_VSIZE=0
+    return (deci_asym.fn_update_factor_TP_INPUT_VSIZE(factor_TP_INPUT_WINDOW_VSIZE, TP_INPUT_WINDOW_VSIZE, param_dict))
+  else:
+    if args["TP_INPUT_WINDOW_VSIZE"]: TP_INPUT_WINDOW_VSIZE=args["TP_INPUT_WINDOW_VSIZE"]
+    else: TP_INPUT_WINDOW_VSIZE=0
     TT_DATA = args["TT_DATA"]
     TT_COEFF = args["TT_COEFF"]
-    AIE_VARIANT = args["AIE_VARIANT"]
-    standard_checks = fn_validate_coeff_type(TT_DATA, TT_COEFF)
-    typeCheck = fn_type_support(TT_DATA, TT_COEFF, AIE_VARIANT)
-    for check in (standard_checks,typeCheck):
-      if check["is_valid"] == False :
-        return check
-    return isValid
+    TP_FIR_LEN = args["TP_FIR_LEN"]
+    TP_API = args["TP_API"]
+    TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
+    TP_SSR = args["TP_SSR"]
+    return fn_update_TP_INPUT_WINDOW_VSIZE(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, factor_TP_INPUT_WINDOW_VSIZE)
 
-def validate_TP_SHIFT(args):
-  TT_DATA = args["TT_DATA"]
-  TP_SHIFT = args["TP_SHIFT"]
-  return fn_validate_shift(TT_DATA, TP_SHIFT)
+def fn_update_TP_INPUT_WINDOW_VSIZE(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, factor_TP_INPUT_WINDOW_VSIZE):
 
-def validate_TP_RND(args):
-  TP_RND = args["TP_RND"]
-  AIE_VARIANT = args["AIE_VARIANT"]
-  return fn_validate_roundMode(TP_RND, AIE_VARIANT)
+  if TP_API == 0:
+    TP_INPUT_WINDOW_VSIZE_max=fn_max_windowsize_for_buffer_update(TT_DATA, TP_FIR_LEN, TP_SSR, TP_INTERPOLATE_FACTOR, AIE_VARIANT=1)
+  else: TP_INPUT_WINDOW_VSIZE_max=TP_INPUT_WINDOW_VSIZE_max_cpp
 
-def validate_TP_SAT(args):
-  TP_SAT = args["TP_SAT"]
-  return fn_validate_satMode(TP_SAT)
+  param_dict={
+    "name"    : TP_INPUT_WINDOW_VSIZE,
+    "minimum" : TP_INPUT_WINDOW_VSIZE_min,
+    "maximum" : TP_INPUT_WINDOW_VSIZE_max
+  }
+
+  streamRptFactor = 4
+  windowSizeMultiplier = (fnNumLanes(TT_DATA, TT_COEFF, TP_API)) if TP_API == 0 else (fnNumLanes(TT_DATA, TT_COEFF, TP_API)*streamRptFactor)
+
+  factor_window_size= windowSizeMultiplier * TP_SSR
+  lcm_ws=find_lcm_list([factor_window_size, factor_TP_INPUT_WINDOW_VSIZE])
+  return deci_asym.fn_update_factor_TP_INPUT_VSIZE(lcm_ws, TP_INPUT_WINDOW_VSIZE, param_dict)
+
 
 def validate_TP_INPUT_WINDOW_VSIZE(args):
-
-    check_valid_decompose = poly.fn_validate_decomposer_TP_INPUT_WINDOW_VSIZE(args)
-    if (check_valid_decompose["is_valid"] == False):
-      # error out before continuing to validate
-      return check_valid_decompose
-
-    # valid decompose
-    #overwrite args with the decomposed version
-    args, uut_kernel = poly.get_modified_args_from_polyphase_decomposer(args, current_uut_kernel)
-    # if we've decomposed to another type of kernel, then import that kernel and use that validate function
-    if uut_kernel != current_uut_kernel:
-      other_kernel = importlib.import_module(uut_kernel)
-      return other_kernel.validate_TP_INPUT_WINDOW_VSIZE(args)
-
-
-    # continue using current library element's validator (with potentially modified parameters)
+  factor_TP_INPUT_WINDOW_VSIZE=poly.fn_factor_decomposer_TP_INPUT_WINDOW_VSIZE(args)
+  args, uut_kernel = poly.get_modified_args_from_polyphase_decomposer(args, current_uut_kernel)
+  if uut_kernel != current_uut_kernel:
+    other_kernel = importlib.import_module(uut_kernel)
+    check_uut_kernel=other_kernel.validate_TP_INPUT_WINDOW_VSIZE(args)
+    if check_uut_kernel==isValid:
+      TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
+      return (deci_asym.fn_validate_factor_TP_INPUT_VSIZE(factor_TP_INPUT_WINDOW_VSIZE, TP_INPUT_WINDOW_VSIZE))
+    else:
+      return check_uut_kernel
+  else:
     TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     TT_DATA = args["TT_DATA"]
     TT_COEFF = args["TT_COEFF"]
@@ -208,119 +564,120 @@ def validate_TP_INPUT_WINDOW_VSIZE(args):
     TP_API = args["TP_API"]
     TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
     TP_SSR = args["TP_SSR"]
+    return fn_validate_TP_INPUT_WINDOW_VSIZE(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, factor_TP_INPUT_WINDOW_VSIZE)
+  
+def fn_validate_TP_INPUT_WINDOW_VSIZE(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, factor_TP_INPUT_WINDOW_VSIZE):
+  streamRptFactor = 4
+  windowSizeMultiplier = (fnNumLanes(TT_DATA, TT_COEFF, TP_API)) if TP_API == 0 else (fnNumLanes(TT_DATA, TT_COEFF, TP_API)*streamRptFactor)
 
-    #interpolate_hb traits looks like the UPSHIFT_CT types have different number of lanes, but it's actually stil the exact same as 384..
-    # decimate_hb also just uses 384, so no additional rules here.
-    return fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR)
+  factor_window_size= windowSizeMultiplier * TP_SSR
+  lcm_ws=find_lcm_list([factor_window_size, factor_TP_INPUT_WINDOW_VSIZE])
+
+  check_factor=deci_asym.fn_validate_factor_TP_INPUT_VSIZE(lcm_ws, TP_INPUT_WINDOW_VSIZE)
+  if check_factor==isValid:
+    param_dict=fn_update_TP_INPUT_WINDOW_VSIZE(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, factor_TP_INPUT_WINDOW_VSIZE)
+
+    range_TP_INPUT_WINDOW_VSIZE=[param_dict["minimum"], param_dict["maximum"]]
+    return (validate_range(range_TP_INPUT_WINDOW_VSIZE, "TP_INPUT_WINDOW_VSIZE", TP_INPUT_WINDOW_VSIZE))
+  else:
+    return check_factor
+
+#######################################################
+############### TP_SHIFT Updater and Validator ########
+#######################################################
+def update_TP_SHIFT(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  return fn_update_TP_SHIFT(AIE_VARIANT, TT_DATA)
+
+def fn_update_TP_SHIFT(AIE_VARIANT, TT_DATA):
+    range_TP_SHIFT=fn_update_range_TP_SHIFT(AIE_VARIANT, TT_DATA)
+
+    param_dict={
+        "name" : "TP_SHIFT",
+        "minimum" : range_TP_SHIFT[0],
+        "maximum" : range_TP_SHIFT[1]
+    }
+    return param_dict
 
 
-
-def validate_TP_FIR_LEN(args):
-
-    check_valid_decompose = poly.fn_validate_decomposer_TP_FIR_LEN(args)
-    if (check_valid_decompose["is_valid"] == False):
-      # error out before continuing to validate
-      return check_valid_decompose
-    # valid decompose
-    #overwrite args with the decomposed version
-    args, uut_kernel = poly.get_modified_args_from_polyphase_decomposer(args, current_uut_kernel)
-    # if we've decomposed to another type of kernel, then import that kernel and use that validate function
-    if uut_kernel != current_uut_kernel:
-      other_kernel = importlib.import_module(uut_kernel)
-      return other_kernel.validate_TP_FIR_LEN(args)
-
-    # continue using current library element's validator (with potentially modified parameters)
+def validate_TP_SHIFT(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
-    TT_COEFF = args["TT_COEFF"]
-    TP_FIR_LEN = args["TP_FIR_LEN"]
-    TP_CASC_LEN = args["TP_CASC_LEN"]
-    TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
-    TP_SSR = args["TP_SSR"]
-    TP_API = args["TP_API"]
-    TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
-    TP_DUAL_IP = args["TP_DUAL_IP"]
+    TP_SHIFT = args["TP_SHIFT"]
+    return fn_validate_shift_val(AIE_VARIANT, TT_DATA, TP_SHIFT)
+
+def fn_validate_shift_val(AIE_VARIANT, TT_DATA, TP_SHIFT):
+  param_dict=fn_update_TP_SHIFT(AIE_VARIANT, TT_DATA)
+  range_TP_SHIFT=[param_dict["minimum"], param_dict["maximum"]]
+  return validate_range(range_TP_SHIFT, "TP_SHIFT", TP_SHIFT)
+
+#######################################################
+##############TP_RND Updater and Validator ############
+#######################################################
+def update_TP_RND(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_update_TP_RND(AIE_VARIANT)
+
+def fn_update_TP_RND(AIE_VARIANT):
+  legal_set_TP_RND=fn_get_legalSet_roundMode(AIE_VARIANT)
+  param_dict={
+    "name" : "TP_RND",
+    "enum" : legal_set_TP_RND
+  }
+  return param_dict
+
+def validate_TP_RND(args):
     AIE_VARIANT = args["AIE_VARIANT"]
+    TP_RND = args["TP_RND"]
+    return fn_validate_roundMode(TP_RND, AIE_VARIANT)
 
-    return fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN,TP_INTERPOLATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, TP_DUAL_IP, AIE_VARIANT)
+#######################################################
+############ TP_SAT Updater and Validator #############
+#######################################################  
+def update_TP_SAT(args):
+  legal_set_sat=fn_legal_set_sat()
+  param_dict={
+    "name" : "TP_SAT",
+    "enum" : legal_set_sat
+  }
+  return param_dict
+                               
+def validate_TP_SAT(args):
+  TP_SAT = args["TP_SAT"]
+  return fn_validate_satMode(TP_SAT)
 
-def validate_TP_DUAL_IP(args):
-    TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
-    TP_API = args["TP_API"]
-    TP_DUAL_IP = args["TP_DUAL_IP"]
-    AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_validate_interp_dual_ip(TP_NUM_OUTPUTS, TP_API, TP_DUAL_IP, AIE_VARIANT)
+#######################################################
+############## coeff Updater and Validator ############
+#######################################################
 
-def validate_TP_NUM_OUTPUTS(args):
-    TP_API = args["TP_API"]
-    TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
-    AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_validate_num_outputs(TP_API, TP_NUM_OUTPUTS, AIE_VARIANT)
+def update_coeff(args):
+  TT_COEFF = args["TT_COEFF"]
+  TP_FIR_LEN = args["TP_FIR_LEN"]
+  return fn_update_coeff(TT_COEFF, TP_FIR_LEN)
 
-def fn_validate_interp_ssr(TP_SSR, TP_INTERPOLATE_FACTOR, TP_PARA_INTERP_POLY, TP_API, AIE_VARIANT):
-  if AIE_VARIANT == 2:
-    # AIE-ML doesn't allow SSR on a non-decomposed designs, as it is highly inefficient.
-    if TP_SSR > 1 and TP_INTERPOLATE_FACTOR != TP_PARA_INTERP_POLY:
-        return isError(f"SSR mode not available when design is not fully decomposed. Please set TP_PARA_INTERP_POLY ({TP_PARA_INTERP_POLY}) to match TP_INTERPOLATE_FACTOR {TP_INTERPOLATE_FACTOR} before increasing TP_SSR {TP_SSR}.")
-  return fn_stream_only_ssr(TP_API, TP_SSR)
+def fn_update_coeff(TT_COEFF, TP_FIR_LEN):
+  
+  if fn_is_complex(TT_COEFF) : len_coeff=2*TP_FIR_LEN
+  else: len_coeff=TP_FIR_LEN
 
-def fn_validate_casc_len(TP_CASC_LEN):
-    return fn_validate_minmax_value("TP_CASC_LEN", TP_CASC_LEN, TP_CASC_LEN_min, TP_CASC_LEN_max)
+  param_dict={"name" : "coeff",
+              "len"  : len_coeff}
 
-def validate_TP_CASC_LEN(args):
-    TP_CASC_LEN = args["TP_CASC_LEN"]
-    return fn_validate_casc_len(TP_CASC_LEN)
+  return param_dict
 
-def validate_TP_PARA_INTERP_POLY(args):
-    TP_PARA_INTERP_POLY = args["TP_PARA_INTERP_POLY"]
-    TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
-    return fn_validate_para_interp_poly(TP_INTERPOLATE_FACTOR, TP_PARA_INTERP_POLY)
+def validate_coeff(args):
+  TT_COEFF = args["TT_COEFF"]
+  TP_FIR_LEN = args["TP_FIR_LEN"]
+  coeff_list = args["coeff"]
+  return fn_validate_coeff(TT_COEFF, TP_FIR_LEN, coeff_list)
 
-def validate_TP_SSR(args):
-    TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
-    TP_PARA_INTERP_POLY = args["TP_PARA_INTERP_POLY"]
-    TP_API = args["TP_API"]
-    TP_SSR = args["TP_SSR"]
-    AIE_VARIANT = args["AIE_VARIANT"]
-    kernelInterpolate = TP_INTERPOLATE_FACTOR//TP_PARA_INTERP_POLY
-    return (
-      fn_validate_interp_ssr(TP_SSR, TP_INTERPOLATE_FACTOR, TP_PARA_INTERP_POLY, TP_API, AIE_VARIANT) if kernelInterpolate > 1
-      else isValid # assume single rate SSR is valid, since it doesn't have a validation function
-    )
+def fn_validate_coeff(TT_COEFF, TP_FIR_LEN, coeff_list):
+  param_dict=fn_update_coeff(TT_COEFF, TP_FIR_LEN)
+  return validate_LUT_len(coeff_list, param_dict["len"])
 
-# Example of updater.
-#
-# Updater are functions to help GUI to hint user on parameter setting with already given parameters.
-# The return object will provide "value" which will be set in the wizard as the dependent parameter is being set.
-# The rest of keys are similar to parameter definition, but with candidates of enum or range values refined
-# based on previously set values.
-#
-# An updator function always return a dictionary,
-# including key "value" for automatically filled default in GUI as dependent parameters have been set, and
-# other keys for overriding the definition of parameter.
-#
-# For example, if a parameter has definition in JSON as
-#  { "name": "foo", "type": "typename", "enum": ["int", "float", "double"] }
-# And the updator returns
-#  { "value": "int", "enum": ["int", "float"] }
-# The GUI would show "int" as default and make "int" and "float" selectable candidates, while disabling "double".
-#
-# If with given combination, no valid value can be set for the parameter being updated, the upater function
-# should set "value" to None, to indicate an error and provide error message via "err_message".
-# For example
-#  { "value": None, "err_message": "With TT_DATA as 'int' there is no valid option for TT_COEFF" }
-#
-# In this example, the following is the updater for TT_COEFF, with TT_DATA as the dependent parameter.
-# When GUI generates a wizard, TT_DATA should be required first, as it shows up in parameter list first.
-# Once user has provided value for TT_DATA, this function will be called and set the value of TT_COEFF.
-# Meanwhile, the candidate shown in wizard based on enum will also be updated.
-#
-def update_TT_COEFF(TT_DATA):
-    return {"value": TT_DATA,
-            "enum": [TT_DATA]}
 
 #### port ####
-
-
 def info_ports(args):
     """Standard function creating a static dictionary of information
     for upper software to correctly connect the IP.

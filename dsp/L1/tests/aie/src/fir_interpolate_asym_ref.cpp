@@ -17,7 +17,7 @@
 #include "aie_api/aie_adf.hpp"
 #include "fir_interpolate_asym_ref.hpp"
 #include "fir_ref_utils.hpp"
-#define _DSPLIB_FIR_INTERPOLATE_ASYM_REF_DEBUG_
+// #define _DSPLIB_FIR_INTERPOLATE_ASYM_REF_DEBUG_
 namespace xf {
 namespace dsp {
 namespace aie {

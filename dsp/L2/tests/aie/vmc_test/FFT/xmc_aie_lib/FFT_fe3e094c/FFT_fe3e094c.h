@@ -42,7 +42,8 @@ class FFT_fe3e094c : public adf::graph {
                                                        0,      // TP_USE_WIDGETS
                                                        2,      // TP_RND
                                                        0,      // TP_SAT
-                                                       0       // TP_TWIDDLE_MODE
+                                                       0,      // TP_TWIDDLE_MODE
+                                                       cint16  // TT_OUT_DATA
                                                        >
         fft_graph;
 

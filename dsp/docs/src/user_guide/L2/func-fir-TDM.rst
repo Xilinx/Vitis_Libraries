@@ -28,10 +28,10 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The TDM FIR filter supports both AIE1 and AIE-ML for all features with the following exceptions:
+The TDM FIR filter supports both AIE and AIE-ML devices for all features with the following exceptions:
 
 - The ``cfloat`` data type is not supported on AIE-ML device
-- Round modes available and the enumerated values of round modes differ between AIE1 and AIE-ML. See :ref:`COMPILING_AND_SIMULATING`.
+- Round modes available and the enumerated values of round modes differ between AIE and AIE-ML devices. See :ref:`COMPILING_AND_SIMULATING`.
 
 Supported Types
 ===============
@@ -238,6 +238,38 @@ Streaming Interface for Filters
 
 Streaming interfaces are not supported by TDM FIR.
 
+Cascaded kernels
+----------------
+
+Cascade - Operation Mode
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+TDM FIR can be configured to operate on multiple cascaded AIE Tiles using ``TP_CASC_LEN`` template parameter.
+
+When used (``TP_CASC_LEN > 1``), an array of ``TP_CASC_LEN`` kernels will be created and connected through cascade interface. Each kernel will operate on a fraction of the ``TP_FIR_LEN`` requested (``TP_FIR_LEN / TP_CASC_LEN``).
+
+FIR taps will be split in a balanced way that ensures maximum efficiency of the cascaded chain.
+
+For example, a 16 tap FIR split over 2 cascaded kernels will result in each operating on 8 taps, while cascade of 3 will result in kernels operating on 6 taps on first kernel and 5 taps on remaining kernels.
+
+
+Cascade - Resource Utilization
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The number of AIE tiles used by a TDM FIR will be an integer multiple of ``TP_CASC_LEN``.
+
+Cascade - Port Utilization
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Configuring TDM FIR into a chain of cascaded kernels (``TP_CASC_LEN > 1``) does not affect Input and Output ports.
+
+
+Output type
+-----------
+
+TDM FIR graph class allows to specify 32-bit output type when input type is 16-bit using template parameter ``TT_OUT_DATA``.
+
+
 .. _FIR_TDM_SSR_OPERATION:
 
 Super Sample Rate
@@ -264,11 +296,11 @@ Input data samples are distributed across the input paths in a round-robin, samp
 Super Sample Rate - Resource Utilization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The number of AIE tiles used by a FIR will be given by the formula:
+The number of AIE tiles used by a TDM FIR will be given by the formula:
 
 .. code-block::
 
-  NUMBER_OF_AIE_TILES = TP_SSR
+  NUMBER_OF_AIE_TILES = TP_SSR x TP_CASC_LEN
 
 TDM FIR graph will split the requested FIR workload among the FIR kernels equally, which can mean that each kernel is tasked with a comparatively low computational effort.
 
@@ -325,7 +357,7 @@ The following code example shows how a TDM FIR graph class might be used within 
 
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_fir_tdm.hpp
     :language: cpp
-    :lines: 15-
+    :lines: 17-
 
 
 .. |image1| image:: ./media/image1.png

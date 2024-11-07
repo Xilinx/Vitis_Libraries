@@ -49,6 +49,7 @@ def get_modified_args_from_polyphase_decomposer(args, uut_kernel):
 
 
     mod_args["TP_FIR_LEN"] = args_with_default["TP_FIR_LEN"] // (args_with_default["TP_PARA_INTERP_POLY"] * args_with_default["TP_PARA_DECI_POLY"])
+    
     # mod_args["TP_INPUT_WINDOW_VSIZE"] = args_with_default["TP_INPUT_WINDOW_VSIZE"] // (args_with_default["TP_PARA_DECI_POLY"])
 
     mod_args["TP_DECIMATE_FACTOR"] = args_with_default["TP_DECIMATE_FACTOR"] // args_with_default["TP_PARA_DECI_POLY"]
@@ -95,6 +96,12 @@ def fn_validate_decomposer_TP_INPUT_WINDOW_VSIZE(args):
     return isError(f"Input window size ({TP_INPUT_WINDOW_VSIZE}) must be a mutliple of TP_PARA_DECI_POLY ({TP_PARA_DECI_POLY})")
 
   return isValid
+
+def fn_factor_decomposer_TP_INPUT_WINDOW_VSIZE(args):
+  #default_args = dargs
+  dargs = fn_mod_args_with_defaults(args)
+  TP_PARA_DECI_POLY = dargs["TP_PARA_DECI_POLY"]
+  return (TP_PARA_DECI_POLY)
 
 def fn_validate_interp_poly(TP_PARA_INTERP_POLY, TP_INTERPOLATE_FACTOR):
   return (

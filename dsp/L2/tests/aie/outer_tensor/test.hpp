@@ -88,14 +88,14 @@ class test_graph : public graph {
             std::string filenameInB = QUOTE(INPUT_FILE_B);
             filenameInA.insert(filenameInA.length() - 4, ("_" + std::to_string(i) + "_0"));
             // filenameInB.insert(filenameInB.length()-4, ("_"+std::to_string(i)+"_0"));
-            inA[i] = input_plio::create("PLIO_inA_" + std::to_string(i), adf::plio_32_bits, filenameInA);
-            inB[i] = input_plio::create("PLIO_inB_" + std::to_string(i), adf::plio_32_bits, filenameInB);
+            inA[i] = input_plio::create("PLIO_inA_" + std::to_string(i), adf::plio_64_bits, filenameInA);
+            inB[i] = input_plio::create("PLIO_inB_" + std::to_string(i), adf::plio_64_bits, filenameInB);
             connect<>(inA[i].out[0], outer_tensorGraph.inA[i]);
             connect<>(inB[i].out[0], outer_tensorGraph.inB[i]);
 
             std::string filenameOut = QUOTE(OUTPUT_FILE);
             filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(i)));
-            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_32_bits, filenameOut);
+            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_64_bits, filenameOut);
             connect<>(outer_tensorGraph.out[i], out[i].in[0]);
         }
 #else
@@ -107,13 +107,13 @@ class test_graph : public graph {
         std::string filenameInA = QUOTE(INPUT_FILE_A);
         std::string filenameInB = QUOTE(INPUT_FILE_B);
 
-        inA[0] = input_plio::create("PLIO_inA_" + std::to_string(0), adf::plio_32_bits, filenameInA);
-        inB[0] = input_plio::create("PLIO_inB_" + std::to_string(0), adf::plio_32_bits, filenameInB);
+        inA[0] = input_plio::create("PLIO_inA_" + std::to_string(0), adf::plio_64_bits, filenameInA);
+        inB[0] = input_plio::create("PLIO_inB_" + std::to_string(0), adf::plio_64_bits, filenameInB);
         connect<>(inA[0].out[0], outer_tensorGraph.inA[0]);
         connect<>(inB[0].out[0], outer_tensorGraph.inB[0]);
 
         std::string filenameOut = QUOTE(OUTPUT_FILE);
-        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_32_bits, filenameOut);
+        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_64_bits, filenameOut);
         connect<>(outer_tensorGraph.out[0], out[0].in[0]);
 #endif
     };

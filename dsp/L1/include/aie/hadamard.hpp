@@ -48,13 +48,6 @@ using namespace adf;
 
 //#define _DSPLIB_HADAMARD_HPP_DEBUG_
 
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
-
 // #include "hadamard_traits.hpp" //for fnPointSizePwr
 
 namespace xf {
@@ -81,8 +74,8 @@ class hadamard {
     static constexpr unsigned int kVecInFrame = CEIL(TP_DIM, kSamplesInVect) / kSamplesInVect;
 
    public:
-    using TT_OUT = out_mul_type<TT_DATA_A, TT_DATA_B>;
-    using ACC_TYPE = acc_mul_type<TT_DATA_A, TT_DATA_B>;
+    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using acc_t = accTypeMult_t<TT_DATA_A, TT_DATA_B>;
 
     // Constructor
     hadamard();
@@ -94,7 +87,7 @@ class hadamard {
     // Main function
     void hadamard_main(input_buffer<TT_DATA_A>& __restrict inWindowA,
                        input_buffer<TT_DATA_B>& __restrict inWindowB,
-                       output_buffer<TT_OUT>& __restrict outWindow);
+                       output_buffer<out_t>& __restrict outWindow);
 };
 
 // Hadamard Product kernel class - stream specialization.
@@ -113,8 +106,8 @@ class hadamard<TT_DATA_A, TT_DATA_B, TP_DIM, TP_NUM_FRAMES, TP_SHIFT, 1, TP_SSR,
     static constexpr unsigned int kVecInFrame = CEIL(TP_DIM, kSamplesInVect) / kSamplesInVect;
 
    public:
-    using TT_OUT = out_mul_type<TT_DATA_A, TT_DATA_B>;
-    using ACC_TYPE = acc_mul_type<TT_DATA_A, TT_DATA_B>;
+    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using acc_t = accTypeMult_t<TT_DATA_A, TT_DATA_B>;
     // Constructor
     hadamard();
 
@@ -125,7 +118,7 @@ class hadamard<TT_DATA_A, TT_DATA_B, TP_DIM, TP_NUM_FRAMES, TP_SHIFT, 1, TP_SSR,
     // These could be claused out according to __STREAMS_PER_TILE__, but the overload is unambiguous.
     void hadamard_main(input_stream<TT_DATA_A>* __restrict inStreamA,
                        input_stream<TT_DATA_B>* __restrict inStreamB,
-                       output_stream<TT_OUT>* __restrict outStream);
+                       output_stream<out_t>* __restrict outStream);
 };
 }
 }

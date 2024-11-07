@@ -63,7 +63,7 @@ using namespace adf;
  * @tparam TP_NUM_FRAMES describes the number of vectors to be processed in each
  *         call to this function.
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
- *         product terms before each output. TP_SHIFT must be in the range 0 to 61.
+ *         product terms before each output. ``TP_SHIFT`` must be in the range 0 to 59 (61 for AIE1).
  * @tparam TP_API described whether to use streams (1) or windows (0).
  * @tparam TP_SSR describes the number of kernels to use in parallel.
  * @tparam TP_RND describes the selection of rounding to be applied during the
@@ -82,7 +82,7 @@ using namespace adf;
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
- *
+ *         \n
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
@@ -112,7 +112,10 @@ class hadamard_graph : public graph {
 
     // Defensive configuration legality checks
 
-    static_assert(TP_SHIFT >= 0 && TP_SHIFT < 61, "ERROR: TP_SHIFT is out of the supported range (0 to 61)");
+    static_assert(fnValidateShiftFloat<TP_SHIFT, TT_DATA_A>(), "ERROR: TP_SHIFT must be 0 for float types.");
+    static_assert(fnValidateShiftRange<TP_SHIFT>(), "ERROR: TP_SHIFT is out of the supported range.");
+    static_assert(fnValidateRoundMode<TP_RND>(), "ERROR: Illegal round mode.");
+    static_assert(fnValidateSatMode<TP_SAT>(), "ERROR: Illegal saturation mode.");
 
 #if __STREAMS_PER_TILE__ == 2
     static_assert(TP_API == 0 || TP_API == 1, "ERROR: TP_API is not a supported value i.e.; (0 or 1)");

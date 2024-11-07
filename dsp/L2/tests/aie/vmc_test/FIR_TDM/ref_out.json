@@ -1,6 +1,6 @@
 {
-    "graphName": "FIR_TDM_f7520b5d",
-    "graphHeaderFile": "FIR_TDM_f7520b5d.h",
+    "graphName": "FIR_TDM_e12d2f03",
+    "graphHeaderFile": "FIR_TDM_e12d2f03.h",
     "graphSearchPath": [
         "L2/include/aie",
         "L2/tests/aie/common/inc",
@@ -17,7 +17,7 @@
             "direction": "in",
             "basictype": "int16",
             "windowsize": 1024,
-            "margin": 480,
+            "margin": 992,
             "synchronicity": "sync",
             "isArray": false,
             "numElements": 1,

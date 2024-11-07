@@ -13,6 +13,19 @@
     ],
     "parameters": [
         {
+            "name": "AIE_VARIANT",
+            "type": "uint",
+            "description": "specifies the device type",
+            "updater": {
+                "file": "dds_mixer.py",
+                "function": "update_AIE_VARIANT"
+            },
+            "validator": {
+                "file": "dds_mixer.py",
+                "function": "validate_AIE_VARIANT"
+            }
+        },
+        {
             "name": "TT_DATA",
             "type": "typename",
             "description": "describes the type of individual data samples input to and output from the dds/mixer",
@@ -21,30 +34,90 @@
                 "cint32",
                 "cfloat"
             ],
+            "updater": {
+                "file": "dds_mixer.py",
+                "function": "update_TT_DATA",
+                "args": [
+                ]
+            },
             "validator": {
                 "file": "dds_mixer.py",
                 "function": "validate_TT_DATA",
                 "args": [
-                    "TP_MIXER_MODE"
-                ]
-            }
-        },
-        {
-            "name": "TP_INPUT_WINDOW_VSIZE",
-            "type": "uint",
-            "description": "describes the number of samples in the input/output window API or number of samples to process per iteration.",
-            "validator": {
-                "file": "dds_mixer.py",
-                "function": "validate_TP_WINDOW_VSIZE",
-                "args": [
-                    "TT_DATA"
                 ]
             }
         },
         {
             "name": "TP_MIXER_MODE",
             "type": "uint",
-            "description": "describes the mode of operation of the dds/mixer"
+            "description": "describes the mode of operation of the dds/mixer",
+            "updater": {
+                "file": "dds_mixer.py",
+                "function": "update_TP_MIXER_MODE",
+                "args": [
+                    "TT_DATA"
+                ]
+            },
+            "validator": {
+                "file": "dds_mixer.py",
+                "function": "validate_TP_MIXER_MODE",
+                "args": [
+                    "TT_DATA"
+                 ]
+            }
+        },
+        {
+            "name": "TP_SSR",
+            "type": "uint",
+            "description": "specifies the super sample rate, ie how much data input/output in parallel for a single channel.",
+            "updater": {
+                "file": "dds_mixer.py",
+                "function": "update_TP_SSR",
+                "args": []
+            },
+            "validator": {
+                "file": "dds_mixer.py",
+                "function": "validate_TP_SSR",
+                "args": []
+            }
+        },
+        {
+            "name": "TP_API",
+            "type": "uint",
+            "description": "specifies if the input/output interface should be window-based or stream-based.",
+            "updater": {
+                "file": "dds_mixer.py",
+                "function": "update_TP_API",
+                "args": [
+                ]},
+            "validator": {
+                "file": "dds_mixer.py",
+                "function": "validate_TP_API",
+                "args": [
+                ]}
+        },
+        {
+            "name": "TP_INPUT_WINDOW_VSIZE",
+            "type": "uint",
+            "description": "describes the number of samples in the input/output window API or number of samples to process per iteration.",
+            "updater": {
+                "file": "dds_mixer.py",
+                "function": "update_TP_INPUT_WINDOW_VSIZE",
+                "args": [
+                    "TT_DATA",
+                    "TP_SSR",
+                    "TP_API"
+                ]
+            },
+            "validator": {
+                "file": "dds_mixer.py",
+                "function": "validate_TP_INPUT_WINDOW_VSIZE",
+                "args": [
+                    "TT_DATA",
+                    "TP_SSR",
+                    "TP_API"
+                ]
+            }
         },
         {
             "name": "TP_USE_PHASE_RELOAD",
@@ -52,6 +125,12 @@
             "description": "specifies if initial phase is to be implemented as a reloadable RTP port or not.",
             "minimum": 0,
             "maximum": 1,
+            "updater": {
+                "file": "dds_mixer.py",
+                "function": "update_TP_USE_PHASE_RELOAD",
+                "args": [
+                    "TP_SSR"
+                ]},
             "validator": {
                 "file": "dds_mixer.py",
                 "function": "validate_TP_USE_PHASE_RELOAD",
@@ -60,52 +139,68 @@
                 ]}
         },
         {
-            "name": "TP_API",
-            "type": "uint",
-            "description": "specifies if the input/output interface should be window-based or stream-based."
-        },
-        {
-            "name": "TP_SSR",
-            "type": "uint",
-            "description": "specifies the super sample rate, ie how much data input/output in parallel for a single channel.",
-            "validator": {
-                "file": "dds_mixer.py",
-                "function": "validate_TP_SSR",
-                "args": []
-            }
-        },
-        {
             "name": "phaseInc",
             "type": "uint",
-            "description": "specifies the phase increment between samples."
+            "description": "specifies the phase increment between samples.",
+            "updater": {
+                "file": "dds_mixer.py",
+                "function": "update_phaseInc",
+                "args": [
+                ]},
+            "validator": {
+                "file": "dds_mixer.py",
+                "function": "validate_phaseInc",
+                "args": [
+                ]}
         },
         {
             "name": "initialPhaseOffset",
             "type": "uint",
-            "description": "specifies the initial value of the phase accumulator, creating a phase offset."
+            "description": "specifies the initial value of the phase accumulator, creating a phase offset.",
+            "updater": {
+                "file": "dds_mixer.py",
+                "function": "update_initialPhaseOffset",
+                "args": [
+                ]},
+            "validator": {
+                "file": "dds_mixer.py",
+                "function": "validate_initialPhaseOffset",
+                "args": [
+                ]}
         },
         {
             "name": "TP_RND",
             "description": "The rounding to be applied during the shift down stage of processing.",
-            "type": "uint"
+            "type": "uint",
+            "updater": {
+                "file": "dds_mixer.py",
+                "function": "update_TP_RND",
+                "args": [
+                    "AIE_VARIANT"
+                ]},
+            "validator": {
+                "file": "dds_mixer.py",
+                "function": "validate_TP_RND",
+                "args": [
+                    "AIE_VARIANT"
+                ]}            
         },
         {
             "name": "TP_SAT",
             "description": "Saturation mode.",
             "type": "uint",
+            "updater": {
+                "file": "dds_mixer.py",
+                "function": "update_TP_SAT",
+                "args": [
+                    "TP_MIXER_MODE"
+                ]},
             "validator": {
                 "file": "dds_mixer.py",
-                "function": "validate_TP_SAT"
-            }
-        },
-        {
-            "name": "AIE_VARIANT",
-            "type": "uint",
-            "description": "specifies the device type",
-            "validator": {
-                "file": "dds_mixer.py",
-                "function": "validate_AIE_VARIANT"
-            }
+                "function": "validate_TP_SAT",
+                "args": [
+                    "TP_MIXER_MODE"
+                ]}
         }
     ],
     "ports": {

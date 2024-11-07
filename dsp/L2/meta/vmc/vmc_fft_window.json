@@ -48,7 +48,7 @@
       "validator": {
         "file": "vmc_fft_window.py",
         "function": "vmc_validate_point_size",
-        "args": ["data_type"]
+        "args": ["data_type", "is_dyn_pt_size"]
       },
             "label": "FFT/IFFT point size:",
             "tablabel": "Main",
@@ -62,7 +62,7 @@
       "validator": {
         "file": "vmc_fft_window.py",
         "function": "vmc_validate_is_dyn_pt_size",
-        "args": [ "point_size" ]
+        "args": [ ]
       },
             "label": "Use dynamic point size",
             "tablabel": "Main",

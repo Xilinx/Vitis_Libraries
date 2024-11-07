@@ -45,7 +45,7 @@ PARAMS ?= test_0_tool_canary_aie
 PARAMS_FILE ?= multi_params.json 
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  vck190 vek280
+PLATFORM_ALLOWLIST += vck190 vek280
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk
@@ -57,7 +57,7 @@ BUILD_DIR = $(RESULT_DIR)
 endif
 BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(PLATFORM_NAME)
 
-include params.mk
+include $(XFLIB_DIR)/L2/tests/aie/common/scripts/params.mk
 
 RUN_DEPS :=
 
@@ -130,7 +130,7 @@ else
 AIE_CXXFLAGS += --platform=$(XPLATFORM)
 endif
 
-AIE_CXXFLAGS += --target=$(AIETARGET)    --aie.pl-freq 1000 
+AIE_CXXFLAGS += --target=$(AIETARGET)    --aie.pl-freq 625 
 AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work

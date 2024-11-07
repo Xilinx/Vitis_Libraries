@@ -31,11 +31,11 @@ namespace aie {
 namespace outer_tensor {
 template <typename T_A, typename T_B>
 outTypeMult_t<T_A, T_B> scalar_mult(T_A a, T_B b, const int shift, unsigned int t_rnd, unsigned int t_sat) {
-    using TT_OUT = outTypeMult_t<T_A, T_B>;
-    TT_OUT ret_val;
+    using out_t = outTypeMult_t<T_A, T_B>;
+    out_t ret_val;
     T_accRef<T_A> aAcc;
     T_accRef<T_B> bAcc;
-    T_accRef<TT_OUT> outAcc;
+    T_accRef<out_t> outAcc;
 
     aAcc = val_accRef(a);
     bAcc = val_accRef(b);
@@ -66,7 +66,6 @@ float scalar_mult(float a, float b, const int shift, unsigned int t_rnd, unsigne
     return ret_val;
 }
 
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 cfloat scalar_mult(float a, cfloat b, const int shift, unsigned int t_rnd, unsigned int t_sat) {
     cfloat ret_val;
@@ -83,9 +82,7 @@ cfloat scalar_mult(float a, cfloat b, const int shift, unsigned int t_rnd, unsig
     ret_val = castAcc(outAcc);
     return ret_val;
 }
-#endif
 
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 cfloat scalar_mult(cfloat a, float b, const int shift, unsigned int t_rnd, unsigned int t_sat) {
     cfloat ret_val;
@@ -102,9 +99,7 @@ cfloat scalar_mult(cfloat a, float b, const int shift, unsigned int t_rnd, unsig
     ret_val = castAcc(outAcc);
     return ret_val;
 }
-#endif
 
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 cfloat scalar_mult(cfloat a, cfloat b, const int shift, unsigned int t_rnd, unsigned int t_sat) {
     cfloat ret_val;
@@ -121,7 +116,6 @@ cfloat scalar_mult(cfloat a, cfloat b, const int shift, unsigned int t_rnd, unsi
     ret_val = castAcc(outAcc);
     return ret_val;
 }
-#endif
 
 // Outer Tensor Product - default/base 'specialization' for both static and dynamic point size
 template <typename TT_DATA_A,
@@ -146,16 +140,16 @@ void outer_tensor_ref<TT_DATA_A,
                       TP_SAT>::outer_tensor_main(input_buffer<TT_DATA_A>& inWindowA,
                                                  input_buffer<TT_DATA_B>& inWindowB,
                                                  output_buffer<outTypeMult_t<TT_DATA_A, TT_DATA_B> >& outWindow0) {
-    using TT_OUT = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
     TT_DATA_A dA_in;
     TT_DATA_B dB_in;
-    TT_OUT d_out;
+    out_t d_out;
 
     unsigned int outDim = TP_DIM_A * TP_DIM_B;
 
     TT_DATA_A* inPtrA = (TT_DATA_A*)inWindowA.data();
     TT_DATA_B* inPtrB = (TT_DATA_B*)inWindowB.data();
-    TT_OUT* outPtr = (TT_OUT*)outWindow0.data();
+    out_t* outPtr = (out_t*)outWindow0.data();
 
     // Processing of one window
     for (int frame = 0; frame < TP_NUM_FRAMES; frame++) {

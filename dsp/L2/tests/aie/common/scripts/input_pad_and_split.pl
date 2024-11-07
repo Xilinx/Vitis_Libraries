@@ -60,6 +60,7 @@ my $numFrames = 1;
 my $variant = 1;
 my $dual = 0;
 my $help = 0;
+my $plioWidth = 64;
 
 
 
@@ -73,6 +74,7 @@ GetOptions (
     "ssr=i" => \$ssr,
     "variant=i"    => \$variant,
     "d|dual=i" => \$dual,
+    "plio|plioWidth=i" => \$plioWidth,
     "h|help" => \$help)
 or die("Error in command line arguments\n");
 
@@ -86,44 +88,40 @@ if ( $file eq "" ) {
 }
 
 
-#"i|g|interleaveGranularity|granularity=i" => \$gran,
-# int16 has two samples per line, but we hanlde this when we initially read file; so that it IS 1 line per sample.
+# Define properties for each data type  
+my %type_properties = (  
+    'int8'      => { numParts => 1, partSize => 8  },  
+    'int16'     => { numParts => 1, partSize => 16 },  
+    'int32'     => { numParts => 1, partSize => 32 },  
+    'float'     => { numParts => 1, partSize => 32 },  
+    'bfloat16'  => { numParts => 1, partSize => 16 },  
+    'cint8'     => { numParts => 2, partSize => 8  },  
+    'cint16'    => { numParts => 2, partSize => 16 },  
+    'cint32'    => { numParts => 2, partSize => 32 },  
+    'cfloat'    => { numParts => 2, partSize => 32 },  
+    'cbfloat16' => { numParts => 2, partSize => 16 },  
+); 
+
+
+# Get properties for the data type  
+my $partsPerSample = $type_properties{$type}{numParts};  
+my $sampleSizeBits = $type_properties{$type}{numParts} * $type_properties{$type}{partSize};
+
+my $samplesPerLine = $plioWidth / $sampleSizeBits;
+# prevent samplesPerLine = 0.5 (round up)
+if (int($samplesPerLine) != $samplesPerLine) {
+  $samplesPerLine = int($samplesPerLine) + 1;
+}
+my $partsPerLine = $plioWidth / $type_properties{$type}{partSize};
+
+# For case when sample is split over two lines (cint32, cfloats with 32-bit PLIO)
 my $linesPerSample = 1;
-if ($type eq "cint32" or $type eq "cfloat") {
-  # A single complex sample is split over two lines
+if ($plioWidth < $sampleSizeBits) {
   $linesPerSample = 2;
-}
-my $samplesPerLine = 1;
-if ($type eq "int16" ) {
-  # A single line has 32 bits of information, so two real int16 samples.
-  $samplesPerLine = 2;
-}
-my $partsPerLine = 1;
-if ($type eq "cint16" or $type eq "int16") {
-  # 2 parts per single line
-  $partsPerLine = 2;
-}
-
+} 
+my $data_type_size_bytes = $sampleSizeBits / 8;
 my $dual_gran;
-my $data_type_size_bytes;
-if ($type eq "cint32")  {
-    $data_type_size_bytes = 8;
-} elsif ($type eq "cfloat") {
-    $data_type_size_bytes = 8;
-} elsif ($type eq "cint16") {
-    $data_type_size_bytes = 4;
-} elsif ($type eq "int32") {
-    $data_type_size_bytes = 4;
-} elsif ($type eq "float") {
-    $data_type_size_bytes = 4;
-} else {
-    $data_type_size_bytes = 2;
-}
 
-my $complex = 0;
-if ($type eq "cint32" || $type eq "cint16" || $type eq "cfloat") {
-  $complex = 1;
-}
 ############################################################################################
 sub ceil {
     my ($x, $y) = @_;
@@ -176,162 +174,97 @@ my @subFilesH;
 my @subFilesFinal;
 my @subFilesFinalH;
 
-print "reading $file\n";
-open(fileH, "<", $file)
-    or die "cannot open $file : $!";
-
-my $outFileMod = "";
 # Rearrange files with multiple samples per line to 1 sample per line and twice the lines.
 # This is set up for data types of 16 bits and less.
 # This is required since casc splits input stream on a sample-by-sample basis.
-if  ($samplesPerLine > 1) {
 
-    # Parse input files
-    open(fileH_mod, ">", "${file}_int16mod")
-        or die "cannot open ${file}_int16Mod : $!";
-
-    # split two samples per line into two lines
-    while (<fileH>) {
-        s/\s+(-?[0-9]+)\s?/\n$1/g ;
-        print fileH_mod $_;
-    }
-
-    close(fileH)
-        or die "couldn't close $file";
-    close(fileH_mod)
-        or die "couldn't close ${file}_int16mod";
-
-    # reset fileH to point to the file we just created
-    open(fileH, "<", "${file}_int16mod")
-        or die "cannot open ${file}_int16Mod : $!";
-
-    # Prep output file name suffix
-    $outFileMod = "_beforeInt16Mod";
-}
+# Read the file into an array  
+# Open the input file  
+open(fileH, "<", $file)
+    or die "cannot open $file : $!";
+# Create array of data parts
+my @dataParts;
+while (my $line = <fileH>) {  
+    chomp $line;  
+    push @dataParts, split ' ', $line;  
+} 
 
 
 ###################### PAD WITH ZEROS ###################
-# Create new file file to contain padded input data
-open(fileH_padded, ">", "$newFile")
-    or die "cannot open newFile : $!";
-
 # Loop through input, insert pad at end of each window
-my $lineNum = 1;
+my @paddedDataParts;
+my $partNum = 1;
 my $currentFrame = 1;
-while(my $line = <fileH>){
-    print fileH_padded $line;
+my $part;
+my $partsToPad = $partsPerSample*(($paddedWindowSize/$numFrames)-$pointSize);
+
+for (my $i = 0; $i < @dataParts; $i++) {  
+    $part = $dataParts[$i];
+    push @paddedDataParts, $dataParts[$i];
     # End of a frame once paddedPointSize lines has been reached
-    if ($lineNum % ($linesPerSample*$pointSize) == 0) {
-        for(my $i = 0; $i < ($paddedWindowSize/$numFrames)-$pointSize; $i++){
-            if ($linesPerSample==1) {
-                print fileH_padded "0 0\n";
-            } else {
-                print fileH_padded "0\n0\n";
-            }   
+    if ($partNum % ($partsPerSample*$pointSize) == 0) {
+        for(my $j = 0; $j < $partsToPad; $j++){
+            push @paddedDataParts, "0";
         }
         $currentFrame++;   
     }    
-    $lineNum++;
+    $partNum++;
 }
-# Set fileH to new padded file
-close(fileH)
-    or die "couldn't close $file";
-close(fileH_padded)
-    or die "couldn't close $newFile";
-open(fileH, "<", "$newFile")
-    or die "cannot open $newFile : $!";
+
 
 ##########################################################
 
 # Open a bunch of files in an array of file handles with a specific filename
+my @subArrays;
 for my $cascIdx (@cascRange){
-    for my $dualIdx (@dualRange){
-        my $fileIdx = $cascIdx*$dualFactor + $dualIdx;
-        $subFiles[$fileIdx] = "${newFileDir}${newFileName}_0_${cascIdx}${newFileExt}${outFileMod}";
-        print "Writing to $subFiles[$fileIdx]\n";
-        open($subFilesH[$fileIdx], ">", $subFiles[$fileIdx])
-            or die "cannot open $subFiles[$fileIdx] : $!";
-    }
+    my $fileIdx = $cascIdx;
+    $subArrays[$fileIdx] = [];      
 }
+my $cascIdx = 0;
+$partNum = 0;
+for (my $i = 0; $i < @paddedDataParts; $i++) {  
+    my $part = $paddedDataParts[$i];        
+    my $fileIdx = $cascIdx;  
+    
+    push @{$subArrays[$fileIdx]}, $part;  
 
-$lineNum = 0;
-my $cascIndex = 0;
-my $dualIdx = 0;
-my $linesPerDualStream = $linesPerSample * $dual_gran;
-my $linesPerCascDualStream = $linesPerDualStream * $cascLen;
+    if ($partNum % $partsPerSample == ($partsPerSample - 1)) { 
+        $cascIdx = ($cascIdx + 1) % $cascLen;  
+    }  
+    $partNum++;   
+}  
+# Assuming @subArrays is an array of array references  
+for my $cascIdx (@cascRange) {  
+    my $fileIdx = $cascIdx;  
+    $subFiles[$fileIdx] = "${newFileDir}${newFileName}_0_$cascIdx${newFileExt}";
+    print "Writing to $subFiles[$fileIdx]\n";  
+    
+    open(my $subFileH, ">", $subFiles[$fileIdx]) or die "Cannot open $subFiles[$fileIdx]: $!";  
+    
+    my @cascParts = @{$subArrays[$fileIdx]};  
+    
+    # Convert parts back into lines and print directly to the file  
+    for (my $i = 0; $i < @cascParts; $i += $partsPerLine) {  
+        my $line = join(' ', @cascParts[$i .. $i + $partsPerLine - 1]) . " \n";  
+        print $subFileH $line;  
+    }  
+    
+    close($subFileH) or die "Cannot close $subFiles[$fileIdx]: $!";  
+} 
 
-while(my $line = <fileH>){
-
-    my $fileIdx = $cascIndex*$dualFactor + $dualIdx;
-    print {$subFilesH[$fileIdx]} $line;
-    if ($lineNum % $linesPerSample == ($linesPerSample-1)) {
-        $cascIndex = ($cascIndex+1) % $cascLen;
-    }
-    if ($lineNum % ($linesPerCascDualStream) == (($linesPerCascDualStream)-1)) {
-        $dualIdx = ($dualIdx+1) % $dualFactor;
-    }
-    $lineNum = $lineNum+1;
-}
-
-# Rearrange tmp output files back to multiple samples per line.
-if  ($samplesPerLine > 1) {
-
-    # Simply open all the output files and force two samples per line
-    for my $cascIdx (@cascRange){
-        for my $dualIdx (@dualRange){
-            my $fileIdx = $cascIdx* $dualFactor + $dualIdx;
-            #close for Write
-            close($subFilesH[$fileIdx])
-                or die "cannot close $subFiles[$fileIdx] : $!";
-            # Open out files for read
-            open($subFilesH[$fileIdx], "<", $subFiles[$fileIdx])
-                or die "cannot open $subFiles[$fileIdx] : $!";
-
-            print "Reading from $subFiles[$fileIdx]\n";
-            # intendedfinal output file without outFileMod
-            $subFilesFinal[$fileIdx] = "${newFileDir}${newFileName}_0_$cascIdx${newFileExt}";
-            print "Writing to $subFilesFinal[$fileIdx]\n";
-
-            open($subFilesFinalH[$fileIdx], ">", $subFilesFinal[$fileIdx])
-                or die "cannot open $subFilesFinal[$fileIdx] : $!";
-
-            my $cascHandle = $subFilesH[$fileIdx];
-            my $cascHandleFinal = $subFilesFinalH[$fileIdx];
-            my $lineCount = 0;
-            while(my $line = <$cascHandle>){
-                # Every even line we remove the newline character.
-                if ($lineCount % $samplesPerLine == 0) {
-                    $line =~ s/\n/ /g ;
-                }
-                print $cascHandleFinal $line;
-                $lineCount++;
-            }
-        }
-    }
-}
 # When input is a vector to be split over cascade, it is cloned for each ssr
 # print "ssr is $ssr\n";
-# if ($ssr > 1) {
-#     if  ($samplesPerLine > 1) {
-#         foreach my $subFile (@subFilesFinal) {  
-#             for (my $i = 1; $i < $ssr; $i++) {  
-#                 print "ssr is $i\n";
-#                 my $cloneFile = $subFile;  
-#                 $cloneFile =~ s/_0\_/_$i\_/; # replace "_0." with "_$i."  
-#                 system("cp $subFile $cloneFile"); # clone the file  
-#             }  
-#         }
-#     } else {
-#         foreach my $subFile (@subFiles) {  
-#             for (my $i = 1; $i < $ssr; $i++) {  
-#                 print "ssr is $i\n";
-#                 my $cloneFile = $subFile;  
-#                 $cloneFile =~ s/_0\_/_$i\_/; # replace "_0." with "_$i."  
-#                 system("cp $subFile $cloneFile"); # clone the file  
-#             }  
-#         }  
-#     }
-# }
+if ($ssr > 1) {
+    foreach my $subFile (@subFiles) {  
+        for (my $i = 1; $i < $ssr; $i++) {  
+            # print "ssr is $i\n";
+            my $cloneFile = $subFile;  
+            $cloneFile =~ s/_0_/_${i}_/; # replace "_0." with "_$i."  
+            system("cp $subFile $cloneFile"); # clone the file  
+        }  
+    }  
+}
+
 close(fileH)
 
 

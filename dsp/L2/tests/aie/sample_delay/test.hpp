@@ -71,12 +71,12 @@ class test_graph : public graph {
         // Make connections
         std::string filenameIn = QUOTE(INPUT_FILE);
         filenameIn.insert(filenameIn.length() - 4, ("_" + std::to_string(0) + "_0"));
-        in[0] = input_plio::create("PLIO_in_" + std::to_string(0), adf::plio_32_bits, filenameIn);
+        in[0] = input_plio::create("PLIO_in_" + std::to_string(0), adf::plio_64_bits, filenameIn);
         connect<>(in[0].out[0], sampleDelayGraph.in);
 
         std::string filenameOut = QUOTE(OUTPUT_FILE);
         filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(0) + "_0"));
-        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_32_bits, filenameOut);
+        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_64_bits, filenameOut);
         connect<>(sampleDelayGraph.out, out[0].in[0]);
         connect<parameter>(numSampleDelay_rtp, sampleDelayGraph.numSampleDelay); // RTP
 

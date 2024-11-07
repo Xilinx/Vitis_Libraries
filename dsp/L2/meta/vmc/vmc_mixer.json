@@ -14,7 +14,7 @@
       "validator": {
         "file": "vmc_mixer.py",
         "function": "vmc_validate_data_type",
-        "args": ["mixer_mode"]
+        "args": []
       },
             "label": "Input/Output data type:",
             "tablabel": "Main",
@@ -28,9 +28,23 @@
       "validator": {
         "file": "vmc_mixer.py",
         "function": "vmc_validate_output_window_size",
-        "args": ["data_type"]
+        "args": ["data_type","ssr"]
       },
             "label": "Input window size (Number of Samples):",
+            "tablabel": "Main",
+            "parameterType":"edit"
+    },
+    {
+      "key": "TP_SSR",
+      "name": "ssr",
+      "description": "Specify number of data input/output in parallel for a single channel.",
+      "default": 1,
+      "validator": {
+        "file": "vmc_mixer.py",
+        "function": "vmc_validate_ssr",
+        "args": []
+      },
+            "label": "SSR: ",
             "tablabel": "Main",
             "parameterType":"edit"
     },
@@ -51,9 +65,9 @@
       "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
       "default": 0,
       "validator": {
-          "file": "vmc_fft_common.py",
+          "file": "vmc_mixer.py",
           "function": "vmc_validate_sat_mode",
-          "args": []
+          "args": ["mixer_mode"]
         },
             "label": "Saturation mode:",
             "tablabel": "Main",
@@ -79,7 +93,7 @@
 	    "validator": {
                "file": "vmc_mixer.py",
                 "function": "validate_USE_PHASE_RELOAD",
-                "args": []
+                "args": ["ssr"]
 		},
 	    "label": "Reload initial phase via input port",
             "tablabel": "Main",

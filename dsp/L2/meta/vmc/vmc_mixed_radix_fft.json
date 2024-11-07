@@ -1,133 +1,147 @@
 {
-  "low_level_file":"mixed_radix_fft.json",
-  "ip_name": "vmc_mixed_radix_fft",
-  "block_info": {
+    "low_level_file":"mixed_radix_fft.json",
+    "ip_name": "vmc_mixed_radix_fft",
+    "block_info": {
     "label": "Mixed-Radix FFT",
     "description": "Mixed-Radix FFT block targeted for AI Engines."
-  },
-  "parameters": [
+    },
+    "parameters": [
     {
-	  "key": "AIE_VARIANT",
-	  "name": "AIE_VARIANT",
-      "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
-      "default": 1,
-	  "label": "AIE Variant:",
-      "tablabel": "Main",
-      "parameterType":"edit"
+        "key": "AIE_VARIANT",
+        "name": "AIE_VARIANT",
+        "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
+        "default": 1,
+        "label": "AIE Variant:",
+        "tablabel": "Main",
+        "parameterType":"edit"
     },
     {
-      "key": "TT_DATA",
-      "name": "data_type",
-      "description": "The type of individual data samples input to and output of the fft function",
-      "default": "cint16",
-            "label": "Input/Output data type:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+        "key": "TT_DATA",
+        "name": "data_type",
+        "description": "The type of individual data samples input to and output of the fft function",
+        "default": "cint16",
+        "label": "Input/Output data type:",
+        "tablabel": "Main",
+        "parameterType":"popup"
     },
     {
-      "key": "TT_TWIDDLE",
-      "name": "twiddle_type",
-      "description": "The type of individual data samples input to and output of the filter function",
-      "default": "cint16",
-      "validator": {
+        "key": "TT_TWIDDLE",
+        "name": "twiddle_type",
+        "description": "The type of individual data samples input to and output of the filter function",
+        "default": "cint16",
+        "validator": {
         "file": "vmc_mixed_radix_fft.py",
         "function": "vmc_validate_twiddle_type",
         "args": ["data_type"]
-      },
-            "label": "Twiddle factor data type:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+        },
+        "label": "Twiddle factor data type:",
+        "tablabel": "Main",
+        "parameterType":"popup"
     },
-      {
-      "key": "TP_POINT_SIZE",
-      "name": "point_size",
-      "description": "The number of samples in the transform",
-      "default": 64,
-      "validator": {
+    {
+        "key": "TP_POINT_SIZE",
+        "name": "point_size",
+        "description": "The number of samples in the transform",
+        "default": 64,
+        "validator": {
         "file": "vmc_mixed_radix_fft.py",
         "function": "vmc_validate_point_size",
-        "args": ["AIE_VARIANT"]
-      },
-            "label": "FFT size:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+        "args": ["AIE_VARIANT", "data_type", "dyn_pt_size"]
+        },
+        "label": "FFT size:",
+        "tablabel": "Main",
+        "parameterType":"edit"
     },
     {
-      "key": "TP_WINDOW_VSIZE",
-      "name": "input_window_size",
-      "description": "The number of samples in the input window",
-      "default": 64,
-      "validator": {
+        "key": "TP_WINDOW_VSIZE",
+        "name": "input_window_size",
+        "description": "The number of samples in the input window",
+        "default": 64,
+        "validator": {
         "file": "vmc_mixed_radix_fft.py",
         "function": "vmc_validate_input_window_size",
-        "args": ["point_size"]
-      },
-            "label": "Input window size (Number of samples):",
-            "tablabel": "Main",
-            "parameterType":"edit"
+        "args": ["AIE_VARIANT", "data_type", "point_size"]
+        },
+        "label": "Input window size (Number of samples):",
+        "tablabel": "Main",
+        "parameterType":"edit"
     },
     {
-      "key": "TP_SHIFT",
-      "name": "shift_val",
-      "description": "The power of 2 shift down applied to the accumulation of FIR before output",
-      "default": 0,
-      "validator": {
+        "key": "TP_DYN_PT_SIZE",
+        "name": "dyn_pt_size",
+        "description": "Indicator of whether to use dynamic (1) or static (0) point size",
+        "default": 0,
+        "validator": {
+        "file": "vmc_mixed_radix_fft.py",
+        "function": "vmc_validate_dyn_pt_size",
+        "args": []
+        },
+        "label": "Dynamic (1) or static (0) point size:",
+        "tablabel": "Main",
+        "parameterType":"edit"
+    },
+    {
+        "key": "TP_CASC_LEN",
+        "name": "casc_length",
+        "description": "The length of cascaded kernels",
+        "default": 1,
+        "validator": {
+        "file": "vmc_mixed_radix_fft.py",
+        "function": "vmc_validate_casc_length",
+        "args": ["point_size", "dyn_pt_size"]
+        },
+        "label": "Number of cascade stages:",
+        "tablabel": "Main",
+        "parameterType":"edit"
+    },
+    {
+        "key": "TP_SHIFT",
+        "name": "shift_val",
+        "description": "The power of 2 shift down applied to the accumulation of FIR before output",
+        "default": 0,
+        "validator": {
         "file": "vmc_mixed_radix_fft.py",
         "function": "vmc_validate_shift_val",
         "args": ["data_type"]
-      },
-            "label": "Scale output down by 2^:",
-            "tablabel": "Main",
-            "parameterType":"edit"
-    },
-    {
-      "key": "TP_RND",
-      "name": "rnd_mode",
-      "description": "The rounding to be applied during the shift down stage of processing.",
-      "default": "Round symmetrical to infinity",
-      "validator": {
-                "file": "vmc_mixed_radix_fft.py",
-                "function": "vmc_validate_TP_RND",
-                "args": ["AIE_VARIANT"]
-                },
-          "label": "Rounding mode:",
-            "tablabel": "Main",
-          "parameterType": "popup"
-    },
-    {
-      "key": "TP_SAT",
-      "name": "sat_mode",
-      "description": "Saturation mode.",
-      "enum": [0, 1, 3],
-      "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
-      "default": 0,
-      "validator": {
-          "file": "vmc_mixed_radix_fft.py",
-          "function": "vmc_validate_sat_mode",
-          "args": []
         },
-            "label": "Saturation mode:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+        "label": "Scale output down by 2^:",
+        "tablabel": "Main",
+        "parameterType":"edit"
     },
     {
-      "key": "TP_CASC_LEN",
-      "name": "casc_length",
-      "description": "The length of cascaded kernels",
-      "default": 1,
-       "validator": {
+        "key": "TP_RND",
+        "name": "rnd_mode",
+        "description": "The rounding to be applied during the shift down stage of processing.",
+        "default": "Round symmetrical to infinity",
+        "validator": {
         "file": "vmc_mixed_radix_fft.py",
-        "function": "vmc_validate_casc_length",
-        "args": ["point_size"]
-      },
-            "label": "Number of cascade stages:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+        "function": "vmc_validate_rnd_mode",
+        "args": ["AIE_VARIANT"]
+        },
+        "label": "Rounding mode:",
+        "tablabel": "Main",
+        "parameterType": "popup"
+    },
+    {
+        "key": "TP_SAT",
+        "name": "sat_mode",
+        "description": "Saturation mode.",
+        "enum": [0, 1, 3],
+        "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
+        "default": 0,
+        "validator": {
+        "file": "vmc_mixed_radix_fft.py",
+        "function": "vmc_validate_sat_mode",
+        "args": []
+        },
+        "label": "Saturation mode:",
+        "tablabel": "Main",
+        "parameterType":"popup"
     }
 
-  ],
-  "generator": {
+    ],
+    "generator": {
     "file": "vmc_mixed_radix_fft.py",
     "function": "vmc_generate_graph"
-  }
+    }
 }

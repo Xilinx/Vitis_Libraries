@@ -44,12 +44,8 @@ compilation.
 
 using namespace adf;
 //#define _DSPLIB_WIDGET_REAL2COMPLEX_HPP_DEBUG_
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
+
+#include "device_defs.h"
 
 namespace xf {
 namespace dsp {

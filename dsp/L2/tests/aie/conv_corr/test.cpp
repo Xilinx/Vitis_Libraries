@@ -26,7 +26,16 @@ xf::dsp::aie::testcase::test_graph conv_corr_TestHarness;
 
 int main(void) {
     conv_corr_TestHarness.init();
+#ifdef USING_UUT
     conv_corr_TestHarness.run(NITER);
+#else
+#if (API_PORT == 1)
+    conv_corr_TestHarness.run(1);
+#else
+    conv_corr_TestHarness.run(NITER);
+#endif
+#endif
+
     conv_corr_TestHarness.end();
 
     return 0;

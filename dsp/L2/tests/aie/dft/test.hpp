@@ -104,17 +104,17 @@ class test_graph : public graph {
             for (int casc = 0; casc < CASC_LEN; casc++) {
                 std::string filenameIn = QUOTE(INPUT_FILE);
                 // Each rank of ssr receives same input data
-                filenameIn.insert(filenameIn.length() - 4, ("_0_" + std::to_string(casc)));
+                filenameIn.insert(filenameIn.length() - 4, ("_" + std::to_string(ssr) + "_" + std::to_string(casc)));
                 // Make connections
                 in[casc + ssr * CASC_LEN] = input_plio::create("PLIO_in_" + std::to_string(casc + ssr * CASC_LEN),
-                                                               adf::plio_32_bits, filenameIn);
+                                                               adf::plio_64_bits, filenameIn);
                 connect<>(in[casc + ssr * CASC_LEN].out[0], dftGraph.in[casc + ssr * CASC_LEN]);
             }
         }
         for (int ssrOut = 0; ssrOut < UUT_SSR; ssrOut++) {
             std::string filenameOut = QUOTE(OUTPUT_FILE);
             filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(ssrOut) + "_0"));
-            out[ssrOut] = output_plio::create("PLIO_out_" + std::to_string(ssrOut), adf::plio_32_bits, filenameOut);
+            out[ssrOut] = output_plio::create("PLIO_out_" + std::to_string(ssrOut), adf::plio_64_bits, filenameOut);
             connect<>(dftGraph.out[ssrOut], out[ssrOut].in[0]);
         }
 #else // using ref
@@ -125,7 +125,7 @@ class test_graph : public graph {
 
         std::string filenameOut = QUOTE(OUTPUT_FILE);
         // filenameOut.insert(filenameOut.length() - 4, ("_0_0"));
-        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_32_bits, filenameOut);
+        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_64_bits, filenameOut);
         connect<>(dftGraph.out[0], out[0].in[0]);
 #endif
     };

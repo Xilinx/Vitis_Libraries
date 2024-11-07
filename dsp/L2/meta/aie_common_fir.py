@@ -1,15 +1,7 @@
-# Common utility variables and functions used accross FIR elements.
-
-
 from aie_common import *
+from aie_common_fir import *
+import fir_polyphase_decomposer as poly
 
-
-
-
-#### internal validation functions ####
-
-
-######## traits ############
 
 TP_DECIMATE_FACTOR_min = 2
 TP_DECIMATE_FACTOR_max = 7
@@ -449,4 +441,9 @@ def fn_type_sr_support(TT_DATA, TT_COEFF, AIE_VARIANT):
     # no restrictions on AIE1, only check AIE-ML restrictions.
     return fn_type_aieml_support(TT_DATA, TT_COEFF, AIE_VARIANT)
 
-
+def fn_lcm_decomposer_TP_FIR_LEN(args):
+  dargs = poly.fn_mod_args_with_defaults(args)
+  TP_PARA_INTERP_POLY = dargs["TP_PARA_INTERP_POLY"]
+  TP_PARA_DECI_POLY = dargs["TP_PARA_DECI_POLY"]
+  lcm_FIR_LEN=(TP_PARA_DECI_POLY * TP_PARA_INTERP_POLY)
+  return lcm_FIR_LEN

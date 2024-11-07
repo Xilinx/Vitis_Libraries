@@ -13,6 +13,21 @@
     ],
     "parameters": [
         {
+            "name": "AIE_VARIANT",
+            "type": "uint",
+            "description": "specifies the device type",
+            "maximum": 2,
+            "minimum": 1,
+            "updater": {
+                "file": "widget_real2complex.py",
+                "function": "update_AIE_VARIANT"
+            },
+            "validator": {
+                "file": "widget_real2complex.py",
+                "function": "validate_AIE_VARIANT"
+            }
+        },
+        {
             "name": "TT_DATA",
             "type": "typename",
             "description": "describes the type of individual data samples input to and output from the dds/mixer",
@@ -23,7 +38,15 @@
                 "cint16",
                 "cint32",
                 "cfloat"
-            ]
+            ],
+            "updater": {
+                "file": "widget_real2complex.py",
+                "function": "update_TT_DATA"
+            },
+            "validator": {
+                "file": "widget_real2complex.py",
+                "function": "validate_TT_DATA"
+            }
         },
         {
             "name": "TT_OUT_DATA",
@@ -37,6 +60,13 @@
                 "cint32",
                 "cfloat"
             ],
+            "updater": {
+                "file": "widget_real2complex.py",
+                "function": "update_TT_OUT_DATA",
+                "args": [
+                    "TT_DATA"
+                ]
+            },
             "validator": {
                 "file": "widget_real2complex.py",
                 "function": "validate_TT_OUT_DATA",
@@ -50,14 +80,17 @@
             "type": "uint",
             "description": "describes the number of samples in the input/output window API or number of samples to process per iteration.",
             "minimum": 4,
-            "maximum": 4096
-        },
-        {
-            "name": "AIE_VARIANT",
-            "type": "uint",
-            "description": "specifies the device type",
-            "maximum": 2,
-            "minimum": 1
+            "maximum": 4096,
+            "updater": {
+                "file": "widget_real2complex.py",
+                "function": "update_TP_WINDOW_VSIZE",
+                "args": ["AIE_VARIANT", "TT_DATA", "TT_OUT_DATA"]
+            },
+            "validator": {
+                "file": "widget_real2complex.py",
+                "function": "validate_TP_WINDOW_VSIZE",
+                "args": ["AIE_VARIANT", "TT_DATA", "TT_OUT_DATA" ]
+            }
         }
     ],
     "ports": {

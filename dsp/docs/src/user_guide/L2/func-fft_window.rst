@@ -23,11 +23,11 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The fft_window supports AIE1 and AIE-ML with the following exception(s):
+The fft_window supports AIE and AIE-ML devices with the following exception(s):
 
-- ``TT_DATA`` supports cfloat on AIE1, but not on AIE-ML.
-- ``TT_COEFF`` supports float on AIE1, but not on AIE-ML.
-- Round modes available and the enumerated values of round modes differ between AIE1 and AIE-ML. See :ref:`COMPILING_AND_SIMULATING`.
+- ``TT_DATA`` supports cfloat on AIE, but not on AIE-ML.
+- ``TT_COEFF`` supports float on AIE, but not on AIE-ML.
+- Round modes available and the enumerated values of round modes differ between AIE and AIE-ML devices. See :ref:`COMPILING_AND_SIMULATING`.
 
 Supported Types
 ===============

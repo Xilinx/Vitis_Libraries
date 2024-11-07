@@ -47,7 +47,10 @@ template <typename TT_DATA_F,
           unsigned int TP_SHIFT,
           unsigned int TP_API,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_NUM_FRAMES,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_PHASES>
 class conv_corr_ref {
    private:
     // constants derived from configuration parameters

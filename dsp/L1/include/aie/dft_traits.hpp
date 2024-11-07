@@ -17,12 +17,7 @@
 #ifndef _DSPLIB_dft_TRAITS_HPP_
 #define _DSPLIB_dft_TRAITS_HPP_
 
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
+#include "device_defs.h"
 
 #define TRUNC(x, y) (((x) / y) * y)
 

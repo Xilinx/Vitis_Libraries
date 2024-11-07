@@ -3,12 +3,13 @@ isValid = {"is_valid": True}
 def isError(msg) :
   return {"is_valid" : False, "err_message" : msg}
 
-dictlist = ["fir_tdm","dds_mixer","dft","fft_window","fft_ifft_dit_1ch","fir_decimate_asym","fir_decimate_hb","fir_decimate_sym",
+dictlist = ["fir_tdm","dds_mixer","dds_mixer_lut","dft","fft_window","fft_ifft_dit_1ch","fir_decimate_asym","fir_decimate_hb","fir_decimate_sym",
 "fir_interpolate_asym","fir_interpolate_hb","fir_resampler","fir_sr_sym","fir_sr_asym","mixed_radix_fft","sample_delay"]
 
 dds_mixer = {
 "ERROR: ":"",
 "TT_DATA":"data_type",
+"TT_OUT_DATA":"data_out_type",
 "TT_COEFF": "coeff_type",
 "TT_TWIDDLE":"twiddle_type",
 "TP_SSR":"ssr",
@@ -34,9 +35,40 @@ dds_mixer = {
 "TP_INTERPOLATE_FACTOR":"interpolate_factor"
 }
 
+
+dds_mixer_lut = {
+"ERROR: ":"",
+"TT_DATA":"data_type",
+"TT_OUT_DATA":"data_out_type",
+"TT_COEFF": "coeff_type",
+"TT_TWIDDLE":"twiddle_type",
+"TP_SSR":"ssr",
+"phaseInc":"phase_increment",
+"initialPhaseOffset":"initial_phase_offset",
+"TP_INPUT_WINDOW_VSIZE":"Input window size",
+"TP_MIXER_MODE":"mixer_mode",
+"TP_API":"TP_API",
+"TP_POINT_SIZE":"point_size",
+"TP_NUM_FRAMES":"num_frames",
+"TP_CASC_LEN":"casc_length",
+"TP_SHIFT":"shift_val",
+"TP_WINDOW_VSIZE":"Input size",
+"TP_RND":"rnd_mode (Rounding mode)",
+"TP_SAT":"sat_mode (Saturation mode)",
+"TP_SFDR":"sfdr",
+"MIXER_MODE_0":"DDS block",
+"TP_DECIMATE_FACTOR":"decimate_factor",
+"TP_NUM_OUTPUTS":"num_outputs",
+"TP_DUAL_IP":"dual_ip",
+"TP_PARA_INTERP_POLY":"interp_poly (Interpolation poly phase)",
+"TP_FIR_LEN":"fir_length (Filter length)",
+"TP_INTERPOLATE_FACTOR":"interpolate_factor"
+}
+
 fir_tdm = {
 "ERROR: ":"",
 "TT_DATA":"data_type",
+"TT_OUT_DATA":"data_out_type",
 "TT_COEFF": "coeff_type",
 "TT_TWIDDLE":"twiddle_type",
 "TP_SSR":"ssr",
@@ -65,6 +97,7 @@ fir_tdm = {
 dft = {
 "ERROR: ":"",
 "TT_COEFF": "coeff_type",
+"TT_OUT_DATA":"data_out_type",
 "TT_DATA":"data_type",
 "TT_TWIDDLE":"twiddle_type",
 "TP_SSR":"ssr",
@@ -91,6 +124,7 @@ fft_window = {
 "ERROR: ":"",
 "TT_COEFF":"coeff_type",
 "TP_DYN_PT_SIZE":"Dynamic point_size",
+"TT_OUT_DATA":"data_out_type",
 "TT_DATA":"data_type",
 "TT_TWIDDLE":"twiddle_type",
 "TP_SSR":"SSR",
@@ -117,6 +151,7 @@ fft_ifft_dit_1ch = {
 "ERROR: ":"",
 "TT_DATA":"data_type",
 "TT_COEFF": "coeff_type",
+"TT_OUT_DATA":"data_out_type",
 "TT_TWIDDLE":"twiddle_type",
 "TP_SSR":"ssr",
 "TP_INPUT_WINDOW_VSIZE":"Input size",

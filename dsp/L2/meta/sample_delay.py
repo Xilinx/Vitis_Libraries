@@ -1,35 +1,195 @@
 import aie_common as com
 
-def validate_TP_MAX_DELAY(args):
-  TT_DATA = args["TT_DATA"]
-  TP_MAX_DELAY = args["TP_MAX_DELAY"]
-  TP_API = args["TP_API"]
-  VEC_SIZE = 256/8/com.fn_size_by_byte(TT_DATA)
+UINT_max_cpp=2**31
 
+#######################################################
+###########AIE_VARIANT Updater and Validator ##########
+#######################################################
+def update_AIE_VARIANT(args):
+  return fn_update_AIE_VARIANT()
+
+def fn_update_AIE_VARIANT():
+  legal_set_aie=[1,2]
+  param_dict={
+    "name" : "AIE_VARIANT",
+    "enum" : legal_set_aie
+   }
+  return param_dict
+
+def validate_AIE_VARIANT(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_validate_aie_variant(AIE_VARIANT)
+
+def fn_validate_aie_variant(AIE_VARIANT):
+  param_dict=fn_update_AIE_VARIANT()
+  return(com.validate_legal_set(param_dict["enum"], "AIE_VARIANT", AIE_VARIANT))
+
+#######################################################
+###########TT_DATA Updater and Validator ##############
+#######################################################
+def update_TT_DATA(args):
+  return fn_update_TT_DATA()
+
+def fn_update_TT_DATA():
+  legal_set_tt_data=["int8", "int16", "cint16", "int32", "cint32", "float", "cfloat", "uint8"]
+  param_dict={
+    "name" : "TT_DATA",
+    "enum" : legal_set_tt_data
+   }
+  return param_dict
+
+def validate_TT_DATA(args):
+  TT_DATA = args["TT_DATA"]
+  return fn_validate_TT_DATA(TT_DATA)
+
+def fn_validate_TT_DATA(TT_DATA):
+  param_dict=fn_update_TT_DATA()
+  return(com.validate_legal_set(param_dict["enum"], "TT_DATA", TT_DATA))
+
+#######################################################
+########### TP_API Updater and Validator ##############
+#######################################################
+def update_TP_API(args):
+  return fn_update_TP_API()
+
+def fn_update_TP_API():
+  legal_set_tp_api=[0, 1]
+  param_dict={
+    "name" : "TP_API",
+    "enum" : legal_set_tp_api
+   }
+  return param_dict
+
+def validate_TP_API(args):
+  TP_API = args["TP_API"]
+  return fn_validate_TP_API(TP_API)
+
+def fn_validate_TP_API(TP_API):
+  param_dict=fn_update_TP_API()
+  legal_set=param_dict["enum"]
+  return(com.validate_legal_set(legal_set, "TP_API", TP_API))
+
+
+#######################################################
+########## TP_MAX_DELAY Updater and Validator #########
+#######################################################
+def update_TP_MAX_DELAY(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  TP_API = args["TP_API"]
+  if args["TP_MAX_DELAY"]: TP_MAX_DELAY = args["TP_MAX_DELAY"]
+  else: TP_MAX_DELAY = 0
+  return fn_update_TP_MAX_DELAY(AIE_VARIANT, TT_DATA, TP_API, TP_MAX_DELAY)
+
+def fn_update_TP_MAX_DELAY(AIE_VARIANT, TT_DATA, TP_API, TP_MAX_DELAY):
   if (TP_API): # stream interface
-    if (TP_MAX_DELAY % 128):
-      return com.isError(f"Min value of TP_MAX_DELAY for TP_API = {TP_API} is 128. The legal values of TP_MAX_DELAY are 2^n where n = 7, 8, 9 ... Got {TP_MAX_DELAY}")
-    return com.isValid
+    TP_MAX_DELAY_min=128
   else: # iobuff (window) interface
-    if (TP_MAX_DELAY % VEC_SIZE) :
-      return com.isError(f"TP_MAX_DELAY for TP_API = {TP_API} should be an integer multiple of vector size. Vector size for the data type {TT_DATA} is {VEC_SIZE}. Got {TP_MAX_DELAY}")
-  return com.isValid
+    VEC_SIZE = 256/8/com.fn_size_by_byte(TT_DATA)
+    TP_MAX_DELAY_min= int(VEC_SIZE)
+
+  if (not(TP_API)):
+    ping_pong_buffer=com.k_data_memory_bytes[AIE_VARIANT] / 2
+    ping_pong_buffer_sample=int(ping_pong_buffer/com.fn_size_by_byte(TT_DATA))
+    TP_WINDOW_VSIZE_min=TP_MAX_DELAY_min
+    TP_MAX_DELAY_max=ping_pong_buffer_sample-TP_WINDOW_VSIZE_min
+  else:
+    TP_MAX_DELAY_max=UINT_max_cpp
+
+  param_dict={
+    "name" : "TP_MAX_DELAY",
+    "minimum" : TP_MAX_DELAY_min,
+    "maximum" : TP_MAX_DELAY_max
+  }  
+
+  if (TP_MAX_DELAY !=0) and (TP_MAX_DELAY%TP_MAX_DELAY_min != 0):
+    TP_MAX_DELAY_act=int(round(TP_MAX_DELAY/TP_MAX_DELAY_min) * TP_MAX_DELAY_min)
+
+    if TP_MAX_DELAY_act < param_dict["minimum"]:
+      TP_MAX_DELAY_act = param_dict["minimum"]
+
+    if(TP_MAX_DELAY_act > param_dict["maximum"]):
+      TP_MAX_DELAY_act = int(com.FLOOR(param_dict["maximum"], TP_MAX_DELAY_min))
+    param_dict.update({"actual" : TP_MAX_DELAY_act})
+  return param_dict
+
+def validate_TP_MAX_DELAY(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  TP_API = args["TP_API"]
+  TP_MAX_DELAY = args["TP_MAX_DELAY"]
+  return fn_validate_TP_MAX_DELAY(AIE_VARIANT, TT_DATA, TP_API, TP_MAX_DELAY)
+
+def fn_validate_TP_MAX_DELAY(AIE_VARIANT, TT_DATA, TP_API, TP_MAX_DELAY):
+  param_dict = fn_update_TP_MAX_DELAY(AIE_VARIANT, TT_DATA, TP_API, TP_MAX_DELAY)
+
+  TP_MAX_DELAY_min = param_dict["minimum"]
+  if (TP_MAX_DELAY % TP_MAX_DELAY_min != 0):
+    return com.isError(f"TP_MAX_DELAY should be a multiple of {TP_MAX_DELAY_min}")
+  else:
+    range_TP_MAX_DELAY=[param_dict["minimum"], param_dict["maximum"]]
+    return com.validate_range(range_TP_MAX_DELAY, "TP_MAX_DELAY", TP_MAX_DELAY)
+
+
+#######################################################
+####### TP_WINDOW_VSIZE Updater and Validator #########
+#######################################################
+def update_TP_WINDOW_VSIZE(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  TP_API = args["TP_API"] 
+  TP_MAX_DELAY = args["TP_MAX_DELAY"]
+  if args["TP_WINDOW_VSIZE"]: TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
+  else: TP_WINDOW_VSIZE = 0
+  return fn_update_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA,TP_API, TP_MAX_DELAY, TP_WINDOW_VSIZE)
+
+def fn_update_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA,TP_API, TP_MAX_DELAY, TP_WINDOW_VSIZE):
+  if (TP_API):
+    TP_WINDOW_VSIZE_min = TP_MAX_DELAY
+  else:
+    VEC_SIZE = 256/8/com.fn_size_by_byte(TT_DATA)
+    TP_WINDOW_VSIZE_min = int(VEC_SIZE)
+
+  if (not(TP_API)):
+    ping_pong_buffer=com.k_data_memory_bytes[AIE_VARIANT] / 2
+    ping_pong_buffer_sample=int(ping_pong_buffer/com.fn_size_by_byte(TT_DATA))
+    TP_WINDOW_VSIZE_max=ping_pong_buffer_sample-TP_MAX_DELAY
+  else: 
+    TP_WINDOW_VSIZE_max=UINT_max_cpp
+  
+  param_dict={
+    "name" : "TP_WINDOW_VSIZE",
+    "minimum" : TP_WINDOW_VSIZE_min,
+    "maximum" : TP_WINDOW_VSIZE_max
+  }
+
+  if (TP_WINDOW_VSIZE !=0) and (TP_WINDOW_VSIZE%TP_WINDOW_VSIZE_min != 0):
+    TP_WINDOW_VSIZE_act=int(round(TP_WINDOW_VSIZE/TP_WINDOW_VSIZE_min) * TP_WINDOW_VSIZE_min)
+
+    if TP_WINDOW_VSIZE_act < param_dict["minimum"]:
+      TP_WINDOW_VSIZE_act = param_dict["minimum"]
+
+    if TP_WINDOW_VSIZE_act > param_dict["maximum"]:
+      TP_WINDOW_VSIZE_act = int(com.FLOOR(param_dict["maximum"], TP_WINDOW_VSIZE_min))
+    param_dict.update({"actual" : TP_WINDOW_VSIZE_act})
+  return param_dict
 
 def validate_TP_WINDOW_VSIZE(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA = args["TT_DATA"]
+  TP_API = args["TP_API"] 
   TP_MAX_DELAY = args["TP_MAX_DELAY"]
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
-  TP_API = args["TP_API"]
-  VEC_SIZE = 256/8/com.fn_size_by_byte(TT_DATA)
+  return fn_validate_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA, TP_API, TP_MAX_DELAY, TP_WINDOW_VSIZE)
 
-  if (TP_API): # stream interface
-    if (TP_WINDOW_VSIZE % TP_MAX_DELAY):
-      return com.isError(f"TP_WINDOW_VSIZE for TP_API = {TP_API} should be an integer multiple of TP_MAX_DELAY. Got {TP_WINDOW_VSIZE}")
-    return com.isValid
-  else: # iobuff (window) interface
-    if (TP_WINDOW_VSIZE % VEC_SIZE):
-      return com.isError(f"TP_WINDOW_VSIZE for TP_API = {TP_API} should be an integer multiple of vector size. Vector size for the data type {TT_DATA} is {VEC_SIZE}. Got {TP_WINDOW_VSIZE}")
-  return com.isValid
+def fn_validate_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA, TP_API, TP_MAX_DELAY, TP_WINDOW_VSIZE):
+  param_dict=fn_update_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA,TP_API, TP_MAX_DELAY, TP_WINDOW_VSIZE)
+  TP_WINDOW_VSIZE_min = param_dict["minimum"]
+  if (TP_WINDOW_VSIZE % TP_WINDOW_VSIZE_min != 0):
+    return com.isError(f"TP_WINDOW_VSIZE should be a multiple of {TP_WINDOW_VSIZE_min}")
+  else:
+    range_TP_WINDOW_VSIZE=[param_dict["minimum"], param_dict["maximum"]]
+    return com.validate_range(range_TP_WINDOW_VSIZE, "TP_WINDOW_VSIZE", TP_WINDOW_VSIZE)
 
 def info_ports(args):
   TT_DATA = args["TT_DATA"]

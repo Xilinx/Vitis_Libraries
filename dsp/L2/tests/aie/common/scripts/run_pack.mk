@@ -43,8 +43,12 @@ all_pack:
 	@echo RESULTS_DIR=$(RESULTS_DIR)
 	@rm -rf $(RESULTS_DIR)
 	@mkdir -p $(RESULTS_DIR)/logs $(RESULTS_DIR)/data
-	@cp -f test.cpp $(RESULTS_DIR)
-	@cp -f test.hpp $(RESULTS_DIR)
+	@if [ -f test.cpp ]; then \
+		cp -f test.cpp $(RESULTS_DIR) ;\
+	fi
+	@if [ -f test.hpp ]; then \
+		cp -f test.hpp $(RESULTS_DIR) ;\
+	fi
 	@if [ -f uut_static_config.h ]; then \
 		cp -f uut_static_config.h $(RESULTS_DIR) ;\
 	fi
@@ -52,7 +56,6 @@ all_pack:
 	@cp -f Makefile $(RESULTS_DIR)
 	@cp -f $(PARAMS_FILE) $(RESULTS_DIR)
 	@cp -f description.json $(RESULTS_DIR)
-	@cp -f params.mk $(RESULTS_DIR)
 	@if [ -f helper.mk ]; then \
 		cp -f helper.mk $(RESULTS_DIR) ;\
 	fi
@@ -70,6 +73,9 @@ all_pack:
 	fi
 	@if [ -f sim_options.txt ]; then \
 		cp -f sim_options.txt $(RESULTS_DIR) ;\
+	fi
+	@if [ -f aie_libadf.mk ]; then \
+		cp -f aie_libadf.mk $(RESULTS_DIR) ;\
 	fi
 	@make -C $(RESULTS_DIR) cleanall PLATFORM=$(PLATFORM) >  $(RESULTS_DIR)/logs/log_$(PARAMS).txt 
 	@make -C $(RESULTS_DIR) run TARGET=$(TARGET) PARAMS=$(PARAMS) PARAMS_FILE=$(PARAMS_FILE) PLATFORM=$(PLATFORM) 2>&1 | tee $(RESULTS_DIR)/logs/log_$(PARAMS).txt

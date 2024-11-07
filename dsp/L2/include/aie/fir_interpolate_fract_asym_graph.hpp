@@ -315,10 +315,10 @@ class create_casc_kernel<1,
  * @tparam TT_COEFF describes the type of individual coefficients of the filter
  *         taps. \n It must be one of the same set of types listed for TT_DATA
  *         and must also satisfy the following rules:
- *         - Complex types are only supported when TT_DATA is also complex.
+ *         - Complex types are only supported when ``TT_DATA`` is also complex.
  *         - 32 bit types are only supported when TT_DATA is also a 32 bit type,
- *         - TT_COEFF must be an integer type if TT_DATA is an integer type
- *         - TT_COEFF must be a float type if TT_DATA is a float type.
+ *         - ``TT_COEFF`` must be an integer type if TT_DATA is an integer type
+ *         - ``TT_COEFF`` must be a float type if TT_DATA is a float type.
  * @tparam TP_FIR_LEN is an unsigned integer which describes the number of taps
  *         in the filter.
  * @tparam TP_INTERPOLATE_FACTOR is an unsigned integer which describes the
@@ -330,7 +330,7 @@ class create_casc_kernel<1,
  *         range 2 to 16. The decimation factor should be less that the interpolation
  *         factor and should not be divisible factor of the interpolation factor.
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
- *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
+ *         FIR terms before output. \n ``TP_SHIFT`` must be in the range 0 to 59 (61 for AIE1).
  * @tparam TP_RND describes the selection of rounding to be applied during the
  *         shift down stage of processing. TP_RND must be in the range 0 to 7
  *         where
@@ -350,7 +350,7 @@ class create_casc_kernel<1,
  *         multiplied by TP_INTERPOLATE_FACTOR and divided by TP_DECIMATE_FACTOR. \n
  *         In the instance this would lead to a fraction number of output samples,
  *         this would be rounded down. \n
- *
+ *         \n
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  * @tparam TP_CASC_LEN describes the number of AIE processors to split the operation
  *         over. \n This allows resource to be traded for higher performance.
@@ -359,10 +359,10 @@ class create_casc_kernel<1,
  *         reloading should be used. \n When defining the parameter:
  *         - 0 = static coefficients, defined in filter constructor,
  *         - 1 = reloadable coefficients, passed as argument to runtime function. \n
- *
+ *         \n
  *         Note: when used, optional port: ``` port<input> coeff;``` will be added to the FIR. \n
  * @tparam TP_NUM_OUTPUTS sets the number of ports to broadcast the output to. \n
- *
+ *         \n
  *         Note: when used, optional port: ``` port<output> out2; ``` will be added to the FIR. \n
 **/
 template <typename TT_DATA,

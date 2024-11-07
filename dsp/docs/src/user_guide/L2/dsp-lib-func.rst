@@ -16,14 +16,15 @@ The DSPLib consists of the following DSP elements:
 .. toctree::
    :maxdepth: 2
 
+   Bitonic Sort <func-bitonic-sort.rst>
    Convolution / Correlation <func-conv-corr.rst>
    DDS / Mixer <func-dds.rst>
    DFT <func-dft.rst>
-   Example of FFT spanning AIE and PL <example-2d-fft.rst>
    FFT/iFFT <func-fft.rst>
    FFT Window <func-fft_window.rst>
    Filters <func-fir-filtersAIE.rst>
    FIR TDM <func-fir-TDM.rst>
+   Function Approximation <func-func-approx.rst>
    Hadamard Product <func-hadamard.rst>
    Kronecker <func-kronecker.rst>
    Matrix Multiply <func-matmul.rst>

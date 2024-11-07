@@ -71,7 +71,7 @@ class hadamard_ref
                     : (128 / 8 / (vectByte<TT_DATA_A, TT_DATA_B>().val_byteBuffStream));
 
    public:
-    using TT_OUT = out_mul_type<TT_DATA_A, TT_DATA_B>;
+    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
 
     // Constructor
     hadamard_ref() {}
@@ -81,7 +81,7 @@ class hadamard_ref
 
     void hadamard_main(input_buffer<TT_DATA_A>& inWindow0,
                        input_buffer<TT_DATA_B>& inWindow1,
-                       output_buffer<TT_OUT>& outWindow0);
+                       output_buffer<out_t>& outWindow0);
 };
 }
 }

@@ -26,7 +26,7 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The Outer Tensor Product library element supports AIE1.
+The Outer Tensor Product library element supports AIE and AIE-ML devices.
 
 Supported Types
 ===============

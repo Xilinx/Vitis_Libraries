@@ -96,7 +96,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 void fft_ifft_dit_1ch_ref<TT_DATA,
                           TT_TWIDDLE,
                           TP_POINT_SIZE,
@@ -107,32 +108,35 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
                           TP_ORIG_PAR_POWER,
                           TP_RND,
                           TP_SAT,
-                          TP_TWIDDLE_MODE>::r2StageInt(T_int_data<TT_DATA>* samplesA,
-                                                       T_int_data<TT_DATA>* samplesB,
-                                                       TT_TWIDDLE* twiddles,
-                                                       int pptSize,
-                                                       bool inv) {
+                          TP_TWIDDLE_MODE,
+                          TT_OUT_DATA>::r2StageInt(T_int_data<TT_DATA>* samplesA,
+                                                   T_int_data<TT_DATA>* samplesB,
+                                                   TT_TWIDDLE* twiddles,
+                                                   int pptSize,
+                                                   bool inv) {
     int ptSize = TP_DYN_PT_SIZE == 0 ? TP_POINT_SIZE : pptSize;
     // T_int_data<TT_DATA> sam1, sam2, sam2rot;
     T_accRef<cint32> sam1, sam2, sam2rot;
     T_accRef<cint32> csum; // basically an accumulator type
+    int64 twreal;
+    int64 twimag;
     TT_TWIDDLE tw;
     int64 temp;
     const unsigned int kTwShift = getTwShift<TT_TWIDDLE, TP_TWIDDLE_MODE>();
     const unsigned int round_const = (1 << (kTwShift - 1));
     for (int op = 0; op < (ptSize >> 1); op++) {
-        tw.real = twiddles[0].real;
-        tw.imag = inv ? -twiddles[0].imag : twiddles[0].imag;
+        twreal = (int64)twiddles[0].real;
+        twimag = inv ? -(int64)twiddles[0].imag : (int64)twiddles[0].imag;
         sam1.real = (int64)samplesA[2 * op].real << kTwShift;
         sam1.imag = (int64)samplesA[2 * op].imag << kTwShift;
         sam2.real = (int64)samplesA[2 * op + 1].real;
         sam2.imag = (int64)samplesA[2 * op + 1].imag;
         if (inv) {
-            sam2rot.real = (int64)sam2.real * tw.real + (int64)sam2.imag * tw.imag;
-            sam2rot.imag = (int64)sam2.imag * tw.real - (int64)sam2.real * tw.imag;
+            sam2rot.real = (int64)sam2.real * twreal + (int64)sam2.imag * twimag;
+            sam2rot.imag = (int64)sam2.imag * twreal - (int64)sam2.real * twimag;
         } else {
-            sam2rot.real = (int64)sam2.real * tw.real - (int64)sam2.imag * tw.imag;
-            sam2rot.imag = (int64)sam2.real * tw.imag + (int64)sam2.imag * tw.real;
+            sam2rot.real = (int64)sam2.real * twreal - (int64)sam2.imag * twimag;
+            sam2rot.imag = (int64)sam2.real * twimag + (int64)sam2.imag * twreal;
         }
         temp = (int64)((int64)sam1.real + (int64)sam2rot.real);
         csum.real = (int64)((int64)sam1.real + (int64)sam2rot.real);
@@ -170,7 +174,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 void fft_ifft_dit_1ch_ref<TT_DATA,
                           TT_TWIDDLE,
                           TP_POINT_SIZE,
@@ -181,12 +186,13 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
                           TP_ORIG_PAR_POWER,
                           TP_RND,
                           TP_SAT,
-                          TP_TWIDDLE_MODE>::r2StageFloat(T_int_data<TT_DATA>* samplesA,
-                                                         T_int_data<TT_DATA>* samplesB,
-                                                         TT_TWIDDLE* twiddles,
-                                                         unsigned int rank,
-                                                         int pptSize,
-                                                         bool inv) {
+                          TP_TWIDDLE_MODE,
+                          TT_OUT_DATA>::r2StageFloat(T_int_data<TT_DATA>* samplesA,
+                                                     T_int_data<TT_DATA>* samplesB,
+                                                     TT_TWIDDLE* twiddles,
+                                                     unsigned int rank,
+                                                     int pptSize,
+                                                     bool inv) {
     int ptSize = TP_DYN_PT_SIZE == 0 ? TP_POINT_SIZE : pptSize;
     constexpr unsigned int kRadix = 2;
     unsigned int opLowMask = (1 << rank) - 1;
@@ -227,7 +233,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 void fft_ifft_dit_1ch_ref<TT_DATA,
                           TT_TWIDDLE,
                           TP_POINT_SIZE,
@@ -238,16 +245,17 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
                           TP_ORIG_PAR_POWER,
                           TP_RND,
                           TP_SAT,
-                          TP_TWIDDLE_MODE>::r4StageIntTrue(T_int_data<TT_DATA>* samplesIn,
-                                                           TT_TWIDDLE* twiddles1,
-                                                           TT_TWIDDLE* twiddles2,
-                                                           unsigned int n,
-                                                           unsigned int r,
-                                                           unsigned int shift,
-                                                           unsigned int rank,
-                                                           T_int_data<TT_DATA>* samplesOut,
-                                                           int pptSize,
-                                                           bool inv) {
+                          TP_TWIDDLE_MODE,
+                          TT_OUT_DATA>::r4StageIntTrue(T_int_data<TT_DATA>* samplesIn,
+                                                       TT_TWIDDLE* twiddles1,
+                                                       TT_TWIDDLE* twiddles2,
+                                                       unsigned int n,
+                                                       unsigned int r,
+                                                       unsigned int shift,
+                                                       unsigned int rank,
+                                                       T_int_data<TT_DATA>* samplesOut,
+                                                       int pptSize,
+                                                       bool inv) {
     int ptSize = TP_DYN_PT_SIZE == 0 ? TP_POINT_SIZE : pptSize;
     constexpr unsigned int kMaxPointSize = 4096;
     constexpr unsigned int kRadix = 4;
@@ -346,7 +354,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 void fft_ifft_dit_1ch_ref<TT_DATA,
                           TT_TWIDDLE,
                           TP_POINT_SIZE,
@@ -357,16 +366,17 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
                           TP_ORIG_PAR_POWER,
                           TP_RND,
                           TP_SAT,
-                          TP_TWIDDLE_MODE>::r4StageIntSpoof(T_int_data<TT_DATA>* samplesIn,
-                                                            TT_TWIDDLE* twiddles1,
-                                                            TT_TWIDDLE* twiddles2,
-                                                            unsigned int n,
-                                                            unsigned int r,
-                                                            unsigned int shift,
-                                                            unsigned int rank,
-                                                            T_int_data<TT_DATA>* samplesOut,
-                                                            int pptSize,
-                                                            bool inv) {
+                          TP_TWIDDLE_MODE,
+                          TT_OUT_DATA>::r4StageIntSpoof(T_int_data<TT_DATA>* samplesIn,
+                                                        TT_TWIDDLE* twiddles1,
+                                                        TT_TWIDDLE* twiddles2,
+                                                        unsigned int n,
+                                                        unsigned int r,
+                                                        unsigned int shift,
+                                                        unsigned int rank,
+                                                        T_int_data<TT_DATA>* samplesOut,
+                                                        int pptSize,
+                                                        bool inv) {
     int ptSize = TP_DYN_PT_SIZE == 0 ? TP_POINT_SIZE : pptSize;
     constexpr unsigned int kMaxPointSize = 4096;
     constexpr unsigned int kRadix = 4; // actually spoofed by 4 radix2 operations.
@@ -452,7 +462,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 void fft_ifft_dit_1ch_ref<TT_DATA,
                           TT_TWIDDLE,
                           TP_POINT_SIZE,
@@ -463,16 +474,21 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
                           TP_ORIG_PAR_POWER,
                           TP_RND,
                           TP_SAT,
-                          TP_TWIDDLE_MODE>::fft(input_buffer<TT_DATA>& inWindow, output_buffer<TT_DATA>& outWindow) {
+                          TP_TWIDDLE_MODE,
+                          TT_OUT_DATA>::fft(input_buffer<TT_DATA>& inWindow, output_buffer<TT_OUT_DATA>& outWindow) {
     constexpr unsigned int kMaxPtSizePwr = 12; // largest is 4096 = 1<<12;
 #if __FFT_R4_IMPL__ == 0
-    constexpr unsigned int kMinPtSizePwr = 4; // smallest is 16 = 1<<4;
-#endif                                        //__FFT_R4_IMPL__ == 0
+    //- minPtSizePwr = 4, temporarily set to 5 for debug
+    // constexpr unsigned int kMinPtSizePwr = (TP_DYN_PT_SIZE == 1) && (std::is_same<TT_TWIDDLE, cint32>::value)? 5:4;
+    // // smallest is 16 = 1<<4;
+    constexpr unsigned int kMinPtSizePwr = 4;
+#endif //__FFT_R4_IMPL__ == 0
 #if __FFT_R4_IMPL__ == 1
     constexpr unsigned int kMinPtSizePwr = 5; // smallest is 16 = 1<<4;
 #endif                                        //__FFT_R4_IMPL__ == 1
 
-    constexpr unsigned int kHeaderSize = 32 / (sizeof(TT_DATA)); // dynamic point size header size in samples
+    constexpr unsigned int kHeaderSize = 32 / (sizeof(TT_DATA));        // dynamic point size header size in samples
+    constexpr unsigned int kHeaderOutSize = 32 / (sizeof(TT_OUT_DATA)); // dynamic point size header size in samples
     constexpr unsigned int kPtSizePwr = fnGetPointSizePower<TP_POINT_SIZE>();
     constexpr unsigned int kScaleFactor = kPtSizePwr - 1; // 1 is for initial rotation factor of 1/sqrt(2).
     constexpr unsigned int kSampleRanks = kRanks + 1;
@@ -501,8 +517,9 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
     unsigned int posA, posB;
     unsigned int rank = 0;
     TT_DATA* headerPtr;
-    TT_DATA* outHeaderPtr;
+    TT_OUT_DATA* outHeaderPtr;
     TT_DATA header;
+    TT_OUT_DATA headerOut;
     int16 ptSizePwr =
         kPtSizePwr;      // default to static point size value. May be overwritten if dynamic point size selected.
     TT_DATA dummyttdata; // used to consume blank data in header.
@@ -513,7 +530,6 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
     unsigned int ptSize =
         TP_POINT_SIZE; // default to static point size value. May be overwritten if dynamic point size selected.
     bool inv = TP_FFT_NIFFT == 1 ? false : true; // may be overwritten if dyn_pt_size is set
-    TT_DATA headerOut;
 
     T_accRef<T_int_data<TT_DATA> > accum;
     T_int_data<TT_DATA> *samplesA, *samplesB, *tempPtr;
@@ -528,23 +544,34 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
     //#endif //__FFT_R4_IMPL__ == 2
 
     headerPtr = (TT_DATA*)inWindow.data();
-    outHeaderPtr = (TT_DATA*)outWindow.data();
+    outHeaderPtr = (TT_OUT_DATA*)outWindow.data();
+    // printf("point size = %d window size = %d\n", TP_POINT_SIZE, TP_WINDOW_VSIZE);
+    // for(int i = 0; i < TP_WINDOW_VSIZE; i++){
+    //     printf("in[%d] = [%d, %d\n]", i,headerPtr[i].real, headerPtr[i].imag);
+    //     if(i % TP_POINT_SIZE == 0 ){
+    //     printf("\n");
+    //     }
+    // }
     if
         constexpr(TP_DYN_PT_SIZE == 1) {
             header = *headerPtr++; // saved for later when output to outWindow
-            *outHeaderPtr++ = header;
+            headerOut.real = header.real;
+            headerOut.imag = header.imag;
+            *outHeaderPtr++ = headerOut;
             inv = header.real == 0 ? true : false;
             header = *headerPtr++;                              // saved for later when output to outWindow
             ptSizePwr = (int32)header.real - TP_ORIG_PAR_POWER; // Modified for case where FFT is a subframe processor.
                                                                 // Then the header refers to the overall point size.
-            *outHeaderPtr++ = header;
-            for (int i = 2; i < kHeaderSize - 1; i++) {
-                *outHeaderPtr++ = blankVector<TT_DATA>();
+            headerOut.real = header.real;
+            headerOut.imag = header.imag;
+            *outHeaderPtr++ = headerOut;
+            for (int i = 2; i < kHeaderOutSize - 1; i++) {
+                *outHeaderPtr++ = blankVector<TT_OUT_DATA>();
             }
             if ((ptSizePwr >= kMinPtSizePwr) && (ptSizePwr <= kMaxPtSizePwr)) {
-                *outHeaderPtr++ = blankVector<TT_DATA>();
+                *outHeaderPtr++ = blankVector<TT_OUT_DATA>();
             } else {
-                *outHeaderPtr++ = unitVector<TT_DATA>();
+                *outHeaderPtr++ = unitVector<TT_OUT_DATA>();
             }
             headerPtr = inWindow.data() + kHeaderSize;
             // override values set for constant point size with values derived from the header in a dynamic point size
@@ -622,33 +649,44 @@ for (unsigned int i = 0; i < (1 << (kMaxPtSizePwr - 1)); i++) {
             }
 
             // Write samples out (natural order)
-            TT_DATA outSample;
-            T_accRef<TT_DATA> mySat; // variable to apply saturation on.
+            TT_OUT_DATA outSample;
+            T_accRef<TT_OUT_DATA> mySat; // variable to apply saturation on.
+            T_int_data<TT_OUT_DATA> myIntSamp;
             for (unsigned int i = 0; i < ptSize; i++) {
                 mySat.real = samplesA[i].real;
                 mySat.imag = samplesA[i].imag;
                 saturateAcc(mySat, TP_SAT);
                 samplesA[i].real = mySat.real;
                 samplesA[i].imag = mySat.imag;
-                outSample = castOutput<TT_DATA>(samplesA[i], 0);
+                myIntSamp.real = samplesA[i].real;
+                myIntSamp.imag = samplesA[i].imag;
+                outSample = castOutput<TT_OUT_DATA>(myIntSamp, 0);
 
                 *outHeaderPtr++ = outSample;
             }
             for (int i = ptSize; i < TP_POINT_SIZE; i++) {
-                *outHeaderPtr++ = blankVector<TT_DATA>();
+                *outHeaderPtr++ = blankVector<TT_OUT_DATA>();
             }
 
         } else { // ptSizePwr is out of range
             // Error handling has already been done in the header clause
             // write out blank frame
             for (int i = 0; i < TP_WINDOW_VSIZE; i++) {
-                *outHeaderPtr++ = blankVector<TT_DATA>();
+                *outHeaderPtr++ = blankVector<TT_OUT_DATA>();
             }
 
             rank += 2;
             // The pea is now under the cup labelled samplesA. The next rank's input or the actual output
         }
     }
+    // outHeaderPtr = (TT_OUT_DATA*)outWindow.data();
+    // printf("point size = %d window size = %d\n", TP_POINT_SIZE, TP_WINDOW_VSIZE);
+    // for(int i = 0; i < TP_WINDOW_VSIZE; i++){
+    //     printf("out[%d] = [%d, %d]\n", i,outHeaderPtr[i].real, outHeaderPtr[i].imag);
+    //     if(i % TP_POINT_SIZE == 0 ){
+    //     printf("\n");
+    //     }
+    // }
 };
 
 // Non Bit-accurate REF FFT DIT function
@@ -663,7 +701,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 void fft_ifft_dit_1ch_ref<TT_DATA,
                           TT_TWIDDLE,
                           TP_POINT_SIZE,
@@ -674,8 +713,9 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
                           TP_ORIG_PAR_POWER,
                           TP_RND,
                           TP_SAT,
-                          TP_TWIDDLE_MODE>::nonBitAccfft(input_buffer<TT_DATA>& inWindow,
-                                                         output_buffer<TT_DATA>& outWindow) {
+                          TP_TWIDDLE_MODE,
+                          TT_OUT_DATA>::nonBitAccfft(input_buffer<TT_DATA>& inWindow,
+                                                     output_buffer<TT_OUT_DATA>& outWindow) {
     constexpr unsigned int kPtSizePwr = fnGetPointSizePower<TP_POINT_SIZE>();
     constexpr unsigned int kScaleFactor = TP_SHIFT; // was kPtSizePwr -1; //1 is for initial rotation factor of
                                                     // 1/sqrt(2), but with TP_SHIFT this is user-config
@@ -731,8 +771,6 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
                 twiddleIndex = bitRev(kPtSizePwr - 1, op) << (kRanks - rank - 1);
                 twiddlePos = twiddleIndex & twiddleMask; // << (kRanks-rank-1);
                 twiddle = twiddles[twiddlePos];
-                // printf("twiddlePos = %2d, twiddle = (%6d, %6d) ",
-                //       twiddlePos,       twiddle.real, twiddle.imag);
                 btflynonbitacc<TT_DATA, TT_TWIDDLE>(twiddle, inSampleA, inSampleB, outSampleA, outSampleB);
                 if (posA < TP_POINT_SIZE && posB < TP_POINT_SIZE) {
                     samplesB[posA] = outSampleA;
@@ -746,10 +784,11 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
             // The pea is now under the cup labelled samplesA. The next rank's input or the actual output
         }
         // Write samples out (natural order)
+        T_int_data<TT_OUT_DATA> myIntSamp;
         for (unsigned int i = 0; i < TP_POINT_SIZE; i++) {
-            *outWindowPtr++ = castOutput<TT_DATA>(samplesA[bitRev(kPtSizePwr, i)], kScaleFactor);
-            //      window_writeincr((output_window<TT_DATA> *)outWindow,
-            //      castOutput<TT_DATA>(samplesA[bitRev(kPtSizePwr,i)],kScaleFactor));
+            myIntSamp.real = samplesA[bitRev(kPtSizePwr, i)].real;
+            myIntSamp.imag = samplesA[bitRev(kPtSizePwr, i)].imag;
+            *outWindowPtr++ = castOutput<TT_OUT_DATA>(myIntSamp, kScaleFactor);
         }
     }
 };

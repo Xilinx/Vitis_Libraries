@@ -1,0 +1,209 @@
+{
+    "schema": "vitis_library_api_spec_schema-1.0",
+    "api_name": "xf::dsp::aie:func_approx::func_approx_graph",
+    "display_name": "func_approx_graph",
+    "header_file_name": "func_approx_graph.hpp",
+    "search_paths": [
+        "L1/include/aie",
+        "L1/src/aie",
+        "L1/tests/aie/inc",
+        "L1/tests/aie/src",
+        "L2/include/aie",
+        "L2/tests/aie/common/inc"
+    ],
+    "parameters": [
+        {
+            "name": "AIE_VARIANT",
+            "type": "uint",
+            "description": "specifies the device type",
+            "updater": {
+                "file": "func_approx.py",
+                "function": "update_AIE_VARIANT",
+                "args": [
+                ]
+            },
+            "validator": {
+                "file": "func_approx.py",
+                "function": "validate_AIE_VARIANT",
+                "args": [
+                ]
+            }
+        },
+        {
+            "name": "TT_DATA",
+            "description": "The data type of input and output data used for the function approximation",
+            "type": "typename",
+            "enum": [
+                "int16",
+                "int32",
+                "float",
+                "bfloat16"
+            ],
+            "updater": {
+                "file": "func_approx.py",
+                "function": "update_TT_DATA",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            },
+            "validator": {
+                "file": "func_approx.py",
+                "function": "validate_TT_DATA",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            }
+        },
+        {
+            "name": "TP_COARSE_BITS",
+            "description": "The data type of input and output data used for the function approximation",
+            "type": "uint",
+            "updater": {
+                "file": "func_approx.py",
+                "function": "update_TP_COARSE_BITS",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA"
+                ]
+            },
+            "validator": {
+                "file": "func_approx.py",
+                "function": "validate_TP_COARSE_BITS",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA"
+                ]
+            }
+        },
+        {
+            "name": "TP_FINE_BITS",
+            "description": "The data type of input and output data used for the function approximation",
+            "type": "uint",
+            "updater": {
+                "file": "func_approx.py",
+                "function": "update_TP_FINE_BITS",
+                "args": [
+                    "TT_DATA",
+                    "TP_COARSE_BITS"
+                ]
+            },
+            "validator": {
+                "file": "func_approx.py",
+                "function": "validate_TP_FINE_BITS",
+                "args": [
+                    "TT_DATA",
+                    "TP_COARSE_BITS"
+                ]
+            }
+        },
+        {
+            "name": "TP_DOMAIN_MODE",
+            "description": "The data type of input and output data used for the function approximation",
+            "type": "uint",
+            "updater": {
+                "file": "func_approx.py",
+                "function": "update_TP_DOMAIN_MODE"
+            },
+            "validator": {
+                "file": "func_approx.py",
+                "function": "validate_TP_DOMAIN_MODE"
+            }
+        },
+        {
+            "name": "TP_WINDOW_VSIZE",
+            "type": "uint",
+            "description": "describes the number of samples in the input/output window API or number of samples to process per iteration.",
+            "updater": {
+                "file": "func_approx.py",
+                "function": "update_TP_WINDOW_VSIZE",
+                "args": [
+                    "AIE_VARIANT" ,
+                    "TT_DATA"
+                ]
+            },
+            "validator": {
+                "file": "func_approx.py",
+                "function": "validate_TP_WINDOW_VSIZE",
+                "args": [
+                    "AIE_VARIANT" ,
+                    "TT_DATA"
+                ]
+            }
+        },
+        {
+            "name": "TP_SHIFT",
+            "description": "The power of 2 shift down applied to the accumulation of FIR before output",
+            "type": "uint",
+            "updater": {
+                "file": "func_approx.py",
+                "function": "update_TP_SHIFT",
+                "args": [
+                    "TT_DATA"
+                ]
+            },
+            "validator": {
+                "file": "func_approx.py",
+                "function": "validate_TP_SHIFT",
+                "args": [
+                    "TT_DATA"
+                ]
+            }
+        },
+        {
+            "name": "TP_RND",
+            "description": "The rounding to be applied during the shift down stage of processing.",
+            "type": "uint",
+            "updater": {
+                "file": "func_approx.py",
+                "function": "update_TP_RND",
+                "args": ["AIE_VARIANT"]
+              },
+            "validator": {
+              "file": "func_approx.py",
+              "function": "validate_TP_RND",
+              "args": ["AIE_VARIANT"]
+            }
+        },
+        {
+            "name": "TP_SAT",
+            "description": "Saturation mode.",
+            "type": "uint",
+            "updater": {
+              "file": "func_approx.py",
+              "function": "update_TP_SAT"
+            },
+            "validator": {
+                "file": "func_approx.py",
+                "function": "validate_TP_SAT"
+              }
+        },
+        {
+            "name": "lookup_values",
+            "description": "Lookup table of slope and offset values required for approximation.",
+            "element_type": "TT_DATA",
+            "type": "vector",
+            "updater": {
+                "file": "func_approx.py",
+                "function": "update_lookup_values",
+                "args": [
+                    "TP_COARSE_BITS"
+                ]
+            },
+            "validator": {
+                "file": "func_approx.py",
+                "function": "validate_lookup_values",
+                "args": [
+                    "TP_COARSE_BITS"
+                ]
+            }
+        }
+    ],
+    "ports": {
+        "file": "func_approx.py",
+        "function": "info_ports"
+    },
+    "generator": {
+        "file": "func_approx.py",
+        "function": "generate_graph"
+    }
+}

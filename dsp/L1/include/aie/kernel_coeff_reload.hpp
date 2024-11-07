@@ -19,13 +19,7 @@
 #ifndef _DSPLIB_KERNEL_COEFF_RELOAD_HPP_
 #define _DSPLIB_KERNEL_COEFF_RELOAD_HPP_
 
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
-
+#include "device_defs.h"
 #include <stdio.h>
 #include <adf.h>
 

@@ -29,12 +29,14 @@ namespace corr_example {
 #define G_LEN_CORR 32
 #define SHIFT_CORR 7
 #define API_CORR 0
+#define CASC_LEN_CORR 1
+#define PHASES_CORR 1
 
 class test_corr : public adf::graph {
    public:
-    port<input> inF;
-    port<input> inG;
-    port<output> out;
+    xf::dsp::aie::port_array<input, PHASES_CONV> inF;
+    xf::dsp::aie::port_array<input, 1> inG;
+    xf::dsp::aie::port_array<output, PHASES_CONV> out;
     xf::dsp::aie::conv_corr::conv_corr_graph<DATATYPE_F_CORR,
                                              DATATYPE_G_CORR,
                                              DATATYPE_OUT_CORR,
@@ -43,12 +45,16 @@ class test_corr : public adf::graph {
                                              F_LEN_CORR,
                                              G_LEN_CORR,
                                              SHIFT_CORR,
-                                             API_CORR>
+                                             API_CORR,
+                                             CASC_LEN_CORR,
+                                             PHASES_CORR>
         corr;
     test_corr() {
-        connect<>(inF, corr.inWindowF);
-        connect<>(inG, corr.inWindowG);
-        connect<>(corr.outWindow, out);
+        for (int i = 0; i < PHASES_CORR; i++) {
+            connect<>(inF[i], corr.inF[i]);
+            connect<>(corr.out[i], out[i]);
+        }
+        connect<>(inG[0], corr.inG);
     };
 };
 };

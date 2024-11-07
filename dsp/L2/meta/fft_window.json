@@ -13,6 +13,19 @@
     ],
     "parameters": [
         {
+            "name": "AIE_VARIANT",
+            "type": "uint",
+            "description": "specifies the device type",
+            "updater": {
+                "file": "fft_window.py",
+                "function": "update_AIE_VARIANT"
+            },
+            "validator": {
+                "file": "fft_window.py",
+                "function": "validate_AIE_VARIANT"
+            }
+        },
+        {
             "name": "TT_DATA",
             "description": "The type of individual data samples input to and output of the function",
             "type": "typename",
@@ -20,7 +33,15 @@
                 "cint16",
                 "cint32",
                 "cfloat"
-            ]
+            ],
+            "updater": {
+                "file": "fft_window.py",
+                "function": "update_TT_DATA"
+            },
+            "validator": {
+                "file": "fft_window.py",
+                "function": "validate_TT_DATA"
+            }
         },
         {
             "name": "TT_COEFF",
@@ -31,18 +52,65 @@
                 "int32",
                 "float"
             ],
+            "updater": {
+                "file": "fft_window.py",
+                "function": "update_TT_COEFF",
+                "args": [
+                    "TT_DATA"
+                ]
+            },
             "validator": {
                 "file": "fft_window.py",
                 "function": "validate_TT_COEFF",
                 "args": [
                     "TT_DATA"
                 ]
-            },
+            }
+        },
+        {
+            "name": "TP_API",
+            "description": "The interface selection (windows/streams) of the function.",
+            "type": "uint",
             "updater": {
                 "file": "fft_window.py",
-                "function": "update_TT_COEFF",
+                "function": "update_TP_API",
+                "args": [   ]
+            },
+            "validator": {
+                "file": "fft_window.py",
+                "function": "validate_TP_API",
+                "args": [ ]
+            }
+        },
+        {
+            "name": "TP_SSR",
+            "description": "The number of kernels to be used in parallel to perform the function.",
+            "type": "uint",
+            "updater": {
+                "file": "fft_window.py",
+                "function": "update_TP_SSR",
+                "args": ["TP_API" ]
+            },
+            "validator": {
+                "file": "fft_window.py",
+                "function": "validate_TP_SSR",
+                "args": ["TP_API" ]
+            }
+        },
+        {
+            "name": "TP_DYN_PT_SIZE",
+            "description": "The selection of static point size or dynamic point size operation.",
+            "type": "uint",
+            "updater": {
+                "file": "fft_window.py",
+                "function": "update_TP_DYN_PT_SIZE",
                 "args": [
-                    "TT_DATA"
+                ]
+            },
+            "validator": {
+                "file": "fft_window.py",
+                "function": "validate_TP_DYN_PT_SIZE",
+                "args": [
                 ]
             }
         },
@@ -50,11 +118,24 @@
             "name": "TP_POINT_SIZE",
             "description": "The number of coefficients in the FFT Window",
             "type": "uint",
+            "updater": {
+                "file": "fft_window.py",
+                "function": "update_TP_POINT_SIZE",
+                "args": [
+                    "TT_DATA",
+                    "TP_DYN_PT_SIZE",
+                    "TP_API",
+                    "TP_SSR"
+                ]
+            },
             "validator": {
                 "file": "fft_window.py",
                 "function": "validate_TP_POINT_SIZE",
                 "args": [
-                    "TT_DATA"
+                    "TT_DATA",
+                    "TP_DYN_PT_SIZE",
+                    "TP_API",
+                    "TP_SSR"
                 ]
             }
         },
@@ -62,16 +143,16 @@
             "name": "TP_WINDOW_VSIZE",
             "description": "The number of samples per call to the kernel",
             "type": "uint",
-            "validator": {
+            "updater": {
                 "file": "fft_window.py",
-                "function": "validate_TP_WINDOW_VSIZE",
+                "function": "update_TP_WINDOW_VSIZE",
                 "args": [
                     "TP_POINT_SIZE"
                 ]
             },
-            "updater": {
+            "validator": {
                 "file": "fft_window.py",
-                "function": "update_TP_WINDOW_VSIZE",
+                "function": "validate_TP_WINDOW_VSIZE",
                 "args": [
                     "TP_POINT_SIZE"
                 ]
@@ -81,92 +162,66 @@
             "name": "TP_SHIFT",
             "description": "The power of 2 shift down applied the product of sample and coefficient",
             "type": "uint",
-            "validator": {
-                "file": "fft_window.py",
-                "function": "validate_TP_SHIFT",
-                "args": [
-                    "TT_DATA"
-                ]
-            },
             "updater": {
                 "file": "fft_window.py",
                 "function": "update_TP_SHIFT",
                 "args": [
                     "TT_DATA"
                 ]
-            }
-        },
-        {
-            "name": "TP_API",
-            "description": "The interface selection (windows/streams) of the function.",
-            "type": "uint"
-        },
-        {
-            "name": "TP_SSR",
-            "description": "The number of kernels to be used in parallel to perform the function.",
-            "type": "uint",
+            },
             "validator": {
                 "file": "fft_window.py",
-                "function": "validate_TP_SSR",
+                "function": "validate_TP_SHIFT",
                 "args": [
-                    "TT_DATA",
-                    "TP_POINT_SIZE",
-                    "TP_API"
-                ]
-            },
-            "updater": {
-                "file": "fft_window.py",
-                "function": "update_TP_SSR",
-                "args": [
-                    "TP_POINT_SIZE"
-                ]
-            }
-        },
-        {
-            "name": "TP_DYN_PT_SIZE",
-            "description": "The selection of static point size or dynamic point size operation.",
-            "type": "uint",
-            "validator": {
-                "file": "fft_window.py",
-                "function": "validate_TP_DYN_PT_SIZE",
-                "args": [
-                    "TP_POINT_SIZE",
-                    "TP_SSR"
-                ]
-            },
-            "updater": {
-                "file": "fft_window.py",
-                "function": "update_TP_DYN_PT_SIZE",
-                "args": [
-                    "TP_POINT_SIZE",
-                    "TP_SSR"
+                    "TT_DATA"
                 ]
             }
         },
         {
             "name": "TP_RND",
             "description": "The rounding to be applied during the shift down stage of processing.",
-            "type": "uint"
+            "type": "uint",
+            "updater": {
+                "file": "fft_window.py",
+                "function": "update_TP_RND",
+                "args": [
+                    "AIE_VARIANT"]
+            },
+            "validator": {
+                "file": "fft_window.py",
+                "function": "validate_TP_RND",
+                "args": [
+                    "AIE_VARIANT"                ]
+            }
         },
         {
             "name": "TP_SAT",
             "description": "Saturation mode.",
             "type": "uint",
+            "updater": {
+                "file": "fft_window.py",
+                "function": "update_TP_SAT",
+                "args": []
+            },
             "validator": {
                 "file": "fft_window.py",
-                "function": "validate_TP_SAT"
-            }
-        },
-        {
-            "name": "AIE_VARIANT",
-            "type": "uint",
-            "description": "specifies the device type"
+                "function": "validate_TP_SAT",
+                "args": []
+                        }
         },
         {
             "name": "weights",
             "description": "The window coefficients.",
             "element_type": "TT_COEFF",
             "type": "vector",
+            "updater": {
+                "file": "fft_window.py",
+                "function": "update_weights",
+                "args": [
+                    "TP_POINT_SIZE",
+                    "TP_DYN_PT_SIZE"
+                ]
+            },
             "validator": {
                 "file": "fft_window.py",
                 "function": "validate_weights",

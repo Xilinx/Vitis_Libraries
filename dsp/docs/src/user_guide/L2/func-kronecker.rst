@@ -22,7 +22,7 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The Kronecker supports AIE1 only.
+The Kronecker supports AIE and AIE-ML devices.
 
 Supported Types
 ===============
@@ -121,7 +121,7 @@ Code Example
 ============
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_kronecker.hpp
     :language: cpp
-    :lines: 15-
+    :lines: 17-
 
 .. |image1| image:: ./media/image1.png
 .. |image2| image:: ./media/image2.png

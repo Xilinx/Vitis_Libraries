@@ -59,9 +59,6 @@ get_status: check_op_ref
 get_diff:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)
 
-get_theoretical_min:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_mtx_theoretical_min.tcl $(T_DATA_A) $(T_DATA_B) $(NUM_MACS_PER_KERNEL) $(P_CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL)
-
 create_config:
 	echo $(STATUS_FILE)
 	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP)

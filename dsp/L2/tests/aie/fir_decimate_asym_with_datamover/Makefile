@@ -61,7 +61,7 @@ PLATFORM := vck190
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  vck190
+PLATFORM_ALLOWLIST += vck190
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk

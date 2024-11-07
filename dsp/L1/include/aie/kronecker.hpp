@@ -40,13 +40,6 @@ This file capture the definition of the Kronecker kernel class.
 
 //#define _DSPLIB_KRONECKER_HPP_DEBUG_
 
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
-
 using namespace adf;
 namespace xf {
 namespace dsp {
@@ -72,7 +65,8 @@ class kronecker {
     static constexpr unsigned int kSamplesInVect = 256 / 8 / sizeof(outTypeMult_t<TT_DATA_A, TT_DATA_B>);
 
    public:
-    using TT_OUT = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using acc_t = accTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
 
     static constexpr unsigned int kSamplesInVectA = vecSampleNum<TT_DATA_A, TT_DATA_B>().A;
     static constexpr unsigned int kSamplesInVectB = vecSampleNum<TT_DATA_A, TT_DATA_B>().B;
@@ -93,7 +87,7 @@ class kronecker {
     // Main function
     void kronecker_main(input_buffer<TT_DATA_A>& __restrict inWindowA,
                         input_buffer<TT_DATA_B>& __restrict inWindowB,
-                        output_buffer<TT_OUT>& __restrict outWindow);
+                        output_buffer<out_t>& __restrict outWindow);
 };
 
 // kernel class - stream i/o interface.
@@ -123,7 +117,8 @@ class kronecker<TT_DATA_A,
     static constexpr unsigned int kSamplesInVect = 256 / 8 / sizeof(outTypeMult_t<TT_DATA_A, TT_DATA_B>);
 
    public:
-    using TT_OUT = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using acc_t = accTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
     static constexpr unsigned int sizeMatA = (TP_DIM_A_ROWS * TP_DIM_A_COLS);
     static constexpr unsigned int sizeMatB = TP_DIM_B_ROWS * TP_DIM_B_COLS;
     static constexpr unsigned int sizeMatOut = sizeMatA * sizeMatB;
@@ -142,7 +137,7 @@ class kronecker<TT_DATA_A,
     // Main function
     void kronecker_main(input_buffer<TT_DATA_A>& __restrict inWindowA,
                         input_buffer<TT_DATA_B>& __restrict inWindowB,
-                        output_stream<TT_OUT>* __restrict outStream);
+                        output_stream<out_t>* __restrict outStream);
 };
 }
 }

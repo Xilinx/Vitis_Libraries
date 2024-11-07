@@ -4,6 +4,7 @@ from vmc_fft_common import *
 def vmc_generate_graph(name, args):
     tmpargs = {}
     tmpargs["TT_DATA"] = args["data_type"]
+    tmpargs["TT_OUT_DATA"] = args["data_out_type"]
     tmpargs["TT_TWIDDLE"] = args["twiddle_type"]
     tmpargs["TP_POINT_SIZE"] = args["point_size"]
     tmpargs["TP_SHIFT"] = args["shift_val"]

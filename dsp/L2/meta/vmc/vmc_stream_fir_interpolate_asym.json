@@ -11,6 +11,11 @@
       "name": "data_type",
       "description": "The type of individual data samples input to and output of the filter function",
       "default": "cint16",
+      "validator": {
+        "file": "vmc_stream_fir_interpolate_asym.py",
+        "function": "vmc_validate_data_type",
+        "args": ["AIE_VARIANT"]
+      },
             "label": "Input/Output data type:",
             "tablabel": "Main",
             "parameterType":"popup"
@@ -29,7 +34,7 @@
             "tablabel": "Main",
             "parameterType":"popup"
     },
-    {
+    { "key" : "TP_USE_COEFF_RELOAD",
       "name": "use_coeff_reload",
       "description": "Allows the user to select of runtime coefficient reloading",
       "default": false,
@@ -49,7 +54,7 @@
       "validator": {
         "file": "vmc_stream_fir_interpolate_asym.py",
         "function": "vmc_validate_input_ports",
-        "args": ["num_outputs", "AIE_VARIANT"]
+        "args": ["AIE_VARIANT"]
       },
           "label": "Provide second set of input ports",
             "tablabel": "Main",
@@ -79,7 +84,7 @@
       "validator": {
         "file": "vmc_stream_fir_interpolate_asym.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "interpolate_factor","ssr","dual_ip","AIE_VARIANT"]
+        "args": ["use_coeff_reload", "coef_type", "fir_length"]
       },
           "label": "Filter coefficients:",
             "tablabel": "Main",
@@ -102,7 +107,7 @@
       "validator": {
         "file": "vmc_stream_fir_interpolate_asym.py",
         "function": "vmc_validate_interpolate_factor",
-        "args": ["AIE_VARIANT"]
+        "args": ["AIE_VARIANT", "fir_length","use_coeff_reload", "coef_type", "coeff"]
       },
             "label": "Interpolation factor:",
             "tablabel": "Main",
@@ -116,7 +121,7 @@
       "validator": {
         "file": "vmc_stream_fir_interpolate_asym.py",
         "function": "vmc_validate_input_window_size",
-        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "interpolate_factor", "ssr"]
+        "args": ["use_coeff_reload", "data_type", "coef_type", "coeff", "interpolate_factor", "interp_poly", "fir_length", "ssr"]
       },
             "label": "Input frame size (Number of samples):",
             "tablabel": "Main",
@@ -130,7 +135,7 @@
        "validator": {
         "file": "vmc_stream_fir_interpolate_asym.py",
         "function": "vmc_validate_shift_val",
-        "args": ["data_type"]
+        "args": ["AIE_VARIANT", "data_type"]
       },
             "label": "Scale output down by 2^:",
             "tablabel": "Main",
@@ -174,7 +179,7 @@
       "validator": {
         "file": "vmc_stream_fir_interpolate_asym.py",
         "function": "vmc_validate_ssr",
-        "args": ["interpolate_factor", "interp_poly", "AIE_VARIANT"]
+        "args": ["interpolate_factor", "interp_poly", "AIE_VARIANT", "data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "dual_ip"]
       },
             "label": "SSR: ",
             "tablabel": "Main",
@@ -202,7 +207,7 @@
       "validator": {
         "file": "vmc_stream_fir_interpolate_asym.py",
         "function": "vmc_validate_casc_length",
-        "args": []
+        "args": ["AIE_VARIANT", "data_type", "coef_type", "use_coeff_reload", "coeff", "interpolate_factor", "interp_poly", "fir_length", "ssr", "dual_ip"]
       },
             "label": "Number of cascade stages:",
             "tablabel": "Main",

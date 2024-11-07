@@ -13,6 +13,21 @@
     ],
     "parameters": [
         {
+            "name": "AIE_VARIANT",
+            "type": "uint",
+            "description": "specifies the device type",
+            "maximum": 2,
+            "minimum": 1,
+            "updater": {
+                "file": "widget_api_cast.py",
+                "function": "update_AIE_VARIANT"
+            },
+            "validator": {
+                "file": "widget_api_cast.py",
+                "function": "validate_AIE_VARIANT"
+            }
+        },
+        {
             "name": "TT_DATA",
             "type": "typename",
             "description": "describes the type of individual data samples input to and output from the dds/mixer",
@@ -23,21 +38,45 @@
                 "cint16",
                 "cint32",
                 "cfloat"
-            ]
+            ],
+            "updater": {
+                "file": "widget_api_cast.py",
+                "function": "update_TT_DATA"
+            },
+            "validator": {
+                "file": "widget_api_cast.py",
+                "function": "validate_TT_DATA"
+            }
         },
         {
             "name": "TP_IN_API",
             "type": "uint",
             "description": "specifies if the input interface should be iobuffer or stream-based.",
             "minimum": 0,
-            "maximum": 1
+            "maximum": 1,
+            "updater": {
+                "file": "widget_api_cast.py",
+                "function": "update_TP_IN_API"
+            },
+            "validator": {
+                "file": "widget_api_cast.py",
+                "function": "validate_TP_IN_API"
+            }
         },
         {
             "name": "TP_OUT_API",
             "type": "uint",
             "description": "specifies if the output interface should be iobuffer or stream-based.",
             "minimum": 0,
-            "maximum": 1
+            "maximum": 1,
+            "updater": {
+                "file": "widget_api_cast.py",
+                "function": "update_TP_OUT_API"
+            },
+            "validator": {
+                "file": "widget_api_cast.py",
+                "function": "validate_TP_OUT_API"
+            }            
         },
         {
             "name": "TP_NUM_INPUTS",
@@ -45,6 +84,13 @@
             "description": "specifies the number of input channels",
             "minimum": 0,
             "maximum": 2,
+            "updater": {
+                "file": "widget_api_cast.py",
+                "function": "update_TP_NUM_INPUTS",
+                "args": [
+                    "TP_IN_API"
+                ]
+            },
             "validator": {
                 "file": "widget_api_cast.py",
                 "function": "validate_TP_NUM_INPUTS",
@@ -58,35 +104,60 @@
             "type": "uint",
             "description": "describes the number of samples in the input/output window API or number of samples to process per iteration.",
             "minimum": 4,
-            "maximum": 4096
+            "maximum": 4096,
+            "updater": {
+                "file": "widget_api_cast.py",
+                "function": "update_TP_WINDOW_VSIZE"
+            },
+            "validator": {
+                "file": "widget_api_cast.py",
+                "function": "validate_TP_WINDOW_VSIZE"
+            }  
         },
         {
             "name": "TP_NUM_OUTPUT_CLONES",
             "type": "uint",
             "description": "specifies the number of copies of the output channel.",
             "minimum": 0,
-            "maximum": 4
+            "maximum": 4,
+            "updater": {
+                "file": "widget_api_cast.py",
+                "function": "update_TP_NUM_OUTPUT_CLONES"
+            },
+            "validator": {
+                "file": "widget_api_cast.py",
+                "function": "validate_TP_NUM_OUTPUT_CLONES"
+            }  
         },
         {
             "name": "TP_PATTERN",
             "type": "uint",
             "description": "specifies how input channels are to be interlaced prior to output.",
             "minimum": 0,
-            "maximum": 2
+            "maximum": 2,
+            "updater": {
+                "file": "widget_api_cast.py",
+                "function": "update_TP_PATTERN"
+            },
+            "validator": {
+                "file": "widget_api_cast.py",
+                "function": "validate_TP_PATTERN"
+            }  
         },
         {
             "name": "TP_HEADER_BYTES",
             "type": "uint",
             "description": "specifies the number of bytes considered to be header (not interlaced) rather than data.",
             "minimum": 0,
-            "maximum": 32
-        },
-        {
-            "name": "AIE_VARIANT",
-            "type": "uint",
-            "description": "specifies the device type",
-            "maximum": 2,
-            "minimum": 1
+            "maximum": 32,
+            "updater": {
+                "file": "widget_api_cast.py",
+                "function": "update_TP_HEADER_BYTES"
+            },
+            "validator": {
+                "file": "widget_api_cast.py",
+                "function": "validate_TP_HEADER_BYTES"
+            }  
         }
     ],
     "ports": {

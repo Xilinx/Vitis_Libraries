@@ -6,6 +6,7 @@
         "twiddle_type": "cint16",
         "point_size": 64,
         "input_window_size": 64,
+        "dyn_pt_size": 0,
         "shift_val": 0,
         "rnd_mode": 4,
         "sat_mode": 0,

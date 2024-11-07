@@ -148,7 +148,7 @@ INLINE_DECL void fft_r2comb_r2stage<TT_DATA,
         twiddles = fnGetR2CombTwTable<TT_TWIDDLE, TP_INDEX, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_DYN_PT_SIZE,
                                       TP_TWIDDLE_MODE>();
     static constexpr std::array<int, 12> twiddleStarts = fnGetR2TwStarts<(TP_POINT_SIZE >> (TP_PARALLEL_POWER + 1))>();
-    constexpr unsigned int kTwShift = getTwShift<TT_TWIDDLE, 0 /*TT_TWIDDLE_MODE placeholder */>();
+    constexpr unsigned int kTwShift = getTwShift<TT_TWIDDLE, TP_TWIDDLE_MODE>();
     constexpr unsigned int kShift = kTwShift + TP_SHIFT;
 
     using t256VectorType = ::aie::vector<TT_DATA, 256 / 8 / sizeof(TT_DATA)>;
@@ -162,7 +162,7 @@ INLINE_DECL void fft_r2comb_r2stage<TT_DATA,
             static constexpr unsigned int kSamplesInHeader = 256 / 8 / sizeof(TT_DATA);
             static constexpr unsigned int kPtSizePwr = fnPointSizePower<TP_POINT_SIZE>();
             static constexpr unsigned int kminPtSizePwr = 4;
-            static constexpr unsigned int kBlankVsize = 256 / 8 / sizeof(TT_DATA);
+
             t256VectorType header;
             TT_DATA headerVal;
             t256VectorType blankOp;
@@ -196,19 +196,22 @@ INLINE_DECL void fft_r2comb_r2stage<TT_DATA,
                 int n = (ptSize >> TP_PARALLEL_POWER);
                 int tw_base = kPtSizePwr - ptSizePwr;
 
-                for (int i = 0; i < TP_WINDOW_VSIZE;
-                     i += (TP_POINT_SIZE >> TP_PARALLEL_POWER)) { // loop for multiple frames in window
+                constexpr int kFrameHolder = TP_POINT_SIZE >> TP_PARALLEL_POWER;
+                using write_type = ::aie::vector<TT_DATA, kSamplesInHeader>;
+                TT_DATA* blankPtr = ybuff;
+                write_type* blankVectPtr = (write_type*)(ybuff);
+                for (int i = 0; i < TP_WINDOW_VSIZE; i += kFrameHolder) { // loop for multiple frames in window
                     r2comb_dit<TT_DATA, TT_TWIDDLE, TP_TWIDDLE_MODE>(xbuff + i,
                                                                      (TT_TWIDDLE*)(&twiddles[twiddleStarts[tw_base]]),
                                                                      n, 0 /* r  */, kShift, ybuff + i, inv);
 
                     // blank the remainder of the frame holder
-                    using write_type = ::aie::vector<TT_DATA, kBlankVsize>;
-                    write_type* blankDataPtr =
-                        (write_type*)(ybuff + n); // addition is in TT_DATA currency, then cast to 128b
-                    for (int i = n; i < (TP_POINT_SIZE >> TP_PARALLEL_POWER); i += kBlankVsize) {
-                        *blankDataPtr++ = ::aie::zeros<TT_DATA, kBlankVsize>();
+                    blankPtr += n;
+                    blankVectPtr = (write_type*)(blankPtr); // addition is in TT_DATA currency, then cast to 128b
+                    for (int k = n; k < kFrameHolder; k += kSamplesInHeader) {
+                        *blankVectPtr++ = ::aie::zeros<TT_DATA, kSamplesInHeader>();
                     }
+                    blankPtr = (TT_DATA*)blankVectPtr; // start of next frame within window
                 }
 
             } else { // illegal framesize or invalid incoming
@@ -217,12 +220,8 @@ INLINE_DECL void fft_r2comb_r2stage<TT_DATA,
                                                       : 3); // set the invalid flag in the status location.
                 *outPtr++ = header;
                 // write out blank window
-
-                TT_DATA* ybuff = (TT_DATA*)&outBuff[0];
-                using write_type = ::aie::vector<TT_DATA, kBlankVsize>;
-                write_type* blankDataPtr = (write_type*)(ybuff); // addition is in TT_DATA currency, then cast to 128b
-                for (int i = 0; i < TP_WINDOW_VSIZE / kBlankVsize; i++) {
-                    *blankDataPtr++ = ::aie::zeros<TT_DATA, kBlankVsize>();
+                for (int i = 0; i < TP_WINDOW_VSIZE / kSamplesInHeader; i++) {
+                    *outPtr++ = ::aie::zeros<TT_DATA, kSamplesInHeader>();
                 }
             } // end of dynamic handling.
         }

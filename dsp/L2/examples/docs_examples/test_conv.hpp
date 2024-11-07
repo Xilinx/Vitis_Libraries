@@ -29,12 +29,14 @@ namespace conv_example {
 #define G_LEN_CONV 32
 #define SHIFT_CONV 7
 #define API_CONV 0
+#define CASC_LEN_CONV 1
+#define PHASES_CONV 1
 
 class test_conv : public adf::graph {
    public:
-    port<input> inF;
-    port<input> inG;
-    port<output> out;
+    xf::dsp::aie::port_array<input, PHASES_CONV> inF;
+    xf::dsp::aie::port_array<input, 1> inG;
+    xf::dsp::aie::port_array<output, PHASES_CONV> out;
     xf::dsp::aie::conv_corr::conv_corr_graph<DATATYPE_F_CONV,
                                              DATATYPE_G_CONV,
                                              DATATYPE_OUT_CONV,
@@ -43,12 +45,16 @@ class test_conv : public adf::graph {
                                              F_LEN_CONV,
                                              G_LEN_CONV,
                                              SHIFT_CONV,
-                                             API_CONV>
+                                             API_CONV,
+                                             CASC_LEN_CONV,
+                                             PHASES_CONV>
         conv;
     test_conv() {
-        connect<>(inF, conv.inWindowF);
-        connect<>(inG, conv.inWindowG);
-        connect<>(conv.outWindow, out);
+        for (int i = 0; i < PHASES_CONV; i++) {
+            connect<>(inF[i], conv.inF[i]);
+            connect<>(conv.out[i], out[i]);
+        }
+        connect<>(inG[0], conv.inG);
     };
 };
 };

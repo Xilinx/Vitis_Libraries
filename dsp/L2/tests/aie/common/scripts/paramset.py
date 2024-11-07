@@ -28,5 +28,14 @@ if not f:
 parameters = json.load(f)
 MAX_FIR_PER_KERNEL = 256
 INTERPOLATE_FACTOR = parameters[parameter_set]["INTERPOLATE_FACTOR"]
-COEFF_SIZE = parameters[parameter_set]["COEFF_SIZE"]
+COEFF_TYPE = parameters[parameter_set]["COEFF_TYPE"]
+
+# COEFF_SIZE depends on bytes in COEFF_TYPE
+if COEFF_TYPE in ["int32", "cint16", "float"]:
+    COEFF_SIZE = 4
+elif COEFF_TYPE in ["cint32", "cfloat"]:
+    COEFF_SIZE = 8
+else:
+    COEFF_SIZE = 2
+
 print(int(MAX_FIR_PER_KERNEL) * int(INTERPOLATE_FACTOR) * int(COEFF_SIZE) + 1536)

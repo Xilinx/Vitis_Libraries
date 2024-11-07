@@ -138,6 +138,11 @@ Throughput and latency are only reported when a stable operation has been detect
 
 Increase the number of iterations the simulation runs for to achieve a stable state and get accurate throughput and latency measurements.
 
+Power Analysis
+--------------
+
+For DSPLIB elements, a common parameter *DUMP_VCD* can be used to harvest dynamic power consumption. Once set, VCD file of the simulation data is captured and PDM (Power Design Manager) calculates power metrics. User can find detailed power reports in `pwr_test` folder under their corresponding test result directory. Dymanic power result can also be found in the `logs/status_<config_details>.txt` file. 
+
 .. _CONFIGURATION_PARAMETERS:
 
 Library Element Configuration Parameters
@@ -148,7 +153,7 @@ Library Element Configuration Parameters
 Common Configuration Parameters
 -------------------------------
 
-Many library elements perform arithmetic and offer a scaling feature exposed as TP_SHIFT. During this operation, rounding and saturation can occur, configured according to parameters TP_RND and TP_SAT. The modes and values for TP_RND are different on AIE1 compared to AIE-ML as captured in the following table.
+Many library elements perform arithmetic and offer a scaling feature exposed as TP_SHIFT. During this operation, rounding and saturation can occur, configured according to parameters TP_RND and TP_SAT. The modes and values for TP_RND are different on AIE compared to AIE-ML as captured in the following table.
 
 .. table:: Common Configuration Parameters
 
@@ -196,6 +201,11 @@ Many library elements perform arithmetic and offer a scaling feature exposed as 
     | NITER                  |    unsigned    |    8           | Number of iterations to execute.     |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
+    | DUMP_VCD               |    unsigned    |    0           | Generate VCD,                        |
+    |                        |                |                | and trigger power analysis.          |
+    |                        |                |                | 0 - disable                          |
+    |                        |                |                | 1 - enable                           |
+    +------------------------+----------------+----------------+--------------------------------------+
     | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
     |                        |                |                | output sample with reference model,  |
     |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
@@ -231,6 +241,43 @@ Many library elements perform arithmetic and offer a scaling feature exposed as 
     |                        |                |                |                                      |
     |                        |                |                | 2: AIE-ML                            |
     +------------------------+----------------+----------------+--------------------------------------+
+
+.. _CONFIGURATION_PARAMETERS_BITONIC_SORT:
+
+Bitonic Sort configuration parameters
+--------------------------------------
+
+For the Bitonic Sort library element, use the following list of configurable parameters and default values.
+
+.. table:: Bitonic Sort configuration parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | T_DATA                 |    typename    |    int32       | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIM_SIZE               |    unsigned    |    32          | Size of list to sort.                |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NUM_FRAMES             |    unsigned    |    1           | Number of frames in a window.        |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | ASCENDING              |    unsigned    |    1           | Indicates whether sort is ascending. |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | CASC_LEN               |    unsigned    |    1           | Sets number of tiles used to chain   |
+    |                        |                |                | bitonic stages.                      |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    4           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
 
 .. _CONFIGURATION_PARAMETERS_CONV_CORR:
 
@@ -665,6 +712,65 @@ The following list consists of configurable parameters for FIR library elements 
 .. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
 
 .. note:: Not all dsplib elements support all of the above configurable parameters. Unsupported parameters which are not used have no impact on execution, e.g., the `INTERPOLATE_FACTOR` parameter is only supported by interpolation filters and will be ignored by other library elements.
+
+.. _CONFIGURATION_PARAMETERS_FUNC_APPROX:
+
+Function Approximation configuration parameters
+-----------------------------------------
+
+For the Function Approximation library element, use the list of configurable parameters and default values is presented below.
+
+.. table:: Function Approximation configuration parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+  
+    |     **Name**           |    **Type**    |  **Default**   |   **Description**                    |  
+    +========================+================+================+======================================+  
+    | DATA_TYPE              | typename       | cint16         | Data type.                           |  
+    +------------------------+----------------+----------------+--------------------------------------+  
+    | COARSE_BITS            | unsigned       | 8              | Number of bits used for coarse       |  
+    |                        |                |                | lookup. Determines the number of     |  
+    |                        |                |                | linear sections in the lookup table. |  
+    +------------------------+----------------+----------------+--------------------------------------+  
+    | FINE_BITS              | unsigned       | 7              | Number of bits used for              |  
+    |                        |                |                | interpolation between lookup         |  
+    |                        |                |                | sections.                            |  
+    +------------------------+----------------+----------------+--------------------------------------+  
+    | DOMAIN_MODE            | unsigned       | 0              | Describes normalized input, x,       |  
+    |                        |                |                | domain.                              |  
+    +------------------------+----------------+----------------+--------------------------------------+  
+    | FUNC_CHOICE            | unsigned       | 0              | Sets which utility function is used  |  
+    |                        |                |                | to create lookup table values. Each  |  
+    |                        |                |                | utility function provides            |  
+    |                        |                |                | approximations for a specific        |  
+    |                        |                |                | function. The following values and   |  
+    |                        |                |                | functions are enumerated for         |  
+    |                        |                |                | FUNC_CHOICE:                         |  
+    |                        |                |                | 0 - SQRT_FUNC                        |  
+    |                        |                |                | 1 - INVSQRT_FUNC                     |  
+    |                        |                |                | 2 - LOG_FUNC                         |  
+    |                        |                |                | 3 - EXP_FUNC                         |  
+    |                        |                |                | 4 - INV_FUNC                         |  
+    +------------------------+----------------+----------------+--------------------------------------+  
+    | SHIFT                  | unsigned       | 0              | See :ref:`COMMON_CONFIG_PARAMETERS`. |   
+    +------------------------+----------------+----------------+--------------------------------------+  
+    | WINDOW_VSIZE           | unsigned       | 6              | See :ref:`COMMON_CONFIG_PARAMETERS`. |  
+    +------------------------+----------------+----------------+--------------------------------------+  
+    | ROUND_MODE             | unsigned       | 0              | See :ref:`COMMON_CONFIG_PARAMETERS`. |  
+    +------------------------+----------------+----------------+--------------------------------------+  
+    | SAT_MODE               | unsigned       | 1              | See :ref:`COMMON_CONFIG_PARAMETERS`. |  
+    +------------------------+----------------+----------------+--------------------------------------+  
+    | NITER                  | unsigned       | 4              | See :ref:`COMMON_CONFIG_PARAMETERS`. |  
+    +------------------------+----------------+----------------+--------------------------------------+  
+    | STIM_TYPE              | unsigned       | 0              | This parameter drives the input data |  
+    |                        |                |                | stimulus differently from other      |  
+    |                        |                |                | library elements, as a different     |  
+    |                        |                |                | input generation script is used.     |  
+    |                        |                |                | STIM_TYPE = 0 provides random data   |  
+    |                        |                |                | in the selected DOMAIN_MODE.         |  
+    |                        |                |                | STIM_TYPE = 1 provides incrementing  |  
+    |                        |                |                | data across the entire domain for    |  
+    |                        |                |                | the selected DOMAIN_MODE.            |  
+    +------------------------+----------------+----------------+--------------------------------------+
 
 .. _CONFIGURATION_PARAMETERS_HADAMARD:
 

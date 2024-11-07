@@ -1,0 +1,42 @@
+{
+    "graphName": "FIR_TDM_Stream_e12d2f03",
+    "graphHeaderFile": "FIR_TDM_Stream_e12d2f03.h",
+    "graphSearchPath": [
+        "L2/include/aie",
+        "L2/tests/aie/common/inc",
+        "L1/include/aie",
+        "L1/src/aie",
+        "L1/tests/aie/inc",
+        "L1/tests/aie/src"
+    ],
+    "graphPreProcOptions": [],
+    "ports": [
+        {
+            "name": "in[0]",
+            "portkind": "stream",
+            "direction": "in",
+            "basictype": "int16",
+            "windowsize": 0,
+            "margin": 0,
+            "synchronicity": "sync",
+            "isArray": true,
+            "numElements": 256,
+            "isComplex": true,
+            "isStdComplex": false
+        },
+        {
+            "name": "out[0]",
+            "portkind": "stream",
+            "direction": "out",
+            "basictype": "int16",
+            "windowsize": 0,
+            "margin": 0,
+            "synchronicity": "sync",
+            "isArray": true,
+            "numElements": 256,
+            "isComplex": true,
+            "isStdComplex": false
+        }
+    ],
+    "graphSourceFileUpdated": true
+}

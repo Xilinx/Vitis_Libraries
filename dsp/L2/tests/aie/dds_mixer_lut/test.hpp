@@ -113,17 +113,17 @@ class test_graph : public graph {
             connect<parameter>(PhaseRTP[i], ddsGraph.PhaseRTP[i]);
 #endif
 #if (MIXER_MODE == 2 || MIXER_MODE == 1)
-            in1[i] = input_plio::create("PLIO_in1_" + std::to_string(i), adf::plio_32_bits, filenameIn1);
+            in1[i] = input_plio::create("PLIO_in1_" + std::to_string(i), adf::plio_64_bits, filenameIn1);
             connect<>(in1[i].out[0], ddsGraph.in1[i]);
             printf("Connecting ddsGraph.in1[%d] to %s\n", i, filenameIn1.c_str());
 #endif
 #if (MIXER_MODE == 2)
-            in2[i] = input_plio::create("PLIO_in2_" + std::to_string(i), adf::plio_32_bits, filenameIn2);
+            in2[i] = input_plio::create("PLIO_in2_" + std::to_string(i), adf::plio_64_bits, filenameIn2);
             connect<>(in2[i].out[0], ddsGraph.in2[i]);
             printf("Connecting ddsGraph.in2[%d] to %s\n", i, filenameIn2.c_str());
 #endif
 
-            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_32_bits, filenameOut);
+            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_64_bits, filenameOut);
             connect<>(ddsGraph.out[i], out[i].in[0]);
             printf("Connecting ddsGraph.out[%d] to %s\n", i, filenameOut.c_str());
         }

@@ -17,13 +17,6 @@
 #ifndef _DSPLIB_fft_ifft_dit_1ch_TRAITS_HPP_
 #define _DSPLIB_fft_ifft_dit_1ch_TRAITS_HPP_
 
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
-
 #include "device_defs.h"
 
 /*
@@ -205,13 +198,12 @@ INLINE_DECL constexpr bool fnCheckDataTwiddleType<cfloat, cfloat>() {
 template <unsigned int TP_POINT_SIZE>
 INLINE_DECL constexpr bool fnCheckPointSize() {
     return (
-#if __FFT_R4_IMPL__ == 0
         // AIE1 outputs vectors of 4, so radix4 outputs 16 samples.
         // AIEML outputs vectors of 8, so the minimum point size is 32.
-        TP_POINT_SIZE == 16 ||
-#endif // __FFT_R4_IMPL__
-        TP_POINT_SIZE == 32 || TP_POINT_SIZE == 64 || TP_POINT_SIZE == 128 || TP_POINT_SIZE == 256 ||
-        TP_POINT_SIZE == 512 || TP_POINT_SIZE == 1024 || TP_POINT_SIZE == 2048 || TP_POINT_SIZE == 4096);
+        TP_POINT_SIZE >= __FFT_MIN_VECTORIZATION__ &&
+        (TP_POINT_SIZE == 16 || TP_POINT_SIZE == 32 || TP_POINT_SIZE == 64 || TP_POINT_SIZE == 128 ||
+         TP_POINT_SIZE == 256 || TP_POINT_SIZE == 512 || TP_POINT_SIZE == 1024 || TP_POINT_SIZE == 2048 ||
+         TP_POINT_SIZE == 4096));
 };
 
 template <unsigned int TP_SHIFT>
@@ -344,6 +336,25 @@ INLINE_DECL constexpr int fnHeapSize() {
     }
 
     return retVal;
+};
+
+// To reduce Data Memory required, the output iobuffer can be re-used as a temporary buffer of samples,
+// but only when the internal type size is the same as the input type size and when the number of stages for the kernel
+// is even
+template <typename TT_D, int T_START_RANK, int T_END_RANK, int T_DYN>
+INLINE_DECL constexpr bool fnReuseOutputBuffer() {
+    if (T_DYN == 1) {
+        return false;
+    }
+    if (std::is_same<TT_D, cint16>::value) {
+        return false;
+#if __SUPPORTS_CFLOAT__ == 1
+    } else if (std::is_same<TT_D, cfloat>::value) {
+        return (T_END_RANK - T_START_RANK) % 2 == 1; // cfloat stages are radix2, stages = ranks.
+#endif
+    } else if (std::is_same<TT_D, cint32>::value) {
+        return (T_END_RANK / 2 - T_START_RANK / 2) % 2 == 1; // cint32 stages are radix4, so stages = ranks/2
+    }
 };
 
 // To reduce Data Memory required, the input window can be re-used as a temporary buffer of samples,

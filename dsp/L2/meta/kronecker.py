@@ -34,7 +34,504 @@ TP_SHIFT_max = 60
 TP_SSR_min = 1
 TP_SSR_max = 16
 
-# validation helper functions
+#######################################################
+########### AIE_VARIANT Updater and Validator #########
+#######################################################
+def update_AIE_VARIANT(args):
+  return fn_update_AIE_VARIANT()
+
+def fn_update_AIE_VARIANT():
+  legal_set_AIE_VARIANT = [1, 2]
+  
+  param_dict ={}
+  param_dict.update({"name" : "AIE_VARIANT"})
+  param_dict.update({"enum" : legal_set_AIE_VARIANT})
+  return param_dict
+
+def validate_AIE_VARIANT(args):
+  AIE_VARIANT=args["AIE_VARIANT"]
+  return (fn_validate_AIE_VARIANT(AIE_VARIANT))
+
+def fn_validate_AIE_VARIANT(AIE_VARIANT):
+  param_dict = fn_update_AIE_VARIANT()
+  legal_set_AIE_VARIANT = param_dict["enum"]
+  return(validate_legal_set(legal_set_AIE_VARIANT, "AIE_VARIANT", AIE_VARIANT))
+
+#######################################################
+########### TT_DATA_A Updater and Validator ###########
+#######################################################
+def update_TT_DATA_A(args):
+  return fn_update_TT_DATA_A()
+
+def fn_update_TT_DATA_A():
+  legal_set_TT_DATA_A=["int16", "cint16", "int32", "cint32", "float", "cfloat"]
+  param_dict={
+    "name" : "TT_DATA_A",
+    "enum" : legal_set_TT_DATA_A
+  }
+  return param_dict
+
+def validate_TT_DATA_A(args):
+  TT_DATA_A = args["TT_DATA_A"]
+  return fn_validate__TT_DATA_A(TT_DATA_A)
+
+
+# validation function    
+def fn_validate__TT_DATA_A(TT_DATA_A):
+  param_dict = fn_update_TT_DATA_A()
+  return validate_legal_set(param_dict["enum"], "TT_DATA_A", TT_DATA_A)
+
+#######################################################
+########### TT_DATA_B Updater and Validator ###########
+#######################################################
+def update_TT_DATA_B(args):
+  TT_DATA_A=args["TT_DATA_A"]
+  return fn_update_TT_DATA_B(TT_DATA_A)
+
+def fn_update_TT_DATA_B(TT_DATA_A):
+  legal_set_TT_DATA_B=["int16", "cint16", "int32", "cint32", "float", "cfloat"]
+  float_set=["float", "cfloat"]
+  integer_set=["int16", "cint16", "int32", "cint32"]
+  if TT_DATA_A in float_set:
+    legal_set_TT_DATA_B=remove_from_set(integer_set, legal_set_TT_DATA_B)
+  elif TT_DATA_A in integer_set:
+    legal_set_TT_DATA_B=remove_from_set(float_set, legal_set_TT_DATA_B)
+
+  param_dict={
+    "name" : TT_DATA_A,
+    "enum" : legal_set_TT_DATA_B
+  }
+
+  return param_dict
+
+def validate_TT_DATA_B(args):
+    TT_DATA_A = args["TT_DATA_A"]
+    TT_DATA_B = args["TT_DATA_B"]
+    return fn_validate__TT_DATA_B(TT_DATA_A, TT_DATA_B)
+
+# validation function    
+def fn_validate__TT_DATA_B(TT_DATA_A, TT_DATA_B):
+  param_dict = fn_update_TT_DATA_B(TT_DATA_A)
+  return validate_legal_set(param_dict["enum"], "TT_DATA_B", TT_DATA_B)
+
+#######################################################
+############# TP_API Updater and Validator ############
+#######################################################
+def update_TP_API(args):
+  return fn_update_TP_API()
+
+def fn_update_TP_API():
+  param_dict={
+    "name" : "TP_API",
+    "enum" : [0,1]
+  }
+  return param_dict
+
+def validate_TP_API(args):
+    TP_API = args["TP_API"]
+    return fn_validate_api_val(TP_API)
+
+def fn_validate_api_val(TP_API):
+  param_dict=fn_update_TP_API()
+  return validate_legal_set(param_dict["enum"], "TP_API", TP_API)
+
+#######################################################
+########### TP_SSR Updater and Validator ##############
+#######################################################
+def update_TP_SSR(args):
+  return fn_update_ssr()
+
+def fn_update_ssr():
+  param_dict={
+    "name" : "TP_SSR",
+    "minimum" : TP_SSR_min,
+    "maximum" : TP_SSR_max
+  }
+  return param_dict
+
+def validate_TP_SSR(args):
+  TP_SSR = args["TP_SSR"]
+  return fn_validate_ssr(TP_SSR)
+
+def fn_validate_ssr(TP_SSR):
+  range_TP_SSR=[TP_SSR_min, TP_SSR_max] 
+  return validate_range(range_TP_SSR, "TP_SSR", TP_SSR)
+
+#######################################################
+####### TP_DIM_A_ROWS Updater and Validator ###########
+#######################################################
+def update_TP_DIM_A_ROWS(args):
+  TT_DATA_A = args["TT_DATA_A"]
+  TT_DATA_B = args["TT_DATA_B"]
+  TP_API = args["TP_API"]
+  if args["TP_DIM_A_ROWS"]: TP_DIM_A_ROWS=args["TP_DIM_A_ROWS"]
+  else: TP_DIM_A_ROWS=0
+  
+  return fn_update_TP_DIM_A_ROWS(TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS)
+
+def fn_update_TP_DIM_A_ROWS(TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS):
+
+  VEC_SIZE = int(256/8/fn_size_by_byte(TT_DATA_A))
+
+  param_dict={
+    "name" : "TT_DATA_A",
+    "minimum" : VEC_SIZE,
+  }
+
+  TP_DIM_A_COLS_SSR = 1
+  if TP_API==0:
+    TP_DIM_B_ROWS = VEC_SIZE
+    TP_DIM_B_COLS = 1
+    TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(fn_det_out_type(TT_DATA_A, TT_DATA_B))
+    TP_DIM_A_ROWS_max = TP_WINDOW_VSIZE_max_size/ (TP_DIM_A_COLS_SSR * TP_DIM_B_ROWS * TP_DIM_B_COLS)
+
+  elif TP_API==1:
+    
+    TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(TT_DATA_A)
+    TP_DIM_A_ROWS_max = TP_WINDOW_VSIZE_max_size / TP_DIM_A_COLS_SSR
+
+  param_dict.update({"maximum" : int(FLOOR(TP_DIM_A_ROWS_max, VEC_SIZE))})
+
+
+  if TP_DIM_A_ROWS != 0 and (TP_DIM_A_ROWS%VEC_SIZE != 0): 
+    TP_DIM_A_ROWS_act=round(TP_DIM_A_ROWS/VEC_SIZE) * VEC_SIZE
+
+    if TP_DIM_A_ROWS_act < param_dict["minimum"]:
+      TP_DIM_A_ROWS_act = param_dict["minimum"]
+
+    if TP_DIM_A_ROWS_act > param_dict["maximum"]:
+      TP_DIM_A_ROWS_act = param_dict["maximum"]
+    
+    param_dict.update({"actual" : int(TP_DIM_A_ROWS_act)})
+  return param_dict
+
+def validate_TP_DIM_A_ROWS(args):
+  TT_DATA_A = args["TT_DATA_A"]
+  TT_DATA_B = args["TT_DATA_B"]
+  TP_API = args["TP_API"]
+
+  TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
+  return fn_validate_dim_a_rows(TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS)
+
+def fn_validate_dim_a_rows(TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS):
+  param_dict= fn_update_TP_DIM_A_ROWS(TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS)
+  VEC_SIZE = int(256/8/fn_size_by_byte(TT_DATA_A))
+
+  if (TP_DIM_A_ROWS % VEC_SIZE):
+    return isError(f"TP_DIM_A_ROWS should be an integer multiple of vector size. Vector size for the data type {TT_DATA_A} is {VEC_SIZE}. Got TP_DIM_A_ROWS = {TP_DIM_A_ROWS}")
+  else:
+    range_TP_DIM_A_ROWS=[param_dict["minimum"], param_dict["maximum"]]
+    return validate_range(range_TP_DIM_A_ROWS, "TP_DIM_A_ROWS", TP_DIM_A_ROWS)
+
+#######################################################
+####### TP_DIM_A_COLS Updater and Validator ###########
+#######################################################
+def update_TP_DIM_A_COLS(args):
+  TT_DATA_A = args["TT_DATA_A"]
+  TT_DATA_B = args["TT_DATA_B"]
+  TP_API = args["TP_API"]
+  TP_SSR = args["TP_SSR"]
+  TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
+
+  if args["TP_DIM_A_COLS"] : TP_DIM_A_COLS=args["TP_DIM_A_COLS"]
+  else: TP_DIM_A_COLS=0
+
+  return fn_update_TP_DIM_A_COLS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS)
+
+def fn_update_TP_DIM_A_COLS(TT_DATA_A,  TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS):
+  VEC_SIZE = int(256/8/fn_size_by_byte(TT_DATA_A))
+
+  param_dict={
+  "name":"TP_DIM_A_COLS",
+  "minimum" : TP_SSR
+  }
+
+  if TP_API==0:
+     #minimum possible values
+    TP_DIM_B_ROWS = VEC_SIZE
+    TP_DIM_B_COLS = 1
+    TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(fn_det_out_type(TT_DATA_A, TT_DATA_B))
+    TP_DIM_A_COLS_max = (TP_WINDOW_VSIZE_max_size * TP_SSR) / (TP_DIM_A_ROWS  * TP_DIM_B_ROWS * TP_DIM_B_COLS)
+
+  elif TP_API==1:
+    TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(TT_DATA_A)
+    TP_DIM_A_COLS_max = (TP_WINDOW_VSIZE_max_size * TP_SSR) / (TP_DIM_A_ROWS)
+
+  param_dict.update({"maximum" :  int(FLOOR(TP_DIM_A_COLS_max, TP_SSR))})
+
+  if TP_DIM_A_COLS != 0 and (TP_DIM_A_COLS % TP_SSR != 0):
+    TP_DIM_A_COLS_act= round(TP_DIM_A_COLS / TP_SSR) * TP_SSR
+    if TP_DIM_A_COLS_act < TP_SSR:
+      TP_DIM_A_COLS_act = TP_SSR
+    if (TP_DIM_A_COLS_act > param_dict["maximum"]):
+      TP_DIM_A_COLS_act = param_dict["maximum"]
+    param_dict.update({"actual" : int(TP_DIM_A_COLS_act)})
+
+  return param_dict
+
+def validate_TP_DIM_A_COLS(args):
+  TT_DATA_A = args["TT_DATA_A"]
+  TT_DATA_B = args["TT_DATA_B"]
+  TP_API = args["TP_API"]
+  TP_SSR = args["TP_SSR"]
+  TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
+  TP_DIM_A_COLS=args["TP_DIM_A_COLS"]
+  return fn_validate_dim_cols_a(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS)
+
+
+def fn_validate_dim_cols_a(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS):
+  param_dict=fn_update_TP_DIM_A_COLS(TT_DATA_A,  TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS)
+
+  if (TP_DIM_A_COLS%TP_SSR != 0):
+    return isError(f"TP_DIM_A_COLS should be an integer multiple of ssr. Got TP_DIM__ROWS = {TP_DIM_A_COLS}, TP_SSR = {TP_SSR}")
+  else:
+    range_TP_DIM_A_COLS=[param_dict["minimum"], param_dict["maximum"]]
+    return validate_range(range_TP_DIM_A_COLS, "TP_DIM_A_COLS", TP_DIM_A_COLS)
+
+  
+#######################################################
+####### TP_DIM_B_ROWS Updater and Validator ###########
+#######################################################
+def update_TP_DIM_B_ROWS(args):
+  TT_DATA_A = args["TT_DATA_A"]
+  TT_DATA_B = args["TT_DATA_B"]
+  TP_API = args["TP_API"]
+  TP_SSR = args["TP_SSR"]
+  TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
+  TP_DIM_A_COLS=args["TP_DIM_A_COLS"]
+
+  if args["TP_DIM_B_ROWS"] : TP_DIM_B_ROWS=args["TP_DIM_B_ROWS"]
+  else: TP_DIM_B_ROWS=0
+
+  return fn_update_TP_DIM_B_ROWS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS)
+
+def fn_update_TP_DIM_B_ROWS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS):
+  VEC_SIZE = int(256/8/fn_size_by_byte(TT_DATA_B))
+
+  param_dict={
+  "name":"TP_DIM_B_ROWS",
+  "minimum" : VEC_SIZE
+  }
+
+  TP_DIM_B_COLS = 1
+  if TP_API==0:
+     #minimum possible values
+    TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(fn_det_out_type(TT_DATA_A, TT_DATA_B))
+    TP_DIM_A_COLS_SSR = TP_DIM_A_COLS / TP_SSR
+    TP_DIM_B_ROWS_max= TP_WINDOW_VSIZE_max_size / (TP_DIM_A_ROWS * TP_DIM_A_COLS_SSR * TP_DIM_B_COLS)
+  elif TP_API==1:
+    TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(TT_DATA_B)
+    TP_DIM_B_ROWS_max= TP_WINDOW_VSIZE_max_size / (TP_DIM_B_COLS)
+
+  param_dict.update({"maximum" : int(FLOOR(TP_DIM_B_ROWS_max, VEC_SIZE))})
+
+  if TP_DIM_B_ROWS != 0 and (TP_DIM_B_ROWS % VEC_SIZE != 0):
+    TP_DIM_B_ROWS_act= round(TP_DIM_B_ROWS / VEC_SIZE) * VEC_SIZE
+    if TP_DIM_B_ROWS_act < VEC_SIZE:
+      TP_DIM_B_ROWS_act = VEC_SIZE
+    if (TP_DIM_B_ROWS_act > param_dict["maximum"]):
+      TP_DIM_B_ROWS_act = param_dict["maximum"]
+    param_dict.update({"actual" : int(TP_DIM_B_ROWS_act)})
+
+  return param_dict
+
+
+def validate_TP_DIM_B_ROWS(args):
+  TT_DATA_A = args["TT_DATA_A"]
+  TT_DATA_B = args["TT_DATA_B"]
+  TP_API = args["TP_API"]
+  TP_SSR = args["TP_SSR"]
+  TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
+  TP_DIM_A_COLS=args["TP_DIM_A_COLS"]
+  TP_DIM_B_ROWS=args["TP_DIM_B_ROWS"]
+  return fn_validate_dim_b_rows(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS)
+
+
+def fn_validate_dim_b_rows(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS):
+  param_dict = fn_update_TP_DIM_B_ROWS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS)
+
+  VEC_SIZE = int(256/8/fn_size_by_byte(TT_DATA_B))
+
+  if (TP_DIM_B_ROWS % VEC_SIZE):
+    return isError(f"TP_DIM_B_ROWS should be an integer multiple of vector size. Vector size for the data type {TT_DATA_B} is {VEC_SIZE}. Got TP_DIM__ROWS = {TP_DIM_B_ROWS}")
+  else:
+    range_TP_DIM_B_ROWS=[param_dict["minimum"], param_dict["maximum"]]
+    return validate_range(range_TP_DIM_B_ROWS, "TP_DIM_B_ROWS", TP_DIM_B_ROWS)
+    
+#######################################################
+####### TP_DIM_B_COLS Updater and Validator ###########
+#######################################################
+
+def update_TP_DIM_B_COLS(args):
+  TT_DATA_A = args["TT_DATA_A"]
+  TT_DATA_B = args["TT_DATA_B"]
+  TP_API = args["TP_API"]
+  TP_SSR = args["TP_SSR"]
+  TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
+  TP_DIM_A_COLS=args["TP_DIM_A_COLS"]
+  TP_DIM_B_ROWS=args["TP_DIM_B_ROWS"]
+
+  return fn_update_TP_DIM_B_COLS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS)
+
+def fn_update_TP_DIM_B_COLS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS):
+  param_dict={
+    "name" : "TP_DIM_B_COLS",
+    "minimum" : 1
+  }
+
+  if TP_API==0:
+    TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(fn_det_out_type(TT_DATA_A, TT_DATA_B))
+    TP_DIM_A_COLS_SSR = TP_DIM_A_COLS / TP_SSR
+    TP_DIM_B_COLS_max=TP_WINDOW_VSIZE_max_size/(TP_DIM_A_ROWS * TP_DIM_A_COLS_SSR * TP_DIM_B_ROWS)
+  elif TP_API==1:
+    TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(TT_DATA_B)
+    TP_DIM_B_COLS_max=TP_WINDOW_VSIZE_max_size/TP_DIM_B_ROWS
+
+  param_dict.update({"maximum" : int(TP_DIM_B_COLS_max)})
+  return param_dict
+
+def validate_TP_DIM_B_COLS(args):
+  TT_DATA_A = args["TT_DATA_A"]
+  TT_DATA_B = args["TT_DATA_B"]
+  TP_API = args["TP_API"]
+  TP_SSR = args["TP_SSR"]
+  TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
+  TP_DIM_A_COLS=args["TP_DIM_A_COLS"]
+  TP_DIM_B_ROWS=args["TP_DIM_B_ROWS"]
+  TP_DIM_B_COLS=args["TP_DIM_B_COLS"]
+  return fn_validate_dim_cols_b(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS)
+
+def fn_validate_dim_cols_b(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS):
+  param_dict = fn_update_TP_DIM_B_COLS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS)
+  range_TP_DIM_B_ROWS=[param_dict["minimum"], param_dict["maximum"]]
+  return validate_range(range_TP_DIM_B_ROWS, "TP_DIM_B_COLS", TP_DIM_B_COLS)
+
+#######################################################
+####### TP_NUM_FRAMES Updater and Validator ###########
+#######################################################  
+def update_TP_NUM_FRAMES(args):
+  TT_DATA_A = args["TT_DATA_A"]
+  TT_DATA_B = args["TT_DATA_B"]
+  TP_API = args["TP_API"]
+  TP_SSR = args["TP_SSR"]
+  TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
+  TP_DIM_A_COLS = args["TP_DIM_A_COLS"]
+  TP_DIM_B_ROWS = args["TP_DIM_B_ROWS"]
+  TP_DIM_B_COLS = args["TP_DIM_B_COLS"]
+
+  return fn_update_TP_NUM_FRAMES(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS)
+
+def fn_update_TP_NUM_FRAMES(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS):
+  param_dict={
+    "name" : "TP_NUM_FRAMES",
+    "minimum" : TP_NUM_FRAMES_Min
+  }
+  if TP_API==0:
+    TP_DIM_A_COLS_SSR = TP_DIM_A_COLS / TP_SSR
+    OUT_FRAME_SIZE = TP_DIM_A_ROWS * TP_DIM_A_COLS_SSR * TP_DIM_B_ROWS * TP_DIM_B_COLS
+    OUT_FRAME_SIZE_BYTES = OUT_FRAME_SIZE * fn_size_by_byte(fn_det_out_type(TT_DATA_A, TT_DATA_B))
+    TP_NUM_FRAMES_max = TP_WINDOW_VSIZE_max / OUT_FRAME_SIZE_BYTES
+  elif TP_API==1:
+    TP_WINDOW_VSIZE_max_size_a = TP_WINDOW_VSIZE_max / fn_size_by_byte(TT_DATA_A)
+    TP_NUM_FRAMES_max1 = TP_WINDOW_VSIZE_max_size_a*TP_SSR/(TP_DIM_A_COLS*TP_DIM_A_ROWS)
+    TP_WINDOW_VSIZE_max_size_b = TP_WINDOW_VSIZE_max / fn_size_by_byte(TT_DATA_B)
+    TP_NUM_FRAMES_max2 = TP_WINDOW_VSIZE_max_size_b/(TP_DIM_B_COLS*TP_DIM_B_ROWS)
+    TP_NUM_FRAMES_max = min(TP_NUM_FRAMES_max1, TP_NUM_FRAMES_max2)
+
+  param_dict.update({"maximum" : int(TP_NUM_FRAMES_max)})
+
+  return param_dict
+
+def validate_TP_NUM_FRAMES(args):
+  TT_DATA_A = args["TT_DATA_A"]
+  TT_DATA_B = args["TT_DATA_B"]
+  TP_API = args["TP_API"]
+  TP_SSR = args["TP_SSR"]
+  TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
+  TP_DIM_A_COLS = args["TP_DIM_A_COLS"]
+  TP_DIM_B_ROWS = args["TP_DIM_B_ROWS"]
+  TP_DIM_B_COLS = args["TP_DIM_B_COLS"]
+  TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
+  return fn_validate_num_frames(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS, TP_NUM_FRAMES)
+
+def fn_validate_num_frames(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS, TP_NUM_FRAMES):
+  param_dict=fn_update_TP_NUM_FRAMES(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS)
+  return validate_range([param_dict["minimum"], param_dict["maximum"]], "TP_NUM_FRAMES", TP_NUM_FRAMES)
+
+#######################################################
+########### TP_SHIFT Updater and Validator ############
+#######################################################  
+
+def update_TP_SHIFT(args):
+  TT_DATA_A = args["TT_DATA_A"]
+  TT_DATA_B = args["TT_DATA_B"]
+  return fn_update_TP_SHIFT(TT_DATA_A, TT_DATA_B)
+
+def fn_update_TP_SHIFT(TT_DATA_A, TT_DATA_B):
+  out_t=fn_det_out_type(TT_DATA_A, TT_DATA_B)
+  range_TP_SHIFT=fn_range_shift(out_t)
+
+  param_dict={
+    "name" : "TP_SHIFT",
+    "minimum" : range_TP_SHIFT[0],
+    "maximum" : range_TP_SHIFT[1]
+  }
+  return param_dict
+
+
+def validate_TP_SHIFT(args):
+    TT_DATA_A = args["TT_DATA_A"]
+    TT_DATA_B = args["TT_DATA_B"]
+    TP_SHIFT = args["TP_SHIFT"]
+    return fn_validate_shift_val(TT_DATA_A, TT_DATA_B, TP_SHIFT)
+
+def fn_validate_shift_val(TT_DATA_A, TT_DATA_B, TP_SHIFT):
+  param_dict=fn_update_TP_SHIFT(TT_DATA_A, TT_DATA_B)
+  range_TP_SHIFT=[param_dict["minimum"], param_dict["maximum"]]
+
+  return validate_range(range_TP_SHIFT, "TP_SHIFT", TP_SHIFT)
+    
+
+#######################################################
+############ TP_RND Updater and Validator #############
+#######################################################  
+def update_TP_RND(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_update_TP_RND(AIE_VARIANT)
+
+def fn_update_TP_RND(AIE_VARIANT):
+  legal_set_TP_RND=fn_get_legalSet_roundMode(AIE_VARIANT)
+  param_dict={
+    "name" : "TP_RND",
+    "enum" : legal_set_TP_RND
+  }
+  return param_dict
+
+def validate_TP_RND(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TP_RND = args["TP_RND"]
+    return fn_validate_roundMode(TP_RND, AIE_VARIANT)
+
+
+#######################################################
+############ TP_SAT Updater and Validator #############
+#######################################################  
+def update_TP_SAT(args):
+  legal_set_sat=fn_legal_set_sat()
+  param_dict={
+    "name" : "TP_SAT",
+    "enum" : legal_set_sat
+  }
+  return param_dict
+                               
+def validate_TP_SAT(args):
+  TP_SAT = args["TP_SAT"]
+  return fn_validate_satMode(TP_SAT)
+
+
+
+# helper functions
+
 def fn_det_out_type(TT_DATA_A, TT_DATA_B):
   if (TT_DATA_A=="int16" and TT_DATA_B=="int16"):
     return "int16"
@@ -77,212 +574,6 @@ def fn_det_out_type(TT_DATA_A, TT_DATA_B):
   if (TT_DATA_A=="cfloat" or TT_DATA_B=="cfloat"):
     return "cfloat"
 
-
-# validation function    
-def fn_validate_data_type(TT_DATA):
-  if ((TT_DATA=="cint16") or (TT_DATA=="cint32") or (TT_DATA=="int16") or (TT_DATA=="int32") or (TT_DATA=="cfloat") or (TT_DATA=="float")):
-    return isValid
-  else:
-    return isError("Data type must be the atomic type of data")
-
-def fn_validate_dim_cols(TP_DIM, TT_DATA, TP_API):
-  # TP_DIM_COLS_Max = 256/8/fn_size_by_byte(TT_DATA) # only applicable when TP_API=0
-  # if (TP_API==0):
-  #   if TP_DIM < TP_DIM_COLS_Min or TP_DIM > TP_DIM_COLS_Max :
-  #       return isError(f"Minimum and maximum value for TP_DIM_COLS is {TP_DIM_COLS_Min} and {TP_DIM_COLS_Max} respectively, but got {TP_DIM}. Consider using stream input interface.")
-  return isValid
-
-def fn_validate_dim_a_rows(TP_DIM, TT_DATA, VEC_SIZE):
-  if (TP_DIM % VEC_SIZE):
-    return isError(f"TP_DIM_A_ROWS should be an integer multiple of vector size. Vector size for the data type {TT_DATA} is {VEC_SIZE}. Got TP_DIM_A_ROWS = {TP_DIM}")
-  return isValid
-
-def fn_validate_dim_b_rows(TP_DIM, TT_DATA, VEC_SIZE):
-  if (TP_DIM % VEC_SIZE):
-    return isError(f"TP_DIM_B_ROWS should be an integer multiple of vector size. Vector size for the data type {TT_DATA} is {VEC_SIZE}. Got TP_DIM__ROWS = {TP_DIM}")
-  return isValid
-
-def fn_validate_num_frames(OUT_FRAME_SIZE, TT_DATA_A, TT_DATA_B, TP_API, TP_NUM_FRAMES):
-  OUT_FRAME_SIZE_BYTES = OUT_FRAME_SIZE * fn_size_by_byte(fn_det_out_type(TT_DATA_A, TT_DATA_B))
-  TP_NUM_FRAMES_Max = TP_WINDOW_VSIZE_max / OUT_FRAME_SIZE_BYTES
-  if (TP_API==0):
-    if TP_NUM_FRAMES < TP_NUM_FRAMES_Min or TP_NUM_FRAMES > TP_NUM_FRAMES_Max :
-      return isError(f"For TP_API = {TP_API}, TT_DATA_A = {TT_DATA_A} and TT_DATA_B = {TT_DATA_B}, the min and max values of TP_NUM_FRAMES are {TP_NUM_FRAMES_Min} and {TP_NUM_FRAMES_Max}, but got {TP_NUM_FRAMES}. Size of the passed single frame is {OUT_FRAME_SIZE_BYTES} which exceeds the available data memory.")
-  return isValid
-
-def fn_validate_api_val(TP_API):
-  if TP_API != 0 and TP_API != 1:
-    return isError("TP_API must be 0 (windowed in stream out) or 1 (window in streaming out")
-  else:
-    return isValid
-
-def fn_validate_aie_variant(AIE_VARIANT):
-  if ((AIE_VARIANT==1) or (AIE_VARIANT==2)):
-    return isValid
-  else:
-    return isError("AIE_VARIANT must be set to 0 (AIE) or 1 (AIE-ML).")
-
-def fn_validate_shift_val(TT_DATA_A, TT_DATA_B, TP_SHIFT):
-  TT_OUT= fn_det_out_type(TT_DATA_A, TT_DATA_B)
-  if TP_SHIFT < TP_SHIFT_min or TP_SHIFT > TP_SHIFT_max :
-    return isError(f"Minimum and maximum value for Shift is {TP_SHIFT_min} and {TP_SHIFT_max},respectively, but got {TP_SHIFT}.")
-  if (TT_OUT=="cfloat" or TT_OUT=="float" ):
-    if (TP_SHIFT==0) :
-      return isValid
-    else:
-      return isError("Shift must be 0 for float/cfloat data type")
-    
-  if (TT_OUT=="cint32"):
-    if (TP_SHIFT>=0 and TP_SHIFT<61) :
-      return isValid
-    else:
-      return isError("Shift must be in range 0 to 61 for cint32 out data type")
-    
-  if (TT_OUT=="cint16"):
-    if (TP_SHIFT>=0 and TP_SHIFT<32) :
-      return isValid
-    else:
-      return isError("Shift must be in range 0 to 31 for cint16 out data type")
-    
-  if (TT_OUT=="int16"):
-    if (TP_SHIFT>=0 and TP_SHIFT<16) :
-      return isValid
-    else:
-      return isError("Shift must be in range 0 to 15 for int16 out data type")
-    
-  if (TT_OUT=="int32"):
-    if (TP_SHIFT>=0 and TP_SHIFT<32) :
-      return isValid
-    else:
-      return isError("Shift must be in range 0 to 31 for int32 out data type")
-    
-def fn_validate_ssr(TP_DIM_A_COLS, TP_SSR):
-  if TP_SSR < TP_SSR_min or TP_SSR > TP_SSR_max:
-    return isError(f"Minimum and maximum value for SSR is {TP_SSR_min} and {TP_SSR_max},respectively, but got {TP_SSR}.")
-  return isValid
-  if (TP_DIM_A_COLS % TP_SSR == 0):
-    return isValid
-  else:
-    return isError("ERROR: Invalid SSR value. TP_DIM_A_COLS must be divisible by TP_SSR.")
-
-#### validation APIs ####
-def validate_TT_DATA_A(args):
-    TT_DATA = args["TT_DATA_A"]
-    return fn_validate_data_type(TT_DATA)
-
-def validate_TT_DATA_B(args):
-    TT_DATA = args["TT_DATA_B"]
-    return fn_validate_data_type(TT_DATA)
-
-def validate_TP_DIM_A_ROWS(args):
-    TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
-    TT_DATA_A = args["TT_DATA_A"]
-    VEC_SIZE = 256/8/fn_size_by_byte(TT_DATA_A)
-    return fn_validate_dim_a_rows(TP_DIM_A_ROWS, TT_DATA_A, VEC_SIZE)
-
-def validate_TP_DIM_B_ROWS(args):
-    TP_DIM_B_ROWS = args["TP_DIM_B_ROWS"]
-    TT_DATA_B = args["TT_DATA_B"]
-    VEC_SIZE = 256/8/fn_size_by_byte(TT_DATA_B)
-    return fn_validate_dim_b_rows(TP_DIM_B_ROWS, TT_DATA_B, VEC_SIZE)
-
-def validate_TP_DIM_A_COLS(args):
-    TP_DIM_A_COLS = args["TP_DIM_A_COLS"]
-    TT_DATA_A = args["TT_DATA_A"]
-    TP_API = args["TP_API"]
-    return fn_validate_dim_cols(TP_DIM_A_COLS, TT_DATA_A, TP_API)
-
-def validate_TP_DIM_B_COLS(args):
-    TP_DIM_B_COLS = args["TP_DIM_B_COLS"]
-    TT_DATA_B = args["TT_DATA_B"]
-    TP_API = args["TP_API"]
-    return fn_validate_dim_cols(TP_DIM_B_COLS, TT_DATA_B, TP_API)
-
-
-def validate_TP_NUM_FRAMES(args):
-    TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
-    TT_DATA_A = args["TT_DATA_A"]
-    TT_DATA_B = args["TT_DATA_B"]
-    TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
-    TP_DIM_A_COLS = args["TP_DIM_A_COLS"]
-    TP_DIM_B_ROWS = args["TP_DIM_B_ROWS"]
-    TP_DIM_B_COLS = args["TP_DIM_B_COLS"]
-    TP_API = args["TP_API"]
-    TP_SSR = args["TP_SSR"]
-    TP_DIM_A_COLS_SSR = TP_DIM_A_COLS / TP_SSR
-    OUT_FRAME_SIZE = TP_DIM_A_ROWS * TP_DIM_A_COLS_SSR * TP_DIM_B_ROWS * TP_DIM_B_COLS
-    OUT_WINDOW_SIZE = OUT_FRAME_SIZE
-    return fn_validate_num_frames(OUT_FRAME_SIZE, TT_DATA_A, TT_DATA_B, TP_API, TP_NUM_FRAMES)
-
-def validate_TP_SHIFT(args):
-    TT_DATA_A = args["TT_DATA_A"]
-    TT_DATA_B = args["TT_DATA_B"]
-    TP_SHIFT = args["TP_SHIFT"]
-    return fn_validate_shift_val(TT_DATA_A, TT_DATA_B, TP_SHIFT)
-
-def validate_TP_API(args):
-    TP_API = args["TP_API"]
-    return fn_validate_api_val(TP_API)
-
-def validate_TP_SSR(args):
-    TP_DIM_A_COLS = args["TP_DIM_A_COLS"]
-    TP_SSR = args["TP_SSR"]
-    return fn_validate_ssr(TP_DIM_A_COLS, TP_SSR)
-
-def validate_TP_RND(args):
-    TP_RND = args["TP_RND"]
-    return fn_validate_roundMode(TP_RND, 1)
-
-def validate_TP_SAT(args):
-    TP_SAT = args["TP_SAT"]
-    return fn_validate_satMode(TP_SAT)
-
-def validate_AIE_VARIANT(args):
-    AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_validate_aie_variant(AIE_VARIANT)
-
-
-# Example of updater.
-#
-# Updater are functions to help GUI to hint user on parameter setting with already given parameters.
-# The return object will provide "value" which will be set in the wizard as the dependent parameter is being set.
-# The rest of keys are similar to paramster definition, but with candidates of enum or range values refined
-# based on previously set values.
-#
-# An updator function always return a dictionary,
-# including key "value" for automatically filled default in GUI as dependent parameters have been set, and
-# other keys for overriding the definition of parameter.
-#
-# For example, if a parameter has definition in JSON as
-#  { "name": "foo", "type": "typename", "enum": ["int", "float", "double"] }
-# And the updator returns
-#  { "value": "int", "enum": ["int", "float"] }
-# The GUI would show "int" as default and make "int" and "float" selectable candidates, while disabling "double".
-#
-# If with given combination, no valid value can be set for the parameter being updated, the upater function
-# should set "value" to None, to indicate an error and provide error message via "err_message".
-# For example
-#  { "value": None, "err_message": "With TT_DATA as 'int' there is no valid option for TT_COEFF" }
-#
-# In this example, the following is the updater for TT_COEF, with TT_DATA as the dependent parameter.
-# When GUI generates a wizard, TT_DATA should be required first, as it shows up in parameter list first.
-# Once user has provided value for TT_DATA, this function will be called and set the value of TT_COEFF.
-# Meanwhile, the candidate shown in wizard based on enum will also be updated.
-#
-
-#### updater APIs ####
-
-
-def update_shift(TT_DATA_A, TT_DATA_B):
-  valid_shift_default = {"cint16": 14, "cint32": 30, "int16": 14, "int32": 30, "cfloat": 0, "float": 0}
-  valid_shift_range = {"cint16": 32, "cint32": 61, "int16": 16, "int32": 32, "cfloat": 0, "float": 0}
-  TT_OUT=fn_det_out_type(TT_DATA_A, TT_DATA_B)
-  return {"value": valid_shift_default[TT_OUT], "range": range(valid_shift_range[TT_OUT])}
-
-def update_TP_SHIFT(args):
-  TT_DATA_A = args["TT_DATA_A"]
-  TT_DATA_B = args["TT_DATA_B"]
-  return update_shift(TT_DATA_A, TT_DATA_B)
 
 #### port ####
 def get_port_info(portname, dir, dataType, dim, numFrames, apiType, vectorLength):

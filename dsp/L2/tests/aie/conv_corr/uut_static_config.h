@@ -14,5 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define INPUT_SAMPLES BLOCK_SIZE* NITER
-#define OUTPUT_SAMPLES BLOCK_SIZE* NITER
+#define INPUT_SAMPLES BLOCK_SIZE* NUM_FRAMES* NITER
+#define OUTPUT_SAMPLES BLOCK_SIZE* NUM_FRAMES* NITER
+
+#ifdef USING_UUT
+#define REF_F_LEN F_LEN
+#else
+#if (API_PORT == 1)
+#define REF_F_LEN (F_LEN * NITER)
+#else
+#define REF_F_LEN F_LEN
+#endif
+#endif

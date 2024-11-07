@@ -1,13 +1,209 @@
 import aie_common as com
 from aie_common import isError,isValid
 
+#######################################################
+###########AIE_VARIANT Updater and Validator ##########
+#######################################################
+def update_AIE_VARIANT(args):
+  return fn_update_AIE_VARIANT()
+
+def fn_update_AIE_VARIANT():
+  legal_set_aie=[1,2]
+  param_dict={
+    "name" : "AIE_VARIANT",
+    "enum" : legal_set_aie
+   }
+  return param_dict
+
+def validate_AIE_VARIANT(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_validate_aie_variant(AIE_VARIANT)
+
+def fn_validate_aie_variant(AIE_VARIANT):
+  param_dict=fn_update_AIE_VARIANT()
+  return(com.validate_legal_set(param_dict["enum"], "AIE_VARIANT", AIE_VARIANT))
+
+#######################################################
+############# TT_DATA Updater and Validator ###########
+#######################################################
+def update_TT_DATA(args):
+  return fn_update_TT_DATA()
+
+def fn_update_TT_DATA():
+  legal_set_tt_data=["int16", "int32", "float", "cint16", "cint32", "cfloat"]
+  param_dict={
+    "name" : "TT_DATA",
+    "enum" : legal_set_tt_data
+   }
+  return param_dict
+
+def validate_TT_DATA(args):
+  TT_DATA=args["TT_DATA"]
+  return fn_validate_TT_DATA(TT_DATA)
+
+def fn_validate_TT_DATA(TT_DATA):
+  legal_set_tt_data=["int16", "int32", "float", "cint16", "cint32", "cfloat"]
+  return(com.validate_legal_set(legal_set_tt_data, "TT_DATA", TT_DATA))
+
+
+#######################################################
+############# TP_IN_API Updater and Validator #########
+#######################################################
+def update_TP_IN_API(args):
+  return fn_update_TP_IN_API()
+
+def fn_update_TP_IN_API():
+  legal_set_TP_IN_API=[0,1]
+  param_dict={
+    "name" : "TP_IN_API",
+    "enum" : legal_set_TP_IN_API
+   }
+  return param_dict
+
+def validate_TP_IN_API(args):
+  TP_IN_API=args["TP_IN_API"]
+  return fn_validate_TP_IN_API(TP_IN_API)
+
+def fn_validate_TP_IN_API(TP_IN_API):
+  legal_set_TP_IN_API=[0, 1]
+  return(com.validate_legal_set(legal_set_TP_IN_API, "TP_IN_API", TP_IN_API))
+
+#######################################################
+############# TP_OUT_API Updater and Validator ########
+#######################################################
+def update_TP_OUT_API(args):
+  return fn_update_TP_OUT_API()
+
+def fn_update_TP_OUT_API():
+  legal_set_TP_OUT_API=[0,1]
+  param_dict={
+    "name" : "TP_OUT_API",
+    "enum" : legal_set_TP_OUT_API
+   }
+  return param_dict
+
+def validate_TP_OUT_API(args):
+  TP_OUT_API=args["TP_OUT_API"]
+  return fn_validate_TP_OUT_API(TP_OUT_API)
+
+def fn_validate_TP_OUT_API(TP_OUT_API):
+  legal_set_TP_OUT_API=[0, 1]
+  return(com.validate_legal_set(legal_set_TP_OUT_API, "TP_OUT_API", TP_OUT_API))
+
+#######################################################
+############# TP_NUM_INPUTS Updater and Validator #####
+#######################################################
+def update_TP_NUM_INPUTS(args):
+  TP_IN_API=args["TP_IN_API"]
+  return fn_update_TP_NUM_INPUTS(TP_IN_API)
+
+def fn_update_TP_NUM_INPUTS(TP_IN_API):
+  legal_set_TP_NUM_INPUTS=[1,2]
+  if TP_IN_API==0:
+    legal_set_TP_NUM_INPUTS=[1]
+  param_dict={
+    "name" : "TP_NUM_INPUTSs",
+    "enum" : legal_set_TP_NUM_INPUTS
+   }
+  return param_dict
+
 def validate_TP_NUM_INPUTS(args):
-  TP_NUM_INPUTS = args["TP_NUM_INPUTS"]
-  TP_IN_API = args["TP_IN_API"]
-  if (TP_IN_API == 0 and TP_NUM_INPUTS > 1):
-    return isError(f"Only one input is supported if using an iobuffer. Got TP_NUM_INPUTS {TP_NUM_INPUTS}")
-  
-  return isValid
+  TP_IN_API=args["TP_IN_API"]
+  TP_NUM_INPUTS=args["TP_NUM_INPUTS"]
+  return fn_validate_TP_NUM_INPUTS(TP_IN_API, TP_NUM_INPUTS)
+
+def fn_validate_TP_NUM_INPUTS(TP_IN_API, TP_NUM_INPUTS):
+  param_dict=fn_update_TP_NUM_INPUTS(TP_IN_API)
+  return(com.validate_legal_set(param_dict["enum"], "TP_NUM_INPUTS", TP_NUM_INPUTS))
+
+#######################################################
+########### TP_WINDOW_VSIZE Updater and Validator #####
+#######################################################
+def update_TP_WINDOW_VSIZE(args):
+  return fn_update_TP_WINDOW_VSIZE()
+
+def fn_update_TP_WINDOW_VSIZE():
+  param_dict={
+    "name" : "TP_WINDOW_VSIZE",
+    "minimum" : 4,
+    "maximum" : 4096
+   }
+  return param_dict
+
+def validate_TP_WINDOW_VSIZE(args):
+  TP_WINDOW_VSIZE=args["TP_WINDOW_VSIZE"]
+  return fn_validate_TP_WINDOW_VSIZE(TP_WINDOW_VSIZE)
+
+def fn_validate_TP_WINDOW_VSIZE(TP_WINDOW_VSIZE):
+  range_TP_WINDOW_VSIZE=[4, 4096]
+  return(com.validate_range(range_TP_WINDOW_VSIZE, "TP_WINDOW_VSIZE", TP_WINDOW_VSIZE))
+
+#######################################################
+###### TP_NUM_OUTPUT_CLONES Updater and Validator #####
+#######################################################
+def update_TP_NUM_OUTPUT_CLONES(args):
+  return fn_update_TP_NUM_OUTPUT_CLONES()
+
+def fn_update_TP_NUM_OUTPUT_CLONES():
+  param_dict={
+    "name" : "TP_NUM_OUTPUT_CLONES",
+    "minimum" : 1,
+    "maximum" : 4
+   }
+  return param_dict
+
+def validate_TP_NUM_OUTPUT_CLONES(args):
+  TP_NUM_OUTPUT_CLONES=args["TP_NUM_OUTPUT_CLONES"]
+  return fn_validate_TP_NUM_OUTPUT_CLONES(TP_NUM_OUTPUT_CLONES)
+
+def fn_validate_TP_NUM_OUTPUT_CLONES(TP_NUM_OUTPUT_CLONES):
+  range_TP_NUM_OUTPUT_CLONES=[1, 4]
+  return(com.validate_range(range_TP_NUM_OUTPUT_CLONES, "TP_NUM_OUTPUT_CLONES", TP_NUM_OUTPUT_CLONES))
+
+#######################################################
+###### TP_PATTERN Updater and Validator ###############
+#######################################################
+def update_TP_PATTERN(args):
+  return fn_update_TP_PATTERN()
+
+def fn_update_TP_PATTERN():
+  param_dict={
+    "name" : "TP_PATTERN",
+    "minimum" : 0,
+    "maximum" : 2
+   }
+  return param_dict
+
+def validate_TP_PATTERN(args):
+  TP_PATTERN=args["TP_PATTERN"]
+  return fn_validate_TP_PATTERN(TP_PATTERN)
+
+def fn_validate_TP_PATTERN(TP_PATTERN):
+  range_TP_PATTERN=[0, 2]
+  return(com.validate_range(range_TP_PATTERN, "TP_PATTERN", TP_PATTERN))
+
+#######################################################
+###### TP_HEADER_BYTES Updater and Validator ##########
+#######################################################
+def update_TP_HEADER_BYTES(args):
+  return fn_update_TP_HEADER_BYTES()
+
+def fn_update_TP_HEADER_BYTES():
+  param_dict={
+    "name" : "TP_HEADER_BYTES",
+    "minimum" : 0,
+    "maximum" : 32
+   }
+  return param_dict
+
+def validate_TP_HEADER_BYTES(args):
+  TP_HEADER_BYTES=args["TP_HEADER_BYTES"]
+  return fn_validate_TP_HEADER_BYTES(TP_HEADER_BYTES)
+
+def fn_validate_TP_HEADER_BYTES(TP_HEADER_BYTES):
+  range_TP_HEADER_BYTES=[0, 32]
+  return(com.validate_range(range_TP_HEADER_BYTES, "TP_HEADER_BYTES", TP_HEADER_BYTES))
+
 
 def local_sizeof(TT_DATA):
   if TT_DATA == "int16":
@@ -24,7 +220,6 @@ def local_sizeof(TT_DATA):
     return 8
   else:
     return -1
-
 
 
   ######### Graph Generator ############

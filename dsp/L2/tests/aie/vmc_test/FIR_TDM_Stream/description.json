@@ -58,7 +58,7 @@
         "customized_params": {
                 "params": "--aie.Xchess=llvm.xargs=-std=c++2a --aie.Xx86sim=-client=vmc --aie.verbose",
                 "default": {
-                    "GRAPHNAME": "FIR_TDM_Stream_d942dd75",
+                    "GRAPHNAME": "FIR_TDM_Stream_e12d2f03",
                     "VMC_GRAPHDIR": "xmc_aie_lib/$(GRAPHNAME)",
                     "VMC_KERNEL": "vmc_stream_fir_tdm"
                 }
@@ -81,6 +81,9 @@
                 }
             ]
         }
+    ],
+    "associated_files": [
+        "LIB_DIR/L2/meta"
     ],
     "testinfo": {
         "disable": true,

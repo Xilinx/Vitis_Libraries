@@ -3,54 +3,66 @@ from aie_common import *
 import fir_polyphase_decomposer as poly
 from vmc_fir_utils import *
 
-#### VMC validators ####
+def vmc_validate_data_type(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    data_type = args["data_type"]
+    return fn_validate_TT_DATA(AIE_VARIANT, data_type)
+
 def vmc_validate_coeff_type(args):
     data_type = args["data_type"]
     coef_type = args["coef_type"]
     AIE_VARIANT = args["AIE_VARIANT"]
-    standard_checks =  fn_validate_coeff_type(data_type, coef_type)
-    type_check = fn_type_support(data_type, coef_type, AIE_VARIANT)
-    for check in (standard_checks,type_check) :
-        if check["is_valid"] == False :
-            return check
-    return {"is_valid": True}
-
+    return fn_validate_TT_COEFF(AIE_VARIANT, data_type, coef_type)
 
 def vmc_validate_input_window_size(args):
-    input_window_size = args["input_window_size"]
-    data_type = args["data_type"]
-    use_coeff_reload = args["use_coeff_reload"]
-    coef_type = args["coef_type"]
-    coeff = args["coeff"]
-    interpolate_factor = args["interpolate_factor"]
-    api = 1
-    ssr = args["ssr"]
-    fir_length = fn_get_fir_length(args)
-    return fn_validate_input_window_size(data_type, coef_type, fir_length, interpolate_factor, input_window_size, api, ssr)
+    vargs=dict(args)
+    vargs={
+        "TP_INPUT_WINDOW_VSIZE" : args["input_window_size"],
+        "TT_DATA"               : args["data_type"],
+        "TT_COEFF"              : args["coef_type"],
+        "coeff"                 : args["coeff"],
+        "TP_INTERPOLATE_FACTOR" : args["interpolate_factor"],
+        "TP_PARA_INTERP_POLY"   : args["interp_poly"],
+        "TP_API"                : 1,
+        "TP_SSR"                : args["ssr"],
+        "TP_FIR_LEN"            : fn_get_fir_length(args)
+    }
+    return validate_TP_INPUT_WINDOW_VSIZE(vargs)
 
 def vmc_validate_casc_length(args):
-    casc_length = args["casc_length"]
-    return fn_validate_casc_len(casc_length);
+    vargs={
+        "AIE_VARIANT"           : args["AIE_VARIANT"],
+        "TT_DATA"               : args["data_type"],
+        "TT_COEFF"              : args["coef_type"],
+        "TP_USE_COEFF_RELOAD"   : args["use_coeff_reload"],
+        "TP_API"                : 1,
+        "TP_FIR_LEN"            : fn_get_fir_length(args),
+        "TP_SSR"                : args["ssr"],
+        "TP_INTERPOLATE_FACTOR" : args["interpolate_factor"],
+        "TP_DUAL_IP"            : args["dual_ip"],
+        "TP_CASC_LEN"           : args["casc_length"],
+        "TP_PARA_INTERP_POLY"   : args["interp_poly"]
+    }
+    return validate_TP_CASC_LEN(vargs)
 
 def validate_sat_mode(args):
     sat_mode = args["sat_mode"]
-    return fn_validate_satMode(sat_mode);
+    return fn_validate_satMode(sat_mode)
 
+def vmc_validate_fir_length(args):
+    data_type = args["data_type"]
+    coef_type = args["coef_type"]
+    api = 1
+    use_coeff_reload = args["use_coeff_reload"]
+    AIE_VARIANT = args["AIE_VARIANT"]
+    fir_length = args["fir_length"]
+    return fn_validate_TP_FIR_LEN(data_type, coef_type, api, use_coeff_reload, AIE_VARIANT, fir_length)
 
 def vmc_validate_coeff(args):
-    use_coeff_reload = args["use_coeff_reload"]
     coef_type = args["coef_type"]
     coeff = args["coeff"]
-    data_type = args["data_type"]
-    casc_length = args["casc_length"]
-    interpolate_factor = args["interpolate_factor"]
-    ssr = args["ssr"]
-    AIE_VARIANT = args["AIE_VARIANT"]
-    api = 1
-    AIE_VARIANT = args["AIE_VARIANT"]
-    dual_ip = args["dual_ip"]
     fir_length = fn_get_fir_length(args)
-    return fn_validate_fir_len(data_type, coef_type, fir_length, interpolate_factor, casc_length, ssr, api, use_coeff_reload, dual_ip, AIE_VARIANT)
+    return fn_validate_coeff(coef_type, fir_length, coeff)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]
@@ -58,35 +70,43 @@ def vmc_validate_shift_val(args):
     return fn_validate_shift(data_type, shift_val)
 
 def vmc_validate_ssr(args):
-    interpolate_factor = args["interpolate_factor"]
-    interp_poly = args["interp_poly"]
-    ssr = args["ssr"]
-    api = 1
-    AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_validate_interp_ssr(ssr, interpolate_factor, interp_poly, api, AIE_VARIANT)
+    vargs={
+        "AIE_VARIANT"           : args["AIE_VARIANT"],
+        "TT_DATA"               : args["data_type"],
+        "TT_COEFF"              : args["coef_type"],
+        "TP_USE_COEFF_RELOAD"   : args["use_coeff_reload"],
+        "coeff"                 : args["coeff"],
+        "TP_API"                : 1,
+        "TP_FIR_LEN"            : fn_get_fir_length(args),
+        "TP_SSR"                : args["ssr"],
+        "TP_INTERPOLATE_FACTOR" : args["interpolate_factor"],
+        "TP_DUAL_IP"            : args["dual_ip"],
+        "TP_PARA_INTERP_POLY"   : args["interp_poly"]
+    }
+    return validate_TP_SSR(vargs)
 
 def vmc_validate_interp_poly(args):
-  interp_poly = args["interp_poly"]
-  ipol_factor = args["interpolate_factor"]
-  return fn_validate_para_interp_poly(ipol_factor, interp_poly)
+    interp_poly = args["interp_poly"]
+    interpolate_factor = args["interpolate_factor"]
+    return fn_validate_TP_PARA_INTERP_POLY(interpolate_factor, interp_poly)
 
 def vmc_validate_interpolate_factor(args):
     interpolate_factor = args["interpolate_factor"]
+    fir_length = fn_get_fir_length(args)
     AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_validate_interpolate_factor(interpolate_factor, AIE_VARIANT)
+    return fn_validate_TP_INTERPOLATE_FACTOR(fir_length, interpolate_factor, AIE_VARIANT)
 
 def vmc_validate_input_ports(args):
     dual_ip = args["dual_ip"]
-    num_outputs = fn_get_num_outputs(args)
     AIE_VARIANT = args["AIE_VARIANT"]
     api = 1
-    return fn_validate_interp_dual_ip(num_outputs,api, dual_ip, AIE_VARIANT)
+    return fn_validate_TP_DUAL_IP(AIE_VARIANT, api, dual_ip)
 
 def vmc_validate_out_ports(args):
     num_outputs = fn_get_num_outputs(args)
     AIE_VARIANT = args["AIE_VARIANT"]
     api = 1
-    return fn_validate_num_outputs(api, num_outputs, AIE_VARIANT)
+    return fn_validate_TP_NUM_OUTPUTS(AIE_VARIANT, api, num_outputs)
 
 def vmc_validate_rnd_mode(args):
     rnd_mode = args["rnd_mode"]

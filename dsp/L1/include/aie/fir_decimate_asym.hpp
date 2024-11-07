@@ -78,7 +78,7 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN = TP_FIR_LEN,
           unsigned int TP_KERNEL_POSITION = 0,
           unsigned int TP_CASC_LEN = 1,
-          unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_USE_COEFF_RELOAD = 0,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_API = 0,
@@ -326,13 +326,13 @@ class kernelFilterClass {
     // Single vector register gets stored on heap beetween iterations when permute is supported. Multiple registers are
     // used when permute is not supported.
     static constexpr int delaySize = m_kPermuteSupport == 1 ? 32 : 32 * TP_DECIMATE_FACTOR;
-    alignas(32) int delay[delaySize] = {0};
+    alignas(__ALIGN_BYTE_SIZE__) int delay[delaySize] = {0};
     // int doInit = (TP_CASC_LEN == 1 || streamInitNullAccs==0)?0: 1;
     // int doPhaseParallelInit = (TP_CASC_LEN == 1 || streamInitNullAccs==0)?0: 1;
     int doInit = 1;
     // Coefficient Load Size - number of samples in 256-bits
     static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
-    alignas(32) TT_COEFF
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF
         m_rawInTaps[CEIL(TP_COEFF_PHASES_LEN, m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
     bool isUpdateRequired;                                        // Are coefficients sets equal?
 
@@ -389,10 +389,11 @@ class kernelFilterClass {
     // the MAC intrinsic used to eliminate the accidental inclusion of terms beyond the FIR length.
     // Since this zero padding cannot be applied to the class-external coefficient array
     // the supplied taps are copied to an internal array, m_internalTaps, which can be padded.
-    alignas(32) TT_COEFF m_internalTaps[CEIL(TP_FIR_RANGE_LEN, m_kCoeffLoadSize)]; // Filter taps/coefficients
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF
+        m_internalTaps[CEIL(TP_FIR_RANGE_LEN, m_kCoeffLoadSize)]; // Filter taps/coefficients
     static constexpr int tapsArraySize = CEIL(CEIL(TP_FIR_RANGE_LEN, TP_DECIMATE_FACTOR) / TP_DECIMATE_FACTOR,
                                               (256 / 8 / sizeof(TT_COEFF))); // ceil'ed to 256-bits
-    alignas(32) TT_COEFF m_internalTaps2[TP_DECIMATE_FACTOR][tapsArraySize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF m_internalTaps2[TP_DECIMATE_FACTOR][tapsArraySize];
 
     // Filter implementation functions
     void filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
@@ -564,7 +565,7 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_USE_COEFF_RELOAD, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_DUAL_IP,
           unsigned int TP_API,

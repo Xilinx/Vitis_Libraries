@@ -30,10 +30,10 @@ PARAM_MAP = DATA_A $(DATA_A) DATA_B $(DATA_B) DIM_A $(DIM_A) DIM_B $(DIM_B) DIM_
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 
 $(HELPER):
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(WINDOW_VSIZE_A) $(NITER) 0 $(STIM_TYPE_A) 0 0 $(DATA_A) 0 1 ;\
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(WINDOW_VSIZE_B) $(NITER) 0 $(STIM_TYPE_B) 0 0 $(DATA_B) 0 1 ;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -f $(LOC_INPUT_FILE_A) --rows $(DIM_A) --cols $(DIM_B) --ssrSplit $(UUT_SSR) --casc $(CASC_LEN) --split -t $(DATA_A) --colMajor $(DIM_A_LEADING) ;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -f $(LOC_INPUT_FILE_B) --rows 1 --cols $(DIM_B) --ssrClone $(UUT_SSR) --casc $(CASC_LEN) --split -t $(DATA_B) ;\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(WINDOW_VSIZE_A) $(NITER) 0 $(STIM_TYPE_A) 0 0 $(DATA_A) 0 1 0 0 0 0 0 64;\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(WINDOW_VSIZE_B) $(NITER) 0 $(STIM_TYPE_B) 0 0 $(DATA_B) 0 1 0 0 0 0 0 64;\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -f $(LOC_INPUT_FILE_A) --rows $(DIM_A) --cols $(DIM_B) --ssrSplit $(UUT_SSR) --casc $(CASC_LEN) --split -t $(DATA_A) --colMajor $(DIM_A_LEADING) --plioWidth 64;\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -f $(LOC_INPUT_FILE_B) --rows 1 --cols $(DIM_B) --ssrClone $(UUT_SSR) --casc $(CASC_LEN) --split -t $(DATA_B) --plioWidth 64 ;\
 	UUT_KERNEL=matrix_vector_mul_ref UUT_SIM_FILE=./data/ref_output.txt make run TARGET=x86sim TAG=REF ;\
 	make cleanall
 
@@ -61,12 +61,9 @@ prep_aie_out:
 		grep -ve '[XT]' $(HELPER_CUR_DIR)/aiesimulator_output/data/$$n > $(HELPER_CUR_DIR)/data/$$n;\
 	done
 
-get_diff: prep_x86_out prep_aie_out
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -f ./data/uut_output.txt --rows $(DIM_A) --cols 1 --ssrSplit $(UUT_SSR) --casc 1 --zip -t $(DATA_A) -findOutType $(DATA_B) -n $(NITER) 
+get_diff:
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -f ./data/uut_output.txt --rows $(DIM_A) --cols 1 --ssrSplit $(UUT_SSR) --casc 1 --zip -t $(DATA_A) -findOutType $(DATA_B) -n $(NITER) --plioWidth 64
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)
-
-get_theoretical_min:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_mtx_theoretical_min.tcl $(DATA_A) $(DATA_B) $(WINDOW_VSIZE_A) $(CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL)
 
 create_config:
 	echo $(STATUS_FILE)

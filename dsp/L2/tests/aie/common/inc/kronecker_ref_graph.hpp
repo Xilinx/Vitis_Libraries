@@ -48,13 +48,13 @@ template <typename TT_DATA_A,
           unsigned int TP_SAT = 1>
 class kronecker_ref_graph : public graph {
    public:
-    using TT_OUT = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
     static constexpr int sizeMatA = TP_DIM_A_ROWS * TP_DIM_A_COLS;
     static constexpr int sizeMatB = TP_DIM_B_ROWS * TP_DIM_B_COLS;
     static constexpr int sizeMatOut = sizeMatA * sizeMatB;
     static constexpr int kWindowVsizeA = (sizeMatA * TP_NUM_FRAMES);
     static constexpr int kWindowVsizeB = (sizeMatB * TP_NUM_FRAMES);
-    static constexpr int outVecSize = 256 / 8 / sizeof(TT_OUT);
+    static constexpr int outVecSize = 256 / 8 / sizeof(out_t);
     static constexpr int kWindowVsizeOut = CEIL((sizeMatOut * TP_NUM_FRAMES), outVecSize);
 
     port<input> inA[1];

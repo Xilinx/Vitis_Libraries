@@ -104,9 +104,9 @@ create_input:
 	@echo helper.mk stage:	create_input
 	@echo NUM_PORTS $(NUM_PORTS)
 	@echo INPUT_FILE $(INPUT_FILE)
-	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_POINT_SIZE) $(DATA_TYPE) $(API_IO) 1 0 ;\
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_POINT_SIZE) $(DATA_TYPE) $(API_IO) 1 0 ;\
-    perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_PORTS) --split --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) ;\
+	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_POINT_SIZE) $(DATA_TYPE) $(API_IO) 1 0 0 0 0 0 64 ;\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_POINT_SIZE) $(DATA_TYPE) $(API_IO) 1 0 0 0 0 0 64 ;\
+    perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_PORTS) --split --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) --plioWidth 64 ;\
 	echo Input ready
 
 sim_ref:
@@ -129,19 +129,15 @@ prep_aie_out:
 		grep -ve '[XT]' $(HELPER_CUR_DIR)/aiesimulator_output/data/$$n > $(HELPER_CUR_DIR)/data/$$n;\
 	done
 
-get_diff: prep_x86_out prep_aie_out
-	@echo helper.mk stage:	check_op_ref
-	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) ;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) ;\
+get_diff:
+	@echo helper.mk stage:	get_diff
+	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) --plioWidth 64 ;\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) --plioWidth 64 ;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)
 
 get_status:
 	@echo helper.mk stage:	get_status
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
-
-get_qor:
-	@echo helper.mk stage:	get_qor
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_wgt_theoretical_min.tcl $(DATA_TYPE) $(WINDOW_VSIZE) $(STATUS_FILE) $(UUT_KERNEL) $(API_IO) $(API_IO) $(NUM_PORTS) $(NUM_PORTS)
 
 get_latency:
 	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)

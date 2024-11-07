@@ -29,16 +29,10 @@ using namespace adf;
 using namespace xf::dsp::aie::widget::api_cast;
 using namespace xf::dsp::aie::fft::r2comb;
 
-// Note on heap. The FFT twiddles and internal scratch memories can be handled by the graph scope mechanism which allows
-// the use of adjacent tile's memory, hence alleviating the 32kB memory limit.
-// Without the graph scope mechanism, heap can be set explicitly, or set automatically using aiecompiler switch
-// --xlopt=1
-// The following #defines allow control over which mechanisms is used, though this must be done in conjunction with the
-// Makefile
-#ifndef __X86SIM__
+// Use Graph scoped buffer definitions for both haie and x86 targets.
+// #ifndef __X86SIM__
 #define USE_GRAPH_SCOPE
-#endif
-//#define USE_EXPLICIT_HEAP
+// #endif
 
 #ifdef USE_GRAPH_SCOPE
 #include "fft_bufs.h" //Extern declarations of all twiddle factor stores and rank-temporary sample stores.
@@ -156,7 +150,8 @@ template <int dim,
           unsigned int TP_TWIDDLE_MODE = 0>
 class create_casc_kernel_recur {
    public:
-    static void create(kernel (&fftKernels)[TP_CASC_LEN]) {
+    // graph scoping of large (>256 twiddle tables)
+    static void create(kernel (&fftKernels)[TP_CASC_LEN], int* startRanks, int* endRanks) {
         static constexpr int kRawRanksPerKernel =
             std::is_same<TT_DATA, cfloat>::value ? (TP_END_RANK / dim) : (TP_END_RANK / dim / 2) * 2;
         static constexpr unsigned int kRanksPerKernel = std::is_same<TT_DATA, cfloat>::value
@@ -165,14 +160,20 @@ class create_casc_kernel_recur {
         static constexpr int kRawStartRank = (int)TP_END_RANK - (int)kRanksPerKernel;
         static constexpr unsigned int TP_START_RANK = kRawStartRank < 0 ? 0 : kRawStartRank;
 
+        startRanks[dim - 1] = TP_START_RANK;
+        endRanks[dim - 1] = TP_END_RANK;
+
         fftKernels[dim - 1] = kernel::create_object<
             fft_ifft_dit_1ch<TT_INT_DATA, TT_INT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_START_RANK,
                              TP_END_RANK, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, 0, 0, TP_ORIG_PAR_POWER, TP_RND, TP_SAT,
                              TP_TWIDDLE_MODE> >(); // 0's are for window connection for internal cascade connections
         create_casc_kernel_recur<dim - 1, TT_DATA, TT_INT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
                                  TP_CASC_LEN, TP_START_RANK, kRanksPerKernel, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE,
-                                 TP_IN_API, TP_ORIG_PAR_POWER, TP_RND, TP_SAT, TP_TWIDDLE_MODE>::create(fftKernels);
-    }
+                                 TP_IN_API, TP_ORIG_PAR_POWER, TP_RND, TP_SAT, TP_TWIDDLE_MODE>::create(fftKernels,
+                                                                                                        startRanks,
+                                                                                                        endRanks);
+
+    } // end of create
 };
 // Recursive fft kernel creation
 // This is the specialization for the end of recursion (first kernel in cascade)
@@ -210,7 +211,7 @@ class create_casc_kernel_recur<1,
                                TP_SAT,
                                TP_TWIDDLE_MODE> {
    public:
-    static void create(kernel (&fftKernels)[TP_CASC_LEN]) {
+    static void create(kernel (&fftKernels)[TP_CASC_LEN], int* startRanks, int* endRanks) {
         static constexpr unsigned int TP_START_RANK = 0;
         if
             constexpr(TP_IN_API != 0) { // AIE2 clause needed?
@@ -228,7 +229,11 @@ class create_casc_kernel_recur<1,
                                                        TP_WINDOW_VSIZE, TP_IN_API, 0 /*window for cascade connection*/,
                                                        TP_ORIG_PAR_POWER, TP_RND, TP_SAT, TP_TWIDDLE_MODE> >();
         }
-    }
+
+        startRanks[0] = TP_START_RANK;
+        endRanks[0] = TP_END_RANK;
+
+    } // end of create
 };
 
 // fft Kernel creation, entry to recursion, also end of cascade.
@@ -246,11 +251,12 @@ template <int dim,
           unsigned int TP_ORIG_PAR_POWER = 0, // invalid default because this must be set
           unsigned int TP_RND = 0,
           unsigned int TP_SAT = 1,
-          unsigned int TP_TWIDDLE_MODE = 0>
+          unsigned int TP_TWIDDLE_MODE = 0,
+          typename TT_OUT_DATA = TT_DATA>
 class create_casc_kernel {
    public:
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
-    static void create(kernel (&fftKernels)[TP_CASC_LEN]) {
+    static void create(kernel (&fftKernels)[TP_CASC_LEN], int* startRanks, int* endRanks) {
         static constexpr unsigned int TP_END_RANK_RAW =
             (TP_POINT_SIZE == 4096)
                 ? 12
@@ -283,26 +289,30 @@ class create_casc_kernel {
                                                                 : (kRawRanksPerKernel < 2 ? 2 : kRawRanksPerKernel);
         static constexpr unsigned int TP_START_RANK = (int)TP_END_RANK - (int)TP_RANKS_PER_KERNEL;
 
+        startRanks[dim - 1] = TP_START_RANK;
+        endRanks[dim - 1] = TP_END_RANK;
+
         if
             constexpr(TP_OUT_API != 0) {
-                std::vector<TT_DATA> outBuff;
-                outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA));
+                std::vector<TT_OUT_DATA> outBuff;
+                outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA));
                 fftKernels[dim - 1] = kernel::create_object<fft_ifft_dit_1ch<
-                    T_internalDataType, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_START_RANK,
+                    T_internalDataType, TT_OUT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_START_RANK,
                     TP_END_RANK, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, 0 /*window for cascade connection*/, TP_OUT_API,
                     TP_ORIG_PAR_POWER, TP_RND, TP_SAT, TP_TWIDDLE_MODE> >(outBuff);
             }
         else {
             fftKernels[dim - 1] = kernel::create_object<fft_ifft_dit_1ch<
-                T_internalDataType, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_START_RANK,
+                T_internalDataType, TT_OUT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_START_RANK,
                 TP_END_RANK, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, 0 /*window for cascade connection*/, TP_OUT_API,
                 TP_ORIG_PAR_POWER, TP_RND, TP_SAT, TP_TWIDDLE_MODE> >();
         }
         create_casc_kernel_recur<dim - 1, TT_DATA, T_internalDataType, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT,
                                  TP_SHIFT, TP_CASC_LEN, TP_START_RANK, TP_RANKS_PER_KERNEL, TP_DYN_PT_SIZE,
                                  TP_WINDOW_VSIZE, TP_IN_API, TP_ORIG_PAR_POWER, TP_RND, TP_SAT,
-                                 TP_TWIDDLE_MODE>::create(fftKernels);
-    }
+                                 TP_TWIDDLE_MODE>::create(fftKernels, startRanks, endRanks);
+
+    } // end of create
 };
 // fft Kernel creation, Specialization for CASC_LEN=1
 template <typename TT_DATA, // type for I/O
@@ -317,7 +327,8 @@ template <typename TT_DATA, // type for I/O
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 class create_casc_kernel<1,
                          TT_DATA,
                          TT_TWIDDLE,
@@ -332,9 +343,10 @@ class create_casc_kernel<1,
                          TP_ORIG_PAR_POWER,
                          TP_RND,
                          TP_SAT,
-                         TP_TWIDDLE_MODE> {
+                         TP_TWIDDLE_MODE,
+                         TT_OUT_DATA> {
    public:
-    static void create(kernel (&fftKernels)[1]) {
+    static void create(kernel (&fftKernels)[1], int* startRanks, int* endRanks) {
         static constexpr unsigned int TP_END_RANK_RAW =
             (TP_POINT_SIZE == 4096)
                 ? 12
@@ -363,17 +375,17 @@ class create_casc_kernel<1,
                 inBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA));
                 if
                     constexpr(TP_OUT_API != 0) {
-                        std::vector<TT_DATA> outBuff;
-                        outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA));
+                        std::vector<TT_OUT_DATA> outBuff;
+                        outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA));
                         fftKernels[0] = kernel::create_object<
-                            fft_ifft_dit_1ch<TT_DATA, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
+                            fft_ifft_dit_1ch<TT_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
                                              TP_START_RANK, TP_END_RANK, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_IN_API,
                                              TP_OUT_API, TP_ORIG_PAR_POWER, TP_RND, TP_SAT, TP_TWIDDLE_MODE> >(inBuff,
                                                                                                                outBuff);
                     }
                 else {
                     fftKernels[0] = kernel::create_object<
-                        fft_ifft_dit_1ch<TT_DATA, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
+                        fft_ifft_dit_1ch<TT_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
                                          TP_START_RANK, TP_END_RANK, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_IN_API,
                                          TP_OUT_API, TP_ORIG_PAR_POWER, TP_RND, TP_SAT, TP_TWIDDLE_MODE> >(inBuff);
                 }
@@ -381,21 +393,24 @@ class create_casc_kernel<1,
         else {
             if
                 constexpr(TP_OUT_API != 0) {
-                    std::vector<TT_DATA> outBuff;
-                    outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA));
+                    std::vector<TT_OUT_DATA> outBuff;
+                    outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA));
                     fftKernels[0] = kernel::create_object<
-                        fft_ifft_dit_1ch<TT_DATA, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
+                        fft_ifft_dit_1ch<TT_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
                                          TP_START_RANK, TP_END_RANK, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_IN_API,
                                          TP_OUT_API, TP_ORIG_PAR_POWER, TP_RND, TP_SAT, TP_TWIDDLE_MODE> >(outBuff);
                 }
             else {
                 fftKernels[0] = kernel::create_object<
-                    fft_ifft_dit_1ch<TT_DATA, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_START_RANK,
-                                     TP_END_RANK, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_IN_API, TP_OUT_API,
+                    fft_ifft_dit_1ch<TT_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
+                                     TP_START_RANK, TP_END_RANK, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_IN_API, TP_OUT_API,
                                      TP_ORIG_PAR_POWER, TP_RND, TP_SAT, TP_TWIDDLE_MODE> >();
             }
         }
-    }
+        startRanks[0] = TP_START_RANK;
+        endRanks[0] = TP_END_RANK;
+
+    } // end of create
 };
 
 //-----------------------------------------
@@ -721,6 +736,7 @@ class create_combOutWidget_kernels<TT_DATA,
 /**
  * @cond NOCOMMENTS
  */
+// This base of inheritance associates twiddle tables with each kernel.
 template <typename TT_DATA,
           typename TT_TWIDDLE,
           unsigned int TP_POINT_SIZE,
@@ -734,18 +750,21 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER = 0, // invalid default because this must be set.
           unsigned int TP_RND = 0,
           unsigned int TP_SAT = 1,
-          unsigned int TP_TWIDDLE_MODE = 0>
+          unsigned int TP_TWIDDLE_MODE = 0,
+          typename TT_OUT_DATA = TT_DATA>
 class fft_ifft_dit_1ch_base_graph : public graph {
    public:
     // declare FFT Kernel array
     kernel m_fftKernels[TP_CASC_LEN];
     kernel* getKernels() { return m_fftKernels; };
+    int startRanks[TP_CASC_LEN];
+    int endRanks[TP_CASC_LEN];
 
 #ifdef USE_GRAPH_SCOPE
     parameter fft_buf1[TP_CASC_LEN];
 
-    // twiddle table
-    parameter fft_lut1[TP_CASC_LEN]; // large twiddle tables
+    // twiddle table graph scoping .
+    parameter fft_lut1[TP_CASC_LEN];
     parameter fft_lut2[TP_CASC_LEN];
     parameter fft_lut3[TP_CASC_LEN];
     parameter fft_lut4[TP_CASC_LEN];
@@ -774,7 +793,7 @@ class fft_ifft_dit_1ch_base_graph : public graph {
         // Create kernel class(s)
         create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN,
                            TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_IN_API, TP_OUT_API, TP_ORIG_PAR_POWER, TP_RND, TP_SAT,
-                           TP_TWIDDLE_MODE>::create(m_fftKernels);
+                           TP_TWIDDLE_MODE, TT_OUT_DATA>::create(m_fftKernels, startRanks, endRanks);
 
         // Make kernel to kernel window connections
         for (int k = 0; k < TP_CASC_LEN - 1; ++k) {
@@ -793,156 +812,157 @@ class fft_ifft_dit_1ch_base_graph : public graph {
         }
 
 #ifdef USE_GRAPH_SCOPE
-        // TODO - at present all twiddles connect to all kernels in a cascade, but this could be optimized for static
-        // pointsize since each twiddle table need only go to one kernel
-        // Connect twiddle Lookups
-        // Note that this switch statement does NOT use break statements. That is deliberate. The top case executes all
-        // cases.
-        if (std::is_same<TT_DATA, cfloat>::value) {
-            if (TP_POINT_SIZE == 4096) {
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
+
+        // Twiddle graph scoping
+        // Attach graph scoped tables as required
+
+        constexpr int kOddPowerAdj = std::is_same<TT_TWIDDLE, cfloat>::value ? 0 : fnOddPower<TP_POINT_SIZE>();
+
+        for (int k = 0; k < TP_CASC_LEN; ++k) {
+            if (std::is_same<TT_TWIDDLE, cfloat>::value) {
+                if (TP_POINT_SIZE == 4096 && (TP_DYN_PT_SIZE == 1 || startRanks[k] <= 11) && endRanks[k] > 11) {
                     fft_lut1[k] = parameter::array(fft_lut_tw2048_cfloat);
                     connect<>(fft_lut1[k], m_fftKernels[k]);
                 }
-            }
-            if (TP_POINT_SIZE >= 2048) {
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
+                if (TP_POINT_SIZE >= 2048 && (TP_DYN_PT_SIZE == 1 || startRanks[k] <= 10) && endRanks[k] > 10) {
                     fft_lut2[k] = parameter::array(fft_lut_tw1024_cfloat);
                     connect<>(fft_lut2[k], m_fftKernels[k]);
                 }
-            }
-            if (TP_POINT_SIZE >= 1024) {
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
+                if (TP_POINT_SIZE >= 1024 && (TP_DYN_PT_SIZE == 1 || startRanks[k] <= 9) && endRanks[k] > 9) {
                     fft_lut3[k] = parameter::array(fft_lut_tw512_cfloat);
                     connect<>(fft_lut3[k], m_fftKernels[k]);
                 }
-            }
-            if (TP_POINT_SIZE >= 512) {
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
+                if (TP_POINT_SIZE >= 512 && (TP_DYN_PT_SIZE == 1 || startRanks[k] <= 8) && endRanks[k] > 8) {
                     fft_lut4[k] = parameter::array(fft_lut_tw256_cfloat);
                     connect<>(fft_lut4[k], m_fftKernels[k]);
                 }
-            }
-        } else if (std::is_same<TT_TWIDDLE, cint16>::value) {
-            // This clause is phrased differently to the cfloat clause because of the _half table optimization.
-            if (TP_POINT_SIZE == 4096) {
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
+                // Integer section differs from cfloat because of half table optimization i.e. largest twiddle table is
+                // half-size.
+            } else if (std::is_same<TT_TWIDDLE, cint16>::value) {
+                if (TP_POINT_SIZE == 4096 && (TP_DYN_PT_SIZE == 1 || startRanks[k] - kOddPowerAdj <= 11) &&
+                    endRanks[k] - kOddPowerAdj > 11) {
                     if (TP_TWIDDLE_MODE == 0) {
                         fft_lut1[k] = parameter::array(fft_lut_tw2048_cint16_half);
-                        fft_lut2[k] = parameter::array(fft_lut_tw1024_cint16);
-                        fft_lut3[k] = parameter::array(fft_lut_tw512_cint16);
-                        fft_lut4[k] = parameter::array(fft_lut_tw256_cint16);
-                    } else if (TP_TWIDDLE_MODE == 1) {
+                    } else {
                         fft_lut1[k] = parameter::array(fft_lut_tw2048_cint15_half);
-                        fft_lut2[k] = parameter::array(fft_lut_tw1024_cint15);
-                        fft_lut3[k] = parameter::array(fft_lut_tw512_cint15);
-                        fft_lut4[k] = parameter::array(fft_lut_tw256_cint15);
                     }
                     connect<>(fft_lut1[k], m_fftKernels[k]);
-                    connect<>(fft_lut2[k], m_fftKernels[k]);
-                    connect<>(fft_lut3[k], m_fftKernels[k]);
-                    connect<>(fft_lut4[k], m_fftKernels[k]);
                 }
-            }
-            if (TP_POINT_SIZE == 2048) {
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    if (TP_TWIDDLE_MODE == 0) {
-                        fft_lut2[k] = parameter::array(fft_lut_tw1024_cint16_half);
-                        fft_lut3[k] = parameter::array(fft_lut_tw512_cint16);
-                        fft_lut4[k] = parameter::array(fft_lut_tw256_cint16);
-                    } else if (TP_TWIDDLE_MODE == 1) {
-                        fft_lut2[k] = parameter::array(fft_lut_tw1024_cint15_half);
-                        fft_lut3[k] = parameter::array(fft_lut_tw512_cint15);
-                        fft_lut4[k] = parameter::array(fft_lut_tw256_cint15);
+
+                if (TP_POINT_SIZE >= 2048 && (TP_DYN_PT_SIZE == 1 || startRanks[k] - kOddPowerAdj <= 10) &&
+                    endRanks[k] - kOddPowerAdj > 10) {
+                    if (TP_POINT_SIZE == 2048) {
+                        if (TP_TWIDDLE_MODE == 0) {
+                            fft_lut2[k] = parameter::array(fft_lut_tw1024_cint16_half);
+                        } else {
+                            fft_lut2[k] = parameter::array(fft_lut_tw1024_cint15_half);
+                        }
+                    } else {
+                        if (TP_TWIDDLE_MODE == 0) {
+                            fft_lut2[k] = parameter::array(fft_lut_tw1024_cint16);
+                        } else {
+                            fft_lut2[k] = parameter::array(fft_lut_tw1024_cint15);
+                        }
                     }
                     connect<>(fft_lut2[k], m_fftKernels[k]);
-                    connect<>(fft_lut3[k], m_fftKernels[k]);
-                    connect<>(fft_lut4[k], m_fftKernels[k]);
                 }
-            }
-            if (TP_POINT_SIZE == 1024) {
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    if (TP_TWIDDLE_MODE == 0) {
-                        fft_lut3[k] = parameter::array(fft_lut_tw512_cint16_half);
-                        fft_lut4[k] = parameter::array(fft_lut_tw256_cint16);
-                    } else if (TP_TWIDDLE_MODE == 1) {
-                        fft_lut3[k] = parameter::array(fft_lut_tw512_cint15_half);
-                        fft_lut4[k] = parameter::array(fft_lut_tw256_cint15);
+                if (TP_POINT_SIZE >= 1024 && (TP_DYN_PT_SIZE == 1 || startRanks[k] - kOddPowerAdj <= 9) &&
+                    endRanks[k] - kOddPowerAdj > 9) {
+                    if (TP_POINT_SIZE == 1024) {
+                        if (TP_TWIDDLE_MODE == 0) {
+                            fft_lut3[k] = parameter::array(fft_lut_tw512_cint16_half);
+                        } else {
+                            fft_lut3[k] = parameter::array(fft_lut_tw512_cint15_half);
+                        }
+                    } else {
+                        if (TP_TWIDDLE_MODE == 0) {
+                            fft_lut3[k] = parameter::array(fft_lut_tw512_cint16);
+                        } else {
+                            fft_lut3[k] = parameter::array(fft_lut_tw512_cint15);
+                        }
                     }
                     connect<>(fft_lut3[k], m_fftKernels[k]);
-                    connect<>(fft_lut4[k], m_fftKernels[k]);
                 }
-            }
-            if (TP_POINT_SIZE == 512) {
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    if (TP_TWIDDLE_MODE == 0) {
-                        fft_lut4[k] = parameter::array(fft_lut_tw256_cint16_half);
-                    } else if (TP_TWIDDLE_MODE == 1) {
-                        fft_lut4[k] = parameter::array(fft_lut_tw256_cint15_half);
+                if (TP_POINT_SIZE >= 512 && (TP_DYN_PT_SIZE == 1 || startRanks[k] - kOddPowerAdj <= 8) &&
+                    endRanks[k] - kOddPowerAdj > 8) {
+                    if (TP_POINT_SIZE == 512) {
+                        if (TP_TWIDDLE_MODE == 0) {
+                            fft_lut4[k] = parameter::array(fft_lut_tw256_cint16_half);
+                        } else {
+                            fft_lut4[k] = parameter::array(fft_lut_tw256_cint15_half);
+                        }
+                    } else {
+                        if (TP_TWIDDLE_MODE == 0) {
+                            fft_lut4[k] = parameter::array(fft_lut_tw256_cint16);
+                        } else {
+                            fft_lut4[k] = parameter::array(fft_lut_tw256_cint15);
+                        }
                     }
                     connect<>(fft_lut4[k], m_fftKernels[k]);
                 }
-            }
-        } else if (std::is_same<TT_TWIDDLE, cint32>::value) {
-            if (TP_POINT_SIZE == 4096) {
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
+            } else if (std::is_same<TT_TWIDDLE, cint32>::value) {
+                if (TP_POINT_SIZE == 4096 && (TP_DYN_PT_SIZE == 1 || startRanks[k] - kOddPowerAdj <= 11) &&
+                    endRanks[k] - kOddPowerAdj > 11) {
                     if (TP_TWIDDLE_MODE == 0) {
                         fft_lut1[k] = parameter::array(fft_lut_tw2048_cint32_half);
-                        fft_lut2[k] = parameter::array(fft_lut_tw1024_cint32);
-                        fft_lut3[k] = parameter::array(fft_lut_tw512_cint32);
-                        fft_lut4[k] = parameter::array(fft_lut_tw256_cint32);
-                    } else if (TP_TWIDDLE_MODE == 1) {
+                    } else {
                         fft_lut1[k] = parameter::array(fft_lut_tw2048_cint31_half);
-                        fft_lut2[k] = parameter::array(fft_lut_tw1024_cint31);
-                        fft_lut3[k] = parameter::array(fft_lut_tw512_cint31);
-                        fft_lut4[k] = parameter::array(fft_lut_tw256_cint31);
                     }
                     connect<>(fft_lut1[k], m_fftKernels[k]);
-                    connect<>(fft_lut2[k], m_fftKernels[k]);
-                    connect<>(fft_lut3[k], m_fftKernels[k]);
-                    connect<>(fft_lut4[k], m_fftKernels[k]);
                 }
-            }
-            if (TP_POINT_SIZE == 2048) {
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    if (TP_TWIDDLE_MODE == 0) {
-                        fft_lut2[k] = parameter::array(fft_lut_tw1024_cint32_half);
-                        fft_lut3[k] = parameter::array(fft_lut_tw512_cint32);
-                        fft_lut4[k] = parameter::array(fft_lut_tw256_cint32);
-                    } else if (TP_TWIDDLE_MODE == 1) {
-                        fft_lut2[k] = parameter::array(fft_lut_tw1024_cint31_half);
-                        fft_lut3[k] = parameter::array(fft_lut_tw512_cint31);
-                        fft_lut4[k] = parameter::array(fft_lut_tw256_cint31);
+                if (TP_POINT_SIZE >= 2048 && (TP_DYN_PT_SIZE == 1 || startRanks[k] - kOddPowerAdj <= 10) &&
+                    endRanks[k] - kOddPowerAdj > 10) {
+                    if (TP_POINT_SIZE == 2048) {
+                        if (TP_TWIDDLE_MODE == 0) {
+                            fft_lut2[k] = parameter::array(fft_lut_tw1024_cint32_half);
+                        } else {
+                            fft_lut2[k] = parameter::array(fft_lut_tw1024_cint31_half);
+                        }
+                    } else {
+                        if (TP_TWIDDLE_MODE == 0) {
+                            fft_lut2[k] = parameter::array(fft_lut_tw1024_cint32);
+                        } else {
+                            fft_lut2[k] = parameter::array(fft_lut_tw1024_cint31);
+                        }
                     }
                     connect<>(fft_lut2[k], m_fftKernels[k]);
-                    connect<>(fft_lut3[k], m_fftKernels[k]);
-                    connect<>(fft_lut4[k], m_fftKernels[k]);
                 }
-            }
-            if (TP_POINT_SIZE == 1024) {
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    if (TP_TWIDDLE_MODE == 0) {
-                        fft_lut3[k] = parameter::array(fft_lut_tw512_cint32_half);
-                        fft_lut4[k] = parameter::array(fft_lut_tw256_cint32);
-                    } else if (TP_TWIDDLE_MODE == 1) {
-                        fft_lut3[k] = parameter::array(fft_lut_tw512_cint31_half);
-                        fft_lut4[k] = parameter::array(fft_lut_tw256_cint31);
+                if (TP_POINT_SIZE >= 1024 && (TP_DYN_PT_SIZE == 1 || startRanks[k] - kOddPowerAdj <= 9) &&
+                    endRanks[k] - kOddPowerAdj > 9) {
+                    if (TP_POINT_SIZE == 1024) {
+                        if (TP_TWIDDLE_MODE == 0) {
+                            fft_lut3[k] = parameter::array(fft_lut_tw512_cint32_half);
+                        } else {
+                            fft_lut3[k] = parameter::array(fft_lut_tw512_cint31_half);
+                        }
+                    } else {
+                        if (TP_TWIDDLE_MODE == 0) {
+                            fft_lut3[k] = parameter::array(fft_lut_tw512_cint32);
+                        } else {
+                            fft_lut3[k] = parameter::array(fft_lut_tw512_cint31);
+                        }
                     }
                     connect<>(fft_lut3[k], m_fftKernels[k]);
-                    connect<>(fft_lut4[k], m_fftKernels[k]);
                 }
-            }
-            if (TP_POINT_SIZE == 512) {
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    if (TP_TWIDDLE_MODE == 0) {
-                        fft_lut4[k] = parameter::array(fft_lut_tw256_cint32_half);
-                    } else if (TP_TWIDDLE_MODE == 1) {
-                        fft_lut4[k] = parameter::array(fft_lut_tw256_cint31_half);
+                if (TP_POINT_SIZE >= 512 && (TP_DYN_PT_SIZE == 1 || startRanks[k] - kOddPowerAdj <= 8) &&
+                    endRanks[k] - kOddPowerAdj > 8) {
+                    if (TP_POINT_SIZE == 512) {
+                        if (TP_TWIDDLE_MODE == 0) {
+                            fft_lut4[k] = parameter::array(fft_lut_tw256_cint32_half);
+                        } else {
+                            fft_lut4[k] = parameter::array(fft_lut_tw256_cint31_half);
+                        }
+                    } else {
+                        if (TP_TWIDDLE_MODE == 0) {
+                            fft_lut4[k] = parameter::array(fft_lut_tw256_cint32);
+                        } else {
+                            fft_lut4[k] = parameter::array(fft_lut_tw256_cint31);
+                        }
                     }
                     connect<>(fft_lut4[k], m_fftKernels[k]);
                 }
-            }
-        }
+            } // end of cint32 clause
+        }     // end of casc_len loop for twiddle graph scoping
 
         // Connect inter-rank temporary storage
         fft_buf4096 = parameter::array(fft_4096_tmp1);
@@ -952,27 +972,41 @@ class fft_ifft_dit_1ch_base_graph : public graph {
         fft_buf256 = parameter::array(fft_256_tmp1);
         fft_buf128 = parameter::array(fft_128_tmp1);
         for (int k = 0; k < TP_CASC_LEN; ++k) {
-            switch (TP_POINT_SIZE) {
-                case 4096:
-                    fft_buf1[k] = fft_buf4096;
-                    break;
-                case 2048:
-                    fft_buf1[k] = fft_buf2048;
-                    break;
-                case 1024:
-                    fft_buf1[k] = fft_buf1024;
-                    break;
-                case 512:
-                    fft_buf1[k] = fft_buf512;
-                    break;
-                case 256:
-                    fft_buf1[k] = fft_buf256;
-                    break;
-                default:
-                    fft_buf1[k] = fft_buf128;
-                    break;
+            int numStages = std::is_same<TT_DATA, cfloat>::value ? (endRanks[k] - startRanks[k])
+                                                                 : (endRanks[k] / 2 - startRanks[k] / 2);
+            bool evenStages = false;
+            if (numStages % 2 == 0 || TP_DYN_PT_SIZE == 1) { // When dynamic, point size can be even or odd at runtime
+                                                             // so it is not safe to numStages since that is based on
+                                                             // max point size.
+                evenStages = true;
             }
-            connect<>(fft_buf1[k], m_fftKernels[k]);
+            // Can we re-use the output buffer? Yes if the output is cint32/cfloat, no if the output is cint16 and no if
+            // the number of stages is even.
+            // So do we need to allocate a temp buffer? Yes if cint16 and this is the last kernel (the one with the
+            // output) or the number of stages is even
+            if ((std::is_same<TT_DATA, cint16>::value && k == TP_CASC_LEN - 1) || evenStages) {
+                switch (TP_POINT_SIZE) {
+                    case 4096:
+                        fft_buf1[k] = fft_buf4096;
+                        break;
+                    case 2048:
+                        fft_buf1[k] = fft_buf2048;
+                        break;
+                    case 1024:
+                        fft_buf1[k] = fft_buf1024;
+                        break;
+                    case 512:
+                        fft_buf1[k] = fft_buf512;
+                        break;
+                    case 256:
+                        fft_buf1[k] = fft_buf256;
+                        break;
+                    default:
+                        fft_buf1[k] = fft_buf128;
+                        break;
+                }
+                connect<>(fft_buf1[k], m_fftKernels[k]);
+            }
         }
 #endif // USE_GRAPH_SCOPE
 
@@ -1027,7 +1061,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER = 0, // invalid default because this must be set.
           unsigned int TP_RND = 0,
           unsigned int TP_SAT = 1,
-          unsigned int TP_TWIDDLE_MODE = 0>
+          unsigned int TP_TWIDDLE_MODE = 0,
+          typename TT_OUT_DATA = TT_DATA>
 class fft_ifft_dit_1ch_baseports_graph : public fft_ifft_dit_1ch_base_graph<TT_DATA,
                                                                             TT_TWIDDLE,
                                                                             TP_POINT_SIZE,
@@ -1041,7 +1076,8 @@ class fft_ifft_dit_1ch_baseports_graph : public fft_ifft_dit_1ch_base_graph<TT_D
                                                                             TP_ORIG_PAR_POWER,
                                                                             TP_RND,
                                                                             TP_SAT,
-                                                                            TP_TWIDDLE_MODE> {
+                                                                            TP_TWIDDLE_MODE,
+                                                                            TT_OUT_DATA> {
    public:
     port_array<input, 1> in;
     port_array<output, 1> out;
@@ -1053,7 +1089,7 @@ class fft_ifft_dit_1ch_baseports_graph : public fft_ifft_dit_1ch_base_graph<TT_D
         connect(in[0], this->m_fftKernels[0].in[0]);
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
         connect(this->m_fftKernels[TP_CASC_LEN - 1].out[0], out[0]);
-        dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
     };
 };
 
@@ -1070,7 +1106,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TT_TWIDDLE,
                                        TP_POINT_SIZE,
@@ -1085,20 +1122,22 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_ORIG_PAR_POWER,
                                        TP_RND,
                                        TP_SAT,
-                                       TP_TWIDDLE_MODE> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
-                                                                                             TT_TWIDDLE,
-                                                                                             TP_POINT_SIZE,
-                                                                                             TP_FFT_NIFFT,
-                                                                                             TP_SHIFT,
-                                                                                             TP_CASC_LEN,
-                                                                                             TP_DYN_PT_SIZE,
-                                                                                             TP_WINDOW_VSIZE,
-                                                                                             kStreamAPI,
-                                                                                             kStreamAPI,
-                                                                                             TP_ORIG_PAR_POWER,
-                                                                                             TP_RND,
-                                                                                             TP_SAT,
-                                                                                             TP_TWIDDLE_MODE> {
+                                       TP_TWIDDLE_MODE,
+                                       TT_OUT_DATA> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                                                                         TT_TWIDDLE,
+                                                                                         TP_POINT_SIZE,
+                                                                                         TP_FFT_NIFFT,
+                                                                                         TP_SHIFT,
+                                                                                         TP_CASC_LEN,
+                                                                                         TP_DYN_PT_SIZE,
+                                                                                         TP_WINDOW_VSIZE,
+                                                                                         kStreamAPI,
+                                                                                         kStreamAPI,
+                                                                                         TP_ORIG_PAR_POWER,
+                                                                                         TP_RND,
+                                                                                         TP_SAT,
+                                                                                         TP_TWIDDLE_MODE,
+                                                                                         TT_OUT_DATA> {
    public:
     static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
 
@@ -1129,7 +1168,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TT_TWIDDLE,
                                        TP_POINT_SIZE,
@@ -1144,20 +1184,22 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_ORIG_PAR_POWER,
                                        TP_RND,
                                        TP_SAT,
-                                       TP_TWIDDLE_MODE> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
-                                                                                             TT_TWIDDLE,
-                                                                                             TP_POINT_SIZE,
-                                                                                             TP_FFT_NIFFT,
-                                                                                             TP_SHIFT,
-                                                                                             TP_CASC_LEN,
-                                                                                             TP_DYN_PT_SIZE,
-                                                                                             TP_WINDOW_VSIZE,
-                                                                                             kWindowAPI,
-                                                                                             kWindowAPI,
-                                                                                             TP_ORIG_PAR_POWER,
-                                                                                             TP_RND,
-                                                                                             TP_SAT,
-                                                                                             TP_TWIDDLE_MODE> {
+                                       TP_TWIDDLE_MODE,
+                                       TT_OUT_DATA> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                                                                         TT_TWIDDLE,
+                                                                                         TP_POINT_SIZE,
+                                                                                         TP_FFT_NIFFT,
+                                                                                         TP_SHIFT,
+                                                                                         TP_CASC_LEN,
+                                                                                         TP_DYN_PT_SIZE,
+                                                                                         TP_WINDOW_VSIZE,
+                                                                                         kWindowAPI,
+                                                                                         kWindowAPI,
+                                                                                         TP_ORIG_PAR_POWER,
+                                                                                         TP_RND,
+                                                                                         TP_SAT,
+                                                                                         TP_TWIDDLE_MODE,
+                                                                                         TT_OUT_DATA> {
    public:
     static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
     static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
@@ -1176,7 +1218,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                                                     1,
                                                                     kSampleIntlv,
                                                                     kHeaderBytes> >();
-    kernel m_outWidgetKernel = kernel::create_object<widget_api_cast<TT_DATA,
+    kernel m_outWidgetKernel = kernel::create_object<widget_api_cast<TT_OUT_DATA,
                                                                      kWindowAPI,
                                                                      kStreamAPI,
                                                                      1,
@@ -1190,8 +1232,8 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
         dimensions(m_inWidgetKernel.out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
         connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
-        dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
-        dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
         // Make data connections
         for (int i = 0; i < kStreamsPerTile; i++) {
             connect<stream>(in[i], m_inWidgetKernel.in[i]);
@@ -1220,7 +1262,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TT_TWIDDLE,
                                        TP_POINT_SIZE,
@@ -1235,20 +1278,22 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_ORIG_PAR_POWER,
                                        TP_RND,
                                        TP_SAT,
-                                       TP_TWIDDLE_MODE> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
-                                                                                             TT_TWIDDLE,
-                                                                                             TP_POINT_SIZE,
-                                                                                             TP_FFT_NIFFT,
-                                                                                             TP_SHIFT,
-                                                                                             TP_CASC_LEN,
-                                                                                             TP_DYN_PT_SIZE,
-                                                                                             TP_WINDOW_VSIZE,
-                                                                                             kWindowAPI,
-                                                                                             kStreamAPI,
-                                                                                             TP_ORIG_PAR_POWER,
-                                                                                             TP_RND,
-                                                                                             TP_SAT,
-                                                                                             TP_TWIDDLE_MODE> {
+                                       TP_TWIDDLE_MODE,
+                                       TT_OUT_DATA> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                                                                         TT_TWIDDLE,
+                                                                                         TP_POINT_SIZE,
+                                                                                         TP_FFT_NIFFT,
+                                                                                         TP_SHIFT,
+                                                                                         TP_CASC_LEN,
+                                                                                         TP_DYN_PT_SIZE,
+                                                                                         TP_WINDOW_VSIZE,
+                                                                                         kWindowAPI,
+                                                                                         kStreamAPI,
+                                                                                         TP_ORIG_PAR_POWER,
+                                                                                         TP_RND,
+                                                                                         TP_SAT,
+                                                                                         TP_TWIDDLE_MODE,
+                                                                                         TT_OUT_DATA> {
    public:
     static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
     /**
@@ -1278,7 +1323,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TT_TWIDDLE,
                                        TP_POINT_SIZE,
@@ -1293,7 +1339,8 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_ORIG_PAR_POWER,
                                        TP_RND,
                                        TP_SAT,
-                                       TP_TWIDDLE_MODE>
+                                       TP_TWIDDLE_MODE,
+                                       TT_OUT_DATA>
     : public fft_ifft_dit_1ch_base_graph<TT_DATA,
                                          TT_TWIDDLE,
                                          TP_POINT_SIZE,
@@ -1307,7 +1354,8 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                          TP_ORIG_PAR_POWER,
                                          TP_RND,
                                          TP_SAT,
-                                         TP_TWIDDLE_MODE> // note output of FFT is iobuffer
+                                         TP_TWIDDLE_MODE,
+                                         TT_OUT_DATA> // note output of FFT is iobuffer
 {
    public:
     static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
@@ -1318,14 +1366,15 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
     port_array<output, 2> out;
 
     kernel m_outWidgetKernel = kernel::create_object<
-        widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv, kHeaderBytes> >();
+        widget_api_cast<TT_OUT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv, kHeaderBytes> >();
 
     fft_ifft_dit_1ch_baseports_graph() {
         // Make data connections
         connect<>(in[0], this->m_fftKernels[0].in[0]);
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
         connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
-        dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
         connect<stream>(this->m_outWidgetKernel.out[0], out[0]);
         connect<stream>(this->m_outWidgetKernel.out[1], out[1]);
 
@@ -1348,7 +1397,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TT_TWIDDLE,
                                        TP_POINT_SIZE,
@@ -1363,20 +1413,22 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_ORIG_PAR_POWER,
                                        TP_RND,
                                        TP_SAT,
-                                       TP_TWIDDLE_MODE> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
-                                                                                             TT_TWIDDLE,
-                                                                                             TP_POINT_SIZE,
-                                                                                             TP_FFT_NIFFT,
-                                                                                             TP_SHIFT,
-                                                                                             TP_CASC_LEN,
-                                                                                             TP_DYN_PT_SIZE,
-                                                                                             TP_WINDOW_VSIZE,
-                                                                                             kWindowAPI,
-                                                                                             kCascStreamAPI,
-                                                                                             TP_ORIG_PAR_POWER,
-                                                                                             TP_RND,
-                                                                                             TP_SAT,
-                                                                                             TP_TWIDDLE_MODE> {
+                                       TP_TWIDDLE_MODE,
+                                       TT_OUT_DATA> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                                                                         TT_TWIDDLE,
+                                                                                         TP_POINT_SIZE,
+                                                                                         TP_FFT_NIFFT,
+                                                                                         TP_SHIFT,
+                                                                                         TP_CASC_LEN,
+                                                                                         TP_DYN_PT_SIZE,
+                                                                                         TP_WINDOW_VSIZE,
+                                                                                         kWindowAPI,
+                                                                                         kCascStreamAPI,
+                                                                                         TP_ORIG_PAR_POWER,
+                                                                                         TP_RND,
+                                                                                         TP_SAT,
+                                                                                         TP_TWIDDLE_MODE,
+                                                                                         TT_OUT_DATA> {
    public:
     static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
     /**
@@ -1406,7 +1458,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TT_TWIDDLE,
                                        TP_POINT_SIZE,
@@ -1421,22 +1474,22 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_ORIG_PAR_POWER,
                                        TP_RND,
                                        TP_SAT,
-                                       TP_TWIDDLE_MODE>
-    : public fft_ifft_dit_1ch_base_graph<TT_DATA,
-                                         TT_TWIDDLE,
-                                         TP_POINT_SIZE,
-                                         TP_FFT_NIFFT,
-                                         TP_SHIFT,
-                                         TP_CASC_LEN,
-                                         TP_DYN_PT_SIZE,
-                                         TP_WINDOW_VSIZE,
-                                         kWindowAPI,
-                                         kWindowAPI,
-                                         TP_ORIG_PAR_POWER,
-                                         TP_RND,
-                                         TP_SAT,
-                                         TP_TWIDDLE_MODE> // note output of FFT is iobuffer
-{
+                                       TP_TWIDDLE_MODE,
+                                       TT_OUT_DATA> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                                                                         TT_TWIDDLE,
+                                                                                         TP_POINT_SIZE,
+                                                                                         TP_FFT_NIFFT,
+                                                                                         TP_SHIFT,
+                                                                                         TP_CASC_LEN,
+                                                                                         TP_DYN_PT_SIZE,
+                                                                                         TP_WINDOW_VSIZE,
+                                                                                         kWindowAPI,
+                                                                                         kWindowAPI,
+                                                                                         TP_ORIG_PAR_POWER,
+                                                                                         TP_RND,
+                                                                                         TP_SAT,
+                                                                                         TP_TWIDDLE_MODE,
+                                                                                         TT_OUT_DATA> {
    public:
     static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
     /**
@@ -1446,14 +1499,15 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
     port_array<output, 2> out;
 
     kernel m_outWidgetKernel = kernel::create_object<
-        widget_api_cast<TT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv, kHeaderBytes> >();
+        widget_api_cast<TT_OUT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv, kHeaderBytes> >();
 
     fft_ifft_dit_1ch_baseports_graph() {
         // Make data connections
         connect<>(in[0], this->m_fftKernels[0].in[0]);
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
         connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
-        dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
         connect<cascade>(m_outWidgetKernel.out[0], out[0]);
         connect<stream>(m_outWidgetKernel.out[1], out[1]);
 
@@ -1476,7 +1530,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TT_TWIDDLE,
                                        TP_POINT_SIZE,
@@ -1491,20 +1546,22 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_ORIG_PAR_POWER,
                                        TP_RND,
                                        TP_SAT,
-                                       TP_TWIDDLE_MODE> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
-                                                                                             TT_TWIDDLE,
-                                                                                             TP_POINT_SIZE,
-                                                                                             TP_FFT_NIFFT,
-                                                                                             TP_SHIFT,
-                                                                                             TP_CASC_LEN,
-                                                                                             TP_DYN_PT_SIZE,
-                                                                                             TP_WINDOW_VSIZE,
-                                                                                             kWindowAPI,
-                                                                                             kStreamCascAPI,
-                                                                                             TP_ORIG_PAR_POWER,
-                                                                                             TP_RND,
-                                                                                             TP_SAT,
-                                                                                             TP_TWIDDLE_MODE> {
+                                       TP_TWIDDLE_MODE,
+                                       TT_OUT_DATA> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                                                                         TT_TWIDDLE,
+                                                                                         TP_POINT_SIZE,
+                                                                                         TP_FFT_NIFFT,
+                                                                                         TP_SHIFT,
+                                                                                         TP_CASC_LEN,
+                                                                                         TP_DYN_PT_SIZE,
+                                                                                         TP_WINDOW_VSIZE,
+                                                                                         kWindowAPI,
+                                                                                         kStreamCascAPI,
+                                                                                         TP_ORIG_PAR_POWER,
+                                                                                         TP_RND,
+                                                                                         TP_SAT,
+                                                                                         TP_TWIDDLE_MODE,
+                                                                                         TT_OUT_DATA> {
    public:
     static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
     /**
@@ -1534,7 +1591,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TT_TWIDDLE,
                                        TP_POINT_SIZE,
@@ -1549,20 +1607,22 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_ORIG_PAR_POWER,
                                        TP_RND,
                                        TP_SAT,
-                                       TP_TWIDDLE_MODE> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
-                                                                                             TT_TWIDDLE,
-                                                                                             TP_POINT_SIZE,
-                                                                                             TP_FFT_NIFFT,
-                                                                                             TP_SHIFT,
-                                                                                             TP_CASC_LEN,
-                                                                                             TP_DYN_PT_SIZE,
-                                                                                             TP_WINDOW_VSIZE,
-                                                                                             kWindowAPI,
-                                                                                             kWindowAPI,
-                                                                                             TP_ORIG_PAR_POWER,
-                                                                                             TP_RND,
-                                                                                             TP_SAT,
-                                                                                             TP_TWIDDLE_MODE> {
+                                       TP_TWIDDLE_MODE,
+                                       TT_OUT_DATA> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                                                                         TT_TWIDDLE,
+                                                                                         TP_POINT_SIZE,
+                                                                                         TP_FFT_NIFFT,
+                                                                                         TP_SHIFT,
+                                                                                         TP_CASC_LEN,
+                                                                                         TP_DYN_PT_SIZE,
+                                                                                         TP_WINDOW_VSIZE,
+                                                                                         kWindowAPI,
+                                                                                         kWindowAPI,
+                                                                                         TP_ORIG_PAR_POWER,
+                                                                                         TP_RND,
+                                                                                         TP_SAT,
+                                                                                         TP_TWIDDLE_MODE,
+                                                                                         TT_OUT_DATA> {
    public:
     static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
     /**
@@ -1572,13 +1632,15 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
     port_array<output, 2> out;
 
     kernel m_outWidgetKernel = kernel::create_object<
-        widget_api_cast<TT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv, kHeaderBytes> >();
+        widget_api_cast<TT_OUT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv, kHeaderBytes> >();
 
     fft_ifft_dit_1ch_baseports_graph() {
         // Make data connections
         connect<>(in[0], this->m_fftKernels[0].in[0]);
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
         connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
+        dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
         connect<stream>(m_outWidgetKernel.out[0], out[0]);
         connect<cascade>(m_outWidgetKernel.out[1], out[1]);
 
@@ -1601,7 +1663,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TT_TWIDDLE,
                                        TP_POINT_SIZE,
@@ -1616,20 +1679,22 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_ORIG_PAR_POWER,
                                        TP_RND,
                                        TP_SAT,
-                                       TP_TWIDDLE_MODE> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
-                                                                                             TT_TWIDDLE,
-                                                                                             TP_POINT_SIZE,
-                                                                                             TP_FFT_NIFFT,
-                                                                                             TP_SHIFT,
-                                                                                             TP_CASC_LEN,
-                                                                                             TP_DYN_PT_SIZE,
-                                                                                             TP_WINDOW_VSIZE,
-                                                                                             kStreamAPI,
-                                                                                             kCascStreamAPI,
-                                                                                             TP_ORIG_PAR_POWER,
-                                                                                             TP_RND,
-                                                                                             TP_SAT,
-                                                                                             TP_TWIDDLE_MODE> {
+                                       TP_TWIDDLE_MODE,
+                                       TT_OUT_DATA> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                                                                         TT_TWIDDLE,
+                                                                                         TP_POINT_SIZE,
+                                                                                         TP_FFT_NIFFT,
+                                                                                         TP_SHIFT,
+                                                                                         TP_CASC_LEN,
+                                                                                         TP_DYN_PT_SIZE,
+                                                                                         TP_WINDOW_VSIZE,
+                                                                                         kStreamAPI,
+                                                                                         kCascStreamAPI,
+                                                                                         TP_ORIG_PAR_POWER,
+                                                                                         TP_RND,
+                                                                                         TP_SAT,
+                                                                                         TP_TWIDDLE_MODE,
+                                                                                         TT_OUT_DATA> {
    public:
     /**
      * I/O is an iobuffer in of TT_DATA type and for output a cascade and stream.
@@ -1657,7 +1722,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TT_TWIDDLE,
                                        TP_POINT_SIZE,
@@ -1672,20 +1738,22 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_ORIG_PAR_POWER,
                                        TP_RND,
                                        TP_SAT,
-                                       TP_TWIDDLE_MODE> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
-                                                                                             TT_TWIDDLE,
-                                                                                             TP_POINT_SIZE,
-                                                                                             TP_FFT_NIFFT,
-                                                                                             TP_SHIFT,
-                                                                                             TP_CASC_LEN,
-                                                                                             TP_DYN_PT_SIZE,
-                                                                                             TP_WINDOW_VSIZE,
-                                                                                             kWindowAPI,
-                                                                                             kWindowAPI,
-                                                                                             TP_ORIG_PAR_POWER,
-                                                                                             TP_RND,
-                                                                                             TP_SAT,
-                                                                                             TP_TWIDDLE_MODE> {
+                                       TP_TWIDDLE_MODE,
+                                       TT_OUT_DATA> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                                                                         TT_TWIDDLE,
+                                                                                         TP_POINT_SIZE,
+                                                                                         TP_FFT_NIFFT,
+                                                                                         TP_SHIFT,
+                                                                                         TP_CASC_LEN,
+                                                                                         TP_DYN_PT_SIZE,
+                                                                                         TP_WINDOW_VSIZE,
+                                                                                         kWindowAPI,
+                                                                                         kWindowAPI,
+                                                                                         TP_ORIG_PAR_POWER,
+                                                                                         TP_RND,
+                                                                                         TP_SAT,
+                                                                                         TP_TWIDDLE_MODE,
+                                                                                         TT_OUT_DATA> {
    public:
     static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
     /**
@@ -1703,7 +1771,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                                                     kSampleIntlv,
                                                                     kHeaderBytes> >();
     kernel m_outWidgetKernel = kernel::create_object<
-        widget_api_cast<TT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv, kHeaderBytes> >();
+        widget_api_cast<TT_OUT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv, kHeaderBytes> >();
 
     fft_ifft_dit_1ch_baseports_graph() {
         // Make data connections
@@ -1712,8 +1780,8 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
         dimensions(m_inWidgetKernel.out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
         connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
-        dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
-        dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
         connect<cascade>(m_outWidgetKernel.out[0], out[0]);
         connect<stream>(m_outWidgetKernel.out[1], out[1]);
 
@@ -1739,7 +1807,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TT_TWIDDLE,
                                        TP_POINT_SIZE,
@@ -1754,20 +1823,22 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_ORIG_PAR_POWER,
                                        TP_RND,
                                        TP_SAT,
-                                       TP_TWIDDLE_MODE> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
-                                                                                             TT_TWIDDLE,
-                                                                                             TP_POINT_SIZE,
-                                                                                             TP_FFT_NIFFT,
-                                                                                             TP_SHIFT,
-                                                                                             TP_CASC_LEN,
-                                                                                             TP_DYN_PT_SIZE,
-                                                                                             TP_WINDOW_VSIZE,
-                                                                                             kStreamAPI,
-                                                                                             kStreamCascAPI,
-                                                                                             TP_ORIG_PAR_POWER,
-                                                                                             TP_RND,
-                                                                                             TP_SAT,
-                                                                                             TP_TWIDDLE_MODE> {
+                                       TP_TWIDDLE_MODE,
+                                       TT_OUT_DATA> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                                                                         TT_TWIDDLE,
+                                                                                         TP_POINT_SIZE,
+                                                                                         TP_FFT_NIFFT,
+                                                                                         TP_SHIFT,
+                                                                                         TP_CASC_LEN,
+                                                                                         TP_DYN_PT_SIZE,
+                                                                                         TP_WINDOW_VSIZE,
+                                                                                         kStreamAPI,
+                                                                                         kStreamCascAPI,
+                                                                                         TP_ORIG_PAR_POWER,
+                                                                                         TP_RND,
+                                                                                         TP_SAT,
+                                                                                         TP_TWIDDLE_MODE,
+                                                                                         TT_OUT_DATA> {
    public:
     /**
      * I/O is an iobuffer in of TT_DATA type and for output a cascade and stream.
@@ -1795,7 +1866,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TT_TWIDDLE,
                                        TP_POINT_SIZE,
@@ -1810,20 +1882,22 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_ORIG_PAR_POWER,
                                        TP_RND,
                                        TP_SAT,
-                                       TP_TWIDDLE_MODE> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
-                                                                                             TT_TWIDDLE,
-                                                                                             TP_POINT_SIZE,
-                                                                                             TP_FFT_NIFFT,
-                                                                                             TP_SHIFT,
-                                                                                             TP_CASC_LEN,
-                                                                                             TP_DYN_PT_SIZE,
-                                                                                             TP_WINDOW_VSIZE,
-                                                                                             kWindowAPI,
-                                                                                             kWindowAPI,
-                                                                                             TP_ORIG_PAR_POWER,
-                                                                                             TP_RND,
-                                                                                             TP_SAT,
-                                                                                             TP_TWIDDLE_MODE> {
+                                       TP_TWIDDLE_MODE,
+                                       TT_OUT_DATA> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                                                                         TT_TWIDDLE,
+                                                                                         TP_POINT_SIZE,
+                                                                                         TP_FFT_NIFFT,
+                                                                                         TP_SHIFT,
+                                                                                         TP_CASC_LEN,
+                                                                                         TP_DYN_PT_SIZE,
+                                                                                         TP_WINDOW_VSIZE,
+                                                                                         kWindowAPI,
+                                                                                         kWindowAPI,
+                                                                                         TP_ORIG_PAR_POWER,
+                                                                                         TP_RND,
+                                                                                         TP_SAT,
+                                                                                         TP_TWIDDLE_MODE,
+                                                                                         TT_OUT_DATA> {
    public:
     static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
     /**
@@ -1841,7 +1915,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                                                     kSampleIntlv,
                                                                     kHeaderBytes> >();
     kernel m_outWidgetKernel = kernel::create_object<
-        widget_api_cast<TT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv, kHeaderBytes> >();
+        widget_api_cast<TT_OUT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv, kHeaderBytes> >();
 
     fft_ifft_dit_1ch_baseports_graph() {
         // Make data connections
@@ -1850,8 +1924,8 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
         dimensions(m_inWidgetKernel.out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
         connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
-        dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
-        dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
         connect<stream>(m_outWidgetKernel.out[0], out[0]);
         connect<cascade>(m_outWidgetKernel.out[1], out[1]);
 
@@ -1882,7 +1956,8 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER = 0, // invalid default because this must be set.
           unsigned int TP_RND = 0,
           unsigned int TP_SAT = 1,
-          unsigned int TP_TWIDDLE_MODE = 0>
+          unsigned int TP_TWIDDLE_MODE = 0,
+          typename TT_OUT_DATA = TT_DATA>
 class fft_ifft_dit_1ch_mono_graph : public fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                                                             TT_TWIDDLE,
                                                                             TP_POINT_SIZE,
@@ -1897,7 +1972,8 @@ class fft_ifft_dit_1ch_mono_graph : public fft_ifft_dit_1ch_baseports_graph<TT_D
                                                                             TP_ORIG_PAR_POWER,
                                                                             TP_RND,
                                                                             TP_SAT,
-                                                                            TP_TWIDDLE_MODE> {
+                                                                            TP_TWIDDLE_MODE,
+                                                                            TT_OUT_DATA> {
     // This is the default for cint32 and cfloat
 };
 
@@ -1915,7 +1991,8 @@ template <typename TT_TWIDDLE,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_TWIDDLE_MODE>
+          unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA>
 class fft_ifft_dit_1ch_mono_graph<cint16,
                                   TT_TWIDDLE,
                                   TP_POINT_SIZE,
@@ -1930,21 +2007,23 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
                                   TP_ORIG_PAR_POWER,
                                   TP_RND,
                                   TP_SAT,
-                                  TP_TWIDDLE_MODE> : public fft_ifft_dit_1ch_baseports_graph<cint16,
-                                                                                             TT_TWIDDLE,
-                                                                                             TP_POINT_SIZE,
-                                                                                             TP_FFT_NIFFT,
-                                                                                             TP_SHIFT,
-                                                                                             TP_CASC_LEN,
-                                                                                             TP_DYN_PT_SIZE,
-                                                                                             TP_WINDOW_VSIZE,
-                                                                                             TP_IN_API,
-                                                                                             TP_OUT_API,
-                                                                                             TP_USE_WIDGETS,
-                                                                                             TP_ORIG_PAR_POWER,
-                                                                                             TP_RND,
-                                                                                             TP_SAT,
-                                                                                             TP_TWIDDLE_MODE> {
+                                  TP_TWIDDLE_MODE,
+                                  TT_OUT_DATA> : public fft_ifft_dit_1ch_baseports_graph<cint16,
+                                                                                         TT_TWIDDLE,
+                                                                                         TP_POINT_SIZE,
+                                                                                         TP_FFT_NIFFT,
+                                                                                         TP_SHIFT,
+                                                                                         TP_CASC_LEN,
+                                                                                         TP_DYN_PT_SIZE,
+                                                                                         TP_WINDOW_VSIZE,
+                                                                                         TP_IN_API,
+                                                                                         TP_OUT_API,
+                                                                                         TP_USE_WIDGETS,
+                                                                                         TP_ORIG_PAR_POWER,
+                                                                                         TP_RND,
+                                                                                         TP_SAT,
+                                                                                         TP_TWIDDLE_MODE,
+                                                                                         TT_OUT_DATA> {
    public:
 #ifdef USE_GRAPH_SCOPE
     parameter fft_buf4096;
@@ -1953,7 +2032,7 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
     parameter fft_buf512;
     parameter fft_buf256;
     parameter fft_buf128;
-    parameter fft_buf2;
+    parameter fft_buf2[TP_CASC_LEN];
     fft_ifft_dit_1ch_mono_graph() {
         fft_buf4096 = parameter::array(fft_4096_tmp2);
         fft_buf2048 = parameter::array(fft_2048_tmp2);
@@ -1961,28 +2040,33 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
         fft_buf512 = parameter::array(fft_512_tmp2);
         fft_buf256 = parameter::array(fft_256_tmp2);
         fft_buf128 = parameter::array(fft_128_tmp2);
-        switch (TP_POINT_SIZE) {
-            case 4096:
-                fft_buf2 = fft_buf4096;
-                break;
-            case 2048:
-                fft_buf2 = fft_buf2048;
-                break;
-            case 1024:
-                fft_buf2 = fft_buf1024;
-                break;
-            case 512:
-                fft_buf2 = fft_buf512;
-                break;
-            case 256:
-                fft_buf2 = fft_buf256;
-                break;
-            default:
-                fft_buf2 = fft_buf128;
-                break;
-        }
-        for (int k = 0; k < TP_CASC_LEN; k++) {
-            connect<>(fft_buf2, this->m_fftKernels[k]);
+        for (int k = 0; k < TP_CASC_LEN; ++k) {
+            // Only the first kernel in a chain will see TT_DATA == cint16 input. All others will see cint32, so could
+            // reuse the input buffer.
+            // We only need to allocate a graph scoped buffer for the first kernel.
+            if (k == 0) {
+                switch (TP_POINT_SIZE) {
+                    case 4096:
+                        fft_buf2[k] = fft_buf4096;
+                        break;
+                    case 2048:
+                        fft_buf2[k] = fft_buf2048;
+                        break;
+                    case 1024:
+                        fft_buf2[k] = fft_buf1024;
+                        break;
+                    case 512:
+                        fft_buf2[k] = fft_buf512;
+                        break;
+                    case 256:
+                        fft_buf2[k] = fft_buf256;
+                        break;
+                    default:
+                        fft_buf2[k] = fft_buf128;
+                        break;
+                }
+                connect<>(fft_buf2[k], this->m_fftKernels[k]);
+            }
         }
     }
 #endif // USE_GRAPH_SCOPE
@@ -1998,24 +2082,16 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
 /**
  * @ingroup fft_graphs
  *
- * @brief fft_dit_1ch is a single-channel, decimation-in-time, fixed point size FFT.
- *
- * This class definition is only used with stream interfaces (TP_API == 1).
- * Stream interface FFT graph is offered with a dual input stream configuration,
- * which interleaves data samples between the streams.
- * Stream interface FFT implementation is capable of supporting parallel computation (TP_PARALLEL_POWER > 0).
- * Dynamic point size, with a header embedded in the data stream.
+ * @brief fft_dit_1ch is a single-channel, decimation-in-time FFT.
  *
  * These are the templates to configure the single-channel decimation-in-time class.
- * @tparam TT_DATA describes the type of individual data samples input to and
- *         output from the transform function. \n
+ * @tparam TT_DATA describes the type of individual data samples input to the transform function. \n
  *         This is a typename and must be one of the following: \n
  *         cint16, cint32, cfloat.
  *         For real-only operation, consider use of the widget_real2complex library element.
  * @tparam TT_TWIDDLE describes the type of twiddle factors of the transform. \n
  *         It must be one of the following: cint16, cint32, cfloat
  *         and must also satisfy the following rules:
- *         - 32 bit types are only supported when TT_DATA is also a 32 bit type,
  *         - TT_TWIDDLE must be an integer type if TT_DATA is an integer type
  *         - TT_TWIDDLE must be cfloat type if TT_DATA is a float type.
  * @tparam TP_POINT_SIZE is an unsigned integer which describes the number of samples in
@@ -2032,8 +2108,6 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
  *         The real part of the first sample indicates the forward (1) or inverse (0) transform. \n
  *         The real part of the second sample indicates the Radix2 power of the point size. \n
  *         e.g. for a 512 point size, this field would hold 9, as 2^9 = 512.
- *         The second least significant byte  8 bits of this field describe the Radix 2 power of the following \n
- *         frame. e.g. for a 512 point size, this field would hold 9, as 2^9 = 512. \n
  *         Any value below 4 or greater than log2(TP_POINT_SIZE) is considered illegal. \n
  *         The output window will also be preceeded by a 256 bit vector which is a copy of the input \n
  *         vector, but for the real part of the top sample, which is 0 to indicate a legal frame or 1 to \n
@@ -2044,8 +2118,7 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
  *         of point size 256 with TP_PARALLEL_POWER = 2 will have 4 lanes each with a minimum of 16 so the minimum \n
  *         legal point size here is 64.
  * @tparam TP_WINDOW_VSIZE is an unsigned integer which describes the number of samples to be processed in each call \n
- *         to the function. When TP_DYN_PT_SIZE is set to 1 the actual window size will be larger than TP_WINDOW_VSIZE
- *\n
+ *         to the function. When TP_DYN_PT_SIZE is set to 1 the actual window size will be larger than TP_WINDOW_VSIZE\n
  *         because the header is not included in TP_WINDOW_VSIZE. \n
  *         By default, TP_WINDOW_SIZE is set to match TP_POINT_SIZE. \n
  *         TP_WINDOW_SIZE may be set to be an integer multiple of the TP_POINT_SIZE, in which case
@@ -2061,11 +2134,11 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
  * @tparam TP_PARALLEL_POWER is an unsigned integer to describe N where 2^N is the numbers of subframe processors
  *         to use, so as to achieve higher throughput. \n
  *         The default is 0. With TP_PARALLEL_POWER set to 2, 4 subframe processors will be used, each of which
- *         takes 2 streams in for a total of 8 streams input and output. Sample[p] must be written to
- *         stream[p modulus q]
- *         where q is the number of streams.
+ *         takes 2 streams or one iobuffer in for a total of 8 streams or 4 iobuffers input and output.
+ *         Sample[p] must be written to stream or iobuffer number [p modulus q] where q is the number of ports.
+ *         A reciprocal operation must be performed on output ports.
  * @tparam TP_USE_WIDGETS is an unsigned integer to control the use of widgets for configurations which either use
- *         TP_API=1 or TP_PARALLEL_POWER>0. \n
+ *         TP_API=1 or TP_PARALLEL_POWER>0.  \n
  *         Designs with streaming IO (TP_API=1) and/or multiple subframe processors (TP_PARALLEL_POWER>0)
  *         will use streams internally, even if not externally. \n The default is not to use widgets
  *         but to have the stream to window conversion performed as part of the FFT kernel or R2combiner kernel.
@@ -2084,14 +2157,13 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
  *         - rnd_sym_zero   = Round halfway towards zero (away from infinity).
  *         - rnd_conv_even  = Round halfway towards nearest even number.
  *         - rnd_conv_odd   = Round halfway towards nearest odd number. \n
- *         No rounding is performed on ceil or floor mode variants. \n
- *         Other modes round to the nearest integer. They differ only in how
- *         they round for values of 0.5. \n
- *
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ *         Note that the FFT does not support floor and ceiling forms of rounding as these result in very poor
+ *         accuracy due to the form of internal calculations.
+ *         Rounding modes differ only in how they round for values of 0.5. \n
+ *         \n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
- *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
+ *         - 0: none           = No saturation is performed and the value is simply cropped (aliased).
  *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
  *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
  *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
@@ -2101,6 +2173,9 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
  *introduce errors
  *         - 1: 0.5 amplitude. Twiddle values are 1/2 that of mode 0 so as to avoid twiddle saturation. However,
  *twiddles are one bit less precise versus mode 0.
+ * @tparam TT_DATA_OUT describes the type of individual data samples output from the transform function. \n
+ *         This is a typename and must be cint16 / cint32 if TT_DATA is cint16 / cint32 or cfloat if TT_DATA is cfloat.
+ *         For real-only operation, consider use of the widget_real2complex library element.
  * @tparam TP_INDEX
  *         This parameter is for internal use regarding the recursion of the parallel power feature. \n
  *         It is recommended
@@ -2127,6 +2202,7 @@ template <typename TT_DATA,
           unsigned int TP_RND = 4,
           unsigned int TP_SAT = 1,
           unsigned int TP_TWIDDLE_MODE = 0,
+          typename TT_OUT_DATA = TT_DATA,
           // template params above this comment are user params. Params below are for recursive calls. Any new user
           // parameters should go above this comment.
           unsigned int TP_INDEX = 0,
@@ -2171,14 +2247,14 @@ class fft_ifft_dit_1ch_graph : public graph {
 
     /**
      * The input data to the function.
-     * I/O  is two parallel streams each TT_DATA type.
+     * I/O  is two parallel streams or one IObuffer each TT_DATA type.
      **/
 
     port_array<input, kPortsPerTile * kParallel_factor> in;
 
     /**
      * The output data from the function.
-     * I/O  is two parallel streams each TT_DATA type.
+     * I/O  is two parallel streams or one IObuffer each TT_DATA type.
      **/
     port_array<output, kOutputPorts> out;
 
@@ -2221,6 +2297,7 @@ class fft_ifft_dit_1ch_graph : public graph {
                            TP_RND,
                            TP_SAT,
                            TP_TWIDDLE_MODE,
+                           TT_OUT_DATA,
                            TP_INDEX,
                            TP_ORIG_PAR_POWER>
         FFTsubframe0;
@@ -2244,6 +2321,7 @@ class fft_ifft_dit_1ch_graph : public graph {
                            TP_RND,
                            TP_SAT,
                            TP_TWIDDLE_MODE,
+                           TT_OUT_DATA,
                            TP_INDEX + kParallel_factor / 2,
                            TP_ORIG_PAR_POWER>
         FFTsubframe1;
@@ -2256,18 +2334,22 @@ class fft_ifft_dit_1ch_graph : public graph {
         // create kernels and subgraphs
         if
             constexpr(TP_USE_WIDGETS == 0) {
-                create_r2comb_kernels<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, kR2Shift, TP_DYN_PT_SIZE,
+                create_r2comb_kernels<TT_OUT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, kR2Shift, TP_DYN_PT_SIZE,
                                       kWindowSize, TP_PARALLEL_POWER, kParallel_factor - 1, TP_INDEX, TP_ORIG_PAR_POWER,
                                       TP_API, TP_USE_WIDGETS, TP_RND, TP_SAT, TP_TWIDDLE_MODE>::create(m_r2Comb);
             }
         else {
-            create_combInWidget_kernels<TT_DATA, kWindowSize, TP_PARALLEL_POWER, kParallel_factor - 1, TP_INDEX,
+            create_combInWidget_kernels<TT_OUT_DATA, kWindowSize, TP_PARALLEL_POWER, kParallel_factor - 1, TP_INDEX,
                                         TP_ORIG_PAR_POWER, TP_API, kHeaderBytes>::create(m_combInKernel);
-            create_r2comb_kernels<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, kR2Shift, TP_DYN_PT_SIZE,
+            create_r2comb_kernels<TT_OUT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, kR2Shift, TP_DYN_PT_SIZE,
                                   kWindowSize, TP_PARALLEL_POWER, kParallel_factor - 1, TP_INDEX, TP_ORIG_PAR_POWER,
                                   kWindowAPI, TP_USE_WIDGETS, TP_RND, TP_SAT, TP_TWIDDLE_MODE>::create(m_r2Comb);
-            create_combOutWidget_kernels<TT_DATA, kWindowSize, TP_PARALLEL_POWER, kParallel_factor - 1, TP_INDEX,
-                                         kHeaderBytes, TP_ORIG_PAR_POWER, TP_API>::create(m_combOutKernel);
+            if
+                constexpr(TP_API == 1 || TP_PARALLEL_POWER < TP_ORIG_PAR_POWER) {
+                    create_combOutWidget_kernels<TT_OUT_DATA, kWindowSize, TP_PARALLEL_POWER, kParallel_factor - 1,
+                                                 TP_INDEX, kHeaderBytes, TP_ORIG_PAR_POWER,
+                                                 TP_API>::create(m_combOutKernel);
+                }
         }
         // make input connections
         if
@@ -2297,8 +2379,8 @@ class fft_ifft_dit_1ch_graph : public graph {
                         connect<stream>(FFTsubframe0.out[i], m_combInKernel[i].in[0]);
                         connect<stream>(FFTsubframe1.out[i], m_combInKernel[i].in[1]);
                         connect<>(m_combInKernel[i].out[0], m_r2Comb[i].in[0]);
-                        dimensions(m_combInKernel[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
-                        dimensions(m_r2Comb[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                        dimensions(m_combInKernel[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+                        dimensions(m_r2Comb[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
                     }
                 }
             }
@@ -2314,8 +2396,8 @@ class fft_ifft_dit_1ch_graph : public graph {
                         connect<cascade>(FFTsubframe0.out[i], m_combInKernel[i].in[0]);
                         connect<stream>(FFTsubframe1.out[i], m_combInKernel[i].in[1]);
                         connect<>(m_combInKernel[i].out[0], m_r2Comb[i].in[0]);
-                        dimensions(m_combInKernel[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
-                        dimensions(m_r2Comb[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                        dimensions(m_combInKernel[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+                        dimensions(m_r2Comb[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
                     }
                 } else { // bottom half
                     if
@@ -2327,8 +2409,8 @@ class fft_ifft_dit_1ch_graph : public graph {
                         connect<stream>(FFTsubframe0.out[i], m_combInKernel[i].in[0]);
                         connect<cascade>(FFTsubframe1.out[i], m_combInKernel[i].in[1]);
                         connect<>(m_combInKernel[i].out[0], m_r2Comb[i].in[0]);
-                        dimensions(m_combInKernel[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
-                        dimensions(m_r2Comb[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                        dimensions(m_combInKernel[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+                        dimensions(m_r2Comb[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
                     }
                 }
             }
@@ -2347,8 +2429,8 @@ class fft_ifft_dit_1ch_graph : public graph {
                         }
                     else {
                         connect<>(m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
-                        dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
-                        dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                        dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+                        dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
                         connect<stream>(m_combOutKernel[i].out[0], out[i]);
                         if (kStreamsPerTile == 2) {
                             connect<stream>(m_combOutKernel[i].out[1], out[i + kParallel_factor]);
@@ -2358,7 +2440,7 @@ class fft_ifft_dit_1ch_graph : public graph {
             } else {
                 for (int i = 0; i < kParallel_factor; i++) {
                     connect<>(m_r2Comb[i].out[0], out[i]);
-                    dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                    dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
                 }
             }
         } else { // not top level, so outputs are internal trellis connections
@@ -2372,8 +2454,8 @@ class fft_ifft_dit_1ch_graph : public graph {
                         }
                     else {
                         connect(m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
-                        dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
-                        dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                        dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+                        dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
                         connect<stream>(m_combOutKernel[i].out[0], out[i]);
                         connect<stream>(m_combOutKernel[i].out[1], out[i + kParallel_factor]);
                     }
@@ -2388,8 +2470,8 @@ class fft_ifft_dit_1ch_graph : public graph {
                             }
                         else {
                             connect(m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
-                            dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
-                            dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                            dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+                            dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
                             connect<cascade>(m_combOutKernel[i].out[0], out[i]);
                             connect<stream>(m_combOutKernel[i].out[1], out[i + kParallel_factor]);
                         }
@@ -2401,8 +2483,8 @@ class fft_ifft_dit_1ch_graph : public graph {
                             }
                         else {
                             connect(m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
-                            dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
-                            dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                            dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+                            dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
                             connect<stream>(m_combOutKernel[i].out[0], out[i]);
                             connect<cascade>(m_combOutKernel[i].out[1], out[i + kParallel_factor]);
                         }
@@ -2439,9 +2521,9 @@ class fft_ifft_dit_1ch_graph : public graph {
  * @brief fft_dit_1ch template specialization for single (monolithic) FFT, window API
  *
  * Window interface (kWindowAPI = 0) FFT graph is offered with a single input windowed, ping-pong buffer.
- * Window interface FFT implementation does not support parallel computation (TP_PARALLEL_POWER = 0 only).
- * However, dynamic point size is available (TP_DYN_PT_SIZE = 1), which allows a window buffer size to be an integer
- * multiple of the FFT's point size ( TP_WINDOW_VSIZE = N * TP_POINT_SIZE).
+ * Dynamic point size is available (TP_DYN_PT_SIZE = 1), which allows a runtime configurable FFT point size.
+ * In addition, window buffer size can be an integer multiple of the FFT's point size ( TP_WINDOW_VSIZE = N *
+ *TP_POINT_SIZE).
  * Feature offers performance improvements, particularly with small FFT graphs.
 **/
 template <typename TT_DATA,
@@ -2456,6 +2538,7 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_SAT,
           unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA,
           unsigned int TP_INDEX,
           unsigned int TP_ORIG_PAR_POWER>
 class fft_ifft_dit_1ch_graph<TT_DATA,
@@ -2472,10 +2555,12 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
                              TP_RND,
                              TP_SAT,
                              TP_TWIDDLE_MODE,
+                             TT_OUT_DATA,
                              TP_INDEX,
                              TP_ORIG_PAR_POWER> : public graph {
    public:
     static constexpr unsigned int TP_PARALLEL_POWER = 0; // for this specialization
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
     static constexpr unsigned int kOutAPI =
         fnGetFFTSubframeOutAPI<kWindowAPI, TP_ORIG_PAR_POWER, TP_PARALLEL_POWER, TP_INDEX>(); // 0=win, 1=stream,
                                                                                               // 2=casc/strm,
@@ -2517,7 +2602,8 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
                                 TP_ORIG_PAR_POWER,
                                 TP_RND,
                                 TP_SAT,
-                                TP_TWIDDLE_MODE>
+                                TP_TWIDDLE_MODE,
+                                TT_OUT_DATA>
         FFTwinproc;
 
     /**
@@ -2532,7 +2618,10 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
     fft_ifft_dit_1ch_graph() {
         connect<>(in[0], FFTwinproc.in[0]);
         if
-            constexpr(kOutAPI == 0) { connect<>(FFTwinproc.out[0], out[0]); }
+            constexpr(kOutAPI == 0) {
+                connect<>(FFTwinproc.out[0], out[0]);
+                //            dimensions(FFTwinproc.out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+            }
         else {
             connect<>(FFTwinproc.out[0], out[0]);
             connect<>(FFTwinproc.out[1], out[1]);
@@ -2563,6 +2652,7 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_SAT,
           unsigned int TP_TWIDDLE_MODE,
+          typename TT_OUT_DATA,
           unsigned int TP_INDEX,
           unsigned int TP_ORIG_PAR_POWER>
 class fft_ifft_dit_1ch_graph<TT_DATA,
@@ -2579,6 +2669,7 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
                              TP_RND,
                              TP_SAT,
                              TP_TWIDDLE_MODE,
+                             TT_OUT_DATA,
                              TP_INDEX,
                              TP_ORIG_PAR_POWER> : public graph {
    public:
@@ -2620,7 +2711,8 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
                                 TP_ORIG_PAR_POWER,
                                 TP_RND,
                                 TP_SAT,
-                                TP_TWIDDLE_MODE>
+                                TP_TWIDDLE_MODE,
+                                TT_OUT_DATA>
         FFTstrproc;
 
     /**

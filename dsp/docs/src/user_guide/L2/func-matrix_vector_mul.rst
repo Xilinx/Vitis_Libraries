@@ -26,6 +26,10 @@ The graph entry point is the following:
 
     xf::dsp::aie::blas::matrix_vector_mul::matrix_vector_mul_graph
 
+Device Support
+==============
+The Matrix-Vector Multiply supports AIE and AIE-ML devices.
+
 Supported Types
 ===============
 

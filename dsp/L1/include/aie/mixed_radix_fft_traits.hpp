@@ -17,13 +17,6 @@
 #ifndef _DSPLIB_mixed_radix_fft_TRAITS_HPP_
 #define _DSPLIB_mixed_radix_fft_TRAITS_HPP_
 
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
-
 /*
 MIXED_RADIX_FFT traits.
 This file contains sets of overloaded, templatized and specialized templatized functions which
@@ -42,9 +35,39 @@ namespace mixed_radix_fft {
 //-------------------------------------
 // app-specific constants
 
-constexpr int kMaxRadix = 5;
-constexpr int kMaxStages = 12; // 4096 is 12 radix2 stages
+constexpr int kMaxRadix = 5;     // for static
+constexpr int kMaxStages = 12;   // 4096 is 12 radix2 stages - for static
+constexpr int kMaxStagesR2 = 12; // for dynamic - as per dsplib_internal_scripts/mrfft_dynptsize_luts_gen.py
+constexpr int kMaxStagesR3 = 6;  // for dynamic - as per dsplib_internal_scripts/mrfft_dynptsize_luts_gen.py
+constexpr int kMaxStagesR5 = 4;  // for dynamic - as per dsplib_internal_scripts/mrfft_dynptsize_luts_gen.py
 constexpr int kNumMaxTables = kMaxRadix * kMaxStages;
+
+// For dynamic - constants for radix stages
+constexpr int kR5 = 5;
+constexpr int kR3 = 3;
+constexpr int kR2 = 2;
+constexpr int kR4 = 4;
+#define __ONLY_R2_STAGES__ \
+    1 // Only use radix 2 stages. Do not perform any radix 4 stages ever. 1 or 0 when AIE1. Only 0 for AIE-ML.
+constexpr int minNumR2 = 3; // point sizes must be divisible by 8 for MRFFT
+
+constexpr int kMaxStagesR4 = kMaxStagesR2 >> 1;
+constexpr int kMaxTotalStages = kMaxStagesR2;
+constexpr int kMaxLegs = 2 * kMaxStagesR4 + kMaxStagesR3 * (kR3 - 1) + kMaxStagesR5 * (kR5 - 1) + 1;
+
+// For dynamic - header type / ancillary fields in twiddles structure type
+typedef int32 T_ancillaryFields;
+constexpr int kNumAncillaryPerRow = 256 / (8 * sizeof(T_ancillaryFields));
+static constexpr int m_knRmultiple = (kMaxStagesR2 - minNumR2) * kMaxStagesR3 * kMaxStagesR5;
+
+// For dynamic - structure of Twiddles and Ancillary Fields (in terms of "rows" of 256 bits) // TODO this may need to be
+// altered (perhaps doubled) for twiddles of larger sized data type
+constexpr int headerIdxStart = 0;
+constexpr int factorsStagePtSizeIdxStart = 1;
+constexpr int factorsStepsizeIdxStart = factorsStagePtSizeIdxStart + 1;
+constexpr int indexIdxStart =
+    factorsStepsizeIdxStart + 1; // plus 1 each time because vectors of 16 int16's and 16>maxStages always
+constexpr int twiddleIdxStart = indexIdxStart + 3; // maximum 3 rows needed for indices for all pointsizes
 
 // Defensive check functions
 // End of Defensive check functions
@@ -52,7 +75,7 @@ constexpr int kNumMaxTables = kMaxRadix * kMaxStages;
 //---------------------------------------------------
 // Functions
 
-template <int T_PTSIZE, int RADIX>
+template <int T_PTSIZE, int RADIX, typename T_TW>
 constexpr int fnGetNumStages() {
     constexpr int kMaxStages = 10;
     int numStages = 0;
@@ -60,7 +83,10 @@ constexpr int fnGetNumStages() {
     // Vectorization in the final stage sets limits on factorization. e.g. radi4 stage on AIE1 outputs 16 samples, so
     // if radix4 is used, the point size must be a multiple of 16. Else set radix4 stages to 0 and hope that radix 2
     // will factorize.
-    if (RADIX == 4 && ptSize % __MRFFT_ATOM__ != 0) return 0;
+    if (RADIX == 4 &&
+        ((ptSize % __MRFFT_ATOM__ != 0) ||     // if factorization fails, return 0 and try radix2 stages instead.
+         (std::is_same<T_TW, cfloat>::value))) // there is no api for radix4 cfloat stage.
+        return 0;
 
     for (int i = 0; i < kMaxStages; i++) {
         if (ptSize % RADIX == 0) {
@@ -71,12 +97,15 @@ constexpr int fnGetNumStages() {
     return numStages;
 }
 
-template <int T_PTSIZE, int RADIX>
+template <int T_PTSIZE, int RADIX, typename T_TW>
 constexpr int fnGetRadixFactor() {
     constexpr int kMaxStages = 10;
     int radixFactor = 1;
     int ptSize = T_PTSIZE;
-    if (RADIX == 4 && ptSize % __MRFFT_ATOM__ != 0) return 1;
+    if (RADIX == 4 &&
+        ((ptSize % __MRFFT_ATOM__ != 0) ||     // if factorization fails, return 0 and try radix2 stages instead.
+         (std::is_same<T_TW, cfloat>::value))) // there is no api for radix4 cfloat stage.
+        return 1;
 
     for (int i = 0; i < kMaxStages; i++) {
         if (ptSize % RADIX == 0) {

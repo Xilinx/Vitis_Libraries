@@ -21,9 +21,7 @@
 FFT/iFFT DIT single channel reference model
 */
 
-#ifndef _DSPLIB_FFT_IFFT_DIT_1CH_REF_DEBUG_
 //#define _DSPLIB_FFT_IFFT_DIT_1CH_REF_DEBUG_
-#endif //_DSPLIB_FFT_IFFT_DIT_1CH_REF_DEBUG_
 
 #include <adf.h>
 #include <limits>
@@ -52,7 +50,8 @@ template <typename TT_DATA,    // type of data input and output
           unsigned int TP_ORIG_PAR_POWER = 0,
           unsigned int TP_RND = 0,
           unsigned int TP_SAT = 1,
-          unsigned int TP_TWIDDLE_MODE = 0>
+          unsigned int TP_TWIDDLE_MODE = 0,
+          typename TT_OUT_DATA = TT_DATA>
 class fft_ifft_dit_1ch_ref {
    private:
     TT_TWIDDLE twiddles[TP_POINT_SIZE];
@@ -94,8 +93,8 @@ class fft_ifft_dit_1ch_ref {
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fft_ifft_dit_1ch_ref::fft); }
     // FFT
-    void fft(input_buffer<TT_DATA>& inWindow, output_buffer<TT_DATA>& outWindow);
-    void nonBitAccfft(input_buffer<TT_DATA>& inWindow, output_buffer<TT_DATA>& outWindow);
+    void fft(input_buffer<TT_DATA>& inWindow, output_buffer<TT_OUT_DATA>& outWindow);
+    void nonBitAccfft(input_buffer<TT_DATA>& inWindow, output_buffer<TT_OUT_DATA>& outWindow);
 };
 }
 }

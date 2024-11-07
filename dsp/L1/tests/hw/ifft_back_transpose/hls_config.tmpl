@@ -1,0 +1,18 @@
+[hls]
+
+clock=3.20
+flow_target=vitis
+syn.file=${XF_PROJ_ROOT}/L1/src/hw/ifft_back_transpose/ifft_back_transpose.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/src/hw/ifft_back_transpose/ifft_back_transpose.cpp, -I${XF_PROJ_ROOT}/L1/src -DSSR=5 -DPOINT_SIZE=4096
+syn.top=ifft_back_transpose_wrapper
+tb.file=test_ifft_back_transpose.cpp
+tb.file_cflags=test_ifft_back_transpose.cpp,-I${XF_PROJ_ROOT}/L1/src/hw/ifft_back_transpose -DSSR=5 -DPOINT_SIZE=4096
+syn.debug.enable=1
+cosim.trace_level=port
+cosim.wave_debug=true
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog

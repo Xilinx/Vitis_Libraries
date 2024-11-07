@@ -69,9 +69,9 @@ kronecker<TT_DATA_A,
                                   output_buffer<outTypeMult_t<TT_DATA_A, TT_DATA_B> >& __restrict outWindow) {
     using dataVectA_t = ::aie::vector<TT_DATA_A, kSamplesInVectA>;
     using dataVectB_t = ::aie::vector<TT_DATA_B, kSamplesInVectB>;
-    using dataVectOut_t = ::aie::vector<TT_OUT, kSamplesInVectOut>;
-    using dataVectTempOut_t = ::aie::vector<TT_OUT, kSamplesInVectTempOut>;
-    ::aie::accum<typename kmpAcc<TT_DATA_A, TT_DATA_B>::type, kVecSampleNumAcc> acc;
+    using dataVectOut_t = ::aie::vector<out_t, kSamplesInVectOut>;
+    using dataVectTempOut_t = ::aie::vector<out_t, kSamplesInVectTempOut>;
+    ::aie::accum<acc_t, kVecSampleNumAcc> acc;
     dataVectA_t* ptrInWindowA = (dataVectA_t*)inWindowA.data();
     dataVectB_t* ptrInWindowB = (dataVectB_t*)inWindowB.data();
     dataVectOut_t* ptrOutWindow = (dataVectOut_t*)outWindow.data();
@@ -104,8 +104,8 @@ kronecker<TT_DATA_A,
                             for (int numVecB = 0; numVecB < TP_DIM_B_ROWS / kSamplesInVectB;
                                  numVecB++) { // Mat B: vectors per column
                                 inDataVecB = *ptrInWindowB++;
-                                acc = ::aie::mul(inDataVecA[indexVecA], inDataVecB);
-                                outDataVecTemp = acc.template to_vector<outTypeMult_t<TT_DATA_A, TT_DATA_B> >(TP_SHIFT);
+                                acc = ::aie::mul<acc_t>(inDataVecA[indexVecA], inDataVecB);
+                                outDataVecTemp = acc.template to_vector<out_t>(TP_SHIFT);
 
 #pragma unroll(kSamplesInVectTempOut / kSamplesInVectOut)
                                 for (int n = 0; n < kSamplesInVectTempOut / kSamplesInVectOut; n++) {
@@ -138,25 +138,24 @@ template <typename TT_DATA_A,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-NOINLINE_DECL void
-kronecker<TT_DATA_A,
-          TT_DATA_B,
-          TP_DIM_A_ROWS,
-          TP_DIM_A_COLS,
-          TP_DIM_B_ROWS,
-          TP_DIM_B_COLS,
-          TP_NUM_FRAMES,
-          1,
-          TP_SHIFT,
-          TP_RND,
-          TP_SAT>::kronecker_main(input_buffer<TT_DATA_A>& __restrict inWindowA,
-                                  input_buffer<TT_DATA_B>& __restrict inWindowB,
-                                  output_stream<outTypeMult_t<TT_DATA_A, TT_DATA_B> >* __restrict outStream0) {
+NOINLINE_DECL void kronecker<TT_DATA_A,
+                             TT_DATA_B,
+                             TP_DIM_A_ROWS,
+                             TP_DIM_A_COLS,
+                             TP_DIM_B_ROWS,
+                             TP_DIM_B_COLS,
+                             TP_NUM_FRAMES,
+                             1,
+                             TP_SHIFT,
+                             TP_RND,
+                             TP_SAT>::kronecker_main(input_buffer<TT_DATA_A>& __restrict inWindowA,
+                                                     input_buffer<TT_DATA_B>& __restrict inWindowB,
+                                                     output_stream<out_t>* __restrict outStream0) {
     using dataVectA_t = ::aie::vector<TT_DATA_A, kSamplesInVectA>;
     using dataVectB_t = ::aie::vector<TT_DATA_B, kSamplesInVectB>;
-    using dataVectOut_t = ::aie::vector<TT_OUT, kSamplesInVectOut>;
-    using dataVectTempOut_t = ::aie::vector<TT_OUT, kSamplesInVectTempOut>;
-    ::aie::accum<typename kmpAcc<TT_DATA_A, TT_DATA_B>::type, kVecSampleNumAcc> acc;
+    using dataVectOut_t = ::aie::vector<out_t, kSamplesInVectOut>;
+    using dataVectTempOut_t = ::aie::vector<out_t, kSamplesInVectTempOut>;
+    ::aie::accum<acc_t, kVecSampleNumAcc> acc;
 
     dataVectA_t* ptrInWindowA = (dataVectA_t*)inWindowA.data();
     dataVectB_t* ptrInWindowB = (dataVectB_t*)inWindowB.data();
@@ -189,12 +188,12 @@ kronecker<TT_DATA_A,
                             for (int numVecB = 0; numVecB < TP_DIM_B_ROWS / kSamplesInVectB;
                                  numVecB++) { // Mat B: vectors per column
                                 inDataVecB = *ptrInWindowB++;
-                                acc = ::aie::mul(inDataVecA[indexVecA], inDataVecB);
-                                outDataVecTemp = acc.template to_vector<TT_OUT>(TP_SHIFT);
-// writeincr<aie_stream_resource_out::a, TT_OUT, kSamplesInVectOut>(outStream0, outDataVec);
+                                acc = ::aie::mul<acc_t>(inDataVecA[indexVecA], inDataVecB);
+                                outDataVecTemp = acc.template to_vector<out_t>(TP_SHIFT);
+// writeincr<aie_stream_resource_out::a, out_t, kSamplesInVectOut>(outStream0, outDataVec);
 #pragma unroll(kSamplesInVectTempOut / kSamplesInVectOut)
                                 for (int n = 0; n < kSamplesInVectTempOut / kSamplesInVectOut; n++) {
-                                    writeincr<aie_stream_resource_out::a, TT_OUT, kSamplesInVectOut>(
+                                    writeincr<aie_stream_resource_out::a, out_t, kSamplesInVectOut>(
                                         outStream0, outDataVecTemp.template extract<kSamplesInVectOut>(n));
                                 }
                                 indexMatB++;

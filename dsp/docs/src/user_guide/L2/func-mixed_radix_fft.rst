@@ -9,7 +9,7 @@
 Mixed Radix FFT
 ===============
 
-This library element implements an FFT or Inverse FFT of a point size which is not a power of 2 but is a product of a power of 2, a power of 3, and a power of 5.
+This library element implements an FFT or Inverse FFT of a point size which is not a power of 2 only but is a product of a power of 2, a power of 3, and a power of 5.
 
 Entry Point
 ===========
@@ -22,11 +22,14 @@ The graph entry point is the following:
 
 Device Support
 ==============
-The mixed_radix_fft supports AIE1 and AIE_ML. All features are supported on these variants with minor differences as follows:
+The mixed_radix_fft supports AIE and AIE-ML devices.
 
-- ``TP_POINT_SIZE``: The width of vectors used for calculations differs by AIE variant. The point size ``TP_POINT_SIZE`` must be a multiple of the number of samples processed in an atomic vectorized butterfly operation. This is 16 for AIE1 and 32 for AIE-ML.
-- ``TP_RND``: Supported round modes differ between AIE1 and AIE2 as for all library elements.
-- Number of ports: When configured for ``TP_API=1`` (stream IO), AIE1 will require 2 input ports (sample interleaved - even samples on the first port) and 2 output ports similarly interleaved. AIE-ML accepts one stream only.
+All features are supported on these variants with minor differences as follows:
+
+- ``TP_POINT_SIZE``: The width of vectors used for calculations differs by AIE variant. The point size ``TP_POINT_SIZE`` must be a multiple of the number of samples processed in an atomic vectorized butterfly operation. This is 16 for AIE and 32 for AIE-ML.
+- ``TP_RND``: Supported round modes differ between AIE and AIE-ML devices as for all library elements.
+- Number of ports: When configured for ``TP_API=1`` (stream IO), AIE will require 2 input ports (sample interleaved - even samples on the first port) and 2 output ports similarly interleaved. AIE-ML accepts one stream only.
+``TP_DYN_PT_SIZE``: the dynamic (run-time) point-size feature is supported on AIE only.
 
 Supported Types
 ===============
@@ -59,7 +62,35 @@ The Mixed Radix FFT performs an FFT or inverse FFT on a frame of data of point s
 Dynamic Point Size
 ------------------
 
-The Mixed Radix FFT does not currently support dynamic (runtime controlled) point sizes.
+Dynamic point size is selected using ``TP_DYN_PT_SIZE`` = 1. When set, the library unit has two input ports and two output ports. There is a header input port
+and a data input port. Similarly there is an output header port and an output data port.
+The header for both input and output is a fixed size of 256bits considered as 8 fields each of int32 type.
+The fields hold the following information:
+
+.. table:: Dynamic point size data header in Mixed Radix FFT
+   :align: center
+
+   +---------------+-------------------------------------------------------------------+
+   | Field index   |    Description                                                    |
+   +===============+===================================================================+
+   |    0          |    Direction. Set this to 0 for inverse FFT and 1 for forward FFT |
+   +---------------+-------------------------------------------------------------------+
+   |    1          |    Not used                                                       |
+   +---------------+-------------------------------------------------------------------+
+   |    2          |    N, where the point size is 2^N * 3^P * 5^Q                     |
+   +---------------+-------------------------------------------------------------------+
+   |    3          |    P, where the point size is 2^N * 3^P * 5^Q                     |
+   +---------------+-------------------------------------------------------------------+
+   |    4          |    Q, where the point size is 2^N * 3^P * 5^Q                     |
+   +---------------+-------------------------------------------------------------------+
+   |    5          |    Not used                                                       |
+   +---------------+-------------------------------------------------------------------+
+   |    6          |    Not used                                                       |
+   +---------------+-------------------------------------------------------------------+
+   |    7          |    Error flag (set on output if the pointsize is invalid)         |
+   +---------------+-------------------------------------------------------------------+
+
+
 
 Super Sample Rate Operation
 ---------------------------
@@ -131,6 +162,8 @@ The mixed radix FFT cascade feature is configured using the ``TP_CASC_LEN`` temp
 
 Use of the cascade feature to split the FFT operation over multiple tiles will improve the throughput, because each tile in question will have fewer ranks of processing to execute and so it is ready for a new frame to process earlier.
 
+The cascade feature is not supported for dynamic point size operation.
+
 API Type
 --------
 
@@ -139,6 +172,8 @@ The mixed radix FFT can be configured using ``TP_API`` to use IO buffer ports (0
 When configured for streams, additional kernels are added on the input and output to convert from streams to iobuffers and vice versa, because internally the kernel performing the FFT itself uses IO buffers.
 
 When configured to use streams, two streams are used. Even samples are to be supplied on the first stream input, and odd samples are to be supplied on the second input. In a similar fashion, even samples out appear on the first port out and odd samples out on the second port out.
+
+Streaming configuration is not supported for dynamic point size operation.
 
 Constraints
 -----------

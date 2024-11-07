@@ -82,6 +82,9 @@
             ]
         }
     ],
+    "associated_files": [
+        "LIB_DIR/L2/meta"
+    ],
     "testinfo": {
         "disable": false,
         "jobs": [

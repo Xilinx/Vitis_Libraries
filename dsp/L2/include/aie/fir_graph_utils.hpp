@@ -65,8 +65,7 @@ class casc_kernels {
     using thisKernelParentClass = typename fir_type<thisKernel_params>::parent_class;
 
     static constexpr int nextBdim = casc_params::Bdim - 1;
-    static constexpr unsigned int nextKernelRange =
-        fir_type<casc_params>::template getKernelFirRangeLen<casc_params::Bdim>();
+    static constexpr unsigned int nextKernelRange = fir_type<casc_params>::template getKernelFirRangeLen<nextBdim>();
 
     // Kernels with cascade out only have one output.
     // This assumption may not be needed.
@@ -82,6 +81,46 @@ class casc_kernels {
 
     // recursive call with updated params
     using next_casc_kernels = casc_kernels<nextKernel_params, fir_type>;
+
+    /**
+     * @brief Separate taps into a specific cascade segment.
+     */
+    static std::vector<typename casc_params::BTT_COEFF> segment_taps_array_for_cascade(
+        const std::vector<typename casc_params::BTT_COEFF>& taps,
+        const unsigned int kernelPosition,
+        const unsigned int cascLen) {
+        // FIR Length divided by cascade length and at this point also by SSR
+        // TDM doesn't require full array for each cascaded kernels, in addition to requiring a fraction of total array
+        // for SSR purposes
+        static constexpr unsigned int tdmTapOffsetPerPhase =
+            fir_type<thisKernel_params>::getFirCoeffOffset(); // in the range of 0 to FL-1
+        // lanes
+        static constexpr unsigned int lanes = fir_type<thisKernel_params>::getLanes();
+        static constexpr unsigned int firTapLanes = fir_type<thisKernel_params>::getFirRangeLen() * lanes;
+        static constexpr unsigned int firTapChannels = CEIL(thisKernel_params::BTP_TDM_CHANNELS, lanes) / lanes;
+
+        static constexpr unsigned int firTapOffsetPerPhase =
+            thisKernel_params::BTP_TDM_CHANNELS == 1 ? 0 : tdmTapOffsetPerPhase * lanes;
+        std::vector<typename casc_params::BTT_COEFF> cascTapsRange; //
+        for (unsigned int j = 0; j < firTapChannels; j++) {
+            for (unsigned int i = 0; i < firTapLanes; i++) {
+                unsigned int tdmCascOffset = firTapOffsetPerPhase + j * lanes * thisKernel_params::BTP_FIR_LEN;
+                unsigned int coefIndex = i + tdmCascOffset;
+                // if (coefIndex < taps.size()) {
+                if (coefIndex < (thisKernel_params::BTP_FIR_LEN * thisKernel_params::BTP_TDM_CHANNELS)) {
+                    cascTapsRange.push_back(taps.at(coefIndex));
+
+                } else {
+                    // padding
+                    cascTapsRange.push_back(fir::nullElem<typename casc_params::BTT_COEFF>());
+                }
+            }
+        }
+
+        // #undef _DSPLIB_FIR_GRAPH_UTILS_DEBUG_
+
+        return cascTapsRange;
+    }
 
    public:
     static void create_and_recurse(kernel firKernels[casc_params::BTP_CASC_LEN],
@@ -118,8 +157,10 @@ class casc_kernels {
         else if
             constexpr(thisKernelClass::getFirType() == eFIRVariant::kTDM) {
                 std::array<typename casc_params::BTT_DATA, thisKernelClass::getInternalBufferSize()> internalBuffer{};
+                std::vector<typename casc_params::BTT_COEFF> cascTaps(
+                    segment_taps_array_for_cascade(taps, casc_params::Bdim, casc_params::BTP_CASC_LEN));
 
-                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>(taps, internalBuffer);
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>(cascTaps, internalBuffer);
             }
         if
             constexpr(casc_params::Bdim != 0) { next_casc_kernels::create_and_recurse(firKernels, taps); }
@@ -167,6 +208,7 @@ template <typename ssr_params = fir_params_defaults, template <typename> typenam
 class ssr_kernels {
    public:
     using TT_DATA = typename ssr_params::BTT_DATA;
+    using TT_OUT_DATA = typename ssr_params::BTT_OUT_DATA;
     using TT_COEFF = typename ssr_params::BTT_COEFF;
     static constexpr unsigned int dim = ssr_params::Bdim;
     static constexpr unsigned int TP_FIR_LEN = ssr_params::BTP_FIR_LEN;
@@ -245,7 +287,7 @@ class ssr_kernels {
         std::vector<TT_COEFF> ssrPhaseTaps(segment_taps_array_for_phase(taps, ssrCoeffPhase));
         unsigned int kernelStartingIndexInt = isSSRaVector == 1 ? ssrDataPhase * TP_CASC_LEN : kernelStartingIndex;
 
-        static_assert((TP_FIR_LEN * TP_TDM_CHANNELS) % TP_SSR == 0, "TP_FIR LEN must be divisble by TP_SSR. "); //
+        static_assert((TP_FIR_LEN * TP_TDM_CHANNELS) % TP_SSR == 0, "TP_FIR LEN must be divisible by TP_SSR. "); //
         this_casc_kernels::create_and_recurse(firKernels + kernelStartingIndexInt, ssrPhaseTaps);
 
         if
@@ -345,7 +387,12 @@ class ssr_kernels {
             unsigned int ssrDataPhase = ssrInnerPhase;
             unsigned int kernelStartingIndex = ssrDataPhase * TP_CASC_LEN;
             kernel* firstKernelOfCascadeChain = m_firKernels + kernelStartingIndex;
-            input_connections(in[ssrDataPhase], firstKernelOfCascadeChain, ssrOutputPath, ssrInnerPhase, net);
+            // printParams<ssr_params>();
+
+            input_tdm_connections(in[ssrDataPhase], firstKernelOfCascadeChain, ssrOutputPath, ssrInnerPhase, net);
+
+            // connect all cascades together
+            cascade_tdm_connections(firstKernelOfCascadeChain);
 
             if
                 constexpr(TP_DUAL_IP == DUAL_IP_DUAL) {
@@ -550,6 +597,7 @@ class ssr_kernels {
     static std::vector<typename ssr_params::BTT_COEFF> segment_taps_array_for_phase(
         const std::vector<typename ssr_params::BTT_COEFF>& taps, const unsigned int coeffPhase) {
         std::vector<typename ssr_params::BTT_COEFF> ssrTapsRange; //
+        static constexpr unsigned int firTypeTapLenPerPhase = fir_type<ssr_params>::getTapLen();
         for (unsigned int i = 0; i < firTypeTapLenPerPhase; i++) {
             unsigned int coefIndex = i * ssr_params::BTP_SSR + coeffPhase;
             if (coefIndex < (ssr_params::BTP_FIR_LEN * ssr_params::BTP_TDM_CHANNELS)) {
@@ -560,8 +608,6 @@ class ssr_kernels {
                 ssrTapsRange.push_back(fir::nullElem<typename ssr_params::BTT_COEFF>());
             }
         }
-
-        //(firstTap, lastTap);
 
         return ssrTapsRange;
     }
@@ -590,7 +636,6 @@ class ssr_kernels {
         static constexpr int BTP_MODIFY_MARGIN_OFFSET = MODIFY_MARGIN_OFFSET;
     };
 
-    static constexpr unsigned int firTypeTapLenPerPhase = fir_type<ssr_params>::getTapLen();
     static constexpr unsigned int kernelStartingIndex =
         getKernelStartingIndex(ssrDataPhase, ssrOutputPath, ssr_params::BTP_SSR, ssr_params::BTP_CASC_LEN);
 
@@ -603,8 +648,9 @@ class ssr_kernels {
     static constexpr unsigned int DUAL_IP_PORT_POS = 1;
     static constexpr unsigned int INPUT_WINDOW_BYTESIZE =
         ssr_params::BTP_INPUT_WINDOW_VSIZE * sizeof(typename ssr_params::BTT_DATA);
-    static constexpr unsigned int OUTPUT_WINDOW_BYTESIZE =
-        TP_INTERPOLATE_FACTOR * INPUT_WINDOW_BYTESIZE / TP_DECIMATE_FACTOR;
+    static constexpr unsigned int OUTPUT_WINDOW_BYTESIZE = TP_INTERPOLATE_FACTOR * ssr_params::BTP_INPUT_WINDOW_VSIZE *
+                                                           sizeof(typename ssr_params::BTT_OUT_DATA) /
+                                                           TP_DECIMATE_FACTOR;
     static constexpr unsigned int MARGIN_BYTESIZE =
         fir_type<last_casc_params>::getSSRMargin() * sizeof(typename ssr_params::BTT_DATA);
 
@@ -647,6 +693,36 @@ class ssr_kernels {
         }
     }
 
+    // make connections for a
+    static void input_tdm_connections(
+        port<input>(&in), kernel firKernels[TP_CASC_LEN], int ssrOutPathIndex, int ssrInPhaseIndex, net_type& net) {
+        // make in connections
+        if (TP_API == USE_WINDOW_API) {
+            for (int i = 0; i < TP_CASC_LEN; i++) {
+                connect<>(in, firKernels[i].in[0]);
+                dimensions(firKernels[i].in[0]) = {INPUT_WINDOW_BYTESIZE / sizeof(TT_DATA)};
+            }
+        } else if (TP_API == USE_STREAM_API) {
+            for (int i = 0; i < TP_CASC_LEN; i++) {
+                net[ssrOutPathIndex][ssrInPhaseIndex][i] = new connect<stream, stream>(in, firKernels[i].in[0]);
+                fifo_depth(*net[ssrOutPathIndex][ssrInPhaseIndex][i]) = calculate_fifo_depth(i);
+            }
+        } else {
+            for (int i = 0; i < TP_CASC_LEN; i++) {
+                connect<>(in, firKernels[i].in[0]);
+                dimensions(firKernels[i].in[0]) = {INPUT_WINDOW_BYTESIZE / sizeof(TT_DATA)};
+            }
+        }
+    }
+
+    // make cascade connections
+    static void cascade_tdm_connections(kernel firKernels[TP_CASC_LEN]) {
+        for (int i = 1; i < TP_CASC_LEN; i++) {
+            // TDM always has input buffer, hence index is always 1
+            connect<cascade>(firKernels[i - 1].out[0], firKernels[i].in[1]);
+        }
+    }
+
     // make cascade connections
     static void cascade_connections(kernel firKernels[TP_CASC_LEN]) {
         for (int i = 1; i < TP_CASC_LEN; i++) {
@@ -661,7 +737,7 @@ class ssr_kernels {
         } else {
             if (TP_API == USE_WINDOW_API) {
                 connect<>(firKernels[TP_CASC_LEN - 1].out[0], out);
-                dimensions(firKernels[TP_CASC_LEN - 1].out[0]) = {OUTPUT_WINDOW_BYTESIZE / sizeof(TT_DATA)};
+                dimensions(firKernels[TP_CASC_LEN - 1].out[0]) = {OUTPUT_WINDOW_BYTESIZE / sizeof(TT_OUT_DATA)};
             } else {
                 connect<stream>(firKernels[TP_CASC_LEN - 1].out[0], out);
             }
@@ -694,11 +770,9 @@ class ssr_kernels {
         if
             constexpr(TP_NUM_OUTPUTS == 2 && casc_out == false) {
                 if (TP_API == USE_WINDOW_API) {
-                    // connect<window<OUTPUT_WINDOW_BYTESIZE> >(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS],
-                    // out2);
                     connect<>(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS], out2);
                     dimensions(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS]) = {OUTPUT_WINDOW_BYTESIZE /
-                                                                                      sizeof(TT_DATA)};
+                                                                                      sizeof(TT_OUT_DATA)};
                 } else {
                     connect<stream>(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS], out2);
                 }

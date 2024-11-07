@@ -89,11 +89,11 @@ create_input:
 	@echo starting create_input
 	@echo LOC_INPUT_FILE_A $(LOC_INPUT_FILE_A)
 	@echo LOC_INPUT_FILE_B $(LOC_INPUT_FILE_B)
-	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(WINDOW_VSIZE_A) $(NITER) $(SEED) $(STIM_TYPE) 0 0 $(T_DATA_A) $(API_IO) 1 0 ;\
-	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(WINDOW_VSIZE_B) $(NITER) $(SEED) $(STIM_TYPE) 0 0 $(T_DATA_B) $(API_IO) 1 0 ;\
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(WINDOW_VSIZE_A) $(NITER) $(SEED) $(STIM_TYPE) 0 0 $(T_DATA_A) $(API_IO) 1 0 ;\
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(WINDOW_VSIZE_B) $(NITER) $(SEED) $(STIM_TYPE) 0 0 $(T_DATA_B) $(API_IO) 1 0 ;\
-    perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl --file $(LOC_INPUT_FILE_A) --rows $(DIM_SIZE_A) --ssrSplit $(UUT_SSR) --split --type $(T_DATA_A) --NITER $(NITER);\
+	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(WINDOW_VSIZE_A) $(NITER) $(SEED) $(STIM_TYPE) 0 0 $(T_DATA_A) $(API_IO) 1 0 0 0 0 0 64 ;\
+	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(WINDOW_VSIZE_B) $(NITER) $(SEED) $(STIM_TYPE) 0 0 $(T_DATA_B) $(API_IO) 1 0 0 0 0 0 64 ;\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(WINDOW_VSIZE_A) $(NITER) $(SEED) $(STIM_TYPE) 0 0 $(T_DATA_A) $(API_IO) 1 0 0 0 0 0 64 ;\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(WINDOW_VSIZE_B) $(NITER) $(SEED) $(STIM_TYPE) 0 0 $(T_DATA_B) $(API_IO) 1 0 0 0 0 0 64 ;\
+    perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl --file $(LOC_INPUT_FILE_A) --rows $(DIM_SIZE_A) --ssrSplit $(UUT_SSR) --split --type $(T_DATA_A) --NITER $(NITER) --plioWidth 64 ;\
 	echo Input ready
 
 sim_ref:
@@ -114,14 +114,11 @@ prep_aie_out:
 	done
 
 get_diff:
-	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -f $(UUT_SIM_FILE) --rows $(shell echo $$(( $(DIM_SIZE_A) * $(DIM_SIZE_B) ))) --cols 1 --ssrSplit $(UUT_SSR) --casc 1 --zip -t $(T_DATA_A) -findOutType $(T_DATA_B) -n $(NITER) ;\
+	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -f $(UUT_SIM_FILE) --rows $(shell echo $$(( $(DIM_SIZE_A) * $(DIM_SIZE_B) ))) --cols 1 --ssrSplit $(UUT_SSR) --casc 1 --zip -t $(T_DATA_A) -findOutType $(T_DATA_B) -n $(NITER) --plioWidth 64 ;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)
 
 get_status:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
-
-get_qor:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_outer_tensor_theoretical_min.tcl $(T_DATA_A) $(T_DATA_B) $(DIM_OUT) $(STATUS_FILE) $(UUT_KERNEL) $(API_IO)
 
 get_latency:
 	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)

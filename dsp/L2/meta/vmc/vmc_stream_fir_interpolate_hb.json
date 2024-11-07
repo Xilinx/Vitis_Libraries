@@ -79,7 +79,7 @@
       "validator": {
         "file": "vmc_stream_fir_interpolate_hb.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "ssr", "interp_poly", "AIE_VARIANT"]
+        "args": [ "data_type", "use_coeff_reload", "coef_type","fir_length"]
       },
           "label": "Filter coefficients:",
             "tablabel": "Main",
@@ -102,7 +102,7 @@
       "validator": {
         "file": "vmc_stream_fir_interpolate_hb.py",
         "function": "vmc_validate_input_window_size",
-        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "ssr"]
+        "args": ["data_type", "coef_type", "coeff", "fir_length", "ssr", "use_coeff_reload"]
       },
             "label": "Input frame size (Number of samples):",
             "tablabel": "Main",
@@ -160,7 +160,7 @@
       "validator": {
         "file": "vmc_stream_fir_interpolate_hb.py",
         "function": "vmc_validate_ssr",
-        "args": []
+        "args": ["AIE_VARIANT", "data_type", "coef_type", "fir_length", "use_coeff_reload", "interp_poly", "coeff"]
       },
             "label": "SSR: ",
             "tablabel": "Main",
@@ -174,7 +174,7 @@
       "validator": {
         "file": "vmc_stream_fir_interpolate_hb.py",
         "function": "vmc_validate_interp_poly",
-        "args": ["ssr"]
+        "args": []
       },
             "label": "Number of interpolator polyphases:",
         "tablabel": "Main",
@@ -202,7 +202,7 @@
       "validator": {
         "file": "vmc_stream_fir_interpolate_hb.py",
         "function": "vmc_validate_casc_length",
-        "args": []
+        "args": ["AIE_VARIANT", "data_type", "coef_type", "fir_length", "use_coeff_reload", "interp_poly", "ssr", "coeff"]
       },
             "label": "Number of cascade stages:",
             "tablabel": "Main",

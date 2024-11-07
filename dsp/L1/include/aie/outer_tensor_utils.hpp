@@ -38,7 +38,7 @@ template <typename T_A, typename T_B>
 struct dataVect_t {
     using A = ::aie::vector<T_A, vecSampleNum<T_A, T_B>().A>;
     using B = ::aie::vector<T_B, vecSampleNum<T_A, T_B>().B>;
-    using Acc = ::aie::accum<typename tOuterTensorACC<T_A, T_B>::type, vecSampleNum<T_A, T_B>().Acc>;
+    using Acc = ::aie::accum<accTypeMult_t<T_A, T_B>, vecSampleNum<T_A, T_B>().Acc>;
     using TempOut = ::aie::vector<outTypeMult_t<T_A, T_B>, vecSampleNum<T_A, T_B>().TempOut>;
     using Out = ::aie::vector<outTypeMult_t<T_A, T_B>, vecSampleNum<T_A, T_B>().Out>;
 };

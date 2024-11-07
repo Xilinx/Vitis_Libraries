@@ -79,7 +79,7 @@
       "validator": {
         "file": "vmc_stream_fir_decimate_hb.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "ssr", "deci_poly", "AIE_VARIANT"]
+        "args": ["use_coeff_reload", "fir_length", "data_type", "coef_type"]
       },
             "label": "Filter coefficients:",
             "tablabel": "Main",
@@ -102,7 +102,7 @@
       "validator": {
         "file": "vmc_stream_fir_decimate_hb.py",
         "function": "vmc_validate_input_window_size",
-        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "ssr", "deci_poly"]
+        "args": ["AIE_VARIANT", "data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "ssr"]
       },
             "label": "Input frame size (Number of samples):",
             "tablabel": "Main",
@@ -160,7 +160,7 @@
       "validator": {
         "file": "vmc_stream_fir_decimate_hb.py",
         "function": "vmc_validate_ssr",
-        "args": []
+        "args": ["AIE_VARIANT", "data_type", "coef_type", "fir_length", "use_coeff_reload", "deci_poly", "coeff"]
       },
             "label": "SSR: ",
             "tablabel": "Main",
@@ -174,7 +174,7 @@
       "validator": {
         "file": "vmc_stream_fir_decimate_hb.py",
         "function": "vmc_validate_deci_poly",
-        "args": ["ssr"]
+        "args": []
       },
             "label": "Number of decimator polyphases:",
             "tablabel": "Main",
@@ -188,7 +188,7 @@
       "validator": {
         "file": "vmc_stream_fir_decimate_hb.py",
         "function": "vmc_validate_casc_length",
-        "args": ["use_coeff_reload", "fir_length"]
+        "args": ["use_coeff_reload", "fir_length", "AIE_VARIANT", "data_type", "coef_type", "deci_poly", "coeff", "ssr"]
       },
             "label": "Number of cascade stages:",
             "tablabel": "Main",

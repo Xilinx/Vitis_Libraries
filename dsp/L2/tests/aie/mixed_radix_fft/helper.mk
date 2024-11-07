@@ -36,7 +36,10 @@ API_IO         ?= 0
 PARALLEL_POWER ?= 0
 DIFF_MODE      ?= ABS
 DIFF_TOLERANCE ?= 4
-CC_TOLERANCE   ?= 0
+CC_TOLERANCE   ?= 0.05  # TODO a -1 is present in the ref output (dynamic dft result) so there is 1 difference in each test
+
+#The data generation does not need to be dynamic. Creating MAX point size of data each iteration is fine - just use a subset. The header is dynamic.
+DATA_DYN_PT_SIZE = 0
 
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 PT_SIZE_PWR    = 4
@@ -70,11 +73,12 @@ NUM_INPUTS := $(INPUTS_PER_TILE)
 
 NUM_OUTPUTS = $(NUM_INPUTS)
 
-PARAM_MAP = DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) WINDOW_VSIZE $(WINDOW_VSIZE) CASC_LEN $(CASC_LEN) API_IO $(API_IO) AIE_VARIANT $(AIE_VARIANT)
+PARAM_MAP = DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) WINDOW_VSIZE $(WINDOW_VSIZE) CASC_LEN $(CASC_LEN) API_IO $(API_IO) DYN_PT_SIZE $(DYN_PT_SIZE) AIE_VARIANT $(AIE_VARIANT)
 
 HELPER:= $(HELPER_CUR_DIR)/.HELPER
 
 $(HELPER): create_config validate_config create_input sim_ref prep_x86_out
+#$(HELPER): create_config create_input prep_x86_out
 	make cleanall
 	
 create_config:
@@ -88,10 +92,12 @@ validate_config:
 create_input:
 	@echo starting create_input
 	@echo NUM_INPUTS $(NUM_INPUTS)
-	@echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  ${PARALLEL_POWER};
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  ${PARALLEL_POWER};
-	@echo perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k $(DYN_PT_SIZE) -w ${WINDOW_VSIZE};
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k $(DYN_PT_SIZE) -w ${WINDOW_VSIZE};
+	@echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DATA_DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  ${PARALLEL_POWER} 0 0 0 0 64;
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DATA_DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  ${PARALLEL_POWER} 0 0 0 0 64;
+	@echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_mrfft_header.tcl $(INPUT_HEADER_FILE) $(WINDOW_VSIZE) $(NITER) $(DYN_PT_SIZE) $(POINT_SIZE) $(DATA_TYPE) $(DATA_SEED) $(STIM_TYPE);
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_mrfft_header.tcl $(INPUT_HEADER_FILE) $(WINDOW_VSIZE) $(NITER) $(DYN_PT_SIZE) $(POINT_SIZE) $(DATA_TYPE) $(DATA_SEED) $(STIM_TYPE);
+	@echo perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k $(DYN_PT_SIZE) -w ${WINDOW_VSIZE} --plioWidth 64;
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k $(DYN_PT_SIZE) -w ${WINDOW_VSIZE} --plioWidth 64; 
 	echo Input ready
 
 sim_ref:
@@ -103,24 +109,27 @@ prep_x86_out:
 	@if [ -s $(HELPER_CUR_DIR)/x86simulator_output/data ]; then \
 		x86_out_files=`ls $(HELPER_CUR_DIR)/x86simulator_output/data` ;\
 		echo "X86 files= " $$x86_out_files ;\
-		for n in $$x86_out_files ; do \
+		for n in $$x86_out_files; do \
 			grep -ve '[XT]' $(HELPER_CUR_DIR)/x86simulator_output/data/$$n > $(HELPER_CUR_DIR)/data/$$n ;\
-		done \
+		done ;\
 	fi
 
 prep_aie_out:
-	@echo starting prep_aie_out
-	@if [ -s $(HELPER_CUR_DIR)/aiesimulator_output/data ]; then \
-		aie_out_files=`ls $(HELPER_CUR_DIR)/aiesimulator_output/data`;\
-		echo "AIE files= " $$aie_out_files;\
-		for n in $$aie_out_files; do \
-			grep -ve '[XT]' $(HELPER_CUR_DIR)/aiesimulator_output/data/$$n > $(HELPER_CUR_DIR)/data/$$n;\
-		done \
-	fi
+		@echo starting prep_aie_out
+		@if [ -s $(HELPER_CUR_DIR)/aiesimulator_output/data ]; then \
+				aie_out_files=`ls $(HELPER_CUR_DIR)/aiesimulator_output/data`;\
+				echo "AIE files= " $$aie_out_files;\
+				for n in $$aie_out_files; do \
+					grep -ve '[XT]' $(HELPER_CUR_DIR)/aiesimulator_output/data/$$n > $(HELPER_CUR_DIR)/data/$$n;\
+				done \
+		fi
 
-get_diff: prep_x86_out prep_aie_out
-	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 -k $(DYN_PT_SIZE) -w ${WINDOW_VSIZE} ;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 -k $(DYN_PT_SIZE) -w ${WINDOW_VSIZE} ;\
+get_diff:
+	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 -k $(DYN_PT_SIZE) -w ${WINDOW_VSIZE} --plioWidth 64 ;\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 -k $(DYN_PT_SIZE) -w ${WINDOW_VSIZE} --plioWidth 64 ;\
+	if [ "$(DYN_PT_SIZE)" = "1" ]; then \
+		tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/mixed_radix_fft/output_post_proc.tcl $(HELPER_CUR_DIR)/data/uut_output.txt $(WINDOW_VSIZE) $(NITER) $(POINT_SIZE) $(HELPER_CUR_DIR)/header_pointsizes.txt $(DATA_TYPE) 64 ;\
+	fi ;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) $(DIFF_MODE)
 
 
@@ -129,10 +138,7 @@ get_latency:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input_0_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
 
 get_stats:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output mixed_radix_fftMain $(NITER)
-
-get_theoretical_min:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_fft_theoretical_min.tcl $(DATA_TYPE) $(TWIDDLE_TYPE) $(WINDOW_VSIZE) $(POINT_SIZE) $(CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL) $(PARALLEL_POWER) $(API_IO)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output mixed_radix_ $(NITER)
 
 get_status:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)

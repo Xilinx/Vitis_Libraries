@@ -28,7 +28,7 @@ def vmc_validate_twiddle_type(args):
 def vmc_validate_TP_RND(args):
   rnd_mode = args["rnd_mode"]
   AIE_VARIANT = args["AIE_VARIANT"]
-  return fn_validate_round_val(rnd_mode, AIE_VARIANT)
+  return fn_validate_roundMode(rnd_mode, AIE_VARIANT)
 
 #### VMC validators ####
 def vmc_validate_point_size(args, api, ssr):
@@ -43,7 +43,7 @@ def vmc_validate_point_size(args, api, ssr):
     data_type = args["data_type"]
     api = 1
     AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_validate_point_size(point_size, dyn_point_size, data_type, pp, api, AIE_VARIANT)
+    return fn_validate_TP_POINT_SIZE(AIE_VARIANT, data_type, api, pp, dyn_point_size, point_size)
 
 def vmc_validate_point_size_stream(args):
     api = 1
@@ -55,6 +55,22 @@ def vmc_validate_point_size_window(args):
     ssr = 1
     return vmc_validate_point_size(args, api, ssr)
 
+def vmc_validate_AIE_VARIANT(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_AIE_VARIANT(AIE_VARIANT);
+
+def vmc_validate_data_type(args):
+    data_type = args["data_type"]
+    return fn_validate_TT_DATA(data_type);
+
+def vmc_validate_data_out_type(args):
+    data_out_type = args["data_out_type"]
+    data_type = args["data_type"]
+    return fn_validate_data_out( data_type, data_out_type);
+
+def vmc_validate_ssr_widget_kernels(args):
+    use_ssr_widget_kernels = args["use_ssr_widget_kernels"]
+    return fn_validate_AIE_VARIANT(use_ssr_widget_kernels);
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]
@@ -95,7 +111,7 @@ def vmc_validate_sat_mode(args):
 
 def vmc_validate_twiddle_mode(args):
     twiddle_mode = args["twiddle_mode"]
-    return fn_validate_twiddleMode(twiddle_mode);
+    return fn_validate_TP_TWIDDLE_MODE(twiddle_mode);
 
 def vmc_validate_ssr(args,api):
     ssr = args["ssr"]
@@ -107,7 +123,7 @@ def vmc_validate_ssr(args,api):
     if pp == -1:
       return isError(f"Invalid SSR value specified. The value should be of the form 2^N between 2 and 512.")
 
-    return fn_validate_parallel_power(api, pp)
+    return fn_validate_parallel_power(pp)
 
 #In VMC the stream and windowed variants of FFT are separate IP, so neither has TP_API.
 #similarly, FFT and IFFT are separate units (except when dynamic because that take direction as a runtime arg)

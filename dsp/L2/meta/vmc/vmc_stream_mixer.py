@@ -8,14 +8,15 @@ def validate_AIE_VARIANT(args):
 
 def vmc_validate_data_type(args):
     data_type = args["data_type"]
-    mixer_mode = args["mixer_mode"]
-    return fn_validate_tt_data(data_type,mixer_mode);
+    return fn_validate_tt_data(data_type);
 
 def vmc_validate_output_window_size(args):
     tempargs = {}
     tempargs["TP_INPUT_WINDOW_VSIZE"] = args["input_window_size"]
     tempargs["TT_DATA"] = args["data_type"]
-    return validate_TP_WINDOW_VSIZE(tempargs)
+    tempargs["TP_SSR"] = args["ssr"]
+    tempargs["TP_API"] = 1
+    return validate_TP_INPUT_WINDOW_VSIZE(tempargs)
 
 def vmc_validate_ssr(args):
     ssr = args["ssr"]
@@ -23,7 +24,7 @@ def vmc_validate_ssr(args):
 
 def validate_USE_PHASE_RELOAD(args):
     tmpargs = {}
-    tmpargs["TP_SSR"] = 1
+    tmpargs["TP_SSR"] = args["ssr"]
     tmpargs["TP_USE_PHASE_RELOAD"] = args["USE_PHASE_RELOAD"]
     return validate_TP_USE_PHASE_RELOAD(tmpargs);
 

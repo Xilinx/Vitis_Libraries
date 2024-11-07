@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _DSPLIB_FFT_IFFT_DIT_1CH_REF_GRAPH_HPP_
-#define _DSPLIB_FFT_IFFT_DIT_1CH_REF_GRAPH_HPP_
+#ifndef _DSPLIB_DYNAMIC_DFT_REF_GRAPH_HPP_
+#define _DSPLIB_DYNAMIC_DFT_REF_GRAPH_HPP_
 
 #include <adf.h>
 #include <vector>
@@ -111,4 +111,4 @@ class dft_ref_graph : public graph {
 }
 }
 }
-#endif // _DSPLIB_dft_REF_GRAPH_HPP_
+#endif // _DSPLIB_DYNAMIC_DFT_REF_GRAPH_HPP_

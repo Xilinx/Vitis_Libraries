@@ -23,11 +23,6 @@
 #include "fft_r2comb_ref.hpp"
 #include "fir_ref_utils.hpp" //for rounding and saturation
 
-#ifndef _DSPLIB_FFT_R2_COMB_REF_DEBUG_
-//#define _DSPLIB_FFT_R2_COMB_REF_DEBUG_
-//#include "debug_utils.h"
-#endif //_DSPLIB_FFT_R2_COMB_REF_DEBUG_
-
 // unitVector cannot be in fft_ref_utils because that is used by 2 different kernels, so leads to multiple definition.
 template <typename T_D>
 constexpr T_D kunitVector(){};
@@ -104,7 +99,9 @@ void fft_r2comb_ref<TT_DATA,
     int64 presat;
     unsigned int inIndex[kRadix];
     unsigned int outIndex[kRadix];
-    cint32 tw; // necessary to accommodate 0,-32768 when conjugated
+
+    int64 twreal;
+    int64 twimag;
     constexpr unsigned int kTwShift = getTwShift<TT_TWIDDLE, TP_TWIDDLE_MODE>();
     const unsigned int round_const = (1 << (kTwShift + TP_SHIFT - 1));
     for (int op = 0; op < loopSize; op++) {
@@ -112,14 +109,14 @@ void fft_r2comb_ref<TT_DATA,
         inIndex[1] = 2 * op + 1;
         outIndex[0] = op;
         outIndex[1] = op + loopSize;
-        tw.real = (int32)twiddles[op].real;
-        tw.imag = inv ? -(int32)twiddles[op].imag : (int32)twiddles[op].imag;
+        twreal = (int64)twiddles[op].real;
+        twimag = inv ? -(int64)twiddles[op].imag : (int64)twiddles[op].imag;
         sam1.real = (int64)samplesA[inIndex[0]].real << kTwShift;
         sam1.imag = (int64)samplesA[inIndex[0]].imag << kTwShift;
         sam2.real = (int64)samplesA[inIndex[1]].real;
         sam2.imag = (int64)samplesA[inIndex[1]].imag;
-        sam2rot.real = (int64)sam2.real * (int64)tw.real - (int64)sam2.imag * (int64)tw.imag;
-        sam2rot.imag = (int64)sam2.real * (int64)tw.imag + (int64)sam2.imag * (int64)tw.real;
+        sam2rot.real = (int64)sam2.real * (int64)twreal - (int64)sam2.imag * (int64)twimag;
+        sam2rot.imag = (int64)sam2.real * (int64)twimag + (int64)sam2.imag * (int64)twreal;
         csum.real = (int64)sam1.real + (int64)sam2rot.real;
         csum.imag = (int64)sam1.imag + (int64)sam2rot.imag;
         roundAcc(TP_RND, kTwShift + TP_SHIFT, csum);

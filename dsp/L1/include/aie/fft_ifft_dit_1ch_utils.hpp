@@ -17,13 +17,6 @@
 #ifndef _DSPLIB_FFT_IFFT_DIT_1CH_UTILS_HPP_
 #define _DSPLIB_FFT_IFFT_DIT_1CH_UTILS_HPP_
 
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
-
 /*
 FFT (1 channel DIT) Utilities
 This file contains sets of overloaded, templatized and specialized templatized functions for use
@@ -186,6 +179,7 @@ void INLINE_DECL stage_radix4_dit(const TT_INPUT_DATA* x,
     constexpr unsigned int kTwShift = getTwShift<TT_TWIDDLE, TP_TWIDDLE_MODE>();
 
 #ifdef __24_1__
+
     ::aie::fft_dit_r4_stage<TP_R, TT_INPUT_DATA, TT_OUTPUT_DATA, TT_TWIDDLE>(x, tw1, tw2, tw3, n, kTwShift, shift, inv,
                                                                              y);
 
@@ -416,8 +410,6 @@ void INLINE_DECL opt_int_stage(TT_DATA* xbuff,
                                unsigned int& pingPong,
                                bool& inv) {
     constexpr unsigned int kTwShift = getTwShift<TT_TWIDDLE, TP_TWIDDLE_MODE>();
-    //  printf("stage = %d, TP_START_RANK = %d, TP_END_RANK = %d, firstRank = %d, kPointSizePowerCeiled = %d\n", stage,
-    //  TP_START_RANK, TP_END_RANK, firstRank, kPointSizePowerCeiled);
     if
         constexpr(stage >= TP_START_RANK && stage < TP_END_RANK) {
             if
@@ -521,6 +513,7 @@ void INLINE_DECL opt_int_dyn_stage(TT_DATA* xbuff,
                                    bool& inv,
                                    int ptSizePwr) {
     constexpr unsigned int kTwShift = getTwShift<TT_TWIDDLE, TP_TWIDDLE_MODE>();
+
     if
         constexpr(stage >= TP_START_RANK && stage < TP_END_RANK) {
             int firstRank = kPointSizePowerCeiled - ptSizePwr;
@@ -643,7 +636,6 @@ template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_
 INLINE_DECL void readStreamIn(input_stream<TT_DATA>* __restrict inStream0,
                               input_stream<TT_DATA>* __restrict inStream1,
                               TT_DATA* inBuff) {
-    //  printf("Entering readStreamIn with window size %d\n", (int)(TP_WINDOW_VSIZE+TP_DYN_PT_SIZE*32/sizeof(TT_DATA)));
     constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
     constexpr unsigned int kDataReadSize = 32;
     constexpr int kSamplesIn128b = 128 / 8 / sizeof(TT_DATA);
@@ -693,7 +685,6 @@ INLINE_DECL void readStreamIn(input_stream<TT_DATA>* __restrict inStream0, TT_DA
         chess_prepare_for_pipelining chess_loop_range(
             TP_HEADER_BYTES / kDataReadSize + TP_WINDOW_VSIZE / kSamplesIn256b, ) {
             readVal1 = readincr_v<kSamplesIn256b>(inStream0);
-            //    ::aie::print(readVal1, true, " readVal1");
             *out256Ptr0++ = readVal1;
         }
 }
@@ -810,8 +801,6 @@ template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_
 INLINE_DECL void writeStreamOut(output_stream<TT_DATA>* __restrict outStream0,
                                 output_stream<TT_DATA>* __restrict outStream1,
                                 TT_DATA* outBuff) {
-    //  printf("Entering writeStreamOut with window size %d\n",
-    //  (int)(TP_WINDOW_VSIZE+TP_DYN_PT_SIZE*32/sizeof(TT_DATA)));
     constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
     constexpr int kSamplesIn128b = 16 / sizeof(TT_DATA);
     using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn128b * 2>;
@@ -858,13 +847,10 @@ INLINE_DECL void writeStreamOut(output_stream<TT_DATA>* __restrict outStream0, T
     t256VectorType out256a;
     t256VectorType* rdptr0 = (t256VectorType*)&outBuff[0];
 
-    //  printf("in writeStreamOut\n");
-
     for (int i = 0; i < TP_HEADER_BYTES / kDataReadSize + TP_WINDOW_VSIZE / kSamplesIn256b; i++)
         chess_prepare_for_pipelining chess_loop_range(
             TP_HEADER_BYTES / kDataReadSize + TP_WINDOW_VSIZE / kSamplesIn256b, ) {
             read256Val = *rdptr0++;
-            //    ::aie::print(read128Val, true, " read128Val ");
             writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn256b>(outStream0, read256Val);
         }
 }
@@ -876,8 +862,6 @@ template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_
 INLINE_DECL void writeCascStreamOut(output_stream<cacc64>* __restrict outStream0,
                                     output_stream<TT_DATA>* __restrict outStream1,
                                     TT_DATA* outBuff) {
-    //  printf("Entering writeStreamOut with window size %d\n",
-    //  (int)(TP_WINDOW_VSIZE+TP_DYN_PT_SIZE*32/sizeof(TT_DATA)));
     constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
     constexpr unsigned int kDataReadSize = 32;
     constexpr int kSamplesIn256b = 32 / sizeof(TT_DATA);

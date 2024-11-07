@@ -58,7 +58,7 @@
         "customized_params": {
                 "params": "--aie.Xchess=llvm.xargs=-std=c++2a --aie.Xx86sim=-client=vmc --aie.verbose",
                 "default": {
-                    "GRAPHNAME": "IDFT_f652e7a3",
+                    "GRAPHNAME": "IDFT_0eba06cd",
                     "VMC_GRAPHDIR": "xmc_aie_lib/$(GRAPHNAME)",
                     "VMC_KERNEL": "vmc_idft"
                 }
@@ -81,6 +81,9 @@
                 }
             ]
         }
+    ],
+    "associated_files": [
+        "LIB_DIR/L2/meta"
     ],
     "testinfo": {
         "disable": false,

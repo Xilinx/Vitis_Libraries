@@ -64,7 +64,7 @@
       "validator": {
         "file": "vmc_fir_resampler.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "decimate_factor", "interpolate_factor", "AIE_VARIANT","deci_poly","interp_poly"]
+        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "AIE_VARIANT"]
       },
           "label": "Filter coefficients:",
            "tablabel": "Main",
@@ -87,7 +87,7 @@
       "validator": {
         "file": "vmc_fir_resampler.py",
         "function": "vmc_validate_interpolate_factor",
-        "args": ["AIE_VARIANT"]
+        "args": ["AIE_VARIANT", "use_coeff_reload", "coef_type", "coeff","fir_length"]
       },
           "label": "Interpolation factor:",
           "tablabel": "Main",
@@ -101,7 +101,7 @@
       "validator": {
         "file": "vmc_fir_resampler.py",
         "function": "vmc_validate_decimate_factor",
-        "args": ["data_type", "coef_type", "interpolate_factor", "AIE_VARIANT"]
+        "args": ["interpolate_factor", "AIE_VARIANT", "use_coeff_reload", "coef_type", "coeff","fir_length"]
       },
           "label": "Decimation factor:",
             "tablabel": "Main",
@@ -129,7 +129,7 @@
       "validator": {
         "file": "vmc_fir_resampler.py",
         "function": "vmc_validate_shift_val",
-        "args": ["data_type"]
+        "args": ["data_type", "AIE_VARIANT"]
       },
           "label": "Scale output down by 2^:",
             "tablabel": "Main",
@@ -173,7 +173,7 @@
       "validator": {
         "file": "vmc_fir_resampler.py",
         "function": "vmc_validate_interp_poly",
-        "args": ["interpolate_factor"]
+        "args": ["interpolate_factor", "use_coeff_reload", "coef_type", "coeff","fir_length"]
       },
             "label": "Number of interpolator polyphases:",
         "tablabel": "Main",
@@ -187,7 +187,7 @@
       "validator": {
         "file": "vmc_fir_resampler.py",
         "function": "vmc_validate_deci_poly",
-        "args": ["decimate_factor"]
+        "args": ["decimate_factor", "use_coeff_reload", "coef_type", "coeff","fir_length"]
       },
             "label": "Number of decimator polyphases:",
         "tablabel": "Main",
@@ -201,7 +201,7 @@
       "validator": {
         "file": "vmc_fir_resampler.py",
         "function": "vmc_validate_casc_length",
-        "args": []
+        "args": ["AIE_VARIANT", "data_type", "coef_type", "coeff", "interpolate_factor", "decimate_factor", "use_coeff_reload","fir_length"]
       },
           "label": "Number of cascade stages:",
             "tablabel": "Main",

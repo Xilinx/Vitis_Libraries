@@ -33,12 +33,16 @@ PARAM_MAP = T_DATA_A $(T_DATA_A) T_DATA_B $(T_DATA_B) P_DIM_A $(P_DIM_A) P_DIM_A
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 
 $(HELPER):
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(P_INPUT_WINDOW_VSIZE_A) $(NITER) 0 $(STIM_TYPE_A) 0 0 $(T_DATA_A) 0 1
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(P_INPUT_WINDOW_VSIZE_B) $(NITER) 0 $(STIM_TYPE_B) 0 0 $(T_DATA_B) 0 1
+	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(P_INPUT_WINDOW_VSIZE_A) $(NITER) 0 $(STIM_TYPE_A) 0 0 $(T_DATA_A) 0 1 0 0 0 0 0 64
+	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(P_INPUT_WINDOW_VSIZE_B) $(NITER) 0 $(STIM_TYPE_B) 0 0 $(T_DATA_B) 0 1 0 0 0 0 0 64
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(P_INPUT_WINDOW_VSIZE_A) $(NITER) 0 $(STIM_TYPE_A) 0 0 $(T_DATA_A) 0 1 0 0 0 0 0 64
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(P_INPUT_WINDOW_VSIZE_B) $(NITER) 0 $(STIM_TYPE_B) 0 0 $(T_DATA_B) 0 1 0 0 0 0 0 64
 	TARGET=x86sim UUT_KERNEL=matrix_mult_ref UUT_SIM_FILE=./data/ref_output.txt make run TARGET=x86sim TAG=REF
 	make cleanall
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --aieVariant $(AIE_VARIANT) --inFile $(LOC_INPUT_FILE_A) --inRow $(P_DIM_A)  --inCol $(P_DIM_AB) --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --cascLen $(P_CASC_LEN) --ssr $(UUT_SSR) --colMajor $(P_DIM_A_LEADING) --isTiled $(P_ADD_TILING_A) --tileInPlace 
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --aieVariant $(AIE_VARIANT) --inFile $(LOC_INPUT_FILE_B) --inRow $(P_DIM_AB) --inCol $(P_DIM_B)  --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --cascLen $(P_CASC_LEN) --ssr $(UUT_SSR) --colMajor $(P_DIM_B_LEADING) --isTiled $(P_ADD_TILING_B) --tileInPlace  --splitRows
+	echo perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --aieVariant $(AIE_VARIANT) --inFile $(LOC_INPUT_FILE_A) --inRow $(P_DIM_A)  --inCol $(P_DIM_AB) --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --cascLen $(P_CASC_LEN) --ssr $(UUT_SSR) --colMajor $(P_DIM_A_LEADING) --isTiled $(P_ADD_TILING_A) --tileInPlace --plioWidth 64
+	echo perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --aieVariant $(AIE_VARIANT) --inFile $(LOC_INPUT_FILE_B) --inRow $(P_DIM_AB) --inCol $(P_DIM_B)  --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --cascLen $(P_CASC_LEN) --ssr $(UUT_SSR) --colMajor $(P_DIM_B_LEADING) --isTiled $(P_ADD_TILING_B) --tileInPlace  --splitRows --plioWidth 64
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --aieVariant $(AIE_VARIANT) --inFile $(LOC_INPUT_FILE_A) --inRow $(P_DIM_A)  --inCol $(P_DIM_AB) --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --cascLen $(P_CASC_LEN) --ssr $(UUT_SSR) --colMajor $(P_DIM_A_LEADING) --isTiled $(P_ADD_TILING_A) --tileInPlace --plioWidth 64
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --aieVariant $(AIE_VARIANT) --inFile $(LOC_INPUT_FILE_B) --inRow $(P_DIM_AB) --inCol $(P_DIM_B)  --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --cascLen $(P_CASC_LEN) --ssr $(UUT_SSR) --colMajor $(P_DIM_B_LEADING) --isTiled $(P_ADD_TILING_B) --tileInPlace  --splitRows --plioWidth 64
 
 get_latency:
 	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
@@ -65,11 +69,9 @@ prep_aie_out:
 	done
 
 get_diff:
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --aieVariant $(AIE_VARIANT) --untile --inFile ./data/uut_output.txt --tileInPlace --inRow $(P_DIM_A) --inCol $(P_DIM_B) --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --ssr $(UUT_SSR) --colMajor $(P_DIM_OUT_LEADING) --isTiled $(P_ADD_DETILING_OUT)
+	echo perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --aieVariant $(AIE_VARIANT) --untile --inFile ./data/uut_output.txt --tileInPlace --inRow $(P_DIM_A) --inCol $(P_DIM_B) --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --ssr $(UUT_SSR) --colMajor $(P_DIM_OUT_LEADING) --isTiled $(P_ADD_DETILING_OUT) --plioWidth 64
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --aieVariant $(AIE_VARIANT) --untile --inFile ./data/uut_output.txt --tileInPlace --inRow $(P_DIM_A) --inCol $(P_DIM_B) --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --ssr $(UUT_SSR) --colMajor $(P_DIM_OUT_LEADING) --isTiled $(P_ADD_DETILING_OUT) --plioWidth 64
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)
-
-get_theoretical_min:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_mtx_theoretical_min.tcl $(T_DATA_A) $(T_DATA_B) $(NUM_MACS_PER_KERNEL) $(P_CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL)
 
 create_config:
 	echo $(STATUS_FILE)

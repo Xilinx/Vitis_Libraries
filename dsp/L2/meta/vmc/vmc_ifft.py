@@ -2,34 +2,7 @@ from fft_ifft_dit_1ch import *
 from vmc_fft_common import *
 import json
 
-#### VMC validators ####
-def vmc_validate_point_size(args):
-    point_size = args["point_size"]
-    dyn_point_size = 0
-    data_type = args["data_type"]
-    parallel_power = 0
 
-    api = 0
-    AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_validate_point_size(point_size, dyn_point_size, data_type, parallel_power, api, AIE_VARIANT)
-
-def vmc_validate_shift_val(args):
-    data_type = args["data_type"]
-    shift_val = args["shift_val"]
-    return fn_validate_shift_val(data_type, shift_val)
-
-def vmc_validate_input_window_size(args):
-    point_size = args["point_size"]
-    input_window_size = args["input_window_size"]
-    dyn_point_size = 0;
-    return fn_validate_window_size(point_size, input_window_size, dyn_point_size)
-
-def vmc_validate_casc_length(args):
-    data_type = args["data_type"]
-    point_size = args["point_size"]
-    casc_length = args["casc_length"]
-    parallel_power = 0
-    return fn_validate_casc_len(data_type, point_size, parallel_power, casc_length)
 
 # Get twiddle types
 k_twiddle_type = {"cfloat":"cfloat", "cint32":"cint16", "cint16":"cint16"}
@@ -41,6 +14,7 @@ def fn_get_twiddle_type(data_type):
 def vmc_generate_graph(name, args):
     tmpargs = {}
     tmpargs["TT_DATA"] = args["data_type"]
+    tmpargs["TT_OUT_DATA"] = args["data_out_type"]
     tmpargs["TT_TWIDDLE"] = args["twiddle_type"]
     tmpargs["TP_POINT_SIZE"] = args["point_size"]
     tmpargs["TP_SHIFT"] = args["shift_val"]
@@ -49,7 +23,7 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_CASC_LEN"] = args["casc_length"]
     tmpargs["TP_DYN_PT_SIZE"] = 0
     tmpargs["TP_API"] = 0
-    ssr = 1 #windows does support
+    ssr = args["ssr"] #windows does support
     api = tmpargs["TP_API"]
     variant = args["AIE_VARIANT"]
     parallel_power = fn_get_parallel_power(ssr, api, variant)

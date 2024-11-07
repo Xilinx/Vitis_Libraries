@@ -2,29 +2,132 @@ from ctypes import sizeof
 import aie_common as com
 from aie_common import isError,isValid
 
-#----------------------------------------
-# Validate Twiddle type 
-def fn_validate_out_data(TT_DATA, TT_OUT_DATA):
-  validTypeCombos = [
-      ("cint16", "int16"),
-      ("cint32", "int32"),
-      ("cfloat", "float"),
-      ("int16",  "cint16"),
-      ("int32",  "cint32"),
-      ("float",  "cfloat")
-    ]
-  return (
-    isValid if ((TT_DATA,TT_OUT_DATA) in validTypeCombos)
-    else (
-        isError(f"Invalid Data in to Data out type combination ({TT_DATA},{TT_OUT_DATA}). Supported combinations are cint16/int16, cint32/int32, cfloat/float, int16/cint16, int32/cint32, float/cfloat")
-    )
-  )
+aie1_pp_buffer=16384
+aie2_pp_buffer=32768
+
+#######################################################
+###########AIE_VARIANT Updater and Validator ##########
+#######################################################
+def update_AIE_VARIANT(args):
+  return fn_update_AIE_VARIANT()
+
+def fn_update_AIE_VARIANT():
+  legal_set_aie=[1,2]
+  param_dict={
+    "name" : "AIE_VARIANT",
+    "enum" : legal_set_aie
+   }
+  return param_dict
+
+def validate_AIE_VARIANT(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_validate_aie_variant(AIE_VARIANT)
+
+def fn_validate_aie_variant(AIE_VARIANT):
+  param_dict=fn_update_AIE_VARIANT()
+  return(com.validate_legal_set(param_dict["enum"], "AIE_VARIANT", AIE_VARIANT))
+
+#######################################################
+#############  TT_DATA Updater and Validator ##########
+#######################################################
+def update_TT_DATA(args):
+  return fn_update_TT_DATA()
+
+def fn_update_TT_DATA():
+  legal_set_tt_data=[
+                "int16",
+                "cint16",
+                "int32",
+                "cint32",
+                "float",
+                "cfloat"]
+  param_dict={
+    "name" : "TT_DATA",
+    "enum" : legal_set_tt_data
+   }
+  return param_dict
+
+def validate_TT_DATA(args):
+  TT_DATA = args["TT_DATA"]
+  return fn_validate_TT_DATA(TT_DATA)
+
+def fn_validate_TT_DATA(TT_DATA):
+  param_dict=fn_update_TT_DATA()
+  return(com.validate_legal_set(param_dict["enum"], "TT_DATA", TT_DATA))
+
+#######################################################
+########## TT_OUT_DATA Updater and Validator ##########
+#######################################################
+
+def update_TT_OUT_DATA(args):
+  TT_DATA = args["TT_DATA"]
+  return fn_update_out_data(TT_DATA)
+
+def fn_update_out_data(TT_DATA):
+  validTypeCombos = {    
+    "cint16": "int16" ,
+    "cint32": "int32" ,
+    "cfloat": "float" ,
+    "int16" : "cint16",
+    "int32" : "cint32",
+    "float" : "cfloat" 
+    }
+  legal_set_tt_out=[validTypeCombos[TT_DATA]]
+
+  param_dict={
+    "name" : "TT_OUT",
+    "enum" : legal_set_tt_out
+  }
+
+  return param_dict
+
 def validate_TT_OUT_DATA(args):
   TT_DATA = args["TT_DATA"]
   TT_OUT_DATA = args["TT_OUT_DATA"]
   return fn_validate_out_data(TT_DATA, TT_OUT_DATA)
 
-  ######### Graph Generator ############
+def fn_validate_out_data(TT_DATA, TT_OUT_DATA):
+  param_dict=fn_update_out_data(TT_DATA)
+  return com.validate_legal_set(param_dict["enum"], "TT_OUT_DATA", TT_OUT_DATA)
+
+#######################################################
+########## TP_WINDOW_VSIZE Updater and Validator ######
+#######################################################
+def update_TP_WINDOW_VSIZE(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  TT_OUT_DATA = args["TT_OUT_DATA"]
+  return fn_update_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA, TT_OUT_DATA)
+
+def fn_update_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA, TT_OUT_DATA):
+  if AIE_VARIANT==1: max_buffer_byte=aie1_pp_buffer
+  elif AIE_VARIANT==2: max_buffer_byte=aie2_pp_buffer
+
+  byte_size_in=com.fn_size_by_byte(TT_DATA)
+  byte_size_out=com.fn_size_by_byte(TT_OUT_DATA)
+  byte_limit=max(byte_size_in, byte_size_out)
+  sample_limit=int(max_buffer_byte/byte_limit)
+
+  param_dict={
+    "name" : "TP_WINDOW_VSIZE",
+    "minimum" : 16,
+    "maximum" : sample_limit
+  }
+  return param_dict
+
+def validate_TP_WINDOW_VSIZE(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  TT_OUT_DATA = args["TT_OUT_DATA"]
+  TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
+  return fn_validate_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA, TT_OUT_DATA, TP_WINDOW_VSIZE)
+
+def fn_validate_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA, TT_OUT_DATA, TP_WINDOW_VSIZE):
+  param_dict=fn_update_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA, TT_OUT_DATA)
+  range_TP_WINDOW_VSIZE=[param_dict["minimum"], param_dict["maximum"]]
+  return com.validate_range(range_TP_WINDOW_VSIZE, "TP_WINDOW_VSIZE", TP_WINDOW_VSIZE)
+
+######### Graph Generator ############
 
 # Used by higher layer software to figure out how to connect blocks together. 
 def info_ports(args):

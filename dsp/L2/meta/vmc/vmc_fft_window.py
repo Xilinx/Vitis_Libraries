@@ -5,12 +5,15 @@ import json
 def vmc_validate_coeff_type(args):
   data_type = args["data_type"]
   coeff_type = args["coeff_type"]
-  return fn_validate_coeff_type(data_type, coeff_type)
+  return fn_validate_TT_COEFF(data_type, coeff_type)
 
 def vmc_validate_point_size(args):
   point_size = args["point_size"]
   data_type = args["data_type"]
-  return fn_validate_point_size(point_size, data_type)
+  dyn_pt = 1 if args["is_dyn_pt_size"] else 0
+  ssr = 1
+  interface_type = 0
+  return fn_validate_point_size(point_size, data_type, dyn_pt, interface_type, ssr)
 
 def vmc_validate_shift_val(args):
   data_type = args["data_type"]
@@ -23,17 +26,14 @@ def vmc_validate_input_window_size(args):
   return fn_validate_window_vsize(point_size, input_window_size)
 
 def vmc_validate_ssr(args):
-  data_type = args["data_type"]
-  point_size = args["point_size"]
-  interface_type = 1
   ssr = 1
-  return fn_validate_ssr(data_type, point_size, interface_type, ssr)
+  interface_type = 0
+  return fn_validate_ssr(interface_type, ssr)
 
 def vmc_validate_is_dyn_pt_size(args):
-  point_size = args["point_size"]
-  ssr = 1
-  dyn_pt = 1 if args["is_dyn_pt_size"] else 0
-  return fn_validate_dyn_pt_size(point_size, ssr, dyn_pt)
+  tempargs = {}
+  tempargs["TP_DYN_PT_SIZE"] = 1 if args["is_dyn_pt_size"] else 0
+  return validate_TP_DYN_PT_SIZE(tempargs)
 
 def vmc_validate_coeff(args):
   dyn_pt = 1 if args["is_dyn_pt_size"] else 0

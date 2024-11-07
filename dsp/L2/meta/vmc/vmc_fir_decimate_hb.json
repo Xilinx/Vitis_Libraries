@@ -79,7 +79,7 @@
       "validator": {
         "file": "vmc_fir_decimate_hb.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type", "fir_length", "data_type", "casc_length", "deci_poly", "AIE_VARIANT"]
+        "args": ["use_coeff_reload", "fir_length", "data_type", "coef_type"]
       },
           "label": "Filter coefficients:",
             "tablabel": "Main",
@@ -102,7 +102,7 @@
       "validator": {
         "file": "vmc_fir_decimate_hb.py",
         "function": "vmc_validate_input_window_size",
-        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length"]
+        "args": ["AIE_VARIANT", "data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length"]
       },
             "label": "Input window size (Number of samples):",
             "tablabel": "Main",
@@ -175,7 +175,7 @@
       "validator": {
         "file": "vmc_fir_decimate_hb.py",
         "function": "vmc_validate_casc_length",
-        "args": ["use_coeff_reload", "fir_length"]
+        "args": ["use_coeff_reload", "fir_length", "AIE_VARIANT", "data_type", "coef_type", "deci_poly", "coeff"]
       },
             "label": "Number of cascade stages:",
             "tablabel": "Main",

@@ -45,7 +45,7 @@ PARAMS ?= test_0_tool_canary_aie
 PARAMS_FILE ?= multi_params.json 
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  vck190 vek280
+PLATFORM_ALLOWLIST += vck190 vek280
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk
@@ -57,7 +57,7 @@ BUILD_DIR = $(RESULT_DIR)
 endif
 BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(PLATFORM_NAME)
 
-include params.mk
+include $(XFLIB_DIR)/L2/tests/aie/common/scripts/params.mk
 
 RUN_DEPS :=
 
@@ -89,7 +89,7 @@ LOC_COEFF_FILE ?= ./data/coeff.txt
 LOC_INPUT_FILE ?= ./data/input.txt
 REF_INPUT_FILE ?= ./data/input_ref.txt
 MAX_FIR_PER_KERNEL ?= 256
-UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xrouter=DMAFIFOsInFreeBankOnly  --aie.stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py $(PARAMS_FILE) $(PARAMS))  --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.pnll="off" 
+UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xrouter=DMAFIFOsInFreeBankOnly  --aie.stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py $(PARAMS_FILE) $(PARAMS))  --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.xargs="-k200" --aie.Xchess=main:backend.mist2.pnll="off" 
 REF_TARGET_COMPILE_ARGS ?= 
 PREPROC_ARGS ?= --aie.Xpreproc=-DCOEFF_FILE=$(LOC_COEFF_FILE)
 REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(REF_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)
@@ -113,7 +113,7 @@ LOC_COEFF_FILE ?= ./data/coeff.txt
 LOC_INPUT_FILE ?= ./data/input.txt
 REF_INPUT_FILE ?= ./data/input_ref.txt
 MAX_FIR_PER_KERNEL ?= 256
-UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xrouter=DMAFIFOsInFreeBankOnly  --aie.stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py $(PARAMS_FILE) $(PARAMS))  --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.pnll="off" 
+UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xrouter=DMAFIFOsInFreeBankOnly  --aie.stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py $(PARAMS_FILE) $(PARAMS))  --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.xargs="-k200" --aie.Xchess=main:backend.mist2.pnll="off" 
 REF_TARGET_COMPILE_ARGS ?= 
 PREPROC_ARGS ?= --aie.Xpreproc=-DCOEFF_FILE=$(LOC_COEFF_FILE)
 REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(REF_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)
@@ -133,7 +133,7 @@ else
 AIE_CXXFLAGS += --platform=$(XPLATFORM)
 endif
 
-AIE_CXXFLAGS += --target=$(AIETARGET)    --aie.pl-freq 1000 
+AIE_CXXFLAGS += --target=$(AIETARGET)    --aie.pl-freq 625 
 AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
@@ -192,7 +192,6 @@ ifeq ($(TARGET), aiesim)
 	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(XFLIB_DIR)/L2/tests/aie/common/scripts/fir_helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)"
 	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(XFLIB_DIR)/L2/tests/aie/common/scripts/fir_helper.mk get_latency HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)"
 	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(XFLIB_DIR)/L2/tests/aie/common/scripts/fir_helper.mk get_stats HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)"
-	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(XFLIB_DIR)/L2/tests/aie/common/scripts/fir_helper.mk get_theoretical_min HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL) SYMMETRY_FACTOR=$(SYMMETRY_FACTOR)"
 	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(XFLIB_DIR)/L2/tests/aie/common/scripts/fir_helper.mk harvest_mem HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)"
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./
 endif

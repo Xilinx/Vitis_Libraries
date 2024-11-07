@@ -1,10 +1,7 @@
-from ctypes import sizeof
-from socket import TIPC_SUB_SERVICE
 from aie_common import *
 from aie_common_fir import *
-import json
+from aie_common_fir_updaters import *
 import fir_sr_asym as sr_asym
-import fir_decimate_hb as deci_hb
 
 #### naming ####
 #
@@ -17,37 +14,341 @@ import fir_decimate_hb as deci_hb
 # Name function arguments as template parameters, when possible
 # so the code matches easier with API definition.
 
-
-# Example of validator.
-#
-# The parameter itself will be passed as first argument for validator functions.
-# These functions can have extra parameters as arguments, as specified as last part of in `validator`.
-# These extra parameters must appear before current one in "parameters" section.
-#
-# A validator function returns a dictionary, with required boolean key "is_valid",
-# and "err_message" if "is_valid" is False.
-#
-
 TP_INPUT_WINDOW_VSIZE_min = 4
+TP_INPUT_WINDOW_VSIZE_max_cpp = 2**31
 TP_SSR_min = 1
+TP_SSR_max = 16
 TP_PARA_INTERP_POLY_min = 1
 TP_CASC_LEN_min = 1
 TP_CASC_LEN_max = 40
 TP_FIR_LEN_min = 4
 TP_FIR_LEN_max = 8192
 
+#######################################################
+########### AIE_VARIANT Updater and Validator #########
+#######################################################
+def update_AIE_VARIANT(args):
+  return fn_update_AIE_VARIANT()
+
+def fn_update_AIE_VARIANT():
+  legal_set_AIE_VARIANT = [1, 2]
+  
+  param_dict ={}
+  param_dict.update({"name" : "AIE_VARIANT"})
+  param_dict.update({"enum" : legal_set_AIE_VARIANT})
+  return param_dict
+
+def validate_AIE_VARIANT(args):
+  AIE_VARIANT=args["AIE_VARIANT"]
+  return (fn_validate_AIE_VARIANT(AIE_VARIANT))
+
+def fn_validate_AIE_VARIANT(AIE_VARIANT):
+  param_dict = fn_update_AIE_VARIANT()
+  legal_set_AIE_VARIANT = param_dict["enum"]
+  return(validate_legal_set(legal_set_AIE_VARIANT, "AIE_VARIANT", AIE_VARIANT))
+
+#######################################################
+############# TT_DATA Updater and Validator ###########
+#######################################################
+def update_TT_DATA(args):
+  AIE_VARIANT=args["AIE_VARIANT"]
+  return fn_update_TT_DATA(AIE_VARIANT)
+
+def fn_update_TT_DATA(AIE_VARIANT):
+  legal_set_TT_DATA = [        
+        "int16",
+        "cint16",
+        "int32",
+        "cint32",
+        "float",
+        "cfloat"]
+  
+  if AIE_VARIANT==2:
+      legal_set_TT_DATA=remove_from_set(["cfloat"], legal_set_TT_DATA)
+  param_dict ={"name" : "TT_DATA",
+               "enum" : legal_set_TT_DATA}
+  return param_dict
+
+def validate_TT_DATA(args):
+  AIE_VARIANT=args["AIE_VARIANT"]
+  TT_DATA=args["TT_DATA"]
+  return (fn_validate_TT_DATA(AIE_VARIANT, TT_DATA))
+
+def fn_validate_TT_DATA(AIE_VARIANT, TT_DATA):
+  param_dict = fn_update_TT_DATA(AIE_VARIANT)
+  legal_set_TT_DATA = param_dict["enum"]
+  return(validate_legal_set(legal_set_TT_DATA, "TT_DATA", TT_DATA))
+
+#######################################################
+############# TT_COEFF Updater and Validator ##########
+#######################################################
+def update_TT_COEFF(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  return fn_update_TT_COEFF(AIE_VARIANT, TT_DATA)
+
+def fn_update_TT_COEFF(AIE_VARIANT, TT_DATA):
+  legal_set_TT_COEFF = [        
+      "int16",
+      "cint16",
+      "int32",
+      "cint32",
+      "float",
+      "cfloat"]
+  legal_set_TT_COEFF=fn_coeff_type_update(TT_DATA, legal_set_TT_COEFF)
+  legal_set_TT_COEFF=fn_type_aieml_support_update(AIE_VARIANT, TT_DATA, legal_set_TT_COEFF)
+  param_dict ={"name" : "TT_COEFF",
+                "enum" : legal_set_TT_COEFF}
+  
+  return param_dict
+
+def validate_TT_COEFF(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  TT_COEFF=args["TT_COEFF"]
+  return (fn_validate_TT_COEFF(AIE_VARIANT, TT_DATA, TT_COEFF))
+
+def fn_validate_TT_COEFF(AIE_VARIANT, TT_DATA, TT_COEFF):
+  param_dict = fn_update_TT_COEFF(AIE_VARIANT, TT_DATA)
+  legal_set_TT_COEFF = param_dict["enum"]
+  return(validate_legal_set(legal_set_TT_COEFF, "TT_COEFF", TT_COEFF))
+
+#######################################################
+############ TP_API Updater and Validator #############
+#######################################################
+def update_TP_API(args):
+  return fn_update_binary("TP_API")
+
+def validate_TP_API(args):
+  TP_API=args["TP_API"]
+  return fn_validate_TP_API(TP_API)
+
+def fn_validate_TP_API(TP_API):
+  return(validate_legal_set([0,1], "TP_API", TP_API))
+
+#######################################################
+###### TP_USE_COEFF_RELOAD Updater and Validator ######
+#######################################################
+def update_TP_USE_COEFF_RELOAD(args):
+  return fn_update_binary("TP_USE_COEFF_RELOAD")
+
+def validate_TP_USE_COEFF_RELOAD(args):
+  TP_USE_COEFF_RELOAD=args["TP_USE_COEFF_RELOAD"]
+  return fn_validate_TP_USE_COEFF_RELOAD(TP_USE_COEFF_RELOAD)
+
+def fn_validate_TP_USE_COEFF_RELOAD(TP_USE_COEFF_RELOAD):
+  return(validate_legal_set([0,1], "TP_USE_COEFF_RELOAD", TP_USE_COEFF_RELOAD))
+
+#######################################################
+########## TP_FIR_LEN Updater and Validator ###########
+#######################################################
+def update_TP_FIR_LEN(args):
+  TT_DATA = args["TT_DATA"]
+  TP_API = args["TP_API"]
+  TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
+  if args["TP_FIR_LEN"]: TP_FIR_LEN = args["TP_FIR_LEN"]
+  else: TP_FIR_LEN = 0
+  return fn_update_TP_FIR_LEN(TT_DATA, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN)
+
+def fn_update_TP_FIR_LEN(TT_DATA, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN):
+  symFactor   = 4 # Symmetric, half-band
+  TP_FIR_LEN_min_int=int(CEIL((TP_FIR_LEN_min+1),4) - 1)
+  TP_FIR_LEN_max_int1=fn_max_fir_len_each_kernel_update(TT_DATA, TP_CASC_LEN_max, TP_USE_COEFF_RELOAD, TP_SSR_max, TP_API, symFactor)
+  TP_FIR_LEN_max_int2=min(TP_FIR_LEN_max_int1, TP_FIR_LEN_max)
+  TP_FIR_LEN_max_int=int(FLOOR((TP_FIR_LEN_max_int2+1),4) - 1)
+
+  param_dict={
+      "name" : "TP_FIR_LEN",
+      "minimum" : TP_FIR_LEN_min_int,
+      "maximum" : TP_FIR_LEN_max_int
+  }
+
+  if TP_FIR_LEN !=0:
+    if (TP_FIR_LEN+1) % 4 != 0:
+      TP_FIR_LEN_act=(round((TP_FIR_LEN+1)/4)*4) - 1
+
+      if TP_FIR_LEN_act < param_dict["minimum"]:
+        TP_FIR_LEN_act = param_dict["minimum"]
+
+      if TP_FIR_LEN_act > param_dict["maximum"]:
+        TP_FIR_LEN_act = param_dict["maximum"]
+      param_dict.update({"actual" : int(TP_FIR_LEN_act)})
+
+  return param_dict
+
+def validate_TP_FIR_LEN(args):
+  TT_DATA = args["TT_DATA"]
+  TP_API = args["TP_API"]
+  TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
+  TP_FIR_LEN = args["TP_FIR_LEN"]
+  return fn_validate_TP_FIR_LEN(TT_DATA, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN)
+
+def fn_validate_TP_FIR_LEN(TT_DATA, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN):
+  check_FIR_LEN= fn_halfband_len(TP_FIR_LEN)
+  if check_FIR_LEN == isValid:
+    param_dict=fn_update_TP_FIR_LEN(TT_DATA, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN)
+    range_TP_FIR_LEN=[param_dict["minimum"], param_dict["maximum"]]
+    return validate_range(range_TP_FIR_LEN, "TP_FIR_LEN", TP_FIR_LEN)
+  else:
+    return check_FIR_LEN
 
 def fn_halfband_len(TP_FIR_LEN):
   return isValid if ((TP_FIR_LEN + 1) % 4 == 0) else isError(f"Filter length must be 4N-1 where N is a positive integer. Got TP_FIR_LEN {TP_FIR_LEN}")
 
-def fn_data_needed_within_buffer_size_ml(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_SSR):
-    firLenPerSSR = TP_FIR_LEN / TP_SSR
-    kInterpolateFactor = 2
-    for TP_KP in range(TP_CASC_LEN):
-        m_kFirRangeLen = fnFirRangeRem(firLenPerSSR, TP_CASC_LEN, TP_KP, 2) if (TP_KP + 1 == TP_CASC_LEN) else fnFirRange(firLenPerSSR, TP_CASC_LEN, TP_KP, 2)
-        m_kNumTaps = ((m_kFirRangeLen + 1) / 2) if (TP_KP == TP_CASC_LEN - 1) else (m_kFirRangeLen / 2)
+#######################################################
+######## TP_PARA_INTERP_POLY Updater and Validator ####
+#######################################################
+def update_TP_PARA_INTERP_POLY(args):
+  return fn_update_TP_PARA_INTERP_POLY()
+
+def fn_update_TP_PARA_INTERP_POLY():
+  legal_set_TP_PARA_INTERP_POLY=[1,2]
+
+  param_dict={
+     "name" : "TP_PARA_INTERP_POLY",
+     "enum" : legal_set_TP_PARA_INTERP_POLY
+  }
+  return param_dict
+
+def validate_TP_PARA_INTERP_POLY(args):
+  TP_PARA_INTERP_POLY   = args["TP_PARA_INTERP_POLY"]
+  return fn_validate_TP_PARA_INTERP_POLY(TP_PARA_INTERP_POLY)
+
+def fn_validate_TP_PARA_INTERP_POLY(TP_PARA_INTERP_POLY):
+  param_dict=fn_update_TP_PARA_INTERP_POLY()
+  return validate_legal_set(param_dict["enum"], "TP_PARA_INTERP_POLY", TP_PARA_INTERP_POLY)
+
+#######################################################
+############# TP_SSR Updater and Validator ############
+#######################################################
+
+def update_TP_SSR(args):
+  AIE_VARIANT=args["AIE_VARIANT"]
+  TT_DATA=args["TT_DATA"]
+  TT_COEFF=args["TT_COEFF"]
+  TP_API=args["TP_API"]
+  TP_FIR_LEN=args["TP_FIR_LEN"]
+  TP_USE_COEFF_RELOAD=args["TP_USE_COEFF_RELOAD"]
+  TP_PARA_INTERP_POLY=args["TP_PARA_INTERP_POLY"]
+  return fn_update_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_PARA_INTERP_POLY)
+
+def fn_update_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_PARA_INTERP_POLY):
+  param_dict={
+      "name" :  "TP_SSR"}
+
+  if (TP_PARA_INTERP_POLY == 1):
+    legal_set_TP_SSR=[1]
+    param_dict.update({"enum" : legal_set_TP_SSR}) 
+  else:
+    legal_set_TP_SSR=list(range(TP_SSR_min, TP_SSR_max+1))
+    remove_list=[]
+    for ssr in legal_set_TP_SSR:
+      param_dict_casc_len=fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_PARA_INTERP_POLY, ssr)
+      if "enum" in param_dict_casc_len:
+        if param_dict_casc_len["enum"] == []:
+          remove_list.append(ssr)
+    legal_set_TP_SSR_eliminated=remove_from_set(remove_list, legal_set_TP_SSR.copy())
+    if legal_set_TP_SSR_eliminated!=legal_set_TP_SSR:
+      param_dict.update({"enum" : legal_set_TP_SSR_eliminated}) 
+    else:
+        param_dict.update({
+          "minimum" : 1,
+          "maximum" : TP_SSR_max
+        })      
+  return param_dict
+
+
+
+def validate_TP_SSR(args):
+  AIE_VARIANT=args["AIE_VARIANT"]
+  TT_DATA=args["TT_DATA"]
+  TT_COEFF=args["TT_COEFF"]
+  TP_API=args["TP_API"]
+  TP_FIR_LEN=args["TP_FIR_LEN"]
+  TP_USE_COEFF_RELOAD=args["TP_USE_COEFF_RELOAD"]
+  TP_PARA_INTERP_POLY=args["TP_PARA_INTERP_POLY"]  
+  TP_SSR=args["TP_SSR"]
+  return fn_validate_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_PARA_INTERP_POLY, TP_SSR)
+
+def fn_validate_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_PARA_INTERP_POLY, TP_SSR):
+  param_dict=fn_update_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_PARA_INTERP_POLY)
+  if "enum" in param_dict:
+    return (validate_legal_set(param_dict["enum"], "TP_SSR", TP_SSR))
+  else:
+    range_TP_SSR=[param_dict["minimum"], param_dict["maximum"]]
+    return (validate_range(range_TP_SSR, "TP_SSR", TP_SSR))
+  
+#######################################################
+########### TP_CASC_LEN Updater and Validator #########
+#######################################################
+def update_TP_CASC_LEN(args):
+  AIE_VARIANT=args["AIE_VARIANT"]
+  TT_DATA=args["TT_DATA"]
+  TT_COEFF=args["TT_COEFF"]
+  TP_API=args["TP_API"]
+  TP_FIR_LEN=args["TP_FIR_LEN"]
+  TP_USE_COEFF_RELOAD=args["TP_USE_COEFF_RELOAD"]
+  TP_PARA_INTERP_POLY=args["TP_PARA_INTERP_POLY"]
+  TP_SSR=args["TP_SSR"]
+  return fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_PARA_INTERP_POLY, TP_SSR)
+
+def fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_PARA_INTERP_POLY, TP_SSR):
+  legal_set_casc1=list(range(TP_CASC_LEN_min, TP_CASC_LEN_max+1))
+  legal_set_casc2=fn_eliminate_casc_len_min_fir_len_each_kernel(legal_set_casc1.copy(), TP_FIR_LEN, TP_SSR)
+
+  symFactor   = 4 # Symmetric, half-band
+  symFactorSSR= 2 if (TP_SSR != 1 ) else symFactor # TP_SSR mode will discard the symmetry
+  symApiSSR   = 0 if (TP_SSR == 1 and TP_PARA_INTERP_POLY == 1) else TP_API  # Force buffer checks when not in TP_SSR mode.
+
+  legal_set_casc3=fn_eliminate_casc_len_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_SSR, symApiSSR, symFactorSSR, legal_set_casc2.copy())
+
+  if TP_PARA_INTERP_POLY > 1:
+    legal_set_casc3=sr_asym.fn_eliminate_casc_len_data_needed_within_buffer_size(TT_DATA, TT_COEFF, (TP_FIR_LEN + 1)/2, TP_API, AIE_VARIANT, TP_SSR, legal_set_casc3.copy())
+
+  if AIE_VARIANT == 2 and TP_API == 1:
+    legal_set_casc3=fn_eliminate_casc_len_data_needed_within_buffer_size_ml(TT_DATA, TP_FIR_LEN, TP_SSR, legal_set_casc3.copy())
+
+  param_dict={
+      "name" :  "TP_CASC_LEN" }
+
+  if legal_set_casc1==legal_set_casc3:
+      param_dict.update({"minimum" : TP_CASC_LEN_min})
+      param_dict.update({"maximum" : TP_CASC_LEN_max})
+  else:
+      param_dict.update({"enum" : legal_set_casc3})
+
+  return param_dict
+
+def validate_TP_CASC_LEN(args):
+    AIE_VARIANT=args["AIE_VARIANT"]
+    TT_DATA=args["TT_DATA"]
+    TT_COEFF=args["TT_COEFF"]
+    TP_API=args["TP_API"]
+    TP_FIR_LEN=args["TP_FIR_LEN"]
+    TP_USE_COEFF_RELOAD=args["TP_USE_COEFF_RELOAD"]
+    TP_PARA_INTERP_POLY=args["TP_PARA_INTERP_POLY"]
+    TP_SSR=args["TP_SSR"]
+    TP_CASC_LEN=args["TP_CASC_LEN"]
+    return fn_validate_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_PARA_INTERP_POLY, TP_SSR, TP_CASC_LEN)
+
+def fn_validate_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_PARA_INTERP_POLY, TP_SSR, TP_CASC_LEN):
+    param_dict=fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_PARA_INTERP_POLY, TP_SSR)
+    if "enum" in param_dict:
+        return (validate_legal_set(param_dict["enum"], "TP_CASC_LEN", TP_CASC_LEN))
+    else:
+        range_casc_len=[param_dict["minimum"], param_dict["maximum"]]
+        return(validate_range(range_casc_len, "TP_CASC_LEN", TP_CASC_LEN))
+
+def fn_eliminate_casc_len_data_needed_within_buffer_size_ml(TT_DATA, TP_FIR_LEN, TP_SSR, legal_set_casc_len):
+  legal_set_casc_len_int=legal_set_casc_len
+  firLenPerSSR = TP_FIR_LEN / TP_SSR
+  kInterpolateFactor = 2
+  for casc_len in legal_set_casc_len.copy():
+    for TP_KP in range(casc_len):
+        m_kFirRangeLen = fnFirRangeRem(firLenPerSSR, casc_len, TP_KP, 2) if (TP_KP + 1 == casc_len) else fnFirRange(firLenPerSSR, casc_len, TP_KP, 2)
+        m_kNumTaps = ((m_kFirRangeLen + 1) / 2) if (TP_KP == casc_len - 1) else (m_kFirRangeLen / 2)
         m_kWinAccessByteSize = 32
-        m_kFirRangeOffset = sr_asym.fnFirRangeOffset(firLenPerSSR, TP_CASC_LEN, TP_KP, kInterpolateFactor) / kInterpolateFactor
+        m_kFirRangeOffset = sr_asym.fnFirRangeOffset(firLenPerSSR, casc_len, TP_KP, kInterpolateFactor) / kInterpolateFactor
         m_kFirAsymTaps = (firLenPerSSR + 1) / kInterpolateFactor
         m_kFirMarginOffset = sr_asym.fnFirMargin(m_kFirAsymTaps, TT_DATA) - (m_kFirAsymTaps) + 1
         m_kFirInitOffset = m_kFirMarginOffset + m_kFirRangeOffset
@@ -57,124 +358,135 @@ def fn_data_needed_within_buffer_size_ml(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_SS
         m_kDataLoadVsize = 256 / 8 / fn_size_by_byte(TT_DATA)
         m_kTotDataNeededPerOp = m_kArchFirLen + m_kDataLoadVsize - 1
         if m_kTotDataNeededPerOp > m_kSamplesInBuff:
-            return isError(
-                f"Requested parameters: FIR length ({TP_FIR_LEN}), cascade length ({TP_CASC_LEN}) and TP_SSR ({TP_SSR}) result in a kernel ({TP_KP}) that requires more data samples ({m_kTotDataNeededPerOp}) than capacity of a data buffer ({m_kSamplesInBuff}) "
-                f"Please increase the cascade length TP_CASC_LEN ({TP_CASC_LEN}) and/or TP_SSR ({TP_SSR})."
-            )
-    return isValid
+          legal_set_casc_len_int=remove_from_set([casc_len], legal_set_casc_len_int.copy())
+    return legal_set_casc_len_int
 
-def fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, TP_PARA_INTERP_POLY, AIE_VARIANT):
-    res = fn_validate_minmax_value("TP_FIR_LEN", TP_FIR_LEN, TP_FIR_LEN_min, TP_FIR_LEN_max)
-    if (res["is_valid"] == False):
-        return res
-    minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
+#######################################################
+############# TP_DUAL_IP Updater and Validator ########
+#######################################################
+def update_TP_DUAL_IP(args):
+  AIE_VARIANT   = args["AIE_VARIANT"]
+  return fn_update_TP_DUAL_IP(AIE_VARIANT)
 
-    symFactor   = 4 # Symmetric, half-band
-    symFactorSSR   = 2 if (TP_SSR != 1 ) else symFactor # SSR mode will discard the symmetry
-    symApiSSR      = 0 if (TP_SSR == 1 and TP_PARA_INTERP_POLY == 1) else TP_API  # Force buffer checks when not in SSR mode.
-    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_SSR, symApiSSR, symFactorSSR)
-    halfbandLenCheck = fn_halfband_len(TP_FIR_LEN)
-    dataNeededCheck = isValid
-    dataNeededAIEMLCheck = isValid
-    if TP_PARA_INTERP_POLY > 1:
-      dataNeededCheck = sr_asym.fn_data_needed_within_buffer_size(TT_DATA, TT_COEFF, (TP_FIR_LEN + 1)/2, TP_CASC_LEN, TP_API, TP_SSR)
-    if AIE_VARIANT == 2 and TP_API == 1:
-      dataNeededAIEMLCheck = fn_data_needed_within_buffer_size_ml(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
-    for check in (minLenCheck, maxLenCheck, halfbandLenCheck, dataNeededCheck, dataNeededAIEMLCheck):
-      if check["is_valid"] == False :
-        return check
+def fn_update_TP_DUAL_IP(AIE_VARIANT):
+  legal_set_TP_DUAL_IP=[0,1]
+  if AIE_VARIANT == 2:
+    legal_set_TP_DUAL_IP=[0]
 
-    return isValid
+  param_dict={
+     "name" : "TP_DUAL_IP",
+     "enum" : legal_set_TP_DUAL_IP
+  }
+  return param_dict
 
-def fn_parapoly_value(TP_PARA_INTERP_POLY):
-    if TP_PARA_INTERP_POLY != 1 and TP_PARA_INTERP_POLY != 2:
-      return isError(f"TP_PARA_INTERP_POLY can be only set to 1 or 2 for halfbands. Got TP_PARA_INTERP_POLY {TP_PARA_INTERP_POLY}")
-    return isValid
+def validate_TP_DUAL_IP(args):
+  AIE_VARIANT= args["AIE_VARIANT"]
+  TP_DUAL_IP = args["TP_DUAL_IP"]
+  return fn_validate_TP_DUAL_IP(AIE_VARIANT, TP_DUAL_IP)
 
-def fn_ssr_for_para_poly(TP_PARA_INTERP_POLY, TP_SSR):
-  if TP_SSR > 1 and TP_PARA_INTERP_POLY != 2:
-    return isError(f"SSR > 1 is only supported with TP_PARA_INTERP_POLY set to 2. Got TP_SSR {TP_SSR}")
-  return isValid
+def fn_validate_TP_DUAL_IP(AIE_VARIANT, TP_DUAL_IP):
+  param_dict=fn_update_TP_DUAL_IP(AIE_VARIANT)
+  return (validate_legal_set(param_dict["enum"], "TP_DUAL_IP", TP_DUAL_IP))
 
-def fn_stream_api_poly(TP_PARA_INTERP_POLY, TP_API):
-    if (TP_PARA_INTERP_POLY == 1 or TP_API == 1):
-        return isValid
-    return isError(f"TP_PARA_INTERP_POLY can be set to 2 only for streaming API. Got TP_PARA_INTERP_POLY {TP_PARA_INTERP_POLY}")
+#######################################################
+############# TP_NUM_OUTPUTS Updater and Validator ####
+#######################################################
+def update_TP_NUM_OUTPUTS(args):
+  TP_PARA_INTERP_POLY = args["TP_PARA_INTERP_POLY"]
+  TP_DUAL_IP = args["TP_DUAL_IP"]
+  return(fn_update_hb_num_outputs(TP_PARA_INTERP_POLY, TP_DUAL_IP, "TP_NUM_OUTPUTS"))
 
-def fn_validate_para_interp_poly(TP_API, TP_PARA_INTERP_POLY, TP_SSR):
-    res = fn_validate_min_value("TP_PARA_INTERP_POLY", TP_PARA_INTERP_POLY, TP_PARA_INTERP_POLY_min)
-    if (res["is_valid"] == False):
-      return res
-    checkParaPolyVal = fn_parapoly_value(TP_PARA_INTERP_POLY)
-    checkSSRPoly     = fn_ssr_for_para_poly(TP_PARA_INTERP_POLY, TP_SSR)
+def validate_TP_NUM_OUTPUTS(args):
+  TP_PARA_INTERP_POLY = args["TP_PARA_INTERP_POLY"]
+  TP_DUAL_IP = args["TP_DUAL_IP"]
+  TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
+  return fn_validate_TP_NUM_OUTPUTS(TP_PARA_INTERP_POLY, TP_DUAL_IP, TP_NUM_OUTPUTS)
 
-    for check in (checkParaPolyVal,checkSSRPoly):
-      if check["is_valid"] == False :
-        return check
+def fn_validate_TP_NUM_OUTPUTS(TP_PARA_INTERP_POLY, TP_DUAL_IP, TP_NUM_OUTPUTS):
+  param_dict=fn_update_hb_num_outputs(TP_PARA_INTERP_POLY, TP_DUAL_IP, "TP_NUM_OUTPUTS")
+  return (validate_legal_set(param_dict["enum"], "TP_NUM_OUTPUTS", TP_NUM_OUTPUTS))
 
-    return isValid
-
-def fn_validate_ssr(TP_API, TP_SSR):
-    return fn_validate_min_value("TP_SSR", TP_SSR, TP_SSR_min)
-
-def fn_validate_casc_len(TP_CASC_LEN):
-    return fn_validate_minmax_value("TP_CASC_LEN", TP_CASC_LEN, TP_CASC_LEN_min, TP_CASC_LEN_max)
-
-#### validation APIs ####
-
-def validate_TP_CASC_LEN(args):
-    TP_CASC_LEN = args["TP_CASC_LEN"]
-    return fn_validate_casc_len(TP_CASC_LEN)
-
-def validate_TT_COEFF(args):
-    TT_DATA = args["TT_DATA"]
-    TT_COEFF = args["TT_COEFF"]
-    AIE_VARIANT = args["AIE_VARIANT"]
-    standard_checks = fn_validate_coeff_type(TT_DATA, TT_COEFF)
-    typeCheck = fn_type_sr_support(TT_DATA, TT_COEFF, AIE_VARIANT)
-    for check in (standard_checks,typeCheck):
-      if check["is_valid"] == False :
-        return check
-    return isValid
-
-def validate_TP_SHIFT(args):
+#######################################################
+##### TP_INPUT_WINDOW_VSIZE Updater and Validator #####
+#######################################################
+def update_TP_INPUT_WINDOW_VSIZE(args):
   TT_DATA = args["TT_DATA"]
-  TP_SHIFT = args["TP_SHIFT"]
-  return fn_validate_shift(TT_DATA, TP_SHIFT)
+  TT_COEFF = args["TT_COEFF"]
+  TP_FIR_LEN = args["TP_FIR_LEN"]
+  TP_API = args["TP_API"]
+  TP_SSR = args["TP_SSR"]
+  if args["TP_INPUT_WINDOW_VSIZE"] : TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
+  else: TP_INPUT_WINDOW_VSIZE = 0
 
-def validate_TP_RND(args):
-  TP_RND = args["TP_RND"]
+  return fn_update_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR)
+
+def fn_update_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR):
+
+  numLanes=fnNumLanes384b(TT_DATA, TT_COEFF)*2
+  lcm_ws=TP_SSR * numLanes
+  TP_INPUT_WINDOW_VSIZE_min_int=int(CEIL(TP_INPUT_WINDOW_VSIZE_min, lcm_ws))
+
+  if TP_API==0:
+    TP_INPUT_WINDOW_VSIZE_max_int=fn_max_windowsize_for_buffer_update(TT_DATA, TP_FIR_LEN, TP_SSR, TP_INTERPOLATE_FACTOR=2, TP_DECIMATE_FACTOR=1)
+    TP_INPUT_WINDOW_VSIZE_max_int=int(FLOOR(TP_INPUT_WINDOW_VSIZE_max_int, lcm_ws))
+  else:
+    TP_INPUT_WINDOW_VSIZE_max_int=TP_INPUT_WINDOW_VSIZE_max_cpp
+
+  param_dict={
+      "name" : "TP_INPUT_WINDOW_VSIZE",
+      "minimum" : TP_INPUT_WINDOW_VSIZE_min_int,
+      "maximum" : TP_INPUT_WINDOW_VSIZE_max_int
+  }  
+
+  if TP_INPUT_WINDOW_VSIZE !=0:
+    if TP_INPUT_WINDOW_VSIZE%lcm_ws != 0:
+        TP_INPUT_WINDOW_VSIZE_act=round(TP_INPUT_WINDOW_VSIZE/lcm_ws) * lcm_ws
+
+        if TP_INPUT_WINDOW_VSIZE_act < param_dict["minimum"]:
+            TP_INPUT_WINDOW_VSIZE_act = param_dict["minimum"]
+
+        if (TP_INPUT_WINDOW_VSIZE_act > param_dict["maximum"]):
+            TP_INPUT_WINDOW_VSIZE_act = int(FLOOR(param_dict["maximum"], lcm_ws))
+        param_dict.update({"actual" : int(TP_INPUT_WINDOW_VSIZE_act)})
+
+  return param_dict
+
+def validate_TP_INPUT_WINDOW_VSIZE(args):
+  TT_DATA = args["TT_DATA"]
+  TT_COEFF = args["TT_COEFF"]
+  TP_FIR_LEN = args["TP_FIR_LEN"]
+  TP_API = args["TP_API"]
+  TP_SSR = args["TP_SSR"]
+  TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
+  return fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR)
+
+def fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR):
+  numLanes=fnNumLanes384b(TT_DATA, TT_COEFF)*2
+  lcm_ws=TP_SSR*numLanes
+  if (TP_INPUT_WINDOW_VSIZE%lcm_ws !=0):
+    return isError(f"TP_INPUT_WINDOW_VSIZE should be a multiple of {lcm_ws}!")
+  else:
+    param_dict=fn_update_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR)
+    range_TP_INPUT_WINDOW_VSIZE=[param_dict["minimum"], param_dict["maximum"]]
+    return(validate_range(range_TP_INPUT_WINDOW_VSIZE, "TP_INPUT_WINDOW_VSIZE", TP_INPUT_WINDOW_VSIZE))  
+
+#######################################################
+######### TP_UPSHIFT_CT Updater and Validator #########
+#######################################################
+def update_TP_UPSHIFT_CT(args):
+  TT_DATA = args["TT_DATA"]
   AIE_VARIANT = args["AIE_VARIANT"]
-  return fn_validate_roundMode(TP_RND, AIE_VARIANT)
+  return fn_update_upshift_ct(TT_DATA, AIE_VARIANT)
 
-def validate_TP_SAT(args):
-  TP_SAT = args["TP_SAT"]
-  return fn_validate_satMode(TP_SAT)
-
-def fn_validate_upshift_ct(TT_DATA, TP_UPSHIFT_CT, AIE_VARIANT):
-  #implied restriction that TT_DATA restricts TT_COEFF, ie, we don't support int16,int32 or int16,cint32
-  if (AIE_VARIANT == 2 and TP_UPSHIFT_CT == 1):
-    return isError(f"Upshift CT is not available on AIE-ML. Please set TP_UPSHIFT_CT to 0. Got TP_UPSHIFT_CT {TP_UPSHIFT_CT}")
-  if ((TT_DATA not in ["cint16", "int16"] ) and (TP_UPSHIFT_CT == 1)):
-    return isError(f"Upshift CT is only available for 16-bit integer combinations. Got TP_UPSHIFT_CT {TP_UPSHIFT_CT}")
-  return isValid
-
-def fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1, TP_PARA_INTERP_POLY=1):
-    # interpolate halfband always uses 384b version of lanes. Some archs use repeat factors, like zig-zag, hence the factor of 2.
-    res = fn_validate_min_value("TP_INPUT_WINDOW_VSIZE", TP_INPUT_WINDOW_VSIZE, TP_INPUT_WINDOW_VSIZE_min)
-    if (res["is_valid"] == False):
-      return res
-    checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEFF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=fnNumLanes384b(TT_DATA, TT_COEFF)*2)
-    symApiSSR      = 0 if (TP_SSR == 1 and TP_PARA_INTERP_POLY == 1) else TP_API  # Force buffer checks when not in SSR mode.
-    checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, symApiSSR, TP_SSR, TP_INTERPOLATE_FACTOR=2, TP_DECIMATE_FACTOR=1)
-    # Input samples are round-robin split to each SSR input paths, so total frame size must be divisable by SSR factor.
-    checkIfDivisableBySSR = fn_windowsize_divisible_by_param(TP_INPUT_WINDOW_VSIZE, TP_SSR)
-
-    for check in (checkMultipleLanes,checkMaxBuffer,checkIfDivisableBySSR):
-      if check["is_valid"] == False :
-        return check
-
-    return isValid
+def fn_update_upshift_ct(TT_DATA, AIE_VARIANT):
+  legal_set_TP_UPSHIFT_CT=[0,1]
+  if AIE_VARIANT == 2 : legal_set_TP_UPSHIFT_CT=[0]
+  if TT_DATA not in ["cint16", "int16"] : legal_set_TP_UPSHIFT_CT=[0]
+  param_dict={
+      "name" : "TP_UPSHIFT_CT",
+      "enum" : legal_set_TP_UPSHIFT_CT
+  }  
+  return param_dict
 
 def validate_TP_UPSHIFT_CT(args):
   TT_DATA = args["TT_DATA"]
@@ -182,90 +494,105 @@ def validate_TP_UPSHIFT_CT(args):
   AIE_VARIANT = args["AIE_VARIANT"]
   return fn_validate_upshift_ct(TT_DATA, TP_UPSHIFT_CT, AIE_VARIANT)
 
-def validate_TP_INPUT_WINDOW_VSIZE(args):
-    TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
-    TT_DATA = args["TT_DATA"]
-    TT_COEFF = args["TT_COEFF"]
-    TP_FIR_LEN = args["TP_FIR_LEN"]
-    TP_API = args["TP_API"]
-    TP_SSR = args["TP_SSR"]
-    TP_PARA_INTERP_POLY = args["TP_PARA_INTERP_POLY"]
 
+def fn_validate_upshift_ct(TT_DATA, TP_UPSHIFT_CT, AIE_VARIANT):
+  param_dict=fn_update_upshift_ct(TT_DATA, AIE_VARIANT)
+  return (validate_legal_set(param_dict["enum"], "TP_UPSHIFT_CT", TP_UPSHIFT_CT))
 
-    return fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_PARA_INTERP_POLY)
+#######################################################
+############# TP_SHIFT Updater and Validator ##########
+#######################################################
+def update_TP_SHIFT(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  return fn_update_TP_SHIFT(AIE_VARIANT, TT_DATA)
 
+def fn_update_TP_SHIFT(AIE_VARIANT, TT_DATA):
+    range_TP_SHIFT=fn_update_range_TP_SHIFT(AIE_VARIANT, TT_DATA)
 
+    param_dict={
+        "name" : "TP_SHIFT",
+        "minimum" : range_TP_SHIFT[0],
+        "maximum" : range_TP_SHIFT[1]
+    }
+    return param_dict
 
-def validate_TP_FIR_LEN(args):
-    TT_DATA = args["TT_DATA"]
-    TT_COEFF = args["TT_COEFF"]
-    TP_FIR_LEN = args["TP_FIR_LEN"]
-    TP_CASC_LEN = args["TP_CASC_LEN"]
-    TP_SSR = args["TP_SSR"]
-    TP_API = args["TP_API"]
-    TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
-    TP_PARA_INTERP_POLY = args["TP_PARA_INTERP_POLY"]
+def validate_TP_SHIFT(args):
     AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, TP_PARA_INTERP_POLY, AIE_VARIANT)
+    TT_DATA = args["TT_DATA"]
+    TP_SHIFT = args["TP_SHIFT"]
+    return fn_validate_shift_val(AIE_VARIANT, TT_DATA, TP_SHIFT)
 
-def validate_TP_NUM_OUTPUTS(args):
-    TP_NUM_OUTPUTS      = args["TP_NUM_OUTPUTS"]
-    TP_PARA_INTERP_POLY = args["TP_PARA_INTERP_POLY"]
-    TP_API          = args["TP_API"]
-    TP_DUAL_IP          = args["TP_DUAL_IP"]
-    AIE_VARIANT         = args["AIE_VARIANT"]
-    return fn_validate_hb_num_outputs(TP_PARA_INTERP_POLY, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_API, AIE_VARIANT)
+def fn_validate_shift_val(AIE_VARIANT, TT_DATA, TP_SHIFT):
+  param_dict=fn_update_TP_SHIFT(AIE_VARIANT, TT_DATA)
+  range_TP_SHIFT=[param_dict["minimum"], param_dict["maximum"]]
+  return validate_range(range_TP_SHIFT, "TP_SHIFT", TP_SHIFT)
 
-def validate_TP_DUAL_IP(args):
-    TP_DUAL_IP        = args["TP_DUAL_IP"]
-    TP_API       = args["TP_API"]
-    AIE_VARIANT       = args["AIE_VARIANT"]
-    return fn_validate_sym_dual_ip(TP_API, TP_DUAL_IP, AIE_VARIANT)
+#######################################################
+##############TP_RND Updater and Validator ############
+#######################################################
+def update_TP_RND(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_update_TP_RND(AIE_VARIANT)
 
-def validate_TP_PARA_INTERP_POLY(args):
-    TP_PARA_INTERP_POLY   = args["TP_PARA_INTERP_POLY"]
-    TP_API              = args["TP_API"]
-    TP_SSR              = args["TP_SSR"]
-    return fn_validate_para_interp_poly(TP_API, TP_PARA_INTERP_POLY, TP_SSR)
+def fn_update_TP_RND(AIE_VARIANT):
+  legal_set_TP_RND=fn_get_legalSet_roundMode(AIE_VARIANT)
+  param_dict={
+    "name" : "TP_RND",
+    "enum" : legal_set_TP_RND
+  }
+  return param_dict
 
-def validate_TP_SSR(args):
-    TP_SSR              = args["TP_SSR"]
-    TP_API              = args["TP_API"]
-    return fn_validate_hb_ssr(TP_API, TP_SSR)
-# Example of updater.
-#
-# Updater are functions to help GUI to hint user on parameter setting with already given parameters.
-# The return object will provide "value" which will be set in the wizard as the dependent parameter is being set.
-# The rest of keys are similar to paramster definition, but with candidates of enum or range values refined
-# based on previously set values.
-#
-# An updator function always return a dictionary,
-# including key "value" for automatically filled default in GUI as dependent parameters have been set, and
-# other keys for overriding the definition of parameter.
-#
-# For example, if a parameter has definition in JSON as
-#  { "name": "foo", "type": "typename", "enum": ["int", "float", "double"] }
-# And the updator returns
-#  { "value": "int", "enum": ["int", "float"] }
-# The GUI would show "int" as default and make "int" and "float" selectable candidates, while disabling "double".
-#
-# If with given combination, no valid value can be set for the parameter being updated, the upater function
-# should set "value" to None, to indicate an error and provide error message via "err_message".
-# For example
-#  { "value": None, "err_message": "With TT_DATA as 'int' there is no valid option for TT_COEFF" }
-#
-# In this example, the following is the updater for TT_COEFF, with TT_DATA as the dependent paramster.
-# When GUI generates a wizard, TT_DATA should be required first, as it shows up in parameter list first.
-# Once user has provided value for TT_DATA, this function will be called and set the value of TT_COEFF.
-# Meanwhile, the candidate shown in wizard based on enum will also be updated.
-#
-def update_TT_COEFF(TT_DATA):
-    return {"value": TT_DATA,
-            "enum": [TT_DATA]}
+def validate_TP_RND(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TP_RND = args["TP_RND"]
+    return fn_validate_roundMode(TP_RND, AIE_VARIANT)
+
+#######################################################
+############ TP_SAT Updater and Validator #############
+#######################################################  
+def update_TP_SAT(args):
+  legal_set_sat=fn_legal_set_sat()
+  param_dict={
+    "name" : "TP_SAT",
+    "enum" : legal_set_sat
+  }
+  return param_dict
+                               
+def validate_TP_SAT(args):
+  TP_SAT = args["TP_SAT"]
+  return fn_validate_satMode(TP_SAT)
+
+#######################################################
+############## coeff Updater and Validator ############
+#######################################################
+def update_coeff(args):
+  TT_COEFF = args["TT_COEFF"]
+  TP_FIR_LEN = args["TP_FIR_LEN"]
+  return fn_update_coeff(TT_COEFF, TP_FIR_LEN)
+
+def fn_update_coeff(TT_COEFF, TP_FIR_LEN):
+  
+  if fn_is_complex(TT_COEFF) : len_coeff=int((TP_FIR_LEN + 1) / 2)
+  else: len_coeff=int((TP_FIR_LEN + 1) / 4)
+
+  param_dict={"name" : "coeff",
+              "len"  : len_coeff}
+
+  return param_dict
+
+def validate_coeff(args):
+  TT_COEFF = args["TT_COEFF"]
+  TP_FIR_LEN = args["TP_FIR_LEN"]
+  coeff_list = args["coeff"]
+  return fn_validate_coeff(TT_COEFF, TP_FIR_LEN, coeff_list)
+
+def fn_validate_coeff(TT_COEFF, TP_FIR_LEN, coeff_list):
+  param_dict=fn_update_coeff(TT_COEFF, TP_FIR_LEN)
+  return validate_LUT_len(coeff_list, param_dict["len"])
+
 
 #### port ####
-
-
 def info_ports(args):
     """Standard function creating a static dictionary of information
     for upper software to correctly connect the IP.

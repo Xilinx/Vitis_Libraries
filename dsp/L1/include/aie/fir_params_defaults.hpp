@@ -29,6 +29,7 @@ namespace aie {
 struct fir_params_defaults {
    public:
     using BTT_DATA = cint16;
+    using BTT_OUT_DATA = BTT_DATA;
     using BTT_COEFF = int16;
     static constexpr unsigned int Bdim = 0;
     static constexpr unsigned int BTP_FIR_LEN = 16;

@@ -72,7 +72,7 @@ using namespace adf;
  * @tparam TP_DIM_B is an unsigned integer which describes the number of elements
  *          along the unique dimension (columns) of Matrix B.
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
- *         product terms before each output. TP_SHIFT must be in the range 0 to 61.
+ *         product terms before each output. ``TP_SHIFT`` must be in the range 0 to 59 (61 for AIE1).
  * @tparam TP_RND describes the selection of rounding to be applied during the
  *         shift down stage of processing. \n
  *         Although, TP_RND accepts unsigned integer values descriptive macros are recommended where
@@ -89,7 +89,7 @@ using namespace adf;
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
- *
+ *         \n
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_DIM_A_LEADING describes the scheme in which the data should be stored
  *         in memory. ROW_MAJOR = 0, COL_MAJOR = 1. Note, a COL_MAJOR matrix can be

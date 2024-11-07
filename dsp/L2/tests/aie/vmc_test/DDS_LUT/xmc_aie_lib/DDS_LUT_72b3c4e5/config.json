@@ -1,0 +1,17 @@
+{
+    "spec": "vmc_dds_lut.json",
+    "outdir": "./xmc_aie_lib/DDS_LUT_72b3c4e5",
+    "parameters": {
+        "AIE_VARIANT": 1,
+        "data_type": "cint16",
+        "sfdr": 40,
+        "ssr": 1,
+        "output_window_size": 64,
+        "USE_PHASE_RELOAD": false,
+        "phase_increment": 0,
+        "initial_phase_offset": 0,
+        "rnd_mode": 0,
+        "sat_mode": 0,
+        "vmc_sample_time": -1.0
+    }
+}

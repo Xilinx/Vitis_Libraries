@@ -49,7 +49,9 @@ template <typename TT_DATA,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_SSR = 1, // just ignored in reference model
-          unsigned int TP_SAT = 1>
+          unsigned int TP_SAT = 1,
+          unsigned int TP_CASC_LEN = 1,
+          typename TT_OUT_DATA = TT_DATA>
 class fir_tdm_ref_graph : public graph {
    private:
     // Unsupported.
@@ -80,6 +82,7 @@ class fir_tdm_ref_graph : public graph {
 
    public:
     using ref_kernel_class = fir_tdm_ref<TT_DATA,
+                                         TT_OUT_DATA,
                                          TT_COEFF,
                                          TP_FIR_LEN,
                                          TP_SHIFT,
@@ -117,7 +120,7 @@ class fir_tdm_ref_graph : public graph {
         // Byte size of window buffer.
         constexpr unsigned int inputWindowByteSize = TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA);
         constexpr unsigned int inputWindowVectorSize = inputWindowByteSize / sizeof(TT_DATA);
-        constexpr unsigned int outputWindowByteSize = TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA);
+        constexpr unsigned int outputWindowByteSize = TP_INPUT_WINDOW_VSIZE * sizeof(TT_OUT_DATA);
 
         // Make input connections
         if

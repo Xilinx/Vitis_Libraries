@@ -37,7 +37,7 @@
       "validator": {
         "file": "vmc_dft_common.py",
         "function": "vmc_validate_point_size",
-        "args": ["AIE_VARIANT","data_type","twiddle_type","casc_length"]
+        "args": []
       },
             "label": "DFT size:",
             "tablabel": "Main",
@@ -51,7 +51,7 @@
     "validator": {
         "file": "vmc_dft_common.py",
         "function": "vmc_validate_num_frames",
-        "args": []
+        "args": ["AIE_VARIANT", "data_type", "point_size"]
       },
             "label": "Number of frames per window:",
             "tablabel": "Main",
@@ -75,10 +75,29 @@
       "key": "TP_RND",
       "name": "rnd_mode",
       "description": "The rounding to be applied during the shift down stage of processing.",
+      "validator": {
+        "file": "vmc_dft_common.py",
+        "function": "vmc_validate_TP_RND",
+        "args": ["AIE_VARIANT"]
+      },
       "default": "Round symmetrical to infinity",
           "label": "Rounding mode:",
             "tablabel": "Main",
           "parameterType": "popup"
+    },
+    {
+      "key": "TP_SSR",
+      "name": "ssr",
+      "description": "The number of cascade chains operating in parallel.",
+      "default": 1,
+       "validator": {
+        "file": "vmc_dft_common.py",
+        "function": "vmc_validate_ssr",
+        "args": ["AIE_VARIANT", "data_type", "point_size"]
+      },
+            "label": "SSR:",
+            "tablabel": "Main",
+            "parameterType":"edit"
     },
     {
       "key": "TP_SAT",
@@ -104,7 +123,7 @@
        "validator": {
         "file": "vmc_dft_common.py",
         "function": "vmc_validate_casc_length",
-        "args": []
+        "args": ["AIE_VARIANT", "data_type", "twiddle_type", "point_size","ssr"]
       },
             "label": "Number of cascade stages:",
             "tablabel": "Main",

@@ -58,13 +58,13 @@ using namespace adf;
  * @tparam TT_COEFF describes the type of individual coefficients of the filter
  *         taps. \n It must be one of the same set of types listed for TT_DATA
  *         and must also satisfy the following rules:
- *         - Complex types are only supported when TT_DATA is also complex.
- *         - TT_COEFF must be an integer type if TT_DATA is an integer type
- *         - TT_COEFF must be a float type if TT_DATA is a float type.
+ *         - Complex types are only supported when ``TT_DATA`` is also complex.
+ *         - ``TT_COEFF`` must be an integer type if TT_DATA is an integer type
+ *         - ``TT_COEFF`` must be a float type if TT_DATA is a float type.
  * @tparam TP_FIR_LEN is an unsigned integer which describes the number of taps
  *         in the filter.
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
- *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
+ *         FIR terms before output. \n ``TP_SHIFT`` must be in the range 0 to 59 (61 for AIE1).
  * @tparam TP_RND describes the selection of rounding to be applied during the
  *         shift down stage of processing. \n
  *         Although, TP_RND accepts unsigned integer values descriptive macros are recommended where
@@ -81,7 +81,7 @@ using namespace adf;
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
- *
+ *         \n
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph
  *         in a single iteration run.  \n
@@ -92,7 +92,7 @@ using namespace adf;
  *\n
  *         In such case, maximum number of samples processed by the graph is limited to 32-bit value (4.294B samples per
  *iteration).  \n
- *
+ *         \n
  *         Note: For SSR configurations (TP_SSR>1), the input data must be split over multiple ports,
  *         where each successive sample is sent to a different input port in a round-robin fashion. \n
  *         As a result, each SSR input path will process a fraction of the frame defined by the TP_INPUT_WINDOW_VSIZE.
@@ -106,17 +106,17 @@ using namespace adf;
  *         reloading should be used. \n When defining the parameter:
  *         - 0 = static coefficients, defined in filter constructor,
  *         - 1 = reloadable coefficients, passed as argument to runtime function. \n
- *
+ *         \n
  *         Note: when used, async port: ```port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeff;```
  *         will be added to the FIR. \n
- *
+ *         \n
  *         Note: the size of the port array is equal to the total number of output paths  (TP_SSR). \n
  *         Each port should contain the same taps array content, i.e. each additional port must be a duplicate of the
  *         coefficient array. \n
  * @tparam TP_NUM_OUTPUTS sets the number of ports to broadcast the output to. \n
- *
+ *         \n
  *         Note: when used, optional port: ``` std::array<port<output>, TP_SSR> out2; ``` will be added to the FIR. \n
- *
+ *         \n
  *         Note: For Windows API, additional output an exact copy of the data. \n
  *         Stream API interleaves the output data with a 128-bit pattern, e.g.: \n
  *         - samples 0-3 to be sent over stream0 for cint16 data type, \n
@@ -127,10 +127,10 @@ using namespace adf;
  *         In such case data should be organized in 128-bit interleaved pattern, e.g.: \n
  *         - samples 0-3 to be sent over stream0 for cint16 data type, \n
  *         - samples 4-7 to be sent over stream1 for cint16 data type. \n
- *
+ *         \n
  *         Note: Dual input streams offer no throughput gain if only single output stream would be used.
  *         Therefore, dual input streams are only supported with 2 output streams. \n
- *
+ *         \n
  *         Note: Dual input ports offer no throughput gain if port api is windows.
  *         Therefore, dual input ports are only supported with streams and not windows.
  * @tparam TP_API specifies if the input/output interface should be window-based or stream-based.  \n

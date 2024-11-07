@@ -107,9 +107,9 @@ class test_graph : public graph {
                                  ("_" + std::to_string(ssrRank) + "_" + std::to_string(cascRank)));
 
                 inA[(ssrRank * P_CASC_LEN) + cascRank] = input_plio::create(
-                    "PLIO_in_A" + std::to_string((ssrRank * P_CASC_LEN) + cascRank), adf::plio_32_bits, filenameA);
+                    "PLIO_in_A" + std::to_string((ssrRank * P_CASC_LEN) + cascRank), adf::plio_64_bits, filenameA);
                 inB[(ssrRank * P_CASC_LEN) + cascRank] = input_plio::create(
-                    "PLIO_in_B" + std::to_string((ssrRank * P_CASC_LEN) + cascRank), adf::plio_32_bits, filenameB);
+                    "PLIO_in_B" + std::to_string((ssrRank * P_CASC_LEN) + cascRank), adf::plio_64_bits, filenameB);
 
                 connect<>(inA[(ssrRank * P_CASC_LEN) + cascRank].out[0],
                           mmultGraph.inA[(ssrRank * P_CASC_LEN) + cascRank]);
@@ -118,7 +118,7 @@ class test_graph : public graph {
             }
             std::string filenameOut = QUOTE(OUTPUT_FILE);
             filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(ssrRank) + "_0"));
-            out[ssrRank] = output_plio::create("PLIO_out_" + std::to_string(ssrRank), adf::plio_32_bits, filenameOut);
+            out[ssrRank] = output_plio::create("PLIO_out_" + std::to_string(ssrRank), adf::plio_64_bits, filenameOut);
             connect<>(mmultGraph.out[ssrRank], out[ssrRank].in[0]);
         }
 
@@ -128,14 +128,14 @@ class test_graph : public graph {
         // filenameA.insert(filenameA.length()-4, ("_0"));
         // filenameB.insert(filenameB.length()-4, ("_0"));
         // Make connections
-        inA[0] = input_plio::create("PLIO_in_A" + std::to_string(0), adf::plio_32_bits, filenameA);
-        inB[0] = input_plio::create("PLIO_in_B" + std::to_string(0), adf::plio_32_bits, filenameB);
+        inA[0] = input_plio::create("PLIO_in_A" + std::to_string(0), adf::plio_64_bits, filenameA);
+        inB[0] = input_plio::create("PLIO_in_B" + std::to_string(0), adf::plio_64_bits, filenameB);
         connect<>(inA[0].out[0], mmultGraph.inA[0]);
         connect<>(inB[0].out[0], mmultGraph.inB[0]);
 
         std::string filenameOut = QUOTE(OUTPUT_FILE);
         // filenameOut.insert(filenameOut.length()-4, ("_0_0"));
-        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_32_bits, filenameOut);
+        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_64_bits, filenameOut);
         connect<>(mmultGraph.out[0], out[0].in[0]);
 #endif
 #endif

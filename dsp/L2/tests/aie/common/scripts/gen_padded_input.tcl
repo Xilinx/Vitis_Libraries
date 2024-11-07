@@ -49,10 +49,12 @@ set coeff_reload_mode 0;
 set tt_coeff "int16" ;# sensible default
 set coeffStimType 0 ;# FIR length
 set firLen 16 ;# FIR length
-set convcorrMode 0
-set tp_data_Length 1024
-set tp_coeff_Length 512
-set tp_aie_arch 1
+set convcorrMode 0; #Compute Mode (0, 1 and 2)
+set tp_data_Length 1024; # defualt F Length
+set tp_coeff_Length 512; # default G Length
+set tp_aie_arch 1; # defaul Arch. is AIE-1
+set tp_num_frames 1; # Num of Frames
+
 if { $::argc > 2} {
     set filename [lindex $argv 0]
     set fileDirpath [file dirname $filename]
@@ -94,7 +96,7 @@ if { $::argc > 2} {
     if {[llength $argv] > 14 } {
         set firLen [lindex $argv 14]
     }
-	if {[llength $argv] > 15 } {
+    if {[llength $argv] > 15 } {
         set convcorrMode [lindex $argv 15]
     }
     if {[llength $argv] > 16 } {
@@ -103,10 +105,13 @@ if { $::argc > 2} {
     if {[llength $argv] > 17 } {
         set tp_coeff_Length [lindex $argv 17]
     }
-	if {[llength $argv] > 18 } {
+    if {[llength $argv] > 18 } {
         set tp_aie_arch [lindex $argv 18]
     }
-	puts "Default Arguments for $filename : "
+    if {[llength $argv] > 19 } {
+        set tp_num_frames [lindex $argv 19]
+    }
+    puts "Default Arguments for $filename : "
     puts "filename          = $filename"
     puts "window_vsize      = $window_vsize"
     puts "iterations        = $iterations"
@@ -126,6 +131,7 @@ if { $::argc > 2} {
     puts "tp_data_Length    = $tp_data_Length"
     puts "tp_coeff_Length   = $tp_coeff_Length"
     puts "tp_aie_arch       = $tp_aie_arch"
+    puts "tp_num_frames     = $tp_num_frames"
 }
 
 set nextSample $seed
@@ -134,6 +140,10 @@ proc srand {seed} {
     set nextSample $seed
 }
 
+proc ceil {x y} {
+   set RetVal [expr ((($x+$y)-1)/ $y) ]
+   return $RetVal
+}
 
 proc randInt {seed sampleType} {
    set nextSample [expr {($seed * 1103515245 + 12345)}]
@@ -157,6 +167,45 @@ proc randInt {seed sampleType} {
     }
 }
 
+proc randFloat {seed sampleType} {
+   set maxfp32 3.4028235e+1
+   set minfp32 1.1754944e-1
+   set range [expr {($maxfp32+1) - ($minfp32)}];
+   set nextSample [expr {($minfp32) + (rand() * $range)}]; # 2147483647.0 --> (2^31)-1
+   return $nextSample
+}
+
+proc randBFloat16 {seed sampleType} {
+    set maxbfp16 3.3895314e+4
+    set minbfp16 1.1754944e-4
+    set bias 127
+    set mask_sign "0x80000000"
+    set mask_exp "0x7F800000" 
+    set mask_mantissa "0x007F8000"
+    set shiftbits31 31
+    set shiftbits23 23
+    set shiftbits7 7
+    set shiftbits16 16
+    
+    set range [expr {($maxbfp16+1) - ($minbfp16)}]; #range
+    set fpSample [expr {($minbfp16) + (rand() * $range)}]; # gen. of random float32 value
+    set fpinhex [format %f $fpSample]; # formatted to float i.e. 6 decimal values
+    
+    # Generate the equivalent Hexadecimal number of fp32
+    binary scan [binary format R $fpinhex] H* hex 
+    set float_int [expr 0x$hex]; # get integer value which is equivalent to above Hexadecimal value.
+    
+    # convert back bfloat16 integer to a float32 approxiation
+    set sign [expr {($float_int & $mask_sign ) >> $shiftbits31}]
+    set exponent [expr {(($float_int & $mask_exp) >> $shiftbits23)-$bias}]
+    set mantissa [expr {(1 + [expr { double([expr {(($float_int & $mask_mantissa) >> $shiftbits16)}])/ [expr {(1 << $shiftbits7)}] }])}]
+    set bfloat16_int [expr {((1-[expr {(2*$sign)}]) * ([expr {$mantissa}]) * ([expr {(1<<$exponent)}]))}]
+    set nextSample [expr { ($bfloat16_int)}]
+    
+    return $nextSample
+   
+}
+
 proc incInt {seed sampleType} {
     set nextSample [expr {$seed +1}]
     if {($sampleType eq "int8") || ($sampleType eq "cint8")} {
@@ -171,12 +220,6 @@ proc incInt {seed sampleType} {
     return $nextSample
 }
 
-proc ceil {x y} {
- 
-   set RetVal [expr ((($x+$y)-1)/ $y) ]
-   return $RetVal
-}
-
 proc getDataSamples {tt_data} {
    set samples_data 8
    if {($tt_data eq "int8")} {
@@ -185,10 +228,14 @@ proc getDataSamples {tt_data} {
        set samples_data 16
    } elseif {($tt_data eq "int32")} {
        set samples_data 32
+   } elseif {($tt_data eq "float")} {
+       set samples_data 32
    } elseif {($tt_data eq "cint16")} {
        set samples_data 32
+   } elseif {($tt_data eq "cint32")} {
+        set samples_data 64
    } else {
-      if {($tt_data eq "cint32")} {
+      if {($tt_data eq "cfloat")} {
        set samples_data 64
       }
    }
@@ -199,7 +246,7 @@ proc getDataSamples {tt_data} {
 proc getNumOfLanes {tt_data tt_coeff tp_aie_arch} {
      set Lanes 0
      if { $tp_aie_arch == 1 } {
-	 if {(($tt_data eq "int8") && ($tt_coeff eq "int8"))} {
+     if {(($tt_data eq "int8") && ($tt_coeff eq "int8"))} {
        # int16s are organized in 2 samplesPerLine
        set Lanes 16
      } elseif {(($tt_data eq "int16") && ($tt_coeff eq "int8"))} {
@@ -223,8 +270,20 @@ proc getNumOfLanes {tt_data tt_coeff tp_aie_arch} {
      } elseif {(($tt_data eq "cint32") && ($tt_coeff eq "int16"))} {
        # int16s are organized in 2 samplesPerLine
        set Lanes 8
+     } elseif {(($tt_data eq "cint32") && ($tt_coeff eq "cint16"))} {
+       # int16s are organized in 2 samplesPerLine
+       set Lanes 4
+     } elseif {(($tt_data eq "float") && ($tt_coeff eq "float"))} {
+       # int16s are organized in 2 samplesPerLine
+       set Lanes 8
+     } elseif {(($tt_data eq "float") && ($tt_coeff eq "cfloat"))} {
+       # int16s are organized in 2 samplesPerLine
+       set Lanes 4
+     } elseif {(($tt_data eq "cfloat") && ($tt_coeff eq "float"))} {
+       # int16s are organized in 2 samplesPerLine
+       set Lanes 4
      } else {
-	   if {(($tt_data eq "cint32") && ($tt_coeff eq "cint16"))} {
+       if {(($tt_data eq "cfloat") && ($tt_coeff eq "cfloat"))} {
        # int16s are organized in 2 samplesPerLine
          set Lanes 4
        }
@@ -232,29 +291,32 @@ proc getNumOfLanes {tt_data tt_coeff tp_aie_arch} {
     } else {
       if { $tp_aie_arch == 2 } {
         if {(($tt_data eq "int8") && ($tt_coeff eq "int8"))} {
-          # int16s are organized in 2 samplesPerLine
-          set Lanes 32
+            # int16s are organized in 2 samplesPerLine
+            set Lanes 32
         } elseif {(($tt_data eq "int16") && ($tt_coeff eq "int8"))} {
-        # int16s are organized in 2 samplesPerLine
-        set Lanes 16
+            # int16s are organized in 2 samplesPerLine
+            set Lanes 16
         } elseif {(($tt_data eq "int16") && ($tt_coeff eq "int16"))} {
-        # int16s are organized in 2 samplesPerLine
-        set Lanes 16
+            # int16s are organized in 2 samplesPerLine
+            set Lanes 16
         } elseif {(($tt_data eq "int32") && ($tt_coeff eq "int16"))} {
-        # int16s are organized in 2 samplesPerLine
-        set Lanes 16
+            # int16s are organized in 2 samplesPerLine
+            set Lanes 16
+        } elseif {(($tt_data eq "float") && ($tt_coeff eq "float"))} {
+            # int16s are organized in 2 samplesPerLine
+            set Lanes 16
         } elseif {(($tt_data eq "cint16") && ($tt_coeff eq "int16"))} {
-        # int16s are organized in 2 samplesPerLine
-        set Lanes 16
+            # int16s are organized in 2 samplesPerLine
+            set Lanes 16
         } elseif {(($tt_data eq "cint16") && ($tt_coeff eq "int32"))} {
-        # int16s are organized in 2 samplesPerLine
-        set Lanes 16
+            # int16s are organized in 2 samplesPerLine
+            set Lanes 16
         } elseif {(($tt_data eq "cint16") && ($tt_coeff eq "cint16"))} {
-        # int16s are organized in 2 samplesPerLine
-        set Lanes 8
+            # int16s are organized in 2 samplesPerLine
+            set Lanes 8
         } elseif {(($tt_data eq "cint32") && ($tt_coeff eq "int16"))} {
-        # int16s are organized in 2 samplesPerLine
-        set Lanes 16
+            # int16s are organized in 2 samplesPerLine
+            set Lanes 16
         } else {
             if {(($tt_data eq "cint32") && ($tt_coeff eq "cint16"))} {
             # int16s are organized in 2 samplesPerLine
@@ -262,12 +324,10 @@ proc getNumOfLanes {tt_data tt_coeff tp_aie_arch} {
           }
        }
        }
-	 }
+     }
 
      return $Lanes
 }
-
-
 
 proc generateSample {stimType sampleSeed sample_idx samples sampleType comp} {
 
@@ -281,9 +341,25 @@ proc generateSample {stimType sampleSeed sample_idx samples sampleType comp} {
     # 9 = ALT_ZEROES_ONES
 
     if { $stimType == 0 } {
-        # Random
-        set nextSample [randInt $sampleSeed $sampleType]
-
+        set integerType 1
+        
+        if {($sampleType eq "float") || ($sampleType eq "cfloat") || ($sampleType eq "bfloat16")} {
+            set integerType 0
+        }
+        if {($sampleType eq "float")} {            
+            #puts "float"
+            set nextSample [randFloat $sampleSeed $sampleType]
+        } elseif {$sampleType eq "cfloat"} {            
+            #puts "cfloat"
+            set nextSample [randFloat $sampleSeed $sampleType]
+        } elseif {$sampleType eq "bfloat16"} {            
+            #puts "bfloat16"
+            set nextSample [randBFloat16 $sampleSeed $sampleType]
+        } else {
+            # Random
+            #puts "int16"
+            set nextSample [randInt $sampleSeed $sampleType]
+        }    
     } elseif { $stimType == 3 } {
         # Impulse
         if {$sample_idx == 0} {
@@ -381,7 +457,7 @@ set headRand [srand $seed]
 set overkill 1
 set padding 0
 set pt_size_pwr $max_pt_size_pwr+1
-set framesInWindow 1
+set framesInWindow [expr ($tp_num_frames)]
 set samplesPerFrame  [expr ($window_vsize)]
 set fir_header 0
 set nextCoeffSample 0
@@ -394,31 +470,36 @@ if {$using_plio_class == 1 && ($tt_data eq "cint32" || $tt_data eq "cfloat")} {
     set samplesPerFrame [expr ($samplesPerFrame) * 2]
 }
 set samplesPerLine 1
-if {($tt_data eq "int16" || $tt_data eq "uint16")} {
+if {($tt_data eq "int16" || $tt_data eq "uint16" || $tt_data eq "bfloat16")} {
     # int16s are organized in 2 samplesPerLine
-    set samplesPerLine 2
+    set samplesPerLine 4
 }
 
 if {($tt_data eq "int8" || $tt_data eq "uint8" || $tt_data eq "cint8")} {
     # int8 values are organized in 4 samplesPerLine
-    set samplesPerLine 4
+    set samplesPerLine 8
+}
+
+if {($tt_data eq "int32" || $tt_data eq "cint16")} {
+    # int8 values are organized in 4 samplesPerLine
+    set samplesPerLine 2
 }
 
 #ADF::PLIO expects data in 32-bits per text line, which for cint16 and int16 is 2 samplesPerFrame/dataPartsPerLine per line
-set dataPartsPerLine 1
+set dataPartsPerLine 2
 if {$using_plio_class == 0} {
-    if {$tt_data eq "cint16" || $tt_data eq "int16" || $tt_data eq "cint32" || $tt_data eq "cfloat"} {
+    if {$tt_data eq "cint16" || $tt_data eq "int16" || $tt_data eq "cint32" || $tt_data eq "cfloat" || $tt_data eq "bfloat16"} {
         set dataPartsPerLine 2
     }
 	 if {$tt_data eq "cint8" || $tt_data eq "int8" || $tt_data eq "uint8"} {
         set dataPartsPerLine 4
     }
 } else { #PLIO
-    if {$tt_data eq "cint16" || $tt_data eq "int16" || $tt_data eq "uint16" } {
-        set dataPartsPerLine 2
+    if {$tt_data eq "cint16" || $tt_data eq "int16" || $tt_data eq "uint16" || $tt_data eq "bfloat16" } {
+        set dataPartsPerLine 4
     }
     if {$tt_data eq "cint8" || $tt_data eq "int8" || $tt_data eq "uint8"} {
-        set dataPartsPerLine 4
+        set dataPartsPerLine 8
     }
 }
 
@@ -516,109 +597,98 @@ set CountPad 0
         ###################################################################################
         # Zero padding to the data based on conv/corr computation Mode i.e. FULL/SAME/VALID
         ###################################################################################
-
-         set padZeros 0
-         if { $convcorrMode eq 0 } {
+        
+        if {($tt_data eq "float") || ($tt_data eq "cfloat") || ($tt_data eq "bfloat16") } {
+            set padZeros 0.0
+        } else {    
+            set padZeros 0
+        }
+        if { $convcorrMode eq 0 } {
              # FULL Mode
              set left_padd_Count [expr ($tp_coeff_Length-1)]
              set right_padd_Count [expr ($tp_coeff_Length-1)]
-         } elseif { $convcorrMode eq 1 } {
+        } elseif { $convcorrMode eq 1 } {
              # SAME MODE
              set left_padd_Count [expr ((($tp_coeff_Length)/2)-1)]
              set right_padd_Count [expr ((($tp_coeff_Length)/2)-1)]
-         } else {
-           if { $convcorrMode eq 2 } {
+        } else {
+            if { $convcorrMode eq 2 } {
                 # VALID Mode
-               set left_padd_Count 0; # No Left Padding for VALID Mode
-               if {$Lanes > $data_Load} {
-                 set right_padd_Count [expr (($data_Load)*2)]
-               } else {
-                 set right_padd_Count [ expr ($data_Load)]
-               }
-           }
-         }
-		 if {$samplesPerFrame eq ($window_vsize*2) } {
-		    set left_padd_Count [expr ($left_padd_Count * 2) ]
-			set right_padd_Count [expr ($right_padd_Count * 2) ]
-			set data_Load [expr ($data_Load * 2)]
-		 }
-		 set PaddedLen [expr ($left_padd_Count + $samplesPerFrame + $right_padd_Count)]
-		 set ReqPaddedLen [expr (([ceil $PaddedLen $data_Load])*$data_Load) ]
-		 set AdjustedPaddLen [expr ($ReqPaddedLen - $PaddedLen)]
-		 
-		 if {$left_padd_Count > 0 || $right_padd_Count > 0 } {
-		    if {$left_padd_Count > 0 } {
-			   set LenOfPad $left_padd_Count
-			} elseif {$right_padd_Count > 0  } {
-			   set LenOfPad $right_padd_Count
-			} else {
-			   set LenOfPad 0
-			}			
-		    set cnt [expr ($LenOfPad/$samplesPerLine) ]
-		    set LeftOverSamplestoBePadded [expr ($LenOfPad-($cnt*$samplesPerLine))]
-			if {$LeftOverSamplestoBePadded eq 0} {
-			  set First_NonZeroSamples 0
-			  set CountPad $AdjustedPaddLen
-			} else {
-		    set First_NonZeroSamples [expr ($samplesPerLine-$LeftOverSamplestoBePadded)]
-		    set CountPad [expr ($dataPartsPerLine-$LeftOverSamplestoBePadded)]
-			}		   
-		 }
-		 
-puts " "
-puts "Print padding parameters to cross verify "
-puts "****************************************"
-puts "Lanes: $Lanes"
-puts "left_padd_Count = $left_padd_Count"
-puts "right_padd_Count = $right_padd_Count"
-puts " "
-puts "PaddedLen = $PaddedLen"
-puts "ReqPaddedLen = $ReqPaddedLen"
-puts "data_samples = $data_samples"
-puts "cnt = $cnt"
-puts "LeftOverSamplestoBePadded = $LeftOverSamplestoBePadded"
-puts "First_NonZeroSamples = $First_NonZeroSamples"
-puts "CountPad = $CountPad"
-puts "data_Load = $data_Load"
-puts "samplesPerFrame = $samplesPerFrame"
-puts "samplesPerLine = $samplesPerLine"
-puts "dataPartsPerLine = $dataPartsPerLine"
-
-puts " "
-	      if {$left_padd_Count > 0} {
-           for {set indx 0} {$indx < [expr ($left_padd_Count / $samplesPerLine)]} { incr indx} {
-			for {set comp 0} {$comp < $dataPartsPerLine} {incr comp} {
-			  if {$comp < 3 && $dataPartsPerLine eq 4} {
-                    puts -nonewline $output_file "$padZeros "
-                } elseif {$comp eq 0 && $dataPartsPerLine eq 2} {
-                    puts -nonewline $output_file "$padZeros "
+                set left_padd_Count 0; # No Left Padding for VALID Mode
+                if {$Lanes > $data_Load} {
+                    set right_padd_Count [expr (($data_Load)*2)]
                 } else {
-              puts $output_file "$padZeros"
-           }
-         }
-           }
-		   for {set indx 0} {$indx < $LeftOverSamplestoBePadded} { incr indx} {
-                    puts -nonewline $output_file "$padZeros "
-         }
-		   for {set sindx 0} {$sindx < $First_NonZeroSamples} { incr sindx} {
-		      set comp 0
-		      set nextSample [generateSample  $dataStimType $nextSample $sindx $samplesPerFrame $tt_data $comp] 
-		      if {$samplesPerLine > 1} {
-                       puts -nonewline $output_file "$nextSample "
-			   	 } else {
-                       puts $output_file "$nextSample "
-                   }
-		    }
-			 if { $LeftOverSamplestoBePadded > 0 && ([expr ($samplesPerLine-$dataPartsPerLine)]) eq 0} {
-			  if {([expr ($First_NonZeroSamples+$LeftOverSamplestoBePadded)]) eq $samplesPerLine } {
-				    puts $output_file ""
-				}
-             }				
-         }
+                    set right_padd_Count [ expr ($data_Load)]
+                }
+            }
+        }
+        if {$samplesPerFrame eq ($window_vsize*2) } {
+            set left_padd_Count [expr ($left_padd_Count * 2) ]
+            set right_padd_Count [expr ($right_padd_Count * 2) ]
+            set data_Load [expr ($data_Load * 2)]
+        }
+        set PaddedLen [expr ($left_padd_Count + $samplesPerFrame + $right_padd_Count)]
+        set ReqPaddedLen [expr (([ceil $PaddedLen $data_Load])*$data_Load) ]
+        set AdjustedPaddLen [expr ($ReqPaddedLen - $PaddedLen)]
+         
+        if {$left_padd_Count > 0 || $right_padd_Count > 0 } {
+            if {$left_padd_Count > 0 } {
+               set LenOfPad $left_padd_Count
+            } elseif {$right_padd_Count > 0  } {
+               set LenOfPad $right_padd_Count
+            } else {
+               set LenOfPad 0
+            }
+            set cnt [expr ($LenOfPad/$samplesPerLine) ]
+            set LeftOverSamplestoBePadded [expr ($LenOfPad-($cnt*$samplesPerLine))]
+            if {$LeftOverSamplestoBePadded eq 0} {
+                set First_NonZeroSamples 0
+                set CountPad $AdjustedPaddLen
+            } else {
+                set First_NonZeroSamples [expr ($samplesPerLine-$LeftOverSamplestoBePadded)]
+                set CountPad [expr ($dataPartsPerLine-$LeftOverSamplestoBePadded)]
+            }
+        }
+
+        if {$left_padd_Count > 0} {
+            for {set indx 0} {$indx < [expr ($left_padd_Count / $samplesPerLine)]} { incr indx} {
+                for {set comp 0} {$comp < $dataPartsPerLine} {incr comp} {
+                    if {$comp < 7 && $dataPartsPerLine eq 8} {
+					 puts -nonewline $output_file "$padZeros "
+		     } elseif {$comp < 3 && $dataPartsPerLine eq 4} {
+                        puts -nonewline $output_file "$padZeros "
+                    } elseif {$comp eq 0 && $dataPartsPerLine eq 2} {
+                        puts -nonewline $output_file "$padZeros "
+                    } else {
+                        puts $output_file "$padZeros"
+                    }
+                }
+            }
+                for {set indx 0} {$indx < [expr $LeftOverSamplestoBePadded*($dataPartsPerLine/$samplesPerLine)]} { incr indx} {
+                     puts -nonewline $output_file "$padZeros "
+                }
+	    }
+            for {set sindx 0} {$sindx < [expr $First_NonZeroSamples*($dataPartsPerLine/$samplesPerLine)]} { incr sindx} {
+                set comp 0
+                set nextSample [generateSample  $dataStimType $nextSample $sindx $samplesPerFrame $tt_data $comp] 
+                if {$samplesPerLine > 1} {
+                    puts -nonewline $output_file "$nextSample "
+                } else {
+                    puts $output_file "$nextSample "
+                }
+            }
+            if { $LeftOverSamplestoBePadded > 0 } {
+                if {([expr ($First_NonZeroSamples+$LeftOverSamplestoBePadded)]) eq $samplesPerLine } {
+                    puts $output_file ""
+                }
+            }                
+        }
         for {set sample_idx $First_NonZeroSamples} {$sample_idx < $samplesPerFrame / $samplesPerLine} {incr sample_idx} {
             for {set comp 0} {$comp < $dataPartsPerLine} {incr comp} {
                 set nextSample [generateSample  $dataStimType $nextSample $sample_idx $samplesPerFrame $tt_data $comp]
-                if {$comp < 3 && $dataPartsPerLine eq 4} {
+                if {$comp < 7 && $dataPartsPerLine eq 8} {
+                    puts -nonewline $output_file "$nextSample "
+		} elseif {$comp < 3 && $dataPartsPerLine eq 4} {
                     puts -nonewline $output_file "$nextSample "
                 } elseif {$comp eq 0 && $dataPartsPerLine eq 2} {
                     puts -nonewline $output_file "$nextSample "
@@ -638,7 +708,7 @@ puts " "
                 }
             }
         }
-		for {set sindx 0} {$sindx < $LeftOverSamplestoBePadded} { incr sindx} { 
+		for {set sindx 0} {$sindx < [expr $LeftOverSamplestoBePadded*($dataPartsPerLine/$samplesPerLine)]} { incr sindx} { 
            set comp 0
 		      set nextSample [generateSample  $dataStimType $nextSample $sindx $samplesPerFrame $tt_data $comp] 
 		      if {$samplesPerLine > 1} {
@@ -647,42 +717,41 @@ puts " "
                        puts $output_file "$nextSample "
                    }
 			 }
-			 for {set indx 0} {$indx < $First_NonZeroSamples } { incr indx} {
+			 for {set indx 0} {$indx < [expr $First_NonZeroSamples*($dataPartsPerLine/$samplesPerLine)] } { incr indx} {
                   puts -nonewline $output_file "$padZeros "
              }
-			 if { $LeftOverSamplestoBePadded > 0 && ([expr ($samplesPerLine-$dataPartsPerLine)]) eq 0} {
+			 if { $LeftOverSamplestoBePadded > 0 } {
 			  if {([expr ($First_NonZeroSamples+$LeftOverSamplestoBePadded)]) eq $samplesPerLine } {
 				    puts $output_file ""
 				}
              }				
         if {$right_padd_Count > 0} {
-              for {set indx 0} {$indx < [expr ($right_padd_Count / $samplesPerLine)]} { incr indx} {
-            for {set comp 0} {$comp < $dataPartsPerLine} {incr comp} {
-              if {$comp < 3 && $dataPartsPerLine eq 4} {
-                    puts -nonewline $output_file "$padZeros "
-                } elseif {$comp eq 0 && $dataPartsPerLine eq 2} {
-                    puts -nonewline $output_file "$padZeros "
-                } else {
-                puts $output_file "$padZeros"
-          }
-        }
-    }
+            for {set indx 0} {$indx < [expr ($right_padd_Count / $samplesPerLine)]} { incr indx} {
+                for {set comp 0} {$comp < $dataPartsPerLine} {incr comp} {
+                    if {$comp < 7 && $dataPartsPerLine eq 8} {
+                        puts -nonewline $output_file "$padZeros "
+                    } elseif {$comp < 3 && $dataPartsPerLine eq 4} {
+                        puts -nonewline $output_file "$padZeros "
+                    } elseif {$comp eq 0 && $dataPartsPerLine eq 2} {
+                        puts -nonewline $output_file "$padZeros "
+                    } else {
+                        puts $output_file "$padZeros"
+                    }
+                }
+            }
         }
 	  
 	    for {set indx 0} {$indx < $CountPad} { incr indx} {	 
             for {set comp 0} {$comp < $dataPartsPerLine} {incr comp} {
-			    if {$comp < 3 && $dataPartsPerLine eq 4} {
+			    if {$comp < 7 && $dataPartsPerLine eq 8} {
+					puts -nonewline $output_file "$padZeros "
+                } elseif {$comp < 3 && $dataPartsPerLine eq 4} {
                   puts -nonewline $output_file "$padZeros "
                 } elseif {$comp eq 0 && $dataPartsPerLine eq 2} {
-                  puts -nonewline $output_file "$padZeros "
+                    puts -nonewline $output_file "$padZeros "
                 } else {
-                  puts $output_file "$padZeros"
-    }
-              }
+                    puts $output_file "$padZeros"
+                }
+            }
         }
 	}
-    puts " ================================================================"
-	puts " Padded Data Generation Done for $filename " 
-	puts " ================================================================"
-	puts " "
-}

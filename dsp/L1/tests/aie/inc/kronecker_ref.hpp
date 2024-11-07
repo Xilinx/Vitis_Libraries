@@ -48,7 +48,7 @@ template <typename TT_DATA_A,
 class kronecker_ref {
    private:
    public:
-    using TT_OUT = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
     static constexpr unsigned int sizeMatA = TP_DIM_A_ROWS * TP_DIM_A_COLS;
     static constexpr unsigned int sizeMatB = TP_DIM_B_ROWS * TP_DIM_B_COLS;
     static constexpr unsigned int rowsMatOut = TP_DIM_A_ROWS * TP_DIM_B_ROWS;
@@ -62,7 +62,7 @@ class kronecker_ref {
     // Declaration of main function
     void kronecker_main(input_buffer<TT_DATA_A>& inWindow0,
                         input_buffer<TT_DATA_B>& inWindow1,
-                        output_buffer<TT_OUT>& outWindow0);
+                        output_buffer<out_t>& outWindow0);
 };
 
 } // namespace kronecker

@@ -85,7 +85,6 @@
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk get_latency HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk get_stats HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk get_theoretical_min HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) \"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk harvest_mem HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
             ]
@@ -151,13 +150,6 @@
             }
         }
     },
-    "generators": {
-        "uut_config.h": {
-            "file": "LIB_DIR/L2/tests/aie/common/scripts/tb_gen.py",
-            "function": "generate_testbench"
-        }
-    },
-    "config_make": "params.mk",
     "aiecontainers": [
         {
             "accelerators": [
@@ -167,13 +159,25 @@
                         "uut_config.h",
                         "LIB_DIR/L1/src/aie/widget_real2complex.cpp"
                     ],
-                    "pl-freq": 1000,
+                    "pl-freq": 625,
                     "workdir": "./Work",
                     "options": "",
                     "name": "libadf.a"
                 }
             ]
         }
+    ],
+    "generators": {
+        "uut_config.h": {
+            "file": "LIB_DIR/L2/tests/aie/common/scripts/tb_gen.py",
+            "function": "generate_testbench"
+        }
+    },
+    "config_make": "LIB_DIR/L2/tests/aie/common/scripts/params.mk",
+    "associated_files": [
+        "LIB_DIR/L2/tests/aie/common/scripts",
+        "LIB_DIR/L2/meta/*common*",
+        "LIB_DIR/L2/meta/widget_real2complex*"
     ],
     "parameter_file": "multi_params.json",
     "testinfo": {
@@ -184,9 +188,12 @@
                 "dependency": [],
                 "env": "",
                 "cmd": "",
-                "max_memory_MB": 32768,
+                "max_memory_MB": {
+                    "vitis_aie_x86sim": 8192,
+                    "vitis_aie_sim": 8192
+                },
                 "max_time_min": {
-                    "vitis_aie_x86sim": 60,
+                    "vitis_aie_x86sim": 180,
                     "vitis_aie_sim": 200
                 }
             }

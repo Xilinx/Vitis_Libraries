@@ -277,12 +277,12 @@ create_input:
 	@echo DIM_SIZE_PADDED  $(DIM_SIZE_PADDED)
 	@echo NUM_FRAMES       $(NUM_FRAMES)
 	@echo WINDOW_VSIZE     $(WINDOW_VSIZE)
-	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_DIM_SIZE) $(T_DATA_A) $(API_IO) 1 0 ;\
-	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_DIM_SIZE) $(T_DATA_B) $(API_IO) 1 0 ;\
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_DIM_SIZE) $(T_DATA_A) $(API_IO) 1 0 ;\
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_DIM_SIZE) $(T_DATA_B) $(API_IO) 1 0 ;\
-    perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(LOC_INPUT_FILE_A) --type $(T_DATA_A) --ssr $(NUM_PORTS) --split --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) ;\
-    perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(LOC_INPUT_FILE_B) --type $(T_DATA_B) --ssr $(NUM_PORTS) --split --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) ;\
+	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_DIM_SIZE) $(T_DATA_A) $(API_IO) 1 0 0 0 0 0 64 ;\
+	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_DIM_SIZE) $(T_DATA_B) $(API_IO) 1 0 0 0 0 0 64 ;\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_DIM_SIZE) $(T_DATA_A) $(API_IO) 1 0 0 0 0 0 64 ;\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_DIM_SIZE) $(T_DATA_B) $(API_IO) 1 0 0 0 0 0 64 ;\
+    perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(LOC_INPUT_FILE_A) --type $(T_DATA_A) --ssr $(NUM_PORTS) --split --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) --plioWidth 64 ;\
+    perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(LOC_INPUT_FILE_B) --type $(T_DATA_B) --ssr $(NUM_PORTS) --split --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) --plioWidth 64 ;\
 	echo Input ready
 
 sim_ref:
@@ -303,15 +303,12 @@ prep_aie_out:
 	done
 
 get_diff:
-	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(T_DATA_OUT) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) ;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(T_DATA_OUT) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) ;\
+	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(T_DATA_OUT) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) --plioWidth 64 ;\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(T_DATA_OUT) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) --plioWidth 64 ;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)
 
 get_status:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
-
-get_qor:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_hadamard_theoretical_min.tcl $(T_DATA_A) $(T_DATA_B) $(WINDOW_VSIZE) $(STATUS_FILE) $(UUT_KERNEL) $(API_IO)
 
 get_latency:
 	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)

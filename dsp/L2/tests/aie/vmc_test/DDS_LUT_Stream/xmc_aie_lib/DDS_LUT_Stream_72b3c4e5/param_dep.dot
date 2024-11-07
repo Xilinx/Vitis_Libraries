@@ -1,0 +1,8 @@
+digraph G {
+ssr -> USE_PHASE_RELOAD;
+data_type -> sfdr;
+AIE_VARIANT -> rnd_mode;
+data_type -> output_window_size;
+ssr -> output_window_size;
+AIE_VARIANT -> output_window_size;
+}

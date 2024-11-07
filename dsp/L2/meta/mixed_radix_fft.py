@@ -1,8 +1,8 @@
-from aie_common import *
+import aie_common as com
 import json
 import sys
 
-TP_POINT_SIZE_min = 16
+TP_POINT_SIZE_min = 8
 TP_POINT_SIZE_max = 3300
 
 TP_FFT_NIFFT_min = 0
@@ -14,7 +14,7 @@ TP_SHIFT_max = 61
 TP_RND_min = 4
 TP_RND_max = 7
 
-TP_WINDOW_VSIZE_min = 16
+TP_WINDOW_VSIZE_min = 8
 TP_WINDOW_VSIZE_max = 4096
 
 TP_CASC_LEN_min = 1
@@ -22,19 +22,23 @@ TP_CASC_LEN_min = 1
 TP_API_min = 0
 TP_API_max = 1
 
+TP_DYN_PT_SIZE_min = 0
+TP_DYN_PT_SIZE_max = 1
+
 AIE_VARIANT_min = 1
 AIE_VARIANT_max = 2
 
 #----------------------------------------
 #Utility functions
 def fn_get_radix_stages(TP_POINT_SIZE, radix):
-  stages = 0;
+  if TP_POINT_SIZE <= 0:
+    return 0
+  stages = 0
   val = TP_POINT_SIZE
   while val % radix == 0:
-    val = val/radix;
+    val = val/radix
     stages = stages +1
   return stages
-
 
 def fn_get_num_stages(TP_POINT_SIZE):
   r4_stages = 0
@@ -42,183 +46,367 @@ def fn_get_num_stages(TP_POINT_SIZE):
   r3_stages = fn_get_radix_stages(TP_POINT_SIZE,3)
   r5_stages = fn_get_radix_stages(TP_POINT_SIZE,5)
   if (r2_stages >= 4):
-    r4_stages = r2_stages/2
+    r4_stages = r2_stages // 2
     r2_stages = r2_stages % 2
-  return r2_stages+r3_stages+r4_stages+r5_stages
+  return r2_stages + r3_stages + r4_stages + r5_stages
 
-#----------------------------------------
-# Validate Twiddle type
-def fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE):
-  validTypeCombos = [
-      ("cint16", "cint16"),
-      ("cint32", "cint16"),
-      ("cfloat", "cfloat")
-    ]
-  return (
-    isValid if ((TT_DATA,TT_TWIDDLE) in validTypeCombos)
-    else (
-    isError(f"Invalid Data/Twiddle type combination ({TT_DATA},{TT_TWIDDLE}). Supported combinations are cint16/cint16, cint32/cint16 and cfloat/cfloat. ")
-    )
-  )
+def fn_get_nearest_valid_pt_size(TP_POINT_SIZE):
+  offset = 0
+  while(True):
+    if fn_get_num_stages(abs(TP_POINT_SIZE - offset)):
+      return abs(TP_POINT_SIZE - offset)
+    elif fn_get_num_stages(TP_POINT_SIZE + offset):
+      return TP_POINT_SIZE + offset
+    offset += 1
+
+#######################################################
+########### AIE_VARIANT Updater and Validator #########
+#######################################################
+def update_AIE_VARIANT(args):
+  return fn_update_aie_variant()
+
+def fn_update_aie_variant():
+  legal_set_AIE_VARIANT = [1,2]
+  
+  param_dict ={}
+  param_dict.update({"name" : "AIE_VARIANT"})
+  param_dict.update({"enum" : legal_set_AIE_VARIANT})
+  return param_dict
+
+def validate_AIE_VARIANT(args):
+  AIE_VARIANT=args["AIE_VARIANT"]
+  return (fn_validate_aie_variant(AIE_VARIANT))
+
+def fn_validate_aie_variant(AIE_VARIANT):
+  param_dict = fn_update_aie_variant()
+  legal_set_AIE_VARIANT = param_dict["enum"]
+  return(com.validate_legal_set(legal_set_AIE_VARIANT, "AIE_VARIANT", AIE_VARIANT))
+
+#######################################################
+########### TT_DATA Updater and Validator #############
+#######################################################
+def update_TT_DATA(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_update_data_type(AIE_VARIANT)
+
+def fn_update_data_type(AIE_VARIANT):
+  valid_types = ["cint16", "cint32", "cfloat"]
+  param_dict={
+    "name" : "TT_DATA",
+    "enum" : valid_types
+  }
+  return param_dict
+
+def validate_TT_DATA(args):
+  TT_DATA = args["TT_DATA"]
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_validate_data_type(TT_DATA, AIE_VARIANT)
+
+def fn_validate_data_type(TT_DATA, AIE_VARIANT):
+  param_dict=fn_update_data_type(AIE_VARIANT)
+  return (com.validate_legal_set(param_dict["enum"], "TT_DATA", TT_DATA))
+
+#######################################################
+########## TT_TWIDDLE Updater and Validator ###########
+#######################################################
+def update_TT_TWIDDLE(args):
+  TT_DATA = args["TT_DATA"]
+  return fn_update_twiddle_type(TT_DATA)
+
+def fn_update_twiddle_type(TT_DATA):
+  valid_combos = {
+    "cint16": ["cint16"],
+    "cint32": ["cint16","cint32"],
+    "cfloat": ["cfloat"]
+  }
+  param_dict={
+    "name" : "TT_TWIDDLE",
+    "enum" : valid_combos[TT_DATA]
+  }
+  return param_dict
+
 def validate_TT_TWIDDLE(args):
   TT_DATA = args["TT_DATA"]
   TT_TWIDDLE = args["TT_TWIDDLE"]
-  return fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE)
+  return fn_validate_twiddle_type(TT_TWIDDLE, TT_DATA)
 
-#----------------------------------------
-# Validate point size
-def fn_validate_point_size(TP_POINT_SIZE,AIE_VARIANT):
-  if (TP_POINT_SIZE < TP_POINT_SIZE_min or TP_POINT_SIZE > TP_POINT_SIZE_max) :
-      return isError(f"Invalid Point Size ({TP_POINT_SIZE}). It must be in the range {TP_POINT_SIZE_min} to {TP_POINT_SIZE_max}.")
+def fn_validate_twiddle_type(TT_TWIDDLE, TT_DATA):
+  param_dict=fn_update_twiddle_type(TT_DATA)
+  return (com.validate_legal_set(param_dict["enum"], "TT_TWIDDLE", TT_TWIDDLE))
 
-  r2_stages = fn_get_radix_stages(TP_POINT_SIZE,2)
-  r3_stages = fn_get_radix_stages(TP_POINT_SIZE,3)
-  r5_stages = fn_get_radix_stages(TP_POINT_SIZE,5)
+#######################################################
+######## TP_POINT_SIZE Updater and Validator ##########
+#######################################################
+def update_TP_POINT_SIZE(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  # TP_API = args["TP_API"] // does this affect point size?
+  TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
+  TP_POINT_SIZE = args["TP_POINT_SIZE"] if args["TP_POINT_SIZE"] else 0
+  return fn_update_point_size(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_DYN_PT_SIZE)
 
-  if AIE_VARIANT == 1: #AIE-1
-    vectorizationMin = 8
-  elif AIE_VARIANT == 2:
-    vectorizationMin = 16
-  else:
-    return isError(f"Unsupported AIE_VARIANT value detected ({AIE_VARIANT})")
+def fn_update_point_size(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_DYN_PT_SIZE):
+  TP_POINT_SIZE_min = 8
+  TP_POINT_SIZE_max = com.k_data_memory_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA)
 
-  if (TP_POINT_SIZE % vectorizationMin != 0) :
-      return isError(f"Invalid Point Size ({TP_POINT_SIZE}). It must be divisible by ({vectorizationMin}) for this AIE variant.")
+  if TP_DYN_PT_SIZE == 1:
+    TP_POINT_SIZE_max = 1920
+  param_dict ={
+    "name" : "TP_POINT_SIZE",
+    "minimum" : TP_POINT_SIZE_min,
+    "maximum" : TP_POINT_SIZE_max
+  }
 
-  r2_stages = fn_get_radix_stages(TP_POINT_SIZE,2)
-  r3_stages = fn_get_radix_stages(TP_POINT_SIZE,3)
-  r5_stages = fn_get_radix_stages(TP_POINT_SIZE,5)
-  if (TP_POINT_SIZE != 2**r2_stages * 3**r3_stages * 5**r5_stages):
-      return isError(f"Invalid Point Size ({TP_POINT_SIZE}). It must factorize completely to 2, 3 and 5")
+  TP_POINT_SIZE_act = fn_get_nearest_valid_pt_size(TP_POINT_SIZE)
 
-  return isValid
+  if TP_POINT_SIZE_act < param_dict["minimum"]: param_dict["actual"] = param_dict["minimum"]
+  elif TP_POINT_SIZE_act > param_dict["maximum"]: param_dict["actual"] = param_dict["maximum"]
+  else: param_dict["actual"] = TP_POINT_SIZE_act
 
+  return param_dict
 
 def validate_TP_POINT_SIZE(args):
-  TP_POINT_SIZE = args["TP_POINT_SIZE"]
-  AIE_VARIANT   = args["AIE_VARIANT"]
-  return fn_validate_point_size(TP_POINT_SIZE, AIE_VARIANT)
-
-#----------------------------------------
-# Validate direction (fft_nifft)
-def fn_validate_fft_nifft(TP_FFT_NIFFT):
-  return (
-    isValid if (TP_FFT_NIFFT == 0 or  TP_FFT_NIFFT == 1)
-    else (
-        isError(f"Invalid transform direction ({TP_FFT_NIFFT}). This must be 0 or 1. ")
-    )
-  )
-
-def validate_TP_FFT_NIFFT(args):
-  TP_FFT_NIFFT = args["TP_FFT_NIFFT"]
-  return fn_validate_fft_nifft(TP_FFT_NIFFT)
-
-#----------------------------------------
-# Validate SHIFT
-def fn_validate_shift(TT_DATA, TP_SHIFT):
-  return (
-    isValid if (TP_SHIFT == 0 or ((TT_DATA in ("cint16","cint32")) and (TP_SHIFT >= TP_SHIFT_min) and (TP_SHIFT <= TP_SHIFT_max)))
-    else
-    isError(f"TP_SHIFT must be 0 for cfloat and in the range {TP_SHIFT_min} to {TP_SHIFT_max} for integer data types. Got {TP_SHIFT}.")
-  )
-
-def validate_TP_SHIFT(args):
-  TP_SHIFT = args["TP_SHIFT"]
-  TT_DATA = args["TT_DATA"]
-  return fn_validate_shift(TT_DATA, TP_SHIFT)
-
-#----------------------------------------
-# Validate rounding
-def fn_validate_rnd(TP_RND, AIE_VARIANT=1):
-  if AIE_VARIANT == 1:
-    if TP_RND == k_rnd_mode_map_aie1["rnd_ceil"] or TP_RND == k_rnd_mode_map_aie1["rnd_floor"]:
-      return isError(f"Round mode of {TP_RND} is not supported for mixed radix FFT. For the targeted AIE device, supported values are \n2: rnd_pos_inf,\n3: rnd_neg_inf,\n4: rnd_sym_zero,\n5: rnd_sym_inf,\n6: rnd_conv_even,\n7: rnd_conv_odd")
-    else:
-      return fn_validate_roundMode(TP_RND, AIE_VARIANT)
-  elif AIE_VARIANT == 2:
-    if TP_RND == k_rnd_mode_map_aie2["rnd_ceil"] or TP_RND == k_rnd_mode_map_aie2["rnd_floor"] or TP_RND == k_rnd_mode_map_aie2["rnd_sym_floor"] or TP_RND == k_rnd_mode_map_aie2["rnd_sym_ceil"]:
-      return isError(f"Round mode of {TP_RND} is not supported for mixed radix FFT. For the targeted AIE device, supported values are \n 8: rnd_neg_inf,\n9: rnd_pos_inf,\n10: rnd_sym_zero,\n11: rnd_sym_inf,\n12: rnd_conv_even,\n13: rnd_conv_odd")
-    else:
-      fn_validate_roundMode(TP_RND, AIE_VARIANT)
-  return isValid
-
-def validate_TP_RND(args):
-  TP_RND = args["TP_RND"]
   AIE_VARIANT = args["AIE_VARIANT"]
-  return fn_validate_rnd(TP_RND, AIE_VARIANT)
+  TT_DATA = args["TT_DATA"]
+  # TP_API = args["TP_API"]
+  TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
+  TP_POINT_SIZE = args["TP_POINT_SIZE"]
+  return fn_validate_point_size(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_DYN_PT_SIZE)
 
-#----------------------------------------
-# Validate saturation
-def fn_validate_sat(TP_SAT):
-  return (
-    isValid if (TP_SAT == 0 or TP_SAT == 1 or TP_SAT == 3)
-    else (
-        isError(f"Invalid saturation mode ({TP_SAT}, must be 0 (unsaturated), 1(asym) or 3(sym)). ")
-    )
-  )
-def validate_TP_SAT(args):
-  TP_SAT = args["TP_SAT"]
-  return fn_validate_sat(TP_SAT)
+def fn_validate_point_size(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_DYN_PT_SIZE):
+  param_dict=fn_update_point_size(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_DYN_PT_SIZE)
+  range_TP_POINT_SIZE= [param_dict["minimum"], param_dict["maximum"]]
 
-#----------------------------------------
-# Validate window size
-def fn_validate_window_vsize(TP_POINT_SIZE, TP_WINDOW_VSIZE):
-  return (
-    isValid if (TP_WINDOW_VSIZE % TP_POINT_SIZE == 0 and TP_WINDOW_VSIZE>=TP_WINDOW_VSIZE_min and TP_WINDOW_VSIZE<=TP_WINDOW_VSIZE_max)
-    else (
-        isError(f"Invalid window_size ({TP_WINDOW_VSIZE}), must be an integer multiple of TP_POINT_SIZE and must be in the range {TP_WINDOW_VSIZE_min} to {TP_WINDOW_VSIZE_max} ")
-    )
-  )
+  if fn_get_num_stages(TP_POINT_SIZE) == 0:
+    return com.isError(f"Point size ({TP_POINT_SIZE}) does not factorize.")
+
+  return(com.validate_range(range_TP_POINT_SIZE, "TP_POINT_SIZE", TP_POINT_SIZE))
+
+#######################################################
+########### TP_WINDOW_VSIZE Updater and Validator #####
+#######################################################
+def update_TP_WINDOW_VSIZE(args):
+  # TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
+  TP_POINT_SIZE = args["TP_POINT_SIZE"]
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+
+  if args["TP_WINDOW_VSIZE"]: TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
+  else: TP_WINDOW_VSIZE = 0
+  return fn_update_window_vsize(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_WINDOW_VSIZE)
+
+def fn_update_window_vsize(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_WINDOW_VSIZE):
+  TP_WINDOW_VSIZE_min = TP_POINT_SIZE
+  frame_bytes = com.fn_size_by_byte(TT_DATA) * TP_POINT_SIZE
+  num_frames = com.k_data_memory_bytes[AIE_VARIANT] // frame_bytes
+  TP_WINDOW_VSIZE_max = num_frames * TP_POINT_SIZE
+
+  param_dict ={
+    "name" : "TP_WINDOW_VSIZE",
+    "minimum" : TP_WINDOW_VSIZE_min,
+    "maximum" : TP_WINDOW_VSIZE_max
+  }
+  TP_WINDOW_VSIZE_act = round(TP_WINDOW_VSIZE/TP_POINT_SIZE) * TP_POINT_SIZE
+
+  if TP_WINDOW_VSIZE_act < param_dict["minimum"]: param_dict["actual"] = param_dict["minimum"]
+  elif TP_WINDOW_VSIZE_act > param_dict["maximum"]: param_dict["actual"] = param_dict["maximum"]
+  else: param_dict["actual"] = TP_WINDOW_VSIZE_act
+
+  return param_dict
+
 def validate_TP_WINDOW_VSIZE(args):
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
   TP_POINT_SIZE = args["TP_POINT_SIZE"]
-  return fn_validate_window_vsize(TP_POINT_SIZE, TP_WINDOW_VSIZE)
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA = args["TT_DATA"]
+  return fn_validate_window_vsize(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_WINDOW_VSIZE)
 
-#----------------------------------------
-# Validate cascade length
-def fn_validate_casc_len(TP_POINT_SIZE, TP_CASC_LEN):
-  num_stages = fn_get_num_stages(TP_POINT_SIZE)
-  return (
-    isValid if (TP_CASC_LEN>=TP_CASC_LEN_min and TP_CASC_LEN<=num_stages)
-    else (
-        isError(f"Invalid cascade length ({TP_CASC_LEN}), must be in the range 1 to num_stages, which is {num_stages} for TP_POINT_SIZE of {TP_POINT_SIZE} ")
-    )
-  )
+
+def fn_validate_window_vsize(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_WINDOW_VSIZE):
+  if (TP_WINDOW_VSIZE % TP_POINT_SIZE != 0):
+    return com.isError(f"Input window size ({TP_WINDOW_VSIZE}) must be a multiple of point size ({TP_POINT_SIZE}) ")
+
+  param_dict = fn_update_window_vsize(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_WINDOW_VSIZE)
+  range_TP_WINDOW_VSIZE= [param_dict["minimum"], param_dict["maximum"]]
+  
+  return(com.validate_range(range_TP_WINDOW_VSIZE, "TP_WINDOW_VSIZE", TP_WINDOW_VSIZE)) 
+
+#######################################################
+########## TP_FFT_IFFT Updater and Validator ##########
+#######################################################
+def update_TP_FFT_NIFFT(args):
+  return fn_update_tp_fft_nifft()
+
+def fn_update_tp_fft_nifft():
+  legal_set_TP_FFT_NIFFT = [0, 1]
+  
+  param_dict ={}
+  param_dict.update({"name" : "TP_FFT_NIFFT"})
+  param_dict.update({"enum" : legal_set_TP_FFT_NIFFT})
+  return param_dict
+
+def validate_TP_FFT_NIFFT(args):
+  TP_FFT_NIFFT=args["TP_FFT_NIFFT"]
+  return (fn_validate_tp_fft_nifft(TP_FFT_NIFFT))
+
+def fn_validate_tp_fft_nifft(TP_FFT_NIFFT):
+  param_dict = fn_update_tp_fft_nifft()
+  legal_set_TP_FFT_NIFFT = param_dict["enum"]
+  return(com.validate_legal_set(legal_set_TP_FFT_NIFFT, "TP_FFT_NIFFT", TP_FFT_NIFFT))
+
+#######################################################
+######## TP_DYN_PT_SIZE Updater and Validator #########
+#######################################################
+def update_TP_DYN_PT_SIZE(args):
+  return fn_update_dyn_pt_size()
+
+def fn_update_dyn_pt_size():
+  legal_set_TP_DYN_PT_SIZE = [0, 1]
+  
+  param_dict ={}
+  param_dict.update({"name" : "TP_DYN_PT_SIZE"})
+  param_dict.update({"enum" : legal_set_TP_DYN_PT_SIZE})
+  return param_dict
+
+def validate_TP_DYN_PT_SIZE(args):
+  TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
+  return (fn_validate_dyn_pt_size(TP_DYN_PT_SIZE))
+
+def fn_validate_dyn_pt_size(TP_DYN_PT_SIZE):
+  param_dict = fn_update_dyn_pt_size()
+  legal_set_TP_DYN_PT_SIZE = param_dict["enum"]
+  return(com.validate_legal_set(legal_set_TP_DYN_PT_SIZE, "TP_DYN_PT_SIZE", TP_DYN_PT_SIZE))
+
+#######################################################
+########### TP_SHIFT Updater and Validator ############
+#######################################################
+def update_TP_SHIFT(args):
+  TT_DATA = args["TT_DATA"]
+  return fn_update_shift(TT_DATA)
+
+def fn_update_shift(TT_DATA):
+  param_dict= {
+    "name" : "TP_SHIFT",
+    "minimum" : 0
+  }
+
+  if TT_DATA in ["cfloat"]:
+    param_dict.update({"maximum" : 0})
+  else:
+    param_dict.update({"maximum" : 61})
+
+  return param_dict
+
+def validate_TP_SHIFT(args):
+  TT_DATA = args["TT_DATA"]
+  TP_SHIFT = args["TP_SHIFT"]
+  return fn_validate_shift(TT_DATA, TP_SHIFT)
+
+def fn_validate_shift(TT_DATA, TP_SHIFT):
+  param_dict=fn_update_shift(TT_DATA)
+  range_TP_SHIFT=[param_dict["minimum"], param_dict["maximum"]]
+  return com.validate_range(range_TP_SHIFT, "TP_SHIFT", TP_SHIFT)
+
+#######################################################
+########### TP_RND Updater and Validator ##############
+#######################################################
+def update_TP_RND(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_update_rnd(AIE_VARIANT)
+
+def fn_update_rnd(AIE_VARIANT):
+
+  legal_set_TP_RND = com.fn_get_legalSet_roundMode(AIE_VARIANT)
+  param_dict={}
+  param_dict.update({"name" : "TP_RND"})
+  param_dict.update({"enum" : legal_set_TP_RND})
+
+  return param_dict
+
+def validate_TP_RND(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TP_RND = args["TP_RND"]
+  return (fn_validate_rnd(AIE_VARIANT, TP_RND))
+
+def fn_validate_rnd(AIE_VARIANT, TP_RND):
+  legal_set_TP_RND = com.fn_get_legalSet_roundMode(AIE_VARIANT)
+  return(com.validate_legal_set(legal_set_TP_RND, "TP_RND", TP_RND))
+
+#######################################################
+########### TP_SAT Updater and Validator ##############
+#######################################################
+def update_TP_SAT(args):
+  return fn_update_sat()
+
+def fn_update_sat():
+  legal_set = com.fn_legal_set_sat()
+
+  param_dict={}
+  param_dict.update({"name" : "TP_SAT"})
+  param_dict.update({"enum" : legal_set})
+  return param_dict
+
+def validate_TP_SAT(args):
+  TP_SAT = args["TP_SAT"]
+  return (fn_validate_sat(TP_SAT))
+
+def fn_validate_sat(TP_SAT):
+  param_dict=fn_update_sat()
+  legal_set_TP_SAT = param_dict["enum"]
+  return (com.validate_legal_set(legal_set_TP_SAT, "TP_SAT", TP_SAT))
+
+#######################################################
+########### TP_API Updater and Validator ##############
+#######################################################
+def update_TP_API(args):
+  TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
+  return fn_update_TP_API(TP_DYN_PT_SIZE)
+
+def fn_update_TP_API(TP_DYN_PT_SIZE):
+  legal_set_TP_API=[0, 1]
+  if TP_DYN_PT_SIZE == 1:
+    legal_set_TP_API=[0]   
+  param_dict={
+    "name" : "TP_API",
+    "enum" : legal_set_TP_API
+  }
+  return param_dict
+
+def validate_TP_API(args):
+    TP_API = args["TP_API"]
+    TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
+    return fn_validate_api_val(TP_API, TP_DYN_PT_SIZE)
+
+def fn_validate_api_val(TP_API, TP_DYN_PT_SIZE):
+  param_dict=fn_update_TP_API(TP_DYN_PT_SIZE)
+  return (com.validate_legal_set(param_dict["enum"], "TP_API", TP_API))
+
+#######################################################
+######### TP_CASC_LEN Updater and Validator ###########
+#######################################################
+def update_TP_CASC_LEN(args):
+  TP_POINT_SIZE = args["TP_POINT_SIZE"]
+  TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
+  return fn_update_casc_len(TP_POINT_SIZE, TP_DYN_PT_SIZE)
+
+def fn_update_casc_len(TP_POINT_SIZE, TP_DYN_PT_SIZE):
+  param_dict={
+    "name" : "TP_CASC_LEN",
+    "minimum" : 1,
+    "maximum" : 1 if TP_DYN_PT_SIZE else fn_get_num_stages(TP_POINT_SIZE)
+  }
+  return param_dict
+
 def validate_TP_CASC_LEN(args):
   TP_CASC_LEN = args["TP_CASC_LEN"]
   TP_POINT_SIZE = args["TP_POINT_SIZE"]
-  return fn_validate_casc_len(TP_POINT_SIZE, TP_CASC_LEN)
+  TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"] # currently we do not support casc_len > 1 for dynamic mixed radix fft
+  return fn_validate_casc_len(TP_CASC_LEN, TP_POINT_SIZE, TP_DYN_PT_SIZE)
 
-#----------------------------------------
-# Validate API type
-def fn_validate_api(TP_API):
-  return (
-    isValid if (TP_API>=TP_API_min and TP_API<=TP_API_max)
-    else (
-        isError(f"Invalid API type. Must be in the range 0 (iobuffers) to 1 (streams). Got {TP_API} ")
-    )
-  )
-def validate_TP_API(args):
-  TP_API = args["TP_API"]
-  return fn_validate_api(TP_API)
-
-#----------------------------------------
-# Validate AIE variant
-def fn_validate_aie_variant(AIE_VARIANT):
-  return (
-    isValid if (AIE_VARIANT>=AIE_VARIANT_min and AIE_VARIANT<=AIE_VARIANT_max)
-    else (
-        isError(f"Invalid AIE variant. Must be one of the following set:  1 (AIE1), or 2 (AIE-ML). Got {AIE_VARIANT}. ")
-    )
-  )
-def validate_AIE_VARIANT(args):
-  AIE_VARIANT = args["AIE_VARIANT"]
-  return fn_validate_aie_variant(AIE_VARIANT)
-
-
-  ######### Finished Validation ###########
-
-  ######### Updators ###########
+def fn_validate_casc_len(TP_CASC_LEN, TP_POINT_SIZE, TP_DYN_PT_SIZE):
+  param_dict = fn_update_casc_len(TP_POINT_SIZE, TP_DYN_PT_SIZE)
+  range_tp_casc_len = [param_dict["minimum"], param_dict["maximum"]]
+  return (com.validate_range(range_tp_casc_len, "TP_CASC_LEN", TP_CASC_LEN))
 
   ######### Graph Generator ############
 
@@ -242,8 +430,8 @@ def info_ports(args):
     else:
       numPorts = 1
 
-  in_ports = get_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE//numPorts, numPorts, 0, TP_API)
-  out_ports = get_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE//numPorts, numPorts, 0, TP_API)
+  in_ports = com.get_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE//numPorts, numPorts, 0, TP_API)
+  out_ports = com.get_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE//numPorts, numPorts, 0, TP_API)
 
   return in_ports + out_ports
 

@@ -1,7 +1,4 @@
-from ctypes import sizeof
-from socket import TIPC_SUB_SERVICE
 from aie_common import *
-import json
 
 #### naming ####
 #
@@ -25,206 +22,376 @@ import json
 # and "err_message" if "is_valid" is False.
 #
 
-TP_POINT_SIZE_min = 16
-TP_POINT_SIZE_max = 65536
+# TP_POINT_SIZE_min = 16
+# TP_POINT_SIZE_max = 65536
 TP_WINDOW_VSIZE_min = 16
-TP_SSR_min = 1
-TP_SSR_max = 32
+TP_WINDOW_VSIZE_max = 65536
+# TP_SSR_min = 1
+# TP_SSR_max = 32
 TP_SHIFT_min = 0
 TP_SHIFT_max = 60
 
-def fn_validate_coeff_type(TT_DATA, TT_COEFF):
-  if ((TT_DATA=="cint16" and TT_COEFF=="int16") or (TT_DATA=="cint32" and TT_COEFF=="int32") or (TT_DATA=="cfloat" and TT_COEFF=="float")):
-    return isValid
-  else:
-    return isError(f"Coefficient type must be the atomic type of data, e.g. for TT_DATA=cint16 TT_COEFF must be int16. Got TT_DATA={TT_DATA} and TT_COEFF={TT_COEFF}")
+#######################################################
+########### AIE_VARIANT Updater and Validator #########
+#######################################################
+def update_AIE_VARIANT(args):
+  return fn_update_AIE_VAR()
 
-def fn_validate_point_size(TP_POINT_SIZE, TT_DATA):
-  res = fn_validate_minmax_value("TP_POINT_SIZE", TP_POINT_SIZE, TP_POINT_SIZE_min, TP_POINT_SIZE_max)
-  if (res["is_valid"] == False):  
-    return res
-  if (TP_POINT_SIZE % (16/fn_size_by_byte(TT_DATA) ) == 0) :
-    return isValid
+def  fn_update_AIE_VAR():
+  legal_set_AIE_VAR = [1,2]
+
+  param_dict ={}
+  param_dict.update({"name" : "AIE_VARIANT"})
+  param_dict.update({"enum" : legal_set_AIE_VAR})
+
+  return param_dict
+
+def validate_AIE_VARIANT(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_validate_AIE_VARIANT(AIE_VARIANT)
+
+def fn_validate_AIE_VARIANT(AIE_VARIANT):
+  return (validate_legal_set([1,2], "AIE_VARIANT", AIE_VARIANT))
+
+#######################################################
+########### TT_DATA Updater and Validator #############
+#######################################################
+def update_TT_DATA(args):
+  return fn_update_TT_DATA()
+
+def fn_update_TT_DATA():
+  legal_set_TT_DATA=["cint16", "cint32", "cfloat"] 
+  param_dict={
+       "name" : "TT_DATA",
+       "enum" : legal_set_TT_DATA
+    }
+  return param_dict
+
+def validate_TT_DATA(args):
+  TT_DATA=args["TT_DATA"]
+  return fn_validate_TT_DATA(TT_DATA)
+
+def fn_validate_TT_DATA(TT_DATA):
+  param_dict=fn_update_TT_DATA()
+  legal_set_TT_DATA=param_dict["enum"]
+  return (validate_legal_set(legal_set_TT_DATA, "TT_DATA", TT_DATA))
+
+#######################################################
+########### TT_COEFF Updater and Validator ############
+#######################################################
+def update_TT_COEFF(args):
+  TT_DATA=args["TT_DATA"]
+  return fn_update_TT_COEFF(TT_DATA)
+
+def fn_update_TT_COEFF(TT_DATA):
+  if TT_DATA=="cint32": legal_set_TT_COEFF=["int32"]
+  elif TT_DATA=="cint16": legal_set_TT_COEFF=["int16"]
+  elif TT_DATA=="cfloat": legal_set_TT_COEFF=["float"]
+  param_dict={
+       "name" : "TT_COEFF",
+       "enum" : legal_set_TT_COEFF
+    }
+  return param_dict
+
+def validate_TT_COEFF(args):
+  TT_DATA=args["TT_DATA"]
+  TT_COEFF=args["TT_COEFF"]
+  return fn_validate_TT_COEFF(TT_DATA, TT_COEFF)
+
+def fn_validate_TT_COEFF(TT_DATA, TT_COEFF):
+  param_dict=fn_update_TT_COEFF(TT_DATA)
+  legal_set_TT_COEFF=param_dict["enum"]
+  return (validate_legal_set(legal_set_TT_COEFF, "TT_COEFF", TT_COEFF))
+
+#######################################################
+############ TP_API Updater and Validator #############
+#######################################################
+def update_TP_API(args):
+  return fn_update_TP_API()
+
+def fn_update_TP_API():
+  legal_set_TP_API = [0,1]
+  param_dict = {
+      "name"     : "TP_API",
+      "enum"     : legal_set_TP_API
+  }
+  return param_dict
+
+def validate_TP_API(args):
+  TP_API=args["TP_API"]
+  legal_set_TP_API = [0,1]
+  return (validate_legal_set(legal_set_TP_API, "TP_API", TP_API))
+
+
+#######################################################
+############ TP_SSR Updater and Validator #############
+#######################################################
+def update_TP_SSR(args):
+  TP_API = args["TP_API"]
+  return fn_update_TP_SSR(TP_API)
+
+def fn_update_TP_SSR(TP_API):
+  if TP_API==0:
+    TP_SSR_max=32
+  elif TP_API==1:
+    TP_SSR_max=16
+
+  param_dict = {
+      "name"     : "TP_SSR",
+      "minimum"  : 1,
+      "maximum"  : TP_SSR_max
+  }
+  return param_dict
+
+def validate_TP_SSR(args):
+  TP_API = args["TP_API"]
+  TP_SSR = args["TP_SSR"]
+  return fn_validate_ssr(TP_API, TP_SSR)
+
+def fn_validate_ssr(TP_API, TP_SSR):
+  param_dict=fn_update_TP_SSR(TP_API)
+  TP_SSR_range=[param_dict["minimum"], param_dict["maximum"]]
+  return validate_range(TP_SSR_range, "TP_SSR", TP_SSR)
+
+#######################################################
+############ TP_DYN_PT_SIZE Updater and Validator #####
+#######################################################
+def update_TP_DYN_PT_SIZE(args) :
+  legal_set_TP_DYN_POINT_SIZE=[0,1]
+  param_dict = {
+      "name"  : "TP_DYN_PT_SIZ",
+      "enum"  : legal_set_TP_DYN_POINT_SIZE
+  }
+  return param_dict
+
+def validate_TP_DYN_PT_SIZE(args):
+  legal_set_TP_DYN_POINT_SIZE=[0,1]
+  TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
+  return validate_range(legal_set_TP_DYN_POINT_SIZE, "TP_DYN_PT_SIZE", TP_DYN_PT_SIZE)
+
+#######################################################
+########### TP_POINT_SIZE Updater and Validator #######
+#######################################################  
+def update_TP_POINT_SIZE(args):
+  TT_DATA=args["TT_DATA"]
+  TP_DYN_PT_SIZE=args["TP_DYN_PT_SIZE"]
+  TP_API=args["TP_API"]
+  TP_SSR=args["TP_SSR"]
+  if args["TP_POINT_SIZE"]:
+    TP_POINT_SIZE = args["TP_POINT_SIZE"]
+  else: 
+    TP_POINT_SIZE = 0 
+
+  return fn_update_TP_POINT_SIZE(TT_DATA, TP_DYN_PT_SIZE, TP_SSR, TP_API, TP_POINT_SIZE)
+
+def fn_update_TP_POINT_SIZE(TT_DATA, TP_DYN_PT_SIZE, TP_SSR, TP_API, TP_POINT_SIZE):
+
+  if TP_API==0:
+    TP_POINT_SIZE_min = 16 * TP_SSR
+    TP_POINT_SIZE_max = 1024* TP_SSR
   else:
-    return isError("Point size must describe a frame size which is a multiple of 128 bits.")
+    TP_POINT_SIZE_min = 16 * TP_SSR
+    TP_POINT_SIZE_max = 4096* TP_SSR
+
+  if TP_DYN_PT_SIZE==1:
+    TP_POINT_SIZE_min = 32* TP_SSR
+
+  param_dict={
+       "name" : "TP_POINT_SIZE",
+       "minimum" : TP_POINT_SIZE_min,
+       "maximum" : TP_POINT_SIZE_max
+    }
+    
+  point_size_granularity= 16/fn_size_by_byte(TT_DATA)
+
+  if TP_POINT_SIZE != 0 and (TP_POINT_SIZE % point_size_granularity != 0):
+    TP_POINT_SIZE_act= int(round(TP_POINT_SIZE / point_size_granularity)*point_size_granularity)
+
+    if TP_POINT_SIZE_act <= TP_POINT_SIZE_min:
+       TP_POINT_SIZE_act= TP_POINT_SIZE_min
+
+    if TP_POINT_SIZE_act==0:
+      TP_POINT_SIZE_act=int(CEIL(TP_POINT_SIZE, point_size_granularity))
+
+    if param_dict["maximum"]< TP_POINT_SIZE_act:
+      TP_POINT_SIZE_act=int(FLOOR(param_dict["maximum"], point_size_granularity))
+    
+    param_dict.update({"actual":TP_POINT_SIZE_act}) 
+                                                                              
+  return param_dict
+
+def validate_TP_POINT_SIZE(args):
+  TT_DATA=args["TT_DATA"]
+  TP_DYN_PT_SIZE=args["TP_DYN_PT_SIZE"]
+  TP_API=args["TP_API"]
+  TP_SSR=args["TP_SSR"]
+  TP_POINT_SIZE=args["TP_POINT_SIZE"]
+  return fn_validate_point_size(TP_POINT_SIZE, TT_DATA, TP_DYN_PT_SIZE, TP_API, TP_SSR)
+
+def fn_validate_point_size(TP_POINT_SIZE, TT_DATA, TP_DYN_PT_SIZE, TP_API, TP_SSR):
+  param_dict= fn_update_TP_POINT_SIZE(TT_DATA, TP_DYN_PT_SIZE, TP_SSR, TP_API, TP_POINT_SIZE)
+  TP_POINT_SIZE_range=[param_dict["minimum"], param_dict["maximum"]]
+  point_size_granularity= 16/fn_size_by_byte(TT_DATA)
+  if (TP_POINT_SIZE % point_size_granularity != 0) :
+    return isError(f"Point size must describe a frame size which is a multiple of 128 bits. TP_POINT_SIZE must be multiples of {point_size_granularity} due to the size of the choosen TT_DATA.")
+  return validate_range(TP_POINT_SIZE_range, "TP_POINT_SIZE", TP_POINT_SIZE)
+
+#######################################################
+########### TP_WINDOW_VSIZE Updater and Validator #####
+#######################################################  
+def update_TP_WINDOW_VSIZE(args):
+  TP_POINT_SIZE=args["TP_POINT_SIZE"]
+
+  if args["TP_WINDOW_VSIZE"]: TP_WINDOW_VSIZE=args["TP_WINDOW_VSIZE"]
+  else: TP_WINDOW_VSIZE=0 
+
+  return fn_update_update_TP_WINDOW_VSIZE(TP_POINT_SIZE, TP_WINDOW_VSIZE)  
+
+def fn_update_update_TP_WINDOW_VSIZE(TP_POINT_SIZE, TP_WINDOW_VSIZE):
+  param_dict={
+       "name" : "TP_WINDOW_VSIZE",
+       "minimum" : TP_POINT_SIZE,
+       "maximum" : TP_WINDOW_VSIZE_max
+    }  
+
+  if TP_WINDOW_VSIZE !=0 and (TP_WINDOW_VSIZE%TP_POINT_SIZE!=0):
+    TP_WINDOW_VSIZE_act=int(round(TP_WINDOW_VSIZE / TP_POINT_SIZE) * TP_POINT_SIZE)
+    
+    if TP_WINDOW_VSIZE_act==0:
+          TP_WINDOW_VSIZE_act=int(CEIL(TP_WINDOW_VSIZE, TP_POINT_SIZE))
+
+    if param_dict["maximum"]< TP_WINDOW_VSIZE_act:
+        TP_WINDOW_VSIZE_act=int(FLOOR(param_dict["maximum"], TP_POINT_SIZE))
+    
+    param_dict.update({"actual":TP_WINDOW_VSIZE_act})  
+
+  return param_dict
+
+def validate_TP_WINDOW_VSIZE(args):
+  TP_POINT_SIZE=args["TP_POINT_SIZE"]
+  TP_WINDOW_VSIZE=args["TP_WINDOW_VSIZE"]
+  return fn_validate_window_vsize(TP_POINT_SIZE,TP_WINDOW_VSIZE)
 
 def fn_validate_window_vsize(TP_POINT_SIZE,TP_WINDOW_VSIZE):
-  res = fn_validate_min_value("TP_WINDOW_VSIZE", TP_WINDOW_VSIZE, TP_WINDOW_VSIZE_min)
-  if (res["is_valid"] == False):  
-    return res
+  param_dict=fn_update_update_TP_WINDOW_VSIZE(TP_POINT_SIZE, TP_WINDOW_VSIZE)
+  TP_WINDOW_VSIZE_range=[param_dict["minimum"], param_dict["maximum"]]
   if ((TP_WINDOW_VSIZE>=TP_POINT_SIZE) and (TP_WINDOW_VSIZE%TP_POINT_SIZE==0)) :
-    return isValid
+    return validate_range(TP_WINDOW_VSIZE_range, "TP_WINDOW_VSIZE", TP_WINDOW_VSIZE)
   else:
     return isError(f"Window size must be an integer multiple of point size. Got window size of {TP_WINDOW_VSIZE} and point size of {TP_POINT_SIZE}.")
 
-def fn_validate_shift_val(TT_DATA, TP_SHIFT):
-  res = fn_validate_minmax_value("TP_SHIFT", TP_SHIFT, TP_SHIFT_min, TP_SHIFT_max)
-  if (res["is_valid"] == False):  
-    return res
-  if (TT_DATA=="cfloat"):
-    if (TP_SHIFT==0) :
-      return isValid
-    else:
-      return isError(f"Shift must be 0 for cfloat data type. Got {TP_SHIFT}.")
-  if (TT_DATA=="cint32"):
-    if (TP_SHIFT>=0 and TP_SHIFT<61) :
-      return isValid
-    else:
-      return isError(f"Shift must be in range 0 to 61 for cint32 data type. Got {TP_SHIFT}.")
-  if (TT_DATA=="cint16"):
-    if (TP_SHIFT>=0 and TP_SHIFT<32) :
-      return isValid
-    else:
-      return isError(f"Shift must be in range 0 to 31 for cint16 data type. Got {TP_SHIFT}.")
+#######################################################
+########## TP_SHIFT Updater and Validator #############
+#######################################################
+def update_TP_SHIFT(args):
+  TT_DATA=args["TT_DATA"]
+  return fn_update_TP_SHIFT(TT_DATA)
 
-def fn_validate_ssr(TT_DATA, TP_POINT_SIZE, TP_API, TP_SSR):
-  res = fn_validate_minmax_value("TP_SSR", TP_SSR, TP_SSR_min, TP_SSR_max)
-  if (res["is_valid"] == False):  
-    return res
-  if (TP_POINT_SIZE/TP_SSR >=16 and TP_POINT_SIZE/TP_SSR<=4096) :
-    if (TP_POINT_SIZE/TP_SSR<=1024 or TP_API==1) :
-      return isValid
-    else:
-      return isError(f"(Point size/SSR) must be less than 1024 for windowed configurations. Got TP_POINT_SIZE={TP_POINT_SIZE} and TP_SSR={TP_SSR}.")
-  else:
-    return isError(f"(Point size/SSR) must be between 16 and 4096. Got TP_POINT_SIZE={TP_POINT_SIZE} and TP_SSR={TP_SSR}.")
+def fn_update_TP_SHIFT(TT_DATA):
+  TP_SHIFT_min=0
 
-def fn_validate_dyn_pt_size(TP_POINT_SIZE, TP_SSR, TP_DYN_PT_SIZE):
-  if (TP_DYN_PT_SIZE==0 or TP_POINT_SIZE/TP_SSR >32) :
-    return isValid
-  else:
-    return isError(f"When dynamic point FFT is selected, (Point size/SSR) must be greater than 32. Got TP_POINT_SIZE={TP_POINT_SIZE} and TP_SSR={TP_SSR}.")
+  if TT_DATA=="cint16": TP_SHIFT_max=31
+  elif TT_DATA=="cint32": TP_SHIFT_max=60
+  elif TT_DATA=="cfloat": TP_SHIFT_max=0
 
-def fn_validate_weights(TP_POINT_SIZE, TP_DYN_PT_SIZE, weights_list):
-  if TP_DYN_PT_SIZE == 0:
-    if len(weights_list) != TP_POINT_SIZE :
-      return isError(f"Specified coefficient list is not equal to Point size({TP_POINT_SIZE})")
-  else:
-    if (len(weights_list) < TP_POINT_SIZE or len(weights_list) > TP_POINT_SIZE*2):
-      return isError(f"The coefficient list array {len(weights_list)} must specify the weights for the maximum point size and all smaller point sizes, so must be in the range Point size + Point size/2 to 2*Point size, where Point size = {TP_POINT_SIZE}")
-  return isValid
-
-#### validation APIs ####
-def validate_TT_COEFF(args):
-    TT_DATA = args["TT_DATA"]
-    TT_COEFF = args["TT_COEFF"]
-    return fn_validate_coeff_type(TT_DATA, TT_COEFF)
-
-def validate_TP_POINT_SIZE(args):
-    TP_POINT_SIZE = args["TP_POINT_SIZE"]
-    TT_DATA = args["TT_DATA"]
-    return fn_validate_point_size(TP_POINT_SIZE, TT_DATA)
-
-def validate_TP_WINDOW_VSIZE(args):
-    TP_POINT_SIZE = args["TP_POINT_SIZE"]
-    TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
-    return fn_validate_window_vsize(TP_POINT_SIZE,TP_WINDOW_VSIZE)
+  param_dict = {
+      "name"     : "TP_SHIFT",
+      "minimum"  : TP_SHIFT_min,
+      "maximum"  : TP_SHIFT_max
+  }
+  return param_dict
 
 def validate_TP_SHIFT(args):
-    TT_DATA = args["TT_DATA"]
-    TP_SHIFT = args["TP_SHIFT"]
-    return fn_validate_shift_val(TT_DATA, TP_SHIFT)
+  TT_DATA = args["TT_DATA"]
+  TP_SHIFT = args["TP_SHIFT"]
+  return fn_validate_shift_val(TT_DATA, TP_SHIFT)
 
-def validate_TP_SSR(args):
-    TT_DATA = args["TT_DATA"]
-    TP_POINT_SIZE = args["TP_POINT_SIZE"]
-    TP_API = args["TP_API"]
-    TP_SSR = args["TP_SSR"]
-    return fn_validate_ssr(TT_DATA, TP_POINT_SIZE, TP_API, TP_SSR)
+def fn_validate_shift_val(TT_DATA, TP_SHIFT):
+  param_dict=fn_update_TP_SHIFT(TT_DATA)
+  TP_SHIFT_range=[param_dict["minimum"], param_dict["maximum"]]
+  return validate_range(TP_SHIFT_range, "TP_SHIFT", TP_SHIFT)
 
-def validate_TP_DYN_PT_SIZE(args):
-    TP_POINT_SIZE = args["TP_POINT_SIZE"]
-    TP_SSR = args["TP_SSR"]
-    TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
-    return fn_validate_dyn_pt_size(TP_POINT_SIZE, TP_SSR, TP_DYN_PT_SIZE)
+#######################################################
+############## TP_RND Updater and Validator ###########
+#######################################################
+def update_TP_RND(args):
+  AIE_VARIANT=args["AIE_VARIANT"]
+  return fn_update_tp_rnd(AIE_VARIANT)
+
+def fn_update_tp_rnd(AIE_VARIANT):
+  legal_set_TP_RND= fn_get_legalSet_roundMode(AIE_VARIANT)
+
+  param_dict={}
+  param_dict.update({"name" : "TP_RND"})
+  param_dict.update({"enum" : legal_set_TP_RND})
+
+  return param_dict
+
+def validate_TP_RND(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TP_RND = args["TP_RND"]
+  param_dict = fn_update_tp_rnd(AIE_VARIANT)
+  legal_set_TP_RND = param_dict["enum"]
+  return(validate_legal_set(legal_set_TP_RND, "TP_RND", TP_RND))
+
+#######################################################
+############## TP_SAT Updater and Validator ###########
+#######################################################
+def update_TP_SAT(args):
+  return fn_update_tp_sat()
+
+def fn_update_tp_sat():
+  legal_set = [0,1,3]
+
+  param_dict={}
+  param_dict.update({"name" : "TP_SAT"})
+  param_dict.update({"enum" : legal_set})
+  return param_dict
 
 def validate_TP_SAT(args):
-    TP_SAT = args["TP_SAT"]
-    return fn_validate_satMode(TP_SAT)
+  TP_SAT = args["TP_SAT"]
+  return fn_validate_satMode(TP_SAT)
+
+
+def validate_TP_SAT(args):
+  TP_SAT = args["TP_SAT"]
+  return fn_validate_satMode(TP_SAT)
+
+#######################################################
+############# weights Updater and Validator ###########
+#######################################################
+def update_weights(args):
+  TP_POINT_SIZE = args["TP_POINT_SIZE"]
+  TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
+  return fn_update_weights(TP_POINT_SIZE, TP_DYN_PT_SIZE)
+
+def fn_update_weights(TP_POINT_SIZE, TP_DYN_PT_SIZE):
+  param_dict={"name" : "weights"}
+  if TP_DYN_PT_SIZE == 0:
+    len_weights=TP_POINT_SIZE
+    param_dict.update({"len" : len_weights})
+  else:
+    len_weights_min= TP_POINT_SIZE 
+    len_weights_max= 2*TP_POINT_SIZE
+    
+    param_dict.update({"len" : len_weights_min})
+    param_dict.update({"len_min" : len_weights_min})
+    param_dict.update({"len_max" : len_weights_max})
+
+  return param_dict
 
 def validate_weights(args):
-    weights = args["weights"]
-    TP_POINT_SIZE = args["TP_POINT_SIZE"]
-    TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
-    return fn_validate_weights(TP_POINT_SIZE, TP_DYN_PT_SIZE, weights)
-
-
-# Example of updater.
-#
-# Updater are functions to help GUI to hint user on parameter setting with already given parameters.
-# The return object will provide "value" which will be set in the wizard as the dependent parameter is being set.
-# The rest of keys are similar to parameter definition, but with candidates of enum or range values refined
-# based on previously set values.
-#
-# An updator function always return a dictionary,
-# including key "value" for automatically filled default in GUI as dependent parameters have been set, and
-# other keys for overriding the definition of parameter.
-#
-# For example, if a parameter has definition in JSON as
-#  { "name": "foo", "type": "typename", "enum": ["int", "float", "double"] }
-# And the updator returns
-#  { "value": "int", "enum": ["int", "float"] }
-# The GUI would show "int" as default and make "int" and "float" selectable candidates, while disabling "double".
-#
-# If with given combination, no valid value can be set for the parameter being updated, the upater function
-# should set "value" to None, to indicate an error and provide error message via "err_message".
-# For example
-#  { "value": None, "err_message": "With TT_DATA as 'int' there is no valid option for TT_COEFF" }
-#
-# In this example, the following is the updater for TT_COEFF, with TT_DATA as the dependent parameter.
-# When GUI generates a wizard, TT_DATA should be required first, as it shows up in parameter list first.
-# Once user has provided value for TT_DATA, this function will be called and set the value of TT_COEFF.
-# Meanwhile, the candidate shown in wizard based on enum will also be updated.
-#
-
-#### updater APIs ####
-def update_coeff(TT_DATA):
-  valid_coeffs_default = {"cint16": int16, "cint32": int32, "cfloat": cfloat}
-  return {"value": valid_coeffs_default[TT_DATA], "enum": valid_coeffs_default[TT_DATA]}
-
-def update_TT_COEFF(args):
-  TT_DATA = args["TP_DATA"]
-  return update_coeff(TT_DATA)
-
-def update_window_vsize(TT_POINT_SIZE):
-  return {"value": TP_POINT_SIZE, "range": range(TP_POINT_SIZE, 65536, 1)}
-
-def update_TP_WINDOW_VSIZE(args):
   TP_POINT_SIZE = args["TP_POINT_SIZE"]
-  return update_window_vsize(TP_POINT_SIZE)
+  TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
+  weights_list = args["weights"]
+  return fn_validate_weights(TP_POINT_SIZE, TP_DYN_PT_SIZE, weights_list)
 
-def update_shift(TT_DATA):
-  valid_shift_default = {"cint16": 14, "cint32": 30, "cfloat": 0}
-  valid_shift_range = {"cint16": 32, "cint32": 61, "cfloat": 0}
-  return {"value": valid_shift_default[TT_DATA], "range": range(valid_shift_range[TT_DATA])}
-
-def update_TP_SHIFT(args):
-  TT_DATA = args["TT_DATA"]
-  return update_shift(TT_DATA)
-
-def update_ssr(TP_POINT_SIZE):
-  lower_ssr = TP_POINT_SIZE/4096
-  if lower_ssr < 1 :
-    lower_ssr = 1
-  upper_ssr = TP_POINT_SIZE/65536
-  if upper_ssr > 16 :
-    upper_ssr = 16
-  return {"value": lower_ssr, "range": range(lower_ssr, upper_ssr, 1)}
-
-def update_TP_SSR(args):
-  TP_POINT_SIZE = args["TT_POINT_SIZE"]
-  return update_ssr(TP_POINT_SIZE)
-
-def update_dyn_pt_size(TP_POINT_SIZE, TP_SSR):
-  if (TP_POINT_SIZE/TP_SSR <32) :
-    return {"value": 0, "range": 0}
-  else :
-    return {"value": 0, "range": range(1)}
-
-def update_TP_DYN_PT_SIZE(args) :
-  TP_POINT_SIZE = args["TP_POINT_SIZE"]
-  TP_SSR = args["TP_SSR"]
-  return update_dyn_pt_size(TP_POINT_SIZE, TP_SSR)
+def fn_validate_weights(TP_POINT_SIZE, TP_DYN_PT_SIZE, weights_list):
+  param_dict=fn_update_weights(TP_POINT_SIZE, TP_DYN_PT_SIZE)
+  if TP_DYN_PT_SIZE==0:
+    return validate_LUT_len(weights_list, param_dict["len"])
+  else:
+    return validate_LUT_len_range(weights_list, param_dict["len_min"], param_dict["len_max"])
 
 #### port ####
 

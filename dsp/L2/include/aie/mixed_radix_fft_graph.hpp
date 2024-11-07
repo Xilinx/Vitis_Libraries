@@ -23,6 +23,9 @@
 #include "graph_utils.hpp"                  //for port_array
 #include "widget_api_cast.hpp"
 #include "mixed_radix_fft.hpp"
+#include "mixed_radix_twGen.hpp"
+#include "mixed_radix_fft_traits.hpp"
+#include "mrfft_dynptsize_luts.h"
 #include "fir_utils.hpp" // for CEIL function outside of L2 flow
 
 using namespace ::xf::dsp::aie::widget::api_cast;
@@ -81,6 +84,7 @@ template <int TP_DIM,
           unsigned int TP_SAT,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_KTWIDDLETABLESIZE,
           unsigned int TP_KNUMMAXTABLES>
 class create_casc_kernel_recur {
@@ -99,15 +103,16 @@ class create_casc_kernel_recur {
 
         std::vector<T_internalDataType> tmpBuff0;
         std::vector<T_internalDataType> tmpBuff1;
+        std::vector<T_internalDataType> tmpBuff2;
         tmpBuff0.resize(TP_POINT_SIZE);
         tmpBuff1.resize(TP_POINT_SIZE);
 
         fftKernels[TP_DIM - 1] = kernel::create_object<
             mixed_radix_fft<T_internalDataType, T_internalDataType, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
-                            TP_RND, TP_SAT, TP_WINDOW_VSIZE, TP_START_RANK, TP_END_RANK> >(
+                            TP_RND, TP_SAT, TP_WINDOW_VSIZE, TP_START_RANK, TP_END_RANK, TP_DYN_PT_SIZE> >(
             tmpBuff0, tmpBuff1, m_twiddleTable, m_twiddlePtrs);
         create_casc_kernel_recur<TP_DIM - 1, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN,
-                                 TP_RND, TP_SAT, TP_WINDOW_VSIZE, TP_START_RANK, TP_KTWIDDLETABLESIZE,
+                                 TP_RND, TP_SAT, TP_WINDOW_VSIZE, TP_START_RANK, TP_DYN_PT_SIZE, TP_KTWIDDLETABLESIZE,
                                  TP_KNUMMAXTABLES>::create(fftKernels, twTable, twiddlePtrs);
 
     } // constructor
@@ -124,6 +129,7 @@ template <typename TT_DATA, // type for I/O
           unsigned int TP_SAT,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_KTWIDDLETABLESIZE,
           unsigned int TP_KNUMMAXTABLES>
 class create_casc_kernel_recur<1,
@@ -137,6 +143,7 @@ class create_casc_kernel_recur<1,
                                TP_SAT,
                                TP_WINDOW_VSIZE,
                                TP_END_RANK,
+                               TP_DYN_PT_SIZE,
                                TP_KTWIDDLETABLESIZE,
                                TP_KNUMMAXTABLES> {
    public:
@@ -153,13 +160,14 @@ class create_casc_kernel_recur<1,
 
         std::vector<T_internalDataType> tmpBuff0;
         std::vector<T_internalDataType> tmpBuff1;
+        std::vector<T_internalDataType> tmpBuff2;
         tmpBuff0.resize(TP_POINT_SIZE);
         tmpBuff1.resize(TP_POINT_SIZE);
 
         fftKernels[0] = kernel::create_object<
             mixed_radix_fft<TT_DATA, T_internalDataType, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_RND,
-                            TP_SAT, TP_WINDOW_VSIZE, TP_START_RANK, TP_END_RANK> >(tmpBuff0, tmpBuff1, m_twiddleTable,
-                                                                                   m_twiddlePtrs);
+                            TP_SAT, TP_WINDOW_VSIZE, TP_START_RANK, TP_END_RANK, TP_DYN_PT_SIZE> >(
+            tmpBuff0, tmpBuff1, m_twiddleTable, m_twiddlePtrs);
 
     } // constructor
 };    // create_casc_kernel_recur class
@@ -176,6 +184,7 @@ template <int TP_DIM,
           unsigned int TP_SAT,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_KTWIDDLETABLESIZE,
           unsigned int TP_KNUMMAXTABLES>
 class create_casc_kernel {
@@ -194,17 +203,17 @@ class create_casc_kernel {
 
         std::vector<T_internalDataType> tmpBuff0;
         std::vector<T_internalDataType> tmpBuff1;
+        std::vector<T_internalDataType> tmpBuff2;
         tmpBuff0.resize(TP_POINT_SIZE);
         tmpBuff1.resize(TP_POINT_SIZE);
 
         fftKernels[TP_DIM - 1] = kernel::create_object<
             mixed_radix_fft<T_internalDataType, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_RND,
-                            TP_SAT, TP_WINDOW_VSIZE, TP_START_RANK, TP_END_RANK> >(tmpBuff0, tmpBuff1, m_twiddleTable,
-                                                                                   m_twiddlePtrs);
+                            TP_SAT, TP_WINDOW_VSIZE, TP_START_RANK, TP_END_RANK, TP_DYN_PT_SIZE> >(
+            tmpBuff0, tmpBuff1, m_twiddleTable, m_twiddlePtrs);
         create_casc_kernel_recur<TP_DIM - 1, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN,
-                                 TP_RND, TP_SAT, TP_WINDOW_VSIZE, TP_START_RANK, TP_KTWIDDLETABLESIZE,
+                                 TP_RND, TP_SAT, TP_WINDOW_VSIZE, TP_START_RANK, TP_DYN_PT_SIZE, TP_KTWIDDLETABLESIZE,
                                  TP_KNUMMAXTABLES>::create(fftKernels, twTable, twiddlePtrs);
-
     } // constructor
 };    // create_casc_kernel class
 
@@ -219,6 +228,7 @@ template <typename TT_DATA, // type for I/O
           unsigned int TP_SAT,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_KTWIDDLETABLESIZE,
           unsigned int TP_KNUMMAXTABLES>
 class create_casc_kernel<1,
@@ -232,6 +242,7 @@ class create_casc_kernel<1,
                          TP_SAT,
                          TP_WINDOW_VSIZE,
                          TP_END_RANK,
+                         TP_DYN_PT_SIZE,
                          TP_KTWIDDLETABLESIZE,
                          TP_KNUMMAXTABLES> {
    public:
@@ -248,15 +259,15 @@ class create_casc_kernel<1,
 
         std::vector<T_internalDataType> tmpBuff0;
         std::vector<T_internalDataType> tmpBuff1;
+        std::vector<T_internalDataType> tmpBuff2;
         tmpBuff0.resize(TP_POINT_SIZE);
         tmpBuff1.resize(TP_POINT_SIZE);
 
         printf("Creating single kernel\n");
-        fftKernels[0] =
-            kernel::create_object<mixed_radix_fft<TT_DATA, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
-                                                  TP_RND, TP_SAT, TP_WINDOW_VSIZE, TP_START_RANK, TP_END_RANK> >(
-                tmpBuff0, tmpBuff1, m_twiddleTable, m_twiddlePtrs);
-
+        fftKernels[0] = kernel::create_object<
+            mixed_radix_fft<TT_DATA, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_RND, TP_SAT,
+                            TP_WINDOW_VSIZE, TP_START_RANK, TP_END_RANK, TP_DYN_PT_SIZE> >(
+            tmpBuff0, tmpBuff1, m_twiddleTable, m_twiddlePtrs);
     } // constructor
 };    // create_casc_kernel class
 
@@ -266,7 +277,7 @@ class create_casc_kernel<1,
 /**
  * @ingroup fft_graphs
  *
- * @brief mixed_radix_fft is a single-channel, decimation-in-time, fixed point size FFT including radix3 or radix5
+ * @brief mixed_radix_fft is a single-channel, decimation-in-time, FFT including radix3 or radix5
  *stages.
  *
  *
@@ -274,35 +285,29 @@ class create_casc_kernel<1,
  * @tparam TT_DATA describes the type of individual data samples input to and
  *         output from the transform function. \n
  *         This is a typename and must be one of the following: \n
- *         int16, cint16, int32, cint32, float, cfloat.
+ *         cint16, cint32, cfloat.
  * @tparam TT_TWIDDLE describes the type of twiddle factors of the transform. \n
  *         It must be one of the following: cint16, cint32, cfloat
  *         and must also satisfy the following rules:
- *         - 32 bit types are only supported when TT_DATA is also a 32 bit type,
  *         - TT_TWIDDLE must be an integer type if TT_DATA is an integer type
- *         - TT_TWIDDLE must be cfloat type if TT_DATA is a float type.
+ *         - TT_TWIDDLE must be cfloat type if TT_DATA is a cfloat type.
  * @tparam TP_POINT_SIZE is an unsigned integer which describes the number of samples in
- *         the transform. \n This must be 2^N where N is an integer in the range
- *         4 to 16 inclusive. \n When TP_DYN_PT_SIZE is set, TP_POINT_SIZE describes the maximum
+ *         the transform. This values must factorize to powers of 2, 3 and 5.
+ *         When TP_DYN_PT_SIZE is set, TP_POINT_SIZE describes the maximum
  *         point size possible.
  * @tparam TP_FFT_NIFFT selects whether the transform to perform is an FFT (1) or IFFT (0).
  * @tparam TP_SHIFT selects the power of 2 to scale the result by prior to output.
  * @tparam TP_RND selects the rounding mode.
- *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
- *         - rnd_ceil       = Always round up (towards positive infinity).
- *         - rnd_sym_floor  = Truncate LSB, always round towards 0.
- *         - rnd_sym_ceil   = Always round up towards infinity.
  *         - rnd_pos_inf    = Round halfway towards positive infinity.
  *         - rnd_neg_inf    = Round halfway towards negative infinity.
  *         - rnd_sym_inf    = Round halfway towards infinity (away from zero).
  *         - rnd_sym_zero   = Round halfway towards zero (away from infinity).
  *         - rnd_conv_even  = Round halfway towards nearest even number.
  *         - rnd_conv_odd   = Round halfway towards nearest odd number. \n
- *         No rounding is performed on ceil or floor mode variants. \n
+ *         Ceil and floor mode variants are not supported. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
- *
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` will only be supported on AIE-ML device. \n
+ *         \n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
@@ -324,6 +329,34 @@ class create_casc_kernel<1,
  *         When stream I/O is selected, one sample is taken from, or output to, a stream and the next sample
  *         from or two the next stream. Two streams minimum are used. In this example, even samples are
  *         read from input stream[0] and odd samples from input stream[1].
+ * @tparam TP_DYN_PT_SIZE is an unsigned int to select static point size (0) or dynamic (1) point size.
+ *         With TP_DYN_PT_SIZE set to 1, there are two input ports. For the first, the user must provide a header input
+ *that \n
+ *         indicates the point size of frame(s) to be processed in this iteration. The header is a 256 bit size, which
+ *         is considered to be 8 fields each of int32 type.
+ *         The first field selects the direction of the transform to perform (1= forward, 0 = inverse). \n
+ *         The third field determines the power of 2 factor of the point size. e.g. 1536 decomposes to 3* 2^9 so \n
+ *         in this case the value would be 9. \n
+ *         The fourth field describes the power of 3 of the point size
+ *         The fifth field describes the power of 5 of the point size.
+ *         For example, a point size of 240 is 2^4 * 3^1 * 5^1 so \n
+ *         the values for the power of 2, 3 and 5 would be 4, 1 and 1 respectively.
+ *         The last (8th) field is an error indication. This is ignored on input, but set for the output header
+ *         if the input header is determined to be invalid (e.g. because the point size described is too large
+ *         or too small.
+ *         The second (data) input, contains one or more frames of data to be processed. \n
+ *         Each frame will start at index n*TP_POINT_SIZE in this iobuffer \n
+ *         Similarly, when using the dynamic point size feature there will be two output ports. The first holds the
+ *output header\n
+ *         which is a copy of the input header, but with the error field set to 0 (valid point size) or 1 (invalid point
+ *size). \n
+ *         The second output port will contain the processed data arranged in the same manner as the input data port.
+ *That is,\n
+ *         there may be one or more frames of data, as determined by TP_WINDOW_VSIZE/TP_POINT_SIZE. The first frame will
+ *begin\n
+ *         at index 0. The second will begin at index TP_POINT_VSIZE, the third at 2*TP_POINT_SIZE and so on.\n
+ *         Note that TP_WINDOW_SIZE still describes the number of samples to be processed and does not include
+ *         the header.
  **/
 template <typename TT_DATA,
           typename TT_TWIDDLE,
@@ -334,8 +367,8 @@ template <typename TT_DATA,
           unsigned int TP_SAT = 1,
           unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE, // to support multiple frames in an iobuffer
           unsigned int TP_CASC_LEN = 1,                 // single kernel operation only to begin with
-          unsigned int TP_API = 0                       // 0 = iobuffer 1 = stream
-          >
+          unsigned int TP_API = 0,                      // 0 = iobuffer 1 = stream
+          unsigned int TP_DYN_PT_SIZE = 0>
 class mixed_radix_fft_graph : public graph {
    public:
     static_assert(TP_RND != rnd_sym_floor && TP_RND != rnd_sym_ceil && TP_RND != rnd_floor && TP_RND != rnd_ceil,
@@ -343,7 +376,9 @@ class mixed_radix_fft_graph : public graph {
                   "ceil. Please set TP_RND to any of the other rounding modes. The mapping of integers to rounding "
                   "modes is device dependent. Please refer to documentation for more information.");
 
-    // declare MIXED_RADIX_FFT Kernel array
+    /**
+        * The array of kernels that will be created and mapped onto AIE tiles.
+    **/
     kernel m_mixed_radix_fftKernels[TP_CASC_LEN];
     kernel* getKernels() { return m_mixed_radix_fftKernels; };
     static constexpr int kStreamsPerTile = get_input_streams_core_module();        // a device trait
@@ -363,17 +398,19 @@ class mixed_radix_fft_graph : public graph {
 
     // decompose TP_POINT_SIZE in product of factors 5^r5stages * 3^r3stages * 2^r2stages * 4^r4stages
     // or TP_POINT_SIZE = r5factor * r3factor * r2factor * r4factor
-    static constexpr int m_kR5Stages = fnGetNumStages<TP_POINT_SIZE, 5>();
-    static constexpr int m_kR3Stages = fnGetNumStages<TP_POINT_SIZE, 3>();
-    static constexpr int m_kR4Stages = fnGetNumStages<TP_POINT_SIZE, 4>();
-    static constexpr int m_kR2Stages = fnGetNumStages<(TP_POINT_SIZE >> (2 * m_kR4Stages)), 2>();
-    static constexpr int m_kR5factor = fnGetRadixFactor<TP_POINT_SIZE, 5>();
-    static constexpr int m_kR3factor = fnGetRadixFactor<TP_POINT_SIZE, 3>();
-    static constexpr int m_kR4factor = fnGetRadixFactor<TP_POINT_SIZE, 4>();
-    static constexpr int m_kR2factor = fnGetRadixFactor<(TP_POINT_SIZE >> (2 * m_kR4Stages)), 2>();
+    static constexpr int m_kR5Stages = fnGetNumStages<TP_POINT_SIZE, 5, TT_TWIDDLE>();
+    static constexpr int m_kR3Stages = fnGetNumStages<TP_POINT_SIZE, 3, TT_TWIDDLE>();
+    static constexpr int m_kR4Stages = fnGetNumStages<TP_POINT_SIZE, 4, TT_TWIDDLE>();
+    static constexpr int m_kR2Stages = fnGetNumStages<(TP_POINT_SIZE >> (2 * m_kR4Stages)), 2, TT_TWIDDLE>();
+    static constexpr int m_kR5factor = fnGetRadixFactor<TP_POINT_SIZE, 5, TT_TWIDDLE>();
+    static constexpr int m_kR3factor = fnGetRadixFactor<TP_POINT_SIZE, 3, TT_TWIDDLE>();
+    static constexpr int m_kR4factor = fnGetRadixFactor<TP_POINT_SIZE, 4, TT_TWIDDLE>();
+    static constexpr int m_kR2factor = fnGetRadixFactor<(TP_POINT_SIZE >> (2 * m_kR4Stages)), 2, TT_TWIDDLE>();
 
     static_assert(m_kR5factor* m_kR3factor* m_kR4factor* m_kR2factor == TP_POINT_SIZE,
                   "ERROR: TP_POINT_SIZE failed to factorize");
+    static_assert(TP_SHIFT == 0 || !std::is_same<TT_DATA, cfloat>::value,
+                  "ERROR: TP_SHIFT must be 0 for cfloat operation");
 
     static constexpr int m_kTotalStages = m_kR5Stages + m_kR3Stages + m_kR2Stages + m_kR4Stages;
     static_assert(m_kTotalStages >= TP_CASC_LEN, "Error: TP_CASC_LEN is greater than the number of stages required");
@@ -391,14 +428,23 @@ class mixed_radix_fft_graph : public graph {
         tmpBuff0.resize(TP_POINT_SIZE);
         tmpBuff1.resize(TP_POINT_SIZE);
 
+        constexpr double kMaxTw = std::is_same<TT_TWIDDLE, cfloat>::value
+                                      ? 1.0
+                                      : (std::is_same<TT_TWIDDLE, cint16>::value ? 32767.0 : 2147483647.0);
+
         std::vector<TT_TWIDDLE> m_twiddleTable;
         m_twiddleTable.resize(m_ktwiddleTableSize);
         std::vector<int> m_twiddlePtrs; // index in m_twiddleTable of the start of each atomic table
         m_twiddlePtrs.resize(kNumMaxTables);
 
-        typedef typename std::conditional<std::is_same<TT_TWIDDLE, cfloat>::value, float, int16>::type T_twiddlebase;
-        int twiddleScale =
-            std::is_same<TT_TWIDDLE, cfloat>::value ? 0 : 32768; // cint16 twiddles are expressed as FIX1_15
+        // these 2 lines derive the atomic type of TT_TWIDDLE. Split over 2 lines for readability
+        typedef typename std::conditional<std::is_same<TT_TWIDDLE, cint16>::value, int16, int32>::type T_intTwiddleBase;
+        typedef typename std::conditional<std::is_same<TT_TWIDDLE, cfloat>::value, float, T_intTwiddleBase>::type
+            T_twiddlebase;
+
+        double intTwScale = std::is_same<TT_TWIDDLE, cint16>::value ? 32768.0 : 2147483648.0;
+        double twiddleScale =
+            std::is_same<TT_TWIDDLE, cfloat>::value ? 1.0 : intTwScale; // cint16 twiddles are expressed as FIX1_15
         double reald, imagd;
         T_twiddlebase realVal;
         T_twiddlebase imagVal;
@@ -441,10 +487,18 @@ class mixed_radix_fft_graph : public graph {
                     // double phase = M_PI * (double)(index * leg) / (double)(ptSizeOfStage[stage] /
                     // radixOfStage[stage]); // W index * 2pi.
                     double phase = M_PI * (double)(2 * index * leg) / (double)(ptSizeOfStage[stage]); // W index * 2pi.
-                    reald = round(cos(phase) * twiddleScale); // cast to follow is a floor operation
-                    imagd = round(-sin(phase) * twiddleScale);
-                    realVal = (T_twiddlebase)(reald > 32767.0 ? 32767.0 : reald);
-                    imagVal = (T_twiddlebase)(imagd > 32767.0 ? 32767.0 : imagd);
+                    if (std::is_same<TT_TWIDDLE, cfloat>::value) {
+                        reald = cos(phase);
+                        imagd = -sin(phase);
+                        realVal = (T_twiddlebase)reald;
+                        imagVal = (T_twiddlebase)imagd;
+                    } else {                                      // int types
+                        reald = round(cos(phase) * twiddleScale); // cast to follow is a floor operation
+                        imagd = round(-sin(phase) * twiddleScale);
+                        realVal = (T_twiddlebase)(reald > kMaxTw ? kMaxTw : reald);
+                        imagVal = (T_twiddlebase)(imagd > kMaxTw ? kMaxTw : imagd);
+                    }
+
                     TT_TWIDDLE val;
                     val.real = realVal;
                     val.imag = imagVal;
@@ -471,8 +525,10 @@ class mixed_radix_fft_graph : public graph {
                     (double)(M_PI * index) / (double)(ptSizeOfStage[stage] / radixOfStage[stage]); // W index * 2pi.
                 reald = round(cos(phase) * twiddleScale);
                 imagd = round(-sin(phase) * twiddleScale);
-                realVal = (T_twiddlebase)(reald > 32767.0 ? 32767.0 : reald);
-                imagVal = (T_twiddlebase)(imagd > 32767.0 ? 32767.0 : imagd);
+
+                realVal = (T_twiddlebase)(reald > kMaxTw ? kMaxTw : reald);
+                imagVal = (T_twiddlebase)(imagd > kMaxTw ? kMaxTw : imagd);
+
                 TT_TWIDDLE val;
                 val.real = realVal;
                 val.imag = imagVal;
@@ -498,8 +554,10 @@ class mixed_radix_fft_graph : public graph {
                     M_PI * (double)(index) / (double)(2 * ptSizeOfStage[stage] / radixOfStage[stage]); // W index * 2pi.
                 reald = round(cos(phase) * twiddleScale);
                 imagd = round(-sin(phase) * twiddleScale);
-                realVal = (T_twiddlebase)(reald > 32767.0 ? 32767.0 : reald);
-                imagVal = (T_twiddlebase)(imagd > 32767.0 ? 32767.0 : imagd);
+
+                realVal = (T_twiddlebase)(reald > kMaxTw ? kMaxTw : reald);
+                imagVal = (T_twiddlebase)(imagd > kMaxTw ? kMaxTw : imagd);
+
                 TT_TWIDDLE val;
                 val.real = realVal;
                 val.imag = imagVal;
@@ -521,8 +579,9 @@ class mixed_radix_fft_graph : public graph {
                                (double)(2 * ptSizeOfStage[stage] / radixOfStage[stage]); // W index * 2pi.
                 reald = round(cos(phase) * twiddleScale);
                 imagd = round(-sin(phase) * twiddleScale);
-                realVal = (T_twiddlebase)(reald > 32767.0 ? 32767.0 : reald);
-                imagVal = (T_twiddlebase)(imagd > 32767.0 ? 32767.0 : imagd);
+                realVal = (T_twiddlebase)(reald > kMaxTw ? kMaxTw : reald);
+                imagVal = (T_twiddlebase)(imagd > kMaxTw ? kMaxTw : imagd);
+
                 TT_TWIDDLE val;
                 val.real = realVal;
                 val.imag = imagVal;
@@ -538,7 +597,7 @@ class mixed_radix_fft_graph : public graph {
 
         // Create kernel classes
         create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_RND,
-                           TP_SAT, TP_WINDOW_VSIZE, m_kTotalStages, m_ktwiddleTableSize,
+                           TP_SAT, TP_WINDOW_VSIZE, m_kTotalStages, TP_DYN_PT_SIZE, m_ktwiddleTableSize,
                            kNumMaxTables>::create(m_mixed_radix_fftKernels, &m_twiddleTable[0], &m_twiddlePtrs[0]);
 
         // Connections
@@ -599,6 +658,200 @@ class mixed_radix_fft_graph : public graph {
         }
     };
 };
+
+// Specialization for Dynamic mode
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE, // Actually Maximum point size for dynamic operation
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_WINDOW_VSIZE, // to support multiple frames in an iobuffer
+          unsigned int TP_CASC_LEN,     // single kernel operation only to begin with
+          unsigned int TP_API           // 0 = iobuffer 1 = stream
+          >
+class mixed_radix_fft_graph<TT_DATA,
+                            TT_TWIDDLE,
+                            TP_POINT_SIZE,
+                            TP_FFT_NIFFT,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_SAT,
+                            TP_WINDOW_VSIZE,
+                            TP_CASC_LEN,
+                            TP_API,
+                            1 /* TP_DYN_PT_SIZE */> : public graph {
+   public:
+    static_assert(TP_RND != rnd_sym_floor && TP_RND != rnd_sym_ceil && TP_RND != rnd_floor && TP_RND != rnd_ceil,
+                  "Error: mixed radix FFT does not support TP_RND set to floor, ceil, symmetric floor, and symmetric "
+                  "ceil. Please set TP_RND to any of the other rounding modes. The mapping of integers to rounding "
+                  "modes is device dependent. Please refer to documentation for more information.");
+
+    static_assert(TP_CASC_LEN == 1, "Error. Dynamic point size is not supported for cascaded configurations.");
+    static_assert(TP_API == 0, "Error. Dynamic point size is not yet supported for streaming configurations.");
+    static constexpr unsigned maxPtSize = 1920;
+    static_assert(TP_POINT_SIZE <= maxPtSize,
+                  "Error. Point sizes greater than 1920 are not supported for dynamic mode on mixed radix fft.");
+
+    static constexpr int m_kNumDataPorts = 1;   // until stream support is added
+    static constexpr int m_kNumHeaderPorts = 1; // until stream support is added
+
+    /**
+     * The input data to the function.
+     * I/O  is an iobuffer of TT_DATA type.
+     **/
+    port_array<input, m_kNumDataPorts> in; // iobuffer only
+    /**
+     * The header input port to the function.
+     * I/O  is an iobuffer of TT_DATA type. Internally, int32.
+     **/
+    port_array<input, m_kNumHeaderPorts> headerIn; // iobuffer only
+
+    /**
+     * The output data from the function.
+     * I/O  is an iobuffer of TT_DATA type.
+     **/
+    port_array<output, m_kNumDataPorts> out;
+
+    /**
+     * The header output port from the function.
+     * I/O  is an iobuffer of TT_DATA type. Internally, int32.
+     **/
+    port_array<output, m_kNumHeaderPorts> headerOut; // iobuffer only
+
+    kernel m_mixed_radix_fftKernels[TP_CASC_LEN];
+    kernel m_mixed_radix_twGenKernels[TP_CASC_LEN];
+
+    typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
+
+    /**
+     * @brief This is the constructor function for the Mixed Radix FFT graph. Dynamic specialization
+     * Constructor has no arguments.
+     **/
+    mixed_radix_fft_graph() {
+        std::vector<T_internalDataType> tmpBuff0;
+        std::vector<T_internalDataType> tmpBuff1;
+        tmpBuff0.resize(TP_POINT_SIZE);
+        tmpBuff1.resize(TP_POINT_SIZE);
+
+        static constexpr int kNumBytesInLoad = 32;
+        // static constexpr int kTwBufferSize = (4+4+16)*8/sizeof(TT_TWIDDLE)+TP_POINT_SIZE; //num stages for each
+        // radix, factor for each radix, index table, master table,
+        // static constexpr int kTwBufferSize = (4+4+16)*8/sizeof(TT_TWIDDLE)+2*TP_POINT_SIZE; // TODO Calculate
+        // properly!
+
+        // Select portion of LUT
+
+        // TODO DUPLICATATION of declarations - different name but same values as eg. m_kR5Stages in
+        // mixed_radix_twGen.hpp around lines 85 and 165
+        // NOTE: RESTRICTED USE TO AVOID ERRORS. r5Stages, r3Stages, r2Stages are ONLY for accessing index for
+        // TP_POINT_SIZE in indices LUT in graph code
+        static constexpr int r5Stages = fnGetNumStages<TP_POINT_SIZE, 5, TT_TWIDDLE>();
+        static constexpr int r3Stages = fnGetNumStages<TP_POINT_SIZE, 3, TT_TWIDDLE>();
+        static constexpr int r2Stages = fnGetNumStages<TP_POINT_SIZE, 2, TT_TWIDDLE>();
+
+        static constexpr int numberOfInfoRows = 6; // TODO MATCHES UP WITH ROW START NUMBERS IN traits
+        static constexpr int m_ktwiddleTableSize = fnGetTwiddleTableSize<TT_TWIDDLE, TP_POINT_SIZE>();
+        static constexpr int kTwBufferSize = m_ktwiddleTableSize + numberOfInfoRows * 256 / 8 / sizeof(TT_TWIDDLE);
+
+        // TODO DUPLICATION of declarations - see around lines 85 and 165 of mixed_radix_twGen.hpp
+        // static constexpr int kFanVectorSize = std::is_same<TT_TWIDDLE, cint16> ? 16 : 8;  // TODO if cint16 else
+        // cfloat
+        static constexpr int kFanVectorSize =
+            16; // number of cint16's in fan array (kTotalVectors step arrays) - maximum possible in 32KB
+        static constexpr int kStepVectorSize =
+            132; // number of cint16's in step array (kTotalVectors step arrays) - maximum possible in 32KB
+        static constexpr int m_knRmultiple = (kMaxStagesR2 - minNumR2) * (kMaxStagesR3) * (kMaxStagesR5);
+
+        static constexpr int kTotalVectors = 62; // 62 possible pointsizes <= maximum pointsize of 3300
+        static constexpr int kfanLUTsize = kFanVectorSize * kTotalVectors;
+        static constexpr int kstepLUTsize = kStepVectorSize * kTotalVectors;
+        // static constexpr int m_knRmultiple = (r2Stages - minNumR2+1) * (r3Stages+1) * (r5Stages+1);  // size of
+        // flattened 3D-array (3D-array = sincosLUT_indices)
+
+        std::array<int16, m_knRmultiple> indicesLUT;
+        std::array<TT_TWIDDLE, kfanLUTsize> fanLUT;
+        std::array<TT_TWIDDLE, kstepLUTsize> stepLUT;
+        static constexpr int coeffSize = (kStepVectorSize + 1) * kFanVectorSize; // +1 because coeff is made up of
+                                                                                 // fan_array (+1) then fan_array*each
+                                                                                 // step element (+kStepVectorSize)
+        std::array<TT_TWIDDLE, coeffSize> coeff;
+
+        // Select whole indices LUT and flatten
+        int index = 0;
+        int index_i = 0;
+        for (int num_r2 = minNumR2; num_r2 < kMaxStagesR2; num_r2++) {
+            for (int num_r3 = 0; num_r3 < kMaxStagesR3; num_r3++) {
+                for (int num_r5 = 0; num_r5 < kMaxStagesR5; num_r5++) {
+                    index = sincosLUT_indices[num_r2 - minNumR2][num_r3][num_r5];
+                    // printf("i[%d] = %d ", index_i, index);
+                    indicesLUT[index_i++] = index;
+                }
+            }
+        }
+
+        // Find index of TP_POINTSIZE
+        int indexOfTPPointsize = sincosLUT_indices[r2Stages - minNumR2][r3Stages][r5Stages];
+
+        // int numVectorsLessThanTP_PTSIZE = indexOfTPPointsize+1;
+        // kfanLUTsize = kFanVectorSize*numVectorsLessThanTP_PTSIZE;
+        // kstepLUTsize = kStepVectorSize*numVectorsLessThanTP_PTSIZE;
+        // std::array<TT_TWIDDLE, kfanLUTsize> fanLUT;
+        // std::array<TT_TWIDDLE, kstepLUTsize> stepLUT;
+
+        // Select up to that index in fan and step LUTs and flatten
+        for (int i = 0; i <= indexOfTPPointsize; i++) {
+            std::array<TT_TWIDDLE, kFanVectorSize> fan = sincosLUTcint16_fan16[i];
+            for (int f = 0; f < kFanVectorSize; f++) {
+                fanLUT[i * kFanVectorSize + f] = fan[f];
+                // printf("(%d, %d) , ", fan[f].real, fan[f].imag);
+            }
+            std::array<TT_TWIDDLE, kStepVectorSize> step = sincosLUTcint16_step16[i];
+            for (int s = 0; s < kStepVectorSize; s++) {
+                stepLUT[i * kStepVectorSize + s] = step[s];
+                // printf("(%d, %d) , ", step[s].real, step[s].imag);
+            }
+        }
+
+        // create data processing kernel
+        m_mixed_radix_fftKernels[0] = kernel::create_object<
+            mixed_radix_fft<TT_DATA, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_RND, TP_SAT,
+                            TP_WINDOW_VSIZE, 0, 10 /* doesn't matter */, 1 /*TP_DYN_PT_SIZE*/> >(tmpBuff0, tmpBuff1);
+        // create twiddle generation kernel
+        m_mixed_radix_twGenKernels[0] =
+            kernel::create_object<mixed_radix_twGen<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_RND, TP_SAT> >(
+                indicesLUT, fanLUT, stepLUT, coeff);
+
+        // Connections
+        // Inputs
+        connect<>(in[0], m_mixed_radix_fftKernels[0].in[0]);
+        dimensions(m_mixed_radix_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE};
+        connect<>(headerIn[0], m_mixed_radix_twGenKernels[0].in[0]);
+        dimensions(m_mixed_radix_twGenKernels[0].in[0]) = {kNumBytesInLoad / sizeof(TT_DATA)};
+
+        // Inter-kernel
+        connect<>(m_mixed_radix_twGenKernels[0].out[1], m_mixed_radix_fftKernels[0].in[1]);
+        dimensions(m_mixed_radix_twGenKernels[0].out[1]) = {kTwBufferSize};
+        dimensions(m_mixed_radix_fftKernels[0].in[1]) = {kTwBufferSize};
+
+        // Outputs
+        connect<>(m_mixed_radix_fftKernels[0].out[0], out[0]);
+        dimensions(m_mixed_radix_fftKernels[0].out[0]) = {TP_WINDOW_VSIZE};
+        connect<>(m_mixed_radix_twGenKernels[0].out[0], headerOut[0]);
+        dimensions(m_mixed_radix_twGenKernels[0].out[0]) = {kNumBytesInLoad / sizeof(TT_DATA)};
+
+        runtime<ratio>(m_mixed_radix_fftKernels[0]) = 0.7;
+        runtime<ratio>(m_mixed_radix_twGenKernels[0]) = 0.7;
+
+        // Source files
+        source(m_mixed_radix_fftKernels[0]) = "mixed_radix_fft.cpp";
+        headers(m_mixed_radix_fftKernels[0]) = {"mixed_radix_fft.hpp"};
+        source(m_mixed_radix_twGenKernels[0]) = "mixed_radix_twGen.cpp";
+        headers(m_mixed_radix_twGenKernels[0]) = {"mixed_radix_twGen.hpp"};
+    };
+
+}; // end of class specialization
 
 } // namespace mixed_radix_fft
 } // namespace fft

@@ -17,12 +17,17 @@
 #ifndef _DSPLIB_FIR_TDM_HPP_
 #define _DSPLIB_FIR_TDM_HPP_
 
-#define __FIR_TDM_USE_48BIT_ACC__ 1
-
 #include <adf.h>
-#include "fir_utils.hpp"
-#include "fir_tdm_traits.hpp"
 #include <vector>
+#include "fir_utils.hpp"
+
+#if __HAS_ACCUM_PERMUTES__ == 1
+#define __FIR_TDM_USE_48BIT_ACC__ 1
+#else
+#define __FIR_TDM_USE_48BIT_ACC__ 0
+#endif
+
+#include "fir_tdm_traits.hpp"
 
 namespace xf {
 namespace dsp {
@@ -31,6 +36,7 @@ namespace fir {
 namespace tdm {
 
 template <typename TT_DATA,
+          typename TT_OUT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
@@ -58,6 +64,7 @@ template <typename fp = fir_params_defaults>
 class fir_tdm_tl {
    public:
     using parent_class = fir_tdm<typename fp::BTT_DATA,
+                                 typename fp::BTT_OUT_DATA,
                                  typename fp::BTT_COEFF,
                                  fp::BTP_FIR_LEN,
                                  fp::BTP_SHIFT,
@@ -84,10 +91,8 @@ class fir_tdm_tl {
     static constexpr unsigned int getKernelFirRangeLen() {
         constexpr unsigned int firRangeLen =
             pos + 1 == fp::BTP_CASC_LEN
-                ? fnFirRangeRemAsym<fp::BTP_FIR_LEN, fp::BTP_CASC_LEN, pos, typename fp::BTT_DATA,
-                                    typename fp::BTT_COEFF, fp::BTP_API>()
-                : fnFirRangeAsym<fp::BTP_FIR_LEN, fp::BTP_CASC_LEN, pos, typename fp::BTT_DATA, typename fp::BTT_COEFF,
-                                 fp::BTP_API>();
+                ? fnFirRangeRem<fp::BTP_FIR_LEN, fp::BTP_CASC_LEN, pos, parent_class::get_ColMultiple()>()
+                : fnFirRange<fp::BTP_FIR_LEN, fp::BTP_CASC_LEN, pos, parent_class::get_ColMultiple()>();
         return firRangeLen;
     };
 
@@ -98,10 +103,16 @@ class fir_tdm_tl {
 
     // Get kernel's FIR range Length
     static constexpr unsigned int getFirRangeLen() { return fp::BTP_FIR_RANGE_LEN; };
+    // static constexpr unsigned int getFirRangeLen() {
+    //     return CEIL(getKernelFirRangeLen<fp::BTP_KERNEL_POSITION>() * fp::BTP_TDM_CHANNELS, fp::BTP_SSR) /
+    //     fp::BTP_SSR;
+    // };
 
     // Get kernel's FIR Total Tap Length
     static constexpr unsigned int getTapLen() {
         return CEIL(fp::BTP_FIR_LEN * fp::BTP_TDM_CHANNELS, fp::BTP_SSR) / fp::BTP_SSR;
+        // return CEIL(getKernelFirRangeLen<fp::BTP_KERNEL_POSITION>() * fp::BTP_TDM_CHANNELS, fp::BTP_SSR) /
+        // fp::BTP_SSR;
     };
 
     // Get kernel's FIR Total Tap Length
@@ -112,7 +123,10 @@ class fir_tdm_tl {
 
     static constexpr unsigned int getLanes() { return parent_class::get_Lanes(); };
     static constexpr unsigned int getInternalBufferSize() { return parent_class::get_internalBufferSize(); };
+    static constexpr unsigned int isInternalMarginEnabled() { return parent_class::isInternalMarginEnabled(); };
     static constexpr unsigned int getColMultiple() { return parent_class::get_ColMultiple(); };
+    static constexpr unsigned int getFirRangeOffset() { return parent_class::get_FirRangeOffset(); };
+    static constexpr unsigned int getFirCoeffOffset() { return parent_class::get_FirCoeffOffset(); };
 
     // Get FIR variant
     static constexpr eFIRVariant getFirType() { return eFIRVariant::kTDM; };
@@ -121,6 +135,7 @@ class fir_tdm_tl {
 };
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA,
+          typename TT_OUT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
@@ -170,67 +185,105 @@ class kernelFilterClass {
                   "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
 #endif
 
-    typedef typename std::conditional_t<std::is_same<TT_COEFF, int32>::value,
-                                        int16,
-                                        std::conditional_t<std::is_same<TT_COEFF, cint32>::value, cint16, TT_COEFF> >
-        TT_COEFF_TEST;
-    static constexpr unsigned int m_kVOutSize = fnVOutSizeTdm<TT_DATA, TT_COEFF_TEST, TP_API>();
+    // typedef typename std::conditional_t<std::is_same<TT_COEFF, int32>::value,
+    //                                     int16,
+    //                                     std::conditional_t<std::is_same<TT_COEFF, cint32>::value, cint16, TT_COEFF> >
+    //     TT_COEFF_TEST;
+    static constexpr unsigned int m_kVOutSize = fnVOutSizeTdm<TT_DATA, TT_COEFF>();
     static constexpr int TP_NUM_FRAMES = TP_INPUT_WINDOW_VSIZE / TP_TDM_CHANNELS;
     static constexpr int TP_TDM_LOOP_SIZE = TP_TDM_CHANNELS / m_kVOutSize;
-    static_assert(
-        TP_TDM_CHANNELS % m_kVOutSize == 0,
-        "ERROR: TP_TDM_CHANNELS must be a integer multiple of lanes vector processor operates on (8, 16 or 32).");
+    static_assert(TP_TDM_CHANNELS % m_kVOutSize == 0,
+                  "ERROR: Number of TDM Channels split over SSR paths (TP_TDM_CHANNELS / TP_SSR) must be a integer "
+                  "multiple of lanes vector processor operates on (8, 16 or 32).");
 
 // always assume data >= coeff. otherwise, we'd need to load data at 0.5 rate, i.e. every second iteration + add offset
 #if __HAS_ACCUM_PERMUTES__ == 1
     // cint16/int16 combo can be overloaded with 2 column MUL/MACs.
     static constexpr unsigned int columnMultiple =
-        (std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, int16>::value) ? 2 : 1;
+        (std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, int16>::value) &&
+                (TP_TDM_CHANNELS > m_kVOutSize) && (TP_TDM_CHANNELS % (2 * m_kVOutSize) == 0)
+            ? 2
+            : 1;
+    static constexpr unsigned int coeffToDataMultiple = 1;
 #else
     static constexpr unsigned int columnMultiple = 1;
+    // When 512-bits of coeffs are needed for 256-bits of data, it takes 2 clock cycles to fetch data for a VMAC.
+    // If 2 operations are unrolled and separate pointers added for coeff reads, can we squeeze 6 operations in 3 clock
+    // cycles, rather than 4?
+    // No, as the 4 coeff reads would need to be scheduled in 3 clock cycles, causing memory conflict, defeating the
+    // purpose.
+
+    // How about operating on multiple frames?
+    // Yes, that would work. Read coeffs once. Read data for first frame and then for second frame.
+    // 512-bits of data and 512-bits of coeffs for 2 VMACs.
+    // static constexpr unsigned int coeffToDataMultiple =
+    // (TP_NUM_FRAMES % 2 == 0
+    // && std::is_same<TT_COEFF, cint32>::value) ? 2 : 1;
+    // && std::is_same<TT_DATA, cint16>::value) ? 2 : 1;
+    // && std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, cint32>::value) ? 2 : 1;
+    // Does it not make sense to enable it for all data types?
+    static constexpr unsigned int coeffToDataMultiple = (TP_NUM_FRAMES % 2 == 0) ? 2 : 1;
 #endif
+
+// Unrolling may offer better pipelining opportunities, at the cost of increased program memory.
+// However, unrolling doesn't always offer best performance.
+// When loop count is around forUnroolThreshold or more, it is best not to unroll and allow a nested loop.
+#if __HAS_ACCUM_PERMUTES__ == 1
+    static constexpr unsigned int firUnrollLoop = TP_FIR_RANGE_LEN / columnMultiple;
+#else
+    static constexpr unsigned int forUnroolThreshold = 16;
+    static constexpr unsigned int firUnrollLoop =
+        (TP_FIR_RANGE_LEN / columnMultiple >= forUnroolThreshold) ? 1 : TP_FIR_RANGE_LEN / columnMultiple;
+#endif // _DSPLIB_FIR_TDM_HPP_DEBUG_
 
     static constexpr int kSamplesInVectData = columnMultiple * m_kVOutSize;
     static constexpr int kSamplesInVectCoeff = columnMultiple * m_kVOutSize;
     static constexpr int kSamplesInVectAcc = m_kVOutSize;
 
     static constexpr unsigned int m_kLanes =
-        fnNumLanesTdm<TT_DATA, TT_COEFF, TP_API>(); // number of operations in parallel of this type combinations
-                                                    // that the vector processor can do.
+        fnNumLanesTdm<TT_DATA, TT_COEFF>(); // number of operations in parallel of this type combinations
+                                            // that the vector processor can do.
     static constexpr unsigned int m_kFirRangeOffset =
-        fnFirRangeOffsetAsym<TP_FIR_RANGE_LEN,
-                             TP_CASC_LEN,
-                             TP_KERNEL_POSITION,
-                             TT_DATA,
-                             TT_COEFF,
-                             TP_API>() +
+        fnFirRangeOffset<TP_FIR_LEN,
+                         TP_CASC_LEN,
+                         TP_KERNEL_POSITION,
+                         columnMultiple>() +
         TP_MODIFY_MARGIN_OFFSET; // FIR Cascade Offset for this kernel position
 
+    // Coeffs are reversed. Need to apply the offset from the back, so that the last kernel starts with a zero.
+    static constexpr unsigned int m_kFirCoeffOffset = TP_FIR_LEN - TP_FIR_RANGE_LEN - m_kFirRangeOffset;
+
+    // Operate on multiple frames in parallel, when possible.
+    // Optimized to reduce data loads, handy when 512-bits of data and 256-bits of coeffs are needed on each clock
+    // cycle.
+    static constexpr unsigned int useEvenFrames =
+        (TP_NUM_FRAMES % 2 == 0 && columnMultiple == 2 && TP_TDM_CHANNELS > m_kVOutSize &&
+         TP_TDM_CHANNELS % kSamplesInVectData == 0)
+            ? 1
+            : 0;
     // TDM FIR Margin = (TP_FIR_LEN-1)*TP_TDM_CHANNELS
     // or set to 0, if handled with internal buffer.
     static constexpr unsigned int enableInternalMargin = __HAS_ACCUM_PERMUTES__ ? 1 : 0;
     static constexpr unsigned int m_kFirMargin =
         fnTDMFirMargin<TP_FIR_LEN, TT_DATA, TP_TDM_CHANNELS, TP_INPUT_WINDOW_VSIZE, enableInternalMargin>();
-    static constexpr eArchType m_kArch = m_kFirMargin == 0 ? kArchInternalMargin : kArchBasic;
+    static constexpr eArchType m_ArchInternalMargin =
+        useEvenFrames == 1 ? kArchInternalMarginEvenFrames : kArchInternalMargin;
+    static constexpr eArchType m_ArchExternalMargin =
+        useEvenFrames == 1 ? kArchExternalMarginEvenFrames : kArchExternalMargin;
+    static constexpr eArchType m_kArch = m_kFirMargin == 0 ? m_ArchInternalMargin : m_ArchExternalMargin;
 
     // Margin frame iteration state
     int marginFrame = 0;
 
-    static constexpr unsigned int internalBufferSize = (m_kFirMargin == 0) ? (TP_FIR_LEN * TP_TDM_CHANNELS) : 32;
+    // Need to store  margin for ALL FIR computation, not just the FIR_RANGE_LEN.
+    static constexpr unsigned int internalBufferFrames = (TP_FIR_LEN + useEvenFrames);
+    static constexpr unsigned int internalBufferSize =
+        (m_kFirMargin == 0) ? (internalBufferFrames * TP_TDM_CHANNELS) : 32;
     // (TP_FIR_LEN-1)*TP_TDM_CHANNELS - margin samples + TP_TDM_CHANNELS new samples.
-    TT_DATA (&m_inputBuffer)[internalBufferSize] = {0};
-    TT_COEFF (&m_internalTaps)[TP_FIR_LEN * TP_TDM_CHANNELS];
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&m_inputBuffer)[internalBufferSize] = {0};
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF (&m_internalTaps)[TP_FIR_RANGE_LEN * TP_TDM_CHANNELS];
 
     static constexpr kernelPositionState m_kKernelPosEnum = getKernelPositionState(TP_KERNEL_POSITION, TP_CASC_LEN);
-
-    struct ssr_params : public fir_params_defaults {
-        using BTT_DATA = TT_DATA;
-        using BTT_COEFF = TT_COEFF;
-        static constexpr unsigned int BTP_FIR_LEN = TP_FIR_LEN;
-        static constexpr unsigned int BTP_CASC_LEN = TP_CASC_LEN;
-        static constexpr unsigned int BTP_TDM_CHANNELS = TP_TDM_CHANNELS;
-        static constexpr unsigned int BTP_API = TP_API;
-    };
 
     // Additional defensive checks
     static_assert(TP_INPUT_WINDOW_VSIZE % m_kLanes == 0,
@@ -239,13 +292,15 @@ class kernelFilterClass {
     static constexpr unsigned int m_kCoeffLoadSize = SCD_SIZE / 8 / sizeof(TT_COEFF);
 
     void filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
-                          T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
+                          T_outputIF<TP_CASC_OUT, TT_OUT_DATA> outInterface);
     // Implementations
     void filterBasic(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
-                     T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
+                     T_outputIF<TP_CASC_OUT, TT_OUT_DATA> outInterface);
     // Implementations
     void filterInternalMargin(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
-                              T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
+                              T_outputIF<TP_CASC_OUT, TT_OUT_DATA> outInterface);
+    void filterInternalMarginEvenFrames(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                        T_outputIF<TP_CASC_OUT, TT_OUT_DATA> outInterface);
 
    public:
     static eArchType get_m_kArch() { return m_kArch; };
@@ -256,23 +311,24 @@ class kernelFilterClass {
     static constexpr unsigned int get_margin() { return m_kFirMargin; };
     static constexpr unsigned int isInternalMarginEnabled() { return enableInternalMargin; };
     // need to switch graph beh if multiple columns are used.
-    static unsigned int get_ColMultiple() { return columnMultiple; };
+    static constexpr unsigned int get_ColMultiple() { return columnMultiple; };
+    static constexpr unsigned int get_FirRangeOffset() { return m_kFirRangeOffset; };
+    static constexpr unsigned int get_FirCoeffOffset() { return m_kFirCoeffOffset; };
 
     // Constructor
-    kernelFilterClass(TT_COEFF (&taps)[TP_FIR_LEN * TP_TDM_CHANNELS], TT_DATA (&inputBuffer)[get_internalBufferSize()])
-        : m_internalTaps{taps}, m_inputBuffer{inputBuffer} {
-        for (int i = 0; i < TP_FIR_LEN * TP_TDM_CHANNELS; i++) {
-        }
-    }
+    kernelFilterClass(TT_COEFF (&taps)[TP_FIR_RANGE_LEN * TP_TDM_CHANNELS],
+                      TT_DATA (&inputBuffer)[get_internalBufferSize()])
+        : m_internalTaps{taps}, m_inputBuffer{inputBuffer} {}
 
     // FIR
     void filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
-                      T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
+                      T_outputIF<TP_CASC_OUT, TT_OUT_DATA> outInterface);
 };
 
 //-----------------------------------------------------------------------------------------------------
 // Single kernel base specialization. No cascade ports. Static coefficients
 template <typename TT_DATA,
+          typename TT_OUT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
@@ -295,6 +351,7 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASES_LEN,
           unsigned int TP_SAT>
 class fir_tdm : public kernelFilterClass<TT_DATA,
+                                         TT_OUT_DATA,
                                          TT_COEFF,
                                          TP_FIR_LEN,
                                          TP_SHIFT,
@@ -319,9 +376,10 @@ class fir_tdm : public kernelFilterClass<TT_DATA,
    public:
     // (TP_FIR_LEN-1)*TP_TDM_CHANNELS - margin samples + TP_INPUT_WINDOW_VSIZE new samples, which are integer multiples
     // of TP_TDM_CHANNELS
-    TT_COEFF (&internalTaps)[TP_FIR_LEN * TP_TDM_CHANNELS];
+    TT_COEFF (&internalTaps)[TP_FIR_RANGE_LEN * TP_TDM_CHANNELS];
     // Constructor
     using thisKernelFilterClass = kernelFilterClass<TT_DATA,
+                                                    TT_OUT_DATA,
                                                     TT_COEFF,
                                                     TP_FIR_LEN,
                                                     TP_SHIFT,
@@ -345,13 +403,21 @@ class fir_tdm : public kernelFilterClass<TT_DATA,
                                                     TP_SAT>;
 
     TT_DATA (&internalBuffer)[thisKernelFilterClass::get_internalBufferSize()];
-    fir_tdm(TT_COEFF (&taps)[TP_FIR_LEN * TP_TDM_CHANNELS],
+    fir_tdm(TT_COEFF (&taps)[TP_FIR_RANGE_LEN * TP_TDM_CHANNELS],
             TT_DATA (&inputBuffer)[thisKernelFilterClass::get_internalBufferSize()])
         : internalTaps(taps), internalBuffer(inputBuffer), thisKernelFilterClass(taps, inputBuffer) {}
 
     // Register Kernel Class
     static void registerKernelClass() {
-        REGISTER_FUNCTION(fir_tdm::filter);
+        if
+            constexpr(TP_CASC_LEN == 1) { REGISTER_FUNCTION(fir_tdm::filter); }
+        else if
+            constexpr(TP_KERNEL_POSITION == 0) { REGISTER_FUNCTION(fir_tdm::filter_first); }
+        else if
+            constexpr(TP_KERNEL_POSITION == TP_CASC_LEN - 1) { REGISTER_FUNCTION(fir_tdm::filter_last); }
+        else {
+            REGISTER_FUNCTION(fir_tdm::filter_middle);
+        }
         REGISTER_PARAMETER(internalBuffer);
         REGISTER_PARAMETER(internalTaps);
     }
@@ -360,7 +426,24 @@ class fir_tdm : public kernelFilterClass<TT_DATA,
     void filter(input_circular_buffer<TT_DATA,
                                       extents<inherited_extent>,
                                       margin<thisKernelFilterClass::get_margin()> >& __restrict inWindow,
-                output_circular_buffer<TT_DATA>& __restrict outWindow);
+                output_circular_buffer<TT_OUT_DATA>& __restrict outWindow);
+    // FIR
+    void filter_first(input_circular_buffer<TT_DATA,
+                                            extents<inherited_extent>,
+                                            margin<thisKernelFilterClass::get_margin()> >& __restrict inWindow,
+                      output_stream_cacc48* outCascade);
+    // FIR
+    void filter_middle(input_circular_buffer<TT_DATA,
+                                             extents<inherited_extent>,
+                                             margin<thisKernelFilterClass::get_margin()> >& __restrict inWindow,
+                       input_stream_cacc48* inCascade,
+                       output_stream_cacc48* outCascade);
+    // FIR
+    void filter_last(input_circular_buffer<TT_DATA,
+                                           extents<inherited_extent>,
+                                           margin<thisKernelFilterClass::get_margin()> >& __restrict inWindow,
+                     input_stream_cacc48* inCascade,
+                     output_circular_buffer<TT_OUT_DATA>& __restrict outWindow);
 };
 }
 }

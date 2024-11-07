@@ -90,6 +90,8 @@ INLINE_DECL void stockhamStages<TT_DATA,
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
 
 #if __FFT_R4_IMPL__ == 0
+    // TODO - minPtSizePwr = 4, temporarily set to 5 for debug
+    // constexpr int minPtSizePwr = (TP_DYN_PT_SIZE == 1) && (std::is_same<TT_TWIDDLE, cint32>::value)? 5:4;
     constexpr int minPtSizePwr = 4;
 #endif //__FFT_R4_IMPL__ == 0
 #if __FFT_R4_IMPL__ == 1
@@ -126,11 +128,12 @@ INLINE_DECL void stockhamStages<TT_DATA,
             out256VectorType headerOp;
             out256VectorType blankOp;
             in256VectorType* inPtr;
-            outVectorType* outPtr;
+            outVectorType* outputPtr;
             in256VectorType in256;
             out256VectorType* out256Ptr;
             outVectorType outVector;
             int ptSizePwr;
+            unsigned int ptSize;
             int firstRank; // first for this particular point size
 
             ::aie::accum<cacc48, kSamplesInHeader> cacc384;
@@ -155,6 +158,7 @@ INLINE_DECL void stockhamStages<TT_DATA,
             headerOpVal.imag = headerVal.imag;
             headerOp.set(headerOpVal, 1);
             ptSizePwr = (int)headerVal.real - TP_ORIG_PAR_POWER;
+            ptSize = 1 << ptSizePwr;
             // firstRank is explained in a large comment where firstRank is defined in stockhamStages::calc (static
             // variant)
             if
@@ -162,7 +166,7 @@ INLINE_DECL void stockhamStages<TT_DATA,
             else {
                 firstRank = kPointSizePowerCeiled - ptSizePwr;
             }
-            obuff = outptr;
+            // obuff = outptr;
             if ((ptSizePwr >= minPtSizePwr) && (ptSizePwr <= kPointSizePower)) {
                 out256Ptr = (out256VectorType*)obuff;
                 *out256Ptr = headerOp;
@@ -171,11 +175,11 @@ INLINE_DECL void stockhamStages<TT_DATA,
                     firstRank) { // i.e. no need to do any processing in this kernel as later kernels will do it all.
                     // copy input window to output window in 256bit chunks
                     inPtr = (in256VectorType*)xbuff;
-                    outPtr = (outVectorType*)obuff;
+                    outputPtr = (outVectorType*)obuff;
                     if
                         constexpr(std::is_same<TT_DATA, cfloat>::value) {
                             for (int i = 0; i < TP_WINDOW_VSIZE / kSamplesInHeader; i++) {
-                                *outPtr++ = *inPtr++;
+                                *outputPtr++ = *inPtr++;
                             }
                         }
                     else {
@@ -184,7 +188,7 @@ INLINE_DECL void stockhamStages<TT_DATA,
                             in256 = *inPtr++;
                             cacc384.from_vector(in256, 0);
                             outVector = cacc384.template to_vector<TT_OUT_DATA>(0);
-                            *outPtr++ = outVector;
+                            *outputPtr++ = outVector;
                         }
                     }
 
@@ -260,9 +264,35 @@ INLINE_DECL void stockhamStages<TT_DATA,
     constexpr int kPointSizePower = fnPointSizePower<TP_POINT_SIZE>();
     bool inv = TP_FFT_NIFFT == 1 ? false : true;
 
+    // Note on internal buffers.
+    // The FFT is calculated over a series of stages of radix 2 or 4. If a kernel calculates N stages, then a basic
+    // implementation would be to read
+    // the input buffer and write results to an internal buffer A. Then, for the next stage, read from A and write to B
+    // and so on.
+    // Since the input buffer or A in the description above is free at the end of the stages in question, they are free
+    // to be re-used.
+    // Therefore, there is never a need for any more than internal buffers A and B because for each stage you would be
+    // reading from one and writing
+    // to the other. Ultimately the output buffer is written to.
+    // Now, with TT_DATA=cint16, the input and output buffers are half the size of the internal buffers because the data
+    // type used internally is cint32,
+    // so here 2 internal buffers are always required.
+    // For TT_DATA = cint32 or cfloat, the input buffer xfbuf can always be used as one of the two internal buffers.
+    // Further, for kernels which have an odd number of stages, the output buffer can be used as one of the two internal
+    // buffers too.
+
+    // Reuse the output buffer as one of the two scratchpad pingpong buffers?
+    TT_INTERNAL_DATA* my_tmp1_buf = fnReuseOutputBuffer<TT_OUT_DATA, TP_START_RANK, TP_END_RANK, TP_DYN_PT_SIZE>()
+                                        ? (TT_INTERNAL_DATA*)obuff
+                                        : tmp1_buf;
+
+    // Reuse the input buffer as one of the two scratchpad pingpong buffers?
     TT_INTERNAL_DATA* my_tmp2_buf = fnUsePingPongIntBuffer<TT_DATA>() ? tmp2_buf : (TT_INTERNAL_DATA*)xbuff;
-    TT_INTERNAL_DATA* tmp_bufs[2] = {tmp1_buf, my_tmp2_buf}; // tmp2 is actually xbuff reused.
-    unsigned int pingPong = 1;                               // use tmp_buf1 as initial output
+
+    // The kernel will ping pong between two buffers. Which two is resolved above.
+    TT_INTERNAL_DATA* tmp_bufs[2] = {my_tmp1_buf,
+                                     my_tmp2_buf}; // tmp2 is may be xbuff reused., tmp1 may be obuff reused
+    unsigned int pingPong = 1;                     // use my_tmp_buf1 as initial output - i.e. output of first stage
     int tw_index = 0;
     int rank = 0;
     int r = 0; // r is an indication to the stage of rank.
@@ -417,14 +447,18 @@ INLINE_DECL void stockhamStages<TT_DATA,
                                                        TT_OUT_DATA* __restrict obuff,
                                                        int ptSizePwr,
                                                        bool inv) {
+    // Reuse the output buffer as one of the two scratchpad pingpong buffers?
+    TT_INTERNAL_DATA* my_tmp1_buf = fnReuseOutputBuffer<TT_DATA, TP_START_RANK, TP_END_RANK, TP_DYN_PT_SIZE>()
+                                        ? (TT_INTERNAL_DATA*)obuff
+                                        : tmp1_buf;
     TT_INTERNAL_DATA* my_tmp2_buf = fnUsePingPongIntBuffer<TT_DATA>() ? tmp2_buf : (TT_INTERNAL_DATA*)xbuff;
-    TT_INTERNAL_DATA* tmp_bufs[2] = {tmp1_buf, my_tmp2_buf}; // tmp2 is actually xbuff reused.
+    TT_INTERNAL_DATA* tmp_bufs[2] = {my_tmp1_buf, my_tmp2_buf}; // tmp2 is actually xbuff reused.
     unsigned int pingPong = 1; // use tmp_buf1 as input or tmp_buf2? Initially tmp2 is input since this is xbuff
     int tw_index = 0;
     int rank = 0;
     int r = 0; // r is an indication to the stage of rank.
     unsigned int intR2Stages;
-    unsigned int ptSize = 1 << ptSizePwr;
+    unsigned int ptSize = (unsigned int)1 << ptSizePwr;
     unsigned int myStart = TP_START_RANK;
     unsigned int myEnd = TP_END_RANK;
     unsigned int firstRank;
@@ -486,12 +520,14 @@ INLINE_DECL void stockhamStages<TT_DATA,
 
     constexpr int koutVSize = 32 / sizeof(TT_OUT_DATA);
 
-    if ((1 << ptSizePwr) < TP_POINT_SIZE) {
+    if (ptSize < TP_POINT_SIZE) {
         using outVectType = ::aie::vector<TT_OUT_DATA, koutVSize>;
         outVectType zerosOut = ::aie::zeros<TT_OUT_DATA, koutVSize>();
-        outVectType* outFillPtr = (outVectType*)obuff;
-        outFillPtr += (1 << ptSizePwr) / koutVSize;
-        int fillCycles = (TP_POINT_SIZE - (1 << ptSizePwr)) / koutVSize;
+        //        outVectType* outFillPtr = (outVectType*)obuff;
+        // outFillPtr += ptSize / koutVSize;
+        outVectType* outFillPtr = (outVectType*)&obuff[ptSize];
+
+        int fillCycles = (TP_POINT_SIZE - ptSize) / koutVSize;
         for (int i = 0; i < fillCycles; i++) {
             *outFillPtr++ = zerosOut;
         }
@@ -499,81 +535,123 @@ INLINE_DECL void stockhamStages<TT_DATA,
     chess_memory_fence();
 };
 
-template <typename T_TW, int T_PT, int T_TWPT, int T_TW_MODE>
+template <typename T_TW, int T_PT, int T_TWPT, int T_TW_MODE, int TP_DYN_PT_SIZE, int TP_START_RANK, int TP_END_RANK>
 INLINE_DECL constexpr T_TW* fnGetTwPtr() {
+    constexpr int kOddPowerAdj = std::is_same<T_TW, cfloat>::value ? 0 : fnOddPower<T_PT>();
+    // This function would be better phrased with for loops rather than nested ifs, but since the tables are unique
+    // identifiers it is not possible.
+    // Also, for integers, TP_END_RANK is rounded up to Even, so point size 128 has TP_END_RANK=8, as does 256.
     if
         constexpr(std::is_same<T_TW, cfloat>::value) {
             if
-                constexpr(T_TWPT == 1 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw1_cfloat;
+                constexpr(T_TWPT == 1 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 0) &&
+                          TP_END_RANK > 0) return (T_TW*)fft_lut_tw1_cfloat;
             else if
-                constexpr(T_TWPT == 2 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw2_cfloat;
+                constexpr(T_TWPT == 2 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 1) &&
+                          TP_END_RANK > 1) return (T_TW*)fft_lut_tw2_cfloat;
             else if
-                constexpr(T_TWPT == 4 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw4_cfloat;
+                constexpr(T_TWPT == 4 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 2) &&
+                          TP_END_RANK > 2) return (T_TW*)fft_lut_tw4_cfloat;
             else if
-                constexpr(T_TWPT == 8 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw8_cfloat;
+                constexpr(T_TWPT == 8 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 3) &&
+                          TP_END_RANK > 3) return (T_TW*)fft_lut_tw8_cfloat;
             else if
-                constexpr(T_TWPT == 16 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw16_cfloat;
+                constexpr(T_TWPT == 16 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 4) &&
+                          TP_END_RANK > 4) return (T_TW*)fft_lut_tw16_cfloat;
             else if
-                constexpr(T_TWPT == 32 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw32_cfloat;
+                constexpr(T_TWPT == 32 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 5) &&
+                          TP_END_RANK > 5) return (T_TW*)fft_lut_tw32_cfloat;
             else if
-                constexpr(T_TWPT == 64 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw64_cfloat;
+                constexpr(T_TWPT == 64 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 6) &&
+                          TP_END_RANK > 6) return (T_TW*)fft_lut_tw64_cfloat;
             else if
-                constexpr(T_TWPT == 128 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw128_cfloat;
+                constexpr(T_TWPT == 128 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 7) &&
+                          TP_END_RANK > 7) return (T_TW*)fft_lut_tw128_cfloat;
             else if
-                constexpr(T_TWPT == 256 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw256_cfloat;
+                constexpr(T_TWPT == 256 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 8) &&
+                          TP_END_RANK > 8) return (T_TW*)fft_lut_tw256_cfloat;
             else if
-                constexpr(T_TWPT == 512 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw512_cfloat;
+                constexpr(T_TWPT == 512 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 9) &&
+                          TP_END_RANK > 9) return (T_TW*)fft_lut_tw512_cfloat;
             else if
-                constexpr(T_TWPT == 1024 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw1024_cfloat;
+                constexpr(T_TWPT == 1024 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 10) &&
+                          TP_END_RANK > 10) return (T_TW*)fft_lut_tw1024_cfloat;
             else if
-                constexpr(T_TWPT == 2048 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw2048_cfloat;
+                constexpr(T_TWPT == 2048 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 11) &&
+                          TP_END_RANK > 11) return (T_TW*)fft_lut_tw2048_cfloat; // Placeholder Not supported in AIE1
             else
                 return NULL;
         }
     if
         constexpr(std::is_same<T_TW, cint32>::value) {
+            // Also, for integers, TP_END_RANK is rounded up to Even, so point size 128 has TP_END_RANK=8, as does 256.
+            // TP_START_RANK is similarly affected. This is why there is -1 in the clause
             if
                 constexpr(T_TW_MODE == 0) {
                     if
-                        constexpr(T_TWPT == 1 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw1_cint32;
+                        constexpr(T_TWPT == 1 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 0) &&
+                                  TP_END_RANK - kOddPowerAdj > 0) return (T_TW*)fft_lut_tw1_cint32;
                     else if
-                        constexpr(T_TWPT == 2 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw2_cint32;
+                        constexpr(T_TWPT == 2 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 1) &&
+                                  TP_END_RANK - kOddPowerAdj > 1) return (T_TW*)fft_lut_tw2_cint32;
                     else if
-                        constexpr(T_TWPT == 4 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw4_cint32;
+                        constexpr(T_TWPT == 4 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 2) &&
+                                  TP_END_RANK - kOddPowerAdj > 2) return (T_TW*)fft_lut_tw4_cint32;
                     else if
-                        constexpr(T_TWPT == 8 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 8 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 3) &&
+                                  TP_END_RANK - kOddPowerAdj > 3) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw8_cint32_half
                             : (T_TW*)fft_lut_tw8_cint32;
                     else if
-                        constexpr(T_TWPT == 16 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 16 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 4) &&
+                                  TP_END_RANK - kOddPowerAdj > 4) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw16_cint32_half
                             : (T_TW*)fft_lut_tw16_cint32;
                     else if
-                        constexpr(T_TWPT == 32 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 32 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 5) &&
+                                  TP_END_RANK - kOddPowerAdj > 5) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw32_cint32_half
                             : (T_TW*)fft_lut_tw32_cint32;
                     else if
-                        constexpr(T_TWPT == 64 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 64 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 6) &&
+                                  TP_END_RANK - kOddPowerAdj > 6) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw64_cint32_half
                             : (T_TW*)fft_lut_tw64_cint32;
                     else if
-                        constexpr(T_TWPT == 128 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 128 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 7) &&
+                                  TP_END_RANK - kOddPowerAdj > 7) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw128_cint32_half
                             : (T_TW*)fft_lut_tw128_cint32;
                     else if
-                        constexpr(T_TWPT == 256 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 256 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 8) &&
+                                  TP_END_RANK - kOddPowerAdj > 8) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw256_cint32_half
                             : (T_TW*)fft_lut_tw256_cint32;
                     else if
-                        constexpr(T_TWPT == 512 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 512 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 9) &&
+                                  TP_END_RANK - kOddPowerAdj > 9) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw512_cint32_half
                             : (T_TW*)fft_lut_tw512_cint32;
                     else if
-                        constexpr(T_TWPT == 1024 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 1024 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 10) &&
+                                  TP_END_RANK - kOddPowerAdj > 10) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw1024_cint32_half
                             : (T_TW*)fft_lut_tw1024_cint32;
                     else if
-                        constexpr(T_TWPT == 2048 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 2048 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 11) &&
+                                  TP_END_RANK - kOddPowerAdj > 11) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw2048_cint32_half
                             : (T_TW*)fft_lut_tw2048_cint32;
                     else
@@ -581,41 +659,69 @@ INLINE_DECL constexpr T_TW* fnGetTwPtr() {
                 }
             else {
                 if
-                    constexpr(T_TWPT == 1 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw1_cint31;
+                    constexpr(T_TWPT == 1 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 0) &&
+                              TP_END_RANK - kOddPowerAdj > 0) return (T_TW*)fft_lut_tw1_cint31;
                 else if
-                    constexpr(T_TWPT == 2 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw2_cint31;
+                    constexpr(T_TWPT == 2 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 1) &&
+                              TP_END_RANK - kOddPowerAdj > 1) return (T_TW*)fft_lut_tw2_cint31;
                 else if
-                    constexpr(T_TWPT == 4 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw4_cint31;
+                    constexpr(T_TWPT == 4 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 2) &&
+                              TP_END_RANK - kOddPowerAdj > 2) return (T_TW*)fft_lut_tw4_cint31;
                 else if
-                    constexpr(T_TWPT == 8 && T_TWPT < T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw8_cint31_half
-                                                                                      : (T_TW*)fft_lut_tw8_cint31;
+                    constexpr(T_TWPT == 8 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 3) &&
+                              TP_END_RANK - kOddPowerAdj > 3) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw8_cint31_half
+                        : (T_TW*)fft_lut_tw8_cint31;
                 else if
-                    constexpr(T_TWPT == 16 && T_TWPT < T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw16_cint31_half
-                                                                                       : (T_TW*)fft_lut_tw16_cint31;
+                    constexpr(T_TWPT == 16 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 4) &&
+                              TP_END_RANK - kOddPowerAdj > 4) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw16_cint31_half
+                        : (T_TW*)fft_lut_tw16_cint31;
                 else if
-                    constexpr(T_TWPT == 32 && T_TWPT < T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw32_cint31_half
-                                                                                       : (T_TW*)fft_lut_tw32_cint31;
+                    constexpr(T_TWPT == 32 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 5) &&
+                              TP_END_RANK - kOddPowerAdj > 5) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw32_cint31_half
+                        : (T_TW*)fft_lut_tw32_cint31;
                 else if
-                    constexpr(T_TWPT == 64 && T_TWPT < T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw64_cint31_half
-                                                                                       : (T_TW*)fft_lut_tw64_cint31;
+                    constexpr(T_TWPT == 64 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 6) &&
+                              TP_END_RANK - kOddPowerAdj > 6) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw64_cint31_half
+                        : (T_TW*)fft_lut_tw64_cint31;
                 else if
-                    constexpr(T_TWPT == 128 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 128 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 7) &&
+                              TP_END_RANK - kOddPowerAdj > 7) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw128_cint31_half
                         : (T_TW*)fft_lut_tw128_cint31;
                 else if
-                    constexpr(T_TWPT == 256 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 256 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 8) &&
+                              TP_END_RANK - kOddPowerAdj > 8) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw256_cint31_half
                         : (T_TW*)fft_lut_tw256_cint31;
                 else if
-                    constexpr(T_TWPT == 512 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 512 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 9) &&
+                              TP_END_RANK - kOddPowerAdj > 9) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw512_cint31_half
                         : (T_TW*)fft_lut_tw512_cint31;
                 else if
-                    constexpr(T_TWPT == 1024 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 1024 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 10) &&
+                              TP_END_RANK - kOddPowerAdj > 10) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw1024_cint31_half
                         : (T_TW*)fft_lut_tw1024_cint31;
                 else if
-                    constexpr(T_TWPT == 2048 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 2048 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 11) &&
+                              TP_END_RANK - kOddPowerAdj > 11) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw2048_cint31_half
                         : (T_TW*)fft_lut_tw2048_cint31;
                 else
@@ -627,45 +733,69 @@ INLINE_DECL constexpr T_TW* fnGetTwPtr() {
             if
                 constexpr(T_TW_MODE == 0) {
                     if
-                        constexpr(T_TWPT == 1 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw1_cint16;
+                        constexpr(T_TWPT == 1 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 0) &&
+                                  TP_END_RANK - kOddPowerAdj > 0) return (T_TW*)fft_lut_tw1_cint16;
                     else if
-                        constexpr(T_TWPT == 2 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw2_cint16;
+                        constexpr(T_TWPT == 2 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 1) &&
+                                  TP_END_RANK - kOddPowerAdj > 1) return (T_TW*)fft_lut_tw2_cint16;
                     else if
-                        constexpr(T_TWPT == 4 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw4_cint16;
+                        constexpr(T_TWPT == 4 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 2) &&
+                                  TP_END_RANK - kOddPowerAdj > 2) return (T_TW*)fft_lut_tw4_cint16;
                     else if
-                        constexpr(T_TWPT == 8 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 8 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 3) &&
+                                  TP_END_RANK - kOddPowerAdj > 3) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw8_cint16_half
                             : (T_TW*)fft_lut_tw8_cint16;
                     else if
-                        constexpr(T_TWPT == 16 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 16 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 4) &&
+                                  TP_END_RANK - kOddPowerAdj > 4) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw16_cint16_half
                             : (T_TW*)fft_lut_tw16_cint16;
                     else if
-                        constexpr(T_TWPT == 32 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 32 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 5) &&
+                                  TP_END_RANK - kOddPowerAdj > 5) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw32_cint16_half
                             : (T_TW*)fft_lut_tw32_cint16;
                     else if
-                        constexpr(T_TWPT == 64 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 64 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 6) &&
+                                  TP_END_RANK - kOddPowerAdj > 6) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw64_cint16_half
                             : (T_TW*)fft_lut_tw64_cint16;
                     else if
-                        constexpr(T_TWPT == 128 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 128 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 7) &&
+                                  TP_END_RANK - kOddPowerAdj > 7) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw128_cint16_half
                             : (T_TW*)fft_lut_tw128_cint16;
                     else if
-                        constexpr(T_TWPT == 256 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 256 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 8) &&
+                                  TP_END_RANK - kOddPowerAdj > 8) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw256_cint16_half
                             : (T_TW*)fft_lut_tw256_cint16;
                     else if
-                        constexpr(T_TWPT == 512 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 512 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 9) &&
+                                  TP_END_RANK - kOddPowerAdj > 9) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw512_cint16_half
                             : (T_TW*)fft_lut_tw512_cint16;
                     else if
-                        constexpr(T_TWPT == 1024 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 1024 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 10) &&
+                                  TP_END_RANK - kOddPowerAdj > 10) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw1024_cint16_half
                             : (T_TW*)fft_lut_tw1024_cint16;
                     else if
-                        constexpr(T_TWPT == 2048 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                        constexpr(T_TWPT == 2048 && T_TWPT < T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 11) &&
+                                  TP_END_RANK - kOddPowerAdj > 11) return T_TWPT == T_PT / 2
                             ? (T_TW*)fft_lut_tw2048_cint16_half
                             : (T_TW*)fft_lut_tw2048_cint16;
                     else
@@ -673,41 +803,69 @@ INLINE_DECL constexpr T_TW* fnGetTwPtr() {
                 }
             else {
                 if
-                    constexpr(T_TWPT == 1 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw1_cint15;
+                    constexpr(T_TWPT == 1 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 0) &&
+                              TP_END_RANK - kOddPowerAdj > 0) return (T_TW*)fft_lut_tw1_cint15;
                 else if
-                    constexpr(T_TWPT == 2 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw2_cint15;
+                    constexpr(T_TWPT == 2 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 1) &&
+                              TP_END_RANK - kOddPowerAdj > 1) return (T_TW*)fft_lut_tw2_cint15;
                 else if
-                    constexpr(T_TWPT == 4 && T_TWPT < T_PT) return (T_TW*)fft_lut_tw4_cint15;
+                    constexpr(T_TWPT == 4 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 2) &&
+                              TP_END_RANK - kOddPowerAdj > 2) return (T_TW*)fft_lut_tw4_cint15;
                 else if
-                    constexpr(T_TWPT == 8 && T_TWPT < T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw8_cint15_half
-                                                                                      : (T_TW*)fft_lut_tw8_cint15;
+                    constexpr(T_TWPT == 8 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 3) &&
+                              TP_END_RANK - kOddPowerAdj > 3) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw8_cint15_half
+                        : (T_TW*)fft_lut_tw8_cint15;
                 else if
-                    constexpr(T_TWPT == 16 && T_TWPT < T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw16_cint15_half
-                                                                                       : (T_TW*)fft_lut_tw16_cint15;
+                    constexpr(T_TWPT == 16 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 4) &&
+                              TP_END_RANK - kOddPowerAdj > 4) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw16_cint15_half
+                        : (T_TW*)fft_lut_tw16_cint15;
                 else if
-                    constexpr(T_TWPT == 32 && T_TWPT < T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw32_cint15_half
-                                                                                       : (T_TW*)fft_lut_tw32_cint15;
+                    constexpr(T_TWPT == 32 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 5) &&
+                              TP_END_RANK - kOddPowerAdj > 5) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw32_cint15_half
+                        : (T_TW*)fft_lut_tw32_cint15;
                 else if
-                    constexpr(T_TWPT == 64 && T_TWPT < T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw64_cint15_half
-                                                                                       : (T_TW*)fft_lut_tw64_cint15;
+                    constexpr(T_TWPT == 64 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 6) &&
+                              TP_END_RANK - kOddPowerAdj > 6) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw64_cint15_half
+                        : (T_TW*)fft_lut_tw64_cint15;
                 else if
-                    constexpr(T_TWPT == 128 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 128 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 7) &&
+                              TP_END_RANK - kOddPowerAdj > 7) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw128_cint15_half
                         : (T_TW*)fft_lut_tw128_cint15;
                 else if
-                    constexpr(T_TWPT == 256 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 256 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 8) &&
+                              TP_END_RANK - kOddPowerAdj > 8) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw256_cint15_half
                         : (T_TW*)fft_lut_tw256_cint15;
                 else if
-                    constexpr(T_TWPT == 512 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 512 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 9) &&
+                              TP_END_RANK - kOddPowerAdj > 9) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw512_cint15_half
                         : (T_TW*)fft_lut_tw512_cint15;
                 else if
-                    constexpr(T_TWPT == 1024 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 1024 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 10) &&
+                              TP_END_RANK - kOddPowerAdj > 10) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw1024_cint15_half
                         : (T_TW*)fft_lut_tw1024_cint15;
                 else if
-                    constexpr(T_TWPT == 2048 && T_TWPT < T_PT) return T_TWPT == T_PT / 2
+                    constexpr(T_TWPT == 2048 && T_TWPT < T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 11) &&
+                              TP_END_RANK - kOddPowerAdj > 11) return T_TWPT == T_PT / 2
                         ? (T_TW*)fft_lut_tw2048_cint15_half
                         : (T_TW*)fft_lut_tw2048_cint15;
                 else
@@ -715,8 +873,9 @@ INLINE_DECL constexpr T_TW* fnGetTwPtr() {
             }
         }
 }
-template <typename T_TW, int T_PT, int T_TWPT, int T_TW_MODE>
+template <typename T_TW, int T_PT, int T_TWPT, int T_TW_MODE, int TP_DYN_PT_SIZE, int TP_START_RANK, int TP_END_RANK>
 INLINE_DECL constexpr T_TW* fnGetR4TwPtr() {
+    constexpr int kOddPowerAdj = std::is_same<T_TW, cfloat>::value ? 0 : fnOddPower<T_PT>();
     if
         constexpr(std::is_same<T_TW, cfloat>::value) { return NULL; }
     if
@@ -724,53 +883,97 @@ INLINE_DECL constexpr T_TW* fnGetR4TwPtr() {
             if
                 constexpr(T_TW_MODE == 0) {
                     if
-                        constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_1_2;
+                        constexpr(T_TWPT == 1 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 0) &&
+                                  TP_END_RANK > 0) return (T_TW*)fft_lut_cint32_r4_1_2;
                     else if
-                        constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_2_4;
+                        constexpr(T_TWPT == 2 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 1) &&
+                                  TP_END_RANK > 1) return (T_TW*)fft_lut_cint32_r4_2_4;
                     else if
-                        constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_4_8;
+                        constexpr(T_TWPT == 4 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 2) &&
+                                  TP_END_RANK > 2) return (T_TW*)fft_lut_cint32_r4_4_8;
                     else if
-                        constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_8_16;
+                        constexpr(T_TWPT == 8 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 3) &&
+                                  TP_END_RANK > 3) return (T_TW*)fft_lut_cint32_r4_8_16;
                     else if
-                        constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_16_32;
+                        constexpr(T_TWPT == 16 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 4) &&
+                                  TP_END_RANK > 4) return (T_TW*)fft_lut_cint32_r4_16_32;
                     else if
-                        constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_32_64;
+                        constexpr(T_TWPT == 32 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 5) &&
+                                  TP_END_RANK > 5) return (T_TW*)fft_lut_cint32_r4_32_64;
                     else if
-                        constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_64_128;
+                        constexpr(T_TWPT == 64 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 6) &&
+                                  TP_END_RANK > 6) return (T_TW*)fft_lut_cint32_r4_64_128;
                     else if
-                        constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_128_256;
+                        constexpr(T_TWPT == 128 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 7) &&
+                                  TP_END_RANK > 7) return (T_TW*)fft_lut_cint32_r4_128_256;
                     else if
-                        constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_256_512;
+                        constexpr(T_TWPT == 256 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 8) &&
+                                  TP_END_RANK > 8) return (T_TW*)fft_lut_cint32_r4_256_512;
                     else if
-                        constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_512_1024;
+                        constexpr(T_TWPT == 512 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 9) &&
+                                  TP_END_RANK > 9) return (T_TW*)fft_lut_cint32_r4_512_1024;
                     else if
-                        constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_1024_2048;
+                        constexpr(T_TWPT == 1024 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 10) &&
+                                  TP_END_RANK > 10) return (T_TW*)fft_lut_cint32_r4_1024_2048;
                     else
                         return NULL;
                 }
             else {
                 if
-                    constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_1_2;
+                    constexpr(T_TWPT == 1 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 0) &&
+                              TP_END_RANK > 0) return (T_TW*)fft_lut_cint31_r4_1_2;
                 else if
-                    constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_2_4;
+                    constexpr(T_TWPT == 2 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 1) &&
+                              TP_END_RANK > 1) return (T_TW*)fft_lut_cint31_r4_2_4;
                 else if
-                    constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_4_8;
+                    constexpr(T_TWPT == 4 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 2) &&
+                              TP_END_RANK > 2) return (T_TW*)fft_lut_cint31_r4_4_8;
                 else if
-                    constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_8_16;
+                    constexpr(T_TWPT == 8 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 3) &&
+                              TP_END_RANK > 3) return (T_TW*)fft_lut_cint31_r4_8_16;
                 else if
-                    constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_16_32;
+                    constexpr(T_TWPT == 16 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 4) &&
+                              TP_END_RANK > 4) return (T_TW*)fft_lut_cint31_r4_16_32;
                 else if
-                    constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_32_64;
+                    constexpr(T_TWPT == 32 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 5) &&
+                              TP_END_RANK > 5) return (T_TW*)fft_lut_cint31_r4_32_64;
                 else if
-                    constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_64_128;
+                    constexpr(T_TWPT == 64 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 6) &&
+                              TP_END_RANK > 6) return (T_TW*)fft_lut_cint31_r4_64_128;
                 else if
-                    constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_128_256;
+                    constexpr(T_TWPT == 128 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 7) &&
+                              TP_END_RANK > 7) return (T_TW*)fft_lut_cint31_r4_128_256;
                 else if
-                    constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_256_512;
+                    constexpr(T_TWPT == 256 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 8) &&
+                              TP_END_RANK > 8) return (T_TW*)fft_lut_cint31_r4_256_512;
                 else if
-                    constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_512_1024;
+                    constexpr(T_TWPT == 512 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 9) &&
+                              TP_END_RANK > 9) return (T_TW*)fft_lut_cint31_r4_512_1024;
                 else if
-                    constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_1024_2048;
+                    constexpr(T_TWPT == 1024 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 10) &&
+                              TP_END_RANK > 10) return (T_TW*)fft_lut_cint31_r4_1024_2048;
                 else
                     return NULL;
             }
@@ -780,53 +983,97 @@ INLINE_DECL constexpr T_TW* fnGetR4TwPtr() {
             if
                 constexpr(T_TW_MODE == 0) {
                     if
-                        constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_1_2;
+                        constexpr(T_TWPT == 1 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 0) &&
+                                  TP_END_RANK > 0) return (T_TW*)fft_lut_cint16_r4_1_2;
                     else if
-                        constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_2_4;
+                        constexpr(T_TWPT == 2 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 1) &&
+                                  TP_END_RANK > 1) return (T_TW*)fft_lut_cint16_r4_2_4;
                     else if
-                        constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_4_8;
+                        constexpr(T_TWPT == 4 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 2) &&
+                                  TP_END_RANK > 2) return (T_TW*)fft_lut_cint16_r4_4_8;
                     else if
-                        constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_8_16;
+                        constexpr(T_TWPT == 8 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 3) &&
+                                  TP_END_RANK > 3) return (T_TW*)fft_lut_cint16_r4_8_16;
                     else if
-                        constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_16_32;
+                        constexpr(T_TWPT == 16 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 4) &&
+                                  TP_END_RANK > 4) return (T_TW*)fft_lut_cint16_r4_16_32;
                     else if
-                        constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_32_64;
+                        constexpr(T_TWPT == 32 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 5) &&
+                                  TP_END_RANK > 5) return (T_TW*)fft_lut_cint16_r4_32_64;
                     else if
-                        constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_64_128;
+                        constexpr(T_TWPT == 64 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 6) &&
+                                  TP_END_RANK > 6) return (T_TW*)fft_lut_cint16_r4_64_128;
                     else if
-                        constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_128_256;
+                        constexpr(T_TWPT == 128 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 7) &&
+                                  TP_END_RANK > 7) return (T_TW*)fft_lut_cint16_r4_128_256;
                     else if
-                        constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_256_512;
+                        constexpr(T_TWPT == 256 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 8) &&
+                                  TP_END_RANK > 8) return (T_TW*)fft_lut_cint16_r4_256_512;
                     else if
-                        constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_512_1024;
+                        constexpr(T_TWPT == 512 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 9) &&
+                                  TP_END_RANK > 9) return (T_TW*)fft_lut_cint16_r4_512_1024;
                     else if
-                        constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_1024_2048;
+                        constexpr(T_TWPT == 1024 && T_TWPT <= T_PT &&
+                                  (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 10) &&
+                                  TP_END_RANK > 10) return (T_TW*)fft_lut_cint16_r4_1024_2048;
                     else
                         return NULL;
                 }
             else {
                 if
-                    constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_1_2;
+                    constexpr(T_TWPT == 1 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 0) &&
+                              TP_END_RANK > 0) return (T_TW*)fft_lut_cint15_r4_1_2;
                 else if
-                    constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_2_4;
+                    constexpr(T_TWPT == 2 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 1) &&
+                              TP_END_RANK > 1) return (T_TW*)fft_lut_cint15_r4_2_4;
                 else if
-                    constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_4_8;
+                    constexpr(T_TWPT == 4 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 2) &&
+                              TP_END_RANK > 2) return (T_TW*)fft_lut_cint15_r4_4_8;
                 else if
-                    constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_8_16;
+                    constexpr(T_TWPT == 8 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 3) &&
+                              TP_END_RANK > 3) return (T_TW*)fft_lut_cint15_r4_8_16;
                 else if
-                    constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_16_32;
+                    constexpr(T_TWPT == 16 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 4) &&
+                              TP_END_RANK > 4) return (T_TW*)fft_lut_cint15_r4_16_32;
                 else if
-                    constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_32_64;
+                    constexpr(T_TWPT == 32 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 5) &&
+                              TP_END_RANK > 5) return (T_TW*)fft_lut_cint15_r4_32_64;
                 else if
-                    constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_64_128;
+                    constexpr(T_TWPT == 64 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 6) &&
+                              TP_END_RANK > 6) return (T_TW*)fft_lut_cint15_r4_64_128;
                 else if
-                    constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_128_256;
+                    constexpr(T_TWPT == 128 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 7) &&
+                              TP_END_RANK > 7) return (T_TW*)fft_lut_cint15_r4_128_256;
                 else if
-                    constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_256_512;
+                    constexpr(T_TWPT == 256 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 8) &&
+                              TP_END_RANK > 8) return (T_TW*)fft_lut_cint15_r4_256_512;
                 else if
-                    constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_512_1024;
+                    constexpr(T_TWPT == 512 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 9) &&
+                              TP_END_RANK > 9) return (T_TW*)fft_lut_cint15_r4_512_1024;
                 else if
-                    constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_1024_2048;
+                    constexpr(T_TWPT == 1024 && T_TWPT <= T_PT &&
+                              (TP_DYN_PT_SIZE == 1 || TP_START_RANK - kOddPowerAdj <= 10) &&
+                              TP_END_RANK > 10) return (T_TW*)fft_lut_cint15_r4_1024_2048;
                 else
                     return NULL;
             }
@@ -861,18 +1108,30 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
                                 TP_TWIDDLE_MODE>::kernelFFT(TT_DATA* __restrict inptr, TT_OUT_DATA* __restrict outptr) {
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
 
-    static constexpr TT_TWIDDLE* __restrict tw1 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw2 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw4 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw8 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw16 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 16, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw32 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 32, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw64 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 64, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw128 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 128, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw256 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 256, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw512 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 512, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw1024 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1024, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw2048 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2048, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw1 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw2 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw4 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw8 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw16 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 16, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw32 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 32, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw64 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 64, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw128 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 128, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw256 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 256, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw512 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 512, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw1024 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1024, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw2048 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2048, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
 
 #if __FFT_R4_IMPL__ == 0
     static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
@@ -889,28 +1148,39 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
 #endif //__FFT_R4_IMPL__ == 0
 #if __FFT_R4_IMPL__ == 1
     static constexpr TT_TWIDDLE* __restrict tw1_2 =
-        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_1_2;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK,
+                     TP_END_RANK>(); //(TT_TWIDDLE*)fft_lut_r4_1_2;
     static constexpr TT_TWIDDLE* __restrict tw2_4 =
-        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_2_4;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK,
+                     TP_END_RANK>(); //(TT_TWIDDLE*)fft_lut_r4_2_4;
     static constexpr TT_TWIDDLE* __restrict tw4_8 =
-        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_4_8;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK,
+                     TP_END_RANK>(); //(TT_TWIDDLE*)fft_lut_r4_4_8;
     static constexpr TT_TWIDDLE* __restrict tw8_16 =
-        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_8_16;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK,
+                     TP_END_RANK>(); //(TT_TWIDDLE*)fft_lut_r4_8_16;
     static constexpr TT_TWIDDLE* __restrict tw16_32 =
-        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 16, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_16_32;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 16, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK,
+                     TP_END_RANK>(); //(TT_TWIDDLE*)fft_lut_r4_16_32;
     static constexpr TT_TWIDDLE* __restrict tw32_64 =
-        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 32, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_32_64;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 32, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK,
+                     TP_END_RANK>(); //(TT_TWIDDLE*)fft_lut_r4_32_64;
     static constexpr TT_TWIDDLE* __restrict tw64_128 =
-        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 64, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_64_128;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 64, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK,
+                     TP_END_RANK>(); //(TT_TWIDDLE*)fft_lut_r4_64_128;
     static constexpr TT_TWIDDLE* __restrict tw128_256 =
-        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 128, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_128_256;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 128, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK,
+                     TP_END_RANK>(); //(TT_TWIDDLE*)fft_lut_r4_128_256;
     static constexpr TT_TWIDDLE* __restrict tw256_512 =
-        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 256, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_256_512;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 256, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK,
+                     TP_END_RANK>(); //(TT_TWIDDLE*)fft_lut_r4_256_512;
     static constexpr TT_TWIDDLE* __restrict tw512_1024 =
-        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 512, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_512_1024;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 512, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK,
+                     TP_END_RANK>(); //(TT_TWIDDLE*)fft_lut_r4_512_1024;
     static constexpr TT_TWIDDLE* __restrict tw1024_2048 =
-        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1024, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_1024_2048;
-#endif                                                                    //__FFT_R4_IMPL__ == 1
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1024, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK,
+                     TP_END_RANK>(); //(TT_TWIDDLE*)fft_lut_r4_1024_2048;
+#endif                               //__FFT_R4_IMPL__ == 1
 
     alignas(32) static TT_TWIDDLE* tw_table[kMaxPointLog * 2] = {
         tw1,   tw2,   tw4,   tw8,    tw16,    tw32,    tw64,     tw128,     tw256,     tw512,      tw1024,      tw2048,
@@ -984,10 +1254,14 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
     const unsigned int TP_POINT_SIZE = FFT16_SIZE;
 
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
-    static constexpr TT_TWIDDLE* __restrict tw1 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw2 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw4 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw8 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw1 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw2 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw4 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw8 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
 
 #if __FFT_R4_IMPL__ == 0
     static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
@@ -997,10 +1271,14 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
     static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
 #endif //__FFT_R4_IMPL__ == 0
 #if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw1_2 =
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw2_4 =
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw4_8 =
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw8_16 =
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
 #endif //__FFT_R4_IMPL__ == 1
 
     alignas(32) static TT_TWIDDLE* tw_table[kMaxPointLog * 2] = {tw1,  tw2,  tw4,  tw8,  NULL,  NULL,  NULL,  NULL,
@@ -1067,10 +1345,14 @@ INLINE_DECL void kernelFFTClass<cint16,
     typedef cint16 TT_DATA;
     typedef cint16 TT_TWIDDLE; // essentially a constant for thie specialization
     typedef cint32_t T_internalDataType;
-    static constexpr cint16* __restrict tw1 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE>();
-    static constexpr cint16* __restrict tw2 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE>();
-    static constexpr cint16* __restrict tw4 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE>();
-    static constexpr cint16* __restrict tw8 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE>();
+    static constexpr cint16* __restrict tw1 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr cint16* __restrict tw2 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr cint16* __restrict tw4 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr cint16* __restrict tw8 =
+        fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
 
 #if __FFT_R4_IMPL__ == 0
     static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
@@ -1079,10 +1361,14 @@ INLINE_DECL void kernelFFTClass<cint16,
     static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
 #endif //__FFT_R4_IMPL__ == 0
 #if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE>();
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw1_2 =
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw2_4 =
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw4_8 =
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
+    static constexpr TT_TWIDDLE* __restrict tw8_16 =
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
 #endif //__FFT_R4_IMPL__ == 1
 
     alignas(32) static cint16* tw_table[kMaxPointLog * 2] = {tw1,  tw2,  tw4,  tw8,  NULL,  NULL,  NULL,  NULL,

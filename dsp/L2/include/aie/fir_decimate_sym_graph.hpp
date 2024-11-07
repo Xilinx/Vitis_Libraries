@@ -367,9 +367,9 @@ class create_casc_kernel<1,
  * @tparam TT_COEFF describes the type of individual coefficients of the filter
  *         taps. \n It must be one of the same set of types listed for TT_DATA
  *         and must also satisfy the following rules:
- *         - Complex types are only supported when TT_DATA is also complex.
- *         - TT_COEFF must be an integer type if TT_DATA is an integer type
- *         - TT_COEFF must be a float type if TT_DATA is a float type.
+ *         - Complex types are only supported when ``TT_DATA`` is also complex.
+ *         - ``TT_COEFF`` must be an integer type if TT_DATA is an integer type
+ *         - ``TT_COEFF`` must be a float type if TT_DATA is a float type.
  * @tparam TP_FIR_LEN is an unsigned integer which describes the number of taps
  *         in the filter. \n
  *         TP_FIR_LEN must be an integer multiple of the TP_DECIMATE_FACTOR value.
@@ -378,7 +378,7 @@ class create_casc_kernel<1,
  *         TP_DECIMATE_FACTOR must be in the range 2 to 3. For larger factors, use
  *         the fir_decimate_asym library element.
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
- *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
+ *         FIR terms before output. \n ``TP_SHIFT`` must be in the range 0 to 59 (61 for AIE1).
  * @tparam TP_RND describes the selection of rounding to be applied during the
  *         shift down stage of processing. \n
  *         Although, TP_RND accepts unsigned integer values descriptive macros are recommended where
@@ -395,7 +395,7 @@ class create_casc_kernel<1,
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
- *
+ *         \n
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph
  *         in a single iteration run.  \n
@@ -407,7 +407,7 @@ class create_casc_kernel<1,
 *buffering takes place. \n
  *         In such case, maximum number of samples processed by the graph is limited to 32-bit value (4.294B samples per
 *iteration).  \n
- *
+ *         \n
  *         Note: For SSR configurations (TP_SSR>1), the input data must be split over multiple ports,
  *         where each successive sample is sent to a different input port in a round-robin fashion. \n
  *         As a result, each SSR input path will process a fraction of the frame defined by the TP_INPUT_WINDOW_VSIZE.
@@ -416,7 +416,7 @@ class create_casc_kernel<1,
  *         divided by TP_DECIMATE_FACTOR by virtue the decimation factor.
  *         TP_INPUT_WINDOW_VSIZE must be an integer multiple of TP_DECIMATE_FACTOR
  *         The resulting output window size must be a multiple of 256bits. \n
- *
+ *         \n
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  * @tparam TP_CASC_LEN describes the number of AIE processors to split the operation
  *         over. \n This allows resource to be traded for higher performance.
@@ -438,25 +438,25 @@ class create_casc_kernel<1,
  *         reloading should be used. \n When defining the parameter:
  *         - 0 = static coefficients, defined in filter constructor,
  *         - 1 = reloadable coefficients, passed as argument to runtime function. \n
- *
+ *         \n
  *         Note: when used, async port: ```port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeff;```
-*will be added to the FIR. \n
- *
+ *         will be added to the FIR. \n
+ *         \n
  *         Note: the size of the port array is equal to the total number of output paths  (TP_SSR).  \n
  *         Each port should contain the same taps array content, i.e. each additional port must be a duplicate of the
-*coefficient array. \n
+ *         coefficient array. \n
  * @tparam TP_NUM_OUTPUTS sets the number of ports over which the output is sent. \n
  *         This can be 1 or 2. It is set to 1 by default. \n
  *         Depending on TP_API, additional output ports functionality differs.
  *         For Windows API, additional output provides flexibility in connecting
  *         FIR output with multiple destinations.
  *         Additional output ``out2`` is an exact copy of the data of the output port ``out``. \n
- *
+ *         \n
  *         With Stream API, the additional output port increases the FIR's throughput. \n
  *         Data is sent in a 128-bit interleaved pattern, e.g. : \n
  *         - samples 0-3 is sent over stream0 for cint16 data type, \n
  *         - samples 4-7 is sent over stream1 for cint16 data type. \n
- *
+ *         \n
  *         Note: when used, optional port: ``` port<output> out2; ``` will be added to the FIR. \n
  * @tparam TP_API specifies if the input/output interface should be window-based or stream-based.  \n
  *         The values supported are 0 (window API) or 1 (stream API).

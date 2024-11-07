@@ -65,6 +65,7 @@ The Vitis AIE DSP Library provides a SSR FFT implementation targeting AIE, as we
 
    Introduction <user_guide/L2/introduction.rst>
    DSP Library Functions <user_guide/L2/dsp-lib-func.rst>
+   Configuration <user_guide/L2/configuration.rst>
    Compiling and Simulating <user_guide/L2/compiling-and-simulating.rst>
    Benchmark/QoR <user_guide/L2/benchmark.rst>
 
@@ -72,12 +73,14 @@ The Vitis AIE DSP Library provides a SSR FFT implementation targeting AIE, as we
    :caption: API Reference
 
    API Reference Overview <user_guide/L2/api-reference.rst>
+   Bitonic Sort <rst/group_bitonic_sort_graph.rst>
    Convolution / Correlation <rst/group_conv_corr_graph.rst>
    DDS Mixer <rst/group_dds_graph.rst>
    DFT <rst/group_dft_graph.rst>
    FFT IFFT <rst/group_fft_graphs.rst>
    FFT Window <rst/group_fft_window.rst>
    FIRs <rst/group_fir_graphs.rst>
+   Function Approximation <rst/group_func_approx.rst>
    GeMM <rst/group_gemm_graph.rst>
    GeMV <rst/group_matrix_vector_mul_graph.rst>
    Graph utils <rst/group_graph_utils.rst>

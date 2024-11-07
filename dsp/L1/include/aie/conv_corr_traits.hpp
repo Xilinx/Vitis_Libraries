@@ -17,13 +17,6 @@
 #ifndef _DSPLIB_CONV_CORR_TRAITS_HPP_
 #define _DSPLIB_CONV_CORR_TRAITS_HPP_
 
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
-
 /*
     Convolution and Correlation traits.
     This file contains sets of overloaded, templatized and specialized templatized functions which
@@ -46,24 +39,134 @@ namespace aie {
 namespace conv_corr {
 
 // Function to return the size of Y Reg
-static constexpr unsigned MAX_WIDTH_Y_REG() {
+static constexpr unsigned maxWidthOfYdReg() {
     return 1024;
 };
 
 // Function to return the size of X Reg
-static constexpr unsigned MAX_WIDTH_X_REG() {
+static constexpr unsigned maxWidthOfXdReg() {
     return 512;
 };
 
 // Function to return the size of bits to load on AIE
-static constexpr unsigned MAX_BITS_LOAD_ON_AIE() {
+static constexpr unsigned maxBitsLoadOnAie() {
     return 256;
 };
 
+// Function to return the size of bytes to load on AIE
+static constexpr unsigned maxBytesLoadOnAie() {
+    return 32;
+};
+
 // Function to return the size of bits to load on AIE
-static constexpr unsigned MAX_BUFFER_LEN_ON_AIE_IN_BITS() {
+static constexpr unsigned maxBufferLenOnAieInTermsBits() {
     return 65536;
 }; // 8192bytes --> (8192*8) bits
+
+//**************************************************************************************//
+//****   STREAM Related traits which were used when TP_API=1 and AIE_VARIANT=1      ****//
+//**************************************************************************************//
+
+// Function to return the minNumOfPhases
+static constexpr unsigned minNumOfPhases() {
+    return 1;
+};
+
+// Function to return the maxNumOfPhases
+static constexpr unsigned maxNumOfPhases() {
+    return 16;
+};
+
+// Function to return the dataBuffLenFactor for stream based conv/corr on AIE-1
+static constexpr unsigned dataBuffLenFactor() {
+    return 4;
+};
+
+// Function to return the minDataBuffLen for stream based conv/corr on AIE-1
+static constexpr unsigned minDataBuffLen() {
+    return 16;
+};
+
+// Function to return the mulFactor2
+static constexpr unsigned mulFactor2() {
+    return 2;
+};
+
+// Function to return the memAlignmentBy32
+static constexpr unsigned memAlignmentBy32() {
+    return 32;
+};
+
+// Function to return the TP_COMPUTE_MODE_IS_VALID_MODE
+static constexpr unsigned TP_COMPUTE_MODE_IS_VALID_MODE() {
+    return 2;
+};
+
+// Function to return the TP_API_IS_ONE
+static constexpr unsigned TP_API_IS_ONE() {
+    return 1;
+};
+
+// Function to return the min. Length of G_Sig when Stream based processing happens
+static constexpr unsigned minLenOfG_Stream() {
+    return 8;
+};
+
+// Function to return the max. Length of G_Sig when Stream based processing happens
+static constexpr unsigned maxLenOfG_Stream() {
+    return 256;
+};
+
+// Function to return the maximum supported streams by AIE-1 is 2
+static constexpr unsigned maxNumOfStreams() {
+    return 2;
+};
+
+// Function to return the maximum supported streams by AIE-1 is 2
+static constexpr unsigned baseOffsetOfStream() {
+    return (0x3210u);
+};
+
+// Function to return the maximum supported streams by AIE-1 is 2
+static constexpr unsigned phase1OffsetOfStream() {
+    return (0x3210u);
+};
+
+// Function to return the maximum supported streams by AIE-1 is 2
+static constexpr unsigned phase2OffsetOfStream() {
+    return (0x3210u);
+};
+
+// Function to return the maximum supported streams by AIE-1 is 2
+static constexpr unsigned phase3OffsetOfStream() {
+    return (0x3210u);
+};
+
+// Function to return the Lanes of MAC4_ROT Intrinsic on AIE-1
+template <typename TT_DATA_F>
+INLINE_DECL constexpr unsigned int getLanesOfMac4RotIntrinsic() {
+    return 4;
+}; // defualt Lanes are 4
+
+template <>
+INLINE_DECL constexpr unsigned int getLanesOfMac4RotIntrinsic<cint16>() {
+    return 4;
+};
+
+// Function to return the Points of MAC4_ROT Intrinsic on AIE-1
+template <typename TT_DATA_F>
+INLINE_DECL constexpr unsigned int getPointsOfMac4RotIntrinsic() {
+    return 2;
+}; // defualt Points are 2
+
+template <>
+INLINE_DECL constexpr unsigned int getPointsOfMac4RotIntrinsic<cint16>() {
+    return 2;
+};
+
+// ************************************** ************ //
+// ****      END of stream related traits      ******* //
+// ************************************** ************ //
 
 // Function to return the default lanes based on choosen architecture
 template <typename TT_DATA_F, typename TT_DATA_G>
@@ -97,7 +200,7 @@ INLINE_DECL constexpr unsigned int aie_CC_Size() {
 
 // for io buffer cases
 // function to return the number of acc's lanes for a type combo
-#ifdef _SUPPORTS_DEVICE_AIE_1_
+#if (__HAS_ACCUM_PERMUTES__ == 1)
 template <>
 INLINE_DECL constexpr unsigned int aie_CC_NumLanes<int8, int8>() {
     return 16;
@@ -207,8 +310,8 @@ INLINE_DECL constexpr unsigned int aie_CC_NumMuls<cfloat, cfloat>() {
 
 #endif
 
-#ifdef _SUPPORTS_DEVICE_AIE_2_
-// _SUPPORTS_DEVICE_AIE_2_
+#if (__HAS_ACCUM_PERMUTES__ == 0)
+// AIE-2
 template <>
 INLINE_DECL constexpr unsigned int aie_CC_NumLanes<int8, int8>() {
     return 32;
@@ -277,7 +380,7 @@ INLINE_DECL constexpr unsigned int aie_CC_NumMuls<float, float>() {
 }; //
 template <>
 INLINE_DECL constexpr unsigned int aie_CC_NumMuls<bfloat16, bfloat16>() {
-    return 128;
+    return 16;
 }; //
 template <>
 INLINE_DECL constexpr unsigned int aie_CC_NumMuls<cint16, int16>() {
@@ -331,7 +434,7 @@ template <>
 INLINE_DECL constexpr unsigned int aie_CC_Fsample_Size<cfloat>() {
     return 64;
 }; //
-#ifdef _SUPPORTS_DEVICE_AIE_2_
+#if (__HAS_ACCUM_PERMUTES__ == 0)
 template <>
 INLINE_DECL constexpr unsigned int aie_CC_Fsample_Size<bfloat16>() {
     return 16;
@@ -367,7 +470,7 @@ template <>
 INLINE_DECL constexpr unsigned int aie_CC_Gsample_Size<cfloat>() {
     return 64;
 }; //
-#ifdef _SUPPORTS_DEVICE_AIE_2_
+#if (__HAS_ACCUM_PERMUTES__ == 0)
 template <>
 INLINE_DECL constexpr unsigned int aie_CC_Gsample_Size<bfloat16>() {
     return 16;
@@ -403,7 +506,7 @@ template <>
 INLINE_DECL constexpr unsigned int aie_CC_Size<cfloat>() {
     return 64;
 }; //
-#ifdef _SUPPORTS_DEVICE_AIE_2_
+#if (__HAS_ACCUM_PERMUTES__ == 0)
 template <>
 INLINE_DECL constexpr unsigned int aie_CC_Size<bfloat16>() {
     return 16;
@@ -499,26 +602,26 @@ INLINE_DECL constexpr unsigned int getLog2() {
 // Function to return the offset to move G Sig Pointer.
 template <typename TT_DATA_G, unsigned int TP_DATA_LEN_G>
 INLINE_DECL constexpr unsigned int getOffsetGsig() {
-    unsigned int G_Load = (MAX_BITS_LOAD_ON_AIE() / aie_CC_Gsample_Size<TT_DATA_G>());
+    unsigned int G_Load = (maxBitsLoadOnAie() / aie_CC_Gsample_Size<TT_DATA_G>());
     return ((TP_DATA_LEN_G / G_Load) - 1);
 };
 
 // Function to return Maximum supported length based on given DATA TYPE.
 template <typename TT_DATA>
 INLINE_DECL constexpr unsigned int getMaxLen() {
-    return ((MAX_BUFFER_LEN_ON_AIE_IN_BITS() / aie_CC_Size<TT_DATA>()));
+    return ((maxBufferLenOnAieInTermsBits() / aie_CC_Size<TT_DATA>()));
 };
 
 // Function to return Minimum supported length based on given DATA TYPE.
 template <typename TT_DATA>
 INLINE_DECL constexpr unsigned int getMinLen() {
-    return (((MAX_BITS_LOAD_ON_AIE() << 1) / aie_CC_Size<TT_DATA>()));
+    return (((maxBitsLoadOnAie() << 1) / aie_CC_Size<TT_DATA>()));
 };
 
 // Function to return true or false by checking given length is in range or not
 template <typename T_DATA, unsigned int TP_SIG_LEN>
 constexpr bool isLenInRange() {
-    unsigned int minDataLoad = (MAX_BITS_LOAD_ON_AIE() / aie_CC_Size<T_DATA>());
+    unsigned int minDataLoad = (maxBitsLoadOnAie() / aie_CC_Size<T_DATA>());
     bool check_len = 0;
 
     if ((TP_SIG_LEN >= getMinLen<T_DATA>()) && (TP_SIG_LEN <= getMaxLen<T_DATA>())) {
@@ -537,7 +640,7 @@ INLINE_DECL constexpr unsigned int getPaddedLength() {
     unsigned int PaddedLength = 0;
     unsigned int lanes = aie_CC_NumLanes<TT_DATA_F, TT_DATA_G>();
     unsigned int Data_Samples = aie_CC_Fsample_Size<TT_DATA_F>();
-    unsigned int data_Load = MAX_BITS_LOAD_ON_AIE() / Data_Samples;
+    unsigned int data_Load = maxBitsLoadOnAie() / Data_Samples;
 
     if (compute_mode == 0) // Full
     {
@@ -619,6 +722,10 @@ INLINE_DECL constexpr bool fnCheckDataOutType<cint16, int16, cint32>() {
 };
 template <>
 INLINE_DECL constexpr bool fnCheckDataOutType<cint16, int32, cint32>() {
+    return true;
+};
+template <>
+INLINE_DECL constexpr bool fnCheckDataOutType<cint16, cint16, cint16>() {
     return true;
 };
 template <>
@@ -726,7 +833,7 @@ template <>
 INLINE_DECL constexpr bool fnCheckDataOutType<cfloat, cfloat, float>() {
     return false;
 };
-#ifdef _SUPPORTS_DEVICE_AIE_2_
+#if (__HAS_ACCUM_PERMUTES__ == 0)
 template <>
 INLINE_DECL constexpr bool fnCheckDataOutType<bfloat16, bfloat16, float>() {
     return true;
@@ -737,7 +844,7 @@ template <typename TT_DATA_F, typename TT_DATA_G>
 INLINE_DECL constexpr bool fnCheckDataTypesOfInputs() {
     return false;
 };
-#ifdef _SUPPORTS_DEVICE_AIE_1_
+#if (__HAS_ACCUM_PERMUTES__ == 1)
 template <>
 INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<int8, int8>() {
     return false;
@@ -792,7 +899,7 @@ INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<cfloat, cfloat>() {
 };
 #endif
 
-#ifdef _SUPPORTS_DEVICE_AIE_2_
+#if (__HAS_ACCUM_PERMUTES__ == 0)
 template <>
 INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<int8, int8>() {
     return true;
@@ -848,16 +955,148 @@ INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<cfloat, cfloat>() {
 #endif
 
 // Configuration Defensive check function to check TT_OUT is complex if any one input is complex
+template <typename TT_DATA_F, typename TT_DATA_G, unsigned int TP_API>
+INLINE_DECL constexpr bool fnCheckInputDataTypes() {
+    bool isDataTypeSupported = false;
+    if (TP_API == 1) {
+        if ((std::is_same<TT_DATA_F, cint16>::value) && (std::is_same<TT_DATA_G, cint16>::value)) {
+            isDataTypeSupported = true;
+        }
+    } else {
+        isDataTypeSupported = (fnCheckDataTypesOfInputs<TT_DATA_F, TT_DATA_G>() ? 1 : 0);
+    }
+    return isDataTypeSupported;
+}
+
+// Configuration Defensive check function to check TT_OUT is complex if any one input is complex
 template <typename TT_DATA_F, typename TT_DATA_G, typename TT_DATA_OUT>
 INLINE_DECL constexpr bool fnCheckDataTypeOfOutput() {
     return (fnCheckDataOutType<TT_DATA_F, TT_DATA_G, TT_DATA_OUT>() ? 1 : 0);
 }
 
 // Configuration Defensive check function to check Length of F Signal and G Signal
-template <typename TT_DATA, unsigned int TP_SIG_LEN>
+template <typename TT_DATA, unsigned int TP_SIG_LEN, unsigned int TP_API>
 INLINE_DECL constexpr bool fnCheckLenOfData() {
-    return (isLenInRange<TT_DATA, TP_SIG_LEN>() ? 1 : 0);
+    if (TP_API == 1) {
+        return true;
+    } else {
+        return (isLenInRange<TT_DATA, TP_SIG_LEN>() ? 1 : 0);
+    }
 }
+
+// Configuration Defensive check function to check whether strem process supported by AIE-1 or AIE-2
+template <unsigned int TP_API>
+INLINE_DECL constexpr bool fnCheckIsStreamSupportedbyArch() {
+    if (TP_API == 1) {
+#if (__HAS_ACCUM_PERMUTES__ == 1)
+        return true;
+#elif (__HAS_ACCUM_PERMUTES__ == 0)
+        return false;
+#endif
+    } else {
+        return true;
+    }
+};
+
+// Function which return true or false if Given Number is power of 2 or not
+template <unsigned int TP_DATA>
+INLINE_DECL constexpr bool isPowerOfTwo() {
+    return (((TP_DATA) && !(TP_DATA & (TP_DATA - 1))) ? 1 : 0);
+};
+
+// Configuration Defensive check function to check Num_Phases which should be power of 2
+template <unsigned int G_Len, unsigned int Casc_Len, unsigned int Num_Phases, unsigned int TP_API>
+INLINE_DECL constexpr bool fnCheckPhases() {
+    bool isphasesValid = 0;
+    if (TP_API == 1 && Num_Phases <= maxNumOfPhases() && isPowerOfTwo<Num_Phases>()) {
+        if ((Casc_Len == (G_Len >> (mulFactor2() + 1))) && (Num_Phases > 1)) {
+            isphasesValid = 1;
+        } else {
+            if (Num_Phases == 1) {
+                isphasesValid = 1;
+            }
+        }
+
+    } else {
+        if (TP_API == 0) {
+            if (Num_Phases == 1) {
+                isphasesValid = 1;
+            }
+        }
+    }
+    return isphasesValid;
+};
+
+// Configuration Defensive check function to check whether COMPUTE_MODE is VALID or not for stream processing
+template <unsigned int compute_mode, unsigned int TP_API>
+INLINE_DECL constexpr bool fnCheckIsComputeModeValid() {
+    bool isItValid = 1;
+
+    if ((TP_API == 1) && (compute_mode != TP_COMPUTE_MODE_IS_VALID_MODE())) {
+        isItValid = 0;
+    } else {
+        if (compute_mode > TP_COMPUTE_MODE_IS_VALID_MODE()) {
+            isItValid = 0;
+        }
+    }
+    return isItValid;
+};
+
+// Configuration Defensive check function to check Length of G Signal should be multiple
+// of ((phases*lanes)*(Points/streams_per_core)) when stream processing happening
+template <typename TT_DATA_F, unsigned int F_Len, unsigned int G_Len, unsigned int Num_Phases, unsigned int TP_API>
+INLINE_DECL constexpr bool fnCheckGLen() {
+    bool isLenOfGvalid = 1;
+    unsigned int lanes = getLanesOfMac4RotIntrinsic<TT_DATA_F>();
+    unsigned int points = getPointsOfMac4RotIntrinsic<TT_DATA_F>();
+    unsigned int muls = (lanes * points);
+    unsigned int streampercore_var = ((muls * Num_Phases) >> 1);
+    unsigned int streams_per_core = (G_Len > streampercore_var) ? 1 : maxNumOfStreams();
+    unsigned int value = (Num_Phases * lanes * (points / streams_per_core));
+
+    if (TP_API == 1) {
+        if ((G_Len > F_Len) && (!(G_Len >= minLenOfG_Stream() && G_Len <= maxLenOfG_Stream()))) {
+            isLenOfGvalid = 0;
+
+        } else {
+            if ((G_Len > F_Len) && (G_Len < (Num_Phases << mulFactor2()))) {
+                isLenOfGvalid = 0;
+
+            } else if (G_Len > (Num_Phases << mulFactor2())) {
+                if ((G_Len > F_Len) && (G_Len % (Num_Phases << (mulFactor2() + 1)) != 0)) {
+                    isLenOfGvalid = 0;
+                }
+            }
+        }
+    } else // Check for G_Len when TP_API = 0 (I/O BUFFER)
+    {
+        if (G_Len > F_Len) // G_Len <= F_Len
+        {
+            isLenOfGvalid = 0;
+        }
+    }
+
+    return isLenOfGvalid;
+};
+
+//  Configuration Defensive check function to check whether Glen/casc_len should be multiple of lanes*points
+template <unsigned int G_Len, unsigned int Casc_Len, unsigned int Num_Phases, unsigned int TP_API>
+INLINE_DECL constexpr bool fnCheckCascLen() {
+    bool isCascLenValid = 0;
+    unsigned int gLendivideby8 = (G_Len >> (mulFactor2() + 1));                 // 1 GSPS
+    unsigned int gLendivideby16 = (G_Len >> (mulFactor2() + mulFactor2()));     // 500 MSPS
+    unsigned int gLendivideby32 = (G_Len >> (mulFactor2() + mulFactor2() + 1)); // 256 MSPS
+
+    if (TP_API == 1) {
+        if ((Casc_Len == gLendivideby8) || (Casc_Len == gLendivideby16) || (Casc_Len == gLendivideby32)) {
+            isCascLenValid = 1;
+        }
+    } else {
+        isCascLenValid = 1;
+    }
+
+    return isCascLenValid;
+};
 
 } // namespace conv_corr {
 } // namespace aie {

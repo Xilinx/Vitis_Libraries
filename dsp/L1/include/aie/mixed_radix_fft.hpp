@@ -65,7 +65,8 @@ template <typename TT_IN_DATA,
           unsigned int TP_SAT,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK>
+          unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE>
 class kernel_MixedRadixFFTClass {
    private:
 #if __FFT_R4_IMPL__ == 0
@@ -75,7 +76,15 @@ class kernel_MixedRadixFFTClass {
     static constexpr int kMinPtSizeGranularity = 16; // AIE-ML is not supported yet, but this will apply when it does
 #endif                                               //__FFT_R4_IMPL__
     // Parameter value defensive and legality checks
-    static_assert(std::is_same<TT_TWIDDLE, cint16>::value, "ERROR: only TT_TWIDDLE=cint16 is currently supported.");
+    static_assert(std::is_same<TT_TWIDDLE, cint16>::value || std::is_same<TT_TWIDDLE, cint32>::value ||
+                      std::is_same<TT_TWIDDLE, cfloat>::value,
+                  "ERROR: TT_TWIDDLE type unrecognised. Must be cint16, cint32 or cfloat");
+    static_assert((std::is_same<TT_IN_DATA, cint16>::value && std::is_same<TT_TWIDDLE, cint16>::value) ||
+                      (std::is_same<TT_IN_DATA, cint32>::value && std::is_same<TT_TWIDDLE, cint16>::value) ||
+                      (std::is_same<TT_IN_DATA, cint32>::value && std::is_same<TT_TWIDDLE, cint32>::value) ||
+                      (std::is_same<TT_IN_DATA, cfloat>::value && std::is_same<TT_TWIDDLE, cfloat>::value),
+                  "ERROR: TT_DATA/TT_TWIDDLE combination is illegal. Must be cint16/cint16, cint32/cint16, "
+                  "cint32/cint32 or cfloat/cfloat");
     static_assert(TP_FFT_NIFFT == 0 || TP_FFT_NIFFT == 1, "ERROR: TP_FFT_NIFFT must be 0 (reverse) or 1 (forward)");
     static_assert(TP_SHIFT >= 0 && TP_SHIFT <= 60, "ERROR: TP_SHIFT is out of range (0 to 60)");
     static_assert(TP_POINT_SIZE % kMinPtSizeGranularity == 0,
@@ -83,14 +92,14 @@ class kernel_MixedRadixFFTClass {
     static_assert(TP_SAT == 0 || TP_SAT == 1 || TP_SAT == 3, "ERROR: unsupported value of TP_SAT");
     static_assert(TP_WINDOW_VSIZE % TP_POINT_SIZE == 0, "ERROR: TP_WINDOW_VSIZE must be a multiple of TP_POINT_SIZE");
 
-    static constexpr int m_kR5Stages = fnGetNumStages<TP_POINT_SIZE, 5>();
-    static constexpr int m_kR3Stages = fnGetNumStages<TP_POINT_SIZE, 3>();
-    static constexpr int m_kR4Stages = fnGetNumStages<TP_POINT_SIZE, 4>();
-    static constexpr int m_kR2Stages = fnGetNumStages<(TP_POINT_SIZE >> (2 * m_kR4Stages)), 2>();
-    static constexpr int m_kR5factor = fnGetRadixFactor<TP_POINT_SIZE, 5>();
-    static constexpr int m_kR3factor = fnGetRadixFactor<TP_POINT_SIZE, 3>();
-    static constexpr int m_kR4factor = fnGetRadixFactor<TP_POINT_SIZE, 4>();
-    static constexpr int m_kR2factor = fnGetRadixFactor<(TP_POINT_SIZE >> (2 * m_kR4Stages)), 2>();
+    static constexpr int m_kR5Stages = fnGetNumStages<TP_POINT_SIZE, 5, TT_TWIDDLE>();
+    static constexpr int m_kR3Stages = fnGetNumStages<TP_POINT_SIZE, 3, TT_TWIDDLE>();
+    static constexpr int m_kR4Stages = fnGetNumStages<TP_POINT_SIZE, 4, TT_TWIDDLE>();
+    static constexpr int m_kR2Stages = fnGetNumStages<(TP_POINT_SIZE >> (2 * m_kR4Stages)), 2, TT_TWIDDLE>();
+    static constexpr int m_kR5factor = fnGetRadixFactor<TP_POINT_SIZE, 5, TT_TWIDDLE>();
+    static constexpr int m_kR3factor = fnGetRadixFactor<TP_POINT_SIZE, 3, TT_TWIDDLE>();
+    static constexpr int m_kR4factor = fnGetRadixFactor<TP_POINT_SIZE, 4, TT_TWIDDLE>();
+    static constexpr int m_kR2factor = fnGetRadixFactor<(TP_POINT_SIZE >> (2 * m_kR4Stages)), 2, TT_TWIDDLE>();
 
     static_assert(m_kR5Stages >= 0 && m_kR5Stages <= 3, "Error: unsupported number of radix5 stages");
     static_assert(m_kR3Stages >= 0 && m_kR3Stages <= 5, "Error: unsupported number of radix3 stages");
@@ -128,6 +137,57 @@ class kernel_MixedRadixFFTClass {
 };
 
 //-----------------------------------------------------------------------------------------------------
+// Dynamic Base class
+template <typename TT_IN_DATA,
+          typename TT_OUT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_START_RANK,
+          unsigned int TP_END_RANK>
+class kernel_MixedRadixFFTClass<TT_IN_DATA,
+                                TT_OUT_DATA,
+                                TT_TWIDDLE,
+                                TP_POINT_SIZE,
+                                TP_FFT_NIFFT,
+                                TP_SHIFT,
+                                TP_RND,
+                                TP_SAT,
+                                TP_WINDOW_VSIZE,
+                                TP_START_RANK,
+                                TP_END_RANK,
+                                1> {
+   private:
+    typedef typename std::conditional<std::is_same<TT_IN_DATA, cint16>::value, cint32_t, TT_IN_DATA>::type
+        T_internalDataType;
+    T_internalDataType (&m_tmpBuff0)[TP_POINT_SIZE];
+    T_internalDataType (&m_tmpBuff1)[TP_POINT_SIZE];
+
+   public:
+    // Constructor
+    kernel_MixedRadixFFTClass(T_internalDataType (&tmpBuff0)[TP_POINT_SIZE],
+                              T_internalDataType (&tmpBuff1)[TP_POINT_SIZE])
+        : // Initializer list
+          m_tmpBuff0(tmpBuff0),
+          m_tmpBuff1(tmpBuff1) {}
+
+    static constexpr int16 kVectorSize = kNumAncillaryPerRow;
+
+    // MIXED_RADIX_FFT
+    void dynamicSingleFrame(TT_IN_DATA* inFrameStart,
+                            TT_TWIDDLE* twiddleInFrameStart,
+                            TT_OUT_DATA* outFrameStart,
+                            std::array<T_ancillaryFields, kVectorSize> headerData); // twiddleInFrameStart ?
+    void kernelMixedRadixFFTmain(input_buffer<TT_IN_DATA>* inWindow,
+                                 input_buffer<TT_TWIDDLE>* twInWindow,
+                                 output_buffer<TT_OUT_DATA>* outWindow);
+};
+
+//-----------------------------------------------------------------------------------------------------
 // Cascade layer class and specializations
 
 //-----------------------------------------------------------------------------------------------------
@@ -144,7 +204,8 @@ template <typename TT_IN_DATA,
           unsigned int TP_SAT,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK>
+          unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE>
 class mixed_radix_fft : public kernel_MixedRadixFFTClass<TT_IN_DATA,
                                                          TT_OUT_DATA,
                                                          TT_TWIDDLE,
@@ -155,16 +216,17 @@ class mixed_radix_fft : public kernel_MixedRadixFFTClass<TT_IN_DATA,
                                                          TP_SAT,
                                                          TP_WINDOW_VSIZE,
                                                          TP_START_RANK,
-                                                         TP_END_RANK> {
+                                                         TP_END_RANK,
+                                                         TP_DYN_PT_SIZE> {
    private:
-    static constexpr int m_kR5Stages = fnGetNumStages<TP_POINT_SIZE, 5>();
-    static constexpr int m_kR3Stages = fnGetNumStages<TP_POINT_SIZE, 3>();
-    static constexpr int m_kR4Stages = fnGetNumStages<TP_POINT_SIZE, 4>();
-    static constexpr int m_kR2Stages = fnGetNumStages<(TP_POINT_SIZE >> (2 * m_kR4Stages)), 2>();
-    static constexpr int m_kR5factor = fnGetRadixFactor<TP_POINT_SIZE, 5>();
-    static constexpr int m_kR3factor = fnGetRadixFactor<TP_POINT_SIZE, 3>();
-    static constexpr int m_kR4factor = fnGetRadixFactor<TP_POINT_SIZE, 4>();
-    static constexpr int m_kR2factor = fnGetRadixFactor<(TP_POINT_SIZE >> (2 * m_kR4Stages)), 2>();
+    static constexpr int m_kR5Stages = fnGetNumStages<TP_POINT_SIZE, 5, TT_TWIDDLE>();
+    static constexpr int m_kR3Stages = fnGetNumStages<TP_POINT_SIZE, 3, TT_TWIDDLE>();
+    static constexpr int m_kR4Stages = fnGetNumStages<TP_POINT_SIZE, 4, TT_TWIDDLE>();
+    static constexpr int m_kR2Stages = fnGetNumStages<(TP_POINT_SIZE >> (2 * m_kR4Stages)), 2, TT_TWIDDLE>();
+    static constexpr int m_kR5factor = fnGetRadixFactor<TP_POINT_SIZE, 5, TT_TWIDDLE>();
+    static constexpr int m_kR3factor = fnGetRadixFactor<TP_POINT_SIZE, 3, TT_TWIDDLE>();
+    static constexpr int m_kR4factor = fnGetRadixFactor<TP_POINT_SIZE, 4, TT_TWIDDLE>();
+    static constexpr int m_kR2factor = fnGetRadixFactor<(TP_POINT_SIZE >> (2 * m_kR4Stages)), 2, TT_TWIDDLE>();
 
     static constexpr int m_kTotalStages = m_kR5Stages + m_kR3Stages + m_kR2Stages + m_kR4Stages;
     static constexpr int m_ktwiddleTableSize = fnGetTwiddleTableSize<TT_TWIDDLE, TP_POINT_SIZE>();
@@ -189,7 +251,8 @@ class mixed_radix_fft : public kernel_MixedRadixFFTClass<TT_IN_DATA,
                                                       TP_SAT,
                                                       TP_WINDOW_VSIZE,
                                                       TP_START_RANK,
-                                                      TP_END_RANK>;
+                                                      TP_END_RANK,
+                                                      TP_DYN_PT_SIZE>;
     mixed_radix_fft(T_internalDataType (&tmpBuff0)[TP_POINT_SIZE],
                     T_internalDataType (&tmpBuff1)[TP_POINT_SIZE],
                     TT_TWIDDLE (&twiddleTable)[m_ktwiddleTableSize],
@@ -211,6 +274,79 @@ class mixed_radix_fft : public kernel_MixedRadixFFTClass<TT_IN_DATA,
     }
     // MIXED_RADIX_FFT
     void mixed_radix_fftMain(input_buffer<TT_IN_DATA>& __restrict inWindow,
+                             output_buffer<TT_OUT_DATA>& __restrict outWindow);
+};
+
+template <typename TT_IN_DATA,
+          typename TT_OUT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_START_RANK,
+          unsigned int TP_END_RANK>
+class mixed_radix_fft<TT_IN_DATA,
+                      TT_OUT_DATA,
+                      TT_TWIDDLE,
+                      TP_POINT_SIZE,
+                      TP_FFT_NIFFT,
+                      TP_SHIFT,
+                      TP_RND,
+                      TP_SAT,
+                      TP_WINDOW_VSIZE,
+                      TP_START_RANK,
+                      TP_END_RANK,
+                      1> : public kernel_MixedRadixFFTClass<TT_IN_DATA,
+                                                            TT_OUT_DATA,
+                                                            TT_TWIDDLE,
+                                                            TP_POINT_SIZE,
+                                                            TP_FFT_NIFFT,
+                                                            TP_SHIFT,
+                                                            TP_RND,
+                                                            TP_SAT,
+                                                            TP_WINDOW_VSIZE,
+                                                            TP_START_RANK,
+                                                            TP_END_RANK,
+                                                            1> {
+   private:
+    typedef typename std::conditional<std::is_same<TT_IN_DATA, cint16>::value, cint16_t, TT_IN_DATA>::type
+        T_internalDataType;
+    T_internalDataType (&m_tmpBuff0)[TP_POINT_SIZE];
+    T_internalDataType (&m_tmpBuff1)[TP_POINT_SIZE];
+
+   public:
+    // Constructor
+    using thisKernelClass = kernel_MixedRadixFFTClass<TT_IN_DATA,
+                                                      TT_OUT_DATA,
+                                                      TT_TWIDDLE,
+                                                      TP_POINT_SIZE,
+                                                      TP_FFT_NIFFT,
+                                                      TP_SHIFT,
+                                                      TP_RND,
+                                                      TP_SAT,
+                                                      TP_WINDOW_VSIZE,
+                                                      TP_START_RANK,
+                                                      TP_END_RANK,
+                                                      1>;
+    mixed_radix_fft(T_internalDataType (&tmpBuff0)[TP_POINT_SIZE],
+                    T_internalDataType (&tmpBuff1)[TP_POINT_SIZE])
+        : // Initializer list
+          m_tmpBuff0(tmpBuff0),
+          m_tmpBuff1(tmpBuff1),
+          thisKernelClass(tmpBuff0, tmpBuff1) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(mixed_radix_fft::mixed_radix_fftMain);
+        REGISTER_PARAMETER(m_tmpBuff0);
+        REGISTER_PARAMETER(m_tmpBuff1);
+    }
+    // MIXED_RADIX_FFT
+    void mixed_radix_fftMain(input_buffer<TT_IN_DATA>& __restrict inWindow,
+                             input_buffer<TT_TWIDDLE>& __restrict twInWindow,
                              output_buffer<TT_OUT_DATA>& __restrict outWindow);
 };
 }

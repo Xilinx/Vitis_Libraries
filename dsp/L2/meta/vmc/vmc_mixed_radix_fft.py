@@ -3,9 +3,11 @@ import json
 
 #### VMC validators ####
 def vmc_validate_point_size(args):
-    point_size = args["point_size"]
     aie_variant = args["AIE_VARIANT"]
-    return fn_validate_point_size(point_size, aie_variant)
+    data_type = args["data_type"]
+    point_size = args["point_size"]
+    dyn_pt_size = args["dyn_pt_size"]
+    return fn_validate_point_size(aie_variant, data_type, point_size, dyn_pt_size)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]
@@ -13,28 +15,35 @@ def vmc_validate_shift_val(args):
     return fn_validate_shift(data_type, shift_val)
 
 def vmc_validate_input_window_size(args):
+    aie_variant = args["AIE_VARIANT"]
+    data_type = args["data_type"]
     point_size = args["point_size"]
     input_window_size = args["input_window_size"]
-    return fn_validate_window_vsize(point_size, input_window_size)
+    return fn_validate_window_vsize(aie_variant, data_type, point_size, input_window_size)
+
+def vmc_validate_dyn_pt_size(args):
+    dyn_pt_size = args["dyn_pt_size"]
+    return fn_validate_dyn_pt_size(dyn_pt_size)
 
 def vmc_validate_casc_length(args):
     point_size = args["point_size"]
     casc_length = args["casc_length"]
-    return fn_validate_casc_len(point_size, casc_length)
+    dyn_pt_size = args["dyn_pt_size"]
+    return fn_validate_casc_len(casc_length, point_size, dyn_pt_size)
 
-def vmc_validate_TP_RND(args):
+def vmc_validate_rnd_mode(args):
   rnd_mode = args["rnd_mode"]
   aie_variant = args["AIE_VARIANT"]
-  return fn_validate_rnd(rnd_mode, aie_variant)
+  return fn_validate_rnd(aie_variant, rnd_mode)
 
 def vmc_validate_sat_mode(args):
     sat_mode = args["sat_mode"]
-    return fn_validate_sat(sat_mode);
+    return fn_validate_sat(sat_mode)
 
 def vmc_validate_twiddle_type(args):
     data_type = args["data_type"]
     twiddle_type = args["twiddle_type"]
-    return fn_validate_twiddle_type(data_type, twiddle_type)
+    return fn_validate_twiddle_type(twiddle_type, data_type)
 
 
 #### VMC graph generator ####
@@ -45,6 +54,7 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_POINT_SIZE"] = args["point_size"]
     tmpargs["TP_SHIFT"] = args["shift_val"]
     tmpargs["TP_WINDOW_VSIZE"] = args["input_window_size"]
+    tmpargs["TP_DYN_PT_SIZE"] = args["dyn_pt_size"]
     tmpargs["TP_CASC_LEN"] = args["casc_length"]
     tmpargs["TP_API"] = 0
     tmpargs["TP_FFT_NIFFT"] = 1

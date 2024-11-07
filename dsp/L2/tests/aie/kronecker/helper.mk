@@ -49,9 +49,9 @@ create_input:
 	@echo LOC_INPUT_FILE_A $(LOC_INPUT_FILE_A)
 	@echo LOC_INPUT_FILE_B $(LOC_INPUT_FILE_B)
 
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(WINDOW_VSIZE_A) $(NITER) $(SEED) $(STIM_TYPE) 0 0 $(T_DATA_A) $(API_IO) 1 0 ;\
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(WINDOW_VSIZE_B) $(NITER) $(SEED) $(STIM_TYPE) 0 0 $(T_DATA_B) $(API_IO) 1 0 ;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -file $(LOC_INPUT_FILE_A) --rows $(DIM_A_SIZE) --cols 1 --ssrSplit $(UUT_SSR) --casc $(CASC_LEN) --split -type $(T_DATA_A) --NITER $(NITER); 
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(WINDOW_VSIZE_A) $(NITER) $(SEED) $(STIM_TYPE) 0 0 $(T_DATA_A) $(API_IO) 1 0 0 0 0 0 64 ;\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(WINDOW_VSIZE_B) $(NITER) $(SEED) $(STIM_TYPE) 0 0 $(T_DATA_B) $(API_IO) 1 0 0 0 0 0 64 ;\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -file $(LOC_INPUT_FILE_A) --rows $(DIM_A_SIZE) --cols 1 --ssrSplit $(UUT_SSR) --casc $(CASC_LEN) --split -type $(T_DATA_A) --NITER $(NITER) --plioWidth 64 
 
 	echo Input ready
 
@@ -76,7 +76,7 @@ prep_aie_out:
 	done
 
 get_diff:
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -f ./data/uut_output.txt --rows $(DIM_OUT_SIZE) --cols 1 --ssrSplit $(UUT_SSR) --casc $(CASC_LEN) --zip -type $(T_DATA_A) -findOutType $(T_DATA_B) -n $(NITER);\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -f ./data/uut_output.txt --rows $(DIM_OUT_SIZE) --cols 1 --ssrSplit $(UUT_SSR) --casc $(CASC_LEN) --zip -type $(T_DATA_A) -findOutType $(T_DATA_B) -n $(NITER) --plioWidth 64;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)
 
 get_status:
@@ -96,6 +96,3 @@ create_config:
 	echo $(STATUS_FILE)
 	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP)
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP)
-
-get_qor:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_kronecker_theoretical_min.tcl $(T_DATA_A) $(T_DATA_B) $(DIM_OUT_SIZE) $(STATUS_FILE) $(UUT_KERNEL) $(API_IO)

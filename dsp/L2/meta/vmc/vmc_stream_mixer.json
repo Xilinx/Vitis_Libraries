@@ -28,7 +28,7 @@
       "validator": {
         "file": "vmc_stream_mixer.py",
         "function": "vmc_validate_output_window_size",
-        "args": ["data_type"]
+        "args": ["data_type", "ssr"]
       },
             "label": "Input frame size (Number of Samples):",
             "tablabel": "Main",
@@ -78,9 +78,9 @@
       "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
       "default": 0,
       "validator": {
-          "file": "vmc_fft_common.py",
+          "file": "vmc_mixer.py",
           "function": "vmc_validate_sat_mode",
-          "args": []
+          "args": ["mixer_mode"]
         },
             "label": "Saturation mode:",
             "tablabel": "Main",

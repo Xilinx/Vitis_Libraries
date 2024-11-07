@@ -742,7 +742,7 @@
         "DATA_SEED": "1",
         "DUMP_VCD": "0"
     },
-    "int32_int16_256_2_14_0_4_4_1_2_16_1_0_1_0_0_aie2_x86sim_checkin": {
+    "int32_int16_256_2_14_0_4_8_1_2_16_1_0_1_0_0_aie2_x86sim_checkin": {
         "T_DATA_A": "int32",
         "T_DATA_B": "int16",
         "DIM_SIZE": "256",
@@ -750,7 +750,7 @@
         "SHIFT": "14",
         "API_IO": "0",
         "UUT_SSR": "4",
-        "ROUND_MODE": "4",
+        "ROUND_MODE": "8",
         "SAT_MODE": "1",
         "STIM_TYPE": "0",
         "AIE_VARIANT": "2",
@@ -778,7 +778,7 @@
         "DATA_SEED": "1",
         "DUMP_VCD": "0"
     },
-    "int32_int16_256_1_14_0_1_7_1_2_16_1_0_1_0_0_aie2_hw_checkin": {
+    "int32_int16_256_1_14_0_1_11_1_2_16_1_0_1_0_0_aie2_hw_checkin": {
         "T_DATA_A": "int32",
         "T_DATA_B": "int16",
         "DIM_SIZE": "256",
@@ -786,7 +786,7 @@
         "SHIFT": "14",
         "API_IO": "0",
         "UUT_SSR": "1",
-        "ROUND_MODE": "7",
+        "ROUND_MODE": "11",
         "SAT_MODE": "1",
         "STIM_TYPE": "0",
         "AIE_VARIANT": "2",

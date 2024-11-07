@@ -3,6 +3,7 @@
     "outdir": "./xmc_aie_lib/FFT_Dynamic_Point_fe3e094c",
     "parameters": {
         "data_type": "cint16",
+        "data_out_type": "cint16",
         "twiddle_type": "cint16",
         "point_size": 64,
         "input_window_size": 64,
@@ -11,6 +12,7 @@
         "sat_mode": 0,
         "twiddle_mode": 0,
         "use_ssr_widget_kernels": false,
+        "ssr": 1,
         "casc_length": 1,
         "AIE_VARIANT": 1
     }

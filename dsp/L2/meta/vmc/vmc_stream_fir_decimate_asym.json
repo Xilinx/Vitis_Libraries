@@ -79,7 +79,7 @@
       "validator": {
         "file": "vmc_stream_fir_decimate_asym.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "decimate_factor", "ssr", "deci_poly","AIE_VARIANT"]
+        "args": ["use_coeff_reload", "coef_type" ,"fir_length"]
       },
           "label": "Filter coefficients:",
             "tablabel": "Main",
@@ -102,7 +102,7 @@
       "validator": {
         "file": "vmc_stream_fir_decimate_asym.py",
         "function": "vmc_validate_decimate_factor",
-        "args": ["data_type", "coef_type", "AIE_VARIANT"]
+        "args": ["AIE_VARIANT", "coeff", "use_coeff_reload", "coef_type"]
       },
             "label": "Decimation factor:",
             "tablabel": "Main",
@@ -116,7 +116,7 @@
       "validator": {
         "file": "vmc_stream_fir_decimate_asym.py",
         "function": "vmc_validate_input_window_size",
-        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "decimate_factor", "ssr", "deci_poly"]
+        "args": ["AIE_VARIANT", "data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "decimate_factor", "ssr", "deci_poly"]
       },
             "label": "Input frame size (Number of samples):",
             "tablabel": "Main",
@@ -174,7 +174,7 @@
       "validator": {
         "file": "vmc_stream_fir_decimate_asym.py",
         "function": "vmc_validate_ssr",
-        "args": ["decimate_factor", "deci_poly", "AIE_VARIANT"]
+        "args": ["AIE_VARIANT", "data_type", "coef_type", "use_coeff_reload", "fir_length", "decimate_factor", "coeff"]
       },
             "label": "SSR: ",
             "tablabel": "Main",
@@ -188,7 +188,7 @@
       "validator": {
         "file": "vmc_stream_fir_decimate_asym.py",
         "function": "vmc_validate_decimate_poly",
-        "args": []
+        "args": ["data_type", "coef_type", "decimate_factor", "AIE_VARIANT"]
       },
             "label": "Number of decimator polyphases:",
             "tablabel": "Main",
@@ -202,7 +202,7 @@
       "validator": {
         "file": "vmc_stream_fir_decimate_asym.py",
         "function": "vmc_validate_casc_length",
-        "args": ["use_coeff_reload", "fir_length"]
+        "args": ["AIE_VARIANT", "data_type", "coef_type", "use_coeff_reload", "fir_length", "ssr", "decimate_factor", "coeff"]
       },
             "label": "Number of cascade stages:",
             "tablabel": "Main",

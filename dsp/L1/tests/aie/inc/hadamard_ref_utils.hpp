@@ -21,16 +21,16 @@
 #include "aie_api/utils.hpp" // for vector print function
 #include "device_defs.h"
 #include "fir_ref_utils.hpp"
-#include "mul_ref_out_type.hpp"
-#include "mul_ref_acc_type.hpp"
+#include "single_mul_ref_out_types.hpp"
+#include "single_mul_ref_acc_types.hpp"
 
 // determine the output type depending on the input type combinations
 template <typename TT_A, typename TT_B>
 struct vectByte {
-    unsigned val_byteA = sizeof(out_mul_type<TT_A, TT_B>);
-    unsigned val_byteB = sizeof(out_mul_type<TT_A, TT_B>);
-    unsigned val_byteOut = sizeof(out_mul_type<TT_A, TT_B>);
-    unsigned val_byteBuffWin = sizeof(out_mul_type<TT_A, TT_B>);
+    unsigned val_byteA = sizeof(outTypeMult_t<TT_A, TT_B>);
+    unsigned val_byteB = sizeof(outTypeMult_t<TT_A, TT_B>);
+    unsigned val_byteOut = sizeof(outTypeMult_t<TT_A, TT_B>);
+    unsigned val_byteBuffWin = sizeof(outTypeMult_t<TT_A, TT_B>);
     unsigned val_byteBuffStream = ::std::min(sizeof(TT_A), sizeof(TT_B));
     unsigned int kCaptureDataA = 1;
     unsigned int kCaptureDataB = 1;

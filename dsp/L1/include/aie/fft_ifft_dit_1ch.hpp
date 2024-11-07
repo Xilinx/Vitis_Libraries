@@ -262,7 +262,6 @@ class fft_ifft_dit_1ch_legality {
     static_assert(TP_SAT >= SAT_MODE_MIN && TP_SAT <= SAT_MODE_MAX && TP_SAT != 2,
                   "ERROR: TP_SAT is out of supported range");
     static_assert(TP_SAT != 2, "ERROR: TP_SAT is invalid. Valid values of TP_SAT are 0, 1, and 3");
-    static_assert(TP_RND >= ROUND_MIN && TP_RND <= ROUND_MAX, "ERROR: TP_RND is out of the supported range.");
     static_assert(TP_TWIDDLE_MODE >= 0 && TP_TWIDDLE_MODE <= 1,
                   "ERROR: TP_TWIDDLE_MODE is out of the supported range.");
 };

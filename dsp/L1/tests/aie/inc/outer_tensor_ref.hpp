@@ -77,7 +77,7 @@ class outer_tensor_ref : public outer_tensor_ref_base<TT_DATA_A,
                                                       TP_SAT> {
    private:
    public:
-    using TT_OUT = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
 
     // Constructor
     outer_tensor_ref() {}
@@ -87,7 +87,7 @@ class outer_tensor_ref : public outer_tensor_ref_base<TT_DATA_A,
 
     void outer_tensor_main(input_buffer<TT_DATA_A>& inWindow0,
                            input_buffer<TT_DATA_B>& inWindow1,
-                           output_buffer<TT_OUT>& outWindow0);
+                           output_buffer<out_t>& outWindow0);
 };
 }
 }

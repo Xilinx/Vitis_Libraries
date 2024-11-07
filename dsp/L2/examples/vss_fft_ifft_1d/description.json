@@ -1,0 +1,45 @@
+{
+    "name": "Xilinx DSPLIB VSS FFT IFFT 1CH",
+    "description": "",
+    "gui": false,
+    "flow": "system",
+    "platform_allowlist": [
+        "vck190"
+    ],
+    "pre_build": [
+        {
+            "build_cmd": "$(make -f example.mk all PLATFORM=$PLATFORM DSPLIB_ROOT_DIR=LIB_DIR)"
+        }     
+    ],
+    "post_launch": [
+        {
+        }
+    ],
+    "launch": [
+        {
+            "name": "hwemu-launch",
+            "target": "hw_emu"
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": {
+                    "vitis_hw_emu": 40960
+                },
+                "max_time_min": {
+                    "vitis_hw_emu": 470
+                }
+            }
+        ],
+        "targets": [
+            "vitis_hw_emu"
+        ],
+        "category": "canary"
+    }
+}

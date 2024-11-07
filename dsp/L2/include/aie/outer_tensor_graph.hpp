@@ -81,7 +81,7 @@ using namespace adf;
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
- *
+ *         \n
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
@@ -124,14 +124,16 @@ class outer_tensor_graph : public graph {
     static_assert(TP_DIM_B * sizeof(TT_DATA_B) * TP_NUM_FRAMES <= 16384,
                   "ERROR: Input at port B must be less than 16384 bytes");
     static_assert(TP_NUM_FRAMES > 0, "ERROR: TP_NUM_FRAMES must be > 0.");
-    static_assert(TP_SHIFT >= 0 && TP_SHIFT <= 60, "ERROR: TP_SHIFT is out of the supported range (0 to 60)");
+    static_assert(fnValidateShiftFloat<TP_SHIFT, TT_DATA_A>(), "ERROR: TP_SHIFT must be 0 for float types.");
+    static_assert(fnValidateShiftRange<TP_SHIFT>(), "ERROR: TP_SHIFT is out of the supported range.");
     static_assert(TP_API == 0 || TP_API == 1, "ERROR: TP_API is not a supported value (0 or 1)");
     static_assert(TP_SSR > 0 && TP_SSR <= kMaxSSR, "ERROR: TP_SSR is not in the supported range of 1 to 16");
     static_assert((TP_DIM_A & (TP_DIM_A - 1)) == 0, "ERROR: TP_DIM_A is not a power of 2.");
     static_assert((TP_DIM_B & (TP_DIM_B - 1)) == 0, "ERROR: TP_DIM_B is not a power of 2.");
     static_assert((TP_NUM_FRAMES & (TP_NUM_FRAMES - 1)) == 0, "ERROR: TP_NUM_FRAMES is not a power of 2.");
     static_assert((TP_SSR & (TP_SSR - 1)) == 0, "ERROR: TP_SSR is not a power of 2.");
-    static_assert(TP_RND >= ROUND_MIN && TP_RND <= ROUND_MAX, "ERROR: TP_RND is out of the supported range.");
+    static_assert(fnValidateRoundMode<TP_RND>(), "ERROR: Illegal round mode.");
+    static_assert(fnValidateSatMode<TP_SAT>(), "ERROR: Illegal saturation mode.");
 
     using outer_tensor_template =
         outer_tensor<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SHIFT, TP_API, TP_SSR, TP_RND, TP_SAT>;
@@ -187,7 +189,7 @@ class outer_tensor_graph : public graph {
             source(m_kernels[i]) = "outer_tensor.cpp";
             if (TP_API == 0) {
                 stack_size(m_kernels[i]) =
-                    outer_tensor_template::vecSampleNumA * outer_tensor_template::vecNumB * 64 / TP_SSR + 512;
+                    outer_tensor_template::vecSampleNumA * outer_tensor_template::vecNumB * 64 / TP_SSR + 1024;
             }
 
             // make connections

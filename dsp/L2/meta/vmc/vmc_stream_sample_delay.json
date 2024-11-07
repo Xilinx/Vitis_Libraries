@@ -12,6 +12,11 @@
           "type": "typename",
           "description": "Data type of individual I/O data samples.",
       "default": "int8",
+      "validator": {
+              "file": "vmc_stream_sample_delay.py",
+              "function": "vmc_validate_TT_DATA",
+	      "args": []
+          },
               "label": "Input/Output data type:",
               "tablabel": "Main",
               "parameterType":"popup"
@@ -24,7 +29,7 @@
       "validator": {
               "file": "vmc_stream_sample_delay.py",
               "function": "vmc_validate_TP_WINDOW_VSIZE",
-              "args": ["data_type", "max_sample_delay"]
+               "args": ["AIE_VARIANT", "data_type", "max_sample_delay"]
           },
               "label": "Input window size (Number of samples):",
               "tablabel": "Main",
@@ -38,7 +43,7 @@
       "validator": {
               "file": "vmc_stream_sample_delay.py",
               "function": "vmc_validate_TP_MAX_DELAY",
-              "args": ["data_type"]
+              "args": ["AIE_VARIANT", "data_type"]
           },
               "label": "Maximum sample delay:",
               "tablabel": "Main",
@@ -49,6 +54,11 @@
 	  "name": "AIE_VARIANT",
       "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
       "default": 1,
+      "validator": {
+	      "file": "vmc_stream_sample_delay.py",
+	      "function": "vmc_validate_AIE_VARIANT",
+	      "args": []
+	  },
 	  "label": "AIE Variant:",
       "tablabel": "Main",
       "parameterType":"edit"

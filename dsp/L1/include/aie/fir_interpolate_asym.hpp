@@ -61,7 +61,7 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN = TP_FIR_LEN,
           unsigned int TP_KERNEL_POSITION = 0,
           unsigned int TP_CASC_LEN = 1,
-          unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_USE_COEFF_RELOAD = 0,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_API = 0,
@@ -324,7 +324,7 @@ class kernelFilterClass {
                                      coefRangeStartIndex / TP_INTERPOLATE_FACTOR;
     static constexpr int streamInitNullStrobes = CEIL(streamInitNullAccs, m_kPhases) / m_kPhases;
 
-    alignas(32) int delay[(1024 / 8) / sizeof(int)] = {0};
+    alignas(__ALIGN_BYTE_SIZE__) int delay[(1024 / 8) / sizeof(int)] = {0};
     int doInit = (streamInitNullAccs == 0) ? 0 : 1;
     // Additional defensive checks
     struct ssr_params : public fir_params_defaults {
@@ -352,8 +352,8 @@ class kernelFilterClass {
         CEIL(CEIL(TP_FIR_RANGE_LEN, m_kPhases) / m_kPhases, (256 / 8 / sizeof(TT_COEFF))); // ceil'ed to 256-bits
     // The m_internalTaps is defined in terms of samples, but loaded into a vector, so has to be memory-aligned to the
     // vector size.
-    alignas(32) TT_COEFF m_internalTaps[m_kLCMPhases][m_kNumOps][m_kColumns][m_kLanes];
-    alignas(32) TT_COEFF m_internalTaps2[m_kPhases][tapsArraySize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF m_internalTaps[m_kLCMPhases][m_kNumOps][m_kColumns][m_kLanes];
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF m_internalTaps2[m_kPhases][tapsArraySize];
 
     // Two implementations have been written for this filter. They have identical behaviour, but one is optimised for an
     // Interpolation factor
@@ -377,7 +377,7 @@ class kernelFilterClass {
         T_outputIF<TP_CASC_OUT, TT_DATA> outInterface); // architecture for streaming interfaces
     // Constants for coeff reload
     static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
-    alignas(32) TT_COEFF
+    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF
         m_rawInTaps[CEIL(TP_COEFF_PHASES_LEN, m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
     bool isUpdateRequired;                                        // Are coefficients sets equal?
 
@@ -542,7 +542,7 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_USE_COEFF_RELOAD, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_DUAL_IP,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_API,

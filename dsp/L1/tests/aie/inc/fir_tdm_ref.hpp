@@ -36,8 +36,9 @@ namespace tdm {
 //-----------------------------------------------------------------------------------------------------
 // Single Rate class
 // Static coefficients
-template <typename TT_DATA,  // type of data input and output
-          typename TT_COEFF, // type of coefficients           (e.g. int16, cint32)
+template <typename TT_DATA,
+          typename TT_OUT_DATA,
+          typename TT_COEFF,
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
@@ -67,7 +68,7 @@ class fir_tdm_ref {
     void filter(input_circular_buffer<TT_DATA,
                                       extents<inherited_extent>,
                                       margin<fnTDMFirMargin<TP_FIR_LEN, TT_DATA, TP_TDM_CHANNELS>()> >& inWindow,
-                output_circular_buffer<TT_DATA>& outWindow);
+                output_circular_buffer<TT_OUT_DATA>& outWindow);
 };
 }
 }

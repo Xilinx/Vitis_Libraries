@@ -24,106 +24,14 @@ this file does not contain any vector types or intrinsics since it is required f
 and therefore must be suitable for the aie compiler graph-level compilation.
 */
 
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
+#include "device_defs.h"
+#include "single_mul_out_types.hpp"
+#include "single_mul_acc_types.hpp"
 
 namespace xf {
 namespace dsp {
 namespace aie {
 namespace kronecker {
-
-// determine the output type depending on the input type combinations
-template <typename T_A, typename T_B>
-struct outTypeMult {
-    using type = cint16;
-};
-template <>
-struct outTypeMult<int16, int16> {
-    using type = int16;
-};
-template <>
-struct outTypeMult<int16, cint16> {
-    using type = cint16;
-};
-template <>
-struct outTypeMult<int16, cint32> {
-    using type = cint32;
-};
-template <>
-struct outTypeMult<int16, int32> {
-    using type = int32;
-};
-template <>
-struct outTypeMult<cint16, int16> {
-    using type = cint16;
-};
-template <>
-struct outTypeMult<cint16, cint16> {
-    using type = cint16;
-};
-template <>
-struct outTypeMult<cint16, int32> {
-    using type = cint32;
-};
-template <>
-struct outTypeMult<cint16, cint32> {
-    using type = cint32;
-};
-template <>
-struct outTypeMult<int32, int16> {
-    using type = int32;
-};
-template <>
-struct outTypeMult<int32, cint16> {
-    using type = cint32;
-};
-template <>
-struct outTypeMult<int32, int32> {
-    using type = int32;
-};
-template <>
-struct outTypeMult<int32, cint32> {
-    using type = cint32;
-};
-template <>
-struct outTypeMult<cint32, int16> {
-    using type = cint32;
-};
-template <>
-struct outTypeMult<cint32, cint16> {
-    using type = cint32;
-};
-template <>
-struct outTypeMult<cint32, int32> {
-    using type = cint32;
-};
-template <>
-struct outTypeMult<cint32, cint32> {
-    using type = cint32;
-};
-template <>
-struct outTypeMult<float, float> {
-    using type = float;
-};
-template <>
-struct outTypeMult<cfloat, float> {
-    using type = cfloat;
-};
-template <>
-struct outTypeMult<float, cfloat> {
-    using type = cfloat;
-};
-template <>
-struct outTypeMult<cfloat, cfloat> {
-    using type = cfloat;
-};
-
-template <typename T_D_A, typename T_D_B>
-using outTypeMult_t = typename outTypeMult<T_D_A, T_D_B>::type;
 
 template <typename T_A, typename T_B>
 struct vectByte {
