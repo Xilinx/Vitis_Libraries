@@ -31,7 +31,8 @@ class Transpose1D {
     void runImpl(adf::input_buffer<uint8_t>& input1,
                  adf::input_buffer<uint8_t>& input2,
                  adf::output_buffer<uint8_t>& output,
-                 int outputStride);
+                 int outputStride,
+                 int channels);
     void xf_transpose_1ch(uint8_t* frame, int16 height, int16 width, uint8_t* output);
     void xf_transpose_4ch(uint8_t* frame, int16 height, int16 width, uint8_t* output);
 };
@@ -92,7 +93,8 @@ void Transpose1D::runImpl(uint8_t* frame, int16 height, int16 width, uint8_t* ou
 void Transpose1D::runImpl(adf::input_buffer<uint8_t>& input_metadata,
                           adf::input_buffer<uint8_t>& input_data,
                           adf::output_buffer<uint8_t>& output,
-                          int outputStride) {
+                          int outputStride,
+                          int channels) {
     uint8_t* in_meta_ptr = (uint8_t*)::aie::begin(input_metadata);
     uint8_t* in_data_ptr = (uint8_t*)::aie::begin(input_data);
 
@@ -120,7 +122,7 @@ void Transpose1D::runImpl(adf::input_buffer<uint8_t>& input_metadata,
     xfSetTileOutOffset_L(out_ptr, (uint16_t)(outOffset & 0x0000ffff));
     xfSetTileOutOffset_U(out_ptr, (uint16_t)(outOffset >> 16));
     uint8_t* ptr_out = (uint8_t*)xfGetImgDataPtr(out_ptr);
-    if (CHANNELS == 1)
+    if (channels == 1)
         xf_transpose_1ch(in_data_ptr, height, width, ptr_out);
     else
         xf_transpose_4ch(in_data_ptr, height, width, ptr_out);

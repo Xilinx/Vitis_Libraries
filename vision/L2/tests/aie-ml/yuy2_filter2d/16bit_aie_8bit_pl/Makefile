@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -61,8 +61,8 @@ PLATFORM := vek280
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  vek280 vck190 vck5000 v70
-PLATFORM_BLOCKLIST += 
+PLATFORM_ALLOWLIST +=  vek280
+PLATFORM_BLOCKLIST +=  vck5000 v70 vck190
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -82,12 +82,12 @@ RUN_DEPS :=
 
 # get global setting
 ifeq ($(HOST_ARCH), x86)
-CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label -D_GLIBCXX_USE_CXX11_ABI=0
+CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
-CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
@@ -120,12 +120,12 @@ AIETARGET := x86sim
 endif
 
 AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM)   --aie.pl-freq 300 
-AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC) --aie.heapsize=16384
+AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
-AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(XFLIB_DIR)/L1/include/aie-ml/dnn
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
@@ -137,50 +137,50 @@ AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 
 #Inclue Required Host Source Files
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/yuy2_filter2d/16bit_aie_8bit_pl/host.cpp 
-CXXFLAGS +=  -D __PS_ENABLE_AIE__ -g
-CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/yuy2_filter2d/16bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
+CXXFLAGS +=  -D __PS_ENABLE_AIE__
+CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/ -L $(XFLIB_DIR)/L1/lib/sw/aarch64-linux
-LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS +=  -luuid
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/yuy2_filter2d/16bit_aie_8bit_pl/host.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/yuy2_filter2d/16bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS +=  
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/ -L $(XFLIB_DIR)/L1/lib/sw/aarch64-linux
-LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS += -luuid
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck5000/'))
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/yuy2_filter2d/16bit_aie_8bit_pl/host.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/yuy2_filter2d/16bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS +=  
 LDFLAGS +=  -L $(XFLIB_DIR)/L1/lib/sw/x86 -L $(OPENCV_LIB)
-LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS += -luuid
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/v70/'))
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/yuy2_filter2d/16bit_aie_8bit_pl/host.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/yuy2_filter2d/16bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS +=  
 LDFLAGS +=  -L $(XFLIB_DIR)/L1/lib/sw/x86 -L $(OPENCV_LIB)
-LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS += -luuid
 else 
 ifeq ($(ps_on_x86), on)
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/yuy2_filter2d/16bit_aie_8bit_pl/host.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/yuy2_filter2d/16bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 LDFLAGS +=  -L $(OPENCV_LIB)
-LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS += -luuid
 else
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/yuy2_filter2d/16bit_aie_8bit_pl/host.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/yuy2_filter2d/16bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 LDFLAGS +=  -L $(OPENCV_LIB)
-LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS += -luuid
 endif
 endif
@@ -208,33 +208,31 @@ endif
 
 ########################## Kernel compiler global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
-VPP_FLAGS +=   --profile.stall all:all
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
-#VPP_LDFLAGS +=   --freqhz 300000000:Tiler_top_1  --freqhz 300000000:stitcher_top_1  --clock.default_tolerance 0.001  --config $(CUR_DIR)/system.cfg  $(XFLIB_DIR)/L1/lib/hw/tiler.xo  $(XFLIB_DIR)/L1/lib/hw/stitcher.xo ./mm2s_top.xo
-VPP_LDFLAGS += --profile.aie all --profile.data all:all:all --profile.stall all:all
-VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg  $(XFLIB_DIR)/L1/lib/hw/tiler.xo  $(XFLIB_DIR)/L1/lib/hw/stitcher.xo -g
+VPP_FLAGS +=   
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/imgproc -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
+VPP_LDFLAGS +=   --clock.freqHz 300000000:Tiler_top_1  --clock.freqHz 300000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   --package.defer_aie_run
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 VPP_FLAGS +=   
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
-VPP_LDFLAGS +=   --freqhz 300000000:Tiler_top_1  --freqhz 300000000:stitcher_top_1  --clock.default_tolerance 0.001  --config $(CUR_DIR)/system.cfg  $(XFLIB_DIR)/L1/lib/hw/tiler.xo  $(XFLIB_DIR)/L1/lib/hw/stitcher.xo
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/imgproc -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
+VPP_LDFLAGS +=   --clock.freqHz 300000000:Tiler_top_1  --clock.freqHz 300000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   --package.defer_aie_run
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck5000/'))
 VPP_FLAGS +=   
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
-VPP_LDFLAGS +=   --freqhz 300000000:Tiler_top_1  --freqhz 300000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg  $(XFLIB_DIR)/L1/lib/hw/tiler.xo  $(XFLIB_DIR)/L1/lib/hw/stitcher.xo
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/imgproc -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
+VPP_LDFLAGS +=   --clock.freqHz 300000000:Tiler_top_1  --clock.freqHz 300000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/v70/'))
 VPP_FLAGS +=   
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
-VPP_LDFLAGS +=   --freqhz 300000000:Tiler_top_1  --freqhz 300000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/imgproc -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
+VPP_LDFLAGS +=   --clock.freqHz 300000000:Tiler_top_1  --clock.freqHz 300000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   
 
 else 
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/imgproc -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
 VPP_LDFLAGS +=   $(XFLIB_DIR)/L1/lib/hw/tiler.xo  $(XFLIB_DIR)/L1/lib/hw/stitcher.xo
 
 endif
@@ -245,10 +243,10 @@ VPP_LDFLAGS_kernel += --clock.defaultFreqHz 300000000
 else
 VPP_LDFLAGS_kernel += --kernel_frequency 300
 endif
-VPP_LDFLAGS_kernel_temp := $(XFLIB_DIR)/L1/lib/hw/tiler.xo $(XFLIB_DIR)/L1/lib/hw/stitcher.xo 
+VPP_LDFLAGS_kernel_temp := $(XFLIB_DIR)/L1/lib/hw/tiler.xo $(XFLIB_DIR)/L1/lib/hw/stitcher.xo
 VPP_LDFLAGS_kernel += $(VPP_LDFLAGS_kernel_temp)
 
-ifneq ($(SD_CARD_NEEDED), on)
+ifneq ($(PACKAGE_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/kernel.xclbin
 else
 BINARY_CONTAINERS += $(BUILD_DIR)/kernel_pkg.$(LINK_TARGET_FMT)
@@ -275,7 +273,14 @@ $(EXE_FILE): $(EXE_FILE_DEPS)
 $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 
-############################## Preparing sdcard folder ##############################
+############################## Package final xclbin or sd_card folder (for embedded) ##############################
+# AIE_ON_X86 Flow
+ifeq ($(pcie_versal), on)
+	@echo "### ***** running AIE ON_X86 ***** ###"
+	${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
+	@echo "### ***** xclbin generation done! ***** ###"
+endif
+
 ifeq ($(SD_CARD_NEEDED), on)
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
@@ -289,7 +294,6 @@ endif
 	@echo 'if [ -f platform_desc.txt  ]; then' >> $(RUN_SCRIPT)
 	@echo '        cp platform_desc.txt /etc/xocl.txt' >> $(RUN_SCRIPT)
 	@echo 'fi' >> $(RUN_SCRIPT)
-	@echo 'dmesg -n 4' >> $(RUN_SCRIPT)
 	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> $(RUN_SCRIPT)
 	@echo 'return_code=$$?' >> $(RUN_SCRIPT)
 	@echo 'if [ $$return_code -ne 0 ]; then' >> $(RUN_SCRIPT)
@@ -326,16 +330,10 @@ ifeq ($(ps_on_x86), on)
 	@echo "### ***** running PS X86 SE_EMU ***** ###"
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir $(SD_CARD) --package.emu_ps x86
 endif
-# 3. AIE_ON_X86 Flow
-ifeq ($(pcie_aie), on)
-	@echo "### ***** running AIE ON_X86 ***** ###"
-	${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
-	@echo "### ***** sd_card generation done! ***** ###"
-endif
-# 4. General Embeded flow
+# 3. General Embeded flow
 ifeq ($(dfx_hw), off)
 ifeq ($(ps_on_x86), off)
-ifeq ($(pcie_aie), off)
+ifeq ($(pcie_versal), off)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
@@ -345,12 +343,15 @@ endif
 .PHONY: sd_card
 sd_card: $(SD_CARD)
 endif
+
 ############################## Setting Essential Checks and Building Rules ##############################
 ifneq (,$(filter x86sim aiesim, $(TARGET)))
 RUN_DEPS += $(AIE_CONTAINER)
 else
 RUN_DEPS += host xclbin $(EMCONFIG)
+ifeq ($(SD_CARD_NEEDED), on)
 RUN_DEPS += $(SD_CARD)
+endif
 endif
 
 .PHONY: mkflag all run
@@ -375,16 +376,17 @@ endif
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
-ifeq ($(pcie_aie), on)
+ifeq ($(pcie_versal), on)
 	cp $(AIE_WORK_DIR)/reports/dma_lock_report.json ./
 	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) $(BINARY_CONTAINERS_PKG)
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS) 
+	
+else
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS)
 	
 endif
-	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
-	
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 

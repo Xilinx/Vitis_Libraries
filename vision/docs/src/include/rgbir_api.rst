@@ -1,10 +1,13 @@
+
+.. _rgbir2bayer:
+
 .. 
    Copyright 2023 Advanced Micro Devices, Inc
   
 .. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 RGBIR  to Standard Bayer Format
-################################
+=================================
 
 The ``rgbir2bayer`` function creates a standard RGB-only-mosaic
 and an IR image from input RGB-IR combined mosaic image. 

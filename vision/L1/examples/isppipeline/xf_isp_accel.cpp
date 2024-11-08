@@ -571,7 +571,7 @@ void ISPpipeline(InVideoStrm_t& s_axis_video,
     fifo_copy<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(
         colorcorrectionmatrix_out_mat, xf_QuatizationDithering_out_mat, height, width);
 
-#elif T_16U
+#else
     constexpr int Q_VAL = 1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX)); /* Used in xf_QuatizationDithering */
 
     function_xf_QuatizationDithering<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, SCALE_FACTOR, Q_VAL, XF_NPPCX,
@@ -583,7 +583,7 @@ void ISPpipeline(InVideoStrm_t& s_axis_video,
     fifo_copy<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(
         AWB_out_mat, xf_QuatizationDithering_out_mat, height, width);
 
-#elif T_16U
+#else
     constexpr int Q_VAL = 1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX)); /* Used in xf_QuatizationDithering */
 
     function_xf_QuatizationDithering<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, SCALE_FACTOR, Q_VAL, XF_NPPCX,
@@ -595,7 +595,7 @@ void ISPpipeline(InVideoStrm_t& s_axis_video,
     fifo_copy<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(
         demosaicing_out_mat, xf_QuatizationDithering_out_mat, height, width);
 
-#elif T_16U
+#else
     constexpr int Q_VAL = 1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX)); /* Used in xf_QuatizationDithering */
 
     function_xf_QuatizationDithering<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, SCALE_FACTOR, Q_VAL, XF_NPPCX,

@@ -84,13 +84,14 @@ The performance is shown in the following table.
 
 .. table:: Table 2: Performance Numbers in Frames Per Second (FPS) for the ISP Pipeline
     :align: center
-	
+
+
     +----------------------+--------------+--------------+
     |       Dataset        |   FPS(CPU)   |   FPS(FPGA)  |
     +======================+==============+==============+
     |     4k (3840x2160)   |     0.11     |     135      |
     +----------------------+--------------+--------------+
-    |   Full HD (1920x1080) |     0.44     |     520      |
+    |  Full HD (1920x1080) |     0.44     |     520      |
     +----------------------+--------------+--------------+
 
 .. toctree::

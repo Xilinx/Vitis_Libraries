@@ -1,3 +1,4 @@
+
 .. _tvl1:
 
 .. 
@@ -6,7 +7,7 @@
 .. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 TVL1 Optical Flow
-##################
+==================
 
 The ``tvl1`` function is used for Optical flow application and its formulation is based on Total Variation (TV) 
 regularization and the robust L1 normalization in the data fidelity term. TVL1 algorithm preserves discontinuities 

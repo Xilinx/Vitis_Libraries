@@ -4,7 +4,7 @@
 .. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 ISP all_in_one_adas Pipeline
-##############################
+==============================
 
 The ISP all_in_one_adas pipeline contains all the necessary functions that
 will enable you to test several combinations of the image sensor

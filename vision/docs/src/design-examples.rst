@@ -13,7 +13,7 @@
 .. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 Design Examples Using the Vitis Vision Library
-###########################################
+################################################
 
 All hardware functions in the library have their own respective
 examples that are available in GitHub. This section provides details

@@ -42,14 +42,16 @@ class Yuv2Rgba {
                      const uint8_t* restrict ptr2,
                      uint8_t* restrict out_ptr,
                      uint16_t tile_width,
-                     uint16_t tile_height);
+                     uint16_t tile_height,
+                     uint8_t index);
 };
 
 __attribute__((noinline)) void Yuv2Rgba::xf_yuv2rgba(const uint8_t* restrict ptr1,
                                                      const uint8_t* restrict ptr2,
                                                      uint8_t* restrict ptr_out,
                                                      uint16_t tile_width,
-                                                     uint16_t tile_height) {
+                                                     uint16_t tile_height,
+                                                     uint8_t index) {
     set_sat();
     const int offset = toFixed<int, 7>((0.0 - 1.164 * 16) + 0.5);
     ::aie::accum<acc32, N> acc_const;
@@ -104,7 +106,8 @@ __attribute__((noinline)) void Yuv2Rgba::xf_yuv2rgba(const uint8_t* restrict ptr
                 ptr_out = ptr_out + 4 * N;
             }
         // Check even/odd tile to modify UV pointer for next row
-        ptr2 = ptr2 - (1 - (i % 2)) * tile_width;
+        // ptr2 = ptr2 - (1 - (i % 2)) * tile_width;
+        ptr2 = ptr2 - (1 - (index % 2)) * tile_width;
     }
 }
 
@@ -116,7 +119,11 @@ void Yuv2Rgba::runImpl(
     uint8_t* restrict ptr2 = (uint8_t*)xfGetImgDataPtr(img_in2);
     uint8_t* restrict ptr_out = (uint8_t*)xfGetImgDataPtr(img_out);
 
-    xf_yuv2rgba(ptr1, ptr2, ptr_out, tile_width, tile_height);
+    int y_row = xfGetTilePosV(img_in1);
+    int uv_row = xfGetTilePosV(img_in2);
+
+    uint8_t index = (((y_row == 1) && (uv_row == 0)) ? 1 : (((y_row == 0) && (uv_row == 0)) ? 0 : (y_row % uv_row)));
+    xf_yuv2rgba(ptr1, ptr2, ptr_out, tile_width, tile_height, index);
 }
 } // aie
 } // cv

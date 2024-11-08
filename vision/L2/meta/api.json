@@ -49,17 +49,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "src2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           }
                                                         ]
@@ -122,17 +122,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "src2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC>& "
                                                                           }
                                                         ]
@@ -193,17 +193,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "src2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC>& "
                                                                           }
                                                         ]
@@ -264,17 +264,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "src2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
@@ -339,17 +339,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "src2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           }
                                                         ]
@@ -409,7 +409,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -421,7 +421,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -484,7 +484,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -494,7 +494,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "_src2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -509,7 +509,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -579,12 +579,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
@@ -677,12 +677,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
-                                                                                            "name": "src2",
-                                                                                            "direction": "",
+                                                                                            "name": "dst1",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
@@ -781,12 +781,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPPC> & "
                                                                           }
                                                         ]
@@ -923,12 +923,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
@@ -1009,12 +1009,12 @@
                                           "ports": [
                                                             {
                                                                               "name": "_Src",
-                                                                              "direction": "",
+                                                                              "direction": "in",
                                                                               "type": "xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPC>& "
                                                             },
                                                             {
                                                                               "name": "_Dst",
-                                                                              "direction": "",
+                                                                              "direction": "out",
                                                                               "type": "xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPC>& "
                                                             },
                                                             {
@@ -1080,17 +1080,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "src2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           }
                                                         ]
@@ -1144,12 +1144,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           }
                                                         ]
@@ -1203,17 +1203,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "src2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           }
                                                         ]
@@ -1267,17 +1267,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "src2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           }
                                                         ]
@@ -1336,7 +1336,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -1346,7 +1346,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "color",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Scalar<4,unsigned char > *"
                                                                           },
                                                                           {
@@ -1421,12 +1421,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -1480,7 +1480,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -1568,12 +1568,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC1> & "
                                                                           },
                                                                           {
@@ -1625,27 +1625,27 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "in_ptr1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint8_t* "
                                                                           },
                                                                           {
                                                                                             "name": "in_ptr2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint8_t* "
                                                                           },
                                                                           {
                                                                                             "name": "tmp_out_ptr1",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "uint8_t* "
                                                                           },
                                                                           {
                                                                                             "name": "tmp_out_ptr2",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "uint8_t* "
                                                                           },
                                                                           {
                                                                                             "name": "out_ptr",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "uint8_t* "
                                                                           },
                                                                           {
@@ -1734,12 +1734,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           }
                                                         ]
@@ -1800,17 +1800,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_src2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -1869,7 +1869,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -1881,7 +1881,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -1944,12 +1944,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -2020,12 +2020,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -2111,12 +2111,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -2189,12 +2189,12 @@
                                                     "ports": [
                                                                         {
                                                                                         "name": "src",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                         },
                                                                         {
                                                                                         "name": "dst",
-                                                                                        "direction": "",
+                                                                                        "direction": "out",
                                                                                         "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>  &"
                                                                         },
                                                                         {
@@ -2266,17 +2266,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>  &"
                                                                           },
                                                                           {
                                                                                             "name": "roi",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Rect_<unsigned int> &"
                                                                           }
                                                         ]
@@ -2340,12 +2340,12 @@
                                                     "ports": [
                                                                         {
                                                                                         "name": "_src_mat",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                         },
                                                                         {
                                                                                         "name": "_dst_mat",
-                                                                                        "direction": "",
+                                                                                        "direction": "out",
                                                                                         "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC>  &"
                                                                         },
                                                                         {
@@ -2424,12 +2424,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &"
                                                                           },
                                                                           {
                                                                                             "name": "dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> &"
                                                                           }
                                                         ]
@@ -2513,12 +2513,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -2583,12 +2583,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "ap_uint<IN_PTR>* "
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "float* "
                                                                           },
                                                                           {
@@ -2659,17 +2659,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -2752,12 +2752,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -2829,12 +2829,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -2900,12 +2900,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -2989,12 +2989,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -3067,12 +3067,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "SrcPtr",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "ap_uint<PTR_WIDTH>* "
                                                                           },
                                                                           {
                                                                                             "name": "DstPtr",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "ap_uint<PTR_WIDTH>* "
                                                                           },
                                                                           {
@@ -3149,12 +3149,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
@@ -3227,12 +3227,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
@@ -3305,12 +3305,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -3392,12 +3392,12 @@
                                                     "ports": [
                                                                         {
                                                                                         "name": "src",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                         },
                                                                         {
                                                                                         "name": "dst",
-                                                                                        "direction": "",
+                                                                                        "direction": "out",
                                                                                         "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>  &"
                                                                         },
                                                                         {
@@ -3563,12 +3563,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_in_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &"
                                                                           },
                                                                           {
                                                                                             "name": "_desc_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, 1, DESC_SIZE, NPC> &"
                                                                           }
                                                         ]
@@ -3654,7 +3654,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -3740,7 +3740,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -3759,7 +3759,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -3819,12 +3819,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_TYPE, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_TYPE, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -3903,7 +3903,7 @@
                                                     "ports": [
                                                                         {
                                                                                         "name": "_src",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                         },
                                                                         {
@@ -4023,12 +4023,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC>& "
                                                                           }
                                                         ]
@@ -4082,12 +4082,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -4167,17 +4167,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "in_img",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<INTYPE, ROWS, COLS, NPPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "lut",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<XF_32FC3, SQLUTDIM, LUTDIM, NPPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "out_img",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<OUTTYPE, ROWS, COLS, NPPC>& "
                                                                           },
                                                                           {
@@ -4248,17 +4248,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_matx",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_src_maty",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -4312,7 +4312,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -4323,7 +4323,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -4397,7 +4397,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_in_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &"
                                                                           },
                                                                           {
@@ -4501,7 +4501,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -4576,12 +4576,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -4641,27 +4641,27 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &"
                                                                           },
                                                                           {
                                                                                             "name": "_src2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &"
                                                                           },
                                                                           {
                                                                                             "name": "_src3",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &"
                                                                           },
                                                                           {
                                                                                             "name": "_src4",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &"
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> &"
                                                                           }
                                                         ]
@@ -4715,17 +4715,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_src2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -4779,7 +4779,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -4863,7 +4863,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -4874,7 +4874,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -4939,12 +4939,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC>& "
                                                                           }
                                                         ]
@@ -5004,17 +5004,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "src2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
@@ -5073,7 +5073,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -5138,17 +5138,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "in_mask",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<MASK_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -5220,17 +5220,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_matx",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_src_maty",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -5289,12 +5289,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<TYPE, (ROWS / 2), (COLS / 2), NPC> & "
                                                                           }
                                                         ]
@@ -5348,12 +5348,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<TYPE, 2 * ROWS, 2 * COLS, NPC> & "
                                                                           }
                                                         ]
@@ -5429,12 +5429,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ONE_D_HEIGHT, ONE_D_WIDTH, 1> & "
                                                                           },
                                                                           {
@@ -5522,22 +5522,22 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &"
                                                                           },
                                                                           {
                                                                                             "name": "_remapped_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> &"
                                                                           },
                                                                           {
                                                                                             "name": "_mapx_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<MAP_T, ROWS, COLS, NPC> &"
                                                                           },
                                                                           {
                                                                                             "name": "_mapy_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<MAP_T, ROWS, COLS, NPC> &"
                                                                           }
                                                         ]
@@ -5621,12 +5621,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<TYPE, SRC_ROWS, SRC_COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<TYPE, DST_ROWS, DST_COLS, NPC> & "
                                                                           }
                                                         ]
@@ -5695,12 +5695,12 @@
                                                     "ports": [
                                                                         {
                                                                                         "name": "src_ptr",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "ap_uint<INPUT_PTR_WIDTH>*"
                                                                         },
                                                                         {
                                                                                         "name": "dst_ptr",
-                                                                                        "direction": "",
+                                                                                        "direction": "out",
                                                                                         "type": "ap_uint<OUTPUT_PTR_WIDTH>*"
                                                                         },
                                                                         {
@@ -5775,22 +5775,22 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_y_image",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_u_image",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_v_image",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -5856,12 +5856,12 @@
                                                     "ports": [
                                                                         {
                                                                                         "name": "src",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                         },
                                                                         {
                                                                                         "name": "dst",
-                                                                                        "direction": "",
+                                                                                        "direction": "out",
                                                                                         "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>  &"
                                                                         },
                                                                         {
@@ -5938,17 +5938,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_matx",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_maty",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -6034,17 +6034,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat_l",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T,ROWS,COLS,NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_src_mat_r",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T,ROWS,COLS,NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T,ROWS,COLS,NPC> & "
                                                                           },
                                                                           {
@@ -6108,7 +6108,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -6119,7 +6119,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -6195,17 +6195,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_matx",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_maty",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -6285,22 +6285,22 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_left_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &"
                                                                           },
                                                                           {
                                                                                             "name": "_right_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> &"
                                                                           },
                                                                           {
                                                                                             "name": "_disp_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> &"
                                                                           },
                                                                           {
                                                                                             "name": "sbmstate",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::xFSBMState<WSIZE,NDISP,NDISP_UNIT> &"
                                                                           }
                                                         ]
@@ -6360,7 +6360,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -6371,7 +6371,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -6431,7 +6431,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -6442,7 +6442,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
@@ -6502,17 +6502,17 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "src2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           }
                                                         ]
@@ -6566,7 +6566,7 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -6649,12 +6649,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "in_1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC1_T, ROWS1, COLS1, NPC> &"
                                                                           },
                                                                           {
                                                                                             "name": "in_2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC2_T, ROWS2, COLS2, NPC> &"
                                                                           },
                                                                           {
@@ -6689,7 +6689,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "result",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "ap_int<DST_WIDTH> *"
                                                                           }
                                                         ]
@@ -6749,12 +6749,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -6834,7 +6834,7 @@
                                                     "ports": [
                                                                         {
                                                                                         "name": "in",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC>&"
                                                                         },
                                                                         {
@@ -6873,7 +6873,7 @@
                                                                         },
                                                                         {
                                                                                         "name": "out",
-                                                                                        "direction": "",
+                                                                                        "direction": "out",
                                                                                         "type": "xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC>&"
                                                                         }
                                                     ]
@@ -6952,12 +6952,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
@@ -7033,12 +7033,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "stream_in",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "stream_out",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC>& "
                                                                           }
                                                         ]
@@ -7092,12 +7092,12 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "_src1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]

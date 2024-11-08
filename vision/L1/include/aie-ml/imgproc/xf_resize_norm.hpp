@@ -179,6 +179,15 @@ class ResizeNorm {
         uint8_t* input, int8_t* output, int tile_width_out, const int16_t* coeff, uint8_t FBits[3], int nChannels);
 
     void runImpl(int8_t* input, uint8_t* output, int tile_width_out, const int16_t* coeff, int nChannels);
+
+    void runImpl(adf::input_buffer<uint8_t>& input,
+                 adf::output_buffer<int8_t>& output,
+                 uint32_t scale_x,
+                 uint32_t scale_y,
+                 int img_height_in,
+                 const int16_t (&coeff)[8],
+                 uint8_t FBits[3],
+                 int nChannels);
 };
 
 __attribute__((noinline)) void ResizeNorm::xf_normalize(
@@ -669,6 +678,28 @@ void ResizeNorm::runImpl(int8_t* input, uint8_t* output, int tile_width_out, con
     xf_clamp((int8_t*)input, (uint8_t*)output, tile_width_out, nChannels, coeff);
 }
 
+void ResizeNorm::runImpl(adf::input_buffer<uint8_t>& input,
+                         adf::output_buffer<int8_t>& output,
+                         uint32_t scale_x,
+                         uint32_t scale_y,
+                         int img_height_in,
+                         const int16_t (&coeff)[8],
+                         uint8_t FBits[3],
+                         int nChannels) {
+    uint8_t* img_in_ptr = (uint8_t*)::aie::begin(input);
+    int8_t* img_out_ptr = (int8_t*)::aie::begin(output);
+
+    int row = xfGetTileOutPosV(img_in_ptr);
+    int tile_width_in = xfGetTileWidth(img_in_ptr);
+    int tile_width_out = xfGetTileOutTWidth(img_in_ptr);
+
+    xfCopyMetaData(img_in_ptr, img_out_ptr);
+    uint8_t* in_ptr = (uint8_t*)xfGetImgDataPtr(img_in_ptr);
+    int8_t* out_ptr = (int8_t*)xfGetImgDataPtr(img_out_ptr);
+
+    runImpl((uint8_t*)in_ptr, (int8_t*)out_ptr, row, scale_x, scale_y, img_height_in, tile_width_in, tile_width_in,
+            tile_width_out, coeff, FBits, nChannels);
+}
 } // aie
 } // cv
 } // xf

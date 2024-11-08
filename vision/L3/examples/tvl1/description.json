@@ -7,12 +7,12 @@
     "platform_allowlist": [
         "vck190",
         "aws-vu9p-f1",
-        "zcu102",
         "u50"
     ],
     "platform_blocklist": [
         "u280",
         "u250",
+        "zcu102",
         "zcu104"
     ],
     "platform_properties": {
@@ -45,50 +45,6 @@
                     "options": "-l opencv_optflow"
                 }
             }
-        },
-        "zcu102": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include",
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/lib"
-                    ],
-                    "options": "-l opencv_optflow"
-                },
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ],
-                    "options": "-l opencv_optflow"
-                }
-            },
-            "containers": [
-                {
-                    "name": "krnl_tvl1",
-                    "accelerators": [
-                        {
-                            "name": "tvl1_accel",
-                            "frequency": 150.0
-                        },
-                        {
-                            "name": "img_pyramid_accel",
-                            "frequency": 150.0
-                        }
-                    ],
-                    "frequency": 150.0
-                }
-            ]
         },
         "vck190": {
             "host": {

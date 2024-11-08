@@ -1,3 +1,23 @@
+/*
+ * Copyright 2021 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef _XFCVDATAMOVERS_PLIO
+#define _XFCVDATAMOVERS_PLIO
+
+namespace xF {
 
 template <DataMoverKind KIND,
           typename DATA_TYPE,
@@ -27,13 +47,18 @@ class xfcvDataMovers {
     std::vector<EmulAxiData<PL_AXI_BITWIDTH> > mMetaDataVec;
 
     std::array<int, CORES> mMetadataSize;
-    std::array<xrtBufferHandle, CORES> mMetadataBOHndl;
-    xrtBufferHandle mImageBOHndl;
+    // std::array<xrtBufferHandle, CORES> mMetadataBOHndl;
+    // xrtBufferHandle mImageBOHndl;
 
-    std::array<xrtKernelHandle, CORES> mPLKHandleArr;
-    std::array<xrtRunHandle, CORES> mPLRHandleArr;
+    std::array<xrt::bo, CORES> mMetadataBOHndl;
+    xrt::bo mImageBOHndl;
 
-    int imgSize() { return (mImageSize[0] * mImageSize[1] * mImageSize[2]); }
+    std::array<xrt::kernel, CORES> mPLKHandleArr;
+    std::array<xrt::run, CORES> mPLRHandleArr;
+
+    xrt::kernel krnl;
+
+    long int imgSize() { return (mImageSize[0] * mImageSize[1] * mImageSize[2]); }
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == TILER)>::type* = nullptr>
     int metaDataSizePerTile() {
@@ -66,9 +91,12 @@ class xfcvDataMovers {
             char* MetaDataVecP = (char*)mMetaDataVec.data();
             for (int i = 0; i < CORES; i++) {
                 assert(mMetadataBOHndl[i]);
-                char* metadata_buffer = (char*)xrtBOMap(mMetadataBOHndl[i]);
+                // char* metadata_buffer = (char*)xrtBOMap(mMetadataBOHndl[i]); // C API
+                char* metadata_buffer = (char*)(mMetadataBOHndl[i].map());
                 memcpy(metadata_buffer, MetaDataVecP, metadataSize(i));
                 MetaDataVecP += metadataSize(i);
+                mMetadataBOHndl[i].sync(XCL_BO_SYNC_BO_TO_DEVICE);
+                // std::cout << "Tiler copy done " << std::endl;
             }
         } else {
             // Column wise partitioning
@@ -76,7 +104,8 @@ class xfcvDataMovers {
             int c = 0;
             for (int i = 0; i < CORES; i++) {
                 assert(mMetadataBOHndl[i]);
-                char* metadata_buffer = (char*)xrtBOMap(mMetadataBOHndl[i]);
+                // char* metadata_buffer = (char*)xrtBOMap(mMetadataBOHndl[i]);  //C API
+                char* metadata_buffer = (char*)(mMetadataBOHndl[i].map());
                 char* MetaDataVecP = ((char*)mMetaDataVec.data()) + (r * mTileCols + c) * metaDataSizePerTile();
 
                 int x_r = tileRowsPerCore(i);
@@ -101,8 +130,11 @@ class xfcvDataMovers {
         if (mbUserHndl == false) {
             assert(mpImage);
             assert(mImageBOHndl);
-            void* buffer = xrtBOMap(mImageBOHndl);
+            // void* buffer = xrtBOMap(mImageBOHndl);  //C API
+            void* buffer = mImageBOHndl.map();
             memcpy(buffer, mpImage->data, imgSize());
+        } else {
+            mImageBOHndl.sync(XCL_BO_SYNC_BO_TO_DEVICE);
         }
     }
     //}
@@ -113,21 +145,20 @@ class xfcvDataMovers {
         // No meta-data
         assert(mImageBOHndl);
 
-        void* buffer = xrtBOMap(mImageBOHndl);
+        // void* buffer = xrtBOMap(mImageBOHndl);  //C API
+        void* buffer = mImageBOHndl.map();
         if (mbUserHndl == false) {
             assert(mpImage);
             memcpy(mpImage->data, buffer, imgSize());
         } else {
-            xrtBOSync(mImageBOHndl, XCL_BO_SYNC_BO_TO_DEVICE, imgSize(), 0);
+            // xrtBOSync(mImageBOHndl, XCL_BO_SYNC_BO_TO_DEVICE, imgSize(), 0); // C API
+            mImageBOHndl.sync(XCL_BO_SYNC_BO_FROM_DEVICE, imgSize(), 0);
         }
     }
     //}
 
     void free_metadata_buffer(int core) {
-        if (mMetadataBOHndl[core] != nullptr) {
-            xrtBOFree(mMetadataBOHndl[core]);
-        }
-        mMetadataBOHndl[core] = nullptr;
+        mMetadataBOHndl[core] = {};
         mMetadataSize[core] = 0;
     }
 
@@ -139,7 +170,7 @@ class xfcvDataMovers {
 
     void alloc_metadata_buffer() {
         for (int i = 0; i < CORES; i++) {
-            if (mMetadataBOHndl[i] == nullptr) {
+            if (!bool(mMetadataBOHndl[i])) {
                 // Update size
                 mMetadataSize[i] = metaDataSizePerTile() * tilesPerCore(i);
 
@@ -147,26 +178,28 @@ class xfcvDataMovers {
                 // assert(metadataSize(i) > 0);
                 std::cout << "Allocating metadata device buffer (Tiler), "
                           << " Size : " << metadataSize(i) << " bytes" << std::endl;
-                mMetadataBOHndl[i] = xrtBOAlloc(gpDhdl, metadataSize(i), 0, 0);
+                // mMetadataBOHndl[i] = xrt::bo(gpDhdl, metadataSize(i), mPLKHandleArr[i].group_id(3));
+                mMetadataBOHndl[i] = xrt::bo(gpDhdl, metadataSize(i), 0, 0);
             }
         }
     }
 
     void free_buffer() {
         if (mbUserHndl == false) {
-            if (mImageBOHndl != nullptr) {
-                xrtBOFree(mImageBOHndl);
+            if (bool(mImageBOHndl)) { // != nullptr) {
+                // xrtBOFree(mImageBOHndl);
+                mImageBOHndl = {};
             }
-            mImageBOHndl = nullptr;
+            mImageBOHndl = {};
         }
     }
 
     void alloc_buffer() {
-        if (mImageBOHndl == nullptr) {
+        if (!bool(mImageBOHndl)) { // == nullptr) {
             assert(imgSize() > 0);
             std::cout << "Allocating image device buffer (Tiler), "
                       << " Size : " << imgSize() << " bytes" << std::endl;
-            mImageBOHndl = xrtBOAlloc(gpDhdl, imgSize(), 0, 0);
+            mImageBOHndl = xrt::bo(gpDhdl, imgSize(), mPLKHandleArr[0].group_id(2));
         }
     }
 
@@ -188,9 +221,8 @@ class xfcvDataMovers {
         for (int i = 0; i < CORES; i++) {
             std::string name =
                 (KIND == TILER) ? krnl_inst_name(++gnTilerInstCount) : krnl_inst_name(++gnStitcherInstCount);
-            std::cout << "Loading kernel " << name.c_str() << std::endl;
-            mPLKHandleArr[i] = xrtPLKernelOpen(gpDhdl, gpTop->m_header.uuid, name.c_str());
-            mPLRHandleArr[i] = xrtRunOpen(mPLKHandleArr[i]);
+            std::cout << ">>>>:> Loading kernel " << name.c_str() << std::endl;
+            mPLKHandleArr[i] = xrt::kernel(gpDhdl, xclbin_uuid, name.c_str());
         }
     }
 
@@ -201,12 +233,9 @@ class xfcvDataMovers {
             uint16_t r = tileRowsPerCore(i);
             uint16_t c = tileColsPerCore(i);
             uint32_t NumTiles = r * c;
-            (void)xrtRunSetArg(mPLRHandleArr[i], 0, mImageSize[1]); // Stride is same as Width
-            (void)xrtRunSetArg(mPLRHandleArr[i], 1, NumTiles);      // Number of Tiles
-            (void)xrtRunSetArg(mPLRHandleArr[i], 2, mImageBOHndl);
-            (void)xrtRunSetArg(mPLRHandleArr[i], 3, mMetadataBOHndl[i]);
-            (void)xrtRunSetArg(mPLRHandleArr[i], 4, mBurstLength);
-            (void)xrtRunSetArg(mPLRHandleArr[i], 5, mTilerRGBtoRGBA);
+
+            mPLRHandleArr[i] = mPLKHandleArr[i](mImageSize[1], NumTiles, mImageBOHndl, mMetadataBOHndl[i], mBurstLength,
+                                                mTilerRGBtoRGBA); // Add mTilerRGBtoRGBA inplace of 0
         }
     }
 
@@ -217,27 +246,24 @@ class xfcvDataMovers {
             uint16_t r = tileRowsPerCore(i);
             uint16_t c = tileColsPerCore(i);
             uint32_t NumTiles = r * c;
-            (void)xrtRunSetArg(mPLRHandleArr[i], 0, mImageSize[1]); // Width
-            (void)xrtRunSetArg(mPLRHandleArr[i], 1, NumTiles);      // Number of Tiles
-            (void)xrtRunSetArg(mPLRHandleArr[i], 2, mImageBOHndl);
-            (void)xrtRunSetArg(mPLRHandleArr[i], 3, r); // Number of Tiles rows
-            (void)xrtRunSetArg(mPLRHandleArr[i], 4, c); // Number of Tiles cols
-            (void)xrtRunSetArg(mPLRHandleArr[i], 5, mStitcherRGBAtoRGB);
+
+            mPLRHandleArr[i] = mPLKHandleArr[i](mImageSize[1], NumTiles, mImageBOHndl, r, c, mStitcherRGBAtoRGB);
         }
     }
 
    public:
     void start() {
         for (auto& r : mPLRHandleArr) {
-            xrtRunStart(r);
+            r.start();
+            // xrtRunStart(r);
         }
     }
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == TILER)>::type* = nullptr>
-    xfcvDataMovers(uint16_t overlapH, uint16_t overlapV, bool tilerRGBtoRGBA = false, int burst = 2) {
-        if (gpDhdl == nullptr) {
-            throw std::runtime_error("No valid device handle found. Make sure using xF::deviceInit(...) is called.");
-        }
+    xfcvDataMovers(uint16_t overlapH, uint16_t overlapV, bool tilerRGBtoRGBA = false, int burst = 1) {
+        // if (gpDhdl == nullptr) {
+        //    throw std::runtime_error("No valid device handle found. Make sure using xF::deviceInit(...) is called.");
+        // }
 
         mpImage = nullptr;
         mImageSize = {0, 0, 0};
@@ -253,30 +279,26 @@ class xfcvDataMovers {
         mTileRows = 0;
         mTileCols = 0;
         mbUserHndl = false;
-
         for (int i = 0; i < CORES; i++) {
-            mMetadataBOHndl[i] = nullptr;
+            mMetadataBOHndl[i] = {};
             mMetadataSize[i] = 0;
         }
-        mImageBOHndl = nullptr;
-
+        mImageBOHndl = {};
         // Load the PL kernel
         load_krnl();
     }
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == STITCHER)>::type* = nullptr>
-    xfcvDataMovers(bool stitcherRGBAtoRGB = false, int burst = 2) {
-        if (gpDhdl == nullptr) {
-            throw std::runtime_error("No valid device handle found. Make sure using xF::deviceInit(...) is called.");
-        }
-
+    xfcvDataMovers(bool stitcherRGBAtoRGB = false, int burst = 1) {
+        // if (gpDhdl == nullptr) {
+        //    throw std::runtime_error("No valid device handle found. Make sure using xF::deviceInit(...) is called.");
+        // }
         mpImage = nullptr;
         mImageSize = {0, 0, 0};
 
         // Initialize overlaps
         mOverlapH = 0;
         mOverlapV = 0;
-
         mStitcherRGBAtoRGB = stitcherRGBAtoRGB;
         mBurstLength = burst;
 
@@ -287,10 +309,10 @@ class xfcvDataMovers {
         mbUserHndl = false;
 
         for (int i = 0; i < CORES; i++) {
-            mMetadataBOHndl[i] = nullptr;
+            mMetadataBOHndl[i] = {};
             mMetadataSize[i] = 0;
         }
-        mImageBOHndl = nullptr;
+        mImageBOHndl = {};
 
         // Load the PL kernel
         load_krnl();
@@ -307,23 +329,28 @@ class xfcvDataMovers {
         free_metadata_buffer();
 
         for (auto& r : mPLRHandleArr) {
-            xrtRunClose(r);
+            // xrtRunClose(r);
         }
         for (auto& r : mPLKHandleArr) {
-            xrtKernelClose(r);
+            // xrtKernelClose(r);
         }
-        if (gpDhdl != nullptr) {
-            xrtDeviceClose(gpDhdl);
-            gpDhdl = nullptr;
+        if (bool(gpDhdl)) {
+            // xrtDeviceClose(gpDhdl);
+            // gpDhdl = {};
         }
     }
     //}
 
-    void compute_metadata(const cv::Size& inImgSize, const cv::Size& outImgSize = cv::Size(0, 0));
+    void compute_metadata(const cv::Size& img_size,
+                          const cv::Size& outImgSize = cv::Size(0, 0),
+                          const cv::Size& orgImgSize = xfcvDataMoverParams().mInputImgSize,
+                          bool YorUV = false,
+                          int crop_x = 0,
+                          int crop_y = 0);
 
     // These functions will start the data transfer protocol {
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == TILER)>::type* = nullptr>
-    auto host2aie_nb(cv::Mat& img, xrtBufferHandle imgHndl, const xfcvDataMoverParams& params) {
+    auto host2aie_nb(cv::Mat& img, xrt::bo imgHndl = {}, const xfcvDataMoverParams& params = xfcvDataMoverParams()) {
         assert(sizeof(DATA_TYPE) >= img.elemSize());
 
         auto old_metadata_buffer_size = metadataSize();
@@ -341,11 +368,7 @@ class xfcvDataMovers {
                 // Pack metadata
                 compute_metadata(img.size());
             }
-        } /* else {
-             mpImage = &img;
-             mImageSize = {(uint16_t)img.rows, (uint16_t)img.cols, (uint16_t)img.elemSize()};
-             compute_metadata(img.size(), params.mOutputImgSize);
-         }*/
+        }
 
         auto new_metadata_buffer_size = metadataSize();
         int new_img_buffer_size = imgSize();
@@ -355,41 +378,37 @@ class xfcvDataMovers {
                 free_metadata_buffer(i);
             }
         }
-
-        if ((new_img_buffer_size > old_img_buffer_size) || (imgHndl != nullptr)) {
+        if ((new_img_buffer_size > old_img_buffer_size) || bool(imgHndl)) {
             free_buffer();
         }
+        mbUserHndl = bool(imgHndl);
 
-        mbUserHndl = (imgHndl != nullptr);
         if (mbUserHndl) mImageBOHndl = imgHndl;
 
         // Allocate buffer
         alloc_metadata_buffer();
         alloc_buffer();
-
         // Copy input data to device buffer
         copy();
-
         // Set args
         setArgs();
-
         // Start the kernel
-        start();
+        // start();
 
         std::array<uint16_t, 4> ret = {mTileRowsPerCore, mTileColsPerCore, mTileRows, mTileCols};
         return ret;
     }
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == TILER)>::type* = nullptr>
-    auto host2aie_nb(xrtBufferHandle imgHndl,
+    auto host2aie_nb(xrt::bo* imgHndl,
                      const cv::Size& size,
                      const xfcvDataMoverParams& params = xfcvDataMoverParams()) {
         cv::Mat img(size, CV_8UC1); // This image is redundant in case a handle is passed
-        return host2aie_nb(img, imgHndl, params);
+        return host2aie_nb(img, (*imgHndl), params);
     }
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == STITCHER)>::type* = nullptr>
-    void aie2host_nb(cv::Mat& img, std::array<uint16_t, 4> tiles, xrtBufferHandle imgHndl = nullptr) {
+    void aie2host_nb(cv::Mat& img, std::array<uint16_t, 4> tiles, xrt::bo imgHndl = {}) {
         assert(sizeof(DATA_TYPE) >= img.elemSize());
 
         int old_img_buffer_size = imgSize();
@@ -402,11 +421,11 @@ class xfcvDataMovers {
         mTileCols = tiles[3];
 
         int new_img_buffer_size = imgSize();
-        if ((new_img_buffer_size > old_img_buffer_size) || (imgHndl != nullptr)) {
+        if ((new_img_buffer_size > old_img_buffer_size) || bool(imgHndl)) {
             free_buffer();
         }
 
-        mbUserHndl = (imgHndl != nullptr);
+        mbUserHndl = bool(imgHndl);
         if (mbUserHndl) mImageBOHndl = imgHndl;
 
         // Allocate buffer
@@ -414,29 +433,28 @@ class xfcvDataMovers {
 
         // Set args
         setArgs();
-
         // Start the kernel
-        start();
+        // start();
     }
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == STITCHER)>::type* = nullptr>
-    void aie2host_nb(xrtBufferHandle imgHndl, const cv::Size& size, std::array<uint16_t, 4> tiles) {
+    void aie2host_nb(xrt::bo* imgHndl, const cv::Size& size, std::array<uint16_t, 4> tiles) {
         cv::Mat img(size, CV_8UC1); // This image is redundant in case a handle is passed
-        aie2host_nb(img, tiles, imgHndl);
+        aie2host_nb(img, tiles, (*imgHndl));
     }
     //}
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == TILER)>::type* = nullptr>
     void wait() {
         for (auto& r : mPLRHandleArr) {
-            (void)xrtRunWait(r);
+            (void)r.wait();
         }
     }
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == STITCHER)>::type* = nullptr>
     void wait() {
         for (auto& r : mPLRHandleArr) {
-            (void)xrtRunWait(r);
+            (void)r.wait();
         }
 
         // Copy data from device buffer to host
@@ -503,7 +521,12 @@ void xfcvDataMovers<KIND,
                     AIE_VECTORIZATION_FACTOR,
                     CORES,
                     PL_AXI_BITWIDTH,
-                    USE_GMIO>::compute_metadata(const cv::Size& inImgSize, const cv::Size& outImgSize) {
+                    USE_GMIO>::compute_metadata(const cv::Size& inImgSize,
+                                                const cv::Size& outImgSize,
+                                                const cv::Size& orgImgSize,
+                                                bool YorUV,
+                                                int crop_x,
+                                                int crop_y) {
     mMetaDataList.clear();
     mMetaDataVec.clear();
 
@@ -526,9 +549,9 @@ void xfcvDataMovers<KIND,
                                                             AIE_VECTORIZATION_FACTOR, true);
     } else {
         isOutputResize = true;
-        smartTileTilerGenerateMetaDataWithSpecifiedTileSize({inputImgSize.height, inputImgSize.width},
-                                                            {outputImgSize.height, outputImgSize.width}, mMetaDataList,
-                                                            mTileRows, mTileCols, AIE_VECTORIZATION_FACTOR, true);
+        smartTileTilerGenerateMetaDataWithSpecifiedTileSize(
+            {inputImgSize.height, inputImgSize.width}, {outputImgSize.height, outputImgSize.width}, mMetaDataList,
+            mTileRows, mTileCols, AIE_VECTORIZATION_FACTOR, YorUV, true);
     }
 
     char sMesg[2048];
@@ -541,7 +564,8 @@ void xfcvDataMovers<KIND,
     mTileRowsPerCore = (mTileRows + CORES - 1) / CORES;
     mTileColsPerCore = mTileCols;
 
-    int OutOffset, InOffset, OutpositionV, OutpositionH, OutWidth, OutHeight;
+    int OutOffset, InOffset, OutpositionV, OutpositionH, OutWidth, OutHeight, ImageStride;
+
     int InputImageStride = (int)inputImgSize.width;
     int OutputImageStride = (int)outputImgSize.width;
 
@@ -560,7 +584,8 @@ void xfcvDataMovers<KIND,
         }
 
         OutOffset = ((OutpositionV * OutputImageStride) + OutpositionH);
-        InOffset = ((metaData.positionV() * InputImageStride) + metaData.positionH());
+        // InOffset = ((metaData.positionV() * InputImageStride) + metaData.positionH());
+        InOffset = (((crop_y + metaData.positionV()) * InputImageStride) + (metaData.positionH() + crop_x));
 
         mMetaDataVec.emplace_back((int16_t)(InOffset & 0x0000ffff));
         mMetaDataVec.emplace_back((int16_t)(InOffset >> 16));
@@ -596,3 +621,6 @@ void xfcvDataMovers<KIND,
         mMetaDataVec.emplace_back((int16_t)0);
     }
 }
+} // xF
+
+#endif

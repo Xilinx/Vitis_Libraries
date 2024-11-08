@@ -52,20 +52,7 @@
                         "$(OPENCV_LIB)"
                     ]
                 }
-            },
-            "containers": [
-                {
-                    "name": "krnl_stereolbm",
-                    "accelerators": [
-                        {
-                            "name": "stereolbm_accel",
-                            "frequency": 150.0
-                        }
-                    ],
-                    "frequency": 150.0
-                }
-            ]
-        }
+            }
         },
         "vck190": {
             "host": {
@@ -104,6 +91,7 @@
                     "frequency": 150.0
                 }
             ]
+        }
     },
     "gui": true,
     "launch": [

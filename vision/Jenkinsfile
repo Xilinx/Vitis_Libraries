@@ -1,4 +1,4 @@
 @Library('pipeline-library')_
 
-VitisLibPipeline (branch: 'next', libname: 'xf_opencv', TARGETS: 'hls_csim:hls_csynth:hls_cosim:vitis_sw_emu:vitis_hw_emu',
-                  devtest: 'RunDeploy.sh', TOOLVERSION: '2024.1_stable_latest')
+VitisLibPipeline (branch: 'next', libname: 'xf_opencv', TARGETS: 'hls_csim:hls_csynth:hls_cosim:vivado_syn:vitis_aie_x86sim:vitis_aie_sim:vitis_sw_emu:vitis_hw_emu:vitis_hw_build',
+                  devtest: 'RunDeploy.sh', TOOLVERSION: '2024.2_stable_latest')

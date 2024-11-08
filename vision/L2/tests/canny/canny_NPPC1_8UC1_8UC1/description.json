@@ -6,12 +6,12 @@
     "flow": "system",
     "platform_allowlist": [
         "zcu104",
-        "vck190",
         "aws-vu9p-f1"
     ],
     "platform_blocklist": [
         "u280",
-        "u250"
+        "u250",
+        "vck190"
     ],
     "platform_properties": {
         "aws-vu9p-f1": {
@@ -29,32 +29,6 @@
             }
         },
         "zcu104": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include",
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/lib"
-                    ]
-                },
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
-                }
-            }
-        },
-        "vck190": {
             "host": {
                 "compiler": {
                     "includepaths": [

@@ -3,12 +3,12 @@
     "description": "YUY2-filter2d AIE function example", 
     "flow": "versal", 
     "platform_allowlist": [
-        "vek280",
-        "vck190"
+        "vek280"
     ], 
     "platform_blocklist": [
         "vck5000",
-        "v70"
+        "v70",
+        "vck190"
     ], 
     "platform_properties": {
         "vek280": {

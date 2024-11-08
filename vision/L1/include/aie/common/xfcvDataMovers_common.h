@@ -1,10 +1,18 @@
-int xrtSyncBOAIENB(xrtDeviceHandle handle,
-                   xrtBufferHandle bohdl,
-                   const char* gmioName,
-                   enum xclBOSyncDirection dir,
-                   size_t size,
-                   size_t offset);
-int xrtGMIOWait(xrtDeviceHandle handle, const char* gmioName);
+/*
+ * Copyright 2021 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 namespace xF {
 
@@ -56,45 +64,32 @@ class CtypeToCVMatType {
                                                 : (std::is_same<T, signed char>::value) ? CV_8S : CV_8U;
 };
 
-static xrtDeviceHandle gpDhdl = nullptr;
+static xrt::device gpDhdl(nullptr);
 static std::vector<char> gHeader;
 static const axlf* gpTop = nullptr;
+static xrt::uuid xclbin_uuid;
+
 static uint16_t gnTilerInstCount = 0;
 static uint16_t gnStitcherInstCount = 0;
 
-void deviceInit(const char* xclBin) {
-    if (xclBin != nullptr) {
-        if (gpDhdl == nullptr) {
+void deviceInit(std::string xclBin) {
+    if (!(xclBin.empty())) {
+        if (!bool(gpDhdl)) {
             assert(gpTop == nullptr);
 
-            gpDhdl = xrtDeviceOpen(0);
-            if (gpDhdl == nullptr) {
+            gpDhdl = xrt::device(0);
+            if (!bool(gpDhdl)) {
                 throw std::runtime_error("No valid device handle found. Make sure using right xclOpen index.");
             }
 
-            std::ifstream stream(xclBin);
-            stream.seekg(0, stream.end);
-            size_t size = stream.tellg();
-            stream.seekg(0, stream.beg);
-
-            gHeader.resize(size);
-            stream.read(gHeader.data(), size);
-
-            gpTop = reinterpret_cast<const axlf*>(gHeader.data());
-            if (xrtDeviceLoadXclbin(gpDhdl, gpTop)) {
-                throw std::runtime_error("Xclbin loading failed");
-            }
-
-            adf::registerXRT(gpDhdl, gpTop->m_header.uuid);
+            xclbin_uuid = gpDhdl.load_xclbin(xclBin);
+            std::cout << xclbin_uuid.to_string().c_str() << std::endl;
+            // adf::registerXRT(dhdl, xclbin_uuid.get());//(const unsigned char*)xclbin_uuid.to_string().c_str());
         }
     }
 
-    if (gpDhdl == nullptr) {
+    if (!bool(gpDhdl)) {
         throw std::runtime_error("No valid device handle found. Make sure using right xclOpen index.");
-    }
-
-    if (gpTop == nullptr) {
-        throw std::runtime_error("Xclbin loading failed");
     }
 }
 
@@ -109,3 +104,4 @@ struct xfcvDataMoverParams {
     xfcvDataMoverParams(const cv::Size& inImgSize, const cv::Size& outImgSize)
         : mInputImgSize(inImgSize), mOutputImgSize(outImgSize) {}
 };
+}

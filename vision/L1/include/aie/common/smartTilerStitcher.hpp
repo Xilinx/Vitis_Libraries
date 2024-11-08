@@ -39,6 +39,7 @@ void smartTileTilerGenerateMetaDataWithSpecifiedTileSize(std::vector<uint16_t> s
                                                          uint16_t& numberOfTileRows,
                                                          uint16_t& numberOfTileColumns,
                                                          int tileAlignment = 1,
+                                                         bool YorUV = 0,
                                                          bool enableInvalidRegions = true);
 } // namespace xF
 

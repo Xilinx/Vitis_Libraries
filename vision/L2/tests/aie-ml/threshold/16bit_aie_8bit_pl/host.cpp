@@ -19,16 +19,21 @@
 
 #include <adf/adf_api/XRTConfig.h>
 #include <chrono>
-#include <common/xfcvDataMovers.h>
 #include <common/xf_aie_sw_utils.hpp>
+#include <common/xfcvDataMovers.h>
 #include <fstream>
+#include <sstream>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <xaiengine.h>
 #include <xrt/experimental/xrt_kernel.h>
+#include <xrt/experimental/xrt_graph.h>
+#include <xrt/experimental/xrt_aie.h>
+#include <cmath>
+#include <string.h>
+#include <vector>
 
-#include "graph.cpp"
+#include "config.h"
 
 int run_opencv_ref(cv::Mat& srcImageR, cv::Mat& dstRefImage, int thresh_val, int max_val) {
     cv::threshold(srcImageR, dstRefImage, thresh_val, max_val, 0);
