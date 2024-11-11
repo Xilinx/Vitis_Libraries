@@ -42,143 +42,135 @@ const uint32_t strbSize = (OUT_BITWIDTH / 8);
 typedef ap_uint<IN_BITWIDTH> in_t;
 typedef ap_uint<OUT_BITWIDTH> out_t;
 
-void gzipMultiByteDecompressEngineRun(
-    hls::stream<in_t> &inStream, hls::stream<bool> &inEos,
-    hls::stream<ap_uint<OUT_BITWIDTH + strbSize>> &outStream)
+void gzipMultiByteDecompressEngineRun(hls::stream<in_t>& inStream,
+                                      hls::stream<bool>& inEos,
+                                      hls::stream<ap_uint<OUT_BITWIDTH + strbSize> >& outStream)
 
 {
-  const int c_decoderType = (int)HUFFMAN_TYPE;
+    const int c_decoderType = (int)HUFFMAN_TYPE;
 
-  xf::compression::details::inflateMultiByteCore<
-      c_decoderType, MULTIPLE_BYTES, xf::compression::FileFormat::BOTH,
-      LL_MODEL, HISTORY_SIZE>(inStream, inEos, outStream);
+    xf::compression::details::inflateMultiByteCore<c_decoderType, MULTIPLE_BYTES, xf::compression::FileFormat::BOTH,
+                                                   LL_MODEL, HISTORY_SIZE>(inStream, inEos, outStream);
 }
 
-bool validateFile(std::string &fileName, std::string &originalFileName) {
-  hls::stream<in_t> inStream("inStream");
-  hls::stream<bool> inEos("inEos");
-  hls::stream<ap_uint<OUT_BITWIDTH + strbSize>> outStream("decompressOut");
+bool validateFile(std::string& fileName, std::string& originalFileName) {
+    hls::stream<in_t> inStream("inStream");
+    hls::stream<bool> inEos("inEos");
+    hls::stream<ap_uint<OUT_BITWIDTH + strbSize> > outStream("decompressOut");
 
-  std::string outputFileName = fileName + ".out";
+    std::string outputFileName = fileName + ".out";
 
-  std::ifstream inFile(fileName.c_str(), std::ifstream::binary);
-  if (!inFile.is_open()) {
-    std::cout << "Cannot open the compressed file!!" << fileName << std::endl;
-    return false;
-  }
-  inFile.seekg(0, std::ios::end); // reaching to end of file
-  uint32_t comp_length = (uint32_t)inFile.tellg();
-  inFile.seekg(0, std::ios::beg);
-  for (uint32_t i = 0; i < comp_length; i += sizeof_in) {
-    in_t x;
-    inFile.read((char *)&x, sizeof_in);
-    inStream << x;
-    inEos << 0;
-  }
-  inStream << 0;
-  inEos << 1;
-  inFile.close();
+    std::ifstream inFile(fileName.c_str(), std::ifstream::binary);
+    if (!inFile.is_open()) {
+        std::cout << "Cannot open the compressed file!!" << fileName << std::endl;
+        return false;
+    }
+    inFile.seekg(0, std::ios::end); // reaching to end of file
+    uint32_t comp_length = (uint32_t)inFile.tellg();
+    inFile.seekg(0, std::ios::beg);
+    for (uint32_t i = 0; i < comp_length; i += sizeof_in) {
+        in_t x;
+        inFile.read((char*)&x, sizeof_in);
+        inStream << x;
+        inEos << 0;
+    }
+    inStream << 0;
+    inEos << 1;
+    inFile.close();
 
-  // DECOMPRESSION CALL
-  gzipMultiByteDecompressEngineRun(inStream, inEos, outStream);
+    // DECOMPRESSION CALL
+    gzipMultiByteDecompressEngineRun(inStream, inEos, outStream);
 
-  std::ofstream outFile;
-  outFile.open(outputFileName.c_str(), std::ofstream::binary);
+    std::ofstream outFile;
+    outFile.open(outputFileName.c_str(), std::ofstream::binary);
 
-  std::ifstream originalFile;
-  originalFile.open(originalFileName.c_str(), std::ifstream::binary);
-  if (!originalFile.is_open()) {
-    std::cout << "Cannot open the original file " << originalFileName
-              << std::endl;
-    return false;
-  }
+    std::ifstream originalFile;
+    originalFile.open(originalFileName.c_str(), std::ifstream::binary);
+    if (!originalFile.is_open()) {
+        std::cout << "Cannot open the original file " << originalFileName << std::endl;
+        return false;
+    }
 
-  bool pass = true;
-  uint64_t outCnt = 0;
-  out_t g;
+    bool pass = true;
+    uint64_t outCnt = 0;
+    out_t g;
 
-  for (ap_uint<OUT_BITWIDTH + strbSize> val = outStream.read(); val != 0;
-       val = outStream.read()) {
-    // reading value from output stream
-    out_t o = val.range(strbSize + OUT_BITWIDTH - 1, strbSize);
-    ap_uint<strbSize> strb = val.range(strbSize - 1, 0);
+    for (ap_uint<OUT_BITWIDTH + strbSize> val = outStream.read(); val != 0; val = outStream.read()) {
+        // reading value from output stream
+        out_t o = val.range(strbSize + OUT_BITWIDTH - 1, strbSize);
+        ap_uint<strbSize> strb = val.range(strbSize - 1, 0);
 
-    size_t size = __builtin_popcount(strb.to_uint());
-    // writing output file
-    outFile.write((char *)&o, size);
-    outCnt += size;
+        size_t size = __builtin_popcount(strb.to_uint());
+        // writing output file
+        outFile.write((char*)&o, size);
+        outCnt += size;
 
-    // Comparing with input file
-    g = 0;
-    originalFile.read((char *)&g, strbSize);
-    if (o != g) {
-      for (uint8_t v = 0; v < size; v++) {
-        uint8_t e = g.range((v + 1) * 8 - 1, v * 8);
-        uint8_t r = o.range((v + 1) * 8 - 1, v * 8);
-        if (e != r) {
-          pass = false;
-          std::cout << "Expected=" << std::hex << e << " got=" << r
-                    << std::endl;
-          std::cout << "-----TEST FAILED: The input file and the file after "
-                    << "decompression are not similar!-----" << std::endl;
+        // Comparing with input file
+        g = 0;
+        originalFile.read((char*)&g, strbSize);
+        if (o != g) {
+            for (uint8_t v = 0; v < size; v++) {
+                uint8_t e = g.range((v + 1) * 8 - 1, v * 8);
+                uint8_t r = o.range((v + 1) * 8 - 1, v * 8);
+                if (e != r) {
+                    pass = false;
+                    std::cout << "Expected=" << std::hex << e << " got=" << r << std::endl;
+                    std::cout << "-----TEST FAILED: The input file and the file after "
+                              << "decompression are not similar!-----" << std::endl;
+                }
+                if (!pass) break;
+            }
         }
-        if (!pass)
-          break;
-      }
     }
-  }
-  std::cout << "Decompressed size: " << std::dec << outCnt << " ";
-  outFile.close();
-  if (pass) {
-    std::cout << "\nTEST PASSED\n" << std::endl;
-  } else {
-    std::cout << "TEST FAILED\n" << std::endl;
-  }
-  originalFile.close();
-  return pass;
+    std::cout << "Decompressed size: " << std::dec << outCnt << " ";
+    outFile.close();
+    if (pass) {
+        std::cout << "\nTEST PASSED\n" << std::endl;
+    } else {
+        std::cout << "TEST FAILED\n" << std::endl;
+    }
+    originalFile.close();
+    return pass;
 }
 
-int main(int argc, char *argv[]) {
-  sda::utils::CmdLineParser parser;
+int main(int argc, char* argv[]) {
+    sda::utils::CmdLineParser parser;
 
-  parser.addSwitch("--file_list", "-l", "List of files", "");
-  parser.addSwitch("--compressed_file", "-f", "Compressed zlib file path", "");
-  parser.addSwitch("--original_file", "-o", "Original file path", "");
-  parser.addSwitch("--current_path", "-p", "Current data path", "");
-  parser.parse(argc, argv);
+    parser.addSwitch("--file_list", "-l", "List of files", "");
+    parser.addSwitch("--compressed_file", "-f", "Compressed zlib file path", "");
+    parser.addSwitch("--original_file", "-o", "Original file path", "");
+    parser.addSwitch("--current_path", "-p", "Current data path", "");
+    parser.parse(argc, argv);
 
-  std::string listFileName = parser.value("file_list");
-  std::string singleInputFileName = parser.value("compressed_file");
-  std::string singleGoldenFileName = parser.value("original_file");
-  std::string currentPath = parser.value("current_path");
+    std::string listFileName = parser.value("file_list");
+    std::string singleInputFileName = parser.value("compressed_file");
+    std::string singleGoldenFileName = parser.value("original_file");
+    std::string currentPath = parser.value("current_path");
 
-  // parse the arguments
-  bool pass;
-  if (!listFileName.empty()) {
-    // validate multiple files
-    if (currentPath.empty()) {
-      std::cout << "Path for data not specified.." << std::endl;
-      std::cout << "Expecting absolute paths for files in list file."
-                << std::endl;
+    // parse the arguments
+    bool pass;
+    if (!listFileName.empty()) {
+        // validate multiple files
+        if (currentPath.empty()) {
+            std::cout << "Path for data not specified.." << std::endl;
+            std::cout << "Expecting absolute paths for files in list file." << std::endl;
+        }
+
+        std::ifstream infilelist(listFileName.c_str());
+        std::string curFileName;
+        // decompress and validate
+        while (std::getline(infilelist, curFileName)) {
+            auto origninalFileName = currentPath + "/" + curFileName;    // get original file path
+            auto dcmpFileName = currentPath + "/" + curFileName + ".gz"; // compressed file path
+
+            std::cout << "File: " << curFileName << std::endl;
+            pass = validateFile(dcmpFileName, origninalFileName);
+        }
+    } else {
+        std::cout << "File: " << singleInputFileName << std::endl;
+        // decompress and validate
+        pass = validateFile(singleInputFileName, singleGoldenFileName);
     }
 
-    std::ifstream infilelist(listFileName.c_str());
-    std::string curFileName;
-    // decompress and validate
-    while (std::getline(infilelist, curFileName)) {
-      auto origninalFileName =
-          currentPath + "/" + curFileName; // get original file path
-      auto dcmpFileName =
-          currentPath + "/" + curFileName + ".gz"; // compressed file path
-
-      std::cout << "File: " << curFileName << std::endl;
-      pass = validateFile(dcmpFileName, origninalFileName);
-    }
-  } else {
-    std::cout << "File: " << singleInputFileName << std::endl;
-    // decompress and validate
-    pass = validateFile(singleInputFileName, singleGoldenFileName);
-  }
-
-  return pass == true ? 0 : 1;
+    return pass == true ? 0 : 1;
 }

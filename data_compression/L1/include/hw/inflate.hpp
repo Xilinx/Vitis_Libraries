@@ -274,9 +274,9 @@ void lzPreProcessingUnitLL(hls::stream<SIZE_DT>& inLitLen,
 
 template <class SIZE_DT = uint8_t, int PARALLEL_BYTES = 8, int PARALLEL_OUT_BYTES = 16, int OWIDTH = 16>
 void lzPreProcessingUnitLL_opt3(hls::stream<SIZE_DT>& inLitLen,
-                           hls::stream<SIZE_DT>& inMatchLen,
-                           hls::stream<ap_uint<OWIDTH> >& inOffset,
-                           hls::stream<ap_uint<11 + OWIDTH + 1 + 5> >& outInfo) {// opt3
+                                hls::stream<SIZE_DT>& inMatchLen,
+                                hls::stream<ap_uint<OWIDTH> >& inOffset,
+                                hls::stream<ap_uint<11 + OWIDTH + 1 + 5> >& outInfo) { // opt3
 
     SIZE_DT litlen = inLitLen.read();
     SIZE_DT matchlen = inMatchLen.read();
@@ -284,20 +284,21 @@ void lzPreProcessingUnitLL_opt3(hls::stream<SIZE_DT>& inLitLen,
     ap_uint<OWIDTH> litCount = litlen;
 
     ap_uint<4> l_litlen = 0;
-    ap_uint<4+1> l_matchlen = 0;
-    ap_uint<5> l_matchlen_overlap = 0;// opt3
+    ap_uint<4 + 1> l_matchlen = 0;
+    ap_uint<5> l_matchlen_overlap = 0; // opt3
     ap_uint<3> l_stateinfo = 0;
     ap_uint<OWIDTH> l_matchloc = litCount - offset;
-    ap_uint<11 +1+ OWIDTH + 5> outVal = 0; // 0-15 Match Loc, 16-19 Match Len, 20-23 Lit length, 24-26 State Info// opt3
+    ap_uint<11 + 1 + OWIDTH + 5> outVal =
+        0; // 0-15 Match Loc, 16-19 Match Len, 20-23 Lit length, 24-26 State Info// opt3
     bool done = false;
     bool read = false;
     bool fdone = false;
 
     if (litlen == 0) {
         outVal.range(OWIDTH - 1, 0) = 0;
-        outVal.range(OWIDTH + 3+1, OWIDTH) = matchlen;
-        outVal.range(OWIDTH + 7+1, OWIDTH + 4+1) = litlen;
-        outVal.range(OWIDTH + 10+1, OWIDTH + 8+1) = 6;
+        outVal.range(OWIDTH + 3 + 1, OWIDTH) = matchlen;
+        outVal.range(OWIDTH + 7 + 1, OWIDTH + 4 + 1) = litlen;
+        outVal.range(OWIDTH + 10 + 1, OWIDTH + 8 + 1) = 6;
         outInfo << outVal;
         done = true;
         fdone = false;
@@ -322,47 +323,44 @@ void lzPreProcessingUnitLL_opt3(hls::stream<SIZE_DT>& inLitLen,
             l_matchloc = 0;
             read = (matchlen || litlen) ? false : true;
         } else {
-#if(0)
+#if (0)
             l_matchlen = (offset > PARALLEL_OUT_BYTES)
                              ? ((matchlen > PARALLEL_OUT_BYTES) ? (SIZE_DT)PARALLEL_OUT_BYTES : (SIZE_DT)matchlen)
                              : (matchlen > offset) ? (SIZE_DT)offset : (SIZE_DT)matchlen;
-            l_matchlen_overlap = (offset > PARALLEL_OUT_BYTES)
-                             ? (0)
-                             : (matchlen == 7 && offset == 4)? 3:0;
-                             ///: (matchlen > offset) ? (SIZE_DT)(matchlen - offset) : 0; error for b1.lz4
-#endif 
-#if(1)
-            l_matchlen = (offset > PARALLEL_OUT_BYTES)
-                             ? ((matchlen > PARALLEL_OUT_BYTES) ? (SIZE_DT)PARALLEL_OUT_BYTES : (SIZE_DT)matchlen)
-                             : (matchlen > offset && !(matchlen == 7 && offset == 4)) ? (SIZE_DT)offset : (SIZE_DT)matchlen;
-            l_matchlen_overlap = (offset > PARALLEL_OUT_BYTES)
-                             ? (0)
-                             : (matchlen == 7 && offset == 4)? 3:0;
-                             ///: (matchlen > offset) ? (SIZE_DT)(matchlen - offset) : 0; error for b1.lz4
+            l_matchlen_overlap = (offset > PARALLEL_OUT_BYTES) ? (0) : (matchlen == 7 && offset == 4) ? 3 : 0;
+///: (matchlen > offset) ? (SIZE_DT)(matchlen - offset) : 0; error for b1.lz4
 #endif
-#if(0)
-            if(matchlen == 7 && offset == 4){//special branch
+#if (1)
+            l_matchlen =
+                (offset > PARALLEL_OUT_BYTES)
+                    ? ((matchlen > PARALLEL_OUT_BYTES) ? (SIZE_DT)PARALLEL_OUT_BYTES : (SIZE_DT)matchlen)
+                    : (matchlen > offset && !(matchlen == 7 && offset == 4)) ? (SIZE_DT)offset : (SIZE_DT)matchlen;
+            l_matchlen_overlap = (offset > PARALLEL_OUT_BYTES) ? (0) : (matchlen == 7 && offset == 4) ? 3 : 0;
+///: (matchlen > offset) ? (SIZE_DT)(matchlen - offset) : 0; error for b1.lz4
+#endif
+#if (0)
+            if (matchlen == 7 && offset == 4) { // special branch
                 l_matchlen_overlap = 3;
-                //l_matchlen = 4;
-                //next: l_matchlen +=  l_matchlen_overlap;     
-                l_matchlen = 7; //recover the original value 
-            }else{//the normal branch
+                // l_matchlen = 4;
+                // next: l_matchlen +=  l_matchlen_overlap;
+                l_matchlen = 7; // recover the original value
+            } else {            // the normal branch
                 l_matchlen_overlap = 0;
                 l_matchlen = (offset > PARALLEL_OUT_BYTES)
-                             ? ((matchlen > PARALLEL_OUT_BYTES) ? (SIZE_DT)PARALLEL_OUT_BYTES : (SIZE_DT)matchlen)
-                             : (matchlen > offset) ? (SIZE_DT)offset : (SIZE_DT)matchlen;
+                                 ? ((matchlen > PARALLEL_OUT_BYTES) ? (SIZE_DT)PARALLEL_OUT_BYTES : (SIZE_DT)matchlen)
+                                 : (matchlen > offset) ? (SIZE_DT)offset : (SIZE_DT)matchlen;
             }
-#endif          
-                             
+#endif
+
             if (offset < 6 * PARALLEL_OUT_BYTES) {
-                l_stateinfo.range(0, 0) = 1; //reg
+                l_stateinfo.range(0, 0) = 1; // reg
                 l_stateinfo.range(2, 1) = 1;
             } else {
-                l_stateinfo.range(0, 0) = 0; //ram
+                l_stateinfo.range(0, 0) = 0; // ram
                 l_stateinfo.range(2, 1) = 1;
             }
             l_matchloc = litCount - offset;
-            
+
             if (offset < PARALLEL_OUT_BYTES) {
                 offset = offset << 1;
             }
@@ -373,28 +371,31 @@ void lzPreProcessingUnitLL_opt3(hls::stream<SIZE_DT>& inLitLen,
             read = matchlen ? false : true;
         }
         outVal.range(OWIDTH - 1, 0) = l_matchloc;
-        outVal.range(OWIDTH + 3+1, OWIDTH) = l_matchlen;
-        outVal.range(OWIDTH + 7+1, OWIDTH + 4+1) = l_litlen;
-        outVal.range(OWIDTH + 10+1, OWIDTH + 8+1) = l_stateinfo;
-        outVal.range(OWIDTH + 11+3, OWIDTH + 11+1) = l_matchlen_overlap;
+        outVal.range(OWIDTH + 3 + 1, OWIDTH) = l_matchlen;
+        outVal.range(OWIDTH + 7 + 1, OWIDTH + 4 + 1) = l_litlen;
+        outVal.range(OWIDTH + 10 + 1, OWIDTH + 8 + 1) = l_stateinfo;
+        outVal.range(OWIDTH + 11 + 3, OWIDTH + 11 + 1) = l_matchlen_overlap;
         outInfo << outVal;
 #ifdef STT_M3
         stt_write_tk++;
         printf("STT_M3 cnt_loop( %7d ) cnt_token( %7d ) ", stt_i_loop++, stt_num_token);
         printf(" litlen(%2d )( %5d )( %5d )", l_litlen.to_int(), stt_lit_len, litlen);
-        printf(" token_len_offset( %5d , %4d ) sent_len_offset( %5d , %4d ) rem_len( %5d )", stt_match_len, stt_offset, l_matchlen.to_int(),  offset, matchlen);
+        printf(" token_len_offset( %5d , %4d ) sent_len_offset( %5d , %4d ) rem_len( %5d )", stt_match_len, stt_offset,
+               l_matchlen.to_int(), offset, matchlen);
         printf(" matloc(%2d )", l_matchloc.to_int());
-        if(l_stateinfo.range(0, 0) == 1)  printf(" Reg ");
-        else  printf(" RAM ");
+        if (l_stateinfo.range(0, 0) == 1)
+            printf(" Reg ");
+        else
+            printf(" RAM ");
         printf("\n");
 #endif
 
         if (read) {
             litlen = inLitLen.read();
-            matchlen = inMatchLen.read(); 
+            matchlen = inMatchLen.read();
             offset = inOffset.read();
             litCount += litlen;
-#ifdef STT_M3            
+#ifdef STT_M3
             stt_num_token++;
             stt_lit_len = litlen;
             stt_match_len = matchlen;
@@ -413,9 +414,9 @@ void lzPreProcessingUnitLL_opt3(hls::stream<SIZE_DT>& inLitLen,
 #endif
     if (fdone) {
         outVal.range(OWIDTH - 1, 0) = l_matchloc;
-        outVal.range(OWIDTH + 3+1, OWIDTH) = l_matchlen;
-        outVal.range(OWIDTH + 7+1, OWIDTH + 4+1) = l_litlen;
-        outVal.range(OWIDTH + 10+1, OWIDTH + 8+1) = 6;
+        outVal.range(OWIDTH + 3 + 1, OWIDTH) = l_matchlen;
+        outVal.range(OWIDTH + 7 + 1, OWIDTH + 4 + 1) = l_litlen;
+        outVal.range(OWIDTH + 10 + 1, OWIDTH + 8 + 1) = 6;
         outInfo << outVal;
     }
 }
@@ -452,7 +453,7 @@ lzProcessing:
         nextValue = inStream.read();
         eosFlag = (nextValue == 0xFFFF);
 
-        bool outFlag = false, outStreamFlag=false;
+        bool outFlag = false, outStreamFlag = false;
         if ((inValue.range(15, 8) == 0xFE) || (inValue.range(15, 8) == 0xFD)) {
             // ignore invalid byte
             outFlag = false;
@@ -546,33 +547,31 @@ lzProcessing:
     litLenStream << 0;
 }
 
-
 //______________________________________________________________________________
 template <class SIZE_DT = uint8_t, int PARALLEL_BYTES = 8, int PARALLEL_OUT_BYTES = 16, int OWIDTH = 16>
 void lzPreProcessingUnitLL_opt2(hls::stream<SIZE_DT>& inLitLen,
-                           hls::stream<SIZE_DT>& inMatchLen,
-                           hls::stream<ap_uint<OWIDTH> >& inOffset,
-                           hls::stream<ap_uint<11 + OWIDTH + 1> >& outInfo) {
-
+                                hls::stream<SIZE_DT>& inMatchLen,
+                                hls::stream<ap_uint<OWIDTH> >& inOffset,
+                                hls::stream<ap_uint<11 + OWIDTH + 1> >& outInfo) {
     SIZE_DT litlen = inLitLen.read();
     SIZE_DT matchlen = inMatchLen.read();
     ap_uint<OWIDTH> offset = inOffset.read();
     ap_uint<OWIDTH> litCount = litlen;
 
     ap_uint<4> l_litlen = 0;
-    ap_uint<4+1> l_matchlen = 0;
+    ap_uint<4 + 1> l_matchlen = 0;
     ap_uint<3> l_stateinfo = 0;
     ap_uint<OWIDTH> l_matchloc = litCount - offset;
-    ap_uint<11 +1+ OWIDTH> outVal = 0; // 0-15 Match Loc, 16-19 Match Len, 20-23 Lit length, 24-26 State Info
+    ap_uint<11 + 1 + OWIDTH> outVal = 0; // 0-15 Match Loc, 16-19 Match Len, 20-23 Lit length, 24-26 State Info
     bool done = false;
     bool read = false;
     bool fdone = false;
 
     if (litlen == 0) {
         outVal.range(OWIDTH - 1, 0) = 0;
-        outVal.range(OWIDTH + 3+1, OWIDTH) = matchlen;
-        outVal.range(OWIDTH + 7+1, OWIDTH + 4+1) = litlen;
-        outVal.range(OWIDTH + 10+1, OWIDTH + 8+1) = 6;
+        outVal.range(OWIDTH + 3 + 1, OWIDTH) = matchlen;
+        outVal.range(OWIDTH + 7 + 1, OWIDTH + 4 + 1) = litlen;
+        outVal.range(OWIDTH + 10 + 1, OWIDTH + 8 + 1) = 6;
         outInfo << outVal;
         done = true;
         fdone = false;
@@ -617,9 +616,9 @@ void lzPreProcessingUnitLL_opt2(hls::stream<SIZE_DT>& inLitLen,
             read = matchlen ? false : true;
         }
         outVal.range(OWIDTH - 1, 0) = l_matchloc;
-        outVal.range(OWIDTH + 3+1, OWIDTH) = l_matchlen;
-        outVal.range(OWIDTH + 7+1, OWIDTH + 4+1) = l_litlen;
-        outVal.range(OWIDTH + 10+1, OWIDTH + 8+1) = l_stateinfo;
+        outVal.range(OWIDTH + 3 + 1, OWIDTH) = l_matchlen;
+        outVal.range(OWIDTH + 7 + 1, OWIDTH + 4 + 1) = l_litlen;
+        outVal.range(OWIDTH + 10 + 1, OWIDTH + 8 + 1) = l_stateinfo;
         outInfo << outVal;
 #ifdef STT_M3
         stt_write_tk++;
@@ -631,10 +630,10 @@ void lzPreProcessingUnitLL_opt2(hls::stream<SIZE_DT>& inLitLen,
 
         if (read) {
             litlen = inLitLen.read();
-            matchlen = inMatchLen.read(); 
+            matchlen = inMatchLen.read();
             offset = inOffset.read();
             litCount += litlen;
-#ifdef STT_M3            
+#ifdef STT_M3
             stt_num_token++;
             stt_lit_len = litlen;
             stt_match_len = matchlen;
@@ -652,9 +651,9 @@ void lzPreProcessingUnitLL_opt2(hls::stream<SIZE_DT>& inLitLen,
 #endif
     if (fdone) {
         outVal.range(OWIDTH - 1, 0) = l_matchloc;
-        outVal.range(OWIDTH + 3+1, OWIDTH) = l_matchlen;
-        outVal.range(OWIDTH + 7+1, OWIDTH + 4+1) = l_litlen;
-        outVal.range(OWIDTH + 10+1, OWIDTH + 8+1) = 6;
+        outVal.range(OWIDTH + 3 + 1, OWIDTH) = l_matchlen;
+        outVal.range(OWIDTH + 7 + 1, OWIDTH + 4 + 1) = l_litlen;
+        outVal.range(OWIDTH + 10 + 1, OWIDTH + 8 + 1) = 6;
         outInfo << outVal;
     }
 }

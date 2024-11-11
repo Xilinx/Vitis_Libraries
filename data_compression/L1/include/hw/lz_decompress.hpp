@@ -504,12 +504,12 @@ template <int PARALLEL_BYTES,
           class SIZE_OFFSET = ap_uint<16> >
 
 void lzMultiByteDecompressLL_opt3(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& litStream,
-                             hls::stream<ap_uint<11 +1+ OWIDTH + 5> >& infoStream,// opt3
-                             hls::stream<ap_uint<(PARALLEL_OUT_BYTES * 8) + PARALLEL_OUT_BYTES> >& outStream) {
+                                  hls::stream<ap_uint<11 + 1 + OWIDTH + 5> >& infoStream, // opt3
+                                  hls::stream<ap_uint<(PARALLEL_OUT_BYTES * 8) + PARALLEL_OUT_BYTES> >& outStream) {
     const uint8_t c_parallelBit = PARALLEL_OUT_BYTES * 8;
     const uint8_t c_lowOffset = 6 * PARALLEL_OUT_BYTES;
 
-    const uint16_t c_ramHistSize = HISTORY_SIZE / (PARALLEL_OUT_BYTES * 2);//4096 //2048
+    const uint16_t c_ramHistSize = HISTORY_SIZE / (PARALLEL_OUT_BYTES * 2); // 4096 //2048
     const uint8_t c_regHistSize = ((c_lowOffset) / (2 * PARALLEL_OUT_BYTES)) + 1;
 
     enum lzDecompressStates { WRITE_LITERAL, READ_MATCH, NO_OP };
@@ -539,12 +539,12 @@ void lzMultiByteDecompressLL_opt3(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& lit
 
     ap_uint<4> lit_len = 0;
     ap_uint<OWIDTH> match_loc = 0;
-    ap_uint<4+1> match_len = 0;
+    ap_uint<4 + 1> match_len = 0;
     ap_uint<OWIDTH> write_idx = 0;
     ap_uint<OWIDTH> w_idx = 0;
     ap_uint<OWIDTH> r_idx = 0;
-    ap_uint<4+1> output_index = 0;
-    ap_uint<5> l_matchlen_overlap = 0;//opt3
+    ap_uint<4 + 1> output_index = 0;
+    ap_uint<5> l_matchlen_overlap = 0; // opt3
 
     bool outStreamFlag = false;
 
@@ -554,15 +554,16 @@ void lzMultiByteDecompressLL_opt3(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& lit
     ap_uint<2 * c_parallelBit> output_window;
     ap_uint<(PARALLEL_OUT_BYTES * 8) + PARALLEL_OUT_BYTES> tmpVal;
 
-    ap_uint<PARALLEL_BYTES * 8> inValue = 0;
+    ap_uint<PARALLEL_BYTES* 8> inValue = 0;
     ap_uint<c_parallelBit> outValue = 0;
     bool matchDone = false;
-    ap_uint<11+1 + OWIDTH + 5> infoVal = 0; // 0-15 Match Loc, 16-19 Match Len, 20-23 Lit length, 24-26 State Info // opt3
+    ap_uint<11 + 1 + OWIDTH + 5> infoVal =
+        0; // 0-15 Match Loc, 16-19 Match Len, 20-23 Lit length, 24-26 State Info // opt3
     infoVal = infoStream.read();
-    lit_len = infoVal.range(OWIDTH + 7+1, OWIDTH + 4+1);
-    match_len = infoVal.range(OWIDTH + 3+1, OWIDTH);
+    lit_len = infoVal.range(OWIDTH + 7 + 1, OWIDTH + 4 + 1);
+    match_len = infoVal.range(OWIDTH + 3 + 1, OWIDTH);
     match_loc = infoVal.range(OWIDTH - 1, 0);
-    l_matchlen_overlap =  infoVal.range(OWIDTH + 11 + 5, OWIDTH + 11+1);//opt3
+    l_matchlen_overlap = infoVal.range(OWIDTH + 11 + 5, OWIDTH + 11 + 1); // opt3
     if (lit_len == 0) {
         matchDone = true;
     }
@@ -570,7 +571,7 @@ void lzMultiByteDecompressLL_opt3(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& lit
     ap_uint<OWIDTH> read_idx = match_loc / PARALLEL_OUT_BYTES;
     ap_uint<8> byte_loc = (match_loc % PARALLEL_OUT_BYTES);
 
-    ap_uint<4+1> incr_output_index = 0;
+    ap_uint<4 + 1> incr_output_index = 0;
 lz4_decoder:
     while (matchDone == false) {
 #pragma HLS PIPELINE II = 1
@@ -605,30 +606,31 @@ lz4_decoder:
 
         localValue.range(c_parallelBit - 1, 0) = lowValue;
         localValue.range(2 * c_parallelBit - 1, c_parallelBit) = highValue;
-        //ap_uint<c_parallelBit> matchValue = localValue >> (byte_loc * 8);
+        // ap_uint<c_parallelBit> matchValue = localValue >> (byte_loc * 8);
         ap_uint<c_parallelBit> matchValue;
         ap_uint<c_parallelBit> matchValue_base = localValue >> (byte_loc * 8);
-        //method-1
-        //matchValue(match_len * 8 -1, 0) = matchValue_base(match_len * 8 -1, 0);
+        // method-1
+        // matchValue(match_len * 8 -1, 0) = matchValue_base(match_len * 8 -1, 0);
         matchValue = matchValue_base;
-        //if(l_matchlen_overlap!=0 && match_len >= l_matchlen_overlap) 
+        // if(l_matchlen_overlap!=0 && match_len >= l_matchlen_overlap)
         //    matchValue(c_parallelBit-1, match_len * 8) = matchValue_base;
-        //if(l_matchlen_overlap==3 && match_len ==4) 
-        if(l_matchlen_overlap==3 && match_len ==7) 
-             matchValue(c_parallelBit-1, 32) = matchValue_base; //  32 should comre from (7-3) * 8 bits = 32 bits (match_len - l_matchlen_overlap) * 8
-        
+        // if(l_matchlen_overlap==3 && match_len ==4)
+        if (l_matchlen_overlap == 3 && match_len == 7)
+            matchValue(c_parallelBit - 1, 32) =
+                matchValue_base; //  32 should comre from (7-3) * 8 bits = 32 bits (match_len - l_matchlen_overlap) * 8
 
         // Take decision on results
-        if (next_state == WRITE_LITERAL) { // literal  
-            inValue = litStream.read();  if(lit_len!=8)inValue(PARALLEL_BYTES * 8-1, lit_len*8)=0;
+        if (next_state == WRITE_LITERAL) { // literal
+            inValue = litStream.read();
+            if (lit_len != 8) inValue(PARALLEL_BYTES * 8 - 1, lit_len * 8) = 0;
             incr_output_index = lit_len;
             output_window.range((output_index + PARALLEL_BYTES) * 8 - 1, output_index * 8) = inValue;
         } else if (next_state == READ_MATCH) { // match
             outValue = matchValue;
-            //incr_output_index = match_len; //opt3 removed 
-            incr_output_index = match_len; //opt3 added; not only for special case;
+            // incr_output_index = match_len; //opt3 removed
+            incr_output_index = match_len; // opt3 added; not only for special case;
             output_window.range((output_index + PARALLEL_OUT_BYTES) * 8 - 1, output_index * 8) = outValue;
-        //} else if (next_state == NO_OP) { // never occurs
+            //} else if (next_state == NO_OP) { // never occurs
         } else {
             assert(0);
         }
@@ -646,7 +648,8 @@ lz4_decoder:
             ramHistory[1][w_idx % c_ramHistSize] = outStreamValue;
         } else { // even case
             regHistory[0][w_idx % c_regHistSize] = outStreamValue;
-            regHistory[1][w_idx % c_regHistSize] = output_window.range((PARALLEL_OUT_BYTES * 16) - 1, PARALLEL_OUT_BYTES * 8);
+            regHistory[1][w_idx % c_regHistSize] =
+                output_window.range((PARALLEL_OUT_BYTES * 16) - 1, PARALLEL_OUT_BYTES * 8);
             ramHistory[0][w_idx % c_ramHistSize] = outStreamValue;
         }
 
@@ -654,30 +657,35 @@ lz4_decoder:
         stt_output_index = output_index;
         STT_Mi_loop++;
         STT_Mnum_token++;
-        printf("SSTT_M4 cnt_loop:\t%5d\t, cnt_token:\t%5d\t, state:\t%s\t", STT_Mi_loop, STT_Mnum_token, next_state==WRITE_LITERAL? "WRITE_LITERAL": "READ_MATCH  ");
-        printf("lit_len( %2d )\t match_len( %2d )\t match_loc( %4d )\t",  lit_len.to_int(), match_len.to_int(), match_loc.to_int() %(c_ramHistSize*2));
-        printf("output_index( %2d )\t byte_loc( %d )\t read_idx( %4d )\t write_idx( %4d )\t", stt_output_index, byte_loc, read_idx.to_int()%(c_regHistSize*2), write_idx.to_int()%(c_regHistSize*2));
-        //printf("\n SSTT_M4_value highValue      ( %s ) lowValue( %s ) ", apuint2str(highValue), apuint2str(lowValue));
-        printf("\n SSTT_M4_value localValue     ( %s )",apuint2str(localValue));
-        printf("\n SSTT_M4_value matchValue     ( ");for(int i=0; i< 8-byte_loc; i++) printf("   ");printf("%s )",apuint2str(matchValue));
-        //printf("\n SSTT_M4_value matchValue     ( %s )",apuint2str(matchValue));
+        printf("SSTT_M4 cnt_loop:\t%5d\t, cnt_token:\t%5d\t, state:\t%s\t", STT_Mi_loop, STT_Mnum_token,
+               next_state == WRITE_LITERAL ? "WRITE_LITERAL" : "READ_MATCH  ");
+        printf("lit_len( %2d )\t match_len( %2d )\t match_loc( %4d )\t", lit_len.to_int(), match_len.to_int(),
+               match_loc.to_int() % (c_ramHistSize * 2));
+        printf("output_index( %2d )\t byte_loc( %d )\t read_idx( %4d )\t write_idx( %4d )\t", stt_output_index,
+               byte_loc, read_idx.to_int() % (c_regHistSize * 2), write_idx.to_int() % (c_regHistSize * 2));
+        // printf("\n SSTT_M4_value highValue      ( %s ) lowValue( %s ) ", apuint2str(highValue),
+        // apuint2str(lowValue));
+        printf("\n SSTT_M4_value localValue     ( %s )", apuint2str(localValue));
+        printf("\n SSTT_M4_value matchValue     ( ");
+        for (int i = 0; i < 8 - byte_loc; i++) printf("   ");
+        printf("%s )", apuint2str(matchValue));
+        // printf("\n SSTT_M4_value matchValue     ( %s )",apuint2str(matchValue));
         if (next_state == WRITE_LITERAL)
-        printf("\n SSTT_M4_value inValue        ( %s )",apuint2str(inValue));
+            printf("\n SSTT_M4_value inValue        ( %s )", apuint2str(inValue));
         else
-        printf("\n SSTT_M4_value outValue       ( %s )",apuint2str(outValue));
-        printf("\n SSTT_M4_value output_window  ( %s )",apuint2str(output_window));
-        printf("\n SSTT_M4_value outStreamValue ( %s ), output_index=%d",apuint2str(outStreamValue), stt_output_index);
-        printf(" \n"); 
+            printf("\n SSTT_M4_value outValue       ( %s )", apuint2str(outValue));
+        printf("\n SSTT_M4_value output_window  ( %s )", apuint2str(output_window));
+        printf("\n SSTT_M4_value outStreamValue ( %s ), output_index=%d", apuint2str(outStreamValue), stt_output_index);
+        printf(" \n");
 #endif
 
         infoVal = infoStream.read();
-        state = infoVal.range(OWIDTH + 10+1, OWIDTH + 9+1);
-        regOrRam = infoVal.range(OWIDTH + 8+1, OWIDTH + 8+1);
-        lit_len = infoVal.range(OWIDTH + 7+1, OWIDTH + 4+1);
-        match_len = infoVal.range(OWIDTH + 3+1, OWIDTH);
+        state = infoVal.range(OWIDTH + 10 + 1, OWIDTH + 9 + 1);
+        regOrRam = infoVal.range(OWIDTH + 8 + 1, OWIDTH + 8 + 1);
+        lit_len = infoVal.range(OWIDTH + 7 + 1, OWIDTH + 4 + 1);
+        match_len = infoVal.range(OWIDTH + 3 + 1, OWIDTH);
         match_loc = infoVal.range(OWIDTH - 1, 0);
-        l_matchlen_overlap =  infoVal.range(OWIDTH + 11 + 5, OWIDTH + 11+1);//opt3
-        
+        l_matchlen_overlap = infoVal.range(OWIDTH + 11 + 5, OWIDTH + 11 + 1); // opt3
 
         if (state == 0) {
             next_state = WRITE_LITERAL;
@@ -706,8 +714,6 @@ lz4_decoder:
             STT_Mwrite_tk++;
 #endif
         }
-
-
     }
 #ifdef STT_M4
     printf("STT_M4_SUM\t cnt_loop:\t%5d\t\n", STT_Mi_loop++);
@@ -734,12 +740,12 @@ template <int PARALLEL_BYTES,
           class SIZE_OFFSET = ap_uint<16> >
 
 void lzMultiByteDecompressLL_opt2(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& litStream,
-                             hls::stream<ap_uint<11 +1+ OWIDTH> >& infoStream,
-                             hls::stream<ap_uint<(PARALLEL_OUT_BYTES * 8) + PARALLEL_OUT_BYTES> >& outStream) {
+                                  hls::stream<ap_uint<11 + 1 + OWIDTH> >& infoStream,
+                                  hls::stream<ap_uint<(PARALLEL_OUT_BYTES * 8) + PARALLEL_OUT_BYTES> >& outStream) {
     const uint8_t c_parallelBit = PARALLEL_OUT_BYTES * 8;
     const uint8_t c_lowOffset = 6 * PARALLEL_OUT_BYTES;
 
-    const uint16_t c_ramHistSize = HISTORY_SIZE / (PARALLEL_OUT_BYTES * 2);//4096 //2048
+    const uint16_t c_ramHistSize = HISTORY_SIZE / (PARALLEL_OUT_BYTES * 2); // 4096 //2048
     const uint8_t c_regHistSize = ((c_lowOffset) / (2 * PARALLEL_OUT_BYTES)) + 1;
 
     enum lzDecompressStates { WRITE_LITERAL, READ_MATCH, NO_OP };
@@ -760,8 +766,8 @@ void lzMultiByteDecompressLL_opt2(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& lit
     int STT_Mi_loop = 0;
     int STT_Mnum_token = 0;
     int STT_Mwrite_tk = 0;
-    // int loop_cnt=0; 
-    // int stt_num_token = 0;
+// int loop_cnt=0;
+// int stt_num_token = 0;
 #endif
 
     ap_uint<PARALLEL_OUT_BYTES * 8> regHistory[2][c_regHistSize];
@@ -770,11 +776,11 @@ void lzMultiByteDecompressLL_opt2(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& lit
 
     ap_uint<4> lit_len = 0;
     ap_uint<OWIDTH> match_loc = 0;
-    ap_uint<4+1> match_len = 0;
+    ap_uint<4 + 1> match_len = 0;
     ap_uint<OWIDTH> write_idx = 0;
     ap_uint<OWIDTH> w_idx = 0;
     ap_uint<OWIDTH> r_idx = 0;
-    ap_uint<4+1> output_index = 0;
+    ap_uint<4 + 1> output_index = 0;
 
     bool outStreamFlag = false;
 
@@ -784,13 +790,13 @@ void lzMultiByteDecompressLL_opt2(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& lit
     ap_uint<2 * c_parallelBit> output_window;
     ap_uint<(PARALLEL_OUT_BYTES * 8) + PARALLEL_OUT_BYTES> tmpVal;
 
-    ap_uint<PARALLEL_BYTES * 8> inValue = 0;
+    ap_uint<PARALLEL_BYTES* 8> inValue = 0;
     ap_uint<c_parallelBit> outValue = 0;
     bool matchDone = false;
-    ap_uint<11+1 + OWIDTH> infoVal = 0; // 0-15 Match Loc, 16-19 Match Len, 20-23 Lit length, 24-26 State Info
+    ap_uint<11 + 1 + OWIDTH> infoVal = 0; // 0-15 Match Loc, 16-19 Match Len, 20-23 Lit length, 24-26 State Info
     infoVal = infoStream.read();
-    lit_len = infoVal.range(OWIDTH + 7+1, OWIDTH + 4+1);
-    match_len = infoVal.range(OWIDTH + 3+1, OWIDTH);
+    lit_len = infoVal.range(OWIDTH + 7 + 1, OWIDTH + 4 + 1);
+    match_len = infoVal.range(OWIDTH + 3 + 1, OWIDTH);
     match_loc = infoVal.range(OWIDTH - 1, 0);
     if (lit_len == 0) {
         matchDone = true;
@@ -799,7 +805,7 @@ void lzMultiByteDecompressLL_opt2(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& lit
     ap_uint<OWIDTH> read_idx = match_loc / PARALLEL_OUT_BYTES;
     ap_uint<8> byte_loc = (match_loc % PARALLEL_OUT_BYTES);
 
-    ap_uint<4+1> incr_output_index = 0;
+    ap_uint<4 + 1> incr_output_index = 0;
 lz4_decoder:
     while (matchDone == false) {
 #pragma HLS PIPELINE II = 1
@@ -838,7 +844,7 @@ lz4_decoder:
         ap_uint<c_parallelBit> matchValue = localValue >> (byte_loc * 8);
 
         // Take decision on results
-        if (next_state == WRITE_LITERAL) { // literal  
+        if (next_state == WRITE_LITERAL) { // literal
             inValue = litStream.read();
             incr_output_index = lit_len;
             output_window.range((output_index + PARALLEL_BYTES) * 8 - 1, output_index * 8) = inValue;
@@ -846,7 +852,7 @@ lz4_decoder:
             outValue = matchValue;
             incr_output_index = match_len;
             output_window.range((output_index + PARALLEL_OUT_BYTES) * 8 - 1, output_index * 8) = outValue;
-        //} else if (next_state == NO_OP) { // never occurs
+            //} else if (next_state == NO_OP) { // never occurs
         } else {
             assert(0);
         }
@@ -861,26 +867,25 @@ lz4_decoder:
             regHistory[1][w_idx % c_regHistSize] = outStreamValue;
             regHistory[0][(w_idx + 1) % c_regHistSize] =
                 output_window.range((PARALLEL_OUT_BYTES * 16) - 1, PARALLEL_OUT_BYTES * 8);
-            if(output_index >= PARALLEL_OUT_BYTES)
-                ramHistory[1][w_idx % c_ramHistSize] = outStreamValue;
+            if (output_index >= PARALLEL_OUT_BYTES) ramHistory[1][w_idx % c_ramHistSize] = outStreamValue;
         } else { // even case
             regHistory[0][w_idx % c_regHistSize] = outStreamValue;
-            regHistory[1][w_idx % c_regHistSize] = output_window.range((PARALLEL_OUT_BYTES * 16) - 1, PARALLEL_OUT_BYTES * 8);
-            if(output_index >= PARALLEL_OUT_BYTES)
-                ramHistory[0][w_idx % c_ramHistSize] = outStreamValue;
+            regHistory[1][w_idx % c_regHistSize] =
+                output_window.range((PARALLEL_OUT_BYTES * 16) - 1, PARALLEL_OUT_BYTES * 8);
+            if (output_index >= PARALLEL_OUT_BYTES) ramHistory[0][w_idx % c_ramHistSize] = outStreamValue;
         }
 
         infoVal = infoStream.read();
-        state = infoVal.range(OWIDTH + 10+1, OWIDTH + 9+1);
-        regOrRam = infoVal.range(OWIDTH + 8+1, OWIDTH + 8+1);
-        lit_len = infoVal.range(OWIDTH + 7+1, OWIDTH + 4+1);
-        match_len = infoVal.range(OWIDTH + 3+1, OWIDTH);
+        state = infoVal.range(OWIDTH + 10 + 1, OWIDTH + 9 + 1);
+        regOrRam = infoVal.range(OWIDTH + 8 + 1, OWIDTH + 8 + 1);
+        lit_len = infoVal.range(OWIDTH + 7 + 1, OWIDTH + 4 + 1);
+        match_len = infoVal.range(OWIDTH + 3 + 1, OWIDTH);
         match_loc = infoVal.range(OWIDTH - 1, 0);
 #ifdef STT_M4
-        // printf("STT_#4 cnt_loop( %7d ) cnt_token( %7d ) (%5d) ", loop_cnt++, stt_num_token, write_idx);
-        // printf(" litlen(%2d ) state(%2d ) regOrRam(%2d )", lit_len, state, regOrRam);
-        // printf(" matlen(%2d )( %5d )", match_len, match_loc);
-        // printf("\n");
+// printf("STT_#4 cnt_loop( %7d ) cnt_token( %7d ) (%5d) ", loop_cnt++, stt_num_token, write_idx);
+// printf(" litlen(%2d ) state(%2d ) regOrRam(%2d )", lit_len, state, regOrRam);
+// printf(" matlen(%2d )( %5d )", match_len, match_loc);
+// printf("\n");
 #endif
 
         if (state == 0) {
@@ -914,7 +919,7 @@ lz4_decoder:
 #ifdef STT_M4
         STT_Mi_loop++;
         STT_Mnum_token++;
-        //printf("STT_M4_#4 cnt_loop( %7d ) cnt_token( %7d \n) ", STT_Mi_loop++, STT_Mnum_token++);
+// printf("STT_M4_#4 cnt_loop( %7d ) cnt_token( %7d \n) ", STT_Mi_loop++, STT_Mnum_token++);
 #endif
     }
 #ifdef STT_M4
@@ -932,7 +937,7 @@ lz4_decoder:
         outStream << tmpVal;
     }
     outStream << 0;
-}//end of lzMultiByteDecompressLL_opt2
+} // end of lzMultiByteDecompressLL_opt2
 
 template <int PARALLEL_BYTES, int HISTORY_SIZE, class SIZE_DT = uint16_t>
 void lzMultiByteDecoder(hls::stream<SIZE_DT>& litlenStream,

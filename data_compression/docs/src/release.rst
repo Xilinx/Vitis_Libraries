@@ -11,6 +11,12 @@ Release Note
    :hidden
    :maxdepth: 1
 
+2024.2
+------
+
+The Lz4 decompression APIs have been enhanced for improving performance and for eliminating potential issue for extreme corner cases. The new-added API lz4DecompressEngine_NinMout has configurable output-port width and can provide up-to 48% throughput improvement.
+
+
 2022.2
 ------
 

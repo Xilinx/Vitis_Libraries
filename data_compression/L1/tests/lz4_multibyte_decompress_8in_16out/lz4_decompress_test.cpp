@@ -34,13 +34,13 @@
 typedef ap_uint<INPUT_BYTES * 8> uintV_t;
 typedef ap_uint<(OUTPUT_BYTES * 8) + OUTPUT_BYTES> uintS_t;
 
-
 void lz4DecompressEngineRun(hls::stream<ap_uint<INPUT_BYTES * 8> >& inStream,
                             hls::stream<ap_uint<(OUTPUT_BYTES * 8) + OUTPUT_BYTES> >& outStream,
                             const uint32_t input_size)
 
-{   
-    xf::compression::lz4DecompressEngine_NinMout<INPUT_BYTES, OUTPUT_BYTES, HISTORY_SIZE>(inStream, outStream, input_size);
+{
+    xf::compression::lz4DecompressEngine_NinMout<INPUT_BYTES, OUTPUT_BYTES, HISTORY_SIZE>(inStream, outStream,
+                                                                                          input_size);
 }
 
 int main(int argc, char* argv[]) {
@@ -105,8 +105,8 @@ int main(int argc, char* argv[]) {
         std::cout << "TEST PASSED" << std::endl;
         return 0;
     } else {
-        std::cout << "TEST FAILED"  << "\tcnt_error=" <<cnt_error << std::endl;
+        std::cout << "TEST FAILED"
+                  << "\tcnt_error=" << cnt_error << std::endl;
         return 1;
     }
-
 }

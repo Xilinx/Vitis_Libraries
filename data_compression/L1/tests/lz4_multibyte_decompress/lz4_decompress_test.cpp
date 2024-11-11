@@ -34,17 +34,16 @@
 typedef ap_uint<INPUT_BYTES * 8> uintV_t;
 typedef ap_uint<(OUTPUT_BYTES * 8) + OUTPUT_BYTES> uintS_t;
 
-
 void lz4DecompressEngineRun(hls::stream<ap_uint<INPUT_BYTES * 8> >& inStream,
                             hls::stream<ap_uint<(OUTPUT_BYTES * 8) + OUTPUT_BYTES> >& outStream,
                             const uint32_t input_size)
 
-{   
+{
     bool error;
-    bool modeBlk=false;
-    //xf::compression::lz4DecompressEngine_NinMout<INPUT_BYTES, OUTPUT_BYTES, HISTORY_SIZE>(inStream, outStream, input_size, &error, modeBlk);
+    bool modeBlk = false;
+    // xf::compression::lz4DecompressEngine_NinMout<INPUT_BYTES, OUTPUT_BYTES, HISTORY_SIZE>(inStream, outStream,
+    // input_size, &error, modeBlk);
     xf::compression::lz4DecompressEngine<INPUT_BYTES, HISTORY_SIZE>(inStream, outStream, input_size);
-
 }
 
 int main(int argc, char* argv[]) {
