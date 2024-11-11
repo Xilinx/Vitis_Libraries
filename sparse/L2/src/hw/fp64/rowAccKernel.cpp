@@ -122,7 +122,7 @@ extern "C" void rowAccKernel(WideParamStrTyp& p_paramStr,
     ParamStrTyp l_paramStr[SPARSE_hbmChannels];
     static const unsigned int t_Xdepth = SPARSE_maxRows * 2;
 #pragma HLS STREAM variable = l_datStr depth = t_Xdepth
-#pragma HLS BIND_STORAGE variable = l_datStr  type=fifo impl=uram
+#pragma HLS BIND_STORAGE variable = l_datStr type = fifo impl = uram
 #pragma HLS STREAM variable = l_paramStr depth = 32
 #pragma HLS DATAFLOW
 
