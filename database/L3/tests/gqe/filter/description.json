@@ -12,11 +12,6 @@
     ],
     "launch": [
         {
-            "name": "generic launch for sw_emu flows",
-            "target": "sw_emu",
-            "cmd_args": " -xclbin BUILD/gqe3in1.xclbin -in PROJECT/db_data/ -scale 100"
-        },
-        {
             "name": "generic launch for hw_emu flows",
             "target": "hw_emu",
             "cmd_args": " -xclbin BUILD/gqe3in1.xclbin -in PROJECT/db_data/ -scale 10000"

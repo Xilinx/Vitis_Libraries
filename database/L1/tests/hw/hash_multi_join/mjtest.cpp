@@ -186,7 +186,7 @@ int check_data(xf::database::enums::JoinType join_type,
                hls::stream<bool>& o_e_strm,
 
                ap_uint<512> j_res[J_MAX_DEPTH]) {
-    int nerror=0;
+    int nerror = 0;
     int error;
     ap_uint<512> j_temp;
     int datacount = 0;

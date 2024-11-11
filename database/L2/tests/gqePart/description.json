@@ -22,11 +22,6 @@
     },
     "launch": [
         {
-            "name": "generic launch for sw_emu flows",
-            "target": "sw_emu",
-            "cmd_args": " -xclbin BUILD/gqe_part_v3.xclbin -scale 1000"
-        },
-        {
             "name": "generic launch for hw_emu flows",
             "target": "hw_emu",
             "cmd_args": " -xclbin BUILD/gqe_part_v3.xclbin -scale 100000"
