@@ -28,9 +28,9 @@
 Vitis Motor Control Library
 =============================
 
-Motor Control Library is an open-sourced library written in C/C++ for accelerating developments of motor control applications. It has covered 4 algorithm-level L1 APIs including FOC, SVPWM__DUTY, PWM_GEN and QEI. These four APIs have AXI configuration interfaces and high integration level, that can be directly integrated into the system. The ap_fixed type has been adopted in these APIs which makes it easier to understand the physical meaning of variables' value. A virtual motor model is provided for doing the verifications of FOC in the Vitis environment.The 4 algorithm-level algorithms APIs implemented by Vitis Motor Control Library include:
+Motor Control Library is an open-sourced library written in C/C++ for accelerating developments of motor control applications. It has covered 4 algorithm-level L1 APIs including FOC, SVPWM__DUTY, PWM_GEN and QEI. These four APIs have AXI configuration interfaces and high integration level, that can be directly integrated into the system. The 4 algorithm-level algorithms APIs implemented by Vitis Motor Control Library include:
 
-- FOC: the API is for sensor based field-orientated control (FOC). The eight control modes it supports cover basic speed and torque control modes, as well as field-weakning control. Besides signal ports, AXI-Lite interface is provided for system control and monitor.
+- FOC: the API is for sensor based field-orientated control (FOC). From 2024.2 release, the L1/test/IP_FOC functionally becomes a register container module which can be composed by the 12 new-added fine-grained function-level APIs.
 - SVPWM_DUTY: the API is the front-end for Space Vector Pulse Width Modulation (SVPWM) to calculate ratios. Besides signal ports, AXI-Lite interface is provided for system control and monitor.
 - PWM_GEN: the API is the back-end for Space Vector Pulse Width Modulation (SVPWM) to generate output signals based on ratios. Besides signal ports, AXI-Lite interface is provided for system control and monitor.
 - QEI: the API is for quadrature encoder interface(QEI). Besides signal ports, AXI-Lite interface is provided for system control and monitor.
@@ -44,7 +44,6 @@ Besides the four algorithm-level L1 APIs, from 24.1 release 12 new fine-grained 
 
    Overview <overview.rst>
    Release Note <release.rst>
-   Vitis Motor Control Library Tutorial <tutorial.rst>
 
 .. toctree::
    :caption: L1 User Guide

@@ -729,7 +729,6 @@ void hls_pwm_gen_axi(hls::stream<T_RATIO_16b>& strm_duty_ratio_a,
 
         strm_h_a, strm_h_b, strm_h_c, strm_l_a, strm_l_b, strm_l_c, strm_sync_a, strm_sync_b, strm_sync_c,
         pwm_stt_pwm_cycle, pwm_stt_duty_ratio_a, pwm_stt_duty_ratio_b, pwm_stt_duty_ratio_c);
-
 }
 } /*end of namespace motorcontrol*/
 } /*end of namespace xf*/

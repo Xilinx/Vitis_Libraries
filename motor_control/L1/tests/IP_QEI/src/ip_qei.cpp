@@ -46,6 +46,22 @@ void hls_qei(hls::stream<bit>& strm_qei_A,
              volatile int& qei_debug_rpm,
              volatile int& qei_count_mode,
              volatile int& qei_args_flt_size_i) {
+#pragma HLS INTERFACE ap_fifo port = strm_qei_A
+#pragma HLS INTERFACE ap_fifo port = strm_qei_B
+#pragma HLS INTERFACE ap_fifo port = strm_qei_I
+#pragma HLS INTERFACE ap_fifo port = logger
+#pragma HLS INTERFACE axis port = strm_qei_RPM_THETA_m
+#pragma HLS INTERFACE s_axilite port = qei_args_cpr offset = 0x10 bundle = qei_args
+#pragma HLS INTERFACE s_axilite port = qei_args_ctrl offset = 0x20 bundle = qei_args
+#pragma HLS INTERFACE s_axilite port = qei_stts_RPM_THETA_m offset = 0x28 bundle = qei_args
+#pragma HLS INTERFACE s_axilite port = qei_stts_dir offset = 0x38 bundle = qei_args
+#pragma HLS INTERFACE s_axilite port = qei_stts_err offset = 0x48 bundle = qei_args
+#pragma HLS interface s_axilite port = qei_args_flt_size bundle = qei_args
+#pragma HLS interface s_axilite port = qei_args_cnt_trip bundle = qei_args
+#pragma HLS interface s_axilite port = qei_debug_rpm bundle = qei_args
+#pragma HLS interface s_axilite port = qei_args_flt_size_i bundle = qei_args
+#pragma HLS interface s_axilite port = qei_count_mode bundle = qei_args
+#pragma HLS interface s_axilite port = return bundle = qei_args
     xf::motorcontrol::hls_qei_axi<bit>(strm_qei_A, strm_qei_B, strm_qei_I, strm_qei_RPM_THETA_m, logger, qei_args_cpr,
                                        qei_args_ctrl, qei_stts_RPM_THETA_m, qei_stts_dir, qei_stts_err,
                                        qei_args_flt_size, qei_args_cnt_trip, qei_debug_rpm, qei_count_mode,

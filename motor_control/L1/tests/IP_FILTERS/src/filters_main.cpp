@@ -47,7 +47,6 @@ int main(void) {
     ap_int<BIT_WIDTH_DATA> input_values_w_u, output_values_w_u;
     int32_t filt_a = 0, filt_b = 0, shift = 0;
 
-
     t_glb_foc2pwm curr_val = 32;
 
     current_a.write(curr_val);

@@ -33,8 +33,6 @@ Design Internals
 .. toctree::
    :maxdepth: 1
 
-   Sensor_Based_FOC <IPs/SensorBasedFOC.rst>
    SVPWM_DUTY  <IPs/svpwm_duty.rst>
    PWM_GEN  <IPs/pwm_gen.rst>
-   QEI <IPs/qei.rst>
 

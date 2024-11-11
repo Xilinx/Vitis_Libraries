@@ -88,9 +88,9 @@ void ps_iir_filter(
     Ib_s = Ib.read();
     Ic_s = Ic.read();
 
-    Ia_ = (Ia_s.range(PWM_AP_FIXED_PARA_W2-1, 0)).to_int();
-    Ib_ = (Ib_s.range(PWM_AP_FIXED_PARA_W2-1, 0)).to_int();
-    Ic_ = (Ic_s.range(PWM_AP_FIXED_PARA_W2-1, 0)).to_int();
+    Ia_ = (Ia_s.range(PWM_AP_FIXED_PARA_W2 - 1, 0)).to_int();
+    Ib_ = (Ib_s.range(PWM_AP_FIXED_PARA_W2 - 1, 0)).to_int();
+    Ic_ = (Ic_s.range(PWM_AP_FIXED_PARA_W2 - 1, 0)).to_int();
 
     packet_rpm_angle = SPEED_THETA_m.read();
 
