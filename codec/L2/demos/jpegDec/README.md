@@ -90,9 +90,6 @@ Different tool versions may result slightly different resource.
 Result
 ------
 
-To check the output yuv file, download https://sourceforge.net/projects/raw-yuvplayer/ . 
-Then upload the rebuild_image.yuv, set the right sample radio and custom size on the software, and check the yuv file.
-
 Table 1 : Jpeg Decoder profiling
 
 ![Table 1 : Jpeg Decoder profiling](../../../docs/images/jpegDecoderpofile.png)

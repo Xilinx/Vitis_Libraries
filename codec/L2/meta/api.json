@@ -22,22 +22,22 @@
                 "ports": [
                     {
                         "name": "jpeg_pointer",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint< (16) > *"
                     },
                     {
                         "name": "size",
-                        "direction": "",
+                        "direction": "in",
                         "type": "const int"
                     },
                     {
                         "name": "yuv_mcu_pointer",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint< 64 > *"
                     },
                     {
                         "name": "info",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint< 32 > *"
                     }
                 ]
@@ -45,7 +45,7 @@
             "target_domain": "PL"
         },
         {
-            "api_name": "hls_ANSclusterHistogram",
+            "api_name": "hls_ans_clusterHistogram",
             "spec": {
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "hls_ANSclusterHistogram",
@@ -64,207 +64,207 @@
                 "ports": [
                     {
                         "name": "config",
-                        "direction": "",
+                        "direction": "in",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "histograms0_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histo_totalcnt0_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "histo_size0_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "nonempty_histo0_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "ctx_map0_ptr",
-                        "direction": "",
+                        "direction": "in",
                         "type": "uint8_t*"
                     },
                     {
                         "name": "histograms_clusd0_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histo_size_clusd0_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "histo_clusdin0_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "histograms1_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histo_totalcnt1_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "histo_size1_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "nonempty_histo1_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "ctx_map1_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint8_t*"
                     },
                     {
                         "name": "histograms_clusd1_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histo_size_clusd1_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "histograms_clusdin1_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histograms2_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histo_totalcnt2_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histo_size2_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "nonempty_histo2_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "ctx_map2_ptr",
-                        "direction": "",
+                        "direction": "in",
                         "type": "uint8_t*"
                     },
                     {
                         "name": "histograms_clusd2_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histo_size_clusd2_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "histograms_clusdin2_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histograms3_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histo_totalcnt3_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "histo_size3_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "nonempty_histo3_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "ctx_map3_ptr",
-                        "direction": "",
+                        "direction": "in",
                         "type": "uint8_t*"
                     },
                     {
                         "name": "histograms_clusd3_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histo_size_clusd3_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "histograms_clusdin3_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histograms4_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histo_totalcnt4_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "histo_size4_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "nonempty_histo4_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "ctx_map4_ptr",
-                        "direction": "",
+                        "direction": "in",
                         "type": "uint8_t*"
                     },
                     {
                         "name": "histograms_clusd4_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histo_size_clusd4_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "histograms_clusdin4_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     }
                 ]
@@ -291,82 +291,82 @@
                 "ports": [
                     {
                         "name": "config",
-                        "direction": "",
+                        "direction": "in",
                         "type": "int*"
                     },
                     {
                         "name": "config_fl",
-                        "direction": "",
+                        "direction": "in",
                         "type": "float*"
                     },
                     {
                         "name": "hls_opsin_1",
-                        "direction": "",
+                        "direction": "in",
                         "type": "float*"
                     },
                     {
                         "name": "hls_opsin_2",
-                        "direction": "",
+                        "direction": "in",
                         "type": "float*"
                     },
                     {
                         "name": "hls_opsin_3",
-                        "direction": "",
+                        "direction": "in",
                         "type": "float*"
                     },
                     {
                         "name": "quant_field_row",
-                        "direction": "",
+                        "direction": "in",
                         "type": "float*"
                     },
                     {
                         "name": "masking_field_row",
-                        "direction": "",
+                        "direction": "in",
                         "type": "float*"
                     },
                     {
                         "name": "aq_map_f",
-                        "direction": "",
+                        "direction": "in",
                         "type": "float*"
                     },
                     {
                         "name": "cmap_axi",
-                        "direction": "",
+                        "direction": "in",
                         "type": "int8_t*  "
                     },
                     {
                         "name": "ac_coef_axiout",
-                        "direction": "",
+                        "direction": "out",
                         "type": "int*"
                     },
                     {
                         "name": "strategy_all",
-                        "direction": "",
+                        "direction": "out",
                         "type": "uint8_t*"
                     },
                     {
                         "name": "raw_quant_field_i",
-                        "direction": "",
+                        "direction": "out",
                         "type": "int*"
                     },
                     {
                         "name": "hls_order",
-                        "direction": "",
+                        "direction": "out",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "hls_dc8x8",
-                        "direction": "",
+                        "direction": "out",
                         "type": "float*"
                     },
                     {
                         "name": "hls_dc16x16",
-                        "direction": "",
+                        "direction": "out",
                         "type": "float*"
                     },
                     {
                         "name": "hls_dc32x32",
-                        "direction": "",
+                        "direction": "out",
                         "type": "float*"
                     }
                 ]
@@ -379,7 +379,7 @@
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "hls_ANSinitHistogram",
                 "display_name": "hls_ANSinitHistogram",
-                "brief": "",
+                "brief": "in",
                 "target_domain": "PL",
                 "visible": false,
                 "header_file_name": [
@@ -393,162 +393,162 @@
                 "ports": [
                     {
                         "name": "config[32]",
-                        "direction": "",
+                        "direction": "in",
                         "type": "int"
                     },
                     {
                         "name": "ac_coeff_ordered_ddr[ALL_PIXEL]",
-                        "direction": "",
+                        "direction": "in",
                         "type": "int32_t"
                     },
                     {
                         "name": "strategy_ddr[MAX_NUM_BLK88]",
-                        "direction": "",
+                        "direction": "in",
                         "type": "int32_t"
                     },
                     {
                         "name": "qf_ddr[MAX_NUM_BLK88]",
-                        "direction": "",
+                        "direction": "in",
                         "type": "int32_t"
                     },
                     {
                         "name": "qdc_ddr[MAX_NUM_BLK88]",
-                        "direction": "",
+                        "direction": "in",
                         "type": "uint8_t"
                     },
                     {
                         "name": "ctx_map[MAX_QF_THRESH_SIZE]",
-                        "direction": "",
+                        "direction": "in",
                         "type": "uint8_t"
                     },
                     {
                         "name": "qf_thresholds[MAX_CTX_MAP_SIZE]",
-                        "direction": "",
+                        "direction": "in",
                         "type": "uint32_t"
                     },
                     {
                         "name": "ac_tokens_ddr[MAX_AC_TOKEN_SIZE]",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint64_t"
                     },
                     {
                         "name": "tokens0_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "ap_uint<64>*"
                     },
                     {
                         "name": "tokens1_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "ap_uint<64>*"
                     },
                     {
                         "name": "tokens2_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "ap_uint<64>*"
                     },
                     {
                         "name": "tokens3_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "ap_uint<64>*"
                     },
                     {
                         "name": "histograms0_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histograms_size0_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "total_count0_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "nonempty0_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "histograms1_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histograms_size1_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "total_count1_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "nonempty1_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "histograms2_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histograms_size2_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "total_count2_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "nonempty2_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "histograms3_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histograms_size3_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "total_count3_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "nonempty3_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "histograms4_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "int32_t*"
                     },
                     {
                         "name": "histograms_size4_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "total_count4_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "nonempty4_ptr",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "uint32_t*"
                     }
                 ]
@@ -561,7 +561,7 @@
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "xf::image::jpegDecLeptonEnc",
                 "display_name": "jpegDecLeptonEnc",
-                "brief": "",
+                "brief": "in",
                 "target_domain": "PL",
                 "visible": false,
                 "header_file_name": [
@@ -579,22 +579,22 @@
                 "ports": [
                     {
                         "name": "datainDDR",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<AXI_WIDTH>*"
                     },
                     {
                         "name": "jpgSize",
-                        "direction": "",
+                        "direction": "in",
                         "type": "int"
                     },
                     {
                         "name": "arithInfo",
-                        "direction": "",
+                        "direction": "in",
                         "type": "int"
                     },
                     {
                         "name": "res",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint<8>*"
                     }
                 ]
@@ -607,7 +607,7 @@
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "kernel1Top",
                 "display_name": "kernel1Top",
-                "brief": "",
+                "brief": "in",
                 "target_domain": "PL",
                 "visible": false,
                 "header_file_name": [
@@ -622,27 +622,27 @@
                 "ports": [
                     {
                         "name": "config[MAX_NUM_CONFIG],",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<32>*"
                     },
                     {
                         "name": "rbuf[BUF_DEPTH / 2],",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<64>*"
                     },
                     {
                         "name": "axi_out[AXI_OUT],",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint<32>*"
                     },
                     {
                         "name": "axi_cmap[AXI_CMAP],",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint<32>*"
                     },
                     {
                         "name": "axi_qf[AXI_QF]",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint<32>*"
                     }
                 ]
@@ -655,7 +655,7 @@
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "kernel2Top",
                 "display_name": "kernel2Top",
-                "brief": "",
+                "brief": "in",
                 "target_domain": "PL",
                 "visible": false,
                 "header_file_name": [
@@ -669,52 +669,52 @@
                 "ports": [
                     {
                         "name": "config[MAX_NUM_CONFIG]",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<AXI_SZ>"
                     },
                     {
                         "name": "src[AXI_OUT / 2]",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<2 * AXI_SZ>"
                     },
                     {
                         "name": "quant_field_in[AXI_QF]",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<AXI_SZ>"
                     },
                     {
                         "name": "cmap[AXI_CMAP]",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<AXI_SZ>"
                     },
                     {
                         "name": "ac[MAX_NUM_AC]",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint<AXI_SZ>"
                     },
                     {
                         "name": "dc[MAX_NUM_DC]",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint<AXI_SZ>"
                     },
                     {
                         "name": "quant_field_out[AXI_QF]",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint<AXI_SZ>"
                     },
                     {
                         "name": "ac_strategy[MAX_NUM_BLOCK88]",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint<AXI_SZ>"
                     },
                     {
                         "name": "block[MAX_NUM_BLOCK88]",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint<AXI_SZ>"
                     },
                     {
                         "name": "order[MAX_NUM_ORDER]",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint<AXI_SZ>"
                     }
                 ]
@@ -727,7 +727,7 @@
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "kernel3Top",
                 "display_name": "kernel3Top",
-                "brief": "",
+                "brief": "in",
                 "target_domain": "PL",
                 "visible": false,
                 "header_file_name": [
@@ -741,62 +741,62 @@
                 "ports": [
                     {
                         "name": "config",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<32>*"
                     },
                     {
                         "name": "ddr_ac",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<32>*"
                     },
                     {
                         "name": "ddr_dc",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<32>*"
                     },
                     {
                         "name": "ddr_quant_field",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<32>*"
                     },
                     {
                         "name": "ddr_ac_strategy",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<32>*"
                     },
                     {
                         "name": "ddr_block",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<32>*"
                     },
                     {
                         "name": "hls_order",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<32>*"
                     },
                     {
                         "name": "histo_cfg",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<32>*"
                     },
                     {
                         "name": "dc_histo_code_out",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint<32>*"
                     },
                     {
                         "name": "dc_code_out",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint<32>*"
                     },
                     {
                         "name": "ac_histo_code_out",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint<32>*"
                     },
                     {
                         "name": "ac_code_ou",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint<32>*"
                     }
                 ]
@@ -809,7 +809,7 @@
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "kernel_resize",
                 "display_name": "kernel_resize",
-                "brief": "",
+                "brief": "in",
                 "target_domain": "PL",
                 "visible": false,
                 "header_file_name": [
@@ -823,17 +823,17 @@
                 "ports": [
                     {
                         "name": "configs",
-                        "direction": "",
-                        "type": "ap_uint<32>*   "
+                        "direction": "in",
+                        "type": "ap_uint<32>*"
                     },
                     {
                         "name": "axi_src",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<64>*"
                     },
                     {
                         "name": "axi_dst",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint<64>*"
                     }
                 ]
@@ -846,7 +846,7 @@
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "kernel_IntraPredLoop2_NoOut_1",
                 "display_name": "kernel_IntraPredLoop2_NoOut_1",
-                "brief": "",
+                "brief": "in",
                 "target_domain": "PL",
                 "visible": false,
                 "header_file_name": [
@@ -860,32 +860,32 @@
                 "ports": [
                     {
                         "name": "p_info",
-                        "direction": "",
+                        "direction": "in",
                         "type": "int32_t* "
                     },
                     {
                         "name": "ysrc",
-                        "direction": "",
+                        "direction": "in",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "usrc",
-                        "direction": "",
+                        "direction": "in",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "vsrc",
-                        "direction": "",
+                        "direction": "in",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "pout_level",
-                        "direction": "",
+                        "direction": "out",
                         "type": "int32_t* "
                     },
                     {
                         "name": "pout_prob",
-                        "direction": "",
+                        "direction": "out",
                         "type": "uint8_t* "
                     }
                 ]
@@ -898,7 +898,7 @@
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "kernel_2_ArithmeticCoding_8",
                 "display_name": "kernel_2_ArithmeticCoding_8",
-                "brief": "",
+                "brief": "in",
                 "target_domain": "PL",
                 "visible": false,
                 "header_file_name": [
@@ -912,27 +912,27 @@
                 "ports": [
                     {
                         "name": "pin_level",
-                        "direction": "",
+                        "direction": "in",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "pin_prob",
-                        "direction": "",
+                        "direction": "in",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "pout_bw",
-                        "direction": "",
+                        "direction": "in",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "pout_ret",
-                        "direction": "",
+                        "direction": "out",
                         "type": "uint32_t*"
                     },
                     {
                         "name": "pout_pred",
-                        "direction": "",
+                        "direction": "out",
                         "type": "uint32_t*"
                     }
                 ]

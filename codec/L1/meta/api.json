@@ -21,42 +21,42 @@
                 "ports": [
                     {
                         "name": "datatoDDR",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<AXI_WIDTH> *"
                     },
                     {
                         "name": "size",
-                        "direction": "",
+                        "direction": "in",
                         "type": "const int"
                     },
                     {
                         "name": "img_info",
-                        "direction": "",
+                        "direction": "in",
                         "type": "xf::codec::img_info&"
                     },
                     {
                         "name": "hls_cmpnfo",
-                        "direction": "",
+                        "direction": "in",
                         "type": "xf::codec::hls_compInfo [MAX_NUM_COLOR]"
                     },
                     {
                         "name": "block_strm",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream<ap_uint<24> >&"
                     },
                     {
                         "name": "rtn",
-                        "direction": "",
+                        "direction": "in",
                         "type": "int&"
                     },
                     {
                         "name": "rtn2",
-                        "direction": "",
+                        "direction": "out",
                         "type": "bool&"
                     },
                     {
                         "name": "pout",
-                        "direction": "",
+                        "direction": "out",
                         "type": "xf::codec::decOutput*"
                     }
                 ]
@@ -83,22 +83,22 @@
                 "ports": [
                     {
                         "name": "used_orders",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint<32>"
                     },
                     {
                         "name": "orderStrm",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream<ap_uint<32> > &"
                     },
                     {
                         "name": "tokenStrm",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<ap_uint<64> > &"
                     },
                     {
                         "name": "e_tokenStrm",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<bool> &"
                     }
                 ]
