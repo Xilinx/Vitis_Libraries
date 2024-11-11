@@ -18,8 +18,7 @@
 #include <stdint.h>
 #include "xf_data_mover/load_master_to_stream.hpp"
 #include "xf_data_mover/get_count.hpp"
-#define NUM_CH 2 
-
+#define NUM_CH 2
 
 extern "C" void m2s_x2(
     // 0
@@ -32,8 +31,7 @@ extern "C" void m2s_x2(
     hls::stream<ap_axiu<32, 0, 0, 0> >& sout2b,
     uint64_t sz1,
 
-    uint64_t* m2s_counter) 
-{
+    uint64_t* m2s_counter) {
     using namespace xf::data_mover;
 
     ; // clang-format off
@@ -59,7 +57,7 @@ extern "C" void m2s_x2(
     hls::stream<uint64_t> counter_str[NUM_CH];
     hls::stream<ap_uint<1> > mvld_str[NUM_CH];
     uint64_t cnt_data[NUM_CH];
-#pragma HLS ARRAY_PARTITION variable=cnt_data complete 
+#pragma HLS ARRAY_PARTITION variable = cnt_data complete
 
 #pragma HLS dataflow
 

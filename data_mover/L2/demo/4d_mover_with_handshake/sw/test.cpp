@@ -555,35 +555,35 @@ int main(int argc, char* argv[]) {
     cfg0_bo->sync(XCL_BO_SYNC_BO_TO_DEVICE, cfg_sz, /*OFFSET=*/0);
     cfg1_bo->sync(XCL_BO_SYNC_BO_TO_DEVICE, cfg_sz, /*OFFSET=*/0);
     sink0_in_bo->sync(XCL_BO_SYNC_BO_TO_DEVICE, data_sz, /*OFFSET=*/0);
-	sum_of_all_pattern *= sizeof(uint64_t);
+    sum_of_all_pattern *= sizeof(uint64_t);
 
-	/*
-    // set Arg
-	auto run_dm0 = new xrt::run(*dm0_krnl); // write4D
-	auto run_dm1 = new xrt::run(*dm1_krnl); // read4D
-	auto run_sk0 = new xrt::run(*sink0_krnl); // mm2s
-	auto run_sk1 = new xrt::run(*sink1_krnl); // s2mm
-	run_dm0->set_arg(0, cfg0_bo);
-	run_dm0->set_arg(1, dm_data_bo);
-	run_sk0->set_arg(0, sink0_in_bo);
-	run_sk0->set_arg(2, sum_of_all_pattern);
-	run_dm1->set_arg(0, cfg1_bo);
-	run_dm1->set_arg(1, dm_data_bo);
-	run_sk1->set_arg(1, sink1_out_bo);
-	run_sk1->set_arg(2, sum_of_all_pattern);
+    /*
+// set Arg
+    auto run_dm0 = new xrt::run(*dm0_krnl); // write4D
+    auto run_dm1 = new xrt::run(*dm1_krnl); // read4D
+    auto run_sk0 = new xrt::run(*sink0_krnl); // mm2s
+    auto run_sk1 = new xrt::run(*sink1_krnl); // s2mm
+    run_dm0->set_arg(0, cfg0_bo);
+    run_dm0->set_arg(1, dm_data_bo);
+    run_sk0->set_arg(0, sink0_in_bo);
+    run_sk0->set_arg(2, sum_of_all_pattern);
+    run_dm1->set_arg(0, cfg1_bo);
+    run_dm1->set_arg(1, dm_data_bo);
+    run_sk1->set_arg(1, sink1_out_bo);
+    run_sk1->set_arg(2, sum_of_all_pattern);
 
-    // start kernel
-	run_dm0->start();
-	run_dm1->start();
-	run_sk0->start();
-	run_sk1->start();
+// start kernel
+    run_dm0->start();
+    run_dm1->start();
+    run_sk0->start();
+    run_sk1->start();
 
-	// wait done
-	run_dm0->wait();
-	run_dm1->wait();
-	run_sk0->wait();
-	run_sk1->wait();
-	*/
+    // wait done
+    run_dm0->wait();
+    run_dm1->wait();
+    run_sk0->wait();
+    run_sk1->wait();
+    */
 
     uint64_t cfg0_bo_addr = cfg0_bo->address();
     uint64_t cfg1_bo_addr = cfg1_bo->address();
@@ -691,10 +691,10 @@ int main(int argc, char* argv[]) {
     delete dm1_krnl;
     delete sink0_krnl;
     delete sink1_krnl;
-	//delete run_dm0;
-	//delete run_dm1;
-	//delete run_sk0;
-	//delete run_sk1;
+    // delete run_dm0;
+    // delete run_dm1;
+    // delete run_sk0;
+    // delete run_sk1;
 
     return total_nerr;
 }

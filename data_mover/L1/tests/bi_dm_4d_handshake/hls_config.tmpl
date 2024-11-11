@@ -3,10 +3,10 @@
 clock=3.30
 flow_target=vivado
 syn.file=tb.cpp
-syn.file_cflags=tb.cpp,-I${XF_PROJ_ROOT}/L1/include
+syn.file_cflags=tb.cpp,-I${XF_PROJ_ROOT}/L1/include -DTEST_BYPASS_ONLY
 syn.top=dut
 tb.file=tb.cpp
-tb.file_cflags=tb.cpp,-I${XF_PROJ_ROOT}/L1/include
+tb.file_cflags=tb.cpp,-I${XF_PROJ_ROOT}/L1/include -DTEST_BYPASS_ONLY
 
 
 
