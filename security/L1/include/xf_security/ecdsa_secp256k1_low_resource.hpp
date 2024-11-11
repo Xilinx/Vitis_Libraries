@@ -26,36 +26,36 @@ class ecdsaSecp256k1 {
     using EType = ap_uint<WPORT + 2>; // element type
     using IType = ap_uint<WPTR>;      // index type
     using RType = ap_uint<WDATA + 2>; // intermediate result type
-    static const int DEP = 512;      
+    static const int DEP = 512;
 
     ecdsaSecp256k1() {
 #pragma HLS inline
 #pragma HLS bind_storage variable = NA type = RAM_S2P impl = BRAM_ECC
     }
 
-    private:
-    //st 0-14
+   private:
+    // st 0-14
     EType NA[DEP] = {
         EType("0x0000000000000000"), EType("0x0000000000000000"), EType("0x0000000000000000"),
         EType("0x0000000000000000"), // a, ptr = 0
         EType("0x0000000000000007"), EType("0x0000000000000000"), EType("0x0000000000000000"),
-        EType("0x0000000000000000"),  // b, ptr = 1
+        EType("0x0000000000000000"), // b, ptr = 1
         EType("0xFFFFFFFEFFFFFC2F"), EType("0xFFFFFFFFFFFFFFFF"), EType("0xFFFFFFFFFFFFFFFF"),
-        EType("0xFFFFFFFFFFFFFFFF"),  // p, ptr = 2
+        EType("0xFFFFFFFFFFFFFFFF"), // p, ptr = 2
         EType("0x59F2815B16F81798"), EType("0x029BFCDB2DCE28D9"), EType("0x55A06295CE870B07"),
-        EType("0x79BE667EF9DCBBAC"),  // Gx, ptr = 3
+        EType("0x79BE667EF9DCBBAC"), // Gx, ptr = 3
         EType("0x9C47D08FFB10D4B8"), EType("0xFD17B448A6855419"), EType("0x5DA4FBFC0E1108A8"),
-        EType("0x483ADA7726A3C465"),  // Gy, ptr = 4
+        EType("0x483ADA7726A3C465"), // Gy, ptr = 4
         EType("0xBFD25E8CD0364141"), EType("0xBAAEDCE6AF48A03B"), EType("0xFFFFFFFFFFFFFFFE"),
-        EType("0xFFFFFFFFFFFFFFFF"),  // n, ptr = 5
+        EType("0xFFFFFFFFFFFFFFFF"), // n, ptr = 5
         EType("0x0000000000000000"), EType("0x0000000000000000"), EType("0x0000000000000000"),
-        EType("0x0000000000000000"),  // 0, ptr = 6
+        EType("0x0000000000000000"), // 0, ptr = 6
         EType("0x0000000000000001"), EType("0x0000000000000000"), EType("0x0000000000000000"),
-        EType("0x0000000000000000"),  // 1, ptr = 7
+        EType("0x0000000000000000"), // 1, ptr = 7
         EType("0x00000001000003D1"), EType("0x0000000000000000"), EType("0x0000000000000000"),
-        EType("0x0000000000000000"),  // 2^256 - p, ptr = 8
+        EType("0x0000000000000000"), // 2^256 - p, ptr = 8
         EType("0x402DA1732FC9BEBF"), EType("0x4551231950B75FC4"), EType("0x0000000000000001"),
-        EType("0x0000000000000000"),  // 2^256 - n, ptr = 9
+        EType("0x0000000000000000"), // 2^256 - n, ptr = 9
                                      // const params, [0] ~ [9]
                                      // [10], undefined and reserved for projective coordinate lamda = lamda * Z
                                      // [11], undefined and reserved for projective coordinate lamda^2
@@ -64,15 +64,15 @@ class ecdsaSecp256k1 {
                                      // [14], undefined and reserved for projective coordinate lamda^3 * Y
     };
 
-    void prt(IType ptr){
+    void prt(IType ptr) {
         RType tmp;
-        load_array(tmp,ptr);
+        load_array(tmp, ptr);
 #ifndef __SYNTHESIS__
         std::cout << "new ecdsa value = " << std::hex << tmp << std::endl;
 #endif
     }
 
-    void load_array(DType& op, IType ptr){
+    void load_array(DType& op, IType ptr) {
 #pragma HLS inline
         for (int i = 0; i < WDATA / WPORT; i++) {
 #pragma HLS unroll
@@ -116,7 +116,7 @@ class ecdsaSecp256k1 {
 
     ap_uint<1> bit(IType ptr, int k) { return NA[ptr * WDATA / WPORT + k / WPORT][k % WPORT]; }
 
-    //st 94-98
+    // st 94-98
     void modularInv(IType pa, IType pb, IType pr) {
 #pragma HLS inline
         const int st = 94; // 5
@@ -216,18 +216,18 @@ class ecdsaSecp256k1 {
     void productMod(IType pa, IType pb, IType pc, IType pr) {
 #pragma HLS inline
         aop(6, pa, pb, pc, pr);
-   }
+    }
 
     bool lt(IType pa, IType pb) {
 #pragma HLS inline
         return aop(7, pa, pb, 0, 0);
     }
 
-/**
- * @brief: aop--all operations
- * type: 000-addMod;    001-subMod;     010-eq;         011-le; 
- *       100-leftShift; 101-rightShift; 110-ProductMod; 111-lt;
-*/
+    /**
+     * @brief: aop--all operations
+     * type: 000-addMod;    001-subMod;     010-eq;         011-le;
+     *       100-leftShift; 101-rightShift; 110-ProductMod; 111-lt;
+    */
     bool aop(ap_uint<3> type, IType pa, IType pb, IType pm, IType pr) {
 #pragma HLS inline off
         RType opA, opB, opM, opR;
@@ -274,99 +274,97 @@ class ecdsaSecp256k1 {
                 }
             } else {
                 if (type[0] == 0) { // 6, productMod
-                     //opR = xf::security::internal::productMod<WDATA>(opA, opB, opM);
-                if(pm == 5){ //productMod_n
-                    ap_uint<WDATA + 1> tmp = 0;
+                                    // opR = xf::security::internal::productMod<WDATA>(opA, opB, opM);
+                    if (pm == 5) {  // productMod_n
+                        ap_uint<WDATA + 1> tmp = 0;
 #pragma HLS bind_op variable = tmp op = add impl = dsp
 #pragma HLS bind_op variable = tmp op = sub impl = dsp
-                    for (int i = WDATA - 1; i >= 0; i--) {
-                        tmp <<= 1;
-                        if (tmp >= opM) {
-                            tmp -= opM;
-                        }
-                        if (opB[i] == 1) {
-                            tmp += opA;
+                        for (int i = WDATA - 1; i >= 0; i--) {
+                            tmp <<= 1;
                             if (tmp >= opM) {
                                 tmp -= opM;
                             }
+                            if (opB[i] == 1) {
+                                tmp += opA;
+                                if (tmp >= opM) {
+                                    tmp -= opM;
+                                }
+                            }
                         }
-                    }
-                    opR = tmp;
-                }
-                else{ //productMod_p
-                    ap_uint<128> aH = opA.range(255, 128);
-                    ap_uint<128> aL = opA.range(127, 0);
-                    ap_uint<128> bH = opB.range(255, 128);
-                    ap_uint<128> bL = opB.range(127, 0);
+                        opR = tmp;
+                    } else { // productMod_p
+                        ap_uint<128> aH = opA.range(255, 128);
+                        ap_uint<128> aL = opA.range(127, 0);
+                        ap_uint<128> bH = opB.range(255, 128);
+                        ap_uint<128> bL = opB.range(127, 0);
 
-                    ap_uint<256> aLbH = aL * bH;
-                    ap_uint<256> aHbL = aH * bL;
-                    ap_uint<512> aHbH = aH * bH;
-                    ap_uint<256> aLbL = aL * bL;
-                    ap_uint<512> mid = aLbH + aHbL;
+                        ap_uint<256> aLbH = aL * bH;
+                        ap_uint<256> aHbL = aH * bL;
+                        ap_uint<512> aHbH = aH * bH;
+                        ap_uint<256> aLbL = aL * bL;
+                        ap_uint<512> mid = aLbH + aHbL;
 
-                    ap_uint<512> mul = (aHbH << 256) + (mid << 128) + aLbL;
-                    ap_uint<256> c0 = mul.range(255, 0);
-                    ap_uint<256> c1 = mul.range(511, 256);
-                    ap_uint<256> w1 = 0;
-                    ap_uint<256> w2 = 0;
-                    ap_uint<256> w3 = 0;
-                    ap_uint<256> w4 = 0;
-                    ap_uint<256> w5 = 0;
-                    ap_uint<256> w6 = 0;
+                        ap_uint<512> mul = (aHbH << 256) + (mid << 128) + aLbL;
+                        ap_uint<256> c0 = mul.range(255, 0);
+                        ap_uint<256> c1 = mul.range(511, 256);
+                        ap_uint<256> w1 = 0;
+                        ap_uint<256> w2 = 0;
+                        ap_uint<256> w3 = 0;
+                        ap_uint<256> w4 = 0;
+                        ap_uint<256> w5 = 0;
+                        ap_uint<256> w6 = 0;
 
-                    w1.range(255, 32) = c1.range(223, 0);
-                    w2.range(255, 9) = c1.range(246, 0);
-                    w3.range(255, 8) = c1.range(247, 0);
-                    w4.range(255, 7) = c1.range(248, 0);
-                    w5.range(255, 6) = c1.range(249, 0);
-                    w6.range(255, 4) = c1.range(251, 0);
+                        w1.range(255, 32) = c1.range(223, 0);
+                        w2.range(255, 9) = c1.range(246, 0);
+                        w3.range(255, 8) = c1.range(247, 0);
+                        w4.range(255, 7) = c1.range(248, 0);
+                        w5.range(255, 6) = c1.range(249, 0);
+                        w6.range(255, 4) = c1.range(251, 0);
 
-                    ap_uint<256> s1 = c1.range(255, 252) + c1.range(255, 250) + c1.range(255, 249) + c1.range(255, 248) +
-                                    c1.range(255, 247) + c1.range(255, 224);
-                    ap_uint<256> k11 = (s1 << 2) + (s1 << 1) + s1;
-                    ap_uint<256> k = (s1 << 32) + (k11 << 7) + (s1 << 6) + (s1 << 4) + s1;
+                        ap_uint<256> s1 = c1.range(255, 252) + c1.range(255, 250) + c1.range(255, 249) +
+                                          c1.range(255, 248) + c1.range(255, 247) + c1.range(255, 224);
+                        ap_uint<256> k11 = (s1 << 2) + (s1 << 1) + s1;
+                        ap_uint<256> k = (s1 << 32) + (k11 << 7) + (s1 << 6) + (s1 << 4) + s1;
 
-                    ap_uint<257> sum = 0;
-                    sum = k + c0;
-                    if (sum >= opM) {
-                        sum -= opM;
+                        ap_uint<257> sum = 0;
+                        sum = k + c0;
+                        if (sum >= opM) {
+                            sum -= opM;
+                        }
+                        sum += w1;
+                        if (sum >= opM) {
+                            sum -= opM;
+                        }
+                        sum += w2;
+                        if (sum >= opM) {
+                            sum -= opM;
+                        }
+                        sum += w3;
+                        if (sum >= opM) {
+                            sum -= opM;
+                        }
+                        sum += w4;
+                        if (sum >= opM) {
+                            sum -= opM;
+                        }
+                        sum += w5;
+                        if (sum >= opM) {
+                            sum -= opM;
+                        }
+                        sum += w6;
+                        if (sum >= opM) {
+                            sum -= opM;
+                        }
+                        sum += c1;
+                        if (sum >= opM) {
+                            sum -= opM;
+                        }
+                        if (sum >= opM) {
+                            sum -= opM;
+                        }
+                        opR = sum;
                     }
-                    sum += w1;
-                    if (sum >= opM) {
-                        sum -= opM;
-                    }
-                    sum += w2;
-                    if (sum >= opM) {
-                        sum -= opM;
-                    }
-                    sum += w3;
-                    if (sum >= opM) {
-                        sum -= opM;
-                    }
-                    sum += w4;
-                    if (sum >= opM) {
-                        sum -= opM;
-                    }
-                    sum += w5;
-                    if (sum >= opM) {
-                        sum -= opM;
-                    }
-                    sum += w6;
-                    if (sum >= opM) {
-                        sum -= opM;
-                    }
-                    sum += c1;
-                    if (sum >= opM) {
-                        sum -= opM;
-                    }
-                    if (sum >= opM) {
-                        sum -= opM;
-                    }
-                    opR = sum;
-                }
-				}
-                 else { // 7, large than
+                } else { // 7, large than
                     res = (opA > opB);
                     ifstore = false;
                 }
@@ -378,7 +376,7 @@ class ecdsaSecp256k1 {
         return res;
     }
 
-    //st 16-18
+    // st 16-18
     void fromJacobian(IType pX, IType pY, IType pZ, IType rX, IType rY) {
 #pragma HLS inline
         const int st = 16; // 16
@@ -395,7 +393,7 @@ class ecdsaSecp256k1 {
         }
     }
 
-    //st 19-39
+    // st 19-39
     void addJacobian(
         IType pX1, IType pY1, IType pZ1, IType pX2, IType pY2, IType pZ2, IType pX3, IType pY3, IType pZ3) {
 #pragma HLS inline
@@ -455,40 +453,40 @@ class ecdsaSecp256k1 {
     // st 40-66
     void doubleJacobian(IType pX1, IType pY1, IType pZ1, IType pX2, IType pY2, IType pZ2) {
 #pragma HLS inline
-        const int st = 40;      // 40
-        productMod(pZ1, pZ1, 2, st);    //N 40
-        productMod(pY1, pY1, 2, st + 1);//E  41
-        productMod(pX1, pX1, 2, st + 2);//B 42
-        productMod(st + 1, st + 1, 2, st + 3);//L 43
+        const int st = 40;                     // 40
+        productMod(pZ1, pZ1, 2, st);           // N 40
+        productMod(pY1, pY1, 2, st + 1);       // E  41
+        productMod(pX1, pX1, 2, st + 2);       // B 42
+        productMod(st + 1, st + 1, 2, st + 3); // L 43
 
-        addMod(pX1, st + 1, 2, st + 4);// tmp1  44
-        productMod(st + 4, st + 4, 2, st + 5);//tmp1 =^2 45
-        addMod(st + 2, st + 3, 2, st + 6);// tmp2  46
-        subMod(st + 5, st + 6, 2, st + 7);//tmp3 47
-        addMod(st + 7, st + 7, 2, st + 8);// S  48
+        addMod(pX1, st + 1, 2, st + 4);        // tmp1  44
+        productMod(st + 4, st + 4, 2, st + 5); // tmp1 =^2 45
+        addMod(st + 2, st + 3, 2, st + 6);     // tmp2  46
+        subMod(st + 5, st + 6, 2, st + 7);     // tmp3 47
+        addMod(st + 7, st + 7, 2, st + 8);     // S  48
 
-        productMod(st, st, 2, st + 9); // tmp4 49 
-        productMod(st + 9, 0, 2, st + 10); // tmp4 50
-        addMod(st + 2, st + 2, 2, st + 11);// tmp5 51
-        addMod(st + 11, st + 2, 2, st + 12);// tmp5 52
-        addMod(st + 12, st + 10, 2, st + 13);// M 53
-        
-        addMod(st + 8, st + 8, 2, st + 14);//tmp6 54 
-        productMod(st + 13, st + 13, 2 , st + 15);//tmp7 55
-        subMod(st + 15, st + 14, 2, st + 16);//X2 56
+        productMod(st, st, 2, st + 9);        // tmp4 49
+        productMod(st + 9, 0, 2, st + 10);    // tmp4 50
+        addMod(st + 2, st + 2, 2, st + 11);   // tmp5 51
+        addMod(st + 11, st + 2, 2, st + 12);  // tmp5 52
+        addMod(st + 12, st + 10, 2, st + 13); // M 53
 
-        subMod(st + 8, st + 16, 2, st + 17);//tmp8 57
-        productMod(st + 17, st + 13, 2, st + 18);//tmp8 58
-        addMod(st + 3, st + 3, 2, st + 19);//tmp9 59
-        addMod(st + 19, st + 19, 2, st + 20);//tmp9 60
-        addMod(st + 20, st + 20, 2, st + 21);//tmp9 61
-        subMod(st + 18, st + 21, 2, st + 22);//Y2 62
+        addMod(st + 8, st + 8, 2, st + 14);       // tmp6 54
+        productMod(st + 13, st + 13, 2, st + 15); // tmp7 55
+        subMod(st + 15, st + 14, 2, st + 16);     // X2 56
 
-        addMod(pY1, pZ1, 2, st + 23);//tmp10 63
-        productMod(st + 23, st + 23, 2, st + 24);//tmp10 64
-        addMod(st + 1, st, 2, st + 25);//tmp11 65
+        subMod(st + 8, st + 16, 2, st + 17);      // tmp8 57
+        productMod(st + 17, st + 13, 2, st + 18); // tmp8 58
+        addMod(st + 3, st + 3, 2, st + 19);       // tmp9 59
+        addMod(st + 19, st + 19, 2, st + 20);     // tmp9 60
+        addMod(st + 20, st + 20, 2, st + 21);     // tmp9 61
+        subMod(st + 18, st + 21, 2, st + 22);     // Y2 62
 
-        subMod(st + 24, st + 25, 2, st + 26);//Z2 66
+        addMod(pY1, pZ1, 2, st + 23);             // tmp10 63
+        productMod(st + 23, st + 23, 2, st + 24); // tmp10 64
+        addMod(st + 1, st, 2, st + 25);           // tmp11 65
+
+        subMod(st + 24, st + 25, 2, st + 26); // Z2 66
         copy_array(st + 16, pX2);
         copy_array(st + 22, pY2);
         copy_array(st + 26, pZ2);
@@ -502,17 +500,17 @@ class ecdsaSecp256k1 {
 
         productMod(px, 11, 2, 13);
         productMod(py, 12, 2, 14);
-        
+
         for (int i = 256 - 1; i >= 0; i--) {
             doubleJacobian(rx, ry, rz, rx, ry, rz);
             if (bit(pk, i) == ap_uint<1>(1)) {
-                //addJacobian(rx, ry, rz, px, py, 7, rx, ry, rz);
+                // addJacobian(rx, ry, rz, px, py, 7, rx, ry, rz);
                 addJacobian(rx, ry, rz, 13, 14, 10, rx, ry, rz);
             }
         }
     }
 
-    //st 67-77
+    // st 67-77
     bool sign(ap_uint<1> isGenPubKey, DType hash, DType k, DType privateKey, DType& r, DType& s) {
 #pragma HLS inline
         const int st = 67; // 67
@@ -525,30 +523,29 @@ class ecdsaSecp256k1 {
         // z1, 72
         // x, 73
         // y, 74
-        dotProductJacobianAffine(3, 4, st + 1, st + 3, st + 4, st + 5);      
+        dotProductJacobianAffine(3, 4, st + 1, st + 3, st + 4, st + 5);
         fromJacobian(st + 3, st + 4, st + 5, st + 6, st + 7);
 
-        if (isGenPubKey == 0) {//sign
+        if (isGenPubKey == 0) { // sign
             if (le(st + 6, 5)) {
-                subMod(st + 6, 5, 5, st + 6);//(xp - n ) mod n
+                subMod(st + 6, 5, 5, st + 6); //(xp - n ) mod n
             }
 
-            if (eq(st + 6, 6)) {//r=0
+            if (eq(st + 6, 6)) { // r=0
                 return false;
             } else {
                 load_array(r, st + 6);
 
                 if (le(st, 5)) {
-                    subMod(st, 5, 5, st);//(hash -n) mod n
+                    subMod(st, 5, 5, st); //(hash -n) mod n
                 }
 
                 if (le(st + 2, 5)) {
-                    subMod(st + 2, 5, 5, st + 2);//(key - n) mod n
+                    subMod(st + 2, 5, 5, st + 2); //(key - n) mod n
                 }
 
                 modularInv(st + 1, 5, st + 8);         // kInv, 75
                 productMod(st + 6, st + 2, 5, st + 9); // rda, 76
-                
 
                 addMod(st + 9, st, 5, st + 9);
 
@@ -562,14 +559,14 @@ class ecdsaSecp256k1 {
                     return true;
                 }
             }
-        } else {//generate public key
+        } else { // generate public key
             load_array(r, st + 6);
             load_array(s, st + 7);
             return true;
         }
     }
 
-    //st 78-93
+    // st 78-93
     bool verify(DType r, DType s, DType hash, DType Px, DType Py) {
 #pragma HLS inline
         const int st = 78; // 78
@@ -627,9 +624,9 @@ class ecdsaSecp256k1 {
      * lamda : lamda to randomize project coordinate
      */
     bool process(ap_uint<2> opType, DType hash, DType op1, DType op2, DType& r, DType& s, DType lamda) {
-        store_array(lamda, 10);//lamda
-        productMod(10, 10, 2, 11);//lamda^2
-        productMod(10, 11, 2, 12);//lamda^3
+        store_array(lamda, 10);    // lamda
+        productMod(10, 10, 2, 11); // lamda^2
+        productMod(10, 11, 2, 12); // lamda^3
 
         if (opType == 1) {
             return verify(r, s, hash, op1, op2);
@@ -643,4 +640,3 @@ class ecdsaSecp256k1 {
 } // namespace xf
 
 #endif
-

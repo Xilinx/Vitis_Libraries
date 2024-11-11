@@ -17,7 +17,6 @@ class aesTable {
 #pragma HLS resource variable = iibox core = ROM_nP_LUTRAM
     }
 
-
     const ap_uint<8> ssbox[256] = {
         0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x1,  0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76, 0xca, 0x82,
         0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0, 0xb7, 0xfd, 0x93, 0x26,
@@ -50,21 +49,14 @@ class aesTable {
         0x2D, 0xE5, 0x7A, 0x9F, 0x93, 0xC9, 0x9C, 0xEF, 0xA0, 0xE0, 0x3B, 0x4D, 0xAE, 0x2A, 0xF5, 0xB0, 0xC8, 0xEB,
         0xBB, 0x3C, 0x83, 0x53, 0x99, 0x61, 0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63,
         0x55, 0x21, 0x0C, 0x7D};
-
 };
-
 
 template <int W>
 class aesEnc {
-   
    public:
-    
-    void updateKey(ap_uint<W> cipherkey) {}  
+    void updateKey(ap_uint<W> cipherkey) {}
     void process(ap_uint<128> plaintext, ap_uint<W> cipherkey, ap_uint<128>& ciphertext) {}
-    
-
 };
-
 
 template <>
 class aesEnc<256> : public aesTable {
@@ -118,25 +110,18 @@ class aesEnc<256> : public aesTable {
         }
     }
 
-//the function of Finite field multiplication *2
-    static ap_uint<8> GFMul2 ( ap_uint<8> a) {
-            ap_uint<8> kModulus=0b00011011;
-                
-                    if (a[7]==1) 
-                        {
-                            a = (a << 1) ^ kModulus;
-                        }    
-                    else 
-                        {
-                            a <<= 1;
-                        }
-                    
-                   
-                
-                    return a;
-                    
-                    }
+    // the function of Finite field multiplication *2
+    static ap_uint<8> GFMul2(ap_uint<8> a) {
+        ap_uint<8> kModulus = 0b00011011;
 
+        if (a[7] == 1) {
+            a = (a << 1) ^ kModulus;
+        } else {
+            a <<= 1;
+        }
+
+        return a;
+    }
 
     void process(ap_uint<128> plaintext, ap_uint<256> cipherkey, ap_uint<128>& ciphertext) {
         ap_uint<128> state, state_1;
@@ -178,10 +163,11 @@ class aesEnc<256> : public aesTable {
             for (int i = 0; i < 16; i++) {
 #pragma HLS unroll
                 ap_uint<8> tmp = state(i * 8 + 7, i * 8);
-                state_1(i * 8 + 7, i * 8)= state(i * 8 + 7, i * 8);
+                state_1(i * 8 + 7, i * 8) = state(i * 8 + 7, i * 8);
             }
 
             if (round_counter < 14) {
+                // clang-format off
                 for (int i = 0; i < 4; i++) {
 #pragma HLS unroll
                     state(i * 32 + 7, i * 32) =GFMul2(state_1(i * 32 + 7, i * 32)) ^ 
@@ -205,6 +191,7 @@ class aesEnc<256> : public aesTable {
                                                       state_1(i * 32 + 23, i * 32 + 16) ^
                                                       GFMul2(state_1(i * 32 + 31, i * 32 + 24));
                 }
+                // clang-format on
             } else {
                 state = state_1;
             }
@@ -249,7 +236,6 @@ class aesEnc<256> : public aesTable {
         }
     }
 };
-
 
 template <>
 class aesEnc<192> : public aesTable {
@@ -300,30 +286,23 @@ class aesEnc<192> : public aesTable {
         }
     }
 
-//the function of Finite field multiplication *2
+    // the function of Finite field multiplication *2
 
-        static ap_uint<8> GFMul2 ( ap_uint<8> a) {
-            ap_uint<8> kModulus=0b00011011;
-                
-                    if (a[7]==1) 
-                        {
-                            a = (a << 1) ^ kModulus;
-                        }    
-                    else 
-                        {
-                            a <<= 1;
-                        }
-                    
-                   
-                
-                    return a;
-                    
-                    }
+    static ap_uint<8> GFMul2(ap_uint<8> a) {
+        ap_uint<8> kModulus = 0b00011011;
 
+        if (a[7] == 1) {
+            a = (a << 1) ^ kModulus;
+        } else {
+            a <<= 1;
+        }
+
+        return a;
+    }
 
     void process(ap_uint<128> plaintext, ap_uint<192> cipherkey, ap_uint<128>& ciphertext) {
         ap_uint<128> state, state_1;
-        ap_uint<8> tmp_1,tmp_2_1,tmp_2_2,tmp_3;
+        ap_uint<8> tmp_1, tmp_2_1, tmp_2_2, tmp_3;
         ap_uint<4> round_counter;
 
         // state init and add roundkey[0]
@@ -361,10 +340,11 @@ class aesEnc<192> : public aesTable {
             for (int i = 0; i < 16; i++) {
 #pragma HLS unroll
                 ap_uint<8> tmp = state(i * 8 + 7, i * 8);
-                state_1(i * 8 + 7, i * 8)= state(i * 8 + 7, i * 8);
+                state_1(i * 8 + 7, i * 8) = state(i * 8 + 7, i * 8);
             }
 
             if (round_counter < 12) {
+                // clang-format off
                 for (int i = 0; i < 4; i++) {
 #pragma HLS unroll
                     state(i * 32 + 7, i * 32) =GFMul2(state_1(i * 32 + 7, i * 32)) ^ 
@@ -388,6 +368,7 @@ class aesEnc<192> : public aesTable {
                                                       state_1(i * 32 + 23, i * 32 + 16) ^
                                                       GFMul2(state_1(i * 32 + 31, i * 32 + 24));
                 }
+                // clang-format on
             } else {
                 state = state_1;
             }
@@ -398,14 +379,11 @@ class aesEnc<192> : public aesTable {
     }
 };
 
-
-
-
-template<>
+template <>
 class aesEnc<128> : public aesTable {
-    public:
+   public:
     ap_uint<128> key_list[11];
-    aesEnc(){
+    aesEnc() {
 #pragma HLS inline
 #pragma HLS ARRAY_PARTITION variable = key_list complete dim = 1
     }
@@ -432,42 +410,30 @@ class aesEnc<128> : public aesTable {
             key_list[iter].range(127, 96) = lastRound.range(127, 96) ^ key_list[iter].range(95, 64);
 
             lastRound.range(127, 0) = key_list[iter];
-           
         }
-        
-       
-
     }
 
-//the function of Finite field multiplication *2
+    // the function of Finite field multiplication *2
 
-    static ap_uint<8> GFMul2 ( ap_uint<8> a) {
-            ap_uint<8> kModulus=0b00011011; 
-                    if (a[7]==1) 
-                        {
-                            a = (a << 1) ^ kModulus;
-                        }    
-                    else 
-                        {
-                            a <<= 1;
-                        }
-                    
-                   
-                
-                    return a;
-                    
-                    }
-    
+    static ap_uint<8> GFMul2(ap_uint<8> a) {
+        ap_uint<8> kModulus = 0b00011011;
+        if (a[7] == 1) {
+            a = (a << 1) ^ kModulus;
+        } else {
+            a <<= 1;
+        }
+
+        return a;
+    }
+
     void process(ap_uint<128> plaintext, ap_uint<128> cipherkey, ap_uint<128>& ciphertext) {
-        
-       
         ap_uint<128> state, state_1;
         ap_uint<8> tmp_1, tmp_2_1, tmp_2_2, tmp_3;
         ap_uint<4> round_counter;
 
         // state init and add roundkey[0]
         state = plaintext ^ key_list[0];
-        //std::cout << "the state is " <<state<< std::endl;
+        // std::cout << "the state is " <<state<< std::endl;
 
         // Start 10 rounds of process
         for (round_counter = 1; round_counter <= 10; round_counter++) {
@@ -476,8 +442,7 @@ class aesEnc<128> : public aesTable {
 #pragma HLS unroll
                 state(i * 8 + 7, i * 8) = ssbox[state(i * 8 + 7, i * 8)];
             }
-              
-           
+
             // ShiftRow
             tmp_1 = state(15, 8);
             state(15, 8) = state(47, 40);
@@ -498,17 +463,16 @@ class aesEnc<128> : public aesTable {
             state(95, 88) = state(63, 56);
             state(63, 56) = state(31, 24);
             state(31, 24) = tmp_3;
-   
 
             // MixColumn
-       
+
             for (int i = 0; i < 16; i++) {
 #pragma HLS unroll
                 ap_uint<8> tmp = state(i * 8 + 7, i * 8);
-                 state_1(i * 8 + 7, i * 8)= state(i * 8 + 7, i * 8);
-            
+                state_1(i * 8 + 7, i * 8) = state(i * 8 + 7, i * 8);
             }
             if (round_counter < 10) {
+                // clang-format off
                 for (int i = 0; i < 4; i++) {
 #pragma HLS unroll
 
@@ -532,17 +496,15 @@ class aesEnc<128> : public aesTable {
                                                       state_1(i * 32 + 15, i * 32 + 8) ^
                                                       state_1(i * 32 + 23, i * 32 + 16) ^
                                                       GFMul2(state_1(i * 32 + 31, i * 32 + 24));
-                }   
-            }
-            
-             else {
+                }
+                // clang-format on
+            } else {
                 state = state_1;
             }
             state ^= key_list[round_counter];
         }
         ciphertext = state;
     }
-    
 };
 
 /**
@@ -567,8 +529,7 @@ class aesDec {
      * @param plaintext Decryption result.
      */
     void process(ap_uint<128> ciphertext, ap_uint<W> cipherkey, ap_uint<128>& plaintext) {}
-};  
-
+};
 
 template <>
 class aesDec<256> : public aesTable {
@@ -618,59 +579,47 @@ class aesDec<256> : public aesTable {
         }
     }
 
-//the function of Finite field multiplication *2 *4 *8            
+    // the function of Finite field multiplication *2 *4 *8
 
-        static ap_uint<8> GFMul2 ( ap_uint<8> a) {
-            ap_uint<8> kModulus=0b00011011;
-                
-                    if (a[7]==1) 
-                        {
-                            a = (a << 1) ^ kModulus;
-                        }    
-                    else 
-                        {
-                            a <<= 1;
-                        }
-                
-                    return a;
-                    
-                    }
+    static ap_uint<8> GFMul2(ap_uint<8> a) {
+        ap_uint<8> kModulus = 0b00011011;
 
-    static ap_uint<8> GFMul4 ( ap_uint<8> a) {
-            ap_uint<8> kModulus=0b00011011;
-                
-                for(int i = 0; i < 2; ++i){
-                    if (a[7]==1) 
-                        {
-                            a = (a << 1) ^ kModulus;
-                        }    
-                    else 
-                        {
-                            a <<= 1;
-                        }
-                    }
-                   
-                    return a;
-                    
-                    }
-    
-    static ap_uint<8> GFMul8 ( ap_uint<8> a) {
-            ap_uint<8> kModulus=0b00011011;
-                
-                for(int i = 0; i < 3; ++i){
-                    if (a[7]==1) 
-                        {
-                            a = (a << 1) ^ kModulus;
-                        }    
-                    else 
-                        {
-                            a <<= 1;
-                        }
-                    }
-                
-                    return a;
-                    
-                    }
+        if (a[7] == 1) {
+            a = (a << 1) ^ kModulus;
+        } else {
+            a <<= 1;
+        }
+
+        return a;
+    }
+
+    static ap_uint<8> GFMul4(ap_uint<8> a) {
+        ap_uint<8> kModulus = 0b00011011;
+
+        for (int i = 0; i < 2; ++i) {
+            if (a[7] == 1) {
+                a = (a << 1) ^ kModulus;
+            } else {
+                a <<= 1;
+            }
+        }
+
+        return a;
+    }
+
+    static ap_uint<8> GFMul8(ap_uint<8> a) {
+        ap_uint<8> kModulus = 0b00011011;
+
+        for (int i = 0; i < 3; ++i) {
+            if (a[7] == 1) {
+                a = (a << 1) ^ kModulus;
+            } else {
+                a <<= 1;
+            }
+        }
+
+        return a;
+    }
 
     void process(ap_uint<128> ciphertext, ap_uint<256> cipherkey, ap_uint<128>& plaintext) {
         ap_uint<128> state;
@@ -683,7 +632,7 @@ class aesDec<256> : public aesTable {
         for (round_counter = 1; round_counter <= 14; round_counter++) {
             ap_uint<8> tmp_1, tmp_2_1, tmp_2_2, tmp_3;
             ap_uint<128> state_1;
-            ap_uint<8> tmp16_s[4]={0x0,0x0,0x0,0x0};
+            ap_uint<8> tmp16_s[4] = {0x0, 0x0, 0x0, 0x0};
             // Inv ShiftRow
             tmp_1 = state(111, 104);
             state(111, 104) = state(79, 72);
@@ -715,13 +664,12 @@ class aesDec<256> : public aesTable {
 
             // Inverse Mix Column
             for (int i = 0; i < 16; i++) {
-               state_1(i * 8 + 7, i * 8)= state(i * 8 + 7, i * 8);
+                state_1(i * 8 + 7, i * 8) = state(i * 8 + 7, i * 8);
             }
             if (round_counter < 14) {
+                // clang-format off
                 for (int i = 0; i < 4; i++) {
 #pragma HLS unroll
-                    
-
                     state(i * 32 + 7, i * 32) = GFMul8(state_1(i * 32 + 7, i * 32))^GFMul4(state_1(i * 32 + 7, i * 32))^GFMul2(state_1(i * 32 + 7, i * 32))^
                                                 GFMul8(state_1(i * 32 + 15, i * 32 + 8)) ^GFMul2(state_1(i * 32 + 15, i * 32 + 8))^state_1(i * 32 + 15, i * 32 + 8)^
                                                 GFMul8(state_1(i * 32 + 23, i * 32 + 16))^GFMul4(state_1(i * 32 + 23, i * 32 + 16))^state_1(i * 32 + 23, i * 32 + 16)^
@@ -739,12 +687,12 @@ class aesDec<256> : public aesTable {
                                                 GFMul8(state_1(i * 32 + 15, i * 32 + 8))^GFMul4(state_1(i * 32 + 15, i * 32 + 8))^state_1(i * 32 + 15, i * 32 + 8)^
                                                 GFMul8(state_1(i * 32 + 23, i * 32 + 16))^state_1(i * 32 + 23, i * 32 + 16);
                 }
+                // clang-format on
             }
         }
         plaintext = state;
     }
 };
-
 
 template <>
 class aesDec<192> : public aesTable {
@@ -794,59 +742,46 @@ class aesDec<192> : public aesTable {
             lastRound = thisRound;
         }
     }
-//the function of Finite field multiplication *2 *4 *8    
-    static ap_uint<8> GFMul2 ( ap_uint<8> a) {
-            ap_uint<8> kModulus=0b00011011;
-                
-                    if (a[7]==1) 
-                        {
-                            a = (a << 1) ^ kModulus;
-                        }    
-                    else 
-                        {
-                            a <<= 1;
-                        }
-                                
-                    return a;
-                    
-                    }
+    // the function of Finite field multiplication *2 *4 *8
+    static ap_uint<8> GFMul2(ap_uint<8> a) {
+        ap_uint<8> kModulus = 0b00011011;
 
+        if (a[7] == 1) {
+            a = (a << 1) ^ kModulus;
+        } else {
+            a <<= 1;
+        }
 
-    static ap_uint<8> GFMul4 ( ap_uint<8> a) {
-            ap_uint<8> kModulus=0b00011011;
-                
-                for(int i = 0; i < 2; ++i){
-                    if (a[7]==1) 
-                        {
-                            a = (a << 1) ^ kModulus;
-                        }    
-                    else 
-                        {
-                            a <<= 1;
-                        }
-                    }
-                   
-                    return a;
-                    
-                    }
-    
-    static ap_uint<8> GFMul8 ( ap_uint<8> a) {
-            ap_uint<8> kModulus=0b00011011;
-                
-                for(int i = 0; i < 3; ++i){
-                    if (a[7]==1) 
-                        {
-                            a = (a << 1) ^ kModulus;
-                        }    
-                    else 
-                        {
-                            a <<= 1;
-                        }
-                    }
-                            
-                    return a;
-                    
-                    }
+        return a;
+    }
+
+    static ap_uint<8> GFMul4(ap_uint<8> a) {
+        ap_uint<8> kModulus = 0b00011011;
+
+        for (int i = 0; i < 2; ++i) {
+            if (a[7] == 1) {
+                a = (a << 1) ^ kModulus;
+            } else {
+                a <<= 1;
+            }
+        }
+
+        return a;
+    }
+
+    static ap_uint<8> GFMul8(ap_uint<8> a) {
+        ap_uint<8> kModulus = 0b00011011;
+
+        for (int i = 0; i < 3; ++i) {
+            if (a[7] == 1) {
+                a = (a << 1) ^ kModulus;
+            } else {
+                a <<= 1;
+            }
+        }
+
+        return a;
+    }
 
     void process(ap_uint<128> ciphertext, ap_uint<192> cipherkey, ap_uint<128>& plaintext) {
         ap_uint<128> state;
@@ -890,9 +825,10 @@ class aesDec<192> : public aesTable {
 
             // Inverse Mix Column
             for (int i = 0; i < 16; i++) {
-                 state_1(i * 8 + 7, i * 8)= state(i * 8 + 7, i * 8);
+                state_1(i * 8 + 7, i * 8) = state(i * 8 + 7, i * 8);
             }
             if (round_counter < 12) {
+                // clang-format off
                 for (int i = 0; i < 4; i++) {
 #pragma HLS unroll
                     state(i * 32 + 7, i * 32) = GFMul8(state_1(i * 32 + 7, i * 32))^GFMul4(state_1(i * 32 + 7, i * 32))^GFMul2(state_1(i * 32 + 7, i * 32))^
@@ -912,14 +848,12 @@ class aesDec<192> : public aesTable {
                                                 GFMul8(state_1(i * 32 + 15, i * 32 + 8))^GFMul4(state_1(i * 32 + 15, i * 32 + 8))^state_1(i * 32 + 15, i * 32 + 8)^
                                                 GFMul8(state_1(i * 32 + 23, i * 32 + 16))^state_1(i * 32 + 23, i * 32 + 16);                            
                 }
+                // clang-format on
             }
         }
         plaintext = state;
     }
 };
-
-
-
 
 template <>
 class aesDec<128> : public aesTable {
@@ -956,62 +890,48 @@ class aesDec<128> : public aesTable {
         }
     }
 
-//the function of Finite field multiplication *2 *4 *8    
+    // the function of Finite field multiplication *2 *4 *8
 
-    static ap_uint<8> GFMul2 ( ap_uint<8> a) {
-            ap_uint<8> kModulus=0b00011011;
-                
-                    if (a[7]==1) 
-                        {
-                            a = (a << 1) ^ kModulus;
-                        }    
-                    else 
-                        {
-                            a <<= 1;
-                        }
-                
-                    return a;
-                    
-                    }
+    static ap_uint<8> GFMul2(ap_uint<8> a) {
+        ap_uint<8> kModulus = 0b00011011;
 
+        if (a[7] == 1) {
+            a = (a << 1) ^ kModulus;
+        } else {
+            a <<= 1;
+        }
 
-    static ap_uint<8> GFMul4 ( ap_uint<8> a) {
-            ap_uint<8> kModulus=0b00011011;
-                
-                for(int i = 0; i < 2; ++i){
-                    if (a[7]==1) 
-                        {
-                            a = (a << 1) ^ kModulus;
-                        }    
-                    else 
-                        {
-                            a <<= 1;
-                        }
-                    }
-                   
-                    return a;
-                    
-                    }
-    
-    static ap_uint<8> GFMul8 ( ap_uint<8> a) {
-            ap_uint<8> kModulus=0b00011011;
-                
-                for(int i = 0; i < 3; ++i){
-                    if (a[7]==1) 
-                        {
-                            a = (a << 1) ^ kModulus;
-                        }    
-                    else 
-                        {
-                            a <<= 1;
-                        }
-                    }
-                
-                    return a;
-                    
-                    }
+        return a;
+    }
 
-                    
+    static ap_uint<8> GFMul4(ap_uint<8> a) {
+        ap_uint<8> kModulus = 0b00011011;
+
+        for (int i = 0; i < 2; ++i) {
+            if (a[7] == 1) {
+                a = (a << 1) ^ kModulus;
+            } else {
+                a <<= 1;
+            }
+        }
+
+        return a;
+    }
+
+    static ap_uint<8> GFMul8(ap_uint<8> a) {
+        ap_uint<8> kModulus = 0b00011011;
+
+        for (int i = 0; i < 3; ++i) {
+            if (a[7] == 1) {
+                a = (a << 1) ^ kModulus;
+            } else {
+                a <<= 1;
+            }
+        }
+
+        return a;
+    }
+
     void process(ap_uint<128> ciphertext, ap_uint<128> cipherkey, ap_uint<128>& plaintext) {
         ap_uint<128> state;
         ap_uint<4> round_counter;
@@ -1055,12 +975,12 @@ class aesDec<128> : public aesTable {
             // Inverse Mix Column
             for (int i = 0; i < 16; i++) {
                 ap_uint<8> tmp = state(i * 8 + 7, i * 8);
-                 state_1(i * 8 + 7, i * 8)= state(i * 8 + 7, i * 8);
+                state_1(i * 8 + 7, i * 8) = state(i * 8 + 7, i * 8);
             }
             if (round_counter < 10) {
+                // clang-format off
                 for (int i = 0; i < 4; i++) {
 #pragma HLS unroll
-                    
                     state(i * 32 + 7, i * 32) = GFMul8(state_1(i * 32 + 7, i * 32))^GFMul4(state_1(i * 32 + 7, i * 32))^GFMul2(state_1(i * 32 + 7, i * 32))^
                                                 GFMul8(state_1(i * 32 + 15, i * 32 + 8)) ^GFMul2(state_1(i * 32 + 15, i * 32 + 8))^state_1(i * 32 + 15, i * 32 + 8)^
                                                 GFMul8(state_1(i * 32 + 23, i * 32 + 16))^GFMul4(state_1(i * 32 + 23, i * 32 + 16))^state_1(i * 32 + 23, i * 32 + 16)^
@@ -1078,14 +998,12 @@ class aesDec<128> : public aesTable {
                                                 GFMul8(state_1(i * 32 + 15, i * 32 + 8))^GFMul4(state_1(i * 32 + 15, i * 32 + 8))^state_1(i * 32 + 15, i * 32 + 8)^
                                                 GFMul8(state_1(i * 32 + 23, i * 32 + 16))^state_1(i * 32 + 23, i * 32 + 16);                            
                 }
-
+                // clang-format on
             }
         }
         plaintext = state;
     }
 };
-
-
 
 } // namespace security
 } // namespace xf
