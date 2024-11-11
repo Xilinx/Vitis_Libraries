@@ -68,16 +68,15 @@ class ComplexMatrix {
         memcpy(ptr, hdl.ptr, sizeof(std::complex<T>) * M * N);
     }
     void createIdentity() {
-        if(M != N) {
+        if (M != N) {
             std::cout << "Create Identity Matrix failed as the input matrix is not a square matrix \n";
         }
-        for(int i=0; i<M; i++) {
-            for(int j=0; j<N; j++) {
-                if(i == j) {
+        for (int i = 0; i < M; i++) {
+            for (int j = 0; j < N; j++) {
+                if (i == j) {
                     elem(i, j).real(1);
                     elem(i, j).imag(0);
-                }
-                else {
+                } else {
                     elem(i, j) = 0;
                 }
             }
@@ -462,8 +461,8 @@ class ComplexMatrix {
         for (int i = 0; i < this->M; i++) {
             for (int j = 0; j < this->M; j++) {
                 Q.elem(i, j) = 0;
-                //if ((i == j) && (i < N)) {
-                if ((i == j) ) {
+                // if ((i == j) && (i < N)) {
+                if ((i == j)) {
                     Q.elem(i, i).real(1);
                 }
             }
@@ -555,7 +554,7 @@ class ComplexMatrix {
                     // R.elem(k, j) = elem(k, j);
                 }
             } // endif (z > tol)
-        } // endfor k 0:N
+        }     // endfor k 0:N
         std::cout << "after vectors transformation" << std::endl;
         print();
         std::cout << "Array Diag: \n";
@@ -585,7 +584,7 @@ class ComplexMatrix {
                 Q.elem(k, j).imag(qkj_real * q.imag() + qkj_imag * q.real());
                 // Q.elem(k, j) = Q.elem(k, j) * q;
             }
-            //for (int j = 0; j < N; j++) {
+            // for (int j = 0; j < N; j++) {
             for (int j = 0; j < M; j++) {
                 q.real(0);
                 q.imag(0);
@@ -626,7 +625,7 @@ class ComplexMatrix {
                 R.elem(i, j) = 0;
             }
         }
-        //ComplexMatrix<T> U(Q);
+        // ComplexMatrix<T> U(Q);
 
         std::complex<T> q;
 
@@ -691,7 +690,7 @@ class ComplexMatrix {
                     R.elem(k, j) = elem(k, j);
                 }
             } // endif (z > tol)
-        } // endfor k 0:N
+        }     // endfor k 0:N
         std::cout << "after vectors transformation" << std::endl;
         print();
         std::cout << "Diag Array : \n";
@@ -740,7 +739,6 @@ class ComplexMatrix {
         Q.print();
     } // end qrd_householder_2
 
-
     void qrd_householder_3(ComplexMatrix<T>& Q, ComplexMatrix<T>& R) {
         if (Q.M != this->M || Q.N != this->M || R.M != this->M || R.N != this->N) {
             std::cout << "Q or R size does not match, Householder QRD failed" << std::endl;
@@ -749,8 +747,8 @@ class ComplexMatrix {
         for (int i = 0; i < this->M; i++) {
             for (int j = 0; j < this->M; j++) {
                 Q.elem(i, j) = 0;
-                //if ((i == j) && (i < N)) {
-                if ((i == j) ) {
+                // if ((i == j) && (i < N)) {
+                if ((i == j)) {
                     Q.elem(i, i).real(1);
                 }
             }
@@ -760,11 +758,11 @@ class ComplexMatrix {
         }
         std::complex<T> q;
         std::complex<T> sgn;
-        T alph=1;
-        T Vr2=0;
+        T alph = 1;
+        T Vr2 = 0;
         T Vr = 0;
-        T akk=0;
-        T akk2=0;
+        T akk = 0;
+        T akk2 = 0;
 
         for (int k = 0; k < this->N; k++) {
             Vr2 = 0;
@@ -773,7 +771,7 @@ class ComplexMatrix {
                 Vr2 += elem(i, k).real() * elem(i, k).real();
                 Vr2 += elem(i, k).imag() * elem(i, k).imag();
             }
-            //Diag[k] = 0;
+            // Diag[k] = 0;
             if (Vr2 > tol) {
                 // Vr is the power of the length of column aj: ||aj||*||aj||
                 Vr = std::sqrt(Vr2);
@@ -789,7 +787,7 @@ class ComplexMatrix {
                 akk = std::sqrt(akk2);
                 // H = I-2ww* = I-(1/alph)uu*;
                 // alph = pow(||ak||) + ||ak||*|akk| = Vr2 + sqrt(Vr2*d1*d1')
-                alph = Vr2+Vr*akk;
+                alph = Vr2 + Vr * akk;
                 if (akk2 != (T)0) {
                     sgn = elem(k, k) / akk;
                 } // endif
@@ -809,7 +807,7 @@ class ComplexMatrix {
                     elem(k, j) -= q * elem(k, k);
                     // Phase Transformation
                     R.elem(k, j) = -std::conj(sgn) * elem(k, j);
-                    for (int i = k+1; i < M; i++) {
+                    for (int i = k + 1; i < M; i++) {
                         elem(i, j) -= q * elem(i, k);
                     }
                 }
@@ -824,17 +822,17 @@ class ComplexMatrix {
 
                     Q.elem(k, j) -= q * elem(k, k);
                     // Phase Transformation
-                    Q.elem(k,j) = -std::conj(sgn) * Q.elem(k,j);
+                    Q.elem(k, j) = -std::conj(sgn) * Q.elem(k, j);
 
-                    for (int i = k+1; i < M; i++) {
+                    for (int i = k + 1; i < M; i++) {
                         Q.elem(i, j) -= q * elem(i, k);
                     }
                 }
             } // endif (z > tol)
-        } // endfor k 0:N
+        }     // endfor k 0:N
 
         Q.conj_transpose();
-        
+
     } // end qrd_householder_3
 
     void qrd_householder_4(ComplexMatrix<T>& Q, ComplexMatrix<T>& R) {
@@ -845,8 +843,8 @@ class ComplexMatrix {
         for (int i = 0; i < this->M; i++) {
             for (int j = 0; j < this->M; j++) {
                 Q.elem(i, j) = 0;
-                //if ((i == j) && (i < N)) {
-                if ((i == j) ) {
+                // if ((i == j) && (i < N)) {
+                if ((i == j)) {
                     Q.elem(i, i).real(1);
                 }
             }
@@ -856,11 +854,11 @@ class ComplexMatrix {
         }
         std::complex<T> q;
         std::complex<T> sgn;
-        T alph=1;
-        T Vr2=0;
+        T alph = 1;
+        T Vr2 = 0;
         T Vr = 0;
-        T akk=0;
-        T akk2=0;
+        T akk = 0;
+        T akk2 = 0;
 
         for (int k = 0; k < this->N; k++) {
             Vr2 = 0;
@@ -869,7 +867,7 @@ class ComplexMatrix {
                 Vr2 += elem(i, k).real() * elem(i, k).real();
                 Vr2 += elem(i, k).imag() * elem(i, k).imag();
             }
-            //Diag[k] = 0;
+            // Diag[k] = 0;
             if (Vr2 > tol) {
                 // Vr is the power of the length of column aj: ||aj||*||aj||
                 Vr = std::sqrt(Vr2);
@@ -885,7 +883,7 @@ class ComplexMatrix {
                 akk = std::sqrt(akk2);
                 // H = I-2ww* = I-(1/alph)uu*;
                 // alph = pow(||ak||) + ||ak||*|akk| = Vr2 + sqrt(Vr2*d1*d1')
-                alph = Vr2+Vr*akk;
+                alph = Vr2 + Vr * akk;
                 if (akk2 != (T)0) {
                     sgn = elem(k, k) / akk;
                 } // endif
@@ -905,7 +903,7 @@ class ComplexMatrix {
                     elem(k, j) -= q * elem(k, k);
                     // Phase Transformation
                     R.elem(k, j) = -std::conj(sgn) * elem(k, j);
-                    for (int i = k+1; i < M; i++) {
+                    for (int i = k + 1; i < M; i++) {
                         elem(i, j) -= q * elem(i, k);
                     }
                 }
@@ -920,17 +918,17 @@ class ComplexMatrix {
 
                     Q.elem(k, j) -= q * elem(k, k);
                     // Phase Transformation
-                    Q.elem(k,j) = -std::conj(sgn) * Q.elem(k,j);
+                    Q.elem(k, j) = -std::conj(sgn) * Q.elem(k, j);
 
-                    for (int i = k+1; i < M; i++) {
+                    for (int i = k + 1; i < M; i++) {
                         Q.elem(i, j) -= q * elem(i, k);
                     }
                 }
             } // endif (z > tol)
-        } // endfor k 0:N
+        }     // endfor k 0:N
 
         Q.conj_transpose();
-        
+
     } // end qrd_householder_4
 
     void diff(ComplexMatrix<T>& hdl) {
@@ -945,13 +943,14 @@ class ComplexMatrix {
                 std::complex<T> diff = elem(i, j) - hdl.elem(i, j);
                 T tmp_err = std::sqrt(diff.real() * diff.real() + diff.imag() * diff.imag());
                 if (max_err < tmp_err) {
-                    //max_err = tmp_err;
+                    // max_err = tmp_err;
                     a = elem(i, j);
                     b = hdl.elem(i, j);
                     x = i;
                     y = j;
                     err_num++;
-                    std::cout << "err_num=" << err_num << ", max_err=" << max_err << " on [" << x << ", " << y << "], a = " << a << ", b = " << b << std::endl;
+                    std::cout << "err_num=" << err_num << ", max_err=" << max_err << " on [" << x << ", " << y
+                              << "], a = " << a << ", b = " << b << std::endl;
                 }
                 /*
                 if(max_rel_err < tmp_rel_err) {

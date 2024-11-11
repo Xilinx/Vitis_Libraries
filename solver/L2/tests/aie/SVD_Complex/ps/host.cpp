@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
     const int column_num = 16;
     const int row_num = 16;
     const int loop = 1;
-    int in_num = column_num * (row_num + column_num) ;
+    int in_num = column_num * (row_num + column_num);
     int out_num = column_num * (row_num + column_num);
     int in_sz = in_num * sizeof(float);
     int out_sz = out_num * sizeof(float);
@@ -79,7 +79,6 @@ int main(int argc, char** argv) {
     float* out_data[out_ch];
     float* gld_data[out_ch];
     std::cout << "test123\n";
-
 
     for (int i = 0; i < in_ch; i++) {
         in_data[i] = (float*)malloc(in_sz);
@@ -99,34 +98,33 @@ int main(int argc, char** argv) {
     load_tv(argv[5], (float*)gld_data[1], out_num);
 
     float* data;
-    data = (float*)malloc(2*in_num*sizeof(float));
+    data = (float*)malloc(2 * in_num * sizeof(float));
     int j = 0;
-    for(int i = 0;i < in_num;i += 4) {
-        for(int k = 0;k < 4;k ++) {
-            data[j ++] = in_data[0][i+k];
+    for (int i = 0; i < in_num; i += 4) {
+        for (int k = 0; k < 4; k++) {
+            data[j++] = in_data[0][i + k];
         }
-        for(int k = 0;k < 4;k ++) {
-            data[j ++] = in_data[1][i+k];
+        for (int k = 0; k < 4; k++) {
+            data[j++] = in_data[1][i + k];
         }
     }
 
     HarnessHelper<256, float> harnessHelper(0, argv[1], {"mygraph"});
     harnessHelper.runAIEGraph(0, loop);
-    harnessHelper.runPL(data, 2*in_num, 2*out_num, loop);
+    harnessHelper.runPL(data, 2 * in_num, 2 * out_num, loop);
     auto result = harnessHelper.waitForRes(10000);
 
     j = 0;
-    for(int i = 0;i < out_num;i += 4) {
-        for(int k = 0;k < 4;k ++) {
-            out_data[0][i+k] = result[j++];
+    for (int i = 0; i < out_num; i += 4) {
+        for (int k = 0; k < 4; k++) {
+            out_data[0][i + k] = result[j++];
         }
-        for(int k = 0;k < 4;k ++) {
-            out_data[1][i+k] = result[j++];
+        for (int k = 0; k < 4; k++) {
+            out_data[1][i + k] = result[j++];
         }
     }
     int checked = 0;
 
-    
     for (int i = 0; i < out_ch; i++) {
         for (int j = 0; j < out_num; j++) {
             compare(out_data[i][j], gld_data[i][j]);

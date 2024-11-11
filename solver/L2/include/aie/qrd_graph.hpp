@@ -17,7 +17,8 @@
 
 /**
  * @file qrd_graph.hpp
- * @brief This file captures the definition of the `L2` graph level class for the QR Decomposition with cfloat data type.
+ * @brief This file captures the definition of the `L2` graph level class for the QR Decomposition with cfloat data
+ *type.
  **/
 
 #ifndef _XF_SOLVER_QRD_GRAPH_HPP_
@@ -92,8 +93,9 @@ class alongCascade {
 using namespace adf;
 
 /**
- * @class QRDComplexFloat 
- * @brief QR decomposition is a decomposition of a matrix A into a product A = QR of an orthonormal matrix Q and an upper triangular matrix R.
+ * @class QRDComplexFloat
+ * @brief QR decomposition is a decomposition of a matrix A into a product A = QR of an orthonormal matrix Q and an
+ *upper triangular matrix R.
  *
  * These are the templates to configure the function.
  * @tparam column_num describes the number of columns.

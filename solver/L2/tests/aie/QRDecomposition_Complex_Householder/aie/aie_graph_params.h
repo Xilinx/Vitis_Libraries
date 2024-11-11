@@ -18,13 +18,13 @@
 #ifndef __TEST_PARAMS_H__
 #define __TEST_PARAMS_H__
 
-//const unsigned int row_num = 4;
-//const unsigned int col_num = 3;
+// const unsigned int row_num = 4;
+// const unsigned int col_num = 3;
 const unsigned int row_num = 16;
 const unsigned int col_num = 5;
-//const unsigned int row_num = 64;
-//const unsigned int col_num = 32;
-//const unsigned int row_num = 512;
-//const unsigned int col_num = 256;
+// const unsigned int row_num = 64;
+// const unsigned int col_num = 32;
+// const unsigned int row_num = 512;
+// const unsigned int col_num = 256;
 
 #endif

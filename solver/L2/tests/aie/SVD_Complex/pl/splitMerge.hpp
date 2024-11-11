@@ -33,9 +33,9 @@ AXIU_TO_FIFO_LOOP:
 }
 
 void split_core(int data_cnt,
-           hls::stream<ap_uint<WDATA> >& o_axis_strm,
-           hls::stream<ap_axiu<WDATA / 2, 0, 0, 0> >& to_aie_strm0,
-           hls::stream<ap_axiu<WDATA / 2, 0, 0, 0> >& to_aie_strm1) {
+                hls::stream<ap_uint<WDATA> >& o_axis_strm,
+                hls::stream<ap_axiu<WDATA / 2, 0, 0, 0> >& to_aie_strm0,
+                hls::stream<ap_axiu<WDATA / 2, 0, 0, 0> >& to_aie_strm1) {
     int cnt = data_cnt;
     ap_axiu<WDATA / 2, 0, 0, 0> dataInstrm0;
     ap_axiu<WDATA / 2, 0, 0, 0> dataInstrm1;
@@ -43,7 +43,7 @@ void split_core(int data_cnt,
 #pragma HLS pipeline II = 1 style = flp
         ap_uint<WDATA> dataIn = o_axis_strm.read();
         ap_uint<WDATA / 2> dataIn0 = dataIn(WDATA / 2 - 1, 0);
-        ap_uint<WDATA / 2> dataIn1 = dataIn(WDATA-1, WDATA / 2);
+        ap_uint<WDATA / 2> dataIn1 = dataIn(WDATA - 1, WDATA / 2);
         dataInstrm0.data = dataIn0;
         dataInstrm1.data = dataIn1;
         to_aie_strm0.write(dataInstrm0);
@@ -51,7 +51,8 @@ void split_core(int data_cnt,
     }
 }
 
-void split(int DATANUM,int LOOP, 
+void split(int DATANUM,
+           int LOOP,
            hls::stream<ap_axiu<WDATA, 0, 0, 0> >& o_axis_strm,
            hls::stream<ap_axiu<WDATA / 2, 0, 0, 0> >& to_aie_strm0,
            hls::stream<ap_axiu<WDATA / 2, 0, 0, 0> >& to_aie_strm1) {
@@ -64,14 +65,14 @@ void split(int DATANUM,int LOOP,
 }
 
 void merge_core(int data_cnt,
-           hls::stream<ap_axiu<WDATA, 0, 0, 0> >& i_axis_strm,
-           hls::stream<ap_uint<WDATA / 2> >& from_aie_strm0,
-           hls::stream<ap_uint<WDATA / 2> >& from_aie_strm1) {
+                hls::stream<ap_axiu<WDATA, 0, 0, 0> >& i_axis_strm,
+                hls::stream<ap_uint<WDATA / 2> >& from_aie_strm0,
+                hls::stream<ap_uint<WDATA / 2> >& from_aie_strm1) {
     int cnt = data_cnt;
     ap_axiu<WDATA, 0, 0, 0> dataOutstrm;
     while (cnt > 0) {
- #pragma HLS pipeline II = 1
-        if(!from_aie_strm0.empty() && !from_aie_strm1.empty()) {
+#pragma HLS pipeline II = 1
+        if (!from_aie_strm0.empty() && !from_aie_strm1.empty()) {
             ap_uint<WDATA / 2> dataOut0 = from_aie_strm0.read();
             ap_uint<WDATA / 2> dataOut1 = from_aie_strm1.read();
             ap_uint<WDATA> dataOut = (static_cast<ap_uint<WDATA> >(dataOut0) << 64) | dataOut1;
@@ -83,7 +84,8 @@ void merge_core(int data_cnt,
     }
 }
 
-void merge(int DATANUM,int LOOP,
+void merge(int DATANUM,
+           int LOOP,
            hls::stream<ap_axiu<WDATA, 0, 0, 0> >& i_axis_strm,
            hls::stream<ap_axiu<WDATA / 2, 0, 0, 0> >& from_aie_strm0,
            hls::stream<ap_axiu<WDATA / 2, 0, 0, 0> >& from_aie_strm1) {
@@ -92,8 +94,8 @@ void merge(int DATANUM,int LOOP,
     hls::stream<ap_uint<WDATA / 2>, 32> axiu_strm0;
     hls::stream<ap_uint<WDATA / 2>, 32> axiu_strm1;
 
-    axiu2fifo<WDATA/2>(from_aie_strm0, axiu_strm0, cnt);
-    axiu2fifo<WDATA/2>(from_aie_strm1, axiu_strm1, cnt);
+    axiu2fifo<WDATA / 2>(from_aie_strm0, axiu_strm0, cnt);
+    axiu2fifo<WDATA / 2>(from_aie_strm1, axiu_strm1, cnt);
 
     merge_core(cnt, i_axis_strm, axiu_strm0, axiu_strm1);
 }

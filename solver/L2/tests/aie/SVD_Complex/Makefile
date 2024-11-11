@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -61,8 +61,8 @@ PLATFORM := vck190
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  vck190
-PLATFORM_BLOCKLIST +=  vek280
+PLATFORM_ALLOWLIST += vck190
+PLATFORM_BLOCKLIST += vek280
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -139,11 +139,11 @@ AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie/SVD_Complex/ps/host.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(XFLIB_DIR)/L2/tests/aie/SVD_Complex/ps -I $(XFLIB_DIR)/L2/tests/aie/SVD_Complex/aie -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
+CXXFLAGS +=  -I $(XFLIB_DIR)/L2/tests/aie/SVD_Complex/ps -I $(XFLIB_DIR)/L2/tests/aie/SVD_Complex/aie -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
 else
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie/SVD_Complex/ps/host.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(XFLIB_DIR)/L2/tests/aie/SVD_Complex/ps -I $(XFLIB_DIR)/L2/tests/aie/SVD_Complex/aie -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
+CXXFLAGS +=  -I $(XFLIB_DIR)/L2/tests/aie/SVD_Complex/ps -I $(XFLIB_DIR)/L2/tests/aie/SVD_Complex/aie -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
 endif
 
 # workaround for opencv
@@ -162,23 +162,23 @@ endif
 
 ########################## Kernel compiler global settings ##########################
 VPP_FLAGS +=  -I $(CUR_DIR)/pl -I $(XFLIB_DIR)/L2/tests/pl/xf_data_mover -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
-VPP_LDFLAGS += -g --config $(CUR_DIR)/cfg/system.cfg
+VPP_LDFLAGS +=   --config $(CUR_DIR)/cfg/system.cfg
 VPP_PACKAGE +=   --package.defer_aie_run
 
 ######################### binary container global settings ##########################
 VPP_FLAGS_biDatamover += --hls.clock 250000000:biDatamover
 VPP_FLAGS_splitMerge += --hls.clock 250000000:splitMerge
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_harness_pl += --clock.defaultFreqHz 250000000
+VPP_LDFLAGS_test_harness += --clock.defaultFreqHz 250000000
 else
-VPP_LDFLAGS_harness_pl += --kernel_frequency 250
+VPP_LDFLAGS_test_harness += --kernel_frequency 250
 endif
 
-ifneq ($(SD_CARD_NEEDED), on)
-BINARY_CONTAINERS += $(BUILD_DIR)/harness_pl.xclbin
+ifneq ($(PACKAGE_NEEDED), on)
+BINARY_CONTAINERS += $(BUILD_DIR)/test_harness.xclbin
 else
-BINARY_CONTAINERS += $(BUILD_DIR)/harness_pl_pkg.$(LINK_TARGET_FMT)
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/harness_pl.xclbin
+BINARY_CONTAINERS += $(BUILD_DIR)/test_harness_pkg.$(LINK_TARGET_FMT)
+BINARY_CONTAINERS_PKG += $(BUILD_DIR)/test_harness.xclbin
 endif
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
@@ -186,19 +186,19 @@ $(TEMP_DIR)/biDatamover.xo: $(CUR_DIR)/pl/biDatamover.cpp
 	$(ECHO) "Compiling Kernel: biDatamover"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_biDatamover) $(VPP_FLAGS) -k biDatamover -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
-BINARY_CONTAINER_harness_pl_OBJS += $(TEMP_DIR)/biDatamover.xo
+BINARY_CONTAINER_test_harness_OBJS += $(TEMP_DIR)/biDatamover.xo
 $(TEMP_DIR)/splitMerge.xo: $(CUR_DIR)/pl/splitMerge.cpp 
 	$(ECHO) "Compiling Kernel: splitMerge"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_splitMerge) $(VPP_FLAGS) -k splitMerge -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
-BINARY_CONTAINER_harness_pl_OBJS += $(TEMP_DIR)/splitMerge.xo
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_harness_pl_OBJS)
+BINARY_CONTAINER_test_harness_OBJS += $(TEMP_DIR)/splitMerge.xo
+BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_test_harness_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/harness_pl $(VPP_LDFLAGS)  $(VPP_LDFLAGS_harness_pl) $(AIE_LDFLAGS)   -o $@ $^
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/test_harness $(VPP_LDFLAGS)  $(VPP_LDFLAGS_test_harness) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER): $(CUR_DIR)/aie/aie_graph.cpp 
+$(AIE_CONTAINER): pre_build $(CUR_DIR)/aie/aie_graph.cpp $(XFLIB_DIR)/L1/src/aie/svd_kernel.cpp 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
@@ -211,7 +211,14 @@ $(EXE_FILE): $(EXE_FILE_DEPS)
 $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 
-############################## Preparing sdcard folder ##############################
+############################## Package final xclbin or sd_card folder (for embedded) ##############################
+# AIE_ON_X86 Flow
+ifeq ($(pcie_versal), on)
+	@echo "### ***** running AIE ON_X86 ***** ###"
+	${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
+	@echo "### ***** xclbin generation done! ***** ###"
+endif
+
 ifeq ($(SD_CARD_NEEDED), on)
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
@@ -261,16 +268,10 @@ ifeq ($(ps_on_x86), on)
 	@echo "### ***** running PS X86 SE_EMU ***** ###"
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir $(SD_CARD) --package.emu_ps x86
 endif
-# 3. AIE_ON_X86 Flow
-ifeq ($(pcie_aie), on)
-	@echo "### ***** running AIE ON_X86 ***** ###"
-	${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
-	@echo "### ***** sd_card generation done! ***** ###"
-endif
-# 4. General Embeded flow
+# 3. General Embeded flow
 ifeq ($(dfx_hw), off)
 ifeq ($(ps_on_x86), off)
-ifeq ($(pcie_aie), off)
+ifeq ($(pcie_versal), off)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
@@ -280,12 +281,15 @@ endif
 .PHONY: sd_card
 sd_card: $(SD_CARD)
 endif
+
 ############################## Setting Essential Checks and Building Rules ##############################
 ifneq (,$(filter x86sim aiesim, $(TARGET)))
 RUN_DEPS += $(AIE_CONTAINER)
 else
 RUN_DEPS += host xclbin $(EMCONFIG)
+ifeq ($(SD_CARD_NEEDED), on)
 RUN_DEPS += $(SD_CARD)
+endif
 endif
 
 .PHONY: mkflag all run
@@ -310,16 +314,17 @@ endif
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
-ifeq ($(pcie_aie), on)
+ifeq ($(pcie_versal), on)
 	cp $(AIE_WORK_DIR)/reports/dma_lock_report.json ./
 	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) $(BINARY_CONTAINERS_PKG)
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS) 
+	
+else
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS)
 	
 endif
-	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
-	
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
@@ -343,7 +348,7 @@ endif
 #hw
 ifeq ($(TARGET), hw)
 ifneq (,$(findstring aws-vu9p-f1, $(PLATFORM_NAME)))
-ifeq (,$(wildcard $(BUILD_DIR)/harness_pl.awsxclbin))
+ifeq (,$(wildcard $(BUILD_DIR)/test_harness.awsxclbin))
 	$(ECHO) "This makefile does not directly support converting .xclbin to .awsxclbin, please refer https://github.com/aws/aws-fpga/blob/master/Vitis/README.md for next operations"
 else
 	$(ECHO) "Running HW using generated .awsxclbin"

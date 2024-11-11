@@ -19,12 +19,12 @@
 #include "aie_graph_params.h"
 using namespace adf;
 
-std::string fmatAU_0="data/matAU_0_"+std::to_string(row_num)+"_"+std::to_string(col_num)+".txt";
-std::string fmatAU_1="data/matAU_1_"+std::to_string(row_num)+"_"+std::to_string(col_num)+".txt";
-std::string fmatRQ_0="data/matRQ_0_"+std::to_string(row_num)+"_"+std::to_string(col_num)+".txt";
-std::string fmatRQ_1="data/matRQ_1_"+std::to_string(row_num)+"_"+std::to_string(col_num)+".txt";
-std::string fgldRQ_0="data/gldRQ_0_"+std::to_string(row_num)+"_"+std::to_string(col_num)+".txt";
-std::string fgldRQ_1="data/gldRQ_1_"+std::to_string(row_num)+"_"+std::to_string(col_num)+".txt";
+std::string fmatAU_0 = "data/matAU_0_" + std::to_string(row_num) + "_" + std::to_string(col_num) + ".txt";
+std::string fmatAU_1 = "data/matAU_1_" + std::to_string(row_num) + "_" + std::to_string(col_num) + ".txt";
+std::string fmatRQ_0 = "data/matRQ_0_" + std::to_string(row_num) + "_" + std::to_string(col_num) + ".txt";
+std::string fmatRQ_1 = "data/matRQ_1_" + std::to_string(row_num) + "_" + std::to_string(col_num) + ".txt";
+std::string fgldRQ_0 = "data/gldRQ_0_" + std::to_string(row_num) + "_" + std::to_string(col_num) + ".txt";
+std::string fgldRQ_1 = "data/gldRQ_1_" + std::to_string(row_num) + "_" + std::to_string(col_num) + ".txt";
 
 xf::solver::QRD_Householder_Graph<row_num, col_num> mygraph(fmatAU_0, fmatAU_1, fmatRQ_0, fmatRQ_1);
 
@@ -132,14 +132,14 @@ void printMatrix(std::string file0, std::string file1, int M, int N) {
     }
     std::cout << std::endl;
     std::cout << "Matrix_Q[" << M << " x " << M << "]" << std::endl;
-    //for (unsigned int i = 0; i < M; i++) {
+    // for (unsigned int i = 0; i < M; i++) {
     //    std::cout << "Row[" << i << "]: ";
     //    for (unsigned int j = 0; j < M; j++) {
     //        std::cout << "(" << Q[i][j].real() << ", " << Q[i][j].imag() << "), ";
     //    }
     //    std::cout << std::endl;
     //}
-    //std::cout << std::endl;
+    // std::cout << std::endl;
 }
 
 int compare(float out, float gld) {
@@ -160,7 +160,12 @@ int compare(float out, float gld) {
     return 0;
 }
 
-int golden_check(std::string output_file0, std::string output_file1, std::string golden_file0, std::string golden_file1, int numRow, int numCol) {
+int golden_check(std::string output_file0,
+                 std::string output_file1,
+                 std::string golden_file0,
+                 std::string golden_file1,
+                 int numRow,
+                 int numCol) {
     int numErr = 0;
     ifstream f_gld0, f_gld1;
     ifstream f_out0, f_out1;
@@ -172,92 +177,98 @@ int golden_check(std::string output_file0, std::string output_file1, std::string
     char c = 'T';
     string str_out0, str_out1;
     string str_gld0, str_gld1;
-    int numR = numCol*numRow;
-    int numQ = numRow*numRow;
+    int numR = numCol * numRow;
+    int numQ = numRow * numRow;
     int num = (numR + numQ);
-    int num4 = num/4;
-    int numR4 = numR/4;
-    int numQ4 = numQ/4;
+    int num4 = num / 4;
+    int numR4 = numR / 4;
+    int numQ4 = numQ / 4;
 
     for (int j = 0; j < num4; j++) {
-            while (getline(f_out0, str_out0, '\n')) {
-                if (str_out0.front() != c) {
-                    break;
+        while (getline(f_out0, str_out0, '\n')) {
+            if (str_out0.front() != c) {
+                break;
+            }
+        }
+        std::stringstream strOut0(str_out0);
+        float dat0[4];
+        for (int k = 0; k < 4; k++) {
+            strOut0 >> dat0[k];
+        }
+        while (getline(f_gld0, str_gld0, '\n')) {
+            if (str_out0.front() != c) {
+                break;
+            }
+        }
+        std::stringstream strGld0(str_gld0);
+        float gld0[4];
+        for (int k = 0; k < 4; k++) {
+            strGld0 >> gld0[k];
+        }
+        for (int l = 0; l < 2; l++) {
+            float outR = dat0[l * 2];
+            float outI = dat0[l * 2 + 1];
+            float gldR = gld0[l * 2];
+            float gldI = gld0[l * 2 + 1];
+            if ((0 != compare(outR, gldR)) || (0 != compare(outI, gldI))) {
+                numErr++;
+                if (j < numR4) {
+                    int idCol = (j * 4) / numRow;
+                    int idRow = (j * 4) % numRow + l;
+                    std::cout << "numErr=" << numErr << ", MatR[" << idRow << "][" << idCol << "] mis-matched"
+                              << ", out=(" << outR << ", " << outI << "), gld=(" << gldR << ", " << gldI << ")"
+                              << std::endl;
+                } else {
+                    int idCol = ((j - numR4) * 4) / numRow;
+                    int idRow = ((j - numR4) * 4) % numRow + l;
+                    std::cout << "numErr=" << numErr << ", MatQ[" << idRow << "][" << idCol << "] mis-matched"
+                              << ", out=(" << outR << ", " << outI << "), gld=(" << gldR << ", " << gldI << ")"
+                              << std::endl;
                 }
             }
-            std::stringstream strOut0(str_out0);
-            float dat0[4];
-            for(int k=0; k<4; k++){
-                strOut0 >> dat0[k];
+        }
+        while (getline(f_out1, str_out1, '\n')) {
+            if (str_out1.front() != c) {
+                break;
             }
-            while (getline(f_gld0, str_gld0, '\n')) {
-                if (str_out0.front() != c) {
-                    break;
+        }
+        std::stringstream strOut1(str_out1);
+        float dat1[4];
+        for (int k = 0; k < 4; k++) {
+            strOut1 >> dat1[k];
+        }
+        while (getline(f_gld1, str_gld1, '\n')) {
+            if (str_out1.front() != c) {
+                break;
+            }
+        }
+        std::stringstream strGld1(str_gld1);
+        float gld1[4];
+        for (int k = 0; k < 4; k++) {
+            strGld1 >> gld1[k];
+        }
+        for (int l = 0; l < 2; l++) {
+            float outR = dat1[l * 2];
+            float outI = dat1[l * 2 + 1];
+            float gldR = gld1[l * 2];
+            float gldI = gld1[l * 2 + 1];
+            if ((0 != compare(outR, gldR)) || (0 != compare(outI, gldI))) {
+                numErr++;
+                if (j < numR4) {
+                    int idCol = (j * 4) / numRow;
+                    int idRow = (j * 4) % numRow + l + 2;
+                    std::cout << "numErr=" << numErr << ", MatR[" << idRow << "][" << idCol << "] mis-matched"
+                              << ", out=(" << outR << ", " << outI << "), gld=(" << gldR << ", " << gldI << ")"
+                              << std::endl;
+                } else {
+                    int idCol = ((j - numR4) * 4) / numRow;
+                    int idRow = ((j - numR4) * 4) % numRow + l + 2;
+                    std::cout << "numErr=" << numErr << ", MatQ[" << idRow << "][" << idCol << "] mis-matched"
+                              << ", out=(" << outR << ", " << outI << "), gld=(" << gldR << ", " << gldI << ")"
+                              << std::endl;
                 }
             }
-            std::stringstream strGld0(str_gld0);
-            float gld0[4];
-            for(int k=0; k<4; k++){
-                strGld0 >> gld0[k];
-            }
-            for(int l=0; l<2; l++) {
-                float outR=dat0[l*2];
-                float outI=dat0[l*2+1];
-                float gldR=gld0[l*2];
-                float gldI=gld0[l*2+1];
-                if ( (0 != compare(outR, gldR)) || (0 != compare(outI, gldI)) ){
-                    numErr ++;
-                    if(j<numR4){
-                        int idCol = (j*4) / numRow;
-                        int idRow = (j*4) % numRow + l;
-                    std::cout << "numErr=" << numErr << ", MatR[" << idRow << "]["<<idCol<<"] mis-matched" << ", out=(" << outR << ", " << outI << "), gld=("<< gldR << ", " << gldI << ")"<< std::endl;
-                    }
-                    else{
-                        int idCol = ((j-numR4)*4) / numRow;
-                        int idRow = ((j-numR4)*4) % numRow + l;
-                    std::cout << "numErr=" << numErr << ", MatQ[" << idRow << "]["<<idCol<<"] mis-matched" << ", out=(" << outR << ", " << outI << "), gld=("<< gldR << ", " << gldI << ")"<< std::endl;
-                    }
-                }
-            }
-            while (getline(f_out1, str_out1, '\n')) {
-                if (str_out1.front() != c) {
-                    break;
-                }
-            }
-            std::stringstream strOut1(str_out1);
-            float dat1[4];
-            for(int k=0; k<4; k++){
-                strOut1 >> dat1[k];
-            }
-            while (getline(f_gld1, str_gld1, '\n')) {
-                if (str_out1.front() != c) {
-                    break;
-                }
-            }
-            std::stringstream strGld1(str_gld1);
-            float gld1[4];
-            for(int k=0; k<4; k++){
-                strGld1 >> gld1[k];
-            }
-            for(int l=0; l<2; l++) {
-                float outR=dat1[l*2];
-                float outI=dat1[l*2+1];
-                float gldR=gld1[l*2];
-                float gldI=gld1[l*2+1];
-                if ( (0 != compare(outR, gldR)) || (0 != compare(outI, gldI)) ){
-                    numErr ++;
-                    if(j<numR4){
-                        int idCol = (j*4) / numRow;
-                        int idRow = (j*4) % numRow + l+2;
-                    std::cout << "numErr=" << numErr << ", MatR[" << idRow << "]["<<idCol<<"] mis-matched" << ", out=(" << outR << ", " << outI << "), gld=("<< gldR << ", " << gldI << ")"<< std::endl;
-                    }
-                    else{
-                        int idCol = ((j-numR4)*4) / numRow;
-                        int idRow = ((j-numR4)*4) % numRow + l+2;
-                    std::cout << "numErr=" << numErr << ", MatQ[" << idRow << "]["<<idCol<<"] mis-matched" << ", out=(" << outR << ", " << outI << "), gld=("<< gldR << ", " << gldI << ")"<< std::endl;
-                    }
-                }
-            }
+        }
     }
     return numErr;
 }
@@ -265,8 +276,8 @@ int golden_check(std::string output_file0, std::string output_file1, std::string
 int main(int argc, char** argv) {
     adf::return_code ret;
     mygraph.init();
-    //mygraph.update(mygraph.column_id_pre, (int)0);
-    for(int i=0; i<col_num; i++) {
+    // mygraph.update(mygraph.column_id_pre, (int)0);
+    for (int i = 0; i < col_num; i++) {
         mygraph.update(mygraph.column_id[i], i);
     }
 
@@ -288,7 +299,7 @@ int main(int argc, char** argv) {
     printMatrix(fmatRQ_0, fmatRQ_1, row_num, col_num);
     std::cout << "Gld Matrix_R && Matrix_Q \n";
     printMatrix(fgldRQ_0, fgldRQ_1, row_num, col_num);
-    int errNum = golden_check(fmatRQ_0, fmatRQ_1, fgldRQ_0, fgldRQ_1,  row_num, col_num);
+    int errNum = golden_check(fmatRQ_0, fmatRQ_1, fgldRQ_0, fgldRQ_1, row_num, col_num);
 
     return errNum;
 }

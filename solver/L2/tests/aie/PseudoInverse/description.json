@@ -2,7 +2,7 @@
     "name": "PseudoInverse on Complex Float",
     "description": [],
     "gui": true,
-    "flow": "aie",
+    "flow": "system",
     "keywords": [
         "aiecompiler",
         "aiesimulator",
@@ -34,13 +34,11 @@
         {
             "name": "aiesim-launch",
             "target": "aiesim",
-            "output-dir": "./",
             "sim_options": "--input-dir=./ --output-dir=./"
         },
         {
             "name": "x86sim-launch",
             "target": "x86sim",
-            "output-dir": "./",
             "sim_options": "--input-dir=./ --output-dir=./"
         }
     ],
@@ -67,7 +65,7 @@
                     "location": "./aie/aie_graph.cpp",
                     "workdir": "./Work",
                     "name": "libadf.a",
-                    "aie_kernel_files": [
+                    "files": [
                         "LIB_DIR/../dsp/L1/src/aie/matrix_mult.cpp",
                         "LIB_DIR/../dsp/L1/src/aie/matrix_mult_tiler.cpp",
                         "LIB_DIR/../dsp/L1/src/aie/matrix_mult_untiler.cpp",

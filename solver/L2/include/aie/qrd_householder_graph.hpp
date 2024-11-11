@@ -33,7 +33,8 @@ using namespace adf;
 
 /**
  * @class QRD_Householder_Graph
- * @brief QR decomposition is a decomposition of a matrix A into a product A = QR of an orthonormal matrix Q and an upper triangular matrix R.
+ * @brief QR decomposition is a decomposition of a matrix A into a product A = QR of an orthonormal matrix Q and an
+ *upper triangular matrix R.
  *
  * These are the templates to configure the function.
  * @tparam column_num describes the number of columns.

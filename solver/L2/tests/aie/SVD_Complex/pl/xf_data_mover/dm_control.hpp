@@ -54,7 +54,7 @@ void alu_for_axim(ap_uint<32> pm[1024],
                   hls::stream<ap_uint<8> >& o_pattern_strm, // to m2s
                   hls::stream<ap_uint<8> >& o_inter_strm,   // to ctrl-1
                   hls::stream<ap_uint<8> >& o_intra_strm    // to sync
-) {
+                  ) {
 #pragma HLS dataflow
     bool last = false;
     ap_uint<8> R[8] = {0, 0, 0, 0, 0, 0, 0, 0};

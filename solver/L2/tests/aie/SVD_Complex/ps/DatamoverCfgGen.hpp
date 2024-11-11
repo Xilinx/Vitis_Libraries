@@ -28,7 +28,7 @@
 #define R7 7
 
 #include <iostream>
-template<int WDATA>
+template <int WDATA>
 class DatamoverCfgGen {
    private:
     int* pattern_buf[4];
@@ -53,13 +53,9 @@ class DatamoverCfgGen {
         return ((0x0 & 0x1F) | ((mode & 0x7) << 5) | ((rd & 0xF) << 8) | ((rs & 0xFF) << 12));
     }
 
-    uint32_t POP(int mode, int rd) {
-        return ((0x1 & 0x1F) | ((mode & 0x7) << 5) | ((rd & 0xF) << 8));
-    }
+    uint32_t POP(int mode, int rd) { return ((0x1 & 0x1F) | ((mode & 0x7) << 5) | ((rd & 0xF) << 8)); }
 
-    uint32_t PUSH(int mode, int rs) {
-        return ((0x2 & 0x1F) | ((mode & 0x7) << 5) | ((rs & 0xF) << 8));
-    }
+    uint32_t PUSH(int mode, int rs) { return ((0x2 & 0x1F) | ((mode & 0x7) << 5) | ((rs & 0xF) << 8)); }
 
     uint32_t ADD(int mode, int rd, int rs1, int rs2) {
         return ((0x3 & 0x1F) | ((mode & 0x7) << 5) | ((rd & 0xF) << 8) | ((rs1 & 0xFF) << 12) | ((rs2 & 0xFF) << 20));
@@ -69,9 +65,7 @@ class DatamoverCfgGen {
         return ((0x4 & 0x1F) | ((mode & 0x7) << 5) | ((rs1 & 0xF) << 8) | ((rs2 & 0xF) << 12) | ((imm & 0xFFFF) << 16));
     }
 
-    uint32_t EXIT(void) {
-        return (0x5 & 0x1F);
-    }
+    uint32_t EXIT(void) { return (0x5 & 0x1F); }
 
     void pm_gen(const int* num_of_pattern,
                 uint32_t* pm0_vec,
@@ -229,7 +223,6 @@ class DatamoverCfgGen {
         pm0_sz = ptr0;
     };
 
-
     void Pattern1DGen(int* pattern, int buffer_dim, int offset, int tiling, int stride, int wrap) {
         std::memcpy(pattern, template_1D_pattern, 24 * sizeof(int));
         pattern[0] = buffer_dim; // dim
@@ -246,7 +239,7 @@ class DatamoverCfgGen {
 
     DatamoverCfgGen(int pattern_size, int loop) {
         int num_of_pattern[4] = {1, 1, 1, 1};
-        
+
         for (int i = 0; i < 4; i++) {
             pattern[i] = (int*)malloc(num_of_pattern[i] * 24 * sizeof(int));
             URAM_offsets[i] = (int*)malloc(num_of_pattern[i] * sizeof(int));
@@ -282,14 +275,14 @@ class DatamoverCfgGen {
         for (int i = 0; i < 4; i++) {
             pm_sz[i] = 0;
             pm[i] = (uint32_t*)malloc(1024 * sizeof(uint32_t));
-            for(int j = 0;j < 1024;j ++) {
+            for (int j = 0; j < 1024; j++) {
                 pm[i][j] = 0;
             }
         }
         pm_gen(num_of_pattern, pm[0], pm[1], pm[2], pm[3], pm_sz[0], pm_sz[1], pm_sz[2], pm_sz[3], loop);
 
         cfg_buf = (uint32_t*)malloc(1024 * sizeof(uint32_t));
-        for(int i = 0;i < 1024;i ++) {
+        for (int i = 0; i < 1024; i++) {
             cfg_buf[i] = 0;
         }
         buf_ptr = 0;
@@ -297,18 +290,18 @@ class DatamoverCfgGen {
         for (int i = 0; i < 4; i++) {
             int ptn_sz = num_of_pattern[i] * 25;
             cfg_buf[buf_ptr] = ptn_sz;
-            buf_ptr += WDATA/32;
+            buf_ptr += WDATA / 32;
             if (num_of_pattern[i]) {
                 std::memcpy(cfg_buf + buf_ptr, pattern_buf[i], ptn_sz * sizeof(uint32_t));
                 buf_ptr += ptn_sz;
-                if(ptn_sz%(WDATA/32) != 0 ) buf_ptr += (WDATA/32) - ptn_sz%(WDATA/32);
+                if (ptn_sz % (WDATA / 32) != 0) buf_ptr += (WDATA / 32) - ptn_sz % (WDATA / 32);
             }
         }
 
         for (int i = 0; i < 4; i++) {
-            if (pm_sz[i] % (WDATA/32) != 0) pm_sz[i] += (WDATA/32) - pm_sz[i]%(WDATA/32);
+            if (pm_sz[i] % (WDATA / 32) != 0) pm_sz[i] += (WDATA / 32) - pm_sz[i] % (WDATA / 32);
             cfg_buf[buf_ptr] = pm_sz[i];
-            buf_ptr += WDATA/32;
+            buf_ptr += WDATA / 32;
             std::memcpy(cfg_buf + buf_ptr, pm[i], pm_sz[i] * sizeof(uint32_t));
             buf_ptr += pm_sz[i];
         }

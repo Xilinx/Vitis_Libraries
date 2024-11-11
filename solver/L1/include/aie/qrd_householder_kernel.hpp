@@ -25,17 +25,17 @@
 namespace xf {
 namespace solver {
 
-template<int M, int N>
-void qrd_householder(input_stream<  cfloat >* __restrict matAU_0,
-                     input_stream<  cfloat >* __restrict matAU_1,
-                     output_stream< cfloat >* __restrict matRQ_0,
-                     output_stream< cfloat >* __restrict matRQ_1,
+template <int M, int N>
+void qrd_householder(input_stream<cfloat>* __restrict matAU_0,
+                     input_stream<cfloat>* __restrict matAU_1,
+                     output_stream<cfloat>* __restrict matRQ_0,
+                     output_stream<cfloat>* __restrict matRQ_1,
                      const int column_id);
-template<int M, int N>
-void qrd_householder_last(input_stream<  cfloat >* __restrict matAU_0,
-                          input_stream<  cfloat >* __restrict matAU_1,
-                          output_stream< cfloat >* __restrict matRQ_0,
-                          output_stream< cfloat >* __restrict matRQ_1,
+template <int M, int N>
+void qrd_householder_last(input_stream<cfloat>* __restrict matAU_0,
+                          input_stream<cfloat>* __restrict matAU_1,
+                          output_stream<cfloat>* __restrict matRQ_0,
+                          output_stream<cfloat>* __restrict matRQ_1,
                           const int column_id);
 
 } // namespace solver

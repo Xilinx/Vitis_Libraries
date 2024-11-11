@@ -38,7 +38,6 @@
 #include "xrt/xrt_kernel.h"
 #include "xrt/xrt_graph.h"
 
-
 struct plKernelArg {
     unsigned int arg_idx;
     bool isBO;
@@ -59,7 +58,6 @@ class fastXM {
     std::vector<xrtGraphHandle> g_hdl;
 
    public:
-
     fastXM(unsigned int device_index,
            std::string xclbin_file_path,
            std::vector<std::string> pl_kernel_name,

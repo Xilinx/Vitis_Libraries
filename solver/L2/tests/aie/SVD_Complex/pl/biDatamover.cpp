@@ -28,23 +28,25 @@
 #include "config.h"
 #include "xf_data_mover/bi_pl_4d_data_mover.hpp"
 
-extern "C" void biDatamover(
-                                    hls::burst_maxi<ap_uint<WDATA> > datamover_cfg,
-                                    hls::burst_maxi<ap_uint<WDATA> > i_maxi_strm,
-                                    hls::burst_maxi<ap_uint<WDATA> > o_maxi_strm,
-                                    hls::stream<ap_axiu<WDATA, 0, 0, 0> >& i_axis_strm,
-                                    hls::stream<ap_axiu<WDATA, 0, 0, 0> >& o_axis_strm) {
-#pragma HLS interface m_axi offset=slave bundle=gmem0_0 port=datamover_cfg max_read_burst_length=32 num_read_outstanding=16 latency=32
-#pragma HLS interface m_axi offset=slave bundle=gmem0_1 port=i_maxi_strm max_read_burst_length=32 num_read_outstanding=16 latency=32
-#pragma HLS interface m_axi offset=slave bundle=gmem0_2 port=o_maxi_strm max_write_burst_length=32 num_write_outstanding=16 latency=32
-#pragma HLS interface s_axilite bundle=control port=datamover_cfg
-#pragma HLS interface s_axilite bundle=control port=i_maxi_strm
-#pragma HLS interface s_axilite bundle=control port=o_maxi_strm
-#pragma HLS interface axis port=i_axis_strm
-#pragma HLS interface axis port=o_axis_strm
+extern "C" void biDatamover(hls::burst_maxi<ap_uint<WDATA> > datamover_cfg,
+                            hls::burst_maxi<ap_uint<WDATA> > i_maxi_strm,
+                            hls::burst_maxi<ap_uint<WDATA> > o_maxi_strm,
+                            hls::stream<ap_axiu<WDATA, 0, 0, 0> >& i_axis_strm,
+                            hls::stream<ap_axiu<WDATA, 0, 0, 0> >& o_axis_strm) {
+#pragma HLS interface m_axi offset = slave bundle = gmem0_0 port = datamover_cfg max_read_burst_length = \
+    32 num_read_outstanding = 16 latency = 32
+#pragma HLS interface m_axi offset = slave bundle = gmem0_1 port = i_maxi_strm max_read_burst_length = \
+    32 num_read_outstanding = 16 latency = 32
+#pragma HLS interface m_axi offset = slave bundle = gmem0_2 port = o_maxi_strm max_write_burst_length = \
+    32 num_write_outstanding = 16 latency = 32
+#pragma HLS interface s_axilite bundle = control port = datamover_cfg
+#pragma HLS interface s_axilite bundle = control port = i_maxi_strm
+#pragma HLS interface s_axilite bundle = control port = o_maxi_strm
+#pragma HLS interface axis port = i_axis_strm
+#pragma HLS interface axis port = o_axis_strm
 
-#pragma HLS interface s_axilite bundle=control port=return
+#pragma HLS interface s_axilite bundle = control port = return
 #pragma HLS dataflow
-    xf::data_mover::bi_details::bi_data_mover<WDATA, 65536, 16, 32, 16>(datamover_cfg, i_maxi_strm, o_maxi_strm, i_axis_strm, o_axis_strm);
-    
+    xf::data_mover::bi_details::bi_data_mover<WDATA, 65536, 16, 32, 16>(datamover_cfg, i_maxi_strm, o_maxi_strm,
+                                                                        i_axis_strm, o_axis_strm);
 }

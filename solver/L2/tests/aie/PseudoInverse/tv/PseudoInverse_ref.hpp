@@ -98,6 +98,7 @@ class CMatrix {
     void PrintCMatrix();
     void WriteCMatrix(std::string filename0);
     std::complex<float>** m_val;
+
    private:
     unsigned m_rows, m_cols;
     void allocSpace();
@@ -108,7 +109,7 @@ class CMatrix {
 void CMatrix::allocSpace() {
     m_val = new std::complex<float>*[m_rows];
     for (int i = 0; i < m_rows; ++i) {
-        m_val[i] = new std::complex<float>[m_cols];
+        m_val[i] = new std::complex<float>[ m_cols ];
     }
 }
 
@@ -502,8 +503,8 @@ void CMatrix::PseudoInverse(const CMatrix& A, CMatrix& Pinv) {
                     break;
                 }
                 // std::cout << "Diagornalization Splitting Test: k=" << k << ", iteration=" << its << ", L=" << L
-                        //   << ", flag=" << flag << ", t[" << L << "]=" << t[L] << ", S[" << L - 1 << "]=" << S[L - 1]
-                        //   << std::endl;
+                //   << ", flag=" << flag << ", t[" << L << "]=" << t[L] << ", S[" << L - 1 << "]=" << S[L - 1]
+                //   << std::endl;
             }
             // Cancellation of E[L]
             if (flag) {
@@ -668,7 +669,7 @@ void CMatrix::PseudoInverse(const CMatrix& A, CMatrix& Pinv) {
     // Assume SVD of matrix A: A = U * W * transpose(V).
     // Pseudoinverse of matrix A: A† = V * W† * transpose(U)
     CMatrix UT = U.ConjugateTranspose(); // transpose(U)
-    CMatrix W_Pinv = W; // W†
+    CMatrix W_Pinv = W;                  // W†
     for (int i = 0; i < n; i++) {
         float norm_square = Norm_Square(W.m_val[i][i]);
         if (norm_square != 0) {

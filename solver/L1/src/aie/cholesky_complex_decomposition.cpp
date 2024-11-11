@@ -141,8 +141,8 @@ void cholesky_complex(input_stream<float>* __restrict matA_real,
 
     // For profiling only
     cycle_num[1] = tile.cycles(); // cycle counter of the AI Engine tile
-    #if defined(__AIESIM__) || defined(__X86SIM__)
+#if defined(__AIESIM__) || defined(__X86SIM__)
     printf("pid=%d, start=%d,end=%d,total=%d\n", pid, cycle_num[0], cycle_num[1], cycle_num[1] - cycle_num[0]);
-    #endif
+#endif
 
 } // end cholesky_complex

@@ -3,7 +3,7 @@
     "description": [
         "QRD based on Householder Algorithm"
     ],
-    "flow": "aie",
+    "flow": "system",
     "keywords": [
         "aiecompiler",
         "aiesimulator",
@@ -42,24 +42,27 @@
         {
             "accelerators": [
                 {
-                    "location": "./aie/aie_graph.cpp",
-                    "pl-freq": 1000,
+                    "location": "PROJECT/aie/aie_graph.cpp",
                     "workdir": "./Work",
                     "name": "libadf.a",
-                    "aie_kernel_files": [
-                        "./aie/aie_adder.cc"
+                    "files": [
+                        "LIB_DIR/L1/src/aie/qrd_householder_kernel.cpp"
                     ]
                 }
             ]
         }
     ],
-    "match_makefile": "true",
-    "contributors": [
+    "launch": [
         {
-            "url": "http://www.xilinx.com",
-            "group": "Xilinx"
+            "target": "aiesim",
+            "sim_options": "--input-dir=./ --output-dir=./"
+        },
+        {
+            "target": "x86sim",
+            "sim_options": "--input-dir=./ --output-dir=./"
         }
     ],
+    "match_makefile": "true",
     "testinfo": {
         "disable": false,
         "jobs": [
@@ -75,5 +78,9 @@
             "vitis_aie_x86sim"
         ],
         "category": "canary"
-    }
+    },
+    "gui": true,
+    "aie_types": [
+        "AIE1"
+    ]
 }

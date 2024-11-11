@@ -26,11 +26,11 @@ using namespace std;
 // const int M = 4; // rows
 // const int N = 3; // columns
 const int M = 16; // rows
-const int N = 5; // columns
+const int N = 5;  // columns
 // const int M = 64; // rows
 // const int N = 5; // columns
-//const int M = 64; // rows
-//const int N = 32; // columns
+// const int M = 64; // rows
+// const int N = 32; // columns
 // const int M = 512; // rows
 // const int N = 256; // columns
 const int row_num = M;
@@ -41,7 +41,6 @@ std::string fmatRQ_0 = "../data/matRQ_0_" + std::to_string(row_num) + "_" + std:
 std::string fmatRQ_1 = "../data/matRQ_1_" + std::to_string(row_num) + "_" + std::to_string(col_num) + ".txt";
 std::string fgldRQ_0 = "../data/gldRQ_0_" + std::to_string(row_num) + "_" + std::to_string(col_num) + ".txt";
 std::string fgldRQ_1 = "../data/gldRQ_1_" + std::to_string(row_num) + "_" + std::to_string(col_num) + ".txt";
-
 
 void printMatrix(std::string file0, std::string file1, int M, int N) {
     ifstream fd0, fd1;
@@ -211,20 +210,20 @@ int main() {
 
     Q3.createIdentity();
     writeFile<Type>(A3, Q3, fmatAU_0, fmatAU_1);
-    //std::cout << "Matrix_A3: \n";
-    //A3.print();
-    //std::cout << "Matrix_U3: \n";
-    //Q3.print();
+    // std::cout << "Matrix_A3: \n";
+    // A3.print();
+    // std::cout << "Matrix_U3: \n";
+    // Q3.print();
 
     A3.qrd_householder_4(Q3, R3);
     // std::cout << "Matrix_Q3: \n";
     // Q3.print();
-    //std::cout << "Matrix_R3: \n";
-    //R3.print();
+    // std::cout << "Matrix_R3: \n";
+    // R3.print();
     ComplexMatrix<Type> QT3(Q3);
     QT3.conj_transpose();
-    //std::cout << "Matrix_QT3: \n";
-    //QT3.print();
+    // std::cout << "Matrix_QT3: \n";
+    // QT3.print();
 
     writeFile<Type>(R3, QT3, fgldRQ_0, fgldRQ_1);
 
@@ -242,10 +241,10 @@ int main() {
     bool is_unitary_Q = I3.is_unitary();
 
     std::cout << std::endl;
-    //std::cout << "Matrix_R && Matrix_Q \n";
-    //printMatrix(fmatRQ_0, fmatRQ_1, row_num, col_num);
-    //std::cout << "Gld Matrix_R && Matrix_Q \n";
-    //printMatrix(fgldRQ_0, fgldRQ_1, row_num, col_num);
+    // std::cout << "Matrix_R && Matrix_Q \n";
+    // printMatrix(fmatRQ_0, fmatRQ_1, row_num, col_num);
+    // std::cout << "Gld Matrix_R && Matrix_Q \n";
+    // printMatrix(fgldRQ_0, fgldRQ_1, row_num, col_num);
 
     return 0;
 }

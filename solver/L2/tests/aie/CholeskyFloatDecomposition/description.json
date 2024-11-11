@@ -1,7 +1,7 @@
 {
     "name": "Cholesky Float on AIE",
     "description": "Cholesky Float on AIE",
-    "flow": "aie",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],
@@ -26,7 +26,7 @@
             "accelerators": [
                 {
                     "location": "PROJECT/aie/platform.cpp",
-                    "aie_kernel_files": [
+                    "files": [
                         "LIB_DIR/L1/src/aie/cholesky_float_decomposition.cpp"
                     ],
                     "workdir": "./Work",
@@ -48,13 +48,11 @@
         {
             "name": "aiesim-launch",
             "target": "aiesim",
-            "output-dir": "./",
             "sim_options": "--input-dir=./ --output-dir=./"
         },
         {
             "name": "x86sim-launch",
             "target": "x86sim",
-            "output-dir": "./",
             "sim_options": "--input-dir=./ --output-dir=./"
         }
     ],
@@ -83,12 +81,12 @@
             ]
         },
         "linker": {
-            "cflags": [
+            "ldclflags": [
                 "--config PROJECT/cfg/system.cfg"
             ]
         },
         "package": {
-            "cflags": [
+            "clflags": [
                 "--package.defer_aie_run"
             ]
         }
