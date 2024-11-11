@@ -25,17 +25,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -71,17 +71,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -117,17 +117,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -163,17 +163,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -209,17 +209,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -255,17 +255,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -301,17 +301,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -347,17 +347,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -393,17 +393,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -439,17 +439,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -485,17 +485,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -531,17 +531,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -577,17 +577,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -623,17 +623,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -669,17 +669,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -715,17 +715,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -761,17 +761,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -807,17 +807,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -853,17 +853,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -899,17 +899,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -945,17 +945,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -996,7 +996,7 @@
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1037,7 +1037,7 @@
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1078,7 +1078,7 @@
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1119,7 +1119,7 @@
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1160,7 +1160,7 @@
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1201,7 +1201,7 @@
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1242,7 +1242,7 @@
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1283,7 +1283,7 @@
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1324,7 +1324,7 @@
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1365,7 +1365,7 @@
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1401,22 +1401,22 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "SCALAR",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1452,22 +1452,22 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "SCALAR",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1503,17 +1503,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1549,17 +1549,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1595,17 +1595,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1641,17 +1641,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1687,17 +1687,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1733,17 +1733,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1779,17 +1779,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1825,17 +1825,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1871,17 +1871,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1917,17 +1917,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -1963,17 +1963,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -2009,17 +2009,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],
@@ -2055,17 +2055,17 @@
                     {
                         "name": "LEN",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "INCREMENT",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
                         "description": "",
-                        "type": "const unsigned"
+                        "type": "const unsigned int"
                     }
                 ],
                 "ports": [],

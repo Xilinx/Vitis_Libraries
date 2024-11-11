@@ -25,14 +25,6 @@ From 23.2 release, an algorithm-end to AIE-end implementation of scanline are pr
    Release Note <introduction/release.rst>
 
 .. toctree::
-   :caption: background
-   :maxdepth: 2
-
-   theoretical_foundation <background/theoretical_foundations.rst>
-   theoretical_foundation_2 <background/theoretical_foundations_2.rst>
-   theoretical_foundation_3 <background/theoretical_foundations_3.rst>
-
-.. toctree::
    :caption: Features
    :maxdepth: 1
 

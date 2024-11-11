@@ -62,27 +62,27 @@
                 "ports": [
                     {
                         "name": "image_points",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::apodization_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::image_points"
                     },
                     {
                         "name": "apodization_reference_i",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::apodization_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::apodization_reference_i"
                     },
                     {
                         "name": "apo_distance_k",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::apodization_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::apo_distance_k"
                     },
                     {
                         "name": "F_number",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::apodization_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::F_number"
                     },
                     {
                         "name": "apodization_output",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::apodization_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::apodization_output"
                     }
                 ],
@@ -155,27 +155,27 @@
                 "ports": [
                     {
                         "name": "image_points",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::apodization_sa_graph< T, LENGTH_, INCREMENT_MATRIX_, INCREMENT_VECTOR_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::image_points"
                     },
                     {
                         "name": "apodization_reference",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::apodization_sa_graph< T, LENGTH_, INCREMENT_MATRIX_, INCREMENT_VECTOR_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::apodization_reference"
                     },
                     {
                         "name": "apo_distance_k",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::apodization_sa_graph< T, LENGTH_, INCREMENT_MATRIX_, INCREMENT_VECTOR_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::apo_distance_k"
                     },
                     {
                         "name": "F_number",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::apodization_sa_graph< T, LENGTH_, INCREMENT_MATRIX_, INCREMENT_VECTOR_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::F_number"
                     },
                     {
                         "name": "apodization_output",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::apodization_sa_graph< T, LENGTH_, INCREMENT_MATRIX_, INCREMENT_VECTOR_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::apodization_output"
                     }
                 ],
@@ -228,37 +228,37 @@
                 "ports": [
                     {
                         "name": "P1",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::bSpline_graph< T, LENGTH_, SIMD_DEPTH_, DIM_MATRIX_ >::P1"
                     },
                     {
                         "name": "P2",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::bSpline_graph< T, LENGTH_, SIMD_DEPTH_, DIM_MATRIX_ >::P2"
                     },
                     {
                         "name": "P3",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::bSpline_graph< T, LENGTH_, SIMD_DEPTH_, DIM_MATRIX_ >::P3"
                     },
                     {
                         "name": "P4",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::bSpline_graph< T, LENGTH_, SIMD_DEPTH_, DIM_MATRIX_ >::P4"
                     },
                     {
                         "name": "P5",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::bSpline_graph< T, LENGTH_, SIMD_DEPTH_, DIM_MATRIX_ >::P5"
                     },
                     {
                         "name": "P6",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::bSpline_graph< T, LENGTH_, SIMD_DEPTH_, DIM_MATRIX_ >::P6"
                     },
                     {
                         "name": "C",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::bSpline_graph< T, LENGTH_, SIMD_DEPTH_, DIM_MATRIX_ >::C"
                     }
                 ],
@@ -331,42 +331,42 @@
                 "ports": [
                     {
                         "name": "image_points_from_PL",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::delay_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::image_points_from_PL"
                     },
                     {
                         "name": "image_points_from_PL_",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::delay_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::image_points_from_PL_"
                     },
                     {
                         "name": "tx_def_ref_point",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::delay_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::tx_def_ref_point"
                     },
                     {
                         "name": "tx_def_delay_distance",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::delay_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::tx_def_delay_distance"
                     },
                     {
                         "name": "tx_def_delay_distance2",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::delay_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::tx_def_delay_distance2"
                     },
                     {
                         "name": "tx_def_focal_point",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::delay_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::tx_def_focal_point"
                     },
                     {
                         "name": "t_start",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::delay_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::t_start"
                     },
                     {
                         "name": "delay_to_PL",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::delay_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::delay_to_PL"
                     }
                 ],
@@ -439,22 +439,22 @@
                 "ports": [
                     {
                         "name": "image_points_from_PL",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::delay_pw_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::image_points_from_PL"
                     },
                     {
                         "name": "tx_def_reference_point",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::delay_pw_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::tx_def_reference_point"
                     },
                     {
                         "name": "t_start",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::delay_pw_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::t_start"
                     },
                     {
                         "name": "delay_to_PL",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::delay_pw_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::delay_to_PL"
                     }
                 ],
@@ -512,27 +512,27 @@
                 "ports": [
                     {
                         "name": "apo_ref_0",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::focusing_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::apo_ref_0"
                     },
                     {
                         "name": "xdc_def_0",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::focusing_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::xdc_def_0"
                     },
                     {
                         "name": "apo_ref_1",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::focusing_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::apo_ref_1"
                     },
                     {
                         "name": "xdc_def_1",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::focusing_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::xdc_def_1"
                     },
                     {
                         "name": "focusing_output",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::focusing_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::focusing_output"
                     }
                 ],
@@ -590,27 +590,27 @@
                 "ports": [
                     {
                         "name": "apo_ref_0",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::focusing_sa_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::apo_ref_0"
                     },
                     {
                         "name": "img_points_0",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::focusing_sa_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::img_points_0"
                     },
                     {
                         "name": "apo_ref_1",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::focusing_sa_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::apo_ref_1"
                     },
                     {
                         "name": "img_points_1",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::focusing_sa_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::img_points_1"
                     },
                     {
                         "name": "focusing_output",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::focusing_sa_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::focusing_output"
                     }
                 ],
@@ -668,22 +668,22 @@
                 "ports": [
                     {
                         "name": "start_positions",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::imagePoints_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_MATRIX_, SIMD_DEPTH_ >::start_positions"
                     },
                     {
                         "name": "directions",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::imagePoints_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_MATRIX_, SIMD_DEPTH_ >::directions"
                     },
                     {
                         "name": "samples_arange",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::imagePoints_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_MATRIX_, SIMD_DEPTH_ >::samples_arange"
                     },
                     {
                         "name": "image_points",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::imagePoints_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_MATRIX_, SIMD_DEPTH_ >::image_points"
                     }
                 ],
@@ -756,27 +756,27 @@
                 "ports": [
                     {
                         "name": "image_points_from_PL",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::samples_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::image_points_from_PL"
                     },
                     {
                         "name": "delay_from_PL",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::samples_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::delay_from_PL"
                     },
                     {
                         "name": "xdc_def_positions",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::samples_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::xdc_def_positions"
                     },
                     {
                         "name": "sampling_frequency",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::samples_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::sampling_frequency"
                     },
                     {
                         "name": "samples_to_PL",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::samples_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::samples_to_PL"
                     }
                 ],
@@ -873,22 +873,22 @@
                 "ports": [
                     {
                         "name": "out",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::apodi_pre_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_apodi_t, LEN_IN_apodi_t, VECDIM_apodi_t, LEN32b_PARA_apodi_t>::out"
                     },
                     {
                         "name": "img_x_in",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::apodi_pre_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_apodi_t, LEN_IN_apodi_t, VECDIM_apodi_t, LEN32b_PARA_apodi_t>::img_x_in"
                     },
                     {
                         "name": "img_z_in",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::apodi_pre_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_apodi_t, LEN_IN_apodi_t, VECDIM_apodi_t, LEN32b_PARA_apodi_t>::img_z_in"
                     },
                     {
                         "name": "para_apodi_const",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::apodi_pre_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_apodi_t, LEN_IN_apodi_t, VECDIM_apodi_t, LEN32b_PARA_apodi_t>::para_apodi_const"
                     }
                 ],
@@ -992,22 +992,22 @@
                 "ports": [
                     {
                         "name": "out",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::apodi_main_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_apodi_t, LEN_IN_apodi_f_t, LEN_IN_apodi_d_t, VECDIM_apodi_t, LEN32b_PARA_apodi_t>::out"
                     },
                     {
                         "name": "p_focal",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::apodi_main_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_apodi_t, LEN_IN_apodi_f_t, LEN_IN_apodi_d_t, VECDIM_apodi_t, LEN32b_PARA_apodi_t>::p_focal"
                     },
                     {
                         "name": "p_invD",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::apodi_main_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_apodi_t, LEN_IN_apodi_f_t, LEN_IN_apodi_d_t, VECDIM_apodi_t, LEN32b_PARA_apodi_t>::p_invD"
                     },
                     {
                         "name": "para_amain_const",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::apodi_main_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_apodi_t, LEN_IN_apodi_f_t, LEN_IN_apodi_d_t, VECDIM_apodi_t, LEN32b_PARA_apodi_t>::para_amain_const"
                     }
                 ],
@@ -1083,27 +1083,27 @@
                 "ports": [
                     {
                         "name": "para_const",
-                        "direction": "adf::direction::in",
+                        "direction": "in",
                         "type": "adf::port<adf::direction::in> us::L2::delay_graph_wrapper<T, NUM_LINE_t, VECDIM_delay_t, LEN_IN_delay_t, LEN_OUT_delay_t, LEN32b_PARA_delay_t>::para_const"
                     },
                     {
                         "name": "para_t_start",
-                        "direction": "adf::direction::in",
+                        "direction": "in",
                         "type": "adf::port<adf::direction::in> us::L2::delay_graph_wrapper<T, NUM_LINE_t, VECDIM_delay_t, LEN_IN_delay_t, LEN_OUT_delay_t, LEN32b_PARA_delay_t>::para_t_start"
                     },
                     {
                         "name": "img_x",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::delay_graph_wrapper<T, NUM_LINE_t, VECDIM_delay_t, LEN_IN_delay_t, LEN_OUT_delay_t, LEN32b_PARA_delay_t>::img_x"
                     },
                     {
                         "name": "img_z",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::delay_graph_wrapper<T, NUM_LINE_t, VECDIM_delay_t, LEN_IN_delay_t, LEN_OUT_delay_t, LEN32b_PARA_delay_t>::img_z"
                     },
                     {
                         "name": "delay",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::delay_graph_wrapper<T, NUM_LINE_t, VECDIM_delay_t, LEN_IN_delay_t, LEN_OUT_delay_t, LEN32b_PARA_delay_t>::delay"
                     }
                 ],
@@ -1186,17 +1186,17 @@
                 "ports": [
                     {
                         "name": "p_para_const",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::graph_foc_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, VECDIM_foc_t, LEN32b_PARA_foc_t>::p_para_const"
                     },
                     {
                         "name": "p_para_pos",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::graph_foc_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, VECDIM_foc_t, LEN32b_PARA_foc_t>::p_para_pos"
                     },
                     {
                         "name": "dataout1",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::graph_foc_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, VECDIM_foc_t, LEN32b_PARA_foc_t>::dataout1"
                     }
                 ],
@@ -1286,17 +1286,17 @@
                 "ports": [
                     {
                         "name": "p_para_const",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::graph_img_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, VECDIM_img_t, LEN_OUT_img_t, LEN32b_PARA_img_t>::p_para_const"
                     },
                     {
                         "name": "p_para_start",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::graph_img_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, VECDIM_img_t, LEN_OUT_img_t, LEN32b_PARA_img_t>::p_para_start"
                     },
                     {
                         "name": "dataout1",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::graph_img_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, VECDIM_img_t, LEN_OUT_img_t, LEN32b_PARA_img_t>::dataout1"
                     }
                 ],
@@ -1400,27 +1400,27 @@
                 "ports": [
                     {
                         "name": "out",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::interpolation_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_interp_t, LEN_PAD_interp_t, LEN_IN_interp_t, LEN_IN_interp_rf_t, VECDIM_interp_t, LEN32b_PARA_interp_t>::out"
                     },
                     {
                         "name": "p_sample_in",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::interpolation_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_interp_t, LEN_PAD_interp_t, LEN_IN_interp_t, LEN_IN_interp_rf_t, VECDIM_interp_t, LEN32b_PARA_interp_t>::p_para_const"
                     },
                     {
                         "name": "p_inside_in",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::interpolation_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_interp_t, LEN_PAD_interp_t, LEN_IN_interp_t, LEN_IN_interp_rf_t, VECDIM_interp_t, LEN32b_PARA_interp_t>::p_para_start"
                     },
                     {
                         "name": "p_rfdata_in",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::interpolation_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_interp_t, LEN_PAD_interp_t, LEN_IN_interp_t, LEN_IN_interp_rf_t, VECDIM_interp_t, LEN32b_PARA_interp_t>::p_para_start"
                     },
                     {
                         "name": "para_interp_const",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::interpolation_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_interp_t, LEN_PAD_interp_t, LEN_IN_interp_t, LEN_IN_interp_rf_t, VECDIM_interp_t, LEN32b_PARA_interp_t>::p_para_start"
                     }
                 ],
@@ -1531,97 +1531,97 @@
                 "ports": [
                     {
                         "name": "para_const_pre",
-                        "direction": "direction::in",
+                        "direction": "in",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_pre"
                     },
                     {
                         "name": "para_const_0",
-                        "direction": "direction::in",
+                        "direction": "in",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_0"
                     },
                     {
                         "name": "para_const_1",
-                        "direction": "direction::in",
+                        "direction": "in",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_1"
                     },
                     {
                         "name": "para_const_2",
-                        "direction": "direction::in",
+                        "direction": "in",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_2"
                     },
                     {
                         "name": "para_const_3",
-                        "direction": "direction::in",
+                        "direction": "in",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_3"
                     },
                     {
                         "name": "para_const_0_0",
-                        "direction": "direction::in",
+                        "direction": "in",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_0_0"
                     },
                     {
                         "name": "para_const_0_1",
-                        "direction": "direction::in",
+                        "direction": "in",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_0_1"
                     },
                     {
                         "name": "para_const_0_2",
-                        "direction": "direction::in",
+                        "direction": "in",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_0_2"
                     },
                     {
                         "name": "para_const_0_3",
-                        "direction": "direction::in",
+                        "direction": "in",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_0_3"
                     },
                     {
                         "name": "para_const_1_1_0",
-                        "direction": "direction::in",
+                        "direction": "in",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_1_1_0"
                     },
                     {
                         "name": "para_const_1",
-                        "direction": "direction::in",
+                        "direction": "in",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_1"
                     },
                     {
                         "name": "para_const_1_2",
-                        "direction": "direction::in",
+                        "direction": "in",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_1_2"
                     },
                     {
                         "name": "para_const_1_3",
-                        "direction": "direction::in",
+                        "direction": "in",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_1_3"
                     },
                     {
                         "name": "interp",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::interp"
                     },
                     {
                         "name": "apod",
-                        "direction": "adf:: input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::apod"
                     },
                     {
                         "name": "mult_0",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::mult_0"
                     },
                     {
                         "name": "mult_1",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::mult_1"
                     },
                     {
                         "name": "mult_2",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::mult_2"
                     },
                     {
                         "name": "mult_3",
-                        "direction": "adf:: output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::mult_3"
                     }
                 ],
@@ -1704,42 +1704,42 @@
                 "ports": [
                     {
                         "name": "para_const",
-                        "direction": "adf::direction::in",
+                        "direction": "in",
                         "type": "adf::port<adf::direction::in> us::L2::sample_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, VECDIM_sample_t, LEN_IN_sample_t, LEN_OUT_sample_t, LEN32b_PARA_sample_t>::para_const"
                     },
                     {
                         "name": "para_rfdim",
-                        "direction": "adf::direction::in",
+                        "direction": "in",
                         "type": "adf::port<adf::direction::innput> us::L2::sample_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, VECDIM_sample_t, LEN_IN_sample_t, LEN_OUT_sample_t, LEN32b_PARA_sample_t>::para_rfdim"
                     },
                     {
                         "name": "para_elem",
-                        "direction": "adf::direction::in",
+                        "direction": "in",
                         "type": "adf::port<adf::direction::innput> us::L2::sample_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, VECDIM_sample_t, LEN_IN_sample_t, LEN_OUT_sample_t, LEN32b_PARA_sample_t>::para_elem"
                     },
                     {
                         "name": "sample",
-                        "direction": "adf::output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::sample_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, VECDIM_sample_t, LEN_IN_sample_t, LEN_OUT_sample_t, LEN32b_PARA_sample_t>::sample"
                     },
                     {
                         "name": "inside",
-                        "direction": "adf::output",
+                        "direction": "out",
                         "type": "adf::port<output> us::L2::sample_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, VECDIM_sample_t, LEN_IN_sample_t, LEN_OUT_sample_t, LEN32b_PARA_sample_t>::inside"
                     },
                     {
                         "name": "img_x",
-                        "direction": "adf::input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::sample_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, VECDIM_sample_t, LEN_IN_sample_t, LEN_OUT_sample_t, LEN32b_PARA_sample_t>::img_x"
                     },
                     {
                         "name": "img_z",
-                        "direction": "adf::input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::sample_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, VECDIM_sample_t, LEN_IN_sample_t, LEN_OUT_sample_t, LEN32b_PARA_sample_t>::img_z"
                     },
                     {
                         "name": "delay",
-                        "direction": "adf::input",
+                        "direction": "in",
                         "type": "adf::port<input> us::L2::sample_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, VECDIM_sample_t, LEN_IN_sample_t, LEN_OUT_sample_t, LEN32b_PARA_sample_t>::delay"
                     }
                 ],
@@ -2053,7 +2053,7 @@
                 "ports": [
                     {
                         "name": "input_rfd_file_name",
-                        "direction": "input",
+                        "direction": "in",
                         "type": "std::string"
                     }
                 ],
