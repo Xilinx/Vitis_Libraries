@@ -1,4 +1,3 @@
-#
 # Copyright (C) 2019-2022, Xilinx, Inc.
 # Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
@@ -13,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+# vitis makefile-generator v2.0.9
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -44,7 +43,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 TARGET ?= aiesim
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  vck190
+PLATFORM_ALLOWLIST += vck190
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk

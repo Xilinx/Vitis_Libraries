@@ -110,7 +110,7 @@ ${MID_XO}: ${MID_XO_CFG} ${HPARAMS} ${HELPER_ROOT_DIR}/L1/src/hw/ifft_transpose/
 help:
 	echo "Makefile Usage:"
 	echo "  make -f vss_fft_ifft_1d.mk vss HELPER_CUR_DIR=<path/to/build/dir> HELPER_ROOT_DIR=<path/to/dsp/library/root>"
-	echo "      Command to generate the full vss according to the parameters defined in vss_fft_ifft_1d_params.cfg. Please edit the vss_fft_params.cfg"
+	echo "      Command to generate the full vss according to the parameters defined in vss_fft_ifft_1d_params.cfg. Please edit the vss_fft_ifft_1d_params.cfg"
 	echo ""
 	echo "  make clean"
 	echo "      Command to remove the generated files."

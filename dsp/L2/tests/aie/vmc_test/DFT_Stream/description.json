@@ -51,7 +51,6 @@
                 "LIB_DIR/L1/tests/aie/inc",
                 "LIB_DIR/L1/tests/aie/src",
                 "LIB_DIR/L2/include/aie",
-                "LIB_DIR/L2/meta/vmc/vmc_test/DDS/$(VMC_GRAPHDIR)",
                 "LIB_DIR/L2/tests/aie/common/inc",
                 "./"
             ],

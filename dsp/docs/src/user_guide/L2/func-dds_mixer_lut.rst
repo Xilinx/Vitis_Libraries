@@ -29,7 +29,9 @@ Supported Types
 ===============
 
 On AI Engine (AIE) devices, the dds_mixer_lut supports cint16, cint32, and cfloat as ``TT_DATA`` type that specifies the type of input and output data. Input is only required when ``TP_MIXER_MODE`` is
-set to 1 (simple mixer) or 2 (dual conjugate mixer). The AIE-ML devices does not support cfloat data type, so the dds_mixer_lut also does not support this data type. Only cint16 and cint32 are supported.
+set to 1 (simple mixer) or 2 (dual conjugate mixer).
+
+The ``cfloat`` data type is not supported on AIE-ML device.
 
 Template Parameters
 ===================

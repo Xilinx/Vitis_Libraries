@@ -60,7 +60,8 @@ using namespace adf;
  *         - int16, int32, float, and bfloat16 for AIE-ML \n
  *
  * @tparam TP_COARSE_BITS Describes the number of bits in a sample of input data that will
- *         be used to address the provided lookup table. It determines the total number of sections in the lookup table.
+ *         be used to address the provided lookup table. It determines the total number of locations in the lookup
+ *table.
  *
  * @tparam TP_FINE_BITS Describes the number of bits in an input data sample used for fine interpolation.
  *

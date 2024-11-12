@@ -9,21 +9,23 @@
 VSS FFT/IFFT
 ============
 
-This design element implements a single-channel DIT FFT using both AIE and programmable logic to extract higher performance for larger point sizes.
+This library element implements a single-channel DIT FFT using both AIE and programmable logic to extract higher performance for larger point sizes.
 
 Entry Point
 ===========
 
-The entry point for the VSS is the vss_fft_ifft_1d.mk file present in the L2/include/vss/vss_fft_ifft_1d directory in the dsp library. The makefile takes in a user configurable file, say "my_params.cfg" as input and generates a .vss object. See Vitis documentation on "Vitis Subsystems" for details on how to include a .vss object into your design. An example of how to use a .vss object in your design is provided in L2/example/vss_fft_ifft_1d/example.mk. It creates a .vss object, links it to a larger system to create an xclbin and runs hardware emulation of the full design.
+The entry points for the VSS are the ``vss_fft_ifft_pararms.cfg`` and ``vss_fft_ifft_1d.mk`` file present in the L2/include/vss/vss_fft_ifft_1d/ directory in the DSP library. The ``vss_fft_ifft_1d.mk`` takes in a user configurable file, say "vss_fft_ifft_pararms.cfg" as input and generates a .vss object as an output after performing all the intermediate steps like generating the necessary AIE and PL products and stitching them together. The user can then integrate this .vss object into their larger design. See Vitis documentation on "Vitis Subsystems" for details on how to include a .vss object into your design. 
+
+Please edit the parameters in the ``cfg`` file and provide it as input to the ``vss_fft_ifft_1d.mk`` file. An example of how to create a vss and include a .vss object in your design is also provided in L2/examples/vss_fft_ifft_1d/example.mk. It creates a vss object, links it to a larger system to create an xclbin and runs hardware emulation of the full design.
 
 Device Support
 ==============
 
-The VSS FFT can generate VSS products for both AIE and AIE-ML devices. The VSS is generated for the part that the user provides in the input cfg file. All features are supported on the two variants with the following differences:
+The VSS FFT can generate VSS products for both AIE and AIE-ML devices. The VSS is generated for the ``part`` that the user provides in the input cfg file. All features are supported on the two variants with the following differences:
 
-- ``TT_DATA`` and ``TT_TWIDDLE``. AIE-ML does not support cfloat type.
-- ``TT_TWIDDLE``: AIE supports cint32. AIE-ML does not.
-- ``TP_RND``: Supported round modes differ between AIE and AIE-ML devices as for all library elements.
+- ``DATA_TYPE`` and ``TWIDDLE_TYPE``. AIE-ML does not support cfloat type.
+- ``TWIDDLE_TYPE``: AIE supports cint32. AIE-ML does not.
+- ``ROUND_MODE``: Supported round modes differ between AIE and AIE-ML devices as for all library elements.
 
 Supported Parameters
 ====================
@@ -47,7 +49,7 @@ The complete list of supported parameters for the VSS FFT is shown in the L2/inc
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | [APP_PARAMS] POINT SIZE     | Used to set TP_POINT_SIZE described in API Reference                                                                                       |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| [APP_PARAMS] FFT_NIFFT      | Used to set TP_FFT_NIFFT decribed in API Reference                                                                                         |
+| [APP_PARAMS] FFT_NIFFT      | Used to set TP_FFT_NIFFT described in API Reference                                                                                        |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | [APP_PARAMS] SHIFT          | Used to set TP_SHIFT described in API reference                                                                                            |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
@@ -67,10 +69,12 @@ The complete list of supported parameters for the VSS FFT is shown in the L2/inc
 Design Notes
 ============
 
-.. _SSR_POINTSIZE_CONSTRAINTS:
+.. _VSS_SSR_OPERATION:
 
-Padding Input Data based on Super Sample Rate and Point Size
-------------------------------------------------------------
+Super Sample Rate
+------------------
+
+The VSS FFT can be configured for Super Sample Rate operation to achieve higher throughputs. The design generates TP_SSR number of input and output ports.
 
 The input data to the SSR input ports of the VSS FFT are expected to be distributed evenly in a "card-dealing" fashion. For example,
 
@@ -78,6 +82,11 @@ Port Number 1 gets samples 1, SSR+1, 2*SSR+1, ...
 Port Number 2 gets samples 2, SSR+2, 2*SSR+2, ...
 ...
 Port Number SSR gets samples SSR, SSR+SSR, 2*SSR+SSR, ...
+
+.. _SSR_POINTSIZE_CONSTRAINTS:
+
+Padding Input Data based on Super Sample Rate and Point Size
+------------------------------------------------------------
 
 If the point size is a multiple of SSR, then the inputs can be passed as is to the FFT. Otherwise every point size number of samples needs to be padded with zeros to the closest multiple of SSR before giving as input to the FFT. The output data also contains Point size number of valid data samples padded to the closest multiple of SSR.
 

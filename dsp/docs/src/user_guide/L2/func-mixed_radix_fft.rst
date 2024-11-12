@@ -3,7 +3,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _Mixed_Radix_FFT:
+.. _MIXED_RADIX_FFT:
 
 ===============
 Mixed Radix FFT
@@ -29,7 +29,7 @@ All features are supported on these variants with minor differences as follows:
 - ``TP_POINT_SIZE``: The width of vectors used for calculations differs by AIE variant. The point size ``TP_POINT_SIZE`` must be a multiple of the number of samples processed in an atomic vectorized butterfly operation. This is 16 for AIE and 32 for AIE-ML.
 - ``TP_RND``: Supported round modes differ between AIE and AIE-ML devices as for all library elements.
 - Number of ports: When configured for ``TP_API=1`` (stream IO), AIE will require 2 input ports (sample interleaved - even samples on the first port) and 2 output ports similarly interleaved. AIE-ML accepts one stream only.
-``TP_DYN_PT_SIZE``: the dynamic (run-time) point-size feature is supported on AIE only.
+- ``TP_DYN_PT_SIZE``: the dynamic (run-time) point-size feature is supported on AIE only.
 
 Supported Types
 ===============
@@ -158,7 +158,7 @@ For ``TT_DATA = cfloat``, the FFT performs no scaling or saturation. Any saturat
 Cascade Feature
 ---------------
 
-The mixed radix FFT cascade feature is configured using the ``TP_CASC_LEN`` template parameter. This determines the number of kernels over which the FFT function is split. To be clear, this feature does not use the cascade ports of kernels to convey any data. IObuffers are used to convey data from one kernel to the next in the chain. The term cascade is used simply in the sense that the function is split into a series of operations which are executed by a series of kernels, each on a separate tile. The FFT function is only split at stage boundaries, so the ``TP_CASC_LEN`` value cannot exceed the number of stages for that FFT.
+The mixed radix FFT cascade feature is configured using the ``TP_CASC_LEN`` template parameter. This determines the number of kernels over which the FFT function is split. To be clear, this feature does not use the cascade ports of kernels to convey any data. IO-buffers are used to convey data from one kernel to the next in the chain. The term cascade is used simply in the sense that the function is split into a series of operations which are executed by a series of kernels, each on a separate tile. The FFT function is only split at stage boundaries, so the ``TP_CASC_LEN`` value cannot exceed the number of stages for that FFT.
 
 Use of the cascade feature to split the FFT operation over multiple tiles will improve the throughput, because each tile in question will have fewer ranks of processing to execute and so it is ready for a new frame to process earlier.
 
@@ -169,7 +169,7 @@ API Type
 
 The mixed radix FFT can be configured using ``TP_API`` to use IO buffer ports (0) or streams (1).
 
-When configured for streams, additional kernels are added on the input and output to convert from streams to iobuffers and vice versa, because internally the kernel performing the FFT itself uses IO buffers.
+When configured for streams, additional kernels are added on the input and output to convert from streams to IO-buffers and vice versa, because internally the kernel performing the FFT itself uses IO buffers.
 
 When configured to use streams, two streams are used. Even samples are to be supplied on the first stream input, and odd samples are to be supplied on the second input. In a similar fashion, even samples out appear on the first port out and odd samples out on the second port out.
 

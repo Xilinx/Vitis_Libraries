@@ -36,9 +36,9 @@ copyright = '2019-2022, Xilinx Inc. 2022-2024, Advanced Micro Devices, Inc.'
 author = 'Xilinx Inc.'
 
 # The short X.Y version
-version = '2024.1'
+version = '2024.2'
 # The full version, including alpha/beta/rc tags
-release = 'v2024.1'
+release = 'v2024.2'
 
 
 # -- General configuration ---------------------------------------------------

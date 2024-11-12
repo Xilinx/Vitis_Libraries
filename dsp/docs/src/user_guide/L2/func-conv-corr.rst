@@ -6,7 +6,7 @@
 .. _CONVOLUTION_CORRELATION:
 
 =======================
-Convolution Correlation
+Convolution/Correlation
 =======================
 
 This library element computes the Convolution or Correlation of two input vectors depending on the specified function type. There are 3 compute modes which affect the size of the output - full, valid and same - which respectively compute the full convolution/correlation of F and G, convolution/correlation that do not rely on zero padding, and the convolution/correlation which has the same dimension size as F, centered with respect to the 'full' output.
@@ -33,7 +33,7 @@ Supported Types
 ===============
 
 The data type for input port F and G (inF and inG) is controlled by T_DATA_F and T_DATA_G respectively.
-Both inputs may take one of the 7 choices: int8, int16, int32, cint16, cint32, float and bfloat16. 
+Both inputs may take one of the 7 choices: int8, int16, int32, cint16, cint32, float and bfloat16.
 The output may take one of 5 choices: int16, int32, cint16, cint32, float.
 Please see table :ref:`CONV_CORR_combos` for valid input/output data type combinations.
 
@@ -98,8 +98,8 @@ To see details on the ports for Convolution / Correlation, see :ref:`API_REFEREN
 
 Design Notes
 ============
-The performance of the IP depends on the chosen data types combo :ref:`CONV_CORR_combos` . The number of multiplications per clock cycle will updated based on data type combo. 
-The Convolution/Correlation operation can be processed by both IO Buffer (TP_API = 0) and Stream Based (TP_API =1) which can controlled by the parameter named as ``TP_API`` 
+The performance of the IP depends on the chosen data types combo :ref:`CONV_CORR_combos` . The number of multiplications per clock cycle will updated based on data type combo.
+The Convolution/Correlation operation can be processed by both IO Buffer (TP_API = 0) and Stream Based (TP_API =1) which can controlled by the parameter named as ``TP_API``
 
 IO Buffer Interface
 -------------------
@@ -111,14 +111,14 @@ Streaming Interface
 -------------------
 The Convolution/Correlation operation via streaming supported by AIE Engine only and there is no support in AIE-ML
 Input F Sig. is assumed to be streaming on AXI-Stream interface. As F is consumed on streams, selection of Length(F) can be higher to meet higher throughput.
-Input G Sig. is assumed to be window on I/O buffer interface and langth(G) can be smaller.
+Input G Sig. is assumed to be window on I/O buffer interface and length(G) can be smaller.
 
 Streaming interface can support only one data type combo, see :ref:`CONV_CORR_combos` `table:: STREAM INTERFACE`
 
 
 Scaling
 -------
-Scaling in Convolution / Correlation is controlled by the ``TP_SHIFT`` parameter which describes the number of bits to shift the output to the right. 
+Scaling in Convolution / Correlation is controlled by the ``TP_SHIFT`` parameter which describes the number of bits to shift the output to the right.
 Float, cfloat and bfloat16 implementations do not support scaling. ``TP_SHIFT`` must be set to '0'.
 
 Saturation

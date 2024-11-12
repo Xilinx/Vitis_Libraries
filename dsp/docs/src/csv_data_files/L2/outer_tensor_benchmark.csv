@@ -1,68 +1,134 @@
-Library Element,AIE_VARIANT,T_DATA_A,T_DATA_B,DIM_SIZE_A,DIM_SIZE_B,NUM_FRAMES,UUT_SSR,API_IO,Dynamic Power,Latency,Throughput,NUM_BANKS,NUM_AIE,DATA_MEMORY,PROGRAM_MEMORY
-outer_tensor,1,cfloat,cfloat,32,32,1,1,0,0.742 W,7548 ns,500 MSa/s,7,1,20103,3232
-outer_tensor,1,cint32,int32,32,32,1,1,0,0.733 W,7890 ns,500 MSa/s,7,1,19848,2572
-outer_tensor,1,float,cfloat,32,32,1,1,0,0.733 W,9978 ns,500 MSa/s,7,1,19847,2530
-outer_tensor,1,float,float,32,32,1,1,0,0.728 W,4952 ns,1000 MSa/s,7,1,11399,2346
-outer_tensor,1,int16,cint16,32,32,1,1,0,0.727 W,6000 ns,1000 MSa/s,7,1,11304,2248
-outer_tensor,1,int16,cint32,16,16,4,1,0,0.731 W,9975 ns,500 MSa/s,7,1,22440,2932
-outer_tensor,1,int16,cint32,32,32,1,1,0,0.732 W,11979 ns,500 MSa/s,8,1,25896,3368
-outer_tensor,1,int16,int16,16,16,32,1,0,0.749 W,15335 ns,2000 MSa/s,9,1,38536,2318
-outer_tensor,1,int16,int16,16,16,8,1,0,0.728 W,3852 ns,2000 MSa/s,7,1,10888,2318
-outer_tensor,1,int16,int16,32,32,1,1,0,0.722 W,2996 ns,2000 MSa/s,7,1,7048,2598
-outer_tensor,1,int16,int32,32,32,1,1,0,0.727 W,6000 ns,1000 MSa/s,7,1,11272,2264
-outer_tensor,1,int32,cint16,32,32,1,1,0,0.733 W,9938 ns,500 MSa/s,7,1,19592,2572
-outer_tensor,1,int32,cint32,32,32,1,1,0,0.733 W,9938 ns,500 MSa/s,7,1,19848,2572
-outer_tensor,1,int32,int16,32,32,1,1,0,0.727 W,4960 ns,1000 MSa/s,7,1,11272,2264
-outer_tensor,1,int32,int32,16,16,2,1,0,0.724 W,2452 ns,1000 MSa/s,7,1,6280,1862
-outer_tensor,1,cint32,int32,16,16,4,1,0,0.731 W,7818 ns,500 MSa/s,7,1,19592,1942
-outer_tensor,1,int32,int32,16,16,2,1,0,0.723 W,2452 ns,1000 MSa/s,7,1,6280,1862
-outer_tensor,1,int32,int32,16,16,2,1,0,0.723 W,2452 ns,1000 MSa/s,7,1,6280,1862
-outer_tensor,1,int32,int32,16,16,2,1,0,0.724 W,2452 ns,1000 MSa/s,7,1,6280,1862
-outer_tensor,1,int32,int32,16,16,2,1,0,0.724 W,2452 ns,1000 MSa/s,7,1,6280,1862
-outer_tensor,1,int32,int32,16,16,2,1,0,0.723 W,2452 ns,1000 MSa/s,7,1,6280,1862
-outer_tensor,1,int32,int32,16,16,2,1,0,0.723 W,2452 ns,1000 MSa/s,7,1,6280,1862
-outer_tensor,1,int32,int32,32,32,1,1,0,0.728 W,4960 ns,1000 MSa/s,7,1,11400,2248
-outer_tensor,1,int32,int32,32,32,4,1,0,0.75 W,15758 ns,1000 MSa/s,9,1,37512,2270
-outer_tensor,1,int32,int32,32,32,4,1,0,0.75 W,15759 ns,1000 MSa/s,9,1,37512,2254
-outer_tensor,1,int32,int32,32,32,4,1,0,0.75 W,15758 ns,1000 MSa/s,9,1,37512,2270
-outer_tensor,1,int32,int32,32,32,4,1,0,0.752 W,15759 ns,1000 MSa/s,9,1,37512,2254
-outer_tensor,1,int32,int32,32,32,4,1,0,0.75 W,15759 ns,1000 MSa/s,9,1,37512,2270
-outer_tensor,1,int32,int32,32,32,4,1,0,0.75 W,15759 ns,1000 MSa/s,9,1,37512,2270
-outer_tensor,1,int32,int32,32,32,4,1,0,0.75 W,15759 ns,1000 MSa/s,9,1,37512,2270
-outer_tensor,1,int32,int32,32,32,4,1,0,0.752 W,15759 ns,1000 MSa/s,9,1,37512,2270
-outer_tensor,1,int32,int32,16,16,2,1,0,0.723 W,2452 ns,1000 MSa/s,7,1,6280,1862
-outer_tensor,1,int32,int32,32,32,4,1,0,0.75 W,15759 ns,1000 MSa/s,9,1,37512,2270
-outer_tensor,1,cint32,int16,32,32,1,1,0,0.733 W,7672 ns,500 MSa/s,7,1,18729,2654
-outer_tensor,1,cint32,cint32,8,4,8,2,0,0.81 W,937 ns,1000 MSa/s,14,2,7698,1722 1722
-outer_tensor,1,cfloat,float,32,32,1,1,0,0.733 W,7930 ns,500 MSa/s,7,1,19847,2530
-outer_tensor,1,cint16,cint16,16,16,16,1,0,0.749 W,15536 ns,1000 MSa/s,9,1,38536,1862
-outer_tensor,1,cint16,cint16,16,16,2,1,0,0.724 W,2452 ns,1000 MSa/s,7,1,6280,1862
-outer_tensor,1,cint16,cint16,32,32,1,1,0,0.727 W,4960 ns,1000 MSa/s,7,1,11400,2248
-outer_tensor,1,cint16,cint32,32,32,1,1,0,0.732 W,9932 ns,500 MSa/s,7,1,19848,2452
-outer_tensor,1,cint16,int16,16,16,8,1,0,0.73 W,7727 ns,1000 MSa/s,7,1,19624,1928
-outer_tensor,1,cint16,int16,32,32,1,1,0,0.727 W,4940 ns,1000 MSa/s,7,1,11304,2324
-outer_tensor,1,cint16,int32,16,16,2,1,0,0.728 W,4951 ns,500 MSa/s,7,1,10376,1958
-outer_tensor,1,cint16,int32,32,32,1,1,0,0.733 W,9938 ns,500 MSa/s,7,1,19592,2572
-outer_tensor,1,cint32,cint16,16,16,4,1,0,0.73 W,7821 ns,500 MSa/s,7,1,19592,1886
-outer_tensor,1,cint32,cint16,32,32,1,1,0,0.732 W,7884 ns,500 MSa/s,7,1,19848,2452
-outer_tensor,1,cint32,cint32,128,16,8,1,1,0.731 W,63698 ns,499 MSa/s,5,1,19593,2158
-outer_tensor,1,cint32,cint32,128,16,8,16,1,1.91 W,4212 ns,7746 MSa/s,69,16,67728,2180 2180 2180 2180 2180 2180 2180 2180 2180 2180 2180 2180 2180 2180 2180 2180
-outer_tensor,1,cint32,cint32,16,128,8,1,1,0.731 W,65489 ns,499 MSa/s,5,1,19593,2158
-outer_tensor,1,cint32,int16,16,16,4,1,0,0.731 W,7583 ns,500 MSa/s,7,1,18857,2058
-outer_tensor,1,cint32,cint32,16,16,2,1,0,0.736 W,3838 ns,500 MSa/s,7,1,10889,2152
-outer_tensor,1,cint32,cint32,16,16,8,4,0,1.041 W,3860 ns,2000 MSa/s,25,4,46628,2160 2160 2160 2160
-outer_tensor,1,cint32,cint32,16,16,8,1,1,0.73 W,8145 ns,493 MSa/s,5,1,5257,2158
-outer_tensor,1,cint32,cint32,16,16,8,2,1,0.813 W,4212 ns,968 MSa/s,10,2,8466,2180 2180
-outer_tensor,1,cint32,cint32,16,256,8,1,1,0.73 W,131028 ns,499 MSa/s,7,1,35977,2174
-outer_tensor,1,cint32,cint32,16,32,8,1,1,0.73 W,16337 ns,496 MSa/s,5,1,7305,2158
-outer_tensor,1,cint32,cint32,16,64,8,1,1,0.731 W,32721 ns,498 MSa/s,5,1,11401,2158
-outer_tensor,1,cint32,cint32,256,16,8,1,1,0.73 W,127191 ns,499 MSa/s,7,1,35977,2158
-outer_tensor,1,cint32,cint32,32,16,8,1,1,0.73 W,16081 ns,496 MSa/s,5,1,7305,2158
-outer_tensor,1,cint32,cint32,32,16,8,4,1,0.982 W,4212 ns,1936 MSa/s,18,4,16932,2180 2180 2180 2180
-outer_tensor,1,cint32,cint32,32,32,1,1,0,0.741 W,7695 ns,500 MSa/s,7,1,20105,3044
-outer_tensor,1,cint32,cint32,4,4,2,1,0,0.713 W,431 ns,380 MSa/s,7,1,1673,1618
-outer_tensor,1,cint32,cint32,4,4,2,1,1,0.719 W,493 ns,288 MSa/s,5,1,1417,1742
-outer_tensor,1,cint32,cint32,64,16,8,1,1,0.731 W,31954 ns,498 MSa/s,5,1,11401,2158
-outer_tensor,1,cint32,cint32,64,16,8,8,1,1.297 W,4212 ns,3873 MSa/s,36,8,33864,2180 2180 2180 2180 2180 2180 2180 2180
-outer_tensor,1,cint32,cint32,16,16,8,2,0,0.835 W,7575 ns,1000 MSa/s,14,2,41234,2180 2180
-outer_tensor,1,int32,int32,32,32,4,1,0,0.75 W,15759 ns,1000 MSa/s,9,1,37512,2270
+Library Element,AIE_VARIANT,TT_DATA_A,TT_DATA_B,TP_DIM_A,TP_DIM_B,TP_NUM_FRAMES,TP_SSR,TP_API,Dynamic Power (W),Latency (ns),Throughput (MSa/s),NUM_BANKS,NUM_AIE,DATA_MEMORY,PROGRAM_MEMORY
+outer_tensor,AIE,cfloat,cfloat,32,32,1,1,0,0.988,5939,622,7,1,20615,3248
+outer_tensor,AIE,cfloat,float,32,32,1,1,0,0.972,6322,622,7,1,20359,2546
+outer_tensor,AIE,cint16,cint16,16,16,16,1,0,0.99,12326,1247,9,1,39048,1878
+outer_tensor,AIE,cint16,cint16,16,16,2,1,0,0.963,1976,1230,7,1,6792,1878
+outer_tensor,AIE,cint16,cint16,32,32,1,1,0,0.965,3973,1241,7,1,11912,2264
+outer_tensor,AIE,cint16,cint32,32,32,1,1,0,0.962,7920,622,7,1,20360,2468
+outer_tensor,AIE,cint16,int16,16,16,8,1,0,0.959,6131,1244,7,1,20136,1944
+outer_tensor,AIE,cint16,int16,32,32,1,1,0,0.964,3952,1239,7,1,11816,2340
+outer_tensor,AIE,cint16,int32,16,16,2,1,0,0.966,3968,619,7,1,10888,1950
+outer_tensor,AIE,cint16,int32,32,32,1,1,0,0.964,7926,622,7,1,20104,2588
+outer_tensor,AIE,cint32,cint16,16,16,4,1,0,0.966,6224,622,7,1,20104,1902
+outer_tensor,AIE,cint32,cint16,32,32,1,1,0,0.962,6275,622,7,1,20360,2468
+outer_tensor,AIE,cint32,cint32,128,16,8,1,1,0.956,59289,538,5,1,19593,2174
+outer_tensor,AIE,cint32,cint32,128,16,8,16,1,2.57,4072,8062,69,16,67728,2196 2196 2196 2196 2196 2196 2196 2196 2196 2196 2196 2196 2196 2196 2196 2196
+outer_tensor,AIE,cint32,cint32,16,128,8,1,1,0.96,53553,610,5,1,19593,2174
+outer_tensor,AIE,cint32,cint32,16,16,2,1,0,0.982,3048,619,7,1,11401,2168
+outer_tensor,AIE,cint32,cint32,16,16,8,2,0,1.118,5977,1244,14,2,42258,2196 2196
+outer_tensor,AIE,cint32,cint32,16,16,8,4,0,1.471,3072,2476,22,4,48676,2176 2176 2176 2176
+outer_tensor,AIE,cint32,cint32,16,16,8,1,1,0.953,7680,526,5,1,5257,2174
+outer_tensor,AIE,cint32,cint32,16,16,8,2,1,1.076,4072,1007,10,2,8466,2196 2196
+outer_tensor,AIE,cint32,cint32,16,256,8,1,1,0.961,105982,617,7,1,35977,2190
+outer_tensor,AIE,cint32,cint32,16,32,8,1,1,0.958,14233,571,5,1,7305,2174
+outer_tensor,AIE,cint32,cint32,16,64,8,1,1,0.96,27339,597,5,1,11401,2174
+outer_tensor,AIE,cint32,cint32,256,16,8,1,1,0.955,118269,539,7,1,35977,2174
+outer_tensor,AIE,cint32,cint32,32,16,8,1,1,0.954,15053,533,5,1,7305,2174
+outer_tensor,AIE,cint32,cint32,32,16,8,4,1,1.317,4072,2015,18,4,16932,2196 2196 2196 2196
+outer_tensor,AIE,cint32,cint32,32,32,1,1,0,0.987,6086,622,7,1,20617,3060
+outer_tensor,AIE,cint32,cint32,4,4,2,1,0,0.953,514,380,7,1,2185,1634
+outer_tensor,AIE,cint32,cint32,4,4,2,1,1,0.936,607,290,5,1,1417,1758
+outer_tensor,AIE,cint32,cint32,64,16,8,1,1,0.955,29798,537,5,1,11401,2174
+outer_tensor,AIE,cint32,cint32,64,16,8,8,1,1.737,4072,4031,36,8,33864,2196 2196 2196 2196 2196 2196 2196 2196
+outer_tensor,AIE,cint32,cint32,8,4,8,2,0,1.126,762,1213,14,2,8722,1738 1738
+outer_tensor,AIE,cint32,int16,16,16,4,1,0,0.968,5987,622,7,1,19369,2074
+outer_tensor,AIE,cint32,int16,32,32,1,1,0,0.964,6063,622,7,1,19241,2670
+outer_tensor,AIE,cint32,int32,16,16,4,1,0,0.968,6232,622,7,1,20104,1934
+outer_tensor,AIE,cint32,int32,32,32,1,1,0,0.964,6282,622,7,1,20360,2588
+outer_tensor,AIE,float,cfloat,32,32,1,1,0,0.972,7965,622,7,1,20359,2546
+outer_tensor,AIE,float,float,32,32,1,1,0,0.966,3963,1239,7,1,11911,2362
+outer_tensor,AIE,int16,cint16,32,32,1,1,0,0.964,5623,1241,7,1,11816,2264
+outer_tensor,AIE,int16,cint32,16,16,4,1,0,0.967,7964,622,7,1,22952,2948
+outer_tensor,AIE,int16,cint32,32,32,1,1,0,0.962,11192,622,8,1,26408,3384
+outer_tensor,AIE,int16,int16,16,16,32,1,0,0.986,12125,2495,9,1,39048,2334
+outer_tensor,AIE,int16,int16,16,16,8,1,0,0.965,3063,2482,7,1,11400,2334
+outer_tensor,AIE,int16,int16,32,32,1,1,0,0.962,2824,2461,7,1,7560,2614
+outer_tensor,AIE,int16,int32,32,32,1,1,0,0.953,5622,1239,7,1,11784,2280
+outer_tensor,AIE,int32,cint16,32,32,1,1,0,0.964,7926,622,7,1,20104,2588
+outer_tensor,AIE,int32,cint32,32,32,1,1,0,0.972,7925,622,7,1,20360,2588
+outer_tensor,AIE,int32,int16,32,32,1,1,0,0.964,3973,1241,7,1,11784,2280
+outer_tensor,AIE,int32,int32,16,16,2,1,0,0.945,1976,1230,7,1,6792,1878
+outer_tensor,AIE,int32,int32,16,16,2,1,0,0.963,1976,1230,7,1,6792,1878
+outer_tensor,AIE,int32,int32,16,16,2,1,0,0.963,1976,1230,7,1,6792,1878
+outer_tensor,AIE,int32,int32,16,16,2,1,0,0.944,1976,1230,7,1,6792,1878
+outer_tensor,AIE,int32,int32,16,16,2,1,0,0.963,1976,1230,7,1,6792,1878
+outer_tensor,AIE,int32,int32,16,16,2,1,0,0.946,1976,1230,7,1,6792,1878
+outer_tensor,AIE,int32,int32,16,16,2,1,0,0.963,1976,1230,7,1,6792,1878
+outer_tensor,AIE,int32,int32,16,16,2,1,0,0.963,1976,1230,7,1,6792,1878
+outer_tensor,AIE,int32,int32,32,32,1,1,0,0.965,3973,1241,7,1,11912,2264
+outer_tensor,AIE,int32,int32,32,32,4,1,0,0.991,12521,1247,9,1,38024,2286
+outer_tensor,AIE,int32,int32,32,32,4,1,0,0.991,12522,1247,9,1,38024,2270
+outer_tensor,AIE,int32,int32,32,32,4,1,0,0.987,12521,1247,9,1,38024,2286
+outer_tensor,AIE,int32,int32,32,32,4,1,0,0.991,12522,1247,9,1,38024,2270
+outer_tensor,AIE,int32,int32,32,32,4,1,0,0.991,12522,1247,9,1,38024,2286
+outer_tensor,AIE,int32,int32,32,32,4,1,0,0.987,12522,1247,9,1,38024,2286
+outer_tensor,AIE,int32,int32,32,32,4,1,0,0.991,12522,1247,9,1,38024,2286
+outer_tensor,AIE,int32,int32,32,32,4,1,0,0.987,12522,1247,9,1,38024,2286
+outer_tensor,AIE,int32,int32,32,32,4,1,0,0.991,12522,1247,9,1,38024,2286
+outer_tensor,AIE,int32,int32,32,32,4,1,0,0.991,12522,1247,9,1,38024,2286
+outer_tensor,AIE-ML,cfloat,cfloat,32,32,1,1,0,0.543,30872,133,7,1,20877,7584
+outer_tensor,AIE-ML,cfloat,float,32,32,1,1,0,0.545,11696,349,7,1,20621,3712
+outer_tensor,AIE-ML,cint16,cint16,16,16,16,1,0,0.577,12331,1247,8,1,39057,1728
+outer_tensor,AIE-ML,cint16,cint16,16,16,2,1,0,0.48,2388,1230,6,1,6801,1728
+outer_tensor,AIE-ML,cint16,cint16,32,32,1,1,0,0.484,4815,1241,7,1,11921,2224
+outer_tensor,AIE-ML,cint16,cint32,32,32,1,1,0,0.487,9625,622,6,1,20369,1888
+outer_tensor,AIE-ML,cint16,int16,16,16,8,1,0,0.487,6214,1244,7,1,20114,1712
+outer_tensor,AIE-ML,cint16,int16,32,32,1,1,0,0.484,4814,1239,7,1,11794,1936
+outer_tensor,AIE-ML,cint16,int32,16,16,2,1,0,0.484,4800,619,6,1,10899,1664
+outer_tensor,AIE-ML,cint16,int32,32,32,1,1,0,0.487,9619,623,6,1,20115,1952
+outer_tensor,AIE-ML,cint32,cint16,16,16,4,1,0,0.487,6282,622,7,1,20113,1632
+outer_tensor,AIE-ML,cint32,cint16,32,32,1,1,0,0.487,7950,622,6,1,20369,1872
+outer_tensor,AIE-ML,cint32,cint32,128,16,8,1,1,0.502,71132,450,4,1,19601,1888
+outer_tensor,AIE-ML,cint32,cint32,128,16,8,16,1,3.131,4745,6921,72,16,67856,1936 1936 1936 1936 1936 1936 1936 1936 1936 1936 1936 1936 1936 1936 1936 1936
+outer_tensor,AIE-ML,cint32,cint32,16,128,8,1,1,0.504,70165,466,5,1,19601,1664
+outer_tensor,AIE-ML,cint32,cint32,16,16,2,1,0,0.503,3838,619,7,1,11409,1792
+outer_tensor,AIE-ML,cint32,cint32,16,16,8,2,0,0.695,6013,1244,14,2,42274,1776 1776
+outer_tensor,AIE-ML,cint32,cint32,16,16,8,4,0,1.13,3857,2479,26,4,48708,1808 1808 1808 1808
+outer_tensor,AIE-ML,cint32,cint32,16,16,8,1,1,0.5,9125,444,5,1,5265,1888
+outer_tensor,AIE-ML,cint32,cint32,16,16,8,2,1,0.715,4747,865,8,2,8482,1936 1936
+outer_tensor,AIE-ML,cint32,cint32,16,256,8,1,1,0.505,135698,482,7,1,35985,1680
+outer_tensor,AIE-ML,cint32,cint32,16,32,8,1,1,0.497,21011,388,5,1,7313,1664
+outer_tensor,AIE-ML,cint32,cint32,16,64,8,1,1,0.501,37395,437,4,1,11409,1664
+outer_tensor,AIE-ML,cint32,cint32,256,16,8,1,1,0.502,141994,451,6,1,35985,1888
+outer_tensor,AIE-ML,cint32,cint32,32,16,8,1,1,0.501,17982,448,5,1,7313,1888
+outer_tensor,AIE-ML,cint32,cint32,32,16,8,4,1,1.067,4745,1730,18,4,16964,1936 1936 1936 1936
+outer_tensor,AIE-ML,cint32,cint32,32,32,1,1,0,0.507,7594,617,7,1,20625,1984
+outer_tensor,AIE-ML,cint32,cint32,4,4,2,1,0,0.473,441,507,7,1,2193,1424
+outer_tensor,AIE-ML,cint32,cint32,4,4,2,1,1,0.472,838,240,4,1,1425,1520
+outer_tensor,AIE-ML,cint32,cint32,64,16,8,1,1,0.502,35701,449,4,1,11409,1888
+outer_tensor,AIE-ML,cint32,cint32,64,16,8,8,1,1.761,4745,3460,36,8,33928,1936 1936 1936 1936 1936 1936 1936 1936
+outer_tensor,AIE-ML,cint32,cint32,8,4,8,2,0,0.651,944,1213,12,2,8738,1536 1536
+outer_tensor,AIE-ML,cint32,int16,16,16,4,1,0,0.477,6156,622,6,1,19346,1680
+outer_tensor,AIE-ML,cint32,int16,32,32,1,1,0,0.477,7851,622,7,1,19218,1936
+outer_tensor,AIE-ML,cint32,int32,16,16,4,1,0,0.548,5362,622,7,1,20116,1824
+outer_tensor,AIE-ML,cint32,int32,32,32,1,1,0,0.548,7132,622,6,1,20372,2496
+outer_tensor,AIE-ML,float,cfloat,32,32,1,1,0,0.546,14125,356,7,1,20621,3552
+outer_tensor,AIE-ML,float,float,32,32,1,1,0,0.537,7845,654,6,1,12173,3456
+outer_tensor,AIE-ML,int16,cint16,32,32,1,1,0,0.484,6477,1241,6,1,11794,2000
+outer_tensor,AIE-ML,int16,cint32,16,16,4,1,0,0.487,9582,622,7,1,22929,2032
+outer_tensor,AIE-ML,int16,cint32,32,32,1,1,0,0.487,12907,622,8,1,26385,2576
+outer_tensor,AIE-ML,int16,int16,16,16,32,1,0,0.577,12568,2495,8,1,39057,1632
+outer_tensor,AIE-ML,int16,int16,16,16,8,1,0,0.484,3968,2479,7,1,11409,1632
+outer_tensor,AIE-ML,int16,int16,32,32,1,1,0,0.479,3257,2461,6,1,7569,1872
+outer_tensor,AIE-ML,int16,int32,32,32,1,1,0,0.502,6336,1239,6,1,11793,1792
+outer_tensor,AIE-ML,int32,cint16,32,32,1,1,0,0.486,9607,622,6,1,20115,1920
+outer_tensor,AIE-ML,int32,cint32,32,32,1,1,0,0.549,8730,627,6,1,20370,2464
+outer_tensor,AIE-ML,int32,int16,32,32,1,1,0,0.501,4675,1239,7,1,11793,1824
+outer_tensor,AIE-ML,int32,int32,16,16,2,1,0,0.522,2184,1236,6,1,6801,1856
+outer_tensor,AIE-ML,int32,int32,16,16,2,1,0,0.523,2184,1236,6,1,6801,1856
+outer_tensor,AIE-ML,int32,int32,16,16,2,1,0,0.522,2184,1236,6,1,6801,1856
+outer_tensor,AIE-ML,int32,int32,16,16,2,1,0,0.52,2184,1236,6,1,6801,1856
+outer_tensor,AIE-ML,int32,int32,16,16,2,1,0,0.523,2184,1236,6,1,6801,1856
+outer_tensor,AIE-ML,int32,int32,16,16,2,1,0,0.523,2184,1236,6,1,6801,1856
+outer_tensor,AIE-ML,int32,int32,16,16,2,1,0,0.523,2184,1236,6,1,6801,1856
+outer_tensor,AIE-ML,int32,int32,16,16,2,1,0,0.52,2184,1236,6,1,6801,1856
+outer_tensor,AIE-ML,int32,int32,32,32,1,1,0,0.539,4461,1241,7,1,11921,2128
+outer_tensor,AIE-ML,int32,int32,32,32,4,1,0,0.644,11187,1247,9,1,38033,2176
+outer_tensor,AIE-ML,int32,int32,32,32,4,1,0,0.644,11187,1247,9,1,38033,2176
+outer_tensor,AIE-ML,int32,int32,32,32,4,1,0,0.643,11188,1247,9,1,38033,2176
+outer_tensor,AIE-ML,int32,int32,32,32,4,1,0,0.643,11187,1247,9,1,38033,2176
+outer_tensor,AIE-ML,int32,int32,32,32,4,1,0,0.644,11188,1247,9,1,38033,2176
+outer_tensor,AIE-ML,int32,int32,32,32,4,1,0,0.643,11188,1247,9,1,38033,2176
+outer_tensor,AIE-ML,int32,int32,32,32,4,1,0,0.643,11188,1247,9,1,38033,2176
+outer_tensor,AIE-ML,int32,int32,32,32,4,1,0,0.643,11188,1247,9,1,38033,2176
+outer_tensor,AIE-ML,int32,int32,32,32,4,1,0,0.643,11188,1247,9,1,38033,2176

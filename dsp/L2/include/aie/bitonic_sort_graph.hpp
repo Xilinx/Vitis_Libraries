@@ -41,6 +41,10 @@ namespace aie {
 namespace bitonic_sort {
 using namespace adf;
 
+/**
+  * @cond NOCOMMENTS
+  */
+
 template <typename TT_DATA,
           unsigned int TP_DIM,
           unsigned int TP_NUM_FRAMES,
@@ -63,12 +67,23 @@ class bitonic_sort_recur {
     }
 };
 
+/**
+  * @endcond
+  */
+
+/**
+ * @defgroup bitonic_sort Bitonic Sort
+ *
+ * Bitonic Sort
+ *
+ */
+
 //--------------------------------------------------------------------------------------------------
 // bitonic_sort_graph template
 //--------------------------------------------------------------------------------------------------
 /**
  * @ingroup bitonic_sort
- * @brief Bitonic Sort is a parallelizable sorting algorithm with an asymptotic complexity of log2(n)*(log2(n)+1)/2 \n
+ * @brief Bitonic Sort is a parallel sorting algorithm with an asymptotic complexity of log2(n)*(log2(n)+1)/2 \n
  *        (assuming all the operations in each stage occur in one time step).
  *
  * These are the templates to configure the function.
@@ -78,7 +93,7 @@ class bitonic_sort_recur {
  * @tparam TP_DIM describes the number of samples in the list.
  * @tparam TP_NUM_FRAMES describes the number of lists to sort per call to the kernel.
  * @tparam TP_ASCENDING describes whether to sort the list in descending (0) or ascending (1) order.
- * @tparam TP_CASC_LEN describes the number of tiles to cascade computation across to incease throughput. \n
+ * @tparam TP_CASC_LEN describes the number of tiles to cascade computation across to increase throughput. \n
  **/
 template <typename TT_DATA,
           unsigned int TP_DIM,

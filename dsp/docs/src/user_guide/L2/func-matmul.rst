@@ -56,7 +56,7 @@ Tiling
 ------
 
 In order to maximize performance, the GEMM unit requires that the input matrix data is arranged into a specific tiling pattern, where each sub-tile within the matrix is contiguous in memory.
-Tiler and detiler widgets are offered which can be configured to arrange the input matrix data into this tiling pattern, and also convert the tiled output data to a specified row or column major format, but this may introduce a notable performance and rescource overhead.
+Tiler and detiler widgets are offered which can be configured to arrange the input matrix data into this tiling pattern, and also convert the tiled output data to a specified row or column major format, but this may introduce a notable performance and resource overhead.
 For optimal performance of the GEMM unit, it is recommended that the user supplies the input data, and accepts the output data, in the required tiled arrangement.
 
 The following table demonstrates how a 16x16 input matrix should be rearranged into a 4x4 tiling pattern.

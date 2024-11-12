@@ -141,7 +141,7 @@ Increase the number of iterations the simulation runs for to achieve a stable st
 Power Analysis
 --------------
 
-For DSPLIB elements, a common parameter *DUMP_VCD* can be used to harvest dynamic power consumption. Once set, VCD file of the simulation data is captured and PDM (Power Design Manager) calculates power metrics. User can find detailed power reports in `pwr_test` folder under their corresponding test result directory. Dymanic power result can also be found in the `logs/status_<config_details>.txt` file. 
+For DSPLIB elements, a naming convention 'VCD' can be used to harvest dynamic power consumption. Once 'VCD' string is added within the test name, VCD file of the simulation data is captured and PDM (Power Design Manager) calculates power metrics. User can find detailed power reports in `pwr_test` folder under their corresponding test result directory. Dynamic power result can also be found in the `logs/status_<config_details>.txt` file. 
 
 .. _CONFIGURATION_PARAMETERS:
 
@@ -200,11 +200,6 @@ Many library elements perform arithmetic and offer a scaling feature exposed as 
     +------------------------+----------------+----------------+--------------------------------------+
     | NITER                  |    unsigned    |    8           | Number of iterations to execute.     |
     |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DUMP_VCD               |    unsigned    |    0           | Generate VCD,                        |
-    |                        |                |                | and trigger power analysis.          |
-    |                        |                |                | 0 - disable                          |
-    |                        |                |                | 1 - enable                           |
     +------------------------+----------------+----------------+--------------------------------------+
     | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
     |                        |                |                | output sample with reference model,  |
@@ -716,7 +711,7 @@ The following list consists of configurable parameters for FIR library elements 
 .. _CONFIGURATION_PARAMETERS_FUNC_APPROX:
 
 Function Approximation configuration parameters
------------------------------------------
+-----------------------------------------------
 
 For the Function Approximation library element, use the list of configurable parameters and default values is presented below.
 

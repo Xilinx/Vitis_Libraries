@@ -14,29 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <adf.h>
-#include "DDS_LUT_bc97a89b.h"
 
-class DUT : public adf::graph {
-public:
-	DDS_LUT_bc97a89b mygraph;
-	adf::output_plio DUT_out[1];
+#include "test_all.hpp"
 
-	DUT() {
-		DUT_out[0] = adf::output_plio::create("DUT_out[0]", adf::plio_32_bits, "data/o0");
+all_example::test_example uut_all;
 
-		adf::connect<> no0(mygraph.out[0], DUT_out[0].in[0]);
-	}
-};
+int main(void) {
+    uut_all.init();
+    uut_all.run(8);
+    uut_all.end();
 
-DUT g;
-
-#ifdef __AIESIM__
-int main(void)
-{
-	g.init();
-	g.run();
-	g.end();
-	return 0;
+    return 0;
 }
-#endif

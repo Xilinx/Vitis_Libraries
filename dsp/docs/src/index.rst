@@ -36,7 +36,7 @@ The AMD Vitis AIE DSP library consists of designs of various DSP algorithms, opt
 The library is organized into three parts:
 
 - L1 AIE kernels
-- L2 AIE graphs
+- L2 AIE graphs and VSS Makefiles
 - L3 software APIs
 
 Currently, there are no L3 software APIs, and the recommended entry point for all library elements is an L2 AIE graph.
@@ -73,11 +73,12 @@ The Vitis AIE DSP Library provides a SSR FFT implementation targeting AIE, as we
    :caption: API Reference
 
    API Reference Overview <user_guide/L2/api-reference.rst>
-   Bitonic Sort <rst/group_bitonic_sort_graph.rst>
+   Bitonic Sort <rst/group_bitonic_sort.rst>
    Convolution / Correlation <rst/group_conv_corr_graph.rst>
    DDS Mixer <rst/group_dds_graph.rst>
    DFT <rst/group_dft_graph.rst>
    FFT IFFT <rst/group_fft_graphs.rst>
+   2D FFT IFFT <rst/group_fft_ifft_2dgraphs.rst>
    FFT Window <rst/group_fft_window.rst>
    FIRs <rst/group_fir_graphs.rst>
    Function Approximation <rst/group_func_approx.rst>

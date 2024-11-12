@@ -1,4 +1,3 @@
-#
 # Copyright (C) 2019-2022, Xilinx, Inc.
 # Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
@@ -13,7 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# vitis makefile-generator v2.0.9
 #
+#+-------------------------------------------------------------------------------
+# The following parameters are assigned with default values. These parameters can
+# be overridden through the make command line
+#+-------------------------------------------------------------------------------
 
 #Check vitis setup
 ifndef XILINX_VITIS

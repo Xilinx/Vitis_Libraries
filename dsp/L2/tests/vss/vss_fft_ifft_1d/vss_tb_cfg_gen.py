@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# this generates the VSS config file based on paramters
 import argparse
  
 parser = argparse.ArgumentParser(description="Python script that produces cfg file based on the configuration parameters",

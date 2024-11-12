@@ -64,7 +64,7 @@ The scaling of the DFT is controlled by the ``TP_SHIFT`` parameter, which descri
 Batch Processing
 ----------------
 
-The ``TP_NUM_FRAMES`` template parameter can be used to drive the kernel to operate on multiple frames on a given iteration. When ``TP_NUM_FRAMES`` is set to 1, the kernel will operate on a single frame with FRAME_SIZE (``TP_POINT_SIZE`` zero-padded for alignment). However, when the number of frames is greater than one, the input buffer of data will contain ``TP_NUM_FRAMES`` batches of FRAME_SIZE input data for kernel to operate on. Processing larger buffers reduces kernel execution overheads and therefore, can increase the throughput of such design. On the other hand, processing larger amounts of data in a single kernel execution iteration leads to increased latency.
+The ``TP_NUM_FRAMES`` template parameter can be used to drive the kernel to operate on multiple frames on a given iteration. When ``TP_NUM_FRAMES`` is set to 1, the kernel will operate on a single frame with FRAME_SIZE (``TP_POINT_SIZE`` zero-padded for alignment). However, when the number of frames is greater than one, the input buffer of data will contain ``TP_NUM_FRAMES`` batches of FRAME_SIZE input data for kernel to operate on. Processing larger buffers reduces kernel execution overheads and therefore can increase the throughput of such design. On the other hand, processing larger amounts of data in a single kernel execution iteration leads to increased latency.
 
 Cascaded Kernels
 ----------------
@@ -76,17 +76,17 @@ SSR
 
 The DFT supports an SSR, using the ``TP_SSR`` template parameter, which allows for multiple cascaded kernel paths to operate in parallel. Kernels in one SSR rank should receive same input data as all other SSR ranks, however, each rank of SSR will produce an equal split of the DFT output. The outputs for each SSR should be interleaved back together to produce the final output of the DFT.
 
-:ref:`FIGURE_DFT_SSR_CASC` shows the input and output graph port connects for a cascaded SSR DFT..
+:ref:`FIGURE_DFT_SSR_CASC` shows the input and output graph port connects for a cascaded SSR DFT.
 
 .. _FIGURE_DFT_SSR_CASC:
 .. figure:: ./media/dft_ssr_3_2.png
 
-    **DFT Kernel Connections with TP_SSR=2 and TP_CASC_LEN=2**
+    **DFT Kernel Connections with TP_SSR=2 and TP_CASC_LEN=3**
 
 Maximum Point Size
 ------------------
 
-.. note:: The maximum ``TP_POINT_SIZE`` that can be used depends on the data type, the number of kernels in cascade, and the available data memory per kernel. Each frame of data in the iobuffer should be zero-padded for alignment.
+.. note:: The maximum ``TP_POINT_SIZE`` that can be used depends on the data type, the number of kernels in cascade, and the available data memory per kernel. Each frame of data in the IO-buffer should be zero-padded for alignment.
 
 The DFT on AIE supports values of ``TP_POINT_SIZE`` from 4 to 88 (4 to 60 for cfloat ``TP_DATA_TYPE``) for a single kernel.
 
@@ -96,7 +96,7 @@ This can be exceeded by using a number of kernels in cascade via the ``TP_CASC_L
 
 For example, a ``TP_POINT_SIZE`` of 128 can be achieved using a ``TP_CASC_LEN`` of 2, as each kernel will only require a half the size of the input buffer that equivalent single kernel configuration would require, as well as half the memory needed for twiddle table.
 
-The DFT has optimal throughput performance with a low point size and a higher number of frames per iobuffer.
+The DFT has optimal throughput performance with a low point size and a higher number of frames per IO-buffer.
 
 Zero Padding Data for Alignment
 -------------------------------

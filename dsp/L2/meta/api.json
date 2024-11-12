@@ -302,6 +302,66 @@
             "target_domain": "AIE"
         },
         {
+            "api_name": "xf::dsp::aie::bitonic_sort::bitonic_sort_graph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::aie::bitonic_sort::bitonic_sort_graph",
+                "display_name": "bitonic_sort_graph",
+                "brief": "Bitonic Sort is a parallel sorting algorithm with an asymptotic complexity of log2(n)*(log2(n)+1)/2",
+                "target_domain": "AIE",
+                "header_file_name": [
+                    "bitonic_sort_graph.hpp"
+                ],
+                "search_paths": [
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "TT_DATA",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input to the function. This is a typename and must be one of the following:"
+                    },
+                    {
+                        "name": "TP_DIM",
+                        "type": "unsigned int",
+                        "description": "describes the number of samples in the list."
+                    },
+                    {
+                        "name": "TP_NUM_FRAMES",
+                        "type": "unsigned int",
+                        "description": "describes the number of lists to sort per call to the kernel."
+                    },
+                    {
+                        "name": "TP_ASCENDING",
+                        "type": "unsigned int",
+                        "description": "describes whether to sort the list in descending (0) or ascending (1) order."
+                    },
+                    {
+                        "name": "TP_CASC_LEN",
+                        "type": "unsigned int",
+                        "description": "describes the number of tiles to cascade computation across to increase throughput."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "input",
+                        "type": "port_array<input, 1> xf::dsp::aie::bitonic_sort::bitonic_sort_graph< TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN >::in"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "output",
+                        "type": "port_array<output, 1> xf::dsp::aie::bitonic_sort::bitonic_sort_graph< TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN >::out"
+                    }
+                ],
+                "visible": true
+            },
+            "target_domain": "AIE"
+        },
+        {
             "api_name": "xf::dsp::aie::conv_corr::conv_corr_graph",
             "spec": {
                 "schema": "vitis_libraries_api_list_schema-1.0",
@@ -373,23 +433,38 @@
                         "name": "TP_SAT",
                         "type": "unsigned int",
                         "description": "describes the selection of saturation to be applied during the shift down stage of processing."
+                    },
+                    {
+                        "name": "TP_NUM_FRAMES",
+                        "type": "unsigned int",
+                        "description": "describes the number of frames of input data samples that occur within each input window of data."
+                    },
+                    {
+                        "name": "TP_CASC_LEN",
+                        "type": "unsigned int",
+                        "description": "describes the number of AIE processors to split the operation over."
+                    },
+                    {
+                        "name": "TP_PHASES",
+                        "type": "unsigned int",
+                        "description": "specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput."
                     }
                 ],
                 "ports": [
                     {
-                        "name": "inWindowF",
+                        "name": "inF",
                         "direction": "input",
-                        "type": "input_port xf::dsp::aie::conv_corr::conv_corr_graph< TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN, TP_SHIFT, TP_API, TP_RND, TP_SAT >::inWindowF"
+                        "type": "port_array<input, TP_PHASES> xf::dsp::aie::conv_corr::conv_corr_graph< TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN, TP_SHIFT, TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN, TP_PHASES >::inF"
                     },
                     {
-                        "name": "inWindowG",
+                        "name": "inG",
                         "direction": "input",
-                        "type": "input_port xf::dsp::aie::conv_corr::conv_corr_graph< TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN, TP_SHIFT, TP_API, TP_RND, TP_SAT >::inWindowG"
+                        "type": "input_port xf::dsp::aie::conv_corr::conv_corr_graph< TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN, TP_SHIFT, TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN, TP_PHASES >::inG"
                     },
                     {
-                        "name": "outWindow",
+                        "name": "out",
                         "direction": "output",
-                        "type": "output_port xf::dsp::aie::conv_corr::conv_corr_graph< TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN, TP_SHIFT, TP_API, TP_RND, TP_SAT >::outWindow"
+                        "type": "port_array<output, TP_PHASES> xf::dsp::aie::conv_corr::conv_corr_graph< TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN, TP_SHIFT, TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN, TP_PHASES >::out"
                     }
                 ],
                 "visible": true
@@ -632,7 +707,7 @@
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph",
                 "display_name": "fft_ifft_dit_1ch_graph",
-                "brief": "fft_dit_1ch is a single-channel, decimation-in-time, fixed point size FFT.",
+                "brief": "fft_dit_1ch is a single-channel, decimation-in-time FFT.",
                 "target_domain": "AIE",
                 "header_file_name": [
                     "fft_ifft_dit_1ch_graph.hpp"
@@ -647,7 +722,7 @@
                     {
                         "name": "TT_DATA",
                         "type": "typename",
-                        "description": "describes the type of individual data samples input to and output from the transform function."
+                        "description": "describes the type of individual data samples input to the transform function."
                     },
                     {
                         "name": "TT_TWIDDLE",
@@ -715,6 +790,10 @@
                         "description": "describes the magnitude of integer twiddles. It has no effect for cfloat."
                     },
                     {
+                        "name": "TT_OUT_DATA",
+                        "type": "typename"
+                    },
+                    {
                         "name": "TP_INDEX",
                         "type": "unsigned int",
                         "description": "This parameter is for internal use regarding the recursion of the parallel power feature."
@@ -729,12 +808,12 @@
                     {
                         "name": "in",
                         "direction": "input",
-                        "type": "port_array<input, kPortsPerTile * kParallel_factor> xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_API, TP_PARALLEL_POWER, TP_USE_WIDGETS, TP_RND, TP_SAT, TP_TWIDDLE_MODE, TP_INDEX, TP_ORIG_PAR_POWER >::in"
+                        "type": "port_array<input, kPortsPerTile * kParallel_factor> xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_API, TP_PARALLEL_POWER, TP_USE_WIDGETS, TP_RND, TP_SAT, TP_TWIDDLE_MODE, TT_OUT_DATA, TP_INDEX, TP_ORIG_PAR_POWER >::in"
                     },
                     {
                         "name": "out",
                         "direction": "output",
-                        "type": "port_array<output, kOutputPorts> xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_API, TP_PARALLEL_POWER, TP_USE_WIDGETS, TP_RND, TP_SAT, TP_TWIDDLE_MODE, TP_INDEX, TP_ORIG_PAR_POWER >::out"
+                        "type": "port_array<output, kOutputPorts> xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_API, TP_PARALLEL_POWER, TP_USE_WIDGETS, TP_RND, TP_SAT, TP_TWIDDLE_MODE, TT_OUT_DATA, TP_INDEX, TP_ORIG_PAR_POWER >::out"
                     }
                 ],
                 "visible": true
@@ -742,15 +821,120 @@
             "target_domain": "AIE"
         },
         {
-            "api_name": "xf::dsp::aie::fft::ifft_2d_aie_pl::fft_ifft_dit_2d_graph",
+            "api_name": "xf::dsp::aie::fft::two_d::fft_ifft_2d_graph",
             "spec": {
                 "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::dsp::aie::fft::ifft_2d_aie_pl::fft_ifft_dit_2d_graph",
-                "display_name": "fft_ifft_dit_2d_graph",
-                "brief": "fft_dit_1ch is a single-channel, decimation-in-time, fixed point size FFT.",
+                "api_name": "xf::dsp::aie::fft::two_d::fft_ifft_2d_graph",
+                "display_name": "fft_ifft_2d_graph",
+                "brief": "",
                 "target_domain": "AIE",
                 "header_file_name": [
-                    "fft_ifft_dit_2d_graph.hpp"
+                    "fft_ifft_2d_graph.hpp"
+                ],
+                "search_paths": [
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "TT_DATA_D1",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input to and output from the first transform function."
+                    },
+                    {
+                        "name": "TT_DATA_D2",
+                        "type": "typename",
+                        "description": "describes the type of individual data samples input to and output from the second transform function."
+                    },
+                    {
+                        "name": "TT_TWIDDLE",
+                        "type": "typename",
+                        "description": "describes the type of twiddle factors of the transform."
+                    },
+                    {
+                        "name": "TP_POINT_SIZE_D1",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of samples in the first transform."
+                    },
+                    {
+                        "name": "TP_POINT_SIZE_D2",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of samples in the second transform."
+                    },
+                    {
+                        "name": "TP_FFT_NIFFT",
+                        "type": "unsigned int",
+                        "description": "selects whether the transform to perform is an FFT (1) or IFFT (0)."
+                    },
+                    {
+                        "name": "TP_SHIFT",
+                        "type": "unsigned int",
+                        "description": "selects the power of 2 to scale the result by prior to output."
+                    },
+                    {
+                        "name": "TP_CASC_LEN",
+                        "type": "unsigned int",
+                        "description": "selects the number of kernels the FFT will be divided over in series to improve throughput"
+                    },
+                    {
+                        "name": "TP_WINDOW_VSIZE_D1",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of samples to be processed in each call to the"
+                    },
+                    {
+                        "name": "TP_WINDOW_VSIZE_D2",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of samples to be processed in each call to the"
+                    },
+                    {
+                        "name": "TP_API",
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer to select window (0) or stream (1) interfaces. When stream I/O is selected, one sample is taken from, or output to, a stream and the next sample from or two the next stream. Two streams minimum are used. In this example, even samples are read from input stream[0] and odd samples from input stream[1]."
+                    },
+                    {
+                        "name": "TP_RND",
+                        "type": "unsigned int",
+                        "description": "describes the selection of rounding to be applied during the shift down stage of processing."
+                    },
+                    {
+                        "name": "TP_SAT",
+                        "type": "unsigned int",
+                        "description": "describes the selection of saturation to be applied during the shift down stage of processing."
+                    },
+                    {
+                        "name": "TP_TWIDDLE_MODE",
+                        "type": "unsigned int",
+                        "description": "describes the magnitude of integer twiddles. It has no effect for cfloat."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "input",
+                        "type": "port_array<input, 1> xf::dsp::aie::fft::two_d::fft_ifft_2d_graph< TT_DATA_D1, TT_DATA_D2, TT_TWIDDLE, TP_POINT_SIZE_D1, TP_POINT_SIZE_D2, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_WINDOW_VSIZE_D1, TP_WINDOW_VSIZE_D2, TP_API, TP_RND, TP_SAT, TP_TWIDDLE_MODE >::in"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "output",
+                        "type": "port_array<output, 1> xf::dsp::aie::fft::two_d::fft_ifft_2d_graph< TT_DATA_D1, TT_DATA_D2, TT_TWIDDLE, TP_POINT_SIZE_D1, TP_POINT_SIZE_D2, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_WINDOW_VSIZE_D1, TP_WINDOW_VSIZE_D2, TP_API, TP_RND, TP_SAT, TP_TWIDDLE_MODE >::out"
+                    }
+                ],
+                "visible": true
+            },
+            "target_domain": "AIE"
+        },
+        {
+            "api_name": "xf::dsp::aie::fft::vss_1d::vss_fft_ifft_1d_graph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::aie::fft::vss_1d::vss_fft_ifft_1d_graph",
+                "display_name": "vss_fft_ifft_1d_graph",
+                "brief": "vss_fft_ifft_1d is a single-channel, decomposed FFT that contains the AIE sub-part of the VSS FFT offering.",
+                "target_domain": "AIE",
+                "header_file_name": [
+                    "vss_fft_ifft_1d_graph.hpp"
                 ],
                 "search_paths": [
                      "L1/include/aie",
@@ -785,21 +969,6 @@
                         "description": "selects the power of 2 to scale the result by prior to output."
                     },
                     {
-                        "name": "TP_CASC_LEN",
-                        "type": "unsigned int",
-                        "description": "selects the number of kernels the FFT will be divided over in series to improve throughput"
-                    },
-                    {
-                        "name": "TP_DYN_PT_SIZE",
-                        "type": "unsigned int",
-                        "description": "selects whether (1) or not (0) to use run-time point size determination."
-                    },
-                    {
-                        "name": "TP_WINDOW_VSIZE",
-                        "type": "unsigned int",
-                        "description": "is an unsigned integer which describes the number of samples to be processed in each call"
-                    },
-                    {
                         "name": "TP_API",
                         "type": "unsigned int",
                         "description": "is an unsigned integer to select window (0) or stream (1) interfaces. When stream I/O is selected, one sample is taken from, or output to, a stream and the next sample from or two the next stream. Two streams minimum are used. In this example, even samples are read from input stream[0] and odd samples from input stream[1]."
@@ -807,12 +976,7 @@
                     {
                         "name": "TP_SSR",
                         "type": "unsigned int",
-                        "description": "is an unsigned integer to describe N where 2^N is the numbers of subframe processors to use, so as to achieve higher throughput."
-                    },
-                    {
-                        "name": "TP_USE_WIDGETS",
-                        "type": "unsigned int",
-                        "description": "is an unsigned integer to control the use of widgets for configurations which either use TP_API=1 (streaming IO) or TP_SSR>0 which uses streams internally, even if not externally. The default is not to use widgets but to have the stream to window conversion performed as part of the FFT kernel or R2combiner kernel. Using widget kernels allows this conversion to be placed in a separate tile and so boost performance at the expense of more tiles being used."
+                        "description": "is an unsigned integer to describe the number of parallel computational paths into which the implementation will be split to improve the performance. Higher SSR relates to higher performance."
                     },
                     {
                         "name": "TP_RND",
@@ -834,22 +998,22 @@
                     {
                         "name": "front_i",
                         "direction": "input",
-                        "type": "port_array<input, TP_SSR> xf::dsp::aie::fft::ifft_2d_aie_pl::fft_ifft_dit_2d_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_API, TP_SSR, TP_USE_WIDGETS, TP_RND, TP_SAT, TP_TWIDDLE_MODE >::front_i"
+                        "type": "port_array<input, TP_SSR> xf::dsp::aie::fft::vss_1d::vss_fft_ifft_1d_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_API, TP_SSR, TP_RND, TP_SAT, TP_TWIDDLE_MODE >::front_i"
                     },
                     {
                         "name": "back_i",
                         "direction": "input",
-                        "type": "port_array<input, TP_SSR> xf::dsp::aie::fft::ifft_2d_aie_pl::fft_ifft_dit_2d_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_API, TP_SSR, TP_USE_WIDGETS, TP_RND, TP_SAT, TP_TWIDDLE_MODE >::back_i"
+                        "type": "port_array<input, TP_SSR> xf::dsp::aie::fft::vss_1d::vss_fft_ifft_1d_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_API, TP_SSR, TP_RND, TP_SAT, TP_TWIDDLE_MODE >::back_i"
                     },
                     {
                         "name": "front_o",
                         "direction": "output",
-                        "type": "port_array<output, TP_SSR> xf::dsp::aie::fft::ifft_2d_aie_pl::fft_ifft_dit_2d_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_API, TP_SSR, TP_USE_WIDGETS, TP_RND, TP_SAT, TP_TWIDDLE_MODE >::front_o"
+                        "type": "port_array<output, TP_SSR> xf::dsp::aie::fft::vss_1d::vss_fft_ifft_1d_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_API, TP_SSR, TP_RND, TP_SAT, TP_TWIDDLE_MODE >::front_o"
                     },
                     {
                         "name": "back_o",
                         "direction": "output",
-                        "type": "port_array<output, TP_SSR> xf::dsp::aie::fft::ifft_2d_aie_pl::fft_ifft_dit_2d_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_API, TP_SSR, TP_USE_WIDGETS, TP_RND, TP_SAT, TP_TWIDDLE_MODE >::back_o"
+                        "type": "port_array<output, TP_SSR> xf::dsp::aie::fft::vss_1d::vss_fft_ifft_1d_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_API, TP_SSR, TP_RND, TP_SAT, TP_TWIDDLE_MODE >::back_o"
                     }
                 ],
                 "visible": true
@@ -2047,7 +2211,7 @@
                     {
                         "name": "TT_DATA",
                         "type": "typename",
-                        "description": "describes the type of individual data samples input to and output from the filter function."
+                        "description": "describes the type of individual data samples input to the filter function."
                     },
                     {
                         "name": "TT_COEFF",
@@ -2098,18 +2262,103 @@
                         "name": "TP_SAT",
                         "type": "unsigned int",
                         "description": "describes the selection of saturation to be applied during the shift down stage of processing."
+                    },
+                    {
+                        "name": "TP_CASC_LEN",
+                        "type": "unsigned int",
+                        "description": "describes the number of AIE processors to split the operation over."
+                    },
+                    {
+                        "name": "TT_OUT_DATA",
+                        "type": "typename",
+                        "description": "describes the type of output data samples from the filter function."
                     }
                 ],
                 "ports": [
                     {
                         "name": "in",
                         "direction": "input",
-                        "type": "port_array<input, TP_SSR> xf::dsp::aie::fir::tdm::fir_tdm_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_TDM_CHANNELS, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_SSR, TP_SAT >::in"
+                        "type": "port_array<input, TP_SSR> xf::dsp::aie::fir::tdm::fir_tdm_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_TDM_CHANNELS, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_SSR, TP_SAT, TP_CASC_LEN, TT_OUT_DATA >::in"
                     },
                     {
                         "name": "out",
                         "direction": "output",
-                        "type": "port_array<output, TP_SSR> xf::dsp::aie::fir::tdm::fir_tdm_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_TDM_CHANNELS, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_SSR, TP_SAT >::out"
+                        "type": "port_array<output, TP_SSR> xf::dsp::aie::fir::tdm::fir_tdm_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_TDM_CHANNELS, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_SSR, TP_SAT, TP_CASC_LEN, TT_OUT_DATA >::out"
+                    }
+                ],
+                "visible": true
+            },
+            "target_domain": "AIE"
+        },
+        {
+            "api_name": "xf::dsp::aie::func_approx::func_approx_graph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::dsp::aie::func_approx::func_approx_graph",
+                "display_name": "func_approx_graph",
+                "brief": "is a utility that provides an approximation of f(x) for a given input data, x.",
+                "target_domain": "AIE",
+                "header_file_name": [
+                    "func_approx_graph.hpp"
+                ],
+                "search_paths": [
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "TT_DATA",
+                        "type": "typename",
+                        "description": "Describes the type of individual data samples input to the function."
+                    },
+                    {
+                        "name": "TP_COARSE_BITS",
+                        "type": "unsigned int",
+                        "description": "Describes the number of bits in a sample of input data that will be used to address the provided lookup table. It determines the total number of locations in the lookup table."
+                    },
+                    {
+                        "name": "TP_FINE_BITS",
+                        "type": "unsigned int",
+                        "description": "Describes the number of bits in an input data sample used for fine interpolation."
+                    },
+                    {
+                        "name": "TP_DOMAIN_MODE",
+                        "type": "unsigned int",
+                        "description": "Specifies a mode for the input domain of the chosen function for approximation."
+                    },
+                    {
+                        "name": "TP_WINDOW_VSIZE",
+                        "type": "unsigned int",
+                        "description": "Describes the number of samples to be processed in each call to this function."
+                    },
+                    {
+                        "name": "TP_SHIFT",
+                        "type": "unsigned int",
+                        "description": "Describes the number of bits to downshift the final output approximation."
+                    },
+                    {
+                        "name": "TP_RND",
+                        "type": "unsigned int",
+                        "description": "Describes the selection of rounding to be applied during the shift down stage of processing."
+                    },
+                    {
+                        "name": "TP_SAT",
+                        "type": "unsigned int",
+                        "description": "Describes the selection of saturation to be applied during the shift down stage of processing."
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "input",
+                        "type": "port_array<input, 1> xf::dsp::aie::func_approx::func_approx_graph< TT_DATA, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE, TP_SHIFT, TP_RND, TP_SAT >::in"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "output",
+                        "type": "port_array<output, 1> xf::dsp::aie::func_approx::func_approx_graph< TT_DATA, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE, TP_SHIFT, TP_RND, TP_SAT >::out"
                     }
                 ],
                 "visible": true
@@ -2122,7 +2371,7 @@
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "xf::dsp::aie::hadamard::hadamard_graph",
                 "display_name": "hadamard_graph",
-                "brief": "hadamard is",
+                "brief": "Hadamard product is element-wise multiplication of two vectors of same size.",
                 "target_domain": "AIE",
                 "header_file_name": [
                     "hadamard_graph.hpp"
@@ -2157,7 +2406,7 @@
                     {
                         "name": "TP_SHIFT",
                         "type": "unsigned int",
-                        "description": "describes power of 2 shift down applied to the accumulation of product terms before each output. TP_SHIFT must be in the range 0 to 61."
+                        "description": "describes power of 2 shift down applied to the accumulation of product terms before each output."
                     },
                     {
                         "name": "TP_API",
@@ -2222,12 +2471,12 @@
                     {
                         "name": "TT_DATA_A",
                         "type": "typename",
-                        "description": "describes the data type of input A."
+                        "description": "describes the data type of input A to the function."
                     },
                     {
                         "name": "TT_DATA_B",
                         "type": "typename",
-                        "description": "describes the data type of input B."
+                        "description": "describes the data type of input B to the function."
                     },
                     {
                         "name": "TP_DIM_A_ROWS",
@@ -2252,7 +2501,7 @@
                     {
                         "name": "TP_NUM_FRAMES",
                         "type": "unsigned int",
-                        "description": "describes number of frames in a window."
+                        "description": "describes number of input data frames to be processed per call to the function."
                     },
                     {
                         "name": "TP_API",
@@ -2262,7 +2511,7 @@
                     {
                         "name": "TP_SHIFT",
                         "type": "unsigned int",
-                        "description": "described the number of bits to downshift"
+                        "description": "described the number of bits to downshift each sample prior to output."
                     },
                     {
                         "name": "TP_SSR",
@@ -2347,7 +2596,7 @@
                     {
                         "name": "TP_SHIFT",
                         "type": "unsigned int",
-                        "description": "describes power of 2 shift down applied to the accumulation of product terms before each output. TP_SHIFT must be in the range 0 to 61."
+                        "description": "describes power of 2 shift down applied to the accumulation of product terms before each output."
                     },
                     {
                         "name": "TP_RND",
@@ -2502,7 +2751,7 @@
                     {
                         "name": "TP_DIM_A_LEADING",
                         "type": "unsigned int",
-                        "description": "describes the leading dimension of the Matrix A data. If TP_DIM_A_LEADING=1, the columns of the matrix are contiguous in memory. This is the only supported order of Matrix A input data when doing the computation"
+                        "description": "describes the leading dimension of the Matrix A data. If TP_DIM_A_LEADING=1, the columns of the matrix are contiguous in memory. This is the only supported order of Matrix A input data when doing the computation."
                     }
                 ],
                 "ports": [
@@ -2532,7 +2781,7 @@
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "xf::dsp::aie::fft::mixed_radix_fft::mixed_radix_fft_graph",
                 "display_name": "mixed_radix_fft_graph",
-                "brief": "is a single-channel, decimation-in-time, fixed point size FFT including radix3 or radix5 stages.",
+                "brief": "is a single-channel, decimation-in-time, FFT including radix3 or radix5 stages.",
                 "target_domain": "AIE",
                 "header_file_name": [
                     "mixed_radix_fft_graph.hpp"
@@ -2557,7 +2806,7 @@
                     {
                         "name": "TP_POINT_SIZE",
                         "type": "unsigned int",
-                        "description": "is an unsigned integer which describes the number of samples in the transform."
+                        "description": "is an unsigned integer which describes the number of samples in the transform. This values must factorize to powers of 2, 3 and 5. When TP_DYN_PT_SIZE is set, TP_POINT_SIZE describes the maximum point size possible."
                     },
                     {
                         "name": "TP_FFT_NIFFT",
@@ -2593,18 +2842,23 @@
                         "name": "TP_API",
                         "type": "unsigned int",
                         "description": "is an unsigned integer to select window (0) or stream (1) interfaces. When stream I/O is selected, one sample is taken from, or output to, a stream and the next sample from or two the next stream. Two streams minimum are used. In this example, even samples are read from input stream[0] and odd samples from input stream[1]."
+                    },
+                    {
+                        "name": "TP_DYN_PT_SIZE",
+                        "type": "unsigned int",
+                        "description": "is an unsigned int to select static point size (0) or dynamic (1) point size. With TP_DYN_PT_SIZE set to 1, there are two input ports. For the first, the user must provide a header input that"
                     }
                 ],
                 "ports": [
                     {
                         "name": "in",
                         "direction": "input",
-                        "type": "port_array<input, m_kNumPorts> xf::dsp::aie::fft::mixed_radix_fft::mixed_radix_fft_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_RND, TP_SAT, TP_WINDOW_VSIZE, TP_CASC_LEN, TP_API >::in"
+                        "type": "port_array<input, m_kNumPorts> xf::dsp::aie::fft::mixed_radix_fft::mixed_radix_fft_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_RND, TP_SAT, TP_WINDOW_VSIZE, TP_CASC_LEN, TP_API, TP_DYN_PT_SIZE >::in"
                     },
                     {
                         "name": "out",
                         "direction": "output",
-                        "type": "port_array<output, m_kNumPorts> xf::dsp::aie::fft::mixed_radix_fft::mixed_radix_fft_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_RND, TP_SAT, TP_WINDOW_VSIZE, TP_CASC_LEN, TP_API >::out"
+                        "type": "port_array<output, m_kNumPorts> xf::dsp::aie::fft::mixed_radix_fft::mixed_radix_fft_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_RND, TP_SAT, TP_WINDOW_VSIZE, TP_CASC_LEN, TP_API, TP_DYN_PT_SIZE >::out"
                     }
                 ],
                 "visible": true

@@ -18,11 +18,39 @@ Release Notes
 
 The following features have been added to the library in this release.
 
-*  **FFT** - New features and optimizations.
+*  **AIE-MLv2** - New device support (EA) is being added to DSPLIB.
 
-In this release a new parameter has been added to the FFT: `TT_OUT_DATA`. This parameter allows the output data type 
-to differ from the input data type. e.g. to allow TT_DATA (input) to be cint16 with TT_OUT_DATA to be cint32.
-Also, various optimizations have been implemented to reduce the memory resource used by some configurations of the FFT.
+Early Access (EA) support for AIE-MLv2 device is being added to the following library elements:
+
+      - Bitonic Sort
+
+      - DDS Mixer LUT
+
+      - DFT
+
+      - FFT
+
+      - FFT Window
+
+      - Filters
+
+      - TDM FIR
+
+      - Hadamard
+
+      - Kronecker
+
+      - Outer Tensor
+
+      - Matrix Mult
+
+      - Matrix Vector
+
+      - Sample Delay
+
+*  **Config Helper** - Console Interface script for configuring DSPLIB IPs.
+
+Config Helper works in conjunction with the DSPLIB metadata for helping users to build legal configurations and generate resulting graphs for DSPLIB AIE-IPs.
 
 *  **Bitonic Sort** - New library element.
 
@@ -34,11 +62,55 @@ Also, various optimizations have been implemented to reduce the memory resource 
 
 This element adds an implementation of the bitonic sorting algorithm.
 
+Supports AIE, AIE-ML and AIE-MLv2 (EA) devices.
+
+*  **FFT** - New features and optimizations.
+
+In this release a new parameter has been added to the FFT: `TT_OUT_DATA`. This parameter allows the output data type
+to differ from the input data type. e.g. to allow `TT_DATA` (input) to be cint16 with `TT_OUT_DATA` to be cint32.
+Also, various optimizations have been implemented to reduce the memory resource used by some configurations of the FFT.
+
+*  **FFT 2D** - New library element.
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and class name**                                                |
++=======================================+=============================================================================+
+| fft_ifft_2d_graph                     |  xf::dsp::aie::fft::two_d::fft_ifft_2d_graph                                |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This configurable design library element implements a 2D FFT/IFFT function, decomposing FFT algorithm into AIE Tiles and MEM Tiles.
+
+Supports AIE-ML devices.
+
+*  **FIR TDM** - New features and optimizations.
+
+In this release various optimizations have been implemented to optimize throughput and/or reduce memory footprint. In addition, new parameters have been added to the FIR TDM: `TT_OUT_DATA` and `TP_CASC_LEN`. These parameters allow:
+
+      - the output data type to differ from the input data type. e.g. to allow `TT_DATA` (input) to be `cint16` with `TT_OUT_DATA` to be `cint32`.
+
+      - FIR workload can be split into multiple kernels connected through the cascade interface, offering increased throughput at the cost of additional resources.
+
+*  **Function Approximation** - New library element.
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and class name**                                                |
++=======================================+=============================================================================+
+| Function Approximation                |  xf::dsp::aie::func_approx                                                  |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This element provides a vectorized linear approximation of a function, f(x), for a given input data, x, using a configured lookup table of slope and offset values that describe the function.
+
+* **Mixed Radix FFT** - New Features
+
+In this release the dynamic point size has been added to the IP, selected by setting the new parameter `TP_DYN_PT_SIZE` to 1.
+This IP now supports cint32 and cfloat for `TT_DATA` and cint32 for `TT_TWIDDLE`.
+
+*  **VSS FFT/IFFT 1CH (AIE + PL)** - New library element.
+
+In this release a VSS (Vitis Sub-System) FFT/IFFT has been added to the DSPLIB.
+This configurable design element implements a single-channel DIT FFT/IFFT, decomposing FFT algorithm into AIE Tiles and PL (programmable logic).
+
 Supports AIE and AIE-ML devices.
-
-*  **Config Helper** - Console Interface script for configuring DSPLIB IPs.
-
-Config Helper works in conjuction with the DSPLIB metadata for helping users to build legal configurations and generate resulting graphs for DSPLIB AIE-IPs.
 
 2024.1
 ======
@@ -114,7 +186,7 @@ Supports AIE and AIE-ML devices.
 
 *  **Matrix-Vector Multiplication**
 
-Added support for AIE-ML devices. 
+Added support for AIE-ML devices.
 
 Added Super Sample Rate (SSR) feature. Allows the matrix-vector multiplication to be computed using parallel paths for increased throughput.
 
@@ -128,7 +200,7 @@ Added Super Sample Rate (SSR) feature. Allows the Discrete Fourier Transform (DF
 
 *  **FFT IFFT**
 
-This element now supports cint32 type twiddles for integer data types. This element also now supports a new parameter 
+This element now supports cint32 type twiddles for integer data types. This element also now supports a new parameter
 TP_TWIDDLE_MODE.
 
 * **Mixed-Radix FFT**

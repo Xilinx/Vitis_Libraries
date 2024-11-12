@@ -37,34 +37,9 @@ namespace fft {
 namespace two_d {
 
 /**
- * @defgroup fft_graphs FFT Graph
- *
- * The FFT graph is offered as a template class that is available with 2 template specializations,
- * that offer varied features and interfaces:
- * - window interface (TP_API == 0) or
- * - stream interface (TP_API == 1).
+ * @defgroup fft_ifft_2dgraphs 2D FFT Graph
  *
  */
-
-/**
- *
- * @brief Defines Window/IO Buffer API
- *
- * @ingroup fft_graphs
- */
-static constexpr unsigned int kWindowAPI = 0;
-
-/**
- *
- * @brief Defines Stream Buffer API
- *
- * @ingroup fft_graphs
- */
-static constexpr unsigned int kStreamAPI = 1;
-
-/**
-  * @endcond
-  */
 
 //--------------------------------------------------------------------------------------------------
 // fft_2d template
@@ -158,30 +133,41 @@ template <typename TT_DATA_D1,
           unsigned int TP_SAT = 1,
           unsigned int TP_TWIDDLE_MODE = 0>
 class fft_ifft_2d_graph : public graph {
-   public:
-    /**
-     * The input data to the function. This input is a window API of
-     * samples of TT_DATA type. The number of samples in the window is
-     * described by TP_POINT_SIZE.
-     **/
-    port_array<input, 1> in;
-
-    /**
-     * A window API of TP_POINT_SIZE samples of TT_DATA type.
-     **/
-    port_array<output, 1> out;
-
-    // fft window kernel
-    kernel m_fftTwRotKernels[1];
-
-    /**
-     * Monolithic FFT block.
-     **/
+   private:
     static constexpr unsigned int kIntParPow = 0;
     static constexpr unsigned int kIntDynPtSize = 0;
     static constexpr unsigned int kIntUseWidgets = 0;
     static constexpr unsigned int kIsRealDataD1 =
         (std::is_same<TT_DATA_D1, int16>::value || std::is_same<TT_DATA_D1, bfloat16>::value) ? 1 : 0;
+    static constexpr unsigned int kPtSizeRealSymOut = TP_POINT_SIZE_D1 / 2;
+    static constexpr unsigned int kD1SizeMemTile = kIsRealDataD1 ? kPtSizeRealSymOut : TP_POINT_SIZE_D1;
+
+   public:
+    /**
+     * The input data to the function. This input is a window API of
+     * samples of TT_DATA_D1 type. If the TT_DATA_D1 is a real type then the samples from two channels
+     * are expected to be interleaved before giving as input to the 2d fft graph.
+     * The number of samples in the window is described by TP_WINDOW_VSIZE_D1.
+     * A total of TP_POINT_SIZE_D1 * TP_POINT_SIZE_D2 samples are needed for one complete 2D FFT operation.
+     **/
+    port_array<input, 1> in;
+
+    /**
+     * The output data from the function. This output is a window API of
+     * samples of TT_DATA_D2 type. The number of samples in the window is
+     * described by TP_WINDOW_VSIZE_D2. A total of TP_POINT_SIZE_D1 * TP_POINT_SIZE_D2 samples are produced when
+     *TT_DATA_D1 is complex.
+     * When TT_DATA_D1 is of real type, a total of (TP_POINT_SIZE_D1 * TP_POINT_SIZE_D2)/2 samples are produced at the
+     *output.
+     * This is because only half the output samples of the first FFT are given as input to the second FFT. Since the
+     *output samples of a
+     * real-only FFT are symmetric, this optimisation reduces the memory footprint of the design.
+     **/
+    port_array<output, 1> out;
+
+    /**
+     * Front FFT graph that computes the first set of FFTs.
+     **/
     typedef typename std::conditional_t<kIsRealDataD1,
                                         fft_dit_2ch_real_graph<TT_DATA_D2,
                                                                TT_TWIDDLE,
@@ -211,8 +197,11 @@ class fft_ifft_2d_graph : public graph {
         frontGraphType;
 
     frontGraphType frontFFTGraph[1];
-    static constexpr unsigned int kPtSizeRealSymOut = TP_POINT_SIZE_D1 / 2;
-    static constexpr unsigned int kD1SizeMemTile = kIsRealDataD1 ? kPtSizeRealSymOut : TP_POINT_SIZE_D1;
+
+    /**
+     * Back FFT graph that computes the second set of FFTs.
+     **/
+
     fft_ifft_dit_1ch_graph<TT_DATA_D2,
                            TT_TWIDDLE,
                            TP_POINT_SIZE_D2,
@@ -228,7 +217,12 @@ class fft_ifft_2d_graph : public graph {
                            TP_SAT,
                            TP_TWIDDLE_MODE>
         backFFTGraph[1];
-
+    /**
+    * @endcond
+    */
+    /**
+     * Memtile object that performs the transpose between the first set of FFTs and the second set of FFTs.
+     **/
     adf::shared_buffer<TT_DATA_D2> memTile1;
 
     /**

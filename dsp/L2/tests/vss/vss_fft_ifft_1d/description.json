@@ -147,22 +147,8 @@
     ],
     "launch": [
         {
-            "name": "swemu-launch",
-            "target": "sw_emu"
-        },
-        {
             "name": "hwemu-launch",
             "target": "hw_emu"
-        },
-        {
-            "name": "aiesim-launch",
-            "target": "aiesim",
-            "sim_options": "--graph-latency"
-        },
-        {
-            "name": "x86sim-launch",
-            "target": "x86sim",
-            "sim_options": ""
         }
     ],
     "aiecompiler": {

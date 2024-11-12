@@ -203,6 +203,7 @@ This is the recommended mode to start with. It performs no scaling, but the outp
 Block Multiplier Inputs), you might consider using one of the other two available scaling schemes. For DSP48 blocks with 18x27 multipliers, the condition will be logR(N) * log2(R) + Input Bit Width > 27.
 
 .. _SCALING_MODE_SSR_FFT_GROW_TO_MAX_WIDTH:
+
 SSR_FFT_GROW_TO_MAX_WIDTH
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -210,6 +211,7 @@ In this mode, a hybrid approach is used. Initially, the bit growth is allowed if
 to the DSP blocks, it allows the bit growth. When the bit width grows beyond what can be mapped to the DSP blocks, it will start scaling the output.
 
 .. _SCALING_MODE_SSR_FFT_SCALE:
+
 SSR_FFT_SCALE
 ^^^^^^^^^^^^^
 

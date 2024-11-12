@@ -154,14 +154,16 @@ template <typename TT_DATA,
           unsigned int TP_TWIDDLE_MODE = 0>
 class vss_fft_ifft_1d_graph : public graph {
    public:
-    port_array<input, TP_SSR> front_i;
-    port_array<input, TP_SSR> back_i;
-
-    port_array<output, TP_SSR> front_o;
-    port_array<output, TP_SSR> back_o;
-
-    // fft front twiddle rotation kernels
+    // FFT twiddle rotation kernels that follow the first set of FFT operations.
     kernel m_fftTwRotKernels[TP_SSR];
+    // This is a port that interfaces with a PL kernel internal to the VSS.
+    port_array<input, TP_SSR> front_i;
+    // This is a port that interfaces with a PL kernel internal to the VSS.
+    port_array<input, TP_SSR> back_i;
+    // This is a port that interfaces with a PL kernel internal to the VSS.
+    port_array<output, TP_SSR> back_o;
+    // This is a port that interfaces with a PL kernel internal to the VSS.
+    port_array<output, TP_SSR> front_o;
 
    private:
     static constexpr unsigned int kIntDynPtSize = 0;
@@ -217,6 +219,7 @@ class vss_fft_ifft_1d_graph : public graph {
     }
 
    public:
+    // FFT graph that performs the initial set of FFT calculations
     fft_ifft_dit_1ch_graph<TT_DATA,
                            TT_TWIDDLE,
                            kPtSizeD1,
@@ -233,6 +236,7 @@ class vss_fft_ifft_1d_graph : public graph {
                            TP_TWIDDLE_MODE>
         frontFFTGraph[TP_SSR];
 
+    // FFT graph that performs the final set of FFT calculations
     fft_ifft_dit_1ch_graph<TT_DATA,
                            TT_TWIDDLE,
                            kPtSizeD2,

@@ -9,13 +9,13 @@
 Matrix-Vector Multiply
 ======================
 
-The DSPLib contains a Matrix-Vector Multiply/GEMV (General Matrix Vector Multiplication) solution. The GEMV has two input ports, one for each input operand. Only iobuffer connections are supported.
+The DSPLib contains a Matrix-Vector Multiply/GEMV (General Matrix Vector Multiplication) solution. The GEMV has two input ports, one for each input operand. Only IO-buffer connections are supported.
 
-The input iobuffer for the matrix is defined as Matrix A (inA) and is described by the ``TP_DIM_A`` and ``TP_DIM_B`` template parameters which specify the number of rows and columns in the matrix, respectively.
+The input IO-buffer for the matrix is defined as Matrix A (inA) and is described by the ``TP_DIM_A`` and ``TP_DIM_B`` template parameters which specify the number of rows and columns in the matrix, respectively.
 
-The second iobuffer of data is defined as Vector B (inB) and will be a vector with a size of ``TP_DIM_B`` elements. The number of columns and the number of elements in the vector must be equal and are therefore defined by the same template parameter.
+The second IO-buffer of data is defined as Vector B (inB) and will be a vector with a size of ``TP_DIM_B`` elements. The number of columns and the number of elements in the vector must be equal and are therefore defined by the same template parameter.
 
-The output iobuffer containing the result of the matrix-vector multiplication is connected to the output port. The output data will be a vector of size ``TP_DIM_A``.
+The output IO-buffer containing the result of the matrix-vector multiplication is connected to the output port. The output data will be a vector of size ``TP_DIM_A``.
 
 Entry Point
 ===========
@@ -63,11 +63,11 @@ The maximum memory accessible by a kernel is 32 kB for AIE and 64kB for AIE-ML. 
 
 A matrix_vector_mul design needs to allocate memory for the following:
 
-* iobuffer Size A: Input matrix A of size ``(TP_DIM_A / TP_SSR) x (TP_DIM_B / TP_CASC_LEN) x sizeof(TT_DATA_A)``.
+* IO-buffer Size A: Input matrix A of size ``(TP_DIM_A / TP_SSR) x (TP_DIM_B / TP_CASC_LEN) x sizeof(TT_DATA_A)``.
 
-* iobuffer Size B: Input vector B of size ``(TP_DIM_B / TP_CASC_LEN) x sizeof(TT_DATA_B)``.
+* IO-buffer Size B: Input vector B of size ``(TP_DIM_B / TP_CASC_LEN) x sizeof(TT_DATA_B)``.
 
-* iobuffer Size Out: Output vector of size ``(TP_DIM_A / TP_SSR) x sizeof(TT_DATA_OUT)``.
+* IO-buffer Size Out: Output vector of size ``(TP_DIM_A / TP_SSR) x sizeof(TT_DATA_OUT)``.
 
 Furthermore, if these buffers are ping-pong buffers, their memory requirement doubles in size. This can be reduced by using the single_buffer constraint on the buffer.
 

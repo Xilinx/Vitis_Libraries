@@ -38,6 +38,8 @@ AMD documentation is organized around a set of standard design processes to help
 
 -  **System and Solution Planning:** Identifying the components, performance, I/O, and data transfer requirements at a system level. Includes application mapping for the solution to the processing subsystem (PS), PL, and AI Engine. Topics in this document that apply to this design process include:
 
+   -  :ref:`BITONIC_SORT`
+
    -  :ref:`CONVOLUTION_CORRELATION`
 
    -  :ref:`DDS_MIXER`
@@ -45,7 +47,9 @@ AMD documentation is organized around a set of standard design processes to help
    -  :ref:`DFT`
 
    -  :ref:`FFT_IFFT`
-
+   
+   -  :ref:`FFT_2D`
+   
    -  :ref:`FFT_WINDOW`
 
    -  :ref:`FILTERS`
@@ -61,6 +65,8 @@ AMD documentation is organized around a set of standard design processes to help
    -  :ref:`MATRIX_MULTIPLY`
 
    -  :ref:`MATRIX_VECTOR_MULTIPLY`
+   
+   -  :ref:`MIXED_RADIX_FFT`
 
    -  :ref:`OUTER_TENSOR_PRODUCT`
 
@@ -84,10 +90,37 @@ Organization
 
 The following figure shows the DSPLib organization.
 
-.. _FIGURE_DSP_ORG:
-.. figure:: ./media/X24061-Page-1.svg
+**DSPLib Organization**
 
-   **DSPLib Organization**
+.. code-block::
+
+   dsp
+   ├── docs
+   ├── ext
+   ├── L1
+   │   ├── examples
+   │   ├── include
+   │   │   ├── aie
+   │   │   └── hw
+   │   ├── meta
+   │   ├── src
+   │   │   ├── aie
+   │   │   └── hw
+   │   └── tests
+   ├── L2
+   │   ├── benchmarks
+   │   ├── examples
+   │   ├── include
+   │   │   ├── aie
+   │   │   ├── hw
+   │   │   └── vss
+   │   ├── meta
+   │   └── tests
+   │       ├── aie
+   │       ├── hw
+   │       └── vss
+   └── scripts
+
 
 
 The directories L1 and L2 correspond to the AI Engine kernels and AI Engine graphs for each function, respectively. Inclusion of an L2 graph rather than an L1 element is recommended in your design. L3 is reserved for future software drivers.

@@ -3,7 +3,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _BITONIC_:
+.. _BITONIC_SORT:
 
 ============
 Bitonic Sort
@@ -25,7 +25,7 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The Outer Tensor Product library element supports AIE and AIE-ML devices.
+The Bitonic Sort Product library element supports AIE and AIE-ML devices.
 
 Supported Types
 ===============
@@ -54,7 +54,7 @@ Design Notes
 Cascade Feature
 ---------------
 
-The Bitonic Sort is configured using the ``TP_CASC_LEN`` template parameter. This determines the number of kernels over which the Bitonic Sort is split. To be clear, this feature does not use the cascade ports of kernels to convey any data. IObuffers are used to convey data from one kernel to the next in the chain. The term cascade is used simply in the sense that the function is split into a series of operations which are executed by a series of kernels, each on a separate tile. The Bitonic Sort is split at stage boundaries, so the ``TP_CASC_LEN`` cannot exceed the number of bitonic stages log2(n)*(log2(n)+1)/2.
+The Bitonic Sort is configured using the ``TP_CASC_LEN`` template parameter. This determines the number of kernels over which the Bitonic Sort is split. To be clear, this feature does not use the cascade ports of kernels to convey any data. IO buffers are used to convey data from one kernel to the next in the chain. The term cascade is used simply in the sense that the function is split into a series of operations which are executed by a series of kernels, each on a separate tile. The Bitonic Sort is split at stage boundaries, so the ``TP_CASC_LEN`` cannot exceed the number of bitonic stages log2(n)*(log2(n)+1)/2.
 
 Constraints
 -----------
