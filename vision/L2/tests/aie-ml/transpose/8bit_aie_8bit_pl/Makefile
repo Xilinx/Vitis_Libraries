@@ -142,30 +142,6 @@ CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSR
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/ -L $(XFLIB_DIR)/L1/lib/sw/aarch64-linux
 LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS +=  -luuid
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/transpose/8bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
-CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS +=  
-LDFLAGS +=  -L $(SYSROOT)/usr/lib/ -L $(XFLIB_DIR)/L1/lib/sw/aarch64-linux
-LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-LDFLAGS += -luuid
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck5000/'))
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/transpose/8bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
-CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS +=  
-LDFLAGS +=  -L $(XFLIB_DIR)/L1/lib/sw/x86 -L $(OPENCV_LIB)
-LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-LDFLAGS += -luuid
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/v70/'))
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/transpose/8bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
-CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS +=  
-LDFLAGS +=  -L $(XFLIB_DIR)/L1/lib/sw/x86 -L $(OPENCV_LIB)
-LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-LDFLAGS += -luuid
 else 
 ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/transpose/8bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
@@ -212,24 +188,6 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/ 
 VPP_LDFLAGS +=   --clock.freqHz 400000000:Tiler_top_1  --clock.freqHz 400000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   --package.defer_aie_run
 
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-VPP_FLAGS +=   
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
-VPP_LDFLAGS +=   --clock.freqHz 400000000:Tiler_top_1  --clock.freqHz 400000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg
-VPP_PACKAGE +=   --package.defer_aie_run
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck5000/'))
-VPP_FLAGS +=   
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
-VPP_LDFLAGS +=   --clock.freqHz 400000000:Tiler_top_1  --clock.freqHz 400000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg
-VPP_PACKAGE +=   
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/v70/'))
-VPP_FLAGS +=   
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
-VPP_LDFLAGS +=   --clock.freqHz 400000000:Tiler_top_1  --clock.freqHz 400000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg
-VPP_PACKAGE +=   
-
 else 
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
 VPP_LDFLAGS +=   $(XFLIB_DIR)/L1/lib/hw/tiler.xo  $(XFLIB_DIR)/L1/lib/hw/stitcher.xo
@@ -259,7 +217,7 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER):  $(XFLIB_DIR)/L2/tests/aie-ml/transpose/8bit_aie_8bit_pl/graph.cpp 
+$(AIE_CONTAINER):  $(XFLIB_DIR)/L2/tests/aie-ml/transpose/8bit_aie_8bit_pl/graph.cpp xf_transpose.cc 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)

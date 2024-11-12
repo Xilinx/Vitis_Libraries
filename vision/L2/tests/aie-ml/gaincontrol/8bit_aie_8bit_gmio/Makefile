@@ -19,10 +19,10 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw_emu/hw> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<hw_emu/hw/x86sim/aiesim> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw_emu/hw> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<hw_emu/hw/x86sim/aiesim> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
 	$(ECHO) "  NOTE: For embedded platform the following setup steps are required:"
@@ -88,7 +88,7 @@ VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
 CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil -luuid
+LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 endif
@@ -180,13 +180,7 @@ endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
 VPP_FLAGS +=   
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/
-VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg  
-VPP_PACKAGE +=   --package.defer_aie_run
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-VPP_FLAGS +=   
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/
-VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg  
+VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   --package.defer_aie_run
 
 else 
@@ -207,7 +201,7 @@ endif
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_kernel_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)  -o $@ $^
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
 $(AIE_CONTAINER):  $(XFLIB_DIR)/L2/tests/aie-ml/gaincontrol/8bit_aie_8bit_gmio/graph.cpp xf_gaincontrol.cc 

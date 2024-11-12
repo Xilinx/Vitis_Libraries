@@ -1,7 +1,7 @@
 {
     "name": "Xilinx NMS AIE-ML GMIO Test",
     "description": "NMS GMIO AIE function example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vek280"
     ],

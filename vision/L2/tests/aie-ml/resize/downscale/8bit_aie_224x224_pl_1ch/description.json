@@ -98,7 +98,7 @@
                     "workdir": "./Work", 
                     "options": "", 
                     "name": "libadf.a", 
-                    "aie_kernel_files": [
+                    "files": [
                         "xf_resize.cc"
                     ]
                 }

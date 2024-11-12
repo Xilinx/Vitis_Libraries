@@ -1,7 +1,7 @@
 {
     "name": "Xilinx AWB_NORM 8bit_GMIO_8bit_AIE2 Test", 
     "description": "AWB_NORM 8bit_GMIO_8bit AIE2 function example", 
-    "flow": "versel", 
+    "flow": "system", 
     "platform_allowlist": [
         "vek280"
     ], 
@@ -47,119 +47,6 @@
                 			"LIB_DIR/L1/lib/sw/aarch64-linux"
             			], 
             		"options": " -luuid"
-                }
-            }
-        },
-        "vck190": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        ""
-                    ]
-                }, 
-                "linker": {
-                    "ldclflags": [
-                        "--config PROJECT/system.cfg"
-                    ]
-                }, 
-                "package": {
-                    "clflags": [
-                        "--package.defer_aie_run"
-                    ]
-                }
-			},
-			"host": {
-				"compiler": {
-					"includepaths": [
-						"$(SYSROOT)/usr/include/xrt/", 
-						"$(SYSROOT)/usr/include/", 
-						"$(SYSROOT)/usr/include/opencv4" 
-                	], 
-            		"options": " ", 
-            		"symbols": [
-                		"__PS_ENABLE_AIE__"
-            			]
-				},
-        		"linker": {
-            			"librarypaths": [
-		                	"$(SYSROOT)/usr/lib/", 
-                			"LIB_DIR/L1/lib/sw/aarch64-linux"
-            			], 
-            		"options": "-luuid"
-        		}
-            }
-        },
-        "vck5000": {
-            "v++": {
-                "compiler": {
-					"clflags": [
-								""
-					]
-				},
-				"linker": {
-                	"ldclflags": [ 
-                        	"--config PROJECT/system.cfg"
-                    	]
-				}, 
-                "package": {
-                    "clflags": [
-							""
-                    ]
-                }
-			},
-			"host": {
-				"compiler":{
-					"includepaths": [
-						"$(OPENCV_INCLUDE)"
-                	], 
-            		"options": " ", 
-            		"symbols": [
-                		"__PS_ENABLE_AIE__"
-            			]
-				},
-        		"linker": {
-            			"librarypaths": [
-                			"LIB_DIR/L1/lib/sw/x86",
-							"$(OPENCV_LIB)"
-            			], 
-            		"options": "-luuid"
-        		}
-            }
-        },
-        "v70": {
-            "v++": {
-                "compiler": {
-					"clflags": [
-								""
-					]
-				},
-				"linker": {
-                	"ldclflags": [
-                        	"--config PROJECT/system.cfg"
-                    	]
-				}, 
-                "package": {
-                    "clflags": [
-							""
-                    ]
-                }
-			},
-			"host": {
-				"compiler":{
-					"includepaths": [
-						"$(OPENCV_INCLUDE)"
-                	], 
-            		"options": " ", 
-            		"symbols": [
-                		"__PS_ENABLE_AIE__"
-            			]
-				},
-        		"linker": {
-            			"librarypaths": [
-                			"LIB_DIR/L1/lib/sw/x86",
-							"$(OPENCV_LIB)"
-            			], 
-            		"options": "-luuid"
                 }
             }
         }
@@ -244,7 +131,7 @@
                     "pl-freq": 300, 
                     "workdir": "./Work", 
                     "name": "libadf.a", 
-                    "aie_kernel_files": [
+                    "files": [
                         "xf_awbnorm_ccm"
                     ]
                 }

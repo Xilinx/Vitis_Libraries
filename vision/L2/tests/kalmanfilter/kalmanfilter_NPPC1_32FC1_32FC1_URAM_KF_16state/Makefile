@@ -180,6 +180,15 @@ endif
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/tests/kalmanfilter/kalmanfilter_NPPC1_32FC1_32FC1_URAM_KF_16state -I $(XFLIB_DIR)/L1/include/
 
 ######################### binary container global settings ##########################
+ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
+VPP_FLAGS_kalmanfilter_accel += --hls.clock 150000000:kalmanfilter_accel
+ifneq ($(HOST_ARCH_temp), x86)
+VPP_LDFLAGS_krnl_kalmanfilter += --clock.defaultFreqHz 150000000
+else
+VPP_LDFLAGS_krnl_kalmanfilter += --kernel_frequency 150
+endif
+
+else 
 VPP_FLAGS_kalmanfilter_accel += --hls.clock 300000000:kalmanfilter_accel
 ifneq ($(HOST_ARCH_temp), x86)
 VPP_LDFLAGS_krnl_kalmanfilter += --clock.defaultFreqHz 300000000
@@ -187,6 +196,7 @@ else
 VPP_LDFLAGS_krnl_kalmanfilter += --kernel_frequency 300
 endif
 
+endif
 ifneq ($(PACKAGE_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/krnl_kalmanfilter.xclbin
 else

@@ -180,6 +180,15 @@ endif
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/tests/stereolbm/stereolbm_NPPC1_8UC1_16UC1_21_64_16 -I $(XFLIB_DIR)/L1/include/
 
 ######################### binary container global settings ##########################
+ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
+VPP_FLAGS_stereolbm_accel += --hls.clock 150000000:stereolbm_accel
+ifneq ($(HOST_ARCH_temp), x86)
+VPP_LDFLAGS_krnl_stereolbm += --clock.defaultFreqHz 150000000
+else
+VPP_LDFLAGS_krnl_stereolbm += --kernel_frequency 150
+endif
+
+else 
 VPP_FLAGS_stereolbm_accel += --hls.clock 200000000:stereolbm_accel
 ifneq ($(HOST_ARCH_temp), x86)
 VPP_LDFLAGS_krnl_stereolbm += --clock.defaultFreqHz 200000000
@@ -187,6 +196,7 @@ else
 VPP_LDFLAGS_krnl_stereolbm += --kernel_frequency 200
 endif
 
+endif
 ifneq ($(PACKAGE_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/krnl_stereolbm.xclbin
 else

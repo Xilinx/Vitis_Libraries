@@ -56,8 +56,8 @@ class myGraph : public adf::graph {
         connect<>(y_filtered_buff1, k1);
         location<kernel>(k1) = tile(15, 0);
         location<parameter>(y_buff1) = {address(15, 0, 0x0000)};
-        location<parameter>(uv_buff1) = {address(15, 0, 0x5000)};
-        location<parameter>(y_filtered_buff1) = {address(15, 0, 0x8000)};
+        location<parameter>(uv_buff1) = {address(15, 0, 0x2000)};
+        location<parameter>(y_filtered_buff1) = {address(15, 0, 0x4000)};
 
         // Initial mapping
         runtime<ratio>(k1) = 0.5;

@@ -52,128 +52,6 @@
             		"options": " -luuid"
                 }
             }
-        },
-        "vck190": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        ""
-                    ]
-                }, 
-                "linker": {
-                    "ldclflags": [
-                        "--clock.freqHz 400000000:Tiler_top_1", 
-                        "--clock.freqHz 400000000:stitcher_top_1", 
-                        "--clock.defaultTolerance 0.001", 
-                        "--config PROJECT/system.cfg"
-                    ]
-                }, 
-                "package": {
-                    "clflags": [
-                        "--package.defer_aie_run"
-                    ]
-                }
-},
-			"host": {
-				"compiler": {
-					"includepaths": [
-						"$(SYSROOT)/usr/include/xrt/", 
-						"$(SYSROOT)/usr/include/", 
-						"$(SYSROOT)/usr/include/opencv4" 
-                	], 
-            		"options": " ", 
-            		"symbols": [
-                		"__PS_ENABLE_AIE__"
-            			]
-				},
-        		"linker": {
-            			"librarypaths": [
-		                	"$(SYSROOT)/usr/lib/", 
-                			"LIB_DIR/L1/lib/sw/aarch64-linux"
-            			], 
-            		"options": "-luuid"
-        		}
-            }
-        },
-        "vck5000": {
-            "v++": {
-                "compiler": {
-					"clflags": [
-								""
-					]
-				},
-				"linker": {
-                	"ldclflags": [
-                        	"--clock.freqHz 400000000:Tiler_top_1", 
-                        	"--clock.freqHz 400000000:stitcher_top_1", 
-                        	"--clock.defaultTolerance 0.001",  
-                        	"--config PROJECT/system.cfg"
-                    	]
-				}, 
-                "package": {
-                    "clflags": [
-							""
-                    ]
-                }
-			},
-			"host": {
-				"compiler":{
-					"includepaths": [
-						"$(OPENCV_INCLUDE)"
-                	], 
-            		"options": " ", 
-            		"symbols": [
-                		"__PS_ENABLE_AIE__"
-            			]
-				},
-        		"linker": {
-            			"librarypaths": [
-                			"LIB_DIR/L1/lib/sw/x86",
-							"$(OPENCV_LIB)"
-            			], 
-            		"options": "-luuid"
-        		}
-            }
-        },
-        "v70": {
-            "v++": {
-                "compiler": {
-					"clflags": [
-								""
-					]
-				},
-				"linker": {
-                	"ldclflags": [
-                        	"--clock.freqHz 400000000:Tiler_top_1", 
-                        	"--clock.freqHz 400000000:stitcher_top_1", 
-                        	"--clock.defaultTolerance 0.001", 
-                        	"--config PROJECT/system.cfg"
-                    	]
-				}, 
-                "package": {
-                    "clflags": [
-							""
-                    ]
-                }
-			},
-			"host": {
-				"compiler":{
-					"includepaths": [
-						"$(OPENCV_INCLUDE)"
-                	], 
-            		"options": " ", 
-            		"symbols": [
-                		"__PS_ENABLE_AIE__"
-            			]
-				},
-        		"linker": {
-            			"librarypaths": [
-                			"LIB_DIR/L1/lib/sw/x86",
-							"$(OPENCV_LIB)"
-            			], 
-            		"options": "-luuid"
-                }
-            }
         }
     }, 
     "data": [
@@ -266,7 +144,7 @@
                     "workdir": "./Work", 
                     "options": "", 
                     "name": "libadf.a", 
-                    "aie_kernel_files": [
+                    "files": [
                         "xf_transpose.cc"
                     ]
                 }
@@ -300,6 +178,7 @@
         ], 
         "targets": [
             "vitis_aie_sim",
+            "vitis_aie_x86sim",
             "vitis_hw_emu", 
             "vitis_hw_build", 
             "vitis_hw_run"

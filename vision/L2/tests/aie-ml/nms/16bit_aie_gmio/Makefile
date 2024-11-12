@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,20 +19,14 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/aiesim/x86sim/hw_emu/> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<hw_emu/hw/x86sim/aiesim> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/aiesim/x86sim/hw_emu/> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<hw_emu/hw/x86sim/aiesim> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<hw/aiesim/x86sim/hw_emu/> PLATFORM=<FPGA platform>"
-	$(ECHO) "      Command to build xclbin application."
-	$(ECHO) ""
-	$(ECHO) "  make host TARGET=<hw/aiesim/x86sim/hw_emu/>"
-	$(ECHO) "      Command to build host application."
-	$(ECHO) ""
-	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vek280, HOST_ARCH is either aarch32 or aarch64."
-	$(ECHO) "      a.IF Download the platform, and common-image from Xilinx Download Center(Suggested):"
+	$(ECHO) "  NOTE: For embedded platform the following setup steps are required:"
+	$(ECHO) "      a.If the platform and common-image are downloaded from Xilinx Download Center(Suggested):"
 	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
 	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
 	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
@@ -41,10 +35,10 @@ help::
 	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
 	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
 	$(ECHO) ""
-	$(ECHO) "  make clean "
+	$(ECHO) "  make clean"
 	$(ECHO) "      Command to remove the generated non-hardware files."
 	$(ECHO) ""
-	$(ECHO) "  make cleanall TARGET=<hw/aiesim/x86sim/hw_emu/>"
+	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
 
@@ -55,20 +49,19 @@ XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
-# setting devault value
+# setting default value
 TARGET ?= hw_emu
-HOST_ARCH ?= aarch64
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := vek280 
+PLATFORM := vek280
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST += vek280 
+PLATFORM_ALLOWLIST +=  vek280
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk
@@ -112,7 +105,7 @@ AIE_CXXFLAGS_INC +=  -I $(XILINX_VITIS)/aietools/include
 AIE_LDFLAGS_LD += -L $(XILINX_VITIS)/aietools/lib/aarch64.o  -ladf_api_xrt 
 endif
 CXXFLAGS += $(AIE_CXXFLAGS_INC)
-LDFLAGS += $(AIE_LDFLAGS_LD) -luuid
+LDFLAGS += $(AIE_LDFLAGS_LD)
 
 AIE_WORK_DIR ?= Work
 AIE_PKG_DIR ?= Work
@@ -126,13 +119,13 @@ else
 AIETARGET := x86sim
 endif
 
-AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --pl-freq=300 
+AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM)   --aie.pl-freq 300 
 AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
-AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
@@ -144,20 +137,20 @@ AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 
 #Inclue Required Host Source Files
 ifeq ($(ps_on_x86), on)
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/nms/16bit_aie_gmio/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie/absdiff/16bit_aie_gmio/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += --sysroot=$(SYSROOT) -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/ -L $(XFLIB_DIR)/L1/lib/sw/aarch64-linux
-LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS += --sysroot=$(SYSROOT)
 else
-HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/nms/16bit_aie_gmio/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie/absdiff/16bit_aie_gmio/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += --sysroot=$(SYSROOT) -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/ -L $(XFLIB_DIR)/L1/lib/sw/aarch64-linux
-LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS += --sysroot=$(SYSROOT)
 endif
 
@@ -177,7 +170,7 @@ PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args
 endif
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw))
-HOST_ARGS := kernel.xclbin
+HOST_ARGS := kernel.xclbin 
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
@@ -197,7 +190,7 @@ endif
 
 ######################### binary container global settings ##########################
 
-ifneq ($(SD_CARD_NEEDED), on)
+ifneq ($(PACKAGE_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/kernel.xclbin
 else
 BINARY_CONTAINERS += $(BUILD_DIR)/kernel_pkg.$(LINK_TARGET_FMT)
@@ -211,21 +204,27 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER): $(XFLIB_DIR)/L2/tests/aie-ml/nms/16bit_aie_gmio/graph.cpp xf_nms.cc   
+$(AIE_CONTAINER):  $(XFLIB_DIR)/L2/tests/aie/absdiff/16bit_aie_gmio/graph.cpp xf_absdiff.cc 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
-	$(AIECXX) $(AIE_CXXFLAGS) $^
-	mv ./libadf.a $(AIE_CONTAINER)
+	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^) $(CXXFLAGS) $(LDFLAGS)
 
 $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 
-############################## Preparing sdcard folder ##############################
+############################## Package final xclbin or sd_card folder (for embedded) ##############################
+# AIE_ON_X86 Flow
+ifeq ($(pcie_versal), on)
+	@echo "### ***** running AIE ON_X86 ***** ###"
+	${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
+	@echo "### ***** xclbin generation done! ***** ###"
+endif
+
 ifeq ($(SD_CARD_NEEDED), on)
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
@@ -248,7 +247,7 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(custom_data_file)
+DATA_FILE := $(XFLIB_DIR)/data/img_hd_bw.png $(XFLIB_DIR)/data/HD.jpg $(XFLIB_DIR)/data/512x512.png $(XFLIB_DIR)/data/512x512.jpg $(XFLIB_DIR)/data/4k_5.png $(XFLIB_DIR)/data/4k.jpg $(custom_data_file)
 DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
@@ -275,16 +274,10 @@ ifeq ($(ps_on_x86), on)
 	@echo "### ***** running PS X86 SE_EMU ***** ###"
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir $(SD_CARD) --package.emu_ps x86
 endif
-# 3. AIE_ON_X86 Flow
-ifeq ($(pcie_aie), on)
-	@echo "### ***** running AIE ON_X86 ***** ###"
-	${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
-	@echo "### ***** sd_card generation done! ***** ###"
-endif
-# 4. General Embeded flow
+# 3. General Embeded flow
 ifeq ($(dfx_hw), off)
 ifeq ($(ps_on_x86), off)
-ifeq ($(pcie_aie), off)
+ifeq ($(pcie_versal), off)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
@@ -294,12 +287,15 @@ endif
 .PHONY: sd_card
 sd_card: $(SD_CARD)
 endif
+
 ############################## Setting Essential Checks and Building Rules ##############################
 ifneq (,$(filter x86sim aiesim, $(TARGET)))
 RUN_DEPS += $(AIE_CONTAINER)
 else
 RUN_DEPS += host xclbin $(EMCONFIG)
+ifeq ($(SD_CARD_NEEDED), on)
 RUN_DEPS += $(SD_CARD)
+endif
 endif
 
 .PHONY: mkflag all run
@@ -324,16 +320,17 @@ endif
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
-ifeq ($(pcie_aie), on)
+ifeq ($(pcie_versal), on)
 	cp $(AIE_WORK_DIR)/reports/dma_lock_report.json ./
 	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) $(BINARY_CONTAINERS_PKG)
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS) 
+	
+else
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS)
 	
 endif
-	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
-	
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
@@ -376,7 +373,7 @@ endif
 
 ############################## Setting Targets ##############################
 
-.PHONY: clean cleanall emconfig gen_instances valid_params
+.PHONY: clean cleanall emconfig valid_params
 emconfig: $(EMCONFIG)
 
 .PHONY: host
@@ -393,11 +390,9 @@ else
 xclbin: check_vpp check_sysroot  $(BINARY_CONTAINERS)
 endif
 
-gen_instances: $(INSTANCE_FILES)
-	@echo "Nothing to generate."
+#################### Parameterized File Generation ##########################
 
-valid_params:
-	@echo "Nothing to validate."
+gen_instances: $(GENERATED_FILES)
 
 ############################## Cleaning Rules ##############################
 cleanh:
@@ -411,6 +406,6 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR) sd_card* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR) $(AIE_CONTAINER) aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS x86simulator_output $(AIE_WORK_DIR) $(AIE_PKG_DIR) $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
-	-$(RMDIR) ISS_RPC_SERVER_PORT pl_sample_counts  *.html $(INSTANCE_FILES)
+	-$(RMDIR) ISS_RPC_SERVER_PORT pl_sample_counts  *.html $(GENERATED_FILES)
 
 clean: cleanh

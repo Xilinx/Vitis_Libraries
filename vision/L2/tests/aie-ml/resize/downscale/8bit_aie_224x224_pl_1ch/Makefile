@@ -208,7 +208,7 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER):  $(XFLIB_DIR)/L2/tests/aie-ml/resize/downscale/8bit_aie_224x224_pl_1ch/graph.cpp 
+$(AIE_CONTAINER):  $(XFLIB_DIR)/L2/tests/aie-ml/resize/downscale/8bit_aie_224x224_pl_1ch/graph.cpp xf_resize.cc 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
@@ -251,7 +251,7 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(XFLIB_DIR)/data/HD.jpg $(XFLIB_DIR)/data/4k.jpg $(custom_data_file)
+DATA_FILE := $(XFLIB_DIR)/data/4k.jpg $(XFLIB_DIR)/data/HD.jpg $(custom_data_file)
 DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)

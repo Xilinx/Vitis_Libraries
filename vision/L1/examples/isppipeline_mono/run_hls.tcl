@@ -58,11 +58,11 @@ if {$COSIM == 1} {
 }
 
 if {$VIVADO_SYN == 1} {
-  export_design -flow syn -rtl verilog
+  export_design -flow syn -rtl verilog -version 2.0
 }
 
 if {$VIVADO_IMPL == 1} {
-  export_design -flow impl -rtl verilog
+  export_design -flow impl -rtl verilog -version 2.0
 }
 
 exit

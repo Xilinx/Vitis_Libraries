@@ -159,7 +159,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < in_gray.rows; i++) {
         for (int j = 0; j < in_gray.cols; j++) {
             unsigned char v = diff.at<unsigned char>(i, j);
-            if (v > 1) cnt++;
+            if (v > 2) cnt++;
             if (minval > v) minval = v;
             if (maxval < v) maxval = v;
         }

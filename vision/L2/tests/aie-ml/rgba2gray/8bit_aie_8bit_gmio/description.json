@@ -29,25 +29,6 @@
                     ]
                 }
             }
-        },
-        "vck190": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        ""
-                    ]
-                }, 
-                "linker": {
-                    "ldclflags": [
-                        "--config PROJECT/system.cfg"
-                    ]
-                }, 
-                "package": {
-                    "clflags": [
-                        "--package.defer_aie_run"
-                    ]
-                }
-            }
         }
     }, 
     "data": [
@@ -113,7 +94,7 @@
                     "pl-freq": 300, 
                     "workdir": "./Work", 
                     "name": "libadf.a", 
-                    "aie_kernel_files": [
+                    "files": [
                         "xf_rgba2gray.cc"
                     ]
                 }

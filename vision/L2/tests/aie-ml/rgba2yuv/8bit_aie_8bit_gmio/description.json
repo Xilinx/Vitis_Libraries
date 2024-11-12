@@ -29,25 +29,6 @@
                     ]
                 }
             }
-        },
-        "vck190": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        ""
-                    ]
-                }, 
-                "linker": {
-                    "ldclflags": [
-                        "--config PROJECT/system.cfg"
-                    ]
-                }, 
-                "package": {
-                    "clflags": [
-                        "--package.defer_aie_run"
-                    ]
-                }
-            }
         }
     }, 
     "data": [

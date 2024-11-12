@@ -88,7 +88,7 @@ VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
 CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil -luuid
+LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 endif
@@ -180,13 +180,7 @@ endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
 VPP_FLAGS +=   
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/
-VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg  
-VPP_PACKAGE +=   --package.defer_aie_run
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-VPP_FLAGS +=   
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/
-VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg 
+VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   --package.defer_aie_run
 
 else 
@@ -210,7 +204,7 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER):  $(XFLIB_DIR)/L2/tests/aie-ml/rgba2gray/8bit_aie_8bit_gmio/graph.cpp 
+$(AIE_CONTAINER):  $(XFLIB_DIR)/L2/tests/aie-ml/rgba2gray/8bit_aie_8bit_gmio/graph.cpp xf_rgba2gray.cc 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
@@ -253,7 +247,7 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(XFLIB_DIR)/data/HD.jpg $(XFLIB_DIR)/data/4k.jpg $(XFLIB_DIR)/data/512x512.jpg $(custom_data_file)
+DATA_FILE := $(XFLIB_DIR)/data/HD.jpg $(XFLIB_DIR)/data/4k.jpg $(custom_data_file)
 DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)

@@ -279,7 +279,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "alpha",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "float"
                                                                           }
                                                         ]
@@ -414,9 +414,9 @@
                                                                           },
                                                                           {
                                                                                             "name": "_scl",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char",
-                                                                                            "array":[""]
+                                                                                            "arrays":[""]
                                                                                             
                                                                           },
                                                                           {
@@ -489,7 +489,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "alpha",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "float"
                                                                           },
                                                                           {
@@ -499,12 +499,12 @@
                                                                           },
                                                                           {
                                                                                             "name": "beta",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "float"
                                                                           },
                                                                           {
                                                                                             "name": "gamma",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "float"
                                                                           },
                                                                           {
@@ -589,16 +589,16 @@
                                                                           },
                                                                           {
                                                                                             "name": "hist_array1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned int",
-                                                                                            "array":["1","256"]
+                                                                                            "arrays":["1","256"]
 
                                                                           },
                                                                           {
                                                                                             "name": "hist_array2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned int",
-                                                                                            "array":["1","256"]
+                                                                                            "arrays":["1","256"]
                                                                           }
                                                         ]
                                       }
@@ -687,34 +687,34 @@
                                                                           },
                                                                           {
                                                                                             "name": "histogram",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "uint32_t",
-                                                                                            "array":["3","HIST_SIZE"]
+                                                                                            "arrays":["3","HIST_SIZE"]
 
                                                                           },
                                                                           {
                                                                                             "name": "thresh",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint32_t"
                                                                           },
                                                                           {
                                                                                             "name": "inputMin",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "float"
                                                                           },
                                                                           {
                                                                                             "name": "inputMax",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "float"
                                                                           },
                                                                           {
                                                                                             "name": "outputMin",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "float"
                                                                           },
                                                                           {
                                                                                             "name": "outputMax",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "float"
                                                                           }
                                                         ]
@@ -824,38 +824,38 @@
                                                         "ports": [
                                                                           {
                                                                                             "name": "desc_list_q",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "ap_uint<256>",
-                                                                                            "array":["MAX_KEYPOINTS"]
+                                                                                            "arrays":["MAX_KEYPOINTS"]
 
                                                                           },
                                                                           {
                                                                                             "name": "desc_list_t",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "ap_uint<256>",
-                                                                                            "array":["MAX_KEYPOINTS"]
+                                                                                            "arrays":["MAX_KEYPOINTS"]
 
                                                                           },
                                                                           {
                                                                                             "name": "match_list",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "ap_int<16>",
-                                                                                            "array":["MAX_KEYPOINTS"]
+                                                                                            "arrays":["MAX_KEYPOINTS"]
 
                                                                           },
                                                                           {
                                                                                             "name": "num_keypoints_q",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "ap_uint<32>"
                                                                           },
                                                                           {
                                                                                             "name": "num_keypoints_t",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "ap_uint<32>"
                                                                           },
                                                                           {
                                                                                             "name": "ratio_thresh",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "float"
                                                                           }
                                                         ]
@@ -933,12 +933,12 @@
                                                                           },
                                                                           {
                                                                                             "name": "sigma_space",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "float"
                                                                           },
                                                                           {
                                                                                             "name": "sigma_color",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "float"
                                                                           }
                                                         ]
@@ -1019,12 +1019,12 @@
                                                             },
                                                             {
                                                                               "name": "black_level",
-                                                                              "direction": "",
+                                                                              "direction": "in",
                                                                               "type": "unsigned short"
                                                             },
                                                             {
                                                                               "name": "mul_value",
-                                                                              "direction": "",
+                                                                              "direction": "in",
                                                                               "type": "int"
                                                             }
                                           ]
@@ -1341,7 +1341,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "roi",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "xf::cv::Rect_<int> *"
                                                                           },
                                                                           {
@@ -1351,7 +1351,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "num_box",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "int"
                                                                           }
                                                         ]
@@ -1485,7 +1485,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "histogram",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "uint32_t *"
                                                                           }
                                                         ]
@@ -1578,12 +1578,12 @@
                                                                           },
                                                                           {
                                                                                             "name": "_lowthreshold",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char"
                                                                           },
                                                                           {
                                                                                             "name": "_highthreshold",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char"
                                                                           }
                                                         ]
@@ -1650,22 +1650,22 @@
                                                                           },
                                                                           {
                                                                                             "name": "obj_pix",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "int& "
                                                                           },
                                                                           {
                                                                                             "name": "def_pix",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "int& "
                                                                           },
                                                                           {
                                                                                             "name": "height",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "int"
                                                                           },
                                                                           {
                                                                                             "name": "width",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "int"
                                                                           }
                                                         ]
@@ -1874,9 +1874,9 @@
                                                                           },
                                                                           {
                                                                                             "name": "_scl",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char",
-                                                                                            "array":[""]
+                                                                                            "arrays":[""]
 
                                                                           },
                                                                           {
@@ -1954,12 +1954,12 @@
                                                                           },
                                                                           {
                                                                                             "name": "scale",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "float"
                                                                           },
                                                                           {
                                                                                             "name": "shift",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "float"
                                                                           }
                                                         ]
@@ -2030,12 +2030,12 @@
                                                                           },
                                                                           {
                                                                                             "name": "_convert_type",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "ap_uint<4>"
                                                                           },
                                                                           {
                                                                                             "name": "_shift",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "int"
                                                                           }
                                                         ]
@@ -2121,12 +2121,12 @@
                                                                           },
                                                                           {
                                                                                             "name": "threshold",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint16_t"
                                                                           },
                                                                           {
                                                                                             "name": "k",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint16_t"
                                                                           }
                                                         ]
@@ -2199,12 +2199,12 @@
                                                                         },
                                                                         {
                                                                                         "name": "params",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "int"
                                                                         },
                                                                         {
                                                                                         "name": "bayerp",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "unsigned short"
                                                                         }
                                                     ]
@@ -2350,7 +2350,7 @@
                                                                         },
                                                                         {
                                                                                         "name": "params",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "struct bgr2y8_params"
                                                                         }
                                                     ]
@@ -2523,9 +2523,9 @@
                                                                           },
                                                                           {
                                                                                             "name": "_kernel",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char",
-                                                                                            "array":["K_ROWS * K_COLS"]
+                                                                                            "arrays":["K_ROWS * K_COLS"]
 
                                                                                             
                                                                           }
@@ -2593,17 +2593,17 @@
                                                                           },
                                                                           {
                                                                                             "name": "_fw_pass",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "ap_uint<FW_PTR>* "
                                                                           },
                                                                           {
                                                                                             "name": "rows",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "int"
                                                                           },
                                                                           {
                                                                                             "name": "cols",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "int"
                                                                           }
                                                         ]
@@ -2762,9 +2762,9 @@
                                                                           },
                                                                           {
                                                                                             "name": "_kernel",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char",
-                                                                                            "array":["K_ROWS * K_COLS"]
+                                                                                            "arrays":["K_ROWS * K_COLS"]
 
 
                                                                           }
@@ -2839,7 +2839,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "_channel",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint16_t"
                                                                           }
                                                         ]
@@ -2910,7 +2910,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "_threshold",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char"
                                                                           }
                                                         ]
@@ -2999,14 +2999,14 @@
                                                                           },
                                                                           {
                                                                                             "name": "filter",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "short int",
-                                                                                            "array":["FILTER_HEIGHT * FILTER_WIDTH"]
+                                                                                            "arrays":["FILTER_HEIGHT * FILTER_WIDTH"]
 
                                                                           },
                                                                           {
                                                                                             "name": "_shift",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char"
                                                                           }
                                                         ]
@@ -3077,17 +3077,17 @@
                                                                           },
                                                                           {
                                                                                             "name": "Rows",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "int"
                                                                           },
                                                                           {
                                                                                             "name": "Cols",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "int"
                                                                           },
                                                                           {
                                                                                             "name": "Direction",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "int"
                                                                           }
                                                         ]
@@ -3159,12 +3159,12 @@
                                                                           },
                                                                           {
                                                                                             "name": "rgain",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned short"
                                                                           },
                                                                           {
                                                                                             "name": "bgain",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned short"
                                                                           }
                                                         ]
@@ -3237,9 +3237,9 @@
                                                                           },
                                                                           {
                                                                                             "name": "lut_table",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char",
-                                                                                            "array":[""]
+                                                                                            "arrays":[""]
                                                                           }
                                                         ]
                                       }
@@ -3315,7 +3315,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "sigma",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "float"
                                                                           }
                                                         ]
@@ -3402,42 +3402,42 @@
                                                                         },
                                                                         {
                                                                                         "name": "mean1",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "ap_ufixed<16, 4>"
                                                                         },
                                                                         {
                                                                                         "name": "mean2",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "ap_ufixed<16, 4>"
                                                                         },
                                                                         {
                                                                                         "name": "L_max1",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "ap_ufixed<16, 4>"
                                                                         },
                                                                         {
                                                                                         "name": "L_max2",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "ap_ufixed<16, 4>"
                                                                         },
                                                                         {
                                                                                         "name": "L_min1",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "ap_ufixed<16, 4>"
                                                                         },
                                                                         {
                                                                                         "name": "L_min2",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "ap_ufixed<16, 4>"
                                                                         },
                                                                         {
                                                                                         "name": "c1",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "float"
                                                                         },
                                                                         {
                                                                                         "name": "c2",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "float"
                                                                         }
                                                     ]
@@ -3659,26 +3659,26 @@
                                                                           },
                                                                           {
                                                                                             "name": "outputrho",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "float",
-                                                                                            "array":["MAXLINES"]
+                                                                                            "arrays":["MAXLINES"]
 
                                                                           },
                                                                           {
                                                                                             "name": "outputtheta",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "float",
-                                                                                            "array":["MAXLINES"]
+                                                                                            "arrays":["MAXLINES"]
 
                                                                           },
                                                                           {
                                                                                             "name": "threshold",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "short"
                                                                           },
                                                                           {
                                                                                             "name": "linesmax",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "short"
                                                                           }
                                                         ]
@@ -3745,16 +3745,16 @@
                                                                           },
                                                                           {
                                                                                             "name": "lower_thresh",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char",
-                                                                                            "array":[""]
+                                                                                            "arrays":[""]
 
                                                                           },
                                                                           {
                                                                                             "name": "upper_thresh",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char",
-                                                                                            "array":[""]
+                                                                                            "arrays":[""]
 
                                                                           },
                                                                           {
@@ -3908,62 +3908,62 @@
                                                                         },
                                                                         {
                                                                                         "name": "stats",
-                                                                                        "direction": "",
+                                                                                        "direction": "out",
                                                                                         "type": "uint32_t*"
                                                                         },
                                                                         {
                                                                                         "name": "max_bins_list",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "ap_uint<13>*"
                                                                         },
                                                                         {
                                                                                         "name": "roi_tlx",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "uint16_t "
                                                                         },
                                                                         {
                                                                                         "name": "roi_tly",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "uint16_t"
                                                                         },
                                                                         {
                                                                                         "name": "roi_brx",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "uint16_t"
                                                                         },
                                                                         {
                                                                                         "name": "roi_bry",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "uint16_t"
                                                                         },
                                                                         {
                                                                                         "name": "zone_col_num",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "uint16_t"
                                                                         },
                                                                         {
                                                                                         "name": "zone_row_num",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "uint16_t"
                                                                         },
                                                                         {
                                                                                         "name": "inputMin",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "float"
                                                                         },
                                                                         {
                                                                                         "name": "inputMax",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "float"
                                                                         },
                                                                         {
                                                                                         "name": "outputMin",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "float"
                                                                         },
                                                                         {
                                                                                         "name": "outputMax",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "float"
                                                                         }
                                                     ]
@@ -4092,7 +4092,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "_lut",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char* "
                                                                           }
                                                         ]
@@ -4182,7 +4182,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "lutdim",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char"
                                                                           }
                                                         ]
@@ -4317,9 +4317,9 @@
                                                                           },
                                                                           {
                                                                                             "name": "_scl",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char",
-                                                                                            "array":[""]
+                                                                                            "arrays":[""]
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
@@ -4402,52 +4402,52 @@
                                                                           },
                                                                           {
                                                                                             "name": "x1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint16_t* "
                                                                           },
                                                                           {
                                                                                             "name": "y1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint16_t* "
                                                                           },
                                                                           {
                                                                                             "name": "obj_height",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint16_t* "
                                                                           },
                                                                           {
                                                                                             "name": "obj_width",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint16_t* "
                                                                           },
                                                                           {
                                                                                             "name": "dx",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "uint16_t* "
                                                                           },
                                                                           {
                                                                                             "name": "dy",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "uint16_t* "
                                                                           },
                                                                           {
                                                                                             "name": "status",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint16_t* "
                                                                           },
                                                                           {
                                                                                             "name": "frame_status",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint8_t"
                                                                           },
                                                                           {
                                                                                             "name": "no_objects",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint8_t"
                                                                           },
                                                                           {
                                                                                             "name": "no_iters",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint8_t"
                                                                           }
                                                         ]
@@ -4506,12 +4506,12 @@
                                                                           },
                                                                           {
                                                                                             "name": "_mean",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "unsigned short* "
                                                                           },
                                                                           {
                                                                                             "name": "_stddev",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "unsigned short* "
                                                                           }
                                                         ]
@@ -4784,32 +4784,32 @@
                                                                           },
                                                                           {
                                                                                             "name": "max_value",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "int32_t *"
                                                                           },
                                                                           {
                                                                                             "name": "min_value",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "int32_t *"
                                                                           },
                                                                           {
                                                                                             "name": "_minlocx",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "uint16_t *"
                                                                           },
                                                                           {
                                                                                             "name": "_minlocy",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "uint16_t *"
                                                                           },
                                                                           {
                                                                                             "name": "_maxlocx",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "uint16_t *"
                                                                           },
                                                                           {
                                                                                             "name": "_maxlocy",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "uint16_t *"
                                                                           }
                                                         ]
@@ -4868,9 +4868,9 @@
                                                                           },
                                                                           {
                                                                                             "name": "_scl",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char",
-                                                                                            "array":[""]
+                                                                                            "arrays":[""]
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
@@ -5019,7 +5019,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "scale",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "float"
                                                                           }
                                                         ]
@@ -5078,7 +5078,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "_thresh",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "uint8_t &"
                                                                           }
                                                         ]
@@ -5153,9 +5153,9 @@
                                                                           },
                                                                           {
                                                                                             "name": "_color",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char",
-                                                                                            "array":[""]
+                                                                                            "arrays":[""]
                                                                           }
                                                         ]
                                       }
@@ -5439,7 +5439,7 @@
                                                                           },
                                                                           {
                                                                                             "name": "dim",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char"
                                                                           }
                                                         ]
@@ -5705,17 +5705,17 @@
                                                                         },
                                                                         {
                                                                                         "name": "rows",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "int"
                                                                         },
                                                                         {
                                                                                         "name": "cols",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "int"
                                                                         },
                                                                         {
                                                                                         "name": "direction",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "int"
                                                                         }
                                                     ]
@@ -5866,13 +5866,13 @@
                                                                         },
                                                                         {
                                                                                         "name": "params",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "ap_ufixed<32, 18>",
-                                                                                        "array":["3","N","3"]
+                                                                                        "arrays":["3","N","3"]
                                                                         },
                                                                         {
                                                                                         "name": "bayerp",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "unsigned short"
                                                                         }
                                                     ]
@@ -6049,12 +6049,12 @@
                                                                           },
                                                                           {
                                                                                             "name": "p1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint8_t"
                                                                           },
                                                                           {
                                                                                             "name": "p2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint8_t"
                                                                           }
                                                         ]
@@ -6113,9 +6113,9 @@
                                                                           },
                                                                           {
                                                                                             "name": "_scl",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char",
-                                                                                            "array":[""]
+                                                                                            "arrays":[""]
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
@@ -6365,9 +6365,9 @@
                                                                           },
                                                                           {
                                                                                             "name": "_scl",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char",
-                                                                                            "array":[""]
+                                                                                            "arrays":[""]
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
@@ -6436,9 +6436,9 @@
                                                                           },
                                                                           {
                                                                                             "name": "_scl",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "unsigned char",
-                                                                                            "array":[""]
+                                                                                            "arrays":[""]
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
@@ -6571,9 +6571,9 @@
                                                                           },
                                                                           {
                                                                                             "name": "sum",
-                                                                                            "direction": "",
+                                                                                            "direction": "out",
                                                                                             "type": "double",
-                                                                                            "array":[""]
+                                                                                            "arrays":[""]
                                                                           }
                                                         ]
                                       }
@@ -6659,32 +6659,32 @@
                                                                           },
                                                                           {
                                                                                             "name": "idx1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint16_t"
                                                                           },
                                                                           {
                                                                                             "name": "idx2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint16_t"
                                                                           },
                                                                           {
                                                                                             "name": "frac1",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uchar_t"
                                                                           },
                                                                           {
                                                                                             "name": "frac2",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uchar_t"
                                                                           },
                                                                           {
                                                                                             "name": "n",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uint16_t"
                                                                           },
                                                                           {
                                                                                             "name": "out_frac",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "uchar_t *"
                                                                           },
                                                                           {
@@ -6759,12 +6759,12 @@
                                                                           },
                                                                           {
                                                                                             "name": "thresh",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "short int"
                                                                           },
                                                                           {
                                                                                             "name": "maxval",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "short int"
                                                                           }
                                                         ]
@@ -6839,37 +6839,37 @@
                                                                         },
                                                                         {
                                                                                         "name": "block_rows",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "int"
                                                                         },
                                                                         {
                                                                                         "name": "block_cols",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "int"
                                                                         },
                                                                         {
                                                                                         "name": "omin_r",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "XF_CTUNAME(IN_TYPE, NPC) ",
-                                                                                        "array":["LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize","LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxHArrSize"]
+                                                                                        "arrays":["LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize","LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxHArrSize"]
                                                                         },
                                                                         {
                                                                                         "name": "omax_r",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "XF_CTUNAME(IN_TYPE, NPC) ",
-                                                                                        "array":["LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize","LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxHArrSize"]
+                                                                                        "arrays":["LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize","LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxHArrSize"]
                                                                         },
                                                                         {
                                                                                         "name": "omin_w",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "XF_CTUNAME(IN_TYPE, NPC) ",
-                                                                                        "array":["LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize","LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxHArrSize"]
+                                                                                        "arrays":["LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize","LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxHArrSize"]
                                                                         },
                                                                         {
                                                                                         "name": "omax_w",
-                                                                                        "direction": "",
+                                                                                        "direction": "in",
                                                                                         "type": "XF_CTUNAME(IN_TYPE, NPC)",
-                                                                                        "array":["LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize","LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxHArrSize"]
+                                                                                        "arrays":["LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize","LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxHArrSize"]
                                                                         },
                                                                         {
                                                                                         "name": "out",
@@ -6962,9 +6962,9 @@
                                                                           },
                                                                           {
                                                                                             "name": "P_matrix",
-                                                                                            "direction": "",
+                                                                                            "direction": "in",
                                                                                             "type": "float",
-                                                                                            "array":["9"]
+                                                                                            "arrays":["9"]
                                                                           }
                                                         ]
                                       }

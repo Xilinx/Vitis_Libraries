@@ -16,7 +16,7 @@
 
 #define PROFILE
 
-#if __X86_DEVICE__
+#if !__X86_DEVICE__
 #include <adf/adf_api/XRTConfig.h>
 #endif
 #include <chrono>
