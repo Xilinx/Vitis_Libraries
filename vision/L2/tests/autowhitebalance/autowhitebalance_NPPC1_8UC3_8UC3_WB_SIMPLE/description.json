@@ -105,7 +105,7 @@
         },
         {
             "target": "hw",
-            "cmd_args": " LIB_DIR/data/4k.jpg",
+            "cmd_args": " LIB_DIR/data/HD.jpg",
             "name": "hardware_build",
             "ld_library_path": [
                 "$(OPENCV_LIB)",
@@ -115,7 +115,7 @@
         }
     ],
     "data": [
-        "LIB_DIR/data/4k.jpg",
+        "LIB_DIR/data/HD.jpg",
         "LIB_DIR/data/128x128.png"
     ],
     "host": {

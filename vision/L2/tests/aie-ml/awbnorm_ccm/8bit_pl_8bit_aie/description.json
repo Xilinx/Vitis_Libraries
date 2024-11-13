@@ -20,6 +20,9 @@
                 }, 
                 "linker": {
                     "ldclflags": [
+                        "--clock.freqHz 300000000:Tiler_top_1", 
+                        "--clock.freqHz 300000000:stitcher_top_1", 
+                        "--clock.defaultTolerance 0.001", 
                         "--config PROJECT/system.cfg"
                     ]
                 }, 
@@ -86,7 +89,13 @@
 				"LIB_DIR/L1/include/aie-ml/dnn", 
 				"./"
 			]
-		}
+		},
+		"linker": {
+               	"ldclflags": [
+                       	"LIB_DIR/L1/lib/hw/tiler.xo", 
+                       	"LIB_DIR/L1/lib/hw/stitcher.xo"
+                   	]
+        }
     },
     "host": {
         "host_exe": "host.elf", 
@@ -130,9 +139,10 @@
                     "location": "LIB_DIR/L2/tests/aie-ml/awbnorm_ccm/8bit_pl_8bit_aie/graph.cpp", 
                     "pl-freq": 300, 
                     "workdir": "./Work", 
+                    "options": "", 
                     "name": "libadf.a", 
                     "files": [
-                        "xf_awbnorm_ccm"
+                        "xf_awbnorm_ccm.cc"
                     ]
                 }
             ]
@@ -141,7 +151,8 @@
     "containers": [
         {
             "frequency": "300", 
-            "name": "kernel"
+            "name": "kernel",
+			"ldclflags": "LIB_DIR/L1/lib/hw/tiler.xo LIB_DIR/L1/lib/hw/stitcher.xo"
         }
     ], 
     "testinfo": {

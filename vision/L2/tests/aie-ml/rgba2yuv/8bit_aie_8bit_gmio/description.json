@@ -28,6 +28,26 @@
                         "--package.defer_aie_run"
                     ]
                 }
+            },
+			"host": {
+				"compiler" : {
+			   	"includepaths": [
+						"$(SYSROOT)/usr/include/xrt/", 
+						"$(SYSROOT)/usr/include/", 
+						"$(SYSROOT)/usr/include/opencv4" 
+                	], 
+            		"options": "", 
+            		"symbols": [
+                		"__PS_ENABLE_AIE__"
+            			]
+				},
+        		"linker": {
+            			"librarypaths": [
+		                	"$(SYSROOT)/usr/lib/", 
+                			"LIB_DIR/L1/lib/sw/aarch64-linux"
+            			], 
+            		"options": " -luuid"
+                }
             }
         }
     }, 
@@ -36,6 +56,14 @@
     ], 
     "gui": false, 
     "launch": [
+{
+            "name": "aiesim-launch",
+            "target": "aiesim"
+        },
+        {
+            "name": "x86sim-launch",
+            "target": "x86sim"
+        },
         {
             "name": "hwemu-launch", 
             "target": "hw_emu", 
@@ -47,6 +75,22 @@
             "cmd_args": "kernel.xclbin LIB_DIR/cvtcolor/RGBA2IYUV/input/input.jpg"
         }
     ], 
+    "v++": { 
+            "compiler": {
+                "symbols": [],
+                "clflags": [],
+                "includepaths": [
+                    "LIB_DIR/L1/include/aie",
+                    "LIB_DIR/L1/include/aie-ml", 
+                    "LIB_DIR/L1/include/aie-ml/dnn", 
+                    "./"
+			]
+		},
+		"linker": {
+               	"ldclflags": [
+                   	]
+        }
+    },
     "host": {
         "host_exe": "host.elf", 
         "compiler": {
@@ -55,34 +99,30 @@
                 "./Work/ps/c_rts/aie_control_xrt.cpp"
             ], 
             "includepaths": [
-                "$(SYSROOT)/usr/include/xrt/", 
-                "$(SYSROOT)/usr/include/", 
-                "$(SYSROOT)/usr/include/opencv4", 
-                "LIB_DIR/L1/include/aie",
-                "LIB_DIR/L1/include/aie-ml", 
-                "./"
+                                "LIB_DIR/L1/include/aie",
+                                "./"
             ], 
-            "options": "--sysroot=$(SYSROOT)", 
+            "options": "", 
             "symbols": [
                 "__PS_ENABLE_AIE__"
             ]
         }, 
         "linker": {
             "librarypaths": [
-                "$(SYSROOT)/usr/lib/", 
-                "LIB_DIR/L1/lib/sw/aarch64-linux"
+                "$(OPENCV_LIB)"
             ], 
             "libraries": [
                 "smartTilerStitcher"
             ], 
-            "options": "--sysroot=$(SYSROOT)"
+            "options": "-luuid"
         }
     }, 
     "aiecompiler": {
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L1/include/aie",
-                "LIB_DIR/L1/include/aie-ml"
+ 		"LIB_DIR/L1/include/aie-ml",
+		"LIB_DIR/L1/include/aie-ml/dnn"
             ]
         }
     }, 
@@ -93,7 +133,6 @@
                     "location": "LIB_DIR/L2/tests/aie-ml/rgba2yuv/8bit_aie_8bit_gmio/host.cpp", 
                     "pl-freq": 400, 
                     "workdir": "./Work", 
-                    "options": "-pl-axi-lite=true", 
                     "name": "libadf.a", 
                     "files": [
                         "xf_rgba2yuv.cc"

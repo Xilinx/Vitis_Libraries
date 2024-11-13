@@ -124,7 +124,7 @@ AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
-AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(XFLIB_DIR)/L1/include/aie-ml/
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(XFLIB_DIR)/L1/include/aie-ml/dnn
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
@@ -138,7 +138,7 @@ AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/mask_gen_tracking/8bit_aie_gmio/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/ -L $(XFLIB_DIR)/L1/lib/sw/aarch64-linux
 LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS +=  -luuid
@@ -146,14 +146,14 @@ else
 ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/mask_gen_tracking/8bit_aie_gmio/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS += -luuid
 else
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/mask_gen_tracking/8bit_aie_gmio/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS += -luuid
@@ -184,12 +184,12 @@ endif
 ########################## Kernel compiler global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
 VPP_FLAGS +=   
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
 VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   --package.defer_aie_run
 
 else 
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
 
 endif
 

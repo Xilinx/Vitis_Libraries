@@ -83,7 +83,7 @@
 			"includepaths": [
 				"LIB_DIR/L1/include/aie",
 				"LIB_DIR/L1/include/aie-ml/", 
-				"LIB_DIR/L1/include/aie-ml/", 
+				"LIB_DIR/L1/include/aie-ml/dnn", 
 				"./"
 			]
 		},
@@ -100,11 +100,8 @@
                 "./Work/ps/c_rts/aie_control_xrt.cpp"
             ], 
             "includepaths": [
-                "$(SYSROOT)/usr/include/xrt/", 
-                "$(SYSROOT)/usr/include/", 
-                "$(SYSROOT)/usr/include/opencv4", 
-                "LIB_DIR/L1/include/aie",
-                "./"
+                                "LIB_DIR/L1/include/aie",
+                                "./"
             ], 
             "options": "", 
             "symbols": [
@@ -125,8 +122,8 @@
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L1/include/aie",
-                "LIB_DIR/L1/include/aie-ml/",
-		        "LIB_DIR/L1/include/aie-ml/"
+ 		"LIB_DIR/L1/include/aie-ml",
+		"LIB_DIR/L1/include/aie-ml/dnn"
             ]
         }
     }, 
@@ -137,7 +134,6 @@
                     "location": "LIB_DIR/L2/tests/aie-ml/mask_gen_tracking/8bit_aie_gmio/graph.cpp", 
                     "pl-freq": 300, 
                     "workdir": "./Work", 
-                    "options": "", 
                     "name": "libadf.a", 
                     "files": [
                         "xf_mask_gen_track.cc",

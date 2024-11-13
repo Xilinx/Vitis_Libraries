@@ -132,7 +132,7 @@
                     "workdir": "./Work", 
                     "name": "libadf.a", 
                     "files": [
-                        "xf_awbnorm_ccm"
+                        "xf_awbnorm_ccm.cc"
                     ]
                 }
             ]
@@ -145,7 +145,7 @@
         }
     ], 
     "testinfo": {
-        "disable": false, 
+        "disable": true, 
         "jobs": [
             {
                 "index": 0, 

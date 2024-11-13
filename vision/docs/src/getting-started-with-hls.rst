@@ -52,37 +52,28 @@ Open a terminal and run the following commands to set the environment and build:
 Use the following steps to operate the HLS Standalone Mode using GUI:
 
 #. Open a terminal and update the LD_LIBRARY_PATH to point to OpenCV lib folder.
-#. From the same terminal, open Vitis HLS in GUI mode and create a new project
-#. Specify the name of the project. For example - Dilation.
+#. From the same terminal, open Vitis in GUI mode and create a new project(file -> New Component -> HLS)
+#. Specify the "Component name" of the project. For example - Dilation.
 #. Click Browse to enter a workspace folder used to store your projects.
 #. Click Next.
-#. Under the source files section, add the accel.cpp file which can be
-   found in the examples folder. Also, fill the top function name (here
-   it is dilation_accel).
-#. Click Next.
+#. Configuration File -> Emplty File
+#. Specify "New configuration file name". For example- hls_config.
+#. Under the source files section, add the accel.cpp file which can be found in the examples folder. Also, fill the top function name (here it is dilation_accel).
 #. Under the test bench section add tb.cpp.
 #. Click Next.
+#. Select the suitable part. For example, xczu9eg-ffvb1156-2-i.
 #. Select the clock period to the required value (10ns in example).
-#. Select the suitable part. For example, ``xczu9eg-ffvb1156-2-i``.
 #. Click Finish.
-#. Right click on the created project and select Project Settings.
+#. Open the created project and select Settings.
+#. Open hls_config.cfg file
+#. Files added under the Test Bench section will be displayed. Select a file and click Edit CFLAGS.
+#. Enter -I<path-to-L1-include-directory> -std=c++0x -I<path-to-opencv-include-folder>.
+#. In the Linker Flags section, enter the opencv libs and path to the opencv libs -L<path-to-opencv-lib-folder> -lopencv_core -lopencv_imgcodecs -lopencv_imgproc
 #. In the opened tab, select Simulation.
-#. Files added under the Test Bench section will be displayed. Select a
-   file and click Edit CFLAGS.
-#. Enter
-   ``-I<path-to-L1-include-directory> -std=c++0x
-   -I<path-to-opencv-include-folder>``.
-   
-#. In the Linker Flags section, enter the opencv libs and path to the opencv libs
-   ``-L<path-to-opencv-lib-folder> -lopencv_core -lopencv_imgcodecs -lopencv_imgproc``
-#. Select Synthesis and repeat the above step for all the displayed
-   files. Do not add opencv include path here.
 #. Click OK.
-#. Run the C Simulation, select Clean Build and specify the required
-   input arguments.
+#. Run the C Simulation, select Clean Build and specify the required input arguments.
 #. Click OK.
-#. All the generated output files/images will be present in the
-   solution1->csim->build.
+#. All the generated output files/images will be present in the solution1->csim->build.
 #. Run C synthesis.
 #. Run co-simulation by specifying the proper input arguments.
 #. The status of co-simulation can be observed on the console.

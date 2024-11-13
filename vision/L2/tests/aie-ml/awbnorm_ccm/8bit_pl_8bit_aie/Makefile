@@ -185,11 +185,12 @@ endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
 VPP_FLAGS +=   
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
-VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg
+VPP_LDFLAGS +=   --clock.freqHz 300000000:Tiler_top_1  --clock.freqHz 300000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   --package.defer_aie_run
 
 else 
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
+VPP_LDFLAGS +=   $(XFLIB_DIR)/L1/lib/hw/tiler.xo  $(XFLIB_DIR)/L1/lib/hw/stitcher.xo
 
 endif
 
@@ -199,6 +200,8 @@ VPP_LDFLAGS_kernel += --clock.defaultFreqHz 300000000
 else
 VPP_LDFLAGS_kernel += --kernel_frequency 300
 endif
+VPP_LDFLAGS_kernel_temp := $(XFLIB_DIR)/L1/lib/hw/tiler.xo $(XFLIB_DIR)/L1/lib/hw/stitcher.xo
+VPP_LDFLAGS_kernel += $(VPP_LDFLAGS_kernel_temp)
 
 ifneq ($(PACKAGE_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/kernel.xclbin
@@ -214,7 +217,7 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER):  $(XFLIB_DIR)/L2/tests/aie-ml/awbnorm_ccm/8bit_pl_8bit_aie/graph.cpp xf_awbnorm_ccm 
+$(AIE_CONTAINER):  $(XFLIB_DIR)/L2/tests/aie-ml/awbnorm_ccm/8bit_pl_8bit_aie/graph.cpp xf_awbnorm_ccm.cc 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)

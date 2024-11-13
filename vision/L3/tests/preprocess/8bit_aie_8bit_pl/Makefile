@@ -150,6 +150,14 @@ CXXFLAGS +=
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/ -L $(XFLIB_DIR)/L1/lib/sw/aarch64-linux
 LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS += -luuid
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck5000/'))
+HOST_SRCS += $(XFLIB_DIR)/L3/tests/preprocess/8bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
+CXXFLAGS +=  -D __PS_ENABLE_AIE__
+CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  
+LDFLAGS +=  -L $(XFLIB_DIR)/L1/lib/sw/x86 -L $(OPENCV_LIB)
+LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+LDFLAGS += -luuid
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/v70/'))
 HOST_SRCS += $(XFLIB_DIR)/L3/tests/preprocess/8bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
@@ -185,13 +193,13 @@ EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
-HOST_ARGS := kernel.xclbin 512x512.png
+HOST_ARGS := kernel.xclbin Y.png UV.png
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw))
-HOST_ARGS := kernel.xclbin 4k.jpg
+HOST_ARGS := kernel.xclbin Y.png UV.png
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
@@ -209,6 +217,12 @@ VPP_FLAGS +=
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
 VPP_LDFLAGS +=   --clock.freqHz 400000000:Tiler_top_1  --clock.freqHz 400000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   --package.defer_aie_run
+
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck5000/'))
+VPP_FLAGS +=   
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
+VPP_LDFLAGS +=   --clock.freqHz 400000000:Tiler_top_1  --clock.freqHz 400000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg
+VPP_PACKAGE +=   
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/v70/'))
 VPP_FLAGS +=   
@@ -260,11 +274,10 @@ $(EMCONFIG):
 
 ############################## Package final xclbin or sd_card folder (for embedded) ##############################
 # AIE_ON_X86 Flow
-ifeq ($(pcie_versal), on)
-	@echo "### ***** running AIE ON_X86 ***** ###"
-	${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
-	@echo "### ***** xclbin generation done! ***** ###"
-endif
+package_x86:
+		@echo "### ***** running AIE ON_X86 ***** ###"
+		${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
+		@echo "### ***** xclbin generation done! ***** ###"
 
 ifeq ($(SD_CARD_NEEDED), on)
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
@@ -288,7 +301,7 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(XFLIB_DIR)/data/512x512.png $(XFLIB_DIR)/data/HD.jpg $(XFLIB_DIR)/data/4k.jpg $(custom_data_file)
+DATA_FILE := $(XFLIB_DIR)/data/Y.png $(XFLIB_DIR)/data/UV.png $(custom_data_file)
 DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
@@ -334,6 +347,9 @@ ifneq (,$(filter x86sim aiesim, $(TARGET)))
 RUN_DEPS += $(AIE_CONTAINER)
 else
 RUN_DEPS += host xclbin $(EMCONFIG)
+ifeq ($(pcie_versal), on)
+RUN_DEPS += package_x86
+endif
 ifeq ($(SD_CARD_NEEDED), on)
 RUN_DEPS += $(SD_CARD)
 endif

@@ -214,7 +214,7 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER):  $(XFLIB_DIR)/L2/tests/aie-ml/awbnorm_ccm/8bit_gmio_8bit_aie/graph.cpp xf_awbnorm_ccm 
+$(AIE_CONTAINER):  $(XFLIB_DIR)/L2/tests/aie-ml/awbnorm_ccm/8bit_gmio_8bit_aie/graph.cpp xf_awbnorm_ccm.cc 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)

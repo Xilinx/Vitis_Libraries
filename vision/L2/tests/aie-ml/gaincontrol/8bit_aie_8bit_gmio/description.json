@@ -28,6 +28,26 @@
                         "--package.defer_aie_run"
                     ]
                 }
+},
+			"host": {
+				"compiler" : {
+			   	"includepaths": [
+						"$(SYSROOT)/usr/include/xrt/", 
+						"$(SYSROOT)/usr/include/", 
+						"$(SYSROOT)/usr/include/opencv4" 
+                	], 
+            		"options": "", 
+            		"symbols": [
+                		"__PS_ENABLE_AIE__"
+            			]
+				},
+        		"linker": {
+            			"librarypaths": [
+		                	"$(SYSROOT)/usr/lib/", 
+                			"LIB_DIR/L1/lib/sw/aarch64-linux"
+            			], 
+            		"options": " -luuid"
+                }
             }
         }
     }, 
@@ -37,6 +57,14 @@
     ], 
     "gui": false, 
     "launch": [
+        {
+            "name": "aiesim-launch",
+            "target": "aiesim"
+        },
+        {
+            "name": "x86sim-launch",
+            "target": "x86sim"
+        },
         {
             "name": "hwemu-launch", 
             "target": "hw_emu", 
@@ -48,6 +76,22 @@
             "cmd_args": "kernel.xclbin LIB_DIR/data/4k.jpg 128 128"
         }
     ], 
+"v++": { 
+        "compiler": {
+            "symbols": [],
+            "clflags": [],
+			"includepaths": [
+				"LIB_DIR/L1/include/aie",
+				"LIB_DIR/L1/include/aie-ml/", 
+				"LIB_DIR/L1/include/aie-ml/", 
+				"./"
+			]
+		},
+		"linker": {
+               	"ldclflags": [
+                   	]
+        }
+    },
     "host": {
         "host_exe": "host.elf", 
         "compiler": {
@@ -56,33 +100,30 @@
                 "./Work/ps/c_rts/aie_control_xrt.cpp"
             ], 
             "includepaths": [
-                "$(SYSROOT)/usr/include/xrt/", 
-                "$(SYSROOT)/usr/include/", 
-                "$(SYSROOT)/usr/include/opencv4", 
-                "LIB_DIR/L1/include/aie", 
-                "./"
+                                "LIB_DIR/L1/include/aie",
+                                "./"
             ], 
-            "options": "--sysroot=$(SYSROOT) -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
+            "options": "", 
             "symbols": [
                 "__PS_ENABLE_AIE__"
             ]
         }, 
         "linker": {
             "librarypaths": [
-                "$(SYSROOT)/usr/lib/", 
-                "LIB_DIR/L1/lib/sw/aarch64-linux"
+                "$(OPENCV_LIB)"
             ], 
             "libraries": [
                 "smartTilerStitcher"
             ], 
-            "options": "--sysroot=$(SYSROOT)"
+            "options": "-luuid"
         }
     }, 
     "aiecompiler": {
         "compiler": {
             "includepaths": [
-		"LIB_DIR/L1/include/aie-ml",
-                "LIB_DIR/L1/include/aie"
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L1/include/aie-ml/",
+		        "LIB_DIR/L1/include/aie-ml/"
             ]
         }
     }, 
@@ -93,6 +134,7 @@
                     "location": "LIB_DIR/L2/tests/aie-ml/gaincontrol/8bit_aie_8bit_gmio/graph.cpp", 
                     "pl-freq": 300, 
                     "workdir": "./Work", 
+                    "options": "", 
                     "name": "libadf.a", 
                     "files": [
                         "xf_gaincontrol.cc"
@@ -103,6 +145,7 @@
     ], 
     "containers": [
         {
+            "frequency": "300", 
             "name": "kernel"
         }
     ], 
@@ -125,11 +168,11 @@
             }
         ], 
         "targets": [
+            "vitis_aie_sim",
+            "vitis_aie_x86sim",
             "vitis_hw_emu", 
             "vitis_hw_build", 
-            "vitis_hw_run",
-            "vitis_aie_x86sim",
-            "vitis_aie_sim"
+            "vitis_hw_run"
         ], 
         "category": "canary"
     },

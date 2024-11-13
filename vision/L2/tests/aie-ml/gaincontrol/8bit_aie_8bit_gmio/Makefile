@@ -19,10 +19,10 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw_emu/hw/x86sim/aiesim> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<aiesim/x86sim/hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw_emu/hw/x86sim/aiesim> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<aiesim/x86sim/hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
 	$(ECHO) "  NOTE: For embedded platform the following setup steps are required:"
@@ -50,7 +50,7 @@ CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
 # setting default value
-TARGET ?= hw_emu
+TARGET ?= aiesim
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
@@ -125,7 +125,7 @@ AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
-AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie-ml -I $(XFLIB_DIR)/L1/include/aie
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(XFLIB_DIR)/L1/include/aie-ml/
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
@@ -136,24 +136,30 @@ AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 ########################## Setting up Host Variables ##########################
 
 #Inclue Required Host Source Files
+ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/gaincontrol/8bit_aie_8bit_gmio/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
+CXXFLAGS +=  -D __PS_ENABLE_AIE__
+CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+LDFLAGS +=  -L $(SYSROOT)/usr/lib/ -L $(XFLIB_DIR)/L1/lib/sw/aarch64-linux
+LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+LDFLAGS +=  -luuid
+else 
 ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/gaincontrol/8bit_aie_8bit_gmio/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += --sysroot=$(SYSROOT) -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -L $(SYSROOT)/usr/lib/ -L $(XFLIB_DIR)/L1/lib/sw/aarch64-linux
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-LDFLAGS += --sysroot=$(SYSROOT)
+LDFLAGS += -luuid
 else
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie-ml/gaincontrol/8bit_aie_8bit_gmio/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += --sysroot=$(SYSROOT) -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -L $(SYSROOT)/usr/lib/ -L $(XFLIB_DIR)/L1/lib/sw/aarch64-linux
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-LDFLAGS += --sysroot=$(SYSROOT)
+LDFLAGS += -luuid
 endif
-
+endif
 # workaround for opencv
 ifeq (,$(findstring opencv,$(CXXFLAGS)))
 CXXFLAGS += $(XRT_CXXFLAGS)
@@ -179,16 +185,21 @@ endif
 ########################## Kernel compiler global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
 VPP_FLAGS +=   
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
 VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   --package.defer_aie_run
 
 else 
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(XFLIB_DIR)/L1/include/aie-ml/ -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
 
 endif
 
 ######################### binary container global settings ##########################
+ifneq ($(HOST_ARCH_temp), x86)
+VPP_LDFLAGS_kernel += --clock.defaultFreqHz 300000000
+else
+VPP_LDFLAGS_kernel += --kernel_frequency 300
+endif
 
 ifneq ($(PACKAGE_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/kernel.xclbin

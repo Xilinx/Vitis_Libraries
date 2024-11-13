@@ -85,9 +85,13 @@
                     "LIB_DIR/L1/include/aie-ml", 
                     "LIB_DIR/L1/include/aie-ml/dnn", 
                     "./"
-                ]
-            }
-        },
+			]
+		},
+		"linker": {
+               	"ldclflags": [
+                   	]
+        }
+    },
     "host": {
         "host_exe": "host.elf", 
         "compiler": {
