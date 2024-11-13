@@ -4,7 +4,7 @@
 
 `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 .. meta::
-   :keywords: AIE, Cholesky, QRD 
+   :keywords: AIE, Cholesky, QRD, LeastSquaresSolution
    :description: Vitis Solver Library provides a collection of matrix decomposition operations on AIE.
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials

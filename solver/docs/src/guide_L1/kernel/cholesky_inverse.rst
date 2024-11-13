@@ -45,25 +45,23 @@ DataType Supported
 * std::complex<ap_fixed>
 
 .. note::
-   * It's recommended to use floating point data types.
-   * Support of "ap_fixed", "x_complex<ap_fixed>" and "std::complex<ap_fixed>" will be deprecated in the future.
    * The function assumes that the input matrix is symmetric positive definite (Hermitian positive definite for complex-valued inputs).
-   * Subnormal values are not supported. If used, the synthesized hardware flushes these to zero, and the behavior differs versus software simulation.
+   * For floating point types, subnormal input values are not supported. If used, the synthesized hardware flushes these to zero, and the behavior differs versus software simulation.
 
 Interfaces
 --------------------
 * Template parameters:
 
-  *  RowsColsA              Defines the matrix dimensions
-  *  InputType              Input data type
-  *  OutputType             Output data type
-  *  CholeskyInverseTraits  Traits class
+    -  RowsColsA              Defines the matrix dimensions
+    -  InputType              Input data type
+    -  OutputType             Output data type
+    -  CholeskyInverseTraits  Traits class
    
 * Arguments:
 
-  * matrixAStrm             Stream of Square Hermitian/symmetric positive definite input matrix
-  * matrixInverseAStrm      Stream of Inverse of input matrix
-  * cholesky_success        Indicates if matrix A was successfully inverted. 0 = Success. 1 = Failure.
+    -  matrixAStrm             Stream of Square Hermitian/symmetric positive definite input matrix
+    -  matrixInverseAStrm      Stream of Inverse of input matrix
+    -  cholesky_success        Indicates if matrix A was successfully inverted. 0 = Success. 1 = Failure. 
 
 
 Implementation Controls
@@ -71,7 +69,31 @@ Implementation Controls
 
 Specifications
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-The DATAFLOW directive is applied to the top function. You can specify the individual sub-function implementations using a configuration class derived from the following basic class by redefining the appropriate class member: 
+* To implement choleskyInverse, the following sub-functions executed sequentially: Cholesky, back substitution, and matrix multiply. You can specify the individual sub-function implementations using a configuration class derived from the following basic class by redefining the appropriate class member: 
+
+.. code::
+
+    typedef xf::solver::choleskyInverseTraits<ROWSCOLSA, MATRIX_IN_T, MATRIX_OUT_T> DEFAULT_CHOL_INV_TRAITS;
+    
+    struct my_cholesky_inv_traits : DEFAULT_CHOL_INV_TRAITS {
+        struct BACK_SUBSTITUTE_TRAITS : xf::solver::backSubstituteTraits<ROWSCOLSA,
+                                                                         DEFAULT_CHOL_INV_TRAITS::CHOLESKY_OUT,
+                                                                         DEFAULT_CHOL_INV_TRAITS::BACK_SUBSTITUTE_OUT> {
+            static const int ARCH = SEL_ARCH;
+        };
+    };
+
+The configuration class is supplied to the **xf::solver::choleskyInverse** function as a template parameter as follows.
+
+.. code::
+
+    xf::solver::choleskyInverse<ROWSCOLSA, MATRIX_IN_T, MATRIX_OUT_T, my_cholesky_inv_traits>(
+        matrixAStrm, matrixInverseAStrm, inverse_OK);
+
+
+The definition of **xf::solver::choleskyInverseTraits** is in the file **L1/include/hw/cholesky_inverse.hpp** .
+
+The default **xf::solver::choleskyInverseTraits** struct defining the internal variable types for the cholesky inverse function, showed as follows:
 
 .. code::
 
@@ -92,34 +114,171 @@ The DATAFLOW directive is applied to the top function. You can specify the indiv
            MATRIX_MULTIPLY_TRAITS;
    };
 
-The configuration class is supplied to the **xf::solver::choleskyInverse** function as a template parameter as follows.
-The sub-functions are executed sequentially: Cholesky, back substitution, and matrix multiply. The implementation selected for these sub-functions determines the resource utilization and function throughput/latency of the Inverse function.
+
+If the input datatype is ap_fixed, the **xf::solver::choleskyInverseTraits** struct is defined as follows:
 
 .. code::
 
    template <int RowsColsA,
-             typename InputType,
-             typename OutputType,
-             typename CholeskyInverseTraits = choleskyInverseTraits<RowsColsA, InputType, OutputType> >
-   void choleskyInverse(hls::stream<InputType>& matrixAStrm,
-                         hls::stream<OutputType>& matrixInverseAStrm,
-                         int& cholesky_success) {
-   #pragma HLS DATAFLOW
-       hls::stream<typename CholeskyInverseTraits::CHOLESKY_OUT> matrixUStrm;
-   #pragma HLS STREAM variable = matrixUStrm depth = 16
-       hls::stream<typename CholeskyInverseTraits::BACK_SUBSTITUTE_OUT> matrixInverseUStrm;
-   #pragma HLS STREAM variable = matrixInverseUStrm depth = 16
-       int U_singular;
-   
-       // Run Cholesky, get upper-triangular result
-       const bool LOWER_TRIANGULAR = false;
-       cholesky_success = cholesky<LOWER_TRIANGULAR, RowsColsA, InputType, typename CholeskyInverseTraits::CHOLESKY_OUT, typename CholeskyInverseTraits::CHOLESKY_TRAITS>(matrixAStrm, matrixUStrm);
-   
-       // Run back-substitution to compute U^-1
-       backSubstitute<RowsColsA, typename CholeskyInverseTraits::CHOLESKY_OUT, typename CholeskyInverseTraits::BACK_SUBSTITUTE_OUT, typename CholeskyInverseTraits::BACK_SUBSTITUTE_TRAITS>(matrixUStrm, matrixInverseUStrm, U_singular);
+             int W1,
+             int I1,
+             ap_q_mode Q1,
+             ap_o_mode O1,
+             int N1,
+             int W2,
+             int I2,
+             ap_q_mode Q2,
+             ap_o_mode O2,
+             int N2>
+   struct choleskyInverseTraits<RowsColsA, ap_fixed<W1, I1, Q1, O1, N1>, ap_fixed<W2, I2, Q2, O2, N2> > {
+       // Cholesky decomposition output precision
+       static const int CholeskyOutputW = W1;
+       static const int CholeskyOutputI = I1;
+       static const ap_q_mode CholeskyOutputQ = Q1;
+       static const ap_o_mode CholeskyOutputO = O1;
+       static const int CholeskyOutputN = N1;
+       typedef ap_fixed<CholeskyOutputW, CholeskyOutputI, CholeskyOutputQ, CholeskyOutputO, CholeskyOutputN> CHOLESKY_OUT;
+       typedef choleskyTraits<false, RowsColsA, ap_fixed<W1, I1, Q1, O1, N1>, CHOLESKY_OUT> CHOLESKY_TRAITS;
+       // Back substitution output precision
+       static const int BackSubstitutionOutW = W2;
+       static const int BackSubstitutionOutI = I2;
+       static const ap_q_mode BackSubstitutionOutQ = Q2;
+       static const ap_o_mode BackSubstitutionOutO = O2;
+       static const int BackSubstitutionOutN = N2;
+       typedef ap_fixed<BackSubstitutionOutW,
+                        BackSubstitutionOutI,
+                        BackSubstitutionOutQ,
+                        BackSubstitutionOutO,
+                        BackSubstitutionOutN>
+           BACK_SUBSTITUTE_OUT;
+       typedef backSubstituteTraits<RowsColsA, CHOLESKY_OUT, BACK_SUBSTITUTE_OUT> BACK_SUBSTITUTE_TRAITS;
+       typedef matrixMultiplyTraits<NoTranspose,
+                                    ConjugateTranspose,
+                                    RowsColsA,
+                                    RowsColsA,
+                                    RowsColsA,
+                                    RowsColsA,
+                                    BACK_SUBSTITUTE_OUT,
+                                    ap_fixed<W2, I2, Q2, O2, N2> >
+           MATRIX_MULTIPLY_TRAITS;
+   };
 
-       // A^-1 = U^-1*U^-t (equivalent to L-t*L-1)
-       matrixMultiply<NoTranspose, ConjugateTranspose, RowsColsA, RowsColsA, RowsColsA, RowsColsA, typename CholeskyInverseTraits::BACK_SUBSTITUTE_OUT, OutputType, typename CholeskyInverseTraits::MATRIX_MULTIPLY_TRAITS>(matrixInverseUStrm, matrixInverseAStrm);
-   }
+If the input datatype is hls::compelx<ap_fixed>, the **xf::solver::choleskyInverseTraits** struct is defined as follows:
+
+.. code::
+
+   template <int RowsColsA,
+             int W1,
+             int I1,
+             ap_q_mode Q1,
+             ap_o_mode O1,
+             int N1,
+             int W2,
+             int I2,
+             ap_q_mode Q2,
+             ap_o_mode O2,
+             int N2>
+   struct choleskyInverseTraits<RowsColsA,
+                                hls::x_complex<ap_fixed<W1, I1, Q1, O1, N1> >,
+                                hls::x_complex<ap_fixed<W2, I2, Q2, O2, N2> > > {
+       // Cholesky decomposition output precision
+       static const int CholeskyOutputW = W1;
+       static const int CholeskyOutputI = I1;
+       static const ap_q_mode CholeskyOutputQ = Q1;
+       static const ap_o_mode CholeskyOutputO = O1;
+       static const int CholeskyOutputN = N1;
+       typedef hls::x_complex<
+           ap_fixed<CholeskyOutputW, CholeskyOutputI, CholeskyOutputQ, CholeskyOutputO, CholeskyOutputN> >
+           CHOLESKY_OUT;
+       typedef choleskyTraits<false, RowsColsA, hls::x_complex<ap_fixed<W1, I1, Q1, O1, N1> >, CHOLESKY_OUT>
+           CHOLESKY_TRAITS;
+       // Back substitution output precision
+       static const int BackSubstitutionOutW = W2;
+       static const int BackSubstitutionOutI = I2;
+       static const ap_q_mode BackSubstitutionOutQ = Q2;
+       static const ap_o_mode BackSubstitutionOutO = O2;
+       static const int BackSubstitutionOutN = N2;
+       typedef hls::x_complex<ap_fixed<BackSubstitutionOutW,
+                                       BackSubstitutionOutI,
+                                       BackSubstitutionOutQ,
+                                       BackSubstitutionOutO,
+                                       BackSubstitutionOutN> >
+           BACK_SUBSTITUTE_OUT;
+       typedef backSubstituteTraits<RowsColsA, CHOLESKY_OUT, BACK_SUBSTITUTE_OUT> BACK_SUBSTITUTE_TRAITS;
+       typedef matrixMultiplyTraits<NoTranspose,
+                                    ConjugateTranspose,
+                                    RowsColsA,
+                                    RowsColsA,
+                                    RowsColsA,
+                                    RowsColsA,
+                                    BACK_SUBSTITUTE_OUT,
+                                    hls::x_complex<ap_fixed<W2, I2, Q2, O2, N2> > >
+           MATRIX_MULTIPLY_TRAITS;
+   };
+   
+If the input datatype is std::compelx<ap_fixed>, the **xf::solver::choleskyInverseTraits** struct is defined as follows:
+
+.. code:: 
+
+   template <int RowsColsA,
+             int W1,
+             int I1,
+             ap_q_mode Q1,
+             ap_o_mode O1,
+             int N1,
+             int W2,
+             int I2,
+             ap_q_mode Q2,
+             ap_o_mode O2,
+             int N2>
+   struct choleskyInverseTraits<RowsColsA,
+                                std::complex<ap_fixed<W1, I1, Q1, O1, N1> >,
+                                std::complex<ap_fixed<W2, I2, Q2, O2, N2> > > {
+       // Cholesky decomposition output precision
+       static const int CholeskyOutputW = W1;
+       static const int CholeskyOutputI = I1;
+       static const ap_q_mode CholeskyOutputQ = Q1;
+       static const ap_o_mode CholeskyOutputO = O1;
+       static const int CholeskyOutputN = N1;
+       typedef std::complex<ap_fixed<CholeskyOutputW, CholeskyOutputI, CholeskyOutputQ, CholeskyOutputO, CholeskyOutputN> >
+           CHOLESKY_OUT;
+       typedef choleskyTraits<false, RowsColsA, std::complex<ap_fixed<W1, I1, Q1, O1, N1> >, CHOLESKY_OUT> CHOLESKY_TRAITS;
+       // Back substitution output precision
+       static const int BackSubstitutionOutW = W2;
+       static const int BackSubstitutionOutI = I2;
+       static const ap_q_mode BackSubstitutionOutQ = Q2;
+       static const ap_o_mode BackSubstitutionOutO = O2;
+       static const int BackSubstitutionOutN = N2;
+       typedef std::complex<ap_fixed<BackSubstitutionOutW,
+                                     BackSubstitutionOutI,
+                                     BackSubstitutionOutQ,
+                                     BackSubstitutionOutO,
+                                     BackSubstitutionOutN> >
+           BACK_SUBSTITUTE_OUT;
+       typedef backSubstituteTraits<RowsColsA, CHOLESKY_OUT, BACK_SUBSTITUTE_OUT> BACK_SUBSTITUTE_TRAITS;
+       typedef matrixMultiplyTraits<NoTranspose,
+                                    ConjugateTranspose,
+                                    RowsColsA,
+                                    RowsColsA,
+                                    RowsColsA,
+                                    RowsColsA,
+                                    BACK_SUBSTITUTE_OUT,
+                                    std::complex<ap_fixed<W2, I2, Q2, O2, N2> > >
+           MATRIX_MULTIPLY_TRAITS;
+   };
+
+
+.. Warning::
+
+    * The function assumes that the input matrix is symmetric positive definite (Hermitian positive definite for complex-valued inputs). 
+    * If the input matrix data type is ap_fixed or complex<ap_fixed>, please give proper parameters to ensure the input matrix is symmetric positive definite/Hermitian positive definte.
+    * The definition of ap_[u]fixed<W,I,Q,O,N>
+
+       - W: the Word length in bits. 
+       - I: the number of bits above the decimal point.
+       - Q: Quantization mode.
+       - O: Quantization mode.
+       - N: This defines the number of saturation bits in overflow wrap modes.
+
 
 
