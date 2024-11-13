@@ -241,6 +241,7 @@ void copyMatrix(dataType dataA[diagSize][diagSize],
         for (int l = 0; l < diagSize; ++l) {
 #pragma HLS unroll
             dataA_new[k][l] = dataA[k][l];
+            dataB_new[k][l] = dataB[k][l];
         }
     }
 }
