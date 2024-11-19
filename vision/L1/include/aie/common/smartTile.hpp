@@ -121,7 +121,8 @@ class smartTileMetaData {
     uint16_t positionH() const { return m_positionH; }
     uint32_t finalWidth() const { return m_finalImageSizeWidth; }
     uint32_t finalHeight() const { return m_finalImageSizeHeight; }
-
+    uint32_t outPositionV() const { return m_coordinate_row; }
+    uint32_t outPositionH() const { return m_coordinate_col; }
     uint16_t overlapSizeH_left() const { return m_overlapSizeH_left; }
     uint16_t overlapSizeH_right() const { return m_overlapSizeH_right; }
     uint16_t overlapSizeV_top() const { return m_overlapSizeV_top; }

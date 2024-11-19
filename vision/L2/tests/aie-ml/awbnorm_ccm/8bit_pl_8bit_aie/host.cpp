@@ -102,10 +102,10 @@ int main(int argc, char** argv) {
 
         // Load image
         void* srcData1 = nullptr;
-        xrtBufferHandle src_hndl1 = xrtBOAlloc(xF::gpDhdl, (srcImage1.total() * srcImage1.elemSize()), 0, 0);
-        std::cout << "image xrtBufferHandle done.\n";
+        xrt::bo src_hndl1 = xrt::bo(xF::gpDhdl, (srcImage1.total() * srcImage1.elemSize()), 0, 0);
+        std::cout << "image xrt::bo done.\n";
 
-        srcData1 = xrtBOMap(src_hndl1);
+        srcData1 = src_hndl1.map();
         memcpy(srcData1, srcImage1.data, (srcImage1.total() * srcImage1.elemSize()));
         std::cout << "memcpy  done.\n";
 
@@ -114,9 +114,9 @@ int main(int argc, char** argv) {
 
         // Allocate output buffer
         void* dstData = nullptr;
-        xrtBufferHandle dst_hndl =
-            xrtBOAlloc(xF::gpDhdl, (op_height * op_width * 4), 0, 0); // '2' for unsigned short type
-        dstData = xrtBOMap(dst_hndl);
+        xrt::bo* dst_hndl =
+           new xrt::bo(xF::gpDhdl, (op_height * op_width * 4), 0, 0); // '2' for unsigned short type
+        dstData = dst_hndl->map();
         cv::Mat dst(op_height, op_width, CV_8UC4, dstData);
 
         T* ref_out = (T*)malloc(srcImage1.total() * 4);
@@ -129,19 +129,43 @@ int main(int argc, char** argv) {
 
         std::cout << "Graph init. This does nothing because CDO in boot PDI already configures AIE.\n";
 
-        ccm_graph.init();
         for (int j = 0; j < 16 + 9; j++) printf("host_coeff: %d \n", (int)coeffs[j]);
-        ccm_graph.update(ccm_graph.coeff, coeffs, (16 + 9));
-        std::chrono::microseconds tt(0);
+        std::array<int16_t, 25> coeff;
+        std::copy(coeffs, coeffs + coeff.size(), coeff.begin());
+
+        #if !__X86_DEVICE__
+        std::cout << "Graph init. This does nothing because CDO in boot PDI "
+                     "already configures AIE.\n";
+        auto gHndl = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "ccm_graph");
+        std::cout << "XRT graph opened" << std::endl;
+        gHndl.reset();
+        std::cout << "Graph reset done" << std::endl;
+        gHndl.update("ccm_graph.k1.in[1]", coeff);
+        #endif  
+
+        START_TIMER
         tiler1.compute_metadata(srcImage1.size());
+        STOP_TIMER("Meta data compute time")
+        
+        for (int j = 0; j < 16 + 9; j++) printf("host_coeff: %d \n", (int)coeffs[j]);
+        std::chrono::microseconds tt(0);
         for (int itr = 0; itr < iterations; itr++) {
             //@{
             START_TIMER
-            auto tiles_sz = tiler1.host2aie_nb(src_hndl1, srcImage1.size());
+            auto tiles_sz = tiler1.host2aie_nb(&src_hndl1, srcImage1.size());
             stitcher.aie2host_nb(dst_hndl, dst.size(), tiles_sz);
-            std::cout << "Graph Run(" << tiles_sz[0] * tiles_sz[1] << ")" << std::endl;
-            ccm_graph.run(tiles_sz[0] * tiles_sz[1]);
-            ccm_graph.wait();
+            #if !__X86_DEVICE__
+            std::cout << "Graph running for " << (tiles_sz[0] * tiles_sz[1]) << " iterations.\n";
+            for (int i = 1; i <= tiles_sz[0] * tiles_sz[1]; i++) {
+                std::cout << "Running graph iteration : " << i << std::endl;
+                std::cout << "...";
+
+                gHndl.run(1);
+                gHndl.wait();
+                std::cout << "[DONE iteration] : " << i << std::endl;
+            }
+            #endif
+
 
             tiler1.wait();
             stitcher.wait();
@@ -151,7 +175,9 @@ int main(int argc, char** argv) {
             tt += tdiff;
         }
 
-        ccm_graph.end();
+#if !__X86_DEVICE__
+        gHndl.end(0);
+#endif
         //@}
         // Analyze output {
         std::cout << "Analyzing diff";

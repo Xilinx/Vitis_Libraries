@@ -38,8 +38,10 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
     bool mTilerRGBtoRGBA;
     bool mStitcherRGBAtoRGB;
     bool mIsOutputResize;
+    bool isDynamicOutputResize;
     cv::Size mOutSize;
     uint8_t mchannels;
+    bool msbm;
 
     cv::Mat* mpImage;
     DATA_TYPE* mpImgData;
@@ -96,6 +98,11 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
                 xf::cv::aie::xfSetTileOutTHeight(
                     meta_data_p, mMetaDataList[t].tileHeight() -
                                      (mMetaDataList[t].overlapSizeV_top() + mMetaDataList[t].overlapSizeV_bottom()));
+            } else if (isDynamicOutputResize == true) {
+                xf::cv::aie::xfSetTileOutPosH(meta_data_p, mMetaDataList[t].outPositionH());
+                xf::cv::aie::xfSetTileOutPosV(meta_data_p, mMetaDataList[t].outPositionV());
+                xf::cv::aie::xfSetTileOutTWidth(meta_data_p, mOutSize.width);
+                xf::cv::aie::xfSetTileOutTHeight(meta_data_p, mOutSize.height);
             } else {
                 xf::cv::aie::xfSetTileOutPosH(meta_data_p, 0);
                 xf::cv::aie::xfSetTileOutPosV(meta_data_p, t);
@@ -107,6 +114,7 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
             int16_t tileWidth = mMetaDataList[t].tileWidth();
             int16_t positionV = mMetaDataList[t].positionV();
             int16_t positionH = mMetaDataList[t].positionH();
+
             for (int ti = 0; ti < tileHeight; ti++) {
                 memcpy(image_data_p + (ti * (tileWidth * mchannels)),
                        mpImgData + (((positionV + ti) * (mImageSize[1] * mchannels)) + positionH * mchannels),
@@ -142,7 +150,6 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == STITCHER)>::type* = nullptr>
     void output_copy(uint16_t startInd, uint16_t endInd) {
         assert(mpImgData != nullptr);
-
         char* buffer = (mImageBOHndl.map<char*>());
         int tileSize = tileWindowSize(mchannels);
         for (int t = startInd; t < endInd; t++) {
@@ -172,15 +179,14 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
             }
         }
     }
+
     //}
 
     // Stitcher copy {
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == STITCHER)>::type* = nullptr>
     void copy() {
         assert(mpImgData != nullptr);
-
-        uint16_t numThreads = std::thread::hardware_concurrency();
-
+        uint16_t numThreads = (msbm == true) ? 1 : std::thread::hardware_concurrency();
         std::thread mCopyThreads[numThreads];
 
         uint16_t tilesPerThread = (mTileRows * mTileCols) / numThreads;
@@ -188,6 +194,7 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
             uint16_t startInd = i * tilesPerThread;
             uint16_t endInd = (i == numThreads - 1) ? (mTileRows * mTileCols) : ((i + 1) * tilesPerThread);
             mCopyThreads[i] = std::thread(&xfcvDataMovers::output_copy, this, startInd, endInd);
+            // std::cout << "start IND = " << startInd << " endInd " << endInd << std::endl;
         }
         for (int i = 0; i < numThreads; i++) {
             mCopyThreads[i].join();
@@ -320,7 +327,7 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
     //}
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == STITCHER)>::type* = nullptr>
-    xfcvDataMovers(uint8_t channels = 1) {
+    xfcvDataMovers(uint8_t channels = 1, bool sbm = false) {
         // if (!bool(gpDhdl)) {
         //  throw std::runtime_error("No valid device handle found. Make sure using xF::deviceInit(...) is called.");
         //}
@@ -339,6 +346,8 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
         mbUserHndl = false;
         mTilerRGBtoRGBA = false;
         mStitcherRGBAtoRGB = false;
+
+        msbm = sbm;
 
         mImageBOHndl = {};
         __mImageBOHndl = {};
@@ -362,7 +371,13 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
     }
     //}
 
-    void compute_metadata(const cv::Size& inImgSize, const cv::Size& outImgSize = cv::Size(0, 0));
+    void compute_metadata(const cv::Size& inImgSize,
+                          const cv::Size& outImgSize = cv::Size(0, 0),
+                          bool YorUV = false,
+                          const int OUT_TILE_WIDTH_MAX = TILE_WIDTH_MAX,
+                          const int OUT_TILE_HEIGHT_MAX = TILE_HEIGHT_MAX,
+                          bool resize_bicubic = false,
+                          bool sbm = false);
 
     // These functions will start the data transfer protocol {
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == TILER)>::type* = nullptr>
@@ -385,6 +400,10 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
                 // Pack metadata
                 compute_metadata(img_size);
             }
+        } else if (isDynamicOutputResize == true) {
+            mpImgData = imgHndl.map<DATA_TYPE*>();
+            mImageSize = {(uint16_t)img_size.height, (uint16_t)img_size.width, (uint16_t)sizeof(DATA_TYPE) * mchannels};
+            // compute_metadata(img_size, params.mOutputImgSize);
         } else {
             mpImgData = imgHndl.map<DATA_TYPE*>();
             mImageSize = {(uint16_t)img_size.height, (uint16_t)img_size.width, (uint16_t)sizeof(DATA_TYPE) * mchannels};
@@ -524,11 +543,11 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
 
         mpImgData = (DATA_TYPE*)img_data;
         mImageSize = {(uint16_t)img_size.height, (uint16_t)img_size.width, sizeof(DATA_TYPE) * mchannels};
-
         mTileRows = tiles[0];
         mTileCols = tiles[1];
 
         int new_img_buffer_size = imgSize();
+
         if ((new_img_buffer_size > old_img_buffer_size)) {
             free_buffer();
         }
@@ -598,17 +617,6 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
     //}
 };
 
-/*
-template <DataMoverKind KIND,
-          typename DATA_TYPE,
-          int TILE_HEIGHT_MAX,
-          int TILE_WIDTH_MAX,
-          int AIE_VECTORIZATION_FACTOR,
-          int CORES>
-void xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX,
-AIE_VECTORIZATION_FACTOR, CORES, 0, true>::
-    setTileCopyFn(DataCopyF_t& fn) {}
-*/
 template <DataMoverKind KIND,
           typename DATA_TYPE,
           int TILE_HEIGHT_MAX,
@@ -616,7 +624,13 @@ template <DataMoverKind KIND,
           int AIE_VECTORIZATION_FACTOR,
           int CORES>
 void xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTORIZATION_FACTOR, CORES, 0, true>::
-    compute_metadata(const cv::Size& inImgSize, const cv::Size& outImgSize) {
+    compute_metadata(const cv::Size& inImgSize,
+                     const cv::Size& outImgSize,
+                     bool YorUV,
+                     const int OUT_TILE_WIDTH_MAX,
+                     const int OUT_TILE_HEIGHT_MAX,
+                     bool resize_bicubic,
+                     bool sbm) {
     mMetaDataList.clear();
 
     cv::Size inputImgSize = inImgSize;
@@ -630,13 +644,26 @@ void xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTOR
     mImageSize[0] = (uint16_t)inputImgSize.height;
     mImageSize[1] = (uint16_t)inputImgSize.width;
 
-    if (inputImgSize.height == outputImgSize.height && inputImgSize.width == outputImgSize.width) {
+    if (inputImgSize.height == outputImgSize.height && inputImgSize.width == outputImgSize.width && sbm == false) {
         smartTileTilerGenerateMetaDataWithSpecifiedTileSize({inputImgSize.height, inputImgSize.width}, mMetaDataList,
                                                             mTileRows, mTileCols, {TILE_HEIGHT_MAX, TILE_WIDTH_MAX},
                                                             {mOverlapH, mOverlapH}, {mOverlapV, mOverlapV},
-                                                            AIE_VECTORIZATION_FACTOR, true);
+                                                            AIE_VECTORIZATION_FACTOR, true, false);
         mIsOutputResize = false;
         mOutSize = cv::Size(inputImgSize.height, inputImgSize.width);
+    } else if (resize_bicubic == true) {
+        smartTileTilerGenerateMetaDataWithSpecifiedTileSize(
+            {inputImgSize.height, inputImgSize.width}, {outputImgSize.height, outputImgSize.width}, mMetaDataList,
+            {TILE_HEIGHT_MAX, TILE_WIDTH_MAX}, {OUT_TILE_HEIGHT_MAX, OUT_TILE_WIDTH_MAX}, mTileRows, mTileCols,
+            AIE_VECTORIZATION_FACTOR, YorUV, true, true);
+        isDynamicOutputResize = true;
+        mIsOutputResize = true;
+        mOutSize = cv::Size(OUT_TILE_WIDTH_MAX, OUT_TILE_HEIGHT_MAX);
+        std::cout << mOutSize.height << " " << mOutSize.width << std::endl;
+    } else if (sbm == true) {
+        smartTileTilerGenerateMetaDataWithSpecifiedTileSize(
+            {inputImgSize.height, inputImgSize.width}, mMetaDataList, mTileRows, mTileCols,
+            {TILE_HEIGHT_MAX, TILE_WIDTH_MAX}, {mOverlapH, 0}, {mOverlapV, 0}, AIE_VECTORIZATION_FACTOR, true, true);
     } else {
         smartTileTilerGenerateMetaDataWithSpecifiedTileSize({inputImgSize.height, inputImgSize.width},
                                                             {outputImgSize.height, outputImgSize.width}, mMetaDataList,

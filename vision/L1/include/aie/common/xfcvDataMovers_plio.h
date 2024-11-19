@@ -343,11 +343,10 @@ class xfcvDataMovers {
 
     void compute_metadata(const cv::Size& img_size,
                           const cv::Size& outImgSize = cv::Size(0, 0),
-                          const cv::Size& orgImgSize = xfcvDataMoverParams().mInputImgSize,
                           bool YorUV = false,
-                          int crop_x = 0,
-                          int crop_y = 0);
-
+                          const int OUT_TILE_WIDTH_MAX = TILE_WIDTH_MAX,
+                          const int OUT_TILE_HEIGHT_MAX = TILE_HEIGHT_MAX,
+                          bool resize_bicubic = false);
     // These functions will start the data transfer protocol {
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == TILER)>::type* = nullptr>
     auto host2aie_nb(cv::Mat& img, xrt::bo imgHndl = {}, const xfcvDataMoverParams& params = xfcvDataMoverParams()) {
@@ -523,10 +522,12 @@ void xfcvDataMovers<KIND,
                     PL_AXI_BITWIDTH,
                     USE_GMIO>::compute_metadata(const cv::Size& inImgSize,
                                                 const cv::Size& outImgSize,
-                                                const cv::Size& orgImgSize,
                                                 bool YorUV,
-                                                int crop_x,
-                                                int crop_y) {
+                                                const int OUT_TILE_WIDTH_MAX,
+                                                const int OUT_TILE_HEIGHT_MAX,
+                                                bool resize_bicubic) {
+    // std::cout << "OUT_TILE_WIDTH_MAX= " << OUT_TILE_WIDTH_MAX << "OUT_TILE_HEIGHT_MAX=" << OUT_TILE_HEIGHT_MAX <<
+    // std::endl;
     mMetaDataList.clear();
     mMetaDataVec.clear();
 
@@ -542,16 +543,26 @@ void xfcvDataMovers<KIND,
     mImageSize[1] = (uint16_t)inputImgSize.width;
 
     bool isOutputResize = false;
+    bool isDynamicOutputResize = false;
+
     if (inputImgSize.height == outputImgSize.height && inputImgSize.width == outputImgSize.width) {
         smartTileTilerGenerateMetaDataWithSpecifiedTileSize({inputImgSize.height, inputImgSize.width}, mMetaDataList,
                                                             mTileRows, mTileCols, {TILE_HEIGHT_MAX, TILE_WIDTH_MAX},
                                                             {mOverlapH, mOverlapH}, {mOverlapV, mOverlapV},
                                                             AIE_VECTORIZATION_FACTOR, true);
     } else {
-        isOutputResize = true;
-        smartTileTilerGenerateMetaDataWithSpecifiedTileSize(
-            {inputImgSize.height, inputImgSize.width}, {outputImgSize.height, outputImgSize.width}, mMetaDataList,
-            mTileRows, mTileCols, AIE_VECTORIZATION_FACTOR, YorUV, true);
+        if (inputImgSize.width == TILE_WIDTH_MAX) {
+            isOutputResize = true;
+            smartTileTilerGenerateMetaDataWithSpecifiedTileSize(
+                {inputImgSize.height, inputImgSize.width}, {outputImgSize.height, outputImgSize.width}, mMetaDataList,
+                mTileRows, mTileCols, AIE_VECTORIZATION_FACTOR, false, true);
+        } else if (resize_bicubic == true) {
+            isDynamicOutputResize = true;
+            smartTileTilerGenerateMetaDataWithSpecifiedTileSize(
+                {inputImgSize.height, inputImgSize.width}, {outputImgSize.height, outputImgSize.width}, mMetaDataList,
+                {TILE_HEIGHT_MAX, TILE_WIDTH_MAX}, {OUT_TILE_HEIGHT_MAX, OUT_TILE_WIDTH_MAX}, mTileRows, mTileCols,
+                AIE_VECTORIZATION_FACTOR, YorUV, true, true);
+        }
     }
 
     char sMesg[2048];
@@ -570,22 +581,27 @@ void xfcvDataMovers<KIND,
     int OutputImageStride = (int)outputImgSize.width;
 
     int i = 0;
+    int j = 0;
+    std::ofstream metadata("metadata.txt");
     for (auto& metaData : mMetaDataList) {
-        if (isOutputResize == false) {
-            OutpositionV = metaData.positionV() + metaData.overlapSizeV_top();
-            OutpositionH = metaData.positionH() + metaData.overlapSizeH_left();
-            OutWidth = (metaData.tileWidth() - (metaData.overlapSizeH_left() + metaData.overlapSizeH_right()));
-            OutHeight = (metaData.tileHeight() - (metaData.overlapSizeV_top() + metaData.overlapSizeV_bottom()));
-        } else {
+        if (isOutputResize == true) {
             OutpositionV = i++;
             OutpositionH = 0;
             OutWidth = OutputImageStride;
             OutHeight = 1;
+        } else if (isDynamicOutputResize == true) {
+            OutpositionV = metaData.outPositionV();
+            OutpositionH = metaData.outPositionH();
+            OutWidth = metaData.finalWidth();
+            OutHeight = metaData.finalHeight();
+        } else {
+            OutpositionV = metaData.positionV() + metaData.overlapSizeV_top();
+            OutpositionH = metaData.positionH() + metaData.overlapSizeH_left();
+            OutWidth = (metaData.tileWidth() - (metaData.overlapSizeH_left() + metaData.overlapSizeH_right()));
+            OutHeight = (metaData.tileHeight() - (metaData.overlapSizeV_top() + metaData.overlapSizeV_bottom()));
         }
-
         OutOffset = ((OutpositionV * OutputImageStride) + OutpositionH);
-        // InOffset = ((metaData.positionV() * InputImageStride) + metaData.positionH());
-        InOffset = (((crop_y + metaData.positionV()) * InputImageStride) + (metaData.positionH() + crop_x));
+        InOffset = ((metaData.positionV() * InputImageStride) + metaData.positionH());
 
         mMetaDataVec.emplace_back((int16_t)(InOffset & 0x0000ffff));
         mMetaDataVec.emplace_back((int16_t)(InOffset >> 16));
@@ -606,6 +622,16 @@ void xfcvDataMovers<KIND,
         mMetaDataVec.emplace_back((int16_t)metaData.positionV()); // In PosV
         mMetaDataVec.emplace_back((int16_t)16);                   // BIT_WIDTH
         mMetaDataVec.emplace_back((int16_t)OutputImageStride);
+        /*metadata << "tile = " << j << " "
+                 << "tileWidth = " << metaData.tileWidth() << " "
+                 << "tileHeight = " << metaData.tileHeight() << " "
+                 << "OutWidth = " << OutWidth << " "
+                 << "OutHeight = " << OutHeight << " "
+                 << "out_x = " << OutpositionH << " "
+                 << "out_y = " << OutpositionV << " "
+                 << "in_x = " << metaData.positionH() << " "
+                 << "in_y = " << metaData.positionV() << " "
+                 << "OutputImageStride = " << OutputImageStride << std::endl;*/
         mMetaDataVec.emplace_back((int16_t)0);
         mMetaDataVec.emplace_back((int16_t)0);
         mMetaDataVec.emplace_back((int16_t)0);
