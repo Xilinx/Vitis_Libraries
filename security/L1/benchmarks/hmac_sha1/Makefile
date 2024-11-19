@@ -143,14 +143,14 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include -I kernel -I $(XFLIB_DIR)/L1/include
 endif
 
 ######################### binary container global settings ##########################
-VPP_FLAGS_hmacSha1Kernel_1 += --hls.clock 300000000:hmacSha1Kernel_1
-VPP_FLAGS_hmacSha1Kernel_2 += --hls.clock 300000000:hmacSha1Kernel_2
-VPP_FLAGS_hmacSha1Kernel_3 += --hls.clock 300000000:hmacSha1Kernel_3
-VPP_FLAGS_hmacSha1Kernel_4 += --hls.clock 300000000:hmacSha1Kernel_4
+VPP_FLAGS_hmacSha1Kernel_1 += --hls.clock 280000000:hmacSha1Kernel_1
+VPP_FLAGS_hmacSha1Kernel_2 += --hls.clock 280000000:hmacSha1Kernel_2
+VPP_FLAGS_hmacSha1Kernel_3 += --hls.clock 280000000:hmacSha1Kernel_3
+VPP_FLAGS_hmacSha1Kernel_4 += --hls.clock 280000000:hmacSha1Kernel_4
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_hmacSha1Kernel += --clock.defaultFreqHz 300000000
+VPP_LDFLAGS_hmacSha1Kernel += --clock.defaultFreqHz 280000000
 else
-VPP_LDFLAGS_hmacSha1Kernel += --kernel_frequency 300
+VPP_LDFLAGS_hmacSha1Kernel += --kernel_frequency 280
 endif
 
 ifneq ($(SD_CARD_NEEDED), on)
