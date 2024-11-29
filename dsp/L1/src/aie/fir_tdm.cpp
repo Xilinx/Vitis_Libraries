@@ -547,7 +547,6 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                     // Rewind by
                     inRdItr -= (TP_FIR_RANGE_LEN)*TP_TDM_LOOP_SIZE - 1;
                 }
-            // inRdItr += m_kFirCoeffOffset * columnMultiple * TP_TDM_CHANNELS / kSamplesInVectData;
         }
 };
 
@@ -615,7 +614,7 @@ kernelFilterClass<TT_DATA,
     using accVect_t = ::aie::accum<typename tTDMAccBaseType<TT_DATA, TT_COEFF>::type, kSamplesInVectAcc>;
 
     dataVect_t dataVect;
-    dataVect_t* __restrict inPointer;
+    dataRead_t* __restrict inPointer;
     outDataVect_t outVect, outVect2;
     coeffVect_t* __restrict coeffVectPtr;
 
@@ -623,14 +622,30 @@ kernelFilterClass<TT_DATA,
     accVect_t acc, acc2;
     input_circular_buffer<TT_DATA, extents<internalBufferSize>, margin<0> > inWindowCirc(&m_inputBuffer[0],
                                                                                          internalBufferSize, 0);
-    auto inWrItr = ::aie::begin_vector_random_circular<kSamplesInVectData>(m_inputBuffer, internalBufferSize);
-    auto inRdItr = ::aie::begin_vector_random_circular<kSamplesInVectAcc>(inWindowCirc);
+    auto inWrItr = ::aie::begin_vector_random_circular<kSamplesInVectAcc>(m_inputBuffer, internalBufferSize);
+    auto inRdItr = ::aie::begin_vector_random_circular<kSamplesInVectAcc>(m_inputBuffer, internalBufferSize);
     dataVect_t* frameStart = (dataVect_t*)inInterface.inWindow;
-    // #undef _DSPLIB_FIR_TDM_HPP_DEBUG_
 
-    inWrItr += (marginFrame)*TP_TDM_CHANNELS / kSamplesInVectData;
+    inWrItr += (marginFrame)*TP_TDM_CHANNELS / kSamplesInVectAcc;
     int readIncr = ((marginFrame + 2 + m_kFirCoeffOffset)) * columnMultiple * TP_TDM_CHANNELS / kSamplesInVectData;
     inRdItr += readIncr;
+    // precalculate margin frame prior to jumping into inner loop.
+    // Alternatively, calculate margin frame within inner loop, to avoid a costly div.
+    // Calculating frame margin inside inner loop benefits cases that operate on a fairly small number of frames.
+    constexpr unsigned int precalculatedMarginFrame = (TP_NUM_FRAMES > internalBufferFrames) ? 1 : 0;
+    if
+        constexpr(m_kFirMargin == 0) {
+            if
+                constexpr(precalculatedMarginFrame == 1) {
+                    marginFrame = (((marginFrame + TP_NUM_FRAMES) >= internalBufferFrames)
+                                       ? ((marginFrame + TP_NUM_FRAMES) % internalBufferFrames)
+                                       : (marginFrame + TP_NUM_FRAMES));
+                }
+        }
+    else {
+        // Margin has been copied externally and is as part of the window
+        marginFrame = 0;
+    }
 
     // Loop through 2 frames at a time
     for (int frame = 0; frame < TP_NUM_FRAMES / 2; frame++)
@@ -640,25 +655,23 @@ kernelFilterClass<TT_DATA,
                     // Embed margin handling here, as this would reduce the amount of buffer size.
 
                     for (int j = 0; j < 2; j++) {
-                        dataVect_t* frameStart =
-                            (dataVect_t*)inInterface.inWindow + j * TP_TDM_CHANNELS / kSamplesInVectData;
+                        dataRead_t* frameStart =
+                            (dataRead_t*)inInterface.inWindow + j * TP_TDM_CHANNELS / kSamplesInVectAcc;
                         // Copy margin for 2 frames at a time
-                        for (int i = 0; i < TP_TDM_CHANNELS / kSamplesInVectData; i++) {
-                            inPointer =
-                                ((dataVect_t*)frameStart) + i + 2 * frame * TP_TDM_CHANNELS / kSamplesInVectData;
+                        for (int i = 0; i < TP_TDM_CHANNELS / kSamplesInVectAcc; i++) {
+                            inPointer = ((dataRead_t*)frameStart) + i + 2 * frame * TP_TDM_CHANNELS / kSamplesInVectAcc;
                             // dataVect = *inPointer;
                             // *inWrItr++ = dataVect;
                             *inWrItr++ = *inPointer;
                         }
                         // Copying 2 frames at a time.
-                        marginFrame = (marginFrame == (internalBufferFrames - 1) ? 0 : marginFrame + 1);
+                        if
+                            constexpr(precalculatedMarginFrame == 0) {
+                                marginFrame = (marginFrame == (internalBufferFrames - 1) ? 0 : marginFrame + 1);
+                            }
                     }
-                    chess_memory_fence();
+                    chess_separator_scheduler();
                 }
-            else {
-                // Margin has been copied externally and is as part of the window
-                marginFrame = 0;
-            }
             // Read once, prior to the loop
             if
                 constexpr(columnMultiple == 2) {
@@ -713,7 +726,6 @@ kernelFilterClass<TT_DATA,
                         }
                     if
                         constexpr(TP_CASC_IN == CASC_IN_TRUE) {
-                            // acc = (accVect_t)readincr_v<kSamplesInVectAcc>(inInterface.inCascade);
                             acc2 = readCascade<TT_DATA, TT_COEFF>(inInterface, acc2);
                             acc2 = macTdm2(acc2, dataVect, coeffVect);
                         }

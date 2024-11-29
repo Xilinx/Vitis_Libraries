@@ -200,10 +200,7 @@ class kernelFilterClass {
 #if __HAS_ACCUM_PERMUTES__ == 1
     // cint16/int16 combo can be overloaded with 2 column MUL/MACs.
     static constexpr unsigned int columnMultiple =
-        (std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, int16>::value) &&
-                (TP_TDM_CHANNELS > m_kVOutSize) && (TP_TDM_CHANNELS % (2 * m_kVOutSize) == 0)
-            ? 2
-            : 1;
+        (std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, int16>::value) ? 2 : 1;
     static constexpr unsigned int coeffToDataMultiple = 1;
 #else
     static constexpr unsigned int columnMultiple = 1;
@@ -256,11 +253,7 @@ class kernelFilterClass {
     // Operate on multiple frames in parallel, when possible.
     // Optimized to reduce data loads, handy when 512-bits of data and 256-bits of coeffs are needed on each clock
     // cycle.
-    static constexpr unsigned int useEvenFrames =
-        (TP_NUM_FRAMES % 2 == 0 && columnMultiple == 2 && TP_TDM_CHANNELS > m_kVOutSize &&
-         TP_TDM_CHANNELS % kSamplesInVectData == 0)
-            ? 1
-            : 0;
+    static constexpr unsigned int useEvenFrames = (TP_NUM_FRAMES % 2 == 0 && columnMultiple == 2) ? 1 : 0;
     // TDM FIR Margin = (TP_FIR_LEN-1)*TP_TDM_CHANNELS
     // or set to 0, if handled with internal buffer.
     static constexpr unsigned int enableInternalMargin = __HAS_ACCUM_PERMUTES__ ? 1 : 0;
