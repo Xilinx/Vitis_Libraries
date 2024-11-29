@@ -1,5 +1,5 @@
 .. 
-  .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+  .. Copyright © 2019–2024 Advanced Micro Devices, Inc
 
 `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -44,14 +44,14 @@ Setup Environment
    #!/bin/bash
 
    # setup vitis env
-   source <Vitis_install_path>/Vitis/2023.2/settings64.sh 
-   source <XRT_install_path>/2023.2/xbb/xrt/packages/setenv.sh
+   source <Vitis_install_path>/Vitis/2024.2/settings64.sh 
+   source <XRT_install_path>/2024.2/xbb/xrt/packages/setenv.sh
    export PLATFORM_REPO_PATHS=<path_to_platforms>
 
    # set petalinux related env
-   export SYSROOT=<path_to_platforms>/sw/versal/xilinx-versal-common-v2023.2/sysroots/aarch64-xilinx-linux/
-   export ROOTFS=<path_to_platforms>/sw/versal/xilinx-versal-common-v2023.2/rootfs.ext4
-   export K_IMAGE=<path_to_platforms>/sw/versal/xilinx-versal-common-v2023.2/Image
+   export SYSROOT=<path_to_platforms>/sw/versal/xilinx-versal-common-v2024.2/sysroots/aarch64-xilinx-linux/
+   export ROOTFS=<path_to_platforms>/sw/versal/xilinx-versal-common-v2024.2/rootfs.ext4
+   export K_IMAGE=<path_to_platforms>/sw/versal/xilinx-versal-common-v2024.2/Image
 
 Download the Vitis Ultrasound Library
 --------------------------------------

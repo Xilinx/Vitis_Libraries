@@ -3,15 +3,15 @@
 ### Setup Environment
 ```bash
 #!/bin/bash
-# setup vitis_22.2 env
-source <Vitis_install_path>/Vitis/2022.2/settings64.sh
+# setup vitis_24.2 env
+source <Vitis_install_path>/Vitis/2024.2/settings64.sh
 source /opt/xilinx/xrt/setup.sh
 export PLATFORM_REPO_PATHS=<path to platforms>
-export PLATFORM=xilinx_vck190_base_202220_1
+export PLATFORM=xilinx_vck190_base_202420_1
 # set up your SYSROOT, ROOTFS and K_IMAGE PATH
-export SYSROOT=<path to platforms>/sw/versal/xilinx-versal-common-v2022.2/sysroots/aarch64-xilinx-linux/
-export ROOTFS=<path to platforms>/sw/versal/xilinx-versal-common-v2022.2/rootfs.ext4
-export K_IMAGE=<path to platforms>/sw/versal/xilinx-versal-common-v2022.2/Image
+export SYSROOT=<path to platforms>/sw/versal/xilinx-versal-common-v2024.2/sysroots/aarch64-xilinx-linux/
+export ROOTFS=<path to platforms>/sw/versal/xilinx-versal-common-v2024.2/rootfs.ext4
+export K_IMAGE=<path to platforms>/sw/versal/xilinx-versal-common-v2024.2/Image
 ```
 
 ### Run a L3 Example
@@ -27,16 +27,20 @@ make all TARGET=hw       # build the entire program for hw_run
 ```
 
 ## License
-Copyright 2022 AMD, Inc.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
 
-    http://www.apache.org/licenses/LICENSE-2.0
+    Copyright (C) 2019-2022, Xilinx, Inc.
+    Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
