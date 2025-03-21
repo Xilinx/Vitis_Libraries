@@ -86,7 +86,7 @@ void SobelBaseImpl<TILE_HEIGHT, NO_DISPARITIES, TILE_WINSIZE>::runImpl(adf::inpu
     int16_t posv_new = (posv == 0) ? 0 : posv + TILE_WINSIZE + 1;
     xfSetTileOutPosH(metadata_ptr, posh);
     xfSetTileOutPosV(metadata_ptr, posv_new);
-    const int16_t otw = 32 + NO_DISPARITIES + 32;
+    const int16_t otw = 32 + 240 + 32;
     xfSetTileOutTWidth(metadata_ptr, otw);
     xfSetTileWidth(metadata_ptr, otw);
     int16_t tile_ht_temp = TILE_HEIGHT - 2;

@@ -88,13 +88,13 @@ void stereopipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_L,
 
     xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_MAT_DISP> mat_disp(rows, cols);
 
-    xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_MAP_XL> mapxLMat(rows, cols);
+    xf::cv::Mat<XF_32SC1, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_MAP_XL> mapxLMat(rows, cols);
 
-    xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_MAP_YL> mapyLMat(rows, cols);
+    xf::cv::Mat<XF_32SC1, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_MAP_YL> mapyLMat(rows, cols);
 
-    xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_MAP_XR> mapxRMat(rows, cols);
+    xf::cv::Mat<XF_32SC1, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_MAP_XR> mapxRMat(rows, cols);
 
-    xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_MAP_YR> mapyRMat(rows, cols);
+    xf::cv::Mat<XF_32SC1, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_MAP_YR> mapyRMat(rows, cols);
 
     xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_LEFT_REMAPPED> leftRemappedMat(rows, cols);
 
@@ -107,18 +107,18 @@ void stereopipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_L,
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_MAT_L>(img_L, mat_L);
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_MAT_R>(img_R, mat_R);
 
-    xf::cv::InitUndistortRectifyMapInverse<XF_CAMERA_MATRIX_SIZE, XF_DIST_COEFF_SIZE, XF_32FC1, XF_HEIGHT, XF_WIDTH,
+    xf::cv::InitUndistortRectifyMapInverse<XF_CAMERA_MATRIX_SIZE, XF_DIST_COEFF_SIZE, XF_32SC1, XF_HEIGHT, XF_WIDTH,
                                            XF_NPPCX, XF_CV_DEPTH_MAP_XL, XF_CV_DEPTH_MAP_YL>(
         cameraMA_l_fix, distC_l_fix, irA_l_fix, mapxLMat, mapyLMat, _cm_size, _dc_size);
 
-    xf::cv::remap<XF_REMAP_BUFSIZE, XF_INTERPOLATION_BILINEAR, XF_8UC1, XF_32FC1, XF_8UC1, XF_HEIGHT, XF_WIDTH,
+    xf::cv::remap<XF_REMAP_BUFSIZE, XF_INTERPOLATION_BILINEAR, XF_8UC1, XF_32SC1, XF_8UC1, XF_HEIGHT, XF_WIDTH,
                   XF_NPPCX, XF_USE_URAM, XF_CV_DEPTH_MAT_L, XF_CV_DEPTH_LEFT_REMAPPED, XF_CV_DEPTH_MAP_XL,
                   XF_CV_DEPTH_MAP_YL>(mat_L, leftRemappedMat, mapxLMat, mapyLMat);
 
-    xf::cv::InitUndistortRectifyMapInverse<XF_CAMERA_MATRIX_SIZE, XF_DIST_COEFF_SIZE, XF_32FC1, XF_HEIGHT, XF_WIDTH,
+    xf::cv::InitUndistortRectifyMapInverse<XF_CAMERA_MATRIX_SIZE, XF_DIST_COEFF_SIZE, XF_32SC1, XF_HEIGHT, XF_WIDTH,
                                            XF_NPPCX, XF_CV_DEPTH_MAP_XR, XF_CV_DEPTH_MAP_YR>(
         cameraMA_r_fix, distC_r_fix, irA_r_fix, mapxRMat, mapyRMat, _cm_size, _dc_size);
-    xf::cv::remap<XF_REMAP_BUFSIZE, XF_INTERPOLATION_BILINEAR, XF_8UC1, XF_32FC1, XF_8UC1, XF_HEIGHT, XF_WIDTH,
+    xf::cv::remap<XF_REMAP_BUFSIZE, XF_INTERPOLATION_BILINEAR, XF_8UC1, XF_32SC1, XF_8UC1, XF_HEIGHT, XF_WIDTH,
                   XF_NPPCX, XF_USE_URAM, XF_CV_DEPTH_MAT_R, XF_CV_DEPTH_RIGHT_REMAPPED, XF_CV_DEPTH_MAP_XR,
                   XF_CV_DEPTH_MAP_YR>(mat_R, rightRemappedMat, mapxRMat, mapyRMat);
 

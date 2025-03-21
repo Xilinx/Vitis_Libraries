@@ -18,9 +18,17 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <common/xf_aie_utils.hpp>
 
 // instantiate adf dataflow graph
 topkGraph topk;
+
+void read_file_uint16(FILE* fpout, uint16_t* in_buffer, int n) {
+    for (int i = 0; i < n; i++) {
+        fscanf(fpout, "%hu \n", (in_buffer));
+        in_buffer += 1;
+    }
+}
 
 typedef union value_convert {
     std::uint32_t u;
@@ -64,78 +72,15 @@ void topKIndices(const float* arr, int* indices, int size, int k) {
 // initialize and run the dataflow graph
 #if defined(__AIESIM__) || defined(__X86SIM__)
 int main(int argc, char** argv) {
-    int BLOCK_SIZE_in_Bytes = (TILE_WIDTH_IN * TILE_HEIGHT * NUM_TILES * sizeof(bfloat16));
-    int BLOCK_SIZE_fl_in_Bytes = (TILE_WIDTH_IN * TILE_HEIGHT * NUM_TILES * sizeof(float));
-    int BLOCK_SIZE_uint16_in_Bytes = (TILE_WIDTH_IN * TILE_HEIGHT * NUM_TILES * sizeof(uint16_t));
+    uint16_t* inputData_aie = (uint16_t*)GMIO::malloc(ELEM_WITH_METADATA_IN * sizeof(uint16_t));
+    uint16_t* out1 = (uint16_t*)GMIO::malloc(ELEM_WITH_METADATA_OUT * sizeof(uint16_t));
+    uint16_t* out2 = (uint16_t*)GMIO::malloc(ELEM_WITH_METADATA_OUT * sizeof(uint16_t));
 
-    float* inputData_fl = (float*)malloc(BLOCK_SIZE_fl_in_Bytes);
-    uint16_t* inputData_uint16 = (uint16_t*)malloc(BLOCK_SIZE_uint16_in_Bytes);
-    float* inputData = (float*)malloc(BLOCK_SIZE_fl_in_Bytes / NUM_TILES);
+    memset(inputData_aie, 0, ELEM_WITH_METADATA_IN);
 
-    uint64_t accu = 0;
-
-    for (int i = 0; i < (TILE_HEIGHT * NUM_TILES); i++) {
-        for (int j = 0; j < TILE_WIDTH_IN; j++) {
-            float value;
-            value = rand();
-
-            inputData_fl[(i * TILE_WIDTH_IN) + j] = value;
-            float temp_f = f_to_bf(value);
-            int* temp_int = reinterpret_cast<int*>(&temp_f);
-            inputData_uint16[(i * TILE_WIDTH_IN) + j] = (uint16_t)((*temp_int) >> 16);
-        }
-    }
-
-    int l = 0;
-    std::ofstream inData("data/input_score_1024x1.txt");
-    for (int i = 0; i < (TILE_HEIGHT * NUM_TILES); i++) {
-        l = 0;
-        inData << 0 << " " << 0 << " " << 1024 << " " << 1 << std::endl;
-        inData << 0 << " " << 0 << " " << 0 << " " << 0 << std::endl;
-        inData << 0 << " " << 0 << " " << 1024 << " " << 1 << std::endl;
-        inData << 0 << " " << 0 << " " << i << " " << 0 << std::endl;
-        inData << i << " " << 0 << " " << 0 << " " << 0 << std::endl;
-        inData << 0 << " " << 0 << " " << 0 << " " << 0 << std::endl;
-        inData << 0 << " " << 0 << " " << 0 << " " << 0 << std::endl;
-        inData << 0 << " " << 0 << " " << 0 << " " << 0 << std::endl;
-
-        for (int j = 0; j < TILE_WIDTH_IN; j++) {
-            inData << inputData_uint16[(i * TILE_WIDTH_IN) + j] << " ";
-            l++;
-            if (l == 4) {
-                inData << std::endl;
-                l = 0;
-            }
-        }
-    }
-
-    std::ofstream inData1("data/input_score_fl_1024x1.txt");
-    for (int i = 0; i < (TILE_HEIGHT * NUM_TILES); i++) {
-        l = 0;
-        for (int j = 0; j < TILE_WIDTH_IN; j++) {
-            inData1 << inputData_fl[(i * TILE_WIDTH_IN) + j] << " ";
-            l++;
-            if (l == 4) {
-                inData1 << std::endl;
-                l = 0;
-            }
-        }
-    }
-
-    int indices[TILE_WIDTH_IN * TILE_HEIGHT * NUM_TILES];
-    for (int i = 0; i < TILE_HEIGHT * NUM_TILES; i++) {
-        for (int j = 0; j < TILE_WIDTH_IN; j++) {
-            inputData[j] = inputData_fl[(i * TILE_WIDTH_IN) + j];
-        }
-        topKIndices(inputData, indices + (i * TILE_WIDTH_IN), (TILE_WIDTH_IN), (TILE_WIDTH_OUT));
-    }
-
-    std::ofstream out_indices("data/out_indices_ref.txt");
-
-    for (int i = 0; i < TILE_HEIGHT * NUM_TILES; i++) {
-        for (int j = 0; j < TILE_WIDTH_OUT; j++) {
-            out_indices << "indices = " << indices[(i * TILE_WIDTH_IN) + j] << std::endl;
-        }
+    uint16_t* dataIn = (uint16_t*)xf::cv::aie::xfGetImgDataPtr(inputData_aie);
+    for (int i = 0; i < TILE_ELEMENTS_IN; i++) {
+        dataIn[i] = i;
     }
 
     topk.init();
@@ -143,8 +88,77 @@ int main(int argc, char** argv) {
     topk.update(topk.ktop, TILE_ELEMENTS_OUT);
     topk.update(topk.start_idx, 0);
     topk.run(NUM_TILES);
+    topk.in1.gm2aie_nb(inputData_aie, ELEM_WITH_METADATA_IN * sizeof(uint16_t));
+    topk.out1.aie2gm_nb(out1, ELEM_WITH_METADATA_OUT * sizeof(uint16_t));
+    topk.out2.aie2gm_nb(out2, ELEM_WITH_METADATA_OUT * sizeof(uint16_t));
+    topk.out1.wait();
+    topk.out2.wait();
     topk.wait();
     topk.end();
+
+    // Compare the results
+    uint16_t* refData1 = (uint16_t*)GMIO::malloc(TILE_ELEMENTS_OUT);
+    FILE* fp_refout1 = NULL;
+    fp_refout1 = fopen("data/output1_ref.txt", "r");
+    if (fp_refout1 == NULL) {
+        printf("Failure opening file %s for reading!!\n", fp_refout1);
+        return -1;
+    } else {
+        read_file_uint16(fp_refout1, refData1, TILE_ELEMENTS_OUT);
+    }
+    fclose(fp_refout1);
+
+    uint16_t* aieOut1 = (uint16_t*)xf::cv::aie::xfGetImgDataPtr(out1);
+    FILE* fp = fopen("aieout1.txt", "w");
+    int err = 0;
+    uint16_t ref_pixel;
+    for (int i = 0; i < TILE_HEIGHT; i++) {
+        for (int j = 0; j < TILE_WIDTH_OUT; j++) {
+            int aie_pixel = aieOut1[i * TILE_WIDTH_OUT + j];
+            fprintf(fp, "%d ", aie_pixel);
+            ref_pixel = refData1[i * 2 * TILE_WIDTH_OUT + j];
+            if (abs(aie_pixel - ref_pixel) > 1) {
+                std::cout << "ind = " << (i * TILE_WIDTH_OUT + j) << " ref_pixel = " << static_cast<int>(ref_pixel)
+                          << " aie_pixel = " << aie_pixel << std::endl;
+                err++;
+            }
+        }
+    }
+    fclose(fp);
+
+    uint16_t* refData2 = (uint16_t*)GMIO::malloc(TILE_ELEMENTS_OUT);
+    FILE* fp_refout2 = NULL;
+    fp_refout2 = fopen("data/output2_ref.txt", "r");
+    if (fp_refout2 == NULL) {
+        printf("Failure opening file %s for reading!!\n", fp_refout2);
+        return -1;
+    } else {
+        read_file_uint16(fp_refout2, refData2, TILE_ELEMENTS_OUT);
+    }
+    fclose(fp_refout2);
+
+    uint16_t* aieOut2 = (uint16_t*)xf::cv::aie::xfGetImgDataPtr(out2);
+    FILE* fp2 = fopen("aieout2.txt", "w");
+
+    for (int i = 0; i < TILE_HEIGHT; i++) {
+        for (int j = 0; j < TILE_WIDTH_OUT; j++) {
+            int aie_pixel = aieOut2[i * TILE_WIDTH_OUT + j];
+            fprintf(fp2, "%d ", aie_pixel);
+            ref_pixel = refData2[i * 2 * TILE_WIDTH_OUT + j];
+            if (abs(aie_pixel - ref_pixel) > 1) {
+                std::cout << "ind = " << (i * TILE_WIDTH_OUT + j) << " ref_pixel = " << static_cast<int>(ref_pixel)
+                          << " aie_pixel = " << aie_pixel << std::endl;
+                err++;
+            }
+        }
+    }
+    fclose(fp2);
+
+    if (err == 0) {
+        std::cout << "Test passed!" << std::endl;
+    } else {
+        std::cout << "Test failed!" << std::endl;
+    }
 
     return 0;
 }

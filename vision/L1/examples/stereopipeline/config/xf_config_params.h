@@ -45,7 +45,7 @@
 
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_16UC1
-#define MAP_TYPE XF_32FC1
+#define MAP_TYPE XF_32SC1
 #define REMAP_TYPE XF_8UC1
 
 #define XF_USE_URAM false

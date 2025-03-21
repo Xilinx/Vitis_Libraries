@@ -64,8 +64,6 @@ int ITER = 0;
 
 ::aie::vector<uint8_t, 64> METADATA;
 
-// uint8_t* META_IN_PTR;
-
 namespace xf {
 
 namespace cv {
@@ -633,8 +631,6 @@ SbmBaseImpl<TILE_OUT_HEIGHT,
 
     y = acc.to_vector<float>();
 
-    // y_out = ::aie::to_fixed<int32_t>(y,0);
-
     return y;
 }
 
@@ -723,17 +719,11 @@ __attribute__((always_inline)) void SbmBaseImpl<TILE_OUT_HEIGHT,
 
     acc = ::aie::add(acc, temp1);
 
-    // int num = p - n; //num = num << 8;
-
     acc1.template from_vector(p, 0);
 
     acc1 = ::aie::sub(acc1, n);
 
     acc1 = ::aie::mul(acc1.template to_vector<int16_t>(0), two_five_six_vec);
-
-    // int delta = 0; if (k != 0) delta = num / k;
-
-    // auto one_over_k = xf_reciprocal(acc.template to_vector<int32_t>(0));
 
     ::aie::vector<float, 16> x_float = ::aie::to_float(acc.template to_vector<int32_t>(0));
 
@@ -741,17 +731,7 @@ __attribute__((always_inline)) void SbmBaseImpl<TILE_OUT_HEIGHT,
 
     ::aie::vector<bfloat16, 16> x1 = to_v16bfloat16(accf);
 
-    // if 2022.2
-
     ::aie::vector<float, 16> one_over_k = xf_reciprocal_bfloat16_lib(x1);
-
-    // if NEW.1
-
-    // auto yf = ::aie::inv(x1);
-
-    // accf.template from_vector(yf);
-
-    //::aie::vector<float, 16>  one_over_k = accf.template to_vector<float>();
 
     auto delta = ::aie::to_fixed<int32_t>(one_over_k, 16);
 
@@ -764,8 +744,6 @@ __attribute__((always_inline)) void SbmBaseImpl<TILE_OUT_HEIGHT,
     temp_vec_int16 = acc.template to_vector<int16_t>(4);
 
     ::aie::store_v(interpolation_ptr, temp_vec_int16);
-
-    // if(1){::aie::print(temp_vec_int16,true,"temp_vec_int16=");}
 }
 
 template <int TILE_OUT_HEIGHT,
@@ -814,8 +792,6 @@ __attribute__((noinline)) void SbmBaseImpl<TILE_OUT_HEIGHT,
     int16_t* restrict out_ptr_bckup = (int16_t*)out;
 
     constexpr int TILE_WINSIZE_IN = TILE_WINSIZE;
-
-    printf("\n ITER=%d", ITER);
 
     {
         ::aie::accum<acc16, 64> acc1, acc2, acc3, acc4;
@@ -1293,14 +1269,11 @@ __attribute__((noinline)) void SbmBaseImpl<TILE_OUT_HEIGHT,
         int COLS_COMBINE1 = 64 - TILE_WINSIZE_IN + 1;
 
         if (ITER == (TILE_WINSIZE - 2)) {
-            out += 64 - 32; // (32 int16 meta data)
+            out += COLS_COMBINE1 - 32; // (32 int16 meta data)
 
             uint8_t* meta_out_ptr = (uint8_t*)out;
 
-            // Replace input tile and tile width with the output tile height and output tile width and undo the change
-            // in xfcvDataMovers_gmio.h -> in output copy use tileWidth instead of corrected tile width
-
-            METADATA[4] = 64;
+            METADATA[4] = COLS_COMBINE1;
 
             METADATA[5] = 0;
 
@@ -1310,7 +1283,7 @@ __attribute__((noinline)) void SbmBaseImpl<TILE_OUT_HEIGHT,
 
             METADATA[7] = (int8_t)((t1 & 0xFF00) >> 8);
 
-            METADATA[20] = 64;
+            METADATA[20] = COLS_COMBINE1;
 
             METADATA[21] = 0;
 
@@ -1369,64 +1342,40 @@ __attribute__((noinline)) void SbmBaseImpl<TILE_OUT_HEIGHT,
             ::aie::store_unaligned_v(meta_out_ptr, METADATA);
 
         } else {
+            // Interpolation
             int16_t* tmp_ptr1 = (int16_t*)tmp_buffer;
-
             ::aie::accum<acc32, 16> acc_left = ::aie::vector_cast<acc32>(V1_left_0);
-
             ::aie::accum<acc32, 16> acc_right = ::aie::vector_cast<acc32>(V1_right_0);
-
             ::aie::accum<acc32, 16> acc_min = ::aie::vector_cast<acc32>(V1_min1_0);
-
             xf_interp(acc_min.template to_vector<uint16_t>(8), D_0, acc_left.to_vector<uint16_t>(8),
                       acc_right.to_vector<uint16_t>(8), out);
-
             out = out + 16;
 
             acc_left = ::aie::vector_cast<acc32>(V1_left_1);
-
             acc_right = ::aie::vector_cast<acc32>(V1_right_1);
-
             acc_min = ::aie::vector_cast<acc32>(V1_min1_1);
-
             xf_interp(acc_min.template to_vector<uint16_t>(8), D_1, acc_left.to_vector<uint16_t>(8),
                       acc_right.to_vector<uint16_t>(8), out);
-
             out = out + 16;
-
             acc_left = ::aie::vector_cast<acc32>(V1_left_2);
-
             acc_right = ::aie::vector_cast<acc32>(V1_right_2);
-
             acc_min = ::aie::vector_cast<acc32>(V1_min1_2);
-
+            int COLS_COMBINE1 = 64 - TILE_WINSIZE_IN + 1;
             if (TILE_WINSIZE_IN > 17) {
                 xf_interp(acc_min.template to_vector<uint16_t>(8), D_2, acc_left.to_vector<uint16_t>(8),
-
-                          acc_right.to_vector<uint16_t>(8), out);
-                out = out + 16;
-
-                xf_interp(acc_min.template to_vector<uint16_t>(8), D_2, acc_left.to_vector<uint16_t>(8),
-
-                          acc_right.to_vector<uint16_t>(8), out);
-                out = out + 16;
-
+                          acc_right.to_vector<uint16_t>(8), tmp_ptr1);
+                for (int i = 0; i < COLS_COMBINE1 % 16; i = i + 1) {
+                    *out++ = tmp_ptr1[i];
+                }
             } else {
                 xf_interp(acc_min.template to_vector<uint16_t>(8), D_2, acc_left.to_vector<uint16_t>(8),
-
                           acc_right.to_vector<uint16_t>(8), out);
-
                 out = out + 16;
-
                 acc_left = ::aie::vector_cast<acc32>(V1_left_3);
-
                 acc_right = ::aie::vector_cast<acc32>(V1_right_3);
-
                 acc_min = ::aie::vector_cast<acc32>(V1_min1_3);
-
                 xf_interp(acc_min.template to_vector<uint16_t>(8), D_3, acc_left.to_vector<uint16_t>(8),
-
                           acc_right.to_vector<uint16_t>(8), tmp_ptr1);
-
                 for (int i = 0; i < COLS_COMBINE1 % 16; i = i + 1) {
                     *out++ = tmp_ptr1[i];
                 }
@@ -1505,6 +1454,7 @@ void SbmBaseImpl<TILE_OUT_HEIGHT,
     uint8_t* restrict meta_data_ptr = (uint8_t*)::aie::begin(img_in_5);
 
     int16_t* restrict img_out_ptr = (int16_t*)::aie::begin(out);
+    // printf(" ITER = %d ", ITER);
 
     if (ITER == 0) {
         METADATA = ::aie::load_v<64>(meta_data_ptr);

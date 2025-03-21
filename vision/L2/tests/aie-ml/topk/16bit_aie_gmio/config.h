@@ -22,7 +22,7 @@
 // tile dimensions are normally computed by tiler but we need to
 // hardcode these values to set the graph window sizes
 using DATA_TYPE = uint16_t;
-static constexpr int NUM_TILES = 16;
+static constexpr int NUM_TILES = 1;
 
 static constexpr int TILE_WIDTH_IN = 1024;
 static constexpr int TILE_HEIGHT = 1;

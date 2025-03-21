@@ -51,11 +51,14 @@ int main(int argc, char** argv) {
         dataIn[i] = rand() % 256;
     }
 
-    uint8_t rgain = 70;
-    uint8_t bgain = 70;
+    uint8_t rgain = 255;
+    uint8_t bgain = 255;
+    uint8_t ggain = 200;
+
     gc.init();
     gc.update(gc.rgain, rgain);
     gc.update(gc.bgain, bgain);
+    gc.update(gc.ggain, ggain);
 
     gc.in1.gm2aie_nb(inputData, BLOCK_SIZE_in_Bytes);
     gc.run(1);
@@ -78,24 +81,34 @@ int main(int argc, char** argv) {
             cond2 = (j % 2 != 0);
             if (CODE == XF_BAYER_RG) {
                 if (i % 2 == 0 && cond1)
-                    pixel = (maxSize)((pixel * rgain) >> 6);
+                    pixel = (maxSize)((pixel * rgain) >> 7);
                 else if (i % 2 != 0 && cond2)
-                    pixel = (maxSize)((pixel * bgain) >> 6);
+                    pixel = (maxSize)((pixel * bgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
             } else if (CODE == XF_BAYER_GR) {
                 if (i % 2 == 0 && cond2)
-                    pixel = (maxSize)((pixel * rgain) >> 6);
+                    pixel = (maxSize)((pixel * rgain) >> 7);
                 else if (i % 2 != 0 && cond1)
-                    pixel = (maxSize)((pixel * bgain) >> 6);
+                    pixel = (maxSize)((pixel * bgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
+
             } else if (CODE == XF_BAYER_BG) {
                 if (i % 2 == 0 && cond1)
-                    pixel = (maxSize)((pixel * bgain) >> 6);
+                    pixel = (maxSize)((pixel * bgain) >> 7);
                 else if (i % 2 == 0 && cond2)
-                    pixel = (maxSize)((pixel * rgain) >> 6);
+                    pixel = (maxSize)((pixel * rgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
+
             } else if (CODE == XF_BAYER_GB) {
                 if (i % 2 == 0 && cond2)
-                    pixel = (maxSize)((pixel * bgain) >> 6);
+                    pixel = (maxSize)((pixel * bgain) >> 7);
                 else if (i % 2 != 0 && cond1)
-                    pixel = (maxSize)((pixel * rgain) >> 6);
+                    pixel = (maxSize)((pixel * rgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
             }
             pixel = saturatecast(pixel);
             if (abs(dataOut[i * TILE_WIDTH + j] - pixel) > acceptableError) {

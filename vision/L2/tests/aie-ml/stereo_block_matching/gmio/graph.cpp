@@ -27,21 +27,19 @@ sobelGraph demo_sobel;
 #if defined(__AIESIM__) || defined(__X86SIM__)
 
 int main(int argc, char** argv) {
-    int left_vtile_size = (TILE_IN_HEIGHT_WITH_WINDOW)*64 + 64; // tile + Boder(winsize-1) + winsize (zeros)
+    int left_vtile_size = (TILE_IN_HEIGHT_WITH_WINDOW)*64 + 64;
     int right_vtile_size = (TILE_IN_HEIGHT_WITH_WINDOW) * (64 + NO_DISPARITIES) + 64;
-    int out_aie_tile_size = (TILE_OUT_HEIGHT)*64;
+    int out_aie_tile_size = (TILE_OUT_HEIGHT)*COLS_COMBINE + 32;
     int gt_tile_size = (TILE_OUT_HEIGHT)*COLS_COMBINE;
 
-    int NO_TILES = 1;
-
-    uint8_t* in_vleft = (uint8_t*)GMIO::malloc(NO_TILES * left_vtile_size * sizeof(uint8_t)); // 2 tiles
-    uint8_t* in_vright = (uint8_t*)GMIO::malloc(NO_TILES * right_vtile_size * sizeof(uint8_t));
-    int16_t* out_minima_neigh = (int16_t*)GMIO::malloc(NO_TILES * out_aie_tile_size * sizeof(int16_t) + 64);
-    int16_t* ground_truth_out = (int16_t*)GMIO::malloc(NO_TILES * gt_tile_size * sizeof(int16_t));
+    uint8_t* in_vleft = (uint8_t*)GMIO::malloc(NO_CORES * left_vtile_size * sizeof(uint8_t));
+    uint8_t* in_vright = (uint8_t*)GMIO::malloc(NO_CORES * right_vtile_size * sizeof(uint8_t));
+    int16_t* out_minima_neigh = (int16_t*)GMIO::malloc(NO_CORES * out_aie_tile_size * sizeof(int16_t));
+    int16_t* ground_truth_out = (int16_t*)GMIO::malloc(NO_CORES * gt_tile_size * sizeof(int16_t));
 
     int lctr = 0;
     int rctr = 0;
-    {
+    for (int i = 0; i < NO_CORES; i++) {
         FILE* fpl = fopen("data/left_tile.txt", "r");
         FILE* fpr = fopen("data/right_tile.txt", "r");
 
@@ -82,17 +80,23 @@ int main(int argc, char** argv) {
         fclose(fpr);
     }
 
-    int run_val = 1;
-
     sbm_graph.init();
-    sbm_graph.run(run_val);
+    sbm_graph.run(1);
+    for (int core = 0; core < NO_CORES; core++) {
+        sbm_graph.in_sobel_left_tile[core].gm2aie_nb(in_vleft + core * left_vtile_size,
+                                                     left_vtile_size * sizeof(uint8_t));
+        sbm_graph.in_sobel_right_tile[core].gm2aie_nb(in_vright + core * left_vtile_size,
+                                                      right_vtile_size * sizeof(uint8_t));
+    }
 
-    sbm_graph.in_sobel_left_tile[0].gm2aie_nb(in_vleft, run_val * left_vtile_size * sizeof(uint8_t));
-    sbm_graph.in_sobel_right_tile[0].gm2aie_nb(in_vright, run_val * right_vtile_size * sizeof(uint8_t));
+    for (int core = 0; core < NO_CORES; core++) {
+        sbm_graph.out_interp[core].aie2gm(out_minima_neigh + core * out_aie_tile_size,
+                                          out_aie_tile_size * sizeof(int16_t));
+    }
 
-    sbm_graph.out_interp[0].aie2gm(out_minima_neigh, run_val * (out_aie_tile_size * sizeof(int16_t) + 64));
-
-    sbm_graph.out_interp[0].wait();
+    for (int core = 0; core < NO_CORES; core++) {
+        sbm_graph.out_interp[core].wait();
+    }
 
     FILE* fp_gt;
     fp_gt = fopen("data/ground_truth_out.txt", "r");
@@ -109,7 +113,6 @@ int main(int argc, char** argv) {
                 error_cnt++;
             }
         }
-        aie_out_ptr += 64 - COLS_COMBINE;
     }
 
     cout << "error_cnt " << error_cnt << "!" << endl;

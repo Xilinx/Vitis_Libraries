@@ -19,8 +19,8 @@
 extern "C" {
 
 void remap_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
-                 float* map_x,
-                 float* map_y,
+                 ap_uint<MAPXY_TYPE_PTR_WIDTH>* map_x,
+                 ap_uint<MAPXY_TYPE_PTR_WIDTH>* map_y,
                  ap_uint<OUTPUT_PTR_WIDTH>* img_out,
                  int rows,
                  int cols) {
@@ -35,34 +35,22 @@ void remap_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
     // clang-format on
 
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1> imgInput(rows, cols);
-    xf::cv::Mat<TYPE_XY, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_2> mapX(rows, cols);
-    xf::cv::Mat<TYPE_XY, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_3> mapY(rows, cols);
+    xf::cv::Mat<MAPXY_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_2> mapX(rows, cols);
+    xf::cv::Mat<MAPXY_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_3> mapY(rows, cols);
     xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT> imgOutput(rows, cols);
 
     const int HEIGHT_WIDTH_LOOPCOUNT = HEIGHT * WIDTH / XF_NPIXPERCYCLE(NPPCX);
-    for (unsigned int i = 0; i < rows * cols; ++i) {
-// clang-format off
-	#pragma HLS LOOP_TRIPCOUNT min=1 max=HEIGHT_WIDTH_LOOPCOUNT
-        #pragma HLS PIPELINE II=1
-        // clang-format on
-        float map_x_val = map_x[i];
-        float map_y_val = map_y[i];
-        mapX.write_float(i, map_x_val);
-        mapY.write_float(i, map_y_val);
-    }
 
-// clang-format off
-// clang-format on
-
-// clang-format off
-    #pragma HLS DATAFLOW
+#pragma HLS DATAFLOW
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1>(img_in, imgInput);
+    xf::cv::Array2xfMat<MAPXY_TYPE_PTR_WIDTH, MAPXY_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_2>(map_x, mapX);
+    xf::cv::Array2xfMat<MAPXY_TYPE_PTR_WIDTH, MAPXY_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_3>(map_y, mapY);
 
     // Run xfOpenCV kernel:
-    xf::cv::remap<XF_WIN_ROWS, XF_REMAP_INTERPOLATION_TYPE, IN_TYPE, TYPE_XY, OUT_TYPE, HEIGHT, WIDTH, NPPCX,
+    xf::cv::remap<XF_WIN_ROWS, XF_REMAP_INTERPOLATION_TYPE, IN_TYPE, MAPXY_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPPCX,
                   XF_USE_URAM, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_IN_3, XF_CV_DEPTH_OUT>(
         imgInput, imgOutput, mapX, mapY);
 

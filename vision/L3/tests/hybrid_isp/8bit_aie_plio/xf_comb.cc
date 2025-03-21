@@ -32,6 +32,7 @@ void comb(adf::input_buffer<uint8_t>& input,
           const uint16_t& mul_fact,
           const uint8_t& rgain,
           const uint8_t& bgain,
+          const uint8_t& ggain,
           adf::output_buffer<uint8_t>& outputDem,
           adf::output_buffer<uint8_t>& output) {
     uint8_t mInEven[INTERLEAVE_TILE_ELEMENTS];
@@ -72,15 +73,19 @@ void comb(adf::input_buffer<uint8_t>& input,
 
     if (posH % 2 == 0) {
         if (posV % 2 == 0) {
-            xf::cv::aie::ComputeGainVector<uint8_t, 32, code>::compute_gain_kernel_coeff(rgain, bgain, coeff0, coeff1);
+            xf::cv::aie::ComputeGainVector<uint8_t, 32, code>::compute_gain_kernel_coeff(rgain, bgain, ggain, coeff0,
+                                                                                         coeff1);
         } else {
-            xf::cv::aie::ComputeGainVector<uint8_t, 32, code>::compute_gain_kernel_coeff(rgain, bgain, coeff1, coeff0);
+            xf::cv::aie::ComputeGainVector<uint8_t, 32, code>::compute_gain_kernel_coeff(rgain, bgain, ggain, coeff1,
+                                                                                         coeff0);
         }
     } else {
         if (posV % 2 == 0) {
-            xf::cv::aie::ComputeGainVector<uint8_t, 32, code>::compute_gain_kernel_coeff(bgain, rgain, coeff0, coeff1);
+            xf::cv::aie::ComputeGainVector<uint8_t, 32, code>::compute_gain_kernel_coeff(bgain, rgain, ggain, coeff0,
+                                                                                         coeff1);
         } else {
-            xf::cv::aie::ComputeGainVector<uint8_t, 32, code>::compute_gain_kernel_coeff(bgain, rgain, coeff1, coeff0);
+            xf::cv::aie::ComputeGainVector<uint8_t, 32, code>::compute_gain_kernel_coeff(bgain, rgain, ggain, coeff1,
+                                                                                         coeff0);
         }
     }
 

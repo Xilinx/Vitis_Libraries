@@ -125,10 +125,11 @@ AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(SYSROOT)/usr/include/opencv4
-AIE_CXXFLAGS += --aie.stacksize=2000
+AIE_CXXFLAGS += --aie.stacksize=2048
 AIE_CXXFLAGS += --aie.heapsize=1000
 AIE_CXXFLAGS +=  --aie.Xchess=\"main:backend.mist2.graph=on\"  
 AIE_CXXFLAGS += --aie.Xchess=main:backend.mist2.xargs="+NOdra"
+AIE_CXXFLAGS += --aie.Xmapper=DisableFloorPlanning
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
 EXE_FILE_DEPS += $(AIE_CONTAINER)

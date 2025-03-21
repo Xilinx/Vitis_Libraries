@@ -1,0 +1,25 @@
+[hls]
+
+clock=3.3
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/examples/remap/xf_remap_accel.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/examples/remap/xf_remap_accel.cpp, -I ${XF_PROJ_ROOT}/L1/tests/remap/remap_NPPC2_8UC1_8UC1_URAM_INTERPOLATION_NN -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/remap/xf_remap_accel.cpp, -I ${XF_PROJ_ROOT}/L1/tests/remap/remap_NPPC2_8UC1_8UC1_URAM_INTERPOLATION_NN -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+syn.top=remap_accel
+tb.file=${XF_PROJ_ROOT}/L1/examples/remap/xf_remap_tb.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/remap/xf_remap_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/remap/remap_NPPC2_8UC1_8UC1_URAM_INTERPOLATION_NN -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/remap/xf_remap_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/remap/remap_NPPC2_8UC1_8UC1_URAM_INTERPOLATION_NN -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+
+csim.argv=  ${XF_PROJ_ROOT}/data/128x128.png
+csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
+
+cosim.argv=  ${XF_PROJ_ROOT}/data/128x128.png
+cosim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+sim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
+
+

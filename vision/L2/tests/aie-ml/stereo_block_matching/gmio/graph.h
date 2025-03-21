@@ -50,8 +50,8 @@ class sobelGraph : public adf::graph {
             adf::dimensions(k1[CORE_IDX].in[0]) = {(TILE_IN_WIDTH_SOBEL * (TILE_IN_HEIGHT_SOBEL + 2))};
 
             // k1 output1 to MemTile
-            mtx_out[CORE_IDX] = shared_buffer<uint8_t>::create({TILE_OUT_WIDTH_SOBEL, (TILE_OUT_HEIGHT_SOBEL + 1)}, 2,
-                                                               1); // 2 for metadata
+            mtx_out[CORE_IDX] =
+                shared_buffer<uint8_t>::create({TILE_OUT_WIDTH_SOBEL, (TILE_OUT_HEIGHT_SOBEL + 1)}, 2, 1);
 
             // k1.out[0] -> metadata
             connect<>(k1[CORE_IDX].out[0], mtx_out[CORE_IDX].in[0]);
@@ -85,7 +85,7 @@ class sobelGraph : public adf::graph {
             // specify kernel sources
             source(k1[CORE_IDX]) = "xf_sobel.cc";
             // location constraints
-            location<kernel>(k1[CORE_IDX]) = tile(20, 0);
+            location<kernel>(k1[CORE_IDX]) = tile(1, CORE_IDX + 1);
             runtime<ratio>(k1[CORE_IDX]) = 0.1;
         }
     }
@@ -128,7 +128,13 @@ class sbmGraph : public adf::graph {
                 shared_buffer<uint8_t>::create({(TILE_IN_HEIGHT_WITH_WINDOW + 1), (LEFT_TILE_IN_WIDTH)}, 1, 3);
             mtx_in_right[CORE_IDX] =
                 shared_buffer<uint8_t>::create({(TILE_IN_HEIGHT_WITH_WINDOW + 1), (RIGHT_TILE_IN_WIDTH)}, 1, 2);
-            mtx_out[CORE_IDX] = shared_buffer<int16_t>::create({TILE_IN_HEIGHT, 64}, 1, 1);
+            mtx_out[CORE_IDX] = shared_buffer<int16_t>::create({TILE_IN_HEIGHT, COLS_COMBINE}, 1, 1);
+
+            location<buffer>(mtx_in_left[CORE_IDX]) = {address(CORE_IDX + 3, 0, 0)};
+            location<buffer>(mtx_in_right[CORE_IDX]) = {address(CORE_IDX + 3, 1, 0)};
+
+            location<buffer>(mtx_out[CORE_IDX]) = {
+                address(CORE_IDX + 3, 0, 2 * LEFT_TILE_IN_WIDTH * (TILE_IN_HEIGHT_WITH_WINDOW + 1))};
 
             // Read left and right images into MemTiles
             // left image
@@ -208,20 +214,19 @@ class sbmGraph : public adf::graph {
 
             // k1 output1 to MemTile
             connect<>(k1[CORE_IDX].out[0], mtx_out[CORE_IDX].in[0]);
-            adf::dimensions(k1[CORE_IDX].out[0]) = {64 * 2 / SIZEOF_INT16};
-
+            adf::dimensions(k1[CORE_IDX].out[0]) = {COLS_COMBINE * 2 / SIZEOF_INT16};
             buffer_descriptor_parameters mtx_out2;
-            mtx_out2.length = (64 * 2) * (TILE_IN_HEIGHT) / 4;
+            mtx_out2.length = (COLS_COMBINE * 2) * (TILE_IN_HEIGHT) / 4;
             mtx_out2.offset = 0;
-            mtx_out2.stepsize = {1, (64 * 2) / 4};
-            mtx_out2.wrap = {(64 * 2) / 4};
+            mtx_out2.stepsize = {1};
+            mtx_out2.wrap = {};
             write_access(mtx_out[CORE_IDX].in[0]) = buffer_descriptor(mtx_out2);
 
             // MemTile to DDR
             connect<stream>(mtx_out[CORE_IDX].out[0], out_interp[CORE_IDX].in[0]);
             buffer_descriptor_parameters mtx_out1;
-            mtx_out1.length = (((64 * 2) * (TILE_OUT_HEIGHT)) + 64) / 4;
-            mtx_out1.offset = (((64 * 2) * (TILE_WINSIZE - 1)) - 64) / 4;
+            mtx_out1.length = (((COLS_COMBINE * 2) * (TILE_OUT_HEIGHT)) + 64) / 4;
+            mtx_out1.offset = (((COLS_COMBINE * 2) * (TILE_WINSIZE - 1)) - 64) / 4;
             mtx_out1.stepsize = {1};
             mtx_out1.wrap = {};
             read_access(mtx_out[CORE_IDX].out[0]) = buffer_descriptor(mtx_out1);
@@ -232,7 +237,7 @@ class sbmGraph : public adf::graph {
             runtime<ratio>(k1[CORE_IDX]) = 1;
 
             // Location constraints
-            location<kernel>(k1[CORE_IDX]) = tile(CORE_IDX + 1, 0);
+            location<kernel>(k1[CORE_IDX]) = tile(CORE_IDX + 3, 2);
         }
     }
 };

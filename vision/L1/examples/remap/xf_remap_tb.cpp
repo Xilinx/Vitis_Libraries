@@ -17,6 +17,7 @@
 
 #include "common/xf_headers.hpp"
 #include "xf_remap_tb_config.h"
+#include "common/xf_axi.hpp"
 
 #define READ_MAPS_FROM_FILE 0
 
@@ -34,7 +35,7 @@ int main(int argc, char** argv) {
 #endif
 
     cv::Mat src, ocv_remapped, hls_remapped;
-    cv::Mat map_x, map_y, diff;
+    cv::Mat map_x, map_y, diff, map_x_int, map_y_int;
 
 // Reading in the image:
 #if GRAY
@@ -53,6 +54,8 @@ int main(int argc, char** argv) {
     ocv_remapped.create(src.rows, src.cols, src.type()); // opencv result
     map_x.create(src.rows, src.cols, CV_32FC1);          // Mapx for opencv remap function
     map_y.create(src.rows, src.cols, CV_32FC1);          // Mapy for opencv remap function
+    map_x_int.create(src.rows, src.cols, CV_32SC1);      // Mapx for opencv remap function
+    map_y_int.create(src.rows, src.cols, CV_32SC1);      // Mapy for opencv remap function
     hls_remapped.create(src.rows, src.cols, src.type()); // create memory for output images
     diff.create(src.rows, src.cols, src.type());
 
@@ -75,16 +78,24 @@ int main(int argc, char** argv) {
             }
             map_x.at<float>(i, j) = valx;
             map_y.at<float>(i, j) = valy;
+
+            map_x_int.at<int32_t>(i, j) = static_cast<int32_t>((valx)*256);
+            map_y_int.at<int32_t>(i, j) = static_cast<int32_t>((valy)*256);
         }
     }
 #else // example map generation, flips the image horizontally
+
     for (int i = 0; i < src.rows; i++) {
         for (int j = 0; j < src.cols; j++) {
             float valx = (float)(src.cols - j - 1), valy = (float)i;
+
             map_x.at<float>(i, j) = valx;
             map_y.at<float>(i, j) = valy;
+            map_x_int.at<int32_t>(i, j) = static_cast<int32_t>((valx)*256);
+            map_y_int.at<int32_t>(i, j) = static_cast<int32_t>((valy)*256);
         }
     }
+
 #endif
 #else // For barrel/pin cushion correction, camera matrix and distortion coeff for camera should be provided by user
     cv::initUndistortRectifyMap(cameraMatrix, distCoeffs, cv::Mat::eye(3, 3, CV_32F), cameraMatrix, src.size(),
@@ -104,9 +115,18 @@ int main(int argc, char** argv) {
     cv::remap(src, ocv_remapped, map_x, map_y, cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
     std::cout << "INFO: Using Bilinear interpolation." << std::endl;
 #endif
+    InVideoStrm_t src_axi;
+    MapxyStrm_t map_x_axi;
+    MapxyStrm_t map_y_axi;
+    OutVideoStrm_t dst_axi;
 
-    remap_accel((ap_uint<INPUT_PTR_WIDTH>*)src.data, (float*)map_x.data, (float*)map_y.data,
-                (ap_uint<OUTPUT_PTR_WIDTH>*)hls_remapped.data, src.rows, src.cols);
+    cvMat2AXIvideoxf<NPPCX>(src, src_axi);
+    cvMat2AXIvideoxf<NPPCX>(map_x_int, map_x_axi);
+    cvMat2AXIvideoxf<NPPCX>(map_y_int, map_y_axi);
+
+    remap_accel(src_axi, dst_axi, map_x_axi, map_y_axi, src.rows, src.cols);
+
+    AXIvideo2cvMatxf<NPPCX>(dst_axi, hls_remapped);
 
     // Save the results:
     cv::imwrite("ocv_reference_out.jpg", ocv_remapped); // Opencv Result

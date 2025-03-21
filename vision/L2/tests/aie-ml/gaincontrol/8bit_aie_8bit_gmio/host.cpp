@@ -30,7 +30,7 @@
 #include "graph.cpp"
 
 template <int code>
-void gainControlOCV(cv::Mat& input, cv::Mat& output, unsigned char rgain, unsigned char bgain) {
+void gainControlOCV(cv::Mat& input, cv::Mat& output, unsigned char rgain, unsigned char bgain, unsigned char ggain) {
     int height = input.size().height;
     int width = input.size().width;
     typedef uint8_t realSize;
@@ -45,24 +45,35 @@ void gainControlOCV(cv::Mat& input, cv::Mat& output, unsigned char rgain, unsign
             cond2 = (j % 2 != 0);
             if (code == XF_BAYER_RG) {
                 if (i % 2 == 0 && cond1)
-                    pixel = (maxSize)((pixel * rgain) >> 6);
+                    pixel = (maxSize)((pixel * rgain) >> 7);
                 else if (i % 2 != 0 && cond2)
-                    pixel = (maxSize)((pixel * bgain) >> 6);
+                    pixel = (maxSize)((pixel * bgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
+
             } else if (code == XF_BAYER_GR) {
                 if (i % 2 == 0 && cond2)
-                    pixel = (maxSize)((pixel * rgain) >> 6);
+                    pixel = (maxSize)((pixel * rgain) >> 7);
                 else if (i % 2 != 0 && cond1)
-                    pixel = (maxSize)((pixel * bgain) >> 6);
+                    pixel = (maxSize)((pixel * bgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
+
             } else if (code == XF_BAYER_BG) {
                 if (i % 2 == 0 && cond1)
-                    pixel = (maxSize)((pixel * bgain) >> 6);
+                    pixel = (maxSize)((pixel * bgain) >> 7);
                 else if (i % 2 == 0 && cond2)
-                    pixel = (maxSize)((pixel * rgain) >> 6);
+                    pixel = (maxSize)((pixel * rgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
+
             } else if (code == XF_BAYER_GB) {
                 if (i % 2 == 0 && cond2)
-                    pixel = (maxSize)((pixel * bgain) >> 6);
+                    pixel = (maxSize)((pixel * bgain) >> 7);
                 else if (i % 2 != 0 && cond1)
-                    pixel = (maxSize)((pixel * rgain) >> 6);
+                    pixel = (maxSize)((pixel * rgain) >> 7);
+                else
+                    pixel = (maxSize)((pixel * ggain) >> 7);
             }
             output.at<realSize>(i, j) = cv::saturate_cast<realSize>(pixel); // writing each pixel
         }
@@ -70,8 +81,8 @@ void gainControlOCV(cv::Mat& input, cv::Mat& output, unsigned char rgain, unsign
 }
 
 template <int code>
-int run_opencv_ref(cv::Mat& srcImageR, cv::Mat& dstRefImage, uint8_t rgain, uint8_t bgain) {
-    gainControlOCV<code>(srcImageR, dstRefImage, rgain, bgain);
+int run_opencv_ref(cv::Mat& srcImageR, cv::Mat& dstRefImage, uint8_t rgain, uint8_t bgain, uint8_t ggain) {
+    gainControlOCV<code>(srcImageR, dstRefImage, rgain, bgain, ggain);
     return 0;
 }
 
@@ -99,15 +110,15 @@ int main(int argc, char** argv) {
         srcImageR = cv::imread(argv[2], 0);
 
         int width = srcImageR.cols;
-        if (argc >= 6) width = atoi(argv[5]);
+        if (argc >= 7) width = atoi(argv[6]);
         int height = srcImageR.rows;
-        if (argc >= 7) height = atoi(argv[6]);
+        if (argc >= 8) height = atoi(argv[7]);
 
         if ((width != srcImageR.cols) || (height != srcImageR.rows))
             cv::resize(srcImageR, srcImageR, cv::Size(width, height));
 
         int iterations = 1;
-        if (argc >= 8) iterations = atoi(argv[7]);
+        if (argc >= 9) iterations = atoi(argv[8]);
 
         std::cout << "Image size" << std::endl;
         std::cout << srcImageR.rows << std::endl;
@@ -122,9 +133,11 @@ int main(int argc, char** argv) {
         //////////////////////////////////////////
         uint8_t rgain = atoi(argv[3]);
         uint8_t bgain = atoi(argv[4]);
+        uint8_t ggain = atoi(argv[5]);
+
         cv::Mat dstRefImage(op_height, op_width, CV_8UC1);
         START_TIMER
-        run_opencv_ref<XF_BAYER_RG>(srcImageR, dstRefImage, rgain, bgain);
+        run_opencv_ref<XF_BAYER_RG>(srcImageR, dstRefImage, rgain, bgain, ggain);
         STOP_TIMER("OpenCV Ref");
 
         // Initializa device
@@ -152,6 +165,7 @@ int main(int argc, char** argv) {
         std::cout << "Graph reset done" << std::endl;
         gHndl.update("gc.k1.in[1]", rgain);
         gHndl.update("gc.k1.in[2]", bgain);
+        gHndl.update("gc.k1.in[3]", ggain);
 #endif
 
         START_TIMER

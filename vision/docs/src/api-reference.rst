@@ -9414,6 +9414,76 @@ with non-maximum suppression (NMS).
     | 8 pixel                     | 150              | 3x3              | 1.86             |
     +-----------------------------+------------------+------------------+------------------+
 
+.. _autogaincontrol:
+
+
+Autogaincontrol
+===============
+
+The autogain function calculates automatic gain adjustment for an image by analyzing its histogram, 
+grouping bins into clusters, and selecting appropriate gain values for the red, green, and blue channels based on 
+the most populated histogram cluster. The computed gain values (rgain, ggain, bgain) help in adjusting the image 
+brightness and contrast dynamically.
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+   template <int SRC_T, int NPC = 1, int HISTSIZE>
+            void autogain(unsigned int histogram[XF_CHANNELS(SRC_T, NPC)][HISTSIZE], uint16_t gain[XF_CHANNELS(SRC_T, NPC)])
+
+The following table describes the template and the function parameters.
+
+.. table:: Table gaincontrol Parameter Description
+
+    +-----------------------+--------------------------------------------------------------------+
+    | Parameter             | Description                                                        |
+    +=======================+====================================================================+
+    | SRC_T                 | Input Pixel Type. Supported types are XF_8UC3, XF_10UC3, XF_12UC3  |
+    |                       | and XF_16UC3.                                                      |                   
+    +-----------------------+--------------------------------------------------------------------+
+    | NPC                   | Number of Pixels to be processed per cycle. Supports (XF_NPPC1)    |
+    +-----------------------+--------------------------------------------------------------------+
+    | HISTSIZE              | Histogram size. Supported values 256, 1024, 4096                   |
+    +-----------------------+--------------------------------------------------------------------+
+    | histogram             | Input histogram array                                              |
+    +-----------------------+--------------------------------------------------------------------+
+    | gain                  | Output gain array                                                  |
+    +-----------------------+--------------------------------------------------------------------+
+
+
+.. rubric:: Resource Utilization
+
+
+The following table summarizes the resource utilization of the kernel in 1 pixel configuration, generated using Vivado HLS 2024.2 tool for the Xilinx xcu200-fsgd2104-2-e FPGA, to process Histogram of 4096 bins.
+
+.. table:: Table autogaincontrol Resource Utilization Summary
+
+    +----------------+---------------------+----------------------+----------+-----+-----+
+    | Operating Mode | Operating Frequency | Utilization Estimate                        |
+    |                |                     |                                             |
+    |                | (MHz)               |                                             |
+    +                +                     +----------------------+----------+-----+-----+
+    |                |                     | BRAM_36K             | DSP_48Es | FF  | LUT |
+    +================+=====================+======================+==========+=====+=====+
+    | 1 pixel        | 300                 | 0                    | 0        | 583 | 766 |
+    +----------------+---------------------+----------------------+----------+-----+-----+
+
+.. rubric:: Performance Estimate
+
+
+The following table summarizes a performance estimate of the kernel in 1 pixel configuration, as generated using Vivado HLS 2024.2 tool for the Xilinx xcu200-fsgd2104-2-e, to process Histogram of 4096 bins.
+
+    +----------------+---------------------+------------------+
+    | Operating Mode | Operating Frequency | Latency Estimate |
+    |                |                     |                  |
+    |                | (MHz)               |                  |
+    +                +                     +------------------+
+    |                |                     | Max (ms)         |
+    +================+=====================+==================+
+    | 1 pixel        | 300                 | 0.01839          |
+    +----------------+---------------------+------------------+
 
 .. _gaincontrol:
 
@@ -11966,104 +12036,70 @@ Xczu9eg-ffvb1156-1-i-es1 to process a grayscale HD (1080x1920) image for
 Preprocessing for Deep Neural Networks
 ======================================
 
-The input image are typically pre-processed before being fed for inference of different deep neural networks (DNNs). The preProcess function provides various modes to perform various preprocessing operations. The preprocessing function\ :math:`\ f(x`) can be described using the following equations.
+The input images are typically pre-processed before being fed for inference of different deep neural networks (DNNs). The Preprocess
+function applies mean (α) and bias (β) values provided by the user to the input image.
 
-|image164|
-
-The preProcess function supports operating modes presented in the following table:
-
-    +---------+--------------------------------------------------+--------------------------------------+
-    | Op Code | Operation                                        | Description                          |
-    +=========+==================================================+======================================+
-    | 0       | |image165|                                       | Mean subtraction                     |
-    +---------+--------------------------------------------------+--------------------------------------+
-    | 1       | |image166|                                       | Scale and clip                       |
-    +---------+--------------------------------------------------+--------------------------------------+
-    | 2       | |image167|                                       | Clipping                             |
-    +---------+--------------------------------------------------+--------------------------------------+
-    | 3       | |image168|                                       | Scale and bias                       |
-    +---------+--------------------------------------------------+--------------------------------------+
-    | 4       | |image169|                                       | Scale and bias with mean subtraction |
-    +---------+--------------------------------------------------+--------------------------------------+
-    | 5       | |image170|                                       | Complete operation                   |
-    +---------+--------------------------------------------------+--------------------------------------+
+		output = (input - α) * β
 
 .. rubric:: API Syntax
 
 
 .. code:: c
 
-   template <int INPUT_PTR_WIDTH_T,int OUTPUT_PTR_WIDTH_T, int T_CHANNELS_T, int CPW_T, int ROWS_T, int COLS_T, int NPC_T, bool PACK_MODE_T, int WX_T, int WA_T, int WB_T, int WY_T, int WO_T, int FX_T, int FA_T, int FB_T, int FY_T,int FO_T, bool SIGNED_IN_T, int OPMODE_T>
-
-   void preProcess(hls::stream<ap_uint<INPUT_PTR_WIDTH_T> > &srcStrm, ap_uint<OUTPUT_PTR_WIDTH_T> \*out, float params[3*T_CHANNELS_T], int rows, int cols, int th1, int th2)
+   template <int IN_TYPE, int OUT_TYPE, int HEIGHT, int WIDTH, int NPC, int WIDTH_A, int IBITS_A, int WIDTH_B, 
+   int IBITS_B, int WIDTH_OUT, int IBITS_OUT, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+   void preProcess(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_IN>& in_mat,
+                xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT>& out_mat,
+                float params[2 * XF_CHANNELS(IN_TYPE, NPC)])
 
 
 The following table describes the template and the function parameters.
 
-.. table:: Table gammacorrection Parameter Description
+.. table:: Table Preprocess Parameter Description
 
     +--------------------+----------------------------------------------+
     | Parameter          | Description                                  |
     +====================+==============================================+
-    | srcStrm            | Input image stream                           |
+    | IN_TYPE            | Type of the input image. Supported values are| 
+    |                    | XF_8UC3, XF_10UC3, XF_12UC3, XF_16UC3        |
     +--------------------+----------------------------------------------+
-    | out                | Output pointer                               |
+    | OUT_TYPE           | Type of the output image. Supported values   | 
+    |                    | are XF_8UC3, XF_10UC3, XF_12UC3, XF_16UC3    |
     +--------------------+----------------------------------------------+
-    | params             | Array containing α, β and γ values           |
+    | HEIGHT             | Maximum rows of the input image              |
     +--------------------+----------------------------------------------+
-    | rows               | Input image height                           |
+    | WIDTH              | Maximum columns of the input image           |
     +--------------------+----------------------------------------------+
-    | cols               | Input image width                            |
+    | NPC                | Number of pixels processed per clock         |
     +--------------------+----------------------------------------------+
-    | th1                | Upper threshold                              |
+    | WIDTH_A            | alpha bit width                              |
     +--------------------+----------------------------------------------+
-    | th2                | Lower threshold                              |
+    | IBITS_A            | Number of integer bits for alpha             |
     +--------------------+----------------------------------------------+
-    | INPUT_PTR_WIDTH_T  | Width of input pointer                       |
+    | WIDTH_B            | beta bit width                               |
     +--------------------+----------------------------------------------+
-    | OUTPUT_PTR_WIDTH_T | Width of output pointer                      |
+    | IBITS_B            | Number of integer bits for beta              |
     +--------------------+----------------------------------------------+
-    | T_CHANNELS_T       | Total Channels                               |
+    | WIDTH_OUT          | Output bit width                             |
     +--------------------+----------------------------------------------+
-    | CPW_T              | Channels Packed per DDR Word                 |
+    | IBITS_OUT          | Number of integer bits for output            |
     +--------------------+----------------------------------------------+
-    | ROWS_T             | Max Height of Image                          |
+    | XFCVDEPTH_IN       | Depth of the hls::stream of input image      |
     +--------------------+----------------------------------------------+
-    | COLS_T             | Max Width of Image                           |
+    | XFCVDEPTH_OUT      | Depth of the hls::stream of output image     |
     +--------------------+----------------------------------------------+
-    | NPC_T              | Number of pixels processed per clock         |
+    | in_mat             | Input image                                  |
     +--------------------+----------------------------------------------+
-    | PACK_MODE_T        | data format (pixel packed or channel packed) |
+    | out_mat            | Output image                                 |
     +--------------------+----------------------------------------------+
-    | WX_T               | x bit width                                  |
+    | params             | Array containing α, β values per channel     |
     +--------------------+----------------------------------------------+
-    | WA_T               | alpha bit width                              |
-    +--------------------+----------------------------------------------+
-    | WB_T               | beta bit width                               |
-    +--------------------+----------------------------------------------+
-    | WY_T               | Gamma bit width                              |
-    +--------------------+----------------------------------------------+
-    | WO_T               | Output bit width                             |
-    +--------------------+----------------------------------------------+
-    | FX_T               | Number of integer bits for x                 |
-    +--------------------+----------------------------------------------+
-    | FA_T               | Number of integer bits for alpha             |
-    +--------------------+----------------------------------------------+
-    | FB_T               | Number of integer bits for beta              |
-    +--------------------+----------------------------------------------+
-    | FY_T               | Number of integer bits for gamma             |
-    +--------------------+----------------------------------------------+
-    | FO_T               | Number of integer bits for output            |
-    +--------------------+----------------------------------------------+
-    | SIGNED_IN_T        | Signed input flag                            |
-    +--------------------+----------------------------------------------+
-    | OPMODE_T           | Operating mode                               |
-    +--------------------+----------------------------------------------+
+ 
 
 .. rubric:: Resource Utilization
 
 
-The following table summarizes the resource utilization of preProcess for NPC_T =8, CPW_T=3 and OPMODE=0, for a maximum input image size of 1280x720 pixels. The results are after synthesis in Vitis 2019.2 for the Xilinx xcu200-fsgd2104-2-e FPGA at 300 MHz. Latency for this configuration is 0.7 ms.
+The following table summarizes the resource utilization of preProcess for NPC =8, for a maximum input image size of 1280x720 pixels. The results are after synthesis in Vitis 2019.2 for the Xilinx xcu200-fsgd2104-2-e FPGA at 300 MHz. Latency for this configuration is 0.7 ms.
 
     +----------------+---------------------+----------------------+----------+------+-------+-------+
     | Operating Mode | Operating Frequency | Utilization Estimate |          |      |       |       |
@@ -12365,7 +12401,8 @@ The following table describes the template and the function parameters.
    +----------------+-------------------------------------------------------+
    | DC_SIZE        | It must be set at the compile time, must be 4,5 or 8  |
    +----------------+-------------------------------------------------------+
-   | MAP_T          | It is the type of output maps, and must be XF_32FC1   |
+   | MAP_T          | It is the type of output maps, and must be XF_32SC1   |
+   |                | (23,9)Q-format.                                       |
    +----------------+-------------------------------------------------------+
    | ROWS           | Maximum image height, necessary to generate the       |
    |                | output maps                                           |
@@ -15742,7 +15779,8 @@ The following table describes the template parameters.
    | SRC_T               | Input image pixel type. Only 8-bit, unsigned, 1       |
    |                     | and 3 channels are supported (XF_8UC1 and XF_8UC3)    |
    +---------------------+-------------------------------------------------------+
-   | MAP_T               | Map type. Single channel float type. XF_32FC1.        |
+   | MAP_T               | Map type. Single channel fixed-point type. XF_32SC1.  |
+   |                     | (23,9)Q-format.                                       |                      
    +---------------------+-------------------------------------------------------+
    | DST_T               | Output image pixel type. Only 8-bit, unsigned, 1      |
    |                     | and 3 channels are supported (XF_8UC1 and XF_8UC3)    |
@@ -15752,8 +15790,8 @@ The following table describes the template parameters.
    | COLS                | Width of input and output images                      |
    +---------------------+-------------------------------------------------------+
    | NPC                 | Number of pixels to be processed per cycle; this      |
-   |                     | function supports only XF_NPPC1 or 1 pixel per cycle  |
-   |                     | operations.                                           |
+   |                     | function supports XF_NPPC1 and XF_NPPC2 pixel per     |
+   |                     | cycle operations.                                     |
    +---------------------+-------------------------------------------------------+
    | USE_URAM            | Enable to map some structures to UltraRAM instead of  |
    |                     | BRAM.                                                 |
@@ -15788,56 +15826,33 @@ The following table describes the function parameters.
 .. rubric:: Resource Utilization
 
 
-The following table summarizes the resource utilization of remap, for HD
-(1080x1920) images generated in the Vivado HLS 2019.1 version tool for
-the Xilinx xczu9eg-ffvb1156-i-es1 FPGA at 300 MHz, with WIN_ROWS as 64
-for the XF_INTERPOLATION_BILINEAR mode.
+The following table summarizes the resource utilization of remap, for 4k
+(2160x3840) with different configurations images generated in the Vivado 
+HLS 2024.2 version tool for the Xilinx xcvc1902-vsva2197-2MP-e-S FPGA at 
+300 MHz, with WIN_ROWS as 74.
+
+Note: Resources are dependent on WIN_ROWS value.
 
 .. table:: Table . remap Function Resource Utilization Summary
 
-   +----------+----------------------+
-   | Name     | Resource Utilization |
-   +==========+======================+
-   | BRAM_18K | 64                   |
-   +----------+----------------------+
-   | DSP48E   | 17                   |
-   +----------+----------------------+
-   | FF       | 1738                 |
-   +----------+----------------------+
-   | LUT      | 1593                 |
-   +----------+----------------------+
-   | CLB      | 360                  |
-   +----------+----------------------+
-
-The following table summarizes the resource utilization of remap, for 4K
-(3840x2160) images generated in the Vivado HLS 2019.1 version tool for the
-Xilinx xczu7ev-ffvc1156 FPGA at 300 MHz, with WIN_ROWS as 100 for the
-XF_INTERPOLATION_BILINEAR mode using UltraRAM .
-
-.. table:: Table . remap Function Resource Utilization Summary with UltraRAM Enabled
-
-   +----------+----------------------+
-   | Name     | Resource Utilization |
-   +==========+======================+
-   | BRAM_18K | 3                    |
-   +----------+----------------------+
-   | DSP48E   | 10                   |
-   +----------+----------------------+
-   | URAM     | 24                   |
-   +----------+----------------------+
-   | FF       | 3196                 |
-   +----------+----------------------+
-   | LUT      | 3705                 |
-   +----------+----------------------+
-
-
+   +---------------------------+----------+----------------+----------------+-------+---------+---------+----------+---------+---------+
+   | Function                  | channels | Height x Width | Frequency(MHZ) | NPC   | LUT     | FF      | DSP      | BRAM    | URAM    |
+   +===========================+==========+================+================+=======+=========+=========+==========+=========+=========+
+   | Remap_Bilinear_URAM       | 3        | 2160 x 3840    | 300            | 2     | 1721    | 1449    | 33       | 0       | 24      |
+   +---------------------------+----------+----------------+----------------+-------+---------+---------+----------+---------+---------+
+   | Remap_Bilinear_BRAM       | 3        | 2160 x 3840    | 300            | 2     | 25800   | 12720   | 24       | 444     | 0       |
+   +---------------------------+----------+----------------+----------------+-------+---------+---------+----------+---------+---------+
+   | Remap_NN_URAM             | 3        | 2160 x 3840    | 300            | 2     | 7838    | 10632   | 4        | 0       | 20      |
+   +---------------------------+----------+----------------+----------------+-------+---------+---------+----------+---------+---------+
+   | Remap_NN_BRAM             | 3        | 2160 x 3840    | 300            | 2     | 30593   | 18946   | 4        | 444     | 0       |
+   +---------------------------+----------+----------------+----------------+-------+---------+---------+----------+---------+---------+
 
 .. rubric:: Performance Estimate
 
 
-The following table summarizes the performance of remap(), for HD
-(1080x1920) images generated in the Vivado HLS 2019.1 version tool for
-the Xilinx xczu9eg-ffvb1156-i-es1 FPGA at 300 MHz, with WIN_ROWS as 64
+The following table summarizes the performance of remap(), for 4k
+(2160x3840) images generated in the Vivado HLS 2024.2 version tool for
+the Xilinx xcvc1902-vsva2197-2MP-e-S FPGA at 300 MHz, with WIN_ROWS as 74
 for XF_INTERPOLATION_BILINEAR mode.
 
 .. table:: Table . remap Function Performance Estimate Summary
@@ -15847,7 +15862,7 @@ for XF_INTERPOLATION_BILINEAR mode.
    |                |                     |                  |
    |                | (MHz)               | Max latency (ms) |
    +================+=====================+==================+
-   | 1 pixel mode   | 300                 | 7.2              |
+   | 2 pixel mode   | 300                 | 14.1             |
    +----------------+---------------------+------------------+
 
 .. _resolution-conversion:

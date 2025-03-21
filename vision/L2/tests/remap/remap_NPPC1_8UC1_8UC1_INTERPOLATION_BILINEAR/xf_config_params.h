@@ -43,18 +43,18 @@
 #endif
 
 // Mat types
-#define TYPE_XY XF_32FC1
+#define MAPXY_TYPE XF_32SC1
 // Configure this based on the number of rows needed for the remap purpose
 // e.g., If its a right to left flip two rows are enough
 #define XF_WIN_ROWS 8
-
+#define BARREL 0
 #define XF_USE_URAM 0
 
 #define GRAY 1
 #define RGB 0
 
 // Set the optimization type:
-// Only XF_NPPC1 is available for this algorithm currently
+//  XF_NPPC1,XF_NPPC2 are available for this algorithm currently
 #define NPPCX XF_NPPC1
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC1
@@ -68,5 +68,6 @@
 
 #define INPUT_PTR_WIDTH 8
 #define OUTPUT_PTR_WIDTH 8
+#define MAPXY_TYPE_PTR_WIDTH 32
 
 #endif
