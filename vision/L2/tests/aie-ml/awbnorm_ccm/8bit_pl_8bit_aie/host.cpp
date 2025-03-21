@@ -114,8 +114,7 @@ int main(int argc, char** argv) {
 
         // Allocate output buffer
         void* dstData = nullptr;
-        xrt::bo* dst_hndl =
-           new xrt::bo(xF::gpDhdl, (op_height * op_width * 4), 0, 0); // '2' for unsigned short type
+        xrt::bo* dst_hndl = new xrt::bo(xF::gpDhdl, (op_height * op_width * 4), 0, 0); // '2' for unsigned short type
         dstData = dst_hndl->map();
         cv::Mat dst(op_height, op_width, CV_8UC4, dstData);
 
@@ -133,7 +132,7 @@ int main(int argc, char** argv) {
         std::array<int16_t, 25> coeff;
         std::copy(coeffs, coeffs + coeff.size(), coeff.begin());
 
-        #if !__X86_DEVICE__
+#if !__X86_DEVICE__
         std::cout << "Graph init. This does nothing because CDO in boot PDI "
                      "already configures AIE.\n";
         auto gHndl = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "ccm_graph");
@@ -141,12 +140,12 @@ int main(int argc, char** argv) {
         gHndl.reset();
         std::cout << "Graph reset done" << std::endl;
         gHndl.update("ccm_graph.k1.in[1]", coeff);
-        #endif  
+#endif
 
         START_TIMER
         tiler1.compute_metadata(srcImage1.size());
         STOP_TIMER("Meta data compute time")
-        
+
         for (int j = 0; j < 16 + 9; j++) printf("host_coeff: %d \n", (int)coeffs[j]);
         std::chrono::microseconds tt(0);
         for (int itr = 0; itr < iterations; itr++) {
@@ -154,7 +153,7 @@ int main(int argc, char** argv) {
             START_TIMER
             auto tiles_sz = tiler1.host2aie_nb(&src_hndl1, srcImage1.size());
             stitcher.aie2host_nb(dst_hndl, dst.size(), tiles_sz);
-            #if !__X86_DEVICE__
+#if !__X86_DEVICE__
             std::cout << "Graph running for " << (tiles_sz[0] * tiles_sz[1]) << " iterations.\n";
             for (int i = 1; i <= tiles_sz[0] * tiles_sz[1]; i++) {
                 std::cout << "Running graph iteration : " << i << std::endl;
@@ -164,8 +163,7 @@ int main(int argc, char** argv) {
                 gHndl.wait();
                 std::cout << "[DONE iteration] : " << i << std::endl;
             }
-            #endif
-
+#endif
 
             tiler1.wait();
             stitcher.wait();

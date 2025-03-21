@@ -134,8 +134,10 @@ int main(int argc, char** argv) {
             memcpy(srcData, srcImageR.data, (srcImageR.total() * srcImageR.elemSize()));
             std::cout << "dst_hndl size()=" << (op_height * op_width * srcImageR.elemSize()) << std::endl;
             xF::xfcvDataMoverParams params(srcImageR.size(), cv::Size(op_width, op_height));
-            xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT_IN, TILE_WIDTH_IN, 8> tiler(0, 0, false, 4);
-            xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_WIDTH_OUT, TILE_HEIGHT_OUT, 8> stitcher(false);
+            xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT_IN, TILE_WIDTH_IN, 8, 1, 16, false, true> tiler(
+                0, 0, false, 4);
+            xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_WIDTH_OUT, TILE_HEIGHT_OUT, 8, 1, 16, false, true> stitcher(
+                false);
             // xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_HEIGHT_OUT, TILE_WIDTH_OUT, 8> stitcher(false);
             std::cout << "Graph init. This does nothing because CDO in boot PDI "
                          "already configures AIE.\n";
@@ -279,8 +281,10 @@ int main(int argc, char** argv) {
             // cv::Mat dst(op_height, op_width, dstRefImage.type(), dstData);
             std::cout << "dst_hndl2 size()=" << (op_height2 * op_width2 * dst2.elemSize()) << std::endl;
             xF::xfcvDataMoverParams params2(dst.size(), cv::Size(op_width2, op_height2));
-            xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT_IN2, TILE_WIDTH_IN2, 8> tiler2(0, 0, false, 4);
-            xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_WIDTH_OUT2, TILE_HEIGHT_OUT2, 8> stitcher2(false);
+            xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT_IN2, TILE_WIDTH_IN2, 8, 1, 16, false, true> tiler2(
+                0, 0, false, 4);
+            xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_WIDTH_OUT2, TILE_HEIGHT_OUT2, 8, 1, 16, false, true>
+                stitcher2(false);
             // xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_HEIGHT_OUT, TILE_WIDTH_OUT, 8> stitcher(false);
             std::cout << "Graph init. This does nothing because CDO in boot PDI "
                          "already configures AIE.\n";

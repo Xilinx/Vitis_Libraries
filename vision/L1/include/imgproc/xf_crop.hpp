@@ -254,18 +254,17 @@ void xFcropkernel_stream(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src
                          unsigned short height,
                          unsigned short width) {
     XF_SNAME(WORDWIDTH_SRC) val_src = 0;
-    XF_SNAME(WORDWIDTH_DST) val_dst = 0;
-    XF_PTNAME(DEPTH) pix_pos = 0;
 
     // computing bottom right loaction of ROI using roi structure
     ap_uint<13> r = roi.y;
     ap_uint<13> r_new = roi.y + roi.height;
     ap_uint<13> c = roi.x;
     ap_uint<13> c_new = (roi.x + roi.width);
-    ap_uint<13> i, j, k;
+    ap_uint<13> i, j;
 
     // intializing the local variables
-    unsigned long long int idx = 0;
+    unsigned int write_pointer = 0;
+    unsigned int read_pointer_src = 0;
 
 rowLoop:
     for (i = 0; i < height; i++) {
@@ -273,7 +272,6 @@ rowLoop:
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         #pragma HLS LOOP_FLATTEN off
     // clang-format on
-
     colLoop:
         for (j = 0; j < width; j++) {
 // clang-format off
@@ -281,32 +279,15 @@ rowLoop:
             #pragma HLS pipeline
             // clang-format on
 
-            val_src =
-                (XF_SNAME(WORDWIDTH_SRC))(_src_mat.read(i * width + j)); // reading the source stream _src into val_src
+            val_src = (XF_SNAME(WORDWIDTH_SRC))(
+                _src_mat.read(read_pointer_src++)); // reading the source stream _src into val_src
 
-            for (k = 0; k < NPC; k++) {
-// clang-format off
-                #pragma HLS unroll
-                // clang-format on
-                int col = (j * NPC) + k;
+            int col = (j * NPC);
 
-                if (((i >= r) && (i < r_new)) && ((col >= c) && (col < c_new))) {
-                    val_dst.range((pix_pos * XF_PIXELWIDTH(SRC_T, NPC) + (XF_PIXELWIDTH(SRC_T, NPC) - 1)),
-                                  pix_pos * XF_PIXELWIDTH(SRC_T, NPC)) =
-                        val_src.range((k * XF_PIXELWIDTH(SRC_T, NPC)) + XF_PIXELWIDTH(SRC_T, NPC) - 1,
-                                      k * XF_PIXELWIDTH(SRC_T, NPC));
-                    pix_pos++;
-                    if (pix_pos == NPC) {
-                        _dst_mat.write(idx++, val_dst);
-                        pix_pos = 0;
-                    }
-                }
+            if (((i >= r) && (i < r_new)) && ((col >= c) && (col < c_new))) {
+                _dst_mat.write(write_pointer++, val_src);
             }
         }
-    }
-
-    if (pix_pos != 0) {
-        _dst_mat.write(idx++, val_dst);
     }
 }
 

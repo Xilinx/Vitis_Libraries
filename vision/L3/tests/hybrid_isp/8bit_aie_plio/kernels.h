@@ -30,6 +30,7 @@ void comb(adf::input_buffer<uint8_t>& input,
           const uint16_t& mul_fact,
           const uint8_t& rgain,
           const uint8_t& bgain,
+          const uint8_t& ggain,
           adf::output_buffer<uint8_t>& outputDem,
           adf::output_buffer<uint8_t>& output);
 

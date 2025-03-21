@@ -171,12 +171,14 @@ int set_borders_to_const(cv::Mat& dstRefImageL_sobel, cv::Mat& dstImageL_sobel) 
     }
     return 0;
 }
+
 int select_output_ranges(cv::Mat& disp8, cv::Mat& aie_outImage8, cv::Mat& dstRefImage, cv::Mat& aie_outImage8_final) {
-    cv::Rect myROIo(NO_DISPARITIES + (TILE_WINSIZE - 1) / 2 + 1, (TILE_WINSIZE - 1) / 2,
-                    IMAGE_WIDTH - NO_DISPARITIES - (TILE_WINSIZE - 1) - (TILE_WINSIZE_SOBEL - 1) - 1,
+    cv::Rect myROIo(NO_DISPARITIES + (TILE_WINSIZE - 1) / 2 + (TILE_WINSIZE_SOBEL - 1) / 2,
+                    (TILE_WINSIZE - 1) / 2 + (TILE_WINSIZE_SOBEL - 1) / 2,
+                    IMAGE_WIDTH - NO_DISPARITIES - (TILE_WINSIZE - 1) - (TILE_WINSIZE_SOBEL - 1),
                     IMAGE_HEIGHT - (TILE_WINSIZE - 1) - (TILE_WINSIZE_SOBEL - 1));
     dstRefImage = disp8(myROIo);
-    cv::Rect myROIo_aie(0, 0, dstRefImage.cols, dstRefImage.rows);
+    cv::Rect myROIo_aie(0, 1, dstRefImage.cols, dstRefImage.rows);
     aie_outImage8_final = aie_outImage8(myROIo_aie);
 
     return 0;
@@ -184,11 +186,8 @@ int select_output_ranges(cv::Mat& disp8, cv::Mat& aie_outImage8, cv::Mat& dstRef
 
 int remove_top_border(cv::Mat& dstRefImageL_sobel, cv::Mat& croppedImage) {
     int topBorderHeight = 1;
-    // Crop the image by specifying a new region of interest (ROI) without the top border
     cv::Rect roi(0, topBorderHeight, dstRefImageL_sobel.cols, dstRefImageL_sobel.rows - topBorderHeight);
     croppedImage = dstRefImageL_sobel(roi);
-    // std::cout << " In remove_top_border " << std::endl;
-
     return 0;
 }
 
@@ -282,8 +281,8 @@ int main(int argc, char** argv) {
 
         // Allocate output buffer
         std::vector<uint8_t> dstDataL_sobel;
-        dstDataL_sobel.assign((IMAGE_HEIGHT + 2 * (TILE_WINSIZE)) * (IMAGE_WIDTH + 32 + NO_DISPARITIES), 0);
-        cv::Mat dstImageL_sobel((IMAGE_HEIGHT + 2 * (TILE_WINSIZE)), (IMAGE_WIDTH + 32 + NO_DISPARITIES), CV_8UC1,
+        dstDataL_sobel.assign((IMAGE_HEIGHT + 2 * (TILE_WINSIZE)) * (IMAGE_WIDTH + 32 + 240), 0);
+        cv::Mat dstImageL_sobel((IMAGE_HEIGHT + 2 * (TILE_WINSIZE)), (IMAGE_WIDTH + 32 + 240), CV_8UC1,
                                 (void*)dstDataL_sobel.data());
 
         xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_IN_HEIGHT_SOBEL, TILE_IN_WIDTH_SOBEL, TILE_IN_WIDTH_SOBEL,
@@ -315,13 +314,16 @@ int main(int argc, char** argv) {
             std::cout << "Sending data: " << lImage.size() << "\n";
             std::cout << "Receiving data: " << dstImageL_sobel.size() << "\n";
 
-            auto tiles_sz = tilerL_sobel.host2aie_nb(lData_sobel.data(), lImage.size(), {"demo_sobel.in[0]"});
-            std::cout << "Graph running for " << (tiles_sz[0] * tiles_sz[1]) << " iterationsL_sobel.\n";
-            stitcherL_sobel.aie2host_nb(dstDataL_sobel.data(), dstImageL_sobel.size(), tiles_sz, {"demo_sobel.out[0]"});
+            auto tiles_sz =
+                tilerL_sobel.host2aie_nb(lData_sobel.data(), lImage.size(), {"demo_sobel.in[0]", "demo_sobel.in[1]"});
+            std::cout << "Graph running for " << (tiles_sz[0] * tiles_sz[1] / NO_CORES_SOBEL)
+                      << " iterationsL_sobel.\n";
+            stitcherL_sobel.aie2host_nb(dstDataL_sobel.data(), dstImageL_sobel.size(), tiles_sz,
+                                        {"demo_sobel.out[0]", "demo_sobel.out[1]"});
 
 #if !__X86_DEVICE__
             START_TIMER
-            gHndl_sobel.run(tiles_sz[0] * tiles_sz[1]);
+            gHndl_sobel.run(tiles_sz[0] * tiles_sz[1] / (NO_CORES_SOBEL));
 #endif
 
 #if !__X86_DEVICE__
@@ -330,7 +332,7 @@ int main(int argc, char** argv) {
 
 #endif
 
-            stitcherL_sobel.wait({"demo_sobel.out[0]"});
+            stitcherL_sobel.wait({"demo_sobel.out[0]", "demo_sobel.out[1]"});
             std::cout << "Data transfer complete (Stitcher - SOBEL LEFT IMAGE)\n";
             tt1 += tdiff;
         }
@@ -346,8 +348,8 @@ int main(int argc, char** argv) {
 
         // Allocate output buffer
         std::vector<uint8_t> dstDataR_sobel;
-        dstDataR_sobel.assign((IMAGE_HEIGHT + 2 * (TILE_WINSIZE)) * (IMAGE_WIDTH + 32 + NO_DISPARITIES), 0);
-        cv::Mat dstImageR_sobel((IMAGE_HEIGHT + 2 * (TILE_WINSIZE)), (IMAGE_WIDTH + 32 + NO_DISPARITIES), CV_8UC1,
+        dstDataR_sobel.assign((IMAGE_HEIGHT + 2 * (TILE_WINSIZE)) * (IMAGE_WIDTH + 32 + 240), 0);
+        cv::Mat dstImageR_sobel((IMAGE_HEIGHT + 2 * (TILE_WINSIZE)), (IMAGE_WIDTH + 32 + 240), CV_8UC1,
                                 (void*)dstDataR_sobel.data());
 
         xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_IN_HEIGHT_SOBEL, TILE_IN_WIDTH_SOBEL, TILE_IN_WIDTH_SOBEL,
@@ -377,13 +379,16 @@ int main(int argc, char** argv) {
             std::cout << "Receiving data: " << dstImageR_sobel.size() << "\n";
 
             //@{
-            auto tiles_sz = tilerR_sobel.host2aie_nb(RData_sobel.data(), rImage.size(), {"demo_sobel.in[0]"});
-            std::cout << "Graph running for " << (tiles_sz[0] * tiles_sz[1]) << " iterationsR_sobel.\n";
-            stitcherR_sobel.aie2host_nb(dstDataR_sobel.data(), dstImageR_sobel.size(), tiles_sz, {"demo_sobel.out[0]"});
+            auto tiles_sz =
+                tilerR_sobel.host2aie_nb(RData_sobel.data(), rImage.size(), {"demo_sobel.in[0]", "demo_sobel.in[1]"});
+            std::cout << "Graph running for " << (tiles_sz[0] * tiles_sz[1] / NO_CORES_SOBEL)
+                      << " iterationsR_sobel.\n";
+            stitcherR_sobel.aie2host_nb(dstDataR_sobel.data(), dstImageR_sobel.size(), tiles_sz,
+                                        {"demo_sobel.out[0]", "demo_sobel.out[1]"});
 
 #if !__X86_DEVICE__
             START_TIMER
-            gHndl_sobel.run(tiles_sz[0] * tiles_sz[1]);
+            gHndl_sobel.run(tiles_sz[0] * tiles_sz[1] / (NO_CORES_SOBEL));
 #endif
 
 #if !__X86_DEVICE__
@@ -393,7 +398,7 @@ int main(int argc, char** argv) {
             STOP_TIMER("Total time to process frame")
             std::cout << "Data transfer complete (Stitcher - SOBEL RIGHT IMAGE)\n";
             tt2 += tdiff;
-            stitcherR_sobel.wait({"demo_sobel.out[0]"});
+            stitcherR_sobel.wait({"demo_sobel.out[0]", "demo_sobel.out[1]"});
         }
 
 #if !__X86_DEVICE__
@@ -404,11 +409,20 @@ int main(int argc, char** argv) {
         // RUN  SBM on AIE
         ///////////////////////////////////
         std::cout << "[INFO] Running SBM on AIE ... " << std::endl;
-
+        START_TIMER
         cv::Mat srcImageR =
             dstImageR_sobel(cv::Rect(0, 0, dstImageR_sobel.cols, dstImageR_sobel.rows - TILE_WINSIZE)).clone();
         cv::Mat srcImageL =
             dstImageL_sobel(cv::Rect(0, 0, dstImageL_sobel.cols, dstImageL_sobel.rows - TILE_WINSIZE)).clone();
+
+        // To have sufficient tiles for 11 cores
+        int append_cols = 200;
+        /*appendColumns(srcImageR, append_cols);
+        appendColumns(srcImageL, append_cols);*/
+
+        STOP_TIMER("DATA TRANFER compute time")
+
+        START_TIMER
 
         // Convert the cv::Mat to a std::vector
         std::vector<uint8_t> srcDataL;
@@ -422,18 +436,21 @@ int main(int argc, char** argv) {
             srcDataR.insert(srcDataR.end(), srcImageR.ptr<uchar>(i),
                             srcImageR.ptr<uchar>(i) + srcImageR.cols * srcImageL.elemSize());
         }
+        STOP_TIMER("Matrix to Array compute time")
 
         // Allocate output buffer
         std::vector<int16_t> dstData;
-        dstData.assign(TILE_OUT_HEIGHT * (IMAGE_WIDTH + NO_DISPARITIES + 32) * sizeof(int16_t), 0);
-        cv::Mat dstImage(TILE_OUT_HEIGHT, (IMAGE_WIDTH + NO_DISPARITIES + 32), CV_16SC1, (void*)dstData.data());
+        dstData.assign(TILE_OUT_HEIGHT * (IMAGE_WIDTH + NO_DISPARITIES + 32 + append_cols) * sizeof(int16_t), 0);
+        cv::Mat dstImage(TILE_OUT_HEIGHT, (IMAGE_WIDTH + NO_DISPARITIES + 32 + append_cols), CV_16SC1,
+                         (void*)dstData.data());
 
         xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_IN_HEIGHT_WITH_WINDOW, LEFT_TILE_IN_WIDTH, 64, NO_CORES, 0, true>
             tiler1(LOVERLAP, 0);
         xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_IN_HEIGHT_WITH_WINDOW, RIGHT_TILE_IN_WIDTH, RIGHT_TILE_IN_WIDTH,
                            NO_CORES, 0, true>
             tiler2(ROVERLAP, 0);
-        xF::xfcvDataMovers<xF::STITCHER, int16_t, TILE_OUT_HEIGHT, 64, 64, NO_CORES, 0, true> stitcher(1, true);
+        xF::xfcvDataMovers<xF::STITCHER, int16_t, TILE_OUT_HEIGHT, COLS_COMBINE, COLS_COMBINE, NO_CORES, 0, true>
+            stitcher(1);
 
 #if !__X86_DEVICE__
         std::cout << "Graph init. This does nothing because CDO in boot PDI "
@@ -456,9 +473,25 @@ int main(int argc, char** argv) {
             std::cout << "Receiving data: " << dstImage.size() << "\n";
 
             //@{
-            tiler1.host2aie_nb(srcDataL.data(), srcImageL.size(), {"sbm_graph.in_sobel_left_tile[0]"});
-            auto tiles_sz = tiler2.host2aie_nb(srcDataR.data(), srcImageR.size(), {"sbm_graph.in_sobel_right_tile[0]"});
-            stitcher.aie2host_nb(dstData.data(), dstImage.size(), tiles_sz, {"sbm_graph.out_interp[0]"});
+            tiler1.host2aie_nb(srcDataL.data(), srcImageL.size(),
+                               {"sbm_graph.in_sobel_left_tile[0]", "sbm_graph.in_sobel_left_tile[1]",
+                                "sbm_graph.in_sobel_left_tile[2]", "sbm_graph.in_sobel_left_tile[3]",
+                                "sbm_graph.in_sobel_left_tile[4]", "sbm_graph.in_sobel_left_tile[5]",
+                                "sbm_graph.in_sobel_left_tile[6]", "sbm_graph.in_sobel_left_tile[7]",
+                                "sbm_graph.in_sobel_left_tile[8]", "sbm_graph.in_sobel_left_tile[9]",
+                                "sbm_graph.in_sobel_left_tile[10]"});
+            auto tiles_sz = tiler2.host2aie_nb(srcDataR.data(), srcImageR.size(),
+                                               {"sbm_graph.in_sobel_right_tile[0]", "sbm_graph.in_sobel_right_tile[1]",
+                                                "sbm_graph.in_sobel_right_tile[2]", "sbm_graph.in_sobel_right_tile[3]",
+                                                "sbm_graph.in_sobel_right_tile[4]", "sbm_graph.in_sobel_right_tile[5]",
+                                                "sbm_graph.in_sobel_right_tile[6]", "sbm_graph.in_sobel_right_tile[7]",
+                                                "sbm_graph.in_sobel_right_tile[8]", "sbm_graph.in_sobel_right_tile[9]",
+                                                "sbm_graph.in_sobel_right_tile[10]"});
+            stitcher.aie2host_nb(dstData.data(), dstImage.size(), tiles_sz,
+                                 {"sbm_graph.out_interp[0]", "sbm_graph.out_interp[1]", "sbm_graph.out_interp[2]",
+                                  "sbm_graph.out_interp[3]", "sbm_graph.out_interp[4]", "sbm_graph.out_interp[5]",
+                                  "sbm_graph.out_interp[6]", "sbm_graph.out_interp[7]", "sbm_graph.out_interp[8]",
+                                  "sbm_graph.out_interp[9]", "sbm_graph.out_interp[10]"});
             std::cout << "Graph running for " << (tiles_sz[0] * tiles_sz[1]) / NO_CORES << " iterations.\n";
 
 #if !__X86_DEVICE__
@@ -470,9 +503,13 @@ int main(int argc, char** argv) {
             gHndl.wait();
 #endif
             STOP_TIMER("Total time to process frame")
-            std::cout << "Data transfer complete (Stitcher)\n";
             tt += tdiff;
-            stitcher.wait({"sbm_graph.out_interp[0]"});
+            std::cout << "Data transfer complete (Stitcher)\n";
+
+            stitcher.wait({"sbm_graph.out_interp[0]", "sbm_graph.out_interp[1]", "sbm_graph.out_interp[2]",
+                           "sbm_graph.out_interp[3]", "sbm_graph.out_interp[4]", "sbm_graph.out_interp[5]",
+                           "sbm_graph.out_interp[6]", "sbm_graph.out_interp[7]", "sbm_graph.out_interp[8]",
+                           "sbm_graph.out_interp[9]", "sbm_graph.out_interp[10]"});
 
             //}
         }
@@ -483,14 +520,15 @@ int main(int argc, char** argv) {
         cv::imwrite("aie_outImage8.png", aie_outImage8);
 
         // Analyze output {
-        std::cout << "Analyzing diff2\n";
+        std::cout << "Analyzing diff6\n";
 
         // select output ignoring disparities and borders
         cv::Mat diff, dstRefImage, aie_outImage8_final;
         select_output_ranges(disp8, aie_outImage8, dstRefImage, aie_outImage8_final);
         cv::absdiff(dstRefImage, aie_outImage8_final, diff);
 
-        std::cout << " TILE_WINSIZE is = " << TILE_WINSIZE << " NO_DISPARITIES = " << NO_DISPARITIES << std::endl;
+        std::cout << " NO_CORES = " << NO_CORES << " TILE_WINSIZE is == " << TILE_WINSIZE
+                  << " NO_DISPARITIES = " << NO_DISPARITIES << std::endl;
         cv::imwrite("ref.jpg", dstRefImage);
         cv::imwrite("aie_final.jpg", aie_outImage8_final);
         cv::imwrite("diff.jpg", diff);
@@ -498,7 +536,7 @@ int main(int argc, char** argv) {
         float err_per;
         analyzeDiff(diff, 1, err_per);
         if (err_per > 0.0f) {
-            std::cerr << "Test failed" << std::endl;
+            std::cerr << "Test failed..." << std::endl;
             exit(-1);
         }
 

@@ -22,8 +22,7 @@
 using DATA_TYPE = uint8_t;
 
 // To be set at compile time
-static constexpr bool IS_SBM = 1;
-static constexpr int NO_CORES = 1;
+static constexpr int NO_CORES = 11;
 static constexpr int IMAGE_WIDTH = 1920;
 static constexpr int IMAGE_HEIGHT = 1080;
 static constexpr int TILE_WINSIZE = 5;
@@ -45,11 +44,11 @@ static constexpr int SIZEOF_INT16 = 2;
 static constexpr int LOVERLAP = (LEFT_TILE_IN_WIDTH - COLS_COMBINE);
 static constexpr int ROVERLAP = (RIGHT_TILE_IN_WIDTH - COLS_COMBINE);
 
-static constexpr int NO_CORES_SOBEL = 1;
+static constexpr int NO_CORES_SOBEL = 2;
 static constexpr int TILE_WINSIZE_SOBEL = 3;
 static constexpr int TILE_IN_HEIGHT_SOBEL = 542;
 static constexpr int TILE_IN_WIDTH_SOBEL = 32;
-static constexpr int TILE_OUT_WIDTH_SOBEL = 32 + NO_DISPARITIES + 32;
+static constexpr int TILE_OUT_WIDTH_SOBEL = 32 + 240 + 32;
 static constexpr int TILE_OUT_HEIGHT_SOBEL = 540 + TILE_WINSIZE + 1;
 static constexpr int TILE_WIDTH = TILE_IN_WIDTH_SOBEL;
 static constexpr int TILE_HEIGHT = TILE_IN_HEIGHT_SOBEL;

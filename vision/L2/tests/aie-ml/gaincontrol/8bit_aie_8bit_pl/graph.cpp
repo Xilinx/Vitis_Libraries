@@ -24,11 +24,13 @@ gaincontrolGraph gc;
 #if defined(__AIESIM__) || defined(__X86SIM__)
 
 int main(int argc, char** argv) {
-    uint8_t rgain = 70;
-    uint8_t bgain = 70;
+    uint8_t rgain = 255;
+    uint8_t bgain = 255;
+    uint8_t ggain = 200;
     gc.init();
     gc.update(gc.rgain, rgain);
     gc.update(gc.bgain, bgain);
+    gc.update(gc.ggain, ggain);
     gc.run(1);
     gc.end();
     return 0;

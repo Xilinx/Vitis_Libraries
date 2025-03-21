@@ -219,8 +219,11 @@ loop_height:
             float mx = (float)u;
             float my = (float)v;
 
-            map1.write_float(idx, mx);
-            map2.write_float(idx++, my);
+            int32_t mx_int = (uint32_t)(mx * 256);
+            int32_t my_int = (uint32_t)(my * 256);
+
+            map1.write(idx, mx_int);
+            map2.write(idx++, my_int);
         }
     }
 }

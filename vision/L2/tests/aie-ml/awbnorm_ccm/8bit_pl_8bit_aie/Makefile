@@ -169,13 +169,13 @@ EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
-HOST_ARGS := kernel.xclbin $(XFLIB_DIR)/data/HD.jpg $(XFLIB_DIR)/data/HD.jpg 0.5
+HOST_ARGS := kernel.xclbin $(XFLIB_DIR)/data/HD.jpg 1920 1080 1
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw))
-HOST_ARGS := kernel.xclbin $(XFLIB_DIR)/data/4k.jpg $(XFLIB_DIR)/data/4k.jpg 0.5
+HOST_ARGS := kernel.xclbin $(XFLIB_DIR)/data/4k.jpg 3840 2160 1
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif

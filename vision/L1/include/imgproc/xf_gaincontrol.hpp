@@ -120,60 +120,60 @@ RowLoop:
                 if (bayer_p == XF_BAYER_RG) {
                     if (i % 2 == 0 && cond1) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * rgain) >> 7);
+                        int v2 = (int)((v1 * rgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else if (i % 2 != 0 && cond2) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * bgain) >> 7);
+                        int v2 = (int)((v1 * bgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * ggain) >> 7);
+                        int v2 = (int)((v1 * ggain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     }
                 }
                 if (bayer_p == XF_BAYER_GR) {
                     if (i % 2 == 0 && cond2) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * rgain) >> 7);
+                        int v2 = (int)((v1 * rgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else if (i % 2 != 0 && cond1) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * bgain) >> 7);
+                        int v2 = (int)((v1 * bgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * ggain) >> 7);
+                        int v2 = (int)((v1 * ggain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     }
                 }
                 if (bayer_p == XF_BAYER_BG) {
                     if (i % 2 == 0 && cond1) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * bgain) >> 7);
+                        int v2 = (int)((v1 * bgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else if (i % 2 != 0 && cond2) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * rgain) >> 7);
+                        int v2 = (int)((v1 * rgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * ggain) >> 7);
+                        int v2 = (int)((v1 * ggain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     }
                 }
                 if (bayer_p == XF_BAYER_GB) {
                     if (i % 2 == 0 && cond2) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * bgain) >> 7);
+                        int v2 = (int)((v1 * bgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else if (i % 2 != 0 && cond1) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * rgain) >> 7);
+                        int v2 = (int)((v1 * rgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * ggain) >> 7);
+                        int v2 = (int)((v1 * ggain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     }
                 }
@@ -265,60 +265,60 @@ RowLoop:
                 if (bayer_p == XF_BAYER_RG) {
                     if (i % 2 == 0 && cond1) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * rgain) >> 7);
+                        int v2 = (int)((v1 * rgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else if (i % 2 != 0 && cond2) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * bgain) >> 7);
+                        int v2 = (int)((v1 * bgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * ggain) >> 7);
+                        int v2 = (int)((v1 * ggain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     }
                 }
                 if (bayer_p == XF_BAYER_GR) {
                     if (i % 2 == 0 && cond2) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * rgain) >> 7);
+                        int v2 = (int)((v1 * rgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else if (i % 2 != 0 && cond1) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * bgain) >> 7);
+                        int v2 = (int)((v1 * bgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * ggain) >> 7);
+                        int v2 = (int)((v1 * ggain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     }
                 }
                 if (bayer_p == XF_BAYER_BG) {
                     if (i % 2 == 0 && cond1) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * bgain) >> 7);
+                        int v2 = (int)((v1 * bgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else if (i % 2 != 0 && cond2) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * rgain) >> 7);
+                        int v2 = (int)((v1 * rgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * ggain) >> 7);
+                        int v2 = (int)((v1 * ggain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     }
                 }
                 if (bayer_p == XF_BAYER_GB) {
                     if (i % 2 == 0 && cond2) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * bgain) >> 7);
+                        int v2 = (int)((v1 * bgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else if (i % 2 != 0 && cond1) {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * rgain) >> 7);
+                        int v2 = (int)((v1 * rgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     } else {
                         XF_CTUNAME(SRC_T, NPC) v1 = pxl1;
-                        int v2 = (int)((v1 * ggain) >> 7);
+                        int v2 = (int)((v1 * ggain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                         t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
                     }
                 }
@@ -423,7 +423,7 @@ RowLoop:
                 pxl1 = pxl_pack1.range(l * STEP + STEP - 1, l * STEP); // extracting each pixel in case of 8-pixel mode
                 XF_PTNAME(XF_DEPTH(SRC_T, NPC)) t;
 
-                int v2 = (int)((pxl1 * lgain) >> 7);
+                int v2 = (int)((pxl1 * lgain) >> (XF_DTPIXELDEPTH(SRC_T, NPC) - 1));
                 t = xf_satcast_gain<XF_CTUNAME(SRC_T, NPC)>(v2);
 
                 pxl_pack_out.range(l * STEP + STEP - 1, l * STEP) = t;

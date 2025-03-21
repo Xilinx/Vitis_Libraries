@@ -182,14 +182,26 @@ This library is written by developers at
 
 ## Changelog
 
+**PL additions/enhancements:** :
+
+    • New Functions:
+        • Added autogain function
+        • Created new L3 example of ISP with autogain
+    • Updates:
+        • Added NPC2 support for Remap function
+        • Corrected preprocess API in documentation
+        • Updated output format of initUndistoredRectifyMapInverse to 32SC1 (fixed point). Updated L3 stereopipeline example accordingly.
+
 **AIE additions/enhancements:** :
 
     • New Functions:
-	    • Added 2 new AIE-ML functions (PLIO & GMIO) targeting Versal devices:
-		• Resize Bicubic
-		• StereoLBM	
+	    • Added NV12-resize function	    
     • Updates:
-    	• Minor bug fixes
+	    • Added g-gain parameter in gain correction. Updated Hybrid-ISP in L3 accordingly.
+	    • Added yuy2-filter2d GMIO testcase
+	    • Fixed TopK hang issue
+	    • Updated computeMetadata function in GMIO datamovers	    
+	    • Minor bug fixes
 
 **Known issues**
 

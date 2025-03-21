@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
 #endif
 
     cv::Mat src, ocv_remapped, hls_remapped;
-    cv::Mat map_x, map_y, diff;
+    cv::Mat map_x, map_y, diff, map_x_int, map_y_int;
 
 // Reading in the image:
 #if GRAY
@@ -53,6 +53,8 @@ int main(int argc, char** argv) {
     ocv_remapped.create(src.rows, src.cols, src.type()); // opencv result
     map_x.create(src.rows, src.cols, CV_32FC1);          // Mapx for opencv remap function
     map_y.create(src.rows, src.cols, CV_32FC1);          // Mapy for opencv remap function
+    map_x_int.create(src.rows, src.cols, CV_32SC1);      // Mapx for opencv remap function
+    map_y_int.create(src.rows, src.cols, CV_32SC1);      // Mapy for opencv remap function
     hls_remapped.create(src.rows, src.cols, src.type()); // create memory for output images
     diff.create(src.rows, src.cols, src.type());
 
@@ -77,6 +79,9 @@ int main(int argc, char** argv) {
             }
             map_x.at<float>(i, j) = valx;
             map_y.at<float>(i, j) = valy;
+
+            map_x_int.at<int32_t>(i, j) = static_cast<int32_t>((valx)*256);
+            map_y_int.at<int32_t>(i, j) = static_cast<int32_t>((valy)*256);
         }
     }
 #else // example map generation, flips the image horizontally
@@ -85,6 +90,8 @@ int main(int argc, char** argv) {
             float valx = (float)(src.cols - j - 1), valy = (float)i;
             map_x.at<float>(i, j) = valx;
             map_y.at<float>(i, j) = valy;
+            map_x_int.at<int32_t>(i, j) = static_cast<int32_t>((valx)*256);
+            map_y_int.at<int32_t>(i, j) = static_cast<int32_t>((valy)*256);
         }
     }
 #endif
@@ -107,7 +114,7 @@ int main(int argc, char** argv) {
 
     // OpenCL section:
     size_t image_in_size_bytes = src.rows * src.cols * sizeof(unsigned char) * CHANNELS;
-    size_t map_in_size_bytes = src.rows * src.cols * sizeof(float);
+    size_t map_in_size_bytes = src.rows * src.cols * sizeof(signed int);
     size_t image_out_size_bytes = image_in_size_bytes;
 
     cl_int err;
@@ -168,7 +175,7 @@ int main(int argc, char** argv) {
                                        CL_TRUE,           // blocking call
                                        0,                 // buffer offset in bytes
                                        map_in_size_bytes, // Size in bytes
-                                       map_x.data,        // Pointer to the data to copy
+                                       map_x_int.data,    // Pointer to the data to copy
                                        nullptr, &event));
 
     OCL_CHECK(err,
@@ -176,7 +183,7 @@ int main(int argc, char** argv) {
                                        CL_TRUE,           // blocking call
                                        0,                 // buffer offset in bytes
                                        map_in_size_bytes, // Size in bytes
-                                       map_y.data,        // Pointer to the data to copy
+                                       map_y_int.data,    // Pointer to the data to copy
                                        nullptr, &event));
 
     // Execute the kernel:

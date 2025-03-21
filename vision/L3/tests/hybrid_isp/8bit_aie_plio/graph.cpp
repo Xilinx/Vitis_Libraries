@@ -28,6 +28,7 @@ TopPipelineGraph<1> TOP[CORES] = {{20, 0, 0}, {22, 0, 1}, {24, 0, 2}}; //, {24, 
 int main(int argc, char** argv) {
     uint8_t rgain1 = 128;
     uint8_t bgain1 = 128;
+    uint8_t ggain1 = 64;
     uint8_t black_level = 32;
     const int MaxLevel = 255; // 8b input value
     float MulValue1 = (float)((float)MaxLevel / (MaxLevel - black_level));
@@ -55,6 +56,7 @@ int main(int argc, char** argv) {
         TOP[i].update(TOP[i].mul_val, MulValue);
         TOP[i].update(TOP[i].rgain, rgain1);
         TOP[i].update(TOP[i].bgain, bgain1);
+        TOP[i].update(TOP[i].ggain, ggain1);
         TOP[i].update(TOP[i].coeffs, coeffs, 25);
         TOP[i].run(NUM_TILES);
     }

@@ -21,6 +21,7 @@ template <int code>
 void gaincontrol(adf::input_buffer<uint8>& input,
                  adf::output_buffer<uint8>& output,
                  const uint8_t& rgain,
-                 const uint8_t& bgain) {
-    xf::cv::aie::gaincontrol_api<code>(input, output, rgain, bgain);
+                 const uint8_t& bgain,
+                 const uint8_t& ggain) {
+    xf::cv::aie::gaincontrol_api<code>(input, output, rgain, bgain, ggain);
 };

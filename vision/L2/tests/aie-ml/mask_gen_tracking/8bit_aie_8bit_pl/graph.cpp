@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
 
     maskgen_ref(inputDataPredDepth, maskRef, (bool)MASKGEN_TRACKING, (uint8)_MIN, (uint8)_MAX, (uint8)_FGTH,
                 (uint8)_BGTH, fg_thresh_track_r, bg_thresh_track_r, (int)(TILE_HEIGHT_IN * NUM_TILES),
-                (int)IMAGE_WIDTH_IN);
+                (int)TILE_WIDTH_IN);
 
     std::ofstream fref("reference.txt");
 

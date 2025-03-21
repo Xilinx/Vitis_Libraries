@@ -38,6 +38,7 @@ class TopPipelineGraph : public adf::graph {
    public:
     port<input> rgain;
     port<input> bgain;
+    port<input> ggain;
     port<input> blk_val;
     port<input> mul_val;
     port<input> coeffs;
@@ -80,6 +81,7 @@ class TopPipelineGraph : public adf::graph {
         connect<adf::parameter>(mul_val, async(k[0].in[3]));
         connect<adf::parameter>(rgain, async(k[0].in[4]));
         connect<adf::parameter>(bgain, async(k[0].in[5]));
+        connect<adf::parameter>(ggain, async(k[0].in[6]));
 
         connect<>(k[CORE_IDX].out[0], out1[CORE_IDX].in[0]);
         connect<>(k[CORE_IDX].out[1], out2[CORE_IDX].in[0]);

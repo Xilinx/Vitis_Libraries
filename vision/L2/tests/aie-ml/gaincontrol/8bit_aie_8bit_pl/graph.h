@@ -30,6 +30,7 @@ class gaincontrolGraph : public adf::graph {
    public:
     port<input> rgain;
     port<input> bgain;
+    port<input> ggain;
 
     input_plio in1;
     output_plio out1;
@@ -46,6 +47,7 @@ class gaincontrolGraph : public adf::graph {
         connect<>(k1.out[0], out1.in[0]);
         connect<parameter>(rgain, async(k1.in[1]));
         connect<parameter>(bgain, async(k1.in[2]));
+        connect<parameter>(ggain, async(k1.in[3]));
 
         adf::dimensions(k1.in[0]) = {TILE_WINDOW_SIZE};
         adf::dimensions(k1.out[0]) = {TILE_WINDOW_SIZE};

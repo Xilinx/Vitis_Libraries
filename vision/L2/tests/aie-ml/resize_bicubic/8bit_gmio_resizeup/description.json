@@ -63,10 +63,6 @@
             "target": "aiesim"
         },
         {
-            "name": "x86sim-launch",
-            "target": "x86sim"
-        },
-        {
             "name": "hwemu-launch", 
             "target": "hw_emu", 
             "cmd_args": "kernel.xclbin LIB_DIR/data/img1.png 1280 720 1"
