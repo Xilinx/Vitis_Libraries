@@ -98,13 +98,13 @@ kernelMatVecMulClass<TT_DATA_A,
                 inPtrA = (matrixStartPtr) + (frame * loadsPerMatrix) + (idx);
                 inPtrB = (vectorStartPtr) + (frame * loadsPerVectorB);
 
-                if
-                    constexpr(TP_CASC_IN == CASC_IN_TRUE) {
-                        acc = (accVect_t)readincr_v<vecSampleNumA>(inInterface.inCascade);
-                    }
-                else {
+                // if
+                //     constexpr(TP_CASC_IN == CASC_IN_TRUE) {
+                //         acc = (accVect_t)readincr_v<vecSampleNumA>(inInterface.inCascade);
+                //     }
+                // else {
                     acc = (accVect_t)blankVect;
-                }
+                // }
                 for (int vecInB = 0; vecInB < loadsPerVectorB; vecInB++) {
                     dataB = *inPtrB++;
 #pragma unroll(vecSampleNumB)
@@ -117,6 +117,10 @@ kernelMatVecMulClass<TT_DATA_A,
                             acc = ::aie::mac(acc, dataB[jdx], dataA);
                         }
                     }
+                }
+                if
+                    constexpr(TP_CASC_IN == CASC_IN_TRUE) {
+                        acc = ::aie::add(acc, (dataA_t)readincr_v<vecSampleNumA>(inInterface.inCascade));
                 }
                 // output to outVect or to outCascade
                 if
