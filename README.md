@@ -29,3 +29,6 @@ To design custom accelerators for your application, use Vitis library functions 
 Combine domain-specific Vitis libraries with pre-optimized deep learning models from the Vitis AI library or the Vitis AI development kit to accelerate your whole application and meet the overall system-level functionality and performance goals.
 
 ![Scalable and Flexible Library Functions](https://xilinx.github.io/Vitis_Libraries/_images/1568760747007.png)
+
+# Support & Contact
+To report any issues or request support, please post your question to the Vitis section of the [Adaptive SoC & FPGA Community Forums](https://adaptivesupport.amd.com/s/topic/0TO2E000000YKXhWAO/vitis?language=en_US)
