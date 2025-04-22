@@ -69,13 +69,6 @@ The matrix block partition information is stored in the DDR and HBM channels. Th
 
 To build and test the design on Linux platform, make sure that your **XILINX_VITIS** and **XILINX_XRT** environment variables are set up correctly and point to the corresponding **Vitis 2022.2** locations. Once your environment is set up properly, navigate to the **L2/tests/csmv** directory and follow the steps below to run emulation and launch accelerator on Alveo U280.
 
-* To run software emulation, enter the following commands. Replace the **$XILINX_VITIS** with your Vitis 2022.2 installation location. The software emulation treats each CU as a dataflow module, and uses a wrapper called ``cscmvSeqKernel`` as the top module to run the software emulation process. This is purely used for C++ level functionality test.
-
-.. code-block:: bash
-
-   make cleanall
-   make run PLATFORM_REPO_PATHS=$XILINX_VITIS/platforms  PLATFORM=$XILINX_VITIS/platform/xilinx_u280_xdma_201920_1/xilinx_u280_xdma_201920_1.xpfm  TARGET=sw_emu
-
 * To run hardware emulation, enter following commands. Replace the **$XILINX_VITIS** with your Vitis 2022.2 installation location.
 
 .. code-block:: bash
