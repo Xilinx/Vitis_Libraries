@@ -19,10 +19,10 @@ To launch the testing process, navigate to each testcase directory under **L2/te
 
 .. code-block:: bash
 
-  make run TARGET=sw_emu/hw_emu
+  make run TARGET=hw_emu
 
-The above command tests and verifies the FCN kernel via AMD Vitis |trade| software-emulation or hardware-emulation.
-Once the emulations are passed, you can use the following command to build FPGA bitstream 
+The above command tests and verifies the FCN kernel via AMD Vitis |trade| hardware-emulation.
+Once the emulation is passed, you can use the following command to build FPGA bitstream 
 and launch the kernel on AMD Alveo |trade| U250/U50 FPGA card. 
 
 .. code-block:: bash

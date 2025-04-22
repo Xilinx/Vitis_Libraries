@@ -36,12 +36,12 @@ Test RTM kernels
 ==============================
 There are several pre-build L2 kernels and they can be tested individually. 
 To launch the testing process, navigate to each testcase directory under **L2/tests/hw**, 
-and enter the following command for software emulation, hardware emulation, or
+and enter the following command for hardware emulation, or
 running on hardware. 
 
 .. code-block:: bash
 
-  make run TARGET=sw_emu/hw_emu/hw
+  make run TARGET=hw_emu/hw
 
 
 Test 2D RTM
@@ -52,10 +52,10 @@ Forward kernel
 
 .. code-block:: bash
 
-  make run TARGET=sw_emu/hw_emu
+  make run TARGET=hw_emu
 
-The above command tests and verifies forward kernel via Vitis software-emulation or hardware-emulation.
-Once the emulations are passed, you can use the following command to build FPGA bitstream 
+The above command tests and verifies forward kernel via Vitis hardware-emulation.
+Once the emulation is passed, you can use the following command to build FPGA bitstream 
 and launch the kernel on AMD Alveo |trade| U280 FPGA. 
 
 .. code-block:: bash
@@ -96,10 +96,10 @@ Backward kernel
 
 .. code-block:: bash
 
-  make run TARGET=sw_emu/hw_emu
+  make run TARGET=hw_emu
 
-The above command tests and verifies backward kernel via Vitis software-emulation or hardware-emulation.
-Once the emulations are passed, you can use the following command to build FPGA bitstream 
+The above command tests and verifies backward kernel via Vitis hardware-emulation.
+Once the emulation is passed, you can use the following command to build FPGA bitstream 
 and launch the kernel on Alveo U280 FPGA. 
 
 .. code-block:: bash
@@ -143,10 +143,10 @@ Forward kernel with HBC/RBC boundary condition
 
 .. code-block:: bash
 
-  make run TARGET=sw_emu/hw_emu
+  make run TARGET=hw_emu
 
-The above command tests and verifies forward kernel with HBC/RBC boundary condition via Vitis software-emulation or hardware-emulation.
-Once the emulations are passed, you can use the following command to build FPGA bitstream 
+The above command tests and verifies forward kernel with HBC/RBC boundary condition via Vitis hardware-emulation.
+Once the emulation is passed, you can use the following command to build FPGA bitstream 
 and launch the kernel on Alveo U280 FPGA. 
 
 .. code-block:: bash

@@ -36,12 +36,12 @@ Test CG kernels
 ==============================
 There are several pre-build L2 kernels and they can be tested individually. 
 To launch the testing process, navigate to each testcase directory under **L2/tests/cgSolver/**, 
-and enter the following command for software emulation, hardware emulation, or
+and enter the following command for hardware emulation, or
 running on hardware. 
 
 .. code-block:: bash
 
-  make run TARGET=sw_emu/hw_emu/hw
+  make run TARGET=hw_emu/hw
 
 
 GEMV-based CG solver

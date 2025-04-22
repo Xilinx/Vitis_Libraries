@@ -98,7 +98,7 @@ Test control variables are:
 ```console
 cd L2/tests/vitis_case_folder
 
-make run TARGET=<sw_emu/hw_emu/hw> PLATFORM=<FPGA platform> PLATFORM_REPO_PATHS=<path to platform directories>
+make run TARGET=<hw_emu/hw> PLATFORM=<FPGA platform> PLATFORM_REPO_PATHS=<path to platform directories>
 
 # delete generated files
 make cleanall
@@ -117,7 +117,6 @@ make cleanall
 
 Here, `TARGET` decides the FPGA binary type
 
-- `sw_emu` is for software emulation
 - `hw_emu` is for hardware emulation
 - `hw` is for deployment on physical card. (Compilation to hardware binary often takes hours.)
 

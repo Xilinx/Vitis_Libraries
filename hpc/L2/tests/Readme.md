@@ -5,15 +5,6 @@ Here are three test cases for three kernels respectively in this directory. Fold
 These kernels can only be tested on  Alveo U280, the makefile does not support
 other devices.
 
-## How to run software emulation
-For small dataset:
-```
-	make run TARGET=sw_emu
-```
-For large dataset (as large as the Pluto model):
-```
-	make run TARGET=sw_emu RTM_height=1280 RTM_width=7040 RTM_time=12860 RTM_verify=0
-```
 ## How to run hardware emulation
 For small dataset:
 ```

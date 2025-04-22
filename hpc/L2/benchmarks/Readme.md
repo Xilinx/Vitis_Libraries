@@ -1,7 +1,7 @@
 # Benchmark Overview
 
 Here are benchmarks of the Vitis HPC Library using the Vitis environment and comparing results on
-several FPGA and CPU platforms. It supports software and hardware emulation as well as running hardware accelerators on the Alveo U250, U280 or U50.
+several FPGA and CPU platforms. It supports hardware emulation as well as running hardware accelerators on the Alveo U250, U280 or U50.
 
 ## Prerequisites
 
