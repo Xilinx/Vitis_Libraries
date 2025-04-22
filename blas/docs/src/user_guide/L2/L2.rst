@@ -20,5 +20,4 @@ L2 Kernels User Guide
 
    L2 API Overview <L2_overview.rst>
    Blas Function Kernel <L2_gemm.rst>
-   L2 API benchmark <L2_benchmark.rst>
 

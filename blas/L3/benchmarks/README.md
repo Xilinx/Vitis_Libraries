@@ -7,7 +7,7 @@ Here are benchmarks of the Vitis BLAS library using the Vitis environment and co
 ### Vitis BLAS Library
 - Alveo U250 installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted (when running hardware)
 - Xilinx runtime (XRT) installed
-- Xilinx Vitis 2022.2 installed and configured
+- Xilinx Vitis 2025.1 installed and configured
 
 ### Interl MK Library
 - Downloaded and installed MKL from https://software.intel.com/en-us/mkl/choose-download/linux 
@@ -51,7 +51,7 @@ These blas benchmarks can be downloaded from [vitis libraries](https://github.co
 Setup and build envrionment using the Vitis and XRT scripts:
 
 ```
-    source <install path>/Vitis/2022.2/settings64.sh
+    source <install path>/Vitis/2025.1/settings64.sh
     source /opt/xilinx/xrt/setup.sh
 ```
 
@@ -60,7 +60,7 @@ Setup and build envrionment using the Vitis and XRT scripts:
 Run Makefile command. For example:
 
 ```
-    make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u250_xdma_201830_2
+    make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u250_gen3x16_xdma_4_1_202210_1
 ```
 
 The Makefile supports various build target including hw emulation and hardware (hw_emu, hw)
@@ -74,5 +74,5 @@ The host application could be run manually using the following pattern:
 For example:
 
 ```
-    build_dir.hw.xilinx_u250_xdma_201830_2/host.exe build_dir.hw.xilinx_u250_xdma_201830_2/blas.xclbin build_dir.hw.xilinx_u250_xdma_201830_2/config_info.dat
+    build_dir.hw.xilinx_u250_gen3x16_xdma_4_1_202210_1/host.exe build_dir.hw.xilinx_u250_gen3x16_xdma_4_1_202210_1/blas.xclbin build_dir.hw.xilinx_u250_gen3x16_xdma_4_1_202210_1/config_info.dat
 ```

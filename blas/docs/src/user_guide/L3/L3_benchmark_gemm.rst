@@ -20,7 +20,7 @@ The benchmark performs the matrix-matrix multiplication (A * B = C); M is number
 1. streamingKernel
 ======================
 
-This example resides in the ``L3/benchmarks/gemm/streamingKernel`` directory. The tutorial provides a step-by-step guide that covers commands for building and running the kernel.
+This example resides in the ``L3/tests/gemm/memKernel/gemm_float`` directory. The tutorial provides a step-by-step guide that covers commands for building and running the kernel.
 
 1.1 Executable Usage
 ---------------------
@@ -28,11 +28,9 @@ This example resides in the ``L3/benchmarks/gemm/streamingKernel`` directory. Th
 1.1.1 Work Directory (Step 1)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The steps for the library download and environment setup can be found [here](https://github.com/Xilinx/Vitis_Libraries/tree/main/blas/L2/benchmarks#building). For getting the design:
-
 .. code-block:: bash 
 
-   cd L3/benchmarks/gemm/streamingKernel
+   cd L3/tests/gemm/memKernel/gemm_float
 
 
 1.1.2 Build the Kernel (Step 2)

@@ -55,7 +55,6 @@ Vitis libraries are organized into L1, L2, and L3 folders, each relating to a di
 **L2** :
        Makefiles and sources in L2 facilitate building XCLBIN file from various sources (HDL, HLS or XO files) of kernels with host code written in OpenCL/XRT framework targeting a device. This flow supports:
 
-* Software emulation to check the functionality
 * Hardware emulation to check RTL level simulation
 * Build and test on hardware
 
@@ -97,7 +96,7 @@ make run TARGET=<cosim/csim/csynth/vivado_syn/vivado_impl> PLATFORM=/path/to/xil
 cd L2/tests/vitis_case_folder
 
 # build and run one of the following using U280 platform
-make run TARGET=sw_emu PLATFORM=/path/to/xilinx_u250_gen3x16_xdma_3_1_202020_1.xpfm
+make run TARGET=hw_emu PLATFORM=/path/to/xilinx_u250_gen3x16_xdma_3_1_202020_1.xpfm
 
 # delete generated files
 make cleanall
@@ -117,7 +116,6 @@ make cleanall
 
 Here, `TARGET` decides the FPGA binary type
 
-- `sw_emu` is for software emulation
 - `hw_emu` is for hardware emulation
 - `hw` is for deployment on physical card. (Compilation to hardware binary often takes hours.)
 

@@ -65,7 +65,7 @@ data_gen: ${GEN_BIN_EXE}
 	${GEN_BIN_EXE} -read ${APP_GOLD_BIN} > ${APP_GOLD_TXT}
 
 run_gemm_api:$(API_GEMM_EXE)
-ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
+ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) $(API_GEMM_EXE) $(BINARY_CONTAINERS) 64 64 64 64 64 64 64 1 0
 else

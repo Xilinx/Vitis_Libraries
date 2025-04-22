@@ -47,8 +47,6 @@ VPP_FLAGS += ${MACROS}
 
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
 	CXXFLAGS += -lxrt_hwemu
-else ifeq ($(TARGET),$(filter $(TARGET),sw_emu))
-	CXXFLAGS += -lxrt_swemu
 else
 	CXXFLAGS += -lxrt_core
 endif

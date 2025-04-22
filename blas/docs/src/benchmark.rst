@@ -14,37 +14,8 @@ Benchmark
 - Kernel execution time only includes the kernel running in FPGA device time.
 - API execution time includes the kernel execution time + memory copy between the host and kernel time.
 
-1.1 gemv
-----------------------
 
-This benchmark performs the matrix-vecotr multiplication; M is number of rows of matrix, and N is number of columns of matrix.
-
-*gemv with OpenCL™ in an AMD Alveo™ U280*
-
-+-------+-------+---------------------------+-------------------------+-----------------+
-|  M    |  N    | Kernel Execution Time [s] | API Execution Time [s]  |  Efficiency [%] |
-+=======+=======+===========================+=========================+=================+
-| 512   | 256   | 1.4316e-05                | 0.00330468              | 42.9173         |
-+-------+-------+---------------------------+-------------------------+-----------------+
-| 512   | 512   | 1.9998e-05                | 0.00337302              | 61.4461         |
-+-------+-------+---------------------------+-------------------------+-----------------+
-| 1024  | 1024  | 6.5904e-05                | 0.0035207               | 74.5812         |
-+-------+-------+---------------------------+-------------------------+-----------------+
-| 2048  | 2048  | 0.000235251               | 0.00365028              | 83.5737         |
-+-------+-------+---------------------------+-------------------------+-----------------+
-| 4096  | 4096  | 0.000939699               | 0.00452506              | 83.6898         |
-+-------+-------+---------------------------+-------------------------+-----------------+
-| 8192  | 8192  | 0.00332612                | 0.0105467               | 94.5764         |
-+-------+-------+---------------------------+-------------------------+-----------------+
-
-For more details on this benchmark, see:
-
-.. toctree::
-   :maxdepth: 1
-   
-   L2 GEMV benchmark <user_guide/L2/L2_benchmark_gemv.rst>
-
-1.2 gemm
+1.1 gemm
 ---------------
 
 This benchmark performs the matrix-matrix multiplication (A * B = C); M is number of rows of matrix A/C, K is number of columns of matrix A/number of rows of matrix B, and N is number of columns of matrix B/C.
@@ -121,7 +92,7 @@ For more details on the benchmarks, see:
 2. Benchmark Test Overview
 ============================
 
-Here are benchmarks of the AMD Vitis™ BLAS library using the Vitis environment. It supports software and hardware emulation as well as running hardware accelerators on the Alveo U250.
+Here are benchmarks of the AMD Vitis™ BLAS library using the Vitis environment. It supportshardware emulation as well as running hardware accelerators on the Alveo U250.
 
 2.1 Prerequisites
 ----------------------
@@ -131,7 +102,7 @@ Here are benchmarks of the AMD Vitis™ BLAS library using the Vitis environment
 
 - Alveo U250 installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted (when running hardware)
 - XRT installed
-- Vitis 2021.1 installed and configured
+- Vitis 2025.1 installed and configured
 
 2.2 Building
 ----------------
@@ -156,5 +127,5 @@ Set up and build the environment using the Vitis and XRT scripts:
 
 .. code-block:: bash 
 
-    source <install path>/Vitis/2021.1/settings64.sh
+    source <install path>/Vitis/2025.1/settings64.sh
     source /opt/xilinx/xrt/setup.sh

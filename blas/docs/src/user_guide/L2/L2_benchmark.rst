@@ -18,13 +18,11 @@ L2 API Benchmark
    :maxdepth: 3
    
    L2 GEMM benchmark <L2_benchmark_gemm.rst>
-   L2 GEMV benchmark <L2_benchmark_gemv.rst>
-
 
 Benchmark Test Overview
 ============================
 
-Here are benchmarks of the AMD Vitis™ BLAS library using the Vitis environment. It supports software and hardware emulation as well as running hardware accelerators on the AMD Alveo™ U250.
+Here are benchmarks of the AMD Vitis™ BLAS library using the Vitis environment. It supports hardware emulation as well as running hardware accelerators on the AMD Alveo™ U250.
 
 1.1 Prerequisites
 ----------------------
@@ -34,12 +32,12 @@ Here are benchmarks of the AMD Vitis™ BLAS library using the Vitis environment
 
 - Alveo U250 installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted (when running hardware)
 - XRT installed
-- Vitis 2022.2 installed and configured
+- Vitis 2025.1 installed and configured
 
 1.2 Building
 ----------------
 
-Take gemm_4CU as an example to indicate how to build the application and kernel with the command line Makefile flow.
+Take gemm_1CU as an example to indicate how to build the application and kernel with the command line Makefile flow.
 
 1.2.1 Download Code
 ^^^^^^^^^^^^^^^^^^^^^
@@ -61,7 +59,7 @@ Set up and build the environment using the Vitis and XRT scripts:
 
 .. code-block:: bash 
 
-    source <install path>/Vitis/2022.2/settings64.sh
+    source <install path>/Vitis/2025.1/settings64.sh
     source /opt/xilinx/xrt/setup.sh
 
 
@@ -72,10 +70,10 @@ Run the Makefile command. For example:
 
 .. code-block:: bash 
 
-    make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u250_xdma_201830_2
+    make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u250_gen3x16_xdma_4_1_202210_1
 
     
-The Makefile supports various build target including software emulation, hw emulation, and hardware (sw_emu, hw_emu, hw).
+The Makefile supports various build target including hw emulation, and hardware (hw_emu, hw).
 
 The host application can be run manually using the following pattern:
 
@@ -88,5 +86,5 @@ For example:
 
 .. code-block:: bash 
 
-    build_dir.hw.xilinx_u250_xdma_201830_2/host.exe build_dir.hw.xilinx_u250_xdma_201830_2/blas.xclbin 64 64 64
+    build_dir.hw.xilinx_u250_gen3x16_xdma_4_1_202210_1/host.exe build_dir.hw.xilinx_u250_gen3x16_xdma_4_1_202210_1/blas.xclbin 64 64 64
 
