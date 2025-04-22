@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+Copyright (C) 2024-2025, Advanced Micro Devices, Inc.
 SPDX-License-Identifier: X11
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,8 +25,8 @@ shall not be used in advertising or otherwise to promote the sale,
 use or other dealings in this Software without prior written authorization
 from Advanced Micro Devices, Inc.
 */
-#ifndef _COMMON_VARS_HPP_
-#define _COMMON_VARS_HPP_
+#ifndef _COMMON_HPP_
+#define _COMMON_HPP_
 
 #include <math.h>
 #include <ap_int.h>
@@ -137,6 +137,7 @@ bool CheckRange(T& v, RangeDef<T>& rg) {
 #define BIT_WIDTH_STREAM_FOC 128
 #define BIT_WIDTH_LOG_STREAM_FOC 512
 #define BIT_WIDTH_STEP_STREAM 32
+#define PWM_DATA_TYPE_ 16
 
 #define MIN_IA_LOGGER 0
 #define MAX_IA_LOGGER 31

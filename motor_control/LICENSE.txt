@@ -2,6 +2,7 @@ Components: Vitis Motorcontrol Library
 
 X11 License
 
+Copyright (C) 2022-2022, Xilinx, Inc.
 Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

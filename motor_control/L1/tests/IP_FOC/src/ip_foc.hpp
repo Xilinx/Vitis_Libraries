@@ -1,5 +1,6 @@
 /*
-Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+Copyright (C) 2022-2022, Xilinx, Inc.
+Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 SPDX-License-Identifier: X11
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -37,16 +38,7 @@ from Advanced Micro Devices, Inc.
 #define TESTNUMBER (3000)
 
 void hls_foc_periodic_ap_fixed(
-    // Input
-    /*hls::stream<t_glb_foc2pwm>& Ia,
-    hls::stream<t_glb_foc2pwm>& Ib,
-    hls::stream<t_glb_foc2pwm>& Ic,
-    hls::stream<t_glb_speed_theta>& SPEED_THETA_m, // RPM & Theta_m
-    // Output
-    hls::stream< ap_uint< 512 > >& logger,
-    hls::stream<t_glb_foc2pwm>& Va_cmd,
-    hls::stream<t_glb_foc2pwm>& Vb_cmd,
-    hls::stream<t_glb_foc2pwm>& Vc_cmd,*/
+    // TO PL
     volatile int& angle_shift_out,
     volatile int& control_mode_,
     volatile int& sp_speed,
@@ -73,6 +65,14 @@ void hls_foc_periodic_ap_fixed(
     volatile int& phase_a_ps,
     volatile int& phase_b_ps,
     volatile int& phase_c_ps,
+    volatile int& volt_mode,
+    volatile int& max_sym_interval,
+    volatile int& double_sym_interval,
+    volatile int& duty_cycle_pwm,
+    // FROM PL
+    volatile int& Va_cmd,
+    volatile int& Vb_cmd,
+    volatile int& Vc_cmd,
     // In-out for parameters
     volatile int& ppr_args,
     volatile int& control_mode_args,
@@ -103,6 +103,10 @@ void hls_foc_periodic_ap_fixed(
     volatile int& phase_a_ps_args,
     volatile int& phase_b_ps_args,
     volatile int& phase_c_ps_args,
+    volatile int& volt_mode_args,
+    volatile int& max_sym_interval_args,
+    volatile int& double_sym_interval_args,
+    volatile int& duty_cycle_pwm_args,
     //
     volatile int& id_stts,
     volatile int& flux_acc_stts,
@@ -122,6 +126,6 @@ void hls_foc_periodic_ap_fixed(
     volatile int& Vc_cmd_stts,
     volatile int& Ialpha_stts,
     volatile int& Ibeta_stts,
-    volatile int& Ihomopolar_stts,
-    volatile int& fixed_angle_args);
+    volatile int& Ihomopolar_stts);
+
 #endif // _IP_FOC_HPP_

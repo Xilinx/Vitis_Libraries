@@ -23,3 +23,6 @@ For more details of the Motor Control library, please refer to Motor Control Lib
 
 The source code in this library is licensed under the MIT X11 license,
 which you can find in the LICENSE.txt file.
+
+    Copyright (C) 2022-2022, Xilinx, Inc.
+    Copyright (C) 2022-2025, Advanced Micro Devices, Inc.

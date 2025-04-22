@@ -1,0 +1,19 @@
+[hls]
+
+clock=10
+clock_uncertainty=1.25
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/tests/IP_PWM_V2/src/pwm_wrapper_fmt.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/IP_PWM_V2/src/pwm_wrapper_fmt.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L1/tests/IP_PWM_V2/src
+syn.top=Pwm_multichannels_7s
+tb.file=${XF_PROJ_ROOT}/L1/tests/IP_PWM_V2/src/test_pwm.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/IP_PWM_V2/src/test_pwm.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L1/tests/IP_PWM_V2/src
+
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+
