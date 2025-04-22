@@ -98,14 +98,13 @@ For all these variables, setting to `1` indicates execution while `0` for skippi
 cd L2/tests/vitis_case_folder
 
 # build and run one of the following using U200 platform
-make run TARGET=sw_emu PLATFORM=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+make run TARGET=hw_emu PLATFORM=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
 
 # delete generated files
 make cleanall
 ```
 
 Here, `TARGET` decides the FPGA binary type
-- `sw_emu` is for software emulation
 - `hw_emu` is for hardware emulation
 - `hw` is for deployment on physical card. (Compilation to hardware binary often takes hours.)
 

@@ -865,11 +865,11 @@ void writeToMem(hls::stream<Object>& obj_strm,
 #pragma HLS stream variable = w64_e_strm depth = 64
 
     hls::stream<ap_uint<W> > str_field_id_strm("str field id strm");
-#pragma HLS stream variable = str_field_id_strm depth = 64
+#pragma HLS stream variable = str_field_id_strm depth = 1024
     hls::stream<ap_uint<32> > str_offset_strm("str offset strm");
-#pragma HLS stream variable = str_offset_strm depth = 64
+#pragma HLS stream variable = str_offset_strm depth = 1024
     hls::stream<bool> str_e_strm("str e strm");
-#pragma HLS stream variable = str_e_strm depth = 64
+#pragma HLS stream variable = str_e_strm depth = 1024
 
     hls::stream<ap_uint<32> > w32_dat_strm[2][1 << W];
 #pragma HLS stream variable = w32_dat_strm depth = 64

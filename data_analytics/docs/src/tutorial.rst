@@ -68,14 +68,13 @@ Command to Run L3 Cases
     cd L3/tests/vitis_case_folder
     
     # build and run one of the following using u200 platform
-    make run TARGET=sw_emu PLATFORM=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+    make run TARGET=hw_emu PLATFORM=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
     
     # delete generated files
     make cleanall
 
 Here, ``TARGET`` decides the FPGA binary type:
 
-* ``sw_emu`` is for software emulation.
 * ``hw_emu`` is for hardware emulation.
 * ``hw`` is for deployment on the physical card (compilation to hardware binary often takes hours).
 
@@ -91,7 +90,7 @@ The target audience of L2 API are users who have a certain understanding of HLS 
 
 (1) Operator combinations in kernel, like number of operators or operator pipeline. Most L1 APIs and glue logics inside L2 kernels are connect with streams. Users could add more operators into kernels to increase its performance as long as it is not bounded by other factors like logic resource and memory bandwidth. 
 (2) Add more pre-processing and post-processing to kernel, like compression/decompression. Certain files might store its data in a compressed format to save the memory space and bandwidth to transfer. Adding a decompression module to build a longer processing pipeline will save the time to decompress the data and increase system performance.
-(3) Test correctness in sw-emu, hw-emu, and on-board.
+(3) Test correctness in hw-emu, and on-board.
 (4) Get accurate kernel resources and clock.
 (5) Analyze kernel's timing performance and throughput.
 
@@ -103,14 +102,13 @@ Command to Run L2 Cases
     cd L2/tests/vitis_case_folder
     
     # build and run one of the following using u200 platform
-    make run TARGET=sw_emu PLATFORM=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+    make run TARGET=hw_emu PLATFORM=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
     
     # delete generated files
     make cleanall
 
 Here, ``TARGET`` decides the FPGA binary type:
 
-* ``sw_emu`` is for software emulation.
 * ``hw_emu`` is for hardware emulation.
 * ``hw`` is for deployment on the physical card (compilation to hardware binary often takes hours).
 

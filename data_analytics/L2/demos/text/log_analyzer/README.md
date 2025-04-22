@@ -30,7 +30,7 @@ Call the Makefile. For example:
     make run TARGET=hw PLATFORM=xilinx_u200_xdma_201830_2
 ```
 
-The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively).
+The Makefile supports software emulation, hardware emulation and hardware targets ('hw_emu' and 'hw', respectively).
 
 ## Test Data
 
@@ -45,19 +45,16 @@ The testbench of process it via the engine and compare to the expected result, d
 
 ```
     ----------------------log analyzer----------------
-    DEBUG: found device 0: xilinx_u200_xdma_201830_2
-    INFO: initilized context.
-    INFO: initilized command queue.
-    INFO: created program with binary build_dir.sw_emu.xilinx_u200_xdma_201830_2/logAnalyzer.xclbin
+    Info: Program created
+    INFO: created program with binary build_dir.hw_emu.xilinx_u200_gen3x16_xdma_2_202110_1/logAnalyzer.xclbin
     INFO: built program.
     load log from disk to in-memory buffer
     load geoip database disk to in-memory buffer
     execute log analyzer
-    The log file is partition into 1 slice with max_slice_lnm 102 and  takes 0.006000 ms.
-    DEBUG: reEngineKernel has 4 CU(s)
-    DEBUG: GeoIP_kernel has 1 CU(s)
-    DEBUG: WJ_kernel has 1 CU(s)
-    logAnalyzer pipelined, time: 1965.33 ms, size: 0 MB, throughput: 0 GB/s
+    geoIPConvert
+    netsLow21 actual use buffer size is 333
+    required geo buffer size 1454733
+    The log file is partition into 1 slice with max_slice_lnm 102 and  takes 0.001000 ms.
     -----------------------------Finished logAnalyzer pipelined test----------------------------------------
 
 

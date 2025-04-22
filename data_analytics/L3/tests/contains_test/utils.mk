@@ -1,5 +1,4 @@
-#
-# Copyright 2019-2022 Xilinx, Inc.
+# Copyright 2022 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.7
+# vitis makefile-generator v2.0.10
 #
 #+-------------------------------------------------------------------------------
 # The following parameters are assigned with default values. These parameters can
@@ -22,6 +21,7 @@
 REPORT := no
 PROFILE := no
 DEBUG := no
+
 
 #'estimate' for estimate report generation
 #'system' for system report generation
@@ -40,14 +40,10 @@ ifeq ($(DEBUG), yes)
 VPP_LDFLAGS += --dk protocol:all:all:all
 endif
 
-#Check environment setup
+#Check vitis setup
 ifndef XILINX_VITIS
   XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
   export XILINX_VITIS
-endif
-ifndef XILINX_XRT
-  XILINX_XRT = /opt/xilinx/xrt
-  export XILINX_XRT
 endif
 
 .PHONY: check_device
@@ -70,9 +66,71 @@ check_device:
 	    then echo "[ERROR]: The device $(PLATFORM_NAME) in blocklist."; exit 1;\
 	fi;
 
+ifneq (,$(wildcard $(PLATFORM)))
+# Use PLATFORM as a file path
+XPLATFORM := $(PLATFORM)
+else
+# Use PLATFORM as a file name pattern
+# 1. search paths specified by variable
+ifneq (,$(PLATFORM_REPO_PATHS))
+# 1.1 as exact name
+XPLATFORM := $(strip $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/$(PLATFORM)/$(PLATFORM).xpfm)))
+# 1.2 as a pattern
+ifeq (,$(XPLATFORM))
+XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
+XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(PLATFORM)/')))
+endif # 1.2
+endif # 1
+# 2. search Vitis installation
+ifeq (,$(XPLATFORM))
+# 2.1 as exact name vitis < 2022.2
+XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/platforms/$(PLATFORM)/$(PLATFORM).xpfm))
+ifeq (,$(XPLATFORM))
+# 2.2 as exact name vitis >= 2022.2
+XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/base_platforms/$(PLATFORM)/$(PLATFORM).xpfm))
+# 2.3 as a pattern vitis < 2022.2
+ifeq (,$(XPLATFORM))
+XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
+XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(PLATFORM)/')))
+# 2.4 as a pattern vitis >= 2022.2
+ifeq (,$(XPLATFORM))
+XPLATFORMS := $(wildcard $(XILINX_VITIS)/base_platforms/*/*.xpfm)
+XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(PLATFORM)/')))
+endif # 2.4
+endif # 2.3
+endif # 2.2
+endif # 2
+# 3. search default locations
+ifeq (,$(XPLATFORM))
+# 3.1 as exact name
+XPLATFORM := $(strip $(wildcard /opt/xilinx/platforms/$(PLATFORM)/$(PLATFORM).xpfm))
+# 3.2 as a pattern
+ifeq (,$(XPLATFORM))
+XPLATFORMS := $(wildcard /opt/xilinx/platforms/*/*.xpfm)
+XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(PLATFORM)/')))
+endif # 3.2
+endif # 3
+endif
+XPLATFORM := $(firstword $(XPLATFORM))
+#Get PLATFORM_NAME by PLATFORM
+PLATFORM_NAME = $(strip $(patsubst %.xpfm, % , $(shell basename $(XPLATFORM))))
+
+define MSG_PLATFORM
+No platform matched pattern '$(PLATFORM)'.
+Available platforms are: $(XPLATFORMS)
+To add more platform directories, set the PLATFORM_REPO_PATHS variable or point PLATFORM variable to the full path of platform .xpfm file.
+endef
+export MSG_PLATFORM
+
+.PHONY: check_platform
+check_platform:
+ifeq (,$(XPLATFORM))
+	@echo "$${MSG_PLATFORM}" && false
+endif
+#Check ends
+
 #get HOST_ARCH by PLATFORM
-ifneq (,$(PLATFORM))
-HOST_ARCH_temp = $(shell platforminfo -p $(PLATFORM) | grep 'CPU Type' | sed 's/.*://' | sed '/ai_engine/d' | sed 's/^[[:space:]]*//')
+HOST_ARCH_temp = $(shell platforminfo -p $(XPLATFORM) | grep 'CPU Type' | sed 's/.*://' | sed '/ai_engine/d' | sed 's/^[[:space:]]*//')
 ifeq ($(HOST_ARCH_temp), x86)
 HOST_ARCH := x86
 else ifeq ($(HOST_ARCH_temp), cortex-a9)
@@ -80,14 +138,18 @@ HOST_ARCH := aarch32
 else ifneq (,$(findstring cortex-a, $(HOST_ARCH_temp)))
 HOST_ARCH := aarch64
 endif
-endif
-
 
 # Special processing for tool version/platform type
 VITIS_VER = $(shell v++ --version | grep 'v++' | sed 's/^[[:space:]]*//' | sed -e 's/^[*]* v++ v//g' | cut -d " " -f1)
-# 1) for versal flow from 2022.1
-DEVICE_TYPE = $(shell platforminfo -p $(PLATFORM) | grep 'FPGA Family' | sed 's/.*://' | sed '/ai_engine/d' | sed 's/^[[:space:]]*//')
-ifeq ($(DEVICE_TYPE), versal)
+AIE_TYPE := $(shell platforminfo $(XPLATFORM) -f -j | grep "arch.:" | sed 's|"arch":||g' | sed 's|["|,]||g')
+DEVICE_ARCH := $(shell platforminfo $(XPLATFORM) -f -j | grep "architecture.*:" | sed 's|"architecture":||g' | sed 's|["|,| ]||g' | head -n 1)
+ifeq (versal ,$(findstring versal, $(DEVICE_ARCH)))
+IS_VERSAL := on
+else
+IS_VERSAL := off
+endif
+# 1) for aie flow from 2022.1
+ifeq (on, $(IS_VERSAL))
 ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
 LINK_TARGET_FMT := xsa
 else
@@ -97,20 +159,43 @@ else
 LINK_TARGET_FMT := xclbin
 endif
 # 2) dfx flow
-dfx_hw := false
+dfx_hw := off
 ifeq ($(findstring _dfx_, $(PLATFORM_NAME)),_dfx_)
 ifeq ($(TARGET),hw)
-dfx_hw := true
+dfx_hw := on
 endif
 endif
-# 3) for embeded sw_emu flow from 2022.2
-ps_on_x86 := false
-ifneq ($(HOST_ARCH), x86)
-ifeq ($(shell expr $(VITIS_VER) \>= 2022.2), 1)
-ifeq ($(TARGET), sw_emu)
-ps_on_x86 := true
+# 3) for aie on x86 flow
+pcie_versal := off
+ifeq ($(HOST_ARCH), x86)
+ifeq ($(IS_VERSAL), on)
+pcie_versal := on
 endif
 endif
+
+#when x86 arch, check XRT setup
+ifeq ($(HOST_ARCH), x86)
+ifndef XILINX_XRT
+  XILINX_XRT = /opt/xilinx/xrt
+  export XILINX_XRT
+endif
+endif
+
+#check if need sd_card and package 
+PACKAGE_NEEDED := off
+SD_CARD_NEEDED := off
+ifeq ($(HOST_ARCH), aarch32)
+SD_CARD_NEEDED := on
+endif
+ifeq ($(HOST_ARCH), aarch64)
+SD_CARD_NEEDED := on
+endif
+ifeq ($(pcie_versal), on)
+SD_CARD_NEEDED := off
+PACKAGE_NEEDED := on
+endif
+ifeq ($(SD_CARD_NEEDED), on)
+PACKAGE_NEEDED := on
 endif
 
 #Checks for Device Family
@@ -162,17 +247,8 @@ ifeq (,$(wildcard $(ROOTFS)))
 endif
 endif
 
-#Checks for g++
-ifeq ($(HOST_ARCH), x86)
-X86_CXX := true
-else
-ifeq ($(ps_on_x86), true)
-X86_CXX := true
-endif
-endif
-
 CXX := g++
-ifeq ($(X86_CXX), true)
+ifeq ($(HOST_ARCH), x86)
 ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
 CXX_VER := 8.3.0
 else
@@ -254,63 +330,6 @@ LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
 endif
 endif
 
-ifneq (,$(wildcard $(PLATFORM)))
-# Use PLATFORM as a file path
-XPLATFORM := $(PLATFORM)
-else
-# Use PLATFORM as a file name pattern
-# 1. search paths specified by variable
-ifneq (,$(PLATFORM_REPO_PATHS))
-# 1.1 as exact name
-XPLATFORM := $(strip $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/$(PLATFORM)/$(PLATFORM).xpfm)))
-# 1.2 as a pattern
-ifeq (,$(XPLATFORM))
-XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(PLATFORM)/')))
-endif # 1.2
-endif # 1
-# 2. search Vitis installation
-ifeq (,$(XPLATFORM))
-# 2.1 as exact name
-XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/platforms/$(PLATFORM)/$(PLATFORM).xpfm))
-# 2.2 as a pattern
-ifeq (,$(XPLATFORM))
-XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(PLATFORM)/')))
-endif # 2.2
-endif # 2
-# 3. search default locations
-ifeq (,$(XPLATFORM))
-# 3.1 as exact name
-XPLATFORM := $(strip $(wildcard /opt/xilinx/platforms/$(PLATFORM)/$(PLATFORM).xpfm))
-# 3.2 as a pattern
-ifeq (,$(XPLATFORM))
-XPLATFORMS := $(wildcard /opt/xilinx/platforms/*/*.xpfm)
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(PLATFORM)/')))
-endif # 3.2
-endif # 3
-endif
-
-define MSG_PLATFORM
-No platform matched pattern '$(PLATFORM)'.
-Available platforms are: $(XPLATFORMS)
-To add more platform directories, set the PLATFORM_REPO_PATHS variable or point PLATFORM variable to the full path of platform .xpfm file.
-endef
-export MSG_PLATFORM
-
-
-.PHONY: check_platform
-check_platform:
-ifeq (,$(XPLATFORM))
-	@echo "$${MSG_PLATFORM}" && false
-endif
-#Check ends
-
-#   device2xsa - create a filesystem friendly name from device name
-#   $(1) - full name of device
-PLATFORM_NAME = $(strip $(patsubst %.xpfm, % , $(shell basename $(PLATFORM))))
-
-
 # Cleaning stuff
 RM = rm -f
 RMDIR = rm -rf
@@ -318,3 +337,6 @@ RMDIR = rm -rf
 MV = mv -f
 CP = cp -rf
 ECHO:= @echo
+PYTHON3 ?= python3
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3

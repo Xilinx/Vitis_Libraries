@@ -34,8 +34,7 @@
 #define MAX_CAT_NUM_ 4
 #define MAX_SPLITS_ 80
 #define MAX_FEAS_ (32)
-#define PARA_NUM_ 32 // for sw_emu, use larger hw_emu
-//#define PARA_NUM_ 128 //use 128 when test benchmarks
+#define PARA_NUM_ 128 //use 128 when test benchmarks
 #define MAX_TREE_DEPTH_ 10
 typedef double DataType;
 typedef ap_uint<64> TType;
