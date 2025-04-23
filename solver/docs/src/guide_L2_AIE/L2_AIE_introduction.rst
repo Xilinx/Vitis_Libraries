@@ -63,7 +63,7 @@ A Makefile is included within each library element. It is located in the `L2/tes
 
 .. code-block::
 
-        source <your-Vitis-install-path>/lin64/Vitis/HEAD/settings64.sh
+        source <your-Vitis-install-path>/lin64/HEAD/Vitis/settings64.sh
         source <your-XRT-install-path>/xbb/xrt/packages/setup.sh
         export PLATFORM=<your-platform-repo-install-path>
 

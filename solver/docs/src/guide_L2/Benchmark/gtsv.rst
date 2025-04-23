@@ -38,9 +38,9 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
 .. code-block:: bash
 
-   source /opt/xilinx/Vitis/2022.2/settings64.sh
+   source /opt/xilinx/2025.1/Vitis/settings64.sh
    source /opt/xilinx/xrt/setenv.sh
-   export PLATFORM=/opt/xilinx/platforms/xilinx_u250_xdma_201830_2/xilinx_u250_xdma_201830_2.xpfm
+   export PLATFORM=/opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/xilinx_u250_gen3x16_xdma_4_1_202210_1.xpfm
    export TARGET=hw
    make run 
 
@@ -50,7 +50,7 @@ To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
-   ./build_dir.hw.xilinx_u250_xdma_201830_2/test_gtsv.exe -xclbin build_dir.hw.xilinx_u250_xdma_201830_2/kernel_gtsv.xclbin -runs 1 -M 1024
+   ./build_dir.hw.xilinx_u250_gen3x16_xdma_4_1_202210_1/test_gtsv.exe -xclbin build_dir.hw.xilinx_u250_gen3x16_xdma_4_1_202210_1/kernel_gtsv.xclbin -runs 1 -M 1024
 
 GTSV Input Arguments:
 
@@ -70,9 +70,9 @@ GTSV Input Arguments:
    ---------------------GTSV Test----------------
    Found Platform
    Platform Name: Xilinx
-   INFO: Found Device=xilinx_u250_xdma_201830_2
-   INFO: Importing build_dir.hw.xilinx_u250_xdma_201830_2/wcc_kernel.xclbin
-   Loading: 'build_dir.hw.xilinx_u250_xdma_201830_2/wcc_kernel.xclbin'
+   INFO: Found Device=xilinx_u250_gen3x16_xdma_4_1_202210_1
+   INFO: Importing build_dir.hw.xilinx_u250_gen3x16_xdma_4_1_202210_1/wcc_kernel.xclbin
+   Loading: 'build_dir.hw.xilinx_u250_gen3x16_xdma_4_1_202210_1/wcc_kernel.xclbin'
    INFO: kernel has been created
    INFO: kernel start------
    INFO: kernel end------

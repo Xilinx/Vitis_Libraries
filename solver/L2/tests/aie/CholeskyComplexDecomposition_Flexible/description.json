@@ -1,0 +1,81 @@
+{
+    "name": "Flexible Cholesky Complex on AIE",
+    "description": [
+        "Flexible Cholesky Complex on AIE"
+    ],
+    "flow": "system",
+    "keywords": [
+        "aiecompiler",
+        "aiesimulator"
+    ],
+    "platform_allowlist": [
+        "vck190"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "pre_build": [
+        {
+            "build_cmd": "cd tv && make tv -f tv.mk"
+        }
+    ],
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "./",
+                "./aie",
+                "LIB_DIR/L1/include",
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L2/include/aie",
+                "LIB_DIR/L1/src",
+                "LIB_DIR/L1/src/aie"
+            ]
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "PROJECT/aie/aie_graph.cpp",
+                    "workdir": "./Work",
+                    "name": "libadf.a",
+                    "files": [
+                        "LIB_DIR/L1/src/aie/cholesky_complex_decomposition_flexible.cpp"
+                    ]
+                }
+            ]
+        }
+    ],
+    "launch": [
+        {
+            "target": "aiesim",
+            "sim_options": "--input-dir=./ --output-dir=./"
+        },
+        {
+            "target": "x86sim",
+            "sim_options": "--input-dir=./ --output-dir=./"
+        }
+    ],
+    "match_makefile": "true",
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "max_memory_MB": 40960,
+                "max_time_min": 300
+            }
+        ],
+        "targets": [
+            "vitis_aie_sim",
+            "vitis_aie_x86sim"
+        ],
+        "category": "canary"
+    },
+    "gui": true,
+    "aie_types": [
+        "AIE1"
+    ]
+}

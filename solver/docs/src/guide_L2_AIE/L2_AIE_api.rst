@@ -27,4 +27,10 @@ AIE APIs Overview
 .. include:: ../rst_L2_aie/class_xf_solver_PseudoInverseComplexFloat.rst
 
 .. include:: ../rst_L2_aie/class_xf_solver_LSTQR_Graph.rst
+
 .. include:: ../rst_L2_aie/class_xf_solver_BackSubstitution_Graph.rst
+
+.. include:: ../rst_L2_aie/class_xf_solver_CholeskyFlexibleGraph.rst
+
+.. include:: ../rst_L2_aie/class_xf_solver_QRDHouseholderComplexFlexibleGraph.rst
+

@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,17 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.9
+# vitis makefile-generator v2.0.10
 
 ############################## Help Section ##############################
 .PHONY: help
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
 	$(ECHO) "  NOTE: For embedded platform the following setup steps are required:"
@@ -50,7 +50,7 @@ CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
 # setting default value
-TARGET ?= sw_emu
+TARGET ?= hw_emu
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
@@ -60,6 +60,10 @@ ifeq ($(PLATFORM),)
 PLATFORM := u250
 endif
 
+# add warnning for sw_emu
+ifeq ($(TARGET),sw_emu)
+$(error Error: The sw_emu target is no longer supported starting from 2025.1.)
+endif
 # #################### Checking if PLATFORM in whitelist ############################
 PLATFORM_ALLOWLIST += u250 vck190 aws-vu9p-f1
 PLATFORM_BLOCKLIST += zc
@@ -82,12 +86,12 @@ RUN_DEPS :=
 
 # get global setting
 ifeq ($(HOST_ARCH), x86)
-CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
-CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
@@ -103,16 +107,12 @@ HOST_SRCS += test_pomatrixinverse.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp
 CXXFLAGS +=  -D USE_DDR
 CXXFLAGS +=  -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/MatrixGen -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
 CXXFLAGS += -O3 
+
 else 
-ifeq ($(ps_on_x86), on)
 HOST_SRCS += test_pomatrixinverse.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/MatrixGen -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
 CXXFLAGS += -O3 
-else
-HOST_SRCS += test_pomatrixinverse.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/MatrixGen -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
-CXXFLAGS += -O3 
-endif
+
 endif
 # workaround for opencv
 ifeq (,$(findstring opencv,$(CXXFLAGS)))
@@ -171,7 +171,8 @@ $(TEMP_DIR)/kernel_pomatrixinverse_0.xo: kernel_pomatrixinverse.cpp
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_kernel_pomatrixinverse_0) $(VPP_FLAGS) -k kernel_pomatrixinverse_0 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
 BINARY_CONTAINER_kernel_pomatrixinverse_OBJS += $(TEMP_DIR)/kernel_pomatrixinverse_0.xo
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_kernel_pomatrixinverse_OBJS)
+
+BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_kernel_pomatrixinverse_OBJS) 
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel_pomatrixinverse $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel_pomatrixinverse) $(AIE_LDFLAGS)   -o $@ $^
@@ -197,7 +198,7 @@ RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
 	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$(LIBRARY_PATH)' >> $(RUN_SCRIPT)
-ifneq ($(filter sw_emu hw_emu, $(TARGET)),)
+ifneq ($(filter hw_emu, $(TARGET)),)
 	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> $(RUN_SCRIPT)
 endif
 	@echo 'export XILINX_VITIS=/mnt' >> $(RUN_SCRIPT)
@@ -236,18 +237,11 @@ ifeq ($(dfx_hw), on)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
-# 2. PS_ON_X86 - From 2022.2, Target:sw_emu
-ifeq ($(ps_on_x86), on)
-	@echo "### ***** running PS X86 SE_EMU ***** ###"
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir $(SD_CARD) --package.emu_ps x86
-endif
-# 3. General Embeded flow
+# 2. General Embeded flow
 ifeq ($(dfx_hw), off)
-ifeq ($(ps_on_x86), off)
 ifeq ($(pcie_versal), off)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
-endif
 endif
 endif
 
@@ -284,19 +278,6 @@ else
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS)
 	
 endif
-else
-	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
-	
-endif
-endif
-#sw_emu
-ifneq (,$(filter sw_emu, $(TARGET)))
-ifeq ($(HOST_ARCH), x86)
-	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
-	
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 

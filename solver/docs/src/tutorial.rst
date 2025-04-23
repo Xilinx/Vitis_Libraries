@@ -42,7 +42,7 @@ Target audience of L2 API are users who have a certain understanding of HLS and 
 
 (1) Operator combinations in kernel, like number of operators or operator pipeline. Most L1 APIs and glue logic inside L2 kernels are connected with streams. You can add more operators into kernels to increase its performance as long as it is not bound by other factors like logic resource and memory bandwidth. 
 (2) Building configs to improve frequency or migrate to other AMD FPGA device.
-(3) Test correctness in sw-emu, hw-emu and on-board.
+(3) Test correctness in hw-emu and on-board.
 
 Command to Run L2 cases
 -------------------------
@@ -52,14 +52,13 @@ Command to Run L2 cases
     cd L2/tests/vitis_case_folder
     
     # build and run one of the following using your card's platform
-    make run TARGET=sw_emu PLATFORM=/path/to/<your_card_platform>
+    make run TARGET=hw_emu PLATFORM=/path/to/<your_card_platform>
     
     # delete generated files
     make cleanall
 
 Here, ``TARGET`` decides the FPGA binary type
 
-* ``sw_emu`` is for software emulation
 * ``hw_emu`` is for hardware emulation
 * ``hw`` is for deployment on physical card. (Compilation to hardware binary often takes hours.)
 

@@ -75,7 +75,7 @@ Specifying the corresponding Vitis, XRT, and path to the platform repository by 
 
 .. code-block:: bash
 
-   source /opt/xilinx/Vitis/2022.2/settings64.sh
+   source /opt/xilinx/2025.1/Vitis/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 

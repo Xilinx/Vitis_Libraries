@@ -37,9 +37,9 @@ If matirx A is a complex square matrix, then there is a decomposition A = QR whe
 The Householder method: Apply a succession of orthogonal matrices :math:`Q_k` to :math: `A` to compute upper triangular matrix R. :math:`Q_k` introduces zeros below the diagonal in column k, while preserving all the zeros previously introduced. 
 
 .. math::
-    Target: A = Q R
-    Algorithm: 
     * Q_N*...*Q_2*Q_1 * A = R
+
+.. math::
     * conjugate_transpose(Q) = Q_N* ...*Q_2*Q_1
 
 Entry Point 

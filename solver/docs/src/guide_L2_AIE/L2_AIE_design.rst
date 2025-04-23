@@ -22,7 +22,9 @@ The Solver Library contains the following elements:
 
    Cholesky Decomposition <MatrixDecomposition/cholesky_decomposition/cholesky_decomposition.rst>
    QR Decomposition <MatrixDecomposition/qr_decomposition/qr_decomposition.rst>
+   Flexible Cholesky Decomposition <MatrixDecomposition/cholesky_decomposition/flexible_cholesky_decomposition.rst>
    QR Decomposition with Householder <MatrixDecomposition/qrd_householder/qrd_householder.rst>
+   Flexible QR Decomposition with Householder <MatrixDecomposition/qrd_householder/flexible_qrd_householder.rst>
    Singular value decomposition <MatrixDecomposition/svd/svd.rst>
    Pseudoinverse <MatrixDecomposition/pinv/pinv.rst>
    Least Squares Solution using QRD<MatrixDecomposition/lstqr/lstqr.rst>
