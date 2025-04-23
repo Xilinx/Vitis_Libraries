@@ -13,7 +13,7 @@ Compiling and Simulating
 
 .. code-block::
 
-        source <your-Vitis-install-path>/lin64/Vitis/HEAD/settings64.csh
+        source <your-Vitis-install-path>/lin64/HEAD/Vitis/settings64.csh
         setenv PLATFORM_REPO_PATHS <your-platform-repo-install-path>
         source <your-XRT-install-path>/xbb/xrt/packages/xrt-2.1.0-centos/opt/xilinx/xrt/setup.csh
 
@@ -36,8 +36,8 @@ The test harness run consists of several steps that result in a simulated and va
 - Validate configuration with metadata (in: `L2/meta`).
 - Reference model compilation and simulation, to produce the `golden output`.
 - Uut design compilation and simulation.
-- Output post-processing (e.g., timestamps processing to produce throughput figures). The output of the reference model ( `logs/ref_output.txt` ) is verified against the output of the AIE graphs (`logs/uut_output.txt`).
-- Status generation. On completion of the make, the `logs/status_<config_details>.txt` file will contain the result of compilation, simulation, and an indication of whether the reference model and AIE model outputs match. The report will also contain resource utilization and performance metrics.
+- Output post-processing (e.g., timestamps processing to produce throughput figures). The output of the reference model ( `logs/ref_output.txt` ) is verified against the output of the AI Engine graphs (`logs/uut_output.txt`).
+- Status generation. On completion of the make, the `logs/status_<config_details>.txt` file will contain the result of compilation, simulation, and an indication of whether the reference model and AI Engine model outputs match. The report will also contain resource utilization and performance metrics.
 
 Compiling Using the Makefile
 ----------------------------
@@ -227,7 +227,7 @@ Many library elements perform arithmetic and offer a scaling feature exposed as 
     | NUM_OUTPUTS            |    unsigned    |    1           | Number of output ports.              |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | AIE_VARIANT            |    unsigned    |    1           | AIE variant to use for metadata      |
+    | AIE_VARIANT            |    unsigned    |    1           | AI Engine variant to use for metadata|
     |                        |                |                | validation.                          |
     |                        |                |                | Ignored for compilation and          |
     |                        |                |                | simulation purposes.                 |

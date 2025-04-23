@@ -32,8 +32,12 @@
 using namespace adf;
 
 #ifdef __SUPPORTS_ACC64__
-using input_stream_cacc48 = input_cascade<cacc64>;
-using output_stream_cacc48 = output_cascade<cacc64>;
+using input_cascade_cacc = input_cascade<cacc64>;
+using output_cascade_cacc = output_cascade<cacc64>;
+#else
+// else defaults to 48-bits
+using input_cascade_cacc = input_cascade<cacc48>;
+using output_cascade_cacc = output_cascade<cacc48>;
 #endif //__SUPPORTS_ACC64__
 
 struct empty {
@@ -1027,10 +1031,14 @@ template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL constexpr unsigned int fnUnsupportedTypeCombo() {
     return 1;
 }; // default here is a legal combo
+
+#if __HAS_ACCUM_PERMUTES__ == 1
+// Permutes require inflexible xsquare for 1 and 2 Byte data types.
 template <>
 INLINE_DECL constexpr unsigned int fnUnsupportedTypeCombo<int16, int16>() {
     return 0;
 };
+#endif
 
 // IF input type
 template <bool T_CASC_IN, typename T_D, unsigned int T_DUAL_IP = 0>
@@ -1045,7 +1053,7 @@ struct T_inputIF {
         NULL; // dummy, never used, but allows optional assignment
     input_stream<T_D>* __restrict inStream;
     input_stream<T_D>* __restrict inStream2;
-    input_stream_cacc48* inCascade;
+    input_cascade_cacc* inCascade;
 };
 
 template <bool T_CASC_IN, typename T_D>
@@ -1055,7 +1063,7 @@ struct T_outputIF<CASC_OUT_FALSE, T_D> {
     T_D* __restrict outWindowPtr;
     output_circular_buffer<T_D>* outWindow = NULL;
     output_circular_buffer<T_D>* outWindow2 = NULL;
-    output_stream_cacc48* outCascade;
+    output_cascade_cacc* outCascade;
     output_async_buffer<T_D>* broadcastWindow;
     output_stream<T_D>* __restrict outStream;
     output_stream<T_D>* __restrict outStream2;
@@ -1067,7 +1075,7 @@ struct T_outputIF<CASC_OUT_TRUE, T_D> {
     input_circular_buffer<T_D, extents<inherited_extent>, margin<kdummy> >* outWindow =
         NULL; // internal buffer filled through cascade
     input_circular_buffer<T_D, extents<inherited_extent>, margin<kdummy> >* outWindow2 = NULL; // dummy
-    output_stream_cacc48* outCascade;
+    output_cascade_cacc* outCascade;
     output_async_buffer<T_D>* broadcastWindow;
     output_stream<T_D>* __restrict outStream;
     output_stream<T_D>* __restrict outStream2;
@@ -1153,9 +1161,11 @@ INLINE_DECL cfloat nullElem() {
 template <size_t TP_FIR_LEN, typename TT_DATA, int TP_MODIFY_MARGIN_OFFSET = 0>
 INLINE_DECL constexpr unsigned int fnFirMargin() {
     if
-        constexpr(TP_FIR_LEN == 1) { return CEIL(TP_FIR_LEN - TP_MODIFY_MARGIN_OFFSET, (32 / sizeof(TT_DATA))); }
+        constexpr(TP_FIR_LEN == 1) {
+            return CEIL(TP_FIR_LEN - TP_MODIFY_MARGIN_OFFSET, (__ALIGN_BYTE_SIZE__ / sizeof(TT_DATA)));
+        }
     else {
-        return CEIL(TP_FIR_LEN, (32 / sizeof(TT_DATA)));
+        return CEIL(TP_FIR_LEN, (__ALIGN_BYTE_SIZE__ / sizeof(TT_DATA)));
     }
 };
 

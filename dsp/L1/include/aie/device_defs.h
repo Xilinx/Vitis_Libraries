@@ -76,6 +76,19 @@
 #endif
 
 //----------------------------------
+// FFT ROUNDING
+
+#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#define __FFT_NO_RND_CEIL_FLOOR__
+#endif
+
+#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
+    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+#define __FFT_NO_RND_CEIL_FLOOR__
+#define __FFT_NO_RND_SYM_CEIL_FLOOR__
+#endif
+
+//----------------------------------
 // FFT cfloat support (native)
 #if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
 #define __SUPPORTS_CFLOAT__ 1
@@ -116,6 +129,10 @@
 // Failing this, lower performance, but function can be achieved using radix2 in place of radix4.
 #if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
 #define __MRFFT_ATOM__ 16
+#elif (__AIE_ARCH__ == 20) || (__AIEARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIEARCH__ == 21)
+#define __MRFFT_ATOM__ 32
+#elif (__AIE_ARCH__ == 22) || (__AIEARCH__ == 22)
+#define __MRFFT_ATOM__ 64
 #else
 // Ideally this would NOT be an else. It is best if an unknown value of AIE_ARCH leaves MRFFT_ATOM
 // undefined, but curiously, 2 independent ifs malfunctions for AIE1.
@@ -123,7 +140,7 @@
 //#endif
 //#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
 //    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
-#define __MRFFT_ATOM__ 32
+#define __MRFFT_ATOM__ 64
 #endif
 
 //----------------------------------
@@ -259,8 +276,27 @@
 #if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
 #define _SUPPORTS_FLOAT_CFLOAT_
 #endif
-#if (__AIE_ARCH__ == 20) || (__AIEARCH__ == 20)
+#if (__AIE_ARCH__ == 20) || (__AIEARCH__ == 20) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 22)
 #define _SUPPORTS_BFLOAT16_
+#endif
+
+#if (__AIE_ARCH__ == 20) || (__AIEARCH__ == 20)
+#define _SUPPORTS_CBFLOAT16_
+#else
+// not supported.
+// #define _SUPPORTS_CBFLOAT16_
+#endif
+
+#if (__AIE_ARCH__ == 10)
+#define __SHUFFLE_CASCADE__ 0
+#elif (__AIE_ARCH__ == 20)
+#define __SHUFFLE_CASCADE__ 1
+#elif (__AIE_ARCH__ == 22)
+// AIE-MLv2 requires core model optimization that are not available at the moment.
+// Adding extra SHUFFLEs here would only degrade performance.
+#define __SHUFFLE_CASCADE__ 0
+#else
+#define __SHUFFLE_CASCADE__ 0
 #endif
 
 // data memory in bytes
@@ -269,6 +305,8 @@
 #elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
     (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
 #define __DATA_MEM_BYTES__ 65536
+#else
+#define __DATA_MEM_BYTES__ 32768
 #endif
 
 //------------------SHIFTING--------------------------
@@ -410,10 +448,10 @@ INLINE_DECL constexpr bool isComplex() {
         constexpr(std::is_same<T, cint32>::value) { return true; }
     else if
         constexpr(std::is_same<T, cfloat>::value) { return true; }
-#ifdef _SUPPORTS_BFLOAT16_
+#ifdef _SUPPORTS_CBFLOAT16_
     else if
         constexpr(std::is_same<T, cbfloat16>::value) { return true; }
-#endif // _SUPPORTS_BFLOAT16_
+#endif // _SUPPORTS_CBFLOAT16_
     else {
         return false;
     }
@@ -428,9 +466,11 @@ INLINE_DECL constexpr bool isFloat() {
 #ifdef _SUPPORTS_BFLOAT16_
     else if
         constexpr(std::is_same<T, bfloat16>::value) { return true; }
+#endif // _SUPPORTS_BFLOAT16_
+#ifdef _SUPPORTS_CBFLOAT16_
     else if
         constexpr(std::is_same<T, cbfloat16>::value) { return true; }
-#endif // _SUPPORTS_BFLOAT16_
+#endif // _SUPPORTS_CBFLOAT16_
     else {
         return false;
     }

@@ -731,20 +731,23 @@ void NOINLINE_DECL opt_r5_dyn_stage(TT_IN_DATA* xbuff,
     // first, but not last of this kernel
     if (stage == start_rank && stage != end_rank - 1) {
         my_r5_fft_stage<TT_IN_DATA, TT_INTERNAL_DATA, TT_TWIDDLE>(
-            xbuff, &tw_table[tw_ptrs[tw_base]], &tw_table[tw_ptrs[tw_base + 1]], &tw_table[tw_ptrs[tw_base + 2]],
-            &tw_table[tw_ptrs[tw_base + 3]], n, r, kTwShift, kTwShift, // compensate for twiddles only
+            xbuff, &tw_table[tw_ptrs[tw_base + 3]], &tw_table[tw_ptrs[tw_base + 2]],
+            &tw_table[tw_ptrs[tw_base + 1]],                       // reverse order!
+            &tw_table[tw_ptrs[tw_base]], n, r, kTwShift, kTwShift, // compensate for twiddles only
             inv, tmp_bufs[1 - pingPong]);
         // call to AIE API function has been replaced to have more control into the loop configuration
         pingPong = 1 - pingPong;
     }
     // not first, nor last of this kernel
-    else if (stage > start_rank && stage < end_rank - 1) {
+    else
+    // if (stage > start_rank && stage < end_rank - 1)
+    {
         // call to AIE API function has been replaced to have more control into the loop configuration
         my_r5_fft_stage<TT_INTERNAL_DATA, TT_INTERNAL_DATA, TT_TWIDDLE>(
-            tmp_bufs[pingPong], &tw_table[tw_ptrs[tw_base]], &tw_table[tw_ptrs[tw_base + 1]],
-            &tw_table[tw_ptrs[tw_base + 2]], &tw_table[tw_ptrs[tw_base + 3]], n, r, kTwShift,
-            kTwShift,                   // compensate for twiddles only
-            inv, tmp_bufs[1 - pingPong] // the destination buffer
+            tmp_bufs[pingPong], &tw_table[tw_ptrs[tw_base + 3]], &tw_table[tw_ptrs[tw_base + 2]],
+            &tw_table[tw_ptrs[tw_base + 1]],                       // reverse order!
+            &tw_table[tw_ptrs[tw_base]], n, r, kTwShift, kTwShift, // compensate for twiddles only
+            inv, tmp_bufs[1 - pingPong]                            // the destination buffer
             );
         pingPong = 1 - pingPong;
     }

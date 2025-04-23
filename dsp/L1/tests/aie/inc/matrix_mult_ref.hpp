@@ -48,97 +48,11 @@ namespace matrix_mult {
 #define COL_MAJOR 1
 #endif // COL_MAJOR
 
-template <typename T_A, typename T_B>
-struct outType {
-    using type = cint16;
-};
-template <>
-struct outType<int16, int16> {
-    using type = int16;
-};
-template <>
-struct outType<int16, cint16> {
-    using type = cint16;
-};
-template <>
-struct outType<int16, cint32> {
-    using type = cint32;
-};
-template <>
-struct outType<int16, int32> {
-    using type = int32;
-};
-template <>
-struct outType<cint16, int16> {
-    using type = cint16;
-};
-template <>
-struct outType<cint16, cint16> {
-    using type = cint16;
-};
-template <>
-struct outType<cint16, int32> {
-    using type = cint32;
-};
-template <>
-struct outType<cint16, cint32> {
-    using type = cint32;
-};
-template <>
-struct outType<int32, int16> {
-    using type = int32;
-};
-template <>
-struct outType<int32, cint16> {
-    using type = cint32;
-};
-template <>
-struct outType<int32, int32> {
-    using type = int32;
-};
-template <>
-struct outType<int32, cint32> {
-    using type = cint32;
-};
-template <>
-struct outType<cint32, int16> {
-    using type = cint32;
-};
-template <>
-struct outType<cint32, cint16> {
-    using type = cint32;
-};
-template <>
-struct outType<cint32, int32> {
-    using type = cint32;
-};
-template <>
-struct outType<cint32, cint32> {
-    using type = cint32;
-};
-template <>
-struct outType<float, float> {
-    using type = float;
-};
-template <>
-struct outType<cfloat, float> {
-    using type = cfloat;
-};
-template <>
-struct outType<float, cfloat> {
-    using type = cfloat;
-};
-template <>
-struct outType<cfloat, cfloat> {
-    using type = cfloat;
-};
-template <typename T_D_A, typename T_D_B>
-using outType_t = typename outType<T_D_A, T_D_B>::type;
-
 //-----------------------------------------------------------------------------------------------------
 // Single Rate class
 template <typename TT_DATA_A,
           typename TT_DATA_B,
+          typename TT_OUT_DATA,
           size_t TP_DIM_A,
           size_t TP_DIM_AB,
           size_t TP_DIM_B,
@@ -168,7 +82,7 @@ class matrix_mult_ref {
     //    - This can be user decision and simply changes SRS.
     void mmult(input_buffer<TT_DATA_A>& inWindowA,
                input_buffer<TT_DATA_B>& inWindowB,
-               output_buffer<outType_t<TT_DATA_A, TT_DATA_B> >& outWindow);
+               output_buffer<TT_OUT_DATA>& outWindow);
 
    private:
 };

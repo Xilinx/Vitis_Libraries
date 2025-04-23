@@ -26,7 +26,7 @@ The mixed_radix_fft supports AIE and AIE-ML devices.
 
 All features are supported on these variants with minor differences as follows:
 
-- ``TP_POINT_SIZE``: The width of vectors used for calculations differs by AIE variant. The point size ``TP_POINT_SIZE`` must be a multiple of the number of samples processed in an atomic vectorized butterfly operation. This is 16 for AIE and 32 for AIE-ML.
+- ``TP_POINT_SIZE``: The width of vectors used for calculations differs by AI Engine variant. The point size ``TP_POINT_SIZE`` must be a multiple of the number of samples processed in an atomic vectorized butterfly operation. This is 16 for AIE and 32 for AIE-ML.
 - ``TP_RND``: Supported round modes differ between AIE and AIE-ML devices as for all library elements.
 - Number of ports: When configured for ``TP_API=1`` (stream IO), AIE will require 2 input ports (sample interleaved - even samples on the first port) and 2 output ports similarly interleaved. AIE-ML accepts one stream only.
 - ``TP_DYN_PT_SIZE``: the dynamic (run-time) point-size feature is supported on AIE only.
@@ -57,7 +57,7 @@ To see details on the ports for the Mixed Radix FFT, see :ref:`API_REFERENCE`.
 Design Notes
 ============
 
-The Mixed Radix FFT performs an FFT or inverse FFT on a frame of data of point size N where N = 2^A * 3^B * 5^C. The minimum value of A is 4, which means all supported point sizes are a multiple of 16. The maximum point size is determined by the amount of memory available to an AIE tile, so it will be in the region of 2048 for cint32. Point size support is currently limited to 3300.
+The Mixed Radix FFT performs an FFT or inverse FFT on a frame of data of point size N where N = 2^A * 3^B * 5^C. The minimum value of A is 4, which means all supported point sizes are a multiple of 16. The maximum point size is determined by the amount of memory available to an AI Engine tile, so it will be in the region of 2048 for cint32. Point size support is currently limited to 3300.
 
 Dynamic Point Size
 ------------------
@@ -95,7 +95,7 @@ The fields hold the following information:
 Super Sample Rate Operation
 ---------------------------
 
-The Super Sample Rate is commonly understood as a sample rate greater than the system clock. In the context of AIE kernels, which are inherently SSR, the term SSR refers to execution using multiple kernels in parallel.
+The Super Sample Rate is commonly understood as a sample rate greater than the system clock. In the context of AI Engine kernels, which are inherently SSR, the term SSR refers to execution using multiple kernels in parallel.
 
 The Mixed Radix FFT does not currently support implementations using multiple kernels in parallel to execute the FFT.
 

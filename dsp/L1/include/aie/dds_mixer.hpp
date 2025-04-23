@@ -97,6 +97,7 @@ class kernelDdsMixerClass {
     static_assert(fnEnumType<TT_DATA>() != enumCint32 || TP_MIXER_MODE != MIXER_MODE_0,
                   "ERROR: cint32 is not support for DDS output.");
     unsigned int m_phaseIndex = 0;
+    unsigned int m_phaseInc;
     unsigned int m_perCyclePhaseInc;
     unsigned int m_phaseValpre = 0;
 
@@ -107,6 +108,7 @@ class kernelDdsMixerClass {
     // Constructor with initialOffset
     kernelDdsMixerClass(unsigned int phaseInc, unsigned int initialPhaseOffset);
 
+    void updatePhaseInc(const uint32& phaseInc);
     // DDS Kernel
     // Use overoads rather than class specialisations to keep hiearchy a bit more simple
     // and avoid requirement of dependant names with this->variable.
@@ -116,8 +118,6 @@ class kernelDdsMixerClass {
     void ddsKernel(void* __restrict in0, void* __restrict out0);
     // mixer mode 0
     void ddsKernel(void* __restrict out0);
-    // RTP Mode
-    void ddsKernel(void* __restrict out0, const unsigned int PhaseRTP);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -170,6 +170,7 @@ class kernelDdsMixerClass<TT_DATA,
                   "this has to be 64 for cint16, 16 for cint32. For AIE2, this has to be 64 for cint16 and cint32.");
 
     unsigned int m_phaseIndex = 0;
+    unsigned int m_phaseInc;
     unsigned int m_perCyclePhaseInc;
     unsigned int m_phaseValpre = 0;
 
@@ -181,6 +182,8 @@ class kernelDdsMixerClass<TT_DATA,
     // Constructor with initialOffset
     kernelDdsMixerClass(unsigned int phaseInc, unsigned int initialPhaseOffset);
 
+    void updatePhaseInc(const uint32& phaseInc);
+
     // DDS Kernel
     // Use overoads rather than class specialisations to keep hiearchy a bit more simple
     // and avoid requirement of dependant names with this->variable.
@@ -190,8 +193,6 @@ class kernelDdsMixerClass<TT_DATA,
     void ddsKernel(void* __restrict in0, void* __restrict out0);
     // mixer mode 0
     void ddsKernel(void* __restrict out0);
-    // RTP Mode
-    void ddsKernel(void* __restrict out0, const unsigned int PhaseRTP);
 };
 
 #if __SUPPORTS_CFLOAT__ == 1
@@ -241,6 +242,7 @@ class kernelDdsMixerClass<cfloat,
 
     // Keeps track of where we are in sincos curve, incremented by phaseIncr; initial value set in constructor
     unsigned int m_phaseIndex = 0;
+    unsigned int m_phaseInc;
     unsigned int m_perCyclePhaseInc;
     unsigned int m_phaseValpre = 0;
 
@@ -250,6 +252,8 @@ class kernelDdsMixerClass<cfloat,
     kernelDdsMixerClass(unsigned int phaseInc);
     // Constructor with initialOffset
     kernelDdsMixerClass(unsigned int phaseInc, unsigned int initialPhaseOffset);
+
+    void updatePhaseInc(const uint32& phaseInc);
 
     // for ddsKernel overloads
     using T_inIF_mm2 = T_inputIF<TT_DATA, T_inType, 2>;
@@ -264,8 +268,6 @@ class kernelDdsMixerClass<cfloat,
     void ddsKernel(void* __restrict in0, void* __restrict out0);
     // mixer mode 0
     void ddsKernel(void* __restrict out0);
-    // RTP Mode
-    void ddsKernel(void* __restrict out0, const unsigned int PhaseRTP);
 };
 
 template <unsigned int TP_INPUT_WINDOW_VSIZE,
@@ -313,6 +315,7 @@ class kernelDdsMixerClass<cfloat,
 
     // Keeps track of where we are in sincos curve, incremented by phaseIncr; initial value set in constructor
     unsigned int m_phaseIndex = 0;
+    unsigned int m_phaseInc;
     unsigned int m_perCyclePhaseInc;
     unsigned int m_phaseValpre = 0;
 
@@ -327,6 +330,8 @@ class kernelDdsMixerClass<cfloat,
     // Constructor with initialOffset
     kernelDdsMixerClass(unsigned int phaseInc, unsigned int initialPhaseOffset);
 
+    void updatePhaseInc(const uint32& phaseInc);
+
     // for ddsKernel overloads
     using T_inIF_mm2 = T_inputIF<TT_DATA, T_inType, 2>;
     using T_inIF_mm1 = T_inputIF<TT_DATA, T_inType, 1>;
@@ -340,8 +345,6 @@ class kernelDdsMixerClass<cfloat,
     void ddsKernel(void* __restrict in0, void* __restrict out0);
     // mixer mode 0
     void ddsKernel(void* __restrict out0);
-    // RTP Mode
-    void ddsKernel(void* __restrict out0, const unsigned int PhaseRTP);
 };
 #endif
 
@@ -355,7 +358,9 @@ template <typename TT_DATA,
           unsigned int TP_SC_MODE = USE_LUT_SINCOS,
           unsigned int TP_NUM_LUTS = 1,
           unsigned int TP_RND = 6,
-          unsigned int TP_SAT = 1>
+          unsigned int TP_SAT = 1,
+          unsigned int TP_PHASE_RELOAD_API = 0,
+          unsigned int TP_USE_PHASE_INC_RELOAD = 0>
 class dds_mixer : public kernelDdsMixerClass<TT_DATA,
                                              TP_INPUT_WINDOW_VSIZE,
                                              TP_MIXER_MODE,
@@ -384,7 +389,9 @@ class dds_mixer : public kernelDdsMixerClass<TT_DATA,
                                 TP_SC_MODE,
                                 TP_NUM_LUTS,
                                 TP_RND,
-                                TP_SAT>;
+                                TP_SAT,
+                                TP_PHASE_RELOAD_API,
+                                TP_USE_PHASE_INC_RELOAD>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -393,12 +400,22 @@ class dds_mixer : public kernelDdsMixerClass<TT_DATA,
     dds_mixer(unsigned int phaseInc, unsigned int initialPhaseOffset) : baseClass(phaseInc, initialPhaseOffset) {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_USE_PHASE_INC_RELOAD == 0) { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+        else {
+            REGISTER_FUNCTION(dds_mixer::ddsMixC);
+        }
+    }
 
     // dds
     void ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
                 input_buffer<TT_DATA>& __restrict inWindowB,
                 output_buffer<TT_DATA>& __restrict outWindow);
+    void ddsMixC(input_buffer<TT_DATA>& __restrict inWindowA,
+                 input_buffer<TT_DATA>& __restrict inWindowB,
+                 const unsigned int PhaseIncRTP,
+                 output_buffer<TT_DATA>& __restrict outWindow);
 };
 
 // Specialization for MODE=2, stream IO
@@ -408,7 +425,9 @@ template <typename TT_DATA,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 class dds_mixer<TT_DATA,
                 TP_INPUT_WINDOW_VSIZE,
                 MIXER_MODE_2,
@@ -417,15 +436,17 @@ class dds_mixer<TT_DATA,
                 TP_SC_MODE,
                 TP_NUM_LUTS,
                 TP_RND,
-                TP_SAT> : public kernelDdsMixerClass<TT_DATA,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     MIXER_MODE_2,
-                                                     TP_USE_PHASE_RELOAD,
-                                                     STREAM_API,
-                                                     TP_SC_MODE,
-                                                     TP_NUM_LUTS,
-                                                     TP_RND,
-                                                     TP_SAT> {
+                TP_SAT,
+                TP_PHASE_RELOAD_API,
+                TP_USE_PHASE_INC_RELOAD> : public kernelDdsMixerClass<TT_DATA,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      MIXER_MODE_2,
+                                                                      TP_USE_PHASE_RELOAD,
+                                                                      STREAM_API,
+                                                                      TP_SC_MODE,
+                                                                      TP_NUM_LUTS,
+                                                                      TP_RND,
+                                                                      TP_SAT> {
    public:
     static constexpr unsigned int TP_MIXER_MODE = MIXER_MODE_2;
     static constexpr unsigned int TP_API = STREAM_API; // we are on a specialization
@@ -447,7 +468,9 @@ class dds_mixer<TT_DATA,
                                 TP_SC_MODE,
                                 TP_NUM_LUTS,
                                 TP_RND,
-                                TP_SAT>;
+                                TP_SAT,
+                                TP_PHASE_RELOAD_API,
+                                TP_USE_PHASE_INC_RELOAD>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -456,12 +479,22 @@ class dds_mixer<TT_DATA,
     dds_mixer(unsigned int phaseInc, unsigned int initialPhaseOffset) : baseClass(phaseInc, initialPhaseOffset) {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_USE_PHASE_INC_RELOAD == 0) { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+        else {
+            REGISTER_FUNCTION(dds_mixer::ddsMixC);
+        }
+    }
 
     // dds
     void ddsMix(input_stream<TT_DATA>* __restrict inWindowA,
                 input_stream<TT_DATA>* __restrict inWindowB,
                 output_stream<TT_DATA>* __restrict outWindow);
+    void ddsMixC(input_stream<TT_DATA>* __restrict inWindowA,
+                 input_stream<TT_DATA>* __restrict inWindowB,
+                 const unsigned int PhaseIncRTP,
+                 output_stream<TT_DATA>* __restrict outWindow);
 };
 
 // Specialization for mixer_mode = 1, buffer IO
@@ -472,7 +505,9 @@ template <typename TT_DATA,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 class dds_mixer<TT_DATA,
                 TP_INPUT_WINDOW_VSIZE,
                 MIXER_MODE_1,
@@ -481,15 +516,17 @@ class dds_mixer<TT_DATA,
                 TP_SC_MODE,
                 TP_NUM_LUTS,
                 TP_RND,
-                TP_SAT> : public kernelDdsMixerClass<TT_DATA,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     MIXER_MODE_1,
-                                                     TP_USE_PHASE_RELOAD,
-                                                     IOBUFFER_API,
-                                                     TP_SC_MODE,
-                                                     TP_NUM_LUTS,
-                                                     TP_RND,
-                                                     TP_SAT> {
+                TP_SAT,
+                TP_PHASE_RELOAD_API,
+                TP_USE_PHASE_INC_RELOAD> : public kernelDdsMixerClass<TT_DATA,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      MIXER_MODE_1,
+                                                                      TP_USE_PHASE_RELOAD,
+                                                                      IOBUFFER_API,
+                                                                      TP_SC_MODE,
+                                                                      TP_NUM_LUTS,
+                                                                      TP_RND,
+                                                                      TP_SAT> {
    private:
    public:
     // Help the compiler deal with dependant names
@@ -510,7 +547,8 @@ class dds_mixer<TT_DATA,
                                 TP_SC_MODE,
                                 TP_NUM_LUTS,
                                 TP_RND,
-                                TP_SAT>;
+                                TP_SAT,
+                                TP_PHASE_RELOAD_API>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -519,10 +557,19 @@ class dds_mixer<TT_DATA,
     dds_mixer(unsigned int phaseInc, unsigned int initialPhaseOffset) : baseClass(phaseInc, initialPhaseOffset) {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_USE_PHASE_INC_RELOAD == 0) { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+        else {
+            REGISTER_FUNCTION(dds_mixer::ddsMixC);
+        }
+    }
 
     // dds
     void ddsMix(input_buffer<TT_DATA>& __restrict inWindowA, output_buffer<TT_DATA>& __restrict outWindow);
+    void ddsMixC(input_buffer<TT_DATA>& __restrict inWindowA,
+                 const unsigned int PhaseIncRTP,
+                 output_buffer<TT_DATA>& __restrict outWindow);
 };
 
 // Specialization for mixer_mode = 1, stream IO
@@ -533,7 +580,9 @@ template <typename TT_DATA,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 class dds_mixer<TT_DATA,
                 TP_INPUT_WINDOW_VSIZE,
                 MIXER_MODE_1,
@@ -542,15 +591,17 @@ class dds_mixer<TT_DATA,
                 TP_SC_MODE,
                 TP_NUM_LUTS,
                 TP_RND,
-                TP_SAT> : public kernelDdsMixerClass<TT_DATA,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     MIXER_MODE_1,
-                                                     TP_USE_PHASE_RELOAD,
-                                                     STREAM_API,
-                                                     TP_SC_MODE,
-                                                     TP_NUM_LUTS,
-                                                     TP_RND,
-                                                     TP_SAT> {
+                TP_SAT,
+                TP_PHASE_RELOAD_API,
+                TP_USE_PHASE_INC_RELOAD> : public kernelDdsMixerClass<TT_DATA,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      MIXER_MODE_1,
+                                                                      TP_USE_PHASE_RELOAD,
+                                                                      STREAM_API,
+                                                                      TP_SC_MODE,
+                                                                      TP_NUM_LUTS,
+                                                                      TP_RND,
+                                                                      TP_SAT> {
    private:
    public:
     // Help the compiler deal with dependant names
@@ -571,7 +622,8 @@ class dds_mixer<TT_DATA,
                                 TP_SC_MODE,
                                 TP_NUM_LUTS,
                                 TP_RND,
-                                TP_SAT>;
+                                TP_SAT,
+                                TP_PHASE_RELOAD_API>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -580,10 +632,19 @@ class dds_mixer<TT_DATA,
     dds_mixer(unsigned int phaseInc, unsigned int initialPhaseOffset) : baseClass(phaseInc, initialPhaseOffset) {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_USE_PHASE_INC_RELOAD == 0) { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+        else {
+            REGISTER_FUNCTION(dds_mixer::ddsMixC);
+        }
+    }
 
     // dds
     void ddsMix(input_stream<TT_DATA>* __restrict inWindowA, output_stream<TT_DATA>* __restrict outWindow);
+    void ddsMixC(input_stream<TT_DATA>* __restrict inWindowA,
+                 const unsigned int PhaseIncRTP,
+                 output_stream<TT_DATA>* __restrict outWindow);
 };
 
 // Specialization for mixer_mode = 0
@@ -593,7 +654,9 @@ template <typename TT_DATA,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 class dds_mixer<TT_DATA,
                 TP_INPUT_WINDOW_VSIZE,
                 MIXER_MODE_0,
@@ -602,15 +665,17 @@ class dds_mixer<TT_DATA,
                 TP_SC_MODE,
                 TP_NUM_LUTS,
                 TP_RND,
-                TP_SAT> : public kernelDdsMixerClass<TT_DATA,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     MIXER_MODE_0,
-                                                     TP_USE_PHASE_RELOAD,
-                                                     IOBUFFER_API,
-                                                     TP_SC_MODE,
-                                                     TP_NUM_LUTS,
-                                                     TP_RND,
-                                                     TP_SAT> {
+                TP_SAT,
+                TP_PHASE_RELOAD_API,
+                TP_USE_PHASE_INC_RELOAD> : public kernelDdsMixerClass<TT_DATA,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      MIXER_MODE_0,
+                                                                      TP_USE_PHASE_RELOAD,
+                                                                      IOBUFFER_API,
+                                                                      TP_SC_MODE,
+                                                                      TP_NUM_LUTS,
+                                                                      TP_RND,
+                                                                      TP_SAT> {
    private:
    public:
     // Help the compiler deal with dependant names
@@ -631,7 +696,8 @@ class dds_mixer<TT_DATA,
                                 TP_SC_MODE,
                                 TP_NUM_LUTS,
                                 TP_RND,
-                                TP_SAT>;
+                                TP_SAT,
+                                TP_PHASE_RELOAD_API>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -640,10 +706,17 @@ class dds_mixer<TT_DATA,
     dds_mixer(unsigned int phaseInc, unsigned int initialPhaseOffset) : baseClass(phaseInc, initialPhaseOffset) {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_USE_PHASE_INC_RELOAD == 0) { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+        else {
+            REGISTER_FUNCTION(dds_mixer::ddsMixC);
+        }
+    }
 
     // dds
     void ddsMix(output_buffer<TT_DATA>& __restrict outWindow);
+    void ddsMixC(const unsigned int PhaseIncRTP, output_buffer<TT_DATA>& __restrict outWindow);
 };
 
 // Specialization for mixer_mode = 0 stream IO
@@ -653,7 +726,9 @@ template <typename TT_DATA,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 class dds_mixer<TT_DATA,
                 TP_INPUT_WINDOW_VSIZE,
                 MIXER_MODE_0,
@@ -662,15 +737,17 @@ class dds_mixer<TT_DATA,
                 TP_SC_MODE,
                 TP_NUM_LUTS,
                 TP_RND,
-                TP_SAT> : public kernelDdsMixerClass<TT_DATA,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     MIXER_MODE_0,
-                                                     TP_USE_PHASE_RELOAD,
-                                                     STREAM_API,
-                                                     TP_SC_MODE,
-                                                     TP_NUM_LUTS,
-                                                     TP_RND,
-                                                     TP_SAT> {
+                TP_SAT,
+                TP_PHASE_RELOAD_API,
+                TP_USE_PHASE_INC_RELOAD> : public kernelDdsMixerClass<TT_DATA,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      MIXER_MODE_0,
+                                                                      TP_USE_PHASE_RELOAD,
+                                                                      STREAM_API,
+                                                                      TP_SC_MODE,
+                                                                      TP_NUM_LUTS,
+                                                                      TP_RND,
+                                                                      TP_SAT> {
    private:
    public:
     // Help the compiler deal with dependant names
@@ -691,7 +768,8 @@ class dds_mixer<TT_DATA,
                                 TP_SC_MODE,
                                 TP_NUM_LUTS,
                                 TP_RND,
-                                TP_SAT>;
+                                TP_SAT,
+                                TP_PHASE_RELOAD_API>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -700,10 +778,17 @@ class dds_mixer<TT_DATA,
     dds_mixer(unsigned int phaseInc, unsigned int initialPhaseOffset) : baseClass(phaseInc, initialPhaseOffset) {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_USE_PHASE_INC_RELOAD == 0) { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+        else {
+            REGISTER_FUNCTION(dds_mixer::ddsMixC);
+        }
+    }
 
     // dds
     void ddsMix(output_stream<TT_DATA>* __restrict outWindow);
+    void ddsMixC(const unsigned int PhaseIncRTP, output_stream<TT_DATA>* __restrict outWindow);
 };
 
 // RTP Specializations
@@ -714,7 +799,9 @@ template <typename TT_DATA,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 class dds_mixer<TT_DATA,
                 TP_INPUT_WINDOW_VSIZE,
                 MIXER_MODE_2,
@@ -723,15 +810,17 @@ class dds_mixer<TT_DATA,
                 TP_SC_MODE,
                 TP_NUM_LUTS,
                 TP_RND,
-                TP_SAT> : public kernelDdsMixerClass<TT_DATA,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     MIXER_MODE_2,
-                                                     USE_PHASE_RELOAD_TRUE,
-                                                     IOBUFFER_API,
-                                                     USE_LUT_SINCOS,
-                                                     TP_NUM_LUTS,
-                                                     TP_RND,
-                                                     TP_SAT> {
+                TP_SAT,
+                TP_PHASE_RELOAD_API,
+                TP_USE_PHASE_INC_RELOAD> : public kernelDdsMixerClass<TT_DATA,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      MIXER_MODE_2,
+                                                                      USE_PHASE_RELOAD_TRUE,
+                                                                      IOBUFFER_API,
+                                                                      TP_SC_MODE, //    USE_LUT_SINCOS,
+                                                                      TP_NUM_LUTS,
+                                                                      TP_RND,
+                                                                      TP_SAT> {
    public:
     // Help the compiler deal with dependant names
     using baseClass = kernelDdsMixerClass<TT_DATA,
@@ -739,7 +828,7 @@ class dds_mixer<TT_DATA,
                                           MIXER_MODE_2,
                                           USE_PHASE_RELOAD_TRUE,
                                           IOBUFFER_API,
-                                          USE_LUT_SINCOS,
+                                          TP_SC_MODE, // USE_LUT_SINCOS,
                                           TP_NUM_LUTS,
                                           TP_RND,
                                           TP_SAT>;
@@ -751,7 +840,8 @@ class dds_mixer<TT_DATA,
                                 USE_LUT_SINCOS,
                                 TP_NUM_LUTS,
                                 TP_RND,
-                                TP_SAT>;
+                                TP_SAT,
+                                TP_PHASE_RELOAD_API>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -760,13 +850,43 @@ class dds_mixer<TT_DATA,
     dds_mixer(unsigned int phaseInc, unsigned int initialPhaseOffset) : baseClass(phaseInc, initialPhaseOffset) {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_USE_PHASE_INC_RELOAD == 0) {
+                if
+                    constexpr(TP_PHASE_RELOAD_API == 0) { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+                else {
+                    REGISTER_FUNCTION(dds_mixer::ddsMixB);
+                }
+            }
+        else {
+            if
+                constexpr(TP_PHASE_RELOAD_API == 0) { REGISTER_FUNCTION(dds_mixer::ddsMixC); }
+            else {
+                REGISTER_FUNCTION(dds_mixer::ddsMixD);
+            }
+        }
+    }
 
     // dds
     void ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
                 input_buffer<TT_DATA>& __restrict inWindowB,
                 output_buffer<TT_DATA>& __restrict outWindow,
                 const unsigned int PhaseRTP);
+    void ddsMixB(input_buffer<TT_DATA>& __restrict inWindowA,
+                 input_buffer<TT_DATA>& __restrict inWindowB,
+                 input_buffer<uint32>& __restrict inPhaseOffset,
+                 output_buffer<TT_DATA>& __restrict outWindow);
+    void ddsMixC(input_buffer<TT_DATA>& __restrict inWindowA,
+                 input_buffer<TT_DATA>& __restrict inWindowB,
+                 output_buffer<TT_DATA>& __restrict outWindow,
+                 const unsigned int PhaseRTP,
+                 const unsigned int PhaseIncRTP);
+    void ddsMixD(input_buffer<TT_DATA>& __restrict inWindowA,
+                 input_buffer<TT_DATA>& __restrict inWindowB,
+                 input_buffer<uint32>& __restrict inPhaseOffset,
+                 const unsigned int PhaseIncRTP,
+                 output_buffer<TT_DATA>& __restrict outWindow);
 };
 
 // Specialization for MODE=2, stream IO
@@ -775,7 +895,9 @@ template <typename TT_DATA,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 class dds_mixer<TT_DATA,
                 TP_INPUT_WINDOW_VSIZE,
                 MIXER_MODE_2,
@@ -784,15 +906,17 @@ class dds_mixer<TT_DATA,
                 TP_SC_MODE,
                 TP_NUM_LUTS,
                 TP_RND,
-                TP_SAT> : public kernelDdsMixerClass<TT_DATA,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     MIXER_MODE_2,
-                                                     USE_PHASE_RELOAD_TRUE,
-                                                     STREAM_API,
-                                                     TP_SC_MODE,
-                                                     TP_NUM_LUTS,
-                                                     TP_RND,
-                                                     TP_SAT> {
+                TP_SAT,
+                TP_PHASE_RELOAD_API,
+                TP_USE_PHASE_INC_RELOAD> : public kernelDdsMixerClass<TT_DATA,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      MIXER_MODE_2,
+                                                                      USE_PHASE_RELOAD_TRUE,
+                                                                      STREAM_API,
+                                                                      TP_SC_MODE,
+                                                                      TP_NUM_LUTS,
+                                                                      TP_RND,
+                                                                      TP_SAT> {
    public:
     static constexpr unsigned int TP_MIXER_MODE = MIXER_MODE_2;
     static constexpr unsigned int TP_API = STREAM_API;                         // we are on a specialization
@@ -815,7 +939,8 @@ class dds_mixer<TT_DATA,
                                 TP_SC_MODE,
                                 TP_NUM_LUTS,
                                 TP_RND,
-                                TP_SAT>;
+                                TP_SAT,
+                                TP_PHASE_RELOAD_API>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -824,13 +949,43 @@ class dds_mixer<TT_DATA,
     dds_mixer(unsigned int phaseInc, unsigned int initialPhaseOffset) : baseClass(phaseInc, initialPhaseOffset) {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_USE_PHASE_INC_RELOAD == 0) {
+                if
+                    constexpr(TP_PHASE_RELOAD_API == 0) { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+                else {
+                    REGISTER_FUNCTION(dds_mixer::ddsMixB);
+                }
+            }
+        else {
+            if
+                constexpr(TP_PHASE_RELOAD_API == 0) { REGISTER_FUNCTION(dds_mixer::ddsMixC); }
+            else {
+                REGISTER_FUNCTION(dds_mixer::ddsMixD);
+            }
+        }
+    }
 
     // dds
     void ddsMix(input_stream<TT_DATA>* __restrict inWindowA,
                 input_stream<TT_DATA>* __restrict inWindowB,
-                output_stream<TT_DATA>* __restrict outWindowx,
+                output_stream<TT_DATA>* __restrict outWindow,
                 const unsigned int PhaseRTP);
+    void ddsMixB(input_stream<TT_DATA>* __restrict inWindowA,
+                 input_stream<TT_DATA>* __restrict inWindowB,
+                 input_buffer<uint32>& __restrict inPhaseOffset,
+                 output_stream<TT_DATA>* __restrict outWindow);
+    void ddsMixC(input_stream<TT_DATA>* __restrict inWindowA,
+                 input_stream<TT_DATA>* __restrict inWindowB,
+                 output_stream<TT_DATA>* __restrict outWindow,
+                 const unsigned int PhaseRTP,
+                 const unsigned int PhaseIncRTP);
+    void ddsMixD(input_stream<TT_DATA>* __restrict inWindowA,
+                 input_stream<TT_DATA>* __restrict inWindowB,
+                 input_buffer<uint32>& __restrict inPhaseOffset,
+                 const unsigned int PhaseIncRTP,
+                 output_stream<TT_DATA>* __restrict outWindow);
 };
 
 // Specialization for mixer_mode = 1, buffer IO
@@ -840,7 +995,9 @@ template <typename TT_DATA,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 class dds_mixer<TT_DATA,
                 TP_INPUT_WINDOW_VSIZE,
                 MIXER_MODE_1,
@@ -849,15 +1006,17 @@ class dds_mixer<TT_DATA,
                 TP_SC_MODE,
                 TP_NUM_LUTS,
                 TP_RND,
-                TP_SAT> : public kernelDdsMixerClass<TT_DATA,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     MIXER_MODE_1,
-                                                     USE_PHASE_RELOAD_TRUE,
-                                                     IOBUFFER_API,
-                                                     TP_SC_MODE,
-                                                     TP_NUM_LUTS,
-                                                     TP_RND,
-                                                     TP_SAT> {
+                TP_SAT,
+                TP_PHASE_RELOAD_API,
+                TP_USE_PHASE_INC_RELOAD> : public kernelDdsMixerClass<TT_DATA,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      MIXER_MODE_1,
+                                                                      USE_PHASE_RELOAD_TRUE,
+                                                                      IOBUFFER_API,
+                                                                      TP_SC_MODE,
+                                                                      TP_NUM_LUTS,
+                                                                      TP_RND,
+                                                                      TP_SAT> {
    private:
    public:
     // Help the compiler deal with dependant names
@@ -878,7 +1037,8 @@ class dds_mixer<TT_DATA,
                                 TP_SC_MODE,
                                 TP_NUM_LUTS,
                                 TP_RND,
-                                TP_SAT>;
+                                TP_SAT,
+                                TP_PHASE_RELOAD_API>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -887,12 +1047,39 @@ class dds_mixer<TT_DATA,
     dds_mixer(unsigned int phaseInc, unsigned int initialPhaseOffset) : baseClass(phaseInc, initialPhaseOffset) {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_USE_PHASE_INC_RELOAD == 0) {
+                if
+                    constexpr(TP_PHASE_RELOAD_API == 0) { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+                else {
+                    REGISTER_FUNCTION(dds_mixer::ddsMixB);
+                }
+            }
+        else {
+            if
+                constexpr(TP_PHASE_RELOAD_API == 0) { REGISTER_FUNCTION(dds_mixer::ddsMixC); }
+            else {
+                REGISTER_FUNCTION(dds_mixer::ddsMixD);
+            }
+        }
+    }
 
     // dds
     void ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
                 output_buffer<TT_DATA>& __restrict outWindow,
                 const unsigned int PhaseRTP);
+    void ddsMixB(input_buffer<TT_DATA>& __restrict inWindowA,
+                 input_buffer<uint32>& __restrict inPhaseOffset,
+                 output_buffer<TT_DATA>& __restrict outWindow);
+    void ddsMixC(input_buffer<TT_DATA>& __restrict inWindowA,
+                 output_buffer<TT_DATA>& __restrict outWindow,
+                 const unsigned int PhaseRTP,
+                 const unsigned int PhaseIncRTP);
+    void ddsMixD(input_buffer<TT_DATA>& __restrict inWindowA,
+                 input_buffer<uint32>& __restrict inPhaseOffset,
+                 const unsigned int PhaseIncRTP,
+                 output_buffer<TT_DATA>& __restrict outWindow);
 };
 
 // Specialization for mixer_mode = 1, stream IO
@@ -902,7 +1089,9 @@ template <typename TT_DATA,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 class dds_mixer<TT_DATA,
                 TP_INPUT_WINDOW_VSIZE,
                 MIXER_MODE_1,
@@ -911,15 +1100,17 @@ class dds_mixer<TT_DATA,
                 TP_SC_MODE,
                 TP_NUM_LUTS,
                 TP_RND,
-                TP_SAT> : public kernelDdsMixerClass<TT_DATA,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     MIXER_MODE_1,
-                                                     USE_PHASE_RELOAD_TRUE,
-                                                     STREAM_API,
-                                                     TP_SC_MODE,
-                                                     TP_NUM_LUTS,
-                                                     TP_RND,
-                                                     TP_SAT> {
+                TP_SAT,
+                TP_PHASE_RELOAD_API,
+                TP_USE_PHASE_INC_RELOAD> : public kernelDdsMixerClass<TT_DATA,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      MIXER_MODE_1,
+                                                                      USE_PHASE_RELOAD_TRUE,
+                                                                      STREAM_API,
+                                                                      TP_SC_MODE,
+                                                                      TP_NUM_LUTS,
+                                                                      TP_RND,
+                                                                      TP_SAT> {
    private:
    public:
     // Help the compiler deal with dependant names
@@ -940,7 +1131,8 @@ class dds_mixer<TT_DATA,
                                 TP_SC_MODE,
                                 TP_NUM_LUTS,
                                 TP_RND,
-                                TP_SAT>;
+                                TP_SAT,
+                                TP_PHASE_RELOAD_API>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -949,12 +1141,39 @@ class dds_mixer<TT_DATA,
     dds_mixer(unsigned int phaseInc, unsigned int initialPhaseOffset) : baseClass(phaseInc, initialPhaseOffset) {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_USE_PHASE_INC_RELOAD == 0) {
+                if
+                    constexpr(TP_PHASE_RELOAD_API == 0) { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+                else {
+                    REGISTER_FUNCTION(dds_mixer::ddsMixB);
+                }
+            }
+        else {
+            if
+                constexpr(TP_PHASE_RELOAD_API == 0) { REGISTER_FUNCTION(dds_mixer::ddsMixC); }
+            else {
+                REGISTER_FUNCTION(dds_mixer::ddsMixD);
+            }
+        }
+    }
 
     // dds
     void ddsMix(input_stream<TT_DATA>* __restrict inWindowA,
                 output_stream<TT_DATA>* __restrict outWindow,
                 const unsigned int PhaseRTP);
+    void ddsMixB(input_stream<TT_DATA>* __restrict inWindowA,
+                 input_buffer<uint32>& __restrict inPhaseOffset,
+                 output_stream<TT_DATA>* __restrict outWindow);
+    void ddsMixC(input_stream<TT_DATA>* __restrict inWindowA,
+                 output_stream<TT_DATA>* __restrict outWindow,
+                 const unsigned int PhaseRTP,
+                 const unsigned int PhaseIncRTP);
+    void ddsMixD(input_stream<TT_DATA>* __restrict inWindowA,
+                 input_buffer<uint32>& __restrict inPhaseOffset,
+                 const unsigned int PhaseIncRTP,
+                 output_stream<TT_DATA>* __restrict outWindow);
 };
 
 // Specialization for mixer_mode = 0
@@ -963,7 +1182,9 @@ template <typename TT_DATA,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 class dds_mixer<TT_DATA,
                 TP_INPUT_WINDOW_VSIZE,
                 MIXER_MODE_0,
@@ -972,15 +1193,17 @@ class dds_mixer<TT_DATA,
                 TP_SC_MODE,
                 TP_NUM_LUTS,
                 TP_RND,
-                TP_SAT> : public kernelDdsMixerClass<TT_DATA,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     MIXER_MODE_0,
-                                                     USE_PHASE_RELOAD_TRUE,
-                                                     IOBUFFER_API,
-                                                     TP_SC_MODE,
-                                                     TP_NUM_LUTS,
-                                                     TP_RND,
-                                                     TP_SAT> {
+                TP_SAT,
+                TP_PHASE_RELOAD_API,
+                TP_USE_PHASE_INC_RELOAD> : public kernelDdsMixerClass<TT_DATA,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      MIXER_MODE_0,
+                                                                      USE_PHASE_RELOAD_TRUE,
+                                                                      IOBUFFER_API,
+                                                                      TP_SC_MODE,
+                                                                      TP_NUM_LUTS,
+                                                                      TP_RND,
+                                                                      TP_SAT> {
    private:
    public:
     // Help the compiler deal with dependant names
@@ -1001,7 +1224,8 @@ class dds_mixer<TT_DATA,
                                 TP_SC_MODE,
                                 TP_NUM_LUTS,
                                 TP_RND,
-                                TP_SAT>;
+                                TP_SAT,
+                                TP_PHASE_RELOAD_API>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -1010,10 +1234,33 @@ class dds_mixer<TT_DATA,
     dds_mixer(unsigned int phaseInc, unsigned int initialPhaseOffset) : baseClass(phaseInc, initialPhaseOffset) {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_USE_PHASE_INC_RELOAD == 0) {
+                if
+                    constexpr(TP_PHASE_RELOAD_API == 0) { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+                else {
+                    REGISTER_FUNCTION(dds_mixer::ddsMixB);
+                }
+            }
+        else {
+            if
+                constexpr(TP_PHASE_RELOAD_API == 0) { REGISTER_FUNCTION(dds_mixer::ddsMixC); }
+            else {
+                REGISTER_FUNCTION(dds_mixer::ddsMixD);
+            }
+        }
+    }
 
     // dds
     void ddsMix(output_buffer<TT_DATA>& __restrict outWindow, const unsigned int PhaseRTP);
+    void ddsMixB(input_buffer<uint32>& __restrict inPhaseOffset, output_buffer<TT_DATA>& __restrict outWindow);
+    void ddsMixC(output_buffer<TT_DATA>& __restrict outWindow,
+                 const unsigned int PhaseRTP,
+                 const unsigned int PhaseIncRTP);
+    void ddsMixD(input_buffer<uint32>& __restrict inPhaseOffset,
+                 const unsigned int PhaseIncRTP,
+                 output_buffer<TT_DATA>& __restrict outWindow);
 };
 
 // Specialization for mixer_mode = 1, stream IO
@@ -1023,7 +1270,9 @@ template <typename TT_DATA,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 class dds_mixer<TT_DATA,
                 TP_INPUT_WINDOW_VSIZE,
                 MIXER_MODE_0,
@@ -1032,15 +1281,17 @@ class dds_mixer<TT_DATA,
                 TP_SC_MODE,
                 TP_NUM_LUTS,
                 TP_RND,
-                TP_SAT> : public kernelDdsMixerClass<TT_DATA,
-                                                     TP_INPUT_WINDOW_VSIZE,
-                                                     MIXER_MODE_0,
-                                                     USE_PHASE_RELOAD_TRUE,
-                                                     STREAM_API,
-                                                     TP_SC_MODE,
-                                                     TP_NUM_LUTS,
-                                                     TP_RND,
-                                                     TP_SAT> {
+                TP_SAT,
+                TP_PHASE_RELOAD_API,
+                TP_USE_PHASE_INC_RELOAD> : public kernelDdsMixerClass<TT_DATA,
+                                                                      TP_INPUT_WINDOW_VSIZE,
+                                                                      MIXER_MODE_0,
+                                                                      USE_PHASE_RELOAD_TRUE,
+                                                                      STREAM_API,
+                                                                      TP_SC_MODE,
+                                                                      TP_NUM_LUTS,
+                                                                      TP_RND,
+                                                                      TP_SAT> {
    private:
    public:
     // Help the compiler deal with dependant names
@@ -1061,7 +1312,8 @@ class dds_mixer<TT_DATA,
                                 TP_SC_MODE,
                                 TP_NUM_LUTS,
                                 TP_RND,
-                                TP_SAT>;
+                                TP_SAT,
+                                TP_PHASE_RELOAD_API>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -1070,10 +1322,33 @@ class dds_mixer<TT_DATA,
     dds_mixer(unsigned int phaseInc, unsigned int initialPhaseOffset) : baseClass(phaseInc, initialPhaseOffset) {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_USE_PHASE_INC_RELOAD == 0) {
+                if
+                    constexpr(TP_PHASE_RELOAD_API == 0) { REGISTER_FUNCTION(dds_mixer::ddsMix); }
+                else {
+                    REGISTER_FUNCTION(dds_mixer::ddsMixB);
+                }
+            }
+        else {
+            if
+                constexpr(TP_PHASE_RELOAD_API == 0) { REGISTER_FUNCTION(dds_mixer::ddsMixC); }
+            else {
+                REGISTER_FUNCTION(dds_mixer::ddsMixD);
+            }
+        }
+    }
 
     // dds
     void ddsMix(output_stream<TT_DATA>* __restrict outWindow, const unsigned int PhaseRTP);
+    void ddsMixB(input_buffer<uint32>& __restrict inPhaseOffset, output_stream<TT_DATA>* __restrict outWindow);
+    void ddsMixC(output_stream<TT_DATA>* __restrict outWindow,
+                 const unsigned int PhaseRTP,
+                 const unsigned int PhaseIncRTP);
+    void ddsMixD(input_buffer<uint32>& __restrict inPhaseOffset,
+                 const unsigned int PhaseIncRTP,
+                 output_stream<TT_DATA>* __restrict outWindow);
 };
 }
 }

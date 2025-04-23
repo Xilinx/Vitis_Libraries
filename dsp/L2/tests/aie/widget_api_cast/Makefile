@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -167,7 +167,8 @@ pre_build:
 	 mkdir -p logs
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)")
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)"  --connector " " --var "DATA_TYPE:IN_API:OUT_API:NUM_INPUTS:WINDOW_VSIZE:NUM_OUTPUT_CLONES:PATTERN:HEADER_BYTES:AIE_VARIANT")
-	$(if $(filter-out REF,$(TAG)), vitis --classic -exec ipmetadata_config_checker $(XFLIB_DIR)/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/meta/scripts/metadata_checker.py --ip $(UUT_KERNEL))
+	$(if $(filter-out REF,$(TAG)), # vitis --classic -exec ipmetadata_config_checker $(XFLIB_DIR)/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk gen_input HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(LOC_INPUT_FILE) ")
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk ssr_split HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(LOC_INPUT_FILE)")
 	$(if $(filter-out REF,$(TAG)), make run TARGET=x86sim TAG=REF)

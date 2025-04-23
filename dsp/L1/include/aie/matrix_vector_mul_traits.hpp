@@ -301,36 +301,21 @@ template <typename T_D_A, typename T_D_B>
 using outType_t = typename outType<T_D_A, T_D_B>::type;
 
 // Input Interfaces
-template <bool T_CASC_IN, typename T_A, typename T_B>
-struct T_inputIF {};
-// CASC_IN_FALSE
 template <typename T_A, typename T_B>
-struct T_inputIF<CASC_IN_FALSE, T_A, T_B> {
+struct T_inputIF {
     T_A* __restrict inWindowA;
     T_B* __restrict inWindowB;
-    input_stream<accType_t<T_A, T_B> >* inCascade = {};
+    input_stream<T_B>* __restrict inStreamB;
+    input_stream<T_B>* __restrict inStreamB2;
+    input_cascade<accType_t<T_A, T_B> >* inCascade = {};
 };
-// CASC_IN_TRUE
-template <typename T_A, typename T_B>
-struct T_inputIF<CASC_IN_TRUE, T_A, T_B> {
-    T_A* __restrict inWindowA;
-    T_B* __restrict inWindowB;
-    input_stream<accType_t<T_A, T_B> >* inCascade;
-};
-// Input Interfaces
-template <bool T_CASC_OUT, typename T_A, typename T_B>
-struct T_outputIF {};
 // CASC_OUT_FALSE
 template <typename T_A, typename T_B>
-struct T_outputIF<CASC_OUT_FALSE, T_A, T_B> {
+struct T_outputIF {
     outType_t<T_A, T_B>* __restrict outWindow;
-    output_stream<accType_t<T_A, T_B> >* outCascade{};
-};
-// CASC_OUT_TRUE
-template <typename T_A, typename T_B>
-struct T_outputIF<CASC_OUT_TRUE, T_A, T_B> {
-    outType_t<T_A, T_B>* __restrict outWindow = {};
-    output_stream<accType_t<T_A, T_B> >* outCascade;
+    output_stream<outType_t<T_A, T_B> >* __restrict outStream;
+    output_stream<outType_t<T_A, T_B> >* __restrict outStream2;
+    output_cascade<accType_t<T_A, T_B> >* outCascade{};
 };
 
 // determine the number of lanes for A and B depending on DATA_TYPE combination

@@ -95,7 +95,11 @@ INLINE_DECL void stockhamStages<TT_DATA,
     constexpr int minPtSizePwr = 4;
 #endif //__FFT_R4_IMPL__ == 0
 #if __FFT_R4_IMPL__ == 1
+#if __ALIGN_BYTE_SIZE__ == 32
     constexpr int minPtSizePwr = 5;
+#else
+    constexpr int minPtSizePwr = 6;
+#endif //__ALIGN_BYTE_SIZE__
 #endif //__FFT_R4_IMPL__ == 1
     constexpr int kOpsInWindow = TP_WINDOW_VSIZE / TP_POINT_SIZE;
 
@@ -110,7 +114,7 @@ INLINE_DECL void stockhamStages<TT_DATA,
 
     if
         constexpr(TP_DYN_PT_SIZE == 1) {
-            constexpr int kHeaderBytes = 32; // 256 bits.
+            constexpr int kHeaderBytes = __ALIGN_BYTE_SIZE__; // 256 bits for AIE and AIE-ML, 512 for AIE-MLv2.
             constexpr int kSamplesInHeader = kHeaderBytes / sizeof(TT_DATA);
             constexpr int kSamplesOutHeader = kHeaderBytes / sizeof(TT_OUT_DATA);
             TT_INTERNAL_DATA* myTmp2_buf = (TT_INTERNAL_DATA*)tmp2_buf; // when dynamic, xbuff header alters start of
@@ -118,19 +122,18 @@ INLINE_DECL void stockhamStages<TT_DATA,
                                                                         // has to alter too.
             TT_DATA headerVal;
             TT_OUT_DATA headerOpVal;
-            //  ::aie::vector<TT_DATA,32/sizeof(TT_DATA)> headerRawVal;
-            using in256VectorType = ::aie::vector<TT_DATA, kSamplesInHeader>;
+            using inHeaderVectorType = ::aie::vector<TT_DATA, kSamplesInHeader>;
             using outVectorType =
                 ::aie::vector<TT_OUT_DATA, kSamplesInHeader>; // has to be same number of elements as input.
-            using out256VectorType =
+            using outHeaderVectorType =
                 ::aie::vector<TT_OUT_DATA, kSamplesOutHeader>; // has to be same number of elements as input.
-            in256VectorType header;
-            out256VectorType headerOp;
-            out256VectorType blankOp;
-            in256VectorType* inPtr;
+            inHeaderVectorType header;
+            outHeaderVectorType headerOp;
+            outHeaderVectorType blankOp;
+            inHeaderVectorType* inPtr;
             outVectorType* outputPtr;
-            in256VectorType in256;
-            out256VectorType* out256Ptr;
+            inHeaderVectorType inHeader;
+            outHeaderVectorType* outHeaderPtr;
             outVectorType outVector;
             int ptSizePwr;
             unsigned int ptSize;
@@ -141,9 +144,9 @@ INLINE_DECL void stockhamStages<TT_DATA,
             blankOp = ::aie::zeros<TT_OUT_DATA, kSamplesOutHeader>();
             headerOp = ::aie::zeros<TT_OUT_DATA, kSamplesOutHeader>();
             xbuff = (TT_DATA*)inptr;
-            inPtr = (in256VectorType*)xbuff;
+            inPtr = (inHeaderVectorType*)xbuff;
             header = *inPtr;
-            xbuff += 32 / sizeof(TT_DATA); // increment by 256 bits.
+            xbuff += kHeaderBytes / sizeof(TT_DATA); // increment by header size bits.
             if
                 constexpr(!fnUsePingPongIntBuffer<TT_DATA>()) myTmp2_buf = (TT_INTERNAL_DATA*)xbuff;
             else
@@ -168,13 +171,13 @@ INLINE_DECL void stockhamStages<TT_DATA,
             }
             // obuff = outptr;
             if ((ptSizePwr >= minPtSizePwr) && (ptSizePwr <= kPointSizePower)) {
-                out256Ptr = (out256VectorType*)obuff;
-                *out256Ptr = headerOp;
-                obuff += 32 / sizeof(TT_OUT_DATA);
+                outHeaderPtr = (outHeaderVectorType*)obuff;
+                *outHeaderPtr = headerOp;
+                obuff += kHeaderBytes / sizeof(TT_OUT_DATA);
                 if (TP_END_RANK <=
                     firstRank) { // i.e. no need to do any processing in this kernel as later kernels will do it all.
-                    // copy input window to output window in 256bit chunks
-                    inPtr = (in256VectorType*)xbuff;
+                    // copy input window to output window in Headerbit chunks
+                    inPtr = (inHeaderVectorType*)xbuff;
                     outputPtr = (outVectorType*)obuff;
                     if
                         constexpr(std::is_same<TT_DATA, cfloat>::value) {
@@ -185,8 +188,8 @@ INLINE_DECL void stockhamStages<TT_DATA,
                     else {
                         // this clause handles the case with different TT_IN_DATA and TT_OUT_DATA
                         for (int i = 0; i < TP_WINDOW_VSIZE / kSamplesInHeader; i++) {
-                            in256 = *inPtr++;
-                            cacc384.from_vector(in256, 0);
+                            inHeader = *inPtr++;
+                            cacc384.from_vector(inHeader, 0);
                             outVector = cacc384.template to_vector<TT_OUT_DATA>(0);
                             *outputPtr++ = outVector;
                         }
@@ -207,13 +210,13 @@ INLINE_DECL void stockhamStages<TT_DATA,
             } else { // illegal point size, so flag error in status field and fill output window with zeros.
                 headerOpVal = unitVector<TT_OUT_DATA>();          // set real to 1, imag to 0, 1 meaning invalid.
                 headerOp.set(headerOpVal, kSamplesOutHeader - 1); // set status in the last sample of the header
-                out256Ptr = (out256VectorType*)obuff;
-                *out256Ptr = headerOp;
-                obuff += 32 / sizeof(TT_OUT_DATA);
+                outHeaderPtr = (outHeaderVectorType*)obuff;
+                *outHeaderPtr = headerOp;
+                obuff += kHeaderBytes / sizeof(TT_OUT_DATA);
 
                 // blank output window beyond header.
-                out256VectorType* blankPtr;
-                blankPtr = (out256VectorType*)obuff;
+                outHeaderVectorType* blankPtr;
+                blankPtr = (outHeaderVectorType*)obuff;
                 for (int i = 0; i < TP_WINDOW_VSIZE / kSamplesOutHeader; i++) {
                     *blankPtr++ = blankOp;
                 }
@@ -518,7 +521,7 @@ INLINE_DECL void stockhamStages<TT_DATA,
 
     } // end of float/integer handling
 
-    constexpr int koutVSize = 32 / sizeof(TT_OUT_DATA);
+    constexpr int koutVSize = __ALIGN_BYTE_SIZE__ / sizeof(TT_OUT_DATA);
 
     if (ptSize < TP_POINT_SIZE) {
         using outVectType = ::aie::vector<TT_OUT_DATA, koutVSize>;
@@ -1182,7 +1185,7 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
                      TP_END_RANK>(); //(TT_TWIDDLE*)fft_lut_r4_1024_2048;
 #endif                               //__FFT_R4_IMPL__ == 1
 
-    alignas(32) static TT_TWIDDLE* tw_table[kMaxPointLog * 2] = {
+    alignas(__ALIGN_BYTE_SIZE__) static TT_TWIDDLE* tw_table[kMaxPointLog * 2] = {
         tw1,   tw2,   tw4,   tw8,    tw16,    tw32,    tw64,     tw128,     tw256,     tw512,      tw1024,      tw2048,
         tw1_2, tw2_4, tw4_8, tw8_16, tw16_32, tw32_64, tw64_128, tw128_256, tw256_512, tw512_1024, tw1024_2048, NULL};
 
@@ -1281,9 +1284,9 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
         fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
 #endif //__FFT_R4_IMPL__ == 1
 
-    alignas(32) static TT_TWIDDLE* tw_table[kMaxPointLog * 2] = {tw1,  tw2,  tw4,  tw8,  NULL,  NULL,  NULL,  NULL,
-                                                                 NULL, NULL, NULL, NULL, tw1_2, tw2_4, tw4_8, tw8_16,
-                                                                 NULL, NULL, NULL, NULL, NULL,  NULL,  NULL,  NULL};
+    alignas(__ALIGN_BYTE_SIZE__) static TT_TWIDDLE* tw_table[kMaxPointLog * 2] = {
+        tw1,   tw2,   tw4,   tw8,    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        tw1_2, tw2_4, tw4_8, tw8_16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
     T_internalDataType* ktmp1_buf = (T_internalDataType*)fft_128_tmp1; // works because cint32 is the same size as
                                                                        // cfloat
@@ -1293,8 +1296,8 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
     TT_OUT_DATA* obuff = outptr;
     T_internalDataType* tmp1_buf = (T_internalDataType*)fft_128_tmp1;
     // The following break with the pattern for other point sizes is a workaround for a compiler issue.
-    alignas(32) T_internalDataType tmp2_buf[FFT16_SIZE]; // must be 256 bit aligned
-    alignas(32) T_internalDataType tmp3_buf[FFT16_SIZE]; // must be 256 bit aligned
+    alignas(__ALIGN_BYTE_SIZE__) T_internalDataType tmp2_buf[FFT16_SIZE]; // must be 256 bit aligned
+    alignas(__ALIGN_BYTE_SIZE__) T_internalDataType tmp3_buf[FFT16_SIZE]; // must be 256 bit aligned
 
     bool inv = TP_FFT_NIFFT == 1 ? false : true;
 
@@ -1371,9 +1374,9 @@ INLINE_DECL void kernelFFTClass<cint16,
         fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE, TP_DYN_PT_SIZE, TP_START_RANK, TP_END_RANK>();
 #endif //__FFT_R4_IMPL__ == 1
 
-    alignas(32) static cint16* tw_table[kMaxPointLog * 2] = {tw1,  tw2,  tw4,  tw8,  NULL,  NULL,  NULL,  NULL,
-                                                             NULL, NULL, NULL, NULL, tw1_2, tw2_4, tw4_8, tw8_16,
-                                                             NULL, NULL, NULL, NULL, NULL,  NULL,  NULL,  NULL};
+    alignas(__ALIGN_BYTE_SIZE__) static cint16* tw_table[kMaxPointLog * 2] = {
+        tw1,   tw2,   tw4,   tw8,    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        tw1_2, tw2_4, tw4_8, tw8_16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
     T_internalDataType* ktmp1_buf = (T_internalDataType*)
         fft_128_tmp1; // all pt sizes 128 or smaller use 128 sample buffer to keep codebase smaller.
@@ -1748,7 +1751,7 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TP_RND,
                                     TP_SAT,
                                     TP_TWIDDLE_MODE>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                                                              output_stream_cacc64* __restrict outStream0, // Cascade
+                                                              output_cascade<cacc64>* __restrict outStream0, // Cascade
                                                               output_stream<TT_OUT_DATA>* __restrict outStream1) {
     TT_DATA* __restrict inPtr = &inBuff[0];
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
@@ -1794,7 +1797,7 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TP_RND,
                                     TP_SAT,
                                     TP_TWIDDLE_MODE>::fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
-                                                              output_stream_cacc64* __restrict outStream0, // Cascade
+                                                              output_cascade<cacc64>* __restrict outStream0, // Cascade
                                                               output_stream<TT_OUT_DATA>* __restrict outStream1) {
     TT_DATA* __restrict inPtr = (TT_DATA*)inWindow0.data();
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
@@ -1839,7 +1842,7 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TP_SAT,
                                     TP_TWIDDLE_MODE>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
                                                               output_stream<TT_OUT_DATA>* __restrict outStream0,
-                                                              output_stream_cacc64* __restrict outStream1 // Cascade
+                                                              output_cascade<cacc64>* __restrict outStream1 // Cascade
                                                               ) {
     TT_DATA* __restrict inPtr = &inBuff[0];
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
@@ -1886,7 +1889,7 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TP_SAT,
                                     TP_TWIDDLE_MODE>::fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
                                                               output_stream<TT_OUT_DATA>* __restrict outStream0,
-                                                              output_stream_cacc64* __restrict outStream1 // Cascade
+                                                              output_cascade<cacc64>* __restrict outStream1 // Cascade
                                                               ) {
     TT_DATA* __restrict inPtr = (TT_DATA*)inWindow0.data();
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];

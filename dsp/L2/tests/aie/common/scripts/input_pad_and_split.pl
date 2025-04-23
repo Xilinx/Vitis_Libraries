@@ -88,23 +88,23 @@ if ( $file eq "" ) {
 }
 
 
-# Define properties for each data type  
-my %type_properties = (  
-    'int8'      => { numParts => 1, partSize => 8  },  
-    'int16'     => { numParts => 1, partSize => 16 },  
-    'int32'     => { numParts => 1, partSize => 32 },  
-    'float'     => { numParts => 1, partSize => 32 },  
-    'bfloat16'  => { numParts => 1, partSize => 16 },  
-    'cint8'     => { numParts => 2, partSize => 8  },  
-    'cint16'    => { numParts => 2, partSize => 16 },  
-    'cint32'    => { numParts => 2, partSize => 32 },  
-    'cfloat'    => { numParts => 2, partSize => 32 },  
-    'cbfloat16' => { numParts => 2, partSize => 16 },  
-); 
+# Define properties for each data type
+my %type_properties = (
+    'int8'      => { numParts => 1, partSize => 8  },
+    'int16'     => { numParts => 1, partSize => 16 },
+    'int32'     => { numParts => 1, partSize => 32 },
+    'float'     => { numParts => 1, partSize => 32 },
+    'bfloat16'  => { numParts => 1, partSize => 16 },
+    'cint8'     => { numParts => 2, partSize => 8  },
+    'cint16'    => { numParts => 2, partSize => 16 },
+    'cint32'    => { numParts => 2, partSize => 32 },
+    'cfloat'    => { numParts => 2, partSize => 32 },
+    'cbfloat16' => { numParts => 2, partSize => 16 },
+);
 
 
-# Get properties for the data type  
-my $partsPerSample = $type_properties{$type}{numParts};  
+# Get properties for the data type
+my $partsPerSample = $type_properties{$type}{numParts};
 my $sampleSizeBits = $type_properties{$type}{numParts} * $type_properties{$type}{partSize};
 
 my $samplesPerLine = $plioWidth / $sampleSizeBits;
@@ -118,7 +118,7 @@ my $partsPerLine = $plioWidth / $type_properties{$type}{partSize};
 my $linesPerSample = 1;
 if ($plioWidth < $sampleSizeBits) {
   $linesPerSample = 2;
-} 
+}
 my $data_type_size_bytes = $sampleSizeBits / 8;
 my $dual_gran;
 
@@ -133,11 +133,11 @@ if ( $type eq "cint16") {
     $kSamplesInVectData = 256 / 8 / 4;
 
 } elsif ( $type eq "cint32") {
-    if ($variant eq 2) {
+    if ($variant eq 1) {
+        $kSamplesInVectData = 256 / 8 / 8;
+    } else {
         # QoR improvement when using 512 bit vectors for cint32 on AIE-ML
         $kSamplesInVectData = 8;
-    } else {
-        $kSamplesInVectData = 256 / 8 / 8;
     }
 } elsif ( $type eq "cfloat") {
     $kSamplesInVectData = 256 / 8 / 8;
@@ -178,16 +178,16 @@ my @subFilesFinalH;
 # This is set up for data types of 16 bits and less.
 # This is required since casc splits input stream on a sample-by-sample basis.
 
-# Read the file into an array  
-# Open the input file  
+# Read the file into an array
+# Open the input file
 open(fileH, "<", $file)
     or die "cannot open $file : $!";
 # Create array of data parts
 my @dataParts;
-while (my $line = <fileH>) {  
-    chomp $line;  
-    push @dataParts, split ' ', $line;  
-} 
+while (my $line = <fileH>) {
+    chomp $line;
+    push @dataParts, split ' ', $line;
+}
 
 
 ###################### PAD WITH ZEROS ###################
@@ -198,7 +198,7 @@ my $currentFrame = 1;
 my $part;
 my $partsToPad = $partsPerSample*(($paddedWindowSize/$numFrames)-$pointSize);
 
-for (my $i = 0; $i < @dataParts; $i++) {  
+for (my $i = 0; $i < @dataParts; $i++) {
     $part = $dataParts[$i];
     push @paddedDataParts, $dataParts[$i];
     # End of a frame once paddedPointSize lines has been reached
@@ -206,8 +206,8 @@ for (my $i = 0; $i < @dataParts; $i++) {
         for(my $j = 0; $j < $partsToPad; $j++){
             push @paddedDataParts, "0";
         }
-        $currentFrame++;   
-    }    
+        $currentFrame++;
+    }
     $partNum++;
 }
 
@@ -218,51 +218,51 @@ for (my $i = 0; $i < @dataParts; $i++) {
 my @subArrays;
 for my $cascIdx (@cascRange){
     my $fileIdx = $cascIdx;
-    $subArrays[$fileIdx] = [];      
+    $subArrays[$fileIdx] = [];
 }
 my $cascIdx = 0;
 $partNum = 0;
-for (my $i = 0; $i < @paddedDataParts; $i++) {  
-    my $part = $paddedDataParts[$i];        
-    my $fileIdx = $cascIdx;  
-    
-    push @{$subArrays[$fileIdx]}, $part;  
+for (my $i = 0; $i < @paddedDataParts; $i++) {
+    my $part = $paddedDataParts[$i];
+    my $fileIdx = $cascIdx;
 
-    if ($partNum % $partsPerSample == ($partsPerSample - 1)) { 
-        $cascIdx = ($cascIdx + 1) % $cascLen;  
-    }  
-    $partNum++;   
-}  
-# Assuming @subArrays is an array of array references  
-for my $cascIdx (@cascRange) {  
-    my $fileIdx = $cascIdx;  
+    push @{$subArrays[$fileIdx]}, $part;
+
+    if ($partNum % $partsPerSample == ($partsPerSample - 1)) {
+        $cascIdx = ($cascIdx + 1) % $cascLen;
+    }
+    $partNum++;
+}
+# Assuming @subArrays is an array of array references
+for my $cascIdx (@cascRange) {
+    my $fileIdx = $cascIdx;
     $subFiles[$fileIdx] = "${newFileDir}${newFileName}_0_$cascIdx${newFileExt}";
-    print "Writing to $subFiles[$fileIdx]\n";  
-    
-    open(my $subFileH, ">", $subFiles[$fileIdx]) or die "Cannot open $subFiles[$fileIdx]: $!";  
-    
-    my @cascParts = @{$subArrays[$fileIdx]};  
-    
-    # Convert parts back into lines and print directly to the file  
-    for (my $i = 0; $i < @cascParts; $i += $partsPerLine) {  
-        my $line = join(' ', @cascParts[$i .. $i + $partsPerLine - 1]) . " \n";  
-        print $subFileH $line;  
-    }  
-    
-    close($subFileH) or die "Cannot close $subFiles[$fileIdx]: $!";  
-} 
+    print "Writing to $subFiles[$fileIdx]\n";
+
+    open(my $subFileH, ">", $subFiles[$fileIdx]) or die "Cannot open $subFiles[$fileIdx]: $!";
+
+    my @cascParts = @{$subArrays[$fileIdx]};
+
+    # Convert parts back into lines and print directly to the file
+    for (my $i = 0; $i < @cascParts; $i += $partsPerLine) {
+        my $line = join(' ', @cascParts[$i .. $i + $partsPerLine - 1]) . " \n";
+        print $subFileH $line;
+    }
+
+    close($subFileH) or die "Cannot close $subFiles[$fileIdx]: $!";
+}
 
 # When input is a vector to be split over cascade, it is cloned for each ssr
 # print "ssr is $ssr\n";
 if ($ssr > 1) {
-    foreach my $subFile (@subFiles) {  
-        for (my $i = 1; $i < $ssr; $i++) {  
+    foreach my $subFile (@subFiles) {
+        for (my $i = 1; $i < $ssr; $i++) {
             # print "ssr is $i\n";
-            my $cloneFile = $subFile;  
-            $cloneFile =~ s/_0_/_${i}_/; # replace "_0." with "_$i."  
-            system("cp $subFile $cloneFile"); # clone the file  
-        }  
-    }  
+            my $cloneFile = $subFile;
+            $cloneFile =~ s/_0_/_${i}_/; # replace "_0." with "_$i."
+            system("cp $subFile $cloneFile"); # clone the file
+        }
+    }
 }
 
 close(fileH)

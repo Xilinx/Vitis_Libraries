@@ -19,12 +19,12 @@
             "updater": {
                 "file": "matrix_vector_mul.py",
                 "function": "update_AIE_VARIANT",
-                "args": [                ]
+                "args": []
             },
             "validator": {
                 "file": "matrix_vector_mul.py",
                 "function": "validate_AIE_VARIANT",
-                "args": [                ]
+                "args": []
             }
         },
         {
@@ -42,12 +42,12 @@
             "updater": {
                 "file": "matrix_vector_mul.py",
                 "function": "update_TT_DATA_A",
-                "args": [                ]
+                "args": []
             },
             "validator": {
                 "file": "matrix_vector_mul.py",
                 "function": "validate_TT_DATA_A",
-                "args": [                ]
+                "args": []
             }
         },
         {
@@ -78,6 +78,42 @@
             }
         },
         {
+            "name": "TP_USE_MATRIX_RELOAD",
+            "type": "uint",
+            "description": "describes if matrix A is reloadable at runtime via RTP port",
+            "minimum": 1,
+            "updater": {
+                "file": "matrix_vector_mul.py",
+                "function": "update_TP_USE_MATRIX_RELOAD",
+                "args": []
+            },
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TP_USE_MATRIX_RELOAD",
+                "args": []
+            }
+        },
+        {
+            "name": "TP_API",
+            "type": "uint",
+            "description": "describes if matrix A is reloadable at runtime via RTP port",
+            "minimum": 1,
+            "updater": {
+                "file": "matrix_vector_mul.py",
+                "function": "update_TP_API",
+                "args": [
+                    "TP_USE_MATRIX_RELOAD"
+                ]
+            },
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TP_API",
+                "args": [
+                    "TP_USE_MATRIX_RELOAD"
+                ]
+            }
+        },
+        {
             "name": "TP_DIM_A",
             "type": "uint",
             "description": "is an unsigned integer which describes the number of elements along the unique dimension (rows) of Matrix A.",
@@ -87,7 +123,8 @@
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA_A",
-                    "TT_DATA_B"                ]
+                    "TT_DATA_B"
+                ]
             },
             "validator": {
                 "file": "matrix_vector_mul.py",
@@ -95,7 +132,8 @@
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA_A",
-                    "TT_DATA_B"                ]
+                    "TT_DATA_B"
+                ]
             }
         },
         {
@@ -108,8 +146,9 @@
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA_A",
-                    "TT_DATA_B",  
-                    "TP_DIM_A"  
+                    "TT_DATA_B",
+                    "TP_DIM_A",
+                    "TP_API"
                 ]
             },
             "validator": {
@@ -118,8 +157,9 @@
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA_A",
-                    "TT_DATA_B",  
-                    "TP_DIM_A"  
+                    "TT_DATA_B",
+                    "TP_DIM_A",
+                    "TP_API"
                 ]
             }
         },
@@ -134,9 +174,10 @@
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA_A",
-                    "TT_DATA_B",  
+                    "TT_DATA_B",
                     "TP_DIM_A",
-                    "TP_DIM_B"  
+                    "TP_DIM_B",
+                    "TP_API"
                 ]
             },
             "validator": {
@@ -145,9 +186,10 @@
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA_A",
-                    "TT_DATA_B",  
+                    "TT_DATA_B",
                     "TP_DIM_A",
-                    "TP_DIM_B"  
+                    "TP_DIM_B",
+                    "TP_API"
                 ]
             }
         },
@@ -159,13 +201,23 @@
             "updater": {
                 "file": "matrix_vector_mul.py",
                 "function": "update_TP_SSR",
-                "args": [ "AIE_VARIANT", "TT_DATA_A", "TP_DIM_A", "TP_DIM_B", "TP_NUM_FRAMES"
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_A",
+                    "TP_DIM_A",
+                    "TP_DIM_B",
+                    "TP_NUM_FRAMES"
                 ]
             },
             "validator": {
                 "file": "matrix_vector_mul.py",
                 "function": "validate_TP_SSR",
-                "args": [ "AIE_VARIANT", "TT_DATA_A", "TP_DIM_A", "TP_DIM_B", "TP_NUM_FRAMES"
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_A",
+                    "TP_DIM_A",
+                    "TP_DIM_B",
+                    "TP_NUM_FRAMES"
                 ]
             }
         },
@@ -177,13 +229,72 @@
             "updater": {
                 "file": "matrix_vector_mul.py",
                 "function": "update_TP_CASC_LEN",
-                "args": [ "AIE_VARIANT", "TT_DATA_A", "TP_DIM_A", "TP_DIM_B", "TP_NUM_FRAMES", "TP_SSR"
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TP_DIM_A",
+                    "TP_DIM_B",
+                    "TP_NUM_FRAMES",
+                    "TP_SSR",
+                    "TP_API"
                 ]
             },
             "validator": {
                 "file": "matrix_vector_mul.py",
                 "function": "validate_TP_CASC_LEN",
-                "args": [ "AIE_VARIANT", "TT_DATA_A", "TP_DIM_A", "TP_DIM_B", "TP_NUM_FRAMES", "TP_SSR"
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TP_DIM_A",
+                    "TP_DIM_B",
+                    "TP_DIM_B",
+                    "TP_NUM_FRAMES",
+                    "TP_SSR",
+                    "TP_API"
+                ]
+            }
+        },
+        {
+            "name": "TP_DUAL_IP",
+            "type": "uint",
+            "description": "describes if matrix A is reloadable at runtime via RTP port",
+            "updater": {
+                "file": "matrix_vector_mul.py",
+                "function": "update_TP_DUAL_IP",
+                "args": [
+                    "AIE_VARIANT",
+                    "TP_API"
+                ]
+            },
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TP_DUAL_IP",
+                "args": [
+                    "AIE_VARIANT",
+                    "TP_API"
+                ]
+            }
+        },
+        {
+            "name": "TP_NUM_OUTPUTS",
+            "type": "uint",
+            "description": "describes if matrix A is reloadable at runtime via RTP port",
+            "updater": {
+                "file": "matrix_vector_mul.py",
+                "function": "update_TP_NUM_OUTPUTS",
+                "args": [
+                    "AIE_VARIANT",
+                    "TP_API"
+                ]
+            },
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TP_NUM_OUTPUTS",
+                "args": [
+                    "AIE_VARIANT",
+                    "TP_API"
                 ]
             }
         },
@@ -196,7 +307,8 @@
                 "function": "update_TP_DIM_A_LEADING",
                 "args": [
                     "TP_NUM_FRAMES",
-                    "TT_DATA_A"
+                    "TT_DATA_A",
+                    "TP_USE_MATRIX_RELOAD"
                 ]
             },
             "validator": {
@@ -204,7 +316,8 @@
                 "function": "validate_TP_DIM_A_LEADING",
                 "args": [
                     "TP_NUM_FRAMES",
-                    "TT_DATA_A"
+                    "TT_DATA_A",
+                    "TP_USE_MATRIX_RELOAD"
                 ]
             }
         },
@@ -218,6 +331,7 @@
                 "file": "matrix_vector_mul.py",
                 "function": "update_TP_SHIFT",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A"
                 ]
             },
@@ -225,6 +339,7 @@
                 "file": "matrix_vector_mul.py",
                 "function": "validate_TP_SHIFT",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A"
                 ]
             }

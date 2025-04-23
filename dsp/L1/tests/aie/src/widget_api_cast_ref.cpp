@@ -657,7 +657,7 @@ void widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2,
 // Widget API Cast - Casc/Stream input 1 window output
 template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
 void widget_api_cast_ref<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>::
-    transferData(input_stream<cacc64>* inStream0,
+    transferData(input_cascade<cacc64>* inStream0,
                  input_stream<TT_DATA>* inStream1,
                  output_buffer<TT_DATA>& outWindow0) {
     TT_DATA d_in, d_in2;
@@ -718,7 +718,7 @@ void widget_api_cast_ref<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE
 template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
 void widget_api_cast_ref<TT_DATA, kStreamCascAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>::
     transferData(input_stream<TT_DATA>* inStream0,
-                 input_stream<cacc64>* inStream1,
+                 input_cascade<cacc64>* inStream1,
                  output_buffer<TT_DATA>& outWindow0) {
     TT_DATA d_in, d_in2;
     TT_DATA* outPtr0 = outWindow0.data();
@@ -778,7 +778,7 @@ void widget_api_cast_ref<TT_DATA, kStreamCascAPI, kWindowAPI, 2, TP_WINDOW_VSIZE
 template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
 void widget_api_cast_ref<TT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>::
     transferData(input_buffer<TT_DATA>& inWindow0,
-                 output_stream<cacc64>* outStream0,
+                 output_cascade<cacc64>* outStream0,
                  output_stream<TT_DATA>* outStream1) {
     constexpr unsigned int kCascadeWidth = 4;                        // samples.
     constexpr unsigned int kStreamWidth = 128 / 8 / sizeof(TT_DATA); // samples.
@@ -849,7 +849,7 @@ template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTER
 void widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>::
     transferData(input_buffer<TT_DATA>& inWindow0,
                  output_stream<TT_DATA>* outStream0,
-                 output_stream<cacc64>* outStream1) {
+                 output_cascade<cacc64>* outStream1) {
     constexpr unsigned int kCascadeWidth = 4;                        // samples.
     constexpr unsigned int kStreamWidth = 128 / 8 / sizeof(TT_DATA); // samples.
     using accVect_t = ::aie::accum<cacc64, kCascadeWidth>;

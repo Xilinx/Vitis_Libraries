@@ -97,13 +97,13 @@ struct T_inputIF {};
 template <typename T_D, typename T_T>
 struct T_inputIF<CASC_IN_FALSE, T_D, T_T> {
     T_D* __restrict inWindow;
-    input_stream<accType_t<T_D, T_T> >* inCascade = {};
+    input_cascade<accType_t<T_D, T_T> >* inCascade = {};
 };
 // CASC_IN_TRUE
 template <typename T_D, typename T_T>
 struct T_inputIF<CASC_IN_TRUE, T_D, T_T> {
     T_D* __restrict inWindow;
-    input_stream<accType_t<T_D, T_T> >* inCascade;
+    input_cascade<accType_t<T_D, T_T> >* inCascade;
 };
 // IF output type ------------------------------------
 template <bool T_CASC_OUT, typename T_D, typename T_T>
@@ -112,13 +112,13 @@ struct T_outputIF {};
 template <typename T_D, typename T_T>
 struct T_outputIF<CASC_OUT_FALSE, T_D, T_T> {
     T_D* __restrict outWindow;
-    output_stream<accType_t<T_D, T_T> >* outCascade{};
+    output_cascade<accType_t<T_D, T_T> >* outCascade{};
 };
 // CASC_OUT_TRUE
 template <typename T_D, typename T_T>
 struct T_outputIF<CASC_OUT_TRUE, T_D, T_T> {
     T_D* __restrict outWindow = {};
-    output_stream<accType_t<T_D, T_T> >* outCascade;
+    output_cascade<accType_t<T_D, T_T> >* outCascade;
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -344,7 +344,7 @@ class dft<TT_DATA,
     }
     // DFT
     void dftMain(input_buffer<TT_DATA>& __restrict inWindow,
-                 output_stream<accType_t<T_outDataType, TT_TWIDDLE> >* outCascade);
+                 output_cascade<accType_t<T_outDataType, TT_TWIDDLE> >* outCascade);
 };
 
 // Partially specialized classes for cascaded interface (middle kernels in cascade), single input, no reload
@@ -420,8 +420,8 @@ class dft<TT_DATA,
     }
     // DFT
     void dftMain(input_buffer<TT_DATA>& __restrict inWindow,
-                 input_stream<accType_t<T_outDataType, TT_TWIDDLE> >* inCascade,
-                 output_stream<accType_t<T_outDataType, TT_TWIDDLE> >* outCascade);
+                 input_cascade<accType_t<T_outDataType, TT_TWIDDLE> >* inCascade,
+                 output_cascade<accType_t<T_outDataType, TT_TWIDDLE> >* outCascade);
 };
 
 // For multiple kernels, final kernel used input cascade output window
@@ -495,7 +495,7 @@ class dft<TT_DATA,
     }
     // DFT
     void dftMain(input_buffer<TT_DATA>& __restrict inWindow,
-                 input_stream<accType_t<T_outDataType, TT_TWIDDLE> >* inCascade,
+                 input_cascade<accType_t<T_outDataType, TT_TWIDDLE> >* inCascade,
                  output_buffer<T_outDataType>& __restrict outWindow);
 };
 }

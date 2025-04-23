@@ -32,7 +32,7 @@ The fft_window supports AIE and AIE-ML devices with the following exception(s):
 Supported Types
 ===============
 
-The data type to the FFT window is controlled by the ``TT_DATA`` template parameter . This can take one of three choices: cint16, cint32, or cfloat (AI Engine (AIE) only, not AIE-ML). This selection applies to both input data and output data.
+The data type to the FFT window is controlled by the ``TT_DATA`` template parameter . This can take one of three choices: cint16, cint32, or cfloat (AIE only, not AIE-ML). This selection applies to both input data and output data.
 
 The ``TT_COEFF`` template parameter  can take one of three values, int16, int32, or cfloat, but currently, this value is forced by the choice of ``TT_DATA``, so ``TT_COEFF`` must be set to:
 
@@ -67,7 +67,7 @@ The FFT Window supports dynamic (runtime controlled) point sizes. This feature i
 
 When set to 0 (static point size), all data will be expected in frames of ``TP_POINT_SIZE`` data samples, though multiple frames might be input together using ``TP_WINDOW_VSIZE`` which is an integer multiple of ``TP_POINT_SIZE``.
 
-When set to 1 (dynamic point size), each _window_ must be preceded by a 256 bit header to describe the runtime parameters of that window. ``TP_WINDOW_VSIZE`` describes the number of samples in a window so it does not include this header.
+When set to 1 (dynamic point size), each _window_ must be preceded by a header to describe the runtime parameters of that window. ``TP_WINDOW_VSIZE`` describes the number of samples in a window so it does not include this header. The size of the header is 256 bits for AIE and AIE-ML, 512 bits for AIE-MLv2.
 
 The format of the header is described in the following table. When ``TP_DYN_PT_SIZE = 1``, ``TP_POINT_SIZE`` describes the maximum point size which can be input.
 
@@ -76,26 +76,27 @@ The format of the header is described in the following table. When ``TP_DYN_PT_S
 .. table:: Header Format
    :align: center
 
-   +-------------------------------+----------------------+---------------------------------------------------------------------------------+
-   |                               | Location (TT_DATA    |                                                                                 |
-   | Field name                    | sample)              | Description                                                                     |
-   +===============================+======================+=================================================================================+
-   |                               |                      |                                                                                 |
-   | Direction                     | 0 (real part)        | 0 (inverse FFT) 1 (forward FFT)                                                 |
-   +-------------------------------+----------------------+---------------------------------------------------------------------------------+
-   |                               |                      |                                                                                 |
-   | Point size (radix2 stages)    | 1 (real part)        | Point size described as a power of 2. E.g. 5 described a   point size of 32.    |
-   +-------------------------------+----------------------+---------------------------------------------------------------------------------+
-   |                               |                      |                                                                                 |
-   | Reserved                      | 2  OR                | reserved                                                                        |
-   |                               | 6 for TT_DATA=cint16 |                                                                                 |
-   +-------------------------------+----------------------+---------------------------------------------------------------------------------+
-   |                               |                      |                                                                                 |
-   | Status (output only)          | 3 (real part)  OR    | 0 = legal point size, 1 = illegal point size                                    |
-   |                               | 7 for TT_DATA=cint16 |                                                                                 |
-   +-------------------------------+----------------------+---------------------------------------------------------------------------------+
-
-The locations are set to suit the ``TT_DATA`` type. That is, for ``TT_DATA=cint16``, direction is described in the first cint16 (real part) of the 256 bit header and point size is described in the real part of the second cint16 value. Similarly, for ``TT_DATA=cint32``, the real part of the first cint32 value in the header holds the direction field and the real part of second cint32 value holds the Point size (radix2) field.
+   +-------------------------------+-----------------------------------+---------------------------------------------------------------------------------+
+   |                               | Location (TT_DATA                 |                                                                                 |
+   | Field name                    | sample)                           | Description                                                                     |
+   +===============================+===================================+=================================================================================+
+   |                               |                                   |                                                                                 |
+   | Direction                     | 0 (real part)                     | 0 (inverse FFT) 1 (forward FFT)                                                 |
+   +-------------------------------+-----------------------------------+---------------------------------------------------------------------------------+
+   |                               |                                   |                                                                                 |
+   | Point size (radix2 stages)    | 1 (real part)                     | Point size described as a power of 2. E.g. 5 described a   point size of 32.    |
+   +-------------------------------+-----------------------------------+---------------------------------------------------------------------------------+
+   |                               |                                   |                                                                                 |
+   | Reserved                      | 2 to (Last position - 1)          | reserved                                                                        |
+   +-------------------------------+-----------------------------------+---------------------------------------------------------------------------------+
+   | Status (output only)          | Real part of last position        | 0 = legal point size, 1 = illegal point size                                    |
+   |                               | (see note 1)                      |                                                                                 |
+   +-------------------------------+-----------------------------------+---------------------------------------------------------------------------------+
+   | Note 1: The last position depends on TT_DATA and the variant of the AI Engine. On AIE and AIE-ML the last position is 3 for TT_DATA = cfloat or     |
+   | cint32 or 7 when TT_DATA = cint16. On AIE-MLv2 the last positions is 7 for TT_DATA = cfloat or cint32 or 15 when TT_DATA = cint16.                  |
+   +-------------------------------+---------------------------+-----------------------------------------------------------------------------------------+
+   
+The locations are set to suit the ``TT_DATA`` type. That is, for ``TT_DATA=cint16``, direction is described in the first cint16 (real part) of the header and point size is described in the real part of the second cint16 value. Similarly, for ``TT_DATA=cint32``, the real part of the first cint32 value in the header holds the direction field and the real part of second cint32 value holds the Point size (radix2) field.
 
 For ``TT_DATA=cfloat``, the values in the header are expected as cfloat and are value-cast (not reinterpret-cast) to integers internally. The output window also has a header. This is copied from the input header except for the status field, which is inserted. The status field is ignored on input. If an illegal point size is entered, the output header will have this field set to a non-zero value and the remainder of the output window is undefined.
 
@@ -104,7 +105,7 @@ For dynamic operation (``TP_DYN_PT_SIZE = 1``), the window will operate on frame
 Super Sample Rate Operation
 ---------------------------
 
-While the term Super Sample Rate strictly means the processing of more than one sample per clock cycle, in the AIE context, it is taken to mean an implementation using parallel kernels to improve performance at the expense of additional resource use. In the FFT window, the SSR operation is controlled by the ``TP_SSR`` template parameter. This parameter is intended to improve performance and also allow support of point sizes beyond the limitations of a single tile.
+While the term Super Sample Rate strictly means the processing of more than one sample per clock cycle, in the AI Engine context, it is taken to mean an implementation using parallel kernels to improve performance at the expense of additional resource use. In the FFT window, the SSR operation is controlled by the ``TP_SSR`` template parameter. This parameter is intended to improve performance and also allow support of point sizes beyond the limitations of a single tile.
 
 The ``TP_SSR`` parameter allows a trade of performance for resource use in the form of tiles used. The tile utilization is quite simply the same as the value of ``TP_SSR``.
 

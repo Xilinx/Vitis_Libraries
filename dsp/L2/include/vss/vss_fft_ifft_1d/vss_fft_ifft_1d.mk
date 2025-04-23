@@ -21,18 +21,24 @@ PART       = xcvc1902-vsva2197-2MP-e-S
 VSSCFG     = ${VSS}_connectivity.cfg
 FRONT_XO   = ifft_front_transpose_wrapper/ifft_front_transpose_wrapper.xo
 MID_XO     = ifft_transpose_wrapper/ifft_transpose_wrapper.xo
-BACK_XO    = ifft_back_transpose_wrapper/ifft_back_transpose_wrapper.xo
-XO         = ${FRONT_XO} ${MID_XO} ${BACK_XO}
-PARAMS_CFG = ${VSS}_params.cfg
+BACK_XO_GEN    = ifft_back_transpose_wrapper/ifft_back_transpose_wrapper.xo
+BACK_XO_SPEC    = back_transpose_simple_wrapper/back_transpose_simple_wrapper.xo
+PARAMS_CFG ?= ${VSS}_params.cfg
 HPARAMS    = hls_params.cfg
 CFGFILE    = hls_config.cfg
 AIE_PARAMS = aie_params.cfg
 AIE_HDR    = config.h
 LIBADF     = libadf.a
 VSSFILE    = ${VSS}/${VSS}.vss
+RTL_FFT_XO = fft_xo/parallel_fft.xo
+HLS_FFT_XO    = ssr_fft_wrapper/ssr_fft_wrapper.xo 
+HLS_FFT_XO_CFG   = ssr_fft_config.cfg
+AIE_TL           = aie.cpp
+
 
 FRONT_XO_CFG     = ifft_front_transpose_config.cfg
-BACK_XO_CFG      = ifft_back_transpose_config.cfg
+BACK_XO_GEN_CFG      = ifft_back_transpose_config.cfg
+BACK_XO_SPEC_CFG      = back_transpose_simple_config.cfg
 MID_XO_CFG       = ifft_transpose_config.cfg
 CONFIG_TMPL      = ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/hls_config.tmpl
 
@@ -55,23 +61,81 @@ DSPLIB_OPTS 	  := -I ${XILINX_VITIS}/aietools/include  \
                      --aie.Xpreproc=-DFRONT_OUTPUT_FILE=./data/output_front.txt \
                      --aie.Xpreproc=-DBACK_OUTPUT_FILE=./data/output_back.txt
 
-VITIS_PYTHON3 = LD_LIBRARY_PATH=$(XILINX_VITIS)/tps/lnx64/python-3.8.3/lib $(XILINX_VITIS)/tps/lnx64/python-3.8.3/bin/python3
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(XILINX_VITIS)/tps/lnx64/python-3.13.0/lib $(XILINX_VITIS)/tps/lnx64/python-3.13.0/bin/python3
 
 libadf: ${LIBADF}
 tb_config: ${AIE_HDR}
 aie_params: ${AIE_PARAMS}
 front_xo: ${FRONT_XO}
-back_xo: ${BACK_XO}
+back_xo_gen: ${BACK_XO_GEN}
+back_xo_spec: ${BACK_XO_SPEC}
 mid_xo: ${MID_XO}
 vss: ${VSSFILE}
 vsscfg: ${VSSCFG}
+hls_fft_xo: ${HLS_FFT_XO}
+rtl_fft_xo: ${RTL_FFT_XO}
 
-hls_freq = $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py $(HELPER_CUR_DIR) "freqhz" "top" $(PARAMS_CFG))
-${VSSFILE}: ${LIBADF} ${FRONT_XO} ${BACK_XO} ${MID_XO} ${VSSCFG}
-	v++ --link --mode vss --part $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py $(HELPER_CUR_DIR) "PART" "top" $(PARAMS_CFG)) --save-temps  --out_dir ${VSS} --config ${VSSCFG} ${LIBADF} ${FRONT_XO} ${BACK_XO} ${MID_XO}
+hls_freq := $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py ${HELPER_CUR_DIR} "freqhz" "top" ${PARAMS_CFG})
+SSR := $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py ${HELPER_CUR_DIR} "SSR" "APP_PARAMS" ${PARAMS_CFG})
+VSS_MODE := $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py ${HELPER_CUR_DIR} "VSS_MODE" "APP_PARAMS" ${PARAMS_CFG})
 
+
+ifeq ($(VSS_MODE), 1)
+AIE_TL = aie.cpp
+else
+AIE_TL = aie_front_only.cpp
+endif  
+
+ifeq ($(VSS_MODE), 2)
+ifeq ($(DATA_TYPE), cfloat)
+PL_FFT_XO = ${RTL_FFT_XO}
+else 
+PL_FFT_XO = ${HLS_FFT_XO}
+endif 
+endif
+
+.PHONY: meta_check
+
+meta_check: 
+#	create config.json file from cfg
+	$(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/include/vss/scripts/create_config_json.py ${HELPER_CUR_DIR} ${PARAMS_CFG}
+# call metadata checks 
+	$(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/meta/scripts/metadata_checker.py --ip vss_fft_ifft_1d
+
+ifeq ($(VSS_MODE), 1)
 ${VSSCFG}: ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d_con_gen.py
 	$(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d_con_gen.py  --ssr $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py $(HELPER_CUR_DIR) "SSR" "APP_PARAMS" $(PARAMS_CFG)) --cfg_file_name ${VSSCFG} --vss_unit ${VSS} --version 1 --freqhz ${hls_freq}
+
+${VSSFILE}: ${LIBADF} ${FRONT_XO} ${BACK_XO_GEN} ${MID_XO} ${VSSCFG}
+	echo $(HLS_FFT_XO) 
+	v++ --link --mode vss --part $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py $(HELPER_CUR_DIR) "PART" "top" $(PARAMS_CFG)) --save-temps  --out_dir ${VSS} --config ${VSSCFG} ${LIBADF} ${FRONT_XO} ${BACK_XO_GEN} ${MID_XO}
+endif
+
+ifeq ($(VSS_MODE), 2)
+ifeq ($(DATA_TYPE), cfloat)
+${RTL_FFT_XO}:
+	${XILINX_VIVADO}/bin/vivado -mode batch -source ${HELPER_ROOT_DIR}/L2/include/vss/scripts/xo_scripts/gen_xo.tcl -tclargs ./fft_xo/parallel_fft.xo parallel_fft hw_emu ${HELPER_ROOT_DIR} ${SSR} ${XILINX_VITIS}
+${VSSCFG}: ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d_hdl_con_gen.py
+	$(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d_hdl_con_gen.py  --ssr $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py $(HELPER_CUR_DIR) "SSR" "APP_PARAMS" $(PARAMS_CFG)) --cfg_file_name ${VSSCFG} --vss_unit ${VSS} --version 1 --freqhz ${hls_freq}
+${VSSFILE}: ${LIBADF} ${RTL_FFT_XO} ${BACK_XO_SPEC} ${VSSCFG}
+	v++ --link --mode vss --part $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py $(HELPER_CUR_DIR) "PART" "top" $(PARAMS_CFG)) --save-temps  --out_dir ${VSS} --config ${VSSCFG} ${LIBADF} ${RTL_FFT_XO} ${BACK_XO_SPEC}
+else
+${VSSCFG}: ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d_pl_biased_con_gen.py
+	$(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d_pl_biased_con_gen.py  --ssr $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py $(HELPER_CUR_DIR) "SSR" "APP_PARAMS" $(PARAMS_CFG)) --cfg_file_name ${VSSCFG} --vss_unit ${VSS} --version 1 --freqhz ${hls_freq}
+
+${VSSFILE}: ${LIBADF} ${HLS_FFT_XO} ${BACK_XO_SPEC} ${VSSCFG}
+	v++ --link --mode vss --part $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py $(HELPER_CUR_DIR) "PART" "top" $(PARAMS_CFG)) --save-temps  --out_dir ${VSS} --config ${VSSCFG} ${LIBADF} ${HLS_FFT_XO} ${BACK_XO_SPEC}
+endif
+endif
+
+ifeq ($(VSS_MODE), 3)
+${VSSCFG}: ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d_pl_hdl_con_gen.py
+	$(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d_hdl_con_gen.py  --ssr $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py $(HELPER_CUR_DIR) "SSR" "APP_PARAMS" $(PARAMS_CFG)) --cfg_file_name ${VSSCFG} --vss_unit ${VSS} --version 1 --freqhz ${hls_freq}
+
+${VSSFILE}: ${LIBADF} ${RTL_FFT_XO} ${BACK_XO_GEN} ${VSSCFG}
+	echo $(HLS_FFT_XO) 
+	v++ --link --mode vss --part $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py $(HELPER_CUR_DIR) "PART" "top" $(PARAMS_CFG)) --save-temps  --out_dir ${VSS} --config ${VSSCFG} ${LIBADF} ${RTL_FFT_XO} ${BACK_XO_GEN}
+endif
 
 ${AIE_HDR}: $(PARAMS_CFG) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/gen_tb_from_cfg.py 
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/gen_tb_from_cfg.py $(HELPER_ROOT_DIR) $(HELPER_CUR_DIR) ${PARAMS_CFG}
@@ -87,7 +151,7 @@ ${LIBADF}: ${AIE_HDR} ${AIE_PARAMS}
 	--config ${AIE_PARAMS} \
 	${DSPLIB_OPTS} \
     -o ${LIBADF} \
-    ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/aie.cpp ${HELPER_ROOT_DIR}/L1/src/aie/twiddle_rotator.cpp ${HELPER_ROOT_DIR}/L1/src/aie/fft_ifft_dit_1ch.cpp
+    ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/${AIE_TL} ${HELPER_ROOT_DIR}/L1/src/aie/twiddle_rotator.cpp ${HELPER_ROOT_DIR}/L1/src/aie/fft_ifft_dit_1ch.cpp
 
 ${FRONT_XO_CFG}: ${PARAMS_CFG} ${CONFIG_TMPL} $(HELPER_ROOT_DIR)/L2/include/vss/vss_fft_ifft_1d/create_hls_cfg.py
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/vss_fft_ifft_1d/create_hls_cfg.py $(HELPER_CUR_DIR) ${HELPER_ROOT_DIR} ifft_front_transpose  ${PARAMS_CFG}
@@ -95,17 +159,29 @@ ${FRONT_XO_CFG}: ${PARAMS_CFG} ${CONFIG_TMPL} $(HELPER_ROOT_DIR)/L2/include/vss/
 ${FRONT_XO}: ${FRONT_XO_CFG} ${HPARAMS} ${HELPER_ROOT_DIR}/L1/src/hw/ifft_front_transpose/ifft_front_transpose.cpp  ${HELPER_ROOT_DIR}/L1/src/hw/ifft_front_transpose/ifft_front_transpose.h  ${HELPER_ROOT_DIR}/L1/src/hw/ifft_front_transpose/ifft_front_transpose_class.h
 	v++ --compile --mode hls --config ${FRONT_XO_CFG} --config ${HPARAMS} --freqhz ${hls_freq} ${HELPER_ROOT_DIR}/L1/src/hw/ifft_front_transpose/ifft_front_transpose.cpp
 
-${BACK_XO_CFG}: ${PARAMS_CFG} ${CONFIG_TMPL} $(HELPER_ROOT_DIR)/L2/include/vss/vss_fft_ifft_1d/create_hls_cfg.py
+${BACK_XO_SPEC_CFG}: ${PARAMS_CFG} ${CONFIG_TMPL} $(HELPER_ROOT_DIR)/L2/include/vss/vss_fft_ifft_1d/create_hls_cfg.py
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/vss_fft_ifft_1d/create_hls_cfg.py $(HELPER_CUR_DIR) ${HELPER_ROOT_DIR} back_transpose_simple  ${PARAMS_CFG}
+
+${BACK_XO_SPEC}: ${BACK_XO_SPEC_CFG} ${HPARAMS} ${HELPER_ROOT_DIR}/L1/src/hw/back_transpose_simple/back_transpose_simple.cpp  ${HELPER_ROOT_DIR}/L1/src/hw/back_transpose_simple/back_transpose_simple.h  ${HELPER_ROOT_DIR}/L1/src/hw/back_transpose_simple/back_transpose_simple_class.h
+	v++ --compile --mode hls --config ${BACK_XO_SPEC_CFG} --config ${HPARAMS} --freqhz ${hls_freq} ${HELPER_ROOT_DIR}/L1/src/hw/back_transpose_simple/back_transpose_simple.cpp
+
+${BACK_XO_GEN_CFG}: ${PARAMS_CFG} ${CONFIG_TMPL} $(HELPER_ROOT_DIR)/L2/include/vss/vss_fft_ifft_1d/create_hls_cfg.py
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/vss_fft_ifft_1d/create_hls_cfg.py $(HELPER_CUR_DIR) ${HELPER_ROOT_DIR} ifft_back_transpose  ${PARAMS_CFG}
 
-${BACK_XO}: ${BACK_XO_CFG} ${HPARAMS} ${HELPER_ROOT_DIR}/L1/src/hw/ifft_back_transpose/ifft_back_transpose.cpp  ${HELPER_ROOT_DIR}/L1/src/hw/ifft_back_transpose/ifft_back_transpose.h  ${HELPER_ROOT_DIR}/L1/src/hw/ifft_back_transpose/ifft_back_transpose_class.h
-	v++ --compile --mode hls --config ${BACK_XO_CFG} --config ${HPARAMS} --freqhz ${hls_freq} ${HELPER_ROOT_DIR}/L1/src/hw/ifft_back_transpose/ifft_back_transpose.cpp
+${BACK_XO_GEN}: ${BACK_XO_GEN_CFG} ${HPARAMS} ${HELPER_ROOT_DIR}/L1/src/hw/ifft_back_transpose/ifft_back_transpose.cpp  ${HELPER_ROOT_DIR}/L1/src/hw/ifft_back_transpose/ifft_back_transpose.h  ${HELPER_ROOT_DIR}/L1/src/hw/ifft_back_transpose/ifft_back_transpose_class.h
+	v++ --compile --mode hls --config ${BACK_XO_GEN_CFG} --config ${HPARAMS} --freqhz ${hls_freq} ${HELPER_ROOT_DIR}/L1/src/hw/ifft_back_transpose/ifft_back_transpose.cpp
 
 ${MID_XO_CFG}: ${PARAMS_CFG} ${CONFIG_TMPL} $(HELPER_ROOT_DIR)/L2/include/vss/vss_fft_ifft_1d/create_hls_cfg.py
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/vss_fft_ifft_1d/create_hls_cfg.py $(HELPER_CUR_DIR) ${HELPER_ROOT_DIR} ifft_transpose  ${PARAMS_CFG}
 
 ${MID_XO}: ${MID_XO_CFG} ${HPARAMS} ${HELPER_ROOT_DIR}/L1/src/hw/ifft_transpose/ifft_transpose.cpp  ${HELPER_ROOT_DIR}/L1/src/hw/ifft_transpose/ifft_transpose.h  ${HELPER_ROOT_DIR}/L1/src/hw/ifft_transpose/ifft_transpose_class.h
 	v++ --compile --mode hls --config ${MID_XO_CFG} --config ${HPARAMS} --freqhz ${hls_freq} ${HELPER_ROOT_DIR}/L1/src/hw/ifft_transpose/ifft_transpose.cpp
+
+${HLS_FFT_XO_CFG}: ${PARAMS_CFG} ${CONFIG_TMPL} $(HELPER_ROOT_DIR)/L2/include/vss/vss_fft_ifft_1d/create_hls_cfg.py
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/vss_fft_ifft_1d/create_hls_cfg.py $(HELPER_CUR_DIR) ${HELPER_ROOT_DIR} ssr_fft ${PARAMS_CFG} ssr_fft_config.tmpl
+
+${HLS_FFT_XO}: ${HLS_FFT_XO_CFG} ${HPARAMS} ${HELPER_ROOT_DIR}/L1/src/hw/ssr_fft/ssr_fft.cpp ${HELPER_ROOT_DIR}/L1/src/hw/ssr_fft/ssr_fft.h
+	v++ --compile --mode hls --config ${HLS_FFT_XO_CFG} --config ${HPARAMS} --freqhz ${hls_freq} ${HELPER_ROOT_DIR}/L1/src/hw/ssr_fft/ssr_fft.cpp
 
 help:
 	echo "Makefile Usage:"
@@ -117,4 +193,4 @@ help:
 	echo ""
 
 clean:
-	rm -rf .crashReporter* .Xil _x ${VSS} *.log *summary ${HPARAMS} ${VSSCFG} ${CFGFILE} ${LIBADF} ${FRONT_XO} ${BACK_XO} ${MID_XO} ${AIE_PARAMS} ${CUR_DIR}/Work ${AIE_HDR} ${FRONT_XO_CFG} ${BACK_XO_CFG} ${MID_XO_CFG} ifft_back_transpose_wrapper ifft_front_transpose_wrapper ifft_transpose_wrapper sol.db map_report.csv
+	rm -rf .crashReporter* .Xil _x ${VSS} *.log *summary ${HPARAMS} ${VSSCFG} ${CFGFILE} ${LIBADF} ${FRONT_XO} ${BACK_XO_GEN} ${MID_XO} ${AIE_PARAMS} ${CUR_DIR}/Work ${AIE_HDR} ${FRONT_XO_CFG} ${BACK_XO_GEN_CFG} ${MID_XO_CFG} back_transpose_simple_wrapper ifft_front_transpose_wrapper ifft_transpose_wrapper sol.db map_report.csv

@@ -636,8 +636,8 @@ template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_
 INLINE_DECL void readStreamIn(input_stream<TT_DATA>* __restrict inStream0,
                               input_stream<TT_DATA>* __restrict inStream1,
                               TT_DATA* inBuff) {
-    constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
-    constexpr unsigned int kDataReadSize = 32;
+    constexpr int TP_HEADER_BYTES = __ALIGN_BYTE_SIZE__ * TP_DYN_PT_SIZE;
+    constexpr unsigned int kDataReadSize = __ALIGN_BYTE_SIZE__;
     constexpr int kSamplesIn128b = 128 / 8 / sizeof(TT_DATA);
     using t128VectorType = ::aie::vector<TT_DATA, kSamplesIn128b>;
     using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn128b * 2>;
@@ -673,9 +673,9 @@ INLINE_DECL void readStreamIn(input_stream<TT_DATA>* __restrict inStream0,
 // overload variant of above, for single stream in - yes this is an s2mm.
 template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_VSIZE>
 INLINE_DECL void readStreamIn(input_stream<TT_DATA>* __restrict inStream0, TT_DATA* inBuff) {
-    constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
-    constexpr unsigned int kDataReadSize = 32;
-    constexpr int kSamplesIn256b = 256 / 8 / sizeof(TT_DATA);
+    constexpr int TP_HEADER_BYTES = __ALIGN_BYTE_SIZE__ * TP_DYN_PT_SIZE;
+    constexpr unsigned int kDataReadSize = __ALIGN_BYTE_SIZE__;
+    constexpr int kSamplesIn256b = __ALIGN_BYTE_SIZE__ / sizeof(TT_DATA);
     using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn256b>;
     t256VectorType readVal1;
     t256VectorType* out256Ptr0 = (t256VectorType*)&inBuff[0];
@@ -694,10 +694,10 @@ INLINE_DECL void readStreamIn(input_stream<TT_DATA>* __restrict inStream0, TT_DA
 // read casc/stream, write window/buffer
 
 template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_VSIZE>
-INLINE_DECL void readCascStreamIn(input_stream<cacc64>* __restrict inStream0,
+INLINE_DECL void readCascStreamIn(input_cascade<cacc64>* __restrict inStream0, // input_cascade generates a warning
                                   input_stream<TT_DATA>* __restrict inStream1,
                                   TT_DATA* inBuff) {
-    constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
+    constexpr int TP_HEADER_BYTES = __ALIGN_BYTE_SIZE__ * TP_DYN_PT_SIZE;
     constexpr unsigned int kDataReadSize = 32;
     constexpr int kSamplesIn256b = 256 / 8 / sizeof(TT_DATA);
     constexpr int kCascVWidth = fnFFTCascVWidth<TT_DATA>();
@@ -705,7 +705,7 @@ INLINE_DECL void readCascStreamIn(input_stream<cacc64>* __restrict inStream0,
     using t512VectorType = ::aie::vector<TT_DATA, kSamplesIn256b * 2>;
     using accTag = typename tFFTAccBaseType<TT_DATA>::type;
     using accVect_t = ::aie::accum<accTag, kCascVWidth>;
-    input_stream<accTag>* __restrict inCasc0 = (input_stream<accTag>*)inStream0;
+    input_cascade<accTag>* __restrict inCasc0 = (input_cascade<accTag>*)inStream0;
     accVect_t acc;
     t256VectorType readVal1, readVal1a, readVal1b;
     t256VectorType readVal2;
@@ -748,9 +748,9 @@ INLINE_DECL void readCascStreamIn(input_stream<cacc64>* __restrict inStream0,
 // read stream/Casc, write window/buffer
 template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_VSIZE>
 INLINE_DECL void readStreamCascIn(input_stream<TT_DATA>* __restrict inStream0,
-                                  input_stream<cacc64>* __restrict inStream1,
+                                  input_cascade<cacc64>* __restrict inStream1, // input_cascade generates a warning
                                   TT_DATA* inBuff) {
-    constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
+    constexpr int TP_HEADER_BYTES = __ALIGN_BYTE_SIZE__ * TP_DYN_PT_SIZE;
     constexpr unsigned int kDataReadSize = 32;
     constexpr int kSamplesIn256b = 256 / 8 / sizeof(TT_DATA);
     constexpr int kCascVWidth = fnFFTCascVWidth<TT_DATA>();
@@ -758,7 +758,7 @@ INLINE_DECL void readStreamCascIn(input_stream<TT_DATA>* __restrict inStream0,
     using t512VectorType = ::aie::vector<TT_DATA, kSamplesIn256b * 2>;
     using accTag = typename tFFTAccBaseType<TT_DATA>::type;
     using accVect_t = ::aie::accum<accTag, kCascVWidth>;
-    input_stream<accTag>* __restrict inCasc1 = (input_stream<accTag>*)inStream1;
+    input_cascade<accTag>* __restrict inCasc1 = (input_cascade<accTag>*)inStream1;
     accVect_t acc;
     t256VectorType readVal1, readVal1a, readVal1b;
     t256VectorType readVal2;
@@ -801,7 +801,7 @@ template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_
 INLINE_DECL void writeStreamOut(output_stream<TT_DATA>* __restrict outStream0,
                                 output_stream<TT_DATA>* __restrict outStream1,
                                 TT_DATA* outBuff) {
-    constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
+    constexpr int TP_HEADER_BYTES = __ALIGN_BYTE_SIZE__ * TP_DYN_PT_SIZE;
     constexpr int kSamplesIn128b = 16 / sizeof(TT_DATA);
     using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn128b * 2>;
     using t128VectorType = ::aie::vector<TT_DATA, kSamplesIn128b>;
@@ -838,7 +838,7 @@ INLINE_DECL void writeStreamOut(output_stream<TT_DATA>* __restrict outStream0,
 // overload variant of above for one stream - yes, this is an mm2s.
 template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_VSIZE>
 INLINE_DECL void writeStreamOut(output_stream<TT_DATA>* __restrict outStream0, TT_DATA* outBuff) {
-    constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
+    constexpr int TP_HEADER_BYTES = __ALIGN_BYTE_SIZE__ * TP_DYN_PT_SIZE;
     constexpr unsigned int kDataReadSize = 32; // bytes
     constexpr int kSamplesIn256b = 32 / sizeof(TT_DATA);
     using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn256b>;
@@ -859,10 +859,10 @@ INLINE_DECL void writeStreamOut(output_stream<TT_DATA>* __restrict outStream0, T
 //-----------------------------------------------------------------------------------------------------
 // read window, write casc/stream
 template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_VSIZE>
-INLINE_DECL void writeCascStreamOut(output_stream<cacc64>* __restrict outStream0,
+INLINE_DECL void writeCascStreamOut(output_cascade<cacc64>* __restrict outStream0, // output_cascade generates a warning
                                     output_stream<TT_DATA>* __restrict outStream1,
                                     TT_DATA* outBuff) {
-    constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
+    constexpr int TP_HEADER_BYTES = __ALIGN_BYTE_SIZE__ * TP_DYN_PT_SIZE;
     constexpr unsigned int kDataReadSize = 32;
     constexpr int kSamplesIn256b = 32 / sizeof(TT_DATA);
     constexpr int kCascVWidth = fnFFTCascVWidth<TT_DATA>();
@@ -877,7 +877,7 @@ INLINE_DECL void writeCascStreamOut(output_stream<cacc64>* __restrict outStream0
     using accTag = typename tFFTAccBaseType<TT_DATA>::type;
     using accVect_t = ::aie::accum<accTag, kCascVWidth>;
     accVect_t acc;
-    output_stream<accTag>* __restrict outCasc0 = (output_stream<accTag>*)outStream0;
+    output_cascade<accTag>* __restrict outCasc0 = (output_cascade<accTag>*)outStream0;
 
     if
         constexpr(TP_HEADER_BYTES > 0) {
@@ -910,9 +910,9 @@ INLINE_DECL void writeCascStreamOut(output_stream<cacc64>* __restrict outStream0
 // read window, write stream/casc
 template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_VSIZE>
 INLINE_DECL void writeStreamCascOut(output_stream<TT_DATA>* __restrict outStream0,
-                                    output_stream<cacc64>* __restrict outStream1,
+                                    output_cascade<cacc64>* __restrict outStream1, // output_cascade generates a warning
                                     TT_DATA* outBuff) {
-    constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
+    constexpr int TP_HEADER_BYTES = __ALIGN_BYTE_SIZE__ * TP_DYN_PT_SIZE;
     constexpr unsigned int kDataReadSize = 32;
     constexpr int kSamplesIn256b = 32 / sizeof(TT_DATA);
     constexpr int kCascVWidth = fnFFTCascVWidth<TT_DATA>();
@@ -927,7 +927,7 @@ INLINE_DECL void writeStreamCascOut(output_stream<TT_DATA>* __restrict outStream
     using accTag = typename tFFTAccBaseType<TT_DATA>::type;
     using accVect_t = ::aie::accum<accTag, kCascVWidth>;
     accVect_t acc;
-    output_stream<accTag>* __restrict outCasc1 = (output_stream<accTag>*)outStream1;
+    output_cascade<accTag>* __restrict outCasc1 = (output_cascade<accTag>*)outStream1;
 
     if
         constexpr(TP_HEADER_BYTES > 0) {

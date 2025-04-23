@@ -35,12 +35,13 @@ The file holds the definition of the Matrix Multiply kernel class.
 #include <cstdint>
 #include <type_traits>
 
+#include "device_defs.h"
 #include "fir_utils.hpp"
 #include "matrix_mult_traits.hpp"
 // added for stubs in hw flow
 #include "matrix_mult_tiler.hpp"
 #include "matrix_mult_untiler.hpp"
-#include "device_defs.h"
+#include "matrix_mult_tiling_scheme.hpp"
 
 // CEIL rounds x up to the next multiple of y, which may be x itself.
 #define CEIL(x, y) (((x + y - 1) / y) * y)
@@ -97,6 +98,7 @@ INLINE_DECL constexpr unsigned int fnEnumType<cfloat>() {
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA_A,
           typename TT_DATA_B,
+          typename TT_OUT_DATA,
           unsigned int TP_DIM_A,
           unsigned int TP_DIM_AB,
           unsigned int TP_DIM_B,
@@ -118,7 +120,7 @@ template <typename TT_DATA_A,
 class kernelMatMultClass {
    protected:
     // Members defined here can be changed in derived classes to support customer inheritance.
-    using TT_OUT = outType_t<TT_DATA_A, TT_DATA_B>;
+    // using TT_OUT = outType_t<TT_DATA_A, TT_DATA_B>;
     // These will actually be the result of a constexpr function, depending on
     // how well the B data would fit into the A data. Or how awkward it is to
     // load the data due to LEADING_DIM.
@@ -143,6 +145,7 @@ class kernelMatMultClass {
 
     // Not sure exactly - other __restrictions will hit first
     static const int TP_DIM_MIN = 4;
+
     // Parameter value defensive and legality checks
     static_assert(TP_DIM_A_RANGE* TP_DIM_AB_RANGE* TP_DIM_B_RANGE >= TP_DIM_MIN,
                   "ERROR: Illegal combination of design matrices and cascade length, resulting in kernel matrice sizes "
@@ -155,13 +158,15 @@ class kernelMatMultClass {
                   "ERROR: TP_INPUT_WINDOW_VSIZE_A must be an integer multiple of TP_DIM_A*TP_DIM_AB.");
     static_assert((TP_INPUT_WINDOW_VSIZE_B % (TP_DIM_B * TP_DIM_AB)) == 0,
                   "ERROR: TP_INPUT_WINDOW_VSIZE_B must be an integer multiple of TP_DIM_B*TP_DIM_AB.");
-    static_assert((TP_INPUT_WINDOW_VSIZE_A * sizeof(TT_DATA_A)) <= 32768,
-                  "ERROR: TP_INPUT_WINDOW_VSIZE_A must fit within a data memory bank of 32kB.");
-    static_assert((TP_INPUT_WINDOW_VSIZE_B * sizeof(TT_DATA_B)) <= 32768,
-                  "ERROR: TP_INPUT_WINDOW_VSIZE_B must fit within a data memory bank of 32kB.");
-    static_assert(((TP_INPUT_WINDOW_VSIZE_A / TP_DIM_AB) * (TP_INPUT_WINDOW_VSIZE_B / TP_DIM_AB) * sizeof(TT_OUT)) <=
-                      32768,
-                  "ERROR: Output matrix must fit within a data memory bank of 32kB.");
+    static_assert(
+        TP_INPUT_WINDOW_VSIZE_A <= getMaxLen<TT_DATA_A>(),
+        "ERROR: TP_INPUT_WINDOW_VSIZE_A must fit within a data memory bank of 32kB for AIE1, 64kB for AIE-ML.");
+    static_assert(
+        TP_INPUT_WINDOW_VSIZE_B <= getMaxLen<TT_DATA_B>(),
+        "ERROR: TP_INPUT_WINDOW_VSIZE_B must fit within a data memory bank of 32kB for AIE1, 64kB for AIE-ML.");
+    static_assert(((TP_INPUT_WINDOW_VSIZE_A / TP_DIM_AB) * (TP_INPUT_WINDOW_VSIZE_B / TP_DIM_AB)) <=
+                      getMaxLen<TT_OUT_DATA>(),
+                  "ERROR: Output matrix must fit within a data memory bank of 32kB for AIE1, 64kB for AIE-ML.");
     static_assert(!(std::is_same<TT_DATA_A, cfloat>::value || std::is_same<TT_DATA_A, float>::value) || (TP_SHIFT == 0),
                   "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0"); // only necessary to
                                                                                                   // check TT_DATA_A as
@@ -172,106 +177,23 @@ class kernelMatMultClass {
     static constexpr unsigned int m_kArch = 0; // no other arch right now
 
     // Only one implementation (with an old name rigt now)
-    void matMult_impl1(T_inputIF<TP_CASC_IN, TT_DATA_A, TT_DATA_B> inInterface,
-                       T_outputIF<TP_CASC_OUT, TT_DATA_A, TT_DATA_B> outInterface); // Each phase is calculated in turn
-                                                                                    // which avoids need for multiple
-                                                                                    // accumulators, but requires data
-                                                                                    // reloading.
+    void matMult_impl1(
+        T_inputIF<TP_CASC_IN, TT_DATA_A, TT_DATA_B> inInterface,
+        T_outputIF<TP_CASC_OUT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA> outInterface); // Each phase is calculated in turn
+                                                                                  // which avoids need for multiple
+                                                                                  // accumulators, but requires data
+                                                                                  // reloading.
 
    public:
     // Access function for AIE Synthesizer
     unsigned int get_m_kArch() { return m_kArch; };
 
-    struct tilingStruct {
-        unsigned int Atile;
-        unsigned int ABtile;
-        unsigned int Btile;
-    };
-#ifdef __SUPPORTS_ACC64__
-    static INLINE_DECL constexpr tilingStruct getTilingScheme() {
-        using A = TT_DATA_A;
-        using B = TT_DATA_B;
-        // needs to be compatible with c++14 -> so just use plain ifs
-        // int16 or int32 x int16 x int 32
-        if ((std::is_same<A, int16>::value || std::is_same<A, int32>::value) &&
-            (std::is_same<B, int16>::value || std::is_same<B, int32>::value)) {
-            return {4, 4, 4};
-        }
-        // cint16 x int16
-        else if (std::is_same<A, cint16>::value && std::is_same<B, int16>::value) {
-            return {4, 4, 4};
-        }
-        // cint16 x cint16
-        else if (std::is_same<A, cint16>::value && std::is_same<B, cint16>::value) {
-            return {1, 4, 8};
-        }
-        // cint32 x cint16
-        else if (std::is_same<A, cint32>::value && std::is_same<B, cint16>::value) {
-            return {2, 4, 8};
-        }
-        // cint32 x cint32
-        else if (std::is_same<A, cint32>::value && std::is_same<B, cint32>::value) {
-            return {1, 2, 8};
-        }
-        // All other combinations are not supported
-        else {
-            return {1, 1, 1};
-        }
-    };
-#else  // __SUPPORTS_ACC48__
-    static INLINE_DECL constexpr tilingStruct getTilingScheme() {
-        using A = TT_DATA_A;
-        using B = TT_DATA_B;
-        // needs to be compatible with c++14 -> so just use plain ifs
-        // 16b x 16b
-        if (std::is_same<A, int16>::value && std::is_same<B, int16>::value) {
-            return {4, 4, 4};
-        }
-        // 32b x 16b
-        if ((std::is_same<A, cint16>::value || std::is_same<A, int32>::value) && std::is_same<B, int16>::value) {
-            return {4, 4, 2};
-        }
-        // 16b x 32b
-        if (std::is_same<A, int16>::value && (std::is_same<B, cint16>::value || std::is_same<B, int32>::value)) {
-            return {4, 2, 2};
-        }
-        // 32b x 32b
-        if (((std::is_same<A, cint16>::value || std::is_same<A, int32>::value) &&
-             (std::is_same<B, cint16>::value || std::is_same<B, int32>::value)) ||
-            std::is_same<A, float>::value && std::is_same<B, float>::value) {
-            return {4, 4, 2};
-        }
-        // 64b x 16b
-        if (std::is_same<A, cint32>::value && std::is_same<B, int16>::value) {
-            return {2, 4, 2};
-        }
-        // 16b x 64b
-        if (std::is_same<A, int16>::value && std::is_same<B, cint32>::value) {
-            return {2, 4, 2}; // 4, 4, 2 is also ok
-        }
-        // 64b x 32b
-        if (std::is_same<A, cint32>::value && (std::is_same<B, cint16>::value || std::is_same<B, int32>::value)) {
-            return {2, 2, 2}; // 2, 4, 2 is also ok
-        }
-        // 32b x 64b
-        if ((std::is_same<A, cint16>::value || std::is_same<A, int32>::value) && std::is_same<B, cint32>::value) {
-            return {2, 2, 2};
-        }
-        // 64b x 64b
-        if (std::is_same<A, cint32>::value && std::is_same<B, cint32>::value) {
-            return {2, 2, 2};
-        }
-        // Mixed Floats
-        if ((std::is_same<A, cfloat>::value && std::is_same<B, float>::value) ||
-            (std::is_same<A, float>::value && std::is_same<B, cfloat>::value)) {
-            return {2, 4, 2}; // 2, 2, 2 is also ok
-        }
-        // cfloats
-        if (std::is_same<A, cfloat>::value && std::is_same<B, cfloat>::value) {
-            return {4, 2, 2};
-        }
-    };
-#endif //__SUPPORTS_ACC64__
+    // struct tilingStruct {
+    //     unsigned int Atile;
+    //     unsigned int ABtile;
+    //     unsigned int Btile;
+    // };
+    static INLINE_DECL constexpr tilingStruct getTilingScheme() { return fnTilingScheme<TT_DATA_A, TT_DATA_B>(); };
 
     // Putting this into a function so that the static assert error message includes the value of the tiling scheme.
     template <unsigned Atile, unsigned ABtile, unsigned Btile>
@@ -292,7 +214,7 @@ class kernelMatMultClass {
 
     // FIR
     void matMultKernel(T_inputIF<TP_CASC_IN, TT_DATA_A, TT_DATA_B> inInterface,
-                       T_outputIF<TP_CASC_OUT, TT_DATA_A, TT_DATA_B> outInterface);
+                       T_outputIF<TP_CASC_OUT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA> outInterface);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -303,6 +225,7 @@ class kernelMatMultClass {
 // no cascade ports, a single input and no reload
 template <typename TT_DATA_A,
           typename TT_DATA_B,
+          typename TT_OUT_DATA,
           unsigned int TP_DIM_A,
           unsigned int TP_DIM_AB,
           unsigned int TP_DIM_B,
@@ -323,6 +246,7 @@ template <typename TT_DATA_A,
           unsigned int TP_CASC_LEN = 1>
 class matrix_mult : public kernelMatMultClass<TT_DATA_A,
                                               TT_DATA_B,
+                                              TT_OUT_DATA,
                                               TP_DIM_A,
                                               TP_DIM_AB,
                                               TP_DIM_B,
@@ -347,6 +271,7 @@ class matrix_mult : public kernelMatMultClass<TT_DATA_A,
     matrix_mult()
         : kernelMatMultClass<TT_DATA_A,
                              TT_DATA_B,
+                             TT_OUT_DATA,
                              TP_DIM_A,
                              TP_DIM_AB,
                              TP_DIM_B,
@@ -372,13 +297,14 @@ class matrix_mult : public kernelMatMultClass<TT_DATA_A,
     // FIR
     void matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
                  input_buffer<TT_DATA_B>& __restrict inWindowB,
-                 output_buffer<outType_t<TT_DATA_A, TT_DATA_B> >& __restrict outWindow);
+                 output_buffer<TT_OUT_DATA>& __restrict outWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------
 // Partially specialized classes for cascaded interface (final kernel in cascade), single input, no reload
 template <typename TT_DATA_A,
           typename TT_DATA_B,
+          typename TT_OUT_DATA,
           unsigned int TP_DIM_A,
           unsigned int TP_DIM_AB,
           unsigned int TP_DIM_B,
@@ -397,6 +323,7 @@ template <typename TT_DATA_A,
           unsigned int TP_CASC_LEN>
 class matrix_mult<TT_DATA_A,
                   TT_DATA_B,
+                  TT_OUT_DATA,
                   TP_DIM_A,
                   TP_DIM_AB,
                   TP_DIM_B,
@@ -416,6 +343,7 @@ class matrix_mult<TT_DATA_A,
                   TP_KERNEL_POSITION,
                   TP_CASC_LEN> : public kernelMatMultClass<TT_DATA_A,
                                                            TT_DATA_B,
+                                                           TT_OUT_DATA,
                                                            TP_DIM_A,
                                                            TP_DIM_AB,
                                                            TP_DIM_B,
@@ -440,6 +368,7 @@ class matrix_mult<TT_DATA_A,
     matrix_mult()
         : kernelMatMultClass<TT_DATA_A,
                              TT_DATA_B,
+                             TT_OUT_DATA,
                              TP_DIM_A,
                              TP_DIM_AB,
                              TP_DIM_B,
@@ -465,14 +394,15 @@ class matrix_mult<TT_DATA_A,
     // FIR
     void matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
                  input_buffer<TT_DATA_B>& __restrict inWindowB,
-                 input_stream<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
-                 output_buffer<outType_t<TT_DATA_A, TT_DATA_B> >& __restrict outWindow);
+                 input_cascade<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
+                 output_buffer<TT_OUT_DATA>& __restrict outWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------
 // Partially specialized classes for cascaded interface (First kernel in cascade), single input, no reload
 template <typename TT_DATA_A,
           typename TT_DATA_B,
+          typename TT_OUT_DATA,
           unsigned int TP_DIM_A,
           unsigned int TP_DIM_AB,
           unsigned int TP_DIM_B,
@@ -491,6 +421,7 @@ template <typename TT_DATA_A,
           unsigned int TP_CASC_LEN>
 class matrix_mult<TT_DATA_A,
                   TT_DATA_B,
+                  TT_OUT_DATA,
                   TP_DIM_A,
                   TP_DIM_AB,
                   TP_DIM_B,
@@ -510,6 +441,7 @@ class matrix_mult<TT_DATA_A,
                   TP_KERNEL_POSITION,
                   TP_CASC_LEN> : public kernelMatMultClass<TT_DATA_A,
                                                            TT_DATA_B,
+                                                           TT_OUT_DATA,
                                                            TP_DIM_A,
                                                            TP_DIM_AB,
                                                            TP_DIM_B,
@@ -534,6 +466,7 @@ class matrix_mult<TT_DATA_A,
     matrix_mult()
         : kernelMatMultClass<TT_DATA_A,
                              TT_DATA_B,
+                             TT_OUT_DATA,
                              TP_DIM_A,
                              TP_DIM_AB,
                              TP_DIM_B,
@@ -559,13 +492,14 @@ class matrix_mult<TT_DATA_A,
     // FIR
     void matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
                  input_buffer<TT_DATA_B>& __restrict inWindowB,
-                 output_stream<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade);
+                 output_cascade<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade);
 };
 
 //-----------------------------------------------------------------------------------------------------
 // Partially specialized classes for cascaded interface (middle kernels in cascade), single input, no reload
 template <typename TT_DATA_A,
           typename TT_DATA_B,
+          typename TT_OUT_DATA,
           unsigned int TP_DIM_A,
           unsigned int TP_DIM_AB,
           unsigned int TP_DIM_B,
@@ -584,6 +518,7 @@ template <typename TT_DATA_A,
           unsigned int TP_CASC_LEN>
 class matrix_mult<TT_DATA_A,
                   TT_DATA_B,
+                  TT_OUT_DATA,
                   TP_DIM_A,
                   TP_DIM_AB,
                   TP_DIM_B,
@@ -603,6 +538,7 @@ class matrix_mult<TT_DATA_A,
                   TP_KERNEL_POSITION,
                   TP_CASC_LEN> : public kernelMatMultClass<TT_DATA_A,
                                                            TT_DATA_B,
+                                                           TT_OUT_DATA,
                                                            TP_DIM_A,
                                                            TP_DIM_AB,
                                                            TP_DIM_B,
@@ -627,6 +563,7 @@ class matrix_mult<TT_DATA_A,
     matrix_mult()
         : kernelMatMultClass<TT_DATA_A,
                              TT_DATA_B,
+                             TT_OUT_DATA,
                              TP_DIM_A,
                              TP_DIM_AB,
                              TP_DIM_B,
@@ -652,8 +589,8 @@ class matrix_mult<TT_DATA_A,
     // FIR
     void matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
                  input_buffer<TT_DATA_B>& __restrict inWindowB,
-                 input_stream<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
-                 output_stream<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade);
+                 input_cascade<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
+                 output_cascade<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade);
 };
 }
 }

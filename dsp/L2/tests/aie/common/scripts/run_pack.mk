@@ -14,17 +14,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 PARAMS ?=test_0_tool_canary_aie
 PARAMS_FILE ?=multi_params.json
 RESULTS_DIR ?=./results/$(PARAMS)
 
+# Set a default. Skip if already defined.
 ifndef PLATFORM
-	ifeq ($(findstring aie1,$(PARAMS)),aie1)
+ifndef XPART
+	ifeq ($(findstring _aie1_,$(PARAMS)),_aie1_)
 		PLATFORM=vck190
-	else ifeq ($(findstring aie2,$(PARAMS)),aie2)
+	else ifeq ($(findstring _aie2_,$(PARAMS)),_aie2_)
 		PLATFORM=vek280
+	else ifeq ($(findstring _aie22_,$(PARAMS)),_aie22_)
+		XPART=xc2ve3858-ssva2112-2LP-e-S
+	else
+		PLATFORM=vck190
 	endif
 endif
+endif
+
+# Set a param for make command
+ifdef PLATFORM
+PART_OR_PLATFORM=PLATFORM
+PART_OR_PLATFORM_VAL=$(PLATFORM)
+endif
+ifdef XPART
+PART_OR_PLATFORM=XPART
+# Alias
+ifeq ($(XPART), aie_mlv2)
+PART_OR_PLATFORM_VAL=xc2ve3858-ssva2112-2LP-e-S
+else
+PART_OR_PLATFORM_VAL=$(XPART)
+endif
+endif
+
+# Set target
 ifndef TARGET
 	ifeq ($(findstring hw,$(PARAMS)),hw)
 		TARGET=aiesim
@@ -39,6 +64,7 @@ all_pack:
 	@echo PARAMS=$(PARAMS)
 	@echo PARAMS_FILE=$(PARAMS_FILE)
 	@echo PLATFORM=$(PLATFORM)
+	@echo XPART=$(XPART)
 	@echo TARGET=$(TARGET)
 	@echo RESULTS_DIR=$(RESULTS_DIR)
 	@rm -rf $(RESULTS_DIR)
@@ -77,5 +103,6 @@ all_pack:
 	@if [ -f aie_libadf.mk ]; then \
 		cp -f aie_libadf.mk $(RESULTS_DIR) ;\
 	fi
-	@make -C $(RESULTS_DIR) cleanall PLATFORM=$(PLATFORM) >  $(RESULTS_DIR)/logs/log_$(PARAMS).txt 
-	@make -C $(RESULTS_DIR) run TARGET=$(TARGET) PARAMS=$(PARAMS) PARAMS_FILE=$(PARAMS_FILE) PLATFORM=$(PLATFORM) 2>&1 | tee $(RESULTS_DIR)/logs/log_$(PARAMS).txt
+	@make -C $(RESULTS_DIR) cleanall $(PART_OR_PLATFORM)=$(PART_OR_PLATFORM_VAL) >  $(RESULTS_DIR)/logs/log_$(PARAMS).txt
+	@ echo "make -C $(RESULTS_DIR) run TARGET=$(TARGET) PARAMS=$(PARAMS) PARAMS_FILE=$(PARAMS_FILE) $(PART_OR_PLATFORM)=$(PART_OR_PLATFORM_VAL) 2>&1 | tee $(RESULTS_DIR)/logs/log_$(PARAMS).txt"
+	@make -C $(RESULTS_DIR) run TARGET=$(TARGET) PARAMS=$(PARAMS) PARAMS_FILE=$(PARAMS_FILE) $(PART_OR_PLATFORM)=$(PART_OR_PLATFORM_VAL) 2>&1 | tee $(RESULTS_DIR)/logs/log_$(PARAMS).txt

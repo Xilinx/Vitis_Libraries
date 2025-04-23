@@ -22,11 +22,11 @@
 using namespace std;
 using namespace back_transpose;
 
-void ifft_back_transpose_wrapper(backTransposeCls<POINT_SIZE, SSR>::TT_STREAM sig_i[SSR],
-                                 backTransposeCls<POINT_SIZE, SSR>::TT_STREAM sig_o[SSR]) {
+void ifft_back_transpose_wrapper(backTransposeCls<POINT_SIZE, SSR, VSS_MODE>::TT_STREAM sig_i[SSR],
+                                 backTransposeCls<POINT_SIZE, SSR, VSS_MODE>::TT_STREAM sig_o[SSR]) {
 #pragma HLS interface mode = ap_ctrl_none port = return
 #pragma HLS DATAFLOW
-    static backTransposeCls<POINT_SIZE, SSR> uut;
+    static backTransposeCls<POINT_SIZE, SSR, VSS_MODE> uut;
     uut.ifft_back_transpose_top(sig_i, sig_o);
 }
 

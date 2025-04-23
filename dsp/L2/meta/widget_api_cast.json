@@ -15,9 +15,7 @@
         {
             "name": "AIE_VARIANT",
             "type": "uint",
-            "description": "specifies the device type",
-            "maximum": 2,
-            "minimum": 1,
+            "description": "Specifies the device type.",
             "updater": {
                 "file": "widget_api_cast.py",
                 "function": "update_AIE_VARIANT"
@@ -76,7 +74,7 @@
             "validator": {
                 "file": "widget_api_cast.py",
                 "function": "validate_TP_OUT_API"
-            }            
+            }
         },
         {
             "name": "TP_NUM_INPUTS",
@@ -112,7 +110,7 @@
             "validator": {
                 "file": "widget_api_cast.py",
                 "function": "validate_TP_WINDOW_VSIZE"
-            }  
+            }
         },
         {
             "name": "TP_NUM_OUTPUT_CLONES",
@@ -127,7 +125,7 @@
             "validator": {
                 "file": "widget_api_cast.py",
                 "function": "validate_TP_NUM_OUTPUT_CLONES"
-            }  
+            }
         },
         {
             "name": "TP_PATTERN",
@@ -142,7 +140,7 @@
             "validator": {
                 "file": "widget_api_cast.py",
                 "function": "validate_TP_PATTERN"
-            }  
+            }
         },
         {
             "name": "TP_HEADER_BYTES",
@@ -157,7 +155,7 @@
             "validator": {
                 "file": "widget_api_cast.py",
                 "function": "validate_TP_HEADER_BYTES"
-            }  
+            }
         }
     ],
     "ports": {

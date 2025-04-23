@@ -15,9 +15,7 @@
         {
             "name": "AIE_VARIANT",
             "type": "uint",
-            "description": "specifies the device type",
-            "maximum": 2,
-            "minimum": 1,
+            "description": "Specifies the device type.",
             "updater": {
                 "file": "dds_mixer_lut.py",
                 "function": "update_AIE_VARIANT",
@@ -162,9 +160,9 @@
         {
             "name": "TP_USE_PHASE_RELOAD",
             "type": "uint",
-            "description": "specifies if initial phase is to be implemented as a reloadable RTP port or not.",
             "minimum": 0,
             "maximum": 1,
+            "description": "specifies if phase_offset can be reloaded at runtime.",
             "updater": {
                 "file": "dds_mixer_lut.py",
                 "function": "update_TP_USE_PHASE_RELOAD",
@@ -174,6 +172,42 @@
             "validator": {
                 "file": "dds_mixer_lut.py",
                 "function": "validate_TP_USE_PHASE_RELOAD",
+                "args": [
+                    "TP_SSR"
+                ]}
+        },
+        {
+            "name": "TP_PHASE_RELOAD_API",
+            "type": "uint",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "specifies whether phase_offset reload, if used, is to be non-blocking (RTP) or blocking (iobuffer).",
+            "updater": {
+                "file": "dds_mixer.py",
+                "function": "update_TP_PHASE_RELOAD_API",
+                "args" : ["TP_USE_PHASE_RELOAD"]
+            },
+            "validator": {
+                "file": "dds_mixer.py",
+                "function": "validate_TP_PHASE_RELOAD_API",
+                "args" : ["TP_USE_PHASE_RELOAD"]
+            }
+        },
+        {
+            "name": "TP_USE_PHASE_INC_RELOAD",
+            "type": "uint",
+            "description": "specifies if phase_increment can be reloaded at runtime.",
+            "minimum": 0,
+            "maximum": 1,
+            "updater": {
+                "file": "dds_mixer.py",
+                "function": "update_TP_USE_PHASE_INC_RELOAD",
+                "args": [
+                    "TP_SSR"
+                ]},
+            "validator": {
+                "file": "dds_mixer.py",
+                "function": "validate_TP_USE_PHASE_INC_RELOAD",
                 "args": [
                     "TP_SSR"
                 ]}
@@ -246,7 +280,7 @@
                     "function": "validate_TP_SAT",
                     "args": [
                     ]
-                }    
+                }
         }
     ],
     "ports": {

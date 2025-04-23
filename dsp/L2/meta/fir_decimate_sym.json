@@ -15,9 +15,7 @@
     {
       "name": "AIE_VARIANT",
       "type": "uint",
-      "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
-      "maximum": 2,
-      "minimum": 1,
+      "description": "Specifies the device type.",
       "updater": {
         "file": "fir_decimate_sym.py",
         "function": "update_AIE_VARIANT",
@@ -92,7 +90,7 @@
     },
     {
       "name": "TP_USE_COEFF_RELOAD",
-      "description": "Selects Coefficient Reload Mode: 0 - no reload, 1 - RTP port based, 2 - Stream Header based.",
+      "description": "Selects Coefficient Reload Mode: 0 - no reload, 1 - RTP port based.",
       "type": "uint",
       "updater": {
           "file": "fir_decimate_sym.py",
@@ -152,7 +150,7 @@
         "args": [
             "AIE_VARIANT"
         ]
-      }     
+      }
     },
     {
       "name": "TP_NUM_OUTPUTS",
@@ -174,7 +172,7 @@
             "AIE_VARIANT"
         ]
       }
-    },  
+    },
     {
       "name": "TP_SSR",
       "description": "TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput.",
@@ -183,7 +181,7 @@
         "file": "fir_decimate_sym.py",
         "function": "update_TP_SSR",
         "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD", "TP_DECIMATE_FACTOR"]
-   
+
       },
       "validator": {
         "file": "fir_decimate_sym.py",
@@ -277,7 +275,7 @@
       "validator": {
         "file": "fir_decimate_sym.py",
         "function": "validate_coeff",
-        "args": ["TT_COEFF", "TP_FIR_LEN"]
+        "args": ["TP_USE_COEFF_RELOAD", "TT_COEFF", "TP_FIR_LEN"]
       }
     }
   ],

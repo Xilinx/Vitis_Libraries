@@ -14,10 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from ctypes import sizeof
-from socket import TIPC_SUB_SERVICE
+import aie_common as com
 from aie_common import *
-import json
+# import json
 
 #### naming ####
 #
@@ -41,11 +40,10 @@ import json
 # and "err_message" if "is_valid" is False.
 #
 
-TP_WINDOW_VSIZE_max = 16384 # ping pong buffers within one bank
-TP_DIM_COLS_Min = 1 
+# TP_WINDOW_VSIZE_max = 16384 # ping pong buffers within one bank
+TP_DIM_COLS_Min = 1
 TP_DIM_ROWS_Min = 1
 TP_NUM_FRAMES_Min = 1
-TP_SHIFT_min = 0
 TP_SHIFT_max = 60
 TP_SSR_min = 1
 TP_SSR_max = 16
@@ -57,8 +55,8 @@ def update_AIE_VARIANT(args):
   return fn_update_AIE_VARIANT()
 
 def fn_update_AIE_VARIANT():
-  legal_set_AIE_VARIANT = [1, 2]
-  
+  legal_set_AIE_VARIANT = [com.AIE, com.AIE_ML, com.AIE_MLv2]
+
   param_dict ={}
   param_dict.update({"name" : "AIE_VARIANT"})
   param_dict.update({"enum" : legal_set_AIE_VARIANT})
@@ -92,7 +90,7 @@ def validate_TT_DATA_A(args):
   return fn_validate__TT_DATA_A(TT_DATA_A)
 
 
-# validation function    
+# validation function
 def fn_validate__TT_DATA_A(TT_DATA_A):
   param_dict = fn_update_TT_DATA_A()
   return validate_legal_set(param_dict["enum"], "TT_DATA_A", TT_DATA_A)
@@ -125,7 +123,7 @@ def validate_TT_DATA_B(args):
     TT_DATA_B = args["TT_DATA_B"]
     return fn_validate__TT_DATA_B(TT_DATA_A, TT_DATA_B)
 
-# validation function    
+# validation function
 def fn_validate__TT_DATA_B(TT_DATA_A, TT_DATA_B):
   param_dict = fn_update_TT_DATA_B(TT_DATA_A)
   return validate_legal_set(param_dict["enum"], "TT_DATA_B", TT_DATA_B)
@@ -170,22 +168,23 @@ def validate_TP_SSR(args):
   return fn_validate_ssr(TP_SSR)
 
 def fn_validate_ssr(TP_SSR):
-  range_TP_SSR=[TP_SSR_min, TP_SSR_max] 
+  range_TP_SSR=[TP_SSR_min, TP_SSR_max]
   return validate_range(range_TP_SSR, "TP_SSR", TP_SSR)
 
 #######################################################
 ####### TP_DIM_A_ROWS Updater and Validator ###########
 #######################################################
 def update_TP_DIM_A_ROWS(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA_A = args["TT_DATA_A"]
   TT_DATA_B = args["TT_DATA_B"]
   TP_API = args["TP_API"]
   if args["TP_DIM_A_ROWS"]: TP_DIM_A_ROWS=args["TP_DIM_A_ROWS"]
   else: TP_DIM_A_ROWS=0
-  
-  return fn_update_TP_DIM_A_ROWS(TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS)
 
-def fn_update_TP_DIM_A_ROWS(TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS):
+  return fn_update_TP_DIM_A_ROWS(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS)
+
+def fn_update_TP_DIM_A_ROWS(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS):
 
   VEC_SIZE = int(256/8/fn_size_by_byte(TT_DATA_A))
 
@@ -194,22 +193,24 @@ def fn_update_TP_DIM_A_ROWS(TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS):
     "minimum" : VEC_SIZE,
   }
 
+  TP_WINDOW_VSIZE_max=k_data_memory_bytes[AIE_VARIANT]
+
   TP_DIM_A_COLS_SSR = 1
-  if TP_API==0:
+  if TP_API == API_BUFFER:
     TP_DIM_B_ROWS = VEC_SIZE
     TP_DIM_B_COLS = 1
     TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(fn_det_out_type(TT_DATA_A, TT_DATA_B))
     TP_DIM_A_ROWS_max = TP_WINDOW_VSIZE_max_size/ (TP_DIM_A_COLS_SSR * TP_DIM_B_ROWS * TP_DIM_B_COLS)
 
-  elif TP_API==1:
-    
+  elif TP_API == API_STREAM:
+
     TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(TT_DATA_A)
     TP_DIM_A_ROWS_max = TP_WINDOW_VSIZE_max_size / TP_DIM_A_COLS_SSR
 
   param_dict.update({"maximum" : int(FLOOR(TP_DIM_A_ROWS_max, VEC_SIZE))})
 
 
-  if TP_DIM_A_ROWS != 0 and (TP_DIM_A_ROWS%VEC_SIZE != 0): 
+  if TP_DIM_A_ROWS != 0 and (TP_DIM_A_ROWS%VEC_SIZE != 0):
     TP_DIM_A_ROWS_act=round(TP_DIM_A_ROWS/VEC_SIZE) * VEC_SIZE
 
     if TP_DIM_A_ROWS_act < param_dict["minimum"]:
@@ -217,20 +218,21 @@ def fn_update_TP_DIM_A_ROWS(TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS):
 
     if TP_DIM_A_ROWS_act > param_dict["maximum"]:
       TP_DIM_A_ROWS_act = param_dict["maximum"]
-    
+
     param_dict.update({"actual" : int(TP_DIM_A_ROWS_act)})
   return param_dict
 
 def validate_TP_DIM_A_ROWS(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA_A = args["TT_DATA_A"]
   TT_DATA_B = args["TT_DATA_B"]
   TP_API = args["TP_API"]
 
   TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
-  return fn_validate_dim_a_rows(TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS)
+  return fn_validate_dim_a_rows(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS)
 
-def fn_validate_dim_a_rows(TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS):
-  param_dict= fn_update_TP_DIM_A_ROWS(TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS)
+def fn_validate_dim_a_rows(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS):
+  param_dict= fn_update_TP_DIM_A_ROWS(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS)
   VEC_SIZE = int(256/8/fn_size_by_byte(TT_DATA_A))
 
   if (TP_DIM_A_ROWS % VEC_SIZE):
@@ -243,6 +245,7 @@ def fn_validate_dim_a_rows(TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_ROWS):
 ####### TP_DIM_A_COLS Updater and Validator ###########
 #######################################################
 def update_TP_DIM_A_COLS(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA_A = args["TT_DATA_A"]
   TT_DATA_B = args["TT_DATA_B"]
   TP_API = args["TP_API"]
@@ -252,9 +255,9 @@ def update_TP_DIM_A_COLS(args):
   if args["TP_DIM_A_COLS"] : TP_DIM_A_COLS=args["TP_DIM_A_COLS"]
   else: TP_DIM_A_COLS=0
 
-  return fn_update_TP_DIM_A_COLS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS)
+  return fn_update_TP_DIM_A_COLS(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS)
 
-def fn_update_TP_DIM_A_COLS(TT_DATA_A,  TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS):
+def fn_update_TP_DIM_A_COLS(AIE_VARIANT, TT_DATA_A,  TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS):
   VEC_SIZE = int(256/8/fn_size_by_byte(TT_DATA_A))
 
   param_dict={
@@ -262,14 +265,15 @@ def fn_update_TP_DIM_A_COLS(TT_DATA_A,  TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS
   "minimum" : TP_SSR
   }
 
-  if TP_API==0:
+  TP_WINDOW_VSIZE_max=k_data_memory_bytes[AIE_VARIANT]
+  if TP_API == API_BUFFER:
      #minimum possible values
     TP_DIM_B_ROWS = VEC_SIZE
     TP_DIM_B_COLS = 1
     TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(fn_det_out_type(TT_DATA_A, TT_DATA_B))
     TP_DIM_A_COLS_max = (TP_WINDOW_VSIZE_max_size * TP_SSR) / (TP_DIM_A_ROWS  * TP_DIM_B_ROWS * TP_DIM_B_COLS)
 
-  elif TP_API==1:
+  elif TP_API == API_STREAM:
     TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(TT_DATA_A)
     TP_DIM_A_COLS_max = (TP_WINDOW_VSIZE_max_size * TP_SSR) / (TP_DIM_A_ROWS)
 
@@ -286,17 +290,18 @@ def fn_update_TP_DIM_A_COLS(TT_DATA_A,  TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS
   return param_dict
 
 def validate_TP_DIM_A_COLS(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA_A = args["TT_DATA_A"]
   TT_DATA_B = args["TT_DATA_B"]
   TP_API = args["TP_API"]
   TP_SSR = args["TP_SSR"]
   TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
   TP_DIM_A_COLS=args["TP_DIM_A_COLS"]
-  return fn_validate_dim_cols_a(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS)
+  return fn_validate_dim_cols_a(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS)
 
 
-def fn_validate_dim_cols_a(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS):
-  param_dict=fn_update_TP_DIM_A_COLS(TT_DATA_A,  TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS)
+def fn_validate_dim_cols_a(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS):
+  param_dict=fn_update_TP_DIM_A_COLS(AIE_VARIANT, TT_DATA_A,  TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS)
 
   if (TP_DIM_A_COLS%TP_SSR != 0):
     return isError(f"TP_DIM_A_COLS should be an integer multiple of ssr. Got TP_DIM__ROWS = {TP_DIM_A_COLS}, TP_SSR = {TP_SSR}")
@@ -304,11 +309,12 @@ def fn_validate_dim_cols_a(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, 
     range_TP_DIM_A_COLS=[param_dict["minimum"], param_dict["maximum"]]
     return validate_range(range_TP_DIM_A_COLS, "TP_DIM_A_COLS", TP_DIM_A_COLS)
 
-  
+
 #######################################################
 ####### TP_DIM_B_ROWS Updater and Validator ###########
 #######################################################
 def update_TP_DIM_B_ROWS(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA_A = args["TT_DATA_A"]
   TT_DATA_B = args["TT_DATA_B"]
   TP_API = args["TP_API"]
@@ -319,10 +325,11 @@ def update_TP_DIM_B_ROWS(args):
   if args["TP_DIM_B_ROWS"] : TP_DIM_B_ROWS=args["TP_DIM_B_ROWS"]
   else: TP_DIM_B_ROWS=0
 
-  return fn_update_TP_DIM_B_ROWS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS)
+  return fn_update_TP_DIM_B_ROWS(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS)
 
-def fn_update_TP_DIM_B_ROWS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS):
+def fn_update_TP_DIM_B_ROWS(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS):
   VEC_SIZE = int(256/8/fn_size_by_byte(TT_DATA_B))
+  TP_WINDOW_VSIZE_max=k_data_memory_bytes[AIE_VARIANT]
 
   param_dict={
   "name":"TP_DIM_B_ROWS",
@@ -330,12 +337,12 @@ def fn_update_TP_DIM_B_ROWS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS,
   }
 
   TP_DIM_B_COLS = 1
-  if TP_API==0:
+  if TP_API == API_BUFFER:
      #minimum possible values
     TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(fn_det_out_type(TT_DATA_A, TT_DATA_B))
     TP_DIM_A_COLS_SSR = TP_DIM_A_COLS / TP_SSR
     TP_DIM_B_ROWS_max= TP_WINDOW_VSIZE_max_size / (TP_DIM_A_ROWS * TP_DIM_A_COLS_SSR * TP_DIM_B_COLS)
-  elif TP_API==1:
+  elif TP_API == API_STREAM:
     TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(TT_DATA_B)
     TP_DIM_B_ROWS_max= TP_WINDOW_VSIZE_max_size / (TP_DIM_B_COLS)
 
@@ -353,6 +360,7 @@ def fn_update_TP_DIM_B_ROWS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS,
 
 
 def validate_TP_DIM_B_ROWS(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA_A = args["TT_DATA_A"]
   TT_DATA_B = args["TT_DATA_B"]
   TP_API = args["TP_API"]
@@ -360,11 +368,11 @@ def validate_TP_DIM_B_ROWS(args):
   TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
   TP_DIM_A_COLS=args["TP_DIM_A_COLS"]
   TP_DIM_B_ROWS=args["TP_DIM_B_ROWS"]
-  return fn_validate_dim_b_rows(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS)
+  return fn_validate_dim_b_rows(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS)
 
 
-def fn_validate_dim_b_rows(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS):
-  param_dict = fn_update_TP_DIM_B_ROWS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS)
+def fn_validate_dim_b_rows(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS):
+  param_dict = fn_update_TP_DIM_B_ROWS(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS)
 
   VEC_SIZE = int(256/8/fn_size_by_byte(TT_DATA_B))
 
@@ -373,12 +381,13 @@ def fn_validate_dim_b_rows(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, 
   else:
     range_TP_DIM_B_ROWS=[param_dict["minimum"], param_dict["maximum"]]
     return validate_range(range_TP_DIM_B_ROWS, "TP_DIM_B_ROWS", TP_DIM_B_ROWS)
-    
+
 #######################################################
 ####### TP_DIM_B_COLS Updater and Validator ###########
 #######################################################
 
 def update_TP_DIM_B_COLS(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA_A = args["TT_DATA_A"]
   TT_DATA_B = args["TT_DATA_B"]
   TP_API = args["TP_API"]
@@ -387,19 +396,21 @@ def update_TP_DIM_B_COLS(args):
   TP_DIM_A_COLS=args["TP_DIM_A_COLS"]
   TP_DIM_B_ROWS=args["TP_DIM_B_ROWS"]
 
-  return fn_update_TP_DIM_B_COLS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS)
+  return fn_update_TP_DIM_B_COLS(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS)
 
-def fn_update_TP_DIM_B_COLS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS):
+def fn_update_TP_DIM_B_COLS(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS):
   param_dict={
     "name" : "TP_DIM_B_COLS",
     "minimum" : 1
   }
 
-  if TP_API==0:
+  TP_WINDOW_VSIZE_max=k_data_memory_bytes[AIE_VARIANT]
+
+  if TP_API == API_BUFFER:
     TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(fn_det_out_type(TT_DATA_A, TT_DATA_B))
     TP_DIM_A_COLS_SSR = TP_DIM_A_COLS / TP_SSR
     TP_DIM_B_COLS_max=TP_WINDOW_VSIZE_max_size/(TP_DIM_A_ROWS * TP_DIM_A_COLS_SSR * TP_DIM_B_ROWS)
-  elif TP_API==1:
+  elif TP_API == API_STREAM:
     TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(TT_DATA_B)
     TP_DIM_B_COLS_max=TP_WINDOW_VSIZE_max_size/TP_DIM_B_ROWS
 
@@ -407,6 +418,7 @@ def fn_update_TP_DIM_B_COLS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS,
   return param_dict
 
 def validate_TP_DIM_B_COLS(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA_A = args["TT_DATA_A"]
   TT_DATA_B = args["TT_DATA_B"]
   TP_API = args["TP_API"]
@@ -415,17 +427,18 @@ def validate_TP_DIM_B_COLS(args):
   TP_DIM_A_COLS=args["TP_DIM_A_COLS"]
   TP_DIM_B_ROWS=args["TP_DIM_B_ROWS"]
   TP_DIM_B_COLS=args["TP_DIM_B_COLS"]
-  return fn_validate_dim_cols_b(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS)
+  return fn_validate_dim_cols_b(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS)
 
-def fn_validate_dim_cols_b(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS):
-  param_dict = fn_update_TP_DIM_B_COLS(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS)
+def fn_validate_dim_cols_b(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS):
+  param_dict = fn_update_TP_DIM_B_COLS(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS)
   range_TP_DIM_B_ROWS=[param_dict["minimum"], param_dict["maximum"]]
   return validate_range(range_TP_DIM_B_ROWS, "TP_DIM_B_COLS", TP_DIM_B_COLS)
 
 #######################################################
 ####### TP_NUM_FRAMES Updater and Validator ###########
-#######################################################  
+#######################################################
 def update_TP_NUM_FRAMES(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA_A = args["TT_DATA_A"]
   TT_DATA_B = args["TT_DATA_B"]
   TP_API = args["TP_API"]
@@ -435,19 +448,20 @@ def update_TP_NUM_FRAMES(args):
   TP_DIM_B_ROWS = args["TP_DIM_B_ROWS"]
   TP_DIM_B_COLS = args["TP_DIM_B_COLS"]
 
-  return fn_update_TP_NUM_FRAMES(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS)
+  return fn_update_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS)
 
-def fn_update_TP_NUM_FRAMES(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS):
+def fn_update_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS):
   param_dict={
     "name" : "TP_NUM_FRAMES",
     "minimum" : TP_NUM_FRAMES_Min
   }
-  if TP_API==0:
+  TP_WINDOW_VSIZE_max=k_data_memory_bytes[AIE_VARIANT]
+  if TP_API == API_BUFFER:
     TP_DIM_A_COLS_SSR = TP_DIM_A_COLS / TP_SSR
     OUT_FRAME_SIZE = TP_DIM_A_ROWS * TP_DIM_A_COLS_SSR * TP_DIM_B_ROWS * TP_DIM_B_COLS
     OUT_FRAME_SIZE_BYTES = OUT_FRAME_SIZE * fn_size_by_byte(fn_det_out_type(TT_DATA_A, TT_DATA_B))
     TP_NUM_FRAMES_max = TP_WINDOW_VSIZE_max / OUT_FRAME_SIZE_BYTES
-  elif TP_API==1:
+  elif TP_API == API_STREAM:
     TP_WINDOW_VSIZE_max_size_a = TP_WINDOW_VSIZE_max / fn_size_by_byte(TT_DATA_A)
     TP_NUM_FRAMES_max1 = TP_WINDOW_VSIZE_max_size_a*TP_SSR/(TP_DIM_A_COLS*TP_DIM_A_ROWS)
     TP_WINDOW_VSIZE_max_size_b = TP_WINDOW_VSIZE_max / fn_size_by_byte(TT_DATA_B)
@@ -459,6 +473,7 @@ def fn_update_TP_NUM_FRAMES(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS,
   return param_dict
 
 def validate_TP_NUM_FRAMES(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA_A = args["TT_DATA_A"]
   TT_DATA_B = args["TT_DATA_B"]
   TP_API = args["TP_API"]
@@ -468,15 +483,15 @@ def validate_TP_NUM_FRAMES(args):
   TP_DIM_B_ROWS = args["TP_DIM_B_ROWS"]
   TP_DIM_B_COLS = args["TP_DIM_B_COLS"]
   TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
-  return fn_validate_num_frames(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS, TP_NUM_FRAMES)
+  return fn_validate_num_frames(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS, TP_NUM_FRAMES)
 
-def fn_validate_num_frames(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS, TP_NUM_FRAMES):
-  param_dict=fn_update_TP_NUM_FRAMES(TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS)
+def fn_validate_num_frames(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS, TP_NUM_FRAMES):
+  param_dict=fn_update_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A_ROWS, TP_DIM_A_COLS, TP_DIM_B_ROWS, TP_DIM_B_COLS)
   return validate_range([param_dict["minimum"], param_dict["maximum"]], "TP_NUM_FRAMES", TP_NUM_FRAMES)
 
 #######################################################
 ########### TP_SHIFT Updater and Validator ############
-#######################################################  
+#######################################################
 
 def update_TP_SHIFT(args):
   TT_DATA_A = args["TT_DATA_A"]
@@ -506,11 +521,11 @@ def fn_validate_shift_val(TT_DATA_A, TT_DATA_B, TP_SHIFT):
   range_TP_SHIFT=[param_dict["minimum"], param_dict["maximum"]]
 
   return validate_range(range_TP_SHIFT, "TP_SHIFT", TP_SHIFT)
-    
+
 
 #######################################################
 ############ TP_RND Updater and Validator #############
-#######################################################  
+#######################################################
 def update_TP_RND(args):
   AIE_VARIANT = args["AIE_VARIANT"]
   return fn_update_TP_RND(AIE_VARIANT)
@@ -531,7 +546,7 @@ def validate_TP_RND(args):
 
 #######################################################
 ############ TP_SAT Updater and Validator #############
-#######################################################  
+#######################################################
 def update_TP_SAT(args):
   legal_set_sat=fn_legal_set_sat()
   param_dict={
@@ -539,7 +554,7 @@ def update_TP_SAT(args):
     "enum" : legal_set_sat
   }
   return param_dict
-                               
+
 def validate_TP_SAT(args):
   TP_SAT = args["TP_SAT"]
   return fn_validate_satMode(TP_SAT)
@@ -562,9 +577,9 @@ def fn_det_out_type(TT_DATA_A, TT_DATA_B):
   if (TT_DATA_A=="int32" and TT_DATA_B=="int32"):
     return "int32"
   if (TT_DATA_A=="int32" and TT_DATA_B=="cint16"):
-    return "cint32"   
+    return "cint32"
   if (TT_DATA_A=="int32" and TT_DATA_B=="cint32"):
-    return "cint32"  
+    return "cint32"
   if (TT_DATA_A=="cint16" and TT_DATA_B=="int16"):
     return "cint16"
   if (TT_DATA_A=="cint16" and TT_DATA_B=="int32"):
@@ -617,7 +632,7 @@ def info_ports(args):
   TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
   TP_API = args["TP_API"]
   TP_SSR = args["TP_SSR"]
-  if (TP_API==0):
+  if (TP_API == API_BUFFER):
     portsInA = get_port_info(
       portname = "inA",
       dir = "in",
@@ -693,7 +708,7 @@ def generate_graph(graphname, args):
   TP_API = args["TP_API"]
   TP_SSR = args["TP_SSR"]
 
-  # if TP_API == 1:
+  # if TP_API == API_STREAM:
   #   ssr = TP_SSR//2
   # else:
   #   ssr = TP_SSR
@@ -726,9 +741,7 @@ public:
 
   {graphname}() : kronecker() {{
     adf::kernel *kronecker_kernels = kronecker.getKernels();
-    for (int i=0; i < 1; i++) {{
-      adf::runtime<ratio>(kronecker_kernels[i]) = 0.9;
-    }}
+
     for (int i=0; i < TP_SSR; i++) {{
       adf::connect<> net_in(inA[i], kronecker.inA[i]);
       adf::connect<> net_in(inB[i], kronecker.inB[i]);

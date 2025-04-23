@@ -126,6 +126,19 @@ class test_graph : public graph {
         connect<>(mixed_radix_fftGraph.headerOut[0], outHdr[0].in[0]);
 // printf("connected \n");
 #endif // DYN_PT_SIZE == 1
+
+#ifdef USING_UUT
+#if (SINGLE_BUF == 1 && API_IO == 0) // Single buffer constraint applies for windows implementations
+        for (int i = 0; i < CASC_LEN; i++) {
+            single_buffer(mixed_radix_fftGraph.getKernels()[i].in[0]);
+            single_buffer(mixed_radix_fftGraph.getKernels()[i].out[0]);
+#if (DYN_PT_SIZE == 1)
+            single_buffer(mixed_radix_fftGraph.getKernels()[i].in[1]);
+#endif
+            printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n", i);
+        }
+#endif
+#endif
     };
 };
 }

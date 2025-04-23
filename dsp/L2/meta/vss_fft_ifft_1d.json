@@ -1,0 +1,259 @@
+{
+    "schema": "vitis_library_api_spec_schema-1.0",
+    "api_name": "vss_fft_ifft_1d",
+    "display_name": "vss_fft_ifft_1d",
+    "header_file_name": "vss_fft_ifft_1d",
+    "search_paths": [
+        "L1/include/aie",
+        "L1/src/aie",
+        "L1/tests/aie/inc",
+        "L1/tests/aie/src",
+        "L2/include/aie",
+        "L2/tests/aie/common/inc"
+    ],
+    "parameters": [
+        {
+            "name": "PART",
+            "type": "typename",
+            "description": "Specifies the part name, e.g. \"xcvc1902-vsva2197-2MP-e-S\"",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_PART",
+                "args": []
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_PART",
+                "args": []
+            }
+        },
+        {
+            "name": "FREQHZ",
+            "description": "Frequency that the PL components of the VSS need to run on (In MHz)",
+            "type": "int",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_FREQHZ",
+                "args": []
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_FREQHZ",
+                "args": []
+
+            }
+        },
+        {
+            "name": "DATA_TYPE",
+            "description": "The type of individual data samples output of the FFT function",
+            "type": "typename",
+            "enum": [
+                "cint16",
+                "cint32",
+                "cfloat"
+            ],
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_DATA_TYPE",
+                "args": [
+                    "PART"
+                ]
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_DATA_TYPE",
+                "args": [
+                    "PART"
+                ]
+            }
+        },
+        {
+            "name": "TWIDDLE_TYPE",
+            "description": "The type of twiddle factors of the transform",
+            "type": "typename",
+            "enum": [
+                "cint16",
+                "cint32",
+                "cfloat"
+            ],
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_TWIDDLE_TYPE",
+                "args": [
+                    "DATA_TYPE",
+                    "PART"
+                ]
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_TWIDDLE_TYPE",
+                "args": [
+                    "DATA_TYPE",
+                    "PART"
+                ]
+            }
+        },
+        {
+            "name": "POINT_SIZE",
+            "description": "Point size of the FFT",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_POINT_SIZE"
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_POINT_SIZE"
+            }
+        },
+        {
+            "name": "FFT_NIFFT",
+            "description": "Selects whether the transform to perform is an FFT (1) or IFFT (0).",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_FFT_NIFFT",
+                "args": []
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_FFT_NIFFT",
+                "args": []
+            }
+        },
+        {
+            "name": "API_IO",
+            "description": "Selects whether the transform to perform is an FFT (1) or IFFT (0).",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_API_IO",
+                "args": []
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_API_IO",
+                "args": []
+            }
+        },
+        {
+            "name": "SHIFT",
+            "description": "The power of 2 shift down applied to the accumulation of fft before output",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_SHIFT",
+                "args": [
+                    "DATA_TYPE"
+                ]
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_SHIFT",
+                "args": [
+                    "DATA_TYPE"
+                ]
+            }
+        },
+        {
+            "name": "ROUND_MODE",
+            "description": "The rounding to be applied during the shift down stage of processing.",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_RND",
+                "args": [
+                    "PART"
+                ]
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_RND",
+                "args": [
+                    "PART"
+                ]
+            }
+        },
+        {
+            "name": "SAT_MODE",
+            "description": "Saturation mode.",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_SAT"
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_SAT"
+            }
+        },
+        {
+            "name": "TWIDDLE_MODE",
+            "description": "Twiddle amplitude mode.",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_TWIDDLE_MODE"
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_TWIDDLE_MODE"
+            }
+        },
+        {
+            "name": "SSR",
+            "description": "TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput.",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_SSR"
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_SSR"
+            }
+        },
+        {
+            "name": "AIE_PLIO_WIDTH",
+            "description": "AIE_PLIO_WIDTH specifies the width of the PLIOs at the AIE-PL interface",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_AIE_PLIO_WIDTH"
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_AIE_PLIO_WIDTH"
+            }
+        },
+        {
+            "name": "VSS_MODE",
+            "description": "VSS_MODE offers choices of decomposing the implementatoin of the FFT. Different implementations offer different resource use and throughputs.",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_VSS_MODE",
+                "args": [
+                    "DATA_TYPE",
+                    "FFT_NIFFT"
+                ]
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_VSS_MODE",
+                "args": [
+                    "DATA_TYPE",
+                    "FFT_NIFFT"
+                ]
+            }
+        }
+    ],
+    "ports": {
+        "file": "vss_fft_ifft_1d.py",
+        "function": "info_ports"
+    },
+    "generator": {
+        "file": "vss_fft_ifft_1d.py",
+        "function": "generate_cfg"
+    }
+}

@@ -1302,7 +1302,7 @@ void fir_decimate_hb<TT_DATA,
                      1,
                      USE_WINDOW_API,
                      TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                     input_stream_cacc48* inCascade,
+                                     input_cascade_cacc* inCascade,
                                      output_circular_buffer<TT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -1341,7 +1341,7 @@ void fir_decimate_hb<TT_DATA,
                      2,
                      USE_WINDOW_API,
                      TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                     input_stream_cacc48* inCascade,
+                                     input_cascade_cacc* inCascade,
                                      output_circular_buffer<TT_DATA>& __restrict outWindow,
                                      output_circular_buffer<TT_DATA>& __restrict outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
@@ -1382,7 +1382,7 @@ void fir_decimate_hb<TT_DATA,
                      1,
                      USE_WINDOW_API,
                      TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                     input_stream_cacc48* inCascade,
+                                     input_cascade_cacc* inCascade,
                                      output_circular_buffer<TT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -1421,7 +1421,7 @@ void fir_decimate_hb<TT_DATA,
                      2,
                      USE_WINDOW_API,
                      TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                     input_stream_cacc48* inCascade,
+                                     input_cascade_cacc* inCascade,
                                      output_circular_buffer<TT_DATA>& __restrict outWindow,
                                      output_circular_buffer<TT_DATA>& __restrict outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
@@ -1463,7 +1463,7 @@ void fir_decimate_hb<TT_DATA,
                      TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                            extents<inherited_extent>,
                                                            margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
-                                     output_stream_cacc48* outCascade,
+                                     output_cascade_cacc* outCascade,
                                      output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -1504,7 +1504,7 @@ void fir_decimate_hb<TT_DATA,
                inWindow,
            input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
                inWindowReverse,
-           output_stream_cacc48* outCascade,
+           output_cascade_cacc* outCascade,
            output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -1546,7 +1546,7 @@ void fir_decimate_hb<TT_DATA,
                      TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                            extents<inherited_extent>,
                                                            margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
-                                     output_stream_cacc48* outCascade,
+                                     output_cascade_cacc* outCascade,
                                      output_async_buffer<TT_DATA>& broadcastWindow,
                                      const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
@@ -1588,7 +1588,7 @@ void fir_decimate_hb<TT_DATA,
                inWindow,
            input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
                inWindowReverse,
-           output_stream_cacc48* outCascade,
+           output_cascade_cacc* outCascade,
            output_async_buffer<TT_DATA>& broadcastWindow,
            const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
@@ -1630,8 +1630,8 @@ void fir_decimate_hb<TT_DATA,
                      1,
                      USE_WINDOW_API,
                      TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                     input_stream_cacc48* inCascade,
-                                     output_stream_cacc48* outCascade,
+                                     input_cascade_cacc* inCascade,
+                                     output_cascade_cacc* outCascade,
                                      output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -1671,8 +1671,8 @@ void fir_decimate_hb<TT_DATA,
                      1,
                      USE_WINDOW_API,
                      TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                     input_stream_cacc48* inCascade,
-                                     output_stream_cacc48* outCascade,
+                                     input_cascade_cacc* inCascade,
+                                     output_cascade_cacc* outCascade,
                                      output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -1875,7 +1875,7 @@ void fir_decimate_hb<TT_DATA,
                      TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                            extents<inherited_extent>,
                                                            margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
-                                     input_stream_cacc48* inCascade,
+                                     input_cascade_cacc* inCascade,
                                      output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -1914,7 +1914,7 @@ void fir_decimate_hb<TT_DATA,
                      1,
                      USE_STREAM_API,
                      TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                     input_stream_cacc48* inCascade,
+                                     input_cascade_cacc* inCascade,
                                      output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -1956,7 +1956,7 @@ void fir_decimate_hb<TT_DATA,
                      TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                            extents<inherited_extent>,
                                                            margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
-                                     input_stream_cacc48* inCascade,
+                                     input_cascade_cacc* inCascade,
                                      output_stream<TT_DATA>* outStream,
                                      output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
@@ -1997,7 +1997,7 @@ void fir_decimate_hb<TT_DATA,
                      2,
                      USE_STREAM_API,
                      TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                     input_stream_cacc48* inCascade,
+                                     input_cascade_cacc* inCascade,
                                      output_stream<TT_DATA>* outStream,
                                      output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
@@ -2040,7 +2040,7 @@ void fir_decimate_hb<TT_DATA,
                      TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                            extents<inherited_extent>,
                                                            margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
-                                     output_stream_cacc48* outCascade) {
+                                     output_cascade_cacc* outCascade) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -2078,7 +2078,7 @@ void fir_decimate_hb<TT_DATA,
                      TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                            extents<inherited_extent>,
                                                            margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
-                                     output_stream_cacc48* outCascade,
+                                     output_cascade_cacc* outCascade,
                                      output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -2120,8 +2120,8 @@ void fir_decimate_hb<TT_DATA,
                      TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                            extents<inherited_extent>,
                                                            margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
-                                     input_stream_cacc48* inCascade,
-                                     output_stream_cacc48* outCascade) {
+                                     input_cascade_cacc* inCascade,
+                                     output_cascade_cacc* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -2159,8 +2159,8 @@ void fir_decimate_hb<TT_DATA,
                      1,
                      USE_STREAM_API,
                      TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                     input_stream_cacc48* inCascade,
-                                     output_stream_cacc48* outCascade,
+                                     input_cascade_cacc* inCascade,
+                                     output_cascade_cacc* outCascade,
                                      output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -2203,7 +2203,7 @@ void fir_decimate_hb<TT_DATA,
                      TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                            extents<inherited_extent>,
                                                            margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
-                                     input_stream_cacc48* inCascade,
+                                     input_cascade_cacc* inCascade,
                                      output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -2242,7 +2242,7 @@ void fir_decimate_hb<TT_DATA,
                      1,
                      USE_STREAM_API,
                      TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                     input_stream_cacc48* inCascade,
+                                     input_cascade_cacc* inCascade,
                                      output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -2284,7 +2284,7 @@ void fir_decimate_hb<TT_DATA,
                      TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                            extents<inherited_extent>,
                                                            margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
-                                     input_stream_cacc48* inCascade,
+                                     input_cascade_cacc* inCascade,
                                      output_stream<TT_DATA>* outStream,
                                      output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
@@ -2325,7 +2325,7 @@ void fir_decimate_hb<TT_DATA,
                      2,
                      USE_STREAM_API,
                      TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                     input_stream_cacc48* inCascade,
+                                     input_cascade_cacc* inCascade,
                                      output_stream<TT_DATA>* outStream,
                                      output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
@@ -2367,7 +2367,7 @@ void fir_decimate_hb<TT_DATA,
                      TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                            extents<inherited_extent>,
                                                            margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
-                                     output_stream_cacc48* outCascade,
+                                     output_cascade_cacc* outCascade,
                                      const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_SINGLE> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -2407,7 +2407,7 @@ void fir_decimate_hb<
     TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                           extents<inherited_extent>,
                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
-                    output_stream_cacc48* outCascade,
+                    output_cascade_cacc* outCascade,
                     output_async_buffer<TT_DATA>& broadcastWindow,
                     const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
@@ -2449,8 +2449,8 @@ void fir_decimate_hb<TT_DATA,
                      TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                            extents<inherited_extent>,
                                                            margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
-                                     input_stream_cacc48* inCascade,
-                                     output_stream_cacc48* outCascade) {
+                                     input_cascade_cacc* inCascade,
+                                     output_cascade_cacc* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_SINGLE> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -2488,8 +2488,8 @@ void fir_decimate_hb<TT_DATA,
                      1,
                      USE_STREAM_API,
                      TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                     input_stream_cacc48* inCascade,
-                                     output_stream_cacc48* outCascade,
+                                     input_cascade_cacc* inCascade,
+                                     output_cascade_cacc* outCascade,
                                      output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;

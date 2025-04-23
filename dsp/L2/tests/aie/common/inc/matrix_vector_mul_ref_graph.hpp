@@ -39,7 +39,11 @@ template <typename TT_DATA_A,
           unsigned int TP_CASC_LEN,
           unsigned int TP_SAT,
           unsigned int TP_SSR,
-          unsigned int TP_DIM_A_LEADING>
+          unsigned int TP_DIM_A_LEADING,
+          unsigned int TP_USE_MATRIX_RELOAD = 0,
+          unsigned int TP_API = 0,
+          unsigned int TP_DUAL_IP = 0,
+          unsigned int TP_NUM_OUT_PUTS = 1>
 class matrix_vector_mul_ref_graph : public graph {
    public:
     // std::array<port<input>, 1> inA[1];

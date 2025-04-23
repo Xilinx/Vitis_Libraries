@@ -20,7 +20,7 @@
 #ifdef USING_UUT
 #define REF_F_LEN F_LEN
 #else
-#if (API_PORT == 1)
+#if (API_IO == 1)
 #define REF_F_LEN (F_LEN * NITER)
 #else
 #define REF_F_LEN F_LEN

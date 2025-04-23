@@ -51,6 +51,7 @@ set tt_coeff "int16" ;# sensible default
 set coeffStimType 0 ;# FIR length
 set firLen 16 ;# FIR length
 set plioWidth 32
+set headSize 0
 if { $::argc > 2} {
     set filename [lindex $argv 0]
     set fileDirpath [file dirname $filename]
@@ -95,6 +96,9 @@ if { $::argc > 2} {
     if {[llength $argv] > 15 } {
         set plioWidth [lindex $argv 15]
     }
+    if {[llength $argv] > 16 } {
+        set headSize [lindex $argv 16]
+    }
     puts "filename          = $filename"
     puts "window_vsize      = $window_vsize"
     puts "iterations        = $iterations"
@@ -110,7 +114,8 @@ if { $::argc > 2} {
     puts "tt_coeff          = $tt_coeff"
     puts "coeffStimType     = $coeffStimType"
     puts "firLen            = $firLen"
-    puts "plioWidth            = $plioWidth"
+    puts "plioWidth         = $plioWidth"
+    puts "headSize          = $headSize"
     puts "------------------------------"
 
 }
@@ -228,7 +233,7 @@ proc generateSample {stimType sampleSeed sample_idx samples sampleType comp} {
     } elseif { ($stimType == 8) } {
         #This is a horrible kludge for $cint32 and $cfloat because this script confuses $linesPerSample and $samplesPerLine
         if {$sampleType eq "cint32" || $sampleType eq "cfloat"} {
-            set mod [expr $sample_idx % 16 ]
+            set mod [expr ($sample_idx*2+$comp) % 16 ]
             if {$mod == 0 || $mod == 5} {
                 set nextSample 8192
             }  elseif {$mod == 2 || $mod == 3 || $mod == 7 || $mod == 14 } {
@@ -241,30 +246,17 @@ proc generateSample {stimType sampleSeed sample_idx samples sampleType comp} {
                 set nextSample -8192
             }
         } else {
-            if {$comp eq 0} {
-                if {$sample_idx % 8 == 0 } {
-                    set nextSample 8192
-                }  elseif {$sample_idx % 8 == 1 || $sample_idx % 8 == 7 } {
-                    set nextSample 5793
-                }  elseif {$sample_idx % 8 == 2 || $sample_idx % 8 == 6 } {
-                    set nextSample 0
-                }  elseif {$sample_idx % 8 == 3 || $sample_idx % 8 == 5 } {
-                    set nextSample -5793
-                }  else {
-                    set nextSample -8192
-                }
-            } else {
-                if {$sample_idx % 8 == 0 | $sample_idx % 8 == 4 } {
-                    set nextSample 0
-                }  elseif {$sample_idx % 8 == 1 || $sample_idx % 8 == 3 } {
-                    set nextSample 5793
-                }  elseif {$sample_idx % 8 == 2 } {
-                    set nextSample 8192
-                }  elseif {$sample_idx % 8 == 5 || $sample_idx % 8 == 7 } {
-                    set nextSample -5793
-                }  else {
-                    set nextSample -8192
-                }
+            set mod [expr ($sample_idx*4+$comp) % 16 ]
+            if {$mod == 0 || $mod == 5} {
+                set nextSample 8192
+            }  elseif {$mod == 2 || $mod == 3  || $mod == 7 || $mod == 14}  {
+                set nextSample 5793
+            }  elseif {$mod == 1 || $mod== 4 || $mod == 9 || $mod== 12 } {
+                set nextSample 0
+            }  elseif {$mod == 6 || $mod == 10 || $mod == 11 || $mod == 15 } {
+                set nextSample -5793
+            }  else {
+                set nextSample -8192
             }
         }
     } elseif {$stimType == 9 } {
@@ -282,7 +274,7 @@ proc generateSample {stimType sampleSeed sample_idx samples sampleType comp} {
                 set tcl_precision 7
                 set nextSample [expr {double($sample_idx)  / $samples}]
             }
-           
+
         } else {
             if {($sampleType eq "int16")} {
                 set nextSample [expr {((2 * $sample_idx + $comp) * 32768 / $samples) }]
@@ -295,7 +287,7 @@ proc generateSample {stimType sampleSeed sample_idx samples sampleType comp} {
             set randSeed $sample_idx
             set randSample [randInt $randSeed "int16"]
             set integerType 0
-            set tcl_precision 17 
+            set tcl_precision 17
             set nextSample [expr {abs($randSample)  / 32768.0}]
         } else {
             set randSample [randInt $sampleSeed $sampleType]
@@ -393,10 +385,12 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
             set pt_size_pwr $max_pt_size_pwr
             set endOfDynPt 1
         }
-        # Header size = 256-bit, i.e. 4 cint32/cfloat or 8 cint16
-        set header_size 4
+        # Header size = 256-bit, i.e. 4 cint32/cfloat or 8 cint16. It is 512 for AIEMLv2, so header size
+        #headSize = 32 when AIE or AIE-ML, 64 for AIE-MLv2
+        #headSize is in bytes, header size in samples, so convert (/8 for cint32 or cfloat, /4 for cint16)
+        set header_size [expr ($headSize/8) ]
         if {$tt_data eq "cint16"} {
-            set header_size 8
+            set header_size [expr ($headSize/4) ]
         }
 
         if {$dataPartsPerLine == 2} {
@@ -411,7 +405,7 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
             puts $output_file "$pt_size_pwr"
             puts $output_file "0"
         }
-        # 2 headers samlpes already written. 2 * (header_size - 2) parts still to write
+        # 2 headers samples already written. 2 * (header_size - 2) parts still to write
         for {set i 0} {$i < ( (2 * ($header_size - 2))) } {incr i} {
             if {$i % $dataPartsPerLine eq ($dataPartsPerLine - 1)} {
                 puts $output_file  "0"
@@ -445,14 +439,16 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
 #    puts $dataPartsPerLine
 #    puts $dataStimType
 
+    puts "framesInWindow   = $framesInWindow"
+    puts "samplesPerFrame  = $samplesPerFrame"
+    puts "samplesPerLine   = $samplesPerLine"
+    puts "dataPartsPerLine = $dataPartsPerLine"
     # Process Window (single frame or multiple frames in window)
     for {set winSplice 0} {$winSplice < $framesInWindow} {incr winSplice} {
         for {set sample_idx 0} {$sample_idx < $samplesPerFrame / $samplesPerLine} {incr sample_idx} {
             for {set comp 0} {$comp < $dataPartsPerLine} {incr comp} {
                 set nextSample [generateSample  $dataStimType $nextSample $sample_idx $samplesPerFrame $tt_data $comp]
-                if {$comp < 3 && $dataPartsPerLine eq 4} {
-                    puts -nonewline $output_file "$nextSample "
-                } elseif {$comp eq 0 && $dataPartsPerLine eq 2} {
+                if {$comp < $dataPartsPerLine-1} {
                     puts -nonewline $output_file "$nextSample "
                 } else {
                     puts $output_file "$nextSample "

@@ -30,35 +30,46 @@ namespace aie {
 namespace fft {
 namespace twidRot {
 
-template <unsigned int TP_POINT_SIZE>
+static constexpr unsigned int usePLffts() {
+    return 1;
+}
+static constexpr unsigned int useAIEffts() {
+    return 0;
+}
+
+template <unsigned int TP_POINT_SIZE, unsigned int TP_VSS_MODE, unsigned TP_SSR>
 constexpr unsigned int fnPtSizeD1() {
-    unsigned int sqrtVal =
-        TP_POINT_SIZE == 65536
-            ? 256
-            : TP_POINT_SIZE == 32768
-                  ? 128
-                  : TP_POINT_SIZE == 16384
-                        ? 128
-                        : TP_POINT_SIZE == 8192
-                              ? 64
-                              : TP_POINT_SIZE == 4096
-                                    ? 64
-                                    : TP_POINT_SIZE == 2048
-                                          ? 32
-                                          : TP_POINT_SIZE == 1024
-                                                ? 32
-                                                : TP_POINT_SIZE == 512
-                                                      ? 16
-                                                      : TP_POINT_SIZE == 256
-                                                            ? 16
-                                                            : TP_POINT_SIZE == 128
-                                                                  ? 8
-                                                                  : TP_POINT_SIZE == 64
-                                                                        ? 8
-                                                                        : TP_POINT_SIZE == 32
-                                                                              ? 4
-                                                                              : TP_POINT_SIZE == 16 ? 4 : 0;
-    return sqrtVal;
+    unsigned int ptSizeD1 = -1;
+    if (TP_VSS_MODE == usePLffts()) {
+        ptSizeD1 = TP_POINT_SIZE / TP_SSR;
+    } else if (TP_VSS_MODE == useAIEffts()) {
+        ptSizeD1 = TP_POINT_SIZE == 65536
+                       ? 256
+                       : TP_POINT_SIZE == 32768
+                             ? 128
+                             : TP_POINT_SIZE == 16384
+                                   ? 128
+                                   : TP_POINT_SIZE == 8192
+                                         ? 64
+                                         : TP_POINT_SIZE == 4096
+                                               ? 64
+                                               : TP_POINT_SIZE == 2048
+                                                     ? 32
+                                                     : TP_POINT_SIZE == 1024
+                                                           ? 32
+                                                           : TP_POINT_SIZE == 512
+                                                                 ? 16
+                                                                 : TP_POINT_SIZE == 256
+                                                                       ? 16
+                                                                       : TP_POINT_SIZE == 128
+                                                                             ? 8
+                                                                             : TP_POINT_SIZE == 64
+                                                                                   ? 8
+                                                                                   : TP_POINT_SIZE == 32
+                                                                                         ? 4
+                                                                                         : TP_POINT_SIZE == 16 ? 4 : 0;
+    }
+    return ptSizeD1;
 }
 
 template <typename TT_DATA,

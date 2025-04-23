@@ -26,6 +26,30 @@ xf::dsp::aie::testcase::test_graph conv_corr_TestHarness;
 
 int main(void) {
     conv_corr_TestHarness.init();
+
+#if (USE_RTP_VECTOR_LENGTHS == 1)
+    conv_corr_TestHarness.m_inVecLen[0] = (int32)(REF_F_LEN);
+    conv_corr_TestHarness.m_inVecLen[1] = (int32)(G_LEN);
+
+#ifdef USING_UUT
+    conv_corr_TestHarness.update(conv_corr_TestHarness.rtpVecLen[0], conv_corr_TestHarness.m_inVecLen, 2);
+    conv_corr_TestHarness.run(NITER / 2);
+    conv_corr_TestHarness
+        .wait(); // Async : the kernel execution waits for the first update to happen for parameter initialization
+#else
+#if (API_IO == 1)
+    conv_corr_TestHarness.update(conv_corr_TestHarness.rtpVecLen[0], conv_corr_TestHarness.m_inVecLen, 2);
+    conv_corr_TestHarness.run(1);
+    conv_corr_TestHarness
+        .wait(); // Async : the kernel execution waits for the first update to happen for parameter initialization
+#else
+    conv_corr_TestHarness.update(conv_corr_TestHarness.rtpVecLen[0], conv_corr_TestHarness.m_inVecLen, 2);
+    conv_corr_TestHarness.run(NITER / 2);
+    conv_corr_TestHarness
+        .wait(); // Async : the kernel execution waits for the first update to happen for parameter initialization
+#endif
+#endif
+#else
 #ifdef USING_UUT
     conv_corr_TestHarness.run(NITER);
 #else
@@ -33,6 +57,7 @@ int main(void) {
     conv_corr_TestHarness.run(1);
 #else
     conv_corr_TestHarness.run(NITER);
+#endif
 #endif
 #endif
 

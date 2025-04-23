@@ -17,7 +17,7 @@
 import sys
 import configparser
 import string 
-def hls_params(cur_dir, root_dir, kernel, params_file):
+def hls_params(cur_dir, root_dir, kernel, params_file, tmpl_file):
     parser = configparser.ConfigParser()
     with open(f'{cur_dir}/{params_file}') as stream:
         parser.read_string("[top]\n" + stream.read())  # python's configparser complains about headerless configurations in cfg files. This is a trick to get around the issue
@@ -28,7 +28,7 @@ def hls_params(cur_dir, root_dir, kernel, params_file):
     full_dict = { **kernel_dict, **hls_config_dict}
     print(full_dict)
 
-    with open(f'{root_dir}/L2/include/vss/vss_fft_ifft_1d/hls_config.tmpl', 'r') as fr:
+    with open(f'{root_dir}/L2/include/vss/vss_fft_ifft_1d/{tmpl_file}', 'r') as fr:
         t = fr.read()
     with open(f"{cur_dir}/{cfg_file}", 'w') as f:
         f.write(string.Template(t).substitute(**full_dict))
@@ -37,5 +37,9 @@ CUR_DIR = sys.argv[1]
 ROOT_DIR = sys.argv[2]
 HLS_KERNEL_NAME = sys.argv[3]
 PARAMS_FILE = sys.argv[4]
+if len(sys.argv) > 5:
+    TMPL_FILE = sys.argv[5]
+else:
+    TMPL_FILE = "hls_config.tmpl"
 
-hls_params(CUR_DIR, ROOT_DIR, HLS_KERNEL_NAME, PARAMS_FILE)
+hls_params(CUR_DIR, ROOT_DIR, HLS_KERNEL_NAME, PARAMS_FILE, TMPL_FILE)

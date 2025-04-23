@@ -29,7 +29,7 @@ NUM_INPUT_SAMPLES = $(shell echo $$(( $(P_DIM_A) * $(P_DIM_B))))
 NUM_MACS_PER_KERNEL = $(shell echo $$(( ( $(P_DIM_A) * $(P_DIM_AB) * $(P_DIM_B) ) / $(P_CASC_LEN) )))
 P_INPUT_WINDOW_VSIZE_A = $(shell echo $$(( $(P_DIM_A) * $(P_DIM_AB))))
 P_INPUT_WINDOW_VSIZE_B = $(shell echo $$(( $(P_DIM_B) * $(P_DIM_AB))))
-PARAM_MAP = T_DATA_A $(T_DATA_A) T_DATA_B $(T_DATA_B) P_DIM_A $(P_DIM_A) P_DIM_AB $(P_DIM_AB) P_DIM_B $(P_DIM_B) P_SHIFT $(P_SHIFT) P_ROUND_MODE $(P_ROUND_MODE) P_SAT_MODE $(P_SAT_MODE) P_DIM_A_LEADING $(P_DIM_A_LEADING) P_DIM_B_LEADING $(P_DIM_B_LEADING) P_DIM_OUT_LEADING $(P_DIM_OUT_LEADING) P_ADD_TILING_A $(P_ADD_TILING_A) P_ADD_TILING_B $(P_ADD_TILING_B) P_ADD_DETILING_OUT $(P_ADD_DETILING_OUT) P_INPUT_WINDOW_VSIZE_A $(P_INPUT_WINDOW_VSIZE_A) P_INPUT_WINDOW_VSIZE_B $(P_INPUT_WINDOW_VSIZE_B) P_CASC_LEN $(P_CASC_LEN) UUT_SSR $(UUT_SSR) AIE_VARIANT $(AIE_VARIANT)
+PARAM_MAP = T_DATA_A $(T_DATA_A) T_DATA_B $(T_DATA_B) DATA_OUT_TYPE $(DATA_OUT_TYPE) P_DIM_A $(P_DIM_A) P_DIM_AB $(P_DIM_AB) P_DIM_B $(P_DIM_B) P_SHIFT $(P_SHIFT) P_ROUND_MODE $(P_ROUND_MODE) P_SAT_MODE $(P_SAT_MODE) P_DIM_A_LEADING $(P_DIM_A_LEADING) P_DIM_B_LEADING $(P_DIM_B_LEADING) P_DIM_OUT_LEADING $(P_DIM_OUT_LEADING) P_ADD_TILING_A $(P_ADD_TILING_A) P_ADD_TILING_B $(P_ADD_TILING_B) P_ADD_DETILING_OUT $(P_ADD_DETILING_OUT) P_INPUT_WINDOW_VSIZE_A $(P_INPUT_WINDOW_VSIZE_A) P_INPUT_WINDOW_VSIZE_B $(P_INPUT_WINDOW_VSIZE_B) P_CASC_LEN $(P_CASC_LEN) UUT_SSR $(UUT_SSR) AIE_VARIANT $(AIE_VARIANT)
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 
 $(HELPER):
@@ -52,7 +52,7 @@ get_stats:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(NUM_INPUT_SAMPLES) $(P_CASC_LEN) $(STATUS_FILE) ./aiesimulator_output matMult
 
 get_status:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) SINGLE_BUF $(SINGLE_BUF)
 
 prep_x86_out:
 	@x86_out_files=`ls $(HELPER_CUR_DIR)/x86simulator_output/data`;\
@@ -69,8 +69,8 @@ prep_aie_out:
 	done
 
 get_diff:
-	echo perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --aieVariant $(AIE_VARIANT) --untile --inFile ./data/uut_output.txt --tileInPlace --inRow $(P_DIM_A) --inCol $(P_DIM_B) --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --ssr $(UUT_SSR) --colMajor $(P_DIM_OUT_LEADING) --isTiled $(P_ADD_DETILING_OUT) --plioWidth 64
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --aieVariant $(AIE_VARIANT) --untile --inFile ./data/uut_output.txt --tileInPlace --inRow $(P_DIM_A) --inCol $(P_DIM_B) --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --ssr $(UUT_SSR) --colMajor $(P_DIM_OUT_LEADING) --isTiled $(P_ADD_DETILING_OUT) --plioWidth 64
+	echo perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --aieVariant $(AIE_VARIANT) --untile --inFile ./data/uut_output.txt --tileInPlace --inRow $(P_DIM_A) --inCol $(P_DIM_B) --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --T_DATA_OUT $(DATA_OUT_TYPE) --ssr $(UUT_SSR) --colMajor $(P_DIM_OUT_LEADING) --isTiled $(P_ADD_DETILING_OUT) --plioWidth 64
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --aieVariant $(AIE_VARIANT) --untile --inFile ./data/uut_output.txt --tileInPlace --inRow $(P_DIM_A) --inCol $(P_DIM_B) --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --T_DATA_OUT $(DATA_OUT_TYPE) --ssr $(UUT_SSR) --colMajor $(P_DIM_OUT_LEADING) --isTiled $(P_ADD_DETILING_OUT) --plioWidth 64
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)
 
 create_config:

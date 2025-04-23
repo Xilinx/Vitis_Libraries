@@ -97,6 +97,11 @@ class sample_delay_graph : public graph {
     kernel m_kernel;
 
     /**
+        * Access function to get pointer to kernel (or first kernel in a chained configuration).
+    **/
+    kernel* getKernels() { return &m_kernel; };
+
+    /**
       * @brief Constructor function for the sample_delay graph. \n The constructor has two forms.
       * If no constructor argument is supplied the initial sample delay will be set to 0, otherwise the
       * constructor argument sets the initial sample delay.

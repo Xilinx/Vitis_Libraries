@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -128,7 +128,8 @@ endif
 ############################## Setting Targets ##############################
 .PHONY: pre_build
 pre_build:
-	vitis --classic -exec ipmetadata_config_checker -newflow -metadata_path $(XFLIB_DIR)/L2/meta/ $(XFLIB_DIR)/L2/meta/vmc/$(VMC_KERNEL).json ./config.json
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/meta/scripts/metadata_checker.py --ip $(UUT_KERNEL))
+	# vitis --classic -exec ipmetadata_config_checker -newflow -metadata_path $(XFLIB_DIR)/L2/meta/ $(XFLIB_DIR)/L2/meta/vmc/$(VMC_KERNEL).json ./config.json
 	perl $(XFLIB_DIR)/L2/tests/aie/common/scripts/compare_json.pl ref_out.json ./xmc_aie_lib/$(GRAPHNAME)/out.json | grep 'Files are identical' || exit 1
 
 .PHONY: clean cleanall valid_params

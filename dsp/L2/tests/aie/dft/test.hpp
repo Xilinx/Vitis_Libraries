@@ -109,6 +109,10 @@ class test_graph : public graph {
                 in[casc + ssr * CASC_LEN] = input_plio::create("PLIO_in_" + std::to_string(casc + ssr * CASC_LEN),
                                                                adf::plio_64_bits, filenameIn);
                 connect<>(in[casc + ssr * CASC_LEN].out[0], dftGraph.in[casc + ssr * CASC_LEN]);
+#if (SINGLE_BUF == 1)
+                single_buffer(dftGraph.getKernels()[casc + ssr * CASC_LEN].in[0]);
+                printf("INFO: Single Buffer Constraint applied to input buffer of kernel %d.\n", casc + ssr * CASC_LEN);
+#endif // single buffer enabled
             }
         }
         for (int ssrOut = 0; ssrOut < UUT_SSR; ssrOut++) {
@@ -116,6 +120,11 @@ class test_graph : public graph {
             filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(ssrOut) + "_0"));
             out[ssrOut] = output_plio::create("PLIO_out_" + std::to_string(ssrOut), adf::plio_64_bits, filenameOut);
             connect<>(dftGraph.out[ssrOut], out[ssrOut].in[0]);
+#if (SINGLE_BUF == 1)
+            single_buffer(dftGraph.getKernels()[(ssrOut * CASC_LEN + CASC_LEN) - 1].out[0]);
+            printf("INFO: Single Buffer Constraint applied to output buffer of kernel %d.\n",
+                   ssrOut * CASC_LEN + CASC_LEN);
+#endif // single buffer enabled
         }
 #else // using ref
         std::string filenameIn = QUOTE(INPUT_FILE);

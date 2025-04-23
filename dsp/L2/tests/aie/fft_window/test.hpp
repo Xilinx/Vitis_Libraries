@@ -172,8 +172,15 @@ class test_graph : public graph {
             filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(i) + "_0"));
             out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_64_bits, filenameOut);
             connect<>(fftWindowGraph.out[i], out[i].in[0]);
-            // valconnect<>(fftWindowGraph.out[i], fftGraph.in[i]);
-            // valconnect<>(fftGraph.out[i], out[i].in[0]);
+// valconnect<>(fftWindowGraph.out[i], fftGraph.in[i]);
+// valconnect<>(fftGraph.out[i], out[i].in[0]);
+#ifdef USING_UUT
+#if (SINGLE_BUF == 1 && API_IO == 0)
+            single_buffer(fftWindowGraph.getKernels()[i].in[0]);
+            single_buffer(fftWindowGraph.getKernels()[i].out[0]);
+            printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n", i);
+#endif
+#endif
         }
 
         printf("========================\n");

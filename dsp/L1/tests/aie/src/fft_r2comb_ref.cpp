@@ -220,7 +220,8 @@ void fft_r2comb_ref<TT_DATA,
         constexpr(TP_DYN_PT_SIZE == 1) {
             constexpr int kMinPtSizePwr = 4;
             constexpr int kMaxPtSizePwr = 16;
-            constexpr unsigned int kHeaderSize = 32 / (sizeof(TT_DATA)); // dynamic point size header size in samples
+            constexpr unsigned int kHeaderSize =
+                __ALIGN_BYTE_SIZE__ / (sizeof(TT_DATA)); // dynamic point size header size in samples
             constexpr unsigned int kPtSizePwr = fnGetPointSizePower<TP_POINT_SIZE>();
             constexpr unsigned int kR2Stages =
                 std::is_same<TT_DATA, cfloat>::value

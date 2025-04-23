@@ -119,6 +119,7 @@
                 "file": "kronecker.py",
                 "function": "update_TP_DIM_A_ROWS",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
                     "TP_API"
@@ -128,6 +129,7 @@
                 "file": "kronecker.py",
                 "function": "validate_TP_DIM_A_ROWS",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
                     "TP_API"
@@ -142,6 +144,7 @@
                 "file": "kronecker.py",
                 "function": "update_TP_DIM_A_COLS",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
                     "TP_API",
@@ -153,6 +156,7 @@
                 "file": "kronecker.py",
                 "function": "validate_TP_DIM_A_COLS",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
                     "TP_API",
@@ -169,6 +173,7 @@
                 "file": "kronecker.py",
                 "function": "update_TP_DIM_B_ROWS",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
                     "TP_API",
@@ -181,6 +186,7 @@
                 "file": "kronecker.py",
                 "function": "validate_TP_DIM_B_ROWS",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
                     "TP_API",
@@ -197,6 +203,7 @@
                 "file": "kronecker.py",
                 "function": "update_TP_DIM_B_COLS",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
                     "TP_API",
@@ -210,6 +217,7 @@
                 "file": "kronecker.py",
                 "function": "validate_TP_DIM_B_COLS",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
                     "TP_API",
@@ -228,6 +236,7 @@
                 "file": "kronecker.py",
                 "function": "update_TP_NUM_FRAMES",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
                     "TP_DIM_A_ROWS",
@@ -242,6 +251,7 @@
                 "file": "kronecker.py",
                 "function": "validate_TP_NUM_FRAMES",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
                     "TP_DIM_A_ROWS",

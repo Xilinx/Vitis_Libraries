@@ -117,6 +117,68 @@ class test_graph : public graph {
             out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_64_bits, filenameOut);
             connect<>(fftGraph.out[i], out[i].in[0]);
 
+#ifdef USING_UUT
+#if (SINGLE_BUF == 1 && API_IO == 0)
+#if (PARALLEL_POWER == 0)
+            single_buffer(fftGraph.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTwinproc.getKernels()->out[0]);
+            printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n", i);
+#endif // PARALLEL_POWER == 0
+#if (PARALLEL_POWER == 1)
+            single_buffer(fftGraph.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.m_r2Comb[i].out[0]);
+
+            printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n", i);
+#endif // PARALLEL_POWER == 1
+#if (PARALLEL_POWER == 2)
+            single_buffer(fftGraph.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.m_r2Comb[i].out[0]);
+
+            printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n", i);
+#endif // PARALLEL_POWER == 2
+#if (PARALLEL_POWER == 3)
+            single_buffer(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+
+            single_buffer(fftGraph.m_r2Comb[i].out[0]);
+
+            printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n", i);
+#endif // PARALLEL_POWER == 3
+#if (PARALLEL_POWER == 4)
+            single_buffer(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+
+            single_buffer(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.m_r2Comb[i].out[0]);
+
+            printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n", i);
+#endif // PARALLEL_POWER == 3
+#endif // SINGLE BUFFER CONSTRAINT
+#endif // USING UUT
+
 // apply location constraints for TP_POINT_SIZE=64k
 #if 0
 #ifdef USING_UUT

@@ -23,7 +23,7 @@ import re
 # argument2 : multi_params path - path to the directory where multi_params file exists
 # rest of the arguments : series of commands in "make all" format that contain the parameters for this test case
 
-run_type=sys.argv[1]
+run_type = sys.argv[1]
 test_dir = sys.argv[2]
 default_params_path = test_dir + "/multi_params.json"
 jenkins = False
@@ -45,10 +45,12 @@ print(default_params_path)
 print(multi_params_path)
 # if run_type == "checkin":
 #     run_type = "daily"
-f = open(default_params_path, )
-json_list=json.load(f)
-default_params=json_list["test_0_tool_canary_aie"]
-new_json_file={}
+f = open(
+    default_params_path,
+)
+json_list = json.load(f)
+default_params = json_list["test_0_tool_canary_aie"]
+new_json_file = {}
 
 if jenkins or clear_json_file:
     new_json_file["test_0_tool_canary_aie"] = default_params
@@ -58,7 +60,6 @@ if jenkins or clear_json_file:
             for def_param in default_params:
                 if def_param not in new_json_file[test]:
                     new_json_file[test][def_param] = default_params[def_param]
-
 
 
 def dds_hex_to_dec(my_dict):
@@ -71,6 +72,7 @@ def dds_hex_to_dec(my_dict):
                 print(f"Value {value} at key {key} is not a valid hexadecimal number.")
     return my_dict
 
+
 def set_float_defaults(my_dict, def_dict):
     if any("float" in str(value) for value in my_dict.values()):
         if "DIFF_TOLERANCE" not in my_dict:
@@ -82,46 +84,52 @@ def set_float_defaults(my_dict, def_dict):
             my_dict["P_SHIFT"] = "0"
     return my_dict
 
+
 def set_dynamic_defaults(my_dict, def_dict, path):
     # set matrix_mult WINDOW_VSIZES to matrix dimensions when not already set in make command
     if "matrix_mult" in path:
         if "P_INPUT_WINDOW_VSIZE_A" not in my_dict:
-            dim_a = my_dict.get('P_DIM_A', def_dict.get('P_DIM_A'))
-            dim_ab = my_dict.get('P_DIM_AB', def_dict.get('P_DIM_AB'))
-            my_dict['P_INPUT_WINDOW_VSIZE_A'] = str(int(dim_a) * int(dim_ab))
+            dim_a = my_dict.get("P_DIM_A", def_dict.get("P_DIM_A"))
+            dim_ab = my_dict.get("P_DIM_AB", def_dict.get("P_DIM_AB"))
+            my_dict["P_INPUT_WINDOW_VSIZE_A"] = str(int(dim_a) * int(dim_ab))
         if "P_INPUT_WINDOW_VSIZE_B" not in tmp_dict:
-            dim_ab = my_dict.get('P_DIM_AB', def_dict.get('P_DIM_AB'))
-            dim_b = my_dict.get('P_DIM_B', def_dict.get('P_DIM_B'))
-            my_dict['P_INPUT_WINDOW_VSIZE_B'] = str(int(dim_ab) * int(dim_b))
+            dim_ab = my_dict.get("P_DIM_AB", def_dict.get("P_DIM_AB"))
+            dim_b = my_dict.get("P_DIM_B", def_dict.get("P_DIM_B"))
+            my_dict["P_INPUT_WINDOW_VSIZE_B"] = str(int(dim_ab) * int(dim_b))
 
     # set WINDOW_VSIZE to POINT_SIZE when not already set in make command
-    if "POINT_SIZE" in def_dict and "WINDOW_VSIZE" in def_dict and "WINDOW_VSIZE" not in my_dict:
-        my_dict["WINDOW_VSIZE"] = my_dict.get("POINT_SIZE", None)
+    if "POINT_SIZE" in def_dict and "WINDOW_VSIZE" not in my_dict:
+        if "POINT_SIZE" in my_dict:
+            my_dict["WINDOW_VSIZE"] = my_dict.get("POINT_SIZE", None)
+        else:
+            if "WINDOW_VSIZE" in def_dict:
+                my_dict["WINDOW_VSIZE"] = def_dict.get("WINDOW_VSIZE", None)
+            else:
+                my_dict["WINDOW_VSIZE"] = def_dict.get("POINT_SIZE", None)
     return my_dict
 
 
-list_case_names=[]
-new_commands=[]
+list_case_names = []
+new_commands = []
 for command in sys.argv:
     # print(command)
-    tmp_dict={}
-    tcase_name=""
-    device="aie1"
-    TARGET="hw"
+    tmp_dict = {}
+    tcase_name = ""
+    device = "aie1"
+    TARGET = "hw"
     enable_pwr = 0
     if "make" in command:
-        stringlist = re.split("\s", command)
+        stringlist = re.split("\\s", command)
         for string in stringlist:
             # tmp_dict for each make command contains specified parameters and values
             if "=" in string:
                 key, value = re.split("=", string)
-                if "AIE_VARIANT" in key and value == "2" or "PART" in key and value == "xcve2802-vsvh1760-2MP-e-S":
-                    device = "aie2"
-                    tmp_dict[key] = value
-                elif "TARGET" in key:
+                if "AIE_VARIANT" in key:
+                    device = "aie" + value
+                if "TARGET" in key:
                     TARGET = value
-                else:
-                    tmp_dict[key] = value
+                # Put all params into test string name.
+                tmp_dict[key] = value
 
         # convert hex numbers in dds_mixers to decimal
         tmp_dict = dds_hex_to_dec(tmp_dict)
@@ -133,20 +141,22 @@ for command in sys.argv:
         for key in default_params:
             if key in tmp_dict:
                 if "." not in tmp_dict[key] and "PART" not in key:
-                    tcase_name=tcase_name+str(tmp_dict[key])+"_"
+                    tcase_name = tcase_name + str(tmp_dict[key]) + "_"
                 continue
+                # tcase_name=tcase_name+str(tmp_dict[key])+"_"
             else:
                 tmp_dict[key] = default_params[key]
+                # tcase_name=tcase_name+str(tmp_dict[key])+"_"
                 if "." not in tmp_dict[key] and "PART" not in key:
-                    tcase_name=tcase_name+str(tmp_dict[key])+"_"
+                    tcase_name = tcase_name + str(tmp_dict[key]) + "_"
 
-        if "DUMP_VCD" in tmp_dict and tmp_dict["DUMP_VCD"] == "1" :
-            tcase_name+="VCD_"
+        if "DUMP_VCD" in tmp_dict and tmp_dict["DUMP_VCD"] == "1":
+            tcase_name += "VCD_"
 
-        tcase_name+=device+"_"
-        tcase_name+=TARGET+"_"
-        tcase_name+=run_type
-        #print(tcase_name)
+        tcase_name += device + "_"
+        tcase_name += TARGET + "_"
+        tcase_name += run_type
+        # print(tcase_name)
         if jenkins == False:
             new_json_file[tcase_name] = tmp_dict
         elif jenkins == True:

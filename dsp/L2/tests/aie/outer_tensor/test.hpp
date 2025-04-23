@@ -97,6 +97,15 @@ class test_graph : public graph {
             filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(i)));
             out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_64_bits, filenameOut);
             connect<>(outer_tensorGraph.out[i], out[i].in[0]);
+#if (SINGLE_BUF == 1) // Single buffer constraint applies for windows implementations
+            single_buffer(outer_tensorGraph.getKernels()[i].in[0]);
+            single_buffer(outer_tensorGraph.getKernels()[i].in[1]);
+            printf("INFO: Single Buffer Constraint applied to the input buffers of kernel %d.\n", i);
+#if (API_IO == 0)
+            single_buffer(outer_tensorGraph.getKernels()[i].out[0]);
+            printf("INFO: Single Buffer Constraint applied to the output buffer of kernel %d.\n", i);
+#endif
+#endif
         }
 #else
         // Outer Tensor sub-graph

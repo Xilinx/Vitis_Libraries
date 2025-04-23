@@ -19,14 +19,12 @@
             "updater": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "update_AIE_VARIANT",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_AIE_VARIANT",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
@@ -41,17 +39,16 @@
             "updater": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "update_TT_DATA",
-                "args": [
-                ]
+                "args": ["AIE_VARIANT"]
             },
             "validator": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TT_DATA",
-                "args": [
-                ]
+                "args": ["AIE_VARIANT"]
+
             }
         },
-         {
+        {
             "name": "TT_OUT_DATA",
             "description": "The type of individual data samples output of the FFT function",
             "type": "typename",
@@ -75,7 +72,7 @@
                 ]
             }
         },
-       {
+        {
             "name": "TT_TWIDDLE",
             "description": "The type of twiddle factors of the transform",
             "type": "typename",
@@ -107,11 +104,11 @@
             "type": "uint",
             "updater": {
                 "file": "fft_ifft_dit_1ch.py",
-                "function": "update_TP_TWIDDLE_MODE" 
+                "function": "update_TP_TWIDDLE_MODE"
             },
             "validator": {
                 "file": "fft_ifft_dit_1ch.py",
-                "function": "validate_TP_TWIDDLE_MODE" 
+                "function": "validate_TP_TWIDDLE_MODE"
             }
         },
         {
@@ -121,14 +118,12 @@
             "updater": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "update_TP_FFT_NIFFT",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TP_FFT_NIFFT",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
@@ -138,14 +133,12 @@
             "updater": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "update_TP_DYN_PT_SIZE",
-                "args": [
-                ]
+                "args": [ ]
             },
             "validator": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TP_DYN_PT_SIZE",
-                "args": [
-                ]
+                "args": [ ]
             }
         },
         {
@@ -155,15 +148,12 @@
             "updater": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "update_TP_API",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TP_API",
-                "args": [
-
-                ]
+                "args": []
             }
         },
         {
@@ -195,6 +185,8 @@
                 "args": [
                     "TP_DYN_PT_SIZE",
                     "TT_DATA",
+                    "TT_TWIDDLE",
+                    "TT_OUT_DATA",
                     "TP_PARALLEL_POWER",
                     "TP_API",
                     "AIE_VARIANT"
@@ -206,6 +198,8 @@
                 "args": [
                     "TP_DYN_PT_SIZE",
                     "TT_DATA",
+                    "TT_TWIDDLE",
+                    "TT_OUT_DATA",
                     "TP_PARALLEL_POWER",
                     "TP_API",
                     "AIE_VARIANT"
@@ -220,7 +214,13 @@
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "update_TP_WINDOW_VSIZE",
                 "args": [
-                    "TP_POINT_SIZE",
+                    "AIE_VARIANT", 
+                    "TT_DATA", 
+                    "TT_TWIDDLE", 
+                    "TT_OUT_DATA", 
+                    "TP_API", 
+                    "TP_PARALLEL_POWER", 
+                    "TP_POINT_SIZE", 
                     "TP_DYN_PT_SIZE"
                 ]
             },
@@ -228,7 +228,13 @@
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TP_WINDOW_VSIZE",
                 "args": [
-                    "TP_POINT_SIZE",
+                    "AIE_VARIANT", 
+                    "TT_DATA", 
+                    "TT_TWIDDLE", 
+                    "TT_OUT_DATA", 
+                    "TP_API", 
+                    "TP_PARALLEL_POWER", 
+                    "TP_POINT_SIZE", 
                     "TP_DYN_PT_SIZE"
                 ]
             }
@@ -266,7 +272,7 @@
                 "args": [
                     "TT_DATA"
                 ]
-            },            
+            },
             "validator": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TP_SHIFT",
@@ -282,12 +288,16 @@
             "updater": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "update_TP_RND",
-                "args": ["AIE_VARIANT"]
+                "args": [
+                    "AIE_VARIANT"
+                ]
             },
             "validator": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TP_RND",
-                "args": ["AIE_VARIANT"]
+                "args": [
+                    "AIE_VARIANT"
+                ]
             }
         },
         {
@@ -296,11 +306,11 @@
             "type": "uint",
             "updater": {
                 "file": "fft_ifft_dit_1ch.py",
-                "function": "update_TP_SAT" 
+                "function": "update_TP_SAT"
             },
             "validator": {
                 "file": "fft_ifft_dit_1ch.py",
-                "function": "validate_TP_SAT" 
+                "function": "validate_TP_SAT"
             }
         },
         {
@@ -310,15 +320,12 @@
             "updater": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "update_TP_USE_WIDGETS",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TP_USE_WIDGETS",
-                "args": [
-
-                ]
+                "args": []
             }
         }
     ],

@@ -138,6 +138,7 @@
                 "file": "func_approx.py",
                 "function": "update_TP_SHIFT",
                 "args": [
+                    "AIE_VARIANT" ,
                     "TT_DATA"
                 ]
             },
@@ -145,6 +146,7 @@
                 "file": "func_approx.py",
                 "function": "validate_TP_SHIFT",
                 "args": [
+                    "AIE_VARIANT" ,
                     "TT_DATA"
                 ]
             }

@@ -36,17 +36,11 @@
             ],
             "updater": {
                 "file": "mixed_radix_fft.py",
-                "function": "update_TT_DATA",
-                "args": [
-                    "AIE_VARIANT"
-                ]
+                "function": "update_TT_DATA"           
             },
             "validator": {
                 "file": "mixed_radix_fft.py",
-                "function": "validate_TT_DATA",
-                "args": [
-                    "AIE_VARIANT"
-                ]
+                "function": "validate_TT_DATA"
             }
         },
         {
@@ -62,14 +56,14 @@
                 "file": "mixed_radix_fft.py",
                 "function": "update_TT_TWIDDLE",
                 "args": [
-                    "TT_DATA"
+                     "AIE_VARIANT", "TT_DATA"
                 ]
             },
             "validator": {
                 "file": "mixed_radix_fft.py",
                 "function": "validate_TT_TWIDDLE",
                 "args": [
-                    "TT_DATA"
+                    "AIE_VARIANT", "TT_DATA"
                 ]
             }
         },
@@ -80,12 +74,16 @@
             "updater": {
                 "file": "mixed_radix_fft.py",
                 "function": "update_TP_DYN_PT_SIZE",
-                "args": []
+                "args": [
+                    "TT_DATA"
+                ]
             },
             "validator": {
                 "file": "mixed_radix_fft.py",
                 "function": "validate_TP_DYN_PT_SIZE",
-                "args": []
+                "args": [
+                    "TT_DATA"
+                ]
             }
         },
         {
@@ -189,6 +187,7 @@
                 "file": "mixed_radix_fft.py",
                 "function": "update_TP_SHIFT",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA"
                 ]
             },
@@ -196,6 +195,7 @@
                 "file": "mixed_radix_fft.py",
                 "function": "validate_TP_SHIFT",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA"
                 ]
             }

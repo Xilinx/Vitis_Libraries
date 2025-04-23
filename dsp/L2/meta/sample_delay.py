@@ -25,10 +25,10 @@ def update_AIE_VARIANT(args):
   return fn_update_AIE_VARIANT()
 
 def fn_update_AIE_VARIANT():
-  legal_set_aie=[1,2]
+  legal_set_AIE_VARIANT = [com.AIE, com.AIE_ML, com.AIE_MLv2]
   param_dict={
     "name" : "AIE_VARIANT",
-    "enum" : legal_set_aie
+    "enum" : legal_set_AIE_VARIANT
    }
   return param_dict
 
@@ -69,10 +69,10 @@ def update_TP_API(args):
   return fn_update_TP_API()
 
 def fn_update_TP_API():
-  legal_set_tp_api=[0, 1]
+  legal_set_TP_API = [0, 1]
   param_dict={
     "name" : "TP_API",
-    "enum" : legal_set_tp_api
+    "enum" : legal_set_TP_API
    }
   return param_dict
 
@@ -93,7 +93,7 @@ def update_TP_MAX_DELAY(args):
   AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA = args["TT_DATA"]
   TP_API = args["TP_API"]
-  if args["TP_MAX_DELAY"]: TP_MAX_DELAY = args["TP_MAX_DELAY"]
+  if ("TP_MAX_DELAY" in args)and args["TP_MAX_DELAY"]: TP_MAX_DELAY = args["TP_MAX_DELAY"]
   else: TP_MAX_DELAY = 0
   return fn_update_TP_MAX_DELAY(AIE_VARIANT, TT_DATA, TP_API, TP_MAX_DELAY)
 
@@ -105,18 +105,22 @@ def fn_update_TP_MAX_DELAY(AIE_VARIANT, TT_DATA, TP_API, TP_MAX_DELAY):
     TP_MAX_DELAY_min= int(VEC_SIZE)
 
   if (not(TP_API)):
-    ping_pong_buffer=com.k_data_memory_bytes[AIE_VARIANT] / 2
-    ping_pong_buffer_sample=int(ping_pong_buffer/com.fn_size_by_byte(TT_DATA))
+    buffer_size=com.k_data_memory_bytes[AIE_VARIANT]
+    buffer_sample=int(buffer_size/com.fn_size_by_byte(TT_DATA))
     TP_WINDOW_VSIZE_min=TP_MAX_DELAY_min
-    TP_MAX_DELAY_max=ping_pong_buffer_sample-TP_WINDOW_VSIZE_min
+    TP_MAX_DELAY_max=buffer_sample-TP_WINDOW_VSIZE_min
+    TP_MAX_DELAY_max_pp=(buffer_sample/2)-TP_WINDOW_VSIZE_min
   else:
     TP_MAX_DELAY_max=UINT_max_cpp
+    TP_MAX_DELAY_max_pp=UINT_max_cpp
 
   param_dict={
     "name" : "TP_MAX_DELAY",
     "minimum" : TP_MAX_DELAY_min,
-    "maximum" : TP_MAX_DELAY_max
-  }  
+    "maximum" : TP_MAX_DELAY_max,
+    "maximum_pingpong_buf":TP_MAX_DELAY_max_pp
+  }
+
 
   if (TP_MAX_DELAY !=0) and (TP_MAX_DELAY%TP_MAX_DELAY_min != 0):
     TP_MAX_DELAY_act=int(round(TP_MAX_DELAY/TP_MAX_DELAY_min) * TP_MAX_DELAY_min)
@@ -153,9 +157,9 @@ def fn_validate_TP_MAX_DELAY(AIE_VARIANT, TT_DATA, TP_API, TP_MAX_DELAY):
 def update_TP_WINDOW_VSIZE(args):
   AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA = args["TT_DATA"]
-  TP_API = args["TP_API"] 
+  TP_API = args["TP_API"]
   TP_MAX_DELAY = args["TP_MAX_DELAY"]
-  if args["TP_WINDOW_VSIZE"]: TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
+  if ("TP_WINDOW_VSIZE" in args) and args["TP_WINDOW_VSIZE"]: TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
   else: TP_WINDOW_VSIZE = 0
   return fn_update_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA,TP_API, TP_MAX_DELAY, TP_WINDOW_VSIZE)
 
@@ -167,16 +171,20 @@ def fn_update_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA,TP_API, TP_MAX_DELAY, TP_WIND
     TP_WINDOW_VSIZE_min = int(VEC_SIZE)
 
   if (not(TP_API)):
-    ping_pong_buffer=com.k_data_memory_bytes[AIE_VARIANT] / 2
-    ping_pong_buffer_sample=int(ping_pong_buffer/com.fn_size_by_byte(TT_DATA))
-    TP_WINDOW_VSIZE_max=ping_pong_buffer_sample-TP_MAX_DELAY
-  else: 
+    buffer_size=com.k_data_memory_bytes[AIE_VARIANT]
+    buffer_sample=int(buffer_size/com.fn_size_by_byte(TT_DATA))
+    TP_WINDOW_VSIZE_max=buffer_sample-TP_MAX_DELAY
+    TP_WINDOW_VSIZE_max_pp=buffer_sample/2-TP_MAX_DELAY
+
+  else:
     TP_WINDOW_VSIZE_max=UINT_max_cpp
-  
+    TP_WINDOW_VSIZE_max_pp=UINT_max_cpp
+
   param_dict={
     "name" : "TP_WINDOW_VSIZE",
     "minimum" : TP_WINDOW_VSIZE_min,
-    "maximum" : TP_WINDOW_VSIZE_max
+    "maximum" : TP_WINDOW_VSIZE_max,
+    "maximum_pingpong_buf" : TP_WINDOW_VSIZE_max_pp
   }
 
   if (TP_WINDOW_VSIZE !=0) and (TP_WINDOW_VSIZE%TP_WINDOW_VSIZE_min != 0):
@@ -193,7 +201,7 @@ def fn_update_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA,TP_API, TP_MAX_DELAY, TP_WIND
 def validate_TP_WINDOW_VSIZE(args):
   AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA = args["TT_DATA"]
-  TP_API = args["TP_API"] 
+  TP_API = args["TP_API"]
   TP_MAX_DELAY = args["TP_MAX_DELAY"]
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
   return fn_validate_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA, TP_API, TP_MAX_DELAY, TP_WINDOW_VSIZE)
@@ -215,11 +223,11 @@ def info_ports(args):
 
   in_1 = com.get_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE, None, 0, TP_API)
   in_2 = com.get_parameter_port_info("numSampleDelay", "in", "uint32", None, 1, "async")
-  out_1 = com.get_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE, None, 0, TP_API)  
+  out_1 = com.get_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE, None, 0, TP_API)
   return (in_1+in_2+out_1)
 
 def generate_graph(graphname, args):
-  
+
   if graphname =="":
     graphname = "default_graphname"
   TT_DATA = args["TT_DATA"]
@@ -230,11 +238,11 @@ def generate_graph(graphname, args):
 f"""
 class {graphname} : public adf::graph {{
 public:
-  adf::port<input> in; 
+  adf::port<input> in;
   adf::port<input> numSampleDelay;
   adf::port<output> out;
   xf::dsp::aie::sample_delay::sample_delay_graph<
-  {TT_DATA}, 
+  {TT_DATA},
   {TP_WINDOW_VSIZE},
   {TP_API},
   {TP_MAX_DELAY}
@@ -243,7 +251,7 @@ public:
   {graphname}() : sample_delay_graph(){{
   adf::connect<>(in, sample_delay_graph.in);
   adf::connect<>(sample_delay_graph.out, out);
-  adf::connect<>(numSampleDelay, sample_delay_graph.numSampleDelay); // RTP 
+  adf::connect<>(numSampleDelay, sample_delay_graph.numSampleDelay); // RTP
   }}
 
 }};
@@ -263,5 +271,3 @@ public:
   ]
 
   return out
-
-print("finished")

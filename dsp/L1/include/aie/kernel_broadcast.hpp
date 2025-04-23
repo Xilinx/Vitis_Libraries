@@ -39,7 +39,7 @@ namespace fir {
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
 template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE>
 INLINE_DECL void windowBroadcast(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >* inWindow,
-                                 output_stream_cacc48* outCascade) {
+                                 output_cascade_cacc* outCascade) {
     const int samplesPerBuffWrite = MCD_SIZE / 8 / sizeof(TT_DATA);
     const int _32bsamplesInUnitWrite = 256 / 8 / sizeof(int32);
     const int samplesInUnitWrite = 256 / 8 / sizeof(TT_DATA);
@@ -73,7 +73,7 @@ INLINE_DECL void windowBroadcast(input_circular_buffer<TT_DATA, extents<inherite
 }
 
 template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE>
-INLINE_DECL void windowBroadcast(input_async_buffer<TT_DATA>* inWindow, output_stream_cacc48* outCascade) {
+INLINE_DECL void windowBroadcast(input_async_buffer<TT_DATA>* inWindow, output_cascade_cacc* outCascade) {
     const int _32bsamplesInUnitWrite = 256 / 8 / sizeof(int32);
     const int samplesInUnitWrite = 256 / 8 / sizeof(TT_DATA);
     const int writesPerLoop = MCD_SIZE / 8 / sizeof(int32);
@@ -106,8 +106,8 @@ INLINE_DECL void windowBroadcast(input_async_buffer<TT_DATA>* inWindow, output_s
 
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
 template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE>
-INLINE_DECL void windowBroadcast(input_stream_cacc48* inCascade,
-                                 output_stream_cacc48* outCascade,
+INLINE_DECL void windowBroadcast(input_cascade_cacc* inCascade,
+                                 output_cascade_cacc* outCascade,
                                  input_async_buffer<TT_DATA>* outWindow) {
     const int samplesPerLoop = MCD_SIZE / 8 / sizeof(int32);
     const int samplesPerBuffWrite = MCD_SIZE / 8 / sizeof(TT_DATA);
@@ -147,7 +147,7 @@ INLINE_DECL void windowBroadcast(input_stream_cacc48* inCascade,
 
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
 template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE>
-INLINE_DECL void windowBroadcast(input_stream_cacc48* inCascade, input_async_buffer<TT_DATA>* outWindow) {
+INLINE_DECL void windowBroadcast(input_cascade_cacc* inCascade, input_async_buffer<TT_DATA>* outWindow) {
     const int _32bsamplesInUnitRead = 256 / 8 / sizeof(int32);
     const int samplesInUnitRead = 256 / 8 / sizeof(TT_DATA);
     const int samplesPerBuffRead = MCD_SIZE / 8 / sizeof(TT_DATA);

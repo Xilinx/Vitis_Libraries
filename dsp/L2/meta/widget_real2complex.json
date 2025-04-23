@@ -15,9 +15,7 @@
         {
             "name": "AIE_VARIANT",
             "type": "uint",
-            "description": "specifies the device type",
-            "maximum": 2,
-            "minimum": 1,
+            "description": "Specifies the device type.",
             "updater": {
                 "file": "widget_real2complex.py",
                 "function": "update_AIE_VARIANT"

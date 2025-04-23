@@ -484,11 +484,17 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
     constexpr unsigned int kMinPtSizePwr = 4;
 #endif //__FFT_R4_IMPL__ == 0
 #if __FFT_R4_IMPL__ == 1
-    constexpr unsigned int kMinPtSizePwr = 5; // smallest is 16 = 1<<4;
-#endif                                        //__FFT_R4_IMPL__ == 1
+#if __ALIGN_BYTE_SIZE__ == 32
+    constexpr int kMinPtSizePwr = 5;
+#else
+    constexpr int kMinPtSizePwr = 6;
+#endif //__ALIGN_BYTE_SIZE__
+#endif //__FFT_R4_IMPL__ == 1
 
-    constexpr unsigned int kHeaderSize = 32 / (sizeof(TT_DATA));        // dynamic point size header size in samples
-    constexpr unsigned int kHeaderOutSize = 32 / (sizeof(TT_OUT_DATA)); // dynamic point size header size in samples
+    constexpr unsigned int kHeaderSize =
+        __ALIGN_BYTE_SIZE__ / (sizeof(TT_DATA)); // dynamic point size header size in samples
+    constexpr unsigned int kHeaderOutSize =
+        __ALIGN_BYTE_SIZE__ / (sizeof(TT_OUT_DATA)); // dynamic point size header size in samples
     constexpr unsigned int kPtSizePwr = fnGetPointSizePower<TP_POINT_SIZE>();
     constexpr unsigned int kScaleFactor = kPtSizePwr - 1; // 1 is for initial rotation factor of 1/sqrt(2).
     constexpr unsigned int kSampleRanks = kRanks + 1;
@@ -545,13 +551,6 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
 
     headerPtr = (TT_DATA*)inWindow.data();
     outHeaderPtr = (TT_OUT_DATA*)outWindow.data();
-    // printf("point size = %d window size = %d\n", TP_POINT_SIZE, TP_WINDOW_VSIZE);
-    // for(int i = 0; i < TP_WINDOW_VSIZE; i++){
-    //     printf("in[%d] = [%d, %d\n]", i,headerPtr[i].real, headerPtr[i].imag);
-    //     if(i % TP_POINT_SIZE == 0 ){
-    //     printf("\n");
-    //     }
-    // }
     if
         constexpr(TP_DYN_PT_SIZE == 1) {
             header = *headerPtr++; // saved for later when output to outWindow
@@ -568,6 +567,7 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
             for (int i = 2; i < kHeaderOutSize - 1; i++) {
                 *outHeaderPtr++ = blankVector<TT_OUT_DATA>();
             }
+            // status output
             if ((ptSizePwr >= kMinPtSizePwr) && (ptSizePwr <= kMaxPtSizePwr)) {
                 *outHeaderPtr++ = blankVector<TT_OUT_DATA>();
             } else {
@@ -583,9 +583,9 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
             r4Stages = std::is_same<TT_DATA, cfloat>::value ? 0 : ptSizePwr / 2;
             ptSize = ((unsigned int)1) << ptSizePwr;
         } // end of TP_DYN_PT_SIZE==1 now for TP_DYN_PT_SIZE=0
-    for (int opIndex = 0; opIndex < TP_WINDOW_VSIZE / TP_POINT_SIZE; opIndex++) {
-        rank = 0;
-        if ((ptSizePwr >= kMinPtSizePwr) && (ptSizePwr <= kMaxPtSizePwr)) {
+    if ((ptSizePwr >= kMinPtSizePwr) && (ptSizePwr <= kMaxPtSizePwr)) {
+        for (int opIndex = 0; opIndex < TP_WINDOW_VSIZE / TP_POINT_SIZE; opIndex++) {
+            rank = 0;
             // read samples in
             for (unsigned int i = 0; i < ptSize; i++) {
                 sampleIn = *headerPtr++;
@@ -667,17 +667,16 @@ for (unsigned int i = 0; i < (1 << (kMaxPtSizePwr - 1)); i++) {
             for (int i = ptSize; i < TP_POINT_SIZE; i++) {
                 *outHeaderPtr++ = blankVector<TT_OUT_DATA>();
             }
-
-        } else { // ptSizePwr is out of range
-            // Error handling has already been done in the header clause
-            // write out blank frame
-            for (int i = 0; i < TP_WINDOW_VSIZE; i++) {
-                *outHeaderPtr++ = blankVector<TT_OUT_DATA>();
-            }
-
-            rank += 2;
-            // The pea is now under the cup labelled samplesA. The next rank's input or the actual output
         }
+    } else { // ptSizePwr is out of range
+        // Error handling has already been done in the header clause
+        // write out blank frame
+        for (int i = 0; i < TP_WINDOW_VSIZE; i++) {
+            *outHeaderPtr++ = blankVector<TT_OUT_DATA>();
+        }
+
+        rank += 2;
+        // The pea is now under the cup labelled samplesA. The next rank's input or the actual output
     }
     // outHeaderPtr = (TT_OUT_DATA*)outWindow.data();
     // printf("point size = %d window size = %d\n", TP_POINT_SIZE, TP_WINDOW_VSIZE);

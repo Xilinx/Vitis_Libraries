@@ -110,7 +110,9 @@ HELPER:= $(HELPER_CUR_DIR)/.HELPER
 $(HELPER):  create_input sim_ref prep_x86_out
 	make cleanall
 
-
+PYTHON3 ?= python3
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -type d -name "python-3*" | head -n 1)
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
 create_input:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(FRONT_INPUT_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  $(TAG_PAR_PWR)
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(BACK_INPUT_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  $(TAG_PAR_PWR);
@@ -159,3 +161,16 @@ get_status: check_op_ref
 
 harvest_mem:
 	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts
+
+ifeq ($(VSS_MODE), 1)
+gen_conn_cfg:
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/vss/vss_fft_ifft_1d/vss_tb_cfg_gen.py --ssr $(SSR) --cfg_file_name system.cfg --vss_unit vss_fft_ifft_1d --freqhz $(FREQ)
+else 
+ifeq ($(DATA_TYPE), cfloat)
+gen_conn_cfg:
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/vss/vss_fft_ifft_1d/vss_tb_cfg_gen_rtl_fft.py --ssr $(SSR) --cfg_file_name system.cfg --vss_unit vss_fft_ifft_1d --freqhz $(FREQ)
+else
+gen_conn_cfg:
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/vss/vss_fft_ifft_1d/vss_tb_cfg_gen_hls_fft.py --ssr $(SSR) --cfg_file_name system.cfg --vss_unit vss_fft_ifft_1d --freqhz $(FREQ)
+endif
+endif

@@ -64,19 +64,24 @@ template <int kPos,
           unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_SSR>
+          unsigned int TP_SSR,
+          unsigned int TP_USE_MATRIX_RELOAD,
+          unsigned int TP_API,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_NUM_OUTPUTS>
 class create_casc_kernel_recur {
    public:
     static void create(kernel (&mat_vec_mulKernels)[TP_CASC_LEN * TP_SSR]) {
         static constexpr unsigned int TP_KERNEL_POSITION = kPos - 1;
 
         for (int ssr = 0; ssr < TP_SSR; ssr++) {
-            mat_vec_mulKernels[kPos - 1 + ssr * TP_CASC_LEN] = kernel::create_object<
-                matrix_vector_mul<TT_DATA_A, TT_DATA_B, TP_DIM_A / TP_SSR, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
-                                  TP_NUM_FRAMES, TP_CASC_LEN, TP_KERNEL_POSITION, true, true> >();
+            mat_vec_mulKernels[kPos - 1 + ssr * TP_CASC_LEN] = kernel::create_object<matrix_vector_mul<
+                TT_DATA_A, TT_DATA_B, TP_DIM_A / TP_SSR, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN,
+                TP_USE_MATRIX_RELOAD, TP_API, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_KERNEL_POSITION, true, true> >();
         }
         create_casc_kernel_recur<kPos - 1, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
-                                 TP_NUM_FRAMES, TP_CASC_LEN, TP_SSR>::create(mat_vec_mulKernels);
+                                 TP_NUM_FRAMES, TP_CASC_LEN, TP_SSR, TP_USE_MATRIX_RELOAD, TP_API, TP_DUAL_IP,
+                                 TP_NUM_OUTPUTS>::create(mat_vec_mulKernels);
     }
 };
 
@@ -91,7 +96,11 @@ template <typename TT_DATA_A,
           unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_SSR>
+          unsigned int TP_SSR,
+          unsigned int TP_USE_MATRIX_RELOAD,
+          unsigned int TP_API,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_NUM_OUTPUTS>
 class create_casc_kernel_recur<1,
                                TT_DATA_A,
                                TT_DATA_B,
@@ -102,15 +111,19 @@ class create_casc_kernel_recur<1,
                                TP_SAT,
                                TP_NUM_FRAMES,
                                TP_CASC_LEN,
-                               TP_SSR> {
+                               TP_SSR,
+                               TP_USE_MATRIX_RELOAD,
+                               TP_API,
+                               TP_DUAL_IP,
+                               TP_NUM_OUTPUTS> {
    public:
     static void create(kernel (&mat_vec_mulKernels)[TP_CASC_LEN * TP_SSR]) {
         static constexpr unsigned int TP_KERNEL_POSITION = 0;
 
         for (int ssr = 0; ssr < TP_SSR; ssr++) {
-            mat_vec_mulKernels[0 + (ssr * TP_CASC_LEN)] = kernel::create_object<
-                matrix_vector_mul<TT_DATA_A, TT_DATA_B, TP_DIM_A / TP_SSR, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
-                                  TP_NUM_FRAMES, TP_CASC_LEN, TP_KERNEL_POSITION, false, true> >();
+            mat_vec_mulKernels[0 + (ssr * TP_CASC_LEN)] = kernel::create_object<matrix_vector_mul<
+                TT_DATA_A, TT_DATA_B, TP_DIM_A / TP_SSR, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN,
+                TP_USE_MATRIX_RELOAD, TP_API, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_KERNEL_POSITION, false, true> >();
         }
     }
 };
@@ -126,19 +139,24 @@ template <int kPos,
           unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_SSR>
+          unsigned int TP_SSR,
+          unsigned int TP_USE_MATRIX_RELOAD,
+          unsigned int TP_API,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_NUM_OUTPUTS>
 class create_casc_kernel {
    public:
     static void create(kernel (&mat_vec_mulKernels)[TP_CASC_LEN * TP_SSR]) {
         static constexpr unsigned int TP_KERNEL_POSITION = kPos - 1;
         for (int ssr = 0; ssr < TP_SSR; ssr++) {
-            mat_vec_mulKernels[kPos - 1 + (TP_CASC_LEN * ssr)] = kernel::create_object<
-                matrix_vector_mul<TT_DATA_A, TT_DATA_B, TP_DIM_A / TP_SSR, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
-                                  TP_NUM_FRAMES, TP_CASC_LEN, TP_KERNEL_POSITION, true, false> >();
+            mat_vec_mulKernels[kPos - 1 + (TP_CASC_LEN * ssr)] = kernel::create_object<matrix_vector_mul<
+                TT_DATA_A, TT_DATA_B, TP_DIM_A / TP_SSR, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN,
+                TP_USE_MATRIX_RELOAD, TP_API, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_KERNEL_POSITION, true, false> >();
         }
 
         create_casc_kernel_recur<kPos - 1, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
-                                 TP_NUM_FRAMES, TP_CASC_LEN, TP_SSR>::create(mat_vec_mulKernels);
+                                 TP_NUM_FRAMES, TP_CASC_LEN, TP_SSR, TP_USE_MATRIX_RELOAD, TP_API, TP_DUAL_IP,
+                                 TP_NUM_OUTPUTS>::create(mat_vec_mulKernels);
     }
 };
 
@@ -152,7 +170,11 @@ template <typename TT_DATA_A,
           unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_SSR>
+          unsigned int TP_SSR,
+          unsigned int TP_USE_MATRIX_RELOAD,
+          unsigned int TP_API,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_NUM_OUTPUTS>
 class create_casc_kernel<1,
                          TT_DATA_A,
                          TT_DATA_B,
@@ -163,14 +185,18 @@ class create_casc_kernel<1,
                          TP_SAT,
                          TP_NUM_FRAMES,
                          TP_CASC_LEN,
-                         TP_SSR> {
+                         TP_SSR,
+                         TP_USE_MATRIX_RELOAD,
+                         TP_API,
+                         TP_DUAL_IP,
+                         TP_NUM_OUTPUTS> {
    public:
     static void create(kernel (&mat_vec_mulKernels)[TP_CASC_LEN * TP_SSR]) {
         for (int ssr = 0; ssr < TP_SSR; ssr++) {
             static constexpr unsigned int TP_KERNEL_POSITION = 0;
-            mat_vec_mulKernels[ssr] = kernel::create_object<
-                matrix_vector_mul<TT_DATA_A, TT_DATA_B, TP_DIM_A / TP_SSR, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
-                                  TP_NUM_FRAMES, TP_CASC_LEN, TP_KERNEL_POSITION, false, false> >();
+            mat_vec_mulKernels[ssr] = kernel::create_object<matrix_vector_mul<
+                TT_DATA_A, TT_DATA_B, TP_DIM_A / TP_SSR, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN,
+                TP_USE_MATRIX_RELOAD, TP_API, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_KERNEL_POSITION, false, false> >();
         }
     }
 };
@@ -215,7 +241,8 @@ class create_casc_kernel<1,
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         \n
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML and AIE-MLv2 device.
+ *\n
  * @tparam TP_NUM_FRAMES describes the number of batches of input data that will be processed per iteration. \n
  * @tparam TP_CASC_LEN describes the number of AIE kernels the matrix-vector multiplication will be divided into in
  *series. \n
@@ -254,7 +281,11 @@ template <typename TT_DATA_A,
           unsigned int TP_CASC_LEN,
           unsigned int TP_SAT,
           unsigned int TP_SSR,
-          unsigned int TP_DIM_A_LEADING>
+          unsigned int TP_DIM_A_LEADING,
+          unsigned int TP_USE_MATRIX_RELOAD = 0,
+          unsigned int TP_API = 0,
+          unsigned int TP_DUAL_IP = 0,
+          unsigned int TP_NUM_OUTPUTS = 1>
 class matrix_vector_mul_graph : public graph {
    public:
     /**
@@ -287,8 +318,8 @@ class matrix_vector_mul_graph : public graph {
      * The number of samples to each Matrix A iobuffer will be (TP_DIM_A / TP_SSR) * (TP_DIM_B / TP_CASC_LEN) *
      *TP_NUM_FRAMES.
      **/
-    port<input> inA[TP_CASC_LEN * TP_SSR];
-
+    port_conditional_array<input, (TP_USE_MATRIX_RELOAD == 0), (TP_SSR * TP_CASC_LEN)> inA;
+    port_conditional_array<input, (TP_USE_MATRIX_RELOAD == 1), (TP_SSR * TP_CASC_LEN)> matrixA;
     /**
      * Input to the function, Vector B.
      * The dimensions of the vector are specified by template
@@ -297,7 +328,7 @@ class matrix_vector_mul_graph : public graph {
      * The vector data can be zero-padded to achieve this requirement. \n
      * The number of samples to the Vector B iobuffer will be (TP_DIM_B / TP_CASC_LEN) * TP_NUM_FRAMES.
      **/
-    port<input> inB[TP_CASC_LEN * TP_SSR];
+    port<input> inB[TP_SSR * TP_CASC_LEN * (TP_DUAL_IP + 1)];
 
     /**
      * The output data of the function. For cascaded designs, this is located at the end of the cascaded kernel chain.
@@ -307,7 +338,16 @@ class matrix_vector_mul_graph : public graph {
      * The number of samples to the Output iobuffer will be (TP_DIM_A / TP_CASC_LEN) * TP_NUM_FRAMES.
      *
      **/
-    port<output> out[TP_SSR];
+    port<output> out[TP_SSR * (TP_NUM_OUTPUTS)];
+
+    /**
+    * @brief Access function to get total number of RTP ports.
+    **/
+    static constexpr unsigned int getTotalRtpPorts() {
+        // return the total number of RTP ports.
+        //
+        return TP_SSR * TP_CASC_LEN;
+    };
 
     /**
      * @brief This is the constructor function for the Matrix Vector Multiply graph.
@@ -322,9 +362,13 @@ class matrix_vector_mul_graph : public graph {
                       "ERROR: TP_DIM_A_LEADING = 1 (Row major data) is not supported when TT_DATA_A is cfloat.");
         static_assert(
             TP_DIM_A_LEADING == 1 || TP_NUM_FRAMES == 1,
-            "ERROR: TP_DIM_A_LEADING = 1 (Row major data) is not supported for batch processing (TP_NUM_FRAMES > 1)");
+            "ERROR: TP_DIM_A_LEADING = 0 (Row major data) is not supported for batch processing (TP_NUM_FRAMES > 1)");
+        static_assert(TP_DIM_A_LEADING == 1 || TP_USE_MATRIX_RELOAD == 0,
+                      "ERROR: TP_DIM_A_LEADING = 0 (Row major data) is not supported when reloadable matrices are used "
+                      "(TP_USE_MATRIX_RELOAD=1)");
         create_casc_kernel<TP_CASC_LEN, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
-                           TP_NUM_FRAMES, TP_CASC_LEN, TP_SSR>::create(m_mat_vec_mulKernels);
+                           TP_NUM_FRAMES, TP_CASC_LEN, TP_SSR, TP_USE_MATRIX_RELOAD, TP_API, TP_DUAL_IP,
+                           TP_NUM_OUTPUTS>::create(m_mat_vec_mulKernels);
 
         constexpr int dimAPerKernel = TP_DIM_A / TP_SSR;
         constexpr int dimBPerKernel = TP_DIM_B / TP_CASC_LEN;
@@ -339,37 +383,62 @@ class matrix_vector_mul_graph : public graph {
                 // connect cascaded kernels
                 if (cascNum >= 1 && TP_CASC_LEN > 1) {
                     connect<cascade>(m_mat_vec_mulKernels[(cascNum - 1) + (ssrRank * TP_CASC_LEN)].out[0],
-                                     m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[2]);
+                                     m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)]
+                                         .in[2 + TP_DUAL_IP]); // In casc port is always A and B ports.
                 }
-                // connect matrix input data to each kernel (DMA buffer port transpose if Matrix is in row major format)
-                connect(inA[cascNum + (ssrRank * TP_CASC_LEN)],
-                        m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[0]);
-                dimensions(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[0]) = {windowSizeA};
-                // Row major data will be transposed using DMA buffer descriptors
                 if
-                    constexpr(!TP_DIM_A_LEADING) {
-                        write_access(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[0]) =
-                            adf::tiling({.buffer_dimension = {(dimAPerKernel), (dimBPerKernel)},
+                    constexpr(TP_USE_MATRIX_RELOAD == 0) {
+                        connect(inA[cascNum + (ssrRank * TP_CASC_LEN)],
+                                m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[0]);
+                        dimensions(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[0]) = {windowSizeA};
+                        // Row major data will be transposed using DMA buffer descriptors
+                        if
+                            constexpr(!TP_DIM_A_LEADING) {
+                                write_access(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[0]) =
+                                    adf::tiling(
+                                        {.buffer_dimension = {(dimAPerKernel), (dimBPerKernel)},
                                          .tiling_dimension = {1, dimBPerKernel},
                                          .offset = {0, 0},
                                          .tile_traversal = {{.dimension = 0, .stride = 1, .wrap = dimAPerKernel},
                                                             {.dimension = 1, .stride = dimBPerKernel, .wrap = 1}}});
+                            }
                     }
-                // connect vector input data to each kernel (no transpose needed)
-                connect(inB[cascNum + (ssrRank * TP_CASC_LEN)],
-                        m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[1]);
-                dimensions(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[1]) = {windowSizeB};
-
+                else {
+                    connect<parameter>(matrixA[cascNum + (ssrRank * TP_CASC_LEN)],
+                                       async(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[0]));
+                }
+                if
+                    constexpr(TP_API == 0) {
+                        connect(inB[cascNum + (ssrRank * TP_CASC_LEN)],
+                                m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[1]);
+                        dimensions(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[1]) = {windowSizeB};
+                    }
+                else {
+                    for (int dualIdx = 0; dualIdx < (TP_DUAL_IP + 1); dualIdx++) {
+                        int bPortIdx = (TP_DUAL_IP + 1) * (cascNum + (ssrRank * TP_CASC_LEN)) + dualIdx;
+                        connect<stream>(inB[bPortIdx],
+                                        m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[1 + dualIdx]);
+                    }
+                }
                 // Specify mapping constraints
                 runtime<ratio>(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)]) = 0.8;
                 // Source files
                 source(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)]) = "matrix_vector_mul.cpp";
                 headers(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)]) = {"matrix_vector_mul.hpp"};
             }
-
-            // connect final kernel output to output of the graph
-            connect(m_mat_vec_mulKernels[(TP_CASC_LEN - 1) + (ssrRank * TP_CASC_LEN)].out[0], out[ssrRank]);
-            dimensions(m_mat_vec_mulKernels[(TP_CASC_LEN - 1) + (ssrRank * TP_CASC_LEN)].out[0]) = {windowSizeOut};
+            if
+                constexpr(TP_API == 0) {
+                    // connect final kernel output to output of the graph
+                    connect(m_mat_vec_mulKernels[(TP_CASC_LEN - 1) + (ssrRank * TP_CASC_LEN)].out[0], out[ssrRank]);
+                    dimensions(m_mat_vec_mulKernels[(TP_CASC_LEN - 1) + (ssrRank * TP_CASC_LEN)].out[0]) = {
+                        windowSizeOut};
+                }
+            else {
+                for (int outIdx = 0; outIdx < (TP_NUM_OUTPUTS); outIdx++) {
+                    connect<stream>(m_mat_vec_mulKernels[(TP_CASC_LEN - 1) + (ssrRank * TP_CASC_LEN)].out[outIdx],
+                                    out[(TP_NUM_OUTPUTS * ssrRank) + outIdx]);
+                }
+            }
         }
     };
 };

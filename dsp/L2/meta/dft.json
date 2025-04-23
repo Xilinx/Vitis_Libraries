@@ -110,7 +110,7 @@
             "validator": {
                 "file": "dft.py",
                 "function": "validate_TP_SSR",
-                "args": [       
+                "args": [
                     "AIE_VARIANT",
                     "TP_POINT_SIZE",
                     "TT_DATA"
@@ -129,7 +129,7 @@
                     "TT_DATA" ,
                     "TT_TWIDDLE" ,
                     "TP_POINT_SIZE" ,
-                    "TP_SSR" 
+                    "TP_SSR"
                     ]
             },
             "validator": {
@@ -140,7 +140,7 @@
                     "TT_DATA" ,
                     "TT_TWIDDLE" ,
                     "TP_POINT_SIZE" ,
-                    "TP_SSR" 
+                    "TP_SSR"
                     ]
             }
         },
@@ -154,7 +154,7 @@
                 "args": [
                     "AIE_VARIANT" ,
                     "TT_DATA" ,
-                    "TP_POINT_SIZE" 
+                    "TP_POINT_SIZE"
                 ]
             },
             "validator": {
@@ -163,7 +163,7 @@
                 "args": [
                     "AIE_VARIANT" ,
                     "TT_DATA" ,
-                    "TP_POINT_SIZE" 
+                    "TP_POINT_SIZE"
                 ]
             }
         },
@@ -175,6 +175,7 @@
                 "file": "dft.py",
                 "function": "update_TP_SHIFT",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA"
                 ]
             },
@@ -182,6 +183,7 @@
                 "file": "dft.py",
                 "function": "validate_TP_SHIFT",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA"
                 ]
             }

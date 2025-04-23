@@ -79,6 +79,34 @@ INLINE_DECL void ddsReadIp(aie::vector<TT_DATA, numLanes>* __restrict(&in0Ptr),
 //==============================================================================
 // integer specializations
 
+// function to populate m_phRot array
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_USE_PHASE_RELOAD,
+          unsigned int TP_API,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+INLINE_DECL void kernelDdsMixerClass<TT_DATA,
+                                     TP_INPUT_WINDOW_VSIZE,
+                                     TP_MIXER_MODE,
+                                     TP_USE_PHASE_RELOAD,
+                                     TP_API,
+                                     TP_SC_MODE,
+                                     TP_NUM_LUTS,
+                                     TP_RND,
+                                     TP_SAT>::updatePhaseInc(const uint32& phaseInc) {
+    m_phaseInc = phaseInc;
+    m_perCyclePhaseInc = phaseInc * m_kNumLanes;
+    for (unsigned int i = 0; i < m_kNumLanes; i++) {
+#if __SINCOS_IN_HW__ == 1
+        m_phRot[i] = aie::sincos_complex(i * phaseInc);
+#endif
+    }
+}
+
 // Constructor to populate m_phRot array
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
@@ -97,14 +125,10 @@ kernelDdsMixerClass<TT_DATA,
                     TP_SC_MODE,
                     TP_NUM_LUTS,
                     TP_RND,
-                    TP_SAT>::kernelDdsMixerClass(uint32_t phaseInc) {
+                    TP_SAT>::kernelDdsMixerClass(uint32 phaseInc) {
     m_phaseIndex = 0;
-    m_perCyclePhaseInc = phaseInc * m_kNumLanes;
-    for (unsigned int i = 0; i < m_kNumLanes; i++) {
-#if __SINCOS_IN_HW__ == 1
-        m_phRot[i] = aie::sincos_complex(i * phaseInc);
-#endif
-    }
+    updatePhaseInc(phaseInc);
+    m_phaseValpre = 0;
 }
 
 // Constructor to populate m_phRot array
@@ -116,19 +140,19 @@ template <typename TT_DATA,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-kernelDdsMixerClass<TT_DATA,
-                    TP_INPUT_WINDOW_VSIZE,
-                    TP_MIXER_MODE,
-                    TP_USE_PHASE_RELOAD,
-                    TP_API,
-                    USE_LUT_SINCOS,
-                    TP_NUM_LUTS,
-                    TP_RND,
-                    TP_SAT>::kernelDdsMixerClass(uint32_t phaseInc) {
+INLINE_DECL void kernelDdsMixerClass<TT_DATA,
+                                     TP_INPUT_WINDOW_VSIZE,
+                                     TP_MIXER_MODE,
+                                     TP_USE_PHASE_RELOAD,
+                                     TP_API,
+                                     USE_LUT_SINCOS,
+                                     TP_NUM_LUTS,
+                                     TP_RND,
+                                     TP_SAT>::updatePhaseInc(const uint32& phaseInc) {
+    m_phaseInc = phaseInc;
     if
         constexpr(!((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value))) {
 #if __SUPPORTS_CFLOAT__ == 1
-            m_phaseIndex = 0;
             set_rnd(rnd_sym_inf); // round to symmetric infinity
             // set_rnd_mode<TP_RND>();
             // set_sat_mode<TP_SAT>();
@@ -185,7 +209,6 @@ kernelDdsMixerClass<TT_DATA,
 #endif // SUPPORTS_CFLOAT
         }
     else {
-        m_phaseIndex = 0;
         set_rnd(rnd_sym_inf); // round to symmetric infinity
         // set_sat_mode<TP_SAT>();
         using T_LUT_TYPE = cint32;
@@ -267,6 +290,29 @@ kernelDdsMixerClass<TT_DATA,
         }
     }
 }
+
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_USE_PHASE_RELOAD,
+          unsigned int TP_API,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+kernelDdsMixerClass<TT_DATA,
+                    TP_INPUT_WINDOW_VSIZE,
+                    TP_MIXER_MODE,
+                    TP_USE_PHASE_RELOAD,
+                    TP_API,
+                    USE_LUT_SINCOS,
+                    TP_NUM_LUTS,
+                    TP_RND,
+                    TP_SAT>::kernelDdsMixerClass(uint32 phaseInc) {
+    m_phaseIndex = 0;
+    m_phaseValpre = 0;
+    updatePhaseInc(phaseInc);
+}
+
 // Constructor to populate m_phRot array with an initial offset
 // making this overload so that the default case doesn't get extra penalty of additions and sets with trivial value of
 // 0.
@@ -288,7 +334,7 @@ kernelDdsMixerClass<TT_DATA,
                     TP_SC_MODE,
                     TP_NUM_LUTS,
                     TP_RND,
-                    TP_SAT>::kernelDdsMixerClass(uint32_t phaseInc, uint32_t initialPhaseOffset)
+                    TP_SAT>::kernelDdsMixerClass(uint32 phaseInc, uint32 initialPhaseOffset)
     : kernelDdsMixerClass(phaseInc) {
     // initialise phase accumulator index to offset.
     // enhancement? if initialPhaseOffset was a template argument, then we could just set this at initialisation without
@@ -312,7 +358,7 @@ kernelDdsMixerClass<TT_DATA,
                     USE_LUT_SINCOS,
                     TP_NUM_LUTS,
                     TP_RND,
-                    TP_SAT>::kernelDdsMixerClass(uint32_t phaseInc, uint32_t initialPhaseOffset)
+                    TP_SAT>::kernelDdsMixerClass(uint32 phaseInc, uint32 initialPhaseOffset)
     : kernelDdsMixerClass(phaseInc) {
     // initialise phase accumulator index to offset.
     // enhancement? if initialPhaseOffset was a template argument, then we could just set this at initialisation without
@@ -698,17 +744,17 @@ template <unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-kernelDdsMixerClass<cfloat,
-                    TP_INPUT_WINDOW_VSIZE,
-                    TP_MIXER_MODE,
-                    TP_USE_PHASE_RELOAD,
-                    TP_API,
-                    USE_INBUILT_SINCOS,
-                    TP_NUM_LUTS,
-                    TP_RND,
-                    TP_SAT>::kernelDdsMixerClass(uint32_t phaseInc) {
-    m_phaseIndex = 0;
+INLINE_DECL void kernelDdsMixerClass<cfloat,
+                                     TP_INPUT_WINDOW_VSIZE,
+                                     TP_MIXER_MODE,
+                                     TP_USE_PHASE_RELOAD,
+                                     TP_API,
+                                     USE_INBUILT_SINCOS,
+                                     TP_NUM_LUTS,
+                                     TP_RND,
+                                     TP_SAT>::updatePhaseInc(const uint32& phaseInc) {
     cint16 phRotInt16;
+    m_phaseInc = phaseInc;
     // Calculate the phase increment for each clock cycle ( = per sample inc * input vector size)
     m_perCyclePhaseInc = phaseInc * m_kNumLanes;
 
@@ -732,11 +778,31 @@ kernelDdsMixerClass<cfloat,
                     TP_MIXER_MODE,
                     TP_USE_PHASE_RELOAD,
                     TP_API,
-                    USE_LUT_SINCOS,
+                    USE_INBUILT_SINCOS,
                     TP_NUM_LUTS,
                     TP_RND,
-                    TP_SAT>::kernelDdsMixerClass(uint32_t phaseInc) {
+                    TP_SAT>::kernelDdsMixerClass(uint32 phaseInc) {
     m_phaseIndex = 0;
+    updatePhaseInc(phaseInc);
+}
+
+template <unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_USE_PHASE_RELOAD,
+          unsigned int TP_API,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+INLINE_DECL void kernelDdsMixerClass<cfloat,
+                                     TP_INPUT_WINDOW_VSIZE,
+                                     TP_MIXER_MODE,
+                                     TP_USE_PHASE_RELOAD,
+                                     TP_API,
+                                     USE_LUT_SINCOS,
+                                     TP_NUM_LUTS,
+                                     TP_RND,
+                                     TP_SAT>::updatePhaseInc(const uint32& phaseInc) {
+    m_phaseInc = phaseInc;
     set_rnd(rnd_sym_inf); // round to symmetric infinity
     aie::vector<cfloat, m_kNumLanes> sincosVal[TP_NUM_LUTS];
     aie::vector<cfloat, m_kNumLanes> tempVal;
@@ -789,6 +855,27 @@ kernelDdsMixerClass<cfloat,
         m_phRotBig[i] = tempOut[i];
     }
 }
+
+template <unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_USE_PHASE_RELOAD,
+          unsigned int TP_API,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+kernelDdsMixerClass<cfloat,
+                    TP_INPUT_WINDOW_VSIZE,
+                    TP_MIXER_MODE,
+                    TP_USE_PHASE_RELOAD,
+                    TP_API,
+                    USE_LUT_SINCOS,
+                    TP_NUM_LUTS,
+                    TP_RND,
+                    TP_SAT>::kernelDdsMixerClass(uint32 phaseInc) {
+    m_phaseIndex = 0;
+    updatePhaseInc(phaseInc);
+}
+
 // Constructor to populate m_phRot array with an initial offset
 // making this overload so that the default case doesn't get extra penalty of additions and sets with trivial value of
 // 0.
@@ -808,7 +895,7 @@ kernelDdsMixerClass<cfloat,
                     USE_INBUILT_SINCOS,
                     TP_NUM_LUTS,
                     TP_RND,
-                    TP_SAT>::kernelDdsMixerClass(uint32_t phaseInc, uint32_t initialPhaseOffset)
+                    TP_SAT>::kernelDdsMixerClass(uint32 phaseInc, uint32 initialPhaseOffset)
     : kernelDdsMixerClass(phaseInc) {
     // initialise phase accumulator index to offset.
     // enhancement? if initialPhaseOffset was a template argument, then we could just set this at initialisation without
@@ -835,7 +922,7 @@ kernelDdsMixerClass<cfloat,
                     USE_LUT_SINCOS,
                     TP_NUM_LUTS,
                     TP_RND,
-                    TP_SAT>::kernelDdsMixerClass(uint32_t phaseInc, uint32_t initialPhaseOffset)
+                    TP_SAT>::kernelDdsMixerClass(uint32 phaseInc, uint32 initialPhaseOffset)
     : kernelDdsMixerClass(phaseInc) {
     // initialise phase accumulator index to offset.
     // enhancement? if initialPhaseOffset was a template argument, then we could just set this at initialisation without
@@ -1201,7 +1288,9 @@ template <typename TT_DATA,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_INPUT_WINDOW_VSIZE,
                              TP_MIXER_MODE,
@@ -1210,9 +1299,11 @@ NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_SC_MODE,
                              TP_NUM_LUTS,
                              TP_RND,
-                             TP_SAT>::ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
-                                             input_buffer<TT_DATA>& __restrict inWindowB,
-                                             output_buffer<TT_DATA>& __restrict outWindow) {
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
+                                                              input_buffer<TT_DATA>& __restrict inWindowB,
+                                                              output_buffer<TT_DATA>& __restrict outWindow) {
     void* in0Ptr = inWindowA.data();
     void* in1Ptr = inWindowB.data();
     void* outPtr = outWindow.data();
@@ -1220,13 +1311,53 @@ NOINLINE_DECL void dds_mixer<TT_DATA,
     this->ddsKernel(in0Ptr, in1Ptr, outPtr);
 };
 
+// as above, but with PhaseIncRTP
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_USE_PHASE_RELOAD,
+          unsigned int TP_API,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             TP_MIXER_MODE,
+                             TP_USE_PHASE_RELOAD,
+                             TP_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixC(input_buffer<TT_DATA>& __restrict inWindowA,
+                                                               input_buffer<TT_DATA>& __restrict inWindowB,
+                                                               const unsigned int PhaseIncRTP,
+                                                               output_buffer<TT_DATA>& __restrict outWindow) {
+    void* in0Ptr = inWindowA.data();
+    void* in1Ptr = inWindowB.data();
+    void* outPtr = outWindow.data();
+
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
+
+    this->ddsKernel(in0Ptr, in1Ptr, outPtr);
+};
+
+// stream, mode 2
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_USE_PHASE_RELOAD,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_INPUT_WINDOW_VSIZE,
                              MIXER_MODE_2,
@@ -1235,18 +1366,54 @@ NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_SC_MODE,
                              TP_NUM_LUTS,
                              TP_RND,
-                             TP_SAT>::ddsMix(input_stream<TT_DATA>* __restrict inWindowA,
-                                             input_stream<TT_DATA>* __restrict inWindowB,
-                                             output_stream<TT_DATA>* __restrict outWindow) {
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMix(input_stream<TT_DATA>* __restrict inWindowA,
+                                                              input_stream<TT_DATA>* __restrict inWindowB,
+                                                              output_stream<TT_DATA>* __restrict outWindow) {
     this->ddsKernel((void*)inWindowA, (void*)inWindowB, (void*)outWindow);
 };
 
+// stream, mode 2, phaseInc RTP
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_USE_PHASE_RELOAD,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_2,
+                             TP_USE_PHASE_RELOAD,
+                             STREAM_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixC(input_stream<TT_DATA>* __restrict inWindowA,
+                                                               input_stream<TT_DATA>* __restrict inWindowB,
+                                                               const unsigned int PhaseIncRTP,
+                                                               output_stream<TT_DATA>* __restrict outWindow) {
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
+
+    this->ddsKernel((void*)inWindowA, (void*)inWindowB, (void*)outWindow);
+};
+
+// mode 2, phase off RTP
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_INPUT_WINDOW_VSIZE,
                              MIXER_MODE_2,
@@ -1255,10 +1422,12 @@ NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_SC_MODE,
                              TP_NUM_LUTS,
                              TP_RND,
-                             TP_SAT>::ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
-                                             input_buffer<TT_DATA>& __restrict inWindowB,
-                                             output_buffer<TT_DATA>& __restrict outWindow,
-                                             const unsigned int PhaseRTP) {
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
+                                                              input_buffer<TT_DATA>& __restrict inWindowB,
+                                                              output_buffer<TT_DATA>& __restrict outWindow,
+                                                              const unsigned int PhaseRTP) {
     void* in0Ptr = inWindowA.data();
     void* in1Ptr = inWindowB.data();
     void* outPtr = outWindow.data();
@@ -1269,12 +1438,135 @@ NOINLINE_DECL void dds_mixer<TT_DATA,
     this->ddsKernel(in0Ptr, in1Ptr, outPtr);
 };
 
+// mode 2, phase off RTP
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_2,
+                             USE_PHASE_RELOAD_TRUE,
+                             IOBUFFER_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixC(input_buffer<TT_DATA>& __restrict inWindowA,
+                                                               input_buffer<TT_DATA>& __restrict inWindowB,
+                                                               output_buffer<TT_DATA>& __restrict outWindow,
+                                                               const unsigned int PhaseRTP,
+                                                               const unsigned int PhaseIncRTP) {
+    void* in0Ptr = inWindowA.data();
+    void* in1Ptr = inWindowB.data();
+    void* outPtr = outWindow.data();
+
+    // Phase offset RTP handling
+    this->m_phaseIndex += (PhaseRTP - this->m_phaseValpre);
+    this->m_phaseValpre = PhaseRTP;
+
+    // Phase Increment phase offset handling
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
+
+    this->ddsKernel(in0Ptr, in1Ptr, outPtr);
+};
+
+// new for CR1223503
+// mode 2, phase off by iobuffer
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_2,
+                             USE_PHASE_RELOAD_TRUE,
+                             IOBUFFER_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixB(input_buffer<TT_DATA>& __restrict inWindowA,
+                                                               input_buffer<TT_DATA>& __restrict inWindowB,
+                                                               input_buffer<uint32>& __restrict inPhaseOffset,
+                                                               output_buffer<TT_DATA>& __restrict outWindow) {
+    void* in0Ptr = inWindowA.data();
+    void* in1Ptr = inWindowB.data();
+    uint32* inPhaseOffsetPtr = inPhaseOffset.data();
+    void* outPtr = outWindow.data();
+
+    uint32 inPhaseOffsetVal = *inPhaseOffsetPtr;
+
+    this->m_phaseIndex += (inPhaseOffsetVal - this->m_phaseValpre);
+    this->m_phaseValpre = inPhaseOffsetVal;
+
+    this->ddsKernel(in0Ptr, in1Ptr, outPtr);
+};
+
+// new for CR1223503
+// mode 2, phase off by iobuffer, phase Inc RTP
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_2,
+                             USE_PHASE_RELOAD_TRUE,
+                             IOBUFFER_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixD(input_buffer<TT_DATA>& __restrict inWindowA,
+                                                               input_buffer<TT_DATA>& __restrict inWindowB,
+                                                               input_buffer<uint32>& __restrict inPhaseOffset,
+                                                               const unsigned int PhaseIncRTP,
+                                                               output_buffer<TT_DATA>& __restrict outWindow) {
+    void* in0Ptr = inWindowA.data();
+    void* in1Ptr = inWindowB.data();
+    uint32* inPhaseOffsetPtr = inPhaseOffset.data();
+    void* outPtr = outWindow.data();
+
+    uint32 inPhaseOffsetVal = *inPhaseOffsetPtr;
+
+    this->m_phaseIndex += (inPhaseOffsetVal - this->m_phaseValpre);
+    this->m_phaseValpre = inPhaseOffsetVal;
+
+    // Phase Increment phase offset handling
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
+
+    this->ddsKernel(in0Ptr, in1Ptr, outPtr);
+};
+
+// Mode 2, stream with phase offset specialization (RPT overload)
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_INPUT_WINDOW_VSIZE,
                              MIXER_MODE_2,
@@ -1283,13 +1575,118 @@ NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_SC_MODE,
                              TP_NUM_LUTS,
                              TP_RND,
-                             TP_SAT>::ddsMix(input_stream<TT_DATA>* __restrict inWindowA,
-                                             input_stream<TT_DATA>* __restrict inWindowB,
-                                             output_stream<TT_DATA>* __restrict outWindow,
-                                             const unsigned int PhaseRTP) {
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMix(input_stream<TT_DATA>* __restrict inWindowA,
+                                                              input_stream<TT_DATA>* __restrict inWindowB,
+                                                              output_stream<TT_DATA>* __restrict outWindow,
+                                                              const unsigned int PhaseRTP) {
     this->m_phaseIndex += (PhaseRTP - this->m_phaseValpre);
     this->m_phaseValpre = PhaseRTP;
 
+    this->ddsKernel((void*)inWindowA, (void*)inWindowB, (void*)outWindow);
+};
+
+// Mode 2, stream with phase offset specialization (RPT overload), phase Inc RTP
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_2,
+                             USE_PHASE_RELOAD_TRUE,
+                             STREAM_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixC(input_stream<TT_DATA>* __restrict inWindowA,
+                                                               input_stream<TT_DATA>* __restrict inWindowB,
+                                                               output_stream<TT_DATA>* __restrict outWindow,
+                                                               const unsigned int PhaseRTP,
+                                                               const unsigned int PhaseIncRTP) {
+    this->m_phaseIndex += (PhaseRTP - this->m_phaseValpre);
+    this->m_phaseValpre = PhaseRTP;
+
+    // Phase Increment phase offset handling
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
+    this->ddsKernel((void*)inWindowA, (void*)inWindowB, (void*)outWindow);
+};
+
+// Mode 2, stream with phase offset specialization (iobuffer for phase offset overload)
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_2,
+                             USE_PHASE_RELOAD_TRUE,
+                             STREAM_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixB(input_stream<TT_DATA>* __restrict inWindowA,
+                                                               input_stream<TT_DATA>* __restrict inWindowB,
+                                                               input_buffer<uint32>& __restrict inPhaseOffset,
+                                                               output_stream<TT_DATA>* __restrict outWindow) {
+    uint32* inPhaseOffsetPtr = inPhaseOffset.data();
+    uint32 inPhaseOffsetVal = *inPhaseOffsetPtr;
+
+    this->m_phaseIndex += (inPhaseOffsetVal - this->m_phaseValpre);
+    this->m_phaseValpre = inPhaseOffsetVal;
+
+    this->ddsKernel((void*)inWindowA, (void*)inWindowB, (void*)outWindow);
+};
+
+// Mode 2, stream with phase offset specialization (iobuffer for phase offset overload), phase inc RTP
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_2,
+                             USE_PHASE_RELOAD_TRUE,
+                             STREAM_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixD(input_stream<TT_DATA>* __restrict inWindowA,
+                                                               input_stream<TT_DATA>* __restrict inWindowB,
+                                                               input_buffer<uint32>& __restrict inPhaseOffset,
+                                                               const unsigned int PhaseIncRTP,
+                                                               output_stream<TT_DATA>* __restrict outWindow) {
+    uint32* inPhaseOffsetPtr = inPhaseOffset.data();
+    uint32 inPhaseOffsetVal = *inPhaseOffsetPtr;
+
+    this->m_phaseIndex += (inPhaseOffsetVal - this->m_phaseValpre);
+    this->m_phaseValpre = inPhaseOffsetVal;
+
+    // Phase Increment phase offset handling
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
     this->ddsKernel((void*)inWindowA, (void*)inWindowB, (void*)outWindow);
 };
 
@@ -1301,7 +1698,9 @@ template <typename TT_DATA,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_INPUT_WINDOW_VSIZE,
                              MIXER_MODE_1,
@@ -1310,20 +1709,57 @@ NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_SC_MODE,
                              TP_NUM_LUTS,
                              TP_RND,
-                             TP_SAT>::ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
-                                             output_buffer<TT_DATA>& __restrict outWindow) {
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
+                                                              output_buffer<TT_DATA>& __restrict outWindow) {
     void* inPtr = inWindowA.data();
     void* outPtr = outWindow.data();
     this->ddsKernel(inPtr, outPtr);
 };
 
+// mode 1, phase inc RTP
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_USE_PHASE_RELOAD,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_1,
+                             TP_USE_PHASE_RELOAD,
+                             IOBUFFER_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixC(input_buffer<TT_DATA>& __restrict inWindowA,
+                                                               const unsigned int PhaseIncRTP,
+                                                               output_buffer<TT_DATA>& __restrict outWindow) {
+    void* inPtr = inWindowA.data();
+    void* outPtr = outWindow.data();
+    // Phase Increment phase offset handling
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
+    this->ddsKernel(inPtr, outPtr);
+};
+
+// streaming, mode 1
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_USE_PHASE_RELOAD,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_INPUT_WINDOW_VSIZE,
                              MIXER_MODE_1,
@@ -1332,17 +1768,52 @@ NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_SC_MODE,
                              TP_NUM_LUTS,
                              TP_RND,
-                             TP_SAT>::ddsMix(input_stream<TT_DATA>* __restrict inWindowA,
-                                             output_stream<TT_DATA>* __restrict outWindow) {
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMix(input_stream<TT_DATA>* __restrict inWindowA,
+                                                              output_stream<TT_DATA>* __restrict outWindow) {
     this->ddsKernel((void*)inWindowA, (void*)outWindow);
 };
 
+// streaming, mode 1, phase inc RTP
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_USE_PHASE_RELOAD,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_1,
+                             TP_USE_PHASE_RELOAD,
+                             STREAM_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixC(input_stream<TT_DATA>* __restrict inWindowA,
+                                                               const unsigned int PhaseIncRTP,
+                                                               output_stream<TT_DATA>* __restrict outWindow) {
+    // Phase Increment phase offset handling
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
+    this->ddsKernel((void*)inWindowA, (void*)outWindow);
+};
+
+// phase offset input specialization, RTP overload
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_INPUT_WINDOW_VSIZE,
                              MIXER_MODE_1,
@@ -1351,9 +1822,11 @@ NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_SC_MODE,
                              TP_NUM_LUTS,
                              TP_RND,
-                             TP_SAT>::ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
-                                             output_buffer<TT_DATA>& __restrict outWindow,
-                                             const unsigned int PhaseRTP) {
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMix(input_buffer<TT_DATA>& __restrict inWindowA,
+                                                              output_buffer<TT_DATA>& __restrict outWindow,
+                                                              const unsigned int PhaseRTP) {
     void* inPtr = inWindowA.data();
     void* outPtr = outWindow.data();
 
@@ -1363,12 +1836,122 @@ NOINLINE_DECL void dds_mixer<TT_DATA,
     this->ddsKernel(inPtr, outPtr);
 };
 
+// phase offset input specialization, RTP overload, phase inc RTP
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_1,
+                             USE_PHASE_RELOAD_TRUE,
+                             IOBUFFER_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixC(input_buffer<TT_DATA>& __restrict inWindowA,
+                                                               output_buffer<TT_DATA>& __restrict outWindow,
+                                                               const unsigned int PhaseRTP,
+                                                               const unsigned int PhaseIncRTP) {
+    void* inPtr = inWindowA.data();
+    void* outPtr = outWindow.data();
+
+    this->m_phaseIndex += (PhaseRTP - this->m_phaseValpre);
+    this->m_phaseValpre = PhaseRTP;
+
+    // Phase Increment phase offset handling
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
+    this->ddsKernel(inPtr, outPtr);
+};
+
+// phase offset input specialization, iobuffer overload
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_1,
+                             USE_PHASE_RELOAD_TRUE,
+                             IOBUFFER_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixB(input_buffer<TT_DATA>& __restrict inWindowA,
+                                                               input_buffer<uint32>& __restrict inPhaseOffset,
+                                                               output_buffer<TT_DATA>& __restrict outWindow) {
+    void* inPtr = inWindowA.data();
+    void* outPtr = outWindow.data();
+    uint32* inPhaseOffsetPtr = inPhaseOffset.data();
+    uint32 inPhaseOffsetVal = *inPhaseOffsetPtr;
+
+    this->m_phaseIndex += (inPhaseOffsetVal - this->m_phaseValpre);
+    this->m_phaseValpre = inPhaseOffsetVal;
+
+    this->ddsKernel(inPtr, outPtr);
+};
+
+// phase offset input specialization, iobuffer overload, phase Inc RTP
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_1,
+                             USE_PHASE_RELOAD_TRUE,
+                             IOBUFFER_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixD(input_buffer<TT_DATA>& __restrict inWindowA,
+                                                               input_buffer<uint32>& __restrict inPhaseOffset,
+                                                               const unsigned int PhaseIncRTP,
+                                                               output_buffer<TT_DATA>& __restrict outWindow) {
+    void* inPtr = inWindowA.data();
+    void* outPtr = outWindow.data();
+    uint32* inPhaseOffsetPtr = inPhaseOffset.data();
+    uint32 inPhaseOffsetVal = *inPhaseOffsetPtr;
+
+    this->m_phaseIndex += (inPhaseOffsetVal - this->m_phaseValpre);
+    this->m_phaseValpre = inPhaseOffsetVal;
+
+    // Phase Increment phase offset handling
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
+    this->ddsKernel(inPtr, outPtr);
+};
+
+// mode 1, stream with phase offset input specialization, RTP overload
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_INPUT_WINDOW_VSIZE,
                              MIXER_MODE_1,
@@ -1377,12 +1960,114 @@ NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_SC_MODE,
                              TP_NUM_LUTS,
                              TP_RND,
-                             TP_SAT>::ddsMix(input_stream<TT_DATA>* __restrict inWindowA,
-                                             output_stream<TT_DATA>* __restrict outWindow,
-                                             const unsigned int PhaseRTP) {
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMix(input_stream<TT_DATA>* __restrict inWindowA,
+                                                              output_stream<TT_DATA>* __restrict outWindow,
+                                                              const unsigned int PhaseRTP) {
     this->m_phaseIndex += (PhaseRTP - this->m_phaseValpre);
     this->m_phaseValpre = PhaseRTP;
 
+    this->ddsKernel((void*)inWindowA, (void*)outWindow);
+};
+
+// mode 1, stream with phase offset input specialization, RTP overload, phase Incr RTP
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_1,
+                             USE_PHASE_RELOAD_TRUE,
+                             STREAM_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixC(input_stream<TT_DATA>* __restrict inWindowA,
+                                                               output_stream<TT_DATA>* __restrict outWindow,
+                                                               const unsigned int PhaseRTP,
+                                                               const unsigned int PhaseIncRTP) {
+    this->m_phaseIndex += (PhaseRTP - this->m_phaseValpre);
+    this->m_phaseValpre = PhaseRTP;
+
+    // Phase Increment phase offset handling
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
+    this->ddsKernel((void*)inWindowA, (void*)outWindow);
+};
+
+// mode 1, stream with phase offset input specialization, iobuffer overaload
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_1,
+                             USE_PHASE_RELOAD_TRUE,
+                             STREAM_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixB(input_stream<TT_DATA>* __restrict inWindowA,
+                                                               input_buffer<uint32>& __restrict inPhaseOffset,
+                                                               output_stream<TT_DATA>* __restrict outWindow) {
+    uint32* inPhaseOffsetPtr = inPhaseOffset.data();
+    uint32 inPhaseOffsetVal = *inPhaseOffsetPtr;
+
+    this->m_phaseIndex += (inPhaseOffsetVal - this->m_phaseValpre);
+    this->m_phaseValpre = inPhaseOffsetVal;
+
+    this->ddsKernel((void*)inWindowA, (void*)outWindow);
+};
+
+// mode 1, stream with phase offset input specialization, iobuffer overload, phase Inc RTP
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_1,
+                             USE_PHASE_RELOAD_TRUE,
+                             STREAM_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixD(input_stream<TT_DATA>* __restrict inWindowA,
+                                                               input_buffer<uint32>& __restrict inPhaseOffset,
+                                                               const unsigned int PhaseIncRTP,
+                                                               output_stream<TT_DATA>* __restrict outWindow) {
+    uint32* inPhaseOffsetPtr = inPhaseOffset.data();
+    uint32 inPhaseOffsetVal = *inPhaseOffsetPtr;
+
+    this->m_phaseIndex += (inPhaseOffsetVal - this->m_phaseValpre);
+    this->m_phaseValpre = inPhaseOffsetVal;
+
+    // Phase Increment phase offset handling
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
     this->ddsKernel((void*)inWindowA, (void*)outWindow);
 };
 
@@ -1394,7 +2079,9 @@ template <typename TT_DATA,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_INPUT_WINDOW_VSIZE,
                              MIXER_MODE_0,
@@ -1403,18 +2090,53 @@ NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_SC_MODE,
                              TP_NUM_LUTS,
                              TP_RND,
-                             TP_SAT>::ddsMix(output_buffer<TT_DATA>& __restrict outWindow) {
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMix(output_buffer<TT_DATA>& __restrict outWindow) {
     void* outPtr = outWindow.data();
     this->ddsKernel(outPtr);
 };
 
+// mode 0, phase Inc RTP
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_USE_PHASE_RELOAD,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_0,
+                             TP_USE_PHASE_RELOAD,
+                             IOBUFFER_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixC(const unsigned int PhaseIncRTP,
+                                                               output_buffer<TT_DATA>& __restrict outWindow) {
+    void* outPtr = outWindow.data();
+    // Phase Increment phase offset handling
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
+    this->ddsKernel(outPtr);
+};
+
+// mode 0, streaming
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_USE_PHASE_RELOAD,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_INPUT_WINDOW_VSIZE,
                              MIXER_MODE_0,
@@ -1423,16 +2145,50 @@ NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_SC_MODE,
                              TP_NUM_LUTS,
                              TP_RND,
-                             TP_SAT>::ddsMix(output_stream<TT_DATA>* __restrict outWindow) {
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMix(output_stream<TT_DATA>* __restrict outWindow) {
     this->ddsKernel((void*)outWindow);
 };
 
+// mode 0, streaming, phase Inc RTP
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_USE_PHASE_RELOAD,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_0,
+                             TP_USE_PHASE_RELOAD,
+                             STREAM_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixC(const unsigned int PhaseIncRTP,
+                                                               output_stream<TT_DATA>* __restrict outWindow) {
+    // Phase Increment phase offset handling
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
+    this->ddsKernel((void*)outWindow);
+};
+
+// mode 0 specialization for phase offset in, RTP overload
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_INPUT_WINDOW_VSIZE,
                              MIXER_MODE_0,
@@ -1441,8 +2197,10 @@ NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_SC_MODE,
                              TP_NUM_LUTS,
                              TP_RND,
-                             TP_SAT>::ddsMix(output_buffer<TT_DATA>& __restrict outWindow,
-                                             const unsigned int PhaseRTP) {
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMix(output_buffer<TT_DATA>& __restrict outWindow,
+                                                              const unsigned int PhaseRTP) {
     void* outPtr = outWindow.data();
 
     this->m_phaseIndex += (PhaseRTP - this->m_phaseValpre);
@@ -1451,12 +2209,116 @@ NOINLINE_DECL void dds_mixer<TT_DATA,
     this->ddsKernel(outPtr);
 };
 
+// mode 0 specialization for phase offset in, RTP overload, phase inc RTP
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_SC_MODE,
           unsigned int TP_NUM_LUTS,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_0,
+                             USE_PHASE_RELOAD_TRUE,
+                             IOBUFFER_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixC(output_buffer<TT_DATA>& __restrict outWindow,
+                                                               const unsigned int PhaseRTP,
+                                                               const unsigned int PhaseIncRTP) {
+    void* outPtr = outWindow.data();
+
+    this->m_phaseIndex += (PhaseRTP - this->m_phaseValpre);
+    this->m_phaseValpre = PhaseRTP;
+
+    // Phase Increment phase offset handling
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
+    this->ddsKernel(outPtr);
+};
+
+// mode 0 specialization for phase offset in, iobuffer overload
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_0,
+                             USE_PHASE_RELOAD_TRUE,
+                             IOBUFFER_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixB(input_buffer<uint32>& __restrict inPhaseOffset,
+                                                               output_buffer<TT_DATA>& __restrict outWindow) {
+    void* outPtr = outWindow.data();
+    uint32* inPhaseOffsetPtr = inPhaseOffset.data();
+    uint32 inPhaseOffsetVal = *inPhaseOffsetPtr;
+
+    this->m_phaseIndex += (inPhaseOffsetVal - this->m_phaseValpre);
+    this->m_phaseValpre = inPhaseOffsetVal;
+
+    this->ddsKernel(outPtr);
+};
+
+// mode 0 specialization for phase offset in, iobuffer overload, phase inc RTP
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_0,
+                             USE_PHASE_RELOAD_TRUE,
+                             IOBUFFER_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixD(input_buffer<uint32>& __restrict inPhaseOffset,
+                                                               const unsigned int PhaseIncRTP,
+                                                               output_buffer<TT_DATA>& __restrict outWindow) {
+    void* outPtr = outWindow.data();
+    uint32* inPhaseOffsetPtr = inPhaseOffset.data();
+    uint32 inPhaseOffsetVal = *inPhaseOffsetPtr;
+
+    this->m_phaseIndex += (inPhaseOffsetVal - this->m_phaseValpre);
+    this->m_phaseValpre = inPhaseOffsetVal;
+
+    // Phase Increment phase offset handling
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
+    this->ddsKernel(outPtr);
+};
+
+// mode 0 specialization for streaming with phase offset in, RTP overload
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
 NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_INPUT_WINDOW_VSIZE,
                              MIXER_MODE_0,
@@ -1465,11 +2327,110 @@ NOINLINE_DECL void dds_mixer<TT_DATA,
                              TP_SC_MODE,
                              TP_NUM_LUTS,
                              TP_RND,
-                             TP_SAT>::ddsMix(output_stream<TT_DATA>* __restrict outWindow,
-                                             const unsigned int PhaseRTP) {
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMix(output_stream<TT_DATA>* __restrict outWindow,
+                                                              const unsigned int PhaseRTP) {
     this->m_phaseIndex += (PhaseRTP - this->m_phaseValpre);
     this->m_phaseValpre = PhaseRTP;
 
+    this->ddsKernel((void*)outWindow);
+};
+
+// mode 0 specialization for streaming with phase offset in, RTP overload, phase Inc RTP
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_0,
+                             USE_PHASE_RELOAD_TRUE,
+                             STREAM_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixC(output_stream<TT_DATA>* __restrict outWindow,
+                                                               const unsigned int PhaseRTP,
+                                                               const unsigned int PhaseIncRTP) {
+    this->m_phaseIndex += (PhaseRTP - this->m_phaseValpre);
+    this->m_phaseValpre = PhaseRTP;
+
+    // Phase Increment phase offset handling
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
+    this->ddsKernel((void*)outWindow);
+};
+
+// mode 0 specialization for streaming with phase offset in, iobuffer overload
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_0,
+                             USE_PHASE_RELOAD_TRUE,
+                             STREAM_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixB(input_buffer<uint32>& __restrict inPhaseOffset,
+                                                               output_stream<TT_DATA>* __restrict outWindow) {
+    uint32* inPhaseOffsetPtr = inPhaseOffset.data();
+    uint32 inPhaseOffsetVal = *inPhaseOffsetPtr;
+
+    this->m_phaseIndex += (inPhaseOffsetVal - this->m_phaseValpre);
+    this->m_phaseValpre = inPhaseOffsetVal;
+
+    this->ddsKernel((void*)outWindow);
+};
+
+// mode 0 specialization for streaming with phase offset in, iobuffer overload, phase Inc RTP
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_PHASE_RELOAD_API,
+          unsigned int TP_USE_PHASE_INC_RELOAD>
+NOINLINE_DECL void dds_mixer<TT_DATA,
+                             TP_INPUT_WINDOW_VSIZE,
+                             MIXER_MODE_0,
+                             USE_PHASE_RELOAD_TRUE,
+                             STREAM_API,
+                             TP_SC_MODE,
+                             TP_NUM_LUTS,
+                             TP_RND,
+                             TP_SAT,
+                             TP_PHASE_RELOAD_API,
+                             TP_USE_PHASE_INC_RELOAD>::ddsMixD(input_buffer<uint32>& __restrict inPhaseOffset,
+                                                               const unsigned int PhaseIncRTP,
+                                                               output_stream<TT_DATA>* __restrict outWindow) {
+    uint32* inPhaseOffsetPtr = inPhaseOffset.data();
+    uint32 inPhaseOffsetVal = *inPhaseOffsetPtr;
+
+    this->m_phaseIndex += (inPhaseOffsetVal - this->m_phaseValpre);
+    this->m_phaseValpre = inPhaseOffsetVal;
+
+    // Phase Increment phase offset handling
+    if (PhaseIncRTP != this->m_phaseInc) {
+        this->updatePhaseInc(PhaseIncRTP);
+    }
     this->ddsKernel((void*)outWindow);
 };
 }

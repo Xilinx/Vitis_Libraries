@@ -73,7 +73,6 @@ class tl_graph : public graph {
         printf("\n");
         printf("========================\n");
         adf::plio_type aiePlioWidth = AIE_PLIO_WIDTH == 64 ? adf::plio_64_bits : adf::plio_128_bits;
-        // FIR sub-graph
         xf::dsp::aie::fft::vss_1d::AIE_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, API_IO, SSR,
                                              ROUND_MODE, SAT_MODE, TWIDDLE_MODE>
             fftGraph;

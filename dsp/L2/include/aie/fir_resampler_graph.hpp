@@ -85,7 +85,8 @@ using namespace adf;
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         \n
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML and AIE-MLv2 device.
+\n
  * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph
  *         in a single iteration run.  \n
  *         When TP_API is set to 0, samples are buffered and stored in a ping-pong window buffer mapped onto Memory
@@ -207,12 +208,12 @@ class fir_resampler_graph : public graph {
                   "ERROR: Exceeded maximum supported FIR length with reloadable coefficients. Please limit the FIR "
                   "length or disable coefficient reload.");
 
-    static constexpr unsigned int kMemoryModuleSize = 32768;
+    static constexpr unsigned int kMemoryModuleSize = __DATA_MEM_BYTES__;
     static constexpr unsigned int inBufferSize = ((TP_FIR_LEN + TP_INPUT_WINDOW_VSIZE) * sizeof(TT_DATA));
     // Requested Input Window buffer exceeds memory module size
     static_assert(TP_API != 0 || inBufferSize < kMemoryModuleSize,
                   "ERROR: Input Window size (based on requested window size and FIR length margin) exceeds Memory "
-                  "Module size of 32kB");
+                  "Module size of 32kB for AIE-1 and 64kB for AIE-ML devices.");
 
     static constexpr unsigned int outBufferSize =
         (TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / TP_DECIMATE_FACTOR);

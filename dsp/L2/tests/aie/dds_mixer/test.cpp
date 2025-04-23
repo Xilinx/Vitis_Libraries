@@ -46,19 +46,33 @@ int main(void) {
     printf("\n");
 
     ddsMix.init();
-#if (USE_PHASE_RELOAD == 1)
+// ddsMix.update(ddsMix.PhaseIncRTP[0], ddsMix.PhaseIncRTP_vec[0]);
+//    printf("USE_PHASE_RELOAD = %d\n", USE_PHASE_RELOAD);
+// printf("PHASE_RELOAD_API  = %d\n", PHASE_RELOAD_API );
+// printf("USE_PHASE_INC_RELOAD  = %d\n", USE_PHASE_INC_RELOAD );
+#if ((USE_PHASE_RELOAD == 1 && PHASE_RELOAD_API == USE_PHASE_RELOAD_API_RTP) || USE_PHASE_INC_RELOAD == 1)
     for (int i = 0; i < NITER; i++) {
-        for (int k = 0; k < P_SSR; k++) {
-            ddsMix.update(ddsMix.PhaseRTP[k], ddsMix.PhaseRTP_vec[i]);
-            printf("Phase is = %d\n", ddsMix.PhaseRTP_vec[i]);
+#if (USE_PHASE_RELOAD == 1 && PHASE_RELOAD_API == USE_PHASE_RELOAD_API_RTP)
+        if (i % 2 == 0) {
+            for (int k = 0; k < P_SSR; k++) {
+                ddsMix.update(ddsMix.PhaseRTP[k], ddsMix.PhaseRTP_vec[i]);
+                // printf("Phase is = %d\n", ddsMix.PhaseRTP_vec[i]);
+            }
         }
+#endif
+#if (USE_PHASE_INC_RELOAD == 1)
+        if (i % 3 == 0) {
+            for (int k = 0; k < P_SSR; k++) {
+                ddsMix.update(ddsMix.PhaseIncRTP[k], ddsMix.PhaseIncRTP_vec[i]);
+                // printf("Phase is = %d\n", ddsMix.PhaseRTP_vec[i]);
+            }
+        }
+#endif
         ddsMix.run(1);
         ddsMix.wait();
     }
-    ddsMix.run(1);
-    ddsMix.wait();
     ddsMix.end();
-#else
+#else // no RTPS
     ddsMix.run(NITER);
     ddsMix.end();
 #endif

@@ -45,10 +45,6 @@ COMPUTE_SAME = 1
 COMPUTE_VALID = 2
 AIE_LOAD_SIZE = 256/8   # 32 Bytes
 AIE_LOAD_SIZE_IN_BITS = 256
-TP_SHIFT_min = 0
-TP_SHIFT_max = 60
-API_WINDOW = 0
-API_STREAM = 1
 TP_NUM_FRAMES_MIN = 1
 TP_NUM_FRAMES_MAX = 1
 TP_CASC_LEN_MIN = 1
@@ -75,8 +71,8 @@ def update_AIE_VARIANT(args):
   return fn_update_AIE_VARIANT()
 
 def fn_update_AIE_VARIANT():
-  legal_set_AIE_VARIANT = [com.AIE, com.AIE_ML]
-  
+  legal_set_AIE_VARIANT = [com.AIE, com.AIE_ML, com.AIE_MLv2]
+
   param_dict ={}
   param_dict.update({"name" : "AIE_VARIANT"})
   param_dict.update({"enum" : legal_set_AIE_VARIANT})
@@ -100,7 +96,7 @@ def update_TP_API(args):
 def fn_update_api():
   param_dict={
     "name" : "TP_API",
-    "enum" : [com.API_WINDOW, com.API_STREAM]
+    "enum" : [com.API_BUFFER, com.API_STREAM]
   }
   return param_dict
 
@@ -124,7 +120,7 @@ def fn_update_data_type_f(AIE_VARIANT, TP_API):
   valid_types = ["int8", "int16", "int32", "float", "bfloat16", "cfloat", "cint16", "cint32"]
   if AIE_VARIANT == com.AIE:
     if TP_API == com.API_STREAM:
-       valid_types = ["cint16"]
+      valid_types = ["cint16"]
     else:
       valid_types.remove("int8")
       valid_types.remove("bfloat16")
@@ -218,7 +214,7 @@ def validate_TP_FUNCT_TYPE(args):
 
 def fn_validate_funct_type(TP_FUNCT_TYPE):
   param_dict = fn_update_funct_type()
-  return(com.validate_legal_set(param_dict["enum"], "TP_FUNCT_TYPE", TP_FUNCT_TYPE))  
+  return(com.validate_legal_set(param_dict["enum"], "TP_FUNCT_TYPE", TP_FUNCT_TYPE))
 
 #######################################################
 ######## TP_COMPUTE_MODE Updater and Validator ########
@@ -234,7 +230,7 @@ def fn_update_compute_mode(TP_API):
         "enum" : [COMPUTE_VALID]
     }
 
-  elif TP_API == com.API_WINDOW:
+  elif TP_API == com.API_BUFFER:
     param_dict={
         "name" : "TP_COMPUTE_MODE",
         "enum" : [COMPUTE_FULL, COMPUTE_SAME, COMPUTE_VALID]
@@ -248,7 +244,7 @@ def validate_TP_COMPUTE_MODE(args):
 
 def fn_validate_compute_mode(TP_COMPUTE_MODE, TP_API):
   param_dict = fn_update_compute_mode(TP_API)
-  return(com.validate_legal_set(param_dict["enum"], "TP_COMPUTE_MODE", TP_COMPUTE_MODE))  
+  return(com.validate_legal_set(param_dict["enum"], "TP_COMPUTE_MODE", TP_COMPUTE_MODE))
 
 #######################################################
 ########### TP_F_LEN Updater and Validator ############
@@ -262,13 +258,12 @@ def update_TP_F_LEN(args):
 
 def fn_update_f_len(TP_F_LEN, TT_DATA_F, TP_API, AIE_VARIANT):
   elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA_F)
-  # TP_F_LEN_max = com.k_data_memory_bytes[AIE_VARIANT] // (4 * com.fn_size_by_byte(TT_DATA_F)) # ! Likely limited beyond what is required.
-  TP_F_LEN_max = 32768 // (4 * com.fn_size_by_byte(TT_DATA_F))  # ! Note to change this to depend on AIE variant.
+  TP_F_LEN_max = com.k_data_memory_bytes[AIE_VARIANT] >> 2 // (com.fn_size_by_byte(TT_DATA_F))
 
   param_dict={
     "name" : "TP_F_LEN",
     "minimum" : elems_per_load,
-    "maximum" : TP_F_LEN_max if TP_API == com.API_WINDOW else 2**31
+    "maximum" : TP_F_LEN_max if TP_API == com.API_BUFFER else 2**31
   }
   TP_F_LEN_act = TP_F_LEN + (TP_F_LEN % elems_per_load)
   if TP_F_LEN_act < param_dict["minimum"]: param_dict["actual"] = param_dict["minimum"]
@@ -290,9 +285,9 @@ def fn_validate_f_len(AIE_VARIANT, TT_DATA_F, TP_API, TP_F_LEN):
 
   if TP_F_LEN % elems_per_load != 0:
     return com.isError(f"TP_F_LEN should be divisible by {elems_per_load}.")
-  
+
   return (com.validate_range(range_TP_F_LEN, "TP_F_LEN", TP_F_LEN))
-  
+
 #######################################################
 ########### TP_G_LEN Updater and Validator ############
 #######################################################
@@ -310,7 +305,7 @@ def fn_update_g_len(TP_G_LEN, TT_DATA_G, TP_F_LEN, TP_API, AIE_VARIANT):
   param_dict={
     "name" : "TT_DATA_G",
     "minimum" : elems_per_load,
-    "maximum" : min(TP_G_LEN_iobuffer_max, TP_F_LEN) if TP_API == API_STREAM else TP_F_LEN
+    "maximum" : min(TP_G_LEN_iobuffer_max, TP_F_LEN) if TP_API == com.API_STREAM else TP_F_LEN
   }
   TP_G_LEN_act = TP_G_LEN + (TP_G_LEN % elems_per_load)
   if TP_G_LEN_act < param_dict["minimum"]: param_dict["actual"] = param_dict["minimum"]
@@ -335,7 +330,7 @@ def fn_validate_g_len(AIE_VARIANT, TP_API, TT_DATA_G, TP_F_LEN, TP_G_LEN):
     return com.isError(f"TP_G_LEN should be divisible by {elems_per_load}.")
   if TP_G_LEN > TP_F_LEN:
     return com.isError(f"TP_G_LEN cannot be greater than TP_F_LEN.")  # ! Assertion is unnecessary but descriptive.
-  
+
   return (com.validate_range(range_TP_G_LEN, "TP_G_LEN", TP_G_LEN))
 
 #######################################################
@@ -374,7 +369,7 @@ def fn_update_casc_len(TP_G_LEN, TP_API):
 
   if TP_API == com.API_STREAM:
     legal_set = [TP_G_LEN // 32, TP_G_LEN // 16, TP_G_LEN // 8] # ? 1 not legal?
-  elif TP_API == com.API_WINDOW:
+  elif TP_API == com.API_BUFFER:
     legal_set = [1]
 
   legal_set = [val for val in legal_set if val >= TP_CASC_LEN_MIN]
@@ -399,32 +394,39 @@ def fn_validate_casc_len(TP_CASC_LEN, TP_G_LEN, TP_API):
 ########## TP_PHASES Updater and Validator ############
 #######################################################
 def update_TP_PHASES(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA_F = args["TT_DATA_F"]
+  TT_DATA_G = args["TT_DATA_G"]
   TP_CASC_LEN = args["TP_CASC_LEN"]
   TP_G_LEN = args["TP_G_LEN"]
   TP_API = args["TP_API"]
-  return fn_update_phases(TP_G_LEN, TP_API, TP_CASC_LEN)
+  return fn_update_phases(AIE_VARIANT, TT_DATA_F,TT_DATA_G,TP_G_LEN, TP_API, TP_CASC_LEN)
 
-def fn_update_phases(TP_G_LEN, TP_API, TP_CASC_LEN):
+def fn_update_phases(AIE_VARIANT, TT_DATA_F,TT_DATA_G,TP_G_LEN, TP_API, TP_CASC_LEN):
+  muls = getNumMuls(TT_DATA_F, TT_DATA_G, AIE_VARIANT)
   legal_set = [i for i in range(TP_PHASES_MIN, TP_PHASES_MAX+1)]
   legal_set = [i for i in legal_set if com.fn_is_power_of_two(i)]
 
-  if (TP_API == com.API_STREAM) and (TP_CASC_LEN != TP_G_LEN // 8):
+  if (TP_API == com.API_STREAM) and (TP_CASC_LEN != TP_G_LEN // muls):
     legal_set = [1]
-  elif TP_API == com.API_WINDOW:
+  elif TP_API == com.API_BUFFER:
     legal_set = [1]
 
   param_dict = {"name": "TP_PHASES", "enum": legal_set}
   return param_dict
 
 def validate_TP_PHASES(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TT_DATA_F = args["TT_DATA_F"]
+  TT_DATA_G = args["TT_DATA_G"]
   TP_PHASES = args["TP_PHASES"]
   TP_G_LEN = args["TP_G_LEN"]
   TP_API = args["TP_API"]
   TP_CASC_LEN = args["TP_CASC_LEN"]
-  return fn_validate_phases(TP_PHASES, TP_G_LEN, TP_API, TP_CASC_LEN)
+  return fn_validate_phases(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TP_PHASES, TP_G_LEN, TP_API, TP_CASC_LEN)
 
-def fn_validate_phases(TP_PHASES, TP_G_LEN, TP_API, TP_CASC_LEN):
-  param_dict = fn_update_phases(TP_G_LEN, TP_API, TP_CASC_LEN)
+def fn_validate_phases(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TP_PHASES, TP_G_LEN, TP_API, TP_CASC_LEN):
+  param_dict = fn_update_phases(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TP_G_LEN, TP_API, TP_CASC_LEN)
 
   legal_set_phases = param_dict["enum"]
   return(com.validate_legal_set(legal_set_phases, "TP_PHASES", TP_PHASES))
@@ -480,7 +482,7 @@ def validate_TP_RND(args):
 
 #######################################################
 ############ TP_SAT Updater and Validator #############
-#######################################################  
+#######################################################
 def update_TP_SAT(args):
   legal_set_sat = com.fn_legal_set_sat()
   param_dict={
@@ -488,11 +490,38 @@ def update_TP_SAT(args):
     "enum" : legal_set_sat
   }
   return param_dict
-                               
+
 def validate_TP_SAT(args):
   TP_SAT = args["TP_SAT"]
   return com.fn_validate_satMode(TP_SAT)
 
+#############################################################
+###### TP_USE_RTP_VECTOR_LENGTHS Updater and Validator ######
+#############################################################
+def update_TP_USE_RTP_VECTOR_LENGTHS(args):
+    TP_API = args["TP_API"]
+    return fn_update_TP_USE_RTP_VECTOR_LENGTHS(TP_API)
+
+def fn_update_TP_USE_RTP_VECTOR_LENGTHS(TP_API):
+    if TP_API == 0:
+        legal_set_use_rtp_vec_lengths=[0, 1]
+    else:
+        legal_set_use_rtp_vec_lengths=[0]
+
+    param_dict={
+        "name" : "TP_USE_RTP_VECTOR_LENGTHS",
+        "enum" : legal_set_use_rtp_vec_lengths
+    }
+    return param_dict
+
+def validate_TP_USE_RTP_VECTOR_LENGTHS(args):
+    TP_API = args["TP_API"]
+    TP_USE_RTP_VECTOR_LENGTHS = args["TP_USE_RTP_VECTOR_LENGTHS"]
+    return fn_validate_TP_USE_RTP_VECTOR_LENGTHS(TP_API, TP_USE_RTP_VECTOR_LENGTHS)
+
+def fn_validate_TP_USE_RTP_VECTOR_LENGTHS(TP_API, TP_USE_RTP_VECTOR_LENGTHS):
+    param_dict=fn_update_TP_USE_RTP_VECTOR_LENGTHS(TP_API)
+    return com.validate_legal_set(param_dict["enum"], "TP_USE_RTP_VECTOR_LENGTHS", TP_USE_RTP_VECTOR_LENGTHS)
 
 #######################################################
 
@@ -502,36 +531,15 @@ def validate_TP_SAT(args):
 # The return object will provide "value" which will be set in the wizard as the dependent parameter is being set.
 # The rest of keys are similar to parameter definition, but with candidates of enum or range values refined
 # based on previously set values.
-#
-# An updator function will always return a dictionary,
-# including key "value" for automatically filled default in GUI as dependent parameters have been set, and
-# other keys for overriding the definition of parameter.
-#
-# For example, if a parameter has definition in JSON as
-#  { "name": "foo", "type": "typename", "enum": ["int", "float", "double"] }
-# And the updator returns
-#  { "value": "int", "enum": ["int", "float"] }
-# The GUI would show "int" as default and make "int" and "float" selectable candidates, while disabling "double".
-#
-# If with given combination, no valid value can be set for the parameter being updated, the updater function
-# should set "value" to None, to indicate an error and provide error message via "err_message".
-# For example
-#  { "value": None, "err_message": "With TT_DATA as 'int' there is no valid option for TT_COEFF" }
-#
-# In this example, the following is the updater for TT_COEF, with TT_DATA as the dependent parameter.
-# When GUI generates a wizard, TT_DATA should be required first, as it shows up in parameter list first.
-# Once user has provided value for TT_DATA, this function will be called and set the value of TT_COEFF.
-# Meanwhile, the candidate shown in wizard based on enum will also be updated.
-#
 
 # Utility Functions
 #### Valid Sliding Mul Combos ####
 def fn_get_valid_g_types_for_mul(TT_DATA_F, AIE_VARIANT, TP_API):
     if AIE_VARIANT == com.AIE:
-        if (TP_API == API_STREAM):
-            if TT_DATA_F == "cint16": return ["cint16"]
+        if (TP_API == com.API_STREAM):
+            if TT_DATA_F == "cint16": return ["int16", "cint16"]
 
-        elif (TP_API == API_WINDOW):    
+        elif (TP_API == com.API_BUFFER):
             if (TT_DATA_F == "int16"):  return ["int16"]
             if (TT_DATA_F == "int32"):  return ["int16"]
             if (TT_DATA_F == "float"):  return ["float"]
@@ -539,7 +547,7 @@ def fn_get_valid_g_types_for_mul(TT_DATA_F, AIE_VARIANT, TP_API):
             if (TT_DATA_F == "cint32"): return ["int16", "cint16"]
             if (TT_DATA_F == "cfloat"): return ["float", "cfloat"]
 
-    elif AIE_VARIANT == com.AIE_ML:
+    elif AIE_VARIANT == com.AIE_ML or AIE_VARIANT == com.AIE_MLv2:
         if (TT_DATA_F == "int8"):       return ["int8"]
         if (TT_DATA_F == "int16"):      return ["int16"]
         if (TT_DATA_F == "int32"):      return ["int16"]
@@ -564,11 +572,11 @@ def fn_get_valid_out_types_for_mul(TT_DATA_F, TT_DATA_G):   # Don't feel too goo
     return []
 
 def getNumLanes(TT_DATA_F, TT_DATA_G, AIE_VARIANT=1):
-    if AIE_VARIANT == 1:
+    if AIE_VARIANT == com.AIE:
         if (
             (TT_DATA_F == "int8" and TT_DATA_G == "int8") or
             (TT_DATA_F == "int16" and TT_DATA_G == "int8") or
-            (TT_DATA_F == "int16" and TT_DATA_G == "int16") 
+            (TT_DATA_F == "int16" and TT_DATA_G == "int16")
         ):
             return 16
         elif (
@@ -589,10 +597,10 @@ def getNumLanes(TT_DATA_F, TT_DATA_G, AIE_VARIANT=1):
             return 4
         else:
             return 0
-    if AIE_VARIANT == 2:
+    if AIE_VARIANT == com.AIE_ML:
         if (
             (TT_DATA_F == "int8" and TT_DATA_G == "int8")
-           ):
+            ):
             return 8
         elif (
             (TT_DATA_F == "int16" and TT_DATA_G == "int8") or
@@ -601,7 +609,7 @@ def getNumLanes(TT_DATA_F, TT_DATA_G, AIE_VARIANT=1):
             (TT_DATA_F == "float" and TT_DATA_G == "float") or
             (TT_DATA_F == "bfloat16" and TT_DATA_G == "bfloat16") or
             (TT_DATA_F == "cint16" and TT_DATA_G == "int16") or
-            (TT_DATA_F == "cint16" and TT_DATA_G == "int32") 
+            (TT_DATA_F == "cint16" and TT_DATA_G == "int32")
             ) :
             return 16
         elif (
@@ -610,6 +618,141 @@ def getNumLanes(TT_DATA_F, TT_DATA_G, AIE_VARIANT=1):
             (TT_DATA_F == "cint32" and TT_DATA_G == "cint16")
         ):
             return 8
+        else:
+            return 0
+    if AIE_VARIANT == com.AIE_MLv2:
+        if (
+            (TT_DATA_F == "int8" and TT_DATA_G == "int8")
+            ):
+            return 8
+        elif (
+            (TT_DATA_F == "int16" and TT_DATA_G == "int8") or
+            (TT_DATA_F == "int16" and TT_DATA_G == "int16") or
+            (TT_DATA_F == "int32" and TT_DATA_G == "int16") or
+            (TT_DATA_F == "float" and TT_DATA_G == "float") or
+            (TT_DATA_F == "bfloat16" and TT_DATA_G == "bfloat16") or
+            (TT_DATA_F == "cint16" and TT_DATA_G == "int16") or
+            (TT_DATA_F == "cint16" and TT_DATA_G == "int32")
+            ) :
+            return 16
+        elif (
+            (TT_DATA_F == "cint16" and TT_DATA_G == "cint16") or
+            (TT_DATA_F == "cint32" and TT_DATA_G == "int16") or
+            (TT_DATA_F == "cint32" and TT_DATA_G == "cint16")
+        ):
+            return 8
+        else:
+            return 0
+
+def getNumMuls(TT_DATA_F, TT_DATA_G, AIE_VARIANT=1):
+    if AIE_VARIANT == com.AIE:
+        if (
+            (TT_DATA_F == "int8" and TT_DATA_G == "int8")
+        ):
+          return 128
+        elif (
+            (TT_DATA_F == "int16" and TT_DATA_G == "int8")
+        ) :
+          return 64
+        elif(
+            (TT_DATA_F == "int16" and TT_DATA_G == "int16")
+        ):
+            return 32
+        elif(
+            (TT_DATA_F == "int32" and TT_DATA_G == "int16") or
+            (TT_DATA_F == "cint16" and TT_DATA_G == "int16")
+        ):
+            return 16
+        elif(
+            (TT_DATA_F == "float" and TT_DATA_G == "float") or
+            (TT_DATA_F == "cint16" and TT_DATA_G == "int32") or
+            (TT_DATA_F == "cint16" and TT_DATA_G == "cint16") or
+            (TT_DATA_F == "cint32" and TT_DATA_G == "int16")
+        ):
+            return 8
+        elif(
+            (TT_DATA_F == "cint32" and TT_DATA_G == "cint16") or
+            (TT_DATA_F == "float" and TT_DATA_G == "cfloat")
+            (TT_DATA_F == "cfloat" and TT_DATA_G == "float") or
+            (TT_DATA_F == "cfloat" and TT_DATA_G == "cfloat")
+        ):
+            return 4
+        else:
+            return 0
+    if AIE_VARIANT == com.AIE_ML:
+        if (
+            (TT_DATA_F == "int8" and TT_DATA_G == "int8")
+            ):
+            return 256
+        elif (
+            (TT_DATA_F == "int16" and TT_DATA_G == "int8")
+            ):
+            return 128
+        elif (
+            (TT_DATA_F == "int16" and TT_DATA_G == "int16") or
+            (TT_DATA_F == "int32" and TT_DATA_G == "int16") or
+            (TT_DATA_F == "cint16" and TT_DATA_G == "int16") or
+            (TT_DATA_F == "cint16" and TT_DATA_G == "int32")
+            ) :
+            return 64
+        elif (
+            (TT_DATA_F == "cint16" and TT_DATA_G == "cint16") or
+            (TT_DATA_F == "cint32" and TT_DATA_G == "int16")
+            ) :
+            return 32
+        elif (
+            (TT_DATA_F == "float" and TT_DATA_G == "float") or
+            (TT_DATA_F == "bfloat16" and TT_DATA_G == "bfloat16")
+        ):
+            return 16
+        elif(
+            (TT_DATA_F == "cint32" and TT_DATA_G == "cint16")
+        ):
+            return 8
+        else:
+            return 0
+    if AIE_VARIANT == com.AIE_MLv2:
+        if (
+            (TT_DATA_F == "int8" and TT_DATA_G == "int8")
+            ):
+            return 512
+        elif (
+            (TT_DATA_F == "int16" and TT_DATA_G == "int16") or
+            (TT_DATA_F == "int16" and TT_DATA_G == "cint16") or
+            (TT_DATA_F == "cint16" and TT_DATA_G == "int16")
+            ):
+            return 128
+        elif(
+            (TT_DATA_F == "bfloat16" and TT_DATA_G == "bfloat16")
+
+          ):
+            return 64
+        elif (
+            (TT_DATA_F == "int16" and TT_DATA_G == "int32") or
+            (TT_DATA_F == "int32" and TT_DATA_G == "int16") or
+            (TT_DATA_F == "int32" and TT_DATA_G == "int32")
+        ):
+          return 32
+        elif(
+            (TT_DATA_F == "int16" and TT_DATA_G == "cint32") or
+            (TT_DATA_F == "int32" and TT_DATA_G == "cint16") or
+            (TT_DATA_F == "int32" and TT_DATA_G == "cint32") or
+            (TT_DATA_F == "float" and TT_DATA_G == "float") or
+            (TT_DATA_F == "cint16" and TT_DATA_G == "int32") or
+            (TT_DATA_F == "cint16" and TT_DATA_G == "cint16") or
+            (TT_DATA_F == "cint16" and TT_DATA_G == "cint32") or
+            (TT_DATA_F == "cint32" and TT_DATA_G == "int16") or
+            (TT_DATA_F == "cint32" and TT_DATA_G == "int32") or
+            (TT_DATA_F == "cint32" and TT_DATA_G == "cint16") or
+            (TT_DATA_F == "cint32" and TT_DATA_G == "cint32")
+            ) :
+            return 16
+        elif (
+            (TT_DATA_F == "float" and TT_DATA_G == "cfloat") or
+            (TT_DATA_F == "cfloat" and TT_DATA_G == "float") or
+            (TT_DATA_F == "cfloat" and TT_DATA_G == "cfloat")
+        ):
+            return 4
         else:
             return 0
 
@@ -628,7 +771,7 @@ def fn_get_input_paddedLength(TT_DATA_F, TT_DATA_G, TP_F_LEN, TP_G_LEN, TP_COMPU
     lanes = getNumLanes(TT_DATA_F, TT_DATA_G)
     dataSamples = sampleSize[TT_DATA_F]
     dataLoad = (AIE_LOAD_SIZE_IN_BITS / dataSamples)
-    
+
     if TP_COMPUTE_MODE == COMPUTE_FULL:
         PaddedLength = ((TP_G_LEN - 1) + TP_F_LEN + (TP_G_LEN - 1))
         PaddedLength = com.CEIL(PaddedLength, dataLoad)
@@ -657,7 +800,7 @@ def get_port_info(portname, dir, dataType, dim, numFrames, numPhases, apiType, v
         "direction": f"{dir}",
         "data_type": dataType,
         "fn_is_complex": com.fn_is_complex(dataType),
-        "window_size" : dim*numFrames, #com.fn_input_window_size(windowVsize, dataType),
+        "window_size" : com.fn_input_window_size((dim*numFrames), dataType),
         "margin_size" : 0,
         "phases" : numPhases
     } for idx in range(vectorLength)]
@@ -681,14 +824,15 @@ def info_ports(args):
     TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
     TP_CASC_LEN = args["TP_CASC_LEN"]
     TP_PHASES = args["TP_PHASES"]
+    TP_USE_RTP_VECTOR_LENGTHS = args["TP_USE_RTP_VECTOR_LENGTHS"]
     AIE_VARIANT = args["AIE_VARIANT"]
-    
+
     lanes = getNumLanes(TT_DATA_F, TT_DATA_G, AIE_VARIANT)
     loopcount = fn_compute_output_dimension(TP_F_LEN, TP_G_LEN, TP_COMPUTE_MODE)
     inDataLen = fn_get_input_paddedLength(TT_DATA_F, TT_DATA_G, TP_F_LEN, TP_G_LEN, TP_COMPUTE_MODE)
     outDataLen = ((((com.CEIL(loopcount,lanes))/lanes))*lanes)
-    
-    if (TP_API==0) :
+
+    if (TP_API == com.API_BUFFER) :
         portsInF = get_port_info(
             portname = "inF",
             dir = "in",
@@ -719,7 +863,8 @@ def info_ports(args):
             apiType = "window",
             vectorLength = TP_PHASES
         )
-    elif (TP_API == 1):
+        portsRtpVecLen = (com.get_parameter_port_info("rtpVecLen", "in", "int32", None, 1, "async") if (args["TP_USE_RTP_VECTOR_LENGTHS"] == 1) else [])
+    elif (TP_API == com.API_STREAM):
         portsInF = get_port_info(
             portname = "inF",
             dir = "in",
@@ -750,9 +895,10 @@ def info_ports(args):
             apiType = "stream",
             vectorLength = TP_PHASES
         )
+        portsRtpVecLen = (com.get_parameter_port_info("rtpVecLen", "in", "int32", None, 1, "async") if (args["TP_USE_RTP_VECTOR_LENGTHS"] == 1) else [])
         pass
 
-    return portsInF+portsInG+portsOut
+    return (portsInF+portsInG+portsOut+portsRtpVecLen)
 
 #### graph generator ####
 def generate_graph(graphname, args):
@@ -774,8 +920,9 @@ def generate_graph(graphname, args):
     TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
     TP_CASC_LEN = args["TP_CASC_LEN"]
     TP_PHASES = args["TP_PHASES"]
+    TP_USE_RTP_VECTOR_LENGTHS = args["TP_USE_RTP_VECTOR_LENGTHS"]
     AIE_VARIANT = args["AIE_VARIANT"]
-    
+
     # Use formatted multi-line string to avoid a lot of \n and \t
     code = (
 f"""
@@ -786,10 +933,11 @@ public:
   static constexpr unsigned int TP_PHASES = {TP_PHASES};
   template <typename dir>
   using ssr_port_array = std::array<adf::port<dir>, TP_PHASES>;
-  
+
   std::array<adf::port<input>, {TP_PHASES}> inF;
   std::array<adf::port<input>, 1> inG;
   std::array<adf::port<output>, {TP_PHASES}> out;
+  std::array<adf::port<input>, 1> rtpVecLen;" if TP_USE_RTP_VECTOR_LENGTHS == 1 else "//No rtpVecLen port"
 
   xf::dsp::aie::conv_corr::conv_corr_graph<
     {TT_DATA_F}, // TT_DATA_F
@@ -805,19 +953,19 @@ public:
     {TP_SAT}, // TP_SAT
     {TP_NUM_FRAMES}, // TP_NUM_FRAMES
     {TP_CASC_LEN}, //TP_CASC_LEN
-    {TP_PHASES} // TP_PHASES
+    {TP_PHASES}, // TP_PHASES
+    {TP_USE_RTP_VECTOR_LENGTHS} // TP_USE_RTP_VECTOR_LENGTHS
     > conv_corr_graph;
 
   {graphname}() : conv_corr_graph() {{
     adf::kernel *conv_corr_kernels = conv_corr_graph.getKernels();
-    for (int i=0; i < 1; i++) {{
-      adf::runtime<ratio>(conv_corr_kernels[i]) = 0.9;
-    }}
+
     for (int phIndx = 0; phIndx < TP_PHASES; phIndx++) {{
         adf::connect<> net_in(inF[phIndx], conv_corr_graph.inF[phIndx]);
         adf::connect<> net_out(conv_corr_graph.out[phIndx], out[phIndx]);
     }}
-    adf::connect<> net_in(inG, conv_corr_graph.inG[1]);
+    adf::connect<> net_in(inG[0], conv_corr_graph.inG);
+    adf::connect<> net_in(rtpVecLen[0], conv_corr_graph.rtpVecLen[0]);
   }}
 }};
 """)

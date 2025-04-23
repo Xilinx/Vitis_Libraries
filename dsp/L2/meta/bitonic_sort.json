@@ -18,15 +18,13 @@
             "description": "specifies the device type",
             "updater": {
                 "file": "bitonic_sort.py",
-                "function": "update_AIE_VARIANT", 
-                "args": [
-                ]
+                "function": "update_AIE_VARIANT",
+                "args": []
             },
             "validator": {
                 "file": "bitonic_sort.py",
-                "function": "validate_AIE_VARIANT", 
-                "args": [
-                ]
+                "function": "validate_AIE_VARIANT",
+                "args": []
             }
         },
         {
@@ -62,14 +60,16 @@
                 "file": "bitonic_sort.py",
                 "function": "update_TP_DIM",
                 "args": [
-                    "AIE_VARIANT", "TT_DATA"
+                    "AIE_VARIANT",
+                    "TT_DATA"
                 ]
             },
             "validator": {
                 "file": "bitonic_sort.py",
                 "function": "validate_TP_DIM",
                 "args": [
-                    "AIE_VARIANT", "TT_DATA"
+                    "AIE_VARIANT",
+                    "TT_DATA"
                 ]
             }
         },
@@ -80,13 +80,44 @@
             "updater": {
                 "file": "bitonic_sort.py",
                 "function": "update_TP_NUM_FRAMES",
-                "args": [ "AIE_VARIANT", "TT_DATA", "TP_DIM"
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_DIM"
                 ]
             },
             "validator": {
                 "file": "bitonic_sort.py",
                 "function": "validate_TP_NUM_FRAMES",
-                "args": [ "AIE_VARIANT", "TT_DATA", "TP_DIM"
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_DIM"
+                ]
+            }
+        },
+        {
+            "name": "TP_SSR",
+            "description": "The number of kernels to be used to split up and cascade the function.",
+            "type": "uint",
+            "updater": {
+                "file": "bitonic_sort.py",
+                "function": "update_TP_SSR",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_DIM",
+                    "TP_NUM_FRAMES"
+                ]
+            },
+            "validator": {
+                "file": "bitonic_sort.py",
+                "function": "validate_TP_SSR",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_DIM",
+                    "TP_NUM_FRAMES"
                 ]
             }
         },
@@ -98,14 +129,16 @@
                 "file": "bitonic_sort.py",
                 "function": "update_TP_CASC_LEN",
                 "args": [
-                    "TP_DIM"
+                    "TP_DIM",
+                    "TP_SSR"
                 ]
             },
             "validator": {
                 "file": "bitonic_sort.py",
                 "function": "validate_TP_CASC_LEN",
                 "args": [
-                    "TP_DIM"
+                    "TP_DIM",
+                    "TP_SSR"
                 ]
             }
         },
@@ -116,14 +149,12 @@
             "updater": {
                 "file": "bitonic_sort.py",
                 "function": "update_TP_ASCENDING",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "bitonic_sort.py",
                 "function": "validate_TP_ASCENDING",
-                "args": [
-                ]
+                "args": []
             }
         }
     ],

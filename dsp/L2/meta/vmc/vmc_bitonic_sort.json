@@ -1,0 +1,82 @@
+{
+    "low_level_file": "bitonic_sort.json",
+    "ip_name": "vmc_bitonic_sort",
+    "block_info": {
+        "label": "Bitonic Sort",
+        "description": "Bitonic Sort block targeted for AI Engines."
+    },
+    "parameters": [
+        {
+            "key": "AIE_VARIANT",
+            "name": "AIE_VARIANT",
+            "description": "Specifies the device type: 1-AIE, 2-AIE-ML, 22-AIE-ML-V2",
+            "default": 1,
+            "label": "AIE Variant:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TT_DATA",
+            "name": "data_type",
+            "type": "typename",
+            "description": "Data type of individual I/O data samples.",
+            "default": "int16",
+            "label": "Input/Output data type:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_DIM",
+            "name": "sample_size",
+            "description": "The number of input samples.",
+            "default": 32,
+            "label": "Input frame size (samples):",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_NUM_FRAMES",
+            "name": "num_frames",
+            "description": "The number of lists to sort per call to the kernel",
+            "default": 1,
+            "label": "Number of frames:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_CASC_LEN",
+            "name": "casc_length",
+            "description": "The number of kernels to be used to split up and cascade the function.",
+            "default": 1,
+            "label": "Number of cascade stages:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_ASCENDING",
+            "name": "sort_order",
+            "description": "sort input samples list in descending or ascending order.",
+            "enum": [0, 1],
+            "enum_str": ["Descending", "Ascending"],
+            "default": 0,
+            "label": "Sort order:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+	{		
+	"key":"TP_SSR",
+        "name": "ssr",
+        "description": "TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput.",
+        "type": "uint",      
+        "default": 1,
+        "label": "SSR:",
+        "tablabel": "Main",
+        "parameterType":"edit"
+     	}
+
+    ],
+    "generator": {
+        "file": "vmc_bitonic_sort.py",
+        "function": "vmc_generate_graph"
+    }
+}

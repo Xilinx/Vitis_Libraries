@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import aie_common as com
 from aie_common import *
 import math
 
@@ -41,8 +42,8 @@ import math
 
 TP_SHIFT_max = 60
 BUFFER_BYTES = 32
-IO_BYTES_max_aie1 = 16384
-IO_BYTES_max_aie2 = 32768
+# IO_BYTES_max_aie1 = 16384
+# IO_BYTES_max_aie2 = 32768
 TP_SSR_min = 1
 TP_SSR_max = 16
 
@@ -55,10 +56,6 @@ byteSize = {
   "cint32":8
 }
 
-aieVariantName = {
-  1:"AIE",
-  2:"AIE-ML"
-}
 
 #######################################################
 ###########AIE_VARIANT Updater and Validator ##########
@@ -67,10 +64,10 @@ def update_AIE_VARIANT(args):
   return fn_update_AIE_VARIANT()
 
 def fn_update_AIE_VARIANT():
-  legal_set_aie=[1, 2]
+  legal_set_AIE_VARIANT = [com.AIE, com.AIE_ML, com.AIE_MLv2]
   param_dict={
     "name" : "AIE_VARIANT",
-    "enum" : legal_set_aie
+    "enum" : legal_set_AIE_VARIANT
    }
   return param_dict
 
@@ -145,7 +142,7 @@ def update_TP_API(args):
   return fn_update_TP_API()
 
 def fn_update_TP_API():
-  legal_set_TP_API=[0, 1]
+  legal_set_TP_API = [0, 1]
   param_dict={
     "name" : "TP_API",
     "enum" : legal_set_TP_API
@@ -193,15 +190,12 @@ def update_TP_DIM_A(args):
   TT_DATA_B = args["TT_DATA_B"]
   TP_API = args["TP_API"]
   TP_SSR = args["TP_SSR"]
-  if args["TP_DIM_A"]: TP_DIM_A = args["TP_DIM_A"]
+  if "TP_DIM_A" in args and args["TP_DIM_A"]: TP_DIM_A = args["TP_DIM_A"]
   else: TP_DIM_A = 0
   return fn_update_TP_DIM_A(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A)
 
 def fn_update_TP_DIM_A(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A):
-
-  if AIE_VARIANT == 1: IO_BYTES_max=IO_BYTES_max_aie1
-  elif AIE_VARIANT == 2: IO_BYTES_max=IO_BYTES_max_aie2
-
+  IO_BYTES_max=k_data_memory_bytes[AIE_VARIANT]
   VEC_SIZE_A = BUFFER_BYTES/byteSize[TT_DATA_A]
   VEC_SIZE_B = BUFFER_BYTES/byteSize[TT_DATA_B]
 
@@ -213,16 +207,17 @@ def fn_update_TP_DIM_A(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM
   }
 
   TP_NUM_FRAMES=1
-  if TP_API==0:
+  if TP_API == API_BUFFER:
     TP_DIM_B=VEC_SIZE_B
     out_t=fn_det_out_type(TT_DATA_A, TT_DATA_B)
     TP_DIM_A_max=(IO_BYTES_max*TP_SSR)/(TP_DIM_B * byteSize[out_t] * TP_NUM_FRAMES)
     TP_DIM_A_max=int(FLOOR(TP_DIM_A_max, common_divisor))
-    param_dict.update({"maximum" : TP_DIM_A_max})
-  elif TP_API==1:
+  elif TP_API == API_STREAM:
     TP_DIM_A_max=(IO_BYTES_max*TP_SSR)/(byteSize[TT_DATA_A] * TP_NUM_FRAMES)
     TP_DIM_A_max=int(FLOOR(TP_DIM_A_max, common_divisor))
-    param_dict.update({"maximum" : TP_DIM_A_max})
+
+  param_dict.update({"maximum" : TP_DIM_A_max})
+  param_dict.update({"maximum_pingpong_buf" : int(param_dict["maximum"]/2)})
 
   if (TP_DIM_A !=0) and (TP_DIM_A % common_divisor != 0):
     TP_DIM_A_act=round(TP_DIM_A/common_divisor) * common_divisor
@@ -245,7 +240,7 @@ def validate_TP_DIM_A(args):
   return fn_validate_TP_DIM_A(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A)
 
 def fn_validate_TP_DIM_A(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A):
-  
+
   VEC_SIZE = BUFFER_BYTES/byteSize[TT_DATA_A]
   common_divisor=find_lcm(VEC_SIZE, TP_SSR)
 
@@ -266,14 +261,12 @@ def update_TP_DIM_B(args):
   TP_API = args["TP_API"]
   TP_SSR = args["TP_SSR"]
   TP_DIM_A = args["TP_DIM_A"]
-  if args["TP_DIM_B"]: TP_DIM_B = args["TP_DIM_B"]
+  if "TP_DIM_B" in args and args["TP_DIM_B"]: TP_DIM_B = args["TP_DIM_B"]
   else: TP_DIM_B = 0
   return fn_update_TP_DIM_B(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A, TP_DIM_B)
 
 def fn_update_TP_DIM_B(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A, TP_DIM_B):
-  if AIE_VARIANT == 1: IO_BYTES_max=IO_BYTES_max_aie1
-  elif AIE_VARIANT == 2: IO_BYTES_max=IO_BYTES_max_aie2
-
+  IO_BYTES_max=k_data_memory_bytes[AIE_VARIANT]
   VEC_SIZE_B = int(BUFFER_BYTES/byteSize[TT_DATA_B])
 
   param_dict={
@@ -282,15 +275,16 @@ def fn_update_TP_DIM_B(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM
   }
 
   TP_NUM_FRAMES=1
-  if TP_API==0:
+  if TP_API == API_BUFFER:
     out_t=fn_det_out_type(TT_DATA_A, TT_DATA_B)
     TP_DIM_B_max=(IO_BYTES_max*TP_SSR)/(TP_DIM_A * byteSize[out_t] * TP_NUM_FRAMES)
     TP_DIM_B_max=int(FLOOR(TP_DIM_B_max, VEC_SIZE_B))
-  elif TP_API==1:
+  elif TP_API == API_STREAM:
     TP_DIM_B_max=(IO_BYTES_max)/(byteSize[TT_DATA_B] * TP_NUM_FRAMES)
     TP_DIM_B_max=int(FLOOR(TP_DIM_B_max, VEC_SIZE_B))
 
   param_dict.update({"maximum" : TP_DIM_B_max})
+  param_dict.update({"maximum_pingpong_buf" : int(param_dict["maximum"]/2)})
 
   if TP_DIM_B !=0 and (TP_DIM_B % VEC_SIZE_B != 0):
     TP_DIM_B_act=round(TP_DIM_B/VEC_SIZE_B) * VEC_SIZE_B
@@ -314,7 +308,7 @@ def validate_TP_DIM_B(args):
   return fn_validate_TP_DIM_B(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A, TP_DIM_B)
 
 def fn_validate_TP_DIM_B(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A, TP_DIM_B):
-  
+
   VEC_SIZE_B = BUFFER_BYTES/byteSize[TT_DATA_B]
 
   if (TP_DIM_B % VEC_SIZE_B != 0):
@@ -336,42 +330,42 @@ def update_TP_NUM_FRAMES(args):
   TP_SSR = args["TP_SSR"]
   TP_DIM_A = args["TP_DIM_A"]
   TP_DIM_B = args["TP_DIM_B"]
-  if args["TP_NUM_FRAMES"]: TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
+  if "TP_NUM_FRAMES" in args and args["TP_NUM_FRAMES"]: TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
   else: TP_NUM_FRAMES = 0
   return fn_update_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES)
 
 def fn_update_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES):
-  
+
   param_dict={
     "name" : "TP_NUM_FRAMES",
     "minimum" : 1
   }
-  
-  if AIE_VARIANT == 1: IO_BYTES_max=IO_BYTES_max_aie1
-  elif AIE_VARIANT == 2: IO_BYTES_max=IO_BYTES_max_aie2  
+  IO_BYTES_max=k_data_memory_bytes[AIE_VARIANT]
 
-  if TP_API==0:
+  if TP_API == API_BUFFER:
     out_t=fn_det_out_type(TT_DATA_A, TT_DATA_B)
     TP_NUM_FRAMES_max=(IO_BYTES_max*TP_SSR)/(TP_DIM_A * byteSize[out_t] * TP_DIM_B)
-    min_power_2_lim = math.log2(TP_NUM_FRAMES_max)//1 
-  elif TP_API==1:
+
+  elif TP_API == API_STREAM:
     TP_NUM_FRAMES_max1 = (IO_BYTES_max*TP_SSR)/(byteSize[TT_DATA_A] * TP_DIM_A)
     TP_NUM_FRAMES_max2 = (IO_BYTES_max)/(byteSize[TT_DATA_B] * TP_DIM_B)
     TP_NUM_FRAMES_max =  min(TP_NUM_FRAMES_max1, TP_NUM_FRAMES_max2)
-    min_power_2_lim = math.log2(TP_NUM_FRAMES_max)//1 
 
+  min_power_2_lim = math.log2(TP_NUM_FRAMES_max)//1
+  min_power_2_lim_pingpong = math.log2(TP_NUM_FRAMES_max/2)//1
   param_dict.update({"maximum" : int(2**(min_power_2_lim))})
+  param_dict.update({"maximum_pingpong_buf" : int(2**(min_power_2_lim_pingpong))})
 
-  
+
   if TP_NUM_FRAMES != 0:
     check_pwr2 = fn_validate_power_of_two("TP_NUM_FRAMES", TP_NUM_FRAMES)
-    if check_pwr2 != "isValid": 
+    if check_pwr2 != "isValid":
       min_power_2 = math.log2(TP_NUM_FRAMES)//1
       max_power_2 = min_power_2+1
       TP_NUM_FRAMES_act= 2**max_power_2
       if TP_NUM_FRAMES_act > param_dict["maximum"]:
         TP_NUM_FRAMES_act = param_dict["maximum"]
-      
+
       param_dict.update({"actual" : int(TP_NUM_FRAMES_act)})
 
   return param_dict
@@ -391,7 +385,7 @@ def validate_TP_NUM_FRAMES(args):
 def fn_validate_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES):
   param_dict=fn_update_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES)
   range_TP_NUM_FRAMES=[param_dict["minimum"], param_dict["maximum"]]
-  check=validate_range(range_TP_NUM_FRAMES, "TP_NUM_FRAMES", TP_NUM_FRAMES) 
+  check=validate_range(range_TP_NUM_FRAMES, "TP_NUM_FRAMES", TP_NUM_FRAMES)
 
   if check == isValid:
     return fn_validate_power_of_two("TP_NUM_FRAMES", TP_NUM_FRAMES)
@@ -401,31 +395,31 @@ def fn_validate_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR,
 ########### TP_SHIFT Updater and Validator ############
 #######################################################
 def update_TP_SHIFT(args):
-  TT_DATA_A = args["TT_DATA_A"]
-  return fn_update_TP_SHIFT(TT_DATA_A)
+  TT_DATA = args["TT_DATA_A"]
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_update_TP_SHIFT(AIE_VARIANT, TT_DATA)
 
-def fn_update_TP_SHIFT(TT_DATA_A):
-  param_dict= {
-    "name" : "TP_SHIFT",
-    "minimum" : 0
-  }
+def fn_update_TP_SHIFT(AIE_VARIANT, TT_DATA):
+    range_TP_SHIFT = com.fn_update_range_TP_SHIFT(AIE_VARIANT, TT_DATA)
 
-  if TT_DATA_A in ["float", "cfloat"]:
-    param_dict.update({"maximum" : 0})
-  else:
-    param_dict.update({"maximum" : 61})
+    param_dict={
+        "name" : "TP_SHIFT",
+        "minimum" : range_TP_SHIFT[0],
+        "maximum" : range_TP_SHIFT[1]
+    }
+    return param_dict
 
-  return param_dict
 
 def validate_TP_SHIFT(args):
-  TT_DATA_A = args["TT_DATA_A"]
+  TT_DATA = args["TT_DATA_A"]
   TP_SHIFT = args["TP_SHIFT"]
-  return fn_validate_TP_SHIFT(TT_DATA_A, TP_SHIFT)
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return (fn_validate_TP_SHIFT(AIE_VARIANT, TT_DATA, TP_SHIFT))
 
-def fn_validate_TP_SHIFT(TT_DATA_A, TP_SHIFT):
-  param_dict=fn_update_TP_SHIFT(TT_DATA_A)
-  range_TP_SHIFT=[param_dict["minimum"], param_dict["maximum"]]
-  return validate_range(range_TP_SHIFT, "TP_SHIFT", TP_SHIFT)
+def fn_validate_TP_SHIFT(AIE_VARIANT, TT_DATA, TP_SHIFT):
+  param_dict = fn_update_TP_SHIFT(AIE_VARIANT, TT_DATA)
+  range_TP_SHIFT = [param_dict["minimum"] ,param_dict["maximum"]]
+  return(validate_range(range_TP_SHIFT, "TP_SHIFT", TP_SHIFT))
 
 #######################################################
 ########### TP_RND Updater and Validator ##############
@@ -490,9 +484,9 @@ def fn_det_out_type(TT_DATA_A, TT_DATA_B):
   if (TT_DATA_A=="int32" and TT_DATA_B=="int32"):
     return "int32"
   if (TT_DATA_A=="int32" and TT_DATA_B=="cint16"):
-    return "cint32"   
+    return "cint32"
   if (TT_DATA_A=="int32" and TT_DATA_B=="cint32"):
-    return "cint32"  
+    return "cint32"
   if (TT_DATA_A=="cint16" and TT_DATA_B=="int16"):
     return "cint16"
   if (TT_DATA_A=="cint16" and TT_DATA_B=="int32"):
@@ -542,7 +536,7 @@ def info_ports(args):
   TP_API = args["TP_API"]
   TP_SSR = args["TP_SSR"]
   TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
-  if (TP_API==0):
+  if (TP_API == API_BUFFER):
     portsInA = get_port_info(
       portname = "inA",
       dir = "in",
@@ -616,7 +610,7 @@ def generate_graph(graphname, args):
   TP_API = args["TP_API"]
   TP_SSR = args["TP_SSR"]
 
-  if TP_API == 1:
+  if TP_API == API_STREAM:
     ssr = TP_SSR//2
   else:
     ssr = TP_SSR
@@ -647,9 +641,7 @@ public:
 
   {graphname}() : outer_tensor() {{
     adf::kernel *outer_tensor_kernels = outer_tensor.getKernels();
-    for (int i=0; i < 1; i++) {{
-      adf::runtime<ratio>(outer_tensor_kernels[i]) = 0.9;
-    }}
+
     for (int i=0; i < TP_SSR; i++) {{
       adf::connect<> net_in(inA[i], outer_tensor.inA[i]);
       adf::connect<> net_in(inB[i], outer_tensor.inB[i]);

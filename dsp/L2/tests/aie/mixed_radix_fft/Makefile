@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ PARAMS ?= test_0_tool_canary_aie
 PARAMS_FILE ?= multi_params.json 
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST += vck190 vek280
+PLATFORM_ALLOWLIST += vck190 vek280 xcvr1602-vsva2488-2LP-e-S-es1 xc2ve3858-ssva2112-2LP-e-S
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk
@@ -70,7 +70,11 @@ AIE_PKG_DIR ?= Work
 
 # Setting customized_params in aiecompiler
 
-    
+ifneq (,$(shell echo $(XPLATFORM) | awk '/xcvr1602-vsva2488-2LP-e-S-es1/'))
+            
+COMPILER_ARGS ?= 
+AIE_VARIANT ?= 1
+FIFO_THRESHOLD ?=  
 TAG ?= UUT
 UUT_KERNEL ?= mixed_radix_fft
 REF_KERNEL ?= mixed_radix_fft_ref
@@ -89,6 +93,49 @@ PREPROC_ARGS ?= --aie.Xpreproc=-DINPUT_FILE=$(INPUT_FILE) --aie.Xpreproc=-DINPUT
 REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) --aie.Xpreproc=-DOUTPUT_HEADER_FILE=$(REF_SIM_HEADER_FILE) $(PREPROC_ARGS) 
 UUT_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_HEADER_FILE=$(OUTPUT_HEADER_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1
 
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/xc2ve3858-ssva2112-2LP-e-S/'))
+            
+COMPILER_ARGS ?= 
+AIE_VARIANT ?= 22
+FIFO_THRESHOLD ?= --aie.swfifo-threshold=120 
+TAG ?= UUT
+UUT_KERNEL ?= mixed_radix_fft
+REF_KERNEL ?= mixed_radix_fft_ref
+UUT_GRAPH ?= mixed_radix_fft_graph
+REF_GRAPH ?= mixed_radix_fft_ref_graph
+STACKSIZE_VAL ?= 1024
+UUT_SIM_FILE ?= ./data/uut_output.txt
+REF_SIM_FILE ?= ./data/ref_output.txt
+REF_SIM_HEADER_FILE ?= ./data/ref_header_output.txt
+INPUT_FILE ?= ./data/input.txt
+INPUT_HEADER_FILE ?= ./data/mrfft_header_input.txt
+OUTPUT_HEADER_FILE ?= ./data/mrfft_header_output.txt
+UUT_TARGET_COMPILE_ARGS ?= --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.pnll="off" --aie.stacksize=$(STACKSIZE_VAL) --aie.Xmapper=disablecorememcolocate
+REF_TARGET_COMPILE_ARGS ?= 
+PREPROC_ARGS ?= --aie.Xpreproc=-DINPUT_FILE=$(INPUT_FILE) --aie.Xpreproc=-DINPUT_HEADER_FILE=$(INPUT_HEADER_FILE)
+REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) --aie.Xpreproc=-DOUTPUT_HEADER_FILE=$(REF_SIM_HEADER_FILE) $(PREPROC_ARGS) 
+UUT_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_HEADER_FILE=$(OUTPUT_HEADER_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1
+
+else             
+TAG ?= UUT
+UUT_KERNEL ?= mixed_radix_fft
+REF_KERNEL ?= mixed_radix_fft_ref
+UUT_GRAPH ?= mixed_radix_fft_graph
+REF_GRAPH ?= mixed_radix_fft_ref_graph
+STACKSIZE_VAL ?= 1024
+UUT_SIM_FILE ?= ./data/uut_output.txt
+REF_SIM_FILE ?= ./data/ref_output.txt
+REF_SIM_HEADER_FILE ?= ./data/ref_header_output.txt
+INPUT_FILE ?= ./data/input.txt
+INPUT_HEADER_FILE ?= ./data/mrfft_header_input.txt
+OUTPUT_HEADER_FILE ?= ./data/mrfft_header_output.txt
+UUT_TARGET_COMPILE_ARGS ?= --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.pnll="off" --aie.stacksize=$(STACKSIZE_VAL) --aie.Xmapper=disablecorememcolocate
+REF_TARGET_COMPILE_ARGS ?= 
+PREPROC_ARGS ?= --aie.Xpreproc=-DINPUT_FILE=$(INPUT_FILE) --aie.Xpreproc=-DINPUT_HEADER_FILE=$(INPUT_HEADER_FILE)
+REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) --aie.Xpreproc=-DOUTPUT_HEADER_FILE=$(REF_SIM_HEADER_FILE) $(PREPROC_ARGS) 
+UUT_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_HEADER_FILE=$(OUTPUT_HEADER_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1
+
+endif
 ############################ setting AIE Compiler ###########################
 ifneq ($(filter aiesim , $(TARGET)),)
 AIETARGET := hw
@@ -108,8 +155,21 @@ AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
+ifneq (,$(shell echo $(XPLATFORM) | awk '/xcvr1602-vsva2488-2LP-e-S-es1/'))
+        
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
 AIE_CXXFLAGS += --aie.verbose  $($(TAG)_TARGET_COMPILE_ARGS) $($(TAG)_PREPROC_ARGS)
+
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/xc2ve3858-ssva2112-2LP-e-S/'))
+        
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
+AIE_CXXFLAGS += --aie.verbose  $($(TAG)_TARGET_COMPILE_ARGS) $($(TAG)_PREPROC_ARGS)
+
+else         
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
+AIE_CXXFLAGS += --aie.verbose  $($(TAG)_TARGET_COMPILE_ARGS) $($(TAG)_PREPROC_ARGS)
+
+endif
 
 AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 
@@ -158,6 +218,9 @@ endif
 pre_build:
 	 mkdir -p logs
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk create_config HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/meta/scripts/metadata_checker.py --ip $(UUT_KERNEL))
+	$(if $(filter-out REF,$(TAG)), # vitis --classic -exec ipmetadata_config_checker $(XFLIB_DIR)/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(INPUT_FILE) INPUT_HEADER_FILE=$(INPUT_HEADER_FILE) UUT_KERNEL=$(UUT_KERNEL)")
 
 .PHONY: clean cleanall valid_params

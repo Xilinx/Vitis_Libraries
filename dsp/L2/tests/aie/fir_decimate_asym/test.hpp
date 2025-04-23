@@ -29,6 +29,7 @@ fir_decimate_asym graph class.
 #include "uut_static_config.h"
 #include "test_utils.hpp"
 #include "fir_common_traits.hpp"
+#include "device_defs.h"
 
 #ifndef UUT_GRAPH
 #define UUT_GRAPH fir_decimate_asym_graph
@@ -200,9 +201,7 @@ class test_graph : public graph {
             }
         }
 #endif
-
-        const int MAX_PING_PONG_SIZE = 16384;
-        const int MEMORY_MODULE_SIZE = 32768;
+        const int MAX_PING_PONG_SIZE = __DATA_MEM_BYTES__ / 2;
         const int bufferSize = (PORT_API == 1 ? 0 : (FIR_LEN + INPUT_SAMPLES) * sizeof(DATA_TYPE));
         if (bufferSize > MAX_PING_PONG_SIZE) {
             single_buffer(firGraph.getKernels()->in[0]);
@@ -210,9 +209,6 @@ class test_graph : public graph {
                 single_buffer(firGraph.getKernels()->in[1]);
             }
         }
-        static_assert(bufferSize < MEMORY_MODULE_SIZE,
-                      "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "
-                      "Module size of 32kB");
 #endif
 
 #ifdef USING_UUT

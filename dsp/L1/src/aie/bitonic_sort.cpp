@@ -225,7 +225,9 @@ bitonic_sort<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN, TP_CASC_
                     }
                 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
             }
-
+            // workaround for for aggressive compiler optimzation that results in functional mismatches in certain
+            // cascaded designs
+            chess_separator_scheduler();
             // If the final write was to the inPtr, then this will resolve to true regardless of inter or intra.
             if (writePtr == outPtr) {
                 constexpr unsigned int kPragmaNum = MIN(kNumVecs, kUnrollMax); // How many unrolls of inner loop.

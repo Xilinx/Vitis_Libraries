@@ -15,9 +15,7 @@
     {
       "name": "AIE_VARIANT",
       "type": "uint",
-      "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
-      "maximum": 2,
-      "minimum": 1,
+      "description": "Specifies the device type.",
       "updater": {
         "file": "fir_sr_asym.py",
         "function": "update_AIE_VARIANT",
@@ -92,7 +90,7 @@
     },
     {
       "name": "TP_USE_COEFF_RELOAD",
-      "description": "Selects Coefficient Reload Mode: 0 - no reload, 1 - RTP port based, 2 - Stream Header based.",
+      "description": "Selects Coefficient Reload Mode: 0 - no reload, 1 - RTP port based.",
       "type": "uint",
       "updater": {
         "file": "fir_sr_asym.py",
@@ -121,48 +119,18 @@
       }
     },
     {
-      "name": "TP_DUAL_IP",
-      "description": "TP_DUAL_IP allows 2 stream inputs to be connected to FIR, increasing available throughput. When set to 0, single stream input will be connected to FIR kernel, when set to 1, both input stream ports will be used.",
-      "type": "uint",
-      "updater": {
-        "file": "fir_sr_asym.py",
-        "function": "update_TP_DUAL_IP",
-        "args": []
-      },
-      "validator": {
-        "file": "fir_sr_asym.py",
-        "function": "validate_TP_DUAL_IP",
-        "args": []
-      }
-    },
-    {
-      "name": "TP_NUM_OUTPUTS",
-      "description": "The number of output ports. Windows API output an exact copy of the data. Stream API interleaves the output data with a 128-bit pattern.",
-      "type": "uint",
-      "updater": {
-        "file": "fir_sr_asym.py",
-        "function": "update_TP_NUM_OUTPUTS",
-        "args": ["AIE_VARIANT", "TP_API"]
-      },
-      "validator": {
-        "file": "fir_sr_asym.py",
-        "function": "validate_TP_NUM_OUTPUTS",
-        "args": ["AIE_VARIANT", "TP_API"]
-      }
-    },
-    {
       "name": "TP_SSR",
       "description": "TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput.",
       "type": "uint",
       "updater": {
         "file": "fir_sr_asym.py",
         "function": "update_TP_SSR",
-        "args": ["TP_FIR_LEN"]
+        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD"]
       },
       "validator": {
         "file": "fir_sr_asym.py",
         "function": "validate_TP_SSR",
-        "args": ["TP_FIR_LEN"]
+        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD"]
       }
     },
     {
@@ -172,12 +140,42 @@
       "updater": {
         "file": "fir_sr_asym.py",
         "function": "update_TP_CASC_LEN",
-        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_SSR"]
+        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_SSR", "TP_USE_COEFF_RELOAD"]
       },
       "validator": {
         "file": "fir_sr_asym.py",
         "function": "validate_TP_CASC_LEN",
-        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_SSR"]
+        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_SSR", "TP_USE_COEFF_RELOAD"]
+      }
+    },
+    {
+      "name": "TP_DUAL_IP",
+      "description": "TP_DUAL_IP allows 2 stream inputs to be connected to FIR, increasing available throughput. When set to 0, single stream input will be connected to FIR kernel, when set to 1, both input stream ports will be used.",
+      "type": "uint",
+      "updater": {
+        "file": "fir_sr_asym.py",
+        "function": "update_TP_DUAL_IP",
+        "args": ["AIE_VARIANT", "TP_API"]
+      },
+      "validator": {
+        "file": "fir_sr_asym.py",
+        "function": "validate_TP_DUAL_IP",
+        "args": ["AIE_VARIANT", "TP_API"]
+      }
+    },
+    {
+      "name": "TP_NUM_OUTPUTS",
+      "description": "The number of output ports. Windows API output an exact copy of the data. Stream API interleaves the output data with a 128-bit pattern.",
+      "type": "uint",
+      "updater": {
+        "file": "fir_sr_asym.py",
+        "function": "update_TP_NUM_OUTPUTS",
+        "args": ["AIE_VARIANT", "TP_API", "TP_DUAL_IP", "TP_SSR"]
+      },
+      "validator": {
+        "file": "fir_sr_asym.py",
+        "function": "validate_TP_NUM_OUTPUTS",
+        "args": ["AIE_VARIANT", "TP_API", "TP_DUAL_IP", "TP_SSR"]
       }
     },
     {
@@ -251,7 +249,7 @@
       "validator": {
         "file": "fir_sr_asym.py",
         "function": "validate_coeff",
-        "args": ["TT_COEFF", "TP_FIR_LEN"]
+        "args": ["TP_USE_COEFF_RELOAD", "TT_COEFF", "TP_FIR_LEN"]
       }
     }
   ],

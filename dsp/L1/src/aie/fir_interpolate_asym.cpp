@@ -1740,7 +1740,7 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& inWindow,
-                                          input_stream_cacc48* inCascade,
+                                          input_cascade_cacc* inCascade,
                                           output_circular_buffer<TT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -1789,7 +1789,7 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& inWindow,
-                                          input_stream_cacc48* inCascade,
+                                          input_cascade_cacc* inCascade,
                                           output_circular_buffer<TT_DATA>& __restrict outWindow,
                                           output_circular_buffer<TT_DATA>& __restrict outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
@@ -1840,7 +1840,7 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& inWindow,
-                                          input_stream_cacc48* inCascade,
+                                          input_cascade_cacc* inCascade,
                                           output_circular_buffer<TT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -1889,7 +1889,7 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& inWindow,
-                                          input_stream_cacc48* inCascade,
+                                          input_cascade_cacc* inCascade,
                                           output_circular_buffer<TT_DATA>& __restrict outWindow,
                                           output_circular_buffer<TT_DATA>& __restrict outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
@@ -1944,7 +1944,7 @@ void fir_interpolate_asym<TT_DATA,
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>()> >& inWindow,
-           output_stream_cacc48* outCascade,
+           output_cascade_cacc* outCascade,
            output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -1999,7 +1999,7 @@ void fir_interpolate_asym<TT_DATA,
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>()> >& inWindow,
-           output_stream_cacc48* outCascade,
+           output_cascade_cacc* outCascade,
            output_async_buffer<TT_DATA>& broadcastWindow,
            const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
@@ -2052,8 +2052,8 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                          input_stream_cacc48* inCascade,
-                                          output_stream_cacc48* outCascade,
+                                          input_cascade_cacc* inCascade,
+                                          output_cascade_cacc* outCascade,
                                           output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -2106,8 +2106,8 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                          input_stream_cacc48* inCascade,
-                                          output_stream_cacc48* outCascade,
+                                          input_cascade_cacc* inCascade,
+                                          output_cascade_cacc* outCascade,
                                           output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -2348,7 +2348,7 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_stream<TT_DATA>* inStream,
-                                          input_stream_cacc48* inCascade,
+                                          input_cascade_cacc* inCascade,
                                           output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -2397,7 +2397,7 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_stream<TT_DATA>* inStream,
-                                          input_stream_cacc48* inCascade,
+                                          input_cascade_cacc* inCascade,
                                           output_stream<TT_DATA>* outStream,
                                           output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
@@ -2448,7 +2448,7 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
                           TP_COEFF_PHASES_LEN,
-                          TP_SAT>::filter(input_stream<TT_DATA>* inStream, output_stream_cacc48* outCascade) {
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream, output_cascade_cacc* outCascade) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2496,8 +2496,8 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_stream<TT_DATA>* inStream,
-                                          input_stream_cacc48* inCascade,
-                                          output_stream_cacc48* outCascade) {
+                                          input_cascade_cacc* inCascade,
+                                          output_cascade_cacc* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2545,7 +2545,7 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_stream<TT_DATA>* inStream,
-                                          input_stream_cacc48* inCascade,
+                                          input_cascade_cacc* inCascade,
                                           output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -2594,7 +2594,7 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_stream<TT_DATA>* inStream,
-                                          input_stream_cacc48* inCascade,
+                                          input_cascade_cacc* inCascade,
                                           output_stream<TT_DATA>* outStream,
                                           output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
@@ -2646,7 +2646,7 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_stream<TT_DATA>* inStream,
-                                          output_stream_cacc48* outCascade,
+                                          output_cascade_cacc* outCascade,
                                           const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -2695,8 +2695,8 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_stream<TT_DATA>* inStream,
-                                          input_stream_cacc48* inCascade,
-                                          output_stream_cacc48* outCascade) {
+                                          input_cascade_cacc* inCascade,
+                                          output_cascade_cacc* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2942,7 +2942,7 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_stream<TT_DATA>* inStream,
                                           input_stream<TT_DATA>* inStream2,
-                                          input_stream_cacc48* inCascade,
+                                          input_cascade_cacc* inCascade,
                                           output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -2993,7 +2993,7 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_stream<TT_DATA>* inStream,
                                           input_stream<TT_DATA>* inStream2,
-                                          input_stream_cacc48* inCascade,
+                                          input_cascade_cacc* inCascade,
                                           output_stream<TT_DATA>* outStream,
                                           output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
@@ -3047,7 +3047,7 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_stream<TT_DATA>* inStream,
                                           input_stream<TT_DATA>* inStream2,
-                                          output_stream_cacc48* outCascade) {
+                                          output_cascade_cacc* outCascade) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -3097,8 +3097,8 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_stream<TT_DATA>* inStream,
                                           input_stream<TT_DATA>* inStream2,
-                                          input_stream_cacc48* inCascade,
-                                          output_stream_cacc48* outCascade) {
+                                          input_cascade_cacc* inCascade,
+                                          output_cascade_cacc* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -3148,7 +3148,7 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_stream<TT_DATA>* inStream,
                                           input_stream<TT_DATA>* inStream2,
-                                          input_stream_cacc48* inCascade,
+                                          input_cascade_cacc* inCascade,
                                           output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -3199,7 +3199,7 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_stream<TT_DATA>* inStream,
                                           input_stream<TT_DATA>* inStream2,
-                                          input_stream_cacc48* inCascade,
+                                          input_cascade_cacc* inCascade,
                                           output_stream<TT_DATA>* outStream,
                                           output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
@@ -3253,7 +3253,7 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_stream<TT_DATA>* inStream,
                                           input_stream<TT_DATA>* inStream2,
-                                          output_stream_cacc48* outCascade,
+                                          output_cascade_cacc* outCascade,
                                           const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -3304,8 +3304,8 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASES_LEN,
                           TP_SAT>::filter(input_stream<TT_DATA>* inStream,
                                           input_stream<TT_DATA>* inStream2,
-                                          input_stream_cacc48* inCascade,
-                                          output_stream_cacc48* outCascade) {
+                                          input_cascade_cacc* inCascade,
+                                          output_cascade_cacc* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;

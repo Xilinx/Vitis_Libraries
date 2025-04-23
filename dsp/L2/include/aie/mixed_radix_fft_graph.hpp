@@ -263,7 +263,6 @@ class create_casc_kernel<1,
         tmpBuff0.resize(TP_POINT_SIZE);
         tmpBuff1.resize(TP_POINT_SIZE);
 
-        printf("Creating single kernel\n");
         fftKernels[0] = kernel::create_object<
             mixed_radix_fft<TT_DATA, TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_RND, TP_SAT,
                             TP_WINDOW_VSIZE, TP_START_RANK, TP_END_RANK, TP_DYN_PT_SIZE> >(
@@ -380,7 +379,11 @@ class mixed_radix_fft_graph : public graph {
         * The array of kernels that will be created and mapped onto AIE tiles.
     **/
     kernel m_mixed_radix_fftKernels[TP_CASC_LEN];
+    /**
+     * Access function to get pointer to kernel (or first kernel in a chained configuration).
+    **/
     kernel* getKernels() { return m_mixed_radix_fftKernels; };
+
     static constexpr int kStreamsPerTile = get_input_streams_core_module();        // a device trait
     static constexpr int m_kNumPorts = TP_API == kWindowAPI ? 1 : kStreamsPerTile; // 1 for iobuffer, 2 for streams
 
@@ -423,8 +426,8 @@ class mixed_radix_fft_graph : public graph {
      * Constructor has no arguments.
      **/
     mixed_radix_fft_graph() {
-        std::vector<T_internalDataType> tmpBuff0;
-        std::vector<T_internalDataType> tmpBuff1;
+        alignas(__ALIGN_BYTE_SIZE__) std::vector<T_internalDataType> tmpBuff0;
+        alignas(__ALIGN_BYTE_SIZE__) std::vector<T_internalDataType> tmpBuff1;
         tmpBuff0.resize(TP_POINT_SIZE);
         tmpBuff1.resize(TP_POINT_SIZE);
 
@@ -432,9 +435,10 @@ class mixed_radix_fft_graph : public graph {
                                       ? 1.0
                                       : (std::is_same<TT_TWIDDLE, cint16>::value ? 32767.0 : 2147483647.0);
 
-        std::vector<TT_TWIDDLE> m_twiddleTable;
+        alignas(__ALIGN_BYTE_SIZE__) std::vector<TT_TWIDDLE> m_twiddleTable;
         m_twiddleTable.resize(m_ktwiddleTableSize);
-        std::vector<int> m_twiddlePtrs; // index in m_twiddleTable of the start of each atomic table
+        alignas(__ALIGN_BYTE_SIZE__) std::vector<int>
+            m_twiddlePtrs; // index in m_twiddleTable of the start of each atomic table
         m_twiddlePtrs.resize(kNumMaxTables);
 
         // these 2 lines derive the atomic type of TT_TWIDDLE. Split over 2 lines for readability
@@ -478,7 +482,7 @@ class mixed_radix_fft_graph : public graph {
 
         int masterIdx = 0; // track entry in m_twiddleTable
         int ptrPtr = 0;    // track entry in m_twiddlePtrs
-        int alignment = 32 / sizeof(TT_TWIDDLE);
+        int alignment = __ALIGN_BYTE_SIZE__ / sizeof(TT_TWIDDLE);
         for (int stage = 0; stage < m_kR5Stages + m_kR3Stages + m_kR2Stages; stage++) { // radix4 breaks the pattern
             for (int leg = 1; leg < radixOfStage[stage]; leg++) {
                 m_twiddlePtrs[ptrPtr++] = masterIdx; // base of table for this leg
@@ -690,9 +694,29 @@ class mixed_radix_fft_graph<TT_DATA,
 
     static_assert(TP_CASC_LEN == 1, "Error. Dynamic point size is not supported for cascaded configurations.");
     static_assert(TP_API == 0, "Error. Dynamic point size is not yet supported for streaming configurations.");
+#if __FFT_R4_IMPL__ == 0 // AIE1
+    static constexpr unsigned maxPtSize =
+        480; // CR1235438 due to the use of only r2 stages, 512 has 9 stages, but max is 8 for data structure rows
+#elif __FFT_R4_IMPL__ == 1 // AIE-ML
     static constexpr unsigned maxPtSize = 1920;
+#endif                     // __FFT_R4_IMPL__
+    static constexpr int m_kR5Stages = fnGetNumStages<TP_POINT_SIZE, 5, TT_TWIDDLE>();
+    static constexpr int m_kR3Stages = fnGetNumStages<TP_POINT_SIZE, 3, TT_TWIDDLE>();
+    static constexpr int m_kR4Stages = fnGetNumStages<TP_POINT_SIZE, 4, TT_TWIDDLE>();
+    static constexpr int m_kR2Stages = fnGetNumStages<(TP_POINT_SIZE >> (2 * m_kR4Stages)), 2, TT_TWIDDLE>();
+    static constexpr int m_kR5factor = fnGetRadixFactor<TP_POINT_SIZE, 5, TT_TWIDDLE>();
+    static constexpr int m_kR3factor = fnGetRadixFactor<TP_POINT_SIZE, 3, TT_TWIDDLE>();
+    static constexpr int m_kR4factor = fnGetRadixFactor<TP_POINT_SIZE, 4, TT_TWIDDLE>();
+    static constexpr int m_kR2factor = fnGetRadixFactor<(TP_POINT_SIZE >> (2 * m_kR4Stages)), 2, TT_TWIDDLE>();
+
+    static_assert(m_kR5factor* m_kR3factor* m_kR4factor* m_kR2factor == TP_POINT_SIZE,
+                  "ERROR: TP_POINT_SIZE failed to factorize");
+
     static_assert(TP_POINT_SIZE <= maxPtSize,
                   "Error. Point sizes greater than 1920 are not supported for dynamic mode on mixed radix fft.");
+
+    static_assert(std::is_same<TT_DATA, cint32>::value,
+                  "Error. The dynamic point size feature is only supported for a data type of cint32");
 
     static constexpr int m_kNumDataPorts = 1;   // until stream support is added
     static constexpr int m_kNumHeaderPorts = 1; // until stream support is added
@@ -720,8 +744,15 @@ class mixed_radix_fft_graph<TT_DATA,
      **/
     port_array<output, m_kNumHeaderPorts> headerOut; // iobuffer only
 
+    /**
+    * The array of kernels that will be created and mapped onto AIE tiles.
+    **/
     kernel m_mixed_radix_fftKernels[TP_CASC_LEN];
     kernel m_mixed_radix_twGenKernels[TP_CASC_LEN];
+    /**
+    * Access function to get pointer to kernel (or first kernel in a chained configuration).
+    **/
+    kernel* getKernels() { return m_mixed_radix_fftKernels; };
 
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
 
@@ -735,7 +766,7 @@ class mixed_radix_fft_graph<TT_DATA,
         tmpBuff0.resize(TP_POINT_SIZE);
         tmpBuff1.resize(TP_POINT_SIZE);
 
-        static constexpr int kNumBytesInLoad = 32;
+        static constexpr int kNumBytesInLoad = __ALIGN_BYTE_SIZE__;
         // static constexpr int kTwBufferSize = (4+4+16)*8/sizeof(TT_TWIDDLE)+TP_POINT_SIZE; //num stages for each
         // radix, factor for each radix, index table, master table,
         // static constexpr int kTwBufferSize = (4+4+16)*8/sizeof(TT_TWIDDLE)+2*TP_POINT_SIZE; // TODO Calculate

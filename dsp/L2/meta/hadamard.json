@@ -184,6 +184,7 @@
                 "file": "hadamard.py",
                 "function": "validate_TP_SHIFT",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_B"
                 ]
             },
@@ -191,6 +192,7 @@
                 "file": "hadamard.py",
                 "function": "update_TP_SHIFT",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_B"
                 ]
             }
@@ -220,13 +222,13 @@
             "type": "uint",
             "updater": {
                 "file": "hadamard.py",
-                "function": "update_TP_SAT", 
+                "function": "update_TP_SAT",
                 "args": [
                 ]
             },
             "validator": {
                 "file": "hadamard.py",
-                "function": "validate_TP_SAT", 
+                "function": "validate_TP_SAT",
                 "args": [
                 ]
             }

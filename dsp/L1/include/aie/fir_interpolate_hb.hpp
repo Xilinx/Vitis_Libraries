@@ -969,7 +969,7 @@ class fir_interpolate_hb<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
     // FIR
     void filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& inWindow,
-                input_stream_cacc48* inCascade,
+                input_cascade_cacc* inCascade,
                 output_circular_buffer<TT_DATA>& __restrict outWindow);
 };
 
@@ -1047,7 +1047,7 @@ class fir_interpolate_hb<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
     // FIR
     void filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& inWindow,
-                input_stream_cacc48* inCascade,
+                input_cascade_cacc* inCascade,
                 output_circular_buffer<TT_DATA>& __restrict outWindow,
                 output_circular_buffer<TT_DATA>& __restrict outWindow2);
 };
@@ -1126,7 +1126,7 @@ class fir_interpolate_hb<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
     // FIR
     void filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& inWindow,
-                input_stream_cacc48* inCascade,
+                input_cascade_cacc* inCascade,
                 output_circular_buffer<TT_DATA>& __restrict outWindow);
 };
 
@@ -1204,7 +1204,7 @@ class fir_interpolate_hb<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
     // FIR
     void filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& inWindow,
-                input_stream_cacc48* inCascade,
+                input_cascade_cacc* inCascade,
                 output_circular_buffer<TT_DATA>& __restrict outWindow,
                 output_circular_buffer<TT_DATA>& __restrict outWindow2);
 };
@@ -1284,7 +1284,7 @@ class fir_interpolate_hb<TT_DATA,
     void filter(input_circular_buffer<TT_DATA,
                                       extents<inherited_extent>,
                                       margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& inWindow,
-                output_stream_cacc48* outCascade,
+                output_cascade_cacc* outCascade,
                 output_async_buffer<TT_DATA>& broadcastWindow);
 };
 
@@ -1367,7 +1367,7 @@ class fir_interpolate_hb<TT_DATA,
         input_circular_buffer<TT_DATA,
                               extents<inherited_extent>,
                               margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& inWindowReverse,
-        output_stream_cacc48* outCascade,
+        output_cascade_cacc* outCascade,
         output_async_buffer<TT_DATA>& broadcastWindow);
 };
 
@@ -1446,7 +1446,7 @@ class fir_interpolate_hb<TT_DATA,
     void filter(input_circular_buffer<TT_DATA,
                                       extents<inherited_extent>,
                                       margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& inWindow,
-                output_stream_cacc48* outCascade,
+                output_cascade_cacc* outCascade,
                 output_async_buffer<TT_DATA>& broadcastWindow,
                 const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]);
 };
@@ -1530,7 +1530,7 @@ class fir_interpolate_hb<TT_DATA,
         input_circular_buffer<TT_DATA,
                               extents<inherited_extent>,
                               margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& inWindowReverse,
-        output_stream_cacc48* outCascade,
+        output_cascade_cacc* outCascade,
         output_async_buffer<TT_DATA>& broadcastWindow,
         const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]);
 };
@@ -1610,8 +1610,8 @@ class fir_interpolate_hb<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_hb::filter); }
     // FIR
     void filter(input_async_buffer<TT_DATA>& inWindow,
-                input_stream_cacc48* inCascade,
-                output_stream_cacc48* outCascade,
+                input_cascade_cacc* inCascade,
+                output_cascade_cacc* outCascade,
                 output_async_buffer<TT_DATA>& broadcastWindow);
 };
 // Partially specialized classes for cascaded interface (middle kernels in cascade), Windowed. single/dual input, reload
@@ -1689,8 +1689,8 @@ class fir_interpolate_hb<TT_DATA,
 
     // FIR
     void filter(input_async_buffer<TT_DATA>& inWindow,
-                input_stream_cacc48* inCascade,
-                output_stream_cacc48* outCascade,
+                input_cascade_cacc* inCascade,
+                output_cascade_cacc* outCascade,
                 output_async_buffer<TT_DATA>& broadcastWindow);
 };
 // ----------------------------------------------------------------------------
@@ -2085,7 +2085,7 @@ class fir_interpolate_hb<TT_DATA,
     void filter(input_circular_buffer<TT_DATA,
                                       extents<inherited_extent>,
                                       margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& inWindow,
-                input_stream_cacc48* inCascade,
+                input_cascade_cacc* inCascade,
                 output_stream<TT_DATA>* outStream);
 };
 
@@ -2162,7 +2162,7 @@ class fir_interpolate_hb<TT_DATA,
 
     // FIR
     void filter(input_async_buffer<TT_DATA>& inWindow,
-                input_stream_cacc48* inCascade,
+                input_cascade_cacc* inCascade,
                 output_stream<TT_DATA>* outStream);
 };
 
@@ -2242,7 +2242,7 @@ class fir_interpolate_hb<TT_DATA,
     void filter(input_circular_buffer<TT_DATA,
                                       extents<inherited_extent>,
                                       margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& inWindow,
-                input_stream_cacc48* inCascade,
+                input_cascade_cacc* inCascade,
                 output_stream<TT_DATA>* outStream,
                 output_stream<TT_DATA>* outStream2);
 };
@@ -2320,7 +2320,7 @@ class fir_interpolate_hb<TT_DATA,
 
     // FIR
     void filter(input_async_buffer<TT_DATA>& inWindow,
-                input_stream_cacc48* inCascade,
+                input_cascade_cacc* inCascade,
                 output_stream<TT_DATA>* outStream,
                 output_stream<TT_DATA>* outStream2);
 };
@@ -2399,7 +2399,7 @@ class fir_interpolate_hb<TT_DATA,
     void filter(input_circular_buffer<TT_DATA,
                                       extents<inherited_extent>,
                                       margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& inWindow,
-                output_stream_cacc48* outCascade);
+                output_cascade_cacc* outCascade);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -2477,7 +2477,7 @@ class fir_interpolate_hb<TT_DATA,
     void filter(input_circular_buffer<TT_DATA,
                                       extents<inherited_extent>,
                                       margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& inWindow,
-                output_stream_cacc48* outCascade,
+                output_cascade_cacc* outCascade,
                 output_async_buffer<TT_DATA>& broadcastWindow);
 };
 
@@ -2556,8 +2556,8 @@ class fir_interpolate_hb<TT_DATA,
     void filter(input_circular_buffer<TT_DATA,
                                       extents<inherited_extent>,
                                       margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& inWindow,
-                input_stream_cacc48* inCascade,
-                output_stream_cacc48* outCascade);
+                input_cascade_cacc* inCascade,
+                output_cascade_cacc* outCascade);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -2633,8 +2633,8 @@ class fir_interpolate_hb<TT_DATA,
 
     // FIR
     void filter(input_async_buffer<TT_DATA>& inWindow,
-                input_stream_cacc48* inCascade,
-                output_stream_cacc48* outCascade,
+                input_cascade_cacc* inCascade,
+                output_cascade_cacc* outCascade,
                 output_async_buffer<TT_DATA>& broadcastWindow);
 };
 
@@ -2714,7 +2714,7 @@ class fir_interpolate_hb<TT_DATA,
     void filter(input_circular_buffer<TT_DATA,
                                       extents<inherited_extent>,
                                       margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& inWindow,
-                input_stream_cacc48* inCascade,
+                input_cascade_cacc* inCascade,
                 output_stream<TT_DATA>* outStream);
 };
 
@@ -2791,7 +2791,7 @@ class fir_interpolate_hb<TT_DATA,
 
     // FIR
     void filter(input_async_buffer<TT_DATA>& inWindow,
-                input_stream_cacc48* inCascade,
+                input_cascade_cacc* inCascade,
                 output_stream<TT_DATA>* outStream);
 };
 
@@ -2871,7 +2871,7 @@ class fir_interpolate_hb<TT_DATA,
     void filter(input_circular_buffer<TT_DATA,
                                       extents<inherited_extent>,
                                       margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& inWindow,
-                input_stream_cacc48* inCascade,
+                input_cascade_cacc* inCascade,
                 output_stream<TT_DATA>* outStream,
                 output_stream<TT_DATA>* outStream2);
 };
@@ -2949,7 +2949,7 @@ class fir_interpolate_hb<TT_DATA,
 
     // FIR
     void filter(input_async_buffer<TT_DATA>& inWindow,
-                input_stream_cacc48* inCascade,
+                input_cascade_cacc* inCascade,
                 output_stream<TT_DATA>* outStream,
                 output_stream<TT_DATA>* outStream2);
 };
@@ -3028,7 +3028,7 @@ class fir_interpolate_hb<TT_DATA,
     void filter(input_circular_buffer<TT_DATA,
                                       extents<inherited_extent>,
                                       margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& inWindow,
-                output_stream_cacc48* outCascade,
+                output_cascade_cacc* outCascade,
                 const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]);
 };
 
@@ -3106,7 +3106,7 @@ class fir_interpolate_hb<TT_DATA,
     void filter(input_circular_buffer<TT_DATA,
                                       extents<inherited_extent>,
                                       margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& inWindow,
-                output_stream_cacc48* outCascade,
+                output_cascade_cacc* outCascade,
                 output_async_buffer<TT_DATA>& broadcastWindow,
                 const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]);
 };
@@ -3186,8 +3186,8 @@ class fir_interpolate_hb<TT_DATA,
     void filter(input_circular_buffer<TT_DATA,
                                       extents<inherited_extent>,
                                       margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& inWindow,
-                input_stream_cacc48* inCascade,
-                output_stream_cacc48* outCascade);
+                input_cascade_cacc* inCascade,
+                output_cascade_cacc* outCascade);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -3263,8 +3263,8 @@ class fir_interpolate_hb<TT_DATA,
 
     // FIR
     void filter(input_async_buffer<TT_DATA>& inWindow,
-                input_stream_cacc48* inCascade,
-                output_stream_cacc48* outCascade,
+                input_cascade_cacc* inCascade,
+                output_cascade_cacc* outCascade,
                 output_async_buffer<TT_DATA>& broadcastWindow);
 };
 

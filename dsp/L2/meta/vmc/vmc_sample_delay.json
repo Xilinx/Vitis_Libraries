@@ -10,14 +10,9 @@
           "key": "TT_DATA",
       "name": "data_type",
           "type": "typename",
-          "description": "Data type of individual I/O data samples.",
+          "description": "Select the input/output data type from the dropdown.",
       "default": "int8",
-      "validator": {
-              "file": "vmc_sample_delay.py",
-              "function": "vmc_validate_TT_DATA",
-	      "args": []
-          },
-              "label": "Input/Output data type:",
+      "label": "Input/Output data type:",
               "tablabel": "Main",
               "parameterType":"popup"
       },
@@ -26,26 +21,16 @@
       "name": "input_window_size",
       "description": "The number of samples in the input window",
       "default": 256,
-      "validator": {
-              "file": "vmc_sample_delay.py",
-              "function": "vmc_validate_TP_WINDOW_VSIZE",
-              "args": ["AIE_VARIANT", "data_type", "max_sample_delay"]
-          },
-              "label": "Input window size (Number of samples):",
+      "label": "Input window size (Number of samples):",
               "tablabel": "Main",
               "parameterType":"edit"
       },
       {
           "key": "TP_MAX_DELAY",
       "name": "max_sample_delay",
-          "description": "Upper bound of the the requested sample delay on RTP port",
+          "description": "Upper bound of the requested sample delay on the RTP port.",
       "default": 256,
-      "validator": {
-              "file": "vmc_sample_delay.py",
-              "function": "vmc_validate_TP_MAX_DELAY",
-              "args": ["AIE_VARIANT", "data_type"]
-          },
-              "label": "Maximum sample delay:",
+      "label": "Maximum sample delay:",
               "tablabel": "Main",
               "parameterType":"edit"
       },
@@ -54,15 +39,21 @@
 	  "name": "AIE_VARIANT",
       "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
       "default": 1,
-      "validator": {
-	      "file": "vmc_sample_delay.py",
-	      "function": "vmc_validate_AIE_VARIANT",
-	      "args": []
-	  },
-	  "label": "AIE Variant:",
+      "label": "AIE Variant:",
       "tablabel": "Main",
       "parameterType":"edit"
-      }
+      },
+     {	
+		"key":"TP_API",
+		"name": "TP_API",
+		"description": "The form of IO: 0 for windows, 1 for streams",
+		"type": "uint",
+		"default": 0,
+		"label": "API:",
+		"tablabel": "Main",
+		"visible": "off",
+		"parameterType":"edit"
+     }
 
   ],
 

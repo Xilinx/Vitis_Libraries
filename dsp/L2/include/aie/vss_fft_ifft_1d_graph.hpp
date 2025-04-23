@@ -127,7 +127,8 @@ class create_par_kernels_vss_decomp {
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         \n
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML and AIE-MLv2 device.
+ *\n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
@@ -171,12 +172,16 @@ class vss_fft_ifft_1d_graph : public graph {
     static constexpr unsigned int kIntCascLen = 1;
     static constexpr unsigned int kIntUseWidg = 0;
     static constexpr unsigned int kHeaderBytes = kIntDynPtSize > 0 ? 32 : 0;
-    static constexpr unsigned int kPtSizeD1 = fnPtSizeD1<TP_POINT_SIZE>();
+    static constexpr unsigned int kPtSizeD1 = fnPtSizeD1<TP_POINT_SIZE, useAIEffts(), TP_SSR>();
     static constexpr unsigned int kPtSizeD2 = TP_POINT_SIZE / kPtSizeD1;
     static constexpr unsigned int kPtSizeD2Ceil = fnCeil<kPtSizeD2, TP_SSR>();
     static constexpr unsigned int kFirstFFTShift = TP_SHIFT / 2;
     static constexpr unsigned int kSecondFFTShift = TP_SHIFT - TP_SHIFT / 2;
-    static constexpr unsigned int kWindowSizeRaw = (kPtSizeD2Ceil * kPtSizeD1) / TP_SSR;
+    // This can be either 1 or 2 for powers of 2 point sizes.
+    static constexpr unsigned int kPointSizesEq = kPtSizeD2 / kPtSizeD1;
+    // Window size needs to be a multiple of both ptSizeD1 and ptSizeD2.
+    // The kPointSizesEq factor ensures that the calculated point size is always divisible by both.
+    static constexpr unsigned int kWindowSizeRaw = (kPtSizeD2Ceil * kPtSizeD1 * kPointSizesEq) / TP_SSR;
     static constexpr unsigned int kWindowSizeCalc = kWindowSizeRaw * 2 * sizeof(TT_DATA) <= __DATA_MEM_BYTES__
                                                         ? kWindowSizeRaw
                                                         : __DATA_MEM_BYTES__ / (2 * sizeof(TT_DATA));

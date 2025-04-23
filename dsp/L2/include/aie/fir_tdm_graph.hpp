@@ -78,7 +78,8 @@ using namespace adf;
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         \n
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML and AIE-MLv2 device.
+ *\n
  * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph
  *         in a single iteration run.  \n
  *         Samples are buffered and stored in a ping-pong window buffer mapped onto Memory Group banks. \n
@@ -142,12 +143,12 @@ template <typename TT_DATA,
           unsigned int TP_SSR = 1,
           unsigned int TP_SAT = 1,
           unsigned int TP_CASC_LEN = 1,
-          typename TT_OUT_DATA = TT_DATA>
+          typename TT_OUT_DATA = TT_DATA,
+          unsigned int TP_USE_COEFF_RELOAD = 0>
 /**
  **/
 class fir_tdm_graph : public graph {
    private:
-    static constexpr unsigned int TP_USE_COEFF_RELOAD = 0;
     static constexpr unsigned int TP_API = 0;
     // static constexpr unsigned int TP_DUAL_IP = 0;
     // static constexpr unsigned int TP_NUM_OUTPUTS = 1;
@@ -267,7 +268,13 @@ class fir_tdm_graph : public graph {
     static_assert(bufferSize <= kMemoryModuleSize,
                   "ERROR: Input Window size (based on requested window size and FIR length margin) exceeds Memory "
                   "Module size of 32kB");
+    /**
+     * The conditional input array data to the function.
+     * This input is (generated when TP_CASC_IN == CASC_IN_TRUE) either a cascade input.
+     **/
+    port_conditional_array<output, (TP_CASC_IN == CASC_IN_TRUE), TP_SSR> casc_in;
 
+   public:
     static std::vector<TT_COEFF> revert_channel_taps(const std::vector<TT_COEFF>& taps) {
         // processed output
         std::vector<TT_COEFF> revertedTaps;
@@ -304,13 +311,12 @@ class fir_tdm_graph : public graph {
         return revertedTaps;
     }
 
-    /**
-     * The conditional input array data to the function.
-     * This input is (generated when TP_CASC_IN == CASC_IN_TRUE) either a cascade input.
-     **/
-    port_conditional_array<output, (TP_CASC_IN == CASC_IN_TRUE), TP_SSR> casc_in;
+    static TT_COEFF* update_revert_channel_taps(const std::vector<TT_COEFF>& taps) {
+        std::vector<TT_COEFF> revertedTaps = revert_channel_taps(taps);
+        TT_COEFF* revertedTapsPtr = &revertedTaps[0];
+        return revertedTapsPtr;
+    }
 
-   public:
     /**
      * The array of kernels that will be created and mapped onto AIE tiles.
      **/
@@ -334,6 +340,14 @@ class fir_tdm_graph : public graph {
      **/
     port_array<output, TP_SSR> out;
 
+    /**
+     * The conditional array of input async ports used to pass run-time programmable (RTP) coefficients.
+     * This port_conditional_array is (generated when TP_USE_COEFF_RELOAD == 1) an array of input ports, which size is
+     *defined by TP_SSR.
+     * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.
+     **/
+    port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), (TP_SSR * TP_CASC_LEN)> coeff;
+
    private:
     // Hide currently unused ports.
 
@@ -344,14 +358,6 @@ class fir_tdm_graph : public graph {
      *
      **/
     port_conditional_array<input, (TP_DUAL_IP == 1), TP_SSR> in2;
-
-    /**
-     * The conditional array of input async ports used to pass run-time programmable (RTP) coefficients.
-     * This port_conditional_array is (generated when TP_USE_COEFF_RELOAD == 1) an array of input ports, which size is
-     *defined by TP_SSR.
-     * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.
-     **/
-    port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeff;
 
     /**
      * The output data array from the function.
@@ -385,21 +391,68 @@ class fir_tdm_graph : public graph {
     };
 
     /**
+    * @brief Access function to get total number of RTP ports.
+    **/
+    static constexpr unsigned int getTotalRtpPorts() {
+        // return the total number of RTP ports.
+        //
+        return TP_SSR * TP_CASC_LEN;
+    };
+
+    /**
+    * @brief Access function to get number taps per RTP port.
+    * Number of taps each RTP port handles may differ when `TP_SSR > 1` and/or when `TP_CASC_LEN > 1`.
+    **/
+    int getTapsPerRtpPort(int kernelNo) {
+        // split over cascaded kernels
+        int kernelPosition = kernelNo % TP_CASC_LEN;
+        int firTapsPerRtpPort = lastSSRKernel::getKernelFirRangeLen(kernelPosition);
+        return firTapsPerRtpPort * (TP_TDM_CHANNELS / TP_SSR);
+    };
+
+    /**
+    * @brief Access function to get a vector of taps per RTP port.
+    * Number of taps each RTP port handles may differ when `TP_SSR > 1` and/or when `TP_CASC_LEN > 1`.
+    **/
+    static std::vector<TT_COEFF> extractTaps(const std::vector<TT_COEFF>& taps, unsigned int kernelNo) {
+        // return the total number of RTP ports.
+        // revert all taps
+        std::vector<TT_COEFF> revertedTaps = revert_channel_taps(taps);
+        // split across SSR phases
+        int ssrCoeffPhase = kernelNo / TP_CASC_LEN;
+        std::vector<TT_COEFF> ssrPhaseTaps = lastSSRKernel::segment_taps_array_for_phase(revertedTaps, ssrCoeffPhase);
+
+        // split over cascaded kernels
+        int kernelPosition = kernelNo % TP_CASC_LEN;
+        std::vector<TT_COEFF> kernelTaps =
+            lastSSRKernel::segment_taps_array_for_cascade(ssrPhaseTaps, kernelPosition, TP_CASC_LEN);
+
+        return kernelTaps;
+    };
+
+    /**
      * @brief This is the constructor function for the FIR graph with static coefficients.
      * @param[in] taps   a reference to the std::vector array of taps values of type TT_COEFF.
      * Coefficients are expected to be in a form that presents each tap for all TDM channels, followed by next tap for
-     *all TDM channels. For example, a 4 tap, 8 TDM channel vector would look like like the vector below:
-     * @code {.c++}
+     * all TDM channels. For example, a 4 tap, 8 TDM channel argument would look like the vector below:
+     * @code
      * std::vector<int16> taps {
-     *            t30, t31, t32, t33, t34, t35, t36, t37,
-     *            t20, t21, t22, t22, t24, t25, t26, t27,
-     *            t10, t11, t12, t11, t14, t15, t16, t17,
-     *            t00, t01, t02, t00, t04, t05, t06, t07}
+     *            t00, t01, t02, t03, t04, t05, t06, t07,
+     *            t10, t11, t12, t13, t14, t15, t16, t17,
+     *            t20, t21, t22, t23, t24, t25, t26, t27,
+     *            t30, t31, t32, t33, t34, t35, t36, t37
+     *            }
      * @endcode
-     * where each element ``tnm`` represents a ''n-th'' tap for a ''m-th'' TDM channel.
+     * where each element ``tnm`` represents a ``n-th`` tap for a ``m-th`` TDM channel.
      **/
     fir_tdm_graph(const std::vector<TT_COEFF>& taps) {
         lastSSRKernel::create_and_recurse(m_firKernels, revert_channel_taps(taps));
+        lastSSRKernel::create_tdm_connections(m_firKernels, &in[0], in2, &out[0], out2, coeff, net, net2, casc_in,
+                                              "fir_tdm.cpp");
+    };
+
+    fir_tdm_graph() {
+        lastSSRKernel::create_and_recurse(m_firKernels);
         lastSSRKernel::create_tdm_connections(m_firKernels, &in[0], in2, &out[0], out2, coeff, net, net2, casc_in,
                                               "fir_tdm.cpp");
     };

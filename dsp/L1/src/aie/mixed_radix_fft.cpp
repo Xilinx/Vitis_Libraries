@@ -73,8 +73,9 @@ INLINE_DECL void kernel_MixedRadixFFTClass<TT_IN_DATA,
                                            TP_START_RANK,
                                            TP_END_RANK,
                                            TP_DYN_PT_SIZE>::singleFrame(TT_IN_DATA* inbuff, TT_OUT_DATA* outbuff) {
-    T_internalDataType* tmp_bufs[2] = {m_tmpBuff0, m_tmpBuff1}; // TODO tmp2 can sometimes be xbuff reused, similarly
-                                                                // for odd stages, obuff can be used in place of tmp1.
+    alignas(__ALIGN_BYTE_SIZE__) T_internalDataType* tmp_bufs[2] = {
+        m_tmpBuff0, m_tmpBuff1}; // TODO tmp2 can sometimes be xbuff reused, similarly
+                                 // for odd stages, obuff can be used in place of tmp1.
 
     constexpr int kR5 = 5;
     constexpr int kR3 = 3;
@@ -299,7 +300,7 @@ INLINE_DECL void kernel_MixedRadixFFTClass<TT_IN_DATA,
                                                                   TT_OUT_DATA* outbuff,
                                                                   std::array<T_ancillaryFields, kVectorSize>
                                                                       headerData) { // TODO aie::vector?
-    T_internalDataType* tmp_bufs[2] = {m_tmpBuff0, m_tmpBuff1};
+    alignas(__ALIGN_BYTE_SIZE__) T_internalDataType* tmp_bufs[2] = {m_tmpBuff0, m_tmpBuff1};
 
     using twVect_t = ::aie::vector<TT_TWIDDLE, kVectorSize>;
     using infoVect_t = ::aie::vector<T_ancillaryFields, kVectorSize>; // TODO T_info

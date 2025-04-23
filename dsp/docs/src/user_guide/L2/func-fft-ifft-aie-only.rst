@@ -7,7 +7,7 @@
 
 
 ============================
-FFT/IFFT 1CH DIT (AIE-only)
+FFT/IFFT 1CH DIT (AI Engine only)
 ============================
 
 This is a single channel, decimation in time (DIT) implementation. It has a configurable point size, data type, forward/reverse direction, scaling (as a shift), cascade length, static/dynamic point size, window size, interface API (stream/window), and parallelism factor.
@@ -64,39 +64,43 @@ Design Notes
 Dynamic Point Size
 ------------------
 
-The FFT supports dynamic (runtime controlled) point sizes. This feature is available when the ``TP_DYN_PT_SIZE`` template parameter is set. When set to 0 (static point size), all data will be expected in frames of ``TP_POINT_SIZE`` data samples, though multiple frames can be input together using ``TP_WINDOW_VSIZE``. When set to 1 (dynamic point size), each window must be preceded by a 256-bit header to describe the runtime parameters of that window. Note that ``TP_WINDOW_VSIZE`` described the number of samples in a window so does not include this header. The format of the header is described in Table 5. When ``TP_DYN_PT_SIZE`` =1, ``TP_POINT_SIZE`` describes the maximum point size which may be input.
+The FFT supports dynamic (runtime controlled) point sizes. This feature is available when the ``TP_DYN_PT_SIZE`` template parameter is set. When set to 0 (static point size), all data will be expected in frames of ``TP_POINT_SIZE`` data samples, though multiple frames can be input together using ``TP_WINDOW_VSIZE``. When set to 1 (dynamic point size), each window must be preceded by a 256-bit header (512 bit in AIE-MLv2) to describe the runtime parameters of that window. Note that ``TP_WINDOW_VSIZE`` described the number of samples in a window so does not include this header. The format of the header is described in Table 5. When ``TP_DYN_PT_SIZE`` =1, ``TP_POINT_SIZE`` describes the maximum point size which may be input.
+The size of the header is 256 bits in AIE and AIE-ML, but 512 bits in AIE-MLv2 as these are the smallest header sizes possible where the following data samples are aligned to memory accesses for the AI Engine variant.
 
 .. _FFT_IFFT_HEADER_FORMAT:
 
 .. table:: Header Format
    :align: center
 
-   +-------------------------------+----------------------+---------------------------------------------------------------------------------+
-   |                               | Location (TT_DATA    |                                                                                 |
-   | Field name                    | sample)              | Description                                                                     |
-   +===============================+======================+=================================================================================+
-   |                               |                      |                                                                                 |
-   | Direction                     | 0 (real part)        | 0 (inverse FFT) 1 (forward FFT)                                                 |
-   +-------------------------------+----------------------+---------------------------------------------------------------------------------+
-   |                               |                      |                                                                                 |
-   | Point size (radix2 stages)    | 1 (real part)        | Point size described as a power of 2. E.g. 5 described a   point size of 32.    |
-   +-------------------------------+----------------------+---------------------------------------------------------------------------------+
-   |                               |                      |                                                                                 |
-   | Reserved                      | 2                    | reserved                                                                        |
-   +-------------------------------+----------------------+---------------------------------------------------------------------------------+
-   |                               | 3 (cint32 or cfloat) |                                                                                 |
-   | Status (output only)          | 7 (cint16)           |                                                                                 |
-   |                               | (real part)          | 0 = legal point size, 1 = illegal point size                                    |
-   +-------------------------------+----------------------+---------------------------------------------------------------------------------+
-
-The locations are set to suit the ``TT_DATA`` type. That is, for ``TT_DATA=cint16``, direction is described in the first cint16 (real part) of the 256 bit header, and point size is described in the real part of the second cint16 value. Similarly, for ``TT_DATA=cint32``, the real part of the first cint32 value in the header holds the direction field and the real part of the second cint32 value holds the Point size (radix2) field.
+   +-------------------------------+---------------------------+---------------------------------------------------------------------------------+
+   |                               | Location (TT_DATA         |                                                                                 |
+   | Field name                    | sample)                   | Description                                                                     |
+   +===============================+===========================+=================================================================================+
+   |                               |                           |                                                                                 |
+   | Direction                     | 0 (real part)             | 0 (inverse FFT) 1 (forward FFT)                                                 |
+   +-------------------------------+---------------------------+---------------------------------------------------------------------------------+
+   |                               |                           |                                                                                 |
+   | Point size (radix2 stages)    | 1 (real part)             | Point size described as a power of 2. E.g. 5 described a   point size of 32.    |
+   +-------------------------------+---------------------------+---------------------------------------------------------------------------------+
+   |                               |                           |                                                                                 |
+   | Reserved                      | 2 to (last position -1)   | reserved                                                                        |
+   +-------------------------------+---------------------------+---------------------------------------------------------------------------------+
+   |                               |                           |                                                                                 |
+   | Status (output only)          | Last position (see note 1)| 0 = legal point size, 1 = illegal point size                                    |
+   |                               | (real part)               |                                                                                 |
+   +-------------------------------+---------------------------+---------------------------------------------------------------------------------+
+   | Note 1: The last position depends on TT_DATA and the AI Engine variant. On AIE and AIE-ML the last position is 3 for TT_DATA = cfloat or    |
+   | cint32 or 7 when TT_DATA = cint16. On AIE-MLv2 the last positions is 7 for TT_DATA = cfloat or cint32 or 15 when TT_DATA = cint16.          |
+   +-------------------------------+---------------------------+---------------------------------------------------------------------------------+
+   
+The locations are set to suit the ``TT_DATA`` type. That is, for ``TT_DATA=cint16``, direction is described in the first cint16 (real part) of the header, and point size is described in the real part of the second cint16 value. Similarly, for ``TT_DATA=cint32``, the real part of the first cint32 value in the header holds the direction field and the real part of the second cint32 value holds the Point size (radix2) field.
 
 Note that for ``TT_DATA=cfloat``, the values in the header are expected as cfloat and are value-cast (not reinterpret-cast) to integers internally. The output window also has a header. This is copied from the input header except for the status field, which is inserted. The status field is ignored on input. If an illegal point size is entered, the output header will have this field set to a non-zero value and the remainder of the output window is undefined.
 
 Super Sample Rate Operation
 ---------------------------
 
-While the term Super Sample Rate strictly means the processing of more than one sample per clock cycle, in the AIE context, it is taken to mean an implementation using parallel kernels to improve performance at the expense of additional resource use. In the FFT, SSR operation is controlled by the ``TP_PARALLEL_POWER`` template parameter. This parameter is intended to improve performance and also allow support of point sizes beyond the limitations of a single tile. Diagram :ref:`FIGURE_FFT_CONSTRAINTS` shows an example graph with ``TP_PARALLEL_POWER`` set to 2. This results in four subframe processors in parallel each performing an FFT of ``N/2^TP_PARALLEL_POWER`` point size. These subframe outputs are then combined by ``TP_PARALLEL_POWER`` stages of radix2 to create the final result. The order of samples is described in the note for ``TP_API`` above.
+While the term Super Sample Rate strictly means the processing of more than one sample per clock cycle, in the AI Engine context, it is taken to mean an implementation using parallel kernels to improve performance at the expense of additional resource use. In the FFT, SSR operation is controlled by the ``TP_PARALLEL_POWER`` template parameter. This parameter is intended to improve performance and also allow support of point sizes beyond the limitations of a single tile. Diagram :ref:`FIGURE_FFT_CONSTRAINTS` shows an example graph with ``TP_PARALLEL_POWER`` set to 2. This results in four subframe processors in parallel each performing an FFT of ``N/2^TP_PARALLEL_POWER`` point size. These subframe outputs are then combined by ``TP_PARALLEL_POWER`` stages of radix2 to create the final result. The order of samples is described in the note for ``TP_API`` above.
 
 The ``TP_PARALLEL_POWER`` parameter  allows a trade of performance for resource use in the form of tiles used. The following table shows the tile utilization versus ``TP_PARALLEL_POWER`` assuming that all widgets co-habit with FFT processing kernels.
 
@@ -262,7 +266,7 @@ For the same example, to ensure that the second radix2 combiner kernel in the fi
 
 	not_equal(location<kernel>(myFFT.FFTsubframe[0].m_combInKernel[1]),location<kernel>( myFFT.FFTsubframe[0].m_r2Comb[1]));
 
-For large point sizes, e.g., 65536, the design is large, requiring 80 tiles. With such a large design, the Vitis AIE mapper might time out due to there being too many possibilities of placement, so placement constraints are recommended to reduce the solution space. Reduce the time spent by the Vitis AIE mapper tool to find a solution. Example constraints have been provided in the ``test.hpp`` file for the fft_ifft_dit_1ch, i.e, in: `L2/tests/aie/fft_ifft_dit_1ch/test.hpp`.
+For large point sizes, e.g., 65536, the design is large, requiring 80 tiles. With such a large design, the Vitis AI Engine mapper might time out due to there being too many possibilities of placement, so placement constraints are recommended to reduce the solution space. Reduce the time spent by the Vitis AI Engine mapper tool to find a solution. Example constraints have been provided in the ``test.hpp`` file for the fft_ifft_dit_1ch, i.e, in: `L2/tests/aie/fft_ifft_dit_1ch/test.hpp`.
 
 Use of single_buffer
 --------------------
@@ -322,12 +326,16 @@ Scenarios
 
 .. note:: ``TP_SHIFT`` is set to 12 for nominal 1/N scaling. ``TP_WINDOW_VSIZE`` has been set to ``TP_POINT_SIZE`` because to attempt any multiple of ``TP_POINT_SIZE`` would exceed memory limits.
 
+Memory Placement
+----------------
+The FFT uses many memories for input, output, internal scratchpad, twiddles and sysmem (heap and stack). Should any two of these be placed on the same bank, then memory collisions can occur, causing wait states and a loss of performance. If performance is not meeting your needs, consider the placement of memories. This may be improved using the BufferOptLevel argument to aiecompiler, or an improvement may be possible by applying location constraints to buffers.
+
 .. _PARAMETER_LEGALITY_NOTES:
 
 Parameter Legality Notes
 ========================
 
-Where possible, illegal values for template parameters, or illegal combinations of values for template parameters are detected at compilation time. Where an illegal configuration is detected, compilation will fail with an error message indicating the constraint in question. However, no attempt has been made to detect and error upon configurations which are simply too large for the resource available, as the library element cannot know how much of the device is used by the user code and also because the resource limits vary by device which the library unit cannot deduce. In these cases, compilation will likely fail, but due to the over-use of a resource detected by the AIE tools. For example, an FFT of ``TT_DATA = cint16`` can be supported up to ``TP_POINT_SIZE=65536`` using ``TP_PARALLEL_POWER=4``. A similarly configured FFT with ``TT_DATA=cint32`` will not compile because the per-tile memory use, which is constant and predictable, is exceeded. This condition is detected and an error would be issued. A FFT with ``TT_DATA=cint32`` and ``TP_PARALLEL_POWER=5`` should, in theory, be possible to implement, but this will use 192 tiles directly and will use the memory of many other tiles, so is likely to exceed the capacity of the AIE array. However, the available capacity cannot easily be determined, so no error check is applied here.
+Where possible, illegal values for template parameters, or illegal combinations of values for template parameters are detected at compilation time. Where an illegal configuration is detected, compilation will fail with an error message indicating the constraint in question. However, no attempt has been made to detect and error upon configurations which are simply too large for the resource available, as the library element cannot know how much of the device is used by the user code and also because the resource limits vary by device which the library unit cannot deduce. In these cases, compilation will likely fail, but due to the over-use of a resource detected by the AI Engine tools. For example, an FFT of ``TT_DATA = cint16`` can be supported up to ``TP_POINT_SIZE=65536`` using ``TP_PARALLEL_POWER=4``. A similarly configured FFT with ``TT_DATA=cint32`` will not compile because the per-tile memory use, which is constant and predictable, is exceeded. This condition is detected and an error would be issued. A FFT with ``TT_DATA=cint32`` and ``TP_PARALLEL_POWER=5`` should, in theory, be possible to implement, but this will use 192 tiles directly and will use the memory of many other tiles, so is likely to exceed the capacity of the AI Engine array. However, the available capacity cannot easily be determined, so no error check is applied here.
 
 The largest point size which can be supported in a single kernel is limited by data memory availability. Since IO-buffer connections default to double buffering for maximal throughput, the choice of ``TP_API`` (IO-buffer or streams) affects the maximum point size, because the limit will be reached for IO-buffers for a lower ``TP_POINT_SIZE`` than for streams. The following table indicates the maximum point size possible for a single kernel for various values of ``TT_DATA`` and ``TP_API``.
 

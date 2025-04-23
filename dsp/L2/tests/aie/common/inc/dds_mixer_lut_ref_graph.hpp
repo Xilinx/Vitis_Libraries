@@ -45,7 +45,9 @@ template <typename TT_DATA,
           unsigned int TP_SSR = 1, // ignored
           unsigned int TP_RND = 0,
           unsigned int TP_SAT = 1,
-          unsigned int TP_USE_PHASE_RELOAD = 0>
+          unsigned int TP_USE_PHASE_RELOAD = 0,
+          unsigned int TP_PHASE_RELOAD_API = 0,
+          unsigned int TP_USE_PHASE_INC_RELOAD = 0>
 
 class dds_mixer_lut_ref_graph : public graph {
    private:
@@ -56,12 +58,14 @@ class dds_mixer_lut_ref_graph : public graph {
         typename std::conditional_t<(TP_MIXER_MODE == 1 || TP_MIXER_MODE == 2), port_array<input>, no_port>;
     using input_port2 = typename std::conditional_t<TP_MIXER_MODE == 2, port_array<input>, no_port>;
     using rtp_port = typename std::conditional_t<(TP_USE_PHASE_RELOAD == 1), port<input>, no_port>;
+    using phinc_rtp_port = typename std::conditional_t<(TP_USE_PHASE_INC_RELOAD == 1), port<input>, no_port>;
 
    public:
     input_port1 in1;
     input_port2 in2;
     port_array<output> out;
     std::array<rtp_port, TP_SSR> PhaseRTP;
+    std::array<phinc_rtp_port, TP_SSR> PhaseIncRTP;
 
     // DDS Kernel
     kernel m_ddsKernel;
@@ -75,10 +79,10 @@ class dds_mixer_lut_ref_graph : public graph {
         // Create DDS_MIXER_REF kernel
         // IO_API is ignored because it's basically just a implementation detail
         static constexpr unsigned int tp_num_luts = TP_SFDR <= 60 ? 1 : TP_SFDR <= 120 ? 2 : 3;
-        m_ddsKernel =
-            kernel::create_object<dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_USE_PHASE_RELOAD,
-                                                USE_LUT_SINCOS, tp_num_luts, TP_RND, TP_SAT> >(phaseInc,
-                                                                                               initialPhaseOffset);
+        m_ddsKernel = kernel::create_object<
+            dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_USE_PHASE_RELOAD, USE_LUT_SINCOS,
+                          tp_num_luts, TP_RND, TP_SAT, TP_PHASE_RELOAD_API, TP_USE_PHASE_INC_RELOAD> >(
+            phaseInc, initialPhaseOffset);
 
         // Make connections
         // Size of window in Bytes.
@@ -94,18 +98,44 @@ class dds_mixer_lut_ref_graph : public graph {
             }
 
         if
-            constexpr(TP_MIXER_MODE == 0 && TP_USE_PHASE_RELOAD == 1) {
-                connect<parameter>(PhaseRTP[0], async(m_ddsKernel.in[0]));
+            constexpr(TP_USE_PHASE_RELOAD == 1) {
+                if
+                    constexpr(TP_PHASE_RELOAD_API == USE_PHASE_RELOAD_API_RTP) {
+                        if
+                            constexpr(TP_MIXER_MODE == 0) { connect<parameter>(PhaseRTP[0], async(m_ddsKernel.in[0])); }
+
+                        if
+                            constexpr(TP_MIXER_MODE == 1) { connect<parameter>(PhaseRTP[0], async(m_ddsKernel.in[1])); }
+
+                        if
+                            constexpr(TP_MIXER_MODE == 2) { connect<parameter>(PhaseRTP[0], async(m_ddsKernel.in[2])); }
+                    }
+                else { // not API_RPT so assume IOBUFF
+                    unsigned int kSizeofPhaseOffsetIObuff = 32 / sizeof(uint32);
+                    if
+                        constexpr(TP_MIXER_MODE == 0) {
+                            connect<>(PhaseRTP[0], m_ddsKernel.in[0]);
+                            dimensions(m_ddsKernel.in[0]) = {kSizeofPhaseOffsetIObuff};
+                        }
+
+                    if
+                        constexpr(TP_MIXER_MODE == 1) {
+                            connect<>(PhaseRTP[0], m_ddsKernel.in[1]);
+                            dimensions(m_ddsKernel.in[1]) = {kSizeofPhaseOffsetIObuff};
+                        }
+
+                    if
+                        constexpr(TP_MIXER_MODE == 2) {
+                            connect<>(PhaseRTP[0], m_ddsKernel.in[2]);
+                            dimensions(m_ddsKernel.in[2]) = {kSizeofPhaseOffsetIObuff};
+                        }
+                }
             }
 
         if
-            constexpr(TP_MIXER_MODE == 1 && TP_USE_PHASE_RELOAD == 1) {
-                connect<parameter>(PhaseRTP[0], async(m_ddsKernel.in[1]));
-            }
-
-        if
-            constexpr(TP_MIXER_MODE == 2 && TP_USE_PHASE_RELOAD == 1) {
-                connect<parameter>(PhaseRTP[0], async(m_ddsKernel.in[2]));
+            constexpr(TP_USE_PHASE_INC_RELOAD == 1) {
+                unsigned int portIndex = TP_MIXER_MODE + TP_USE_PHASE_RELOAD;
+                connect<parameter>(PhaseIncRTP[0], async(m_ddsKernel.in[portIndex]));
             }
 
         connect<>(m_ddsKernel.out[0], out[0]);

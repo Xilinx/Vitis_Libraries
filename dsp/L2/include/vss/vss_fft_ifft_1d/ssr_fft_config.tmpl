@@ -1,0 +1,8 @@
+[hls]
+
+flow_target=vitis
+syn.file=${ROOT_DIR}/L1/src/hw/${KERNEL_NAME}/${KERNEL_NAME}.cpp
+syn.file_cflags=${ROOT_DIR}/L1/src/hw/${KERNEL_NAME}/${KERNEL_NAME}.cpp, -I${ROOT_DIR}/L1/include -DSSR=${ssr} -DPOINT_SIZE=${ssr} -DDATA_TYPE=${data_type} -DTWIDDLE_TYPE=${twiddle_type}
+syn.top=${KERNEL_NAME}_wrapper
+syn.output.format=xo
+syn.ip.name=${KERNEL_NAME}_wrapper

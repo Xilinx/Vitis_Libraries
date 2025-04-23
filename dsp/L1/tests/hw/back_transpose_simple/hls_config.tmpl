@@ -1,0 +1,18 @@
+[hls]
+
+clock=3.20
+flow_target=vitis
+syn.file=${XF_PROJ_ROOT}/L1/src/hw/back_transpose_simple/back_transpose_simple.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/src/hw/back_transpose_simple/back_transpose_simple.cpp, -I${XF_PROJ_ROOT}/L1/src -DSSR=4 -DPOINT_SIZE=256
+syn.top=back_transpose_simple_wrapper
+tb.file=test_back_transpose_simple.cpp
+tb.file_cflags=test_back_transpose_simple.cpp,-I${XF_PROJ_ROOT}/L1/src/hw/back_transpose_simple -DSSR=4 -DPOINT_SIZE=256
+syn.debug.enable=1
+cosim.trace_level=port
+cosim.wave_debug=true
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog

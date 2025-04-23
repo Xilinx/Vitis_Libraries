@@ -82,7 +82,8 @@ using namespace adf;
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         \n
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML and AIE-MLv2 device.
+ *\n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
@@ -107,22 +108,22 @@ class outer_tensor_graph : public graph {
      * @cond NOCOMMENTS
      */
     static constexpr int bufferSizeBytes = 32;
-    static constexpr int pingPongSize = 32768 / 2;
     static constexpr int kMaxSSR = 16;
     static constexpr int dimSizeMinA = bufferSizeBytes / sizeof(TT_DATA_A);
     static constexpr int dimSizeMinB = bufferSizeBytes / sizeof(TT_DATA_B);
 
     // Defensive configuration legality checks
-    static_assert(TP_NUM_FRAMES* TP_DIM_A* TP_DIM_B* vectByte<TT_DATA_A, TT_DATA_B>().val_byteOut <= pingPongSize ||
+    static_assert(TP_NUM_FRAMES* TP_DIM_A* TP_DIM_B* vectByte<TT_DATA_A, TT_DATA_B>().val_byteOut <=
+                          __DATA_MEM_BYTES__ ||
                       TP_API == 1,
-                  "ERROR: Output cannot exceed 16384 bytes with windowed interface.");
+                  "ERROR: Output cannot exceed 32kB for AIE-1 and 64kB for AIE-ML with windowed interface.");
     static_assert(TP_DIM_A / TP_SSR >= dimSizeMinA,
                   "ERROR: TP_DIM_A * sizeof(TT_DATA_A) / TP_SSR must be >= 32 bytes.");
     static_assert(TP_DIM_B >= dimSizeMinB, "ERROR: TP_DIM_B * sizeof(TT_DATA_B) must be >= 32 bytes.");
-    static_assert(TP_DIM_A * sizeof(TT_DATA_A) * TP_NUM_FRAMES <= 16384,
-                  "ERROR: Input at port A must be less than 16384 bytes");
-    static_assert(TP_DIM_B * sizeof(TT_DATA_B) * TP_NUM_FRAMES <= 16384,
-                  "ERROR: Input at port B must be less than 16384 bytes");
+    static_assert(TP_DIM_A * sizeof(TT_DATA_A) * TP_NUM_FRAMES <= __DATA_MEM_BYTES__,
+                  "ERROR: Input at port A must be less than 32kB for AIE-1 and 64kB for AIE-ML.");
+    static_assert(TP_DIM_B * sizeof(TT_DATA_B) * TP_NUM_FRAMES <= __DATA_MEM_BYTES__,
+                  "ERROR: Input at port B must be less than 32kB for AIE-1 and 64kB for AIE-ML.");
     static_assert(TP_NUM_FRAMES > 0, "ERROR: TP_NUM_FRAMES must be > 0.");
     static_assert(fnValidateShiftFloat<TP_SHIFT, TT_DATA_A>(), "ERROR: TP_SHIFT must be 0 for float types.");
     static_assert(fnValidateShiftRange<TP_SHIFT>(), "ERROR: TP_SHIFT is out of the supported range.");

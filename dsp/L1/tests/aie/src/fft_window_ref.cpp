@@ -141,7 +141,8 @@ void fft_window_ref<TT_DATA,
             constexpr unsigned int kMaxPtSizePwr = 16; // largest is 64k = 1<<16;
             constexpr unsigned int kMinPtSizePwr = 4;  // smallest is 16 = 1<<4;
             constexpr unsigned int kHeaderSize =
-                32 / (sizeof(TT_DATA)); // dynamic point size header size (256bits or 32 bytes) in terms of samples
+                __ALIGN_BYTE_SIZE__ /
+                (sizeof(TT_DATA)); // dynamic point size header size (256bits or 32 bytes) in terms of samples
             TT_DATA header;
             int16 ptSizePwr; // default to static point size value. May be overwritten if dynamic point size selected.
 
@@ -158,15 +159,13 @@ void fft_window_ref<TT_DATA,
             tableSelect = (kPtSizePwr - ptSizePwr);
             coeff_base = &this->weights[this->tableStarts[tableSelect]];
             for (int i = 2; i < kHeaderSize - 1; i++) {
-                // window_writeincr(outWindow0, blankVector<TT_DATA>());
                 *outPtr++ = blankVector<TT_DATA>();
             }
             if ((ptSizePwr >= kMinPtSizePwr) && (ptSizePwr <= kMaxPtSizePwr)) {
-                // window_writeincr(outWindow0, blankVector<TT_DATA>()); //Status word. 0 indicated all ok.
                 *outPtr++ = blankVector<TT_DATA>();
             } else {
-                // window_writeincr(outWindow0, unitVector<TT_DATA>()); //Status word. 0 indicated all ok.
-                *outPtr++ = unitVector<TT_DATA>();
+                *outPtr++ = unitVector<TT_DATA>(); // flag an error in the status bit
+                ptSize = 0;
             }
             inPtr += kHeaderSize - 2; // two reads already;
             // window_incr(inWindow0,kHeaderSize);
@@ -232,7 +231,8 @@ void fft_window_ref<TT_DATA,
             constexpr unsigned int kMaxPtSizePwr = 16; // largest is 64k = 1<<16;
             constexpr unsigned int kMinPtSizePwr = 4;  // smallest is 16 = 1<<4;
             constexpr unsigned int kHeaderSize =
-                32 / (sizeof(TT_DATA)); // dynamic point size header size (256bits or 32 bytes) in terms of samples
+                __ALIGN_BYTE_SIZE__ /
+                (sizeof(TT_DATA)); // dynamic point size header size (256bits or 32 bytes) in terms of samples
             TT_DATA* headerPtr;
             TT_DATA header;
             int16 ptSizePwr; // default to static point size value. May be overwritten if dynamic point size selected.
@@ -264,6 +264,7 @@ void fft_window_ref<TT_DATA,
             } else {
                 writeincr(outStream0, unitVector<TT_DATA>()); // Status word. 0 indicated all ok.
                 writeincr(outStream1, unitVector<TT_DATA>()); // Status word. 0 indicated all ok.
+                ptSize = 0;
             }
         }
 
@@ -327,7 +328,8 @@ void fft_window_ref<TT_DATA,
             constexpr unsigned int kMaxPtSizePwr = 16; // largest is 64k = 1<<16;
             constexpr unsigned int kMinPtSizePwr = 4;  // smallest is 16 = 1<<4;
             constexpr unsigned int kHeaderSize =
-                32 / (sizeof(TT_DATA)); // dynamic point size header size (256bits or 32 bytes) in terms of samples
+                __ALIGN_BYTE_SIZE__ /
+                (sizeof(TT_DATA)); // dynamic point size header size (256bits or 32 bytes) in terms of samples
             TT_DATA* headerPtr;
             TT_DATA header;
             int16 ptSizePwr; // default to static point size value. May be overwritten if dynamic point size selected.
@@ -353,6 +355,7 @@ void fft_window_ref<TT_DATA,
                 writeincr(outStream0, blankVector<TT_DATA>()); // Status word. 0 indicated all ok.
             } else {
                 writeincr(outStream0, unitVector<TT_DATA>()); // Status word. 0 indicated all ok.
+                ptSize = 0;
             }
         }
 

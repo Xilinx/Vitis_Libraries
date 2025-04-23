@@ -43,18 +43,15 @@ IN_WINDOW_VSIZE 	:= $(shell echo $$(( 	$(IN_FRAME_SIZE) * $(NUM_FRAMES)		)))
 OUT_WINDOW_VSIZE 	:= $(shell echo $$(( 	$(OUT_FRAME_SIZE) * $(NUM_FRAMES)		)))
 NO_PAD_WINDOW_VSIZE := $(shell echo $$(( 	$(POINT_SIZE) 	 * $(NUM_FRAMES)		)))
 
-PARAM_MAP = DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) CASC_LEN $(CASC_LEN) NUM_FRAMES $(NUM_FRAMES) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) API_IO $(API_IO) AIE_VARIANT $(AIE_VARIANT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) UUT_SSR $(UUT_SSR)
+PARAM_MAP = DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) CASC_LEN $(CASC_LEN) NUM_FRAMES $(NUM_FRAMES) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) API_IO $(API_IO) AIE_VARIANT $(AIE_VARIANT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) UUT_SSR $(UUT_SSR) 
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 
-$(HELPER): create_config validate_config create_input sim_ref prep_x86_out
+$(HELPER):create_input sim_ref prep_x86_out
 	make cleanall
 
 create_config:
 	echo validating configuration;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP);
-
-validate_config:
-	vitis --classic -exec ipmetadata_config_checker $(HELPER_ROOT_DIR)/L2/meta/dft.json ./config.json -newflow
 
 create_input:
 	@echo starting create_input
@@ -85,7 +82,7 @@ get_diff:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) PERCENT
 
 get_status:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)  SINGLE_BUF $(SINGLE_BUF)
 
 get_qor:
 	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)

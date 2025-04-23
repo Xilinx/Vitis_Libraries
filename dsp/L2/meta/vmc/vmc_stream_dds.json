@@ -9,28 +9,18 @@
     {
       "key": "TT_DATA",
       "name": "data_type",
-      "description": "The type of individual data samples output of the DDS function",
+      "description": "Select the output data type from the dropdown",
       "default": "cint16",
-      "validator": {
-        "file": "vmc_stream_dds.py",
-        "function": "vmc_validate_data_type",
-        "args": []
-      },
-            "label": "Output data type:",
+      "label": "Output data type:",
             "tablabel": "Main",
             "parameterType":"popup"
     },
     {
       "key": "TP_INPUT_WINDOW_VSIZE",
       "name": "output_window_size",
-      "description": "The number of samples in output window",
+      "description": "Enter the number of samples in output window",
       "default": 32,
-      "validator": {
-        "file": "vmc_stream_dds.py",
-        "function": "vmc_validate_output_window_size",
-        "args": ["data_type"]
-      },
-            "label": "Samples per frame:",
+      "label": "Samples per frame:",
             "tablabel": "Main",
             "parameterType":"edit"
     },
@@ -39,26 +29,24 @@
       "name": "ssr",
       "description": "Specify number of data input/output in parallel for a single channel.",
       "default": 1,
-      "validator": {
-        "file": "vmc_stream_dds.py",
-        "function": "vmc_validate_ssr",
-        "args": []
-      },
-            "label": "SSR: ",
+      "label": "SSR: ",
             "tablabel": "Main",
             "parameterType":"edit"
+    },
+    {
+      "key": "TP_PHASE_RELOAD_API",
+	    "name": "PHASE_RELOAD_API",
+            "description": "specifies whether phase_offset reload, if used, is to be non-blocking (RTP) or blocking (iobuffer).",
+            "default": false,
+	    "label": "phase_offset reload",
+            "tablabel": "Main",
+            "parameterType":"checkbox"
     },
     {
       "key": "TP_USE_PHASE_RELOAD",
 	    "name": "USE_PHASE_RELOAD",
             "description": "specifies if initial phase is to be implemented as a reloadable RTP port or not.",
             "default": false,
-      	    "type": "bool",
-	    "validator": {
-               "file": "vmc_stream_dds.py",
-                "function": "validate_USE_PHASE_RELOAD",
-                "args": ["ssr"]
-		},
 	    "label": "Reload initial phase via input port",
             "tablabel": "Main",
             "parameterType":"checkbox"
@@ -66,11 +54,20 @@
     {
       "key": "phaseInc",
       "name": "phase_increment",
-      "description": "The phase increment between samples.",
+      "description": "Enter the phase increment between samples.",
       "default": 0,
             "label": "Phase increment:",
             "tablabel": "Main",
             "parameterType":"edit"
+    },
+    {
+      "key": "TP_USE_PHASE_INC_RELOAD",
+	    "name": "phase_increment_reload",
+            "description": "specifies if phase_increment can be reloaded at runtime.",
+            "default": false,
+	    "label": "phase_increment reload at runtime ",
+            "tablabel": "Main",
+            "parameterType":"checkbox"
     },
     {
       "key" : "initialPhaseOffset" ,
@@ -84,7 +81,7 @@
     {
       "key": "TP_RND",
       "name": "rnd_mode",
-      "description": "The rounding to be applied during the shift down stage of processing.",
+      "description": "Select a rounding mode from the dropdown.",
       "default": "Round to positive infinity",
           "label": "Rounding mode:",
             "tablabel": "Main",
@@ -93,20 +90,16 @@
     {
       "key": "TP_SAT",
       "name": "sat_mode",
-      "description": "Saturation mode.",
+      "description": "Select a saturation mode from the dropdown.",
       "enum": [0, 1, 3],
       "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
       "default": 0,
-      "validator": {
-          "file": "vmc_dds.py",
-          "function": "vmc_validate_sat_mode",
-          "args": []
-        },
-            "label": "Saturation mode:",
+      "label": "Saturation mode:",
             "tablabel": "Main",
             "parameterType":"popup"
     },
     {
+      "key": "vmc_sample_time",
       "name": "vmc_sample_time",
       "description": "Sample time for the block output port(s)",
       "default": -1,
@@ -116,19 +109,47 @@
             "parameterType":"edit"
     },
 	{
-	  "key": "AIE_VARIANT",
-	  "name": "AIE_VARIANT",
+	"key": "AIE_VARIANT",
+	"name": "AIE_VARIANT",
       "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
       "default": 1,
-    "validator": {
-                "file": "vmc_stream_dds.py",
-                "function": "validate_AIE_VARIANT",
-                "args": []
-            },
-	  "label": "AIE Variant:",
+      "label": "AIE Variant:",
       "tablabel": "Main",
       "parameterType":"edit"
-    }
+    },
+     {	
+		"key":"TP_API",
+		"name": "TP_API",
+		"description": "The form of IO: 0 for windows, 1 for streams",
+		"type": "uint",
+		"default": 1,
+		"label": "API:",
+		"tablabel": "Main",
+		"visible": "off",
+		"parameterType":"edit"
+     },
+     {		
+	"key":"initialPhaseOffset",
+        "name": "initialPhaseOffset",
+        "description": "specifies the initial value of the phase accumulator, creating a phase offset.",
+        "type": "uint",      
+        "default": 0,
+        "label": "Initial PhaseOffset:",
+        "tablabel": "Main",
+        "visible": "off",
+        "parameterType":"edit"
+     },
+     {		
+	"key":"TP_MIXER_MODE",
+        "name": "MIXER_MODE",
+        "description": "describes the mode of operation of the dds/mixer. Mixer_mode 0 means DDS block",
+        "type": "uint",      
+        "default": 0,
+        "label": "Mixer Mode:",
+        "tablabel": "Main",
+        "visible": "off",
+        "parameterType":"edit"
+     }
 
   ],
   "generator": {

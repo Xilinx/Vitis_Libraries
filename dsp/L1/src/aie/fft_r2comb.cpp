@@ -41,6 +41,8 @@ using namespace std;
 #include "fft_ifft_dit_1ch_utils.hpp"
 #include "fft_r2comb_twiddle_lut_all.hpp"
 
+//#define _DSPLIB_FFT_R2COMB_HPP_DEBUG_
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -144,14 +146,13 @@ INLINE_DECL void fft_r2comb_r2stage<TT_DATA,
     static constexpr int kTableFactor = (TP_DYN_PT_SIZE == 1) ? 1 : 2; // for dynamic point size, the max point size
                                                                        // table is not alone. We need 1/2, 1/4, etc,
                                                                        // hence twice the storage
-    alignas(32) static constexpr std::array<TT_TWIDDLE, ((TP_POINT_SIZE / kTableFactor) >> TP_PARALLEL_POWER)>
-        twiddles = fnGetR2CombTwTable<TT_TWIDDLE, TP_INDEX, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_DYN_PT_SIZE,
-                                      TP_TWIDDLE_MODE>();
+    alignas(__ALIGN_BYTE_SIZE__) static constexpr
+        std::array<TT_TWIDDLE, ((TP_POINT_SIZE / kTableFactor) >> TP_PARALLEL_POWER)>
+            twiddles = fnGetR2CombTwTable<TT_TWIDDLE, TP_INDEX, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_DYN_PT_SIZE,
+                                          TP_TWIDDLE_MODE>();
     static constexpr std::array<int, 12> twiddleStarts = fnGetR2TwStarts<(TP_POINT_SIZE >> (TP_PARALLEL_POWER + 1))>();
     constexpr unsigned int kTwShift = getTwShift<TT_TWIDDLE, TP_TWIDDLE_MODE>();
     constexpr unsigned int kShift = kTwShift + TP_SHIFT;
-
-    using t256VectorType = ::aie::vector<TT_DATA, 256 / 8 / sizeof(TT_DATA)>;
 
     bool inv;
     TT_DATA* xbuff = (TT_DATA*)&inBuff[0];  // sample-wise pointer
@@ -159,15 +160,17 @@ INLINE_DECL void fft_r2comb_r2stage<TT_DATA,
 
     if
         constexpr(TP_DYN_PT_SIZE == 1) {
-            static constexpr unsigned int kSamplesInHeader = 256 / 8 / sizeof(TT_DATA);
+            static constexpr unsigned int kSamplesInHeader = __ALIGN_BYTE_SIZE__ / sizeof(TT_DATA);
+            using tHeaderVectorType = ::aie::vector<TT_DATA, kSamplesInHeader>;
+
             static constexpr unsigned int kPtSizePwr = fnPointSizePower<TP_POINT_SIZE>();
             static constexpr unsigned int kminPtSizePwr = 4;
 
-            t256VectorType header;
+            tHeaderVectorType header;
             TT_DATA headerVal;
-            t256VectorType blankOp;
-            t256VectorType* inPtr = (t256VectorType*)&inBuff[0];   // vector-wise pointer
-            t256VectorType* outPtr = (t256VectorType*)&outBuff[0]; // vector-wise pointer
+            tHeaderVectorType blankOp;
+            tHeaderVectorType* inPtr = (tHeaderVectorType*)&inBuff[0];   // vector-wise pointer
+            tHeaderVectorType* outPtr = (tHeaderVectorType*)&outBuff[0]; // vector-wise pointer
             int ptSizePwr;
             int ptSize;
 
@@ -184,14 +187,14 @@ INLINE_DECL void fft_r2comb_r2stage<TT_DATA,
             ptSizePwr = (int)headerVal.real - (TP_ORIG_PAR_POWER - TP_PARALLEL_POWER);
             ptSize = (1 << ptSizePwr);
             // read in the incoming status field (1 = error, 0 = ok)
-            headerVal = header.get(std::is_same<TT_DATA, cint16>::value ? 7 : 3);
+            headerVal = header.get(kSamplesInHeader - 1);
 
             //    if (headerVal.real == 0 && ptSizePwr >= kminPtSizePwr && ptSizePwr <= kPtSizePwr) { //ie legal request
             if (headerVal.real ==
                 0) { // the FFT subframe has already checked pointsize legality, so just use the status field.
-                *outPtr++ = header;            // write header to output buffer
-                xbuff += 32 / sizeof(TT_DATA); // move past header
-                ybuff += 32 / sizeof(TT_DATA); // move past header
+                *outPtr++ = header;        // write header to output buffer
+                xbuff += kSamplesInHeader; // move past header
+                ybuff += kSamplesInHeader; // move past header
 
                 int n = (ptSize >> TP_PARALLEL_POWER);
                 int tw_base = kPtSizePwr - ptSizePwr;
@@ -214,10 +217,8 @@ INLINE_DECL void fft_r2comb_r2stage<TT_DATA,
                     blankPtr = (TT_DATA*)blankVectPtr; // start of next frame within window
                 }
 
-            } else { // illegal framesize or invalid incoming
-                header.set(unitVector<TT_DATA>(), std::is_same<TT_DATA, cint16>::value
-                                                      ? 7
-                                                      : 3); // set the invalid flag in the status location.
+            } else {                                                     // illegal framesize or invalid incoming
+                header.set(unitVector<TT_DATA>(), kSamplesInHeader - 1); // set the invalid flag in the status location.
                 *outPtr++ = header;
                 // write out blank window
                 for (int i = 0; i < TP_WINDOW_VSIZE / kSamplesInHeader; i++) {
@@ -317,7 +318,7 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               kStreamAPI,
                               TP_RND,
                               TP_SAT,
-                              TP_TWIDDLE_MODE>::fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // cascade
+                              TP_TWIDDLE_MODE>::fft_r2comb_main(input_cascade<cacc64>* __restrict inStream0, // cascade
                                                                 input_stream<TT_DATA>* __restrict inStream1,
                                                                 output_stream<TT_DATA>* __restrict outStream0) {
     set_rnd_mode<TP_RND>();
@@ -345,24 +346,25 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_SAT,
           unsigned int TP_TWIDDLE_MODE>
-NOINLINE_DECL void fft_r2comb<TT_DATA,
-                              TT_TWIDDLE,
-                              TP_POINT_SIZE,
-                              TP_FFT_NIFFT,
-                              TP_SHIFT,
-                              TP_DYN_PT_SIZE,
-                              TP_WINDOW_VSIZE,
-                              TP_PARALLEL_POWER,
-                              TP_INDEX,
-                              TP_ORIG_PAR_POWER,
-                              kCascStreamAPI,
-                              kCascStreamAPI,
-                              TP_RND,
-                              TP_SAT,
-                              TP_TWIDDLE_MODE>::fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // cascade
-                                                                input_stream<TT_DATA>* __restrict inStream1,
-                                                                output_stream_cacc64* __restrict outStream0, // cascade
-                                                                output_stream<TT_DATA>* __restrict outStream1) {
+NOINLINE_DECL void
+fft_r2comb<TT_DATA,
+           TT_TWIDDLE,
+           TP_POINT_SIZE,
+           TP_FFT_NIFFT,
+           TP_SHIFT,
+           TP_DYN_PT_SIZE,
+           TP_WINDOW_VSIZE,
+           TP_PARALLEL_POWER,
+           TP_INDEX,
+           TP_ORIG_PAR_POWER,
+           kCascStreamAPI,
+           kCascStreamAPI,
+           TP_RND,
+           TP_SAT,
+           TP_TWIDDLE_MODE>::fft_r2comb_main(input_cascade<cacc64>* __restrict inStream0, // cascade
+                                             input_stream<TT_DATA>* __restrict inStream1,
+                                             output_cascade<cacc64>* __restrict outStream0, // cascade
+                                             output_stream<TT_DATA>* __restrict outStream1) {
     set_rnd_mode<TP_RND>();
     set_sat_mode<TP_SAT>();
 
@@ -402,10 +404,10 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               kStreamCascAPI,
                               TP_RND,
                               TP_SAT,
-                              TP_TWIDDLE_MODE>::fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // cascade
+                              TP_TWIDDLE_MODE>::fft_r2comb_main(input_cascade<cacc64>* __restrict inStream0, // cascade
                                                                 input_stream<TT_DATA>* __restrict inStream1,
                                                                 output_stream<TT_DATA>* __restrict outStream0,
-                                                                output_stream_cacc64* __restrict outStream1 // cascade
+                                                                output_cascade<cacc64>* __restrict outStream1 // cascade
                                                                 ) {
     set_rnd_mode<TP_RND>();
     set_sat_mode<TP_SAT>();
@@ -447,7 +449,7 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TP_RND,
                               TP_SAT,
                               TP_TWIDDLE_MODE>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                                                                input_stream_cacc64* __restrict inStream1, // cascade
+                                                                input_cascade<cacc64>* __restrict inStream1, // cascade
                                                                 output_stream<TT_DATA>* __restrict outStream0) {
     set_rnd_mode<TP_RND>();
     set_sat_mode<TP_SAT>();
@@ -474,24 +476,25 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_SAT,
           unsigned int TP_TWIDDLE_MODE>
-NOINLINE_DECL void fft_r2comb<TT_DATA,
-                              TT_TWIDDLE,
-                              TP_POINT_SIZE,
-                              TP_FFT_NIFFT,
-                              TP_SHIFT,
-                              TP_DYN_PT_SIZE,
-                              TP_WINDOW_VSIZE,
-                              TP_PARALLEL_POWER,
-                              TP_INDEX,
-                              TP_ORIG_PAR_POWER,
-                              kStreamCascAPI,
-                              kCascStreamAPI,
-                              TP_RND,
-                              TP_SAT,
-                              TP_TWIDDLE_MODE>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                                                                input_stream_cacc64* __restrict inStream1,   // cascade
-                                                                output_stream_cacc64* __restrict outStream0, // cascade
-                                                                output_stream<TT_DATA>* __restrict outStream1) {
+NOINLINE_DECL void
+fft_r2comb<TT_DATA,
+           TT_TWIDDLE,
+           TP_POINT_SIZE,
+           TP_FFT_NIFFT,
+           TP_SHIFT,
+           TP_DYN_PT_SIZE,
+           TP_WINDOW_VSIZE,
+           TP_PARALLEL_POWER,
+           TP_INDEX,
+           TP_ORIG_PAR_POWER,
+           kStreamCascAPI,
+           kCascStreamAPI,
+           TP_RND,
+           TP_SAT,
+           TP_TWIDDLE_MODE>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                                             input_cascade<cacc64>* __restrict inStream1,   // cascade
+                                             output_cascade<cacc64>* __restrict outStream0, // cascade
+                                             output_stream<TT_DATA>* __restrict outStream1) {
     set_rnd_mode<TP_RND>();
     set_sat_mode<TP_SAT>();
 
@@ -532,9 +535,9 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TP_RND,
                               TP_SAT,
                               TP_TWIDDLE_MODE>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                                                                input_stream_cacc64* __restrict inStream1, // cascade
+                                                                input_cascade<cacc64>* __restrict inStream1, // cascade
                                                                 output_stream<TT_DATA>* __restrict outStream0,
-                                                                output_stream_cacc64* __restrict outStream1 // cascade
+                                                                output_cascade<cacc64>* __restrict outStream1 // cascade
                                                                 ) {
     set_rnd_mode<TP_RND>();
     set_sat_mode<TP_SAT>();
@@ -616,7 +619,7 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               kWindowAPI,
                               TP_RND,
                               TP_SAT,
-                              TP_TWIDDLE_MODE>::fft_r2comb_main(input_stream_cacc64* __restrict inStream0,
+                              TP_TWIDDLE_MODE>::fft_r2comb_main(input_cascade<cacc64>* __restrict inStream0,
                                                                 input_stream<TT_DATA>* __restrict inStream1,
                                                                 output_buffer<TT_DATA>& __restrict outWindow0) {
     TT_DATA* outPtr = outWindow0.data();
@@ -658,7 +661,7 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TP_RND,
                               TP_SAT,
                               TP_TWIDDLE_MODE>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                                                                input_stream_cacc64* __restrict inStream1,
+                                                                input_cascade<cacc64>* __restrict inStream1,
                                                                 output_buffer<TT_DATA>& __restrict outWindow0) {
     TT_DATA* outPtr = outWindow0.data();
     set_rnd_mode<TP_RND>();

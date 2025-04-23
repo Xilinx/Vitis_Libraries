@@ -216,7 +216,7 @@ class create_casc_kernel_recur<1,
         if
             constexpr(TP_IN_API != 0) { // AIE2 clause needed?
                 std::vector<TT_DATA> inBuff;
-                inBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA));
+                inBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * __ALIGN_BYTE_SIZE__ / sizeof(TT_DATA));
                 fftKernels[0] = kernel::create_object<fft_ifft_dit_1ch<
                     TT_DATA, TT_INT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_START_RANK, TP_END_RANK,
                     TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_IN_API, 0 /*window for cascade connection*/, TP_ORIG_PAR_POWER,
@@ -295,7 +295,7 @@ class create_casc_kernel {
         if
             constexpr(TP_OUT_API != 0) {
                 std::vector<TT_OUT_DATA> outBuff;
-                outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA));
+                outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * __ALIGN_BYTE_SIZE__ / sizeof(TT_OUT_DATA));
                 fftKernels[dim - 1] = kernel::create_object<fft_ifft_dit_1ch<
                     T_internalDataType, TT_OUT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_START_RANK,
                     TP_END_RANK, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, 0 /*window for cascade connection*/, TP_OUT_API,
@@ -372,11 +372,11 @@ class create_casc_kernel<1,
         if
             constexpr(TP_IN_API != 0) { //
                 std::vector<TT_DATA> inBuff;
-                inBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA));
+                inBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * __ALIGN_BYTE_SIZE__ / sizeof(TT_DATA));
                 if
                     constexpr(TP_OUT_API != 0) {
                         std::vector<TT_OUT_DATA> outBuff;
-                        outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA));
+                        outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * __ALIGN_BYTE_SIZE__ / sizeof(TT_OUT_DATA));
                         fftKernels[0] = kernel::create_object<
                             fft_ifft_dit_1ch<TT_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
                                              TP_START_RANK, TP_END_RANK, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_IN_API,
@@ -394,7 +394,7 @@ class create_casc_kernel<1,
             if
                 constexpr(TP_OUT_API != 0) {
                     std::vector<TT_OUT_DATA> outBuff;
-                    outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA));
+                    outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * __ALIGN_BYTE_SIZE__ / sizeof(TT_OUT_DATA));
                     fftKernels[0] = kernel::create_object<
                         fft_ifft_dit_1ch<TT_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
                                          TP_START_RANK, TP_END_RANK, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_IN_API,
@@ -444,7 +444,7 @@ class create_r2comb_kernels {
     static void create(kernel (&m_r2Comb)[kParallel_factor]) {
         // Memories for stream to window and window to stream conversion.
         std::vector<TT_DATA> inBuff, outBuff;
-        inBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA));
+        inBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * __ALIGN_BYTE_SIZE__ / sizeof(TT_DATA));
 
         if (kOutAPI == kWindowAPI) { // no need for outbuff if output is a window anyway
             m_r2Comb[TP_INDEX] =
@@ -453,7 +453,7 @@ class create_r2comb_kernels {
                                                  TP_ORIG_PAR_POWER, kInAPI, kOutAPI, TP_RND, TP_SAT, TP_TWIDDLE_MODE> >(
                     inBuff);
         } else { // need and output buffer too.
-            outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA));
+            outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * __ALIGN_BYTE_SIZE__ / sizeof(TT_DATA));
             m_r2Comb[TP_INDEX] =
                 kernel::create_object<fft_r2comb<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
                                                  TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_PARALLEL_POWER, TP_INDEX,
@@ -556,7 +556,7 @@ class create_r2comb_kernels<TT_DATA,
     static void create(kernel (&m_r2Comb)[kParallel_factor]) {
         // Memories for stream to window and window to stream conversion.
         std::vector<TT_DATA> inBuff, outBuff;
-        inBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA));
+        inBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * __ALIGN_BYTE_SIZE__ / sizeof(TT_DATA));
 
         if (kOutAPI == kWindowAPI) { // no need for outbuff if output is a window anyway
             m_r2Comb[0] = kernel::create_object<
@@ -564,7 +564,7 @@ class create_r2comb_kernels<TT_DATA,
                            TP_PARALLEL_POWER, 0, TP_ORIG_PAR_POWER, kInAPI, kOutAPI, TP_RND, TP_SAT, TP_TWIDDLE_MODE> >(
                 inBuff);
         } else { // need and output buffer if non-window output
-            outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA));
+            outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * __ALIGN_BYTE_SIZE__ / sizeof(TT_DATA));
             m_r2Comb[0] = kernel::create_object<
                 fft_r2comb<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE,
                            TP_PARALLEL_POWER, 0, TP_ORIG_PAR_POWER, kInAPI, kOutAPI, TP_RND, TP_SAT, TP_TWIDDLE_MODE> >(
@@ -784,9 +784,9 @@ class fft_ifft_dit_1ch_base_graph : public graph {
         // output.
         // These buffers are created here and passed to the cascade create to associate with the first and last kernels.
         // If not streaming, these buffers are not connected so should disappear.
-        constexpr int bufferbytes = TP_WINDOW_VSIZE * sizeof(TT_DATA) + 32 * TP_DYN_PT_SIZE;
+        constexpr int bufferbytes = TP_WINDOW_VSIZE * sizeof(TT_DATA) + __ALIGN_BYTE_SIZE__ * TP_DYN_PT_SIZE;
 
-        static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+        static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? __ALIGN_BYTE_SIZE__ : 0;
         typedef
             typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
 
@@ -1085,7 +1085,7 @@ class fft_ifft_dit_1ch_baseports_graph : public fft_ifft_dit_1ch_base_graph<TT_D
     // Constructor
     fft_ifft_dit_1ch_baseports_graph() {
         // Make data connections
-        static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+        static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? __ALIGN_BYTE_SIZE__ : 0;
         connect(in[0], this->m_fftKernels[0].in[0]);
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
         connect(this->m_fftKernels[TP_CASC_LEN - 1].out[0], out[0]);
@@ -1201,7 +1201,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                                                                          TP_TWIDDLE_MODE,
                                                                                          TT_OUT_DATA> {
    public:
-    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? __ALIGN_BYTE_SIZE__ : 0;
     static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
 
     /**
@@ -1295,7 +1295,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                                                                          TP_TWIDDLE_MODE,
                                                                                          TT_OUT_DATA> {
    public:
-    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? __ALIGN_BYTE_SIZE__ : 0;
     /**
      * I/O is an iobuffer in of TT_DATA type and for output 2 streams.
      **/
@@ -1358,7 +1358,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                          TT_OUT_DATA> // note output of FFT is iobuffer
 {
    public:
-    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? __ALIGN_BYTE_SIZE__ : 0;
     /**
      * I/O is an iobuffer in of TT_DATA type and for output 2 streams.
      **/
@@ -1430,7 +1430,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                                                                          TP_TWIDDLE_MODE,
                                                                                          TT_OUT_DATA> {
    public:
-    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? __ALIGN_BYTE_SIZE__ : 0;
     /**
      * I/O is an iobuffer in of TT_DATA type and for output a cascade and stream.
      **/
@@ -1491,7 +1491,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                                                                          TP_TWIDDLE_MODE,
                                                                                          TT_OUT_DATA> {
    public:
-    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? __ALIGN_BYTE_SIZE__ : 0;
     /**
      * I/O is an iobuffer in of TT_DATA type and for output a cascade and stream.
      **/
@@ -1563,7 +1563,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                                                                          TP_TWIDDLE_MODE,
                                                                                          TT_OUT_DATA> {
    public:
-    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? __ALIGN_BYTE_SIZE__ : 0;
     /**
      * I/O is an iobuffer in of TT_DATA type and for output a cascade and stream.
      **/
@@ -1624,7 +1624,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                                                                          TP_TWIDDLE_MODE,
                                                                                          TT_OUT_DATA> {
    public:
-    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? __ALIGN_BYTE_SIZE__ : 0;
     /**
      * I/O is an iobuffer in of TT_DATA type and for output a cascade and stream.
      **/
@@ -1755,7 +1755,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                                                                          TP_TWIDDLE_MODE,
                                                                                          TT_OUT_DATA> {
    public:
-    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? __ALIGN_BYTE_SIZE__ : 0;
     /**
      * I/O is an iobuffer in of TT_DATA type and for output a cascade and stream.
      **/
@@ -1899,7 +1899,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                                                                          TP_TWIDDLE_MODE,
                                                                                          TT_OUT_DATA> {
    public:
-    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? __ALIGN_BYTE_SIZE__ : 0;
     /**
      * I/O is an iobuffer in of TT_DATA type and for output a cascade and stream.
      **/
@@ -2213,10 +2213,20 @@ class fft_ifft_dit_1ch_graph : public graph {
     // more, as of 23.1
     static_assert(TP_PARALLEL_POWER >= 1 && TP_PARALLEL_POWER < 9,
                   "Error: TP_PARALLEL_POWER is out of supported range");
-    static_assert(TP_RND != rnd_sym_floor && TP_RND != rnd_sym_ceil && TP_RND != rnd_floor && TP_RND != rnd_ceil,
-                  "Error: FFT does not support TP_RND set to floor, ceil, symmetric floor, and symmetric ceil. Please "
-                  "set TP_RND to any of the other rounding modes. The mapping of integers to rounding modes is device "
-                  "dependent. Please refer to documentation for more information.");
+#ifdef __FFT_NO_RND_SYM_CEIL_FLOOR__
+    static_assert(
+        TP_RND != rnd_sym_floor && TP_RND != rnd_sym_ceil,
+        "Error: FFT does not support TP_RND set to floor. Please set TP_RND to any of the other rounding modes."
+        "The mapping of integers to rounding modes is device dependent."
+        "Please refer to documentation for more information.");
+#endif
+#ifdef __FFT_NO_RND_CEIL_FLOOR__
+    static_assert(
+        TP_RND != rnd_floor && TP_RND != rnd_ceil,
+        "Error: FFT does not support TP_RND set to floor. Please set TP_RND to any of the other rounding modes."
+        "The mapping of integers to rounding modes is device dependent."
+        "Please refer to documentation for more information.");
+#endif
     static_assert(!(std::is_same<TT_TWIDDLE, cint32>::value) || __SUPPORTS_32B_TW__ == 1,
                   "ERROR: This variant of AIE does not support TT_TWIDDLE = cint32");
 
@@ -2237,7 +2247,7 @@ class fft_ifft_dit_1ch_graph : public graph {
     static constexpr int kR2Shift = TP_SHIFT > 0 ? 1 : 0;
     static constexpr int kFFTsubShift = TP_SHIFT > 0 ? TP_SHIFT - 1 : 0;
 
-    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? __ALIGN_BYTE_SIZE__ : 0;
     static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
     static constexpr int kPortsPerTile = (TP_API == 0) ? 1 : kStreamsPerTile;
     static constexpr int kOutputPorts =
@@ -2560,16 +2570,28 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
                              TP_ORIG_PAR_POWER> : public graph {
    public:
     static constexpr unsigned int TP_PARALLEL_POWER = 0; // for this specialization
-    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? __ALIGN_BYTE_SIZE__ : 0;
     static constexpr unsigned int kOutAPI =
         fnGetFFTSubframeOutAPI<kWindowAPI, TP_ORIG_PAR_POWER, TP_PARALLEL_POWER, TP_INDEX>(); // 0=win, 1=stream,
                                                                                               // 2=casc/strm,
                                                                                               // 3=strm/casc
     static constexpr unsigned int kNumOutPorts = (kOutAPI == 0) ? 1 : 2;
-    static_assert(TP_RND != rnd_sym_floor && TP_RND != rnd_sym_ceil && TP_RND != rnd_floor && TP_RND != rnd_ceil,
-                  "Error: FFT does not support TP_RND set to floor, ceil, symmetric floor, and symmetric ceil. Please "
-                  "set TP_RND to any of the other rounding modes. The mapping of integers to rounding modes is device "
-                  "dependent. Please refer to documentation for more information.");
+
+#ifdef __FFT_NO_RND_SYM_CEIL_FLOOR__
+    static_assert(
+        TP_RND != rnd_sym_floor && TP_RND != rnd_sym_ceil,
+        "Error: FFT does not support TP_RND set to floor. Please set TP_RND to any of the other rounding modes."
+        "The mapping of integers to rounding modes is device dependent."
+        "Please refer to documentation for more information.");
+#endif
+#ifdef __FFT_NO_RND_CEIL_FLOOR__
+    static_assert(
+        TP_RND != rnd_floor && TP_RND != rnd_ceil,
+        "Error: FFT does not support TP_RND set to floor. Please set TP_RND to any of the other rounding modes."
+        "The mapping of integers to rounding modes is device dependent."
+        "Please refer to documentation for more information.");
+#endif
+
     static_assert(!(std::is_same<TT_TWIDDLE, cint32>::value) || __SUPPORTS_32B_TW__ == 1,
                   "ERROR: This variant of AIE does not support TT_TWIDDLE = cint32");
 
@@ -2678,14 +2700,25 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
         fnGetFFTSubframeOutAPI<kStreamAPI, TP_ORIG_PAR_POWER, TP_PARALLEL_POWER, TP_INDEX>();
     static constexpr unsigned int kNumOutPorts = (kOutAPI == 0) ? 1 : 2;
     static constexpr int kStreamsPerTile = get_input_streams_core_module();
-    static_assert(TP_RND != rnd_sym_floor && TP_RND != rnd_sym_ceil && TP_RND != rnd_floor && TP_RND != rnd_ceil,
-                  "Error: FFT does not support TP_RND set to floor, ceil, symmetric floor, and symmetric ceil. Please "
-                  "set TP_RND to any of the other rounding modes. The mapping of integers to rounding modes is device "
-                  "dependent. Please refer to documentation for more information.");
+#ifdef __FFT_NO_RND_SYM_CEIL_FLOOR__
+    static_assert(
+        TP_RND != rnd_sym_floor && TP_RND != rnd_sym_ceil,
+        "Error: FFT does not support TP_RND set to floor. Please set TP_RND to any of the other rounding modes."
+        "The mapping of integers to rounding modes is device dependent."
+        "Please refer to documentation for more information.");
+#endif
+#ifdef __FFT_NO_RND_CEIL_FLOOR__
+    static_assert(
+        TP_RND != rnd_floor && TP_RND != rnd_ceil,
+        "Error: FFT does not support TP_RND set to floor. Please set TP_RND to any of the other rounding modes."
+        "The mapping of integers to rounding modes is device dependent."
+        "Please refer to documentation for more information.");
+#endif
+
     /**
-     * The input data to the function.
-     * I/O  is two parallel streams each TT_DATA type.
-     **/
+       * The input data to the function.
+       * I/O  is two parallel streams each TT_DATA type.
+       **/
     port_array<input, kStreamsPerTile> in; // dual streams
 
     /**

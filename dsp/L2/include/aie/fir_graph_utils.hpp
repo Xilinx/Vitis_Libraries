@@ -27,6 +27,8 @@ The file captures the definition of the graph utilities commonly used across var
 #include "fir_utils.hpp"
 #include "graph_utils.hpp"
 
+// #define _DSPLIB_FIR_GRAPH_UTILS_DEBUG_
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -82,32 +84,90 @@ class casc_kernels {
     // recursive call with updated params
     using next_casc_kernels = casc_kernels<nextKernel_params, fir_type>;
 
+    template <int kernelFirRangeLen, int kernelPosition, int cascLen>
+    struct kernelPositionParams : public casc_params {
+        static constexpr int BTP_FIR_RANGE_LEN = kernelFirRangeLen;
+        static constexpr int BTP_KERNEL_POSITION = kernelPosition;
+        static constexpr int BTP_CASC_LEN = cascLen;
+    };
+
+    static constexpr unsigned int fnFirRange(unsigned int TP_FL, unsigned int TP_CL, int TP_KP, int TP_Rnd = 1) {
+        // TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
+        return ((fir::fnTrunc(TP_FL, TP_Rnd * TP_CL) / TP_CL) +
+                ((TP_FL - fir::fnTrunc(TP_FL, TP_Rnd * TP_CL)) >= TP_Rnd * (TP_KP + 1) ? TP_Rnd : 0));
+    }
+
+    static constexpr unsigned int fnFirRangeRem(unsigned int TP_FL, unsigned int TP_CL, int TP_KP, int TP_Rnd = 1) {
+        // TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
+        // this is for last in the cascade
+        return ((fir::fnTrunc(TP_FL, TP_Rnd * TP_CL) / TP_CL) +
+                ((TP_FL - fir::fnTrunc(TP_FL, TP_Rnd * TP_CL)) % TP_Rnd));
+    }
+    static constexpr unsigned int fnFirRangeOffset(
+        unsigned int TP_FL, unsigned int TP_CL, int TP_KP, int TP_Rnd = 1, int TP_Sym = 1) {
+        // TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
+        return (TP_KP * (fir::fnTrunc(TP_FL, TP_Rnd * TP_CL) / TP_CL) +
+                ((TP_FL - fir::fnTrunc(TP_FL, TP_Rnd * TP_CL)) >= TP_Rnd * TP_KP
+                     ? TP_Rnd * TP_KP
+                     : (fir::fnTrunc(TP_FL, TP_Rnd) - fir::fnTrunc(TP_FL, TP_Rnd * TP_CL)))) /
+               TP_Sym;
+    }
+
+#if __HAS_ACCUM_PERMUTES__ == 1
+    // cint16/int16 combo can be overloaded with 2 column MUL/MACs.
+    static constexpr unsigned int tdmColumnMultiple = (std::is_same<typename casc_params::BTT_DATA, cint16>::value &&
+                                                       std::is_same<typename casc_params::BTT_COEFF, int16>::value)
+                                                          ? 2
+                                                          : 1;
+#else
+    static constexpr unsigned int tdmColumnMultiple = 1;
+#endif
+
+    static constexpr unsigned int getKernelFirRangeOffset(int pos) {
+        unsigned int firRangeOffset =
+            fnFirRangeOffset(casc_params::BTP_FIR_LEN, casc_params::BTP_CASC_LEN, pos, tdmColumnMultiple);
+        return firRangeOffset;
+    };
+
+   public:
+    static constexpr unsigned int getKernelFirRangeLen(int pos) {
+        unsigned int firRangeLen =
+            pos + 1 == casc_params::BTP_CASC_LEN
+                ? fnFirRangeRem(casc_params::BTP_FIR_LEN, casc_params::BTP_CASC_LEN, pos, tdmColumnMultiple)
+                : fnFirRange(casc_params::BTP_FIR_LEN, casc_params::BTP_CASC_LEN, pos, tdmColumnMultiple);
+        return firRangeLen;
+    };
     /**
-     * @brief Separate taps into a specific cascade segment.
+     * @brief Separate taps into a specific cascade segment. Only used for TDM FIR (other FIRs - kernels take the full
+     * array anyway)
      */
+    template <unsigned int kernelPosition, unsigned int cascLen>
     static std::vector<typename casc_params::BTT_COEFF> segment_taps_array_for_cascade(
-        const std::vector<typename casc_params::BTT_COEFF>& taps,
-        const unsigned int kernelPosition,
-        const unsigned int cascLen) {
+        const std::vector<typename casc_params::BTT_COEFF>& taps) {
+        // internal struct of the method
+        static constexpr unsigned int kernelFirRangeLen =
+            fir_type<casc_params>::template getKernelFirRangeLen<kernelPosition>();
+        using thisPositionParams = kernelPositionParams<kernelFirRangeLen, kernelPosition, cascLen>;
+
         // FIR Length divided by cascade length and at this point also by SSR
         // TDM doesn't require full array for each cascaded kernels, in addition to requiring a fraction of total array
         // for SSR purposes
         static constexpr unsigned int tdmTapOffsetPerPhase =
-            fir_type<thisKernel_params>::getFirCoeffOffset(); // in the range of 0 to FL-1
+            fir_type<thisPositionParams>::getFirCoeffOffset(); // in the range of 0 to FL-1
         // lanes
-        static constexpr unsigned int lanes = fir_type<thisKernel_params>::getLanes();
-        static constexpr unsigned int firTapLanes = fir_type<thisKernel_params>::getFirRangeLen() * lanes;
-        static constexpr unsigned int firTapChannels = CEIL(thisKernel_params::BTP_TDM_CHANNELS, lanes) / lanes;
+        static constexpr unsigned int lanes = fir_type<thisPositionParams>::getLanes();
+        static constexpr unsigned int firTapLanes = fir_type<thisPositionParams>::getFirRangeLen() * lanes;
+        static constexpr unsigned int firTapChannels = CEIL(thisPositionParams::BTP_TDM_CHANNELS, lanes) / lanes;
 
         static constexpr unsigned int firTapOffsetPerPhase =
-            thisKernel_params::BTP_TDM_CHANNELS == 1 ? 0 : tdmTapOffsetPerPhase * lanes;
+            thisPositionParams::BTP_TDM_CHANNELS == 1 ? 0 : tdmTapOffsetPerPhase * lanes;
         std::vector<typename casc_params::BTT_COEFF> cascTapsRange; //
         for (unsigned int j = 0; j < firTapChannels; j++) {
             for (unsigned int i = 0; i < firTapLanes; i++) {
-                unsigned int tdmCascOffset = firTapOffsetPerPhase + j * lanes * thisKernel_params::BTP_FIR_LEN;
+                unsigned int tdmCascOffset = firTapOffsetPerPhase + j * lanes * thisPositionParams::BTP_FIR_LEN;
                 unsigned int coefIndex = i + tdmCascOffset;
                 // if (coefIndex < taps.size()) {
-                if (coefIndex < (thisKernel_params::BTP_FIR_LEN * thisKernel_params::BTP_TDM_CHANNELS)) {
+                if (coefIndex < (thisPositionParams::BTP_FIR_LEN * thisPositionParams::BTP_TDM_CHANNELS)) {
                     cascTapsRange.push_back(taps.at(coefIndex));
 
                 } else {
@@ -122,7 +182,55 @@ class casc_kernels {
         return cascTapsRange;
     }
 
-   public:
+    /**
+     * @brief Separate taps into a specific cascade segment. Only used for TDM FIR (other FIRs - kernels take the full
+     * array anyway)
+     */
+    static std::vector<typename casc_params::BTT_COEFF> segment_taps_array_for_cascade(
+        const std::vector<typename casc_params::BTT_COEFF>& taps, unsigned int kernelNo, unsigned int cascLen) {
+        // 8 tap, 4 tap per kernel. 16 channels. 128 taps in total, 64 taps each kernel
+        // kernel (1) -> 0  - 31, 64 - 95
+        // kernel (0) -> 32 - 63, 96 - 127
+
+        // Kernel position in the cascade chain is reversed. Recursive calls fill the data from the last kernel
+        // unsigned int kernelPosition =  cascLen - kernelNo - 1;
+        unsigned int kernelPosition = kernelNo;
+        unsigned int kernelFirRangeLen = getKernelFirRangeLen(kernelPosition);
+        unsigned int kernelFirRangeOffset = getKernelFirRangeOffset(kernelPosition);
+
+        // FIR Length divided by cascade length and at this point also by SSR
+        // TDM doesn't require full array for each cascaded kernels, in addition to requiring a fraction of total array
+        // for SSR purposes
+        unsigned int tdmTapOffsetPerPhase =
+            casc_params::BTP_FIR_LEN - kernelFirRangeLen - kernelFirRangeOffset; // in the range of 0 to FL-1
+        // lanes
+        unsigned int lanes = fir_type<casc_params>::getLanes();
+        unsigned int firTapLanes = kernelFirRangeLen * lanes;
+        unsigned int firTapChannels = CEIL(casc_params::BTP_TDM_CHANNELS, lanes) / lanes;
+
+        unsigned int firTapOffsetPerPhase = casc_params::BTP_TDM_CHANNELS == 1 ? 0 : tdmTapOffsetPerPhase * lanes;
+        std::vector<typename casc_params::BTT_COEFF> cascTapsRange; //
+        for (unsigned int j = 0; j < firTapChannels; j++) {
+            for (unsigned int i = 0; i < firTapLanes; i++) {
+                unsigned int tdmCascOffset = firTapOffsetPerPhase + j * lanes * casc_params::BTP_FIR_LEN;
+                unsigned int coefIndex = i + tdmCascOffset;
+                // if (coefIndex < taps.size()) {
+                if (coefIndex < (casc_params::BTP_FIR_LEN * casc_params::BTP_TDM_CHANNELS)) {
+                    cascTapsRange.push_back(taps.at(coefIndex));
+
+                } else {
+                    // padding
+                    cascTapsRange.push_back(fir::nullElem<typename casc_params::BTT_COEFF>());
+                }
+            }
+        }
+
+        // #undef _DSPLIB_FIR_GRAPH_UTILS_DEBUG_
+
+        return cascTapsRange;
+    }
+    // #undef _DSPLIB_FIR_GRAPH_UTILS_DEBUG_
+
     static void create_and_recurse(kernel firKernels[casc_params::BTP_CASC_LEN],
                                    const std::vector<typename casc_params::BTT_COEFF>& taps) {
         using namespace fir;
@@ -158,7 +266,7 @@ class casc_kernels {
             constexpr(thisKernelClass::getFirType() == eFIRVariant::kTDM) {
                 std::array<typename casc_params::BTT_DATA, thisKernelClass::getInternalBufferSize()> internalBuffer{};
                 std::vector<typename casc_params::BTT_COEFF> cascTaps(
-                    segment_taps_array_for_cascade(taps, casc_params::Bdim, casc_params::BTP_CASC_LEN));
+                    segment_taps_array_for_cascade<casc_params::Bdim, casc_params::BTP_CASC_LEN>(taps));
 
                 firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>(cascTaps, internalBuffer);
             }
@@ -197,7 +305,9 @@ class casc_kernels {
             }
         else if
             constexpr(thisKernelClass::getFirType() == eFIRVariant::kTDM) {
-                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>();
+                std::array<typename casc_params::BTT_DATA, thisKernelClass::getInternalBufferSize()> internalBuffer{};
+
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>(internalBuffer);
             }
         if
             constexpr(casc_params::Bdim != 0) { next_casc_kernels::create_and_recurse(firKernels); }
@@ -247,6 +357,7 @@ class ssr_kernels {
     using in2_type = port_conditional_array<input, (TP_DUAL_IP == 1), TP_SSR>;
     using out2_type = port_conditional_array<output, (TP_NUM_OUTPUTS == 2), TP_SSR>;
     using coeff_type = port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR>;
+    using tdm_coeff_type = port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR * TP_CASC_LEN>;
     using casc_in_type = port_conditional_array<input, (TP_CASC_IN == CASC_IN_TRUE), TP_SSR>;
     using net_type = typename std::array<std::array<std::array<connect<stream, stream>*, TP_CASC_LEN>, TP_SSR>, TP_SSR>;
 
@@ -296,7 +407,8 @@ class ssr_kernels {
 
     static void create_and_recurse(kernel (&firKernels)[totalKernels]) {
         // pass the kernels from a specific index so cascades can be placed as "normal" from that position.
-        this_casc_kernels::create_and_recurse(firKernels + kernelStartingIndex);
+        unsigned int kernelStartingIndexInt = isSSRaVector == 1 ? ssrDataPhase * TP_CASC_LEN : kernelStartingIndex;
+        this_casc_kernels::create_and_recurse(firKernels + kernelStartingIndexInt);
 
         if
             constexpr(ssr_params::Bdim > 0) { next_ssr_kernels::create_and_recurse(firKernels); }
@@ -341,7 +453,7 @@ class ssr_kernels {
                 if
                     constexpr(TP_USE_COEFF_RELOAD == USE_COEFF_RELOAD_TRUE && TP_CASC_IN == CASC_IN_FALSE) {
                         // Currently only first kernels in chain are configured with RTP port.
-                        // Subsequent kernels in cascade chain expect it's coneffs to be passed through the cascade IF.
+                        // Subsequent kernels in cascade chain expect its coeffs to be passed through the cascade IF.
 
                         if (ssrInnerPhase == 0) {
                             conditional_rtp_connections(coeff[ssrOutputPath], firstKernelOfCascadeChain);
@@ -377,7 +489,7 @@ class ssr_kernels {
                                        in2_type(&in2),
                                        port<output>* out,
                                        out2_type out2,
-                                       coeff_type coeff,
+                                       tdm_coeff_type coeff,
                                        net_type& net,
                                        net_type& net2,
                                        casc_in_type(&casc_in),
@@ -400,15 +512,18 @@ class ssr_kernels {
                                                     ssrInnerPhase, net2);
                 }
 
-            // if
-            //     constexpr(TP_USE_COEFF_RELOAD == USE_COEFF_RELOAD_TRUE && TP_CASC_IN == CASC_IN_FALSE) {
-            //         // Currently only first kernels in chain are configured with RTP port.
-            //         // Subsequent kernels in cascade chain expect it's coneffs to be passed through the cascade IF.
+            if
+                constexpr(TP_USE_COEFF_RELOAD == USE_COEFF_RELOAD_TRUE) {
+                    for (int i = 0; i < TP_CASC_LEN; i++) {
+                        unsigned int kernelIndex = ssrDataPhase * TP_CASC_LEN + i;
+                        unsigned int rtpPosition = i == 0 ? 1 : 2;
 
-            //         if (ssrInnerPhase == 0) {
-            //             conditional_rtp_connections(coeff[ssrOutputPath], firstKernelOfCascadeChain);
-            //         }
-            //     }
+                        kernel* kernelInCascadeChain = m_firKernels + kernelIndex;
+                        printf("kernelIndex: %d \n", kernelIndex);
+
+                        conditional_rtp_connections(coeff[kernelIndex], kernelInCascadeChain, rtpPosition);
+                    }
+                }
 
             // if (ssrInnerPhase == 0)
             //     if
@@ -584,6 +699,7 @@ class ssr_kernels {
                          : (dataIndex) / decompInnerPhases) +
         ssr_params::BTP_MODIFY_MARGIN_OFFSET; // add whatever margin offset that is sent to ssr kernels
 
+   public:
     /**
      * @brief Separate taps into a specific SSR phase.
      *    Phase 0 contains taps index 0, TP_SSR, 2*TP_SSR, ...
@@ -612,6 +728,7 @@ class ssr_kernels {
         return ssrTapsRange;
     }
 
+   private:
     // middle kernels connect to each other.
     static constexpr bool casc_in =
         isSSRaVector == 1 ? false : (ssrInnerPhase == 0) ? (false || TP_CASC_IN) : true; // first kernel of output phase
@@ -654,8 +771,28 @@ class ssr_kernels {
     static constexpr unsigned int MARGIN_BYTESIZE =
         fir_type<last_casc_params>::getSSRMargin() * sizeof(typename ssr_params::BTT_DATA);
 
+   public:
     using this_casc_kernels = casc_kernels<last_casc_params, fir_type>;
 
+    /**
+     * @brief Separate taps into a specific cascade segment.
+     */
+    static std::vector<typename ssr_params::BTT_COEFF> segment_taps_array_for_cascade(
+        const std::vector<typename ssr_params::BTT_COEFF>& taps, unsigned int kernelPosition, unsigned int cascLen) {
+        // call casc_kernels class method:
+        std::vector<TT_COEFF> kernelTaps =
+            this_casc_kernels::segment_taps_array_for_cascade(taps, kernelPosition, cascLen);
+        return kernelTaps;
+    }
+    /**
+     * @brief Separate taps into a specific cascade segment.
+     */
+    static int getKernelFirRangeLen(int pos) {
+        // call casc_kernels class method:
+        return this_casc_kernels::getKernelFirRangeLen(pos);
+    }
+
+   private:
     static constexpr int nextSSRBdim = ssr_params::Bdim - 1;
 
     // need to create parameters for downstream kernels, e.g. dim.
@@ -780,10 +917,13 @@ class ssr_kernels {
     }
 
     // make RTP connection
-    static void conditional_rtp_connections(port<input>(&coeff), kernel firKernels[TP_CASC_LEN]) {
+    static void conditional_rtp_connections(port<input>(&coeff),
+                                            kernel firKernels[TP_CASC_LEN],
+                                            int rtpPosition = RTP_PORT_POS) {
         if
             constexpr(TP_USE_COEFF_RELOAD == USE_COEFF_RELOAD_TRUE) {
-                connect<parameter>(coeff, async(firKernels[0].in[RTP_PORT_POS]));
+                printf("rtpPosition: %d \n", rtpPosition);
+                connect<parameter>(coeff, async(firKernels[0].in[rtpPosition]));
             }
     }
 };

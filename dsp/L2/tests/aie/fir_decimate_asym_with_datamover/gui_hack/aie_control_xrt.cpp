@@ -28,7 +28,7 @@ adf::GraphConfig GraphConfigurations[] = {
     //{id, name, graphLoadElfFunc, graphInitFunc, graphDebugHalt, coreColumns, coreRows, iterMemColumns, iterMemRows,
     // iterMemAddrs, triggered, plKernelInstanceNames, plAxiLiteModes, plDriverStartFuncs, plDriverCheckIPDoneFuncs}
     {
-        0, "filter", nullptr, nullptr, nullptr, {24}, {0}, {24}, {1}, {0x2d04}, {0}, {}, {}, {}, {},
+        0, "filter", nullptr, nullptr, nullptr, {24}, {0}, {24}, {1}, {0x4}, {0}, {}, {}, {}, {},
     },
 };
 const int NUM_GRAPH = 1;
@@ -56,16 +56,16 @@ class InitializeAIEControlXRT {
         adf::initializeConfigurations(nullptr, 0, 0, 0, GraphConfigurations, NUM_GRAPH, nullptr, 0, nullptr, 0, nullptr,
                                       0, nullptr, 0, nullptr, 0, nullptr, 0, nullptr, 0, nullptr, 0, PLIOConfigurations,
                                       NUM_PLIO, nullptr, 0, 0, nullptr, false, exclude_pl_control, false, nullptr, true,
-                                      2);
+                                      0, 2);
     }
 } initAIEControlXRT;
 
-#if !defined(__CDO__)
+using namespace adf;
 
 // Kernel Stub Definition
 template <>
 void xf::dsp::aie::fir::decimate_asym::
-    fir_decimate_asym<cint16, short, 9, 3, 15, 0, 384, false, false, 9, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 9>::filter(
+    fir_decimate_asym<cint16, short, 9, 3, 15, 0, 384, false, false, 9, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 9, 1>::filter(
         adf::io_buffer<cint16,
                        adf::direction::in,
                        adf::io_buffer_config<adf::extents<4294967295>,
@@ -79,4 +79,3 @@ void xf::dsp::aie::fir::decimate_asym::
                                              adf::addressing::circular,
                                              adf::margin<4294967295> > >& __restrict) { /* Stub */
 }
-#endif

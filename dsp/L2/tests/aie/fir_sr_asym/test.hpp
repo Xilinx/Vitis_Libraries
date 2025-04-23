@@ -29,6 +29,7 @@
 #include "uut_static_config.h"
 #include "test_utils.hpp"
 #include "fir_common_traits.hpp"
+#include "device_defs.h"
 
 #ifndef UUT_GRAPH
 #define UUT_GRAPH fir_sr_asym_graph
@@ -207,23 +208,33 @@ class test_graph : public graph {
         }
 #endif
 
-        const int MAX_PING_PONG_SIZE = 16384;
-        const int MEMORY_MODULE_SIZE = 32768;
+        const int MAX_PING_PONG_SIZE = __DATA_MEM_BYTES__ / 2;
         const int bufferSize = (PORT_API == 1 ? 0 : (FIR_LEN + INPUT_WINDOW_VSIZE / P_SSR) * sizeof(DATA_TYPE));
-        if (bufferSize > MAX_PING_PONG_SIZE) {
-            single_buffer(firGraph.getKernels()->in[0]);
-            single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[0]);
-            if (DUAL_IP == 1) {
-                single_buffer(firGraph.getKernels()->in[1]);
-            }
-            if (NUM_OUTPUTS == 2) {
-                single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[1]);
+        if (bufferSize > MAX_PING_PONG_SIZE || (SINGLE_BUF == 1 && PORT_API == 0)) {
+            for (int ssr = 0; ssr < P_SSR; ssr++) {
+                for (int ker = 0; ker < P_SSR * CASC_LEN; ker++) {
+                    single_buffer(firGraph.getKernels()[CASC_LEN * P_SSR * ssr + ker].in[0]);
+                    printf("INFO: Single Buffer Constraint applied to input buffer-0 of kernel %d.\n",
+                           CASC_LEN * P_SSR * ssr + ker);
+
+                    if (DUAL_IP == 1) {
+                        single_buffer(firGraph.getKernels()[CASC_LEN * P_SSR * ssr + ker].in[1]);
+                        printf("INFO: Single Buffer Constraint applied to input buffer-1 of kernel %d.\n",
+                               CASC_LEN * P_SSR * ssr + ker);
+                    }
+                }
+
+                single_buffer(firGraph.getKernels()[CASC_LEN * P_SSR * ssr + (CASC_LEN * P_SSR - 1)].out[0]);
+                printf("INFO: Single Buffer Constraint applied to output buffer-0 of kernel %d.\n",
+                       CASC_LEN * P_SSR * ssr + (CASC_LEN * P_SSR - 1));
+
+                if (NUM_OUTPUTS == 2) {
+                    single_buffer(firGraph.getKernels()[CASC_LEN * P_SSR * ssr + (CASC_LEN * P_SSR - 1)].out[1]);
+                    printf("INFO: Single Buffer Constraint applied to output buffer-1 of kernel %d.\n",
+                           CASC_LEN * P_SSR * ssr + (CASC_LEN * P_SSR - 1));
+                }
             }
         }
-        // use default ping-pong buffer, unless requested buffer exceeds memory module size
-        static_assert(bufferSize < MEMORY_MODULE_SIZE,
-                      "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "
-                      "Module size of 32kB");
 #endif
 
 #if (USE_COEFF_RELOAD == 1)

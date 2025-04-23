@@ -31,6 +31,7 @@ Single Rate Symmetrical FIR graph class.
 
 #include "test_utils.hpp"
 #include "fir_common_traits.hpp"
+#include "device_defs.h"
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
@@ -175,8 +176,7 @@ class test_graph : public graph {
 #endif
 
 #ifdef USING_UUT
-        const int MAX_PING_PONG_SIZE = 16384;
-        const int MEMORY_MODULE_SIZE = 32768;
+        const int MAX_PING_PONG_SIZE = __DATA_MEM_BYTES__ / 2;
 #if (P_SSR == 1) // Check buffer size is within limits, when buffer interface is used.
         const int bufferSize = (PORT_API == 1 ? 0 : (FIR_LEN + INPUT_SAMPLES) * sizeof(DATA_TYPE));
         if (bufferSize > MAX_PING_PONG_SIZE) {
@@ -188,12 +188,6 @@ class test_graph : public graph {
             if (NUM_OUTPUTS == 2) {
                 single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[1]);
             }
-
-        } else {
-            // use default ping-pong buffer, unless requested buffer exceeds memory module size
-            static_assert(bufferSize < MEMORY_MODULE_SIZE,
-                          "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds "
-                          "Memory Module size of 32kB");
         }
 #endif
 #endif

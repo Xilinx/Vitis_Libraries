@@ -13,9 +13,9 @@ Configuring the Library Elements
 
 .. code-block::
 
-	setenv PATH "<your-Vitis-install-path>/lin64/Vitis/2024.2/aietools/tps/lnx64/python-3.8.3/bin:$PATH"
+	setenv PATH "<your-Vitis-install-path>/lin64/Vitis/2025.1/aietools/tps/lnx64/python-3.13.0/bin:$PATH"
 
-DSPLIB AIE-IPs can be configured by utilizing a Python script called "config_helper.py". The "config_helper.py" is designed to assist users in establishing a valid configuration for any DSPLIB AIE-IP. This script communicates with the user through the console interface.
+DSPLIB IPs can be configured by utilizing a Python script called "config_helper.py". The "config_helper.py" is designed to assist users in establishing a valid configuration for any DSPLIB IP. This script communicates with the user through the console interface.
 
 The config helper will print either a legal set or a legal range for a parameter asking the user input a value. If the parameter is set to a legal value, the config helper will move to the next parameter on the parameter list of the chosen IP. If the given value is not legal, config helper will return error and ask the user to choose a legal value from the legal set/range. User can go back to the previous parameter by entering z/Z and return at any time.
 

@@ -36,6 +36,9 @@ namespace dsp {
 namespace aie {
 namespace conv_corr {
 
+class empty {};
+struct no_port {};
+
 // TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN, TP_SHIFT, TP_API, TP_RND,
 // TP_SAT, TP_CASC_LEN, TP_PHASES
 template <typename TT_DATA_F,
@@ -51,8 +54,12 @@ template <typename TT_DATA_F,
           unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_PHASES>
+          unsigned int TP_PHASES,
+          unsigned int TP_USE_RTP_VECTOR_LENGTHS>
 class conv_corr_ref_graph : public graph {
+   private:
+    using rtp_port = typename std::conditional_t<(TP_USE_RTP_VECTOR_LENGTHS == 1), port<input>, no_port>;
+
    public:
     // Defensive configuration legality checks
 
@@ -145,14 +152,14 @@ class conv_corr_ref_graph : public graph {
     // STREAM BASED PROCESSING: DEFENSIVE CHECKS
     // defensive check for (TP_G_LEN/TP_CASC_LEN)should be multiples of (Lanes*Points) when Stream only Processing
     // happening
-    static_assert(fnCheckCascLen<TP_G_LEN, TP_CASC_LEN, TP_PHASES, TP_API>(),
+    static_assert(fnCheckCascLen<TT_DATA_F, TT_DATA_G, TP_G_LEN, TP_CASC_LEN, TP_PHASES, TP_API>(),
                   "Assertion Failed : \n"
                   "            ERROR: TP_CASC_LEN should be equal to (TP_G_LEN/8) or \n"
                   "            TP_CASC_LEN should be (TP_G_LEN/16) or (TP_G_LEN/32) for less throughput requirement\n");
 
     // defensive check for PHASES which should be power of 2
     static_assert(
-        fnCheckPhases<TP_G_LEN, TP_CASC_LEN, TP_PHASES, TP_API>(),
+        fnCheckPhases<TT_DATA_F, TT_DATA_G, TP_G_LEN, TP_CASC_LEN, TP_PHASES, TP_API>(),
         "Assertion Failed : \n"
         "            ERROR: TP_PHASES can be greater than 1 only when TP_CASC_LEN should be equal to (TP_G_LEN/8) \n "
         "                  TP_PHASES is always 1 for both TP_API=0 and TP_API==1 \n ");
@@ -169,6 +176,11 @@ class conv_corr_ref_graph : public graph {
     port_array<output, TP_PHASES> out;
 
     /**
+     *  RTP Parameter for F and G Lengths
+     */
+    std::array<rtp_port, 1> rtpVecLen;
+
+    /**
         * The array of kernels that will be created and mapped onto AIE tiles.
     **/
     kernel m_conv_corr_ref[TP_PHASES];
@@ -176,9 +188,8 @@ class conv_corr_ref_graph : public graph {
     // Constructor
     conv_corr_ref_graph() {
         // Create CONV_CORR class
-        printf("\n CONV_CORR Ref\n");
-        static constexpr unsigned int kLanes = ref_CC_NumLanes<TT_DATA_F, TT_DATA_G>();
-        static constexpr unsigned int kLoopCount = getLoopCount<TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
+        static constexpr unsigned int kLanes = fnRefNumLanes<TT_DATA_F, TT_DATA_G>();
+        static constexpr unsigned int kLoopCount = getRefLoopCount<TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
         static constexpr unsigned int kRefLoopCount = (CEIL(kLoopCount, kLanes) / kLanes);
         static constexpr unsigned int kRefOutLen = (kRefLoopCount * kLanes);
         static constexpr unsigned int kRefPaddedFsigLen =
@@ -207,13 +218,16 @@ class conv_corr_ref_graph : public graph {
         printf("TP_NUM_FRAMES        = %d\n", TP_NUM_FRAMES);
         printf("TP_CASC_LEN          = %d\n", TP_CASC_LEN);
         printf("TP_PHASES            = %d\n", TP_PHASES);
+        printf("TP_USE_RTP_VECTOR_LENGTHS = %d\n", TP_USE_RTP_VECTOR_LENGTHS);
+
 #endif
         // make connections
-        m_conv_corr_ref[0] = kernel::create_object<
-            conv_corr_ref<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN,
-                          TP_SHIFT, TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN, TP_PHASES> >();
+        m_conv_corr_ref[0] =
+            kernel::create_object<conv_corr_ref<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE,
+                                                TP_F_LEN, TP_G_LEN, TP_SHIFT, TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES,
+                                                TP_CASC_LEN, TP_PHASES, TP_USE_RTP_VECTOR_LENGTHS> >();
         connect<>(inF[0], m_conv_corr_ref[0].in[0]);
-        if (TP_API == 0) {
+        if (TP_API == USE_WINDOW_API) {
             dimensions(m_conv_corr_ref[0].in[0]) = {kRefPaddedFsigLen * TP_NUM_FRAMES};
         } else {
             dimensions(m_conv_corr_ref[0].in[0]) = {TP_F_LEN};
@@ -221,9 +235,13 @@ class conv_corr_ref_graph : public graph {
 
         connect<>(inG, m_conv_corr_ref[0].in[1]);
         dimensions(m_conv_corr_ref[0].in[1]) = {TP_G_LEN * TP_NUM_FRAMES};
+        if
+            constexpr(TP_USE_RTP_VECTOR_LENGTHS == 1) {
+                connect<parameter>(rtpVecLen[0], async(m_conv_corr_ref[0].in[2]));
+            }
 
         connect<>(m_conv_corr_ref[0].out[0], out[0]);
-        if (TP_API == 0) {
+        if (TP_API == USE_WINDOW_API) {
             dimensions(m_conv_corr_ref[0].out[0]) = {kRefOutLen * TP_NUM_FRAMES};
         } else {
             dimensions(m_conv_corr_ref[0].out[0]) = {TP_F_LEN};

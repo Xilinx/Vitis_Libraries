@@ -35,8 +35,9 @@ template <typename TT_DATA,
           unsigned int TP_DIM,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_ASCENDING,
-          unsigned int TP_CASC_LEN>
-void bitonic_sort_ref<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN>::bitonic_sort_main(
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR>
+void bitonic_sort_ref<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN, TP_SSR>::bitonic_sort_main(
     input_buffer<TT_DATA>& inWindow0, output_buffer<TT_DATA>& outWindow0) {
     TT_DATA d_in, d_out;
     TT_DATA* inPtr = (TT_DATA*)inWindow0.data();

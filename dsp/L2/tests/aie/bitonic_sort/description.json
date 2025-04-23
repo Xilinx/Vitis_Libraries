@@ -7,6 +7,13 @@
         "vck190",
         "vek280"
     ],
+    "part_allowlist": [
+        "xcvr1602-vsva2488-2LP-e-S-es1",
+        "xc2ve3858-ssva2112-2LP-e-S"
+    ],
+    "part_alias": {
+        "xc2ve3858-ssva2112-2LP-e-S": "aie_mlv2"
+    },
     "platform_properties": {
         "vck190": {
             "v++": {
@@ -39,37 +46,100 @@
             }
         }
     },
+    "part_properties": {
+        "xcvr1602-vsva2488-2LP-e-S-es1": {
+            "param_set": [
+                "*canary_aie"
+            ],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            },
+            "aiecompiler": {
+                "compiler": {
+                    "customized_params": {
+                        "default": {
+                            "COMPILER_ARGS": "",
+                            "AIE_VARIANT": "1",
+                            "FIFO_THRESHOLD": " "
+                        }
+                    }
+                }
+            }
+        },
+        "xc2ve3858-ssva2112-2LP-e-S": {
+            "param_set": [
+                "*_aie22_*"
+            ],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            },
+            "aiecompiler": {
+                "compiler": {
+                    "customized_params": {
+                        "default": {
+                            "COMPILER_ARGS": "",
+                            "AIE_VARIANT": "22",
+                            "FIFO_THRESHOLD": "--aie.swfifo-threshold=120 "
+                        }
+                    }
+                }
+            }
+        }
+    },
     "pre_build": [
         {
             "build_cmd": " mkdir -p logs"
         },
         {
-            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)\" --connector \" \" --var \"DATA_TYPE:DIM_SIZE:NUM_FRAMES:ASCENDING:CASC_LEN:AIE_VARIANT\")"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")"
         },
         {
-            "build_cmd": "$(if $(filter-out REF,$(TAG)), vitis --classic -exec ipmetadata_config_checker LIB_DIR/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk create_config HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) LOC_INPUT_FILE=$(LOC_INPUT_FILE)\")"
         },
         {
-            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f $(CUR_DIR)/helper.mk HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=LIB_DIR LOC_INPUT_FILE=$(LOC_INPUT_FILE)\")"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/meta/scripts/metadata_checker.py --ip $(UUT_KERNEL))"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), # vitis --classic -exec ipmetadata_config_checker LIB_DIR/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR LOC_INPUT_FILE=$(LOC_INPUT_FILE)\")"
         }
     ],
     "post_launch": [
         {
             "target": "aiesim",
             "launch_cmd": [
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk prep_aie_out HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\"",
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\"",
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f $(CUR_DIR)/helper.mk get_latency HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=LIB_DIR STATUS_FILE=$(STATUS_FILE)\"",
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f $(CUR_DIR)/helper.mk get_stats HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=LIB_DIR STATUS_FILE=$(STATUS_FILE)\"",
-                "LIB_DIR/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) LIB_DIR/L2/tests/aie/common/scripts",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk prep_aie_out HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_latency HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_stats HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk harvest_mem HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
             ]
         },
         {
             "target": "x86sim",
             "launch_cmd": [
-                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk prep_x86_out HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\")",
-                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\")",
+                "$(if $(filter REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./data/ref_output.txt)",
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk prep_x86_out HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")",
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")",
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")",
                 "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
             ]
         }
@@ -105,15 +175,9 @@
                     "REF_KERNEL": "bitonic_sort_ref",
                     "UUT_GRAPH": "bitonic_sort_graph",
                     "REF_GRAPH": "bitonic_sort_ref_graph",
-                    "SEED": "1",
-                    "STIM_TYPE": "0",
                     "UUT_SIM_FILE": "./data/uut_output.txt",
                     "REF_SIM_FILE": "./data/ref_output.txt",
                     "LOC_INPUT_FILE": "./data/input.txt",
-                    "UUT_FILE_SUFFIX": "$(UUT_KERNEL)_$(PARAMS)",
-                    "LOG_FILE": "./logs/log_$(UUT_FILE_SUFFIX).txt",
-                    "STATUS_LOG_FILE": "./logs/status_$(UUT_FILE_SUFFIX).txt",
-                    "STATUS_FILE": "$(STATUS_LOG_FILE)",
                     "UUT_TARGET_COMPILE_ARGS": "--aie.Xchess=llvm.xargs=\"-std=c++2a\" --aie.Xchess=main:backend.mist2.xargs=\"+NOdra\" --aie.Xchess=main:backend.mist2.pnll=\"off\"  ",
                     "REF_TARGET_COMPILE_ARGS": "",
                     "UUT_WORK_DIR": "./Work",
@@ -132,6 +196,7 @@
                     "location": "test.cpp",
                     "files": [
                         "LIB_DIR/L1/src/aie/bitonic_sort.cpp",
+                        "LIB_DIR/L1/src/aie/merge_sort.cpp",
                         "uut_config.h"
                     ],
                     "pl-freq": 625,
@@ -168,8 +233,8 @@
                     "vitis_aie_sim": 32768
                 },
                 "max_time_min": {
-                    "vitis_aie_x86sim": 180,
-                    "vitis_aie_sim": 200
+                    "vitis_aie_x86sim": 470,
+                    "vitis_aie_sim": 470
                 }
             }
         ],
@@ -180,20 +245,28 @@
         "category": "canary",
         "param_set": {
             "pull_req": {
-                "*_hw_checkin":[
+                "*_canary_aie": [
                     "vitis_aie_sim",
                     "vitis_aie_x86sim"
                 ],
-                "*_x86sim_checkin":[
+                "*_hw_checkin": [
+                    "vitis_aie_sim",
+                    "vitis_aie_x86sim"
+                ],
+                "*_x86sim_checkin": [
                     "vitis_aie_x86sim"
                 ]
             },
             "daily": {
-                "*_hw_qor":[
+                "*_canary_aie": [
                     "vitis_aie_sim",
                     "vitis_aie_x86sim"
                 ],
-                "*_x86sim_qor":[
+                "*_hw_qor": [
+                    "vitis_aie_sim",
+                    "vitis_aie_x86sim"
+                ],
+                "*_x86sim_qor": [
                     "vitis_aie_x86sim"
                 ]
             }

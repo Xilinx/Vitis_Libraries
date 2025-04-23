@@ -89,10 +89,10 @@ class kernel_MRFFTTwiddleGenerationClass {
                                                                              // (+1) then fan_array*each step element
                                                                              // (+kStepVectorSize)
 
-    int16 (&m_kIndicesLUT)[m_knRmultiple];
-    TT_TWIDDLE (&m_kFanLUT)[kfanLUTsize];
-    TT_TWIDDLE (&m_kStepLUT)[kstepLUTsize];
-    TT_TWIDDLE (&coeff)[coeffSize];
+    alignas(__ALIGN_BYTE_SIZE__) int16 (&m_kIndicesLUT)[m_knRmultiple];
+    alignas(__ALIGN_BYTE_SIZE__) TT_TWIDDLE (&m_kFanLUT)[kfanLUTsize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_TWIDDLE (&m_kStepLUT)[kstepLUTsize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_TWIDDLE (&coeff)[coeffSize];
 
     // static constexpr int kHeaderSize = 16; // 16 since 16 int16's in 256 bits
     // static constexpr int kFanVectorSize = 16; // 16 since 16 int16's in 256 bits
@@ -151,10 +151,10 @@ class mixed_radix_twGen
                                                                              // (+1) then fan_array*each step element
                                                                              // (+kStepVectorSize)
 
-    int16 (&m_kIndicesLUT)[m_knRmultiple];
-    TT_TWIDDLE (&m_kFanLUT)[kfanLUTsize];
-    TT_TWIDDLE (&m_kStepLUT)[kstepLUTsize];
-    TT_TWIDDLE (&coeff)[coeffSize];
+    alignas(__ALIGN_BYTE_SIZE__) int16 (&m_kIndicesLUT)[m_knRmultiple];
+    alignas(__ALIGN_BYTE_SIZE__) TT_TWIDDLE (&m_kFanLUT)[kfanLUTsize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_TWIDDLE (&m_kStepLUT)[kstepLUTsize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_TWIDDLE (&coeff)[coeffSize];
 
    public:
     // Constructor

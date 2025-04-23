@@ -52,6 +52,10 @@ class test_graph : public graph {
     std::array<input_plio, 1> inWindowG;
     std::array<output_plio, PHASES> outWindow;
 
+#if (USE_RTP_VECTOR_LENGTHS == 1)
+    port_conditional_array<input, (USE_RTP_VECTOR_LENGTHS == 1), 1> rtpVecLen;
+#endif
+    int32 m_inVecLen[2];
     // Constructor
     test_graph() {
         printf("=============================================================\n");
@@ -73,17 +77,19 @@ class test_graph : public graph {
         printf("F_LEN          = %d \n", REF_F_LEN);
         printf("G_LEN          = %d \n", G_LEN);
         printf("SHIFT          = %d \n", SHIFT);
-        printf("API            = %d \n", API_PORT);
+        printf("API            = %d \n", API_IO);
         printf("RND            = %d \n", RND);
         printf("SAT            = %d \n", SAT);
         printf("NUM_FRAMES     = %d \n", NUM_FRAMES);
         printf("CASC_LEN       = %d \n", CASC_LEN);
         printf("PHASES         = %d \n", PHASES);
+        printf("USE_RTP_VECTOR_LENGTHS = %d \n", USE_RTP_VECTOR_LENGTHS);
 
         // Conv_Corr sub-graph
         dsplib::conv_corr::UUT_GRAPH<DATA_F, DATA_G, DATA_OUT, FUNCT_TYPE, COMPUTE_MODE, REF_F_LEN, G_LEN, SHIFT,
-                                     API_PORT, RND, SAT, NUM_FRAMES, CASC_LEN, PHASES>
+                                     API_IO, RND, SAT, NUM_FRAMES, CASC_LEN, PHASES, USE_RTP_VECTOR_LENGTHS>
             conv_corrGraph;
+
 // Make connections:
 #ifdef USING_UUT
         for (int i = 0; i < PHASES; i++) {
@@ -98,6 +104,20 @@ class test_graph : public graph {
             outWindow[i] = output_plio::create("PLIO_OutFile" + std::to_string(i), adf::plio_64_bits, OutFile);
             connect<>(conv_corrGraph.out[i], outWindow[i].in[0]);
         }
+#if (SINGLE_BUF == 1)
+#if (API_IO == 0)
+        single_buffer(conv_corrGraph.getKernels()[0].in[0]);
+        single_buffer(conv_corrGraph.getKernels()[0].in[1]);
+        single_buffer(conv_corrGraph.getKernels()[0].out[0]);
+        printf("INFO: Single Buffer Constraint applied to input and output buffers of kernels.\n");
+#else
+        for (int i = 0; i < PHASES; i++) {
+            single_buffer(conv_corrGraph.m_conv_corr[i][0].in[2]);
+            printf("INFO: Single Buffer Constraint applied to input-G buffer of the kernel %d.\n", i);
+        }
+#endif // API
+#endif // SINGLE_BUF
+
 #else
         std::string inpFile_F_Sig = QUOTE(INPUT_FILE_F);
         inWindowF[0] = input_plio::create("PLIO_inpFile_F_Sig", adf::plio_64_bits, inpFile_F_Sig);
@@ -112,6 +132,10 @@ class test_graph : public graph {
         std::string inpFile_G_Sig = QUOTE(INPUT_FILE_G);
         inWindowG[0] = input_plio::create("PLIO_inpFile_G_Sig", adf::plio_64_bits, inpFile_G_Sig);
         connect<>(inWindowG[0].out[0], conv_corrGraph.inG);
+
+#if (USE_RTP_VECTOR_LENGTHS == 1)
+        connect<parameter>(rtpVecLen[0], conv_corrGraph.rtpVecLen[0]);
+#endif
 
         printf("==================================\n");
         printf("======= End of sub-graph ======\n");

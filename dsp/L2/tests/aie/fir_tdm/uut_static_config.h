@@ -40,8 +40,7 @@
 #define PORT_API 0
 #define NUM_OUTPUTS 1
 #define DUAL_IP 0
-#endif
-#ifndef USE_COEFF_RELOAD
+#undef USE_COEFF_RELOAD
 #define USE_COEFF_RELOAD 0
 #endif
 #ifndef CASC_LEN

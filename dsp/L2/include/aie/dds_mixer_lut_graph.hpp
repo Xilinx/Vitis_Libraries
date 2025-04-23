@@ -98,7 +98,8 @@ using namespace adf;
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         \n
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML and AIE-MLv2 device.
+ *\n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
@@ -111,8 +112,11 @@ using namespace adf;
  *         - 0 = static phase initialization, defined in dds constructor,
  *         - 1 = reloadable initial phase, passed as argument to runtime function. \n
  *         \n
- *         Note: when used, async port: ```port_conditional_array<input, (TP_USE_PHASE_RELOAD == 1), TP_SSR> initPhase;
- *``` will be added to the DDS. \n
+ *         The form of the port is defined by TP_PHASE_RELOAD_API.\n
+ * @tparam TP_PHASE_RELOAD_API defines the form of the phase_offset port.\n
+ *         The values supported are:\n
+ *         - 0 = RTP. \n      i.e. non-blocking \n
+ *         - 1 = IOBUFFER \n  i.e. blocking \n
  * @tparam TP_SFDR specifies the expected Spurious Free Dynamic Range that the useR expects from the generated  \n
  *         design. There are three distinct implementations available that offer a tradeoff between SFDR and
  *performance. \n
@@ -128,6 +132,11 @@ using namespace adf;
  * @tparam TP_SSR specifies the super sample rate, ie how much data input/output in parallel for a single channel.  \n
  *         There will be a TP_SSR number of kernels, with a TP_SSR number of each port used on the interface. \n
  *         A default value of 1 corresponds to the typical single kernel case.
+ * @tparam TP_USE_PHASE_INC_RELOAD allows the user to select if phase increment
+ *         can be changed at runtimed. \n When defining the parameter:
+ *         - 0 = static phase increment initialization, defined in dds constructor,
+ *         - 1 = reloadable initial phase increment, passed as argument to runtime function. \n
+ *         Currently on RTP update is supported.
  **/
 template <typename TT_DATA,
           unsigned int TP_MIXER_MODE,
@@ -137,7 +146,9 @@ template <typename TT_DATA,
           unsigned int TP_SSR = 1,
           unsigned int TP_RND = 0,
           unsigned int TP_SAT = 1,
-          unsigned int TP_USE_PHASE_RELOAD = 0>
+          unsigned int TP_USE_PHASE_RELOAD = 0,
+          unsigned int TP_PHASE_RELOAD_API = 0,
+          unsigned int TP_USE_PHASE_INC_RELOAD = 0>
 class dds_mixer_lut_graph : public graph {
    private:
    public:
@@ -159,6 +170,10 @@ class dds_mixer_lut_graph : public graph {
 
     static_assert(!(TP_USE_PHASE_RELOAD == 1 && TP_SSR > 1),
                   "ERROR: Phase Offset Update cannot be used for TP_SSR > 1!");
+    static_assert(!(TP_USE_PHASE_INC_RELOAD == 1 && TP_SSR > 1),
+                  "ERROR: Phase Increment Update cannot be used for TP_SSR > 1!");
+    static_assert(!(TP_USE_PHASE_RELOAD == 0 && TP_PHASE_RELOAD_API == 1),
+                  "ERROR: TP_PHASE_RELOAD_API is void when TP_USE_PHASE_RELOAD = 0");
 
     template <typename direction>
     using portArray = std::array<port<direction>, TP_SSR>;
@@ -170,11 +185,21 @@ class dds_mixer_lut_graph : public graph {
      **/
     portArray<input> in1;
     portArray<input> in2;
+
+    /**
+     * Conditional port. Present when phase offset is a run-time input
+     */
+    port_conditional_array<input, (TP_USE_PHASE_RELOAD == 1), TP_SSR> PhaseRTP;
+
+    /**
+     * Conditional port. Present when phase increment is a run-time input
+     */
+    port_conditional_array<input, (TP_USE_PHASE_INC_RELOAD == 1), TP_SSR> PhaseIncRTP;
+
     /**
      * An output port of TT_DATA type. When in TP_API=WINDOW, the port is a window of TP_INPUT_WINDOW_VSIZE samples.
      **/
     portArray<output> out;
-    port_conditional_array<input, (TP_USE_PHASE_RELOAD == 1), TP_SSR> PhaseRTP;
 
     /**
      * kernel instance used to set constraints - getKernels function returns a pointer to this.
@@ -197,7 +222,9 @@ class dds_mixer_lut_graph : public graph {
                                   USE_LUT_SINCOS,
                                   TP_NUM_TABLES,
                                   TP_RND,
-                                  TP_SAT>;
+                                  TP_SAT,
+                                  TP_PHASE_RELOAD_API,
+                                  TP_USE_PHASE_INC_RELOAD>;
 
     /**
      * @brief This is the constructor function for the dds_mixer graph.
@@ -226,21 +253,50 @@ class dds_mixer_lut_graph : public graph {
             m_ddsKernel[ssrIdx] = kernel::create_object<kernelClass<t_kNumLUTs> >(
                 uint32_t(phaseInc * TP_SSR), uint32_t(initialPhaseOffset + phaseInc * ssrIdx));
 
+            // optionally connect PHASE OFFSET port
             if
-                constexpr(TP_MIXER_MODE == 0 && TP_USE_PHASE_RELOAD == 1) {
-                    connect<parameter>(PhaseRTP[ssrIdx], async(m_ddsKernel[ssrIdx].in[0]));
+                constexpr(TP_USE_PHASE_RELOAD == 1) {
+                    if
+                        constexpr(TP_PHASE_RELOAD_API == USE_PHASE_RELOAD_API_RTP) {
+                            if
+                                constexpr(TP_MIXER_MODE == 0) {
+                                    connect<parameter>(PhaseRTP[ssrIdx], async(m_ddsKernel[ssrIdx].in[0]));
+                                }
+
+                            if
+                                constexpr(TP_MIXER_MODE == 1) {
+                                    connect<parameter>(PhaseRTP[ssrIdx], async(m_ddsKernel[ssrIdx].in[1]));
+                                }
+
+                            if
+                                constexpr(TP_MIXER_MODE == 2) {
+                                    connect<parameter>(PhaseRTP[ssrIdx], async(m_ddsKernel[ssrIdx].in[2]));
+                                }
+                        }
+                    else { // i.e. assume TP_PHASE_RELOAD_API == USE_PHASE_RELOAD_API_IOBUFF
+                        // iobuffer must be 32 bytes min. This carries only one uint32.
+                        unsigned int kSizeofPhaseOffsetIObuff = 32 / sizeof(uint32);
+                        if
+                            constexpr(TP_MIXER_MODE == 0) {
+                                connect<>(PhaseRTP[ssrIdx], m_ddsKernel[ssrIdx].in[0]);
+                                dimensions(m_ddsKernel[ssrIdx].in[0]) = {kSizeofPhaseOffsetIObuff};
+                            }
+
+                        if
+                            constexpr(TP_MIXER_MODE == 1) {
+                                connect<>(PhaseRTP[ssrIdx], m_ddsKernel[ssrIdx].in[1]);
+                                dimensions(m_ddsKernel[ssrIdx].in[1]) = {kSizeofPhaseOffsetIObuff};
+                            }
+
+                        if
+                            constexpr(TP_MIXER_MODE == 2) {
+                                connect<>(PhaseRTP[ssrIdx], m_ddsKernel[ssrIdx].in[2]);
+                                dimensions(m_ddsKernel[ssrIdx].in[2]) = {kSizeofPhaseOffsetIObuff};
+                            }
+                    }
                 }
 
-            if
-                constexpr(TP_MIXER_MODE == 1 && TP_USE_PHASE_RELOAD == 1) {
-                    connect<parameter>(PhaseRTP[ssrIdx], async(m_ddsKernel[ssrIdx].in[1]));
-                }
-
-            if
-                constexpr(TP_MIXER_MODE == 2 && TP_USE_PHASE_RELOAD == 1) {
-                    connect<parameter>(PhaseRTP[ssrIdx], async(m_ddsKernel[ssrIdx].in[2]));
-                }
-
+            // Connect in1 if it exists
             if
                 constexpr(TP_MIXER_MODE == 1 || TP_MIXER_MODE == 2) {
                     if
@@ -252,6 +308,7 @@ class dds_mixer_lut_graph : public graph {
                         connect<stream>(in1[ssrIdx], m_ddsKernel[ssrIdx].in[0]);
                     }
                 }
+            // Connect in2 if it exists
             if
                 constexpr(TP_MIXER_MODE == 2) {
                     if
@@ -264,11 +321,21 @@ class dds_mixer_lut_graph : public graph {
                     }
                 }
 
+            // optionally connect phaseInc port
+            if
+                constexpr(TP_USE_PHASE_INC_RELOAD == 1) {
+                    unsigned int portIndex = TP_MIXER_MODE + TP_USE_PHASE_RELOAD;
+                    connect<parameter>(PhaseIncRTP[ssrIdx], async(m_ddsKernel[ssrIdx].in[portIndex]));
+                }
+
+            // graph scope LUT memory
             connect<>(ddsLut1, m_ddsKernel[ssrIdx]);
             if
                 constexpr(t_kNumLUTs > 1) { connect<>(ddsLut2, m_ddsKernel[ssrIdx]); }
             if
                 constexpr(t_kNumLUTs > 2) { connect<>(ddsLut3, m_ddsKernel[ssrIdx]); }
+
+            // Connect output
             if
                 constexpr(TP_API == 0) {
                     connect<>(m_ddsKernel[ssrIdx].out[0], out[ssrIdx]);

@@ -26,29 +26,32 @@ use File::Basename;
 
 use Term::ReadLine;
 
-# TODO: accept STDIN as well as inFile. 
+# TODO: accept STDIN as well as inFile.
 
 my $usage = "
 This script will tile/untile an input text file with each sample on a newline.
-use it thus:
-matrix_mult_datafile_partition.pl -f data/inputA.txt -tileRow 2 -tileCol 4 -r 16 -c 32
-    The above will output a data/inputAtiled.txt file assuming that 16x32 row major matrix input. Will tile with 2x4 pattern.
-options:
-    -f|--file|--inFile=s       => input filepath containing input matrix of size r_c. mandatory.
-    -m|--mtile|--tileRow=i     => tileRows (M) dimension for AIE API mmult scheme
-    -n|--ntile|--tileCol=i     => tileCols (N) dimension for AIE API mmult scheme
-    -r|--inRow=i               => Actual number of rows for InMatrix
-    -c|--inCol=i               => Actual number of cols for InMatrix
-    -p|--partition|--cascLen=i => Number of partitions / Cascade length for InMatrix
-    -s|--ssr=i
-    [--splitRows]              => Optional. Specify if input data is to be partitioned over rows. Default behaviour assumes split over columns. 
-    [--isTiled]                => Optional. Specify if input data is already tiled. Default behaviour assumes it is not tiled. 
-    [-o|--outFile=s]           => Optional. output filepath (default is inFilePath/inFileName_<casc_index>.<inFileExt>)
-    [--tileInPlace]            => Optional. Specificy if tiling should happen in-place or be given a suffix of _tiled or _untiled. ,
-    [--colMajor]               => Optional. Specifies that the InMatrx is stored colMajor. Output will be tiled&rowMajor.
-    [--untile]                 => Optional. the input matrix is un-tiled. Works with other options, ie if colMajor present output will be stored ColumnMajor
-    [-h|--help]                => Optional. prints this usage
-    [-v|--verbose]             => Optional. additional logging
+Usage:
+matrix_mult_datafile_partition.pl -f data/inputA.txt -m 2 -n 4 -r 16 -c 32
+    The above will output a data/inputAtiled.txt file assuming a 16x32 row-major matrix input. It will tile with a 2x4 pattern.
+
+Options:
+    -f|--file|--inFile=s       => Input filepath containing input matrix of size r_c. Mandatory.
+    -o|--outFile=s             => Optional. Output filepath (default is inFilePath/inFileName_<casc_index>.<inFileExt>).
+    -r|--inRow=i               => Actual number of rows for InMatrix. Mandatory.
+    -c|--inCol=i               => Actual number of columns for InMatrix. Mandatory.
+    -p|--partition|--cascLen=i => Number of partitions / Cascade length for InMatrix.
+    -s|--ssr=i                 => Optional. Specify the SSR (Super Sample Rate) factor.
+    --splitRows                => Optional. Specify if input data is to be partitioned over rows. Default behavior assumes split over columns.
+    --untile                   => Optional. Specify if the input matrix is un-tiled. Works with other options, e.g., if colMajor is present, output will be stored ColumnMajor.
+    --isTiled=i                => Optional. Specify if input data is already tiled. Default behavior assumes it is not tiled.
+    --tileInPlace              => Optional. Specify if tiling should happen in-place or be given a suffix of _tiled or _untiled.
+    --colMajor=i               => Optional. Specifies that the InMatrix is stored colMajor. Output will be tiled & rowMajor.
+    --T_DATA_A=s               => Specifies data type of matrix A. Mandatory.
+    --T_DATA_B=s               => Specifies data type of matrix B. Mandatory.
+    --T_DATA_OUT=s             => Optional. Specifies the data type of the output matrix. Defaults to a sensible value if not chosen.
+    --plio|plioWidth=i         => Optional. Specifies the PLIO width in bits. Default is 32.
+    -h|--help                  => Optional. Prints this usage.
+    -v|--verbose               => Optional. Additional logging.
 
 ";
 
@@ -68,6 +71,7 @@ my $colMajor = 0;
 my $help = 0;
 my $T_DATA_A = "";
 my $T_DATA_B = "";
+my $T_DATA_OUT = "";
 my $plioWidth = 32;
 
 GetOptions (
@@ -85,62 +89,63 @@ GetOptions (
             "colMajor=i"            => \$colMajor,
             "T_DATA_A=s"            => \$T_DATA_A,
             "T_DATA_B=s"            => \$T_DATA_B,
+            "T_DATA_OUT=s"          => \$T_DATA_OUT,
             "plio|plioWidth=i"      => \$plioWidth,
             "h|help"                => \$help,
             "v|verbose"             => \$verbose) # flag
 or die("Error in command line arguments\n");
 
-if ( $help ) { 
+if ( $help ) {
     die "$usage";
 }
 
 # TODO: command line arguments for tile / untile and inplace / filename_tiled.txt
 
 # Handle mandatory arguments
-if ( $inFile eq "" ) { 
+if ( $inFile eq "" ) {
     die "ERROR: Provide command line argument for inFile. Use -h for usage. ";
 }
 
-if ( $T_DATA_A eq "" ) { 
+if ( $T_DATA_A eq "" ) {
     die "ERROR: Provide command line argument for T_DATA_A. Use -h for usage. ";
 }
-if ( $T_DATA_B eq "" ) { 
+if ( $T_DATA_B eq "" ) {
     die "ERROR: Provide command line argument for T_DATA_B. Use -h for usage. ";
 }
 
-if ( $inRow eq "" ) { 
+if ( $inRow eq "" ) {
     die "ERROR: Provide command line argument for inRow. Use -h for usage. ";
 }
 
-if ( $inCol eq "" ) { 
+if ( $inCol eq "" ) {
     die "ERROR: Provide command line argument for inCol. Use -h for usage. ";
 }
 
 # Handle verbose
-if ( $verbose ) { 
-    if ( $inFile ne "" ) { 
+if ( $verbose ) {
+    if ( $inFile ne "" ) {
         print "inFile is $inFile. \n";
     }
-    if ( $inRow ne "" ) { 
+    if ( $inRow ne "" ) {
         print "inRow is $inRow. \n";
     }
-    if ( $inCol ne "" ) { 
+    if ( $inCol ne "" ) {
         print "inCol is $inCol. \n";
     }
 
-    if  ($colMajor) { 
+    if  ($colMajor) {
         print "colMajor is enabled\n";
     }
-    if  ($untile) { 
+    if  ($untile) {
         print "untile is enabled\n";
     }
-    if  ($help) { 
+    if  ($help) {
         print "help is enabled\n";
     }
-    if  ($verbose) { 
+    if  ($verbose) {
         print "verbose is enabled\n";
     }
-    if ($outFile ne "" ) { 
+    if ($outFile ne "" ) {
         print "outFile is $outFile. \n";
     }
 }
@@ -171,6 +176,62 @@ if ( $aieVariant eq 2) {
         ${DIM_A_TILE}  = 4;
         ${DIM_AB_TILE} = 4;
         ${DIM_B_TILE}  = 4;
+    }
+
+} elsif  ( $aieVariant eq 22) {
+    if ( (${T_DATA_A} eq "int8") && (${T_DATA_B} eq "int8")) {
+        ${DIM_A_TILE}  = 4;
+        ${DIM_AB_TILE} = 8;
+        ${DIM_B_TILE}  = 8;
+    } elsif ( (${T_DATA_A} eq "int16") && (${T_DATA_B} eq "int8")) {
+        ${DIM_A_TILE}  = 4;
+        ${DIM_AB_TILE} = 4;
+        ${DIM_B_TILE}  = 8;
+    } elsif ( (${T_DATA_A} eq "int16") && (${T_DATA_B} eq "int16")) {
+        ${DIM_A_TILE}  = 4;
+        ${DIM_AB_TILE} = 4;
+        ${DIM_B_TILE}  = 8;
+    } elsif ( (${T_DATA_A} eq "int32") && (${T_DATA_B} eq "int16")) {
+        ${DIM_A_TILE}  = 4;
+        ${DIM_AB_TILE} = 2;
+        ${DIM_B_TILE}  = 8;
+    } elsif ( (${T_DATA_A} eq "int16") && (${T_DATA_B} eq "int32")) {
+        ${DIM_A_TILE}  = 4;
+        ${DIM_AB_TILE} = 4;
+        ${DIM_B_TILE}  = 8;
+    } elsif ( (${T_DATA_A} eq "int32") && (${T_DATA_B} eq "int32")) {
+        ${DIM_A_TILE}  = 4;
+        ${DIM_AB_TILE} = 2;
+        ${DIM_B_TILE}  = 8;
+    } elsif ( (${T_DATA_A} eq "bfloat16") && (${T_DATA_B} eq "bfloat16")) {
+        ${DIM_A_TILE}  = 4;
+        ${DIM_AB_TILE} = 8;
+        ${DIM_B_TILE}  = 8;
+    } elsif ( (${T_DATA_A} eq "float") && (${T_DATA_B} eq "float")) {
+        ${DIM_A_TILE}  = 4;
+        ${DIM_AB_TILE} = 8;
+        ${DIM_B_TILE}  = 4;
+    } elsif ( (${T_DATA_A} eq "cint16") && (${T_DATA_B} eq "int16")) {
+        ${DIM_A_TILE}  = 4;
+        ${DIM_AB_TILE} = 4;
+        ${DIM_B_TILE}  = 8;
+    } elsif ( (${T_DATA_A} eq "cint16") && (${T_DATA_B} eq "cint16")) {
+        ${DIM_A_TILE}  = 1;
+        ${DIM_AB_TILE} = 4;
+        ${DIM_B_TILE}  = 8;
+    } elsif ( (${T_DATA_A} eq "cint32") && (${T_DATA_B} eq "cint16")) {
+        ${DIM_A_TILE}  = 1;
+        ${DIM_AB_TILE} = 2;
+        ${DIM_B_TILE}  = 8;
+    } elsif ( (${T_DATA_A} eq "cint32") && (${T_DATA_B} eq "cint32")) {
+        ${DIM_A_TILE}  = 1;
+        ${DIM_AB_TILE} = 2;
+        ${DIM_B_TILE}  = 8;
+    } else {
+        # Unsupported
+        ${DIM_A_TILE}  = 1;
+        ${DIM_AB_TILE} = 1;
+        ${DIM_B_TILE}  = 1;
     }
 } else {
 
@@ -203,7 +264,7 @@ if ( $aieVariant eq 2) {
             ${DIM_AB_TILE} = 4;
             ${DIM_B_TILE}  = 2;
         }
-        
+
         if ( ${T_DATA_B} eq "cint16" ) {
             ${DIM_A_TILE}  = 4;
             ${DIM_AB_TILE} = 4;
@@ -215,7 +276,7 @@ if ( $aieVariant eq 2) {
             ${DIM_AB_TILE} = 4;
             ${DIM_B_TILE}  = 2;
         }
-        
+
         if ( ${T_DATA_B} eq "cint32" ) {
             ${DIM_A_TILE}  = 2;
             ${DIM_AB_TILE} = 2;
@@ -229,7 +290,7 @@ if ( $aieVariant eq 2) {
             ${DIM_AB_TILE} = 4;
             ${DIM_B_TILE}  = 2;
         }
-        
+
         if ( ${T_DATA_B} eq "cint16" ) {
             ${DIM_A_TILE}  = 4;
             ${DIM_AB_TILE} = 4;
@@ -241,7 +302,7 @@ if ( $aieVariant eq 2) {
             ${DIM_AB_TILE} = 4;
             ${DIM_B_TILE}  = 2;
         }
-        
+
         if ( ${T_DATA_B} eq "cint32" ) {
             ${DIM_A_TILE}  = 2;
             ${DIM_AB_TILE} = 2;
@@ -255,7 +316,7 @@ if ( $aieVariant eq 2) {
             ${DIM_AB_TILE} = 4;
             ${DIM_B_TILE}  = 2;
         }
-        
+
         if ( ${T_DATA_B} eq "cint16" ) {
             ${DIM_A_TILE}  = 2;
             ${DIM_AB_TILE} = 2;
@@ -267,7 +328,7 @@ if ( $aieVariant eq 2) {
             ${DIM_AB_TILE} = 2;
             ${DIM_B_TILE}  = 2;
         }
-        
+
         if ( ${T_DATA_B} eq "cint32" ) {
             ${DIM_A_TILE}  = 2;
             ${DIM_AB_TILE} = 2;
@@ -281,7 +342,7 @@ if ( $aieVariant eq 2) {
             ${DIM_AB_TILE} = 4;
             ${DIM_B_TILE}  = 2;
         }
-        
+
         if ( ${T_DATA_B} eq "cfloat" ) {
             ${DIM_A_TILE}  = 2;
             ${DIM_AB_TILE} = 4;
@@ -295,7 +356,7 @@ if ( $aieVariant eq 2) {
             ${DIM_AB_TILE} = 4;
             ${DIM_B_TILE}  = 2;
         }
-        
+
         if ( ${T_DATA_B} eq "cfloat" ) {
             ${DIM_A_TILE}  = 4;
             ${DIM_AB_TILE} = 2;
@@ -313,33 +374,36 @@ my $dataType = "";
 my $ssrSplit = 1;
 my $ssrClone = 1;
 my $ssrJoin = 1;
-# default tiler gets provided dimensions, if cascade, we divide AB by casc len. 
+# default tiler gets provided dimensions, if cascade, we divide AB by casc len.
 my $tileInRow = $inRow;
 my $tileInCol = $inCol;
-if ( $cascLen eq "" ) { 
+if ( $cascLen eq "" ) {
     # using output
     $tileRow = $DIM_A_TILE;
     $tileCol = $DIM_B_TILE;
     $ssrJoin = $ssr;
-    # Need to find if output dataType is cin32, or cfloat
-    if ($T_DATA_A eq "cfloat" or $T_DATA_B eq "cfloat") {
-        $dataType = "cfloat"
-    } elsif ($T_DATA_A eq "cint32" or $T_DATA_B eq "cint32") {
-        $dataType = "cint32";
-    } elsif ($T_DATA_A eq "int32" and $T_DATA_B eq "cint16") {
-        $dataType = "cint32";
-    } elsif ($T_DATA_A eq "cint16" and $T_DATA_B eq "int32") {
-        $dataType = "cint32";    
-    } elsif ($T_DATA_A eq "int32" and $T_DATA_B eq "int16") {
-        $dataType = "int32";
-    } elsif ($T_DATA_A eq "int16" and $T_DATA_B eq "int32") {
-        $dataType = "int32";
-    } elsif ($T_DATA_A eq "int16" and $T_DATA_B eq "cint16") {
-        $dataType = "cint16";
+    if ($T_DATA_OUT eq "") {
+        # Need to find if output dataType is cin32, or cfloat
+        if ($T_DATA_A eq "cfloat" or $T_DATA_B eq "cfloat") {
+            $dataType = "cfloat"
+        } elsif ($T_DATA_A eq "cint32" or $T_DATA_B eq "cint32") {
+            $dataType = "cint32";
+        } elsif ($T_DATA_A eq "int32" and $T_DATA_B eq "cint16") {
+            $dataType = "cint32";
+        } elsif ($T_DATA_A eq "cint16" and $T_DATA_B eq "int32") {
+            $dataType = "cint32";
+        } elsif ($T_DATA_A eq "int32" and $T_DATA_B eq "int16") {
+            $dataType = "int32";
+        } elsif ($T_DATA_A eq "int16" and $T_DATA_B eq "int32") {
+            $dataType = "int32";
+        } elsif ($T_DATA_A eq "int16" and $T_DATA_B eq "cint16") {
+            $dataType = "cint16";
+        } else {
+            $dataType = $T_DATA_A;
+        }
     } else {
-        $dataType = $T_DATA_A;
+        $dataType = $T_DATA_OUT;
     }
-
 } elsif ( $splitRows ) {
     # using B
     $tileRow = $DIM_AB_TILE;
@@ -347,7 +411,7 @@ if ( $cascLen eq "" ) {
     $dataType = $T_DATA_B;
     $tileInRow = ( $inRow / $cascLen );
     $ssrClone = $ssr;
-} else { 
+} else {
     # using A
     $tileRow = $DIM_A_TILE;
     $tileCol = $DIM_AB_TILE;
@@ -359,25 +423,25 @@ if ( $cascLen eq "" ) {
 
 
 print "Data Type is $dataType\n";
-# Define properties for each data type  
-my %type_properties = (  
-    'uint8'     => { numParts => 1, partSize => 8  },  
-    'uint16'    => { numParts => 1, partSize => 16 },  
-    'uint32'    => { numParts => 1, partSize => 32 },  
-    'int8'      => { numParts => 1, partSize => 8  },  
-    'int16'     => { numParts => 1, partSize => 16 },  
-    'int32'     => { numParts => 1, partSize => 32 },  
-    'float'     => { numParts => 1, partSize => 32 },  
-    'bfloat16'  => { numParts => 1, partSize => 16 },  
-    'cint8'     => { numParts => 2, partSize => 8  },  
-    'cint16'    => { numParts => 2, partSize => 16 },  
-    'cint32'    => { numParts => 2, partSize => 32 },  
-    'cfloat'    => { numParts => 2, partSize => 32 },  
-    'cbfloat16' => { numParts => 2, partSize => 16 },  
-);  
-  
-# Get properties for the data type  
-my $partsPerSample = $type_properties{$dataType}{numParts};  
+# Define properties for each data type
+my %type_properties = (
+    'uint8'     => { numParts => 1, partSize => 8  },
+    'uint16'    => { numParts => 1, partSize => 16 },
+    'uint32'    => { numParts => 1, partSize => 32 },
+    'int8'      => { numParts => 1, partSize => 8  },
+    'int16'     => { numParts => 1, partSize => 16 },
+    'int32'     => { numParts => 1, partSize => 32 },
+    'float'     => { numParts => 1, partSize => 32 },
+    'bfloat16'  => { numParts => 1, partSize => 16 },
+    'cint8'     => { numParts => 2, partSize => 8  },
+    'cint16'    => { numParts => 2, partSize => 16 },
+    'cint32'    => { numParts => 2, partSize => 32 },
+    'cfloat'    => { numParts => 2, partSize => 32 },
+    'cbfloat16' => { numParts => 2, partSize => 16 },
+);
+
+# Get properties for the data type
+my $partsPerSample = $type_properties{$dataType}{numParts};
 my $sampleSizeBits = $type_properties{$dataType}{numParts} * $type_properties{$dataType}{partSize};
 
 my $samplesPerLine = $plioWidth / $sampleSizeBits;
@@ -391,20 +455,20 @@ my $partsPerLine = $plioWidth / $type_properties{$dataType}{partSize};
 my $linesPerSample = 1;
 if ($plioWidth < $sampleSizeBits) {
   $linesPerSample = 2;
-} 
+}
 
 # get component parts of input/output filenames
 (my $inFileName, my $inFileDir, my $inFileExt) = fileparse($inFile, '\..*');
 
 my $outFileName;my $outFileDir;my $outFileExt;my $outFileTempName;
-if ($outFile ne "" ) { 
+if ($outFile ne "" ) {
     ($outFileTempName, $outFileDir, $outFileExt) = fileparse($outFile, '\..*');
     $outFileName = "${outFileTempName}_";
-} else { 
+} else {
     $outFileName = "${inFileName}_";
     $outFileDir = $inFileDir;
     $outFileExt = $inFileExt;
-    #print "$outFileName  : $outFileDir  :  $outFileExt \n" ; 
+    #print "$outFileName  : $outFileDir  :  $outFileExt \n" ;
 }
 
 
@@ -414,54 +478,54 @@ print "isTiled is $isTiled\n\n";
 my @subFiles;
 my @dataParts;
 
-if ( $cascLen eq "" ) { 
-    # in this case, output is stil tiled and needs detiling. 
+if ( $cascLen eq "" ) {
+    # in this case, output is stil tiled and needs detiling.
     zip_files($inFile);
 
-    if ( ! $isTiled ) { 
+    if ( ! $isTiled ) {
         tile_matrix($inFile);
     }
-} else { 
+} else {
 
     open(my $inFileh, "<" , $inFile)
         or die "Can't open < $inFile";
     # Create array of data parts
-    while(my $line = <$inFileh>) { 
-        chomp $line;  
-        push @dataParts, split ' ', $line;  
-    } 
+    while(my $line = <$inFileh>) {
+        chomp $line;
+        push @dataParts, split ' ', $line;
+    }
     close($inFileh)
         or die "couldn't close inFileh $inFileh";
-    
+
     partition_matrix();
 
     print "\n Writing to :\n";
     print join(", ", @subFiles);
     print "\n";
     if ( ! $isTiled ) {
-        for my $fileForTile (@subFiles) { 
+        for my $fileForTile (@subFiles) {
             tile_matrix($fileForTile);
-        } 
+        }
     }
 
 }
 
 if ($splitRows==1 and $ssrClone > 1) {
 
-    foreach my $subFile (@subFiles) {  
+    foreach my $subFile (@subFiles) {
         print ("Copying $subFile to ");
-        for (my $i = 1; $i < $ssrClone; $i++) {  
+        for (my $i = 1; $i < $ssrClone; $i++) {
             # print "ssr is $i\n";
-            my $cloneFile = $subFile;  
-            $cloneFile =~ s/_0_/_${i}_/; # replace "_0." with "_$i."  
-            system("cp $subFile $cloneFile"); # clone the file  
+            my $cloneFile = $subFile;
+            $cloneFile =~ s/_0_/_${i}_/; # replace "_0." with "_$i."
+            system("cp $subFile $cloneFile"); # clone the file
             print "$cloneFile "
-        }  
+        }
         print("\n");
     }
 }
 
-sub partition_matrix { 
+sub partition_matrix {
     use integer;
     my @duplicateText = @dataParts;
     my @numFiles = (0...(($cascLen * $ssrSplit) - 1));
@@ -470,11 +534,11 @@ sub partition_matrix {
     my @outFileh;
     my @ssrRange = (0...($ssrSplit - 1));
     my @cascRange = (0...($cascLen - 1));
-    my @subArrays;  
+    my @subArrays;
     for my $cascIdx (@cascRange){
         for my $ssrIdx (@ssrRange){
             my $fileIdx = $cascLen * ($ssrIdx) + $cascIdx;
-            $subArrays[$fileIdx] = [];  
+            $subArrays[$fileIdx] = [];
       }
     }
     # Partition for matrix A - split for ssr along rows, split for casc along cols
@@ -489,11 +553,11 @@ sub partition_matrix {
             my $cascIndex = $colNum/$colsPerCasc;
             my $fileIdx = $ssrIndex * ($cascLen) + $cascIndex;
             push @{$subArrays[$fileIdx]}, $part;
-            if ($partNum % $partsPerSample == ($partsPerSample - 1)) { 
+            if ($partNum % $partsPerSample == ($partsPerSample - 1)) {
                 # print "SSR=$ssrIndex casc=$cascIndex\n";
                 # print "lineNum = $lineNum\n";
                 # print "rowNum = $rowNum\n";
-                # print "colNum = $colNum\n"; 
+                # print "colNum = $colNum\n";
                 # print "fileIdx = $fileIdx\n\n";
 
                 if ($colMajor) {
@@ -519,7 +583,7 @@ sub partition_matrix {
             $partNum = $partNum + 1;
         }
     } else {
-        
+
         # Partition matrix B - split along for cascade along columns - no split for ssr
         my $rowNum = 0;
         my $colNum = 0;
@@ -533,7 +597,7 @@ sub partition_matrix {
             # print "colNum = $colNum\n";
             # print "fileIdx = $fileIdx\n\n";
             push @{$subArrays[$fileIdx]}, $part;
-            if ($partNum % $partsPerSample == ($partsPerSample - 1)) { 
+            if ($partNum % $partsPerSample == ($partsPerSample - 1)) {
                 if ($colMajor) {
                     $rowNum = $rowNum + 1;
                     if ($rowNum == $inRow) {
@@ -555,32 +619,32 @@ sub partition_matrix {
                 }
             }
             $partNum = $partNum + 1;
-        }        
+        }
     }
-    # Finally write out resultant data to each file. 
+    # Finally write out resultant data to each file.
     for my $cascIdx (@cascRange){
         for my $ssrIdx (@ssrRange){
             my $fileIdx = $cascLen * ($ssrIdx) + $cascIdx;
-            # $subArrays[$fileIdx] = [];  
-            $subFiles[$fileIdx] = "${outFileDir}${outFileName}${ssrIdx}_${cascIdx}${outFileExt}"; 
-            open(my $subFileH, ">", $subFiles[$fileIdx]) or die "Cannot open $subFiles[$fileIdx]: $!";  
+            # $subArrays[$fileIdx] = [];
+            $subFiles[$fileIdx] = "${outFileDir}${outFileName}${ssrIdx}_${cascIdx}${outFileExt}";
+            open(my $subFileH, ">", $subFiles[$fileIdx]) or die "Cannot open $subFiles[$fileIdx]: $!";
 
-            my @fileParts = @{$subArrays[$fileIdx]};  
+            my @fileParts = @{$subArrays[$fileIdx]};
 
-            # Convert parts back into lines and print directly to the file  
-            for (my $i = 0; $i < @fileParts; $i += $partsPerLine) {  
-                my $line = join(' ', @fileParts[$i .. $i + $partsPerLine - 1]) . " \n";  
-                print $subFileH $line;  
-            }  
-            
-            close($subFileH) or die "Cannot close $subFiles[$fileIdx]: $!"; 
+            # Convert parts back into lines and print directly to the file
+            for (my $i = 0; $i < @fileParts; $i += $partsPerLine) {
+                my $line = join(' ', @fileParts[$i .. $i + $partsPerLine - 1]) . " \n";
+                print $subFileH $line;
+            }
+
+            close($subFileH) or die "Cannot close $subFiles[$fileIdx]: $!";
       }
     }
 
 }
 
-sub tile_matrix { 
-    my ($fileForTile) = @_ ; 
+sub tile_matrix {
+    my ($fileForTile) = @_ ;
     (my $fileForTileName, my $fileForTileDir, my $fileForTileExt) = fileparse($fileForTile, '\..*');
 
     my $outTileFileName;my $outTileFileDir;my $outTileFileExt;
@@ -591,8 +655,8 @@ sub tile_matrix {
         $outTileFileExt = $fileForTileExt;
 
     } else {
-        
-        if ($outFile ne "" ) { 
+
+        if ($outFile ne "" ) {
             ($outTileFileName, $outTileFileDir, $outTileFileExt) = fileparse($outFile, '\..*');
         } else {
             my $un = "";
@@ -602,7 +666,7 @@ sub tile_matrix {
             $outTileFileExt = $fileForTileExt;
         }
     }
-    #print "$outTileFileName  : $outTileFileDir  :  $outTileFileExt \n" ; 
+    #print "$outTileFileName  : $outTileFileDir  :  $outTileFileExt \n" ;
     my $resOutTileFile = "${outTileFileDir}${outTileFileName}${outTileFileExt}";
 
     print "outTileFile is $resOutTileFile\n";
@@ -610,29 +674,29 @@ sub tile_matrix {
 
     open(my $fileForTileh, "<" , $fileForTile)
         or die "Can't open < $fileForTile";
-    
+
     # convert file for tile into array of parts
     my @inFileParts;
-    while(<$fileForTileh>) { 
+    while(<$fileForTileh>) {
         chomp;
         push @inFileParts, split ' ', $_;
     }
     # convert array of parts into array of samples
     my @inTileText;
-    for (my $i = 0; $i < @inFileParts; $i += $partsPerSample) {  
-        my $samp = join(' ', @inFileParts[$i .. $i + $partsPerSample - 1]);  
-        push @inTileText, $samp;  
-    } 
+    for (my $i = 0; $i < @inFileParts; $i += $partsPerSample) {
+        my $samp = join(' ', @inFileParts[$i .. $i + $partsPerSample - 1]);
+        push @inTileText, $samp;
+    }
 
     close($fileForTileh)
         or die "couldn't close fileForTileh $fileForTileh";
-    
+
     if ($inplace) {
         rename($fileForTile, $fileForTile . '.beforeTile'); # create a backup file
     }
     print "Finished reading file\n";
 
-    
+
     my @duplicateText = @inTileText;
     my @transText = @inTileText;
     # fill with dummy data basically
@@ -651,7 +715,7 @@ sub tile_matrix {
 
     print "Shuffling indicies\n";
     my @iIter = (0..$#inTileText);
-    for my $i (@iIter){ 
+    for my $i (@iIter){
         my $newIndex;
         my $transposeIndex;
         {
@@ -667,13 +731,13 @@ sub tile_matrix {
             #print "transposeIndex: ($colI * $colIncr) + ($rowI * $rowIncr) + ($batchI * $batchIncr) = $transposeIndex\n ";
 
             # fine-grained within a chunk index
-            my $colInTileI =  ($i % $tileCol); 
-            my $colInTileIncr = 1; 
+            my $colInTileI =  ($i % $tileCol);
+            my $colInTileIncr = 1;
 
             # which chunk of N samples within tile row
-            my $rowInTileI = (( $i/$tileCol ) % $tileRow); 
-            my $rowInTileIncr = $tileInCol; # grab next row for each tileRow. 
-            
+            my $rowInTileI = (( $i/$tileCol ) % $tileRow);
+            my $rowInTileIncr = $tileInCol; # grab next row for each tileRow.
+
             my $tileIndex = ($i/($tileRow*$tileCol));
             my $tileIncr = $tileCol; # advance further down the row ;
 
@@ -686,7 +750,7 @@ sub tile_matrix {
 
 
             # force everything to be integer arithmetic
-                                        
+
             $newIndex = ($rowOfTileIndex*$rowOfTileIncr) +  $tileWithinRowOffset + ($rowInTileI*$rowInTileIncr) + ($colInTileI * $colInTileIncr);
 
             #print "newIndex: ($rowOfTileIndex*$rowOfTileIncr) + $tileWithinRowOffset + ($rowInTileI*$rowInTileIncr) + ($colInTileI * $colInTileIncr) = $newIndex\n";
@@ -696,13 +760,13 @@ sub tile_matrix {
 
         if ($untile) {
             $indices[$newIndex] = $i;
-        } else { 
+        } else {
             $indices[$i] = $newIndex;
         }
         #if ($colMajor) {
             $transIndices[$i] = $transposeIndex;
         #}
-        #print (int $i/( $tileInCol * $tileCol )); 
+        #print (int $i/( $tileInCol * $tileCol ));
         #print "$newIndex \n";
     }
 
@@ -710,17 +774,17 @@ sub tile_matrix {
     my @outFileSamples;
 
     #my @iIter = (0..$#inText/8);
-    for my $i (@iIter){ 
+    for my $i (@iIter){
         #if ($colMajor) {
         #    $duplicateText[$i] = $inText[$transIndices[$indices[$i]]];
         #} else {
             $duplicateText[$i] = "$inTileText[$indices[$i]]";
         #}
     }
-    for my $i (@iIter){ 
-        if ($untile) { 
+    for my $i (@iIter){
+        if ($untile) {
             $transText[$i] = "$duplicateText[$transIndices[$i]]";
-        } else { 
+        } else {
             $transText[$i] = "$inTileText[$transIndices[$indices[$i]]]";
         }
         if ($colMajor) {
@@ -737,15 +801,15 @@ sub tile_matrix {
 
     # Convert tiled array of samples into array of parts
     my @outFileParts;
-    foreach my $samp (@outFileSamples) {  
-        push @outFileParts, split(' ', $samp);  
-    }  
+    foreach my $samp (@outFileSamples) {
+        push @outFileParts, split(' ', $samp);
+    }
     my @outFile;
     # Convert parts into lines
-    for (my $i = 0; $i < @outFileParts; $i += $partsPerLine) {  
-        my $line = join(' ', @outFileParts[$i .. $i + $partsPerLine - 1]) . " \n";  
-        push @outFile, $line;  
-    }  
+    for (my $i = 0; $i < @outFileParts; $i += $partsPerLine) {
+        my $line = join(' ', @outFileParts[$i .. $i + $partsPerLine - 1]) . " \n";
+        push @outFile, $line;
+    }
 
     print "Writing $resOutTileFile. \n";
     open(my $outFileh, ">" , $resOutTileFile)
@@ -759,7 +823,7 @@ sub tile_matrix {
 }
 
 sub zip_files {
-    my ($outFile) = @_ ; 
+    my ($outFile) = @_ ;
     print("OUT file is $outFile\n");
     my @ssrOutFiles = (0...(( $ssrJoin - 1)));
 
@@ -769,41 +833,41 @@ sub zip_files {
     print join(", ", @files);
     # print("\nnum_lines =$num_lines\n");
     my @filehandles;
-    # open all files  
-    for my $file (@files) {  
-        open my $fh, '<', $file or die "Can't open file $file: $!";  
-        push @filehandles, $fh;  
-    }  
-    
-    # # open output file  
-    open my $outfh, '>', $outFile or die "Can't open output file $outFile: $!";  
-    
-    # # read and write lines  
-    while (1) {  
-        my $eof_count = 0;  
-        for my $fh (@filehandles) {  
-            for (1..$num_lines) {  
-                my $line = <$fh>;  
-                if (defined $line) {  
-                    print $outfh $line;  
-                } else {  
-                    $eof_count++;  
-                    last;  
-                }  
-            }  
-        }  
-        last if $eof_count == scalar @filehandles; # exit loop if all files are at EOF  
-    }  
-    
-    # close all files  
-    for my $fh (@filehandles) {  
-        close $fh;  
-    }  
-    close $outfh; 
+    # open all files
+    for my $file (@files) {
+        open my $fh, '<', $file or die "Can't open file $file: $!";
+        push @filehandles, $fh;
+    }
+
+    # # open output file
+    open my $outfh, '>', $outFile or die "Can't open output file $outFile: $!";
+
+    # # read and write lines
+    while (1) {
+        my $eof_count = 0;
+        for my $fh (@filehandles) {
+            for (1..$num_lines) {
+                my $line = <$fh>;
+                if (defined $line) {
+                    print $outfh $line;
+                } else {
+                    $eof_count++;
+                    last;
+                }
+            }
+        }
+        last if $eof_count == scalar @filehandles; # exit loop if all files are at EOF
+    }
+
+    # close all files
+    for my $fh (@filehandles) {
+        close $fh;
+    }
+    close $outfh;
 }
 
-sub int16_twoSamplesPerLine { 
-    my ($fileToParse) = @_ ; 
+sub int16_twoSamplesPerLine {
+    my ($fileToParse) = @_ ;
     rename($fileToParse, $fileToParse . '.beforeInt16EditResult');
     open(IN, '<' . $fileToParse . '.beforeInt16EditResult') or die $!;
     open(OUT, '>' . $fileToParse) or die $!;
@@ -820,9 +884,9 @@ sub int16_twoSamplesPerLine {
 
 
 }
-            
-sub doSamplePerLine { 
-    my ($fileToParse) = @_ ; 
+
+sub doSamplePerLine {
+    my ($fileToParse) = @_ ;
 
     open(IN, '<' . $fileToParse) or die $!;
     # rename($fileToParse, $fileToParse . '.plio');
@@ -847,7 +911,7 @@ sub doSamplePerLine {
 }
 
 sub undoSamplePerLine {
-    my ($fileToParse) = @_ ; 
+    my ($fileToParse) = @_ ;
     open(IN, '<' . $fileToParse) or die $!;
     my $plio32File = $fileToParse . ".plio";
     open(OUT, '>' . $plio32File) or die $!;
@@ -862,6 +926,6 @@ sub undoSamplePerLine {
 
     }
     close(OUT)
-        or die "couldn't close OUT";    
+        or die "couldn't close OUT";
     rename($plio32File, $fileToParse);
 }

@@ -279,7 +279,7 @@ NOINLINE_DECL void dft<TT_DATA,
                        CASC_OUT_TRUE,
                        TP_RND,
                        TP_SAT>::dftMain(input_buffer<TT_DATA>& __restrict inWindow,
-                                        output_stream<accType_t<T_outDataType, TT_TWIDDLE> >* outCascade) {
+                                        output_cascade<accType_t<T_outDataType, TT_TWIDDLE> >* outCascade) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TT_TWIDDLE> inInterface;
     TT_TWIDDLE* __restrict coeffPtr = &inCoeff[0];
     T_outputIF<CASC_OUT_TRUE, T_outDataType, TT_TWIDDLE> outInterface;
@@ -313,8 +313,8 @@ NOINLINE_DECL void dft<TT_DATA,
                        CASC_OUT_TRUE,
                        TP_RND,
                        TP_SAT>::dftMain(input_buffer<TT_DATA>& __restrict inWindow,
-                                        input_stream<accType_t<T_outDataType, TT_TWIDDLE> >* inCascade,
-                                        output_stream<accType_t<T_outDataType, TT_TWIDDLE> >* outCascade) {
+                                        input_cascade<accType_t<T_outDataType, TT_TWIDDLE> >* inCascade,
+                                        output_cascade<accType_t<T_outDataType, TT_TWIDDLE> >* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TT_TWIDDLE> inInterface;
     TT_TWIDDLE* __restrict coeffPtr = &inCoeff[0];
     T_outputIF<CASC_OUT_TRUE, T_outDataType, TT_TWIDDLE> outInterface;
@@ -349,7 +349,7 @@ NOINLINE_DECL void dft<TT_DATA,
                        CASC_OUT_FALSE,
                        TP_RND,
                        TP_SAT>::dftMain(input_buffer<TT_DATA>& __restrict inWindow,
-                                        input_stream<accType_t<T_outDataType, TT_TWIDDLE> >* inCascade,
+                                        input_cascade<accType_t<T_outDataType, TT_TWIDDLE> >* inCascade,
                                         output_buffer<T_outDataType>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TT_TWIDDLE> inInterface;
     TT_TWIDDLE* __restrict coeffPtr = &inCoeff[0];

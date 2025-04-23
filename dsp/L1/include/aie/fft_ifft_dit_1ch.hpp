@@ -380,10 +380,11 @@ class fft_ifft_dit_1ch<TT_DATA,
                    TP_TWIDDLE_MODE>
         m_fftKernel; // Kernel for FFT
 
-    static constexpr int kInBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kInBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_DATA);
 
    public:
-    TT_DATA (&inBuff)[kInBufferSize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&inBuff)[kInBufferSize];
 
     fft_ifft_dit_1ch(TT_DATA (&myInBuff)[kInBufferSize]) : inBuff(myInBuff) {}
 
@@ -459,10 +460,11 @@ class fft_ifft_dit_1ch<TT_DATA,
                    TP_ORIG_PAR_POWER,
                    TP_TWIDDLE_MODE>
         m_fftKernel; // Kernel for FFT
-    static constexpr int kInBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA);
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kInBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_OUT_DATA);
 
    public:
-    TT_OUT_DATA (&outBuff)[kInBufferSize]; // Note the type. Downsizing occurs before the conversion to streams
+    alignas(__ALIGN_BYTE_SIZE__) TT_OUT_DATA (&outBuff)[kInBufferSize];
 
     fft_ifft_dit_1ch(TT_OUT_DATA (&myOutBuff)[kInBufferSize]) : outBuff(myOutBuff) {}
 
@@ -540,10 +542,11 @@ class fft_ifft_dit_1ch<TT_DATA,
         m_fftKernel; // Kernel for FFT
 
    public:
-    static constexpr int kInBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
-    static constexpr int kOutBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA);
-    TT_DATA (&inBuff)[kInBufferSize];
-    TT_OUT_DATA (&outBuff)[kOutBufferSize];
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kInBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_DATA);
+    static constexpr int kOutBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_OUT_DATA);
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&inBuff)[kInBufferSize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_OUT_DATA (&outBuff)[kOutBufferSize];
 
     fft_ifft_dit_1ch(TT_DATA (&myInBuff)[kInBufferSize], TT_OUT_DATA (&myOutBuff)[kOutBufferSize])
         : inBuff(myInBuff), outBuff(myOutBuff) {}
@@ -624,10 +627,11 @@ class fft_ifft_dit_1ch<TT_DATA,
         m_fftKernel; // Kernel for FFT
 
    public:
-    static constexpr int kInBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
-    static constexpr int kOutBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA);
-    TT_DATA (&inBuff)[kInBufferSize];
-    TT_OUT_DATA (&outBuff)[kOutBufferSize];
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kInBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_DATA);
+    static constexpr int kOutBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_OUT_DATA);
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&inBuff)[kInBufferSize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_OUT_DATA (&outBuff)[kOutBufferSize];
 
     fft_ifft_dit_1ch(TT_DATA (&myInBuff)[kInBufferSize], TT_OUT_DATA (&myOutBuff)[kOutBufferSize])
         : inBuff(myInBuff), outBuff(myOutBuff) {}
@@ -639,7 +643,7 @@ class fft_ifft_dit_1ch<TT_DATA,
         REGISTER_PARAMETER(outBuff);
     }
     void fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                 output_stream_cacc64* __restrict outStream0, // Cascade
+                 output_cascade<cacc64>* __restrict outStream0, // Cascade
                  output_stream<TT_OUT_DATA>* __restrict outStream1);
 };
 
@@ -703,8 +707,9 @@ class fft_ifft_dit_1ch<TT_DATA,
         m_fftKernel; // Kernel for FFT
 
    public:
-    static constexpr int kOutBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA);
-    TT_OUT_DATA (&outBuff)[kOutBufferSize];
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kOutBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_OUT_DATA);
+    alignas(__ALIGN_BYTE_SIZE__) TT_OUT_DATA (&outBuff)[kOutBufferSize];
 
     fft_ifft_dit_1ch(TT_OUT_DATA (&myOutBuff)[kOutBufferSize]) : outBuff(myOutBuff) {}
 
@@ -714,7 +719,7 @@ class fft_ifft_dit_1ch<TT_DATA,
         REGISTER_PARAMETER(outBuff);
     }
     void fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
-                 output_stream_cacc64* __restrict outStream0, // Cascade
+                 output_cascade<cacc64>* __restrict outStream0, // Cascade
                  output_stream<TT_OUT_DATA>* __restrict outStream1);
 };
 
@@ -778,10 +783,11 @@ class fft_ifft_dit_1ch<TT_DATA,
         m_fftKernel; // Kernel for FFT
 
    public:
-    static constexpr int kInBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
-    static constexpr int kOutBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA);
-    TT_DATA (&inBuff)[kInBufferSize];
-    TT_OUT_DATA (&outBuff)[kOutBufferSize];
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kInBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_DATA);
+    static constexpr int kOutBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_OUT_DATA);
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&inBuff)[kInBufferSize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_OUT_DATA (&outBuff)[kOutBufferSize];
 
     fft_ifft_dit_1ch(TT_DATA (&myInBuff)[kInBufferSize], TT_OUT_DATA (&myOutBuff)[kOutBufferSize])
         : inBuff(myInBuff), outBuff(myOutBuff) {}
@@ -794,7 +800,7 @@ class fft_ifft_dit_1ch<TT_DATA,
     }
     void fftMain(input_stream<TT_DATA>* __restrict inStream0,
                  output_stream<TT_OUT_DATA>* __restrict outStream0,
-                 output_stream_cacc64* __restrict outStream1); // Cascade
+                 output_cascade<cacc64>* __restrict outStream1); // Cascade
 };
 
 // specialization of top level for iobuffer in, stream/cascade out
@@ -857,8 +863,9 @@ class fft_ifft_dit_1ch<TT_DATA,
         m_fftKernel; // Kernel for FFT
 
    public:
-    static constexpr int kOutBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA);
-    TT_OUT_DATA (&outBuff)[kOutBufferSize];
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kOutBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_OUT_DATA);
+    alignas(__ALIGN_BYTE_SIZE__) TT_OUT_DATA (&outBuff)[kOutBufferSize];
 
     fft_ifft_dit_1ch(TT_OUT_DATA (&myOutBuff)[kOutBufferSize]) : outBuff(myOutBuff) {}
 
@@ -869,7 +876,7 @@ class fft_ifft_dit_1ch<TT_DATA,
     }
     void fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
                  output_stream<TT_OUT_DATA>* __restrict outStream0,
-                 output_stream_cacc64* __restrict outStream1); // Cascade
+                 output_cascade<cacc64>* __restrict outStream1); // Cascade
 };
 }
 }

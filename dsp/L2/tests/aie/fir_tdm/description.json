@@ -7,6 +7,13 @@
         "vck190",
         "vek280"
     ],
+    "part_allowlist": [
+        "xcvr1602-vsva2488-2LP-e-S-es1",
+        "xc2ve3858-ssva2112-2LP-e-S"
+    ],
+    "part_alias": {
+        "xc2ve3858-ssva2112-2LP-e-S": "aie_mlv2"
+    },
     "platform_properties": {
         "vck190": {
             "param_set": [
@@ -28,6 +35,7 @@
                         "default": {
                             "UNUSED_COMPILER_ARGS": "--aie.Xchess=main:backend.mist2.xargs=\"+NOdra\" --aie.Xchess=main:backend.mist2.pnll=\"off\" ",
                             "COMPILER_ARGS": " ",
+                            "AIE_VARIANT": "1",
                             "FIFO_THRESHOLD": ""
                         }
                     }
@@ -53,6 +61,61 @@
                     "customized_params": {
                         "default": {
                             "COMPILER_ARGS": "",
+                            "AIE_VARIANT": "2",
+                            "FIFO_THRESHOLD": "--aie.swfifo-threshold=120 "
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "part_properties": {
+        "xcvr1602-vsva2488-2LP-e-S-es1": {
+            "param_set": [
+                "*canary_aie"
+            ],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            },
+            "aiecompiler": {
+                "compiler": {
+                    "customized_params": {
+                        "default": {
+                            "COMPILER_ARGS": "",
+                            "AIE_VARIANT": "1",
+                            "FIFO_THRESHOLD": " "
+                        }
+                    }
+                }
+            }
+        },
+        "xc2ve3858-ssva2112-2LP-e-S": {
+            "param_set": [
+                "*_aie22_*"
+            ],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            },
+            "aiecompiler": {
+                "compiler": {
+                    "customized_params": {
+                        "default": {
+                            "COMPILER_ARGS": "",
+                            "AIE_VARIANT": "22",
                             "FIFO_THRESHOLD": "--aie.swfifo-threshold=120 "
                         }
                     }
@@ -68,10 +131,13 @@
             "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")"
         },
         {
-            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)\"  --connector \" \" --var \"DATA_TYPE:DATA_OUT_TYPE:COEFF_TYPE:FIR_LEN:SHIFT:ROUND_MODE:INPUT_WINDOW_VSIZE:TDM_CHANNELS:CASC_LEN:NUM_OUTPUTS:PORT_API:DUAL_IP:UUT_SSR:SAT_MODE:AIE_VARIANT\")"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)\"  --connector \" \" --var \"DATA_TYPE:DATA_OUT_TYPE:COEFF_TYPE:FIR_LEN:SHIFT:ROUND_MODE:INPUT_WINDOW_VSIZE:TDM_CHANNELS:CASC_LEN:NUM_OUTPUTS:PORT_API:DUAL_IP:UUT_SSR:SAT_MODE:AIE_VARIANT:USE_COEFF_RELOAD\")"
         },
         {
-            "build_cmd": "$(if $(filter-out REF,$(TAG)), vitis --classic -exec ipmetadata_config_checker LIB_DIR/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/meta/scripts/metadata_checker.py --ip $(UUT_KERNEL))"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), # vitis --classic -exec ipmetadata_config_checker LIB_DIR/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)"
         },
         {
             "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk gen_input HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(LOC_INPUT_FILE)\")"
@@ -146,12 +212,10 @@
                 "params": "--aie.verbose $($(TAG)_TARGET_COMPILE_ARGS) $($(TAG)_PREPROC_ARGS)",
                 "default": {
                     "TAG": "UUT",
-                    "AIE_VARIANT": "1",
                     "UUT_KERNEL": "fir_tdm",
                     "REF_KERNEL": "fir_tdm_ref",
                     "UUT_GRAPH": "fir_tdm_graph",
                     "REF_GRAPH": "fir_tdm_ref_graph",
-                    "SYMMETRY_FACTOR": "1",
                     "LOC_OUTPUT_FILE_X86": "./x86simulator_output/data/uut_output.txt",
                     "REF_LOC_OUTPUT_FILE_X86": "./x86simulator_output/data/ref_output.txt",
                     "LOC_OUTPUT_FILE_HW": "./aiesimulator_output/data/uut_output.txt",
@@ -160,7 +224,6 @@
                     "LOC_COEFF_FILE": "./data/coeff.txt",
                     "LOC_INPUT_FILE": "./data/input.txt",
                     "REF_INPUT_FILE": "./data/input_ref.txt",
-                    "MAX_FIR_PER_KERNEL": "256",
                     "UUT_TARGET_COMPILE_ARGS": " $(FIFO_THRESHOLD) --aie.Xrouter=DMAFIFOsInFreeBankOnly  --aie.stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py $(PARAMS_FILE) $(PARAMS))  --aie.Xchess=llvm.xargs=\"-std=c++2a\" $(COMPILER_ARGS) ",
                     "REF_TARGET_COMPILE_ARGS": "",
                     "PREPROC_ARGS": "--aie.Xpreproc=-DCOEFF_FILE=$(LOC_COEFF_FILE)",
@@ -213,7 +276,7 @@
                     "vitis_aie_sim": 51200
                 },
                 "max_time_min": {
-                    "vitis_aie_x86sim": 180,
+                    "vitis_aie_x86sim": 470,
                     "vitis_aie_sim": 470
                 }
             }
@@ -225,6 +288,10 @@
         "category": "canary",
         "param_set": {
             "pull_req": {
+                "*_canary_aie": [
+                    "vitis_aie_sim",
+                    "vitis_aie_x86sim"
+                ],
                 "*_hw_checkin": [
                     "vitis_aie_sim",
                     "vitis_aie_x86sim"
@@ -234,6 +301,10 @@
                 ]
             },
             "daily": {
+                "*_canary_aie": [
+                    "vitis_aie_sim",
+                    "vitis_aie_x86sim"
+                ],
                 "*_hw_qor": [
                     "vitis_aie_sim",
                     "vitis_aie_x86sim"

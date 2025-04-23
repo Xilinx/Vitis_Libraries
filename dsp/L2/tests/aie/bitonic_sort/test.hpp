@@ -49,7 +49,7 @@ namespace dsplib = xf::dsp::aie;
 
 class test_graph : public graph {
    public:
-    std::array<input_plio, 1> in;
+    std::array<input_plio, UUT_SSR> in;
     std::array<output_plio, 1> out;
 
     // Constructor
@@ -66,24 +66,346 @@ class test_graph : public graph {
         printf("NUM_FRAMES        = %d \n", NUM_FRAMES);
         printf("ASCENDING         = %d \n", ASCENDING);
         printf("CASC_LEN          = %d \n", CASC_LEN);
+        printf("UUT_SSR          = %d \n", UUT_SSR);
         printf("========================\n");
 
 #ifdef USING_UUT
         // Bitonic Sort sub-graph
-        dsplib::bitonic_sort::UUT_GRAPH<DATA_TYPE, DIM_SIZE, NUM_FRAMES, ASCENDING, CASC_LEN> bitonic_sortGraph;
-
-        // Make connections
-        std::string filenameIn = QUOTE(INPUT_FILE);
-        in[0] = input_plio::create("PLIO_in_" + std::to_string(0), adf::plio_64_bits, filenameIn);
-        connect<>(in[0].out[0], bitonic_sortGraph.in[0]);
-
+        dsplib::bitonic_sort::UUT_GRAPH<DATA_TYPE, DIM_SIZE, NUM_FRAMES, ASCENDING, CASC_LEN, UUT_SSR>
+            bitonic_sortGraph;
+        for (int ssr = 0; ssr < UUT_SSR; ssr++) {
+            // Make connections
+            std::string filenameIn = QUOTE(INPUT_FILE);
+            filenameIn.insert(filenameIn.length() - 4, ("_" + std::to_string(ssr) + "_" + std::to_string(0)));
+            in[ssr] = input_plio::create("PLIO_in_" + std::to_string(ssr), adf::plio_64_bits, filenameIn);
+            connect<>(in[ssr].out[0], bitonic_sortGraph.in[ssr]);
+        }
         std::string filenameOut = QUOTE(OUTPUT_FILE);
-        filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(0)));
+        // filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(0)));
         out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_64_bits, filenameOut);
         connect<>(bitonic_sortGraph.out[0], out[0].in[0]);
+#if (SINGLE_BUF == 1)
+        for (int casc = 0; casc < CASC_LEN; casc++) {
+#if (UUT_SSR == 1)
+            single_buffer(bitonic_sortGraph.m_kernels[casc].in[0]);
+            single_buffer(bitonic_sortGraph.m_kernels[casc].out[0]);
+            printf("INFO: Single Buffer Constraint applied to input and output buffers of the kernel %d.\n", (casc));
+#endif
+#if (UUT_SSR == 2)
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.m_kernels[casc].in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.m_kernels[casc].out[0]);
+            printf("INFO: Single Buffer Constraint applied to input and output buffers of the subframe0/kernel %d.\n",
+                   (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.m_kernels[casc].in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.m_kernels[casc].out[0]);
+            printf("INFO: Single Buffer Constraint applied to input and output buffers of the subframe1/kernel %d.\n",
+                   (casc));
+
+#endif
+#if (UUT_SSR == 4)
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe0.m_kernels[casc].in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe0.m_kernels[casc].out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the subframe0/subframe0/kernel "
+                "%d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe1.m_kernels[casc].in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe1.m_kernels[casc].out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the subframe0/subframe1/kernel "
+                "%d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe0.m_kernels[casc].in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe0.m_kernels[casc].out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the subframe1/subframe0/kernel "
+                "%d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe1.m_kernels[casc].in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe1.m_kernels[casc].out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the subframe1/subframe1/kernel "
+                "%d.\n",
+                (casc));
+
+#endif
+#if (UUT_SSR == 8)
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe0.bitonic_merge_subframe0
+                              .m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe0.bitonic_merge_subframe0
+                              .m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe0/subframe0/subframe0/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe0.bitonic_merge_subframe1
+                              .m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe0.bitonic_merge_subframe1
+                              .m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe0/subframe0/subframe1/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe1.bitonic_merge_subframe0
+                              .m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe1.bitonic_merge_subframe0
+                              .m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe0/subframe1/subframe0/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe1.bitonic_merge_subframe1
+                              .m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe1.bitonic_merge_subframe1
+                              .m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe0/subframe1/subframe1/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe0.bitonic_merge_subframe0
+                              .m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe0.bitonic_merge_subframe0
+                              .m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe1/subframe0/subframe0/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe0.bitonic_merge_subframe1
+                              .m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe0.bitonic_merge_subframe1
+                              .m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe1/subframe0/subframe1/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe1.bitonic_merge_subframe0
+                              .m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe1.bitonic_merge_subframe0
+                              .m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe1/subframe1/subframe0/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe1.bitonic_merge_subframe1
+                              .m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe1.bitonic_merge_subframe1
+                              .m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe1/subframe1/subframe1/kernel %d.\n",
+                (casc));
+#endif
+#if (UUT_SSR == 16)
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe0.bitonic_merge_subframe0
+                              .bitonic_merge_subframe0.m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe0.bitonic_merge_subframe0
+                              .bitonic_merge_subframe0.m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe0/subframe0/subframe0/subframe0/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe0.bitonic_merge_subframe0
+                              .bitonic_merge_subframe1.m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe0.bitonic_merge_subframe0
+                              .bitonic_merge_subframe1.m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe0/subframe0/subframe0/subframe1/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe0.bitonic_merge_subframe1
+                              .bitonic_merge_subframe0.m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe0.bitonic_merge_subframe1
+                              .bitonic_merge_subframe0.m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe0/subframe0/subframe1/subframe0/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe0.bitonic_merge_subframe1
+                              .bitonic_merge_subframe1.m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe0.bitonic_merge_subframe1
+                              .bitonic_merge_subframe1.m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe0/subframe0/subframe1/subframe1/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe1.bitonic_merge_subframe0
+                              .bitonic_merge_subframe0.m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe1.bitonic_merge_subframe0
+                              .bitonic_merge_subframe0.m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe0/subframe1/subframe0/subframe0/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe1.bitonic_merge_subframe0
+                              .bitonic_merge_subframe1.m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe1.bitonic_merge_subframe0
+                              .bitonic_merge_subframe1.m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe0/subframe1/subframe0/subframe1/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe1.bitonic_merge_subframe1
+                              .bitonic_merge_subframe0.m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe1.bitonic_merge_subframe1
+                              .bitonic_merge_subframe0.m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe0/subframe1/subframe1/subframe0/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe1.bitonic_merge_subframe1
+                              .bitonic_merge_subframe1.m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe0.bitonic_merge_subframe1.bitonic_merge_subframe1
+                              .bitonic_merge_subframe1.m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe0/subframe1/subframe1/subframe1/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe0.bitonic_merge_subframe0
+                              .bitonic_merge_subframe0.m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe0.bitonic_merge_subframe0
+                              .bitonic_merge_subframe0.m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe1/subframe0/subframe0/subframe0/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe0.bitonic_merge_subframe0
+                              .bitonic_merge_subframe1.m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe0.bitonic_merge_subframe0
+                              .bitonic_merge_subframe1.m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe1/subframe0/subframe0/subframe1/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe0.bitonic_merge_subframe1
+                              .bitonic_merge_subframe0.m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe0.bitonic_merge_subframe1
+                              .bitonic_merge_subframe0.m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe1/subframe0/subframe1/subframe0/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe0.bitonic_merge_subframe1
+                              .bitonic_merge_subframe1.m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe0.bitonic_merge_subframe1
+                              .bitonic_merge_subframe1.m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe1/subframe0/subframe1/subframe1/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe1.bitonic_merge_subframe0
+                              .bitonic_merge_subframe0.m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe1.bitonic_merge_subframe0
+                              .bitonic_merge_subframe0.m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe1/subframe1/subframe0/subframe0/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe1.bitonic_merge_subframe0
+                              .bitonic_merge_subframe1.m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe1.bitonic_merge_subframe0
+                              .bitonic_merge_subframe1.m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe1/subframe1/subframe0/subframe1/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe1.bitonic_merge_subframe1
+                              .bitonic_merge_subframe0.m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe1.bitonic_merge_subframe1
+                              .bitonic_merge_subframe0.m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe1/subframe1/subframe1/subframe0/kernel %d.\n",
+                (casc));
+
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe1.bitonic_merge_subframe1
+                              .bitonic_merge_subframe1.m_kernels[casc]
+                              .in[0]);
+            single_buffer(bitonic_sortGraph.bitonic_merge_subframe1.bitonic_merge_subframe1.bitonic_merge_subframe1
+                              .bitonic_merge_subframe1.m_kernels[casc]
+                              .out[0]);
+            printf(
+                "INFO: Single Buffer Constraint applied to input and output buffers of the "
+                "subframe1/subframe1/subframe1/subframe1/kernel %d.\n",
+                (casc));
+
+#endif
+        }
+#endif
+
 #else
         // Bitonic Sort sub-graph
-        dsplib::bitonic_sort::UUT_GRAPH<DATA_TYPE, DIM_SIZE, NUM_FRAMES, ASCENDING, 1> bitonic_sortGraph;
+        dsplib::bitonic_sort::UUT_GRAPH<DATA_TYPE, DIM_SIZE, NUM_FRAMES, ASCENDING, 1, 1> bitonic_sortGraph;
 
         std::string filenameIn = QUOTE(INPUT_FILE);
         in[0] = input_plio::create("PLIO_in_" + std::to_string(0), adf::plio_64_bits, filenameIn);
@@ -95,9 +417,9 @@ class test_graph : public graph {
 #endif
     };
 };
-}
-}
-}
-};
+} // namespace testcase
+} // namespace aie
+} // namespace dsp
+}; // namespace xf
 
 #endif // _DSPLIB_TEST_HPP_

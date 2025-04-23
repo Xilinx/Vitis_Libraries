@@ -45,9 +45,9 @@ options:
     [--split | --zip]                                 => Controls wether to split an input file into SSR sub-files or to combine (zip) SSR sub-files into one output file
     [-d | --dual]                                     => If using dual input/output streams, SSR phases are split into io1 and io2 with a granularity determined by the data type.
     [-t|--type=i]                                     => Data type for the file - note int16 has two samples per line.
-    [-k|--headerMode=i]                               => Header Embedded in Data stream. Supported modes: 0 - no header, 1 - fixed length.
+    [-k|--headerBytes=i]                              => Header Embedded in Data stream. Size is in Bytes
     [-w|--windowVsize=i]                              => Number of samples per window
-    [-h|--help]                                      => Optional. prints this usage
+    [-h|--help]                                       => Optional. prints this usage
     [-v|--verbose]                                    => Optional. additional logging
 ";
 
@@ -57,7 +57,7 @@ my $split = 0;
 my $zip = 0;
 my $type = "cint16";
 my $dual = 0;
-my $headerMode = 0;
+my $headerBytes = 0;
 my $windowVsize = 0;
 my $coeffType = 0;
 my $firLen = 0;
@@ -73,14 +73,16 @@ GetOptions (
     "zip" => \$zip,
     "t|type=s" => \$type,
     "d|dual=i" => \$dual,
-    "k|headerMode=i" => \$headerMode,
+    "k|headerBytes=i" => \$headerBytes,
     "w|windowVsize=i" => \$windowVsize,
     "c|coeffType=s" => \$coeffType,
     "fl|firLen=i" => \$firLen,
     "plio|plioWidth=i" => \$plioWidth,
     "h|help" => \$help,
     "v|verbose" => \$verbose)
-or die("Error in command line arguments\n");
+  or die("Error in command line arguments\n");
+
+print("headerBytes = ${headerBytes}\n");
 
 if ( $help ) {
     die "$usage";
@@ -95,25 +97,25 @@ if ( $file eq "" ) {
 if ( ($split and $zip) or ((not $split) and (not $zip)) ) {
     die "ERROR: need only split or zip. -h for usage"
 }
-# Define properties for each data type  
-my %type_properties = (  
-    'uint8'     => { numParts => 1, partSize => 8  },  
-    'uint16'    => { numParts => 1, partSize => 16 },  
-    'uint32'    => { numParts => 1, partSize => 32 },  
-    'int8'      => { numParts => 1, partSize => 8  },  
-    'int16'     => { numParts => 1, partSize => 16 },  
-    'int32'     => { numParts => 1, partSize => 32 },  
-    'float'     => { numParts => 1, partSize => 32 },  
-    'bfloat16'  => { numParts => 1, partSize => 16 },  
-    'cint8'     => { numParts => 2, partSize => 8  },  
-    'cint16'    => { numParts => 2, partSize => 16 },  
-    'cint32'    => { numParts => 2, partSize => 32 },  
-    'cfloat'    => { numParts => 2, partSize => 32 },  
-    'cbfloat16' => { numParts => 2, partSize => 16 },  
-);  
-  
-# Get properties for the data type  
-my $partsPerSample = $type_properties{$type}{numParts};  
+# Define properties for each data type
+my %type_properties = (
+    'uint8'     => { numParts => 1, partSize => 8  },
+    'uint16'    => { numParts => 1, partSize => 16 },
+    'uint32'    => { numParts => 1, partSize => 32 },
+    'int8'      => { numParts => 1, partSize => 8  },
+    'int16'     => { numParts => 1, partSize => 16 },
+    'int32'     => { numParts => 1, partSize => 32 },
+    'float'     => { numParts => 1, partSize => 32 },
+    'bfloat16'  => { numParts => 1, partSize => 16 },
+    'cint8'     => { numParts => 2, partSize => 8  },
+    'cint16'    => { numParts => 2, partSize => 16 },
+    'cint32'    => { numParts => 2, partSize => 32 },
+    'cfloat'    => { numParts => 2, partSize => 32 },
+    'cbfloat16' => { numParts => 2, partSize => 16 },
+);
+
+# Get properties for the data type
+my $partsPerSample = $type_properties{$type}{numParts};
 my $sampleSizeBits = $type_properties{$type}{numParts} * $type_properties{$type}{partSize};
 
 my $samplesPerLine = $plioWidth / $sampleSizeBits;
@@ -127,23 +129,27 @@ my $partsPerLine = $plioWidth / $type_properties{$type}{partSize};
 my $linesPerSample = 1;
 if ($plioWidth < $sampleSizeBits) {
   $linesPerSample = 2;
-} 
+}
 
 my $dual_gran;
 my $data_type_size_bytes = $sampleSizeBits / 8;
 
-my $headerVsize = 0;
-if ($headerMode != 0 ) {
-  if ($type eq "int16" ) {
-    $headerVsize = 16;
-  } elsif ($type eq "cint16" || $type eq "int32" || $type eq "float") {
-    $headerVsize = 8;
-  } else {
-    $headerVsize = 4;
-  }
+my $dataBytes = 1;
+if ($type eq "int16" ) {
+    $dataBytes = 2;
+} elsif ($type eq "cint16" || $type eq "int32" || $type eq "float") {
+    $dataBytes = 4;
+} elsif ($type eq "cfloat" || $type eq "cint32") {
+    $dataBytes = 8;
 } else {
-  $headerVsize = 0;
+  $dataBytes = 1;
 }
+
+my $headerVsize = 0;
+if ($headerBytes != 0 ) {
+  $headerVsize = $headerBytes/$dataBytes;
+}
+
 my $dualFactor = $dual+1; #i.e. when dual=1, dualFactor=2 otherwise =1
 
 use integer;
@@ -164,25 +170,25 @@ my @subFilesFinal;
 my @subFilesFinalH;
 
 if ($split) {
-  # Read the file into an array  
-  # Open the input file  
+  # Read the file into an array
+  # Open the input file
   open(fileH, "<", $file)
       or die "cannot open $file : $!";
   # Create array of data parts
   my @dataParts;
-  while (my $line = <fileH>) {  
-      chomp $line;  
-      push @dataParts, split ' ', $line;  
-  }  
+  while (my $line = <fileH>) {
+      chomp $line;
+      push @dataParts, split ' ', $line;
+  }
 
-  # Prepare output arrays  
-  my @subArrays;  
-  for my $ssrIdx (@ssrRange) {  
-      for my $dualIdx (@dualRange) {  
-          my $fileIdx = $ssrIdx * $dualFactor + $dualIdx;  
-          $subArrays[$fileIdx] = [];  
-      }  
-  }  
+  # Prepare output arrays
+  my @subArrays;
+  for my $ssrIdx (@ssrRange) {
+      for my $dualIdx (@dualRange) {
+          my $fileIdx = $ssrIdx * $dualFactor + $dualIdx;
+          $subArrays[$fileIdx] = [];
+      }
+  }
 
     my $partNum = 0;
     my $lineNumHeader = 0;
@@ -190,79 +196,79 @@ if ($split) {
     my $dualIdx = 0;
     my $partsPerSSRDualStream = $partsPerSample * $dual_gran * $ssr;
     # Convert parts back into lines
-  if ($headerMode == 1) {  
-      my $thisHeaderParts = $headerVsize * $partsPerSample;  
-      my $thisFrameParts = $windowVsize * $partsPerSample;  
-    
-      foreach my $part (@dataParts) {  
-          if ($thisHeaderParts > 0) {  
-              for my $sI (@ssrRange) {  
-                  for my $dI (@dualRange) {  
-                      my $fI = $sI * $dualFactor + $dI;  
-                      push @{$subArrays[$fI]}, $part;  
-                  }  
-              }  
-              $thisHeaderParts--;  
-              $thisFrameParts = $windowVsize * $partsPerSample;  
-          } else {  
-              if ($thisFrameParts > 0) {  
-                  my $fileIdx = $ssrIndex * $dualFactor + $dualIdx;  
-                  push @{$subArrays[$fileIdx]}, $part;  
+  if ($headerBytes > 0) {
+      my $thisHeaderParts = $headerVsize * $partsPerSample;
+      my $thisFrameParts = $windowVsize * $partsPerSample;
 
-                  if ($partNum % $partsPerSSRDualStream == ($partsPerSSRDualStream - 1)) { 
-                      $dualIdx = ($dualIdx + 1) % $dualFactor;  
-                  }  
-                  if ($partNum % $partsPerSample == ($partsPerSample - 1)) { 
-                      $ssrIndex = ($ssrIndex + 1) % $ssr;  
-                  }  
-                  $partNum++;   
-                  $thisFrameParts--;  
-                  if ($thisFrameParts == 0) {  
-                      $thisHeaderParts = $headerVsize * $partsPerSample;  
-                  }  
-              }  
-          }  
-      }  
+      foreach my $part (@dataParts) {
+          if ($thisHeaderParts > 0) {
+              for my $sI (@ssrRange) {
+                  for my $dI (@dualRange) {
+                      my $fI = $sI * $dualFactor + $dI;
+                      push @{$subArrays[$fI]}, $part;
+                  }
+              }
+              $thisHeaderParts--;
+              $thisFrameParts = $windowVsize * $partsPerSample;
+          } else {
+              if ($thisFrameParts > 0) {
+                  my $fileIdx = $ssrIndex * $dualFactor + $dualIdx;
+                  push @{$subArrays[$fileIdx]}, $part;
+
+                  if ($partNum % $partsPerSSRDualStream == ($partsPerSSRDualStream - 1)) {
+                      $dualIdx = ($dualIdx + 1) % $dualFactor;
+                  }
+                  if ($partNum % $partsPerSample == ($partsPerSample - 1)) {
+                      $ssrIndex = ($ssrIndex + 1) % $ssr;
+                  }
+                  $partNum++;
+                  $thisFrameParts--;
+                  if ($thisFrameParts == 0) {
+                      $thisHeaderParts = $headerVsize * $partsPerSample;
+                  }
+              }
+          }
+      }
   } else {
-      
-    for (my $i = 0; $i < @dataParts; $i++) {  
-        my $part = $dataParts[$i];        
-        my $fileIdx = $ssrIndex * $dualFactor + $dualIdx;  
-        
-        push @{$subArrays[$fileIdx]}, $part;  
 
-        if ($partNum % $partsPerSSRDualStream == ($partsPerSSRDualStream - 1)) { 
-            $dualIdx = ($dualIdx + 1) % $dualFactor;  
-        }  
-        if ($partNum % $partsPerSample == ($partsPerSample - 1)) { 
-            $ssrIndex = ($ssrIndex + 1) % $ssr;  
-        }  
-        $partNum++;   
-    }  
+    for (my $i = 0; $i < @dataParts; $i++) {
+        my $part = $dataParts[$i];
+        my $fileIdx = $ssrIndex * $dualFactor + $dualIdx;
+
+        push @{$subArrays[$fileIdx]}, $part;
+
+        if ($partNum % $partsPerSSRDualStream == ($partsPerSSRDualStream - 1)) {
+            $dualIdx = ($dualIdx + 1) % $dualFactor;
+        }
+        if ($partNum % $partsPerSample == ($partsPerSample - 1)) {
+            $ssrIndex = ($ssrIndex + 1) % $ssr;
+        }
+        $partNum++;
+    }
   }
 
-  # Assuming @subArrays is an array of array references  
-  for my $ssrIdx (@ssrRange) {  
-      for my $dualIdx (@dualRange) {  
-          my $fileIdx = $ssrIdx * $dualFactor + $dualIdx;  
-          $subFiles[$fileIdx] = "${fileDir}${fileName}_${ssrIdx}_${dualIdx}${fileExt}";  
-          print "Writing to $subFiles[$fileIdx]\n";  
-            
-          open(my $subFileH, ">", $subFiles[$fileIdx]) or die "Cannot open $subFiles[$fileIdx]: $!";  
-            
-          my @ssrParts = @{$subArrays[$fileIdx]};  
-            
-          # Convert parts back into lines and print directly to the file  
-          for (my $i = 0; $i < @ssrParts; $i += $partsPerLine) {  
-              my $line = join(' ', @ssrParts[$i .. $i + $partsPerLine - 1]) . " \n";  
-              print $subFileH $line;  
-          }  
-            
-          close($subFileH) or die "Cannot close $subFiles[$fileIdx]: $!";  
-      }  
-  } 
+  # Assuming @subArrays is an array of array references
+  for my $ssrIdx (@ssrRange) {
+      for my $dualIdx (@dualRange) {
+          my $fileIdx = $ssrIdx * $dualFactor + $dualIdx;
+          $subFiles[$fileIdx] = "${fileDir}${fileName}_${ssrIdx}_${dualIdx}${fileExt}";
+          print "Writing to $subFiles[$fileIdx]\n";
 
-    
+          open(my $subFileH, ">", $subFiles[$fileIdx]) or die "Cannot open $subFiles[$fileIdx]: $!";
+
+          my @ssrParts = @{$subArrays[$fileIdx]};
+
+          # Convert parts back into lines and print directly to the file
+          for (my $i = 0; $i < @ssrParts; $i += $partsPerLine) {
+              my $line = join(' ', @ssrParts[$i .. $i + $partsPerLine - 1]) . " \n";
+              print $subFileH $line;
+          }
+
+          close($subFileH) or die "Cannot close $subFiles[$fileIdx]: $!";
+      }
+  }
+
+
 
 
 
@@ -311,13 +317,13 @@ if ($split) {
       # Convert lines into an array of parts
       # print("partsPerLine = $partsPerLine, samplesPerLine = $samplesPerLine, linesPerSample = $linesPerSample\n");
       for my $lineIdx (@lineRange) {
-        push @all_parts, $lines[$lineIdx] =~ /-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;  
+        push @all_parts, $lines[$lineIdx] =~ /-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
       }
       # Convert parts into samples
-      for (my $i = 0; $i < @all_parts; $i += $partsPerSample) {  
-          my $sample = join(' ', @all_parts[$i .. $i + $partsPerSample - 1]);  
-          $samples[$sampleIdx] = "$sample ";    
-          $sampleIdx++;      
+      for (my $i = 0; $i < @all_parts; $i += $partsPerSample) {
+          my $sample = join(' ', @all_parts[$i .. $i + $partsPerSample - 1]);
+          $samples[$sampleIdx] = "$sample ";
+          $sampleIdx++;
       }
 
       $headersIdx = 0;
@@ -391,17 +397,17 @@ if ($split) {
   my $numSSRSamples = @ssrSamples;
   #print "numSSRSamples = $numSSRSamples\n";
   my @outFile;
-  my @ssrParts;  
+  my @ssrParts;
 
   # Convert zipped samples back into parts
-  foreach my $ssrSample (@ssrSamples) {  
-      push @ssrParts, split(' ', $ssrSample);  
-  }  
+  foreach my $ssrSample (@ssrSamples) {
+      push @ssrParts, split(' ', $ssrSample);
+  }
   # Convert parts back into lines
-  for (my $i = 0; $i < @ssrParts; $i += $partsPerLine) {  
-      my $line = join(' ', @ssrParts[$i .. $i + $partsPerLine - 1]) . " \n";  
-      push @outFile, $line;  
-  }  
+  for (my $i = 0; $i < @ssrParts; $i += $partsPerLine) {
+      my $line = join(' ', @ssrParts[$i .. $i + $partsPerLine - 1]) . " \n";
+      push @outFile, $line;
+  }
 
   # newly re-arranged lines to result file
   print $fileH @outFile;

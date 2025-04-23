@@ -51,11 +51,10 @@ template <typename TT_DATA,
           unsigned int TP_SSR = 1, // just ignored in reference model
           unsigned int TP_SAT = 1,
           unsigned int TP_CASC_LEN = 1,
-          typename TT_OUT_DATA = TT_DATA>
+          typename TT_OUT_DATA = TT_DATA,
+          unsigned int TP_USE_COEFF_RELOAD = 0>
 class fir_tdm_ref_graph : public graph {
    private:
-    // Unsupported.
-    static constexpr unsigned int TP_USE_COEFF_RELOAD = 0;
     static constexpr unsigned int TP_API = 0;
 
     static_assert(TP_SSR == 1, "ERROR: Reference Model only deals with SSR = 1");

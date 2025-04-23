@@ -1,0 +1,15 @@
+[hls]
+
+clock=3.20
+flow_target=vitis
+syn.file=ssr_fft.cpp
+syn.file_cflags=ssr_fft.cpp, -I${XF_PROJ_ROOT}/L1/src/hw/ssr_fft -DPOINT_SIZE=4 -DNITER=16 -DTT_DATA=cfloat -DTT_TWIDDLE=cfloat
+syn.top=ssr_fft_wrapper
+tb.file=test_ssr_fft.cpp
+tb.file_cflags=test_ssr_fft.cpp,-I${XF_PROJ_ROOT}/L1/src/hw/ssr_fft -DPOINT_SIZE=4 -DNITER=16 -DTT_DATA=cfloat -DTT_TWIDDLE=cfloat
+syn.debug.enable=1
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog

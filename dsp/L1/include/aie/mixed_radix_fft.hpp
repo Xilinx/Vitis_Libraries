@@ -88,7 +88,7 @@ class kernel_MixedRadixFFTClass {
     static_assert(TP_FFT_NIFFT == 0 || TP_FFT_NIFFT == 1, "ERROR: TP_FFT_NIFFT must be 0 (reverse) or 1 (forward)");
     static_assert(TP_SHIFT >= 0 && TP_SHIFT <= 60, "ERROR: TP_SHIFT is out of range (0 to 60)");
     static_assert(TP_POINT_SIZE % kMinPtSizeGranularity == 0,
-                  "ERROR. TP_POINT_SIZE must be a multiple of 16 on AIE1 and 32 on AIE2");
+                  "ERROR. TP_POINT_SIZE must be a multiple of 8 on AIE1 and 16 on AIE2");
     static_assert(TP_SAT == 0 || TP_SAT == 1 || TP_SAT == 3, "ERROR: unsupported value of TP_SAT");
     static_assert(TP_WINDOW_VSIZE % TP_POINT_SIZE == 0, "ERROR: TP_WINDOW_VSIZE must be a multiple of TP_POINT_SIZE");
 
@@ -111,13 +111,13 @@ class kernel_MixedRadixFFTClass {
     static constexpr int m_kTotalStages = m_kR5Stages + m_kR3Stages + m_kR2Stages + m_kR4Stages;
     static constexpr int m_ktwiddleTableSize = fnGetTwiddleTableSize<TT_TWIDDLE, TP_POINT_SIZE>();
 
-    TT_TWIDDLE (&m_twTable)[m_ktwiddleTableSize];
-    int (&m_twiddlePtrPtr)[kNumMaxTables];
+    alignas(__ALIGN_BYTE_SIZE__) TT_TWIDDLE (&m_twTable)[m_ktwiddleTableSize];
+    alignas(__ALIGN_BYTE_SIZE__) int (&m_twiddlePtrPtr)[kNumMaxTables];
 
     typedef typename std::conditional<std::is_same<TT_IN_DATA, cint16>::value, cint32_t, TT_IN_DATA>::type
         T_internalDataType;
-    T_internalDataType (&m_tmpBuff0)[TP_POINT_SIZE];
-    T_internalDataType (&m_tmpBuff1)[TP_POINT_SIZE];
+    alignas(__ALIGN_BYTE_SIZE__) T_internalDataType (&m_tmpBuff0)[TP_POINT_SIZE];
+    alignas(__ALIGN_BYTE_SIZE__) T_internalDataType (&m_tmpBuff1)[TP_POINT_SIZE];
 
    public:
     // Constructor
@@ -164,8 +164,8 @@ class kernel_MixedRadixFFTClass<TT_IN_DATA,
    private:
     typedef typename std::conditional<std::is_same<TT_IN_DATA, cint16>::value, cint32_t, TT_IN_DATA>::type
         T_internalDataType;
-    T_internalDataType (&m_tmpBuff0)[TP_POINT_SIZE];
-    T_internalDataType (&m_tmpBuff1)[TP_POINT_SIZE];
+    alignas(__ALIGN_BYTE_SIZE__) T_internalDataType (&m_tmpBuff0)[TP_POINT_SIZE];
+    alignas(__ALIGN_BYTE_SIZE__) T_internalDataType (&m_tmpBuff1)[TP_POINT_SIZE];
 
    public:
     // Constructor
@@ -233,11 +233,11 @@ class mixed_radix_fft : public kernel_MixedRadixFFTClass<TT_IN_DATA,
 
     typedef typename std::conditional<std::is_same<TT_IN_DATA, cint16>::value, cint32_t, TT_IN_DATA>::type
         T_internalDataType;
-    T_internalDataType (&m_tmpBuff0)[TP_POINT_SIZE];
-    T_internalDataType (&m_tmpBuff1)[TP_POINT_SIZE];
+    alignas(__ALIGN_BYTE_SIZE__) T_internalDataType (&m_tmpBuff0)[TP_POINT_SIZE];
+    alignas(__ALIGN_BYTE_SIZE__) T_internalDataType (&m_tmpBuff1)[TP_POINT_SIZE];
 
-    TT_TWIDDLE (&m_twTable)[m_ktwiddleTableSize];
-    int (&m_twiddlePtrPtr)[kNumMaxTables];
+    alignas(__ALIGN_BYTE_SIZE__) TT_TWIDDLE (&m_twTable)[m_ktwiddleTableSize];
+    alignas(__ALIGN_BYTE_SIZE__) int (&m_twiddlePtrPtr)[kNumMaxTables];
 
    public:
     // Constructor
@@ -312,10 +312,10 @@ class mixed_radix_fft<TT_IN_DATA,
                                                             TP_END_RANK,
                                                             1> {
    private:
-    typedef typename std::conditional<std::is_same<TT_IN_DATA, cint16>::value, cint16_t, TT_IN_DATA>::type
+    typedef typename std::conditional<std::is_same<TT_IN_DATA, cint16>::value, cint32_t, TT_IN_DATA>::type
         T_internalDataType;
-    T_internalDataType (&m_tmpBuff0)[TP_POINT_SIZE];
-    T_internalDataType (&m_tmpBuff1)[TP_POINT_SIZE];
+    alignas(__ALIGN_BYTE_SIZE__) T_internalDataType (&m_tmpBuff0)[TP_POINT_SIZE];
+    alignas(__ALIGN_BYTE_SIZE__) T_internalDataType (&m_tmpBuff1)[TP_POINT_SIZE];
 
    public:
     // Constructor

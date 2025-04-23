@@ -9,12 +9,12 @@
 VSS FFT/IFFT
 ============
 
-This library element implements a single-channel DIT FFT using both AIE and programmable logic to extract higher performance for larger point sizes.
+This library element implements a single-channel DIT FFT using both AI Engine tiles and programmable logic to extract higher performance for larger point sizes.
 
 Entry Point
 ===========
 
-The entry points for the VSS are the ``vss_fft_ifft_pararms.cfg`` and ``vss_fft_ifft_1d.mk`` file present in the L2/include/vss/vss_fft_ifft_1d/ directory in the DSP library. The ``vss_fft_ifft_1d.mk`` takes in a user configurable file, say "vss_fft_ifft_pararms.cfg" as input and generates a .vss object as an output after performing all the intermediate steps like generating the necessary AIE and PL products and stitching them together. The user can then integrate this .vss object into their larger design. See Vitis documentation on "Vitis Subsystems" for details on how to include a .vss object into your design. 
+The entry points for the VSS are the ``vss_fft_ifft_pararms.cfg`` and ``vss_fft_ifft_1d.mk`` file present in the L2/include/vss/vss_fft_ifft_1d/ directory in the DSP library. The ``vss_fft_ifft_1d.mk`` takes in a user configurable file, say "vss_fft_ifft_pararms.cfg" as input and generates a .vss object as an output after performing all the intermediate steps like generating the necessary AI Engine graph and PL products and stitching them together. The user can then integrate this .vss object into their larger design. See Vitis documentation on "Vitis Subsystems" for details on how to include a .vss object into your design. 
 
 Please edit the parameters in the ``cfg`` file and provide it as input to the ``vss_fft_ifft_1d.mk`` file. An example of how to create a vss and include a .vss object in your design is also provided in L2/examples/vss_fft_ifft_1d/example.mk. It creates a vss object, links it to a larger system to create an xclbin and runs hardware emulation of the full design.
 
@@ -30,7 +30,7 @@ The VSS FFT can generate VSS products for both AIE and AIE-ML devices. The VSS i
 Supported Parameters
 ====================
 
-The complete list of supported parameters for the VSS FFT is shown in the L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_pararms.cfg. Please edit only the parameters in this file to configure the VSS FFT. Please see API reference on vss_fft_ifft_1d_graph.hpp for details on the AIE configurable parameters.
+The complete list of supported parameters for the VSS FFT is shown in the L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_pararms.cfg. Please edit only the parameters in this file to configure the VSS FFT. Please see API reference on vss_fft_ifft_1d_graph.hpp for details on the AI Engine configurable parameters.
 
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | [Category] Parameter        | Description                                                                                                                                |
@@ -39,9 +39,9 @@ The complete list of supported parameters for the VSS FFT is shown in the L2/inc
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | freqhz                      | Frequency of the internal PL components of the VSS (In Hz)                                                                                 |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| [aie] enable_partition      | Configuration of the range of columns that you want to place the compiled AIE kernels. Please do not change the name of the aie partition. |
+| [aie] enable_partition      | Configuration of the range of columns that to place the compiled AI Engine kernels. Please do not change the name of the partition.        |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| [aie] pl-freq               | Frequency of the PLIO kernels of the AIE-PL interface. (In MHz)                                                                            |
+| [aie] pl-freq               | Frequency of the PLIO kernels of the AI Engine-PL interface. (In MHz)                                                                      |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | [APP_PARAMS] DATA_TYPE      | Used to set TT_DATA described in API Reference                                                                                             |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
@@ -63,7 +63,7 @@ The complete list of supported parameters for the VSS FFT is shown in the L2/inc
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | [APP_PARAMS] SSR            | Used to set TP_SSR described in API reference                                                                                              |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| [APP_PARAMS] AIE_PLIO_WIDTH | Sets the PLIO width of the AIE-PL interface                                                                                                |
+| [APP_PARAMS] AIE_PLIO_WIDTH | Sets the PLIO width of the AI Engine-PL interface                                                                                          |
 +-----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 
 Design Notes

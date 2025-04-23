@@ -75,6 +75,29 @@
             }
         },
         {
+            "name": "TT_OUT_DATA",
+            "type": "typename",
+            "description": "describes the type of data samples in the output matrix. This is a typename and must be one of the following:",
+            "enum": [
+                "int16",
+                "cint16",
+                "int32",
+                "cint32",
+                "float",
+                "cfloat"
+            ],
+            "updater": {
+                "file": "matrix_mult.py",
+                "function": "update_TT_OUT_DATA",
+                "args": ["TT_DATA_A", "TT_DATA_B"]
+            },
+            "validator": {
+                "file": "matrix_mult.py",
+                "function": "validate_TT_OUT_DATA",
+                "args": ["TT_DATA_A", "TT_DATA_B"]
+            }
+        },
+        {
             "name": "TP_DIM_A",
             "type": "uint",
             "description": "is an unsigned integer which describes the number of elements along the unique dimension (rows) of Matrix A.",
@@ -84,7 +107,8 @@
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA_A",
-                    "TT_DATA_B"
+                    "TT_DATA_B",
+                    "TT_OUT_DATA"
                    ]
             },
             "validator": {
@@ -93,7 +117,8 @@
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA_A",
-                    "TT_DATA_B"
+                    "TT_DATA_B",
+                    "TT_OUT_DATA"
                 ]
             }
         },
@@ -108,6 +133,7 @@
                     "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
+                    "TT_OUT_DATA",
                     "TP_DIM_A"
                 ]
             },
@@ -118,6 +144,7 @@
                     "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
+                    "TT_OUT_DATA",
                     "TP_DIM_A"
                 ]
             }
@@ -157,13 +184,13 @@
             "updater": {
                 "file": "matrix_mult.py",
                 "function": "update_TP_SSR",
-                "args": [ "AIE_VARIANT", "TT_DATA_A", "TP_DIM_A", "TP_DIM_AB"
+                "args": [ "AIE_VARIANT", "TT_DATA_A", "TT_DATA_B", "TT_OUT_DATA", "TP_DIM_A", "TP_DIM_AB", "TP_DIM_B"
                 ]
             },
             "validator": {
                 "file": "matrix_mult.py",
                 "function": "validate_TP_SSR",
-                "args": ["AIE_VARIANT", "TT_DATA_A", "TP_DIM_A", "TP_DIM_AB"
+                "args": ["AIE_VARIANT", "TT_DATA_A", "TT_DATA_B", "TT_OUT_DATA", "TP_DIM_A", "TP_DIM_AB", "TP_DIM_B"
                 ]
             }
         },
@@ -225,7 +252,7 @@
                 "function": "validate_TP_INPUT_WINDOW_VSIZE_B",
                 "args": [
                     "TP_DIM_B",
-                    "TP_DIM_AB"    
+                    "TP_DIM_AB"
                 ]
             }
         },
@@ -235,11 +262,11 @@
             "description": "describes the scheme in which the data should be stored in memory. ROW_MAJOR = 0, COL_MAJOR = 1. Note, a COL_MAJOR matrix can be transposed to become a ROW_MAJOR matrix.",
             "updater": {
                 "file": "matrix_mult.py",
-                "function": "update_TP_DIM_A_LEADING" 
+                "function": "update_TP_DIM_A_LEADING"
             },
               "validator": {
                   "file": "matrix_mult.py",
-                  "function": "validate_TP_DIM_A_LEADING" 
+                  "function": "validate_TP_DIM_A_LEADING"
             }
         },
         {
@@ -248,7 +275,7 @@
             "description": "describes the scheme in which the data should be stored in memory. ROW_MAJOR = 0, COL_MAJOR = 1.",
             "updater": {
                 "file": "matrix_mult.py",
-                "function": "update_TP_DIM_B_LEADING" 
+                "function": "update_TP_DIM_B_LEADING"
                         },
               "validator": {
                   "file": "matrix_mult.py",
@@ -262,15 +289,15 @@
             "updater": {
                 "file": "matrix_mult.py",
                 "function": "update_TP_DIM_OUT_LEADING"
- 
+
             },
               "validator": {
                   "file": "matrix_mult.py",
                   "function": "validate_TP_DIM_OUT_LEADING",
                   "args" : ["TP_DIM_A_LEADING",
                             "TP_DIM_B_LEADING"
-    ] 
-            }            
+    ]
+            }
         },
         {
             "name": "TP_ADD_TILING_A",
@@ -280,6 +307,7 @@
                 "file": "matrix_mult.py",
                 "function": "update_TP_ADD_TILING_A",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A",
                     "TP_DIM_A",
                     "TP_DIM_AB",
@@ -292,6 +320,7 @@
                 "file": "matrix_mult.py",
                 "function": "validate_TP_ADD_TILING_A",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A",
                     "TP_DIM_A",
                     "TP_DIM_AB",
@@ -309,6 +338,7 @@
                 "file": "matrix_mult.py",
                 "function": "update_TP_ADD_TILING_B",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_B",
                     "TP_DIM_AB",
                     "TP_DIM_B",
@@ -320,6 +350,7 @@
                 "file": "matrix_mult.py",
                 "function": "validate_TP_ADD_TILING_B",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_B",
                     "TP_DIM_AB",
                     "TP_DIM_B",
@@ -336,19 +367,24 @@
                 "file": "matrix_mult.py",
                 "function": "update_TP_ADD_DETILING_OUT",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
+                    "TT_OUT_DATA",
                     "TP_DIM_A",
                     "TP_DIM_B",
                     "TP_SSR",
-                    "TP_DIM_OUT_LEADING"                ]
+                    "TP_DIM_OUT_LEADING"
+                ]
             },
             "validator": {
                 "file": "matrix_mult.py",
                 "function": "validate_TP_ADD_DETILING_OUT",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
+                    "TT_OUT_DATA",
                     "TP_DIM_A",
                     "TP_DIM_B",
                     "TP_SSR",
@@ -366,6 +402,7 @@
                 "file": "matrix_mult.py",
                 "function": "update_TP_SHIFT",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A"
                 ]
             },
@@ -373,6 +410,7 @@
                 "file": "matrix_mult.py",
                 "function": "validate_TP_SHIFT",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA_A"
                 ]
             }
@@ -404,11 +442,11 @@
             "type": "uint",
             "updater": {
               "file": "matrix_mult.py",
-              "function": "update_TP_SAT" 
+              "function": "update_TP_SAT"
             },
             "validator": {
                 "file": "matrix_mult.py",
-                "function": "validate_TP_SAT" 
+                "function": "validate_TP_SAT"
               }
         }
     ],

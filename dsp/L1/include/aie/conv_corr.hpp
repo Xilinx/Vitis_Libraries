@@ -49,7 +49,7 @@ using namespace adf;
 #ifndef _DSPLIB_CONV_CORR_HPP_DEBUG_
 //#define _DSPLIB_CONV_CORR_HPP_DEBUG_
 #endif //_DSPLIB_CONV_CORR_HPP_DEBUG_
-#define V8SIZEOFACC 8
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -74,7 +74,8 @@ template <typename TT_DATA_F,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_PH_POSITION,
           bool TP_CASC_IN = CASC_IN_FALSE,
-          bool TP_CASC_OUT = CASC_OUT_FALSE>
+          bool TP_CASC_OUT = CASC_OUT_FALSE,
+          unsigned int TP_USE_RTP_VECTOR_LENGTHS = USE_RTP_VECTOR_LENGTHS_FALSE>
 class conv_corr {
    private:
     // constants derived from configuration parameters
@@ -95,20 +96,34 @@ class conv_corr {
     static constexpr unsigned int m_kLoopCount = getLoopCount<TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
 
     // load max possible elements each time based on sample size from memory that aie would operate
-    static constexpr unsigned int m_kVecLoadF = (maxBitsLoadOnAie() / (aie_CC_Fsample_Size<TT_DATA_F>()));
+    static constexpr unsigned int m_kVecLoadF = (kMaxBitsLoadOnAie / (fnSampleSizeOfSigF<TT_DATA_F>()));
 
     // load max possible elements each time based on sample size from memory that aie would operate
-    static constexpr unsigned int m_kVecLoadG = (maxBitsLoadOnAie() / (aie_CC_Gsample_Size<TT_DATA_G>()));
+    static constexpr unsigned int m_kVecLoadG = (kMaxBitsLoadOnAie / (fnSampleSizeOfSigG<TT_DATA_G>()));
+
+    unsigned int m_vecLenF = 0;
+    unsigned int m_vecLenG = 0;
 
    public:
     // Constructor of con_corr class
     conv_corr() {}
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(conv_corr::conv_corrMain); }
-    // Conv_Corr
-    void conv_corrMain(input_buffer<TT_DATA_F>& __restrict inWindowF,
-                       input_buffer<TT_DATA_G>& __restrict inWindowG,
-                       output_buffer<TT_DATA_OUT>& __restrict outWindow);
+    static void registerKernelClass() {
+        if
+            constexpr(TP_USE_RTP_VECTOR_LENGTHS == 1) { REGISTER_FUNCTION(conv_corr::conv_corrRTP); }
+        else {
+            REGISTER_FUNCTION(conv_corr::conv_corrNoRTP);
+        }
+    }
+    // Convolution and Correlation
+    void conv_corrNoRTP(input_buffer<TT_DATA_F>& __restrict inWindowF,
+                        input_buffer<TT_DATA_G>& __restrict inWindowG,
+                        output_buffer<TT_DATA_OUT>& __restrict outWindow);
+
+    void conv_corrRTP(input_buffer<TT_DATA_F>& __restrict inWindowF,
+                      input_buffer<TT_DATA_G>& __restrict inWindowG,
+                      output_buffer<TT_DATA_OUT>& __restrict outWindow,
+                      const int32 (&inVecLen)[2]);
 };
 
 #if (__HAS_ACCUM_PERMUTES__ == 1)
@@ -134,11 +149,11 @@ class conv_corr<TT_DATA_F,
                 TT_DATA_G,
                 TT_DATA_OUT,
                 TP_FUNCT_TYPE,
-                TP_COMPUTE_MODE_IS_VALID_MODE(),
+                VALID_MODE /* stream supports only Valid Mode*/,
                 TP_F_LEN,
                 TP_G_LEN,
                 TP_SHIFT,
-                TP_API_IS_ONE(),
+                USE_STREAM_API /*For Stream TP_API is 1*/,
                 TP_RND,
                 TP_SAT,
                 TP_NUM_FRAMES,
@@ -147,23 +162,25 @@ class conv_corr<TT_DATA_F,
                 TP_KERNEL_POSITION,
                 TP_PH_POSITION,
                 CASC_IN_FALSE,
-                CASC_OUT_TRUE> {
+                CASC_OUT_TRUE,
+                USE_RTP_VECTOR_LENGTHS_FALSE /*No RTP Lengths */> {
    private:
     // number of muls that intrinsic would operate
     static constexpr unsigned int m_kMuls = getNumofMULs<TT_DATA_F, TT_DATA_G>();
-    static constexpr unsigned int m_kLanes = getLanesOfMac4RotIntrinsic<TT_DATA_F>(); // Num of lanes
-    static constexpr unsigned int m_kPoints = (m_kMuls / m_kLanes);                   // Num of Points
+    static constexpr unsigned int m_kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of lanes
+    static constexpr unsigned int m_kPoints = (m_kMuls / m_kLanes);               // Num of Points
     static constexpr unsigned int m_kCores = (TP_CASC_LEN * TP_PHASES);
     static constexpr unsigned int m_kMaxMuls = (m_kLanes * m_kPoints * m_kCores);
     static constexpr unsigned int m_kMacsPerCore = (CEIL(TP_G_LEN, m_kMaxMuls)) / m_kMaxMuls;
     static constexpr unsigned int m_kDataBuffLen =
-        ((m_kMacsPerCore * m_kPoints) < dataBuffLenFactor())
-            ? minDataBuffLen()
-            : ((m_kMacsPerCore * m_kPoints) << mulFactor2()); // Len of Data Buffer
+        ((m_kMacsPerCore * m_kPoints) < kDataBuffLenFactor)
+            ? kMinDataBuffLen
+            : ((m_kMacsPerCore * m_kPoints) << kShiftFactor2); // Len of Data Buffer
+    static constexpr unsigned int m_kAccSize = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
 
     // Note, both these variables are non-static, so all kernels can update this variable
     alignas(__ALIGN_BYTE_SIZE__) int delayBuff[(m_kDataBuffLen * sizeof(TT_DATA_F)) / sizeof(int)] = {0};
-    alignas(__ALIGN_BYTE_SIZE__) int delayAcc[(V8SIZEOFACC * sizeof(cacc48)) / sizeof(int)] = {0};
+    alignas(__ALIGN_BYTE_SIZE__) int delayAcc[(m_kAccSize * sizeof(cacc48)) / sizeof(int)] = {0};
     int doInit = 1;
 
    public:
@@ -198,11 +215,11 @@ class conv_corr<TT_DATA_F,
                 TT_DATA_G,
                 TT_DATA_OUT,
                 TP_FUNCT_TYPE,
-                TP_COMPUTE_MODE_IS_VALID_MODE(),
+                VALID_MODE /* stream supports only Valid Mode*/,
                 TP_F_LEN,
                 TP_G_LEN,
                 TP_SHIFT,
-                TP_API_IS_ONE(),
+                USE_STREAM_API /*For Stream TP_API is 1*/,
                 TP_RND,
                 TP_SAT,
                 TP_NUM_FRAMES,
@@ -211,23 +228,25 @@ class conv_corr<TT_DATA_F,
                 TP_KERNEL_POSITION,
                 TP_PH_POSITION,
                 CASC_IN_TRUE,
-                CASC_OUT_TRUE> {
+                CASC_OUT_TRUE,
+                USE_RTP_VECTOR_LENGTHS_FALSE /*No RTP Lengths */> {
    private:
     // number of muls that intrinsic would operate
     static constexpr unsigned int m_kMuls = getNumofMULs<TT_DATA_F, TT_DATA_G>();
-    static constexpr unsigned int m_kLanes = getLanesOfMac4RotIntrinsic<TT_DATA_F>(); // Num of Lanes
-    static constexpr unsigned int m_kPoints = m_kMuls / m_kLanes;                     // Num of Points
+    static constexpr unsigned int m_kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of Lanes
+    static constexpr unsigned int m_kPoints = m_kMuls / m_kLanes;                 // Num of Points
     static constexpr unsigned int m_kCores = TP_CASC_LEN * TP_PHASES;
     static constexpr unsigned int m_kMaxMuls = m_kLanes * m_kPoints * m_kCores;
     static constexpr unsigned int m_kMacsPerCore = (CEIL(TP_G_LEN, m_kMaxMuls)) / m_kMaxMuls;
     static constexpr unsigned int m_kDataBuffLen =
-        ((m_kMacsPerCore * m_kPoints) < dataBuffLenFactor())
-            ? minDataBuffLen()
-            : ((m_kMacsPerCore * m_kPoints) << mulFactor2()); // Len of Data Buffer
+        ((m_kMacsPerCore * m_kPoints) < kDataBuffLenFactor)
+            ? kMinDataBuffLen
+            : ((m_kMacsPerCore * m_kPoints) << kShiftFactor2); // Len of Data Buffer
+    static constexpr unsigned int m_kAccSize = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
 
     // Note, both these variables are non-static, so all kernels can update this variable
     alignas(__ALIGN_BYTE_SIZE__) int delayBuff[(m_kDataBuffLen * sizeof(TT_DATA_F)) / sizeof(int)] = {0};
-    alignas(__ALIGN_BYTE_SIZE__) int delayAcc[(V8SIZEOFACC * sizeof(cacc48)) / sizeof(int)] = {0};
+    alignas(__ALIGN_BYTE_SIZE__) int delayAcc[(m_kAccSize * sizeof(cacc48)) / sizeof(int)] = {0};
     int doInit = 1;
 
    public:
@@ -262,11 +281,11 @@ class conv_corr<TT_DATA_F,
                 TT_DATA_G,
                 TT_DATA_OUT,
                 TP_FUNCT_TYPE,
-                TP_COMPUTE_MODE_IS_VALID_MODE(),
+                VALID_MODE /* stream supports only Valid Mode*/,
                 TP_F_LEN,
                 TP_G_LEN,
                 TP_SHIFT,
-                TP_API_IS_ONE(),
+                USE_STREAM_API /*For Stream TP_API is 1*/,
                 TP_RND,
                 TP_SAT,
                 TP_NUM_FRAMES,
@@ -275,24 +294,26 @@ class conv_corr<TT_DATA_F,
                 TP_KERNEL_POSITION,
                 TP_PH_POSITION,
                 CASC_IN_TRUE,
-                CASC_OUT_FALSE> {
+                CASC_OUT_FALSE,
+                USE_RTP_VECTOR_LENGTHS_FALSE /*No RTP Lengths */> {
    private:
     // number of muls that intrinsic would operate
     static constexpr unsigned int m_kMuls = getNumofMULs<TT_DATA_F, TT_DATA_G>();
-    static constexpr unsigned int m_kLanes = getLanesOfMac4RotIntrinsic<TT_DATA_F>(); // Num of Lanes
-    static constexpr unsigned int m_kPoints = (m_kMuls / m_kLanes);                   // Num of Points
+    static constexpr unsigned int m_kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of Lanes
+    static constexpr unsigned int m_kPoints = (m_kMuls / m_kLanes);               // Num of Points
 
     static constexpr unsigned int m_kCores = TP_CASC_LEN * TP_PHASES;
     static constexpr unsigned int m_kMaxMuls = m_kLanes * m_kPoints * m_kCores;
     static constexpr unsigned int m_kMacsPerCore = (CEIL(TP_G_LEN, m_kMaxMuls)) / m_kMaxMuls;
     static constexpr unsigned int m_kDataBuffLen =
-        ((m_kMacsPerCore * m_kPoints) < dataBuffLenFactor())
-            ? minDataBuffLen()
-            : ((m_kMacsPerCore * m_kPoints) << mulFactor2()); // Len of Data Buffer
+        ((m_kMacsPerCore * m_kPoints) < kDataBuffLenFactor)
+            ? kMinDataBuffLen
+            : ((m_kMacsPerCore * m_kPoints) << kShiftFactor2); // Len of Data Buffer
+    static constexpr unsigned int m_kAccSize = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
 
     // Note, both these variables are non-static, so all kernels can update this variable
     alignas(__ALIGN_BYTE_SIZE__) int delayBuff[(m_kDataBuffLen * sizeof(TT_DATA_F)) / sizeof(int)] = {0};
-    alignas(__ALIGN_BYTE_SIZE__) int delayAcc[(V8SIZEOFACC * sizeof(cacc48)) / sizeof(int)] = {0};
+    alignas(__ALIGN_BYTE_SIZE__) int delayAcc[(m_kAccSize * sizeof(cacc48)) / sizeof(int)] = {0};
     int doInit = 1;
 
    public:
@@ -326,11 +347,11 @@ class conv_corr<TT_DATA_F,
                 TT_DATA_G,
                 TT_DATA_OUT,
                 TP_FUNCT_TYPE,
-                TP_COMPUTE_MODE_IS_VALID_MODE(),
+                VALID_MODE /* stream supports only Valid Mode*/,
                 TP_F_LEN,
                 TP_G_LEN,
                 TP_SHIFT,
-                TP_API_IS_ONE(),
+                USE_STREAM_API /*For Stream TP_API is 1*/,
                 TP_RND,
                 TP_SAT,
                 TP_NUM_FRAMES,
@@ -339,24 +360,26 @@ class conv_corr<TT_DATA_F,
                 TP_KERNEL_POSITION,
                 TP_PH_POSITION,
                 CASC_IN_FALSE,
-                CASC_OUT_FALSE> {
+                CASC_OUT_FALSE,
+                USE_RTP_VECTOR_LENGTHS_FALSE /*No RTP Lengths */> {
    private:
     // number of Lanes that intrinsic would operate
     static constexpr unsigned int m_kMuls = getNumofMULs<TT_DATA_F, TT_DATA_G>();
-    static constexpr unsigned int m_kLanes = getLanesOfMac4RotIntrinsic<TT_DATA_F>(); // Num of Lanes
-    static constexpr unsigned int m_kPoints = m_kMuls / m_kLanes;                     // Num of Points
+    static constexpr unsigned int m_kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of Lanes
+    static constexpr unsigned int m_kPoints = m_kMuls / m_kLanes;                 // Num of Points
 
     static constexpr unsigned int m_kCores = TP_CASC_LEN * TP_PHASES;
     static constexpr unsigned int m_kMaxMuls = m_kLanes * m_kPoints * m_kCores;
     static constexpr unsigned int m_kMacsPerCore = (CEIL(TP_G_LEN, m_kMaxMuls)) / m_kMaxMuls;
     static constexpr unsigned int m_kDataBuffLen =
-        ((m_kMacsPerCore * m_kPoints) < dataBuffLenFactor())
-            ? minDataBuffLen()
-            : ((m_kMacsPerCore * m_kPoints) << mulFactor2()); // Len of Data Buffer
+        ((m_kMacsPerCore * m_kPoints) < kDataBuffLenFactor)
+            ? kMinDataBuffLen
+            : ((m_kMacsPerCore * m_kPoints) << kShiftFactor2); // Len of Data Buffer
+    static constexpr unsigned int m_kAccSize = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
 
     // Note, both these variables are non-static, so all kernels can update this variable
     alignas(__ALIGN_BYTE_SIZE__) int delayBuff[(m_kDataBuffLen * sizeof(TT_DATA_F)) / sizeof(int)] = {0};
-    alignas(__ALIGN_BYTE_SIZE__) int delayAcc[(V8SIZEOFACC * sizeof(cacc48)) / sizeof(int)] = {0};
+    alignas(__ALIGN_BYTE_SIZE__) int delayAcc[(m_kAccSize * sizeof(cacc48)) / sizeof(int)] = {0};
     int doInit = 1;
 
    public:

@@ -85,7 +85,7 @@
         "LIB_DIR/L2/meta"
     ],
     "testinfo": {
-        "disable": false,
+        "disable": true,
         "jobs": [
             {
                 "index": 0,

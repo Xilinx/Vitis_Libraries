@@ -121,6 +121,7 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
     // the multiply nor deinterleaved afterwards, all because the window samples
     // have been pre-compile-time interleaved in like fashion.
     using tally_t = typename std::conditional<std::is_same<TT_DATA, float>::value, float, int64>::type;
+    static constexpr int kSamplesInStream = 16 / sizeof(TT_DATA);
     int offset;
     int tableBase = 0;
     int fromIdx;
@@ -289,17 +290,17 @@ NOINLINE_DECL void fft_window<TT_DATA,
         // indicate that the frame is invalid by setting the flag in the status field of the header.
         // header.val.set(unitVector<TT_DATA>(), std::is_same<TT_DATA,cint16>::value ? 7:3); //set the invalid flag in
         // the status location.
-        header.set(unitVector<TT_DATA>(), std::is_same<TT_DATA, cint16>::value ? 7 : 3);
+        header.set(unitVector<TT_DATA>(), kSamplesInVect - 1);
         // window_writeincr(outWindow, header.val);
         *outPtr++ = header;
 
         // write out blank window
         // TT_DATA* ybuff = (TT_DATA*)outWindow->ptr;
-        using write_type = ::aie::vector<TT_DATA, 128 / 8 / sizeof(TT_DATA)>;
+        using write_type = ::aie::vector<TT_DATA, __ALIGN_BYTE_SIZE__ / sizeof(TT_DATA)>;
         // write_type* blankDataPtr = (write_type*)(ybuff); //addition is in TT_DATA currency, then cast to 128b
         write_type* blankDataPtr = (write_type*)(outPtr);
-        for (int i = 0; i < TP_WINDOW_VSIZE / (16 / sizeof(TT_DATA)); i++) {
-            *blankDataPtr++ = ::aie::zeros<TT_DATA, 16 / sizeof(TT_DATA)>();
+        for (int i = 0; i < TP_WINDOW_VSIZE / (__ALIGN_BYTE_SIZE__ / sizeof(TT_DATA)); i++) {
+            *blankDataPtr++ = ::aie::zeros<TT_DATA, __ALIGN_BYTE_SIZE__ / sizeof(TT_DATA)>();
         }
     }
 };
@@ -324,6 +325,7 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
     using coeffVect_t = ::aie::vector<TT_COEFF, kSamplesInVect>;
     using accVect_t = ::aie::accum<typename tAccBaseType<TT_DATA, TT_COEFF>::type, kSamplesInVect>;
+    static constexpr int kSamplesInStream = 16 / sizeof(TT_DATA);
     dataVect_t dataVect;
     T_buff_128b<TT_DATA> strm0data, strm1data;
     T_buff_128b<TT_DATA> out0data, out1data;
@@ -350,8 +352,8 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
                 coeffVect = *coeffVectPtr++;
                 acc = ::aie::mul(dataVect, coeffVect);
                 outVect = acc.template to_vector<TT_DATA>(TP_SHIFT);
-                out0data.val = outVect.template extract<kSamplesInVect / 2>(0);
-                out1data.val = outVect.template extract<kSamplesInVect / 2>(1);
+                out0data.val = outVect.template extract<kSamplesInStream>(0);
+                out1data.val = outVect.template extract<kSamplesInStream>(1);
                 stream_writeincr_128b(outStream0, out0data, 0);
                 stream_writeincr_128b(outStream1, out1data, 1);
             }
@@ -379,6 +381,7 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
     using coeffVect_t = ::aie::vector<TT_COEFF, kSamplesInVect>;
     using accVect_t = ::aie::accum<typename tAccBaseType<TT_DATA, TT_COEFF>::type, kSamplesInVect>;
+    static constexpr int kSamplesInStream = 16 / sizeof(TT_DATA);
     dataVect_t dataVect;
     T_buff_128b<TT_DATA> strm0data, strm1data;
     T_buff_128b<TT_DATA> out0data, out1data;
@@ -406,12 +409,16 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
     ptSizePwr = (int)headerVal.real - kLogSSR;
     ptSize = (1 << ptSizePwr);
     tableBase = tableStarts[kPtSizePwr - ptSizePwr];
-    header = stream_readincr_128b(inStream1, 1);
-    header = stream_readincr_128b(inStream0, 0);
+    for (int i = 1; i < kSamplesInVect / kSamplesInStream; i++) { // read and ignore remainder of header
+        header = stream_readincr_128b(inStream1, 1);
+        header = stream_readincr_128b(inStream0, 0);
+    }
 
     if (ptSizePwr >= kMinPtSizePwr && ptSizePwr <= kMaxPtSizePwr) {
-        stream_writeincr_128b(outStream1, header, 1);
-        stream_writeincr_128b(outStream0, header, 0);
+        for (int i = 1; i < kSamplesInVect / kSamplesInStream; i++) { // write out remainder of header
+            stream_writeincr_128b(outStream1, header, 1);
+            stream_writeincr_128b(outStream0, header, 0);
+        }
         vecInFrame = ptSize >> kLogSamplesInVect;
         for (int frame = 0; frame < TP_WINDOW_VSIZE / TP_POINT_SIZE; frame++)
             chess_prepare_for_pipelining chess_loop_range(TP_WINDOW_VSIZE / TP_POINT_SIZE, ) {
@@ -428,8 +435,8 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
                     coeffVect = *coeffVectPtr++;
                     acc = ::aie::mul(dataVect, coeffVect);
                     outVect = acc.template to_vector<TT_DATA>(TP_SHIFT);
-                    out0data.val = outVect.template extract<kSamplesInVect / 2>(0);
-                    out1data.val = outVect.template extract<kSamplesInVect / 2>(1);
+                    out0data.val = outVect.template extract<kSamplesInStream>(0);
+                    out1data.val = outVect.template extract<kSamplesInStream>(1);
                     stream_writeincr_128b(outStream0, out0data, 0);
                     stream_writeincr_128b(outStream1, out1data, 1);
                 }
@@ -446,13 +453,20 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
             }
     } else {
         // indicate that the frame is invalid by setting the flag in the status field of the header.
+        for (int i = 1; i < kSamplesInVect / kSamplesInStream - 1; i++) { // blank all reserved fields in header
+            stream_writeincr_128b(outStream0, blankData, 0);
+            stream_writeincr_128b(outStream1, blankData, 1);
+        }
+
         header.val.set(unitVector<TT_DATA>(),
                        std::is_same<TT_DATA, cint16>::value ? 3 : 1); // set the invalid flag in the status location.
         stream_writeincr_128b(outStream0, header, 0);
         stream_writeincr_128b(outStream1, header, 1);
 
-        // write out blank window
-        for (int i = 0; i < TP_WINDOW_VSIZE / (32 / sizeof(TT_DATA)); i++) {
+        // write out blank window (and also read and discard the illegal input 'window')
+        for (int i = 0; i < TP_WINDOW_VSIZE / (kSamplesInStream * 2); i++) {
+            header = stream_readincr_128b(inStream1, 1); // read and discard the illegal 'window'
+            header = stream_readincr_128b(inStream0, 0); // read and discard the illegal 'window'
             stream_writeincr_128b(outStream0, blankData, 0);
             stream_writeincr_128b(outStream1, blankData, 1);
         }
@@ -499,17 +513,17 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
             // chess_prepare_for_pipelining
             // chess_loop_range(kVecInFrame,)
             {
-                strm0data = readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.
-                strm1data = readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.
+                strm0data = readincr_v<kSamplesIn128b>(inStream0); // 0? refers to physical stream number on tile.
+                strm1data = readincr_v<kSamplesIn128b>(inStream0); // 0? refers to physical stream number on tile.
                 dataVect.insert(0, strm0data);
                 dataVect.insert(1, strm1data);
                 coeffVect = *coeffVectPtr++;
                 acc = ::aie::mul(dataVect, coeffVect);
                 outVect = acc.template to_vector<TT_DATA>(TP_SHIFT);
-                out0data = outVect.template extract<kSamplesInVect / 2>(0);
-                out1data = outVect.template extract<kSamplesInVect / 2>(1);
-                writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, out0data);
-                writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, out1data);
+                out0data = outVect.template extract<kSamplesIn128b>(0);
+                out1data = outVect.template extract<kSamplesIn128b>(1);
+                writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, out0data);
+                writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, out1data);
             }
         }
 };
@@ -537,6 +551,7 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
     using accVect_t = ::aie::accum<typename tAccBaseType<TT_DATA, TT_COEFF>::type, kSamplesInVect>;
     constexpr int kSamplesIn128b = 128 / 8 / sizeof(TT_DATA);
     using t128VectorType = ::aie::vector<TT_DATA, kSamplesIn128b>;
+    constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__ / sizeof(TT_DATA);
 
     dataVect_t dataVect;
     t128VectorType strm0data, strm1data;
@@ -556,17 +571,23 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
     set_rnd_mode<TP_RND>();
     set_sat_mode<TP_SAT>();
 
-    blankData = ::aie::zeros<TT_DATA, 16 / sizeof(TT_DATA)>();
-    header = readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.
-    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, header);
+    printf("tracer1\n");
+    blankData = ::aie::zeros<TT_DATA, kSamplesIn128b>();
+    header = readincr_v<kSamplesIn128b>(inStream0); // 0? refers to physical stream number on tile.
+    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, header);
     headerVal = header.get(1);
     ptSizePwr = (int)headerVal.real - kLogSSR;
     ptSize = (1 << ptSizePwr);
     tableBase = tableStarts[kPtSizePwr - ptSizePwr];
-    header = readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.
+    for (int i = 1; i < kHeaderSize / kSamplesIn128b; i++) {
+        header = readincr_v<kSamplesIn128b>(inStream0); // 0? refers to physical stream number on tile.
+    }
+    for (int i = 1; i < kHeaderSize / kSamplesIn128b - 1; i++) { // write out reserved fields of header
+        writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, blankData);
+    }
 
     if (ptSizePwr >= kMinPtSizePwr && ptSizePwr <= kMaxPtSizePwr) {
-        writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, header);
+        writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, header);
         vecInFrame = ptSize >> kLogSamplesInVect;
         for (int frame = 0; frame < TP_WINDOW_VSIZE / TP_POINT_SIZE; frame++)
             chess_prepare_for_pipelining chess_loop_range(TP_WINDOW_VSIZE / TP_POINT_SIZE, ) {
@@ -576,42 +597,39 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
                 // chess_prepare_for_pipelining
                 // chess_loop_range(kVecInFrame,)
                 {
-                    strm0data =
-                        readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.
-                    strm1data =
-                        readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.
+                    strm0data = readincr_v<kSamplesIn128b>(inStream0); // 0? refers to physical stream number on tile.
+                    strm1data = readincr_v<kSamplesIn128b>(inStream0); // 0? refers to physical stream number on tile.
                     dataVect.insert(0, strm0data);
                     dataVect.insert(1, strm1data);
                     coeffVect = *coeffVectPtr++;
                     acc = ::aie::mul(dataVect, coeffVect);
                     outVect = acc.template to_vector<TT_DATA>(TP_SHIFT);
-                    out0data = outVect.template extract<kSamplesInVect / 2>(0);
-                    out1data = outVect.template extract<kSamplesInVect / 2>(1);
-                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, out0data);
-                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, out1data);
+                    out0data = outVect.template extract<kSamplesIn128b>(0);
+                    out1data = outVect.template extract<kSamplesIn128b>(1);
+                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, out0data);
+                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, out1data);
                 }
                 for (int vect = vecInFrame; vect < kVecInFrame; vect++) // fill in remainder of frame holder with blanks
                 // chess_prepare_for_pipelining
                 // chess_loop_range(kVecInFrame,)
                 {
                     // read in and discard, while writing blanks.
-                    strm0data =
-                        readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.
-                    strm1data =
-                        readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.
-                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, blankData);
-                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, blankData);
+                    strm0data = readincr_v<kSamplesIn128b>(inStream0); // 0? refers to physical stream number on tile.
+                    strm1data = readincr_v<kSamplesIn128b>(inStream0); // 0? refers to physical stream number on tile.
+                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, blankData);
+                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, blankData);
                 }
             }
     } else {
         // indicate that the frame is invalid by setting the flag in the status field of the header.
         header.set(unitVector<TT_DATA>(),
                    std::is_same<TT_DATA, cint16>::value ? 3 : 1); // set the invalid flag in the status location.
-        writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, header);
+        writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, header);
 
         // write out blank window
         for (int i = 0; i < TP_WINDOW_VSIZE / (16 / sizeof(TT_DATA)); i++) {
-            writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, blankData);
+            header = readincr_v<kSamplesIn128b>(inStream0); // read and discard illegal 'window'
+            writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, blankData);
         }
     }
 };

@@ -30,6 +30,11 @@ aie_parser["aie"] = aie_config
 no_header_params = dict(parser.items('top'))
 with open(f'{CUR_DIR}/aie_params.cfg', 'w') as stream:
     for key,val in no_header_params.items():
+        if key not in ["freqhz"]:
+            stream.write(key + "=" + val)
+            stream.write("\n")
+    stream.write("[aie]\n")
+    for key,val in aie_config.items():
         stream.write(key + "=" + val)
         stream.write("\n")
-    aie_parser.write(stream, str(aie_config))
+#        aie_parser.write(stream, str(aie_config))

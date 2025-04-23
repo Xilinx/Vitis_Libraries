@@ -29,6 +29,7 @@
 #include "uut_static_config.h"
 #include "test_utils.hpp"
 #include "fir_common_traits.hpp"
+#include "device_defs.h"
 
 #ifndef UUT_GRAPH
 #define UUT_GRAPH fir_tdm_graph
@@ -45,7 +46,7 @@ namespace testcase {
 namespace dsplib = xf::dsp::aie;
 
 class test_graph : public graph {
-   private:
+   public:
     static constexpr int tapsNo = (FIR_LEN * TDM_CHANNELS);
     COEFF_TYPE taps[tapsNo];
 
@@ -55,7 +56,8 @@ class test_graph : public graph {
     std::array<output_plio, P_SSR*(NUM_OUTPUTS)> out;
 
 #if (USE_COEFF_RELOAD == 1)
-    port_conditional_array<input, USE_COEFF_RELOAD == 1, P_SSR> coeff;
+    // port_conditional_array<input, USE_COEFF_RELOAD == 1, P_SSR> coeff;
+    port_conditional_array<input, USE_COEFF_RELOAD == 1, P_SSR * CASC_LEN> coeff;
 #endif
 
     using uut_g = dsplib::fir::tdm::UUT_GRAPH<DATA_TYPE,
@@ -70,24 +72,23 @@ class test_graph : public graph {
                                               P_SSR, // Note P_SSR forced to 1 for REF
                                               SAT_MODE,
                                               CASC_LEN,
-                                              DATA_OUT_TYPE>;
+                                              DATA_OUT_TYPE,
+                                              USE_COEFF_RELOAD>;
 
-    std::vector<COEFF_TYPE> m_taps_v;
+    std::vector<COEFF_TYPE> m_taps_v =
+        generateTaps<COEFF_TYPE, COEFF_STIM_TYPE, FIR_LEN * TDM_CHANNELS, COEFF_SEED>(QUOTE(COEFF_FILE));
 
+    // RTP coefficients
+    uut_g firGraph;
+
+#if (USE_COEFF_RELOAD == 1)
     // Constructor
     test_graph() {
+#else
+    test_graph() : firGraph(m_taps_v) {
+#endif
         printConfig();
 
-        // Generate random taps
-        // STIM_GEN_INCONES, STIM_GEN_ALLONES, STIM_GEN_IMPULSE, STIM_GEN_RANDOM
-        test_stim<COEFF_TYPE, tapsNo, 0> taps_gen(QUOTE(COEFF_FILE));
-        taps_gen.prepSeed(COEFF_SEED);
-        taps_gen.gen(COEFF_STIM_TYPE, taps);
-
-        // Copy taps from C++ array into std::vector
-        for (int i = 0; i < tapsNo; i++) {
-            m_taps_v.push_back(taps[i]);
-        }
 // FIR sub-graph
 
 #if (USE_COEFF_RELOAD != 0) // Reloadable coefficients
@@ -95,34 +96,6 @@ class test_graph : public graph {
                       "ERROR: Please set NITER to be a multiple of 2 when reloadable coefficients are used");
 #endif
 
-#if (USE_COEFF_RELOAD == 0)
-        // Static coefficients
-        uut_g firGraph(m_taps_v);
-#elif (USE_COEFF_RELOAD == 1)
-        // RTP coefficients
-        uut_g firGraph;
-#elif (USE_COEFF_RELOAD == 2)
-#if (USE_COMPILE_TIME_COEFFS == 1)
-        // Initialize with Constructor created coefficients
-        uut_g firGraph(m_taps_v);
-#else // Multi-kernel, static coefficients
-        // Initialize with Coefficient array passed during runtime, i.e. initialize compilation.
-        uut_g firGraph;
-#endif
-#else
-        //  default. Pass coeffs through graph constructor.
-        uut_g firGraph(m_taps_v);
-#endif
-// Connect two identical FIRs to ensure we don't get any errors regarding interoperability.
-// don't mix up num_outputs to different number of inputs
-#if (USE_CHAIN == 1 && ((NUM_OUTPUTS == 1 && DUAL_IP == 0) || (NUM_OUTPUTS == 2 && DUAL_INPUT_SAMPLES == 1)))
-// FIR sub-graph
-#if (USE_COEFF_RELOAD == 1) // Reloadable coefficients
-        uut_g firGraph2;
-#else // Multi-kernel, static coefficients
-        uut_g firGraph2(m_taps_v);
-#endif
-#endif
         // Make plio connections
         createPLIOFileConnections<P_SSR, DUAL_INPUT_SAMPLES>(in, QUOTE(INPUT_FILE), "in");
         createPLIOFileConnections<P_SSR, (NUM_OUTPUTS - 1)>(out, QUOTE(OUTPUT_FILE), "out");
@@ -135,24 +108,35 @@ class test_graph : public graph {
             connect<>(in[plioBaseIdx + DUAL_INPUT_SAMPLES].out[0], firGraph.in2[i]);
 #endif
 
-// Ensure we can connect to another element without error
-#if (USE_CHAIN == 1)
-            connect<>(firGraph.out[i], firGraph2.in[i]);
-            connect<>(firGraph2.out[i], out[plioBaseIdx].in[0]);
-#if (NUM_OUTPUTS == 2 && DUAL_INPUT_SAMPLES == 1)
-            connect<>(firGraph.out2[i], firGraph2.in2[i]);
-            connect<>(firGraph2.out2[i], out[plioBaseIdx + 1].in[0]);
-#endif
-#else
             connect<>(firGraph.out[i], out[plioBaseIdx].in[0]);
 #if (NUM_OUTPUTS == 2)
             // Always feed to seperate plio
             connect<>(firGraph.out2[i], out[plioBaseIdx + 1].in[0]);
 #endif
-#endif
         }
 
 #ifdef USING_UUT
+
+        // place location constraints
+        for (int k = 0; k < P_SSR * CASC_LEN; k++) {
+            // not_equal(location<parameter>(firGraph.m_firKernels[k].param[0]),
+            // location<parameter>(firGraph.m_firKernels[k].param[1]));
+            // location<parameter>(firGraph.m_firKernels[k].in[0]) =
+            // location<parameter>(firGraph.m_firKernels[k].param[1]);
+            // location<parameter>(firGraph.m_firKernels[k].in[0]) = location<kernel>(firGraph.m_firKernels[k]);
+            // location<parameter>(firGraph.m_firKernels[k].in[0]) = location<kernel>(firGraph.m_firKernels[k]);
+        }
+
+// // place location constraints
+// for (int k = 0; k < P_SSR * CASC_LEN; k++) {
+//     if (firGraph.isInternalBufferEnabled()) {
+//         not_equal(location<parameter>(firGraph.m_firKernels[k].param[0]),
+//         location<parameter>(firGraph.m_firKernels[k].param[1]));
+//     } else {
+//         location<parameter>(firGraph.m_firKernels[k].param[0]) =
+//         location<parameter>(firGraph.m_firKernels[k].param[1]);
+//     }
+// }
 
 #if (USE_CUSTOM_CONSTRAINT == 1)
         // place location constraints
@@ -183,27 +167,26 @@ class test_graph : public graph {
         }
 #endif
 
-        const int MAX_PING_PONG_SIZE = 32768;
-        const int MEMORY_MODULE_SIZE = 32768;
-        const int bufferSize = (PORT_API == 1 ? 0 : (FIR_LEN + INPUT_WINDOW_VSIZE / P_SSR) * sizeof(DATA_TYPE));
+        const int MAX_PING_PONG_SIZE = __DATA_MEM_BYTES__ / 2;
+        const int bufferSize =
+            (PORT_API == 1 ? 0 : ((FIR_LEN * TDM_CHANNELS) + INPUT_WINDOW_VSIZE / P_SSR) * sizeof(DATA_TYPE));
         if (bufferSize > MAX_PING_PONG_SIZE) {
-            single_buffer(firGraph.getKernels()->in[0]);
-            single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[0]);
-            if (DUAL_IP == 1) {
-                single_buffer(firGraph.getKernels()->in[1]);
+            for (int i = 0; i < P_SSR * CASC_LEN; i++) {
+                single_buffer(firGraph.getKernels(i)->in[0]);
             }
-            if (NUM_OUTPUTS == 2) {
-                single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[1]);
-            }
+            // single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[0]);
+            // if (DUAL_IP == 1) {
+            //     single_buffer(firGraph.getKernels()->in[1]);
+            // }
+            // if (NUM_OUTPUTS == 2) {
+            //     single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[1]);
+            // }
         }
-        // use default ping-pong buffer, unless requested buffer exceeds memory module size
-        static_assert(bufferSize < MEMORY_MODULE_SIZE,
-                      "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "
-                      "Module size of 32kB");
 #endif
 
 #if (USE_COEFF_RELOAD == 1)
-        for (int i = 0; i < P_SSR; i++) {
+        // for (int i = 0; i < P_SSR; i++) {
+        for (int i = 0; i < P_SSR * CASC_LEN; i++) {
             connect<>(coeff[i], firGraph.coeff[i]);
         }
 #endif

@@ -69,8 +69,8 @@ template <typename TT_DATA,
           unsigned int TP_SAT>
 class fft_window {
    private:
-    static constexpr unsigned int kSamplesInVect = 256 / 8 / sizeof(TT_DATA);
-    static constexpr unsigned int kLogSamplesInVect = std::is_same<TT_DATA, cint16>::value ? 3 : 2;
+    static constexpr unsigned int kSamplesInVect = __ALIGN_BYTE_SIZE__ / sizeof(TT_DATA);
+    static constexpr unsigned int kLogSamplesInVect = fnLogSSR<kSamplesInVect>(); // just a handy log2 function
     static constexpr unsigned int kVecInFrame = TP_POINT_SIZE / kSamplesInVect;
     static constexpr unsigned int kLogSSR = fnLogSSR<TP_SSR>();
     static constexpr unsigned int kCoeffsTableSize = (TP_DYN_PT_SIZE == 0) ? TP_POINT_SIZE : TP_POINT_SIZE * 2;
@@ -122,8 +122,12 @@ class fft_window<TT_DATA,
                  TP_RND,
                  TP_SAT> {
    private:
-    static constexpr unsigned int kSamplesInVect = 256 / 8 / sizeof(TT_DATA);
-    static constexpr unsigned int kLogSamplesInVect = std::is_same<TT_DATA, cint16>::value ? 3 : 2;
+    // With mlv2 memory access can be 512b, but this gives no advantage due to slow stream access, so keeping access to
+    // 256b
+    static constexpr unsigned int kMemIOWidth =
+        32; // bytes. Not __ALIGN_BYTE_SIZE__ here because streams are critical path
+    static constexpr unsigned int kSamplesInVect = kMemIOWidth / sizeof(TT_DATA);
+    static constexpr unsigned int kLogSamplesInVect = fnLogSSR<kSamplesInVect>(); // just a handy log2 function
     static constexpr unsigned int kVecInFrame = TP_POINT_SIZE / kSamplesInVect;
     static constexpr unsigned int kLogSSR = fnLogSSR<TP_SSR>();
     static constexpr unsigned int kCoeffsTableSize = (TP_DYN_PT_SIZE == 0) ? TP_POINT_SIZE : TP_POINT_SIZE * 2;

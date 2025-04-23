@@ -185,6 +185,10 @@ proc randBFloat16 {seed sampleType} {
     # convert back bfloat16 integer to a float32 approxiation
     set sign [expr {($float_int & $mask_sign ) >> $shiftbits31}]
     set exponent [expr {(($float_int & $mask_exp) >> $shiftbits23)-$bias}]
+    #Ensure exponent is non-negative
+    if {($exponent < 0)} {
+      set exponent 0  
+    }
     set mantissa [expr {(1 + [expr { double([expr {(($float_int & $mask_mantissa) >> $shiftbits16)}])/ [expr {(1 << $shiftbits7)}] }])}]
     set bfloat16_int [expr {((1-[expr {(2*$sign)}]) * ([expr {$mantissa}]) * ([expr {(1<<$exponent)}]))}]
     set nextSample [expr { ($bfloat16_int)}]

@@ -54,7 +54,8 @@ template <typename TT_DATA,
           unsigned int TP_DIM,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_ASCENDING,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR>
 class bitonic_sort_ref : public bitonic_sort_ref_base<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING> {
    private:
    public:

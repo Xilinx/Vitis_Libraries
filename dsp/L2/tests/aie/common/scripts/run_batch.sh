@@ -41,29 +41,39 @@ done
 
 funcDir=$(dirname "$(dirname "$scriptDir")")/$libelemName
 echo "Start of Batch Run $funcDir/results/batch_${json_file}_${suffix}" | tee $funcDir/runmake_logs/runmake.log
-# Read keys into an array  
-mapfile -t json_test_names < <(python -c "import json; print('\n'.join(json.load(open('$funcDir/$json_file.json')).keys()))")  
+# Read keys into an array
+mapfile -t json_test_names < <(python -c "import json; print('\n'.join(json.load(open('$funcDir/$json_file.json')).keys()))")
 makeCmd=()
 test_num=0
 en_pwr_calc=0
 
-# Print keys  
-for test_name in "${json_test_names[@]}"; do  
-    if [[ "$test_name" == *aie2* ]]; then
+# Print keys
+for test_name in "${json_test_names[@]}"; do
+    if [[ "$test_name" == *_aie2_* ]]; then
             platform="vek280"
-    else
-            platform="vck190"
+            part_or_platform="PLATFORM"
     fi
+    if [[ "$test_name" == *_aie1_* ]]; then
+            platform="vck190"
+            part_or_platform="PLATFORM"
+    fi
+    if [[ "$test_name" == *_aie22_* ]]; then
+            platform="xc2ve3858-ssva2112-2LP-e-S"
+            part_or_platform="XPART"
+    fi
+
+
     if [[ "$test_name" == *x86sim* ]]; then
         target_uut="x86sim"
     else
         target_uut="aiesim"
     fi
 
-    updated_cmd="make -f $scriptDir/run_pack.mk all_pack PLATFORM=${platform} PARAMS=${test_name} PARAMS_FILE=${json_file}.json RESULTS_DIR=$funcDir/results/batch_${json_file}_${suffix}/test_${test_name} TARGET=${target_uut} UUT_KERNEL=$libelemName"
+    updated_cmd="make -f $scriptDir/run_pack.mk all_pack ${part_or_platform}=${platform} PARAMS=${test_name} PARAMS_FILE=${json_file}.json RESULTS_DIR=$funcDir/results/batch_${json_file}_${suffix}/${test_name} TARGET=${target_uut} UUT_KERNEL=$libelemName"
+    # echo $updated_cmd
     makeCmd[${#makeCmd[*]}]=$updated_cmd
     test_num=`expr $test_num + 1`
-done  
+done
 
 num_tests=${#makeCmd[@]}
 echo "There are $num_tests tests to be run." | tee -a ./runmake_logs/runmake.log
@@ -89,10 +99,9 @@ elif [[ "$*" == *-nolsf* ]]; then
     printf '%s\n' "${makeCmd[@]}" | xargs -P 0 -I % sh -c "%";
 
 else
-    # Each make should only take around 30 min, so 1hr max on short queue is fine.
-    # Pretty sure we need x86 arch for the simulations
-    # We need >ws6 because GLIBC requirements in Vivado/Vitis.
-    bsub -env "all" -q short -R "rusage[mem=16384] select[(type==X86_64) && (osver == ws7 || osver == cent7)]" -oo runmake_logs/LSFrunmake_%I.log -eo runmake_logs/LSFrunmake_err_%I.log -J DSPLIB_run_batch[1-$num_tests] $pathToScript -lsfSubmit ${args[@]}
+    # Each make should take less than 1hr, so short queue is fine.
+    bsub -env "all" -q short -R "rusage[mem=16384] select[(type==X86_64) && (osver == ws8 || osver == rhelws810)]" -oo runmake_logs/LSFrunmake_%I.log -eo runmake_logs/LSFrunmake_err_%I.log -J DSPLIB_run_batch[1-$num_tests] $pathToScript -lsfSubmit ${args[@]}
+    # bsub -env "all" -q short -R "rusage[mem=16384] select[(type==X86_64) && (osver >= 8.10 || osver >= ws7 || osver >= cent7)]" -oo runmake_logs/LSFrunmake_%I.log -eo runmake_logs/LSFrunmake_err_%I.log -J DSPLIB_run_batch[1-$num_tests] $pathToScript -lsfSubmit ${args[@]}
     sleep 15
     echo "Going to wait on end of job array. Feel free to stick this in the background. "
     #bjobs
@@ -119,7 +128,7 @@ for i in "${!test_arr[@]}"; do
 done
 
 echo "Check runmake_logs/runmake.log for full log of ran commands. Check runmake_logs/LSFrunmake.log for make command log along with job resource stats. "
-echo `grep -H  "FUNC: .* 1" $funcDir/results/batch_${json_file}_${suffix}/*/logs/status* | wc -l` of $num_tests tests have passed  
+echo `grep -H  "FUNC: .* 1" $funcDir/results/batch_${json_file}_${suffix}/*/logs/status* | wc -l` of $num_tests tests have passed
 
 echo Generating summary yaml file and html report
 bash $DSPLIB_SCRIPTS/scripts/html_reporting/create_html_report.sh -batch $funcDir/results/batch_${json_file}_${suffix}

@@ -36,11 +36,13 @@
             ],
             "updater": {
                 "file": "fft_window.py",
-                "function": "update_TT_DATA"
+                "function": "update_TT_DATA",
+                "args" :["AIE_VARIANT"]
             },
             "validator": {
                 "file": "fft_window.py",
-                "function": "validate_TT_DATA"
+                "function": "validate_TT_DATA",
+                "args" :["AIE_VARIANT"]
             }
         },
         {
@@ -147,14 +149,14 @@
                 "file": "fft_window.py",
                 "function": "update_TP_WINDOW_VSIZE",
                 "args": [
-                    "TP_POINT_SIZE"
+                    "AIE_VARIANT", "TT_DATA", "TP_POINT_SIZE", "TP_SSR", "TP_DYN_PT_SIZE"
                 ]
             },
             "validator": {
                 "file": "fft_window.py",
                 "function": "validate_TP_WINDOW_VSIZE",
                 "args": [
-                    "TP_POINT_SIZE"
+                    "AIE_VARIANT", "TT_DATA", "TP_POINT_SIZE", "TP_SSR", "TP_DYN_PT_SIZE"
                 ]
             }
         },

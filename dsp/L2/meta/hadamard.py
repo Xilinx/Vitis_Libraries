@@ -14,10 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from ctypes import sizeof
-from socket import TIPC_SUB_SERVICE
+import aie_common as com
 from aie_common import *
-import json
+# import json
 import math
 
 #### naming ####
@@ -41,12 +40,11 @@ import math
 # A validator function returns a dictionary, with required boolean key "is_valid",
 # and "err_message" if "is_valid" is False.
 #
-PING_PONG_BUFFER_16kB = 16384
-PING_PONG_BUFFER_32kB = 32768
+# PING_PONG_BUFFER_16kB = 16384
+# PING_PONG_BUFFER_32kB = 32768
 TP_INPUT_NUM_FRAMES_min = 1
 TP_SSR_min = 1
 TP_SSR_max = 32
-TP_SHIFT_min = 0
 TP_SHIFT_max = 60
 TP_SHIFT_cint16_max = 32
 TP_CASC_LEN_min = 1
@@ -58,6 +56,15 @@ TP_CASC_LEN_max = 11
 #AIE_VARIANT_min=2
 #AIE_VARIANT_max=1
 
+byte_size={
+  "int16": 2,
+  "int32": 4,
+  "cint16": 4,
+  "cint32": 8,
+  "float": 4,
+  "cfloat": 8
+  }
+
 #######################################################
 ########### AIE_VARIANT Updater and Validtor###########
 #######################################################
@@ -65,7 +72,7 @@ def update_AIE_VARIANT(args):
   return fn_update_aie_variant()
 
 def fn_update_aie_variant():
-  legal_set_AIE_VARIANT = [1,2]
+  legal_set_AIE_VARIANT = [com.AIE, com.AIE_ML, com.AIE_MLv2]
   param_dict ={}
 
   param_dict.update({"name" : "AIE_VARIANT"})
@@ -117,11 +124,11 @@ def fn_update_tt_data_b(AIE_VARIANT, TT_DATA_A):
   elif (TT_DATA_A in "int16" , "int32", "cint16" , "cint32"):
     legal_set_TT_DATA_B = remove_from_set(["float", "cfloat"], legal_set_TT_DATA_B)
 
-  if (AIE_VARIANT==2):
+  if (AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2):
     if(TT_DATA_A=="cint16"):
-       legal_set_TT_DATA_B.remove("int32") 
+       legal_set_TT_DATA_B.remove("int32")
     if(TT_DATA_A=="int32"):
-       legal_set_TT_DATA_B.remove("cint16") 
+       legal_set_TT_DATA_B.remove("cint16")
 
   param_dict={}
   param_dict.update({"name" : "TT_DATA_B"})
@@ -144,14 +151,14 @@ def update_TP_API(args):
 
 def fn_update_tp_api(AIE_VARIANT):
 
-  if (AIE_VARIANT==1):
-    legal_set_tp_api = [0, 1]
-  elif (AIE_VARIANT==2):
-    legal_set_tp_api = [0]
+  if (AIE_VARIANT == AIE):
+    legal_set_TP_API = [0, 1]
+  elif (AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2):
+    legal_set_TP_API = [0]
 
   param_dict={}
   param_dict.update({"name" : "TP_API"})
-  param_dict.update({"enum" : legal_set_tp_api})
+  param_dict.update({"enum" : legal_set_TP_API})
 
   return param_dict
 
@@ -186,28 +193,27 @@ def validate_TP_SSR(args):
 ########### TP_DIM Updater and Validator ###########
 #######################################################
 
-def update_TP_DIM(args):                    
+def update_TP_DIM(args):
 
   AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA_A = args["TT_DATA_A"]
   TT_DATA_B = args["TT_DATA_B"]
+  TP_SSR = args["TP_SSR"]
 
-  return fn_update_tp_dim(AIE_VARIANT, TT_DATA_A, TT_DATA_B)
+  return fn_update_tp_dim(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_SSR)
 
-def fn_update_tp_dim(AIE_VARIANT, TT_DATA_A, TT_DATA_B):
-  TP_DIM_min = 16
+def fn_update_tp_dim(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_SSR):
+  TP_DIM_min = 16 * TP_SSR
 
-  if (AIE_VARIANT==1):
-    PING_PONG_BUFFER_SIZE = PING_PONG_BUFFER_16kB
-  if (AIE_VARIANT==2):
-    PING_PONG_BUFFER_SIZE = PING_PONG_BUFFER_32kB
-
-  TP_DIM_max = math.floor(PING_PONG_BUFFER_SIZE / fn_det_calc_byte(TT_DATA_A, TT_DATA_B))
+  BUFFER_SIZE = k_data_memory_bytes[AIE_VARIANT]
+  buf_in_total = BUFFER_SIZE * TP_SSR
+  TP_DIM_max = int(math.floor(buf_in_total / byte_size[fn_det_out_type(TT_DATA_A, TT_DATA_B)]))
 
   param_dict ={}
   param_dict.update({"name" : "TP_DIM"})
   param_dict.update({"minimum" : TP_DIM_min})
   param_dict.update({"maximum" : TP_DIM_max})
+  param_dict.update({"maximum_pingpong_buf" : int(TP_DIM_max/2)})
 
   return param_dict
 
@@ -230,7 +236,7 @@ def update_TP_NUM_FRAMES(args):
 
   return fn_update_tp_num_frames(AIE_VARIANT,TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM)
 
-def fn_update_tp_num_frames(AIE_VARIANT,TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM):  
+def fn_update_tp_num_frames(AIE_VARIANT,TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM):
   TP_NUM_FRAMES_max= calc_max_num_frames(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM)
 
   param_dict ={}
@@ -238,6 +244,7 @@ def fn_update_tp_num_frames(AIE_VARIANT,TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP
   param_dict.update({"name" : "TP_NUM_FRAMES"})
   param_dict.update({"minimum" : 1})
   param_dict.update({"maximum" : TP_NUM_FRAMES_max})
+  param_dict.update({"maximum_pingpong_buf" : int(TP_NUM_FRAMES_max/2)})
 
   return param_dict
 
@@ -246,50 +253,45 @@ def validate_TP_NUM_FRAMES(args):
   param_dict = update_TP_NUM_FRAMES(args)
   range_TP_NUM_FRAMES = [param_dict["minimum"], param_dict["maximum"]]
   return validate_range(range_TP_NUM_FRAMES, "TP_NUM_FRAMES", TP_NUM_FRAMES)
-  
+
 def calc_max_num_frames(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DIM):
-
-    if (AIE_VARIANT==1):
-      PING_PONG_BUFFER_SIZE = PING_PONG_BUFFER_16kB
-    if (AIE_VARIANT==2):
-      PING_PONG_BUFFER_SIZE = PING_PONG_BUFFER_32kB
-
-    VEC_IN_FRAME = calc_vecinframe(TP_API,TT_DATA_A,TT_DATA_B)
-    TP_DIM_PADDED = calc_padded_tp_dim(VEC_IN_FRAME, TP_DIM, TP_SSR)
-    OUT_BYTE = fn_det_calc_byte(TT_DATA_A, TT_DATA_B)
-    TP_DIM_PADDED_BYTE = TP_DIM_PADDED * OUT_BYTE
-    TP_INPUT_NUM_FRAMES_max = math.floor(PING_PONG_BUFFER_SIZE / TP_DIM_PADDED_BYTE)
-
-    return TP_INPUT_NUM_FRAMES_max
+  BUFFER_SIZE=k_data_memory_bytes[AIE_VARIANT]
+  VEC_IN_FRAME = calc_vecinframe(TP_API,TT_DATA_A,TT_DATA_B)
+  TP_DIM_PADDED = calc_padded_tp_dim(VEC_IN_FRAME, TP_DIM, TP_SSR)
+  OUT_BYTE = byte_size[fn_det_out_type(TT_DATA_A, TT_DATA_B)]
+  TP_DIM_PADDED_BYTE = TP_DIM_PADDED * OUT_BYTE
+  TP_INPUT_NUM_FRAMES_max = math.floor(BUFFER_SIZE / TP_DIM_PADDED_BYTE)
+  return TP_INPUT_NUM_FRAMES_max
 
 #######################################################
 ########### TP_SHIFT Updater and Validator #######
 #######################################################
 def update_TP_SHIFT(args):
-  TT_DATA_B = args["TT_DATA_B"]
-  return fn_update_tp_shift(TT_DATA_B)
+  TT_DATA = args["TT_DATA_B"]
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_update_TP_SHIFT(AIE_VARIANT, TT_DATA)
 
-def fn_update_tp_shift(TT_DATA):  
-  if (TT_DATA=="float") or (TT_DATA=="cfloat"):
-    min_tp_shift = 0
-    max_tp_shift= 0
-  else:
-    min_tp_shift = 0
-    max_tp_shift= 60
+def fn_update_TP_SHIFT(AIE_VARIANT, TT_DATA):
+    range_TP_SHIFT = com.fn_update_range_TP_SHIFT(AIE_VARIANT, TT_DATA)
 
-  param_dict={}
-  param_dict.update({"name" : "TP_SHIFT"})
-  param_dict.update({"minimum" : min_tp_shift})
-  param_dict.update({"maximum" : max_tp_shift})
-
-  return param_dict
+    param_dict={
+        "name" : "TP_SHIFT",
+        "minimum" : range_TP_SHIFT[0],
+        "maximum" : range_TP_SHIFT[1]
+    }
+    return param_dict
 
 
 def validate_TP_SHIFT(args):
+  TT_DATA = args["TT_DATA_B"]
   TP_SHIFT = args["TP_SHIFT"]
-  param_dict = update_TP_SHIFT(args)
-  range_TP_SHIFT=[param_dict["minimum"],param_dict["maximum"]]
-  return validate_range(range_TP_SHIFT, "TP_SHIFT", TP_SHIFT)
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return (fn_validate_TP_SHIFT(AIE_VARIANT, TT_DATA, TP_SHIFT))
+
+def fn_validate_TP_SHIFT(AIE_VARIANT, TT_DATA, TP_SHIFT):
+  param_dict = fn_update_TP_SHIFT(AIE_VARIANT, TT_DATA)
+  range_TP_SHIFT = [param_dict["minimum"] ,param_dict["maximum"]]
+  return(validate_range(range_TP_SHIFT, "TP_SHIFT", TP_SHIFT))
 
 #######################################################
 ########### TP_RND Updater and Validator #######
@@ -336,7 +338,7 @@ def validate_TP_SAT(args):
   legal_set_TP_SAT = param_dict["enum"]
   return validate_legal_set(legal_set_TP_SAT, "TP_SAT", TP_SAT)
 
-  
+
 def fn_det_out_type(TT_DATA_A, TT_DATA_B):
   if (TT_DATA_A=="int16" and TT_DATA_B=="int16"):
     return "int16"
@@ -349,7 +351,7 @@ def fn_det_out_type(TT_DATA_A, TT_DATA_B):
   if (TT_DATA_A=="int32" and TT_DATA_B=="int32"):
     return "int32"
   if (TT_DATA_A=="int32" and TT_DATA_B=="cint16"):
-    return "cint32"    
+    return "cint32"
   if (TT_DATA_A=="cint16" and TT_DATA_B=="int16"):
     return "cint16"
   if (TT_DATA_A=="cint16" and TT_DATA_B=="int32"):
@@ -362,7 +364,7 @@ def fn_det_out_type(TT_DATA_A, TT_DATA_B):
     return "float"
   if (TT_DATA_A=="cfloat" or TT_DATA_B=="cfloat"):
     return "cfloat"
-  
+
 def fn_det_calc_byte(TT_DATA_A, TT_DATA_B):
   if (TT_DATA_A=="int16" and TT_DATA_B=="int16"):
     return 2
@@ -377,9 +379,9 @@ def fn_det_calc_byte(TT_DATA_A, TT_DATA_B):
   if (TT_DATA_A=="int32" and TT_DATA_B=="int32"):
     return 4
   if (TT_DATA_A=="int32" and TT_DATA_B=="cint16"):
-    return 8    
+    return 8
   if (TT_DATA_A=="int32" and TT_DATA_B=="cint32"):
-    return 8   
+    return 8
   if (TT_DATA_A=="cint16" and TT_DATA_B=="int16"):
     return 4
   if (TT_DATA_A=="cint16" and TT_DATA_B=="int32"):
@@ -399,17 +401,17 @@ def fn_det_calc_byte(TT_DATA_A, TT_DATA_B):
   if (TT_DATA_A=="float" and TT_DATA_B=="float"):
     return 4
   if (TT_DATA_A=="cfloat" or TT_DATA_B=="cfloat"):
-    return 8  
+    return 8
 
 def calc_vecinframe(TP_API,TT_DATA_A,TT_DATA_B):
-    if(TP_API==0):
+    if(TP_API == API_BUFFER):
       if (TT_DATA_A=="int16" and TT_DATA_B=="cint32"):
         VEC_IN_FRAME=16/fn_det_calc_byte(TT_DATA_A, TT_DATA_B)
       elif (TT_DATA_A=="cint32" and TT_DATA_B=="int16"):
         VEC_IN_FRAME=16/fn_det_calc_byte(TT_DATA_A, TT_DATA_B)
-      else: 
+      else:
         VEC_IN_FRAME=32/fn_det_calc_byte(TT_DATA_A, TT_DATA_B)
-    elif(TP_API==1):
+    elif(TP_API == API_STREAM):
       VEC_IN_FRAME=16/fn_det_calc_byte(TT_DATA_A, TT_DATA_B)
     return VEC_IN_FRAME
 
@@ -450,8 +452,8 @@ def info_ports(args):
   VEC_IN_FRAME = calc_vecinframe(TP_API,TT_DATA_A,TT_DATA_B)
   TP_DIM_PADDED = calc_padded_tp_dim(VEC_IN_FRAME, TP_DIM, TP_SSR)
   TP_WINDOW_VSIZE = calc_window_size(TP_DIM_PADDED, TP_NUM_FRAMES)
-  
-  if (TP_API==0):
+
+  if (TP_API == API_BUFFER):
     portsInA = get_port_info(
       portname = "inA",
       dir = "in",
@@ -518,7 +520,7 @@ def generate_graph(graphname, args):
   TP_API = args["TP_API"]
   TP_SSR = args["TP_SSR"]
 
-  if TP_API == 1:
+  if TP_API == API_STREAM:
     ssr = TP_SSR//2
   else:
     ssr = TP_SSR
@@ -548,9 +550,7 @@ public:
 
   {graphname}() : hadamard() {{
     adf::kernel *hadamard_kernels = hadamard.getKernels();
-    for (int i=0; i < 1; i++) {{
-      adf::runtime<ratio>(hadamard_kernels[i]) = 0.9;
-    }}
+
     for (int i=0; i < TP_SSR; i++) {{
       adf::connect<> net_in(inA[i], hadamard.inA[i]);
       adf::connect<> net_in(inB[i], hadamard.inB[i]);

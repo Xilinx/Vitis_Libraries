@@ -61,8 +61,8 @@ class test_graph : public graph {
         printf("DATA_TYPE         = ");
         printf(QUOTE(DATA_TYPE));
         printf("\n");
-        printf("WINDOW_VSIZE      = %d \n", WINDOW_VSIZE);
-        printf("API      = %d \n", PORT_API);
+        printf("WINDOW_VSIZE   = %d \n", WINDOW_VSIZE);
+        printf("API            = %d \n", PORT_API);
         printf("MAX_DELAY      = %d \n", MAX_DELAY);
         namespace dsplib = xf::dsp::aie;
 
@@ -81,6 +81,12 @@ class test_graph : public graph {
         connect<parameter>(numSampleDelay_rtp, sampleDelayGraph.numSampleDelay); // RTP
 
 #ifdef USING_UUT
+#if (SINGLE_BUF == 1 && PORT_API == 0) // Single buffer constraint applies for windows implementations
+        single_buffer(sampleDelayGraph.getKernels()[0].in[0]);
+        single_buffer(sampleDelayGraph.getKernels()[0].out[0]);
+        printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n");
+
+#endif
 #define CASC_LEN 1
 // Report out for AIE Synthesizer QoR harvest
 // Nothing to report

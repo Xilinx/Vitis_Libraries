@@ -86,7 +86,8 @@ using namespace adf;
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         \n
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML and AIE-MLv2 device.
+ *\n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
@@ -110,7 +111,7 @@ template <typename TT_DATA,
 class fft_window_graph : public graph {
    public:
     static constexpr int kMaxSSR = 16;
-    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? __ALIGN_BYTE_SIZE__ : 0;
     static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
 
 // Defensive configuration legality checks

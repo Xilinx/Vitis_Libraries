@@ -25,7 +25,7 @@
 
 using namespace back_transpose;
 
-void ifft_back_transpose_wrapper(backTransposeCls<POINT_SIZE, SSR>::TT_STREAM sig_i[SSR],
-                                 backTransposeCls<POINT_SIZE, SSR>::TT_STREAM sig_o[SSR]);
+void ifft_back_transpose_wrapper(backTransposeCls<POINT_SIZE, SSR, VSS_MODE>::TT_STREAM sig_i[SSR],
+                                 backTransposeCls<POINT_SIZE, SSR, VSS_MODE>::TT_STREAM sig_o[SSR]);
 
 #endif

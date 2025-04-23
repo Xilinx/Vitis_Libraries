@@ -88,7 +88,7 @@ INLINE_DECL void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN], TT_COEFF* ou
 template <typename TT_COEFF, unsigned int TP_FIR_LEN>
 INLINE_DECL void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN],
                               TT_COEFF* outTaps,
-                              output_stream_cacc48* outCascade) {
+                              output_cascade_cacc* outCascade) {
     const int samplesPerBuffWrite = MCD_SIZE / 8 / sizeof(TT_COEFF);
     ::aie::vector<TT_COEFF, samplesPerBuffWrite>* inTapsPtr = (::aie::vector<TT_COEFF, samplesPerBuffWrite>*)inTaps;
     ::aie::vector<TT_COEFF, samplesPerBuffWrite>* __restrict outTapsPtr =
@@ -108,7 +108,7 @@ INLINE_DECL void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN],
 // cascade output.
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
 template <typename TT_COEFF, unsigned int TP_FIR_LEN>
-INLINE_DECL void bufferReload(input_stream_cacc48* inCascade, TT_COEFF* outTaps, output_stream_cacc48* outCascade) {
+INLINE_DECL void bufferReload(input_cascade_cacc* inCascade, TT_COEFF* outTaps, output_cascade_cacc* outCascade) {
     ::aie::vector<int32, MCD_SIZE / 8 / 4>* __restrict outTapsPtr = (::aie::vector<int32, MCD_SIZE / 8 / 4>*)outTaps;
     ::aie::vector<int32, MCD_SIZE / 8 / 4> readBuff; //
     const int samplesPerReadBuff = MCD_SIZE / 8 / sizeof(TT_COEFF);
@@ -130,7 +130,7 @@ INLINE_DECL void bufferReload(input_stream_cacc48* inCascade, TT_COEFF* outTaps,
 // Buffer reload. Copies contents read from cascade input into a destination buffer.
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
 template <typename TT_COEFF, unsigned int TP_FIR_LEN>
-INLINE_DECL void bufferReload(input_stream_cacc48* inCascade, TT_COEFF* outTaps) {
+INLINE_DECL void bufferReload(input_cascade_cacc* inCascade, TT_COEFF* outTaps) {
     const int samplesPerBuffRead = SCD_SIZE / 8 / sizeof(TT_COEFF);
     const int intsPerBuffRead = SCD_SIZE / 8 / sizeof(int32);
     ::aie::vector<int32, intsPerBuffRead>* __restrict outTapsPtr = (::aie::vector<int32, intsPerBuffRead>*)outTaps;

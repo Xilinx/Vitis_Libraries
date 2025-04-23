@@ -130,7 +130,10 @@ Static Coefficients - Array Size
 
 **Asymmetrical FIR**
 
-Asymmetrical filters expect the port to contain the full array of coefficients, i.e., the coefficient array size is equal to the ``TP_FIR_LEN``.
+| Asymmetrical filters expect the port to contain the full array of coefficients, i.e., the coefficient array size is equal to the ``TP_FIR_LEN``.
+| The length of the array expected will therefore be ``(TP_FIR_LEN``, e.g., for a filter of length 7, where coefficients are ``int16``:
+| ``{1, 2, 3, 4, 5, 6, 7}``, the constructor expects an argument:
+| ``std::array<int16, 7> tapsIn =  {1, 2, 3, 4, 5, 6, 7}``.
 
 **Symmetrical FIR**
 
@@ -172,7 +175,10 @@ Array size of an argument passed to the graph's `update()` method depends on the
 
 **Asymmetrical* FIR**
 
-| Asymmetrical filters expect the port to contain the full array of coefficients, i.e., the coefficient array size is equal to the ``TP_FIR_LEN``.
+| Asymmetrical filters expect the port to contain the full array of coefficients, i.e., the coefficient array size is equal to the ``TP_FIR_LEN``,
+| e.g., for a filter of length 7, where ``int16`` type coefficient's values are:
+| ``{1, 2, 3, 4, 5, 6, 7}``, the graph's `update()` method expects an argument:
+| ``int16 tapsIn =  {1, 2, 3, 4, 5, 6, 7}``.
 
 **Symmetrical FIR**
 
@@ -180,7 +186,7 @@ Array size of an argument passed to the graph's `update()` method depends on the
 | The length of the array expected will therefore be ``(TP_FIR_LEN+1)/2``,
 | e.g., for a filter of length 7, where ``int16`` type coefficient's values are:
 |  ``{1, 2, 3, 5, 3, 2, 1}``,
-| four non-zero tap values, including the center tap, are expected, i.e., the constructor expects an argument:
+| four non-zero tap values, including the center tap are expected, i.e., the graph's `update()` method expects an argument:
 | ``int16 tapsIn[4] =  {1, 2, 3, 5}``.
 
 **Half-band FIR**
@@ -189,7 +195,7 @@ Array size of an argument passed to the graph's `update()` method depends on the
 | The length of the array expected will therefore be ``(TP_FIR_LEN+1)/4+1``,
 | e.g., for a half-band filter of length 7, where ``int16`` type coefficient's values are:
 | ``{1, 0, 2, 5, 2, 0, 1}``,
-| three non-zero tap values, including the center tap, are expected, i.e., the constructor expects an argument:
+| three non-zero tap values, including the center tap are expected, i.e., the graph's `update()` method expects an argument:
 | ``int16 tapsIn[3] =  {1, 2, 5}``.
 
 .. _RTP_ARRAY_SIZE_FOR_SSR_CASES:
@@ -242,7 +248,7 @@ Window Interface for Filters
 
 On the AI Engine processor, data can be packetized into window buffers, which are mapped to the local memory.
 
-Window buffers can be accessed with a 256-bit wide load/store operation, hence offering a throughput of up to 256 Gb/s (based on 1 GHz AIE clock).
+Window buffers can be accessed with a 256-bit wide load/store operation, hence offering a throughput of up to 256 Gb/s (based on 1 GHz AI Engine clock).
 
 In the case of FIRs, each window is extended by a margin so that the state of the filter at the end of the previous iteration of the window can be restored before the new computations begins.
 
@@ -257,7 +263,7 @@ In each iteration run, the kernel operates on a set number of samples from the w
 Buffer synchronization requirements introduce a fixed overhead when a kernel is triggered.
 Therefore, to maximize throughput, the window size should be set to the maximum that the system will allow.
 
-For example, a four tap single-rate symmetric FIR with a `2560` sample input/output window operating on ``int32`` data with ``int16`` implemented on AIE can produce an output window buffer in `354` clock cycles, which, taking into account kernel's startup overhead (around `40` lock cycles), equates to a throughput of close to `6500 MSa/s` (based on 1 GHz AIE clock).
+For example, a four tap single-rate symmetric FIR with a `2560` sample input/output window operating on ``int32`` data with ``int16`` implemented on AIE  can produce an output window buffer in `354` clock cycles, which, taking into account kernel's startup overhead (around `40` lock cycles), equates to a throughput of close to `6500 MSa/s` (based on 1 GHz AIE clock).
 
 .. note:: To achieve maximum performance, the producer and consumer kernels should be placed in adjacent AIE tiles, so the window buffers can be accessed without a requirement for a MM2S/S2MM direct memory access (DMA) stream conversions.
 
@@ -320,7 +326,7 @@ Single Buffer Constraint
 Streaming Interface for Filters
 -------------------------------
 
-Streaming interfaces are now supported by all FIRs. Streaming interfaces are based on 32-bit AXI4-Stream and offer throughput of up to 32 Gb/s (based on 1 GHz AIE) per stream used.
+Streaming interfaces are now supported by all FIRs. Streaming interfaces are based on 32-bit AXI4-Stream and offer throughput of up to 32 Gb/s (based on 1 GHz clock) per stream used.
 
 When ``TP_API = 1``, the FIR will have stream API input and output ports, allowing greater interoperability and flexibility in placement of the design.
 Streaming interfaces can be configured to connect single or dual stream inputs (driven by ``TP_DUAL_IP``) or one or two stream outputs (driven by ``TP_NUM_OUTPUTS``).
@@ -344,7 +350,7 @@ For example, a single kernel (``TP_CASC_LEN = 1``), 16 tap single-rate asymmetri
 Symmetric FIRs, including half-band FIRs, cannot take full advantage of input streams when operating in a non-SSR mode, i.e., ``TP_SSR``, ``TP_PARA_INTERP_POLY``, and ``TP_PARA_DECI_POLY`` are all set to 1.
 Instead, the input stream will be converted to a window buffer ,and the FIR kernels will operate in a window based architecture.
 Output data will be sent directly out through a stream port.
-Such designs allow a more flexible connection and mapping onto AIE tiles.
+Such designs allow a more flexible connection and mapping onto AI Engine tiles.
 Latency is reduced, when compared to a window based equivalent, but is much greater than compared with an asymmetric design. Lack of an output buffer also reduces the memory requirements.
 
 For example, a 16 tap single-rate symmetric FIR implemented on AIE with a `512` sample input/output window operating on ``cint16`` data and ``int16`` coefficients achieves a throughput of `978 MSa/s` (based on 1 GHz AIE clock) and will need around `1.4 us` before a full window of samples is available for the consumer to read.
@@ -461,7 +467,7 @@ Maximum Stream based FIRs Length
 | When using a stream based API, the architecture uses internal vector registers to store data samples, instead of window buffers, which removes the limiting factors of the window-based equivalent architecture.
 | However, the internal vector register is only 1024-bits wide, which greatly limits the amount of data samples each FIR kernel can operate on.
 | In addition, data registers storage capacity will be affected by decimation factors, when a Decimation FIR is used.
-| As a result, the number of taps each AIE kernel can process, limited by the capacity of the input vector register, depends on a variety of factors, like data type, coefficient type, and decimation factor.
+| As a result, the number of taps each AI Engine kernel can process, limited by the capacity of the input vector register, depends on a variety of factors, like data type, coefficient type, and decimation factor.
 
 To help find the number of FIR kernels required (or desired) to implement requested FIR length, refer to the helper functions: :ref:`MINIUM_CASC_LEN`, :ref:`OPTIMUM_CASC_LEN` described below.
 
@@ -527,7 +533,7 @@ More details are provided in the :ref:`API_REFERENCE`.
 Super Sample Rate
 -----------------
 
-The term Super Sample Rate strictly means the processing of more than one sample per clock cycle. Because the AIE is a vector processor, almost every operation is SSR by this definition, making it superfluous. Therefore, in the AIE context, SSR is taken to mean an implementation using multiple computation paths to improve performance at the expense of additional resource use.
+The term Super Sample Rate strictly means the processing of more than one sample per clock cycle. Because the AIE is a vector processor, almost every operation is SSR by this definition, making it superfluous. Therefore, in the AI Engine context, SSR is taken to mean an implementation using multiple computation paths to improve performance at the expense of additional resource use.
 
 .. _SSR_OPERATION_MODES:
 
@@ -545,7 +551,7 @@ In the FIR, SSR operation can be achieved using one of the following modes:
 Super Sample Rate - Resource Utilization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The number of AIE tiles used by a FIR will be given by the formula:
+The number of AI Engine tiles used by a FIR will be given by the formula:
 
 .. code-block::
 
@@ -609,7 +615,7 @@ Therefore, the maximum throughput achievable for a given data type, e.g., cint16
 * maximum theoretical sample rate at output: ``THROUGHPUT_OUT  = NUM_OUTPUT_PORTS x 1 GSa/s``.
 
 
-**AIE Tile Utilization Ratio**
+**AI Engine Tile Utilization Ratio**
 
 A Super Sample Rate operation creates multiple computation paths that are used to produce the output samples.
 Having multiple computation paths reduces the amount of computation required by each kernel.
@@ -622,7 +628,7 @@ The total number of FIR computation paths can be described with the following fo
 
 The FIR graph will try to split the requested FIR workload among the FIR kernels equally, which can mean that each kernel is tasked with a comparatively low computational effort.
 
-In such a scenario, the bandwidth will be limited by the amount of ports, but the AIE tile utilization ratio (often defined as ratio of VMAC operations to cycles without VMAC operation) might be reduced.
+In such a scenario, the bandwidth will be limited by the amount of ports, but the AI Engine tile utilization ratio (often defined as ratio of VMAC operations to cycles without VMAC operation) might be reduced.
 
 For example, a 32 tap Single Rate FIR operating on a ``cint16`` data type and ``int16`` coefficients with ``TP_SSR`` set to 2 and a cascade length ``TP_CASC_LEN`` set to 2 will perform at the bandwidth close to `2 GSa/s` (2 output stream paths). Each of the kernels will be tasked with computing only eight coefficients. The design will use eight FIR kernels mapped to eight AIE tiles to achieve that.
 However, a similarly configured FIR, a 32 tap Single Rate FIR operating on ``cint16`` data type and ``int16`` coefficients with ``TP_SSR`` set to 2, but without further cascade configuration (``TP_CASC_LEN`` set to 1) would also perform at the bandwidth close to `2 GSa/s` but only consume four kernels to achieve that.
@@ -630,7 +636,7 @@ However, a similarly configured FIR, a 32 tap Single Rate FIR operating on ``cin
 **Rate-changing FIR Throughput**
 
 | For rate changers, the bandwidth of either the input or output port, depending on whether it is a decimator or an interpolator, can limit the throughput of the filter.
-| For example, an interpolator with an interpolation factor of 3 produces three times the number of outputs as inputs. However, the AIE stream port bandwidth is the same for the input and output.
+| For example, an interpolator with an interpolation factor of 3 produces three times the number of outputs as inputs. However, the AI Engine stream port bandwidth is the same for the input and output.
 | Hence, if the output runs at maximum bandwidth, the input would need to run at 1/3rd its maximum bandwidth, and you are forced to underutilize the input stream of the filter at only 33 percent efficiency.
 | However, if you are able to split the operation of the interpolator over three kernels, broadcast the input stream to their inputs, and operate the kernels at maximum performance, it will be possible to use both the input and output bandwidths at their maximum bandwidths.
 
@@ -862,25 +868,25 @@ The least resource-expensive method to obtain higher performance is to use the d
 
 | The next method that offers higher performances at lower resource costs is the ``TP_PARA_{INTERP/DECI}_POLY`` parameter.
 | ``TP_PARA_X_POLY`` can take a minimum value of 1 and a maximum value equal to the interpolation factor or the decimation factor. It can increase in steps of the integer factors of the interpolation or decimation factor.
-| It is important to note that, the advantage of higher throughput comes at the cost of additional AIE tiles. When you set the ``TP_PARA_X_POLY`` parameter, the graph creates a number of ``TP_PARA_X_POLY`` polyphase paths. Each path contains ``TP_CASC_LEN`` kernels. The number of tiles used will be ``TP_PARA_X_POLY * TP_CASC_LEN``, i.e., ``TP_PARA_X_POLY`` is a single dimensional expansion.
+| It is important to note that, the advantage of higher throughput comes at the cost of additional AI Engine tiles. When you set the ``TP_PARA_X_POLY`` parameter, the graph creates a number of ``TP_PARA_X_POLY`` polyphase paths. Each path contains ``TP_CASC_LEN`` kernels. The number of tiles used will be ``TP_PARA_X_POLY * TP_CASC_LEN``, i.e., ``TP_PARA_X_POLY`` is a single dimensional expansion.
 
-| ``TP_SSR`` is the parameter that enables finer control over the throughput and AIE tiles use.
-| The number of tiles used will be ``TP_CASC_LEN * TP_SSR * TP_SSR``, i.e., SSR is a 2-dimensional expansion. Both methods can work in addition to the ``TP_CASC_LEN`` parameter which also increases the number of tiles. ``TP_SSR`` can take any positive integer value and its maximum is only limited by the number of AIE tiles available. This can be used to prevent overutilization of kernels if the throughput requirement is not as high as the one offered by ``TP_PARA_X_POLY``.
+| ``TP_SSR`` is the parameter that enables finer control over the throughput and AI Engine tiles use.
+| The number of tiles used will be ``TP_CASC_LEN * TP_SSR * TP_SSR``, i.e., SSR is a 2-dimensional expansion. Both methods can work in addition to the ``TP_CASC_LEN`` parameter which also increases the number of tiles. ``TP_SSR`` can take any positive integer value and its maximum is only limited by the number of AI Engine tiles available. This can be used to prevent overutilization of kernels if the throughput requirement is not as high as the one offered by ``TP_PARA_X_POLY``.
 
 ``TP_CASC_LEN`` indicates the number of kernels to be cascaded together to distribute the calculation of the ``TP_FIR_LEN`` parameter. It works in addition to ``TP_SSR`` and ``TP_PARA_X_POLY`` to overcome any bottlenecks posed by the vector processor. The library provides access functions to determine the value of ``TP_CASC_LEN`` that gives you the optimum performance, i.e., the minimum number of kernels that can provide the maximum performance. More details can be found in :ref:`API_REFERENCE`.
 
-If there is no constraint on the number of AIE tiles, the easiest way to get the required performance is to set the ``TP_PARA_X_POLY`` to the closest factor of the interpolation/decimation rate that is higher than the throughput needed. If, however, the goal is to obtain a performance using the least number of tiles, ``TP_SSR`` might need to be used as a finer tuning parameter to get the throughput you want.
+If there is no constraint on the number of AI Engine tiles, the easiest way to get the required performance is to set the ``TP_PARA_X_POLY`` to the closest factor of the interpolation/decimation rate that is higher than the throughput needed. If, however, the goal is to obtain a performance using the least number of tiles, ``TP_SSR`` might need to be used as a finer tuning parameter to get the throughput you want.
 
 **SCENARIO 1:**
 
 | For a 64 tap interpolate by 5 filter that needs 4 GSa/s at output:
-| ``TP_PARA_INTERP_POLY`` can only be set to 5; this would need at least five AIE tiles. The optimum cascade length is 2. This would use 10 AIE tiles and give you 10 GSa/s at the output.
-| On the other hand, setting ``TP_SSR = 2`` and ``TP_PARA_INTERP_POLY = 1`` will be able to do that in four AIE tiles, and the maximum throughput at the output would be 4 GSa/s.
+| ``TP_PARA_INTERP_POLY`` can only be set to 5; this would need at least five AI Engine tiles. The optimum cascade length is 2. This would use 10 AI Engine tiles and give you 10 GSa/s at the output.
+| On the other hand, setting ``TP_SSR = 2`` and ``TP_PARA_INTERP_POLY = 1`` will be able to do that in four AI Engine tiles, and the maximum throughput at the output would be 4 GSa/s.
 
 **SCENARIO 2:**
 
 | For a 32 tap interpolate by 2 filter that needs 4 GSa/s at output:
-| ``TP_PARA_INTERP_POLY`` can be set to 2. This would create two output paths and so, at least two AIE tiles. Say that the optimum cascade length for the data_type/coeff_type combination is 2. Set ``TP_CASC_LEN = 2``.
+| ``TP_PARA_INTERP_POLY`` can be set to 2. This would create two output paths and so, at least two AI Engine tiles. Say that the optimum cascade length for the data_type/coeff_type combination is 2. Set ``TP_CASC_LEN = 2``.
 | The optimum cascade lengths for the various parameters can be obtained using the helper functions in :ref:`API_REFERENCE`. With these two output paths, it is possible to obtain the required sample rate of 4 GSa/s.
 
 **SCENARIO 3:**

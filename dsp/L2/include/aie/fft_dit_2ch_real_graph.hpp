@@ -107,7 +107,8 @@ using namespace adf;
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML and AIE-MLv2 device.
+ *\n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.

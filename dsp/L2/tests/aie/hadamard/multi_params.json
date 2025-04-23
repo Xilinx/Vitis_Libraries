@@ -15,9 +15,10 @@
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
         "STIM_TYPE": "0",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_19_4_14_0_1_0_1_1_16_1_0_1_0_0_aie1_x86sim_checkin": {
+    "cint16_cint32_19_4_14_0_1_0_1_1_16_1_0_1_0_0_0_aie1_x86sim_checkin": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "19",
@@ -28,14 +29,16 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1",
         "STIM_TYPE": "0",
+        "TARGET": "x86sim",
         "AIE_VARIANT": "1",
         "NITER": "16",
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int32_377_1_30_0_1_0_1_1_16_1_0_1_0_0_aie1_hw_checkin": {
+    "cint32_int32_377_1_30_0_1_0_1_1_16_1_0_1_0_0_0_aie1_hw_checkin": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "int32",
         "DIM_SIZE": "377",
@@ -51,9 +54,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_float_256_1_0_0_1_0_1_1_16_1_0_1_1_0_aie1_hw_checkin": {
+    "cfloat_float_256_1_0_0_1_0_1_1_16_1_0_1_1_0_0_aie1_hw_checkin": {
         "T_DATA_A": "cfloat",
         "T_DATA_B": "float",
         "DIM_SIZE": "256",
@@ -70,9 +74,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_16_16_14_0_1_0_1_1_16_1_0_1_0_0_aie1_hw_checkin": {
+    "cint16_int16_16_16_14_0_1_0_1_1_16_1_0_1_0_0_0_aie1_hw_checkin": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "16",
@@ -88,9 +93,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_cint32_16_16_14_1_1_0_1_1_16_1_0_1_5_0_aie1_hw_checkin": {
+    "int16_cint32_16_16_14_1_1_0_1_1_16_1_0_1_5_0_0_aie1_hw_checkin": {
         "T_DATA_A": "int16",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "16",
@@ -106,9 +112,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int32_32_8_14_0_2_0_1_1_16_1_0_1_0_0_aie1_hw_checkin": {
+    "cint16_int32_32_8_14_0_2_0_1_1_16_1_0_1_0_0_0_aie1_hw_checkin": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int32",
         "DIM_SIZE": "32",
@@ -124,9 +131,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_cint32_32_8_14_1_2_0_1_1_16_1_0_1_0_0_aie1_hw_checkin": {
+    "int16_cint32_32_8_14_1_2_0_1_1_16_1_0_1_0_0_0_aie1_hw_checkin": {
         "T_DATA_A": "int16",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "32",
@@ -142,9 +150,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_1024_1_30_1_2_0_1_1_16_1_0_1_0_0_aie1_hw_checkin": {
+    "cint32_cint16_1024_1_30_1_2_0_1_1_16_1_0_1_0_0_0_aie1_hw_checkin": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "1024",
@@ -160,9 +169,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_cint16_1024_1_14_1_2_0_1_1_16_1_0_1_3_0_aie1_hw_checkin": {
+    "int32_cint16_1024_1_14_1_2_0_1_1_16_1_0_1_0_0_0_aie1_hw_checkin": {
         "T_DATA_A": "int32",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "1024",
@@ -172,15 +182,16 @@
         "UUT_SSR": "2",
         "ROUND_MODE": "0",
         "SAT_MODE": "1",
-        "STIM_TYPE": "3",
+        "STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "NITER": "16",
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int16_256_2_14_1_4_0_1_1_16_1_0_1_0_0_aie1_hw_checkin": {
+    "cint32_int16_256_2_14_1_4_0_1_1_16_1_0_1_0_0_0_aie1_hw_checkin": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "int16",
         "DIM_SIZE": "256",
@@ -196,9 +207,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_256_1_14_0_1_0_1_1_16_1_0_1_0_0_aie1_hw_checkin": {
+    "cint16_int16_256_1_14_0_1_0_1_1_16_1_0_1_0_0_0_aie1_hw_checkin": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "256",
@@ -214,9 +226,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int32_256_1_32_0_1_0_1_1_16_1_0_1_0_0_aie1_hw_checkin": {
+    "cint32_int32_256_1_32_0_1_0_1_1_16_1_0_1_0_0_0_aie1_hw_checkin": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "int32",
         "DIM_SIZE": "256",
@@ -232,9 +245,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int16_256_5_32_1_1_0_1_1_16_1_0_1_0_0_aie1_hw_checkin": {
+    "cint32_int16_256_5_32_1_1_0_1_1_16_1_0_1_0_0_0_aie1_hw_checkin": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "int16",
         "DIM_SIZE": "256",
@@ -250,9 +264,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_256_16_14_1_1_0_1_1_16_1_0_1_0_0_aie1_hw_checkin": {
+    "cint16_int16_256_16_14_1_1_0_1_1_16_1_0_1_0_0_0_aie1_hw_checkin": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "256",
@@ -268,9 +283,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int32_256_1_14_1_16_0_1_1_16_1_0_1_0_0_aie1_hw_checkin": {
+    "cint16_int32_256_1_14_1_16_0_1_1_16_1_0_1_0_0_0_aie1_hw_checkin": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int32",
         "DIM_SIZE": "256",
@@ -286,9 +302,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "float_float_256_8_0_1_1_0_1_1_16_1_0_1_0_0_aie1_x86sim_checkin": {
+    "float_float_256_8_0_1_1_0_1_1_16_1_0_1_0_0_0_aie1_x86sim_checkin": {
         "T_DATA_A": "float",
         "T_DATA_B": "float",
         "DIM_SIZE": "256",
@@ -299,15 +316,17 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1",
         "STIM_TYPE": "0",
+        "TARGET": "x86sim",
         "DIFF_TOLERANCE": "0.1",
         "AIE_VARIANT": "1",
         "NITER": "16",
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_1024_1_14_0_2_2_3_1_16_1_0_1_0_0_aie1_x86sim_checkin": {
+    "cint32_cint16_1024_1_14_0_2_2_3_1_16_1_0_1_0_0_0_aie1_x86sim_checkin": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "1024",
@@ -318,14 +337,16 @@
         "ROUND_MODE": "2",
         "SAT_MODE": "3",
         "STIM_TYPE": "0",
+        "TARGET": "x86sim",
         "AIE_VARIANT": "1",
         "NITER": "16",
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_256_2_14_0_4_4_1_1_16_1_0_1_0_0_aie1_x86sim_checkin": {
+    "int32_int16_256_2_14_0_4_4_1_1_16_1_0_1_0_0_0_aie1_x86sim_checkin": {
         "T_DATA_A": "int32",
         "T_DATA_B": "int16",
         "DIM_SIZE": "256",
@@ -336,14 +357,16 @@
         "ROUND_MODE": "4",
         "SAT_MODE": "1",
         "STIM_TYPE": "0",
+        "TARGET": "x86sim",
         "AIE_VARIANT": "1",
         "NITER": "16",
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_256_7_14_1_1_2_0_1_16_1_0_1_0_0_aie1_hw_checkin": {
+    "cint32_cint16_256_7_14_1_1_2_0_1_16_1_0_1_0_0_0_aie1_hw_checkin": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "256",
@@ -359,9 +382,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_256_1_14_1_1_7_1_1_16_1_0_1_0_0_aie1_hw_checkin": {
+    "int32_int16_256_1_14_1_1_7_1_1_16_1_0_1_0_0_0_aie1_hw_checkin": {
         "T_DATA_A": "int32",
         "T_DATA_B": "int16",
         "DIM_SIZE": "256",
@@ -377,9 +401,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_19_4_14_1_1_0_0_1_16_1_0_1_1_0_aie1_x86sim_checkin": {
+    "cint16_cint16_19_4_14_1_1_0_0_1_16_1_0_1_1_0_0_aie1_x86sim_checkin": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "19",
@@ -388,6 +413,7 @@
         "API_IO": "1",
         "UUT_SSR": "1",
         "STIM_TYPE": "1",
+        "TARGET": "x86sim",
         "ROUND_MODE": "0",
         "SAT_MODE": "0",
         "AIE_VARIANT": "1",
@@ -395,9 +421,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_cint16_76_4_14_0_2_0_0_1_16_1_0_1_1_0_aie1_x86sim_checkin": {
+    "int32_cint16_76_4_14_0_2_0_0_1_16_1_0_1_1_0_0_aie1_x86sim_checkin": {
         "T_DATA_A": "int32",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "76",
@@ -406,6 +433,7 @@
         "API_IO": "0",
         "UUT_SSR": "2",
         "STIM_TYPE": "1",
+        "TARGET": "x86sim",
         "ROUND_MODE": "0",
         "SAT_MODE": "0",
         "AIE_VARIANT": "1",
@@ -413,9 +441,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_cint32_600_4_14_1_3_0_0_1_16_1_0_1_1_0_aie1_x86sim_checkin": {
+    "int32_cint32_600_4_14_1_3_0_0_1_16_1_0_1_1_0_0_aie1_x86sim_checkin": {
         "T_DATA_A": "int32",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "600",
@@ -424,6 +453,7 @@
         "API_IO": "1",
         "UUT_SSR": "3",
         "STIM_TYPE": "1",
+        "TARGET": "x86sim",
         "ROUND_MODE": "0",
         "SAT_MODE": "0",
         "AIE_VARIANT": "1",
@@ -431,9 +461,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_19_4_14_0_1_0_1_2_16_1_0_1_0_0_aie2_x86sim_checkin": {
+    "cint16_cint32_19_4_14_0_1_0_1_2_16_1_0_1_0_0_0_aie2_x86sim_checkin": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "19",
@@ -444,14 +475,16 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1",
         "STIM_TYPE": "0",
+        "TARGET": "x86sim",
         "AIE_VARIANT": "2",
         "NITER": "16",
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int32_377_1_30_0_1_0_1_2_16_1_0_1_0_0_aie2_hw_checkin": {
+    "cint32_int32_377_1_30_0_1_0_1_2_16_1_0_1_0_0_0_aie2_hw_checkin": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "int32",
         "DIM_SIZE": "377",
@@ -467,9 +500,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_float_256_1_0_0_1_0_1_2_16_1_0_1_1_0_aie2_hw_checkin": {
+    "cfloat_float_256_1_0_0_1_0_1_2_16_1_0_1_1_0_0_aie2_hw_checkin": {
         "T_DATA_A": "cfloat",
         "T_DATA_B": "float",
         "DIM_SIZE": "256",
@@ -486,9 +520,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_16_16_14_0_1_0_1_2_16_1_0_1_0_0_aie2_hw_checkin": {
+    "cint16_int16_16_16_14_0_1_0_1_2_16_1_0_1_0_0_0_aie2_hw_checkin": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "16",
@@ -504,9 +539,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_cint32_16_16_14_0_1_0_1_2_16_1_0_1_5_0_aie2_hw_checkin": {
+    "int16_cint32_16_16_14_0_1_0_1_2_16_1_0_1_5_0_0_aie2_hw_checkin": {
         "T_DATA_A": "int16",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "16",
@@ -522,9 +558,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_float_32_8_0_0_2_0_1_2_16_1_0_1_0_0_aie2_hw_checkin": {
+    "cfloat_float_32_8_0_0_2_0_1_2_16_1_0_1_0_0_0_aie2_hw_checkin": {
         "T_DATA_A": "cfloat",
         "T_DATA_B": "float",
         "DIM_SIZE": "32",
@@ -541,9 +578,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_cint32_32_8_14_0_2_0_1_2_16_1_0_1_0_0_aie2_hw_checkin": {
+    "int16_cint32_32_8_14_0_2_0_1_2_16_1_0_1_0_0_0_aie2_hw_checkin": {
         "T_DATA_A": "int16",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "32",
@@ -559,9 +597,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_1024_1_30_0_2_0_1_2_16_1_0_1_0_0_aie2_hw_checkin": {
+    "cint32_cint16_1024_1_30_0_2_0_1_2_16_1_0_1_0_0_0_aie2_hw_checkin": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "1024",
@@ -577,9 +616,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_1024_1_14_0_2_0_1_2_16_1_0_1_3_0_aie2_hw_checkin": {
+    "int32_int32_1024_1_14_0_2_0_1_2_16_1_0_1_0_0_0_aie2_hw_checkin": {
         "T_DATA_A": "int32",
         "T_DATA_B": "int32",
         "DIM_SIZE": "1024",
@@ -589,15 +629,16 @@
         "UUT_SSR": "2",
         "ROUND_MODE": "0",
         "SAT_MODE": "1",
-        "STIM_TYPE": "3",
+        "STIM_TYPE": "0",
         "AIE_VARIANT": "2",
         "NITER": "16",
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int16_256_2_14_0_4_0_1_2_16_1_0_1_0_0_aie2_hw_checkin": {
+    "cint32_int16_256_2_14_0_4_0_1_2_16_1_0_1_0_0_0_aie2_hw_checkin": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "int16",
         "DIM_SIZE": "256",
@@ -613,9 +654,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_256_1_14_0_1_0_1_2_16_1_0_1_0_0_aie2_hw_checkin": {
+    "cint16_int16_256_1_14_0_1_0_1_2_16_1_0_1_0_0_0_aie2_hw_checkin": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "256",
@@ -631,9 +673,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int32_256_1_32_0_1_0_1_2_16_1_0_1_0_0_aie2_hw_checkin": {
+    "cint32_int32_256_1_32_0_1_0_1_2_16_1_0_1_0_0_0_aie2_hw_checkin": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "int32",
         "DIM_SIZE": "256",
@@ -649,9 +692,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int16_256_5_32_0_1_0_1_2_16_1_0_1_0_0_aie2_hw_checkin": {
+    "cint32_int16_256_5_32_0_1_0_1_2_16_1_0_1_0_0_0_aie2_hw_checkin": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "int16",
         "DIM_SIZE": "256",
@@ -667,9 +711,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_256_16_14_0_1_0_1_2_16_1_0_1_0_0_aie2_hw_checkin": {
+    "cint16_int16_256_16_14_0_1_0_1_2_16_1_0_1_0_0_0_aie2_hw_checkin": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "256",
@@ -685,9 +730,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_256_1_14_0_16_0_1_2_16_1_0_1_0_0_aie2_hw_checkin": {
+    "cint16_cint32_256_1_14_0_16_0_1_2_16_1_0_1_0_0_0_aie2_hw_checkin": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "256",
@@ -703,9 +749,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "float_float_256_8_0_0_1_0_1_2_16_1_0_1_0_0_aie2_x86sim_checkin": {
+    "float_float_256_8_0_0_1_0_1_2_16_1_0_1_0_0_0_aie2_x86sim_checkin": {
         "T_DATA_A": "float",
         "T_DATA_B": "float",
         "DIM_SIZE": "256",
@@ -716,15 +763,17 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1",
         "STIM_TYPE": "0",
+        "TARGET": "x86sim",
         "AIE_VARIANT": "2",
         "DIFF_TOLERANCE": "0.1",
         "NITER": "16",
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_1024_1_14_0_2_2_3_2_16_1_0_1_0_0_aie2_x86sim_checkin": {
+    "cint32_cint16_1024_1_14_0_2_2_3_2_16_1_0_1_0_0_0_aie2_x86sim_checkin": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "1024",
@@ -735,14 +784,16 @@
         "ROUND_MODE": "2",
         "SAT_MODE": "3",
         "STIM_TYPE": "0",
+        "TARGET": "x86sim",
         "AIE_VARIANT": "2",
         "NITER": "16",
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_256_2_14_0_4_8_1_2_16_1_0_1_0_0_aie2_x86sim_checkin": {
+    "int32_int16_256_2_14_0_4_8_1_2_16_1_0_1_0_0_0_aie2_x86sim_checkin": {
         "T_DATA_A": "int32",
         "T_DATA_B": "int16",
         "DIM_SIZE": "256",
@@ -753,14 +804,16 @@
         "ROUND_MODE": "8",
         "SAT_MODE": "1",
         "STIM_TYPE": "0",
+        "TARGET": "x86sim",
         "AIE_VARIANT": "2",
         "NITER": "16",
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_256_7_14_0_1_2_0_2_16_1_0_1_0_0_aie2_hw_checkin": {
+    "cint32_cint16_256_7_14_0_1_2_0_2_16_1_0_1_0_0_0_aie2_hw_checkin": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "256",
@@ -776,9 +829,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_256_1_14_0_1_11_1_2_16_1_0_1_0_0_aie2_hw_checkin": {
+    "int32_int16_256_1_14_0_1_11_1_2_16_1_0_1_0_0_0_aie2_hw_checkin": {
         "T_DATA_A": "int32",
         "T_DATA_B": "int16",
         "DIM_SIZE": "256",
@@ -794,9 +848,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_19_4_14_0_1_0_0_2_16_1_0_1_1_0_aie2_x86sim_checkin": {
+    "cint16_cint16_19_4_14_0_1_0_0_2_16_1_0_1_1_0_0_aie2_x86sim_checkin": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "19",
@@ -805,6 +860,7 @@
         "API_IO": "0",
         "UUT_SSR": "1",
         "STIM_TYPE": "1",
+        "TARGET": "x86sim",
         "AIE_VARIANT": "2",
         "ROUND_MODE": "0",
         "SAT_MODE": "0",
@@ -812,9 +868,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_76_4_14_0_2_0_0_2_16_1_0_1_1_0_aie2_x86sim_checkin": {
+    "cint32_cint16_76_4_14_0_2_0_0_2_16_1_0_1_1_0_0_aie2_x86sim_checkin": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "76",
@@ -823,6 +880,7 @@
         "API_IO": "0",
         "UUT_SSR": "2",
         "STIM_TYPE": "1",
+        "TARGET": "x86sim",
         "AIE_VARIANT": "2",
         "ROUND_MODE": "0",
         "SAT_MODE": "0",
@@ -830,9 +888,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_cint32_600_4_14_0_3_0_0_2_16_1_0_1_1_0_aie2_x86sim_checkin": {
+    "int32_cint32_600_4_14_0_3_0_0_2_16_1_0_1_1_0_0_aie2_x86sim_checkin": {
         "T_DATA_A": "int32",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "600",
@@ -841,6 +900,7 @@
         "API_IO": "0",
         "UUT_SSR": "3",
         "STIM_TYPE": "1",
+        "TARGET": "x86sim",
         "AIE_VARIANT": "2",
         "ROUND_MODE": "0",
         "SAT_MODE": "0",
@@ -848,9 +908,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_16_1_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "int16_int16_16_1_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "int16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "16",
@@ -866,9 +927,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_16_1_14_0_1_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "int16_int16_16_1_14_0_1_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "int16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "16",
@@ -884,9 +946,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_27_1_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "int32_int32_27_1_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "int32",
         "T_DATA_B": "int32",
         "DIM_SIZE": "27",
@@ -902,9 +965,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_float_16_1_0_1_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cfloat_float_16_1_0_1_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cfloat",
         "T_DATA_B": "float",
         "DIM_SIZE": "16",
@@ -921,9 +985,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int16_254_1_14_1_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint32_int16_254_1_14_1_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "int16",
         "DIM_SIZE": "254",
@@ -939,9 +1004,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_cint16_16_1_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "int32_cint16_16_1_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "int32",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "16",
@@ -957,9 +1023,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_cint32_700_1_14_0_5_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "int32_cint32_700_1_14_0_5_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "int32",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "700",
@@ -975,9 +1042,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_128_4_14_0_4_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint16_int16_128_4_14_0_4_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "128",
@@ -993,9 +1061,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_40_1_14_0_1_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "int32_int16_40_1_14_0_1_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "int32",
         "T_DATA_B": "int16",
         "DIM_SIZE": "40",
@@ -1011,9 +1080,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "float_float_25_1_0_0_1_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "float_float_25_1_0_0_1_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "float",
         "T_DATA_B": "float",
         "DIM_SIZE": "25",
@@ -1030,9 +1100,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_256_1_14_0_1_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "cint32_cint16_256_1_14_0_1_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "256",
@@ -1048,9 +1119,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_512_1_14_0_1_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "int32_int32_512_1_14_0_1_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "int32",
         "T_DATA_B": "int32",
         "DIM_SIZE": "512",
@@ -1066,9 +1138,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_cint32_80_1_14_0_5_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "int16_cint32_80_1_14_0_5_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "int16",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "80",
@@ -1084,9 +1157,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_64_4_14_0_4_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "cint16_cint32_64_4_14_0_4_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "64",
@@ -1102,9 +1176,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_16_1_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint16_int16_16_1_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "16",
@@ -1120,9 +1195,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_32_1_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint16_cint16_32_1_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "32",
@@ -1138,9 +1214,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_64_1_14_1_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "int16_int16_64_1_14_1_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "int16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "64",
@@ -1156,9 +1233,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_cint32_128_1_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "int16_cint32_128_1_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "int16",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "128",
@@ -1174,9 +1252,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int32_256_1_14_1_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint32_int32_256_1_14_1_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "int32",
         "DIM_SIZE": "256",
@@ -1192,9 +1271,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_512_1_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint16_int16_512_1_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "512",
@@ -1210,9 +1290,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_1024_1_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint16_cint32_1024_1_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "1024",
@@ -1228,9 +1309,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "float_float_2048_1_0_1_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "float_float_2048_1_0_1_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "float",
         "T_DATA_B": "float",
         "DIM_SIZE": "2048",
@@ -1247,9 +1329,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_16_1_14_0_1_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "cint16_cint32_16_1_14_0_1_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "16",
@@ -1265,9 +1348,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_cint16_32_1_14_0_1_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "int16_cint16_32_1_14_0_1_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "int16",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "32",
@@ -1283,9 +1367,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_64_1_14_0_1_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "int32_int32_64_1_14_0_1_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "int32",
         "T_DATA_B": "int32",
         "DIM_SIZE": "64",
@@ -1301,9 +1386,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_cint32_128_1_14_0_1_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "int16_cint32_128_1_14_0_1_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "int16",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "128",
@@ -1319,9 +1405,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int32_256_1_14_0_1_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "cint32_int32_256_1_14_0_1_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "int32",
         "DIM_SIZE": "256",
@@ -1337,9 +1424,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_512_1_14_0_1_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "int32_int16_512_1_14_0_1_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "int32",
         "T_DATA_B": "int16",
         "DIM_SIZE": "512",
@@ -1355,9 +1443,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_1024_1_14_0_1_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "cint16_cint32_1024_1_14_0_1_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "1024",
@@ -1373,9 +1462,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "float_float_2048_1_0_0_2_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "float_float_2048_1_0_0_2_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "float",
         "T_DATA_B": "float",
         "DIM_SIZE": "2048",
@@ -1392,9 +1482,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int32_16_1_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint16_int32_16_1_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "AIE_VARIANT": "1",
         "T_DATA_A": "cint16",
         "T_DATA_B": "int32",
@@ -1410,9 +1501,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_32_1_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "int32_int16_32_1_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "AIE_VARIANT": "1",
         "T_DATA_A": "int32",
         "T_DATA_B": "int16",
@@ -1428,9 +1520,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int16_64_1_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint32_int16_64_1_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "AIE_VARIANT": "1",
         "T_DATA_A": "cint32",
         "T_DATA_B": "int16",
@@ -1446,9 +1539,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_128_1_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "int32_int16_128_1_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "AIE_VARIANT": "1",
         "T_DATA_A": "int32",
         "T_DATA_B": "int16",
@@ -1464,9 +1558,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_cint16_256_1_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "int16_cint16_256_1_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "AIE_VARIANT": "1",
         "T_DATA_A": "int16",
         "T_DATA_B": "cint16",
@@ -1482,9 +1577,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_512_1_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint16_cint32_512_1_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "AIE_VARIANT": "1",
         "T_DATA_A": "cint16",
         "T_DATA_B": "cint32",
@@ -1500,9 +1596,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_1024_1_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "int16_int16_1024_1_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "AIE_VARIANT": "1",
         "T_DATA_A": "int16",
         "T_DATA_B": "int16",
@@ -1518,9 +1615,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_16_2_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint16_cint32_16_2_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "16",
@@ -1536,9 +1634,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_16_4_14_1_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint16_cint16_16_4_14_1_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "16",
@@ -1554,9 +1653,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_16_8_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "int16_int16_16_8_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "int16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "16",
@@ -1572,9 +1672,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_16_16_14_1_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "int32_int32_16_16_14_1_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "int32",
         "T_DATA_B": "int32",
         "DIM_SIZE": "16",
@@ -1590,9 +1691,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_16_2_14_0_1_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "cint32_cint32_16_2_14_0_1_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "16",
@@ -1608,9 +1710,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int32_16_4_14_0_1_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "int16_int32_16_4_14_0_1_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "int16",
         "T_DATA_B": "int32",
         "DIM_SIZE": "16",
@@ -1626,9 +1729,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_16_8_14_0_1_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "int16_int16_16_8_14_0_1_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "int16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "16",
@@ -1644,9 +1748,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_16_16_14_0_1_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "cint16_cint16_16_16_14_0_1_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "cint16",
         "DIM_SIZE": "16",
@@ -1662,9 +1767,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_32_1_14_0_2_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint16_int16_32_1_14_0_2_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "32",
@@ -1680,9 +1786,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_64_1_14_1_4_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint32_cint32_64_1_14_1_4_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "64",
@@ -1698,9 +1805,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_128_1_14_1_8_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "int16_int16_128_1_14_1_8_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "int16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "128",
@@ -1716,9 +1824,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_256_1_14_0_16_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint32_cint32_256_1_14_0_16_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "256",
@@ -1734,9 +1843,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_32_1_14_0_2_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "int16_int16_32_1_14_0_2_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "int16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "32",
@@ -1752,9 +1862,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_cint32_64_1_14_0_4_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "int32_cint32_64_1_14_0_4_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "int32",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "64",
@@ -1770,9 +1881,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_128_1_14_0_8_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "int32_int32_128_1_14_0_8_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "int32",
         "T_DATA_B": "int32",
         "DIM_SIZE": "128",
@@ -1788,9 +1900,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_cint32_256_1_14_0_16_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "int32_cint32_256_1_14_0_16_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "int32",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "256",
@@ -1806,9 +1919,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_256_1_14_1_16_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint16_int16_256_1_14_1_16_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "256",
@@ -1824,9 +1938,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_256_4_30_1_4_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint32_cint32_256_4_30_1_4_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "256",
@@ -1842,9 +1957,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_256_1_14_0_16_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "cint16_int16_256_1_14_0_16_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "256",
@@ -1860,9 +1976,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_256_4_30_0_4_0_0_2_16_1_0_1_0_0_aie2_hw_qor": {
+    "cint32_cint32_256_4_30_0_4_0_0_2_16_1_0_1_0_0_0_aie2_hw_qor": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "256",
@@ -1878,9 +1995,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_16_32_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint16_int16_16_32_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "16",
@@ -1896,9 +2014,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_16_64_14_0_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint16_int16_16_64_14_0_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int16",
         "DIM_SIZE": "16",
@@ -1914,9 +2033,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int32_16_128_14_1_1_0_0_1_16_1_0_1_0_0_aie1_hw_qor": {
+    "cint16_int32_16_128_14_1_1_0_0_1_16_1_0_1_0_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint16",
         "T_DATA_B": "int32",
         "DIM_SIZE": "16",
@@ -1932,9 +2052,10 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_16_128_14_1_1_0_0_1_16_1_0_1_6_0_aie1_hw_qor": {
+    "cint32_cint32_16_128_14_1_1_0_0_1_16_1_0_1_6_0_0_aie1_hw_qor": {
         "T_DATA_A": "cint32",
         "T_DATA_B": "cint32",
         "DIM_SIZE": "16",
@@ -1950,6 +2071,7 @@
         "NUM_OUTPUTS": "1",
         "USE_CUSTOM_CONSTRAINT": "0",
         "DATA_SEED": "1",
-        "DUMP_VCD": "0"
+        "DUMP_VCD": "0",
+        "SINGLE_BUF": "0"
     }
 }

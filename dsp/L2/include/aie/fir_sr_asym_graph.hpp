@@ -82,7 +82,8 @@ using namespace adf;
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         \n
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML and AIE-MLv2 device.
+ \n
  * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph
  *         in a single iteration run.  \n
  *         When TP_API is set to 0, samples are buffered and stored in a ping-pong window buffer mapped onto Memory
@@ -289,13 +290,13 @@ class fir_sr_asym_graph : public graph {
                   "ERROR: Unsupported TP_USE_COEFF_RELOAD and TP_API combination. Header based coeff reload "
                   "(TP_USE_COEFF_RELOAD == 2) only supported with Streaming API (TP_API == 1)."); //
 
-    static constexpr unsigned int kMemoryModuleSize = 32768;
+    static constexpr unsigned int kMemoryModuleSize = __DATA_MEM_BYTES__;
     static constexpr unsigned int bufferSize =
         (((TP_FIR_LEN / TP_SSR) + TP_INPUT_WINDOW_VSIZE / TP_SSR) * sizeof(TT_DATA));
     // Requested Window buffer exceeds memory module size
     static_assert(TP_API != 0 || bufferSize < kMemoryModuleSize,
                   "ERROR: Input Window size (based on requested window size and FIR length margin) exceeds Memory "
-                  "Module size of 32kB");
+                  "Module size of 32kB for AIE-1 and 64kB for AIE-ML devices.");
 
     template <unsigned int CL>
     struct tmp_ssr_params : public ssr_params<0> {
@@ -458,6 +459,13 @@ class fir_sr_asym_graph : public graph {
     /**
      * @brief This is the constructor function for the FIR graph with static coefficients.
      * @param[in] taps   a reference to the std::vector array of taps values of type TT_COEFF.
+     * For example, an 8 tap vector would look like the below:
+     * @code
+     * std::vector<int16> taps {
+     *            t0, t1, t2, t3, t4, t5, t6, t7,
+     *            }
+     * @endcode
+     * where each element ``tn`` represents a ``n-th`` tap.
      **/
     fir_sr_asym_graph(const std::vector<TT_COEFF>& taps) {
         printf("== class fir_sr_asym_base_graph (static): \n");

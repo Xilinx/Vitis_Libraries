@@ -113,7 +113,7 @@ The IP performs a ceiling operation on the ``TP_DIM`` value to the nearest multi
 Super Sample Rate Operation
 ---------------------------
 
-While the term Super Sample Rate strictly means the processing of more than one sample per clock cycle, in the AIE context it is taken to mean an implementation using parallel kernels to improve performance at the expense of additional resource use.
+While the term Super Sample Rate strictly means the processing of more than one sample per clock cycle, in the AI Engine context it is taken to mean an implementation using parallel kernels to improve performance at the expense of additional resource use.
 In the Hadamard Product, SSR operation is controlled by the template parameter ``TP_SSR``. This parameter is intended to improve performance and also allow support of point sizes beyond the limitations of a single tile.
 
 The parameter ``TP_SSR`` allows a trade of performance for resource use in the form of tiles used.

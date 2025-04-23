@@ -15,7 +15,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "0_float_8_7_2_256_8_0_0_0_1_1_aie1_hw_checkin": {
+    "0_float_8_7_2_256_8_0_0.02_0.1_0_0_1_1_aie1_hw_checkin": {
         "FUNC_CHOICE": "0",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -31,7 +31,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "0_float_8_7_2_256_8_0_0_0_1_2_aie2_hw_checkin": {
+    "0_float_8_7_2_256_8_0_0.02_0.1_0_0_1_2_aie2_hw_checkin": {
         "FUNC_CHOICE": "0",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -47,8 +47,184 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "0_bfloat16_8_7_2_256_8_0_0_0_1_2_aie2_hw_checkin": {
+    "0_float_8_7_2_256_8_0_0.02_0.1_0_0_1_22_aie22_hw_checkin": {
         "FUNC_CHOICE": "0",
+        "DATA_TYPE": "float",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "0_bfloat16_8_7_2_256_8_0_0.02_0.1_0_0_1_2_aie2_hw_checkin": {
+        "FUNC_CHOICE": "0",
+        "DATA_TYPE": "bfloat16",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "2",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "0_bfloat16_8_7_2_256_8_0_0.02_0.1_0_0_1_22_aie22_hw_checkin": {
+        "FUNC_CHOICE": "0",
+        "DATA_TYPE": "bfloat16",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "0_int16_8_7_2_256_8_0_0.02_0.1_0_0_1_1_aie1_hw_checkin": {
+        "FUNC_CHOICE": "0",
+        "DATA_TYPE": "int16",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1",
+        "AIE_VARIANT": "1"
+    },
+    "0_int16_8_7_2_256_8_0_0.02_0.1_0_0_1_2_aie2_hw_checkin": {
+        "FUNC_CHOICE": "0",
+        "DATA_TYPE": "int16",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "2",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "0_int32_8_7_2_256_8_0_0.02_0.1_0_0_1_1_aie1_hw_checkin": {
+        "FUNC_CHOICE": "0",
+        "DATA_TYPE": "int32",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1",
+        "AIE_VARIANT": "1"
+    },
+    "0_int32_8_7_2_256_8_0_0.02_0.1_0_0_1_2_aie2_hw_checkin": {
+        "FUNC_CHOICE": "0",
+        "DATA_TYPE": "int32",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "2",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "0_int32_8_7_2_256_8_0_0.02_0.1_0_0_1_22_aie22_hw_checkin": {
+        "FUNC_CHOICE": "0",
+        "DATA_TYPE": "int32",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "1_float_8_7_2_256_8_0_0.02_0.1_0_0_1_1_aie1_hw_checkin": {
+        "FUNC_CHOICE": "1",
+        "DATA_TYPE": "float",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1",
+        "AIE_VARIANT": "1"
+    },
+    "1_float_8_7_2_256_8_0_0.02_0.1_0_0_1_2_aie2_hw_checkin": {
+        "FUNC_CHOICE": "1",
+        "DATA_TYPE": "float",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "2",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "1_float_8_7_2_256_8_0_0.02_0.1_0_0_1_22_aie22_hw_checkin": {
+        "FUNC_CHOICE": "1",
+        "DATA_TYPE": "float",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "1_bfloat16_8_7_2_256_8_0_0.02_0.1_0_0_1_2_aie2_hw_checkin": {
+        "FUNC_CHOICE": "1",
         "DATA_TYPE": "bfloat16",
         "COARSE_BITS": "8",
         "FINE_BITS": "7",
@@ -63,103 +239,7 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "0_int16_8_7_2_256_8_0_0_0_1_1_aie1_hw_checkin": {
-        "FUNC_CHOICE": "0",
-        "DATA_TYPE": "int16",
-        "COARSE_BITS": "8",
-        "FINE_BITS": "7",
-        "DOMAIN_MODE": "2",
-        "WINDOW_VSIZE": "256",
-        "NITER": "8",
-        "STIM_TYPE": "0",
-        "DIFF_TOLERANCE": "0.02",
-        "CC_TOLERANCE": "0.1",
-        "SHIFT": "0",
-        "ROUND_MODE": "0",
-        "SAT_MODE": "1",
-        "AIE_VARIANT": "1"
-    },
-    "0_int16_8_7_2_256_8_0_0_0_1_2_aie2_hw_checkin": {
-        "FUNC_CHOICE": "0",
-        "DATA_TYPE": "int16",
-        "COARSE_BITS": "8",
-        "FINE_BITS": "7",
-        "DOMAIN_MODE": "2",
-        "WINDOW_VSIZE": "256",
-        "NITER": "8",
-        "AIE_VARIANT": "2",
-        "STIM_TYPE": "0",
-        "DIFF_TOLERANCE": "0.02",
-        "CC_TOLERANCE": "0.1",
-        "SHIFT": "0",
-        "ROUND_MODE": "0",
-        "SAT_MODE": "1"
-    },
-    "0_int32_8_7_2_256_8_0_0_0_1_1_aie1_hw_checkin": {
-        "FUNC_CHOICE": "0",
-        "DATA_TYPE": "int32",
-        "COARSE_BITS": "8",
-        "FINE_BITS": "7",
-        "DOMAIN_MODE": "2",
-        "WINDOW_VSIZE": "256",
-        "NITER": "8",
-        "STIM_TYPE": "0",
-        "DIFF_TOLERANCE": "0.02",
-        "CC_TOLERANCE": "0.1",
-        "SHIFT": "0",
-        "ROUND_MODE": "0",
-        "SAT_MODE": "1",
-        "AIE_VARIANT": "1"
-    },
-    "0_int32_8_7_2_256_8_0_0_0_1_2_aie2_hw_checkin": {
-        "FUNC_CHOICE": "0",
-        "DATA_TYPE": "int32",
-        "COARSE_BITS": "8",
-        "FINE_BITS": "7",
-        "DOMAIN_MODE": "2",
-        "WINDOW_VSIZE": "256",
-        "NITER": "8",
-        "AIE_VARIANT": "2",
-        "STIM_TYPE": "0",
-        "DIFF_TOLERANCE": "0.02",
-        "CC_TOLERANCE": "0.1",
-        "SHIFT": "0",
-        "ROUND_MODE": "0",
-        "SAT_MODE": "1"
-    },
-    "1_float_8_7_2_256_8_0_0_0_1_1_aie1_hw_checkin": {
-        "FUNC_CHOICE": "1",
-        "DATA_TYPE": "float",
-        "COARSE_BITS": "8",
-        "FINE_BITS": "7",
-        "DOMAIN_MODE": "2",
-        "WINDOW_VSIZE": "256",
-        "NITER": "8",
-        "STIM_TYPE": "0",
-        "DIFF_TOLERANCE": "0.02",
-        "CC_TOLERANCE": "0.1",
-        "SHIFT": "0",
-        "ROUND_MODE": "0",
-        "SAT_MODE": "1",
-        "AIE_VARIANT": "1"
-    },
-    "1_float_8_7_2_256_8_0_0_0_1_2_aie2_hw_checkin": {
-        "FUNC_CHOICE": "1",
-        "DATA_TYPE": "float",
-        "COARSE_BITS": "8",
-        "FINE_BITS": "7",
-        "DOMAIN_MODE": "2",
-        "WINDOW_VSIZE": "256",
-        "NITER": "8",
-        "AIE_VARIANT": "2",
-        "STIM_TYPE": "0",
-        "DIFF_TOLERANCE": "0.02",
-        "CC_TOLERANCE": "0.1",
-        "SHIFT": "0",
-        "ROUND_MODE": "0",
-        "SAT_MODE": "1"
-    },
-    "1_bfloat16_8_7_2_256_8_0_0_0_1_2_aie2_hw_checkin": {
+    "1_bfloat16_8_7_2_256_8_0_0.02_0.1_0_0_1_22_aie22_hw_checkin": {
         "FUNC_CHOICE": "1",
         "DATA_TYPE": "bfloat16",
         "COARSE_BITS": "8",
@@ -167,7 +247,7 @@
         "DOMAIN_MODE": "2",
         "WINDOW_VSIZE": "256",
         "NITER": "8",
-        "AIE_VARIANT": "2",
+        "AIE_VARIANT": "22",
         "STIM_TYPE": "0",
         "DIFF_TOLERANCE": "0.02",
         "CC_TOLERANCE": "0.1",
@@ -175,7 +255,7 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "1_int16_8_7_2_256_8_0_0_0_1_1_aie1_hw_checkin": {
+    "1_int16_8_7_2_256_8_0_0.02_0.1_0_0_1_1_aie1_hw_checkin": {
         "FUNC_CHOICE": "1",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -191,7 +271,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "1_int16_8_7_2_256_8_0_0_0_1_2_aie2_hw_checkin": {
+    "1_int16_8_7_2_256_8_0_0.02_0.1_0_0_1_2_aie2_hw_checkin": {
         "FUNC_CHOICE": "1",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -207,7 +287,7 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "1_int32_8_7_2_256_8_0_0_0_1_1_aie1_hw_checkin": {
+    "1_int32_8_7_2_256_8_0_0.02_0.1_0_0_1_1_aie1_hw_checkin": {
         "FUNC_CHOICE": "1",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -223,7 +303,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "1_int32_8_7_2_256_8_0_0_0_1_2_aie2_hw_checkin": {
+    "1_int32_8_7_2_256_8_0_0.02_0.1_0_0_1_2_aie2_hw_checkin": {
         "FUNC_CHOICE": "1",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -239,7 +319,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "2_float_8_7_1_256_8_0_0_0_1_1_aie1_hw_checkin": {
+    "1_int32_8_7_2_256_8_0_0.02_0.1_0_0_1_22_aie22_hw_checkin": {
+        "FUNC_CHOICE": "1",
+        "DATA_TYPE": "int32",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "2_float_8_7_1_256_8_0_0.02_0.1_0_0_1_1_aie1_hw_checkin": {
         "FUNC_CHOICE": "2",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -255,7 +351,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "2_float_8_7_1_256_8_0_0_0_1_2_aie2_hw_checkin": {
+    "2_float_8_7_1_256_8_0_0.02_0.1_0_0_1_2_aie2_hw_checkin": {
         "FUNC_CHOICE": "2",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -271,7 +367,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "2_bfloat16_8_7_1_256_8_0_0_0_1_2_aie2_hw_checkin": {
+    "2_float_8_7_1_256_8_0_0.02_0.1_0_0_1_22_aie22_hw_checkin": {
+        "FUNC_CHOICE": "2",
+        "DATA_TYPE": "float",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "1",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "2_bfloat16_8_7_1_256_8_0_0.02_0.1_0_0_1_2_aie2_hw_checkin": {
         "FUNC_CHOICE": "2",
         "DATA_TYPE": "bfloat16",
         "COARSE_BITS": "8",
@@ -287,7 +399,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "2_int16_8_7_1_256_8_0_0_0_1_1_aie1_hw_checkin": {
+    "2_bfloat16_8_7_1_256_8_0_0.02_0.1_0_0_1_22_aie22_hw_checkin": {
+        "FUNC_CHOICE": "2",
+        "DATA_TYPE": "bfloat16",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "1",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "2_int16_8_7_1_256_8_0_0.02_0.1_0_0_1_1_aie1_hw_checkin": {
         "FUNC_CHOICE": "2",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -303,7 +431,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "2_int16_8_7_1_256_8_0_0_0_1_2_aie2_hw_checkin": {
+    "2_int16_8_7_1_256_8_0_0.02_0.1_0_0_1_2_aie2_hw_checkin": {
         "FUNC_CHOICE": "2",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -319,7 +447,7 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "2_int32_8_7_1_256_8_0_0_0_1_1_aie1_hw_checkin": {
+    "2_int32_8_7_1_256_8_0_0.02_0.1_0_0_1_1_aie1_hw_checkin": {
         "FUNC_CHOICE": "2",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -335,7 +463,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "2_int32_8_7_1_256_8_0_0_0_1_2_aie2_hw_checkin": {
+    "2_int32_8_7_1_256_8_0_0.02_0.1_0_0_1_2_aie2_hw_checkin": {
         "FUNC_CHOICE": "2",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -351,7 +479,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "3_float_8_7_0_256_8_0_0_0_1_1_aie1_hw_checkin": {
+    "2_int32_8_7_1_256_8_0_0.02_0.1_0_0_1_22_aie22_hw_checkin": {
+        "FUNC_CHOICE": "2",
+        "DATA_TYPE": "int32",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "1",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "3_float_8_7_0_256_8_0_0.02_0.1_0_0_1_1_aie1_hw_checkin": {
         "FUNC_CHOICE": "3",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -367,7 +511,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "3_float_8_7_0_256_8_0_0_0_1_2_aie2_hw_checkin": {
+    "3_float_8_7_0_256_8_0_0.02_0.1_0_0_1_2_aie2_hw_checkin": {
         "FUNC_CHOICE": "3",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -383,7 +527,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "3_bfloat16_8_7_0_256_8_0_0_0_1_2_aie2_hw_checkin": {
+    "3_float_8_7_0_256_8_0_0.02_0.1_0_0_1_22_aie22_hw_checkin": {
+        "FUNC_CHOICE": "3",
+        "DATA_TYPE": "float",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "0",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "3_bfloat16_8_7_0_256_8_0_0.02_0.1_0_0_1_2_aie2_hw_checkin": {
         "FUNC_CHOICE": "3",
         "DATA_TYPE": "bfloat16",
         "COARSE_BITS": "8",
@@ -399,7 +559,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "3_int16_8_7_0_256_8_0_2_0_1_1_aie1_hw_checkin": {
+    "3_bfloat16_8_7_0_256_8_0_0.02_0.1_0_0_1_22_aie22_hw_checkin": {
+        "FUNC_CHOICE": "3",
+        "DATA_TYPE": "bfloat16",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "0",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "3_int16_8_7_0_256_8_0_0.02_0.1_2_0_1_1_aie1_hw_checkin": {
         "FUNC_CHOICE": "3",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -415,7 +591,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "3_int16_8_7_0_256_8_0_2_0_1_2_aie2_hw_checkin": {
+    "3_int16_8_7_0_256_8_0_0.02_0.1_2_0_1_2_aie2_hw_checkin": {
         "FUNC_CHOICE": "3",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -431,7 +607,7 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "3_int32_8_7_0_256_8_0_2_0_1_1_aie1_hw_checkin": {
+    "3_int32_8_7_0_256_8_0_0.02_0.1_2_0_1_1_aie1_hw_checkin": {
         "FUNC_CHOICE": "3",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -447,7 +623,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "3_int32_8_7_0_256_8_0_2_0_1_2_aie2_hw_checkin": {
+    "3_int32_8_7_0_256_8_0_0.02_0.1_2_0_1_2_aie2_hw_checkin": {
         "FUNC_CHOICE": "3",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -463,7 +639,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "4_float_8_7_1_256_8_0_0_0_1_1_aie1_hw_checkin": {
+    "3_int32_8_7_0_256_8_0_0.02_0.1_2_0_1_22_aie22_hw_checkin": {
+        "FUNC_CHOICE": "3",
+        "DATA_TYPE": "int32",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "0",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "2",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "4_float_8_7_1_256_8_0_0.02_0.1_0_0_1_1_aie1_hw_checkin": {
         "FUNC_CHOICE": "4",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -479,7 +671,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "4_float_8_7_1_256_8_0_0_0_1_2_aie2_hw_checkin": {
+    "4_float_8_7_1_256_8_0_0.02_0.1_0_0_1_2_aie2_hw_checkin": {
         "FUNC_CHOICE": "4",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -495,7 +687,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "4_bfloat16_8_7_1_256_8_0_0_0_1_2_aie2_hw_checkin": {
+    "4_float_8_7_1_256_8_0_0.02_0.1_0_0_1_22_aie22_hw_checkin": {
+        "FUNC_CHOICE": "4",
+        "DATA_TYPE": "float",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "1",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "4_bfloat16_8_7_1_256_8_0_0.02_0.1_0_0_1_2_aie2_hw_checkin": {
         "FUNC_CHOICE": "4",
         "DATA_TYPE": "bfloat16",
         "COARSE_BITS": "8",
@@ -511,7 +719,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "4_int16_8_7_1_256_8_0_2_0_1_1_aie1_hw_checkin": {
+    "4_bfloat16_8_7_1_256_8_0_0.02_0.1_0_0_1_22_aie22_hw_checkin": {
+        "FUNC_CHOICE": "4",
+        "DATA_TYPE": "bfloat16",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "1",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "4_int16_8_7_1_256_8_0_0.02_0.1_2_0_1_1_aie1_hw_checkin": {
         "FUNC_CHOICE": "4",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -527,7 +751,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "4_int16_8_7_1_256_8_0_2_0_1_2_aie2_hw_checkin": {
+    "4_int16_8_7_1_256_8_0_0.02_0.1_2_0_1_2_aie2_hw_checkin": {
         "FUNC_CHOICE": "4",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -543,7 +767,7 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "4_int32_8_7_1_256_8_0_2_0_1_1_aie1_hw_checkin": {
+    "4_int32_8_7_1_256_8_0_0.02_0.1_2_0_1_1_aie1_hw_checkin": {
         "FUNC_CHOICE": "4",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -559,7 +783,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "4_int32_8_7_1_256_8_0_2_0_1_2_aie2_hw_checkin": {
+    "4_int32_8_7_1_256_8_0_0.02_0.1_2_0_1_2_aie2_hw_checkin": {
         "FUNC_CHOICE": "4",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -575,7 +799,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "0_float_8_7_2_512_8_0_0_0_1_1_aie1_hw_qor": {
+    "4_int32_8_7_1_256_8_0_0.02_0.1_2_0_1_22_aie22_hw_checkin": {
+        "FUNC_CHOICE": "4",
+        "DATA_TYPE": "int32",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "1",
+        "WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "2",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "0_float_8_7_2_512_8_0_0.02_0.1_0_0_1_1_aie1_hw_qor": {
         "FUNC_CHOICE": "0",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -591,7 +831,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "0_float_8_7_2_512_8_0_0_0_1_2_aie2_hw_qor": {
+    "0_float_8_7_2_512_8_0_0.02_0.1_0_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "0",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -607,7 +847,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "0_bfloat16_8_7_2_512_8_0_0_0_1_2_aie2_hw_qor": {
+    "0_float_8_7_2_512_8_0_0.02_0.1_0_0_1_22_aie22_hw_qor": {
+        "FUNC_CHOICE": "0",
+        "DATA_TYPE": "float",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "0_bfloat16_8_7_2_512_8_0_0.02_0.1_0_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "0",
         "DATA_TYPE": "bfloat16",
         "COARSE_BITS": "8",
@@ -623,7 +879,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "0_int16_8_7_2_512_8_0_0_0_1_1_aie1_hw_qor": {
+    "0_bfloat16_8_7_2_512_8_0_0.02_0.1_0_0_1_22_aie22_hw_qor": {
+        "FUNC_CHOICE": "0",
+        "DATA_TYPE": "bfloat16",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "0_int16_8_7_2_512_8_0_0.02_0.1_0_0_1_1_aie1_hw_qor": {
         "FUNC_CHOICE": "0",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -639,7 +911,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "0_int16_8_7_2_512_8_0_0_0_1_2_aie2_hw_qor": {
+    "0_int16_8_7_2_512_8_0_0.02_0.1_0_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "0",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -655,7 +927,7 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "0_int32_8_7_2_512_8_0_0_0_1_1_aie1_hw_qor": {
+    "0_int32_8_7_2_512_8_0_0.02_0.1_0_0_1_1_aie1_hw_qor": {
         "FUNC_CHOICE": "0",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -671,7 +943,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "0_int32_8_7_2_512_8_0_0_0_1_2_aie2_hw_qor": {
+    "0_int32_8_7_2_512_8_0_0.02_0.1_0_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "0",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -687,7 +959,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "1_float_8_7_2_512_8_0_0_0_1_1_aie1_hw_qor": {
+    "0_int32_8_7_2_512_8_0_0.02_0.1_0_0_1_22_aie22_hw_qor": {
+        "FUNC_CHOICE": "0",
+        "DATA_TYPE": "int32",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "1_float_8_7_2_512_8_0_0.02_0.1_0_0_1_1_aie1_hw_qor": {
         "FUNC_CHOICE": "1",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -703,7 +991,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "1_float_8_7_2_512_8_0_0_0_1_2_aie2_hw_qor": {
+    "1_float_8_7_2_512_8_0_0.02_0.1_0_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "1",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -719,7 +1007,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "1_bfloat16_8_7_2_512_8_0_0_0_1_2_aie2_hw_qor": {
+    "1_float_8_7_2_512_8_0_0.02_0.1_0_0_1_22_aie22_hw_qor": {
+        "FUNC_CHOICE": "1",
+        "DATA_TYPE": "float",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "1_bfloat16_8_7_2_512_8_0_0.02_0.1_0_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "1",
         "DATA_TYPE": "bfloat16",
         "COARSE_BITS": "8",
@@ -735,7 +1039,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "1_int16_8_7_2_512_8_0_0_0_1_1_aie1_hw_qor": {
+    "1_bfloat16_8_7_2_512_8_0_0.02_0.1_0_0_1_22_aie22_hw_qor": {
+        "FUNC_CHOICE": "1",
+        "DATA_TYPE": "bfloat16",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "1_int16_8_7_2_512_8_0_0.02_0.1_0_0_1_1_aie1_hw_qor": {
         "FUNC_CHOICE": "1",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -751,7 +1071,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "1_int16_8_7_2_512_8_0_0_0_1_2_aie2_hw_qor": {
+    "1_int16_8_7_2_512_8_0_0.02_0.1_0_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "1",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -767,7 +1087,7 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "1_int32_8_7_2_512_8_0_0_0_1_1_aie1_hw_qor": {
+    "1_int32_8_7_2_512_8_0_0.02_0.1_0_0_1_1_aie1_hw_qor": {
         "FUNC_CHOICE": "1",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -783,7 +1103,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "1_int32_8_7_2_512_8_0_0_0_1_2_aie2_hw_qor": {
+    "1_int32_8_7_2_512_8_0_0.02_0.1_0_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "1",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -799,7 +1119,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "2_float_8_7_1_512_8_0_0_0_1_1_aie1_hw_qor": {
+    "1_int32_8_7_2_512_8_0_0.02_0.1_0_0_1_22_aie22_hw_qor": {
+        "FUNC_CHOICE": "1",
+        "DATA_TYPE": "int32",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "2",
+        "WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "2_float_8_7_1_512_8_0_0.02_0.1_0_0_1_1_aie1_hw_qor": {
         "FUNC_CHOICE": "2",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -815,7 +1151,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "2_float_8_7_1_512_8_0_0_0_1_2_aie2_hw_qor": {
+    "2_float_8_7_1_512_8_0_0.02_0.1_0_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "2",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -831,7 +1167,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "2_bfloat16_8_7_1_512_8_0_0_0_1_2_aie2_hw_qor": {
+    "2_float_8_7_1_512_8_0_0.02_0.1_0_0_1_22_aie22_hw_qor": {
+        "FUNC_CHOICE": "2",
+        "DATA_TYPE": "float",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "1",
+        "WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "2_bfloat16_8_7_1_512_8_0_0.02_0.1_0_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "2",
         "DATA_TYPE": "bfloat16",
         "COARSE_BITS": "8",
@@ -847,7 +1199,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "2_int16_8_7_1_512_8_0_0_0_1_1_aie1_hw_qor": {
+    "2_bfloat16_8_7_1_512_8_0_0.02_0.1_0_0_1_22_aie22_hw_qor": {
+        "FUNC_CHOICE": "2",
+        "DATA_TYPE": "bfloat16",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "1",
+        "WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "2_int16_8_7_1_512_8_0_0.02_0.1_0_0_1_1_aie1_hw_qor": {
         "FUNC_CHOICE": "2",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -863,7 +1231,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "2_int16_8_7_1_512_8_0_0_0_1_2_aie2_hw_qor": {
+    "2_int16_8_7_1_512_8_0_0.02_0.1_0_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "2",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -879,7 +1247,7 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "2_int32_8_7_1_512_8_0_0_0_1_1_aie1_hw_qor": {
+    "2_int32_8_7_1_512_8_0_0.02_0.1_0_0_1_1_aie1_hw_qor": {
         "FUNC_CHOICE": "2",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -895,7 +1263,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "2_int32_8_7_1_512_8_0_0_0_1_2_aie2_hw_qor": {
+    "2_int32_8_7_1_512_8_0_0.02_0.1_0_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "2",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -911,7 +1279,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "3_float_8_7_0_512_8_0_0_0_1_1_aie1_hw_qor": {
+    "2_int32_8_7_1_512_8_0_0.02_0.1_0_0_1_22_aie22_hw_qor": {
+        "FUNC_CHOICE": "2",
+        "DATA_TYPE": "int32",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "1",
+        "WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "3_float_8_7_0_512_8_0_0.02_0.1_0_0_1_1_aie1_hw_qor": {
         "FUNC_CHOICE": "3",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -927,7 +1311,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "3_float_8_7_0_512_8_0_0_0_1_2_aie2_hw_qor": {
+    "3_float_8_7_0_512_8_0_0.02_0.1_0_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "3",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -943,7 +1327,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "3_bfloat16_8_7_0_512_8_0_0_0_1_2_aie2_hw_qor": {
+    "3_float_8_7_0_512_8_0_0.02_0.1_0_0_1_22_aie22_hw_qor": {
+        "FUNC_CHOICE": "3",
+        "DATA_TYPE": "float",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "0",
+        "WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "3_bfloat16_8_7_0_512_8_0_0.02_0.1_0_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "3",
         "DATA_TYPE": "bfloat16",
         "COARSE_BITS": "8",
@@ -959,7 +1359,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "3_int16_8_7_0_512_8_0_2_0_1_1_aie1_hw_qor": {
+    "3_bfloat16_8_7_0_512_8_0_0.02_0.1_0_0_1_22_aie22_hw_qor": {
+        "FUNC_CHOICE": "3",
+        "DATA_TYPE": "bfloat16",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "0",
+        "WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "3_int16_8_7_0_512_8_0_0.02_0.1_2_0_1_1_aie1_hw_qor": {
         "FUNC_CHOICE": "3",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -975,7 +1391,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "3_int16_8_7_0_512_8_0_2_0_1_2_aie2_hw_qor": {
+    "3_int16_8_7_0_512_8_0_0.02_0.1_2_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "3",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -991,7 +1407,7 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "3_int32_8_7_0_512_8_0_2_0_1_1_aie1_hw_qor": {
+    "3_int32_8_7_0_512_8_0_0.02_0.1_2_0_1_1_aie1_hw_qor": {
         "FUNC_CHOICE": "3",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -1007,7 +1423,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "3_int32_8_7_0_512_8_0_2_0_1_2_aie2_hw_qor": {
+    "3_int32_8_7_0_512_8_0_0.02_0.1_2_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "3",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -1023,7 +1439,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "4_float_8_7_1_512_8_0_0_0_1_1_aie1_hw_qor": {
+    "3_int32_8_7_0_512_8_0_0.02_0.1_2_0_1_22_aie22_hw_qor": {
+        "FUNC_CHOICE": "3",
+        "DATA_TYPE": "int32",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "0",
+        "WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "2",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "4_float_8_7_1_512_8_0_0.02_0.1_0_0_1_1_aie1_hw_qor": {
         "FUNC_CHOICE": "4",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -1039,7 +1471,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "4_float_8_7_1_512_8_0_0_0_1_2_aie2_hw_qor": {
+    "4_float_8_7_1_512_8_0_0.02_0.1_0_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "4",
         "DATA_TYPE": "float",
         "COARSE_BITS": "8",
@@ -1055,7 +1487,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "4_bfloat16_8_7_1_512_8_0_0_0_1_2_aie2_hw_qor": {
+    "4_float_8_7_1_512_8_0_0.02_0.1_0_0_1_22_aie22_hw_qor": {
+        "FUNC_CHOICE": "4",
+        "DATA_TYPE": "float",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "1",
+        "WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "4_bfloat16_8_7_1_512_8_0_0.02_0.1_0_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "4",
         "DATA_TYPE": "bfloat16",
         "COARSE_BITS": "8",
@@ -1071,7 +1519,23 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "4_int16_8_7_1_512_8_0_2_0_1_1_aie1_hw_qor": {
+    "4_bfloat16_8_7_1_512_8_0_0.02_0.1_0_0_1_22_aie22_hw_qor": {
+        "FUNC_CHOICE": "4",
+        "DATA_TYPE": "bfloat16",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "1",
+        "WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "0",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "4_int16_8_7_1_512_8_0_0.02_0.1_2_0_1_1_aie1_hw_qor": {
         "FUNC_CHOICE": "4",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -1087,7 +1551,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "4_int16_8_7_1_512_8_0_2_0_1_2_aie2_hw_qor": {
+    "4_int16_8_7_1_512_8_0_0.02_0.1_2_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "4",
         "DATA_TYPE": "int16",
         "COARSE_BITS": "8",
@@ -1103,7 +1567,7 @@
         "ROUND_MODE": "0",
         "SAT_MODE": "1"
     },
-    "4_int32_8_7_1_512_8_0_2_0_1_1_aie1_hw_qor": {
+    "4_int32_8_7_1_512_8_0_0.02_0.1_2_0_1_1_aie1_hw_qor": {
         "FUNC_CHOICE": "4",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -1119,7 +1583,7 @@
         "SAT_MODE": "1",
         "AIE_VARIANT": "1"
     },
-    "4_int32_8_7_1_512_8_0_2_0_1_2_aie2_hw_qor": {
+    "4_int32_8_7_1_512_8_0_0.02_0.1_2_0_1_2_aie2_hw_qor": {
         "FUNC_CHOICE": "4",
         "DATA_TYPE": "int32",
         "COARSE_BITS": "8",
@@ -1128,6 +1592,22 @@
         "WINDOW_VSIZE": "512",
         "NITER": "8",
         "AIE_VARIANT": "2",
+        "STIM_TYPE": "0",
+        "DIFF_TOLERANCE": "0.02",
+        "CC_TOLERANCE": "0.1",
+        "SHIFT": "2",
+        "ROUND_MODE": "0",
+        "SAT_MODE": "1"
+    },
+    "4_int32_8_7_1_512_8_0_0.02_0.1_2_0_1_22_aie22_hw_qor": {
+        "FUNC_CHOICE": "4",
+        "DATA_TYPE": "int32",
+        "COARSE_BITS": "8",
+        "FINE_BITS": "7",
+        "DOMAIN_MODE": "1",
+        "WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "AIE_VARIANT": "22",
         "STIM_TYPE": "0",
         "DIFF_TOLERANCE": "0.02",
         "CC_TOLERANCE": "0.1",

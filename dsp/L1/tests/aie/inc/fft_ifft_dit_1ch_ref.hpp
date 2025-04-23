@@ -36,7 +36,7 @@ namespace dit_1ch {
 
 #include "fft_ref_utils.hpp"
 
-constexpr int kFftDynHeadBytes = 32;
+constexpr int kFftDynHeadBytes = __ALIGN_BYTE_SIZE__;
 
 //-----------------------------------------------------------------------------------------------------
 // FFT/iFFT DIT single channel reference model class

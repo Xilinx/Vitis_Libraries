@@ -69,20 +69,28 @@ test_arr=()
 
 if [[ "$*" == *checkin* ]]
 then
-# POINT_SIZE=16
     test_arr[${#test_arr[*]}]="make all SSR=5 AIE_VARIANT=1"
     test_arr[${#test_arr[*]}]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint32 AIE_VARIANT=1"
     test_arr[${#test_arr[*]}]="make all POINT_SIZE=8192 PARALLEL_POWER=1 AIE_VARIANT=1"
     test_arr[${#test_arr[*]}]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat SHIFT=0 POINT_SIZE=4096 AIE_VARIANT=1"
     test_arr[${#test_arr[*]}]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint32 SHIFT=5 POINT_SIZE=16384 AIE_VARIANT=1"
     test_arr[${#test_arr[*]}]="make all PART=xcve2802-vsvh1760-2MP-e-S AIE_VARIANT=2 ROUND_MODE=11"
-    test_arr[${#test_arr[*]}]="make all PART=xcve2802-vsvh1760-2MP-e-S SSR=5  AIE_PLIO_WIDTH=64 AIE_VARIANT=2 ROUND_MODE=11"
+    test_arr[${#test_arr[*]}]="make all PART=xcve2802-vsvh1760-2MP-e-S SSR=5  AIE_PLIO_WIDTH=128 AIE_VARIANT=2 ROUND_MODE=11"
     test_arr[${#test_arr[*]}]="make all PART=xcve2802-vsvh1760-2MP-e-S POINT_SIZE=32768 AIE_VARIANT=2 ROUND_MODE=11"
+# vss_mode = 2
+    test_arr[${#test_arr[*]}]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat SHIFT=0 POINT_SIZE=4096 AIE_VARIANT=1 SSR=4 VSS_MODE=2"
+    test_arr[${#test_arr[*]}]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat SHIFT=0 POINT_SIZE=8192 AIE_VARIANT=1 SSR=16 VSS_MODE=2"
+    test_arr[${#test_arr[*]}]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat SHIFT=0 POINT_SIZE=16384 AIE_VARIANT=1 SSR=16 VSS_MODE=2"
+    test_arr[${#test_arr[*]}]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat SHIFT=0 POINT_SIZE=32768 AIE_VARIANT=1 SSR=32 VSS_MODE=2 AIE_PLIO_WIDTH=64"
+    test_arr[${#test_arr[*]}]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat SHIFT=0 POINT_SIZE=32768 AIE_VARIANT=1 SSR=64 VSS_MODE=2 AIE_PLIO_WIDTH=64"
+#    test_arr[${#test_arr[*]}]="make all  PART=xcve2802-vsvh1760-2MP-e-S  DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat SHIFT=0 POINT_SIZE=4096 AIE_VARIANT=2 SSR=4 VSS_MODE=2"
+#    test_arr[${#test_arr[*]}]="make all  PART=xcve2802-vsvh1760-2MP-e-S  DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat SHIFT=0 POINT_SIZE=16384 AIE_VARIANT=2 SSR=16 VSS_MODE=2"
+#    test_arr[${#test_arr[*]}]="make all  PART=xcve2802-vsvh1760-2MP-e-S  DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat SHIFT=0 POINT_SIZE=65536 AIE_VARIANT=2 SSR=32 VSS_MODE=2"
 fi
 
 if [[ "$*" == *qor* ]]
 then
-# POINT_SIZE=16
+# POINT_SIZE=16i
     test_arr[${#test_arr[*]}]="make all SSR=8"
 fi
 

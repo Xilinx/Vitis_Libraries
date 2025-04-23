@@ -37,7 +37,8 @@ template <typename TT_DATA,
           unsigned int TP_DIM,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_ASCENDING,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN = 1,
+          unsigned int TP_SSR = 1>
 class bitonic_sort_ref_graph : public graph {
    public:
     static constexpr int kDim = TP_DIM;
@@ -57,7 +58,7 @@ class bitonic_sort_ref_graph : public graph {
         printf("TP_ASCENDING            = %d\n", TP_ASCENDING);
         printf("TP_CASC_LEN             = %d\n", TP_CASC_LEN);
 
-        m_kernel = kernel::create_object<bitonic_sort_ref<TT_DATA, kDim, TP_NUM_FRAMES, TP_ASCENDING, 1> >();
+        m_kernel = kernel::create_object<bitonic_sort_ref<TT_DATA, kDim, TP_NUM_FRAMES, TP_ASCENDING, 1, 1> >();
 
         // Specify mapping constraints
         runtime<ratio>(m_kernel) = 0.9; // Nominal figure. The real figure requires knowledge of the sample

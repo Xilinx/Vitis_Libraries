@@ -121,7 +121,8 @@ class ct_kernels {
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         \n
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML and AIE-MLv2 device.
+ *\n
  * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph
  *         in a single iteration run.  \n
  *         When TP_API is set to 0, samples are buffered and stored in a ping-pong window buffer mapped onto Memory
@@ -257,12 +258,12 @@ class fir_decimate_hb_graph : public graph {
                   "ERROR: Exceeded maximum supported FIR length with reloadable coefficients. Please limit the FIR "
                   "length or disable coefficient reload.");
 
-    static constexpr unsigned int kMemoryModuleSize = 32768;
+    static constexpr unsigned int kMemoryModuleSize = __DATA_MEM_BYTES__;
     static constexpr unsigned int inBufferSize = ((TP_FIR_LEN + TP_INPUT_WINDOW_VSIZE / TP_SSR) * sizeof(TT_DATA));
     // Requested Input Window buffer exceeds memory module size
     static_assert(TP_API != 0 || inBufferSize < kMemoryModuleSize,
                   "ERROR: Input Window size (based on requested window size and FIR length margin) exceeds Memory "
-                  "Module size of 32kB");
+                  "Module size of 32kB for AIE-1 and 64kB for AIE-ML devices.");
     static_assert(
         TP_SSR == 1 || TP_PARA_DECI_POLY == 2,
         "Please set TP_PARA_DECI_POLY=2 for SSR>1; SSR>1 and TP_PARA_DECI_POLY=1 are currently not supported");
@@ -404,7 +405,7 @@ class fir_decimate_hb_graph : public graph {
                     constexpr(TP_DUAL_IP == 1) { connect<stream>(in2[2 * i], in2_dummy[i]); }
             }
             // Only first kernels in chain are configured with RTP port.
-            // Subsequent kernels in cascade chain expect it's coneffs to be passed through the cascade IF.
+            // Subsequent kernels in cascade chain expect its coeffs to be passed through the cascade IF.
             // Since the first in chain is the CT one, a dummy one is passed to Asym kernels to mark the distinction.
             typename lastSSRKernelSrAsym::coeff_type coeff_dummy;
             lastSSRKernelSrAsym::create_connections(m_firKernels, &in_dummy[0], in2_dummy, &out[0], out2, coeff_dummy,

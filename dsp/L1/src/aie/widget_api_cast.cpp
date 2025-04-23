@@ -128,6 +128,11 @@ INLINE_DECL void kernelClass<TT_DATA,
                     if
                         constexpr(TP_NUM_OUTPUT_CLONES >= 4)* out128Ptr3++ = readVal1;
                 }
+            // since the header has been output, all output 256b pointers must move on.
+            outPtr0++;
+            outPtr1++;
+            outPtr2++;
+            outPtr3++;
         }
 
     if
@@ -395,7 +400,7 @@ INLINE_DECL void kernelClass<TT_DATA,
     using t512v = ::aie::vector<TT_DATA, kSamplesIn256b * 2>;
     using accTag = typename tFFTAccBaseType<TT_DATA>::type;
     using accVect_t = ::aie::accum<accTag, kCascVWidth>;
-    input_stream<accTag>* __restrict inCasc0 = (input_stream<accTag>*)inInterface.inStream0;
+    input_cascade<accTag>* __restrict inCasc0 = (input_cascade<accTag>*)inInterface.inStream0;
     accVect_t acc;
     t256v readVal1, readVal1a, readVal1b;
     t256v readVal2;
@@ -458,7 +463,7 @@ INLINE_DECL void kernelClass<TT_DATA,
     using t512v = ::aie::vector<TT_DATA, kSamplesIn256b * 2>;
     using accTag = typename tFFTAccBaseType<TT_DATA>::type;
     using accVect_t = ::aie::accum<accTag, kCascVWidth>;
-    input_stream<accTag>* __restrict inCasc1 = (input_stream<accTag>*)inInterface.inStream1;
+    input_cascade<accTag>* __restrict inCasc1 = (input_cascade<accTag>*)inInterface.inStream1;
     accVect_t acc;
     t256v readVal1, readVal1a, readVal1b;
     t256v readVal2;
@@ -527,7 +532,7 @@ INLINE_DECL void kernelClass<TT_DATA,
     using accTag = typename tFFTAccBaseType<TT_DATA>::type;
     using accVect_t = ::aie::accum<accTag, kCascVWidth>;
     accVect_t acc;
-    output_stream<accTag>* __restrict outCasc0 = (output_stream<accTag>*)outInterface.outStream0;
+    output_cascade<accTag>* __restrict outCasc0 = (output_cascade<accTag>*)outInterface.outStream0;
 
     if
         constexpr(TP_HEADER_BYTES > 0) {
@@ -587,7 +592,7 @@ INLINE_DECL void kernelClass<TT_DATA,
     using accTag = typename tFFTAccBaseType<TT_DATA>::type;
     using accVect_t = ::aie::accum<accTag, kCascVWidth>;
     accVect_t acc;
-    output_stream<accTag>* __restrict outCasc1 = (output_stream<accTag>*)outInterface.outStream1;
+    output_cascade<accTag>* __restrict outCasc1 = (output_cascade<accTag>*)outInterface.outStream1;
 
     if
         constexpr(TP_HEADER_BYTES > 0) {

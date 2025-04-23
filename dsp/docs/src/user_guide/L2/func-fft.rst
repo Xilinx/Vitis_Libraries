@@ -9,13 +9,13 @@
 FFT/iFFT
 ========
 
-The DSPLib contains two different FFT/iFFT solutions. The first AIE-only implementation is recommended for point sizes less than or equal to 4096, or for configurations which do not require Super Sample Rate performance. The second AIE+PL implementation is recommended for larger point sizes and Super Sample Rate performance. While both support super-sample-rate, the AIE+PL uses resources more efficiently. 
+The DSPLib contains two different FFT/iFFT solutions. The first AI Engine-only implementation is recommended for point sizes less than or equal to 4096, or for configurations which do not require Super Sample Rate performance. The second AI Engine + PL implementation is recommended for larger point sizes and Super Sample Rate performance. While both support super-sample-rate, the AI Engine+PL uses resources more efficiently. 
 
 .. toctree::
    :maxdepth: 1
 
-   FFT/IFFT 1CH (AIE-only) <func-fft-ifft-aie-only.rst>
-   VSS FFT/IFFT 1CH (AIE + PL) <func-fft-vss.rst>
+   FFT/IFFT 1CH (AI Engine-only) <func-fft-ifft-aie-only.rst>
+   VSS FFT/IFFT 1CH (AI Engine + PL) <func-fft-vss.rst>
 
 
 .. |image1| image:: ./media/image1.png

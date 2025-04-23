@@ -19,7 +19,7 @@ The metrics reported for each case are:
 - **Latency**: The time delay between the first input sample and the first output sample. If there are multiple ports, the latency is recorded from the first input and first output port.
 - **Throughput**: Input throughput calculated based on the number of samples per iteration and the time between each consecutive iteration.
 - **NUM_BANKS**: Number of memory banks used by the design.
-- **NUM_AIE**: Number of AIE tiles used by the design.
+- **NUM_AIE**: Number of AI Engine tiles used by the design.
 - **DATA_MEMORY**: Total data memory in bytes used by the design.
 - **PROGRAM_MEMORY**: Program memory in bytes used by each kernel.
 
@@ -95,6 +95,9 @@ The following table gives results for the DFT function with a wide variety of su
    :align: center
    :header-rows: 1
    :widths: auto
+
+The following table gives an extended dataset for DFT function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_DFT`.
+:download:`dft_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/dft_database.csv>`
 
 FFT IFFT DIT 1CH
 ================

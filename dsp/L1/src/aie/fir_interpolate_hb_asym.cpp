@@ -1070,7 +1070,7 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_WINDOW_API,
                              TP_SAT>::filter(input_async_buffer<TT_DATA,
                                                                 extents<inherited_extent> >& __restrict inWindow,
-                                             input_stream_cacc48* inCascade,
+                                             input_cascade_cacc* inCascade,
                                              output_circular_buffer<TT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -1112,7 +1112,7 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_WINDOW_API,
                              TP_SAT>::filter(input_async_buffer<TT_DATA,
                                                                 extents<inherited_extent> >& __restrict inWindow,
-                                             input_stream_cacc48* inCascade,
+                                             input_cascade_cacc* inCascade,
                                              output_circular_buffer<TT_DATA>& __restrict outWindow,
                                              output_circular_buffer<TT_DATA>& __restrict outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
@@ -1156,7 +1156,7 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_WINDOW_API,
                              TP_SAT>::filter(input_async_buffer<TT_DATA,
                                                                 extents<inherited_extent> >& __restrict inWindow,
-                                             input_stream_cacc48* inCascade,
+                                             input_cascade_cacc* inCascade,
                                              output_circular_buffer<TT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -1198,7 +1198,7 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_WINDOW_API,
                              TP_SAT>::filter(input_async_buffer<TT_DATA,
                                                                 extents<inherited_extent> >& __restrict inWindow,
-                                             input_stream_cacc48* inCascade,
+                                             input_cascade_cacc* inCascade,
                                              output_circular_buffer<TT_DATA>& __restrict outWindow,
                                              output_circular_buffer<TT_DATA>& __restrict outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
@@ -1244,7 +1244,7 @@ void fir_interpolate_hb_asym<TT_DATA,
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& __restrict inWindow,
-           output_stream_cacc48* outCascade,
+           output_cascade_cacc* outCascade,
            output_async_buffer<TT_DATA>& __restrict broadcastWindow) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_SINGLE> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -1293,7 +1293,7 @@ void fir_interpolate_hb_asym<TT_DATA,
                TT_DATA,
                extents<inherited_extent>,
                margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& __restrict inWindowReverse,
-           output_stream_cacc48* outCascade,
+           output_cascade_cacc* outCascade,
            output_async_buffer<TT_DATA>& __restrict broadcastWindow) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -1340,7 +1340,7 @@ void fir_interpolate_hb_asym<TT_DATA,
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& __restrict inWindow,
-           output_stream_cacc48* outCascade,
+           output_cascade_cacc* outCascade,
            output_async_buffer<TT_DATA>& __restrict broadcastWindow,
            const TT_COEFF (&inTaps)[getHbTaps(TP_FIR_LEN)]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_SINGLE> inInterface;
@@ -1390,7 +1390,7 @@ void fir_interpolate_hb_asym<TT_DATA,
                TT_DATA,
                extents<inherited_extent>,
                margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& __restrict inWindowReverse,
-           output_stream_cacc48* outCascade,
+           output_cascade_cacc* outCascade,
            output_async_buffer<TT_DATA>& __restrict broadcastWindow,
            const TT_COEFF (&inTaps)[getHbTaps(TP_FIR_LEN)]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
@@ -1437,8 +1437,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              TP_UPSHIFT_CT,
                              USE_WINDOW_API,
                              TP_SAT>::filter(input_async_buffer<TT_DATA>& __restrict inWindow,
-                                             input_stream_cacc48* inCascade,
-                                             output_stream_cacc48* outCascade,
+                                             input_cascade_cacc* inCascade,
+                                             output_cascade_cacc* outCascade,
                                              output_async_buffer<TT_DATA>& __restrict broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -1480,8 +1480,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              TP_UPSHIFT_CT,
                              USE_WINDOW_API,
                              TP_SAT>::filter(input_async_buffer<TT_DATA>& __restrict inWindow,
-                                             input_stream_cacc48* inCascade,
-                                             output_stream_cacc48* outCascade,
+                                             input_cascade_cacc* inCascade,
+                                             output_cascade_cacc* outCascade,
                                              output_async_buffer<TT_DATA>& __restrict broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -1685,7 +1685,7 @@ void fir_interpolate_hb_asym<TT_DATA,
                              TP_UPSHIFT_CT,
                              USE_STREAM_API,
                              TP_SAT>::filter(input_stream<TT_DATA>* inStream,
-                                             input_stream_cacc48* inCascade,
+                                             input_cascade_cacc* inCascade,
                                              output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -1726,7 +1726,7 @@ void fir_interpolate_hb_asym<TT_DATA,
                              TP_UPSHIFT_CT,
                              USE_STREAM_API,
                              TP_SAT>::filter(input_stream<TT_DATA>* inStream,
-                                             input_stream_cacc48* inCascade,
+                                             input_cascade_cacc* inCascade,
                                              output_stream<TT_DATA>* outStream,
                                              output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
@@ -1767,7 +1767,7 @@ void fir_interpolate_hb_asym<TT_DATA,
                              1,
                              TP_UPSHIFT_CT,
                              USE_STREAM_API,
-                             TP_SAT>::filter(input_stream<TT_DATA>* inStream, output_stream_cacc48* outCascade) {
+                             TP_SAT>::filter(input_stream<TT_DATA>* inStream, output_cascade_cacc* outCascade) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_SINGLE> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -1806,8 +1806,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              TP_UPSHIFT_CT,
                              USE_STREAM_API,
                              TP_SAT>::filter(input_stream<TT_DATA>* inStream,
-                                             input_stream_cacc48* inCascade,
-                                             output_stream_cacc48* outCascade) {
+                                             input_cascade_cacc* inCascade,
+                                             output_cascade_cacc* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_SINGLE> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -1848,7 +1848,7 @@ void fir_interpolate_hb_asym<TT_DATA,
                              TP_UPSHIFT_CT,
                              USE_STREAM_API,
                              TP_SAT>::filter(input_stream<TT_DATA>* inStream,
-                                             input_stream_cacc48* inCascade,
+                                             input_cascade_cacc* inCascade,
                                              output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -1890,7 +1890,7 @@ void fir_interpolate_hb_asym<TT_DATA,
                              TP_UPSHIFT_CT,
                              USE_STREAM_API,
                              TP_SAT>::filter(input_stream<TT_DATA>* inStream,
-                                             input_stream_cacc48* inCascade,
+                                             input_cascade_cacc* inCascade,
                                              output_stream<TT_DATA>* outStream,
                                              output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
@@ -1932,7 +1932,7 @@ void fir_interpolate_hb_asym<TT_DATA,
                              TP_UPSHIFT_CT,
                              USE_STREAM_API,
                              TP_SAT>::filter(input_stream<TT_DATA>* inStream,
-                                             output_stream_cacc48* outCascade,
+                                             output_cascade_cacc* outCascade,
                                              const TT_COEFF (&inTaps)[getHbTaps(TP_FIR_LEN)]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_SINGLE> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -1972,8 +1972,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              TP_UPSHIFT_CT,
                              USE_STREAM_API,
                              TP_SAT>::filter(input_stream<TT_DATA>* inStream,
-                                             input_stream_cacc48* inCascade,
-                                             output_stream_cacc48* outCascade) {
+                                             input_cascade_cacc* inCascade,
+                                             output_cascade_cacc* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;

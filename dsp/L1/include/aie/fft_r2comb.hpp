@@ -46,11 +46,6 @@ using namespace adf;
 #include "fft_ifft_dit_1ch_traits.hpp"
 #include "widget_api_cast_traits.hpp"
 
-#ifndef __SUPPORTS_ACC64__
-using output_stream_cacc64 = output_stream_cacc80;
-using input_stream_cacc64 = input_stream_cacc80;
-#endif //__SUPPORTS_ACC64__
-
 using namespace xf::dsp::aie::widget::api_cast; // for API definitions like kStreamAPI
 
 #ifndef _DSPLIB_FFT_R2COMB_HPP_DEBUG_
@@ -111,9 +106,10 @@ class fft_r2comb : public fft_r2comb_r2stage<TT_DATA,
                                              TP_ORIG_PAR_POWER,
                                              TP_TWIDDLE_MODE> {
    public:
-    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
-    TT_DATA (&inBuff)[kBufferSize];
-    TT_DATA (&outBuff)[kBufferSize];
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_DATA);
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&inBuff)[kBufferSize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&outBuff)[kBufferSize];
 
     // Constructor
     fft_r2comb(TT_DATA (&myInBuff)[kBufferSize], TT_DATA (&myOutBuff)[kBufferSize])
@@ -173,9 +169,10 @@ class fft_r2comb<TT_DATA,
                                                               TP_ORIG_PAR_POWER,
                                                               TP_TWIDDLE_MODE> {
    public:
-    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
-    TT_DATA (&inBuff)[kBufferSize];
-    TT_DATA (&outBuff)[kBufferSize];
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_DATA);
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&inBuff)[kBufferSize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&outBuff)[kBufferSize];
 
     // Constructor
     fft_r2comb(TT_DATA (&myInBuff)[kBufferSize], TT_DATA (&myOutBuff)[kBufferSize])
@@ -189,7 +186,7 @@ class fft_r2comb<TT_DATA,
     }
 
     // r2comb main
-    void fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // Cascade
+    void fft_r2comb_main(input_cascade<cacc64>* __restrict inStream0, // Cascade
                          input_stream<TT_DATA>* __restrict inStream1,
                          output_stream<TT_DATA>* __restrict outStream0);
 };
@@ -234,9 +231,10 @@ class fft_r2comb<TT_DATA,
                                                               TP_ORIG_PAR_POWER,
                                                               TP_TWIDDLE_MODE> {
    public:
-    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
-    TT_DATA (&inBuff)[kBufferSize];
-    TT_DATA (&outBuff)[kBufferSize];
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_DATA);
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&inBuff)[kBufferSize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&outBuff)[kBufferSize];
 
     // Constructor
     fft_r2comb(TT_DATA (&myInBuff)[kBufferSize], TT_DATA (&myOutBuff)[kBufferSize])
@@ -250,9 +248,9 @@ class fft_r2comb<TT_DATA,
     }
 
     // r2comb main
-    void fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // Cascade
+    void fft_r2comb_main(input_cascade<cacc64>* __restrict inStream0, // Cascade
                          input_stream<TT_DATA>* __restrict inStream1,
-                         output_stream_cacc64* __restrict outStream0, // Cascade
+                         output_cascade<cacc64>* __restrict outStream0, // Cascade
                          output_stream<TT_DATA>* __restrict outStream1);
 };
 
@@ -296,9 +294,10 @@ class fft_r2comb<TT_DATA,
                                                               TP_ORIG_PAR_POWER,
                                                               TP_TWIDDLE_MODE> {
    public:
-    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
-    TT_DATA (&inBuff)[kBufferSize];
-    TT_DATA (&outBuff)[kBufferSize];
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_DATA);
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&inBuff)[kBufferSize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&outBuff)[kBufferSize];
 
     // Constructor
     fft_r2comb(TT_DATA (&myInBuff)[kBufferSize], TT_DATA (&myOutBuff)[kBufferSize])
@@ -312,10 +311,10 @@ class fft_r2comb<TT_DATA,
     }
 
     // r2comb main
-    void fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // Cascade
+    void fft_r2comb_main(input_cascade<cacc64>* __restrict inStream0, // Cascade
                          input_stream<TT_DATA>* __restrict inStream1,
                          output_stream<TT_DATA>* __restrict outStream0,
-                         output_stream_cacc64* __restrict outStream1); // Cascade
+                         output_cascade<cacc64>* __restrict outStream1); // Cascade
 };
 
 // Specialization for Stream/Cascade in, single Stream out
@@ -358,9 +357,10 @@ class fft_r2comb<TT_DATA,
                                                               TP_ORIG_PAR_POWER,
                                                               TP_TWIDDLE_MODE> {
    public:
-    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
-    TT_DATA (&inBuff)[kBufferSize];
-    TT_DATA (&outBuff)[kBufferSize];
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_DATA);
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&inBuff)[kBufferSize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&outBuff)[kBufferSize];
 
     // Constructor
     fft_r2comb(TT_DATA (&myInBuff)[kBufferSize], TT_DATA (&myOutBuff)[kBufferSize])
@@ -375,7 +375,7 @@ class fft_r2comb<TT_DATA,
 
     // r2comb main
     void fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                         input_stream_cacc64* __restrict inStream1, // Cascade
+                         input_cascade<cacc64>* __restrict inStream1, // Cascade
                          output_stream<TT_DATA>* __restrict outStream0);
 };
 
@@ -419,9 +419,10 @@ class fft_r2comb<TT_DATA,
                                                               TP_ORIG_PAR_POWER,
                                                               TP_TWIDDLE_MODE> {
    public:
-    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
-    TT_DATA (&inBuff)[kBufferSize];
-    TT_DATA (&outBuff)[kBufferSize];
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_DATA);
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&inBuff)[kBufferSize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&outBuff)[kBufferSize];
 
     // Constructor
     fft_r2comb(TT_DATA (&myInBuff)[kBufferSize], TT_DATA (&myOutBuff)[kBufferSize])
@@ -436,8 +437,8 @@ class fft_r2comb<TT_DATA,
 
     // r2comb main
     void fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                         input_stream_cacc64* __restrict inStream1,   // Cascade
-                         output_stream_cacc64* __restrict outStream0, // Cascade
+                         input_cascade<cacc64>* __restrict inStream1,   // Cascade
+                         output_cascade<cacc64>* __restrict outStream0, // Cascade
                          output_stream<TT_DATA>* __restrict outStream1);
 };
 
@@ -481,9 +482,10 @@ class fft_r2comb<TT_DATA,
                                                               TP_ORIG_PAR_POWER,
                                                               TP_TWIDDLE_MODE> {
    public:
-    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
-    TT_DATA (&inBuff)[kBufferSize];
-    TT_DATA (&outBuff)[kBufferSize];
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_DATA);
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&inBuff)[kBufferSize];
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&outBuff)[kBufferSize];
 
     // Constructor
     fft_r2comb(TT_DATA (&myInBuff)[kBufferSize], TT_DATA (&myOutBuff)[kBufferSize])
@@ -498,9 +500,9 @@ class fft_r2comb<TT_DATA,
 
     // r2comb main
     void fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                         input_stream_cacc64* __restrict inStream1, // Cascade
+                         input_cascade<cacc64>* __restrict inStream1, // Cascade
                          output_stream<TT_DATA>* __restrict outStream0,
-                         output_stream_cacc64* __restrict outStream1); // Cascade
+                         output_cascade<cacc64>* __restrict outStream1); // Cascade
 };
 
 // Specialization for Streams in, single Window out
@@ -543,8 +545,9 @@ class fft_r2comb<TT_DATA,
                                                               TP_ORIG_PAR_POWER,
                                                               TP_TWIDDLE_MODE> {
    public:
-    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
-    TT_DATA (&inBuff)[kBufferSize];
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_DATA);
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&inBuff)[kBufferSize];
 
     // Constructor
     fft_r2comb(TT_DATA (&myInBuff)[kBufferSize]) : inBuff(myInBuff) {}
@@ -601,8 +604,9 @@ class fft_r2comb<TT_DATA,
                                                               TP_ORIG_PAR_POWER,
                                                               TP_TWIDDLE_MODE> {
    public:
-    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
-    TT_DATA (&inBuff)[kBufferSize];
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_DATA);
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&inBuff)[kBufferSize];
 
     // Constructor
     fft_r2comb(TT_DATA (&myInBuff)[kBufferSize]) : inBuff(myInBuff) {}
@@ -614,7 +618,7 @@ class fft_r2comb<TT_DATA,
     }
 
     // r2comb main
-    void fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // Cascade
+    void fft_r2comb_main(input_cascade<cacc64>* __restrict inStream0, // Cascade
                          input_stream<TT_DATA>* __restrict inStream1,
                          output_buffer<TT_DATA>& __restrict outWindow0);
 };
@@ -659,8 +663,9 @@ class fft_r2comb<TT_DATA,
                                                               TP_ORIG_PAR_POWER,
                                                               TP_TWIDDLE_MODE> {
    public:
-    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
-    TT_DATA (&inBuff)[kBufferSize];
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_DATA);
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&inBuff)[kBufferSize];
 
     // Constructor
     fft_r2comb(TT_DATA (&myInBuff)[kBufferSize]) : inBuff(myInBuff) {}
@@ -673,7 +678,7 @@ class fft_r2comb<TT_DATA,
 
     // r2comb main
     void fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                         input_stream_cacc64* __restrict inStream1, // Cascade
+                         input_cascade<cacc64>* __restrict inStream1, // Cascade
                          output_buffer<TT_DATA>& __restrict outWindow0);
 };
 
@@ -717,7 +722,8 @@ class fft_r2comb<TT_DATA,
                                                               TP_ORIG_PAR_POWER,
                                                               TP_TWIDDLE_MODE> {
    public:
-    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
+    static constexpr int kHeaderSize = __ALIGN_BYTE_SIZE__;
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * kHeaderSize / sizeof(TT_DATA);
 
     // Constructor
     fft_r2comb() {}

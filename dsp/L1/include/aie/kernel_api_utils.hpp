@@ -623,6 +623,36 @@ INLINE_DECL void writeOutput(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
     }
 }
 
+// Prevent the superfluous VSHUFFLEs on cascaded kernels,
+// where complex and real data are zipped to a complex form,
+// only to be unzipped on the other end.
+template <typename TT_DATA, typename TT_COEFF>
+INLINE_DECL constexpr bool isShuffleNeeded() {
+#ifdef __chess__
+    using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
+
+    constexpr int isShuffleRequiredOnDev = (__SHUFFLE_CASCADE__ == 1) ? 1 : 0;
+    constexpr int isShuffleRequiredDataType =
+        ((std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, int16>::value) ||
+         (std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, cint16>::value) ||
+         (std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, int32>::value) ||
+         // (std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, cint32>::value) || - not complex coeffs.
+         (std::is_same<TT_DATA, cint32>::value && std::is_same<TT_COEFF, int16>::value) ||
+         // (std::is_same<TT_DATA, cint32>::value && std::is_same<TT_COEFF, cint32>::value) || - not complex coeffs.
+         (std::is_same<TT_DATA, cint32>::value && std::is_same<TT_COEFF, int32>::value))
+            ? 1
+            : 0;
+    if
+        constexpr(isShuffleRequiredOnDev == 1 && isShuffleRequiredDataType == 1) { return true; }
+    else {
+        return false;
+    }
+
+#else
+    return false;
+#endif
+};
+
 // Overloaded function to skip writing to cascade output.
 template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL void writeCascade(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface, T_acc<TT_DATA, TT_COEFF> acc) {
@@ -632,9 +662,23 @@ INLINE_DECL void writeCascade(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface, 
 // Overloaded function to write to cascade output.
 template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL void writeCascade(T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface, T_acc<TT_DATA, TT_COEFF> acc) {
-    //    using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
     using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
-    writeincr<accTag, fnNumLanes<TT_DATA, TT_COEFF>()>((output_cascade<accTag>*)outInterface.outCascade, acc.val);
+
+    auto accumulator = acc.val;
+#if __SHUFFLE_CASCADE__ == 1
+    if
+        constexpr(isShuffleNeeded<TT_DATA, TT_COEFF>()) {
+            auto[lo, hi] = ::aie::detail::unzip_complex(accumulator);
+
+            constexpr unsigned N = decltype(lo)::size();
+            auto tmp = lo.template grow<N * 2>();
+            tmp.insert(1, hi);
+
+            accumulator = tmp.template cast_to<cacc64>();
+        }
+#endif
+
+    writeincr<accTag, fnNumLanes<TT_DATA, TT_COEFF>()>((output_cascade<accTag>*)outInterface.outCascade, accumulator);
 }
 
 // Overloaded function to write to cascade output.
@@ -646,9 +690,24 @@ INLINE_DECL void writeCascade(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface, 
 // Overloaded function to write to cascade output.
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DUAL_IP = 0>
 INLINE_DECL void writeCascade(T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface, T_acc384<TT_DATA, TT_COEFF> acc) {
-    // using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
     using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
-    writeincr<accTag, fnNumLanes384<TT_DATA, TT_COEFF>()>((output_cascade<accTag>*)outInterface.outCascade, acc.val);
+    auto accumulator = acc.val;
+
+#if __SHUFFLE_CASCADE__ == 1
+    if
+        constexpr(isShuffleNeeded<TT_DATA, TT_COEFF>()) {
+            auto[lo, hi] = ::aie::detail::unzip_complex(accumulator);
+
+            constexpr unsigned N = decltype(lo)::size();
+            auto tmp = lo.template grow<N * 2>();
+            tmp.insert(1, hi);
+
+            accumulator = tmp.template cast_to<cacc64>();
+        }
+#endif
+
+    writeincr<accTag, fnNumLanes384<TT_DATA, TT_COEFF>()>((output_cascade<accTag>*)outInterface.outCascade,
+                                                          accumulator);
 }
 
 // Overloaded function to read from cascade input.
@@ -670,7 +729,18 @@ INLINE_DECL T_acc<TT_DATA, TT_COEFF> readCascade(T_inputIF<true, TT_DATA, TP_DUA
     T_acc<TT_DATA, TT_COEFF> ret;
     // using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
     using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
-    ret.val = readincr_v<fnNumLanes<TT_DATA, TT_COEFF>(), accTag>((input_cascade<accTag>*)inInterface.inCascade);
+    auto accumulator =
+        readincr_v<fnNumLanes<TT_DATA, TT_COEFF>(), accTag>((input_cascade<accTag>*)inInterface.inCascade);
+#if __SHUFFLE_CASCADE__ == 1
+    if
+        constexpr(isShuffleNeeded<TT_DATA, TT_COEFF>()) {
+            auto lo = accumulator.template extract<acc.val.size() / 2>(0).template cast_to<acc64>();
+            auto hi = accumulator.template extract<acc.val.size() / 2>(1).template cast_to<acc64>();
+            accumulator = ::aie::detail::combine_into_complex(lo, hi);
+        }
+#endif
+
+    ret.val = accumulator;
     return ret;
 };
 
@@ -680,7 +750,6 @@ INLINE_DECL T_acc384<TT_DATA, TT_COEFF> readCascade(T_inputIF<false, TT_DATA, TP
                                                     T_acc384<TT_DATA, TT_COEFF> acc) {
     // Do nothing
     T_acc384<TT_DATA, TT_COEFF> ret;
-    // using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
     using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
     ret.val = ::aie::zeros<accTag, ret.val.size()>();
     return ret;
@@ -691,9 +760,19 @@ template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DUAL_IP = 0>
 INLINE_DECL T_acc384<TT_DATA, TT_COEFF> readCascade(T_inputIF<true, TT_DATA, TP_DUAL_IP> inInterface,
                                                     T_acc384<TT_DATA, TT_COEFF> acc) {
     T_acc384<TT_DATA, TT_COEFF> ret;
-    // using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
     using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
-    ret.val = readincr_v<fnNumLanes384<TT_DATA, TT_COEFF>(), accTag>((input_cascade<accTag>*)inInterface.inCascade);
+
+    auto accumulator =
+        readincr_v<fnNumLanes384<TT_DATA, TT_COEFF>(), accTag>((input_cascade<accTag>*)inInterface.inCascade);
+#if __SHUFFLE_CASCADE__ == 1
+    if
+        constexpr(isShuffleNeeded<TT_DATA, TT_COEFF>()) {
+            auto lo = accumulator.template extract<acc.val.size() / 2>(0).template cast_to<acc64>();
+            auto hi = accumulator.template extract<acc.val.size() / 2>(1).template cast_to<acc64>();
+            accumulator = ::aie::detail::combine_into_complex(lo, hi);
+        }
+#endif
+    ret.val = accumulator;
     return ret;
 };
 

@@ -51,15 +51,15 @@ if { $::argc >= 6} {
     # any entry sets absolute tolerance mode on
     set toleranceMode               [lindex $argv 5]
     puts  "toleranceMode = $toleranceMode"
-        if {($toleranceMode == "abs")|| ($toleranceMode == "ABS") } {
-            set toleranceMode  abs
-            # Absolute tolerance Mode
-           puts "Using Absolute Tolerance Mode"
-           puts  "tolerance = $tolerance"
-        } else {
-            # Percentage tolerance Mode
-           puts "Using Percentage Tolerance Mode"
-        }
+    if {($toleranceMode == "abs")|| ($toleranceMode == "ABS") } {
+        set toleranceMode  abs
+        # Absolute tolerance Mode
+        puts "Using Absolute Tolerance Mode"
+        puts  "tolerance = $tolerance"
+    } else {
+        # Percentage tolerance Mode
+        puts "Using Percentage Tolerance Mode"
+    }
 } else {
     # Default abs off ( i.e. percentage tolerance mode on )
     set toleranceMode         percent
@@ -68,16 +68,28 @@ if { $::argc >= 6} {
     puts "Using Percentage Tolerance Mode"
 }
 
+# Validate tolerance for percentage mode
+if {($toleranceMode == "percent" || $toleranceMode == "PERCENT") && $tolerance > 0.5} {
+    puts "error: Tolerance for percentage mode should not exceed 0.5 (50%)."
+    exit 1
+}
 
-# global variable to track max difference
+# global variable to track max difference and zero samples
 set maxDiffVal 0
 set sampleNum 0
+set zeroSamples 0
+
 proc isSame {a b tolerance toleranceMode} {
     variable maxDiffVal
     variable sampleNum
+    variable zeroSamples
+
+    if {($a == 0.0 && $b == 0.0)} {
+        incr zeroSamples
+    }
 
     if {(($a == 0.0) && ($toleranceMode != "abs"))} {
-    # Avoid division by 0
+        # Avoid division by 0
         if {$b == 0.0} {
             set res 1
         } else {
@@ -89,7 +101,7 @@ proc isSame {a b tolerance toleranceMode} {
             set diffVal [expr {abs(($a-$b))}]
         } else {
             # Percentage tolerance
-        set diffVal [expr {abs(((double(($a-$b))) / double($a)))}]
+            set diffVal [expr {abs(((double(($a-$b))) / double($a)))}]
         }
         if {($maxDiffVal < $diffVal)} {
             set maxDiffVal $diffVal
@@ -131,40 +143,51 @@ if {$fexist2} {
 if {$fexist1 && $fexist2} {
     # Compare line by line, until EoF.
     while {[gets $inFile1 line1] != -1} {
-            incr lineNo
-            if {[gets $inFile2 line2] != -1} {
-                set valList1 [split $line1 " "]
-                set valList2 [split $line2 " "]
-                set indexList2 0
-                set printLines 0
-                foreach val1  $valList1 {
-                    # Assume that each files have same number of arguments
-                    # skip empty spaces at the end of the line
-                    if {($val1!="")} {
-                        if {[isSame $val1  [lindex $valList2 $indexList2] $tolerance $toleranceMode] } {
-                            # Good, move on
-                            incr fileMatchesFound
-                        } else {
-                            # Bad, set out flag to print out diff lines to diff file.
-                            set printLines 1
-                            # and set the comparison result
-                            set fileMismatch 1
-                            incr fileDiffsFound
-                        }
-                    }
-                    incr indexList2
-                }
-                        if {$printLines == 1} {
-                    set outFile [open $fileNameOut a]
-                    # Write to file
-                    puts $outFile "Line no: $lineNo:     $line1"
-                    puts $outFile "Line no: $lineNo:     $line2"
-                    close $outFile
-                }
-            } else {
-                # inFile2 too short
-                set fileLengthMismatch 1
+        incr lineNo
+        if {[gets $inFile2 line2] != -1} {
+            set valList1 [split $line1 " "]
+            set valList2 [split $line2 " "]
+            # Check if the number of numbers in each line is the same
+            if {[llength $valList1] != [llength $valList2]} {
+                set outFile [open $fileNameOut a]
+                puts "Error: Line $lineNo has different number of samples/parts."
+                puts $outFile "Error: Line $lineNo has different number of samples/parts."
+                # Write line differences to the differences file
+                puts $outFile "Line no: $lineNo:     $line1"
+                puts $outFile "Line no: $lineNo:     $line2"
+                close $outFile
+                exit 1
             }
+            set indexList2 0
+            set printLines 0
+            foreach val1  $valList1 {
+                # Assume that each files have same number of arguments
+                # skip empty spaces at the end of the line
+                if {($val1!="")} {
+                    if {[isSame $val1  [lindex $valList2 $indexList2] $tolerance $toleranceMode] } {
+                        # Good, move on
+                        incr fileMatchesFound
+                    } else {
+                        # Bad, set out flag to print out diff lines to diff file.
+                        set printLines 1
+                        # and set the comparison result
+                        set fileMismatch 1
+                        incr fileDiffsFound
+                    }
+                }
+                incr indexList2
+            }
+            if {$printLines == 1} {
+                set outFile [open $fileNameOut a]
+                # Write to file
+                puts $outFile "Line no: $lineNo:     $line1"
+                puts $outFile "Line no: $lineNo:     $line2"
+                close $outFile
+            }
+        } else {
+            # inFile2 too short
+            set fileLengthMismatch 1
+        }
     }
     # Error if other file still has data left.
     if  {[gets $inFile2 line2] != -1} {
@@ -215,6 +238,12 @@ if {!$fexist1} {
     set outFile [open $fileNameOut a]
     # Write to file
     puts $outFile "error: File empty: $fileName1"
+    close $outFile
+} elseif {$zeroSamples == $fileAllSamples} {
+    # All samples are zero
+    puts "warning: All samples are zero in both files. This may indicate an issue."
+    set outFile [open $fileNameOut a]
+    puts $outFile "warning: All samples are zero in both files. This may indicate an issue."
     close $outFile
 } elseif {$fileMismatch != 0} {
     # Diffs are showing mismatches

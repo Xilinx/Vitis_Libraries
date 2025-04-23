@@ -110,7 +110,7 @@ hadamard<TT_DATA_A, TT_DATA_B, TP_DIM, TP_NUM_FRAMES, TP_SHIFT, TP_API, TP_SSR, 
     set_sat_mode<TP_SAT>();
 
     for (int frame = 0; frame < TP_NUM_FRAMES; frame++) chess_prepare_for_pipelining chess_loop_range(TP_NUM_FRAMES, ) {
-#pragma unroll(kVecInFrame)
+#pragma unroll(kUNROLL)
             for (int vect = 0; vect < kVecInFrame; vect++) {
                 // CaptureAndMul<TT_DATA_A, TT_DATA_B>(inAPtr, inBPtr, outPtr, TP_SHIFT);
 
@@ -160,7 +160,7 @@ hadamard<TT_DATA_A, TT_DATA_B, TP_DIM, TP_NUM_FRAMES, TP_SHIFT, 1, TP_SSR, TP_RN
     set_sat_mode<TP_SAT>();
 
     for (int frame = 0; frame < TP_NUM_FRAMES; frame++) chess_prepare_for_pipelining chess_loop_range(TP_NUM_FRAMES, ) {
-#pragma unroll(kVecInFrame)
+#pragma unroll(kUNROLL)
             for (int vect = 0; vect < kVecInFrame; vect++) {
                 dataVectA = readincr_v<kSamplesInVect, aie_stream_resource_in::a>(inStreamA);
                 dataVectB = readincr_v<kSamplesInVect, aie_stream_resource_in::b>(inStreamB);

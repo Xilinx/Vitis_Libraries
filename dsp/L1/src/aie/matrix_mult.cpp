@@ -54,6 +54,7 @@ namespace aie = ::aie;
 //#TEMPLATE_FUNCTION_DEFINITION
 template <typename TT_DATA_A,
           typename TT_DATA_B,
+          typename TT_OUT_DATA,
           unsigned int TP_DIM_A,
           unsigned int TP_DIM_AB,
           unsigned int TP_DIM_B,
@@ -72,34 +73,36 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B_RANGE,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN>
-INLINE_DECL void
-kernelMatMultClass<TT_DATA_A,
-                   TT_DATA_B,
-                   TP_DIM_A,
-                   TP_DIM_AB,
-                   TP_DIM_B,
-                   TP_SHIFT,
-                   TP_RND,
-                   TP_SAT,
-                   TP_DIM_A_LEADING,
-                   TP_DIM_B_LEADING,
-                   TP_DIM_OUT_LEADING,
-                   TP_INPUT_WINDOW_VSIZE_A,
-                   TP_INPUT_WINDOW_VSIZE_B,
-                   TP_CASC_IN,
-                   TP_CASC_OUT,
-                   TP_DIM_A_RANGE,
-                   TP_DIM_AB_RANGE,
-                   TP_DIM_B_RANGE,
-                   TP_KERNEL_POSITION,
-                   TP_CASC_LEN>::matMultKernel(T_inputIF<TP_CASC_IN, TT_DATA_A, TT_DATA_B> inInterface,
-                                               T_outputIF<TP_CASC_OUT, TT_DATA_A, TT_DATA_B> outInterface) {
+INLINE_DECL void kernelMatMultClass<
+    TT_DATA_A,
+    TT_DATA_B,
+    TT_OUT_DATA,
+    TP_DIM_A,
+    TP_DIM_AB,
+    TP_DIM_B,
+    TP_SHIFT,
+    TP_RND,
+    TP_SAT,
+    TP_DIM_A_LEADING,
+    TP_DIM_B_LEADING,
+    TP_DIM_OUT_LEADING,
+    TP_INPUT_WINDOW_VSIZE_A,
+    TP_INPUT_WINDOW_VSIZE_B,
+    TP_CASC_IN,
+    TP_CASC_OUT,
+    TP_DIM_A_RANGE,
+    TP_DIM_AB_RANGE,
+    TP_DIM_B_RANGE,
+    TP_KERNEL_POSITION,
+    TP_CASC_LEN>::matMultKernel(T_inputIF<TP_CASC_IN, TT_DATA_A, TT_DATA_B> inInterface,
+                                T_outputIF<TP_CASC_OUT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA> outInterface) {
     // This function hides exposure of the implementation choice from the user.
     matMult_impl1(inInterface, outInterface);
 };
 
 template <typename TT_DATA_A,
           typename TT_DATA_B,
+          typename TT_OUT_DATA,
           unsigned int TP_DIM_A,
           unsigned int TP_DIM_AB,
           unsigned int TP_DIM_B,
@@ -118,28 +121,29 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B_RANGE,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN>
-INLINE_DECL void
-kernelMatMultClass<TT_DATA_A,
-                   TT_DATA_B,
-                   TP_DIM_A,
-                   TP_DIM_AB,
-                   TP_DIM_B,
-                   TP_SHIFT,
-                   TP_RND,
-                   TP_SAT,
-                   TP_DIM_A_LEADING,
-                   TP_DIM_B_LEADING,
-                   TP_DIM_OUT_LEADING,
-                   TP_INPUT_WINDOW_VSIZE_A,
-                   TP_INPUT_WINDOW_VSIZE_B,
-                   TP_CASC_IN,
-                   TP_CASC_OUT,
-                   TP_DIM_A_RANGE,
-                   TP_DIM_AB_RANGE,
-                   TP_DIM_B_RANGE,
-                   TP_KERNEL_POSITION,
-                   TP_CASC_LEN>::matMult_impl1(T_inputIF<TP_CASC_IN, TT_DATA_A, TT_DATA_B> inInterface,
-                                               T_outputIF<TP_CASC_OUT, TT_DATA_A, TT_DATA_B> outInterface) {
+INLINE_DECL void kernelMatMultClass<
+    TT_DATA_A,
+    TT_DATA_B,
+    TT_OUT_DATA,
+    TP_DIM_A,
+    TP_DIM_AB,
+    TP_DIM_B,
+    TP_SHIFT,
+    TP_RND,
+    TP_SAT,
+    TP_DIM_A_LEADING,
+    TP_DIM_B_LEADING,
+    TP_DIM_OUT_LEADING,
+    TP_INPUT_WINDOW_VSIZE_A,
+    TP_INPUT_WINDOW_VSIZE_B,
+    TP_CASC_IN,
+    TP_CASC_OUT,
+    TP_DIM_A_RANGE,
+    TP_DIM_AB_RANGE,
+    TP_DIM_B_RANGE,
+    TP_KERNEL_POSITION,
+    TP_CASC_LEN>::matMult_impl1(T_inputIF<TP_CASC_IN, TT_DATA_A, TT_DATA_B> inInterface,
+                                T_outputIF<TP_CASC_OUT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA> outInterface) {
     set_rnd_mode<TP_RND>();
     set_sat_mode<TP_SAT>();
     constexpr unsigned int M = tilingScheme.Atile;
@@ -163,11 +167,11 @@ kernelMatMultClass<TT_DATA_A,
     TT_DATA_A* inputAPtr = (TT_DATA_A*)inInterface.inWindowA;
     TT_DATA_B* inputBPtr = (TT_DATA_B*)inInterface.inWindowB;
 
-    TT_OUT* tiledOutWindowPtr;
-    outType_t<TT_DATA_A, TT_DATA_B>* outPtr = (outType_t<TT_DATA_A, TT_DATA_B>*)outInterface.outWindow;
+    TT_OUT_DATA* tiledOutWindowPtr;
+    TT_OUT_DATA* outPtr = (TT_OUT_DATA*)outInterface.outWindow;
 
     if
-        constexpr(TP_CASC_OUT == CASC_OUT_FALSE) { tiledOutWindowPtr = (TT_OUT*)outInterface.outWindow; }
+        constexpr(TP_CASC_OUT == CASC_OUT_FALSE) { tiledOutWindowPtr = (TT_OUT_DATA*)outInterface.outWindow; }
     else {
         tiledOutWindowPtr = nullptr;
     }
@@ -176,12 +180,12 @@ kernelMatMultClass<TT_DATA_A,
         chess_prepare_for_pipelining chess_loop_count((TP_DIM_A / M) / numAReg) // TP_DIM_A)
         {
             // window pointer for output
-            TT_OUT* __restrict pC1 = (TP_CASC_OUT == CASC_OUT_FALSE)
-                                         ? tiledOutWindowPtr + ((AChunk * TP_DIM_B / K + 0) * sizeTileC)
-                                         : nullptr;
-            TT_OUT* __restrict pC2 = (TP_CASC_OUT == CASC_OUT_FALSE && parallelA)
-                                         ? tiledOutWindowPtr + (((AChunk + 1) * TP_DIM_B / K + 0) * sizeTileC)
-                                         : nullptr;
+            TT_OUT_DATA* __restrict pC1 = (TP_CASC_OUT == CASC_OUT_FALSE)
+                                              ? tiledOutWindowPtr + ((AChunk * TP_DIM_B / K + 0) * sizeTileC)
+                                              : nullptr;
+            TT_OUT_DATA* __restrict pC2 = (TP_CASC_OUT == CASC_OUT_FALSE && parallelA)
+                                              ? tiledOutWindowPtr + (((AChunk + 1) * TP_DIM_B / K + 0) * sizeTileC)
+                                              : nullptr;
 
             for (unsigned BChunk = 0; BChunk < TP_DIM_B / K; BChunk += numBReg)
                 chess_prepare_for_pipelining chess_pipeline_non_leaf_loop_solution(non_leaf_loop_sol)
@@ -281,21 +285,21 @@ kernelMatMultClass<TT_DATA_A,
 
                     if
                         constexpr(TP_CASC_OUT == CASC_OUT_FALSE) {
-                            aie::store_v(pC1, C00.template to_vector<TT_OUT>(TP_SHIFT));
+                            aie::store_v(pC1, C00.template to_vector<TT_OUT_DATA>(TP_SHIFT));
                             pC1 += sizeTileC;
                             if
                                 constexpr(parallelB) {
-                                    aie::store_v(pC1, C01.template to_vector<TT_OUT>(TP_SHIFT));
+                                    aie::store_v(pC1, C01.template to_vector<TT_OUT_DATA>(TP_SHIFT));
                                     pC1 += sizeTileC;
                                 }
                             if
                                 constexpr(parallelA) {
-                                    aie::store_v(pC2, C10.template to_vector<TT_OUT>(TP_SHIFT));
+                                    aie::store_v(pC2, C10.template to_vector<TT_OUT_DATA>(TP_SHIFT));
                                     pC2 += sizeTileC;
                                 }
                             if
                                 constexpr(parallelA && parallelB) {
-                                    aie::store_v(pC2, C11.template to_vector<TT_OUT>(TP_SHIFT));
+                                    aie::store_v(pC2, C11.template to_vector<TT_OUT_DATA>(TP_SHIFT));
                                     pC2 += sizeTileC;
                                 }
                         }
@@ -317,6 +321,7 @@ kernelMatMultClass<TT_DATA_A,
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA_A,
           typename TT_DATA_B,
+          typename TT_OUT_DATA,
           unsigned int TP_DIM_A,
           unsigned int TP_DIM_AB,
           unsigned int TP_DIM_B,
@@ -335,31 +340,31 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B_RANGE,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN>
-NOINLINE_DECL void
-matrix_mult<TT_DATA_A,
-            TT_DATA_B,
-            TP_DIM_A,
-            TP_DIM_AB,
-            TP_DIM_B,
-            TP_SHIFT,
-            TP_RND,
-            TP_SAT,
-            TP_DIM_A_LEADING,
-            TP_DIM_B_LEADING,
-            TP_DIM_OUT_LEADING,
-            TP_INPUT_WINDOW_VSIZE_A,
-            TP_INPUT_WINDOW_VSIZE_B,
-            TP_CASC_IN,
-            TP_CASC_OUT,
-            TP_DIM_A_RANGE,
-            TP_DIM_AB_RANGE,
-            TP_DIM_B_RANGE,
-            TP_KERNEL_POSITION,
-            TP_CASC_LEN>::matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
-                                  input_buffer<TT_DATA_B>& __restrict inWindowB,
-                                  output_buffer<outType_t<TT_DATA_A, TT_DATA_B> >& __restrict outWindow) {
+NOINLINE_DECL void matrix_mult<TT_DATA_A,
+                               TT_DATA_B,
+                               TT_OUT_DATA,
+                               TP_DIM_A,
+                               TP_DIM_AB,
+                               TP_DIM_B,
+                               TP_SHIFT,
+                               TP_RND,
+                               TP_SAT,
+                               TP_DIM_A_LEADING,
+                               TP_DIM_B_LEADING,
+                               TP_DIM_OUT_LEADING,
+                               TP_INPUT_WINDOW_VSIZE_A,
+                               TP_INPUT_WINDOW_VSIZE_B,
+                               TP_CASC_IN,
+                               TP_CASC_OUT,
+                               TP_DIM_A_RANGE,
+                               TP_DIM_AB_RANGE,
+                               TP_DIM_B_RANGE,
+                               TP_KERNEL_POSITION,
+                               TP_CASC_LEN>::matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
+                                                     input_buffer<TT_DATA_B>& __restrict inWindowB,
+                                                     output_buffer<TT_OUT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_FALSE, TT_DATA_A, TT_DATA_B> inInterface;
-    T_outputIF<CASC_OUT_FALSE, TT_DATA_A, TT_DATA_B> outInterface;
+    T_outputIF<CASC_OUT_FALSE, TT_DATA_A, TT_DATA_B, TT_OUT_DATA> outInterface;
     inInterface.inWindowA = (void*)inWindowA.data();
     inInterface.inWindowB = (void*)inWindowB.data();
     outInterface.outWindow = outWindow.data();
@@ -371,6 +376,7 @@ matrix_mult<TT_DATA_A,
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA_A,
           typename TT_DATA_B,
+          typename TT_OUT_DATA,
           unsigned int TP_DIM_A,
           unsigned int TP_DIM_AB,
           unsigned int TP_DIM_B,
@@ -389,6 +395,7 @@ template <typename TT_DATA_A,
           unsigned int TP_CASC_LEN>
 void matrix_mult<TT_DATA_A,
                  TT_DATA_B,
+                 TT_OUT_DATA,
                  TP_DIM_A,
                  TP_DIM_AB,
                  TP_DIM_B,
@@ -408,10 +415,10 @@ void matrix_mult<TT_DATA_A,
                  TP_KERNEL_POSITION,
                  TP_CASC_LEN>::matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
                                        input_buffer<TT_DATA_B>& __restrict inWindowB,
-                                       input_stream<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
-                                       output_buffer<outType_t<TT_DATA_A, TT_DATA_B> >& __restrict outWindow) {
+                                       input_cascade<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
+                                       output_buffer<TT_OUT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA_A, TT_DATA_B> inInterface;
-    T_outputIF<CASC_OUT_FALSE, TT_DATA_A, TT_DATA_B> outInterface;
+    T_outputIF<CASC_OUT_FALSE, TT_DATA_A, TT_DATA_B, TT_OUT_DATA> outInterface;
     inInterface.inWindowA = (void*)inWindowA.data();
     inInterface.inWindowB = (void*)inWindowB.data();
     inInterface.inCascade = inCascade;
@@ -424,6 +431,7 @@ void matrix_mult<TT_DATA_A,
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA_A,
           typename TT_DATA_B,
+          typename TT_OUT_DATA,
           unsigned int TP_DIM_A,
           unsigned int TP_DIM_AB,
           unsigned int TP_DIM_B,
@@ -442,6 +450,7 @@ template <typename TT_DATA_A,
           unsigned int TP_CASC_LEN>
 void matrix_mult<TT_DATA_A,
                  TT_DATA_B,
+                 TT_OUT_DATA,
                  TP_DIM_A,
                  TP_DIM_AB,
                  TP_DIM_B,
@@ -461,9 +470,9 @@ void matrix_mult<TT_DATA_A,
                  TP_KERNEL_POSITION,
                  TP_CASC_LEN>::matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
                                        input_buffer<TT_DATA_B>& __restrict inWindowB,
-                                       output_stream<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade) {
+                                       output_cascade<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade) {
     T_inputIF<CASC_IN_FALSE, TT_DATA_A, TT_DATA_B> inInterface;
-    T_outputIF<CASC_OUT_TRUE, TT_DATA_A, TT_DATA_B> outInterface;
+    T_outputIF<CASC_OUT_TRUE, TT_DATA_A, TT_DATA_B, TT_OUT_DATA> outInterface;
     inInterface.inWindowA = (void*)inWindowA.data();
     inInterface.inWindowB = (void*)inWindowB.data();
     outInterface.outWindow = outCascade; // toodo rename outWindow to just outPort
@@ -475,6 +484,7 @@ void matrix_mult<TT_DATA_A,
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA_A,
           typename TT_DATA_B,
+          typename TT_OUT_DATA,
           unsigned int TP_DIM_A,
           unsigned int TP_DIM_AB,
           unsigned int TP_DIM_B,
@@ -493,6 +503,7 @@ template <typename TT_DATA_A,
           unsigned int TP_CASC_LEN>
 void matrix_mult<TT_DATA_A,
                  TT_DATA_B,
+                 TT_OUT_DATA,
                  TP_DIM_A,
                  TP_DIM_AB,
                  TP_DIM_B,
@@ -512,10 +523,10 @@ void matrix_mult<TT_DATA_A,
                  TP_KERNEL_POSITION,
                  TP_CASC_LEN>::matMult(input_buffer<TT_DATA_A>& inWindowA,
                                        input_buffer<TT_DATA_B>& inWindowB,
-                                       input_stream<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
-                                       output_stream<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade) {
+                                       input_cascade<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
+                                       output_cascade<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA_A, TT_DATA_B> inInterface;
-    T_outputIF<CASC_OUT_TRUE, TT_DATA_A, TT_DATA_B> outInterface;
+    T_outputIF<CASC_OUT_TRUE, TT_DATA_A, TT_DATA_B, TT_OUT_DATA> outInterface;
     inInterface.inWindowA = (void*)inWindowA.data();
     inInterface.inWindowB = (void*)inWindowB.data();
     inInterface.inCascade = inCascade;

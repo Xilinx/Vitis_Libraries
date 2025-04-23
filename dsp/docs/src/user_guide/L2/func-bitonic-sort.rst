@@ -58,7 +58,7 @@ The Bitonic Sort is configured using the ``TP_CASC_LEN`` template parameter. Thi
 
 Constraints
 -----------
-The Bitonic Sort input ``TP_DIM`` must be a power of 2. ``TP_DIM * size_of(TT_DATA)`` must have a minimum value of 64 bytes (size of buffer on AIE * 2).
+The Bitonic Sort input ``TP_DIM`` must be a power of 2. ``TP_DIM * size_of(TT_DATA)`` must have a minimum value of 64 bytes (size of buffer on AI Engine * 2).
 
 Code Example
 ============

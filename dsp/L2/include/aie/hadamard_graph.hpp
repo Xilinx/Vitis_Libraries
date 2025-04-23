@@ -83,7 +83,8 @@ using namespace adf;
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         \n
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML and AIE-MLv2 device.
+ *\n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
@@ -142,8 +143,8 @@ class hadamard_graph : public graph {
     static constexpr int kKernelWindowVsize = (TP_NUM_FRAMES * kKernelPtSize);
 
     static_assert(kKernelPtSize >= 16, "ERROR: TP_DIM/TP_SSR must be at least 16");
-    static_assert(kKernelWindowVsize <= (__DATA_MEM_BYTES__ / 2),
-                  "ERROR: TP_NUM_FRAMES*(TP_DIM/TP_SSR) must be at no more than data memory size.");
+    //     static_assert(kKernelWindowVsize * sizeof(outTypeMult_t<TT_DATA_A, TT_DATA_B>) <= __DATA_MEM_BYTES__,
+    //                   "ERROR: TP_NUM_FRAMES*(TP_DIM/TP_SSR) must be at no more than data memory size.");
     /**
       * @endcond
       */

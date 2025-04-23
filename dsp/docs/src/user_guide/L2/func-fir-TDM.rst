@@ -113,12 +113,12 @@ Coefficient vector must be created in a form that lists set of taps for each cha
 .. code-block::
 
    std::vector<TT_COEFF> coeffVector = {
-                                 CN-1.0, CN-1.1, CN-1.2, CN-1.2, ..., CN-1.M-2, CN-1.M-1,
-                                 CN-2.0, CN-2.1, CN-2.2, CN-2.2, ..., CN-2.M-2, CN-2.M-1,
+                                 C0.0, C0.1, C0.2, C0.3, ..., C0.M-2, C0.M-1,
+                                 C1.0, C1.1, C1.2, C1.3, ..., C1.M-2, C1.M-1,
+                                 C2.0, C2.1, C2.2, C2.3, ..., C2.M-2, C2.M-1,
                                  ...
-                                 C2.0, C2.1, C2.2, C2.2, ..., C2.M-2, C2.M-1,
-                                 C1.0, C1.1, C1.2, C1.2, ..., C1.M-2, C1.M-1,
-                                 CN0.0, C0.1, C0.2, C0.2, ..., C0.M-2, C0.M-1,
+                                 CN-2.0, CN-2.1, CN-2.2, CN-2.3, ..., CN-2.M-2, CN-2.M-1,
+                                 CN-1.0, CN-1.1, CN-1.2, CN-1.3, ..., CN-1.M-2, CN-1.M-1,
                                  };
 
 where:
@@ -134,7 +134,7 @@ IO Buffer Interface for Filters
 
 On the AI Engine processor, data can be packetized into IO buffers, which are mapped to the local memory.
 
-IO buffers can be accessed with a 256-bit wide load/store operation, hence offering a throughput of up to 256 Gb/s (based on 1 GHz AIE clock).
+IO buffers can be accessed with a 256-bit wide load/store operation, hence offering a throughput of up to 256 Gb/s (based on 1 GHz AI Engine clock).
 
 IO buffers are implemented using a `ping-pong` mechanism, where the consumer kernel would read the `ping` portion of the buffer while the producer would fill the `pong` portion of the buffer that would be consumed in the next iteration.
 
@@ -166,7 +166,7 @@ Maximizing Throughput
 Buffer synchronization requirements introduce a fixed overhead when a kernel is triggered.
 Therefore, to maximize throughput, the input buffer size should be set to the maximum that the system will allow.
 
-.. note:: To achieve maximum performance, the producer and consumer kernels should be placed in adjacent AIE tiles, so the window buffers can be accessed without a requirement for a MM2S/S2MM direct memory access (DMA) stream conversions.
+.. note:: To achieve maximum performance, the producer and consumer kernels should be placed in adjacent AI Engine tiles, so the window buffers can be accessed without a requirement for a MM2S/S2MM direct memory access (DMA) stream conversions.
 
 Multiple Frames
 ^^^^^^^^^^^^^^^
@@ -244,7 +244,7 @@ Cascaded kernels
 Cascade - Operation Mode
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-TDM FIR can be configured to operate on multiple cascaded AIE Tiles using ``TP_CASC_LEN`` template parameter.
+TDM FIR can be configured to operate on multiple cascaded AI Engine Tiles using ``TP_CASC_LEN`` template parameter.
 
 When used (``TP_CASC_LEN > 1``), an array of ``TP_CASC_LEN`` kernels will be created and connected through cascade interface. Each kernel will operate on a fraction of the ``TP_FIR_LEN`` requested (``TP_FIR_LEN / TP_CASC_LEN``).
 
@@ -256,7 +256,7 @@ For example, a 16 tap FIR split over 2 cascaded kernels will result in each oper
 Cascade - Resource Utilization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The number of AIE tiles used by a TDM FIR will be an integer multiple of ``TP_CASC_LEN``.
+The number of AI Engine tiles used by a TDM FIR will be an integer multiple of ``TP_CASC_LEN``.
 
 Cascade - Port Utilization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -275,7 +275,7 @@ TDM FIR graph class allows to specify 32-bit output type when input type is 16-b
 Super Sample Rate
 -----------------
 
-The term Super Sample Rate strictly means the processing of more than one sample per clock cycle. Because the AIE is a vector processor, almost every operation is SSR by this definition, making it superfluous. Therefore, in the AIE context, SSR is taken to mean an implementation using multiple computation paths to improve performance at the expense of additional resource use.
+The term Super Sample Rate strictly means the processing of more than one sample per clock cycle. Because the AI Engine is a vector processor, almost every operation is SSR by this definition, making it superfluous. Therefore, in the AI Engine context, SSR is taken to mean an implementation using multiple computation paths to improve performance at the expense of additional resource use.
 
 .. _FIR_TDM_SSR_OPERATION_MODE:
 
@@ -296,7 +296,7 @@ Input data samples are distributed across the input paths in a round-robin, samp
 Super Sample Rate - Resource Utilization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The number of AIE tiles used by a TDM FIR will be given by the formula:
+The number of AI Engine tiles used by a TDM FIR will be given by the formula:
 
 .. code-block::
 

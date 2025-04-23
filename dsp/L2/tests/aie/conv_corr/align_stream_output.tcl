@@ -45,6 +45,7 @@ set tp_window_size [lindex $argv 4]
 set tp_Sig_len [lindex $argv 5]
 set tp_num_iter [lindex $argv 6]
 set tp_API     [lindex $argv 7]
+set tt_data     [lindex $argv 8]
 }
 
 puts "inp_ref_file      = $inp_ref_file"
@@ -55,6 +56,18 @@ puts "tp_window_size    = $tp_window_size"
 puts "tp_Sig_len        = $tp_Sig_len"
 puts "tp_num_iter       = $tp_num_iter"
 puts "tp_API            = $tp_API"
+puts "tt_data           = $tt_data"
+
+
+proc getNumOfPoints {tt_data} {
+     set Points 0
+     if {$tt_data eq "cint16" } {
+       set Points 2
+     } elseif {$tt_data eq "int16"} {
+       set Points 4
+     }
+ return $Points
+}
 
 if {$tp_API == 1} {
     set streams_per_core 1
@@ -62,7 +75,8 @@ if {$tp_API == 1} {
     set delay 0
     set discordedSamples_count 0
     set Lanes 4
-    set Points 2
+    #set Points 2
+    set Points [getNumOfPoints $tt_data]
     
     proc ceil {x y} {
        set RetVal [expr ((($x+$y)-1)/ $y) ]
@@ -135,11 +149,6 @@ if {$tp_API == 1} {
             #set endIndex [expr {[expr ([llength $elements]-1)] - [expr (($len_of_sig +$delay_offset - [expr ($sample_count)])*2)]}]
             set endIndex [expr {[expr (($len_window * $iter_nr)-1)] - [expr (($len_of_sig +$delay_offset - [expr ($sample_count)])*2)]}]
             
-            puts "num_iter = $num_iter"
-            puts "startIndex = $startIndex"
-            puts "endIndex = $endIndex"
-            puts " "
-
             lappend newelements {*}[lrange $elements $startIndex $endIndex]
         }
         

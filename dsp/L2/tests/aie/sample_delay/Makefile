@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ PARAMS ?= test_0_tool_canary_aie
 PARAMS_FILE ?= multi_params.json 
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST += vck190 vek280
+PLATFORM_ALLOWLIST += vck190 vek280 xcvr1602-vsva2488-2LP-e-S-es1 xc2ve3858-ssva2112-2LP-e-S
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk
@@ -75,6 +75,56 @@ ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
 FIFO_THRESHOLD ?=  
 TAG ?= UUT
 AIE_VARIANT ?= 1
+UUT_KERNEL ?= sample_delay
+REF_KERNEL ?= sample_delay_ref
+UUT_GRAPH ?= sample_delay_graph
+REF_GRAPH ?= sample_delay_ref_graph
+DIFF_TOLERANCE ?= 0
+CC_TOLERANCE ?= 0
+LOC_OUTPUT_FILE_X86 ?= ./x86simulator_output/data/uut_output.txt
+REF_LOC_OUTPUT_FILE_X86 ?= ./x86simulator_output/data/ref_output.txt
+LOC_OUTPUT_FILE_HW ?= ./aiesimulator_output/data/uut_output.txt
+LOC_INPUT_FILE ?= ./data/input.txt
+REF_INPUT_FILE ?= ./data/input_ref.txt
+UUT_SIM_FILE ?= ./data/uut_output.txt
+REF_SIM_FILE ?= ./data/ref_output.txt
+UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off" 
+REF_TARGET_COMPILE_ARGS ?= 
+PREPROC_ARGS ?= 
+REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(LOC_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)
+UUT_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(LOC_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1
+
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/xcvr1602-vsva2488-2LP-e-S-es1/'))
+            
+COMPILER_ARGS ?= 
+AIE_VARIANT ?= 1
+FIFO_THRESHOLD ?=  
+TAG ?= UUT
+UUT_KERNEL ?= sample_delay
+REF_KERNEL ?= sample_delay_ref
+UUT_GRAPH ?= sample_delay_graph
+REF_GRAPH ?= sample_delay_ref_graph
+DIFF_TOLERANCE ?= 0
+CC_TOLERANCE ?= 0
+LOC_OUTPUT_FILE_X86 ?= ./x86simulator_output/data/uut_output.txt
+REF_LOC_OUTPUT_FILE_X86 ?= ./x86simulator_output/data/ref_output.txt
+LOC_OUTPUT_FILE_HW ?= ./aiesimulator_output/data/uut_output.txt
+LOC_INPUT_FILE ?= ./data/input.txt
+REF_INPUT_FILE ?= ./data/input_ref.txt
+UUT_SIM_FILE ?= ./data/uut_output.txt
+REF_SIM_FILE ?= ./data/ref_output.txt
+UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off" 
+REF_TARGET_COMPILE_ARGS ?= 
+PREPROC_ARGS ?= 
+REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(LOC_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)
+UUT_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(LOC_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1
+
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/xc2ve3858-ssva2112-2LP-e-S/'))
+            
+COMPILER_ARGS ?= 
+AIE_VARIANT ?= 22
+FIFO_THRESHOLD ?= --aie.swfifo-threshold=120 
+TAG ?= UUT
 UUT_KERNEL ?= sample_delay
 REF_KERNEL ?= sample_delay_ref
 UUT_GRAPH ?= sample_delay_graph
@@ -141,6 +191,16 @@ ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
 AIE_CXXFLAGS += --aie.verbose $($(TAG)_TARGET_COMPILE_ARGS) $($(TAG)_PREPROC_ARGS)
 
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/xcvr1602-vsva2488-2LP-e-S-es1/'))
+        
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
+AIE_CXXFLAGS += --aie.verbose $($(TAG)_TARGET_COMPILE_ARGS) $($(TAG)_PREPROC_ARGS)
+
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/xc2ve3858-ssva2112-2LP-e-S/'))
+        
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
+AIE_CXXFLAGS += --aie.verbose $($(TAG)_TARGET_COMPILE_ARGS) $($(TAG)_PREPROC_ARGS)
+
 else         
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
 AIE_CXXFLAGS += --aie.verbose $($(TAG)_TARGET_COMPILE_ARGS) $($(TAG)_PREPROC_ARGS)
@@ -199,7 +259,8 @@ pre_build:
 	 mkdir -p logs
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)")
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk create_config HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)")
-	$(if $(filter-out REF,$(TAG)), vitis --classic -exec ipmetadata_config_checker $(XFLIB_DIR)/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/meta/scripts/metadata_checker.py --ip $(UUT_KERNEL))
+	$(if $(filter-out REF,$(TAG)), # vitis --classic -exec ipmetadata_config_checker $(XFLIB_DIR)/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk gen_input HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(LOC_INPUT_FILE)")
 	$(if $(filter-out REF,$(TAG)), make run TARGET=x86sim TAG=REF)
 	$(if $(filter-out REF,$(TAG)), make cleanall)

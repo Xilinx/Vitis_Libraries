@@ -29,6 +29,7 @@ namespace matrix_mult {
 // This file holds the body of the Asymmetric Interpolation FIR reference model kernel class
 template <typename TT_DATA_A,
           typename TT_DATA_B,
+          typename TT_OUT_DATA,
           size_t TP_DIM_A,
           size_t TP_DIM_AB,
           size_t TP_DIM_B,
@@ -43,6 +44,7 @@ template <typename TT_DATA_A,
           >
 void matrix_mult_ref<TT_DATA_A,
                      TT_DATA_B,
+                     TT_OUT_DATA,
                      TP_DIM_A,
                      TP_DIM_AB,
                      TP_DIM_B,
@@ -55,18 +57,16 @@ void matrix_mult_ref<TT_DATA_A,
                      TP_INPUT_WINDOW_VSIZE_A,
                      TP_INPUT_WINDOW_VSIZE_B>::mmult(input_buffer<TT_DATA_A>& inWindowA,
                                                      input_buffer<TT_DATA_B>& inWindowB,
-                                                     output_buffer<outType_t<TT_DATA_A, TT_DATA_B> >& outWindow) {
-    // typename TT_OUT = outType_t<TT_DATA_A,TT_DATA_B>;
-    using TT_OUT = outType_t<TT_DATA_A, TT_DATA_B>;
+                                                     output_buffer<TT_OUT_DATA>& outWindow) {
     const unsigned int shift = TP_SHIFT;
-    T_accRef<TT_OUT> accum;
+    T_accRef<TT_OUT_DATA> accum;
     TT_DATA_A dA_in[TP_DIM_AB];
     TT_DATA_B dB_in[TP_DIM_AB];
-    TT_OUT accum_srs;
+    TT_OUT_DATA accum_srs;
 
     TT_DATA_A* inPtrA = (TT_DATA_A*)inWindowA.data();
     TT_DATA_B* inPtrB = (TT_DATA_B*)inWindowB.data();
-    TT_OUT* outPtr = (TT_OUT*)outWindow.data();
+    TT_OUT_DATA* outPtr = (TT_OUT_DATA*)outWindow.data();
 
     /*
     Most Ideal Case                  |   Good for A
@@ -104,13 +104,6 @@ void matrix_mult_ref<TT_DATA_A,
     const int matAPostBDimIncr = AElementDist;    // Move one Arow/BCol forward
     const int matBPostBDimIncr = -((int)(TP_DIM_B * BElementDist)); // Move back to the start of Brow
 
-    printf("Ref model params:\n");
-    printf("TP_SHIFT = %lu\n", TP_SHIFT);
-    printf("TP_RND = %d\n", TP_RND);
-    printf("TP_SAT = %d\n", TP_SAT);
-    printf("TP_INPUT_WINDOW_VSIZE_A = %d\n", TP_INPUT_WINDOW_VSIZE_A);
-    printf("TP_INPUT_WINDOW_VSIZE_B = %d\n", TP_INPUT_WINDOW_VSIZE_B);
-
     constexpr unsigned int num_matrix_A = (TP_INPUT_WINDOW_VSIZE_A / (TP_DIM_A * TP_DIM_AB));
     constexpr unsigned int num_matrix_B = (TP_INPUT_WINDOW_VSIZE_B / (TP_DIM_B * TP_DIM_AB));
     static_assert(
@@ -134,7 +127,8 @@ void matrix_mult_ref<TT_DATA_A,
                     inPtrB += matBLoadIncr;
                 }
 
-                accum = null_accRef<TT_OUT>(); // reset accumulator at the start of the mult-add for each output sample
+                accum =
+                    null_accRef<TT_OUT_DATA>(); // reset accumulator at the start of the mult-add for each output sample
                 for (unsigned int j = 0; j < TP_DIM_AB; ++j) {
                     multiplyAcc(accum, dA_in[j], dB_in[j]);
                 }
@@ -168,8 +162,8 @@ void matrix_mult_ref<TT_DATA_A,
         // if both more than one, then we've already got a static assert to cover this.
     }
 };
-}
-}
-}
-}
-}
+} // namespace matrix_mult
+} // namespace blas
+} // namespace aie
+} // namespace dsp
+} // namespace xf

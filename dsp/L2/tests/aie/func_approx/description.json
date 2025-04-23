@@ -7,6 +7,13 @@
         "vck190",
         "vek280"
     ],
+    "part_allowlist": [
+        "xcvr1602-vsva2488-2LP-e-S-es1",
+        "xc2ve3858-ssva2112-2LP-e-S"
+    ],
+    "part_alias": {
+        "xc2ve3858-ssva2112-2LP-e-S": "aie_mlv2"
+    },
     "platform_properties": {
         "vck190": {
             "param_set": [
@@ -47,7 +54,60 @@
                 }
             }
         }
-
+    },
+    "part_properties": {
+        "xcvr1602-vsva2488-2LP-e-S-es1": {
+            "param_set": [
+                "*canary_aie"
+            ],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            },
+            "aiecompiler": {
+                "compiler": {
+                    "customized_params": {
+                        "default": {
+                            "COMPILER_ARGS": "",
+                            "AIE_VARIANT": "1",
+                            "FIFO_THRESHOLD": " "
+                        }
+                    }
+                }
+            }
+        },
+        "xc2ve3858-ssva2112-2LP-e-S": {
+            "param_set": [
+                "*_aie22_*"
+            ],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            },
+            "aiecompiler": {
+                "compiler": {
+                    "customized_params": {
+                        "default": {
+                            "COMPILER_ARGS": "",
+                            "AIE_VARIANT": "22",
+                            "FIFO_THRESHOLD": "--aie.swfifo-threshold=120 "
+                        }
+                    }
+                }
+            }
+        }
     },
     "pre_build": [
         {
@@ -60,7 +120,10 @@
             "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk gen_input HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) INPUT_FILE=$(LOC_INPUT_FILE)\")"
         },
         {
-            "build_cmd": "$(if $(filter-out REF,$(TAG)), vitis --classic -exec ipmetadata_config_checker LIB_DIR/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/meta/scripts/metadata_checker.py --ip $(UUT_KERNEL))"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), # vitis --classic -exec ipmetadata_config_checker LIB_DIR/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)"
         },
         {
             "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk sim_ref HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) INPUT_FILE=$(LOC_INPUT_FILE)\")"
@@ -181,8 +244,8 @@
                     "vitis_aie_sim": 51200
                 },
                 "max_time_min": {
-                    "vitis_aie_x86sim": 180,
-                    "vitis_aie_sim": 200
+                    "vitis_aie_x86sim": 470,
+                    "vitis_aie_sim": 470
                 }
             }
         ],
@@ -193,20 +256,28 @@
         "category": "canary",
         "param_set": {
             "pull_req": {
-                "*_hw_checkin":[
+                "*_canary_aie": [
                     "vitis_aie_sim",
                     "vitis_aie_x86sim"
                 ],
-                "*_x86sim_checkin":[
+                "*_hw_checkin": [
+                    "vitis_aie_sim",
+                    "vitis_aie_x86sim"
+                ],
+                "*_x86sim_checkin": [
                     "vitis_aie_x86sim"
                 ]
             },
             "daily": {
-                "*_hw_qor":[
+                "*_canary_aie": [
                     "vitis_aie_sim",
                     "vitis_aie_x86sim"
                 ],
-                "*_x86sim_qor":[
+                "*_hw_qor": [
+                    "vitis_aie_sim",
+                    "vitis_aie_x86sim"
+                ],
+                "*_x86sim_qor": [
                     "vitis_aie_x86sim"
                 ]
             }

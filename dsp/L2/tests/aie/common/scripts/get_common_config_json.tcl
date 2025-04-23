@@ -76,7 +76,7 @@ for {set i 3} { $i < [llength $argv] } { incr i 2 } {
         # Don't put a comma on the last parameter if we still have dummy constructor coeffs/weights to generate
         if { [expr ($i+1)] == [expr [llength $argv]-1] } {
             # FIRs and FFT Window both need a comma
-            if { $libElement eq "fft_ifft_dit_1ch" || $libElement eq "matrix_mult" || $libElement eq "dds_mixer" || $libElement eq "dds_mixer_lut" || $libElement eq "mixed_radix_fft" || $libElement eq "dft" || $libElement eq "matrix_vector_mul" || $libElement eq "sample_delay" || $libElement eq "widget_real2complex"  || $libElement eq "widget_api_cast" || $libElement eq "hadamard" || $libElement eq "kronecker" || $libElement eq "outer_tensor" || $libElement eq "conv_corr" || $libElement eq "bitonic_sort" } {
+            if { $libElement eq "fft_ifft_dit_1ch" || $libElement eq "matrix_mult" || $libElement eq "dds_mixer" || $libElement eq "dds_mixer_lut" || $libElement eq "mixed_radix_fft" || $libElement eq "dft" || $libElement eq "matrix_vector_mul" || $libElement eq "sample_delay" || $libElement eq "widget_real2complex"  || $libElement eq "widget_api_cast" || $libElement eq "hadamard" || $libElement eq "kronecker" || $libElement eq "outer_tensor" || $libElement eq "conv_corr" || $libElement eq "bitonic_sort" || $libElement eq "euclidean_distance" } {
                 set isComma ""
             } elseif { $libElement eq "fir_sr_asym" || $libElement eq "fir_sr_sym" || $libElement eq "fir_interpolate_hb" || $libElement eq "fir_decimate_hb" || $libElement eq "fir_interpolate_asym" || $libElement eq "fir_decimate_asym" || $libElement eq "fir_decimate_sym" || $libElement eq "fir_resampler" || $libElement eq "fir_tdm" || $libElement eq "fft_window"	 || $libElement eq "func_approx"    } {
                 set isComma ","
@@ -104,7 +104,7 @@ if {[string match "*$string2*" $libElement]} {
 
 set string2 "_hb"
 if {[string match "*$string2*" $libElement]} {  
-    set firLen [expr {(int($firLen + 1) / 4)}]  }
+    set firLen [expr {(int($firLen + 1) / 4) + 1}]  }
 
 set coeffs {}
 if { $firLen != -1 } {

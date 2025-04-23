@@ -41,8 +41,10 @@ PARAM_MAP = DATA_TYPE $(DATA_TYPE) \
 			DATA_SEED $(DATA_SEED) \
 			DATA_STIM_TYPE $(DATA_STIM_TYPE) \
 			DIFF_MODE $(DIFF_MODE) \
-			DIFF_TOLERANCE $(DIFF_TOLERANCE)
-       
+			DIFF_TOLERANCE $(DIFF_TOLERANCE) \
+            PHASE_RELOAD_API $(PHASE_RELOAD_API)\
+            USE_PHASE_INC_RELOAD $(USE_PHASE_INC_RELOAD)
+
 
 # ref model and uut use different base angles when SSR > 1 and thus are prone to different bit errors
 # set DIFF_TOLERANCE = 4 when DATA_TYPE = cint32 and UUT_SSR > 1 
@@ -73,10 +75,15 @@ HELPER_CUR_DIR ?= .
 diff:
 	@echo helper.mk stage: diff
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) $(DIFF_MODE)
-	
+
 gen_input:
 	@echo helper.mk stage:  gen_input
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(DATA_STIM_TYPE) 0 0 $(DATA_TYPE) 0 1 0 0 0 0 0 64 
+
+gen_phase_offset:
+	@echo helper.mk stage:  gen_phase_offset
+#8 because the uint32 single value has to go into a mimimum window size of 32 bytes or 8 uint32s
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) 8 $(NITER) $(DATA_SEED) $(DATA_STIM_TYPE) 0 0 int32 0 1 0 0 0 0 0 64 
 
 ssr_split:
 	@echo helper.mk stage:  ssr_split
@@ -88,7 +95,7 @@ ssr_zip:
 
 get_status:
 	@echo helper.mk stage:  get_status
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) SINGLE_BUF $(SINGLE_BUF)
 
 get_latency:
 	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)

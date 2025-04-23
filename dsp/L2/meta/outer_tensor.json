@@ -205,13 +205,17 @@
                 "file": "outer_tensor.py",
                 "function": "update_TP_SHIFT",
                 "args": [
-                    "TT_DATA_A"                ]
+                    "AIE_VARIANT",
+                    "TT_DATA_A"
+                ]
             },
             "validator": {
                 "file": "outer_tensor.py",
                 "function": "validate_TP_SHIFT",
                 "args": [
-                    "TT_DATA_A"                ]
+                    "AIE_VARIANT",
+                    "TT_DATA_A"
+                ]
             }
         },
         {
@@ -237,13 +241,13 @@
             "type": "uint",
             "updater": {
                 "file": "outer_tensor.py",
-                "function": "update_TP_SAT", 
+                "function": "update_TP_SAT",
                 "args": [
                 ]
             },
             "validator": {
                 "file": "outer_tensor.py",
-                "function": "validate_TP_SAT", 
+                "function": "validate_TP_SAT",
                 "args": [
                 ]
             }

@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -86,13 +86,14 @@ UUT_SIM_FILE2 ?= ./data/uut_output_2.txt
 REF_SIM_FILE2 ?= ./data/ref_output_2.txt
 LOC_INPUT_FILE ?= ./data/input.txt
 LOC_INPUT_FILE2 ?= ./data/input2.txt
+LOC_INPUT_FILE_PO ?= ./data/input_po.txt
 LOC_OUTPUT_FILE_X86 ?= ./x86simulator_output/data/uut_output.txt
 LOC_OUTPUT_FILE_HW ?= ./aiesimulator_output/data/uut_output.txt
 UUT_TARGET_COMPILE_ARGS ?= --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off" 
 REF_TARGET_COMPILE_ARGS ?= 
 UUT_WORK_DIR ?= ./Work
 REF_WORK_DIR ?= ./Work
-PREPROC_ARGS ?= --aie.Xpreproc=-DINPUT_FILE=$(LOC_INPUT_FILE) --aie.Xpreproc=-DINPUT_FILE2=$(LOC_INPUT_FILE2)
+PREPROC_ARGS ?= --aie.Xpreproc=-DINPUT_FILE=$(LOC_INPUT_FILE) --aie.Xpreproc=-DINPUT_FILE2=$(LOC_INPUT_FILE2) --aie.Xpreproc=-DINPUT_FILE_PO=$(LOC_INPUT_FILE_PO)
 USING_REF ?= 
 USING_UUT ?= --aie.Xpreproc=-DUSING_UUT=1
 TAG_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$($(TAG)_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$($(TAG)_SIM_FILE) --aie.Xpreproc=-DOUTPUT_FILE2=$($(TAG)_SIM_FILE2) $(PREPROC_ARGS) $(USING_$(TAG))
@@ -169,10 +170,12 @@ endif
 pre_build:
 	 mkdir -p logs
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)")
-	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)" --connector " " --var "DATA_TYPE:MIXER_MODE:USE_PHASE_RELOAD:INPUT_WINDOW_VSIZE:P_API:UUT_SSR:DDS_PHASE_INC:INITIAL_DDS_OFFSET:ROUND_MODE:SAT_MODE:AIE_VARIANT")
-	$(if $(filter-out REF,$(TAG)), vitis --classic -exec ipmetadata_config_checker $(XFLIB_DIR)/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)" --connector " " --var "DATA_TYPE:MIXER_MODE:USE_PHASE_RELOAD:INPUT_WINDOW_VSIZE:P_API:UUT_SSR:DDS_PHASE_INC:INITIAL_DDS_OFFSET:ROUND_MODE:SAT_MODE:PHASE_RELOAD_API:USE_PHASE_INC_RELOAD:AIE_VARIANT")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/meta/scripts/metadata_checker.py --ip $(UUT_KERNEL))
+	$(if $(filter-out REF,$(TAG)), # vitis --classic -exec ipmetadata_config_checker $(XFLIB_DIR)/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk gen_input HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(LOC_INPUT_FILE) DATA_SEED=$(DATA_SEED)")
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk gen_input HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(LOC_INPUT_FILE2) DATA_SEED=$(DATA_SEED)")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk gen_phase_offset HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(LOC_INPUT_FILE_PO) DATA_SEED=$(DATA_SEED)")
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk ssr_split HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) SPLIT_ZIP_FILE=$(LOC_INPUT_FILE)")
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk ssr_split HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) SPLIT_ZIP_FILE=$(LOC_INPUT_FILE2)")
 	$(if $(filter-out REF,$(TAG)), make run TARGET=x86sim TAG=REF)

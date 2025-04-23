@@ -1,6 +1,5 @@
-#
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+# vitis makefile-generator v2.0.10
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -53,7 +52,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 # setting default value
 TARGET ?= hw_emu
 PARAMS ?= test_0_tool_canary_aie
-PARAMS_FILE ?= multi_params.json 
+PARAMS_FILE ?= multi_params.json
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
@@ -63,9 +62,13 @@ ifeq ($(PLATFORM),)
 PLATFORM := vck190
 endif
 
+# add warnning for sw_emu
+ifeq ($(TARGET),sw_emu)
+$(error Error: The sw_emu target is no longer supported starting from 2025.1.)
+endif
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  vck190 vek280
-PLATFORM_BLOCKLIST += 
+PLATFORM_ALLOWLIST += vck190 vek280
+PLATFORM_BLOCKLIST +=
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -85,15 +88,15 @@ RUN_DEPS :=
 
 # get global setting
 ifeq ($(HOST_ARCH), x86)
-CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel 
-VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
-VPP_LDFLAGS += --optimize 2 -R 2 
+CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
+VPP_LDFLAGS += --optimize 2 -R 2
 else ifeq ($(HOST_ARCH), aarch64)
-CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
-VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
-VPP_LDFLAGS += --optimize 2 -R 2 
+CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
+VPP_LDFLAGS += --optimize 2 -R 2
 endif
 CXXFLAGS += $(EXTRA_CXXFLAGS)
 VPP_FLAGS += $(EXTRA_VPP_FLAGS)
@@ -101,11 +104,11 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 # aie template
 XILINX_VITIS_AIETOOLS := $(XILINX_VITIS)/aietools
 ifeq ($(HOST_ARCH), x86)
-AIE_CXXFLAGS_INC +=  -I $(XILINX_VITIS)/aietools/include 
-AIE_LDFLAGS_LD += -L $(XILINX_VITIS)/aietools/lib/lnx64.o -ladf_api_xrt 
+AIE_CXXFLAGS_INC +=  -I $(XILINX_VITIS)/aietools/include
+AIE_LDFLAGS_LD += -L $(XILINX_VITIS)/aietools/lib/lnx64.o -ladf_api_xrt
 else
-AIE_CXXFLAGS_INC +=  -I $(XILINX_VITIS)/aietools/include 
-AIE_LDFLAGS_LD += -L $(XILINX_VITIS)/aietools/lib/aarch64.o  -ladf_api_xrt 
+AIE_CXXFLAGS_INC +=  -I $(XILINX_VITIS)/aietools/include
+AIE_LDFLAGS_LD += -L $(XILINX_VITIS)/aietools/lib/aarch64.o  -ladf_api_xrt
 endif
 CXXFLAGS += $(AIE_CXXFLAGS_INC)
 LDFLAGS += $(AIE_LDFLAGS_LD)
@@ -130,7 +133,8 @@ BACK_OUTPUT_FILE ?= ./data/output_back.txt
 INPUT_FILE ?= ./data/input.txt
 REF_INPUT_FILE ?= ./data/input_ref.txt
 UUT_TARGET_COMPILE_ARGS ?= --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.pnll="off" --aie.stacksize=$(STACKSIZE_VAL)
-REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) --aie.Xpreproc=-DINPUT_FILE=$(REF_INPUT_FILE) $(PREPROC_ARGS) 
+REF_TARGET_COMPILE_ARGS ?=
+REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) --aie.Xpreproc=-DINPUT_FILE=$(REF_INPUT_FILE) $(PREPROC_ARGS)
 UUT_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) --aie.Xpreproc=-DFRONT_INPUT_FILE=$(FRONT_INPUT_FILE) --aie.Xpreproc=-DBACK_INPUT_FILE=$(BACK_INPUT_FILE) --aie.Xpreproc=-DFRONT_OUTPUT_FILE=$(FRONT_OUTPUT_FILE) --aie.Xpreproc=-DBACK_OUTPUT_FILE=$(BACK_OUTPUT_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1
 
 ############################ setting AIE Compiler ###########################
@@ -146,27 +150,18 @@ AIE_CXXFLAGS += --aie.verbose  $($(TAG)_TARGET_COMPILE_ARGS)  $($(TAG)_PREPROC_A
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
 EXE_FILE_DEPS += $(AIE_CONTAINER)
-BINARY_CONTAINERS_DEPS += $(AIE_CONTAINER)  
+BINARY_CONTAINERS_DEPS += $(AIE_CONTAINER)
 AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 
 ########################## Setting up Host Variables ##########################
 
 #Inclue Required Host Source Files
-ifeq ($(ps_on_x86), on)
-HOST_SRCS += host.cpp 
+HOST_SRCS += host.cpp
 CXXFLAGS +=  -D __PS_ENABLE_AIE__ -D USING_UUT=1
 CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I PROJECT -I $(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += --sysroot=$(SYSROOT) -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE")  -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "NITER")   -DSSR=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "SSR") -DTT_DATA=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "DATA_TYPE")
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/
 LDFLAGS += --sysroot=$(SYSROOT)
-else
-HOST_SRCS += host.cpp 
-CXXFLAGS +=  -D __PS_ENABLE_AIE__ -D USING_UUT=1
-CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I PROJECT -I $(XFLIB_DIR)/L1/include/hw
-CXXFLAGS += --sysroot=$(SYSROOT) -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE")  -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "NITER")   -DSSR=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "SSR") -DTT_DATA=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "DATA_TYPE")
-LDFLAGS +=  -L $(SYSROOT)/usr/lib/
-LDFLAGS += --sysroot=$(SYSROOT)
-endif
 
 # workaround for opencv
 ifeq (,$(findstring opencv,$(CXXFLAGS)))
@@ -188,7 +183,7 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw
 VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   --package.defer_aie_run
 
-else 
+else
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw
 
 endif
@@ -205,12 +200,12 @@ BINARY_CONTAINERS_PKG += $(BUILD_DIR)/kernel.xclbin
 endif
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
-$(TEMP_DIR)/mm2s_wrapper.xo: $(XFLIB_DIR)/L1/tests/hw/mm2s/mm2s.cpp 
+$(TEMP_DIR)/mm2s_wrapper.xo: $(XFLIB_DIR)/L1/tests/hw/mm2s/mm2s.cpp
 	$(ECHO) "Compiling Kernel: mm2s_wrapper"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_mm2s_wrapper) $(VPP_FLAGS) -k mm2s_wrapper -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
 BINARY_CONTAINER_kernel_OBJS += $(TEMP_DIR)/mm2s_wrapper.xo
-$(TEMP_DIR)/s2mm_wrapper.xo: $(XFLIB_DIR)/L1/tests/hw/s2mm/s2mm.cpp 
+$(TEMP_DIR)/s2mm_wrapper.xo: $(XFLIB_DIR)/L1/tests/hw/s2mm/s2mm.cpp
 	$(ECHO) "Compiling Kernel: s2mm_wrapper"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_s2mm_wrapper) $(VPP_FLAGS) -k s2mm_wrapper -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
@@ -219,7 +214,7 @@ BINARY_CONTAINER_kernel_OBJS += $(TEMP_DIR)/s2mm_wrapper.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_kernel_OBJS) vss_fft_ifft_1d/vss_fft_ifft_1d.vss
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l -g $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
 
@@ -246,7 +241,7 @@ RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
 	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$(LIBRARY_PATH)' >> $(RUN_SCRIPT)
-ifneq ($(filter sw_emu hw_emu, $(TARGET)),)
+ifneq ($(filter hw_emu, $(TARGET)),)
 	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> $(RUN_SCRIPT)
 endif
 	@echo 'export XILINX_VITIS=/mnt' >> $(RUN_SCRIPT)
@@ -285,18 +280,11 @@ ifeq ($(dfx_hw), on)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
-# 2. PS_ON_X86 - From 2022.2, Target:sw_emu
-ifeq ($(ps_on_x86), on)
-	@echo "### ***** running PS X86 SE_EMU ***** ###"
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir $(SD_CARD) --package.emu_ps x86
-endif
-# 3. General Embeded flow
+# 2. General Embeded flow
 ifeq ($(dfx_hw), off)
-ifeq ($(ps_on_x86), off)
 ifeq ($(pcie_versal), off)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
-endif
 endif
 endif
 
@@ -325,16 +313,16 @@ all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
 run: all
 #x86sim
 ifeq ($(TARGET), x86sim)
-	$(X86SIMULATOR) --pkg-dir=$(AIE_PKG_DIR) 
+	$(X86SIMULATOR) --pkg-dir=$(AIE_PKG_DIR)
 	mkdir -p logs
-	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL) FRONT_INPUT_FILE=$(FRONT_INPUT_FILE) FRONT_OUTPUT_FILE=$(FRONT_OUTPUT_FILE)")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)")
 	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./)
 endif
 #aiesim
 ifeq ($(TARGET), aiesim)
-	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile --graph-latency $(AIESIMFLAGS)
+	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile  $(AIESIMFLAGS)
 	mkdir -p logs
-	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL) FRONT_OUTPUT_FILE=$(FRONT_OUTPUT_FILE) BACK_OUTPUT_FILE=$(BACK_OUTPUT_FILE)"
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)"
 	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_latency HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)"
 	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_stats HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL) "
 	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_theoretical_min HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)"
@@ -348,31 +336,18 @@ ifeq ($(pcie_versal), on)
 	cp $(AIE_WORK_DIR)/reports/dma_lock_report.json ./
 	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS) 
-	
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS)
+
 else
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS)
-	
+
 endif
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
-	
-endif
-endif
-#sw_emu
-ifneq (,$(filter sw_emu, $(TARGET)))
-ifeq ($(HOST_ARCH), x86)
-	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
-	
-else
-	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
-	
+
 endif
 endif
 #hw
@@ -384,12 +359,12 @@ else
 	$(ECHO) "Running HW using generated .awsxclbin"
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(EXE_FILE) $(subst .xclbin,.awsxclbin,$(HOST_ARGS))
-	
+
 endif
 else ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(EXE_FILE) $(HOST_ARGS)
-	
+
 else
 	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
 endif
@@ -402,8 +377,8 @@ pre_build:
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL) TAG=$(TAG) FRONT_INPUT_FILE=$(FRONT_INPUT_FILE) BACK_INPUT_FILE=$(BACK_INPUT_FILE) REF_INPUT_FILE=$(REF_INPUT_FILE) REF_SIM_FILE=$(REF_SIM_FILE)")
 	$(if $(filter hw_emu,$(TARGET)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(XFLIB_DIR)/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d.mk vss HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) AIETARGET=hw")
 	$(if $(filter hw,$(TARGET)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(XFLIB_DIR)/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d.mk vss HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) AIETARGET=hw")
-	$(if $(filter hw_emu,$(TARGET)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/vss/vss_fft_ifft_1d/vss_tb_cfg_gen.py --ssr $(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "SSR") --cfg_file_name system.cfg --vss_unit vss_fft_ifft_1d --freqhz $(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "FREQ"))
-	$(if $(filter hw,$(TARGET)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/vss/vss_fft_ifft_1d/vss_tb_cfg_gen.py --ssr $(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "SSR") --cfg_file_name system.cfg --vss_unit vss_fft_ifft_1d --freqhz $(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "FREQ"))
+	$(if $(filter hw_emu,$(TARGET)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk gen_conn_cfg HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR)")
+	$(if $(filter hw,$(TARGET)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk gen_conn_cfg HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR)")
 
 .PHONY: clean cleanall emconfig valid_params
 emconfig: $(EMCONFIG)
@@ -425,7 +400,7 @@ endif
 #################### Parameterized File Generation ##########################
 
 GENERATED_FILES += uut_config.h
-uut_config.h: $(XFLIB_DIR)/L2/tests/aie/common/scripts/tb_gen.py 
+uut_config.h: $(XFLIB_DIR)/L2/tests/aie/common/scripts/tb_gen.py
 	$(VITIS_PYTHON3) $(XFLIB_DIR)/scripts/instance_generator.py -o uut_config.h --param-set $(PARAMS) --param-file $(PARAMS_FILE) --file "$(XFLIB_DIR)/L2/tests/aie/common/scripts/tb_gen.py" --func "generate_testbench"
 
 .PHONY: valid_params gen_instances

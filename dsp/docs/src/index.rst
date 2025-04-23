@@ -31,19 +31,19 @@ The Vitis PL DSP Library provides a fully synthesizable PL based Super Sample da
 AI Engine DSP Library
 =====================
 
-The AMD Vitis AIE DSP library consists of designs of various DSP algorithms, optimized to take full advantage of the processing power of AMD Versal |trade| Adaptive SoC devices, which contain an array of AI Engines high-performance vector processors.
+The AMD Vitis AI Engine DSP library consists of designs of various DSP algorithms, optimized to take full advantage of the processing power of AMD Versal |trade| Adaptive SoC devices, which contain an array of AI Engines high-performance vector processors.
 
 The library is organized into three parts:
 
-- L1 AIE kernels
-- L2 AIE graphs and VSS Makefiles
+- L1 AI Engine kernels
+- L2 AI Engine graphs and VSS Makefiles
 - L3 software APIs
 
-Currently, there are no L3 software APIs, and the recommended entry point for all library elements is an L2 AIE graph.
+Currently, there are no L3 software APIs. The recommended entry point for all library elements is an L2 graph for designs that include only AI Engines and a vss Makefile for designs including both AI Engine and PL components.
 
 For more information, refer to :ref:`INTRODUCTION`.
 
-The Vitis AIE DSP Library provides a SSR FFT implementation targeting AIE, as well as various SSR Finite Impulse Response (FIR) filters, SSR Direct Digital Synthesis (DDS), and General Matrix Multiply (GeMM) implementation. For a full list of available DSP functions, refer to :ref:`DSP_LIB_FUNC`.
+The Vitis AIE DSP Library provides a SSR FFT implementations, various SSR Finite Impulse Response (FIR) filters, SSR Direct Digital Synthesis (DDS), and General Matrix Multiply (GeMM) implementation. For a full list of available DSP functions, refer to :ref:`DSP_LIB_FUNC`.
 
 .. toctree::
    :caption: Introduction

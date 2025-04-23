@@ -106,7 +106,7 @@ Design Notes
 Super Sample Rate Operation
 ---------------------------
 
-While the term Super Sample Rate strictly means the processing of more than one sample per clock cycle, in the AIE context it is taken to mean an implementation using parallel kernels to improve performance at the expense of additional resource use.
+While the term Super Sample Rate strictly means the processing of more than one sample per clock cycle, in the AI Engine context it is taken to mean an implementation using parallel kernels to improve performance at the expense of additional resource use.
 In the Outer Tensor Product, SSR operation is controlled by the template parameter ``TP_SSR``. The number of tiles utilized to divide up workload is the value of ``TP_SSR``.
 
 Scaling

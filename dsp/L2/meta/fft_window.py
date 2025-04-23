@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import aie_common as com
 from aie_common import *
 
 #### naming ####
@@ -41,10 +42,9 @@ from aie_common import *
 # TP_POINT_SIZE_min = 16
 # TP_POINT_SIZE_max = 65536
 TP_WINDOW_VSIZE_min = 16
-TP_WINDOW_VSIZE_max = 65536
+# TP_WINDOW_VSIZE_max = 65536
 # TP_SSR_min = 1
 # TP_SSR_max = 32
-TP_SHIFT_min = 0
 TP_SHIFT_max = 60
 
 #######################################################
@@ -54,7 +54,7 @@ def update_AIE_VARIANT(args):
   return fn_update_AIE_VAR()
 
 def  fn_update_AIE_VAR():
-  legal_set_AIE_VAR = [1,2]
+  legal_set_AIE_VAR = [com. AIE, com.AIE_ML, com.AIE_MLv2]
 
   param_dict ={}
   param_dict.update({"name" : "AIE_VARIANT"})
@@ -67,16 +67,21 @@ def validate_AIE_VARIANT(args):
   return fn_validate_AIE_VARIANT(AIE_VARIANT)
 
 def fn_validate_AIE_VARIANT(AIE_VARIANT):
-  return (validate_legal_set([1,2], "AIE_VARIANT", AIE_VARIANT))
+  param_dict=fn_update_AIE_VAR()
+  legal_set_AIE_VAR=param_dict["enum"]
+  return (validate_legal_set(legal_set_AIE_VAR, "AIE_VARIANT", AIE_VARIANT))
 
 #######################################################
 ########### TT_DATA Updater and Validator #############
 #######################################################
 def update_TT_DATA(args):
-  return fn_update_TT_DATA()
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_update_TT_DATA(AIE_VARIANT)
 
-def fn_update_TT_DATA():
-  legal_set_TT_DATA=["cint16", "cint32", "cfloat"] 
+def fn_update_TT_DATA(AIE_VARIANT):
+  legal_set_TT_DATA=["cint16", "cint32", "cfloat"]
+  if AIE_VARIANT in [AIE_ML, AIE_MLv2]:
+    legal_set_TT_DATA = ["cint16", "cint32"]
   param_dict={
        "name" : "TT_DATA",
        "enum" : legal_set_TT_DATA
@@ -84,11 +89,12 @@ def fn_update_TT_DATA():
   return param_dict
 
 def validate_TT_DATA(args):
+  AIE_VARIANT = args["AIE_VARIANT"]
   TT_DATA=args["TT_DATA"]
-  return fn_validate_TT_DATA(TT_DATA)
+  return fn_validate_TT_DATA(AIE_VARIANT,TT_DATA)
 
-def fn_validate_TT_DATA(TT_DATA):
-  param_dict=fn_update_TT_DATA()
+def fn_validate_TT_DATA(AIE_VARIANT,TT_DATA):
+  param_dict=fn_update_TT_DATA(AIE_VARIANT)
   legal_set_TT_DATA=param_dict["enum"]
   return (validate_legal_set(legal_set_TT_DATA, "TT_DATA", TT_DATA))
 
@@ -126,7 +132,7 @@ def update_TP_API(args):
   return fn_update_TP_API()
 
 def fn_update_TP_API():
-  legal_set_TP_API = [0,1]
+  legal_set_TP_API = [0, 1]
   param_dict = {
       "name"     : "TP_API",
       "enum"     : legal_set_TP_API
@@ -135,7 +141,7 @@ def fn_update_TP_API():
 
 def validate_TP_API(args):
   TP_API=args["TP_API"]
-  legal_set_TP_API = [0,1]
+  legal_set_TP_API = [0, 1]
   return (validate_legal_set(legal_set_TP_API, "TP_API", TP_API))
 
 
@@ -147,11 +153,12 @@ def update_TP_SSR(args):
   return fn_update_TP_SSR(TP_API)
 
 def fn_update_TP_SSR(TP_API):
-  if TP_API==0:
-    TP_SSR_max=32
-  elif TP_API==1:
-    TP_SSR_max=16
-
+  if TP_API == API_BUFFER:
+    TP_SSR_max_vmc=32
+  elif TP_API == API_STREAM:
+    TP_SSR_max_vmc=16
+    
+  TP_SSR_max=16
   param_dict = {
       "name"     : "TP_SSR",
       "minimum"  : 1,
@@ -187,22 +194,23 @@ def validate_TP_DYN_PT_SIZE(args):
 
 #######################################################
 ########### TP_POINT_SIZE Updater and Validator #######
-#######################################################  
+#######################################################
 def update_TP_POINT_SIZE(args):
   TT_DATA=args["TT_DATA"]
   TP_DYN_PT_SIZE=args["TP_DYN_PT_SIZE"]
   TP_API=args["TP_API"]
   TP_SSR=args["TP_SSR"]
-  if args["TP_POINT_SIZE"]:
-    TP_POINT_SIZE = args["TP_POINT_SIZE"]
-  else: 
-    TP_POINT_SIZE = 0 
+
+  if ("TP_POINT_SIZE" in args) and args["TP_POINT_SIZE"]:
+      TP_POINT_SIZE = args["TP_POINT_SIZE"]
+  else:
+    TP_POINT_SIZE = 0
 
   return fn_update_TP_POINT_SIZE(TT_DATA, TP_DYN_PT_SIZE, TP_SSR, TP_API, TP_POINT_SIZE)
 
 def fn_update_TP_POINT_SIZE(TT_DATA, TP_DYN_PT_SIZE, TP_SSR, TP_API, TP_POINT_SIZE):
 
-  if TP_API==0:
+  if TP_API == API_BUFFER:
     TP_POINT_SIZE_min = 16 * TP_SSR
     TP_POINT_SIZE_max = 1024* TP_SSR
   else:
@@ -216,24 +224,22 @@ def fn_update_TP_POINT_SIZE(TT_DATA, TP_DYN_PT_SIZE, TP_SSR, TP_API, TP_POINT_SI
        "name" : "TP_POINT_SIZE",
        "minimum" : TP_POINT_SIZE_min,
        "maximum" : TP_POINT_SIZE_max
-    }
-    
+               }
+
   point_size_granularity= 16/fn_size_by_byte(TT_DATA)
 
-  if TP_POINT_SIZE != 0 and (TP_POINT_SIZE % point_size_granularity != 0):
-    TP_POINT_SIZE_act= int(round(TP_POINT_SIZE / point_size_granularity)*point_size_granularity)
+  if TP_POINT_SIZE != 0:
+    if (TP_POINT_SIZE % point_size_granularity != 0):
+      TP_POINT_SIZE_act= int(round(TP_POINT_SIZE / point_size_granularity)*point_size_granularity)
+      if TP_POINT_SIZE_act <= TP_POINT_SIZE_min:
+        TP_POINT_SIZE_act= TP_POINT_SIZE_min
+      if TP_POINT_SIZE_act==0:
+        TP_POINT_SIZE_act=int(CEIL(TP_POINT_SIZE, point_size_granularity))
+      if param_dict["maximum"]< TP_POINT_SIZE_act:
+        TP_POINT_SIZE_act=int(FLOOR(param_dict["maximum"], point_size_granularity))
 
-    if TP_POINT_SIZE_act <= TP_POINT_SIZE_min:
-       TP_POINT_SIZE_act= TP_POINT_SIZE_min
+      param_dict.update({"actual":TP_POINT_SIZE_act})
 
-    if TP_POINT_SIZE_act==0:
-      TP_POINT_SIZE_act=int(CEIL(TP_POINT_SIZE, point_size_granularity))
-
-    if param_dict["maximum"]< TP_POINT_SIZE_act:
-      TP_POINT_SIZE_act=int(FLOOR(param_dict["maximum"], point_size_granularity))
-    
-    param_dict.update({"actual":TP_POINT_SIZE_act}) 
-                                                                              
   return param_dict
 
 def validate_TP_POINT_SIZE(args):
@@ -254,42 +260,59 @@ def fn_validate_point_size(TP_POINT_SIZE, TT_DATA, TP_DYN_PT_SIZE, TP_API, TP_SS
 
 #######################################################
 ########### TP_WINDOW_VSIZE Updater and Validator #####
-#######################################################  
+#######################################################
 def update_TP_WINDOW_VSIZE(args):
+  AIE_VARIANT=args["AIE_VARIANT"]
+  TT_DATA=args["TT_DATA"]
   TP_POINT_SIZE=args["TP_POINT_SIZE"]
+  TP_SSR=args["TP_SSR"]
+  TP_DYN_PT_SIZE=args["TP_DYN_PT_SIZE"]
 
-  if args["TP_WINDOW_VSIZE"]: TP_WINDOW_VSIZE=args["TP_WINDOW_VSIZE"]
-  else: TP_WINDOW_VSIZE=0 
+  if ("TP_WINDOW_VSIZE" in args) and args["TP_WINDOW_VSIZE"]:
+    TP_WINDOW_VSIZE=args["TP_WINDOW_VSIZE"]
+  else: TP_WINDOW_VSIZE=0
 
-  return fn_update_update_TP_WINDOW_VSIZE(TP_POINT_SIZE, TP_WINDOW_VSIZE)  
+  return fn_update_update_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_SSR, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE)
 
-def fn_update_update_TP_WINDOW_VSIZE(TP_POINT_SIZE, TP_WINDOW_VSIZE):
+def fn_update_update_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_SSR, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE):
+  if TP_DYN_PT_SIZE==1: headerBytes=k_mem_header_bytes[AIE_VARIANT]
+  else: headerBytes=0
+  WINDOW_SIZE_max_sample=(k_data_memory_bytes[AIE_VARIANT]-headerBytes)/fn_size_by_byte(TT_DATA)
+  WINDOW_SIZE_max_sample_pp=(k_data_memory_bytes[AIE_VARIANT]/2-headerBytes)/fn_size_by_byte(TT_DATA)
+  TP_WINDOW_VSIZE_max=int(WINDOW_SIZE_max_sample*TP_SSR)
+  TP_WINDOW_VSIZE_max_pp=int(WINDOW_SIZE_max_sample_pp*TP_SSR)
+
   param_dict={
        "name" : "TP_WINDOW_VSIZE",
        "minimum" : TP_POINT_SIZE,
-       "maximum" : TP_WINDOW_VSIZE_max
-    }  
+       "maximum" : TP_WINDOW_VSIZE_max,
+       "maximum_pingpong_buf" : TP_WINDOW_VSIZE_max_pp
+    }
 
   if TP_WINDOW_VSIZE !=0 and (TP_WINDOW_VSIZE%TP_POINT_SIZE!=0):
     TP_WINDOW_VSIZE_act=int(round(TP_WINDOW_VSIZE / TP_POINT_SIZE) * TP_POINT_SIZE)
-    
+
     if TP_WINDOW_VSIZE_act==0:
           TP_WINDOW_VSIZE_act=int(CEIL(TP_WINDOW_VSIZE, TP_POINT_SIZE))
 
     if param_dict["maximum"]< TP_WINDOW_VSIZE_act:
         TP_WINDOW_VSIZE_act=int(FLOOR(param_dict["maximum"], TP_POINT_SIZE))
-    
-    param_dict.update({"actual":TP_WINDOW_VSIZE_act})  
+
+    param_dict.update({"actual":TP_WINDOW_VSIZE_act})
 
   return param_dict
 
 def validate_TP_WINDOW_VSIZE(args):
+  AIE_VARIANT=args["AIE_VARIANT"]
+  TT_DATA=args["TT_DATA"]
+  TP_SSR=args["TP_SSR"]
   TP_POINT_SIZE=args["TP_POINT_SIZE"]
+  TP_DYN_PT_SIZE=args["TP_DYN_PT_SIZE"]
   TP_WINDOW_VSIZE=args["TP_WINDOW_VSIZE"]
-  return fn_validate_window_vsize(TP_POINT_SIZE,TP_WINDOW_VSIZE)
+  return fn_validate_window_vsize(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_SSR, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE)
 
-def fn_validate_window_vsize(TP_POINT_SIZE,TP_WINDOW_VSIZE):
-  param_dict=fn_update_update_TP_WINDOW_VSIZE(TP_POINT_SIZE, TP_WINDOW_VSIZE)
+def fn_validate_window_vsize(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_SSR, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE):
+  param_dict=fn_update_update_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_SSR, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE)
   TP_WINDOW_VSIZE_range=[param_dict["minimum"], param_dict["maximum"]]
   if ((TP_WINDOW_VSIZE>=TP_POINT_SIZE) and (TP_WINDOW_VSIZE%TP_POINT_SIZE==0)) :
     return validate_range(TP_WINDOW_VSIZE_range, "TP_WINDOW_VSIZE", TP_WINDOW_VSIZE)
@@ -307,7 +330,7 @@ def fn_update_TP_SHIFT(TT_DATA):
   TP_SHIFT_min=0
 
   if TT_DATA=="cint16": TP_SHIFT_max=31
-  elif TT_DATA=="cint32": TP_SHIFT_max=60
+  elif TT_DATA=="cint32": TP_SHIFT_max=59
   elif TT_DATA=="cfloat": TP_SHIFT_max=0
 
   param_dict = {
@@ -387,9 +410,9 @@ def fn_update_weights(TP_POINT_SIZE, TP_DYN_PT_SIZE):
     len_weights=TP_POINT_SIZE
     param_dict.update({"len" : len_weights})
   else:
-    len_weights_min= TP_POINT_SIZE 
+    len_weights_min= TP_POINT_SIZE
     len_weights_max= 2*TP_POINT_SIZE
-    
+
     param_dict.update({"len" : len_weights_min})
     param_dict.update({"len_min" : len_weights_min})
     param_dict.update({"len_max" : len_weights_max})
@@ -426,7 +449,7 @@ def get_port_info(portname, dir, dataType, windowVsize, apiType, vectorLength):
 def get_dyn_pt_port_info(portname, dir, TT_DATA, windowVSize, vectorLength=None, marginSize=0, TP_API=0):
   return [{
     "name" : f"{portname}[{idx}]" if vectorLength else f"{portname}", # portname no index
-    "type" : "window" if TP_API==0 else "stream",
+    "type" : "window" if TP_API == API_BUFFER else "stream",
     "direction" : f"{dir}",
     "data_type" : TT_DATA,
     "fn_is_complex" : fn_is_complex(TT_DATA),
@@ -447,7 +470,7 @@ def info_ports(args):
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
   AIE_VARIANT = args["AIE_VARIANT"]
 
-  if TP_API == 0 :
+  if TP_API == API_BUFFER :
     if TP_DYN_PT_SIZE == 0 :
       portsIn = get_port_info(
         portname = "in",
@@ -470,7 +493,7 @@ def info_ports(args):
       portsOut = get_dyn_pt_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE/TP_SSR, TP_SSR, 0, TP_API)
   else:
     #AIE_VARIANT=1 and TP_API=1 uses 2x ports
-    if AIE_VARIANT == 1:
+    if AIE_VARIANT == AIE:
       if TP_DYN_PT_SIZE == 0 :
         portsIn = get_port_info(
           portname = "in",
@@ -491,7 +514,7 @@ def info_ports(args):
       else:
         portsIn = get_dyn_pt_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE*2/TP_SSR, TP_SSR, 0, TP_API)
         portsOut = get_dyn_pt_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE*2/TP_SSR, TP_SSR, 0, TP_API)
-    else: #AIE-ML
+    else: #AIE-ML or AIE-MLv2
       if TP_DYN_PT_SIZE == 0 :
         portsIn = get_port_info(
           portname = "in",
@@ -541,7 +564,7 @@ def generate_graph(graphname, args):
   TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
   AIE_VARIANT = args["AIE_VARIANT"]
   coeff_list = args["weights"]
-  if TP_API == 1 and AIE_VARIANT == 1: #2 streams per tile
+  if TP_API == API_STREAM and AIE_VARIANT == AIE: #2 streams per tile
     ssr = TP_SSR//2
   else:
     ssr = TP_SSR
@@ -574,9 +597,7 @@ public:
 
   {graphname}() : fft_window(weights) {{
     adf::kernel *fft_window_kernels = fft_window.getKernels();
-    for (int i=0; i < 1; i++) {{
-      adf::runtime<ratio>(fft_window_kernels[i]) = 0.9;
-    }}
+
     for (int i=0; i < TP_SSR; i++) {{
       adf::connect<> net_in(in[i], fft_window.in[i]);
       adf::connect<> net_out(fft_window.out[i], out[i]);

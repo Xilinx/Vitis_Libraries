@@ -94,6 +94,15 @@ class test_graph : public graph {
             filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(i) + "_0"));
             out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_64_bits, filenameOut);
             connect<>(hadamardGraph.out[i], out[i].in[0]);
+#ifdef USING_UUT
+#if (SINGLE_BUF == 1 && API_IO == 0) // Single buffer constraint applies for windows implementations
+            single_buffer(hadamardGraph.getKernels()[i].in[0]);
+            single_buffer(hadamardGraph.getKernels()[i].in[1]);
+            single_buffer(hadamardGraph.getKernels()[i].out[0]);
+            printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n", i);
+
+#endif
+#endif
         }
 
         printf("========================\n");

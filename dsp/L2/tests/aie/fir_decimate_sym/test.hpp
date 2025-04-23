@@ -26,6 +26,7 @@
 #include "test_utils.hpp"
 #include "fir_common_traits.hpp"
 #include "test_stim.hpp"
+#include "device_defs.h"
 
 #ifndef UUT_GRAPH
 #define UUT_GRAPH fir_decimate_sym_graph
@@ -166,8 +167,7 @@ class test_graph : public graph {
 #endif
 
 #ifdef USING_UUT
-        const int MAX_PING_PONG_SIZE = 16384;
-        const int MEMORY_MODULE_SIZE = 32768;
+        const int MAX_PING_PONG_SIZE = __DATA_MEM_BYTES__ / 2;
 #if (P_SSR == 1)
         const int bufferSize = ((FIR_LEN + INPUT_SAMPLES) * sizeof(DATA_TYPE));
         if (bufferSize > MAX_PING_PONG_SIZE) {
@@ -175,11 +175,6 @@ class test_graph : public graph {
             if (DUAL_IP == 1) {
                 single_buffer(firGraph.getKernels()->in[1]);
             }
-        } else {
-            // use default ping-pong buffer, unless requested buffer exceeds memory module size
-            static_assert(bufferSize < MEMORY_MODULE_SIZE,
-                          "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds "
-                          "Memory Module size of 32kB");
         }
 #endif
 #endif

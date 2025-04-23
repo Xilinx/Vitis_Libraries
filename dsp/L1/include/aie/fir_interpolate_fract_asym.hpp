@@ -616,7 +616,7 @@ class fir_interpolate_fract_asym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_fract_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, input_stream_cacc48* inCascade, output_window<TT_DATA>* outWindow);
+    void filter(input_window<TT_DATA>* inWindow, input_cascade_cacc* inCascade, output_window<TT_DATA>* outWindow);
 };
 
 // Partially specialized classes for cascaded interface (final kernel in cascade) with static coefficients, dual output
@@ -685,7 +685,7 @@ class fir_interpolate_fract_asym<TT_DATA,
 
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
-                input_stream_cacc48* inCascade,
+                input_cascade_cacc* inCascade,
                 output_window<TT_DATA>* outWindow,
                 output_window<TT_DATA>* outWindow2);
 };
@@ -756,7 +756,7 @@ class fir_interpolate_fract_asym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_fract_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, input_stream_cacc48* inCascade, output_window<TT_DATA>* outWindow);
+    void filter(input_window<TT_DATA>* inWindow, input_cascade_cacc* inCascade, output_window<TT_DATA>* outWindow);
 };
 
 // Partially specialized classes for cascaded interface (final kernel in cascade) with reloadable coefficients, dual
@@ -826,7 +826,7 @@ class fir_interpolate_fract_asym<TT_DATA,
 
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
-                input_stream_cacc48* inCascade,
+                input_cascade_cacc* inCascade,
                 output_window<TT_DATA>* outWindow,
                 output_window<TT_DATA>* outWindow2);
 };
@@ -897,7 +897,7 @@ class fir_interpolate_fract_asym<TT_DATA,
 
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
-                output_stream_cacc48* outCascade,
+                output_cascade_cacc* outCascade,
                 output_window<TT_DATA>* broadcastWindow);
 };
 
@@ -967,7 +967,7 @@ class fir_interpolate_fract_asym<TT_DATA,
 
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
-                output_stream_cacc48* outCascade,
+                output_cascade_cacc* outCascade,
                 output_window<TT_DATA>* broadcastWindow,
                 const TT_COEFF (&inTaps)[TP_FIR_LEN]);
 };
@@ -1039,8 +1039,8 @@ class fir_interpolate_fract_asym<TT_DATA,
 
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
-                input_stream_cacc48* inCascade,
-                output_stream_cacc48* outCascade,
+                input_cascade_cacc* inCascade,
+                output_cascade_cacc* outCascade,
                 output_window<TT_DATA>* broadcastWindow);
 };
 
@@ -1110,8 +1110,8 @@ class fir_interpolate_fract_asym<TT_DATA,
 
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
-                input_stream_cacc48* inCascade,
-                output_stream_cacc48* outCascade,
+                input_cascade_cacc* inCascade,
+                output_cascade_cacc* outCascade,
                 output_window<TT_DATA>* broadcastWindow);
 };
 }

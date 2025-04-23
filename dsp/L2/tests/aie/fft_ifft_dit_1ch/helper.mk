@@ -98,10 +98,22 @@ else ifeq ($(PARALLEL_POWER), 6)
 endif
 
 ifeq ($(DYN_PT_SIZE), 1)
-	DYN_PT_HEADER_MODE := 1
-else
-	DYN_PT_HEADER_MODE := 0
 endif
+
+HEADER_SIZE ?= 0
+ifeq ($(DYN_PT_SIZE), 1)
+	ifeq ($(AIE_VARIANT), 1)
+		HEADER_SIZE := 32
+	else ifeq ($(AIE_VARIANT), 2)
+		HEADER_SIZE := 32
+	else ifeq ($(AIE_VARIANT), 22)
+		HEADER_SIZE := 64
+	else 
+		HEADER_SIZE := 0
+	endif
+endif
+
+PLIO_WIDTH  = 64
 
 NUM_OUTPUTS = $(NUM_INPUTS)
 
@@ -109,24 +121,20 @@ PARAM_MAP = DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POI
 
 HELPER:= $(HELPER_CUR_DIR)/.HELPER
 
-$(HELPER): create_config validate_config create_input sim_ref prep_x86_out
+$(HELPER): create_input sim_ref prep_x86_out
 	make cleanall
 
 create_config:
 	@echo creating configuration
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP);
 
-validate_config:
-	@echo validating configuration
-	vitis --classic -exec ipmetadata_config_checker $(HELPER_ROOT_DIR)/L2/meta/fft_ifft_dit_1ch.json ./config.json -newflow
-
 create_input:
 	@echo starting create_input
 	@echo NUM_INPUTS $(NUM_INPUTS)
-	@echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  ${PARALLEL_POWER} 0 0 0 0 64;
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  ${PARALLEL_POWER} 0 0 0 0 64;
-	@echo perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k $(DYN_PT_HEADER_MODE) -w ${WINDOW_VSIZE} -plioWidth 64 ;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k $(DYN_PT_HEADER_MODE) -w ${WINDOW_VSIZE} -plioWidth 64;\
+	@echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  ${PARALLEL_POWER} 0 0 0 0 ${PLIO_WIDTH} ${HEADER_SIZE};
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  ${PARALLEL_POWER} 0 0 0 0 ${PLIO_WIDTH} ${HEADER_SIZE};
+	@echo perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k $(HEADER_SIZE) -w ${WINDOW_VSIZE} -plioWidth ${PLIO_WIDTH} ;\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k $(HEADER_SIZE) -w ${WINDOW_VSIZE} -plioWidth ${PLIO_WIDTH};\
 	echo Input ready
 
 sim_ref:
@@ -149,8 +157,8 @@ prep_aie_out:
 
 get_diff:
 	@echo starting get_diff
-	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_OUT_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w ${WINDOW_VSIZE} -plioWidth 64;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_OUT_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w ${WINDOW_VSIZE} -plioWidth 64
+	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_OUT_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 -k $(HEADER_SIZE) -w ${WINDOW_VSIZE} -plioWidth ${PLIO_WIDTH};\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_OUT_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 -k $(HEADER_SIZE) -w ${WINDOW_VSIZE} -plioWidth ${PLIO_WIDTH}
 	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) $(DIFF_MODE);\
     tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) $(DIFF_MODE)
 
@@ -162,7 +170,7 @@ get_stats:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(INPUT_WINDOW_VSIZE) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output fftMain $(NITER)
 
 get_status:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) SINGLE_BUF $(SINGLE_BUF)
 
 harvest_mem:
 	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts

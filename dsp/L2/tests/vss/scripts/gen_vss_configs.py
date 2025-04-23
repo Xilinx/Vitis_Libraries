@@ -26,10 +26,14 @@ def system_params(test, fname, aie_graph_name):
     macro_body_str=f'''
 part={PART}
 freqhz={FREQ}
-
-
-[aie]
-enable-partition=0:35:{aie_graph_name}
+'''
+    if "vc1902" in PART:
+        macro_body_str += f'''[aie]
+enable-partition=6:35:{aie_graph_name}
+'''
+    else:
+        macro_body_str += f'''[aie]
+enable-partition=0:38:{aie_graph_name}
 '''
     with open(f"{CUR_DIR}/{fname}", 'w') as f:
         f.write(macro_body_str)
@@ -39,7 +43,7 @@ def uut_params(cur_dir, test, fname):
     macro_body= []
     for key, value in test.items():
         if key != "PART":
-            if key in ["DATA_TYPE", "TWIDDLE_TYPE", "POINT_SIZE", "FFT_NIFFT", "SHIFT", "API_IO", "USE_WIDGETS", "ROUND_MODE", "SAT_MODE", "TWIDDLE_MODE", "SSR", "AIE_PLIO_WIDTH"]:
+            if key in ["DATA_TYPE", "TWIDDLE_TYPE", "POINT_SIZE", "FFT_NIFFT", "SHIFT", "API_IO", "ROUND_MODE", "SAT_MODE", "TWIDDLE_MODE", "SSR", "AIE_PLIO_WIDTH", "VSS_MODE"]:
                 macro_body.append(
     f'''
 {key}={value}''' 

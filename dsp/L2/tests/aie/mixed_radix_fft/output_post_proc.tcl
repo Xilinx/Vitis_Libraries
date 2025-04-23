@@ -53,13 +53,13 @@ set samplesPerLine [expr {double($plio_width)/$dataSize}]
 puts $samplesPerLine
 set dataLineOfZeros 0
 if {($tt_data eq "cint32" || $tt_data eq "cfloat")} {
-    set dataLineOfZeros "0 0"
+    set dataLineOfZeros "0 0 "
 } elseif {($tt_data eq "cint16")} {
-    set dataLineOfZeros "0 0 0 0"
+    set dataLineOfZeros "0 0 0 0 "
 } elseif {($tt_data eq "int32")} {
-    set dataLineOfZeros "0 0"
+    set dataLineOfZeros "0 0 "
 } elseif {($tt_data eq "float")} {
-    set dataLineOfZeros "0 0"
+    set dataLineOfZeros "0 0 "
 } 
 set inPtsFile [open $inPtSizefile r]
 set tmpOutFile [open "tmpOutFile.txt" w]

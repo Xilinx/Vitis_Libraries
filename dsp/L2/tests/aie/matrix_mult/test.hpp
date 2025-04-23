@@ -84,7 +84,7 @@ class test_graph : public graph {
         dsplib::blas::matrix_mult::UUT_GRAPH<T_DATA_A, T_DATA_B, P_DIM_A, P_DIM_AB, P_DIM_B, P_SHIFT, P_ROUND_MODE,
                                              P_DIM_A_LEADING, P_DIM_B_LEADING, P_DIM_OUT_LEADING, P_ADD_TILING_A,
                                              P_ADD_TILING_B, P_ADD_DETILING_OUT, P_INPUT_WINDOW_VSIZE_A,
-                                             P_INPUT_WINDOW_VSIZE_B, P_CASC_LEN, P_SAT_MODE, UUT_SSR>
+                                             P_INPUT_WINDOW_VSIZE_B, P_CASC_LEN, P_SAT_MODE, UUT_SSR, DATA_OUT_TYPE>
             mmultGraph;
 
 // Make connections
@@ -115,11 +115,22 @@ class test_graph : public graph {
                           mmultGraph.inA[(ssrRank * P_CASC_LEN) + cascRank]);
                 connect<>(inB[(ssrRank * P_CASC_LEN) + cascRank].out[0],
                           mmultGraph.inB[(ssrRank * P_CASC_LEN) + cascRank]);
+#if (SINGLE_BUF == 1)
+                single_buffer(mmultGraph.getKernels()[(ssrRank * P_CASC_LEN) + cascRank].in[0]);
+                single_buffer(mmultGraph.getKernels()[(ssrRank * P_CASC_LEN) + cascRank].in[1]);
+                printf("INFO: Single Buffer Constraint applied to input buffers of kernel %d.\n",
+                       ((ssrRank * P_CASC_LEN) + cascRank));
+#endif
             }
             std::string filenameOut = QUOTE(OUTPUT_FILE);
             filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(ssrRank) + "_0"));
             out[ssrRank] = output_plio::create("PLIO_out_" + std::to_string(ssrRank), adf::plio_64_bits, filenameOut);
             connect<>(mmultGraph.out[ssrRank], out[ssrRank].in[0]);
+#if (SINGLE_BUF == 1)
+            single_buffer(mmultGraph.getKernels()[(ssrRank * P_CASC_LEN) + (P_CASC_LEN - 1)].out[0]);
+            printf("INFO: Single Buffer Constraint applied the output buffer of kernel %d.\n",
+                   (ssrRank * P_CASC_LEN) + (P_CASC_LEN - 1));
+#endif
         }
 
 #else // using ref

@@ -35,6 +35,7 @@ namespace aie {
 namespace hadamard {
 
 static constexpr unsigned int kPointSizeMin = 16;
+static constexpr unsigned int kUnrollMax = 512;
 
 // determine the output type depending on the input type combinations
 template <typename TT_A, typename TT_B>

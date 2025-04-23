@@ -185,12 +185,12 @@
             "validator": {
                 "file": "conv_corr.py",
                 "function": "validate_TP_PHASES",
-                "args": ["TP_G_LEN", "TP_CASC_LEN", "TP_API"]
+                "args": ["AIE_VARIANT", "TT_DATA_F", "TT_DATA_G", "TP_G_LEN", "TP_CASC_LEN", "TP_API"]
             },
             "updater": {
                 "file": "conv_corr.py",
                 "function": "update_TP_PHASES",
-                "args": ["TP_G_LEN", "TP_CASC_LEN", "TP_API"]
+                "args": ["AIE_VARIANT", "TT_DATA_F", "TT_DATA_G", "TP_G_LEN", "TP_CASC_LEN", "TP_API"]
             }
         },
         {
@@ -236,6 +236,21 @@
                 "file": "conv_corr.py",
                 "function": "update_TP_SAT", 
                 "args": []
+            }
+        },
+		{
+            "name": "TP_USE_RTP_VECTOR_LENGTHS",
+            "description": "Selects Vector Lengths of F and G as Real Time Mode: 0 - no RTP F and G LEN, 1 - RTP port based ",
+            "type": "uint",
+            "validator": {
+                "file": "conv_corr.py",
+                "function": "validate_TP_USE_RTP_VECTOR_LENGTHS", 
+                "args": ["TP_API"]
+            },
+            "updater": {
+                "file": "conv_corr.py",
+                "function": "update_TP_USE_RTP_VECTOR_LENGTHS", 
+                "args": ["TP_API"]
             }
         }
     ],

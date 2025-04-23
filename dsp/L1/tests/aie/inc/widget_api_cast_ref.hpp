@@ -397,7 +397,7 @@ class widget_api_cast_ref<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZ
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
-    void transferData(input_stream<cacc64>* inStream0,
+    void transferData(input_cascade<cacc64>* inStream0,
                       input_stream<TT_DATA>* inStream1,
                       output_buffer<TT_DATA>& outWindow0);
 };
@@ -421,7 +421,7 @@ class widget_api_cast_ref<TT_DATA, kStreamCascAPI, kWindowAPI, 2, TP_WINDOW_VSIZ
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
     void transferData(input_stream<TT_DATA>* inStream0,
-                      input_stream<cacc64>* inStream1,
+                      input_cascade<cacc64>* inStream1,
                       output_buffer<TT_DATA>& outWindow0);
 };
 #endif //__SUPPORTS_ACC64__
@@ -441,7 +441,7 @@ class widget_api_cast_ref<TT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZ
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
     void transferData(input_buffer<TT_DATA>& inWindow0,
-                      output_stream<cacc64>* outStream0,
+                      output_cascade<cacc64>* outStream0,
                       output_stream<TT_DATA>* outStream1);
 };
 #endif //__SUPPORTS_ACC64__
@@ -462,7 +462,7 @@ class widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZ
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
     void transferData(input_buffer<TT_DATA>& inWindow0,
                       output_stream<TT_DATA>* outStream0,
-                      output_stream<cacc64>* outStream1);
+                      output_cascade<cacc64>* outStream1);
 };
 #endif //__SUPPORTS_ACC64__
 }

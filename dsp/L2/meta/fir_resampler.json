@@ -15,7 +15,7 @@
     {
       "name": "AIE_VARIANT",
       "type": "uint",
-      "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
+      "description": "Specifies the device type.",
       "updater": {
         "file": "fir_resampler.py",
         "function": "update_AIE_VARIANT"
@@ -40,12 +40,12 @@
       "updater": {
         "file"    : "fir_resampler.py",
         "function": "update_TT_DATA",
-        "args"    : []
+        "args"    : ["AIE_VARIANT"]
       },
       "validator": {
         "file"    : "fir_resampler.py",
         "function": "validate_TT_DATA",
-        "args"    : []
+        "args"    : ["AIE_VARIANT"]
       }
     },
     {
@@ -88,7 +88,7 @@
     },
     {
       "name": "TP_USE_COEFF_RELOAD",
-      "description": "Selects Coefficient Reload Mode: 0 - no reload, 1 - RTP port based, 2 - Stream Header based.",
+      "description": "Selects Coefficient Reload Mode: 0 - no reload, 1 - RTP port based.",
       "type": "uint",
       "updater": {
         "file": "fir_resampler.py",
@@ -172,7 +172,7 @@
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_PARA_DECI_POLY",
-        "args": ["TP_FIR_LEN", "TP_DECIMATE_FACTOR"]      
+        "args": ["TP_FIR_LEN", "TP_DECIMATE_FACTOR"]
       }
     },
     {
@@ -215,7 +215,7 @@
             "TP_API",
             "AIE_VARIANT"
         ]
-      } 
+      }
     },
     {
       "name": "TP_SSR",
@@ -328,7 +328,7 @@
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_coeff",
-        "args" : ["TT_COEFF", "TP_FIR_LEN"]
+        "args" : ["TP_USE_COEFF_RELOAD", "TT_COEFF", "TP_FIR_LEN"]
       }
     }
   ],

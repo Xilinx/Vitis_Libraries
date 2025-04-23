@@ -55,6 +55,22 @@ void createPLIOFileConnections(std::array<plioType, ssr*(dual + 1)>& plioPorts,
     }
 }
 
+template <typename coeff_type, int stim_type, size_t tapsNo, int seed>
+std::vector<coeff_type> generateTaps(std::string filename = std::string("data/input.txt")) {
+    // Generate random taps
+    // STIM_GEN_INCONES, STIM_GEN_ALLONES, STIM_GEN_IMPULSE, STIM_GEN_RANDOM
+    coeff_type taps[tapsNo];
+    std::vector<coeff_type> taps_v;
+    test_stim<coeff_type, tapsNo, 0> taps_gen(filename);
+    taps_gen.prepSeed(seed);
+    taps_gen.gen(stim_type, taps);
+
+    // Copy taps from C++ array into std::vector
+    for (int i = 0; i < tapsNo; i++) {
+        taps_v.push_back(taps[i]);
+    }
+    return taps_v;
+}
 // Unused parameters get a default here.
 #ifndef INTERPOLATE_FACTOR
 #define INTERPOLATE_FACTOR 1

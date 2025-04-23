@@ -35,52 +35,6 @@
 
 using namespace adf;
 
-#ifndef INLINE_DECL
-#define INLINE_DECL inline __attribute__((always_inline))
-#endif
-
-#ifndef NOINLINE_DECL
-#define NOINLINE_DECL inline __attribute__((noinline))
-#endif
-
-#define Y_REG_BITS 1024
-#define X_REG_BITS 512
-#define W_REG_BITS 256
-#define V_REG_BITS 128
-#define ZERO 0
-#define ONE 1
-#define TWO 2
-#define THREE 3
-#define FOUR 4
-#define EIGHT 8
-#define SIXTEEN 16
-#define THIRTYTWO 32
-#define V4SIZE 4
-#define V8SIZE 8
-#define V16SIZE 16
-#define V32SIZE 32
-#define UNROLL_4 4
-#define UNROLL_8 8
-#define UNROLL_16 16
-#define MAC4ROTDELAY 3
-#define ONE_PHASE_BUFFOFFSET_LOW_CONV 0x76543210u
-#define ONE_PHASE_BUFFOFFSET_LOW_CORR 0x45670123u
-#define ONE_PHASE_BUFFOFFSET_HI_CONV 0xFEDCBA98u
-#define ONE_PHASE_BUFFOFFSET_HI_CORR 0xCDEF89ABu
-#define TWO_PHASE_BUFFOFFSET_LOW_CONV_SINGLE_STREAM 0xECA86420u
-#define TWO_PHASE_BUFFOFFSET_LOW_CORR_SINGLE_STREAM 0x8ACE0246u
-#define TWO_PHASE_BUFFOFFSET_HIGH_CONV_SINGLE_STREAM 0xFDB97531u
-#define TWO_PHASE_BUFFOFFSET_HIGH_CORR_SINGLE_STREAM 0x9BDF1357u
-#define GREATERTHAN_TWO_PHASE_BUFFOFFSET_LOW_CONV_TWO_STREAM 0xDC985410u
-#define GREATERTHAN_TWO_PHASE_BUFFOFFSET_LOW_CORR_TWO_STREAM 0x89CD0145u
-#define GREATERTHAN_TWO_PHASE_BUFFOFFSET_LOW_CONV_SINGLE_STREAM 0xD951C840u
-#define GREATERTHAN_TWO_PHASE_BUFFOFFSET_LOW_CORR_SINGLE_STREAM 0x159D048Cu
-#define GREATERTHAN_TWO_PHASE_BUFFOFFSET_HIGH_CONV_TWO_STREAM 0xFEBA7632u
-#define GREATERTHAN_TWO_PHASE_BUFFOFFSET_HIGH_CORR_TWO_STREAM 0xABEF2367u
-#define GREATERTHAN_TWO_PHASE_BUFFOFFSET_HIGH_CONV_SINGLE_STREAM 0xFB73EA62u
-#define GREATERTHAN_TWO_PHASE_BUFFOFFSET_HIGH_CORR_SINGLE_STREAM 0x37BF26AEu
-#define ROUND(X, Y) (((X % Y) > ((Y + 1) / 2)) ? ((int)(X + Y - 1) / (int)Y) : ((int)X / (int)Y))
-
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -497,30 +451,6 @@ struct outType<cint32, cint32> {
 
 #endif // __HAS_ACCUM_PERMUTES__ == 0
 
-//----------------------------------------------------------------------
-// isComplex
-template <typename T>
-constexpr bool isComplex() {
-#if __SUPPORTS_CFLOAT__ == 1
-    return (std::is_same<T, cint16>::value || std::is_same<T, cint32>::value || std::is_same<T, cfloat>::value) ? true
-                                                                                                                : false;
-#endif
-#if __SUPPORTS_CFLOAT__ == 0
-    return (std::is_same<T, cint16>::value || std::is_same<T, cint32>::value) ? true : false;
-#endif
-};
-
-// isFloat
-template <typename T>
-constexpr bool isFloat() {
-#if __SUPPORTS_CFLOAT__ == 1
-    return (std::is_same<T, float>::value || std::is_same<T, cfloat>::value) ? true : false;
-#endif
-#if __SUPPORTS_CFLOAT__ == 0
-    return (std::is_same<T, float>::value) ? true : false;
-#endif
-};
-
 template <typename T_D_A, typename T_D_B>
 using tConvCorrAccType_t = typename tConvCorrAccType<T_D_A, T_D_B>::type;
 
@@ -605,9 +535,9 @@ INLINE_DECL void upd_W_buff(::aie::vector<TT_DATA_F, 1024 / 8 / sizeof(TT_DATA_F
 // T_acc struct with ::aie::accum
 template <typename TT_DATA_F, typename TT_DATA_G>
 struct T_acc_ConCor {
-    using v_type = ::aie::accum<tConvCorrAccType_t<TT_DATA_F, TT_DATA_G>, aie_CC_NumLanes<TT_DATA_F, TT_DATA_G>()>;
+    using v_type = ::aie::accum<tConvCorrAccType_t<TT_DATA_F, TT_DATA_G>, fnNumOfLanes<TT_DATA_F, TT_DATA_G>()>;
     v_type val, uval;
-    static constexpr unsigned getLanes() { return aie_CC_NumLanes<TT_DATA_F, TT_DATA_G>(); };
+    static constexpr unsigned getLanes() { return fnNumOfLanes<TT_DATA_F, TT_DATA_G>(); };
     static constexpr unsigned getSize() { return getAccSize<TT_DATA_F, TT_DATA_G>(); };
 };
 
@@ -634,99 +564,307 @@ INLINE_DECL void readStream(::aie::vector<TT_DATA_F, 1024 / 8 / sizeof(TT_DATA_F
     inbuff.insert(index, vect);
 };
 
+struct BuffOffsetShuffle {
+    unsigned int xBuffOffsetLow = 0;
+    unsigned int xBuffOffsetHi = 0;
+    unsigned int yBuffOffsetLow = 0;
+    unsigned int yBuffOffsetHi = 0;
+    unsigned int select = 0;
+    unsigned int xsquare = 0;
+    unsigned int ysquare = 0;
+};
+
+// function to get offset for shuffle.
+template <typename TT_DATA_G>
+auto getRearrangeOffsets(unsigned int streamsPerCore, unsigned int TP_PHASES, unsigned int TP_FUNCT_TYPE) {
+    unsigned int xBuffOffsetLow = 0;
+    unsigned int xBuffOffsetHi = 0;
+    unsigned int yBuffOffsetLow = 0;
+    unsigned int yBuffOffsetHi = 0;
+    unsigned int select = 0;
+    unsigned int xsquare = 0;
+    unsigned int ysquare = 0;
+    if (isComplex<TT_DATA_G>()) {
+        if (TP_PHASES == 1) {
+            xBuffOffsetLow = (TP_FUNCT_TYPE == CONV) ? ONE_PHASE_BUFFOFFSET_LOW_CONV : ONE_PHASE_BUFFOFFSET_LOW_CORR;
+            xBuffOffsetHi = (TP_FUNCT_TYPE == CONV) ? ONE_PHASE_BUFFOFFSET_HI_CONV : ONE_PHASE_BUFFOFFSET_HI_CORR;
+        } else if (TP_PHASES == TWO_PHASES) {
+            if (streamsPerCore == TWO_STREAMS) {
+                xBuffOffsetLow =
+                    (TP_FUNCT_TYPE == CONV) ? ONE_PHASE_BUFFOFFSET_LOW_CONV : ONE_PHASE_BUFFOFFSET_LOW_CORR;
+                xBuffOffsetHi = (TP_FUNCT_TYPE == CONV) ? ONE_PHASE_BUFFOFFSET_HI_CONV : ONE_PHASE_BUFFOFFSET_HI_CORR;
+            } else {
+                xBuffOffsetLow = (TP_FUNCT_TYPE == CONV) ? TWO_PHASE_BUFFOFFSET_LOW_CONV_SINGLE_STREAM
+                                                         : TWO_PHASE_BUFFOFFSET_LOW_CORR_SINGLE_STREAM;
+                xBuffOffsetHi = (TP_FUNCT_TYPE == CONV) ? TWO_PHASE_BUFFOFFSET_HIGH_CONV_SINGLE_STREAM
+                                                        : TWO_PHASE_BUFFOFFSET_HIGH_CORR_SINGLE_STREAM;
+            }
+        } else {
+            if (streamsPerCore == TWO_STREAMS) {
+                xBuffOffsetLow = (TP_FUNCT_TYPE == CONV) ? GREATERTHAN_TWO_PHASE_BUFFOFFSET_LOW_CONV_TWO_STREAM
+                                                         : GREATERTHAN_TWO_PHASE_BUFFOFFSET_LOW_CORR_TWO_STREAM;
+                xBuffOffsetHi = (TP_FUNCT_TYPE == CONV) ? GREATERTHAN_TWO_PHASE_BUFFOFFSET_HIGH_CONV_TWO_STREAM
+                                                        : GREATERTHAN_TWO_PHASE_BUFFOFFSET_HIGH_CORR_TWO_STREAM;
+            } else {
+                xBuffOffsetLow = (TP_FUNCT_TYPE == CONV) ? GREATERTHAN_TWO_PHASE_BUFFOFFSET_LOW_CONV_SINGLE_STREAM
+                                                         : GREATERTHAN_TWO_PHASE_BUFFOFFSET_LOW_CORR_SINGLE_STREAM;
+                xBuffOffsetHi = (TP_FUNCT_TYPE == CONV) ? GREATERTHAN_TWO_PHASE_BUFFOFFSET_HIGH_CONV_SINGLE_STREAM
+                                                        : GREATERTHAN_TWO_PHASE_BUFFOFFSET_HIGH_CORR_SINGLE_STREAM;
+            }
+        }
+    } else {
+        if (TP_PHASES == SINGLE_PHASE) {
+            select = BASE_OFFSET_OF_SELECT;
+            xBuffOffsetLow =
+                (TP_FUNCT_TYPE == CONV) ? INT16_ONE_PHASE_XBUFFOFFSET_LOW_CONV : INT16_ONE_PHASE_XBUFFOFFSET_LOW_CORR;
+            xBuffOffsetHi =
+                (TP_FUNCT_TYPE == CONV) ? INT16_ONE_PHASE_XBUFFOFFSET_HIGH_CONV : INT16_ONE_PHASE_XBUFFOFFSET_HIGH_CORR;
+            xsquare = (TP_FUNCT_TYPE == CONV) ? INT16_ONE_PHASE_XSQUARE_CONV : INT16_ONE_PHASE_XSQUARE_CORR;
+        } else if (TP_PHASES == TWO_PHASES) {
+            if (streamsPerCore == TWO_STREAMS) {
+                select = BASE_OFFSET_OF_SELECT;
+                xBuffOffsetLow = (TP_FUNCT_TYPE == CONV) ? INT16_TWO_PHASE_XBUFFOFFSET_LOW_CONV_TWO_STREAM
+                                                         : INT16_TWO_PHASE_XBUFFOFFSET_LOW_CORR_TWO_STREAM;
+                xBuffOffsetHi = (TP_FUNCT_TYPE == CONV) ? INT16_TWO_PHASE_XBUFFOFFSET_HIGH_CONV_TWO_STREAM
+                                                        : INT16_TWO_PHASE_XBUFFOFFSET_HIGH_CORR_TWO_STREAM;
+                xsquare = (TP_FUNCT_TYPE == CONV) ? INT16_ONE_PHASE_XSQUARE_CONV : INT16_ONE_PHASE_XSQUARE_CORR;
+            } else {
+                select = TWO_PHASES_TWO_STREAMS_OFFSET_OF_SELECT;
+                xBuffOffsetLow = (TP_FUNCT_TYPE == CONV) ? INT16_TWO_PHASE_XBUFFOFFSET_LOW_CONV_SINGLE_STREAM
+                                                         : INT16_TWO_PHASE_XBUFFOFFSET_LOW_CORR_SINGLE_STREAM;
+                xBuffOffsetHi = (TP_FUNCT_TYPE == CONV) ? INT16_TWO_PHASE_XBUFFOFFSET_HIGH_CONV_SINGLE_STREAM
+                                                        : INT16_TWO_PHASE_XBUFFOFFSET_HIGH_CORR_SINGLE_STREAM;
+                yBuffOffsetLow = (TP_FUNCT_TYPE == CONV) ? INT16_TWO_PHASE_YBUFFOFFSET_LOW_CONV_SINGLE_STREAM
+                                                         : INT16_TWO_PHASE_YBUFFOFFSET_LOW_CORR_SINGLE_STREAM;
+                yBuffOffsetHi = (TP_FUNCT_TYPE == CONV) ? INT16_TWO_PHASE_YBUFFOFFSET_HIGH_CONV_SINGLE_STREAM
+                                                        : INT16_TWO_PHASE_YBUFFOFFSET_HIGH_CORR_SINGLE_STREAM;
+                xsquare = (TP_FUNCT_TYPE == CONV) ? INT16_ONE_PHASE_XSQUARE_CONV : INT16_XSQUARE_CORR;
+                ysquare = (TP_FUNCT_TYPE == CONV) ? INT16_YSQUARE_CONV : INT16_YSQUARE_CORR;
+            }
+        } else if (TP_PHASES == FOUR_PHASES) {
+            if (streamsPerCore == TWO_STREAMS) {
+                select = BASE_OFFSET_OF_SELECT;
+                xBuffOffsetLow = (TP_FUNCT_TYPE == CONV) ? INT16_FOUR_PHASE_XBUFFOFFSET_LOW_CONV_TWO_STREAM
+                                                         : INT16_FOUR_PHASE_XBUFFOFFSET_LOW_CORR_TWO_STREAM;
+                xBuffOffsetHi = (TP_FUNCT_TYPE == CONV) ? INT16_FOUR_PHASE_XBUFFOFFSET_HIGH_CONV_TWO_STREAM
+                                                        : INT16_FOUR_PHASE_XBUFFOFFSET_HIGH_CORR_TWO_STREAM;
+                xsquare = (TP_FUNCT_TYPE == CONV) ? INT16_ONE_PHASE_XSQUARE_CONV : INT16_ONE_PHASE_XSQUARE_CORR;
+            } else {
+                select = FOUR_PHASES_TWO_STREAMS_OFFSET_OF_SELECT;
+                xBuffOffsetLow = (TP_FUNCT_TYPE == CONV) ? INT16_FOUR_PHASE_XBUFFOFFSET_LOW_CONV_SINGLE_STREAM
+                                                         : INT16_FOUR_PHASE_XBUFFOFFSET_LOW_CORR_SINGLE_STREAM;
+                xBuffOffsetHi = (TP_FUNCT_TYPE == CONV) ? INT16_FOUR_PHASE_XBUFFOFFSET_HIGH_CONV_SINGLE_STREAM
+                                                        : INT16_FOUR_PHASE_XBUFFOFFSET_HIGH_CORR_SINGLE_STREAM;
+                yBuffOffsetLow = (TP_FUNCT_TYPE == CONV) ? INT16_FOUR_PHASE_YBUFFOFFSET_LOW_CONV_SINGLE_STREAM
+                                                         : INT16_FOUR_PHASE_YBUFFOFFSET_LOW_CORR_SINGLE_STREAM;
+                yBuffOffsetHi = (TP_FUNCT_TYPE == CONV) ? INT16_FOUR_PHASE_YBUFFOFFSET_HIGH_CONV_SINGLE_STREAM
+                                                        : INT16_FOUR_PHASE_YBUFFOFFSET_HIGH_CORR_SINGLE_STREAM;
+                xsquare = (TP_FUNCT_TYPE == CONV) ? INT16_ONE_PHASE_XSQUARE_CONV : INT16_XSQUARE_CORR;
+                ysquare = (TP_FUNCT_TYPE == CONV) ? INT16_YSQUARE_CONV : INT16_YSQUARE_CORR;
+            }
+        } else {
+            if (streamsPerCore == TWO_STREAMS) {
+                select = BASE_OFFSET_OF_SELECT;
+                xBuffOffsetLow = (TP_FUNCT_TYPE == CONV) ? INT16_G_FOUR_PHASE_XBUFFOFFSET_LOW_CONV_TWO_STREAM
+                                                         : INT16_G_FOUR_PHASE_XBUFFOFFSET_LOW_CORR_TWO_STREAM;
+                xBuffOffsetHi = (TP_FUNCT_TYPE == CONV) ? INT16_G_FOUR_PHASE_XBUFFOFFSET_HIGH_CONV_TWO_STREAM
+                                                        : INT16_G_FOUR_PHASE_XBUFFOFFSET_HIGH_CORR_TWO_STREAM;
+                xsquare = (TP_FUNCT_TYPE == CONV) ? INT16_ONE_PHASE_XSQUARE_CONV : INT16_ONE_PHASE_XSQUARE_CORR;
+            } else {
+                select = ONLY_TWO_STREAMS_OFFSET_OF_SELECT;
+                xBuffOffsetLow = (TP_FUNCT_TYPE == CONV) ? INT16_G_FOUR_PHASE_XBUFFOFFSET_LOW_CONV_SINGLE_STREAM
+                                                         : INT16_G_FOUR_PHASE_XBUFFOFFSET_LOW_CORR_SINGLE_STREAM;
+                xBuffOffsetHi = (TP_FUNCT_TYPE == CONV) ? INT16_G_FOUR_PHASE_XBUFFOFFSET_HIGH_CONV_SINGLE_STREAM
+                                                        : INT16_G_FOUR_PHASE_XBUFFOFFSET_HIGH_CORR_SINGLE_STREAM;
+                yBuffOffsetLow = (TP_FUNCT_TYPE == CONV) ? INT16_G_FOUR_PHASE_YBUFFOFFSET_LOW_CONV_SINGLE_STREAM
+                                                         : INT16_G_FOUR_PHASE_YBUFFOFFSET_LOW_CORR_SINGLE_STREAM;
+                yBuffOffsetHi = (TP_FUNCT_TYPE == CONV) ? INT16_G_FOUR_PHASE_YBUFFOFFSET_HIGH_CONV_SINGLE_STREAM
+                                                        : INT16_G_FOUR_PHASE_YBUFFOFFSET_HIGH_CORR_SINGLE_STREAM;
+                xsquare =
+                    (TP_FUNCT_TYPE == CONV) ? INT16_ONE_PHASE_XSQUARE_CONV : INT16_XSQUARE_CORR; // INT16_YSQUARE_CORR ;
+                ysquare = (TP_FUNCT_TYPE == CONV) ? INT16_YSQUARE_CONV : INT16_YSQUARE_CORR;     // INT16_XSQUARE_CORR;
+            }
+        }
+    }
+    return BuffOffsetShuffle{xBuffOffsetLow, xBuffOffsetHi, yBuffOffsetLow, yBuffOffsetHi, select, xsquare, ysquare};
+};
+
 template <typename TT_DATA_F, typename TT_DATA_G>
-INLINE_DECL void gdata_rearrange(::aie::vector<TT_DATA_G, V4SIZE>* g_buff_ptr,
-                                 ::aie::vector<TT_DATA_G, V4SIZE>* g_rearrange_ptr,
-                                 unsigned int streams_per_core,
-                                 unsigned int TP_PHASES,
-                                 unsigned int TP_G_LEN,
-                                 unsigned int TP_FUNCT_TYPE) {
-    // constexpr int buffsize = (TP_G_LEN > 16) ? 16 : (TP_G_LEN) ;
-    using buff_vector = ::aie::vector<TT_DATA_G, V16SIZE>;
-    using t_vect = ::aie::vector<TT_DATA_G, V4SIZE>;
+INLINE_DECL void gDataReArrange(
+    ::aie::vector<TT_DATA_G, (kMaxSamplesInShuffleVec / sizeof(TT_DATA_G))>* g_buff_ptr,
+    ::aie::vector<TT_DATA_G, (kMaxSamplesInShuffleVec / sizeof(TT_DATA_G))>* g_rearrange_ptr,
+    unsigned int streamsPerCore,
+    unsigned int TP_PHASES,
+    unsigned int TP_G_LEN,
+    unsigned int TP_FUNCT_TYPE) {
+    constexpr int kVsize = kBuffSize64Byte / sizeof(TT_DATA_G);  // vector size with 512-bit buffer interms of Bytes
+    constexpr int kVsize1 = kBuffSize16Byte / sizeof(TT_DATA_G); // vector size with 128-bit buffer interms of Bytes
+
+    // Alias for for different size of vectors to define.
+    using buff_vector = ::aie::vector<TT_DATA_G, kVsize>;
+    using t_vect = ::aie::vector<TT_DATA_G, kVsize1>;
+    using t_VectInt16 = ::aie::vector<int16, (kMinDataBuffLen << 1)>;
+    using t_VectCint16 = ::aie::vector<cint16, kMinDataBuffLen>;
+
     t_vect __aie_dm_resource_a* ppin = (t_vect __aie_dm_resource_a*)g_buff_ptr;
     t_vect __aie_dm_resource_b* ppout0 = (t_vect __aie_dm_resource_b*)g_rearrange_ptr;
     t_vect __aie_dm_resource_a* ppin_alias = (t_vect __aie_dm_resource_a*)g_buff_ptr;
 
-    static constexpr unsigned int kLanes = getLanesOfMac4RotIntrinsic<TT_DATA_F>();
-    unsigned int num_buff_req =
-        ((TP_PHASES > TWO) ? ((TP_G_LEN / TP_PHASES) / kLanes) : (CEIL(TP_G_LEN, minDataBuffLen()) / minDataBuffLen()));
-    unsigned int buff_ptr_inc = (CEIL(TP_PHASES, kLanes) / kLanes);
-    unsigned int max_buf_idx = (TP_G_LEN < minDataBuffLen()) ? TWO : FOUR;
+    static constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>();
+    unsigned int reqNumBuff =
+        ((TP_PHASES > ((kBuffSize16Byte >> 1) / sizeof(TT_DATA_G))) ? ((TP_G_LEN / TP_PHASES) / kLanes)
+                                                                    : (CEIL(TP_G_LEN, kVsize) / kVsize));
+    unsigned int buffPtrInc = (CEIL(TP_PHASES, kVsize1) / kVsize1);
+    unsigned int maxBuffIndx = (TP_G_LEN < kVsize) ? kMaxIndexOf16ByteVector : kMaxIndexOf32ByteVector;
+    auto[xbuffOffset, xbuffOffsetHi, ybuffOffset, ybuffOffsetHi, select, xsquare, ysquare] =
+        getRearrangeOffsets<TT_DATA_G>(streamsPerCore, TP_PHASES, TP_FUNCT_TYPE);
+    unsigned int numrd = (TP_PHASES > TWO_PHASES) ? (TWO_PHASES / streamsPerCore) : 1;
 
-    // offset to shuffle for phases = 1
-    unsigned int buff_offset_1ph = (TP_FUNCT_TYPE == 1) ? ONE_PHASE_BUFFOFFSET_LOW_CONV : ONE_PHASE_BUFFOFFSET_LOW_CORR;
-    unsigned int buff_offset_hi_1ph =
-        (TP_FUNCT_TYPE == 1) ? ONE_PHASE_BUFFOFFSET_HI_CONV : ONE_PHASE_BUFFOFFSET_HI_CORR;
+    buff_vector buff[reqNumBuff];
+    buff_vector aShuffleBuff[reqNumBuff];
+    t_vect tempGdata;
+    t_VectInt16 vectInt16Buff1, vectInt16Buff2;
+    t_VectCint16 VectCint16;
 
-    // offset to shuffle for phases = 2
-    unsigned int buff_offset_2ph =
-        (streams_per_core == TWO)
-            ? ((TP_FUNCT_TYPE == 1) ? ONE_PHASE_BUFFOFFSET_LOW_CONV : ONE_PHASE_BUFFOFFSET_LOW_CORR)
-            : ((TP_FUNCT_TYPE == 1) ? TWO_PHASE_BUFFOFFSET_LOW_CONV_SINGLE_STREAM
-                                    : TWO_PHASE_BUFFOFFSET_LOW_CORR_SINGLE_STREAM);
-    unsigned int buff_offset_hi_2ph =
-        (streams_per_core == TWO) ? ((TP_FUNCT_TYPE == 1) ? ONE_PHASE_BUFFOFFSET_HI_CONV : ONE_PHASE_BUFFOFFSET_HI_CORR)
-                                  : ((TP_FUNCT_TYPE == 1) ? TWO_PHASE_BUFFOFFSET_HIGH_CONV_SINGLE_STREAM
-                                                          : TWO_PHASE_BUFFOFFSET_HIGH_CORR_SINGLE_STREAM);
+    for (int i = 0; i < buffPtrInc; i++) chess_prepare_for_pipelining chess_loop_range((kBuffSize16Byte >> 1), ) {
+            ppin = (TP_FUNCT_TYPE == CONV) ? (ppin_alias + i) : (ppin_alias + (buffPtrInc - 1 - i));
 
-    // offset to shuffle for phases > 2
-    unsigned int buff_offset_gt_2ph =
-        (streams_per_core == TWO) ? ((TP_FUNCT_TYPE == 1) ? GREATERTHAN_TWO_PHASE_BUFFOFFSET_LOW_CONV_TWO_STREAM
-                                                          : GREATERTHAN_TWO_PHASE_BUFFOFFSET_LOW_CORR_TWO_STREAM)
-                                  : ((TP_FUNCT_TYPE == 1) ? GREATERTHAN_TWO_PHASE_BUFFOFFSET_LOW_CONV_SINGLE_STREAM
-                                                          : GREATERTHAN_TWO_PHASE_BUFFOFFSET_LOW_CORR_SINGLE_STREAM);
-    unsigned int buff_offset_hi_gt_2ph =
-        (streams_per_core == TWO) ? ((TP_FUNCT_TYPE == 1) ? GREATERTHAN_TWO_PHASE_BUFFOFFSET_HIGH_CONV_TWO_STREAM
-                                                          : GREATERTHAN_TWO_PHASE_BUFFOFFSET_HIGH_CORR_TWO_STREAM)
-                                  : ((TP_FUNCT_TYPE == 1) ? GREATERTHAN_TWO_PHASE_BUFFOFFSET_HIGH_CONV_SINGLE_STREAM
-                                                          : GREATERTHAN_TWO_PHASE_BUFFOFFSET_HIGH_CORR_SINGLE_STREAM);
+            for (int j = 0; j < reqNumBuff; j++) {
+                for (int k = 0; k < kMaxIndexOf32ByteVector /* 4 */; k++) {
+                    buff[j].insert(k, *ppin);
+                    ppin = ppin + buffPtrInc;
+                }
 
-    unsigned int buff_offset =
-        (TP_PHASES > TWO) ? buff_offset_gt_2ph : ((TP_PHASES == TWO) ? buff_offset_2ph : buff_offset_1ph);
-    unsigned int buff_offset_hi =
-        (TP_PHASES > TWO) ? buff_offset_hi_gt_2ph : ((TP_PHASES == TWO) ? buff_offset_hi_2ph : buff_offset_hi_1ph);
-    unsigned int numrd = (TP_PHASES > TWO) ? (TWO / streams_per_core) : 1;
-
-    buff_vector buff[num_buff_req];
-    buff_vector shuffle_buff[num_buff_req];
-    t_vect gdata_temp;
-
-    for (int i = 0; i < buff_ptr_inc; i++) chess_prepare_for_pipelining chess_loop_range(EIGHT, ) {
-            if (TP_FUNCT_TYPE == 1) {
-                ppin = ppin_alias + i;
-            } else {
-                ppin = ppin_alias + (buff_ptr_inc - 1 - i);
-            }
-            for (int j = 0; j < num_buff_req; j++) {
-                buff[j].insert(0, *ppin);
-                ppin = ppin + buff_ptr_inc;
-                buff[j].insert(1, *ppin);
-                ppin = ppin + buff_ptr_inc;
-                buff[j].insert(TWO, *ppin);
-                ppin = ppin + buff_ptr_inc;
-                buff[j].insert(THREE, *ppin);
-                ppin = ppin + buff_ptr_inc;
-                shuffle_buff[j] = shuffle16(buff[j], 0, buff_offset, buff_offset_hi);
-                if (TP_FUNCT_TYPE == 0) {
-                    shuffle_buff[j] = (::aie::conj(shuffle_buff[j]));
+                if (isComplex<TT_DATA_G>()) {
+                    VectCint16 = as_v16cint16(shuffle16(as_v16cint16(buff[j]), 0, xbuffOffset, xbuffOffsetHi));
+                    aShuffleBuff[j] = ::aie::vector_cast<TT_DATA_G>(VectCint16);
+                    if (TP_FUNCT_TYPE == CORR) {
+                        aShuffleBuff[j] =
+                            ::aie::vector_cast<TT_DATA_G>(::aie::conj(::aie::vector_cast<cint16>(aShuffleBuff[j])));
+                    }
+                } else {
+                    vectInt16Buff1 = as_v32int16(select32(select, as_v32int16(buff[j]), 0, xbuffOffset, xbuffOffsetHi,
+                                                          xsquare, 0, ybuffOffset, ybuffOffsetHi, ysquare));
+                    aShuffleBuff[j] = ::aie::vector_cast<TT_DATA_G>(vectInt16Buff1);
                 }
             }
 
-            for (int j = 0; j < num_buff_req / numrd; j++) {
-                for (int k = 0; k < max_buf_idx; k++) {
-                    for (int l = 0; l < numrd; l++) {
-                        if (TP_FUNCT_TYPE == 1) {
-                            gdata_temp = shuffle_buff[j * numrd + l].template extract<FOUR>(k);
+            if (((kVsize / TP_PHASES) < kVsize1) && (!(isComplex<TT_DATA_G>()))) {
+                for (int j = 0; j < (reqNumBuff >> 1); j++) {
+                    if (streamsPerCore == SINGLE_STREAM) {
+                        if (TP_FUNCT_TYPE == CONV) {
+                            vectInt16Buff1 = as_v32int16(select32(
+                                INT16_G_FOUR_PHASE_SINGLE_STREAM_LANE_SELECT_CONV,
+                                as_v64int16(concat(aShuffleBuff[(j << 1)], aShuffleBuff[(j << 1) + 1])), 0,
+                                INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE,
+                                (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE + INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                0x3210, kBuffSize32Byte, INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE,
+                                (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE + INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                0x3210));
+                            vectInt16Buff2 = as_v32int16(
+                                select32(INT16_G_FOUR_PHASE_SINGLE_STREAM_LANE_SELECT_CONV,
+                                         as_v64int16(concat(aShuffleBuff[(j << 1)], aShuffleBuff[(j << 1) + 1])), 0,
+                                         (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
+                                          (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
+                                         (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
+                                          MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                         0x3210, kBuffSize32Byte, (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
+                                                                   (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
+                                         (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
+                                          MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                         0x3210));
                         } else {
-                            gdata_temp = shuffle_buff[(num_buff_req / numrd - 1 - j) * numrd + (numrd - 1 - l)]
-                                             .template extract<FOUR>((max_buf_idx - 1) - k);
+                            vectInt16Buff1 = as_v32int16(select32(
+                                INT16_G_FOUR_PHASE_SINGLE_STREAM_LANE_SELECT_CORR,
+                                as_v64int16(concat(aShuffleBuff[(j << 1)], aShuffleBuff[(j << 1) + 1])), 0,
+                                INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE,
+                                (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE + INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                0x3210, kBuffSize32Byte, INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE,
+                                (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE + INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                0x3210));
+                            vectInt16Buff2 = as_v32int16(
+                                select32(INT16_G_FOUR_PHASE_SINGLE_STREAM_LANE_SELECT_CORR,
+                                         as_v64int16(concat(aShuffleBuff[(j << 1)], aShuffleBuff[(j << 1) + 1])), 0,
+                                         (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
+                                          (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
+                                         (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
+                                          MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                         0x3210, kBuffSize32Byte, (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
+                                                                   (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
+                                         (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
+                                          MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                         0x3210));
                         }
-                        *ppout0++ = gdata_temp;
+                    } else {
+                        if (TP_FUNCT_TYPE == CONV) {
+                            vectInt16Buff1 = as_v32int16(select32(
+                                INT16_G_FOUR_PHASE_TWO_STREAM_LANE_SELECT_CONV,
+                                as_v64int16(concat(aShuffleBuff[(j << 1)], aShuffleBuff[(j << 1) + 1])), 0,
+                                INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE,
+                                (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE + INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                0x3210, kBuffSize32Byte, INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE,
+                                (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE + INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                0x1032));
+                            vectInt16Buff2 = as_v32int16(
+                                select32(INT16_G_FOUR_PHASE_TWO_STREAM_LANE_SELECT_CONV,
+                                         as_v64int16(concat(aShuffleBuff[(j << 1)], aShuffleBuff[(j << 1) + 1])), 0,
+                                         (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE +
+                                          (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
+                                         (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE +
+                                          MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                         0x3210, kBuffSize32Byte, (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE +
+                                                                   (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
+                                         (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE +
+                                          MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                         0x1032));
+                        } else {
+                            vectInt16Buff1 = as_v32int16(select32(
+                                INT16_G_FOUR_PHASE_TWO_STREAM_LANE_SELECT_CORR,
+                                as_v64int16(concat(aShuffleBuff[(j << 1)], aShuffleBuff[(j << 1) + 1])), 0,
+                                INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE,
+                                (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE + INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                0x1032, kBuffSize32Byte, INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE,
+                                (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE + INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                0x3210));
+                            vectInt16Buff2 = as_v32int16(
+                                select32(INT16_G_FOUR_PHASE_TWO_STREAM_LANE_SELECT_CORR,
+                                         as_v64int16(concat(aShuffleBuff[(j << 1)], aShuffleBuff[(j << 1) + 1])), 0,
+                                         (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE +
+                                          (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
+                                         (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE +
+                                          MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                         0x1032, kBuffSize32Byte, (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE +
+                                                                   (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
+                                         (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE +
+                                          MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                         0x3210));
+                        }
+                    }
+                    buff[j] = ::aie::vector_cast<TT_DATA_G>(vectInt16Buff1);
+                    buff[(reqNumBuff >> 1) + j] = ::aie::vector_cast<TT_DATA_G>(vectInt16Buff2);
+                }
+            } else {
+                for (int j = 0; j < reqNumBuff; j++) {
+                    buff[j] = aShuffleBuff[j];
+                }
+            }
+
+            for (int j = 0; j < reqNumBuff / numrd; j++) {
+                for (int k = 0; k < maxBuffIndx; k++) {
+                    for (int l = 0; l < numrd; l++) {
+                        if (TP_FUNCT_TYPE == CONV) {
+                            tempGdata = buff[j * numrd + l].template extract<kVsize1>(k);
+                        } else {
+                            tempGdata =
+                                buff[(reqNumBuff / numrd - 1 - j) * numrd + (numrd - 1 - l)].template extract<kVsize1>(
+                                    (maxBuffIndx - 1) - k);
+                        }
+                        *ppout0++ = tempGdata;
                     }
                 }
             }
-        }
+
+        } // End of Main Loop
 };
 #endif
 

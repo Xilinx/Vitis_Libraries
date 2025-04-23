@@ -15,7 +15,7 @@
     {
       "name": "AIE_VARIANT",
       "type": "uint",
-      "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
+      "description": "Specifies the device type.",
       "updater": {
         "file": "fir_interpolate_asym.py",
         "function": "update_AIE_VARIANT"
@@ -89,7 +89,7 @@
     },
     {
       "name": "TP_USE_COEFF_RELOAD",
-      "description": "Selects Coefficient Reload Mode: 0 - no reload, 1 - RTP port based, 2 - Stream Header based.",
+      "description": "Selects Coefficient Reload Mode: 0 - no reload, 1 - RTP port based.",
       "type": "uint",
       "updater": {
         "file": "fir_interpolate_asym.py",
@@ -180,12 +180,12 @@
       "updater": {
         "file": "fir_interpolate_asym.py",
         "function": "update_TP_SSR",
-        "args": ["AIE_VARIANT", "TP_API", "TP_FIR_LEN", "TP_INTERPOLATE_FACTOR", "TP_PARA_INTERP_POLY"]
+        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_INTERPOLATE_FACTOR", "TP_PARA_INTERP_POLY",  "TP_USE_COEFF_RELOAD" ]
       },
       "validator": {
         "file": "fir_interpolate_asym.py",
         "function": "validate_TP_SSR",
-        "args": ["AIE_VARIANT", "TP_API", "TP_FIR_LEN", "TP_INTERPOLATE_FACTOR", "TP_PARA_INTERP_POLY"]
+        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_INTERPOLATE_FACTOR", "TP_PARA_INTERP_POLY", "TP_USE_COEFF_RELOAD"]
       }
     },
     {
@@ -274,7 +274,7 @@
       "validator": {
         "file": "fir_interpolate_asym.py",
         "function": "validate_coeff",
-        "args": ["TT_COEFF", "TP_FIR_LEN"]
+        "args": ["TP_USE_COEFF_RELOAD", "TT_COEFF", "TP_FIR_LEN"]
       }
     }
   ],

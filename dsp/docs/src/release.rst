@@ -78,7 +78,7 @@ Also, various optimizations have been implemented to reduce the memory resource 
 | fft_ifft_2d_graph                     |  xf::dsp::aie::fft::two_d::fft_ifft_2d_graph                                |
 +---------------------------------------+-----------------------------------------------------------------------------+
 
-This configurable design library element implements a 2D FFT/IFFT function, decomposing FFT algorithm into AIE Tiles and MEM Tiles.
+This configurable design library element implements a 2D FFT/IFFT function, decomposing FFT algorithm into AI Engine Tiles and MEM Tiles.
 
 Supports AIE-ML devices.
 
@@ -105,7 +105,7 @@ This element provides a vectorized linear approximation of a function, f(x), for
 In this release the dynamic point size has been added to the IP, selected by setting the new parameter `TP_DYN_PT_SIZE` to 1.
 This IP now supports cint32 and cfloat for `TT_DATA` and cint32 for `TT_TWIDDLE`.
 
-*  **VSS FFT/IFFT 1CH (AIE + PL)** - New library element.
+*  **VSS FFT/IFFT 1CH (AI Engine + PL)** - New library element.
 
 In this release a VSS (Vitis Sub-System) FFT/IFFT has been added to the DSPLIB.
 This configurable design element implements a single-channel DIT FFT/IFFT, decomposing FFT algorithm into AIE Tiles and PL (programmable logic).
@@ -178,9 +178,9 @@ This element adds an implementation of the  Kronecker Matrix Product.
 
 Supports AIE devices.
 
-*  **Example design of FFT on AIE and PL**
+*  **Example design of FFT on AI Engine and PL**
 
-This element illustrates the implementation of the Fast Fourier transform that spans across the AIE and Programmable Logic.
+This element illustrates the implementation of the Fast Fourier transform that spans across the AI Engine array and Programmable Logic.
 
 Supports AIE and AIE-ML devices.
 
@@ -222,7 +222,7 @@ The following features have been added to the library in this release.
 
 This element adds an implementation of the Discrete Fourier transform (DFT).
 
-Supports both AI Engine (AIE) and AIE-ML devices.
+Supports both AIE and AIE-ML devices.
 
 * **Mixed-Radix FFT**: New library element.
 
@@ -266,7 +266,7 @@ The support for AIE-ML devices has been rolled out to all FIR variants.
 
 * **FFT IFFT**
 
-Added a performance optimization that will extract some SSR FFT features onto widget kernels and map these kernels in separate tiles, achieving better performance at a high AIE usage cost.
+Added a performance optimization that will extract some SSR FFT features onto widget kernels and map these kernels in separate tiles, achieving better performance at a high AI Engine usage cost.
 
 * **All Library Elements**
 

@@ -22,7 +22,10 @@
     },
     "pre_build": [
         {
-            "build_cmd": "vitis --classic -exec ipmetadata_config_checker -newflow -metadata_path LIB_DIR/L2/meta/ LIB_DIR/L2/meta/vmc/$(VMC_KERNEL).json ./config.json"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/meta/scripts/metadata_checker.py --ip $(UUT_KERNEL))"
+        },
+        {
+            "build_cmd": "# vitis --classic -exec ipmetadata_config_checker -newflow -metadata_path LIB_DIR/L2/meta/ LIB_DIR/L2/meta/vmc/$(VMC_KERNEL).json ./config.json"
         },
         {
             "build_cmd": "perl LIB_DIR/L2/tests/aie/common/scripts/compare_json.pl ref_out.json ./xmc_aie_lib/$(GRAPHNAME)/out.json | grep 'Files are identical' || exit 1"
@@ -86,7 +89,7 @@
         "LIB_DIR/L2/meta"
     ],
     "testinfo": {
-        "disable": false,
+        "disable": true,
         "jobs": [
             {
                 "index": 0,

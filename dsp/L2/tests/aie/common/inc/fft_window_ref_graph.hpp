@@ -51,7 +51,7 @@ class fft_window_ref_graph : public graph {
     static constexpr int kWindowVsize = TP_WINDOW_VSIZE / TP_SSR;
     static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
     static constexpr int kAPIFactor = TP_API == 0 ? 1 : kStreamsPerTile;
-    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? __ALIGN_BYTE_SIZE__ : 0;
 
     port<input> in[kAPIFactor * TP_SSR];
     port<output> out[kAPIFactor * TP_SSR];

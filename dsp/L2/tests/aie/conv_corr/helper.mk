@@ -24,10 +24,11 @@ HELPER_ROOT_DIR ?= ./../../../../
 HELPER:= $(HELPER_CUR_DIR)/.helper
 SEED_DATA_G ?= 0
 SEED_DATA_F ?= 0
+USE_RTP_VECTOR_LENGTHS ?= 0
 ceil = $(shell echo $$(((($1 + $2 - 1)/ $2) * $2)))
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 
-PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_F $(DATA_F) DATA_G $(DATA_G) DATA_OUT $(DATA_OUT) FUNCT_TYPE $(FUNCT_TYPE) COMPUTE_MODE $(COMPUTE_MODE) F_LEN $(F_LEN) G_LEN $(G_LEN) SHIFT $(SHIFT) API_PORT $(API_PORT) RND $(RND) SAT $(SAT) NUM_FRAMES $(NUM_FRAMES) CASC_LEN $(CASC_LEN) PHASES $(PHASES)
+PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_F $(DATA_F) DATA_G $(DATA_G) DATA_OUT $(DATA_OUT) FUNCT_TYPE $(FUNCT_TYPE) COMPUTE_MODE $(COMPUTE_MODE) F_LEN $(F_LEN) G_LEN $(G_LEN) SHIFT $(SHIFT) API_IO $(API_IO) RND $(RND) SAT $(SAT) NUM_FRAMES $(NUM_FRAMES) CASC_LEN $(CASC_LEN) PHASES $(PHASES) USE_RTP_VECTOR_LENGTHS $(USE_RTP_VECTOR_LENGTHS)
 
 ifeq ($(DATA_F), int8)
 	ifeq ($(DATA_G), int8)
@@ -35,7 +36,9 @@ ifeq ($(DATA_F), int8)
 		    NUM_LANES := 16
 		else ifeq ($(AIE_VARIANT), 2)
 		    NUM_LANES := 32
-		endif	
+		else ifeq ($(AIE_VARIANT), 22)
+		    NUM_LANES := 32
+		endif
 	endif
 endif
 
@@ -45,7 +48,9 @@ ifeq ($(DATA_F), int16)
 		    NUM_LANES := 16
 		else ifeq ($(AIE_VARIANT), 2)
 		    NUM_LANES := 16
-		endif	
+		else ifeq ($(AIE_VARIANT), 22)
+		    NUM_LANES := 16
+		endif
 	endif
 endif
 
@@ -55,7 +60,9 @@ ifeq ($(DATA_F), int16)
 		    NUM_LANES := 16
 		else ifeq ($(AIE_VARIANT), 2)
 		    NUM_LANES := 16
-		endif	
+		else ifeq ($(AIE_VARIANT), 22)
+		    NUM_LANES := 16
+		endif
 	endif
 endif
 
@@ -65,7 +72,9 @@ ifeq ($(DATA_F), int32)
 		    NUM_LANES := 8
 		else ifeq ($(AIE_VARIANT), 2)
 		    NUM_LANES := 16
-		endif	
+		else ifeq ($(AIE_VARIANT), 22)
+		    NUM_LANES := 16
+		endif
 	endif
 endif
 
@@ -75,7 +84,9 @@ ifeq ($(DATA_F), float)
 		    NUM_LANES := 8
 		else ifeq ($(AIE_VARIANT), 2)
 		    NUM_LANES := 16
-		endif	
+		else ifeq ($(AIE_VARIANT), 22)
+		    NUM_LANES := 16
+		endif
 	endif
 endif
 
@@ -85,7 +96,9 @@ ifeq ($(DATA_F), float)
 		    NUM_LANES := 8
 		else ifeq ($(AIE_VARIANT), 2)
 		    NUM_LANES := 16
-		endif	
+		else ifeq ($(AIE_VARIANT), 22)
+		    NUM_LANES := 16
+		endif
 	endif
 endif
 
@@ -95,7 +108,9 @@ ifeq ($(DATA_F), cint16)
 		    NUM_LANES := 8
 		else ifeq ($(AIE_VARIANT), 2)
 		    NUM_LANES := 16
-		endif	
+		else ifeq ($(AIE_VARIANT), 22)
+		    NUM_LANES := 16
+		endif
 	endif
 endif
 
@@ -105,7 +120,9 @@ ifeq ($(DATA_F), cint16)
 		    NUM_LANES := 8
 		else ifeq ($(AIE_VARIANT), 2)
 		    NUM_LANES := 16
-		endif	
+		else ifeq ($(AIE_VARIANT), 22)
+		    NUM_LANES := 16
+		endif
 	endif
 endif
 
@@ -115,7 +132,9 @@ ifeq ($(DATA_F), cint16)
 		    NUM_LANES := 8
 		else ifeq ($(AIE_VARIANT), 2)
 		    NUM_LANES := 16
-		endif	
+		else ifeq ($(AIE_VARIANT), 22)
+		    NUM_LANES := 16
+		endif
 	endif
 endif
 
@@ -126,7 +145,9 @@ ifeq ($(DATA_F), cint32)
 		    NUM_LANES := 8
 		else ifeq ($(AIE_VARIANT), 2)
 		    NUM_LANES := 16
-		endif	
+		else ifeq ($(AIE_VARIANT), 22)
+		    NUM_LANES := 16
+		endif
 	endif
 endif
 
@@ -136,7 +157,9 @@ ifeq ($(DATA_F), cint32)
 		    NUM_LANES := 8
 		else ifeq ($(AIE_VARIANT), 2)
 		    NUM_LANES := 16
-		endif	
+		else ifeq ($(AIE_VARIANT), 22)
+		    NUM_LANES := 16
+		endif
 	endif
 endif
 
@@ -146,7 +169,9 @@ ifeq ($(DATA_F), cfloat)
 		    NUM_LANES := 8
 		else ifeq ($(AIE_VARIANT), 2)
 		    NUM_LANES := 16
-		endif	
+		else ifeq ($(AIE_VARIANT), 22)
+		    NUM_LANES := 16
+		endif
 	endif
 endif
 
@@ -156,7 +181,9 @@ ifeq ($(DATA_F), cfloat)
 		    NUM_LANES := 8
 		else ifeq ($(AIE_VARIANT), 2)
 		    NUM_LANES := 16
-		endif	
+		else ifeq ($(AIE_VARIANT), 22)
+		    NUM_LANES := 16
+		endif
 	endif
 endif
 
@@ -164,7 +191,9 @@ ifeq ($(DATA_F), bfloat16)
 	ifeq ($(DATA_G), bfloat16)
 	    ifeq ($(AIE_VARIANT), 2)
 		    NUM_LANES := 16
-		endif	
+		else ifeq ($(AIE_VARIANT), 22)
+		    NUM_LANES := 16
+		endif
 	endif
 endif
 
@@ -180,9 +209,9 @@ else
 endif
 
 CEIL_RES = $(call ceil, $(OUT_LEN), $(NUM_LANES))
-ifeq ($(API_PORT),1)
+ifeq ($(API_IO),1)
     OUT_DATA_LEN := $(F_LEN)
-else	
+else
     OUT_DATA_LEN := $(shell echo $$((  $(CEIL_RES)*$(NUM_FRAMES))))
 endif
 
@@ -199,7 +228,7 @@ REF_F_LEN         = $(F_LEN)
 REF_G_LEN         = $(G_LEN)
 NITER_UUT         = $(NITER)
 NITER_REF         = $(NITER_UUT)
-ifeq ($(API_PORT), 1)
+ifeq ($(API_IO), 1)
   NITER_REF      := 1
   REF_F_LEN      := $(shell echo ${F_LEN}*${NITER_UUT} | bc )
 endif
@@ -212,22 +241,18 @@ create_config:
 	echo creating configuration;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP);
 
-validate_config:
-	echo validating configuration;\
-	vitis --classic -exec ipmetadata_config_checker $(HELPER_ROOT_DIR)/L2/meta/conv_corr.json ./config.json -newflow
-	
 create_input:
 	@echo starting generation of input
-	@if [ $(API_PORT) == 1 ]; then \
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/gen_input.tcl $(LOC_INPUT_FILE_F) $(F_LEN) $(NITER_UUT) $(SEED_DATA_F) $(STIM_TYPE_F) 0 0 $(DATA_F) $(API_PORT) 1 0 0 $(DATA_G) 0 0 ; \
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/gen_input_f32_bf16.tcl $(LOC_INPUT_FILE_G) $(G_LEN) $(NITER_UUT) $(SEED_DATA_G) $(STIM_TYPE_G) 0 0 $(DATA_G) $(API_PORT) 1 0 0 $(DATA_G) 0 0 $(NUM_FRAMES) 1; \
+	@if [ $(API_IO) == 1 ]; then \
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/gen_input.tcl $(LOC_INPUT_FILE_F) $(F_LEN) $(NITER_UUT) $(SEED_DATA_F) $(STIM_TYPE_F) 0 0 $(DATA_F) $(API_IO) 1 0 0 $(DATA_G) 0 0 ; \
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/gen_input_f32_bf16.tcl $(LOC_INPUT_FILE_G) $(G_LEN) $(NITER_UUT) $(SEED_DATA_G) $(STIM_TYPE_G) 0 0 $(DATA_G) $(API_IO) 1 0 0 $(DATA_G) 0 0 $(NUM_FRAMES) 1; \
     else \
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/gen_padded_input.tcl $(LOC_INPUT_FILE_F) $(F_LEN) $(NITER_UUT) $(SEED_DATA_F) $(STIM_TYPE_F) 0 0 $(DATA_F) $(API_PORT) 1 0 0 $(DATA_G) 0 0 $(COMPUTE_MODE) $(G_LEN) $(AIE_VARIANT) $(NUM_FRAMES) ; \
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/gen_input_f32_bf16.tcl $(LOC_INPUT_FILE_G) $(G_LEN) $(NITER_UUT) $(SEED_DATA_G) $(STIM_TYPE_G) 0 0 $(DATA_G) $(API_PORT) 1 0 0 $(DATA_G) 0 0 $(NUM_FRAMES) 0 ; \
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/gen_padded_input.tcl $(LOC_INPUT_FILE_F) $(F_LEN) $(NITER_UUT) $(SEED_DATA_F) $(STIM_TYPE_F) 0 0 $(DATA_F) $(API_IO) 1 0 0 $(DATA_G) 0 0 $(COMPUTE_MODE) $(G_LEN) $(AIE_VARIANT) $(NUM_FRAMES) ; \
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/gen_input_f32_bf16.tcl $(LOC_INPUT_FILE_G) $(G_LEN) $(NITER_UUT) $(SEED_DATA_G) $(STIM_TYPE_G) 0 0 $(DATA_G) $(API_IO) 1 0 0 $(DATA_G) 0 0 $(NUM_FRAMES) 0 ; \
 	fi; \
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/split_interleave.tcl $(LOC_INPUT_FILE_F) $(DATA_F) $(PHASES) ; \
     echo Input ready
-	
+
 sim_ref:
 	@echo starting sim_ref;\
 	UUT_KERNEL=conv_corr_ref UUT_SIM_FILE=./data/ref_output.txt make run TARGET=x86sim TAG=REF
@@ -249,7 +274,7 @@ prep_aie_out:
 get_diff:
 	perl $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_OUT) --ssr $(PHASES) --zip --dual 0 -k 0 -w ${OUT_DATA_LEN} ;\
 	perl $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_OUT) --ssr 1 --zip --dual 0 -k 0 -w ${OUT_DATA_LEN} ;\
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/align_stream_output.tcl $(REF_SIM_FILE) $(UUT_SIM_FILE) $(PHASES) $(CASC_LEN) $(REF_F_LEN) $(G_LEN) 1 $(API_PORT) ;\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/align_stream_output.tcl $(REF_SIM_FILE) $(UUT_SIM_FILE) $(PHASES) $(CASC_LEN) $(REF_F_LEN) $(G_LEN) 1 $(API_IO) $(DATA_G);\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl $(UUT_SIM_FILE) $(REF_SIM_FILE) ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) PERCENT
 
 get_latency:
@@ -264,6 +289,6 @@ get_status:
 
 harvest_mem:
 	@$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts
-	
+
 cleanup:
 	make cleanall

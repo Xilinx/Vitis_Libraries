@@ -15,9 +15,7 @@
     {
       "name": "AIE_VARIANT",
       "type": "uint",
-      "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
-      "maximum": 2,
-      "minimum": 1,
+      "description": "Specifies the device type.",
       "updater": {
         "file": "fir_tdm.py",
         "function": "update_AIE_VARIANT"
@@ -65,12 +63,12 @@
       "updater": {
         "file": "fir_tdm.py",
         "function": "update_TT_OUT_DATA",
-        "args": ["TT_DATA"]
+        "args": ["AIE_VARIANT", "TT_DATA"]
       },
       "validator": {
         "file": "fir_tdm.py",
         "function": "validate_TT_OUT_DATA",
-        "args": ["TT_DATA"]
+        "args": ["AIE_VARIANT", "TT_DATA"]
       }
     },
     {
@@ -254,6 +252,21 @@
       }
     },
     {
+      "name": "TP_USE_COEFF_RELOAD",
+      "description": "Selects Coefficient Reload Mode: 0 - no reload, 1 - RTP port based.",
+      "type": "uint",
+      "updater": {
+        "file": "fir_sr_asym.py",
+        "function": "update_TP_USE_COEFF_RELOAD",
+        "args": []
+      },
+      "validator": {
+        "file": "fir_sr_asym.py",
+        "function": "validate_TP_USE_COEFF_RELOAD",
+        "args": []
+      }
+    },
+    {
       "name": "coeff",
       "description": "The filter coefficients.",
       "element_type": "TT_COEFF",
@@ -261,12 +274,12 @@
       "updater": {
         "file": "fir_tdm.py",
         "function": "update_coeff",
-        "args": ["TP_TDM_CHANNELS", "TT_COEFF", "TP_FIR_LEN"]
+        "args": ["TP_TDM_CHANNELS", "TT_COEFF", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD"]
       },
       "validator": {
         "file": "fir_tdm.py",
         "function": "validate_coeff",
-        "args": ["TP_TDM_CHANNELS", "TT_COEFF", "TP_FIR_LEN"]
+        "args": ["TP_TDM_CHANNELS", "TT_COEFF", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD"]
       }
     }
   ],

@@ -58,7 +58,7 @@ namespace conv_corr {
 
 // phPos, kPos, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN, TP_SHIFT, TP_API,
 // TP_RND,
-// TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN, TP_PHASES
+// TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN, TP_PHASES, TP_USE_RTP_VECTOR_LENGTHS
 template <int phPos,
           int kPos,
           typename TT_DATA_F,
@@ -74,7 +74,8 @@ template <int phPos,
           unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_PHASES>
+          unsigned int TP_PHASES,
+          unsigned int TP_USE_RTP_VECTOR_LENGTHS>
 class create_casc_kernel_recur {
    public:
     static void create(kernel (&convcorrKernels)[TP_PHASES][TP_CASC_LEN]) {
@@ -83,14 +84,13 @@ class create_casc_kernel_recur {
         static constexpr bool CASC_OUT = (TP_KERNEL_POSITION == TP_CASC_LEN - 1) ? false : true;
         static constexpr bool CASC_IN = (TP_KERNEL_POSITION == 0) ? false : true;
 
-        convcorrKernels[TP_PH_POSITION][TP_KERNEL_POSITION] =
-            kernel::create_object<conv_corr<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN,
-                                            TP_G_LEN, TP_SHIFT, TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN,
-                                            TP_PHASES, TP_KERNEL_POSITION, TP_PH_POSITION, CASC_IN, CASC_OUT> >();
-
+        convcorrKernels[TP_PH_POSITION][TP_KERNEL_POSITION] = kernel::create_object<
+            conv_corr<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN, TP_SHIFT,
+                      TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN, TP_PHASES, TP_KERNEL_POSITION, TP_PH_POSITION,
+                      CASC_IN, CASC_OUT, TP_USE_RTP_VECTOR_LENGTHS> >();
         create_casc_kernel_recur<TP_PH_POSITION, TP_KERNEL_POSITION, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE,
                                  TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN, TP_SHIFT, TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES,
-                                 TP_CASC_LEN, TP_PHASES>::create(convcorrKernels);
+                                 TP_CASC_LEN, TP_PHASES, TP_USE_RTP_VECTOR_LENGTHS>::create(convcorrKernels);
     }
 };
 
@@ -109,7 +109,8 @@ template <typename TT_DATA_F,
           unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_PHASES>
+          unsigned int TP_PHASES,
+          unsigned int TP_USE_RTP_VECTOR_LENGTHS>
 class create_casc_kernel_recur<0,
                                1,
                                TT_DATA_F,
@@ -125,15 +126,16 @@ class create_casc_kernel_recur<0,
                                TP_SAT,
                                TP_NUM_FRAMES,
                                TP_CASC_LEN,
-                               TP_PHASES> {
+                               TP_PHASES,
+                               TP_USE_RTP_VECTOR_LENGTHS> {
    public:
     static void create(kernel (&convcorrKernels)[TP_PHASES][TP_CASC_LEN]) {
         static constexpr unsigned int TP_KERNEL_POSITION = 0;
         static constexpr unsigned int TP_PH_POSITION = 0;
-        convcorrKernels[0][0] =
-            kernel::create_object<conv_corr<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN,
-                                            TP_G_LEN, TP_SHIFT, TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN,
-                                            TP_PHASES, TP_KERNEL_POSITION, TP_PH_POSITION, false, true> >();
+        convcorrKernels[0][0] = kernel::create_object<
+            conv_corr<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN, TP_SHIFT,
+                      TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN, TP_PHASES, TP_KERNEL_POSITION, TP_PH_POSITION,
+                      false, true, TP_USE_RTP_VECTOR_LENGTHS> >();
     }
 };
 
@@ -153,24 +155,27 @@ template <int phPos,
           unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_PHASES>
+          unsigned int TP_PHASES,
+          unsigned int TP_USE_RTP_VECTOR_LENGTHS>
 class create_casc_kernel {
    public:
     static void create(kernel (&convcorrKernels)[TP_PHASES][TP_CASC_LEN]) {
         static constexpr unsigned int TP_KERNEL_POSITION = kPos - 1;
         static constexpr unsigned int TP_PH_POSITION = phPos - 1;
-        convcorrKernels[phPos - 1][kPos - 1] =
-            kernel::create_object<conv_corr<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN,
-                                            TP_G_LEN, TP_SHIFT, TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN,
-                                            TP_PHASES, TP_KERNEL_POSITION, TP_PH_POSITION, true, false> >();
+        static constexpr bool CASC_OUT = (TP_KERNEL_POSITION == TP_CASC_LEN - 1) ? false : true;
+        static constexpr bool CASC_IN = (TP_KERNEL_POSITION == 0) ? false : true;
 
+        convcorrKernels[phPos - 1][kPos - 1] = kernel::create_object<
+            conv_corr<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN, TP_SHIFT,
+                      TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN, TP_PHASES, TP_KERNEL_POSITION, TP_PH_POSITION,
+                      CASC_IN, CASC_OUT, TP_USE_RTP_VECTOR_LENGTHS> >();
         create_casc_kernel_recur<phPos - 1, kPos - 1, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE,
                                  TP_F_LEN, TP_G_LEN, TP_SHIFT, TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN,
-                                 TP_PHASES>::create(convcorrKernels);
+                                 TP_PHASES, TP_USE_RTP_VECTOR_LENGTHS>::create(convcorrKernels);
     }
 };
 
-// Conv,Corr Kernel creation, Specialization for CASC_LEN=1
+// Conv,Corr Kernel creation, Specialization for CASC_LEN=1 and PHASES = 1
 template <typename TT_DATA_F,
           typename TT_DATA_G,
           typename TT_DATA_OUT,
@@ -184,7 +189,8 @@ template <typename TT_DATA_F,
           unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_PHASES>
+          unsigned int TP_PHASES,
+          unsigned int TP_USE_RTP_VECTOR_LENGTHS>
 class create_casc_kernel<1,
                          1,
                          TT_DATA_F,
@@ -200,15 +206,65 @@ class create_casc_kernel<1,
                          TP_SAT,
                          TP_NUM_FRAMES,
                          TP_CASC_LEN,
-                         TP_PHASES> {
+                         TP_PHASES,
+                         TP_USE_RTP_VECTOR_LENGTHS> {
    public:
     static void create(kernel (&convcorrKernels)[1][1]) {
         static constexpr unsigned int TP_KERNEL_POSITION = 0;
         static constexpr unsigned int TP_PH_POSITION = 0;
+        convcorrKernels[0][0] = kernel::create_object<
+            conv_corr<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN, TP_SHIFT,
+                      TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN, TP_PHASES, TP_KERNEL_POSITION, TP_PH_POSITION,
+                      false, false, TP_USE_RTP_VECTOR_LENGTHS> >();
+    }
+};
+
+// Conv,Corr Kernel creation, Specialization for CASC_LEN=1 and PHASES = 2
+template <typename TT_DATA_F,
+          typename TT_DATA_G,
+          typename TT_DATA_OUT,
+          unsigned int TP_FUNCT_TYPE,
+          unsigned int TP_COMPUTE_MODE,
+          unsigned int TP_F_LEN,
+          unsigned int TP_G_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_API,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_NUM_FRAMES,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_PHASES,
+          unsigned int TP_USE_RTP_VECTOR_LENGTHS>
+class create_casc_kernel<2,
+                         1,
+                         TT_DATA_F,
+                         TT_DATA_G,
+                         TT_DATA_OUT,
+                         TP_FUNCT_TYPE,
+                         TP_COMPUTE_MODE,
+                         TP_F_LEN,
+                         TP_G_LEN,
+                         TP_SHIFT,
+                         TP_API,
+                         TP_RND,
+                         TP_SAT,
+                         TP_NUM_FRAMES,
+                         TP_CASC_LEN,
+                         TP_PHASES,
+                         TP_USE_RTP_VECTOR_LENGTHS> {
+   public:
+    static void create(kernel (&convcorrKernels)[2][1]) {
+        static constexpr bool CASC_OUT = false;
+        static constexpr bool CASC_IN = false;
+
+        convcorrKernels[1][0] =
+            kernel::create_object<conv_corr<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN,
+                                            TP_G_LEN, TP_SHIFT, TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN,
+                                            TP_PHASES, 0, 1, CASC_IN, CASC_OUT, TP_USE_RTP_VECTOR_LENGTHS> >();
         convcorrKernels[0][0] =
             kernel::create_object<conv_corr<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN,
                                             TP_G_LEN, TP_SHIFT, TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN,
-                                            TP_PHASES, TP_KERNEL_POSITION, TP_PH_POSITION, false, false> >();
+                                            TP_PHASES, 0, 0, CASC_IN, CASC_OUT, TP_USE_RTP_VECTOR_LENGTHS> >();
     }
 };
 
@@ -263,7 +319,8 @@ class create_casc_kernel<1,
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         \n
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML and AIE-MLv2 device.
+ *\n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
@@ -286,7 +343,7 @@ class create_casc_kernel<1,
 
 // TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN, TP_SHIFT, TP_API, TP_RND,
 // TP_SAT
-// TP_NUM_FRAMES, TP_CASC_LEN, TP_PHASES
+// TP_NUM_FRAMES, TP_CASC_LEN, TP_PHASES, TP_USE_RTP_VECTOR_LENGTHS
 template <typename TT_DATA_F,
           typename TT_DATA_G,
           typename TT_DATA_OUT,
@@ -300,8 +357,8 @@ template <typename TT_DATA_F,
           unsigned int TP_SAT = 1,
           unsigned int TP_NUM_FRAMES = 1,
           unsigned int TP_CASC_LEN = 1,
-          unsigned int TP_PHASES = 1>
-
+          unsigned int TP_PHASES = 1,
+          unsigned int TP_USE_RTP_VECTOR_LENGTHS = 0>
 class conv_corr_graph : public graph {
    public:
     /**
@@ -396,14 +453,14 @@ class conv_corr_graph : public graph {
     // STREAM BASED PROCESSING: DEFENSIVE CHECKS
     // defensive check for (TP_G_LEN/TP_CASC_LEN)should be multiples of (Lanes*Points) when Stream only Processing
     // happening
-    static_assert(fnCheckCascLen<TP_G_LEN, TP_CASC_LEN, TP_PHASES, TP_API>(),
+    static_assert(fnCheckCascLen<TT_DATA_F, TT_DATA_G, TP_G_LEN, TP_CASC_LEN, TP_PHASES, TP_API>(),
                   "Assertion Failed : \n"
                   "            ERROR: TP_CASC_LEN should be equal to (TP_G_LEN/8) or \n"
                   "            TP_CASC_LEN should be (TP_G_LEN/16) or (TP_G_LEN/32) for less throughput requirement\n");
 
     // defensive check for PHASES which should be power of 2
     static_assert(
-        fnCheckPhases<TP_G_LEN, TP_CASC_LEN, TP_PHASES, TP_API>(),
+        fnCheckPhases<TT_DATA_F, TT_DATA_G, TP_G_LEN, TP_CASC_LEN, TP_PHASES, TP_API>(),
         "Assertion Failed : \n"
         "            ERROR: TP_PHASES can be greater than 1 only when TP_CASC_LEN should be equal to (TP_G_LEN/8) \n "
         "                  TP_PHASES is always 1 for both TP_API=0 and TP_API==1 \n ");
@@ -425,19 +482,31 @@ class conv_corr_graph : public graph {
     port_array<output, TP_PHASES> out;
 
     /**
+      * The conditional array of input async ports used to pass run-time programmable (RTP) vector lengths.
+     **/
+    port_conditional_array<input, (TP_USE_RTP_VECTOR_LENGTHS == 1), 1> rtpVecLen;
+
+    /**
         * The array of kernels that will be created and mapped onto AIE tiles.
     **/
     kernel m_conv_corr[TP_PHASES][TP_CASC_LEN];
+
+    /**
+     * Access function to get pointer to kernel (or first kernel in a chained and/or PHASE configurations).
+     * No arguments required.
+     **/
+    kernel* getKernels() { return m_conv_corr[0]; };
 
     /**
         * @brief This is the constructor function for the conv_corr graph.
     **/
     conv_corr_graph() {
         if
-            constexpr(TP_API == 0) {
-                m_conv_corr[0][0] = kernel::create_object<
-                    conv_corr<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN,
-                              TP_SHIFT, TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN, TP_PHASES, 0, 0> >();
+            constexpr(TP_API == USE_WINDOW_API) {
+                m_conv_corr[0][0] =
+                    kernel::create_object<conv_corr<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE,
+                                                    TP_F_LEN, TP_G_LEN, TP_SHIFT, TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES,
+                                                    TP_CASC_LEN, TP_PHASES, 0, 0, 0, 0, TP_USE_RTP_VECTOR_LENGTHS> >();
 
                 // Loop Count
                 static constexpr int kLanes = getNumofLanes<TT_DATA_F, TT_DATA_G>();
@@ -456,6 +525,12 @@ class conv_corr_graph : public graph {
                 // connect final kernel output to output of the graph
                 connect<>(m_conv_corr[0][0].out[0], out[0]);
                 dimensions(m_conv_corr[0][0].out[0]) = {kOutLen * TP_NUM_FRAMES};
+
+                // connect RTP port of F and G Lengths to the Kernel
+                if
+                    constexpr(TP_USE_RTP_VECTOR_LENGTHS == 1) {
+                        connect<parameter>(rtpVecLen[0], async(m_conv_corr[0][0].in[2])); // RTP for F_LEN and G_LEN
+                    }
 
                 // Specify mapping constraints
                 runtime<ratio>(m_conv_corr[0][0]) =
@@ -476,7 +551,7 @@ class conv_corr_graph : public graph {
             // Create kernel classes
             create_casc_kernel<TP_PHASES, TP_CASC_LEN, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE,
                                TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN, TP_SHIFT, TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES,
-                               TP_CASC_LEN, TP_PHASES>::create(m_conv_corr);
+                               TP_CASC_LEN, TP_PHASES, TP_USE_RTP_VECTOR_LENGTHS>::create(m_conv_corr);
 
             // Outer Loop that iterates for all phases
             for (unsigned int i = 0; i < TP_PHASES; i++) {
@@ -509,6 +584,12 @@ class conv_corr_graph : public graph {
                 dimensions(m_conv_corr[i][0].in[2]) = {TP_G_LEN};
                 // connect final kernel output to output of the graph
                 connect<stream>(m_conv_corr[i][TP_CASC_LEN - 1].out[0], out[i]);
+
+                // connect RTP port of F and G Lengths to the Kernel
+                if
+                    constexpr(TP_USE_RTP_VECTOR_LENGTHS == 1) {
+                        connect<parameter>(rtpVecLen[0], async(m_conv_corr[i][0].in[3])); // RTP for F_LEN and G_LEN
+                    }
             }
         }
     }; // constructor

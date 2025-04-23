@@ -63,12 +63,12 @@ class widget_2ch_real_fft_graph : public graph {
    public:
     // using TT_DATA = cbfloat16;
     static constexpr unsigned int kBufferBytes = 32;
-    static constexpr unsigned int kPingPongSize = __DATA_MEM_BYTES__ / 2;
 
     static_assert(TP_WINDOW_VSIZE * sizeof(TT_DATA) * 2 >= kBufferBytes,
                   "ERROR: TP_WINDOW_VSIZE * sizeof(TT_DATA) * 2 must be greater than or equal to 32 bytes.");
-    static_assert(TP_WINDOW_VSIZE * sizeof(TT_DATA) * 2 <= kPingPongSize,
-                  "ERROR: TP_DIM * sizeof(TT_DATA) * TP_NUM_FRAMES must be less than or equal to ping-pong size.");
+    static_assert(TP_WINDOW_VSIZE * sizeof(TT_DATA) * 2 <= __DATA_MEM_BYTES__,
+                  "ERROR: TP_DIM * sizeof(TT_DATA) * TP_NUM_FRAMES must be less than or equal to buffer size, 32kB for "
+                  "AIE1 and 64kB for AIE-ML.");
 
     /**
      * The input data to the function.

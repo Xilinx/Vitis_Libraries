@@ -37,7 +37,7 @@ create_input:
 	echo Input ready
 
 sim_ref:
-	make UUT_KERNEL=widget_2ch_real_fft_ref UUT_SIM_FILE=./data/ref_output.txt run TARGET=x86sim TAG=REF |& tee -a ref_log.txt
+	make UUT_KERNEL=widget_2ch_real_fft_ref UUT_SIM_FILE=./data/ref_output.txt run TARGET=x86sim TAG=REF 
 
 prep_x86_out:
 	@x86_out_files=`ls $(HELPER_CUR_DIR)/x86simulator_output/data`;\

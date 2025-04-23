@@ -712,11 +712,11 @@ class fir_sr_asym<TT_DATA,
         output_circular_buffer<TT_DATA>& __restrict outWindow2);
 
     void filterFinalKernelSingleOP(input_async_buffer<TT_DATA>& __restrict inWindow,
-                                   input_stream_cacc48* inCascade,
+                                   input_cascade_cacc* inCascade,
                                    output_circular_buffer<TT_DATA>& __restrict outWindow);
 
     void filterFinalKernelDualOP(input_async_buffer<TT_DATA>& __restrict inWindow,
-                                 input_stream_cacc48* inCascade,
+                                 input_cascade_cacc* inCascade,
                                  output_circular_buffer<TT_DATA>& __restrict outWindow,
                                  output_circular_buffer<TT_DATA>& __restrict outWindow2);
 
@@ -725,7 +725,7 @@ class fir_sr_asym<TT_DATA,
             TT_DATA,
             extents<inherited_extent>,
             margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
-        output_stream_cacc48* outCascade,
+        output_cascade_cacc* outCascade,
         output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 
     void filterFirstKernelWithoutBroadcast(
@@ -733,27 +733,27 @@ class fir_sr_asym<TT_DATA,
             TT_DATA,
             extents<inherited_extent>,
             margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
-        output_stream_cacc48* outCascade);
+        output_cascade_cacc* outCascade);
 
     void filterMiddleKernel(input_async_buffer<TT_DATA>& __restrict inWindow,
-                            input_stream_cacc48* inCascade,
-                            output_stream_cacc48* outCascade,
+                            input_cascade_cacc* inCascade,
+                            output_cascade_cacc* outCascade,
                             output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 
     void filterMiddleKernelNoBdcst(input_async_buffer<TT_DATA>& __restrict inWindow,
-                                   input_stream_cacc48* inCascade,
-                                   output_stream_cacc48* outCascade);
+                                   input_cascade_cacc* inCascade,
+                                   output_cascade_cacc* outCascade);
 
     void filterMiddleKernelWithoutBroadcast(input_async_buffer<TT_DATA>& __restrict inWindow,
-                                            input_stream_cacc48* inCascade,
-                                            output_stream_cacc48* outCascade);
+                                            input_cascade_cacc* inCascade,
+                                            output_cascade_cacc* outCascade);
 
     void filterLastChainFirstSSRKernel(
         input_circular_buffer<
             TT_DATA,
             extents<inherited_extent>,
             margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
-        input_stream_cacc48* inCascade,
+        input_cascade_cacc* inCascade,
         output_circular_buffer<TT_DATA>& __restrict outWindow);
 
     void filterMidChainFirstSSRKernel(
@@ -761,8 +761,8 @@ class fir_sr_asym<TT_DATA,
             TT_DATA,
             extents<inherited_extent>,
             margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
-        input_stream_cacc48* inCascade,
-        output_stream_cacc48* outCascade,
+        input_cascade_cacc* inCascade,
+        output_cascade_cacc* outCascade,
         output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 
     void filterMidChainFirstSSRKernelNoBdcst(
@@ -770,15 +770,15 @@ class fir_sr_asym<TT_DATA,
             TT_DATA,
             extents<inherited_extent>,
             margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
-        input_stream_cacc48* inCascade,
-        output_stream_cacc48* outCascade);
+        input_cascade_cacc* inCascade,
+        output_cascade_cacc* outCascade);
 
     void filterFirstKernelNoBdcst(
         input_circular_buffer<
             TT_DATA,
             extents<inherited_extent>,
             margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
-        output_stream_cacc48* outCascade);
+        output_cascade_cacc* outCascade);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -990,11 +990,11 @@ class fir_sr_asym<TT_DATA,
         const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 
     void filterFinalKernelSingleOP(input_async_buffer<TT_DATA>& __restrict inWindow,
-                                   input_stream_cacc48* inCascade,
+                                   input_cascade_cacc* inCascade,
                                    output_circular_buffer<TT_DATA>& __restrict outWindow);
 
     void filterFinalKernelDualOP(input_async_buffer<TT_DATA>& __restrict inWindow,
-                                 input_stream_cacc48* inCascade,
+                                 input_cascade_cacc* inCascade,
                                  output_circular_buffer<TT_DATA>& __restrict outWindow,
                                  output_circular_buffer<TT_DATA>& __restrict outWindow2);
 
@@ -1003,7 +1003,7 @@ class fir_sr_asym<TT_DATA,
             TT_DATA,
             extents<inherited_extent>,
             margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
-        output_stream_cacc48* outCascade,
+        output_cascade_cacc* outCascade,
         output_async_buffer<TT_DATA>& __restrict broadcastWindow,
         const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 
@@ -1012,24 +1012,24 @@ class fir_sr_asym<TT_DATA,
             TT_DATA,
             extents<inherited_extent>,
             margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
-        output_stream_cacc48* outCascade,
+        output_cascade_cacc* outCascade,
         const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 
     void filterMiddleKernel(input_async_buffer<TT_DATA>& __restrict inWindow,
-                            input_stream_cacc48* inCascade,
-                            output_stream_cacc48* outCascade,
+                            input_cascade_cacc* inCascade,
+                            output_cascade_cacc* outCascade,
                             output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 
     void filterMiddleKernelWithoutBroadcast(input_async_buffer<TT_DATA>& __restrict inWindow,
-                                            input_stream_cacc48* inCascade,
-                                            output_stream_cacc48* outCascade);
+                                            input_cascade_cacc* inCascade,
+                                            output_cascade_cacc* outCascade);
 
     void filterLastChainFirstSSRKernel(
         input_circular_buffer<
             TT_DATA,
             extents<inherited_extent>,
             margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
-        input_stream_cacc48* inCascade,
+        input_cascade_cacc* inCascade,
         output_circular_buffer<TT_DATA>& __restrict outWindow);
 
     void filterMidChainFirstSSRKernel(
@@ -1037,8 +1037,8 @@ class fir_sr_asym<TT_DATA,
             TT_DATA,
             extents<inherited_extent>,
             margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
-        input_stream_cacc48* inCascade,
-        output_stream_cacc48* outCascade,
+        input_cascade_cacc* inCascade,
+        output_cascade_cacc* outCascade,
         output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 
     void filterMidChainFirstSSRKernelNoBdcst(
@@ -1046,18 +1046,18 @@ class fir_sr_asym<TT_DATA,
             TT_DATA,
             extents<inherited_extent>,
             margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
-        input_stream_cacc48* inCascade,
-        output_stream_cacc48* outCascade);
+        input_cascade_cacc* inCascade,
+        output_cascade_cacc* outCascade);
     void filterMiddleKernelNoBdcst(input_async_buffer<TT_DATA>& __restrict inWindow,
-                                   input_stream_cacc48* inCascade,
-                                   output_stream_cacc48* outCascade);
+                                   input_cascade_cacc* inCascade,
+                                   output_cascade_cacc* outCascade);
 
     void filterFirstKernelNoBdcst(
         input_circular_buffer<
             TT_DATA,
             extents<inherited_extent>,
             margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
-        output_stream_cacc48* outCascade,
+        output_cascade_cacc* outCascade,
         const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 };
 
@@ -1233,39 +1233,39 @@ class fir_sr_asym<TT_DATA,
                                         output_stream<TT_DATA>* outStream2);
 
     void filterFinalKernelSingleIPSingleOP(input_stream<TT_DATA>* inStream,
-                                           input_stream_cacc48* inCascade,
+                                           input_cascade_cacc* inCascade,
                                            output_stream<TT_DATA>* outStream);
 
     void filterFinalKernelSingleIPDualOP(input_stream<TT_DATA>* inStream,
-                                         input_stream_cacc48* inCascade,
+                                         input_cascade_cacc* inCascade,
                                          output_stream<TT_DATA>* outStream,
                                          output_stream<TT_DATA>* outStream2);
 
     void filterFinalKernelDualIPSingleOP(input_stream<TT_DATA>* inStream,
                                          input_stream<TT_DATA>* inStream2,
-                                         input_stream_cacc48* inCascade,
+                                         input_cascade_cacc* inCascade,
                                          output_stream<TT_DATA>* outStream);
 
     void filterFinalKernelDualIPDualOP(input_stream<TT_DATA>* inStream,
                                        input_stream<TT_DATA>* inStream2,
-                                       input_stream_cacc48* inCascade,
+                                       input_cascade_cacc* inCascade,
                                        output_stream<TT_DATA>* outStream,
                                        output_stream<TT_DATA>* outStream2);
 
-    void filterFirstKernelSingleIP(input_stream<TT_DATA>* inStream, output_stream_cacc48* outCascade);
+    void filterFirstKernelSingleIP(input_stream<TT_DATA>* inStream, output_cascade_cacc* outCascade);
 
     void filterFirstKernelDualIP(input_stream<TT_DATA>* inStream,
                                  input_stream<TT_DATA>* inStream2,
-                                 output_stream_cacc48* outCascade);
+                                 output_cascade_cacc* outCascade);
 
     void filterMiddleKernelSingleIP(input_stream<TT_DATA>* inStream,
-                                    input_stream_cacc48* inCascade,
-                                    output_stream_cacc48* outCascade);
+                                    input_cascade_cacc* inCascade,
+                                    output_cascade_cacc* outCascade);
 
     void filterMiddleKernelDualIP(input_stream<TT_DATA>* inStream,
                                   input_stream<TT_DATA>* inStream2,
-                                  input_stream_cacc48* inCascade,
-                                  output_stream_cacc48* outCascade);
+                                  input_cascade_cacc* inCascade,
+                                  output_cascade_cacc* outCascade);
 };
 
 // Single kernel specialization. No cascade ports. Reloadable coefficients
@@ -1437,42 +1437,42 @@ class fir_sr_asym<TT_DATA,
                                         const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 
     void filterFinalKernelSingleIPSingleOP(input_stream<TT_DATA>* inStream,
-                                           input_stream_cacc48* inCascade,
+                                           input_cascade_cacc* inCascade,
                                            output_stream<TT_DATA>* outStream);
 
     void filterFinalKernelSingleIPDualOP(input_stream<TT_DATA>* inStream,
-                                         input_stream_cacc48* inCascade,
+                                         input_cascade_cacc* inCascade,
                                          output_stream<TT_DATA>* outStream,
                                          output_stream<TT_DATA>* outStream2);
 
     void filterFinalKernelDualIPSingleOP(input_stream<TT_DATA>* inStream,
                                          input_stream<TT_DATA>* inStream2,
-                                         input_stream_cacc48* inCascade,
+                                         input_cascade_cacc* inCascade,
                                          output_stream<TT_DATA>* outStream);
 
     void filterFinalKernelDualIPDualOP(input_stream<TT_DATA>* inStream,
                                        input_stream<TT_DATA>* inStream2,
-                                       input_stream_cacc48* inCascade,
+                                       input_cascade_cacc* inCascade,
                                        output_stream<TT_DATA>* outStream,
                                        output_stream<TT_DATA>* outStream2);
 
     void filterFirstKernelSingleIP(input_stream<TT_DATA>* inStream,
-                                   output_stream_cacc48* outCascade,
+                                   output_cascade_cacc* outCascade,
                                    const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 
     void filterFirstKernelDualIP(input_stream<TT_DATA>* inStream,
                                  input_stream<TT_DATA>* inStream2,
-                                 output_stream_cacc48* outCascade,
+                                 output_cascade_cacc* outCascade,
                                  const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 
     void filterMiddleKernelSingleIP(input_stream<TT_DATA>* inStream,
-                                    input_stream_cacc48* inCascade,
-                                    output_stream_cacc48* outCascade);
+                                    input_cascade_cacc* inCascade,
+                                    output_cascade_cacc* outCascade);
 
     void filterMiddleKernelDualIP(input_stream<TT_DATA>* inStream,
                                   input_stream<TT_DATA>* inStream2,
-                                  input_stream_cacc48* inCascade,
-                                  output_stream_cacc48* outCascade);
+                                  input_cascade_cacc* inCascade,
+                                  output_cascade_cacc* outCascade);
 };
 }
 }

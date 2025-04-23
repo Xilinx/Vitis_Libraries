@@ -9,7 +9,7 @@
 Matrix Multiply
 ===============
 
-The DSPLib contains one Matrix Multiply/GEMM (General Matrix Multiply) solution for AI Engine (AIE) and AIE-ML. The GEMM has two input ports connected to two windows of data. The inputs are denoted as Matrix A (inA) and Matrix B (inB). Matrix A has a ``TP_DIM_A`` template parameter to describe the number of rows in Matrix A. The number of columns in Matrix A must be equal to the number of rows in Matrix. This is denoted with the ``TP_DIM_AB`` template parameter. The number of columns in Matrix B is denoted by ``TP_DIM_B``.
+The DSPLib contains one Matrix Multiply/GEMM (General Matrix Multiply) solution for AIE and AIE-ML. The GEMM has two input ports connected to two windows of data. The inputs are denoted as Matrix A (inA) and Matrix B (inB). Matrix A has a ``TP_DIM_A`` template parameter to describe the number of rows in Matrix A. The number of columns in Matrix A must be equal to the number of rows in Matrix. This is denoted with the ``TP_DIM_AB`` template parameter. The number of columns in Matrix B is denoted by ``TP_DIM_B``.
 
 An output port connects to a window, where the data for the output matrix will be stored. The output matrix will have (``TP_DIM_A``) rows and (``TP_DIM_B``) columns. The data type of both input matrices can be configured, and the data type of the output is derived from the inputs.
 
@@ -166,10 +166,18 @@ This is stored contiguously in memory like:
 
 Multiplying a 16x16 matrix (with 4x4 tiling) with a 16x16 matrix (with 4x2 tiling) will result in a 16x16 matrix with 4x2 tiling.
 
+Output Data Type
+----------------
+
+The Matrix-Multiplication graph class can specify the data type of the output matrix with the template parameter, ``TT_OUT_DATA``. This can allow a 32-bit output type when both inputs are 16-bit. 
+For example, ``TT_OUT_DATA`` can be set to cint32, when ``TT_DATA_A`` is int16 and ``TT_DATA_B`` is cint16. 
+
+``TT_OUT_DATA`` must be the same or greater precision than both of the input types. The default ``TT_OUT_DATA`` values for each input type combination are listed in the tables below. 
+
 Tiling Schemes and Data Type Combinations
 -----------------------------------------
 
-The following table specifies the tiling scheme used for a given data type combination and the corresponding output data type for AIE devices:
+The following table specifies the tiling scheme used for a given data type combination and the corresponding default output data type for AI Engine devices:
 
 .. _table-tile-pattern-AIE:
 .. table:: Matrix Multiply Tiling Pattern Combination for AIE
@@ -263,7 +271,7 @@ The tiling imposes a restriction that the matrix dimensions need to be multiples
 Maximum matrix dimensions per kernel
 ------------------------------------
 
-The maximum memory accessible by an AIE kernel is 32 kB x 4 for AIE. The maximum matrix dimensions per kernel is limited by the memory requirements and how much memory is available.
+The maximum memory accessible by an AI Engine kernel is 32 kB x 4 for AIE. The maximum matrix dimensions per kernel is limited by the memory requirements and how much memory is available.
 A matrix_mult design needs to allocate memory for the following:
 
 * Window Size A: Input matrix A of size ``(TP_DIM_A / TP_SSR) x (TP_DIM_AB / TP_CASC_LEN) x sizeof(TT_DATA_A)``.
@@ -485,8 +493,8 @@ When using the ``TP_SSR`` parameter, this will determine the number of parallel 
    |            |            |   32  |   33  |   34  |   35  |   36  |   37  |   38  |   39  |   40  |   41  |   42  |   43  |   44  |   45  |   46  |   47  |
    |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
    |            |            |   48  |   49  |   50  |   51  |   52  |   53  |   54  |   55  |   56  |   57  |   58  |   59  |   60  |   61  |   62  |   63  |
-   |            +------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
-   |            | Tile Row 1 |   64  |   65  |   66  |   67  |   68  |   69  |   70  |   71  |   72  |   73  |   74  |   75  |   76  |   77  |   78  |   79  |
+   +------------+------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   | SSR 1      | Tile Row 1 |   64  |   65  |   66  |   67  |   68  |   69  |   70  |   71  |   72  |   73  |   74  |   75  |   76  |   77  |   78  |   79  |
    |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
    |            |            |   80  |   81  |   82  |   83  |   84  |   85  |   86  |   87  |   88  |   89  |   90  |   91  |   92  |   93  |   94  |   95  |
    |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
@@ -494,15 +502,15 @@ When using the ``TP_SSR`` parameter, this will determine the number of parallel 
    |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
    |            |            |  112  |  113  |  114  |  115  |  116  |  117  |  118  |  119  |  120  |  121  |  122  |  123  |  124  |  125  |  126  |  127  |
    +------------+------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
-   | SSR 1      | Tile Row 2 |  128  |  129  |  130  |  131  |  132  |  133  |  134  |  135  |  136  |  137  |  138  |  139  |  140  |  141  |  142  |  143  |
+   | SSR 2      | Tile Row 2 |  128  |  129  |  130  |  131  |  132  |  133  |  134  |  135  |  136  |  137  |  138  |  139  |  140  |  141  |  142  |  143  |
    |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
    |            |            |  144  |  145  |  146  |  147  |  148  |  149  |  150  |  151  |  152  |  153  |  154  |  155  |  156  |  157  |  158  |  159  |
    |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
    |            |            |  160  |  161  |  162  |  163  |  164  |  165  |  166  |  167  |  168  |  169  |  170  |  171  |  172  |  173  |  174  |  175  |
    |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
    |            |            |  176  |  177  |  178  |  179  |  180  |  181  |  182  |  183  |  184  |  185  |  186  |  187  |  188  |  189  |  190  |  191  |
-   |            +------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
-   |            | Tile Row 3 |  192  |  193  |  194  |  195  |  196  |  197  |  198  |  199  |  200  |  201  |  202  |  203  |  204  |  205  |  206  |  207  |
+   +------------+------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+   | SSR 3      | Tile Row 3 |  192  |  193  |  194  |  195  |  196  |  197  |  198  |  199  |  200  |  201  |  202  |  203  |  204  |  205  |  206  |  207  |
    |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
    |            |            |  208  |  209  |  210  |  211  |  212  |  213  |  214  |  215  |  216  |  217  |  218  |  219  |  220  |  221  |  222  |  223  |
    |            |            +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+

@@ -406,6 +406,11 @@ inline void multiplyAcc(T_accRef<cint16_t>& accum, int16_t data, cint16_t coeff)
     accum.imag += data * (int64_t)coeff.imag;
 };
 template <>
+inline void multiplyAcc(T_accRef<cint32_t>& accum, int16_t data, cint16_t coeff) {
+    accum.real += data * (int64_t)coeff.real;
+    accum.imag += data * (int64_t)coeff.imag;
+};
+template <>
 inline void multiplyAcc(T_accRef<cint16_t>& accum, cint16_t data, cint16_t coeff) {
     accum.real += (int64_t)coeff.real * (int64_t)data.real - (int64_t)coeff.imag * (int64_t)data.imag;
     accum.imag += (int64_t)coeff.real * (int64_t)data.imag + (int64_t)coeff.imag * (int64_t)data.real;
@@ -554,7 +559,7 @@ inline void multiplyAccUct(T_accRef<cfloat>& accum, cfloat data, unsigned int sh
 // function to return Margin length.
 template <unsigned int TP_FIR_LEN, typename TT_DATA, int TP_MODIFY_MARGIN_OFFSET = 0>
 constexpr unsigned int fnFirMargin() {
-    return CEIL(TP_FIR_LEN, (32 / sizeof(TT_DATA)));
+    return CEIL(TP_FIR_LEN, (__ALIGN_BYTE_SIZE__ / sizeof(TT_DATA)));
 };
 
 // function to return Margin length.
@@ -618,12 +623,12 @@ template <>
 struct realType<cfloat> {
     using type = float;
 };
-#ifdef _SUPPORTS_BFLOAT16_
+#ifdef _SUPPORTS_CBFLOAT16_
 template <>
 struct realType<cbfloat16> {
     using type = bfloat16;
 };
-#endif // _SUPPORTS_BFLOAT16_
+#endif // _SUPPORTS_CBFLOAT16_
 template <typename TT>
 using realType_t = typename realType<TT>::type;
 
@@ -639,12 +644,12 @@ template <>
 struct complexType<float> {
     using type = cfloat;
 };
-#ifdef _SUPPORTS_BFLOAT16_
+#ifdef _SUPPORTS_CBFLOAT16_
 template <>
 struct complexType<bfloat16> {
     using type = cbfloat16;
 };
-#endif // _SUPPORTS_BFLOAT16_
+#endif // _SUPPORTS_CBFLOAT16_
 template <typename TT>
 using complexType_t = typename complexType<TT>::type;
 

@@ -15,9 +15,7 @@
         {
             "name": "AIE_VARIANT",
             "type": "uint",
-            "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
-            "maximum": 2,
-            "minimum": 1,
+            "description": "Specifies the device type.",
             "updater": {
                 "file": "fir_interpolate_hb.py",
                 "function": "update_AIE_VARIANT",
@@ -89,10 +87,10 @@
                 "function": "validate_TP_API",
                 "args": [ ]
             }
-        },        
+        },
         {
             "name": "TP_USE_COEFF_RELOAD",
-            "description": "Selects Coefficient Reload Mode: 0 - no reload, 1 - RTP port based, 2 - Stream Header based.",
+            "description": "Selects Coefficient Reload Mode: 0 - no reload, 1 - RTP port based.",
             "type": "uint",
             "updater": {
                 "file": "fir_interpolate_hb.py",
@@ -119,7 +117,7 @@
                 "function": "validate_TP_FIR_LEN",
                 "args": ["TT_DATA", "TP_API", "TP_USE_COEFF_RELOAD"]
             }
-        },        
+        },
         {
             "name": "TP_PARA_INTERP_POLY",
             "description": "Number of parallel polyphases to decompose interpolator over.",
@@ -301,7 +299,7 @@
         "validator": {
             "file": "fir_interpolate_hb.py",
             "function": "validate_coeff",
-            "args": ["TT_COEFF", "TP_FIR_LEN"]
+            "args": ["TP_USE_COEFF_RELOAD", "TT_COEFF", "TP_FIR_LEN"]
         }
         }
   ],

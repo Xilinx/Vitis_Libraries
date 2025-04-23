@@ -27,6 +27,7 @@
 #include <vector>
 #include "graph_utils.hpp"
 
+#include "matrix_mult_tiling_scheme.hpp"
 #include "matrix_mult.hpp"
 #include "matrix_mult_untiler.hpp"
 #include "matrix_mult_tiler.hpp"
@@ -90,7 +91,8 @@ using namespace adf;
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         \n
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML and AIE-MLv2 device.
+ *\n
  * @tparam TP_DIM_A_LEADING describes the scheme in which the data should be stored
  *         in memory. ROW_MAJOR = 0, COL_MAJOR = 1. Note, a COL_MAJOR matrix can be
  *         transposed to become a ROW_MAJOR matrix.
@@ -132,6 +134,14 @@ using namespace adf;
  *         There is no splitting of the Matrix B data when TP_SSR > 1 (only split when TP_CASC_LEN > 1).
  *         The Matrix B inputs across a
  *         chain of cascaded kernels will be the same across all SSR ranks
+ * @tparam TT_OUT_DATA describes the type of data samples in the output matrix. \n
+ *         It must be int16, cint16, int32, cint32, float, or cfloat.
+ *         ``TT_OUT_DATA`` must also satisfy the following rules:
+ *         - Complex types are only supported when either ``TT_DATA_A`` or ``TT_DATA_B`` is also complex.
+ *         - ``TT_OUT_DATA`` must be same or greater precision than both of the input data types,
+ *         e.g. 32-bit ``TT_OUT_DATA``, when ``TT_DATA_A`` and ``TT_DATA_B`` is 16-bit.
+ *         - ``TT_OUT_DATA`` must be an integer type if ``TT_DATA_A`` and ``TT_DATA_B`` are integer types
+ *         - ``TT_OUT_DATA`` must be a float type if ``TT_DATA_A`` and ``TT_DATA_B`` are float types.
 **/
 
 template <typename TT_DATA_A,
@@ -151,7 +161,8 @@ template <typename TT_DATA_A,
           unsigned int TP_INPUT_WINDOW_VSIZE_B = TP_DIM_B* TP_DIM_AB,
           unsigned int TP_CASC_LEN = 1,
           unsigned int TP_SAT = 1,
-          unsigned int TP_SSR = 1>
+          unsigned int TP_SSR = 1,
+          typename TT_OUT_DATA = outType_t<TT_DATA_A, TT_DATA_B> >
 class matrix_mult_graph : public graph {
    public:
     /**
@@ -215,12 +226,25 @@ class matrix_mult_graph : public graph {
      */
     struct no_kernel {};
 
-    // TODO: Have the first or last kernel take the remainder. ie DIM_AB=15 and CASC =2; should be one kernel of 8 and
-    // one kernel of 6, where we round by tilingScheme.ABtile.
+    // Flag request for Tiler/Untiler with COL_MAJOR
+    static constexpr int isTilingReq =
+        (TP_ADD_TILING_A == 1 || TP_ADD_TILING_B == 1 || TP_ADD_DETILING_OUT == 1) ? 1 : 0;
+    static constexpr int isTilingAReq = (TP_ADD_TILING_A == 1) ? 1 : 0;
+    static constexpr int isTilingBReq = (TP_ADD_TILING_B == 1) ? 1 : 0;
+    static constexpr int isTilingOutReq = (TP_ADD_DETILING_OUT == 1) ? 1 : 0;
+    // Tiling kernels are not supported in on devices that use 512-bit vector read/writes.
+    static constexpr int isTilingSupported = (__ALIGN_BYTE_SIZE__ == 64) ? 0 : 1;
+
+    // static_assert(isTilingSupported == 1 || isTilingReq == 0, "Tiling is not supported on this device.");
+    static_assert(isTilingSupported == 1 || isTilingAReq == 0, "Tiling (TP_ADD_TILING_A == 1) is not supported.");
+    static_assert(isTilingSupported == 1 || isTilingBReq == 0, "Tiling (TP_ADD_TILING_B == 1) is not supported.");
+    static_assert(isTilingSupported == 1 || isTilingOutReq == 0, "Tiling (TP_ADD_DETILING_OUT == 1) is not supported.");
+
     static_assert(TP_DIM_AB % TP_CASC_LEN == 0, "TP_DIM_AB needs to be a multiple of TP_CASC_LEN");
     template <bool cascIn, bool cascOut>
     using matMultCasc = matrix_mult<TT_DATA_A,
                                     TT_DATA_B,
+                                    TT_OUT_DATA,
                                     (TP_DIM_A / TP_SSR),
                                     (TP_DIM_AB / TP_CASC_LEN),
                                     TP_DIM_B,
@@ -240,11 +264,9 @@ class matrix_mult_graph : public graph {
     using firstMatMult = typename std::conditional<(TP_CASC_LEN > 1), matMultCasc<false, true>, onlyMatMult>::type;
     using lastMatMult = typename std::conditional<(TP_CASC_LEN > 1), matMultCasc<true, false>, firstMatMult>::type;
     using middleMatMult = typename std::conditional<(TP_CASC_LEN > 2), matMultCasc<true, true>, lastMatMult>::type;
-
-    // Todo structured binding instead (C++17)
     // AIE_API tiling scheme in use - single configuration for each data type.
     // Tiling scheme doesn't change vs cascade or not.
-    static constexpr typename middleMatMult::tilingStruct tilingScheme = middleMatMult::getTilingScheme();
+    static constexpr tilingStruct tilingScheme = middleMatMult::getTilingScheme();
 
     // Forward compatible for batch window processing.
     static constexpr unsigned int dimAPerKernel = (TP_INPUT_WINDOW_VSIZE_A / TP_DIM_AB);
@@ -267,7 +289,7 @@ class matrix_mult_graph : public graph {
                                                (dimAPerKernel / TP_SSR),
                                                dimBPerKernel,
                                                TP_DIM_OUT_LEADING,
-                                               outType_t<TT_DATA_A, TT_DATA_B> >;
+                                               TT_OUT_DATA>;
 
     static constexpr bool isRedundantTilerA =
         (((TP_DIM_AB / TP_CASC_LEN) <= tilingScheme.ABtile) && (TP_DIM_A_LEADING == ROW_MAJOR));

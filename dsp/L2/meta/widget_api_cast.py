@@ -24,10 +24,10 @@ def update_AIE_VARIANT(args):
   return fn_update_AIE_VARIANT()
 
 def fn_update_AIE_VARIANT():
-  legal_set_aie=[1,2]
+  legal_set_AIE_VARIANT = [com.AIE, com.AIE_ML, com.AIE_MLv2]
   param_dict={
     "name" : "AIE_VARIANT",
-    "enum" : legal_set_aie
+    "enum" : legal_set_AIE_VARIANT
    }
   return param_dict
 
@@ -240,7 +240,7 @@ def local_sizeof(TT_DATA):
 
   ######### Graph Generator ############
 
-# Used by higher layer software to figure out how to connect blocks together. 
+# Used by higher layer software to figure out how to connect blocks together.
 def info_ports(args):
   TT_DATA = args["TT_DATA"]
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
@@ -249,12 +249,12 @@ def info_ports(args):
   TP_NUM_INPUTS = args["TP_NUM_INPUTS"]
   TP_NUM_OUTPUT_CLONES = args["TP_NUM_OUTPUT_CLONES"]
   TP_HEADER_BYTES = args["TP_HEADER_BYTES"]
-  in_ports  = com.get_port_info("in",  "in",  TT_DATA, (TP_WINDOW_VSIZE+TP_HEADER_BYTES/local_sizeof(TT_DATA)), TP_NUM_INPUTS,        0, TP_IN_API) 
+  in_ports  = com.get_port_info("in",  "in",  TT_DATA, (TP_WINDOW_VSIZE+TP_HEADER_BYTES/local_sizeof(TT_DATA)), TP_NUM_INPUTS,        0, TP_IN_API)
   out_ports = com.get_port_info("out", "out", TT_DATA, (TP_WINDOW_VSIZE+TP_HEADER_BYTES/local_sizeof(TT_DATA)), TP_NUM_OUTPUT_CLONES, 0, TP_OUT_API)
 
   return (in_ports+out_ports) # concat lists
 
-def gen_ports_code(args): 
+def gen_ports_code(args):
   TT_DATA = args["TT_DATA"]
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
   TP_IN_API = args["TP_IN_API"]
@@ -262,12 +262,12 @@ def gen_ports_code(args):
   TP_NUM_INPUTS = args["TP_NUM_INPUTS"]
   TP_NUM_OUTPUT_CLONES = args["TP_NUM_OUTPUT_CLONES"]
   TP_HEADER_BYTES = args["TP_HEADER_BYTES"]
-  in_ports  = (f"  std::array<adf::port<input>, {TP_NUM_INPUTS}> in;\n") 
+  in_ports  = (f"  std::array<adf::port<input>, {TP_NUM_INPUTS}> in;\n")
   out_ports = (f"  std::array<adf::port<output>, {TP_NUM_OUTPUT_CLONES}> out;\n")
 
   return (in_ports+out_ports) # concat strings
 
-def gen_inports_connections(args): 
+def gen_inports_connections(args):
   TT_DATA = args["TT_DATA"]
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
   TP_IN_API = args["TP_IN_API"]
@@ -275,11 +275,11 @@ def gen_inports_connections(args):
   TP_NUM_INPUTS = args["TP_NUM_INPUTS"]
   TP_NUM_OUTPUT_CLONES = args["TP_NUM_OUTPUT_CLONES"]
   TP_HEADER_BYTES = args["TP_HEADER_BYTES"]
-  in_ports  = (f"      adf::connect<>(in[inIdx],widget_api_cast_graph.in[inIdx]);\n") 
+  in_ports  = (f"      adf::connect<>(in[inIdx],widget_api_cast_graph.in[inIdx]);\n")
 
   return (in_ports) # concat strings
 
-def gen_outports_connections(args): 
+def gen_outports_connections(args):
   TT_DATA = args["TT_DATA"]
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
   TP_IN_API = args["TP_IN_API"]
@@ -336,7 +336,7 @@ public:
   }}
 
 }};
-"""    
+"""
   )
   out["graph"] = code
   out["headerfile"] = "dds_mixer_graph.hpp"

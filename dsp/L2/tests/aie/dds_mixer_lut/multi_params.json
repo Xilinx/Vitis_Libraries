@@ -14,9 +14,192 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_320_0_1_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint16_0_0_4096_0_1_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_0_0_4096_0_2_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "2",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_0_0_4096_0_4_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "4",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_1_0_4096_0_1_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_1_0_4096_0_2_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "2",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_1_0_4096_0_4_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "4",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_2_0_4096_0_1_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_2_0_4096_0_2_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "2",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_2_0_4096_0_4_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "4",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_2_0_320_0_1_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "P_API": "0",
@@ -31,9 +214,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_4096_1_1_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint16_0_0_4096_1_1_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
@@ -48,9 +234,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_128_0_1_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint16_0_0_128_0_1_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
@@ -65,9 +254,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_4096_1_1_16_0_1797958314_1_0_100_1_1_1_aie1_hw_checkin": {
+    "cint32_0_0_4096_1_1_16_0_1797958314_1_0_100_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
@@ -82,9 +274,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_128_0_1_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint32_0_0_128_0_1_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
@@ -99,9 +294,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_0_0_128_0_1_16_0_1797958314_1_0_50_1_1_1_aie1_hw_checkin": {
+    "cfloat_0_0_128_0_1_16_0_1797958314_1_0_50_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "0",
@@ -117,9 +315,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_4096_1_1_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint16_1_0_4096_1_1_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -134,9 +335,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_128_0_1_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint16_1_0_128_0_1_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -151,9 +355,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_4096_1_1_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint32_1_0_4096_1_1_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
@@ -168,9 +375,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_128_0_1_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint32_1_0_128_0_1_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
@@ -185,9 +395,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_1_0_128_0_1_16_0_1797958314_1_0_100_1_1_1_aie1_hw_checkin": {
+    "cfloat_1_0_128_0_1_16_0_1797958314_1_0_100_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "1",
@@ -203,9 +416,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_128_0_1_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint16_2_0_128_0_1_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
@@ -220,9 +436,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_2_0_128_0_1_16_0_1797958314_1_0_150_1_1_1_aie1_hw_checkin": {
+    "cint32_2_0_128_0_1_16_0_1797958314_1_0_150_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "2",
@@ -237,9 +456,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_2_0_128_0_1_16_0_1797958314_1_0_150_1_1_1_aie1_hw_checkin": {
+    "cfloat_2_0_128_0_1_16_0_1797958314_1_0_150_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "2",
@@ -255,9 +477,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_4096_1_2_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint16_0_0_4096_1_2_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
@@ -272,9 +497,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_384_0_3_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint16_0_0_384_0_3_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
@@ -289,9 +517,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_4096_1_4_16_0_1797958314_1_0_100_1_1_1_aie1_hw_checkin": {
+    "cint32_0_0_4096_1_4_16_0_1797958314_1_0_100_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
@@ -306,9 +537,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_640_0_5_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint32_0_0_640_0_5_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
@@ -323,9 +557,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_0_0_640_0_5_16_0_1797958314_1_0_50_1_1_1_aie1_hw_checkin": {
+    "cfloat_0_0_640_0_5_16_0_1797958314_1_0_50_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "0",
@@ -341,9 +578,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_12288_1_3_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint16_1_0_12288_1_3_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -358,9 +598,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_512_0_4_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint16_1_0_512_0_4_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -375,9 +618,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_20480_1_5_16_0_1797958314_1_0_150_1_1_1_aie1_hw_checkin": {
+    "cint32_1_0_20480_1_5_16_0_1797958314_1_0_150_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
@@ -392,9 +638,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_384_0_3_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint32_1_0_384_0_3_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
@@ -409,9 +658,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_1_0_384_0_3_16_0_1807958314_1_0_100_1_1_1_aie1_hw_checkin": {
+    "cfloat_1_0_384_0_3_16_0_1807958314_1_0_100_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "1",
@@ -428,9 +680,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_128_0_2_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint16_2_0_128_0_2_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
@@ -445,9 +700,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_2_0_768_0_6_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint32_2_0_768_0_6_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "2",
@@ -462,9 +720,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_2_0_768_0_6_16_0_1797958314_1_0_150_1_1_1_aie1_hw_checkin": {
+    "cfloat_2_0_768_0_6_16_0_1797958314_1_0_150_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "2",
@@ -481,369 +742,16 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_0_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "0",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_0_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "0",
         "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_0_3_aie1_hw_checkin": {
+    "cint16_2_0_512_0_1_16_0_1797958314_1_0_90_1_7_0_0_0_0_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
         "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "0",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_1_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "1",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "1",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_1_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "1",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_2_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "2",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_2_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "2",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_2_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "2",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_3_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "3",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_3_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "3",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_3_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "3",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_4_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "4",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_4_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "4",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_4_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "4",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_5_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "5",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_5_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "5",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_5_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "5",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_6_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "6",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_6_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "6",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_6_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "6",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_7_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
+        "MIXER_MODE": "2",
+        "P_API": "0",
         "UUT_SSR": "1",
         "INPUT_WINDOW_VSIZE": "512",
         "ROUND_MODE": "7",
@@ -855,15 +763,18 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_7_1_aie1_hw_checkin": {
+    "cint16_2_0_512_0_1_16_0_1797958314_1_0_90_2_11_1_0_0_0_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
+        "MIXER_MODE": "2",
+        "P_API": "0",
         "UUT_SSR": "1",
         "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "7",
+        "ROUND_MODE": "11",
         "SAT_MODE": "1",
         "USE_PHASE_RELOAD": "0",
         "NITER": "16",
@@ -872,15 +783,18 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_512_1_1_16_0_1797958314_1_0_90_1_7_3_aie1_hw_checkin": {
+    "cint16_2_0_512_0_1_16_0_1797958314_1_0_90_22_13_3_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
         "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
+        "MIXER_MODE": "2",
+        "P_API": "0",
         "UUT_SSR": "1",
         "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "7",
+        "ROUND_MODE": "13",
         "SAT_MODE": "3",
         "USE_PHASE_RELOAD": "0",
         "NITER": "16",
@@ -889,825 +803,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_0_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "0",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_0_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "0",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_0_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "0",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_1_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "1",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "1",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_1_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "1",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_2_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "2",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_2_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "2",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_2_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "2",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_3_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "3",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_3_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "3",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_3_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "3",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_4_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "4",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_4_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "4",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_4_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "4",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_5_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "5",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_5_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "5",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_5_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "5",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_6_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "6",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_6_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "6",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_6_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "6",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_7_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "7",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_7_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "7",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_0_512_1_1_16_0_1797958314_1_0_90_1_7_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "7",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_0_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "0",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_0_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "0",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_0_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "0",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_1_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "1",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "1",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_1_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "1",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_2_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "2",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_2_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "2",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_2_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "2",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_3_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "3",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_3_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "3",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_3_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "3",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_4_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "4",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_4_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "4",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_4_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "4",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_5_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "5",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_5_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "5",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_5_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "5",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_6_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "6",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_6_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "6",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_6_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "6",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_7_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "7",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_7_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "7",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_0_512_1_1_16_0_1797958314_1_0_90_1_7_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "7",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "0",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_0_256_0_1_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint16_0_0_256_0_1_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
@@ -1722,9 +822,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_256_0_1_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint32_0_0_256_0_1_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
@@ -1739,9 +842,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_256_0_1_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint16_1_0_256_0_1_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -1756,9 +862,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_256_0_1_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint32_1_0_256_0_1_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
@@ -1773,9 +882,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_256_0_1_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint16_2_0_256_0_1_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
@@ -1790,9 +902,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_2_0_256_0_1_16_0_1797958314_1_0_150_2_1_1_aie2_hw_checkin": {
+    "cint32_2_0_256_0_1_16_0_1797958314_1_0_150_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "2",
@@ -1807,9 +922,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_768_0_3_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint16_0_0_768_0_3_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
@@ -1824,9 +942,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_1280_0_5_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint32_0_0_1280_0_5_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
@@ -1841,9 +962,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_1024_0_4_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint16_1_0_1024_0_4_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -1858,9 +982,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_768_0_3_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint32_1_0_768_0_3_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
@@ -1875,9 +1002,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_512_0_2_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint16_2_0_512_0_2_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
@@ -1892,9 +1022,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_2_0_1536_0_6_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint32_2_0_1536_0_6_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "2",
@@ -1909,9 +1042,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_256_1_1_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint16_0_0_256_1_1_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
@@ -1926,9 +1062,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_256_1_1_16_0_1797958314_1_0_100_2_1_1_aie2_hw_checkin": {
+    "cint32_0_0_256_1_1_16_0_1797958314_1_0_100_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
@@ -1943,9 +1082,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_256_1_1_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint16_1_0_256_1_1_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -1960,9 +1102,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_256_1_1_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint32_1_0_256_1_1_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
@@ -1977,9 +1122,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_512_1_2_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint16_0_0_512_1_2_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
@@ -1994,9 +1142,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_1024_1_4_16_0_1797958314_1_0_100_2_1_1_aie2_hw_checkin": {
+    "cint32_0_0_1024_1_4_16_0_1797958314_1_0_100_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
@@ -2011,9 +1162,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_768_1_3_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint16_1_0_768_1_3_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -2028,9 +1182,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_5120_1_5_16_0_1797958314_1_0_150_2_1_1_aie2_hw_checkin": {
+    "cint32_1_0_5120_1_5_16_0_1797958314_1_0_150_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
@@ -2045,9 +1202,412 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_0_1_640_0_1_16_0_1797958314_1_0_50_1_1_1_aie1_hw_checkin": {
+    "cint16_0_0_256_0_1_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "256",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_0_0_256_0_1_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "256",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_0_256_0_1_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "256",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_1_0_256_0_1_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "256",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_2_0_256_0_1_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "256",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_2_0_256_0_1_16_0_1797958314_1_0_150_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "SFDR": "150",
+        "INPUT_WINDOW_VSIZE": "256",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_0_0_768_0_3_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "3",
+        "INPUT_WINDOW_VSIZE": "768",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_0_0_1280_0_5_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "5",
+        "INPUT_WINDOW_VSIZE": "1280",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_0_1024_0_4_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "4",
+        "INPUT_WINDOW_VSIZE": "1024",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_1_0_768_0_3_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "3",
+        "INPUT_WINDOW_VSIZE": "768",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_2_0_512_0_2_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "2",
+        "INPUT_WINDOW_VSIZE": "512",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_2_0_1536_0_6_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "6",
+        "INPUT_WINDOW_VSIZE": "1536",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_0_0_256_1_1_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "256",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_0_0_256_1_1_16_0_1797958314_1_0_100_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "0",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "SFDR": "100",
+        "INPUT_WINDOW_VSIZE": "256",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_0_256_1_1_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "256",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_1_0_256_1_1_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "256",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_0_0_512_1_2_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "1",
+        "UUT_SSR": "2",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "512",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_0_0_1024_1_4_16_0_1797958314_1_0_100_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "0",
+        "P_API": "1",
+        "UUT_SSR": "4",
+        "SFDR": "100",
+        "INPUT_WINDOW_VSIZE": "1024",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_0_768_1_3_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "3",
+        "INPUT_WINDOW_VSIZE": "768",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_1_0_5120_1_5_16_0_1797958314_1_0_150_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "5",
+        "SFDR": "150",
+        "INPUT_WINDOW_VSIZE": "5120",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cfloat_0_1_640_0_1_16_0_1797958314_1_0_50_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "0",
@@ -2063,9 +1623,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_1_12288_1_1_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint16_1_1_12288_1_1_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -2080,60 +1643,13 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_1_512_0_1_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
+    "cint16_2_1_512_1_1_16_0_1797958314_1_0_90_1_3_0_0_0_0_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "0",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "USE_PHASE_RELOAD": "1",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "ROUND_MODE": "1",
-        "SAT_MODE": "1"
-    },
-    "cint32_1_1_20480_1_1_16_0_1797958314_1_0_150_1_1_1_aie1_hw_checkin": {
-        "AIE_VARIANT": "1",
-        "DATA_TYPE": "cint32",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "SFDR": "150",
-        "INPUT_WINDOW_VSIZE": "20480",
-        "USE_PHASE_RELOAD": "1",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "ROUND_MODE": "1",
-        "SAT_MODE": "1"
-    },
-    "cint32_1_1_384_0_1_16_0_1797958314_1_0_90_1_1_1_aie1_hw_checkin": {
-        "AIE_VARIANT": "1",
-        "DATA_TYPE": "cint32",
-        "MIXER_MODE": "1",
-        "P_API": "0",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "384",
-        "USE_PHASE_RELOAD": "1",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "ROUND_MODE": "1",
-        "SAT_MODE": "1"
-    },
-    "cint16_2_1_512_1_1_16_0_1797958314_1_0_90_1_3_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "P_API": "1",
@@ -2148,145 +1664,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_1_512_1_1_16_0_1797958314_1_0_90_1_3_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "3",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "1",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_1_512_1_1_16_0_1797958314_1_0_90_1_3_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "3",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "1",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_0_1_512_0_1_16_0_1797958314_1_0_90_1_5_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "0",
-        "P_API": "0",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "5",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "1",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_1_1_256_0_1_16_0_1797958314_1_0_90_1_5_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "1",
-        "P_API": "0",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "256",
-        "ROUND_MODE": "5",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "1",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_1_512_0_1_16_0_1797958314_1_0_90_1_6_0_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "0",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "512",
-        "ROUND_MODE": "6",
-        "SAT_MODE": "0",
-        "USE_PHASE_RELOAD": "1",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_1_1024_0_1_16_0_1797958314_1_0_90_1_6_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "0",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "1024",
-        "ROUND_MODE": "6",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "1",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_1_64_1_1_16_0_1797958314_1_0_90_1_5_3_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "64",
-        "ROUND_MODE": "5",
-        "SAT_MODE": "3",
-        "USE_PHASE_RELOAD": "1",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint16_2_1_2048_1_1_16_0_1797958314_1_0_90_1_6_1_aie1_hw_checkin": {
-        "DATA_TYPE": "cint16",
-        "MIXER_MODE": "2",
-        "P_API": "1",
-        "UUT_SSR": "1",
-        "INPUT_WINDOW_VSIZE": "2048",
-        "ROUND_MODE": "6",
-        "SAT_MODE": "1",
-        "USE_PHASE_RELOAD": "1",
-        "NITER": "16",
-        "INITIAL_DDS_OFFSET": "0",
-        "DDS_PHASE_INC": "1797958314",
-        "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0",
-        "SFDR": "90",
-        "AIE_VARIANT": "1"
-    },
-    "cint32_0_1_1280_0_1_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint32_0_1_1280_0_1_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
@@ -2301,9 +1683,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_1_1024_0_1_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint16_1_1_1024_0_1_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -2318,9 +1703,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_1_768_0_1_16_0_1797958314_1_0_90_2_1_1_aie2_hw_checkin": {
+    "cint32_1_1_768_0_1_16_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
@@ -2335,9 +1723,381 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_256_0_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_2_1_256_1_1_16_0_1797958314_1_0_90_1_1_1_1_0_0_aie1_x86sim_checkin": {
+        "AIE_VARIANT": "1",
+        "TARGET": "x86sim",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "256",
+        "USE_PHASE_RELOAD": "1",
+        "PHASE_RELOAD_API": "1",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_1_64_1_1_16_0_1797958314_1_0_90_1_1_1_1_0_0_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "TARGET": "hw",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "USE_PHASE_RELOAD": "1",
+        "PHASE_RELOAD_API": "1",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_1_1_128_0_1_16_0_1797958314_1_0_90_2_1_1_1_0_0_aie2_x86sim_checkin": {
+        "AIE_VARIANT": "2",
+        "TARGET": "x86sim",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "128",
+        "USE_PHASE_RELOAD": "1",
+        "PHASE_RELOAD_API": "1",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_0_1_64_1_1_16_0_1797958314_1_0_90_2_1_1_1_0_0_aie2_x86sim_checkin": {
+        "AIE_VARIANT": "2",
+        "TARGET": "x86sim",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "USE_PHASE_RELOAD": "1",
+        "PHASE_RELOAD_API": "1",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_0_1_1280_0_1_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "1280",
+        "USE_PHASE_RELOAD": "1",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_1_1024_0_1_16_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "1024",
+        "USE_PHASE_RELOAD": "1",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_2_1_64_0_1_16_0_1797958314_1_0_90_2_1_1_1_1_0_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "TARGET": "hw",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "USE_PHASE_RELOAD": "1",
+        "PHASE_RELOAD_API": "1",
+        "USE_PHASE_INC_RELOAD": "1",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_0_1_64_0_1_16_0_1797958314_1_0_90_2_1_1_0_1_0_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "TARGET": "hw",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "USE_PHASE_RELOAD": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "1",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_1_64_0_1_16_0_1797958314_1_0_90_2_1_1_0_1_0_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "TARGET": "hw",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "USE_PHASE_RELOAD": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "1",
+        "DIFF_MODE": "ABS",
+        "DIFF_TOLERANCE": "3",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_0_0_4096_0_1_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_0_0_4096_0_2_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "2",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_0_0_4096_0_4_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "4",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_1_0_4096_0_1_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_1_0_4096_0_2_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "2",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_1_0_4096_0_4_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "4",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_2_0_4096_0_1_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_2_0_4096_0_2_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "2",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_2_0_4096_0_4_16_0_1797958314_1_0_90_1_1_1_0_0_1_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "4",
+        "SFDR": "90",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SINGLE_BUF": "1",
+        "USE_PHASE_RELOAD": "0",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0"
+    },
+    "cint16_2_0_256_0_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "P_API": "0",
@@ -2352,9 +2112,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_4096_0_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_0_0_4096_0_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
         "P_API": "0",
@@ -2369,9 +2132,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_4096_1_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_2_0_4096_1_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "P_API": "1",
@@ -2386,9 +2152,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_64_1_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_1_0_64_1_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
         "P_API": "1",
@@ -2403,9 +2172,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_256_1_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_1_0_256_1_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
         "P_API": "1",
@@ -2420,9 +2192,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_4096_1_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_0_0_4096_1_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
         "P_API": "1",
@@ -2437,9 +2212,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_64_0_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_2_0_64_0_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "P_API": "0",
@@ -2454,9 +2232,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_4096_0_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_2_0_4096_0_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "P_API": "0",
@@ -2471,9 +2252,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_512_0_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_1_0_512_0_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
         "P_API": "0",
@@ -2488,9 +2272,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_512_0_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_0_0_512_0_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
         "P_API": "0",
@@ -2505,9 +2292,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_512_1_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_1_0_512_1_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
         "P_API": "1",
@@ -2522,14 +2312,18 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_512_0_1_16_0_1797958314_1_0_90_1_1_1_aie1_x86sim_qor": {
+    "cint16_2_0_512_0_1_16_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_x86sim_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "P_API": "0",
         "UUT_SSR": "1",
         "INPUT_WINDOW_VSIZE": "512",
+        "TARGET": "x86sim",
         "USE_PHASE_RELOAD": "0",
         "NITER": "16",
         "INITIAL_DDS_OFFSET": "0",
@@ -2539,9 +2333,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_8192_1_2_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_2_0_8192_1_2_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "P_API": "1",
@@ -2556,9 +2353,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_12288_1_3_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_2_0_12288_1_3_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "P_API": "1",
@@ -2573,9 +2373,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_16384_1_4_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_2_0_16384_1_4_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "P_API": "1",
@@ -2590,9 +2393,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_20480_1_5_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_2_0_20480_1_5_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "P_API": "1",
@@ -2607,9 +2413,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_45056_1_11_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_2_0_45056_1_11_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "P_API": "1",
@@ -2624,9 +2433,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_8192_0_16_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_0_0_8192_0_16_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
         "P_API": "0",
@@ -2641,9 +2453,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_8192_1_16_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_0_0_8192_1_16_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
         "P_API": "1",
@@ -2658,9 +2473,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_6656_0_13_8_3595916629_3595916629_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_1_0_6656_0_13_8_3595916629_3595916629_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
         "P_API": "0",
@@ -2675,9 +2493,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_512_0_1_8_0_1797958314_1_0_60_1_1_1_aie1_hw_qor": {
+    "cint16_0_0_512_0_1_8_0_1797958314_1_0_60_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
         "P_API": "0",
@@ -2692,9 +2513,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_4096_1_1_8_0_1797958314_1_0_60_1_1_1_aie1_hw_qor": {
+    "cint16_0_0_4096_1_1_8_0_1797958314_1_0_60_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
         "P_API": "1",
@@ -2709,9 +2533,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_256_0_1_8_0_1797958314_1_0_60_1_1_1_aie1_hw_qor": {
+    "cint32_0_0_256_0_1_8_0_1797958314_1_0_60_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
         "P_API": "0",
@@ -2726,9 +2553,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_256_0_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint32_0_0_256_0_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
         "P_API": "0",
@@ -2743,9 +2573,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_256_0_1_8_0_1797958314_1_0_150_1_1_1_aie1_hw_qor": {
+    "cint32_0_0_256_0_1_8_0_1797958314_1_0_150_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
         "P_API": "0",
@@ -2760,9 +2593,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_4096_1_1_8_0_1797958314_1_0_60_1_1_1_aie1_hw_qor": {
+    "cint32_0_0_4096_1_1_8_0_1797958314_1_0_60_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
         "P_API": "1",
@@ -2777,9 +2613,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_4096_1_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint32_0_0_4096_1_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
         "P_API": "1",
@@ -2794,9 +2633,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_4096_1_1_8_0_1797958314_1_0_120_1_1_1_aie1_hw_qor": {
+    "cint32_0_0_4096_1_1_8_0_1797958314_1_0_120_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
         "P_API": "1",
@@ -2811,9 +2653,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_512_0_1_8_0_1797958314_1_0_60_1_1_1_aie1_hw_qor": {
+    "cint16_1_0_512_0_1_8_0_1797958314_1_0_60_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
         "P_API": "0",
@@ -2828,9 +2673,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_4096_1_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_1_0_4096_1_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
         "P_API": "1",
@@ -2845,9 +2693,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_256_0_1_8_0_1797958314_1_0_60_1_1_1_aie1_hw_qor": {
+    "cint32_1_0_256_0_1_8_0_1797958314_1_0_60_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
         "P_API": "0",
@@ -2862,9 +2713,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_256_0_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint32_1_0_256_0_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
         "P_API": "0",
@@ -2879,9 +2733,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_256_0_1_8_0_1797958314_1_0_150_1_1_1_aie1_hw_qor": {
+    "cint32_1_0_256_0_1_8_0_1797958314_1_0_150_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
         "P_API": "0",
@@ -2896,9 +2753,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_4096_1_1_8_0_1797958314_1_0_60_1_1_1_aie1_hw_qor": {
+    "cint32_1_0_4096_1_1_8_0_1797958314_1_0_60_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
         "P_API": "1",
@@ -2913,9 +2773,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_4096_1_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint32_1_0_4096_1_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
         "P_API": "1",
@@ -2930,9 +2793,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_4096_1_1_8_0_1797958314_1_0_120_1_1_1_aie1_hw_qor": {
+    "cint32_1_0_4096_1_1_8_0_1797958314_1_0_120_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
         "P_API": "1",
@@ -2947,9 +2813,12 @@
         "DATA_STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_80_0_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint32_1_0_80_0_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
         "P_API": "0",
@@ -2964,9 +2833,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_2_0_80_0_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint32_2_0_80_0_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "2",
         "P_API": "0",
@@ -2981,9 +2853,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_80_0_1_8_3595916629_3595916629_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint32_1_0_80_0_1_8_3595916629_3595916629_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
         "P_API": "0",
@@ -2998,9 +2873,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_560_0_7_8_0_3595916629_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint32_1_0_560_0_7_8_0_3595916629_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
         "P_API": "0",
@@ -3015,9 +2893,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_560_0_7_8_3595916629_3595916629_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint32_1_0_560_0_7_8_3595916629_3595916629_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
         "P_API": "0",
@@ -3032,9 +2913,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_0_0_256_0_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cfloat_0_0_256_0_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "0",
         "P_API": "0",
@@ -3050,9 +2934,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_1_0_256_0_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cfloat_1_0_256_0_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "1",
         "P_API": "0",
@@ -3068,9 +2955,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_2_0_256_0_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cfloat_2_0_256_0_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "2",
         "P_API": "0",
@@ -3086,9 +2976,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_1_0_80_0_1_8_3595916629_3595916629_1_0_90_1_1_1_aie1_hw_qor": {
+    "cfloat_1_0_80_0_1_8_3595916629_3595916629_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "1",
         "P_API": "0",
@@ -3104,9 +2997,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_1_0_560_0_7_8_0_3595916629_1_0_90_1_1_1_aie1_hw_qor": {
+    "cfloat_1_0_560_0_7_8_0_3595916629_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "1",
         "P_API": "0",
@@ -3122,9 +3018,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_1_0_560_0_7_8_3595916629_3595916629_1_0_90_1_1_1_aie1_hw_qor": {
+    "cfloat_1_0_560_0_7_8_3595916629_3595916629_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "1",
         "P_API": "0",
@@ -3140,9 +3039,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_256_0_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_2_0_256_0_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
@@ -3157,9 +3059,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_4096_0_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_0_0_4096_0_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
@@ -3174,9 +3079,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_64_1_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_1_0_64_1_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -3191,9 +3099,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_256_1_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_1_0_256_1_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -3208,9 +3119,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_4096_1_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_0_0_4096_1_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
@@ -3225,9 +3139,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_64_0_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_2_0_64_0_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
@@ -3242,9 +3159,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_4096_0_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_2_0_4096_0_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
@@ -3259,9 +3179,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_512_0_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_1_0_512_0_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -3276,9 +3199,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_512_0_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_0_0_512_0_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
@@ -3293,9 +3219,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_512_1_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_1_0_512_1_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -3310,9 +3239,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_4096_1_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_1_0_4096_1_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -3327,9 +3259,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_8192_1_2_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_1_0_8192_1_2_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -3344,9 +3279,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_12288_1_3_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_1_0_12288_1_3_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -3361,9 +3299,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_16384_1_4_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_1_0_16384_1_4_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -3378,9 +3319,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_20480_1_5_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_1_0_20480_1_5_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -3395,9 +3339,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_45056_1_11_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_1_0_45056_1_11_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -3412,9 +3359,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_8192_0_16_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_0_0_8192_0_16_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
@@ -3429,9 +3379,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_8192_1_16_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_0_0_8192_1_16_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
@@ -3446,9 +3399,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_6656_0_13_8_3595916629_3595916629_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_1_0_6656_0_13_8_3595916629_3595916629_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -3463,9 +3419,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_64_0_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint32_1_0_64_0_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
@@ -3480,9 +3439,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_2_0_64_0_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint32_2_0_64_0_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "2",
@@ -3497,9 +3459,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_64_1_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint32_1_0_64_1_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
@@ -3514,9 +3479,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_128_0_1_8_3595916629_3595916629_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint32_1_0_128_0_1_8_3595916629_3595916629_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
@@ -3531,9 +3499,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_896_0_7_8_0_3595916629_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint32_1_0_896_0_7_8_0_3595916629_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
@@ -3548,9 +3519,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_896_0_7_8_3595916629_3595916629_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint32_1_0_896_0_7_8_3595916629_3595916629_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
@@ -3565,9 +3539,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_64_0_1_8_0_1797958314_1_0_50_2_1_1_aie2_hw_qor": {
+    "cint32_0_0_64_0_1_8_0_1797958314_1_0_50_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
@@ -3582,9 +3559,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_64_0_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint32_0_0_64_0_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
@@ -3599,9 +3579,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_64_0_1_8_0_1797958314_1_0_130_2_1_1_aie2_hw_qor": {
+    "cint32_0_0_64_0_1_8_0_1797958314_1_0_130_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
@@ -3616,9 +3599,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_64_1_1_8_0_1797958314_1_0_50_2_1_1_aie2_hw_qor": {
+    "cint32_0_0_64_1_1_8_0_1797958314_1_0_50_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
@@ -3633,9 +3619,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_64_1_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint32_0_0_64_1_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
@@ -3650,9 +3639,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_0_64_1_1_8_0_1797958314_1_0_130_2_1_1_aie2_hw_qor": {
+    "cint32_0_0_64_1_1_8_0_1797958314_1_0_130_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
@@ -3667,9 +3659,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_512_0_1_8_0_1797958314_1_0_50_2_1_1_aie2_hw_qor": {
+    "cint16_0_0_512_0_1_8_0_1797958314_1_0_50_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
@@ -3684,9 +3679,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_0_4096_1_1_8_0_1797958314_1_0_50_2_1_1_aie2_hw_qor": {
+    "cint16_0_0_4096_1_1_8_0_1797958314_1_0_50_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
@@ -3701,9 +3699,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_2_0_64_0_1_8_0_1797958314_1_0_50_2_1_1_aie2_hw_qor": {
+    "cint32_2_0_64_0_1_8_0_1797958314_1_0_50_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "2",
@@ -3718,9 +3719,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_2_0_64_0_1_8_0_1797958314_1_0_130_2_1_1_aie2_hw_qor": {
+    "cint32_2_0_64_0_1_8_0_1797958314_1_0_130_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "2",
@@ -3735,9 +3739,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_64_1_1_8_0_1797958314_1_0_50_2_1_1_aie2_hw_qor": {
+    "cint32_1_0_64_1_1_8_0_1797958314_1_0_50_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
@@ -3752,9 +3759,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_1_0_64_1_1_8_0_1797958314_1_0_130_2_1_1_aie2_hw_qor": {
+    "cint32_1_0_64_1_1_8_0_1797958314_1_0_130_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
@@ -3769,9 +3779,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_512_0_1_8_0_1797958314_1_0_50_2_1_1_aie2_hw_qor": {
+    "cint16_2_0_512_0_1_8_0_1797958314_1_0_50_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
@@ -3786,9 +3799,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_0_512_0_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_2_0_512_0_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
@@ -3803,9 +3819,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_0_4096_1_1_8_0_1797958314_1_0_50_2_1_1_aie2_hw_qor": {
+    "cint16_1_0_4096_1_1_8_0_1797958314_1_0_50_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -3820,9 +3839,812 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_1_4096_0_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_2_0_256_0_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_0_0_4096_0_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_0_64_1_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_0_256_1_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "256",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_0_0_4096_1_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SFDR": "90",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_2_0_64_0_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_2_0_4096_0_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_0_512_0_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_0_0_512_0_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "512",
+        "SFDR": "90",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_0_512_1_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "512",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_0_4096_1_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SFDR": "90",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_0_8192_1_2_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "2",
+        "INPUT_WINDOW_VSIZE": "8192",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_0_12288_1_3_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "3",
+        "INPUT_WINDOW_VSIZE": "12288",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_0_16384_1_4_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "4",
+        "INPUT_WINDOW_VSIZE": "16384",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_0_20480_1_5_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "5",
+        "INPUT_WINDOW_VSIZE": "20480",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_0_45056_1_11_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "11",
+        "INPUT_WINDOW_VSIZE": "45056",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_0_0_8192_0_16_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "16",
+        "INPUT_WINDOW_VSIZE": "8192",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_0_0_8192_1_16_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "1",
+        "UUT_SSR": "16",
+        "INPUT_WINDOW_VSIZE": "8192",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_0_6656_0_13_8_3595916629_3595916629_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "13",
+        "INPUT_WINDOW_VSIZE": "6656",
+        "DDS_PHASE_INC": "3595916629",
+        "INITIAL_DDS_OFFSET": "3595916629",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_1_0_64_0_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_2_0_64_0_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "SFDR": "90",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_1_0_64_1_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "SFDR": "90",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_1_0_128_0_1_8_3595916629_3595916629_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "128",
+        "DDS_PHASE_INC": "3595916629",
+        "INITIAL_DDS_OFFSET": "3595916629",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_1_0_896_0_7_8_0_3595916629_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "7",
+        "INPUT_WINDOW_VSIZE": "896",
+        "DDS_PHASE_INC": "3595916629",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_1_0_896_0_7_8_3595916629_3595916629_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "1",
+        "P_API": "0",
+        "UUT_SSR": "7",
+        "INPUT_WINDOW_VSIZE": "896",
+        "DDS_PHASE_INC": "3595916629",
+        "INITIAL_DDS_OFFSET": "3595916629",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "SFDR": "90",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_0_0_64_0_1_8_0_1797958314_1_0_50_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "SFDR": "50",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_0_0_64_0_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "SFDR": "90",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_0_0_64_0_1_8_0_1797958314_1_0_130_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "SFDR": "130",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_0_0_64_1_1_8_0_1797958314_1_0_50_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "0",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "SFDR": "50",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_0_0_64_1_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "0",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "SFDR": "90",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_0_0_64_1_1_8_0_1797958314_1_0_130_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "0",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "SFDR": "130",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_0_0_512_0_1_8_0_1797958314_1_0_50_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "512",
+        "SFDR": "50",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_0_0_4096_1_1_8_0_1797958314_1_0_50_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SFDR": "50",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_2_0_64_0_1_8_0_1797958314_1_0_50_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "SFDR": "50",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_2_0_64_0_1_8_0_1797958314_1_0_130_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "SFDR": "130",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_1_0_64_1_1_8_0_1797958314_1_0_50_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "SFDR": "50",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint32_1_0_64_1_1_8_0_1797958314_1_0_130_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "64",
+        "SFDR": "130",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_2_0_512_0_1_8_0_1797958314_1_0_50_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "512",
+        "SFDR": "50",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_2_0_512_0_1_8_0_1797958314_1_0_90_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "512",
+        "SFDR": "90",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_1_0_4096_1_1_8_0_1797958314_1_0_50_22_1_1_0_0_0_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "P_API": "1",
+        "UUT_SSR": "1",
+        "INPUT_WINDOW_VSIZE": "4096",
+        "SFDR": "50",
+        "NITER": "8",
+        "USE_PHASE_RELOAD": "0",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE": "1",
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_0_1_4096_0_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
         "P_API": "0",
@@ -3837,9 +4659,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_2_1_4096_1_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_2_1_4096_1_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "P_API": "1",
@@ -3854,9 +4679,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_1_64_1_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_1_1_64_1_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
         "P_API": "1",
@@ -3871,9 +4699,12 @@
         "SFDR": "90",
         "AIE_VARIANT": "1",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_0_1_4096_1_1_16_0_5592405_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint16_0_1_4096_1_1_16_0_5592405_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
@@ -3888,9 +4719,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_2_1_8192_1_1_8_0_1797958314_1_0_90_1_1_1_aie1_hw_qor": {
+    "cint32_2_1_8192_1_1_8_0_1797958314_1_0_90_1_1_1_0_0_0_aie1_hw_qor": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "2",
@@ -3905,9 +4739,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_0_1_8192_1_1_8_0_1797958314_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint32_0_1_8192_1_1_8_0_1797958314_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
@@ -3922,9 +4759,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_1_1_6656_0_1_8_3595916629_3595916629_1_0_90_2_1_1_aie2_hw_qor": {
+    "cint16_1_1_6656_0_1_8_3595916629_3595916629_1_0_90_2_1_1_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
@@ -3939,9 +4779,12 @@
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_0_1_128_0_1_16_0_1797958314_1_0_50_1_1_1_aie1_hw_qor": {
+    "cfloat_0_1_128_0_1_16_0_1797958314_1_0_50_1_1_1_0_0_0_aie1_hw_qor": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "0",
@@ -3957,9 +4800,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_2_1_512_1_1_16_0_1797958314_1_0_50_1_1_1_aie1_hw_qor": {
+    "cfloat_2_1_512_1_1_16_0_1797958314_1_0_50_1_1_1_0_0_0_aie1_hw_qor": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "2",
@@ -3975,9 +4821,12 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_1_1_4096_1_1_16_0_1797958314_1_0_50_1_1_1_aie1_hw_qor": {
+    "cfloat_1_1_4096_1_1_16_0_1797958314_1_0_50_1_1_1_0_0_0_aie1_hw_qor": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "1",
@@ -3993,6 +4842,9 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "ROUND_MODE": "1",
-        "SAT_MODE": "1"
+        "SAT_MODE": "1",
+        "PHASE_RELOAD_API": "0",
+        "USE_PHASE_INC_RELOAD": "0",
+        "SINGLE_BUF": "0"
     }
 }

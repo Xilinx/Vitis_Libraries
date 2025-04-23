@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ PARAMS ?= test_0_tool_canary_aie
 PARAMS_FILE ?= multi_params.json 
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST += vck190 vek280
+PLATFORM_ALLOWLIST += vck190 vek280 xcvr1602-vsva2488-2LP-e-S-es1 xc2ve3858-ssva2112-2LP-e-S
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk

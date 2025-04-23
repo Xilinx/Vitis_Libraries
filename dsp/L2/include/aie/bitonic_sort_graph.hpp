@@ -33,6 +33,7 @@ the Bitonic Sort library element.
 #include <tuple>
 
 #include "bitonic_sort.hpp"
+#include "merge_sort.hpp"
 #include "bitonic_sort_traits.hpp"
 
 namespace xf {
@@ -58,8 +59,9 @@ class bitonic_sort_recur {
         bitonic_sort_recur<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN, TP_CASC_IDX + 1>;
 
     static void create(kernel (&m_kernels)[TP_CASC_LEN]) {
-        m_kernels[TP_CASC_IDX] = kernel::create_object<bitonic_sort_template>(); // Create bitonic kernel and add it to
-                                                                                 // idx position TP_CASC_IDX.
+        m_kernels[TP_CASC_IDX] =
+            kernel::create_object<bitonic_sort_template>(); // Create bitonic kernel and add it to idx position
+                                                            // TP_CASC_IDX.
         if
             constexpr(TP_CASC_IDX != TP_CASC_LEN - 1) {
                 bitonic_sort_recur_template::create(m_kernels);
@@ -99,27 +101,40 @@ template <typename TT_DATA,
           unsigned int TP_DIM,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_ASCENDING,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR = 1,
+          unsigned int TP_INDEX = 0>
 class bitonic_sort_graph : public graph {
    public:
     static constexpr unsigned int kKernelSize = TP_DIM;
+    static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
+    // Use dual streams in if available (AIE1). Else use iobuffers for merge kernels connected directly to bitonic_sort
+    // kernels outputs. The next "level" of merge_sort kernels will use one stream and one cascade in
+    static constexpr unsigned int TP_IN_API =
+        (kStreamsPerTile == 2) ? kStreamAPI : (TP_SSR == 2) ? kWindowAPI : kStreamCascAPI;
+    // If two streams available, each merge_sort out can be stream. Else alternate between stream and cascade. TP_INDEX
+    // / TP_SSR % 2 == 0 for all desired stream inputs. False for cascades
+    static constexpr unsigned int TP_OUT_API =
+        (kStreamsPerTile == 2) ? kStreamAPI : (TP_INDEX / TP_SSR % 2 == 0) ? kStreamAPI : kCascAPI;
 
     static_assert(fnLog2<kKernelSize * sizeof(TT_DATA) * TP_NUM_FRAMES>() != -1,
                   "ERROR: TP_DIM * sizeof(TT_DATA) * TP_NUM_FRAMES must be a power of 2.");
-    static_assert(kKernelSize * sizeof(TT_DATA) * TP_NUM_FRAMES >= 2 * __MAX_READ_WRITE__ / 8,
+    // TODO: Please fix static_assert. Checks against __MAX_READ_WRITE__, but underlying vector is fixed at 256-bits).
+    // Reverting to using const.
+    static_assert(kKernelSize * sizeof(TT_DATA) * TP_NUM_FRAMES >= 2 * 256 / 8,
                   "ERROR: TP_DIM * sizeof(TT_DATA) * TP_NUM_FRAMES must be greater than or equal to 64 bytes.");
     static_assert(kKernelSize * sizeof(TT_DATA) * TP_NUM_FRAMES <= __DATA_MEM_BYTES__,
-                  "ERROR: TP_DIM * sizeof(TT_DATA) * TP_NUM_FRAMES must be less than or equal to ping-pong size.");
+                  "ERROR: TP_DIM * sizeof(TT_DATA) * TP_NUM_FRAMES must be less than or equal to I/O buffer bytes.");
     static_assert(TP_ASCENDING == 0 || TP_ASCENDING == 1,
                   "ERROR: TP_ASCENDING must be 0 (descending) or (1) ascending.");
     static_assert(
         TP_CASC_LEN <= getNumStages<TP_DIM>(),
         "ERROR: TP_CASC_LEN must be less or equal to the number of bitonic stages (log2(TP_DIM)+1)*log2(TP_DIM)/2.");
-
+    static_assert(TP_NUM_FRAMES == 1 || TP_SSR == 1, "ERROR: TP_NUM_FRAMES > 1 is only supported for TP_SSR = 1");
     /**
      * The input data to be sorted.
      **/
-    port_array<input, 1> in;
+    port_array<input, TP_SSR> in;
     /**
      * The sorted output data.
      **/
@@ -129,20 +144,95 @@ class bitonic_sort_graph : public graph {
      **/
     kernel m_kernels[TP_CASC_LEN];
     /**
+    * Access function to get pointer to kernel (or first kernel in a chained configuration).
+    * No arguments required.
+    **/
+    kernel* getKernels() { return m_kernels; };
+
+    kernel merge_sorter;
+    /**
      * @brief This is the constructor function for the bitonic_sort graph.
      **/
-    bitonic_sort_graph() {
-        printf("Graph constructor...\n");
-        printf("kKernelSize = %d\n", kKernelSize);
-        printf("TP_DIM = %d\n", TP_DIM);
-        printf("TP_NUM_FRAMES = %d\n", TP_NUM_FRAMES);
-        printf("TP_ASCENDING = %d\n", TP_ASCENDING);
-        printf("TP_CASC_LEN = %d\n", TP_CASC_LEN);
-        printf("Graph constructor...\n");
 
-        bitonic_sort_recur<TT_DATA, kKernelSize, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN, 0>::create(m_kernels);
+    bitonic_sort_graph<TT_DATA, TP_DIM / 2, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN, TP_SSR / 2, TP_INDEX>
+        bitonic_merge_subframe0;
+    bitonic_sort_graph<TT_DATA,
+                       TP_DIM / 2,
+                       TP_NUM_FRAMES,
+                       TP_ASCENDING,
+                       TP_CASC_LEN,
+                       TP_SSR / 2,
+                       TP_INDEX + (TP_SSR / 2)>
+        bitonic_merge_subframe1;
+
+    using mergerClass = merge_sort<TT_DATA, TP_IN_API, TP_OUT_API, TP_DIM, TP_ASCENDING>;
+    bitonic_sort_graph() {
+        merge_sorter = kernel::create_object<mergerClass>();
+        // connect inputs - first half to subframe0, second half to subframe1
+        for (int i = 0; i < TP_SSR / 2; i++) {
+            connect(in[2 * i], bitonic_merge_subframe0.in[i]);
+            connect(in[2 * i + 1], bitonic_merge_subframe1.in[i]);
+        }
+        if (TP_IN_API == kStreamAPI) {
+            connect<stream>(bitonic_merge_subframe0.out[0], merge_sorter.in[0]);
+            connect<stream>(bitonic_merge_subframe1.out[0], merge_sorter.in[1]);
+        } else if (TP_IN_API == kWindowAPI) {
+            // This is the first layer of merge sorts. Bitonic out connects to merge in, thus merge sort input can be
+            // iobuffer
+            connect(bitonic_merge_subframe0.out[0], merge_sorter.in[0]);
+            dimensions(merge_sorter.in[0]) = {TP_DIM / 2};
+            connect(bitonic_merge_subframe1.out[0], merge_sorter.in[1]);
+            dimensions(merge_sorter.in[1]) = {TP_DIM / 2};
+        } else { // kStreamCascAPI - streams to in[0] and casc to in[1]
+            connect<stream>(bitonic_merge_subframe0.out[0], merge_sorter.in[0]);
+            connect<cascade>(bitonic_merge_subframe1.out[0], merge_sorter.in[1]);
+        }
+        if
+            constexpr(TP_OUT_API == kStreamAPI) {
+                // output connections - connect merge out to out
+                connect<stream>(merge_sorter.out[0], out[0]);
+            }
+        else {
+            connect<cascade>(merge_sorter.out[0], out[0]);
+        }
+
+        runtime<ratio>(merge_sorter) = 0.9;
+        source(merge_sorter) = "merge_sort.cpp";
+    }; // constructor
+};
+template <typename TT_DATA,
+          unsigned int TP_DIM,
+          unsigned int TP_NUM_FRAMES,
+          unsigned int TP_ASCENDING,
+          unsigned int TP_CASC_LEN,
+          //   unsigned int TP_SSR,
+          unsigned int TP_INDEX>
+class bitonic_sort_graph<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN, 1, TP_INDEX> : public graph {
+   public:
+    static constexpr unsigned int TP_SSR = 1;
+    /**
+    * Input to bitonic kernel
+    **/
+    port_array<input, 1> in;
+    /**
+    * Output to bitonic kernel
+    **/
+    port_array<output, 1> out;
+    /**
+    * The array of kernels that will be created and mapped onto AIE tiles.
+    **/
+    kernel m_kernels[TP_CASC_LEN];
+    /**
+    * Access function to get pointer to kernel (or first kernel in a chained configuration).
+    * No arguments required.
+    **/
+    kernel* getKernels() { return m_kernels; };
+
+    bitonic_sort_graph() {
+        bitonic_sort_recur<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN, 0>::create(m_kernels);
 
         for (int k = 0; k < TP_CASC_LEN; k++) {
+            int kernelIdx = k;
             // Specify mapping constraints
             runtime<ratio>(m_kernels[k]) = 0.9; // Nominal figure. Requires knowledge of sample rate.
 
@@ -156,13 +246,12 @@ class bitonic_sort_graph : public graph {
             } else {
                 connect(m_kernels[k - 1].out[0], m_kernels[k].in[0]);
             }
-
             if (k == TP_CASC_LEN - 1) {
                 connect(m_kernels[k].out[0], out[0]);
             }
 
-            dimensions(m_kernels[k].in[0]) = {kKernelSize * TP_NUM_FRAMES};
-            dimensions(m_kernels[k].out[0]) = {kKernelSize * TP_NUM_FRAMES};
+            dimensions(m_kernels[k].in[0]) = {TP_DIM * TP_NUM_FRAMES};
+            dimensions(m_kernels[k].out[0]) = {TP_DIM * TP_NUM_FRAMES};
         }
     }; // constructor
 };

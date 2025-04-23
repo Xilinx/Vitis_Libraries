@@ -7,10 +7,16 @@
         "vck190",
         "vek280"
     ],
-
     "data": [
         "PROJECT/data/"
     ],
+    "part_allowlist": [
+        "xcvr1602-vsva2488-2LP-e-S-es1",
+        "xc2ve3858-ssva2112-2LP-e-S"
+    ],
+    "part_alias": {
+        "xc2ve3858-ssva2112-2LP-e-S": "aie_mlv2"
+    },
     "platform_properties": {
         "vck190": {
             "param_set": [
@@ -51,7 +57,60 @@
                 }
             }
         }
-
+    },
+    "part_properties": {
+        "xcvr1602-vsva2488-2LP-e-S-es1": {
+            "param_set": [
+                "*canary_aie"
+            ],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            },
+            "aiecompiler": {
+                "compiler": {
+                    "customized_params": {
+                        "default": {
+                            "COMPILER_ARGS": "",
+                            "AIE_VARIANT": "1",
+                            "FIFO_THRESHOLD": " "
+                        }
+                    }
+                }
+            }
+        },
+        "xc2ve3858-ssva2112-2LP-e-S": {
+            "param_set": [
+                "*_aie22_*"
+            ],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            },
+            "aiecompiler": {
+                "compiler": {
+                    "customized_params": {
+                        "default": {
+                            "COMPILER_ARGS": " --aie.Xpreproc=-D_AIE_API_WORKAROUND_CR_1223259_=1",
+                            "AIE_VARIANT": "22",
+                            "FIFO_THRESHOLD": "--aie.swfifo-threshold=120 "
+                        }
+                    }
+                }
+            }
+        }
     },
     "pre_build": [
         {
@@ -64,7 +123,10 @@
             "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk create_config HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) LOC_INPUT_FILE_F=$(LOC_INPUT_FILE_F) LOC_INPUT_FILE_G=$(LOC_INPUT_FILE_G)\")"
         },
         {
-            "build_cmd": "$(if $(filter-out REF,$(TAG)), vitis --classic -exec ipmetadata_config_checker LIB_DIR/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/meta/scripts/metadata_checker.py --ip $(UUT_KERNEL))"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), # vitis --classic -exec ipmetadata_config_checker LIB_DIR/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)"
         },
         {
             "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR LOC_INPUT_FILE_F=$(LOC_INPUT_FILE_F) LOC_INPUT_FILE_G=$(LOC_INPUT_FILE_G)\")"
@@ -135,7 +197,7 @@
                     "LOG_FILE": "./logs/log_$(UUT_FILE_SUFFIX).txt",
                     "STATUS_LOG_FILE": "./logs/status_$(UUT_FILE_SUFFIX).txt",
                     "STATUS_FILE": "$(STATUS_LOG_FILE)",
-                    "UUT_TARGET_COMPILE_ARGS": " $(FIFO_THRESHOLD) --aie.Xchess=main:backend.mist2.xargs=-k120 --aie.xlopt=1 --aie.Xrouter=DMAFIFOsInFreeBankOnly --aie.Xchess=llvm.xargs=\"-std=c++2a\" --aie.Xchess=main:backend.mist2.xargs=\"+NOdra\"  --aie.Xchess=main:backend.mist2.pnll=\"off\" --aie.stacksize=$(STACKSIZE_VAL)",
+                    "UUT_TARGET_COMPILE_ARGS": " $(COMPILER_ARGS)  $(FIFO_THRESHOLD) --aie.Xchess=main:backend.mist2.xargs=-k120 --aie.xlopt=1 --aie.Xrouter=DMAFIFOsInFreeBankOnly --aie.Xchess=llvm.xargs=\"-std=c++2a\" --aie.Xchess=main:backend.mist2.xargs=\"+NOdra\"  --aie.Xchess=main:backend.mist2.pnll=\"off\" --aie.stacksize=$(STACKSIZE_VAL)",
                     "REF_TARGET_COMPILE_ARGS": "",
                     "UUT_WORK_DIR": "./Work",
                     "REF_WORK_DIR": "./Work",
@@ -205,20 +267,28 @@
         "category": "canary",
         "param_set": {
             "pull_req": {
-                "*_hw_checkin":[
+                "*_canary_aie": [
                     "vitis_aie_sim",
                     "vitis_aie_x86sim"
                 ],
-                "*_x86sim_checkin":[
+                "*_hw_checkin": [
+                    "vitis_aie_sim",
+                    "vitis_aie_x86sim"
+                ],
+                "*_x86sim_checkin": [
                     "vitis_aie_x86sim"
                 ]
             },
             "daily": {
-                "*_hw_qor":[
+                "*_canary_aie": [
                     "vitis_aie_sim",
                     "vitis_aie_x86sim"
                 ],
-                "*_x86sim_qor":[
+                "*_hw_qor": [
+                    "vitis_aie_sim",
+                    "vitis_aie_x86sim"
+                ],
+                "*_x86sim_qor": [
                     "vitis_aie_x86sim"
                 ]
             }

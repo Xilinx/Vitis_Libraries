@@ -291,149 +291,164 @@ template <bool T_CASC_IN, typename T_D_A, typename T_D_B>
 struct T_inputIF {
     void* __restrict inWindowA;
     void* __restrict inWindowB;
-    typename std::conditional<T_CASC_IN == CASC_IN_FALSE, no_port, input_stream<accType_t<T_D_A, T_D_B> > >::type*
+    typename std::conditional<T_CASC_IN == CASC_IN_FALSE, no_port, input_cascade<accType_t<T_D_A, T_D_B> > >::type*
         inCascade;
 };
 
 // IF output type
-template <bool T_CASC_OUT, typename T_D_A, typename T_D_B>
+template <bool T_CASC_OUT, typename T_D_A, typename T_D_B, typename T_D_O>
 struct T_outputIF {
-    typename std::conditional<T_CASC_OUT == CASC_OUT_FALSE,
-                              outType_t<T_D_A, T_D_B>,
-                              output_stream<accType_t<T_D_A, T_D_B> > >::type* __restrict outWindow;
+    typename std::conditional<T_CASC_OUT == CASC_OUT_FALSE, T_D_O, output_cascade<accType_t<T_D_A, T_D_B> > >::
+        type* __restrict outWindow;
 };
 
-// The following is a set of type-specialized functions which return the number of accumulator registers
-// available in the processor. Since these may be 384 or 768 bit registers the number could vary by type.
-template <typename TT_DATA_A, typename TT_DATA_B>
-unsigned int fnAccRegsMatMult() {
-    return 0;
-}; // default error trap
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsMatMult<int16, int16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint16, int16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint16, cint16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsMatMult<int32, int16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsMatMult<int32, int32>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint32, int16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint32, cint16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint32, int32>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint32, cint32>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsMatMult<float, float>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cfloat, float>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cfloat, cfloat>() {
-    return 4;
-};
+// // The following is a set of type-specialized functions which return the number of accumulator registers
+// // available in the processor. Since these may be 384 or 768 bit registers the number could vary by type.
+// template <typename TT_DATA_A, typename TT_DATA_B>
+// unsigned int fnAccRegsMatMult() {
+//     return 0;
+// }; // default error trap
+// template <>
+// INLINE_DECL constexpr unsigned int fnAccRegsMatMult<int16, int16>() {
+//     return 4;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint16, int16>() {
+//     return 4;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint16, cint16>() {
+//     return 4;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnAccRegsMatMult<int32, int16>() {
+//     return 4;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnAccRegsMatMult<int32, int32>() {
+//     return 4;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint32, int16>() {
+//     return 4;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint32, cint16>() {
+//     return 4;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint32, int32>() {
+//     return 4;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cint32, cint32>() {
+//     return 4;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnAccRegsMatMult<float, float>() {
+//     return 4;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cfloat, float>() {
+//     return 4;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnAccRegsMatMult<cfloat, cfloat>() {
+//     return 4;
+// };
 
-// function to return the number of lanes for a type combo
-// The default is effectively an error trap, but adding an error message to a constexpr return results in a warning.
-template <typename TT_DATA_A, typename TT_DATA_B>
-INLINE_DECL constexpr unsigned int fnNumLanesMatMult() {
-    return 0;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesMatMult<int16, int16>() {
-    return 16;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint16, int16>() {
-    return 8;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint16, cint16>() {
-    return 8;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesMatMult<int32, int16>() {
-    return 8;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesMatMult<int32, int32>() {
-    return 8;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint32, int16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint32, cint16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint32, int32>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint32, cint32>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesMatMult<float, float>() {
-    return 8;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cfloat, float>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cfloat, cfloat>() {
-    return 4;
-};
+// // function to return the number of lanes for a type combo
+// // The default is effectively an error trap, but adding an error message to a constexpr return results in a warning.
+// template <typename TT_DATA_A, typename TT_DATA_B>
+// INLINE_DECL constexpr unsigned int fnNumLanesMatMult() {
+//     return 0;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnNumLanesMatMult<int8, int8>() {
+//     return 64;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnNumLanesMatMult<int16, int8>() {
+//     return 32;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnNumLanesMatMult<int16, int16>() {
+//     return 16; //tilingScheme.ATile x ABTile: 16  for AIE, AIE-ML and 32 AIE-MLv2
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint16, int16>() {
+//     return 8;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint16, cint16>() {
+//     return 8;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnNumLanesMatMult<int32, int16>() {
+//     return 8;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnNumLanesMatMult<int32, int32>() {
+//     return 8;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint32, int16>() {
+//     return 4;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint32, cint16>() {
+//     return 4;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint32, int32>() {
+//     return 4;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cint32, cint32>() {
+//     return 4;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnNumLanesMatMult<float, float>() {
+//     return 8;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cfloat, float>() {
+//     return 4;
+// };
+// template <>
+// INLINE_DECL constexpr unsigned int fnNumLanesMatMult<cfloat, cfloat>() {
+//     return 4;
+// };
 
-// Function to return the lowest common multiple of two numbers
-// A full implementation of this would entail prime factor decomposition, but here
-// The maximum integer size is 16, so a simpler brute force method will do.
-template <typename TT_DATA_A, typename TT_DATA_B, unsigned int TP_FACTOR>
-INLINE_DECL constexpr unsigned int fnLCMMatMult() {
-    return ((fnNumLanesMatMult<TT_DATA_A, TT_DATA_B>() == 2)
-                ? ((TP_FACTOR % 2 == 0) ? TP_FACTOR : (TP_FACTOR * 2))
-                : (fnNumLanesMatMult<TT_DATA_A, TT_DATA_B>() == 4)
-                      ? ((TP_FACTOR % 4 == 0) ? TP_FACTOR : ((TP_FACTOR % 2 == 0) ? (TP_FACTOR * 2) : (TP_FACTOR * 4)))
-                      : (fnNumLanesMatMult<TT_DATA_A, TT_DATA_B>() == 8)
-                            ? ((TP_FACTOR % 8 == 0)
-                                   ? TP_FACTOR
-                                   : ((TP_FACTOR % 4 == 0) ? (TP_FACTOR * 2)
-                                                           : ((TP_FACTOR % 2 == 0) ? (TP_FACTOR * 4) : TP_FACTOR * 8)))
-                            : 0);
-};
+// // Function to return the lowest common multiple of two numbers
+// // A full implementation of this would entail prime factor decomposition, but here
+// // The maximum integer size is 16, so a simpler brute force method will do.
+// template <typename TT_DATA_A, typename TT_DATA_B, unsigned int TP_FACTOR>
+// INLINE_DECL constexpr unsigned int fnLCMMatMult() {
+//     return ((fnNumLanesMatMult<TT_DATA_A, TT_DATA_B>() == 2)
+//                 ? ((TP_FACTOR % 2 == 0) ? TP_FACTOR : (TP_FACTOR * 2))
+//                 : (fnNumLanesMatMult<TT_DATA_A, TT_DATA_B>() == 4)
+//                       ? ((TP_FACTOR % 4 == 0) ? TP_FACTOR : ((TP_FACTOR % 2 == 0) ? (TP_FACTOR * 2) : (TP_FACTOR *
+//                       4)))
+//                       : (fnNumLanesMatMult<TT_DATA_A, TT_DATA_B>() == 8)
+//                             ? ((TP_FACTOR % 8 == 0)
+//                                    ? TP_FACTOR
+//                                    : ((TP_FACTOR % 4 == 0) ? (TP_FACTOR * 2)
+//                                                            : ((TP_FACTOR % 2 == 0) ? (TP_FACTOR * 4) : TP_FACTOR *
+//                                                            8)))
+//                             : 0);
+// };
 
-// function to return the number of samples in an output vector for a type combo
-template <typename TT_DATA_A, typename TT_DATA_B>
-INLINE_DECL constexpr unsigned int fnVOutSizeMatMult() {
-    return fnNumLanesMatMult<TT_DATA_A, TT_DATA_B>();
+// // function to return the number of samples in an output vector for a type combo
+// template <typename TT_DATA_A, typename TT_DATA_B>
+// INLINE_DECL constexpr unsigned int fnVOutSizeMatMult() {
+//     return fnNumLanesMatMult<TT_DATA_A, TT_DATA_B>();
+// };
+
+// Function to return Maximum supported length based on given DATA TYPE.
+template <typename TT_DATA>
+INLINE_DECL constexpr unsigned int getMaxLen() {
+    return (__DATA_MEM_BYTES__ / sizeof(TT_DATA));
 };
 }
 }

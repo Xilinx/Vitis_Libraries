@@ -524,7 +524,7 @@ void fir_interpolate_fract_asym<TT_DATA,
                                 TP_CASC_LEN,
                                 USE_COEFF_RELOAD_FALSE,
                                 1>::filter(input_window<TT_DATA>* inWindow,
-                                           input_stream_cacc48* inCascade,
+                                           input_cascade_cacc* inCascade,
                                            output_window<TT_DATA>* outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -561,7 +561,7 @@ void fir_interpolate_fract_asym<TT_DATA,
                                 TP_CASC_LEN,
                                 USE_COEFF_RELOAD_FALSE,
                                 2>::filter(input_window<TT_DATA>* inWindow,
-                                           input_stream_cacc48* inCascade,
+                                           input_cascade_cacc* inCascade,
                                            output_window<TT_DATA>* outWindow,
                                            output_window<TT_DATA>* outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
@@ -601,7 +601,7 @@ void fir_interpolate_fract_asym<TT_DATA,
                                 TP_CASC_LEN,
                                 USE_COEFF_RELOAD_TRUE,
                                 1>::filter(input_window<TT_DATA>* inWindow,
-                                           input_stream_cacc48* inCascade,
+                                           input_cascade_cacc* inCascade,
                                            output_window<TT_DATA>* outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -639,7 +639,7 @@ void fir_interpolate_fract_asym<TT_DATA,
                                 TP_CASC_LEN,
                                 USE_COEFF_RELOAD_TRUE,
                                 2>::filter(input_window<TT_DATA>* inWindow,
-                                           input_stream_cacc48* inCascade,
+                                           input_cascade_cacc* inCascade,
                                            output_window<TT_DATA>* outWindow,
                                            output_window<TT_DATA>* outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
@@ -678,7 +678,7 @@ void fir_interpolate_fract_asym<TT_DATA,
                                 TP_CASC_LEN,
                                 USE_COEFF_RELOAD_FALSE,
                                 1>::filter(input_window<TT_DATA>* inWindow,
-                                           output_stream_cacc48* outCascade,
+                                           output_cascade_cacc* outCascade,
                                            output_window<TT_DATA>* broadcastWindow) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -715,7 +715,7 @@ void fir_interpolate_fract_asym<TT_DATA,
                                 TP_CASC_LEN,
                                 USE_COEFF_RELOAD_TRUE,
                                 1>::filter(input_window<TT_DATA>* inWindow,
-                                           output_stream_cacc48* outCascade,
+                                           output_cascade_cacc* outCascade,
                                            output_window<TT_DATA>* broadcastWindow,
                                            const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
@@ -754,8 +754,8 @@ void fir_interpolate_fract_asym<TT_DATA,
                                 TP_CASC_LEN,
                                 USE_COEFF_RELOAD_FALSE,
                                 1>::filter(input_window<TT_DATA>* inWindow,
-                                           input_stream_cacc48* inCascade,
-                                           output_stream_cacc48* outCascade,
+                                           input_cascade_cacc* inCascade,
+                                           output_cascade_cacc* outCascade,
                                            output_window<TT_DATA>* broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
@@ -794,8 +794,8 @@ void fir_interpolate_fract_asym<TT_DATA,
                                 TP_CASC_LEN,
                                 USE_COEFF_RELOAD_TRUE,
                                 1>::filter(input_window<TT_DATA>* inWindow,
-                                           input_stream_cacc48* inCascade,
-                                           output_stream_cacc48* outCascade,
+                                           input_cascade_cacc* inCascade,
+                                           output_cascade_cacc* outCascade,
                                            output_window<TT_DATA>* broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;

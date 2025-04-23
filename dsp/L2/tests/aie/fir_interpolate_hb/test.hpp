@@ -30,6 +30,7 @@ Halfband Interpolator FIR graph class.
 #include "uut_static_config.h"
 #include "test_utils.hpp"
 #include "fir_common_traits.hpp"
+#include "device_defs.h"
 
 #ifndef UUT_GRAPH
 #define UUT_GRAPH fir_interpolate_hb_graph
@@ -196,8 +197,7 @@ class test_graph : public graph {
 #endif
 
 #ifdef USING_UUT
-        const int MAX_PING_PONG_SIZE = 16384;
-        const int MEMORY_MODULE_SIZE = 32768;
+        const int MAX_PING_PONG_SIZE = __DATA_MEM_BYTES__ / 2;
         const int inputBufferSize = PORT_API == 1 ? 0 : (FIR_LEN + INPUT_SAMPLES) * sizeof(DATA_TYPE);
         const int outputBufferSize =
             PORT_API == 1
@@ -216,14 +216,6 @@ class test_graph : public graph {
             single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[1]);
 #endif
         }
-
-        // use default ping-pong buffer, unless requested buffer exceeds memory module size
-        static_assert(!(PORT_API == 0 && inputBufferSize >= MEMORY_MODULE_SIZE),
-                      "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "
-                      "Module size of 32kB");
-        static_assert(!(PORT_API == 0 && outputBufferSize >= MEMORY_MODULE_SIZE),
-                      "ERROR: Output Window size (based on requrested window size and rate change) exceeds Memory "
-                      "Module size of 32kB");
 #endif
 
 #ifdef USING_UUT

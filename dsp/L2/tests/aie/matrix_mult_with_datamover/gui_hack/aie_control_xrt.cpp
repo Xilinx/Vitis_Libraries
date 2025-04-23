@@ -28,7 +28,7 @@
 
 adf::GraphConfig GraphConfigurations[] = {
     //{id, name, graphLoadElfFunc, graphInitFunc, graphDebugHalt, coreColumns, coreRows, iterMemColumns, iterMemRows,
-    // iterMemAddrs, triggered, plKernelInstanceNames, plAxiLiteModes, plDriverStartFuncs, plDriverCheckIPDoneFuncs}
+    //iterMemAddrs, triggered, plKernelInstanceNames, plAxiLiteModes, plDriverStartFuncs, plDriverCheckIPDoneFuncs}
     {
         0,
         "matMult",
@@ -37,9 +37,9 @@ adf::GraphConfig GraphConfigurations[] = {
         nullptr,
         {24, 24, 25},
         {0, 1, 0},
-        {24, 25, 25},
-        {0, 1, 1},
-        {0x5764, 0x6404, 0x4},
+        {24, 25, 24},
+        {1, 1, 0},
+        {0x1b44, 0x4, 0x6004},
         {0, 0, 0},
         {},
         {},
@@ -53,9 +53,9 @@ const int NUM_GRAPH = 1;
 
 adf::PLIOConfig PLIOConfigurations[] = {
     //{id, name, loginal_name, shim_column, slaveOrMaster, streamId}
-    {0, "matMult.inA[0]", "PLIO_in_A0", 24, 0, 1},
-    {1, "matMult.inB[0]", "PLIO_in_B0", 24, 0, 4},
-    {2, "matMult.out[0]", "PLIO_out_0", 25, 1, 0},
+    {0, "matMult.inA[0]", "DataIn1", 25, 0, 1},
+    {1, "matMult.inB[0]", "DataIn2", 25, 0, 4},
+    {2, "matMult.out[0]", "DataOut1", 24, 1, 0},
 };
 const int NUM_PLIO = 3;
 
@@ -73,19 +73,19 @@ class InitializeAIEControlXRT {
         adf::initializeConfigurations(nullptr, 0, 0, 0, GraphConfigurations, NUM_GRAPH, nullptr, 0, nullptr, 0, nullptr,
                                       0, nullptr, 0, nullptr, 0, nullptr, 0, nullptr, 0, nullptr, 0, PLIOConfigurations,
                                       NUM_PLIO, nullptr, 0, 0, nullptr, false, exclude_pl_control, false, nullptr, true,
-                                      2);
+                                      0, 2);
     }
 } initAIEControlXRT;
 
-#if !defined(__CDO__) && !defined(__AIECONTROLCODE__)
+using namespace adf;
 
 // Kernel Stub Definition
 template <>
 void xf::dsp::aie::blas::matrix_mult::
-    matrix_mult<cint16, cint16, 16, 16, 16, 20, 0, 0, 0, 1, 0, 256, 256, false, false, 16, 16, 16, 0, 1>::matMult(
-        adf::io_buffer<cint16, adf::direction::in, adf::io_buffer_config<> >& __restrict,
-        adf::io_buffer<cint16, adf::direction::in, adf::io_buffer_config<> >& __restrict,
-        adf::io_buffer<cint16, adf::direction::out, adf::io_buffer_config<> >& __restrict) { /* Stub */
+    matrix_mult<cint16, cint16, cint16, 16, 16, 16, 20, 0, 0, 0, 1, 0, 256, 256, false, false, 16, 16, 16, 0, 1>::
+        matMult(adf::io_buffer<cint16, adf::direction::in, adf::io_buffer_config<> >& __restrict,
+                adf::io_buffer<cint16, adf::direction::in, adf::io_buffer_config<> >& __restrict,
+                adf::io_buffer<cint16, adf::direction::out, adf::io_buffer_config<> >& __restrict) { /* Stub */
 }
 template <>
 void xf::dsp::aie::blas::matrix_mult::tilerKernelClass<4, 2, 16, 16, 1, cint16>::tile(
@@ -102,4 +102,3 @@ void xf::dsp::aie::blas::matrix_mult::untilerKernelClass<4, 2, 16, 16, 0, cint16
     adf::io_buffer<cint16, adf::direction::in, adf::io_buffer_config<> >& __restrict,
     adf::io_buffer<cint16, adf::direction::out, adf::io_buffer_config<> >& __restrict) { /* Stub */
 }
-#endif
