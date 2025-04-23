@@ -207,8 +207,6 @@ To run the Vitis projects for benchmark evaluation and test, you may need the ex
 	$ ./opt/xilinx/xrt/setup.sh
 	$ export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 	$ cd L1/benchmarks/specific_algorithm/
-	$ # Run software emulation for correctness test
-	$ make run TARGET=sw_emu DEIVCE=u250_xdma_201830_1
 	$ # Run hardware emulation for cycle-accurate simulation with the RTL-model
 	$ make run TARGET=hw_emu DEIVCE=u250_xdma_201830_1
 	$ # Run hardware to generate the desired xclbin binary

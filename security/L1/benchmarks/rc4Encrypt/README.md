@@ -49,8 +49,8 @@ Input Arguments:
    Found Platform
    Platform Name: Xilinx
    Selected Device xilinx_u250_xdma_201830_2
-   INFO: Importing build_dir.sw_emu.xilinx_u250_xdma_201830_2/rc4EncryptKernel.xclbin
-   Loading: 'build_dir.sw_emu.xilinx_u250_xdma_201830_2/rc4EncryptKernel.xclbin'
+   INFO: Importing build_dir.hw_emu.xilinx_u250_xdma_201830_2/rc4EncryptKernel.xclbin
+   Loading: 'build_dir.hw_emu.xilinx_u250_xdma_201830_2/rc4EncryptKernel.xclbin'
    Kernel has been created.
    DDR buffers have been mapped/copy-and-mapped
    Kernel has been run for 2 times.

@@ -49,8 +49,8 @@ Input Arguments:
    Found Platform
    Platform Name: Xilinx
    Selected Device xilinx_u250_gen3x16_xdma_3_1_202020_1
-   INFO: Importing build_dir.sw_emu.xilinx_u250_gen3x16_xdma_3_1_202020_1/aes256CbcDecryptKernel.xclbin
-   Loading: 'build_dir.sw_emu.xilinx_u250_gen3x16_xdma_3_1_202020_1/aes256CbcDecryptKernel.xclbin'
+   INFO: Importing build_dir.hw_emu.xilinx_u250_gen3x16_xdma_3_1_202020_1/aes256CbcDecryptKernel.xclbin
+   Loading: 'build_dir.hw_emu.xilinx_u250_gen3x16_xdma_3_1_202020_1/aes256CbcDecryptKernel.xclbin'
    Kernel has been created.
    allocate to DDR
    DDR buffers have been mapped/copy-and-mapped

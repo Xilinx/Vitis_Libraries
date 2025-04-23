@@ -64,17 +64,12 @@ Input Arguments:
 
 .. code-block:: bash
 
-   Found Platform
-   Platform Name: Xilinx
-   Selected Device xilinx_u250_xdma_201830_2
-   INFO: Importing build_dir.sw_emu.xilinx_u250_xdma_201830_2/aes256CbcEncryptKernel.xclbin
-   Loading: 'build_dir.sw_emu.xilinx_u250_xdma_201830_2/aes256CbcEncryptKernel.xclbin'
-   Kernel has been created.
-   DDR buffers have been mapped/copy-and-mapped
-   12 channels, 2 tasks, 64 messages verified. No error found!
-   Kernel has been run for 2 times.
-   Total execution time 4725069us
-
+   Info: Program created
+   Info: Kernel created
+   Transfer package of 0.0166168 MB to device took 20581.2us, bandwidth = 0.80738MB/s
+   Packages contains additional info, pure message size = 0.015625MB
+   Kernel process message of 0.015625 MB took 5.00062e+06us, performance = 0.00312461MB/s
+   Transfer package of 0.0158844 MB to host took 20674.2us, bandwidth = 0.768321MB/s
 
 Profiling 
 =========
