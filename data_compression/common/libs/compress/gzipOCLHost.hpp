@@ -615,10 +615,10 @@ class memoryManager {
 
     cl::Buffer* getBuffer(cl_mem_flags flag, size_t size, uint8_t* host_ptr, uint8_t mode = 0);
     void release(buffers* buffer);
-    bool is_sw_emulation() {
+    bool is_hw_emulation() {
         bool ret = false;
         char* xcl_mode = getenv("XCL_EMULATION_MODE");
-        if ((xcl_mode != NULL) && !strcmp(xcl_mode, "sw_emu")) {
+        if ((xcl_mode != NULL) && !strcmp(xcl_mode, "hw_emu")) {
             ret = true;
         }
         return ret;

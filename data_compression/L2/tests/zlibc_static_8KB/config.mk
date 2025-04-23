@@ -20,7 +20,3 @@ ifeq ($(findstring 2018, $(DEVICE)), 2018)
 endif
 endif
 
-ifeq ($(TARGET),$(filter $(TARGET), sw_emu))
-	VPP_FLAGS += -DTUSER_DWIDTH=0
-	VPP_FLAGS += -DNO_SYNTH -DAVOID_STATIC_MODE
-endif

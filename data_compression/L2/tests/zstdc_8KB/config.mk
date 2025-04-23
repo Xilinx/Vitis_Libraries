@@ -19,7 +19,7 @@ ifneq ($(TARGET),$(filter $(TARGET), hw_emu))
 #	VPP_FLAGS += -DFREE_RUNNING_KERNEL
 #endif
 
-ifneq ($(TARGET),$(filter $(TARGET), sw_emu))
+ifeq ($(TARGET),$(filter $(TARGET), hw_emu))
 	CXXFLAGS += -DFREE_RUNNING_KERNEL
 	VPP_FLAGS += -DFREE_RUNNING_KERNEL
 endif

@@ -20,10 +20,10 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Device."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
 	$(ECHO) "  make clean "
@@ -44,7 +44,7 @@ TOOL_VERSION ?= 2019.2
 
 #check environment setup
 ifndef XILINX_VITIS
-  XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
+  XILINX_VITIS = /opt/xilinx/$(TOOL_VERSION)/Vitis
   export XILINX_VITIS
 endif
 ifndef XILINX_VIVADO
@@ -85,10 +85,10 @@ ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
   export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
 endif
 
-# sw_emu, hw_emu, hw
-TARGET ?= sw_emu
-ifeq ($(filter $(TARGET),sw_emu hw hw_emu),)
-  $(error TARGET is not sw_emu, hw_emu or hw)
+# hw_emu, hw
+TARGET ?= hw_emu
+ifeq ($(filter $(TARGET),hw hw_emu),)
+  $(error TARGET is not hw_emu or hw)
 endif
 
 # ZLIB Version
@@ -424,10 +424,7 @@ $(BUILD_DIR)/emconfig.json :
 
 HOST_ARGS = -t ./sample.txt
 
-ifeq ($(TARGET),sw_emu)
-  RUN_ENV = export XCL_EMULATION_MODE=sw_emu
-  EMU_CONFIG = $(BUILD_DIR)/emconfig.json
-else ifeq ($(TARGET),hw_emu)
+ifeq ($(TARGET),hw_emu)
   RUN_ENV = export XCL_EMULATION_MODE=hw_emu
   EMU_CONFIG = $(BUILD_DIR)/emconfig.json
 else ifeq ($(TARGET),hw)
@@ -441,7 +438,7 @@ RUN_ENV += export XRT_INI_PATH=$(PWD)/xrt.ini
 
 run: xclbin lib host $(EMU_CONFIG)
 	$(RUN_ENV);  
-ifeq ($(TARGET), $(filter $(TARGET), sw_emu hw_emu))
+ifeq ($(TARGET), $(filter $(TARGET), hw_emu))
 	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(XCLBIN_FILE)
 else 
 	./run.sh $(EXE_FILE) $(XFLIB_DIR) $(XCLBIN_DIR)

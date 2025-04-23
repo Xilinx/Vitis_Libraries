@@ -62,7 +62,7 @@ Emulation Flows
 
 ::
 
-     make run TARGET=<sw_emu/hw_emu> PLATFORM=xilinx_u200_xdma_201830_2
+     make run TARGET=hw_emu PLATFORM=xilinx_u200_xdma_201830_2
      
     NOTE: This command compiles for the targeted emulation mode and executes the application.
 

@@ -47,8 +47,7 @@
             "symbols": [
                 "GZIP_MULTICORE_COMPRESS",
                 "GZIP_MODE"
-            ],
-            "options": "-std=c++1y"
+            ]
         },
         "linker": {
             "libraries": [
@@ -90,19 +89,16 @@
                 "max_memory_MB": {
                     "vitis_hw_build": 40960,
                     "vitis_hw_emu": 40960,
-                    "vitis_sw_emu": 10240,
                     "vitis_hw_run": 10240
                 },
                 "max_time_min": {
                     "vitis_hw_build": 470,
                     "vitis_hw_emu": 600,
-                    "vitis_sw_emu": 25,
                     "vitis_hw_run": 10
                 }
             }
         ],
         "targets": [
-            "vitis_sw_emu",
             "vitis_hw_emu",
             "vitis_hw"
         ],

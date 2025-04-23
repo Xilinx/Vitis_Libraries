@@ -18,7 +18,7 @@ do
                 make run CSIM=1 XPART=xcu200
                 make cleanall
             else
-                make run TARGET=sw_emu  
+                make run TARGET=hw_emu  
                 make cleanall
             fi
             echo "$d"

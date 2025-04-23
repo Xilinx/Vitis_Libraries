@@ -2262,10 +2262,7 @@ cl::Buffer* memoryManager::getBuffer(cl_mem_flags flag, size_t size, uint8_t* ho
     OCL_CHECK(err, clBuffer = new cl::Buffer(*(this->mContext), CL_MEM_USE_HOST_PTR | flag, size, host_ptr, &err));
     return clBuffer;
 #else
-    if (is_sw_emulation()) { // Software Emulation doesnt work with random bank
-        OCL_CHECK(err, clBuffer = new cl::Buffer(*(this->mContext), CL_MEM_USE_HOST_PTR | flag, size, host_ptr, &err));
-        return clBuffer;
-    } else { // HW_EMU and HW flows works with random HBM selection
+    if (is_hw_emulation()) { // HW_EMU and HW flows works with random HBM selection
         cl_mem_ext_ptr_t ext;
         ext.obj = host_ptr;
         ext.param = 0;

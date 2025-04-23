@@ -26,7 +26,7 @@ Build
 
 Emulation:
 
-``make run TARGET=<sw_emu/hw_emu> PLATFORM=< absolute path to u50 xpfm >``
+``make run TARGET=hw_emu PLATFORM=< absolute path to u50 xpfm >``
 
 Hardware:
 

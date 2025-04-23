@@ -4,14 +4,7 @@ LIB_PROJ_ROOT=$2
 XCLBIN_FILE=$3
 echo "XCL_MODE=${XCL_EMULATION_MODE}"
 export XILINX_LIBZ_XCLBIN=$XCLBIN_FILE
-if [ "${XCL_EMULATION_MODE}" == "sw_emu" ]; 
-then
-    echo -e "\n\n-----------Supported Options-----------\n"
-    cmd1="$EXE_FILE -h"
-    echo $cmd1
-    $cmd1
-fi
-if [ "${XCL_EMULATION_MODE}" != "hw_emu" ] && [ "${XCL_EMULATION_MODE}" != "sw_emu" ];  
+if [ "${XCL_EMULATION_MODE}" != "hw_emu" ] ;  
 then
     cp $LIB_PROJ_ROOT/common/data/sample.txt sample_run.txt
     cp $LIB_PROJ_ROOT/common/data/test.list test.list

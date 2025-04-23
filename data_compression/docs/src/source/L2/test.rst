@@ -49,12 +49,10 @@ Execute the following commands to compile and test run this example:
 
 .. code-block:: bash
       
-   $ make run TARGET=sw_emu
+   $ make run TARGET=hw_emu
 
 Variable ``TARGET`` can take the following values:
 
-  - **sw_emu**: Software emulation.
-  
   - **hw_emu**: Hardware emulation.
   
   - **hw** : Run on actual hardware.
@@ -63,7 +61,7 @@ By default, the target device is set as AMD Alveo™ U200. To target a different
 
 .. code-block:: bash
 
-    make run TARGET=sw_emu PLATFORM=<new_device.xpfm>
+    make run TARGET=hw_emu PLATFORM=<new_device.xpfm>
 
 .. note::
    Build instructions explained in this section are common for all the applications. The generated executable names might differ.

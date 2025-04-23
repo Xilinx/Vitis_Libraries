@@ -126,14 +126,13 @@ Commands to Run L2 and L3 Cases
 
     cd L2/tests/    
     # build and run one of the following using U250 platform
-    make run TARGET=sw_emu PLATFORM=/path/to/xilinx_u250_gen3x16_xdma_4_1_202210_1/
+    make run TARGET=hw_emu PLATFORM=/path/to/xilinx_u250_gen3x16_xdma_4_1_202210_1/
     
     # delete generated files
     make cleanall
 
 Here, ``TARGET`` decides the FPGA binary type.
 
-* ``sw_emu`` is for software emulation.
 * ``hw_emu`` is for hardware emulation.
 * ``hw`` is for deployment on physical card (compilation to hardware binary often takes hours).
 

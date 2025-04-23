@@ -154,7 +154,6 @@ std::vector<cl::Device> get_devices(const std::string& vendor_name);
 std::vector<unsigned char> read_binary_file(const std::string& xclbin_file_name);
 bool is_emulation();
 bool is_hw_emulation();
-bool is_sw_emulation();
 bool is_xpr_device(const char* device_name);
 class Stream {
    public:

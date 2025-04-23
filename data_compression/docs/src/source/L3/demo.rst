@@ -38,12 +38,10 @@ Execute the following command to compile and test run this application:
 
 .. code-block:: bash
    
-   $ make run TARGET=sw_emu
+   $ make run TARGET=hw_emu
 
 Variable ``TARGET`` can take the following values:
 
-	- **sw_emu**: Software emulation.
-	
 	- **hw_emu**: Hardware emulation.
 	
 	- **hw**: Run on actual hardware.
