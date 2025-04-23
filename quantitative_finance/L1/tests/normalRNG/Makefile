@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -166,12 +166,16 @@ with open('$(CONFIG_FILE)', 'w') as f:
 endef
 export CONFIG_GEN_PY
 
-VITIS_PYTHON3 = LD_LIBRARY_PATH=$(XILINX_VITIS)/tps/lnx64/python-3.8.3/lib $(XILINX_VITIS)/tps/lnx64/python-3.8.3/bin/python3
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
 
 $(CONFIG_FILE): $(CONFIG_TMPL)
 	@echo "$${CONFIG_GEN_PY}" | (${VITIS_PYTHON3})
+
+data:
+	make -C ${XF_PROJ_ROOT}/ext/dcmt
 	
-all: check_vivado check_part $(CONFIG_FILE)
+all: check_vivado check_part data $(CONFIG_FILE)
 ifneq ($(TARGET_REL), csim)
 	v++ -c --mode hls --config $(CONFIG_FILE) --work_dir $(WORK_DIR) --part $(XPART)
 endif

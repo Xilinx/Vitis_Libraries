@@ -92,7 +92,7 @@ al_vec<unsigned> getFpgaSeeds() {
 /**
  * @brief Main entry point to test
  *
- * This is a command-line application to test the HJM kernel. It supports software and hardware emulation as well as
+ * This is a command-line application to test the HJM kernel. It supports hardware emulation as well as
  * running on an Alveo target.
  *
  * Usage: ./hjm_test ./xclbin/<kernel_name> <historical_data_csv> [<sim_years> <no_paths>]

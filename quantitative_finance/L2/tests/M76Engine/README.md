@@ -1,5 +1,5 @@
 ## Merton Jump Diffusion Call Demo
-This is a demonstration of the Merton Jump Diffusion solver using the Vitis environment.  It supports software and hardware emulation as well as running the hardware accelerator on supported Alveo cards.
+This is a demonstration of the Merton Jump Diffusion solver using the Vitis environment.  It supports hardware emulation as well as running the hardware accelerator on supported Alveo cards.
 
 The demo runs a test file containing test cases. The test case has the format:
 
@@ -44,9 +44,6 @@ To build a 'double' FPGA, edit Makefile and edit DT=double
 
             make all TARGET=hw PLATFORM=xilinx_u250_xdma_201830_1
                 Generates the m76_demo application and the FPGA xclbin file to run on a xilinx_u250_xdma_201830_1 card
-
-            make all TARGET=sw_emu
-                Generates the m76_demo application to run a sofware simulation of the FPGA
 
 ## Running the demo
 ### Example 1:

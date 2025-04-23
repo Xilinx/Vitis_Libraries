@@ -18,7 +18,7 @@ Benchmark of MCEuropeanEngine
 
 Overview
 ========
-This is a benchmark of MC (Monte-Carlo) European Engine using the AMD Vitis |trade| environment to compare with QuantLib.  It supports software and hardware emulation as well as running the hardware accelerator on the AMD Alveo |trade| U250.
+This is a benchmark of MC (Monte-Carlo) European Engine using the AMD Vitis |trade| environment to compare with QuantLib.  It supports hardware emulation as well as running the hardware accelerator on the AMD Alveo |trade| U250.
 
 This example resides in ``L2/benchmarks/MCEuropeanEngine`` directory. The tutorial provides a step-by-step guide that covers commands for build and running kernel.
 
@@ -61,7 +61,7 @@ Input Arguments:
           -xclbin     MCEuropeanEngine binary;
           -rep        repeat number; 
 
-.. Note:: Default num_rep(repeat number) is set in host code. For sw_emu, num_rep is cu_number*3; for hw_emu, num_rep is cu_number; for hw, the default value is 1, user could reset num_rep by paramter ``rep``. As this case is a 4CU design, cu_number is 4.   
+.. Note:: Default num_rep(repeat number) is set in host code. For hw_emu, num_rep is cu_number; for hw, the default value is 1, user could reset num_rep by paramter ``rep``. As this case is a 4CU design, cu_number is 4.   
 
 * **Example output(Step 4)** 
 

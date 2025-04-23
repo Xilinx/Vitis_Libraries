@@ -3,7 +3,7 @@
 
 Overview
 ========
-This is a benchmark of Singular Value Decomposition (SVD).  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
+This is a benchmark of Singular Value Decomposition (SVD).  It supports hardware emulation as well as running the hardware accelerator on the Alveo U250.
 
 This example resides in ``L1/benchmarks/SVD`` directory. The tutorial provides a step-by-step guide that covers commands for build and runging kernel.
 

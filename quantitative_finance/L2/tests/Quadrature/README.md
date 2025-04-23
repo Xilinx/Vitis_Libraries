@@ -1,5 +1,5 @@
 ## Numerical Integration Test
-This is a demonstration of using the Numerical Integration library to solve an integration using the Vitis environment.  It supports software and hardware emulation as well as running the hardware accelerator on supported Alveo cards.
+This is a demonstration of using the Numerical Integration library to solve an integration using the Vitis environment.  It supports hardware emulation as well as running the hardware accelerator on supported Alveo cards.
 
 It uses pre-canned test data to integrate a polynomial between various limits. The host uses the exact integration formula and the host generated results are compared with the kernel generated results. The kernel is run three times; once using the Adaptive Trapezoidal rule, once using the Adaptive Simpson's rule and one using the Romberg rule.
 
@@ -20,10 +20,10 @@ Setup the build environment using the Vitis and XRT scripts:
 ### Step 2 :
 Call the Makefile. For example:
 
-	make check TARGET=sw_emu PLATFORMS=xilinx_u200_xdma_201830_2
+	make check TARGET=hw_emu PLATFORMS=xilinx_u200_xdma_201830_2
         
 
-The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively).  
+The Makefile supports hardware emulation and hardware targets ('hw_emu' and 'hw', respectively).  
 
 
 

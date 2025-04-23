@@ -143,7 +143,7 @@ int main(int argc, const char* argv[]) {
 
         // testcase and sv grid input files
         ifstream inputFileTestCases;
-        if (mode == "sw_emu" || mode == "hw_emu") {
+        if (mode == "hw_emu") {
             inputFileTestCases.open(inputTestCasesFileEmulationName);
             tolerance = 1.25; // emulation uses less tree depth => less accuracy
         } else {

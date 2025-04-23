@@ -1,5 +1,5 @@
 ## Heston Closed Form Call Demo
-This is a demonstration of the Heston Closed Form solver using the Vitis environment.  It supports software and hardware emulation as well as running the hardware accelerator on supported Alveo cards.
+This is a demonstration of the Heston Closed Form solver using the Vitis environment.  It supports hardware emulation as well as running the hardware accelerator on supported Alveo cards.
 
 There are 2 demos described in more detail below:
 - Run a series of tests and compare the results with pre-computed Heston Closed Form QuantLib results.
@@ -31,9 +31,6 @@ To build a 'double' FPGA, edit Makefile and edit DT=double
 
             make all TARGET=hw PLATFORM=xilinx_u200_xdma_201830_1
                 Generates the hcf_host application and the FPGA xclbin file to run on a xilinx_u200_xdma_201830_2 
-            make all TARGET=sw_emu PLATFORM=xilinx_u200_xdma_201830_1
-                Generates the hcf_host application to run a sofware simulation of the FPGA
-
 
 ## Running the demo
 ./compare_with_ql.sh data/sub_grid/test_data_11_1.txt 

@@ -1,5 +1,5 @@
 ## Portfolio Optimisation L2 Test 
-This is a test of the Portfolio Optimisation model using the Vitis environment.  It supports software and hardware emulation as well as running the hardware accelerator on supported Alveo cards.
+This is a test of the Portfolio Optimisation model using the Vitis environment.  It supports hardware emulation as well as running the hardware accelerator on supported Alveo cards.
 
 It uses a fixed set of test data with expected values as calculated by the C Model the kernel was developed from. The test will take the input data and calculate asset weights, portfolio expected return and portfolio variance for 4 different types of portfolio; the Global Miminum Variance Portfolio, an Efficient Portfolio of risky assets for a given target return, the Tangency Portfolio for a given risk free rate and an Efficient Portfolio composed of risky assets and a risk free asset for given target return and risk free rate.
 
@@ -20,15 +20,13 @@ Setup the build environment using the Vitis and XRT scripts:
 ### Step 2 :
 Call the Makefile. For example:
 
-	make check TARGET=sw_emu PLATFORMS=xilinx_u200_xdma_201830_2
-
 	make check TARGET=hw_emu PLATFORMS=xilinx_u200_xdma_201830_2
 
 	make all TARGET=hw PLATFORMS=xilinx_u200_xdma_201830_2
         
 	make run TARGET=hw PLATFORMS=xilinx_u200_xdma_201830_2
 
-The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively).
+The Makefile supports hardware emulation and hardware targets ('hw_emu' and 'hw', respectively).
 
 
 

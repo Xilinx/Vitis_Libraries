@@ -1,5 +1,5 @@
 ## Binomial Tree  Demonstration
-This is a demonstration of the BinomialTree solver using the Vitis environment.  It supports software and hardware emulation as well as running the hardware accelerator on supported Alveo cards.
+This is a demonstration of the BinomialTree solver using the Vitis environment.  It supports hardware emulation as well as running the hardware accelerator on supported Alveo cards.
 
 It uses a fixed set of test data produced from quantlib (Black Scholes for European & Binomial Leisen Reimer for American) stored in the data directory and the output from the host/kernel. The demo will take the input data, compute a number of options using the kernel and then compare this to the reference data.  The largest difference between the reference data and the kernel computed grid will be displayed as well as the root mean squared.
 
@@ -20,14 +20,12 @@ Setup the build environment using the Vitis and XRT scripts:
 ### Step 2 :
 Call the Makefile. For example:
 
-	make run TARGET=sw_emu PLATFORMS=xilinx_u200_xdma_201830_2 DT=double PE=1
-
 	make run TARGET=hw_emu PLATFORMS=xilinx_u200_xdma_201830_2 DT=double PE=1
 
 	make all TARGET=hw PLATFORMS=xilinx_u200_xdma_201830_2 DT=double PE=1
         
 
-The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively).  Additionally, several parameters are used to configure the host and/or kernel build. Most have restricted acceptable values and several must be consistent with others for the build to succeed.
+The Makefile supports hardware emulation and hardware targets ('hw_emu' and 'hw', respectively).  Additionally, several parameters are used to configure the host and/or kernel build. Most have restricted acceptable values and several must be consistent with others for the build to succeed.
 
 | Makefile parameter | Default | Kernel/Host | Decription                                   | Valid Values                                |
 |--------------------|---------|-------------|----------------------------------------------|---------------------------------------------|

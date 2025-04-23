@@ -135,9 +135,6 @@ int main(int argc, const char* argv[]) {
         num_rep = cu_number;
         requiredSamples = 1024 * MCM_NM;
         max_diff = 0.06;
-    } else if (mode_emu.compare("sw_emu") == 0) {
-        loop_nm = 1;
-        num_rep = cu_number * 3;
     }
 
     std::cout << "loop_nm = " << loop_nm << std::endl;

@@ -18,7 +18,7 @@ Benchmark of TreeEngine
 
 Overview
 ========
-This is a serial of benchmark based on tree structure using the AMD Vitis |trade| environment to compare with QuantLib, where the Instrument supports multiple instruments, including swaption, swap, capfloor, callablebond, the Rate Model supports multiple models, including Vasicek, HullWhite, BlackKarasinski, CoxIngersollRoss, ExtendedCoxIngersollRoss, Two-additive-factor gaussian. It supports software and hardware emulation as well as running the hardware accelerator on the AMD Alveo |trade| U250.
+This is a serial of benchmark based on tree structure using the AMD Vitis |trade| environment to compare with QuantLib, where the Instrument supports multiple instruments, including swaption, swap, capfloor, callablebond, the Rate Model supports multiple models, including Vasicek, HullWhite, BlackKarasinski, CoxIngersollRoss, ExtendedCoxIngersollRoss, Two-additive-factor gaussian. It supports hardware emulation as well as running the hardware accelerator on the AMD Alveo |trade| U250.
 
 These examples reside in ``L2/benchmarks/TreeEngine`` directory. Take `TreeSwaptionEngineHWMOdel` as example, the tutorial below provides a step-by-step guide that covers commands for build and running kernel.
 

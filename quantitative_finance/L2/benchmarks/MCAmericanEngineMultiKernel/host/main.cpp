@@ -118,8 +118,6 @@ int main(int argc, const char* argv[]) {
         timeSteps = UN_K2_STEP;
         golden_output = 4.18;
         loop_nm = 1;
-    } else if (mode.compare("sw_emu") == 0) {
-        loop_nm = 1;
     }
 
     std::cout << "loop_nm: " << loop_nm << std::endl;

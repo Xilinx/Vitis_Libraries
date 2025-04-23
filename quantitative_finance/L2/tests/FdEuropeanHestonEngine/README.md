@@ -1,5 +1,5 @@
 ## Heston Equation Finite Difference Demonstration
-This is a demonstration of the Heston Finite Difference solver using the Vitis environment.  It supports software and hardware emulation as well as running on a Xilinx Accelerator Card.
+This is a demonstration of the Heston Finite Difference solver using the Vitis environment.  It supports hardware emulation as well as running on a Xilinx Accelerator Card.
 
 It uses a fixed set of test data produced via a Python model and a corresponding reference output, all stored in .csv format in the /data subdirectory.  The demo will take the input data, compute the pricing grid based using the kernel and then compare this to the reference data from the Python model.  The largest difference between the reference data and the kernel computed grid will be displayed.
 
@@ -19,13 +19,13 @@ Setup the build environment using the Vitis and XRT scripts:
             source /opt/xilinx/xrt/setup.sh
 
 ### Step 2 :
-Call the Makefile passing in the intended target and device. The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively). For example to build and run the test application:
+Call the Makefile passing in the intended target and device. The Makefile supports hardware emulation and hardware targets ('hw_emu' and 'hw', respectively). For example to build and run the test application:
 
-            make check TARGET=sw_emu PLATFORM=xilinx_u250_xdma_201830_2
+            make check TARGET=hw_emu PLATFORM=xilinx_u250_xdma_201830_2
 
 Alternatively use 'all' to build the output products without running the application:
 
-            make all TARGET=sw_emu PLATFORM=xilinx_u250_xdma_201830_2
+            make all TARGET=hw_emu PLATFORM=xilinx_u250_xdma_201830_2
 
 Several parameters can be passed to the Makefile in order to modify the configuration of the host and/or kernel. Most have restricted acceptable values and several must be consistent with others for the build to succeed.
 
@@ -39,14 +39,14 @@ Several parameters can be passed to the Makefile in order to modify the configur
 |FD_M2               | 64      | Host        | Matrix dimension in V direction              | Must be power-of-two                        |
 |FD_N                | 200     | Host        | Number of iterations of FD engine            |                                             |
 
-In the case of the software and hardware emulations, the Makefile will build and launch the host code as part of the run.  These can be rerun manually using the following pattern:
+In the case of the hardware emulations, the Makefile will build and launch the host code as part of the run.  These can be rerun manually using the following pattern:
 
             <host application> <xclbin> <data location> <M1> <M2> <N>
 
-For example example to run a prebuilt software emulation output (assuming the standard build directories):
+For example example to run a prebuilt hardware emulation output (assuming the standard build directories):
 
-            export XCL_EMULATION_MODE=sw_emu
-            ./bin_xilinx_u250_xdma_201830_2/fd_test.exe ./xclbin_xilinx_u250_xdma_201830_2_sw_emu/fd_heston_kernel_u250_m8192_double.xclbin ./data 128 64 200
+            export XCL_EMULATION_MODE=hw_emu
+            ./bin_xilinx_u250_xdma_201830_2/fd_test.exe ./xclbin_xilinx_u250_xdma_201830_2_hw_emu/fd_heston_kernel_u250_m8192_double.xclbin ./data 128 64 200
 
 Assuming an Alveo U250 card with the XRT configured, the hardware build is run as follows:
 
@@ -54,7 +54,7 @@ Assuming an Alveo U250 card with the XRT configured, the hardware build is run a
             ./bin_xilinx_u250_xdma_201830_2/fd_test.exe ./xclbin_xilinx_u250_xdma_201830_2_hw/fd_heston_kernel_u250_m8192_double.xclbin ./data 128 64 200
 
 ## Example Output
-The testbench will load precomputed data, process it via the FD engine and compare to the expected result, displaying the worst case difference. For example, the following is from the software emulation:
+The testbench will load precomputed data, process it via the FD engine and compare to the expected result, displaying the worst case difference. For example, the following is from the hardware emulation:
 
             Loading precomputed data from Python reference model...
             Opened ./data/ref_128x64_N200/A.csv OK
@@ -70,8 +70,8 @@ The testbench will load precomputed data, process it via the FD engine and compa
             Opened ./data/ref_128x64_N200/ref.csv OK
             Found Platform
             Platform Name: Xilinx
-            INFO: Importing ./xclbin_xilinx_u250_xdma_201830_2_sw_emu/fd_heston_kernel_u250_m8192_double.xclbin
-            Loading: './xclbin_xilinx_u250_xdma_201830_2_sw_emu/fd_heston_kernel_u250_m8192_double.xclbin'
+            INFO: Importing ./xclbin_xilinx_u250_xdma_201830_2_hw_emu/fd_heston_kernel_u250_m8192_double.xclbin
+            Loading: './xclbin_xilinx_u250_xdma_201830_2_hw_emu/fd_heston_kernel_u250_m8192_double.xclbin'
             Maximum difference is 5.57066e-12, found at array index 2301
 
 There will be a slight difference of the order 10^-12 for a double precision engine.  This is due to the ordering of floating point operations between the hardware implementation and the Python based reference model.

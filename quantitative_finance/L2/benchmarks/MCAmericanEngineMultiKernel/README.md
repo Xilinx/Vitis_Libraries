@@ -3,7 +3,7 @@
 
 Overview
 ========
-This is a benchmark of MC (Monte-Carlo) European Engine using the Xilinx Vitis environment to compare with QuantLib.  It supports software and hardware emulation as well as running the hardware accelerator on the Alveo U250.
+This is a benchmark of MC (Monte-Carlo) European Engine using the Xilinx Vitis environment to compare with QuantLib.  It supports hardware emulation as well as running the hardware accelerator on the Alveo U250.
 
 This example resides in ``L2/benchmarks/MCAmericanEngineMultiKernel`` directory. The tutorial provides a step-by-step guide that covers commands for build and runging kernel.
 

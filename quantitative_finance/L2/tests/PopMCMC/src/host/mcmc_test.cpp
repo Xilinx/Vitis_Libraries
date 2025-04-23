@@ -43,7 +43,7 @@
 
 /// @brief Main entry point to test
 ///
-/// This is a command-line application to test the kernel.  It supports software and hardware emulation as well as
+/// This is a command-line application to test the kernel.  It supports hardware emulation as well as
 /// running on an Alveo target.
 ///
 /// Usage: ./mcmc_test ./xclbin/<kernel_name> <number of prices>

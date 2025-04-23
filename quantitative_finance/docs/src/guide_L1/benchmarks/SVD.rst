@@ -18,7 +18,7 @@ Benchmark of Singular Value Decomposition (SVD)
 
 Overview
 ========
-This is a benchmark of Singular Value Decomposition.  It supports software and hardware emulation as well as running the hardware accelerator on the AMD Alveo |trade| U250.
+This is a benchmark of Singular Value Decomposition.  It supports hardware emulation as well as running the hardware accelerator on the AMD Alveo |trade| U250.
 
 This example resides in ``L1/benchmarks/SVD`` directory. The tutorial provides a step-by-step guide that covers commands for build and running kernel.
 

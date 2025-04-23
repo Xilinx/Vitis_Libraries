@@ -64,7 +64,6 @@ constexpr size_t mylog2(size_t n) {
     return ((n < 2) ? 0 : 1 + mylog2(n / 2));
 }
 
-// Extern C required for sw_emu
 extern "C" {
 
 void fd_kernel(ap_uint<512>* A,

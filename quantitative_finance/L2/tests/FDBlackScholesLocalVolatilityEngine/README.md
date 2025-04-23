@@ -1,5 +1,5 @@
 ## Heston Equation Finite Difference Demonstration
-This is a demonstration of a 1D Local Volatility Finite Difference solver using the Vitis environment.  It supports software and hardware emulation as well as running on a Xilinx Accelerator Card.
+This is a demonstration of a 1D Local Volatility Finite Difference solver using the Vitis environment.  It supports hardware emulation as well as running on a Xilinx Accelerator Card.
 
 It uses a fixed set of test data produced via a Python model and a corresponding reference output, all stored in .csv format in the /data subdirectory.  The demo will take the input data, compute the pricing grid based using the kernel and then compare this to the reference data from the Python model.  The largest difference between the reference data and the kernel computed grid will be displayed.
 
@@ -19,13 +19,13 @@ Setup the build environment using the Vitis and XRT scripts:
             source /opt/xilinx/xrt/setup.sh
 
 ### Step 2 :
-Call the Makefile passing in the intended target and device. The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively). For example to build and run the test application:
+Call the Makefile passing in the intended target and device. The Makefile supports hardware emulation and hardware targets ('hw_emu' and 'hw', respectively). For example to build and run the test application:
 
-            make run TARGET=sw_emu PLATFORM=xilinx_u200_xdma_201830_2
+            make run TARGET=hw_emu PLATFORM=xilinx_u200_xdma_201830_2
 
 Alternatively use 'all' to build the output products without running the application:
 
-            make all TARGET=sw_emu PLATFORM=xilinx_u200_xdma_201830_2
+            make all TARGET=hw_emu PLATFORM=xilinx_u200_xdma_201830_2
 
 Several parameters can be passed to the Makefile in order to modify the configuration of the host and/or kernel. Most have restricted acceptable values and several must be consistent with others for the build to succeed.
 
@@ -38,13 +38,13 @@ Several parameters can be passed to the Makefile in order to modify the configur
 |FD_NUM_PCR          | 2       | Kernel      | Number of units used by PCR solver             | Must be power of two                        |
 |FD_LOG2_N_SIZE      | 8       | Kernel      | log2(FD_N)                                     | Must be consistent with FD_N_SIZE           |
 
-In the case of the software and hardware emulations, the Makefile will build and launch the host code as part of the run.  These can be rerun manually using the following pattern:
+In the case of the hardware emulations, the Makefile will build and launch the host code as part of the run.  These can be rerun manually using the following pattern:
 
             <host application> <xclbin> <testcase name> 
 
-For example example to run a prebuilt software emulation output (assuming the standard build directories):
+For example example to run a prebuilt hardware emulation output (assuming the standard build directories):
 
-            ./bin_xilinx_u200_xdma_201830_2/fd_bs_lv_test.exe ./xclbin_xilinx_u200_xdma_201830_2_sw_emu/fd_bs_lv_kernel_N128_M256.xclbin case0
+            ./bin_xilinx_u200_xdma_201830_2/fd_bs_lv_test.exe ./xclbin_xilinx_u200_xdma_201830_2_hw_emu/fd_bs_lv_kernel_N128_M256.xclbin case0
 
 The data for a particular test is stored in ./data/<casename> in .csv format.  A parameters.csv file stores the information about the test.  For example, the case0 run above results in the following output:
 
@@ -64,8 +64,8 @@ The data for a particular test is stored in ./data/<casename> in .csv format.  A
             Opened ./data/case0/reference.csv OK
             Found Platform
             Platform Name: Xilinx
-            INFO: Importing ./xclbin_xilinx_u200_xdma_201830_2_sw_emu/fd_bs_lv_kernel_N128_M256.xclbin
-            Loading: './xclbin_xilinx_u200_xdma_201830_2_sw_emu/fd_bs_lv_kernel_N128_M256.xclbin'
+            INFO: Importing ./xclbin_xilinx_u200_xdma_201830_2_hw_emu/fd_bs_lv_kernel_N128_M256.xclbin
+            Loading: './xclbin_xilinx_u200_xdma_201830_2_hw_emu/fd_bs_lv_kernel_N128_M256.xclbin'
             Launching kernel...
               Duration returned by profile API is 171.97 ms **** 
             Maximum difference is -0.00238037, found at array index 120

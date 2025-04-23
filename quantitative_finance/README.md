@@ -164,17 +164,15 @@ As well as verifying functional correctness, the reports generated from this flo
 
 L2 provides the pricing engine APIs presented as kernels.
 
-The available flow for L2 based around the SDAccel tool facilitates the generation and packaging of pricing engine kernels along with the required host application for configuration and control. In addition to supporting FPGA platform targets, emulation options are available for preliminary investigations or where dedicated access to a hardware platform may not be available. Two emulation options are available, software emulation performs a high level simulation of the pricing engine while hardware emulation performs a cycle-accurate simulation of the generated RTL for the kernel. This flow is makefile driven from the console where the target is selected as a command line parameter as in the examples below:
+The available flow for L2 based around the SDAccel tool facilitates the generation and packaging of pricing engine kernels along with the required host application for configuration and control. In addition to supporting FPGA platform targets, emulation options are available for preliminary investigations or where dedicated access to a hardware platform may not be available. hardware emulation is available, hardware emulation performs a cycle-accurate simulation of the generated RTL for the kernel. This flow is makefile driven from the console where the target is selected as a command line parameter as in the examples below:
 
 ```console
 $ cd L2/tests/GarmanKohlhagenEngine
 
 # build and run one of the following using U250 platform
-#  * software emulation
 #  * hardware emulation
 #  * actual deployment on physical platform
 
-$ make run TARGET=sw_emu PLATFORM=u250_xdma_201830_1
 $ make run TARGET=hw_emu PLATFORM=u250_xdma_201830_1
 $ make run TARET=hw PLATFORM=u250_xdma_201830_1
 

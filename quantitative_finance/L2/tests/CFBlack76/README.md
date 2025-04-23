@@ -1,5 +1,5 @@
 ## Black76 Closed Form Demonstration
-This is a demonstration of the Black76 (B76) closed form solver built using the Vitis environment.  It supports software and hardware emulation as well as running the hardware accelerator on supported Alveo cards.
+This is a demonstration of the Black76 (B76) closed form solver built using the Vitis environment.  It supports hardware emulation as well as running the hardware accelerator on supported Alveo cards.
 
 The demonstration generates a configurable number of randomized input parameter sets (one input parameter set consists of the underlying, volatility, risk free rate, time-to-maturity and strike price), passes them to the kernel and retrieves the pricing and associated Greeks.  These are then compared to a full precision model and the worst case difference between the kernel and model are displayed.
 
@@ -19,26 +19,21 @@ Setup the build environment using the Vitis and XRT scripts:
             source /opt/xilinx/xrt/setup.sh
 
 ### Step 2 :
-Call the Makefile passing in the intended target and device. The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively). For example to build and run the test application:
+Call the Makefile passing in the intended target and device. The Makefile supports hardware emulation and hardware targets ('hw_emu' and 'hw', respectively). For example to build and run the test application:
 
-            make check TARGET=sw_emu PLATFORM=xilinx_u250_xdma_201830_2
+            make check TARGET=hw_emu PLATFORM=xilinx_u250_xdma_201830_2
 
 Alternatively use 'all' to build the output products without running the application:
 
-            make all TARGET=sw_emu PLATFORM=xilinx_u250_xdma_201830_2
+            make all TARGET=hw_emu PLATFORM=xilinx_u250_xdma_201830_2
 
 For all Makefile targets, the host application and xclbin are delivered to named folders depending on the target and part selected.  For example, the command above will produce:
 
             ./bin_xilinx_u250_xdma_201830_2/b76_test.exe
-            ./xclbin_xilinx_u250_xdma_201830_2_sw_emu/b76_kernel.xclbin
+            ./xclbin_xilinx_u250_xdma_201830_2_hw_emu/b76_kernel.xclbin
 
 These output products can be used directly from the command line.  The application takes the xclbin as the first argument along followed by the number of test parameters to generate.  Due the parallel nature of the processing, the kernel processes input sets in multiples of 16 so the host will round up the number of parameters if required.
 
-
-The software emulation can be run as follows:
-
-            export XCL_EMULATION_MODE=sw_emu
-            ./bin_xilinx_u250_xdma_201830_2/b76_test.exe ./xclbin_xilinx_u250_xdma_201830_2_sw_emu/b76_kernel.xclbin 16384
 
 The hardware emulation can be run in a similar way, but a smaller number of parameters should be used as an RTL simulation is used under-the-hood:
 

@@ -106,12 +106,6 @@ int main(int argc, const char* argv[]) {
         maxk0 = 16;
         maxk1 = 16;
         maxk2 = 16;
-    } else if (mode_emu == "sw_emu") {
-        // limit test vectors for software emulation
-        testCases.resize(5);
-        maxk0 = 256;
-        maxk1 = 256;
-        maxk2 = 256;
     }
 
     // -------------setup k0 params---------------

@@ -34,7 +34,7 @@ int main() {
     TEST_DT inrhs[P_SIZE];
     TEST_DT sol[P_SIZE];
     unsigned int N = P_SIZE;
-    bool fail;
+    bool fail = false;
     /*
     * Generate diagonals
     */

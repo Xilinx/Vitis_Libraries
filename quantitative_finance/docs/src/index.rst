@@ -412,7 +412,7 @@ L2
 
 L2 provides the pricing engine APIs presented as kernels.
 
-The available flow for L2 based around the Vitis tool facilitates the generation and packaging of pricing engine kernels along with the required host application for configuration and control. In addition to supporting FPGA platform targets, emulation options are available for preliminary investigations or where dedicated access to a hardware platform may not be available. Two emulation options are available, software emulation performs a high level simulation of the pricing engine while hardware emulation performs a cycle-accurate simulation of the generated RTL for the kernel. This flow is makefile driven from the console where the target is selected as a command line parameter as in the examples below:
+The available flow for L2 based around the Vitis tool facilitates the generation and packaging of pricing engine kernels along with the required host application for configuration and control. In addition to supporting FPGA platform targets, emulation options are available for preliminary investigations or where dedicated access to a hardware platform may not be available. Hardware emulation options is available, hardware emulation performs a cycle-accurate simulation of the generated RTL for the kernel. This flow is makefile driven from the console where the target is selected as a command line parameter as in the examples below:
 
 .. code-block:: bash
 
@@ -420,8 +420,6 @@ The available flow for L2 based around the Vitis tool facilitates the generation
 
     # build and run one of the following using U250 platform
 
-    #  * software emulation
-    make run TARGET=sw_emu PLATFORM=u250_xdma_201830_1
     #  * hardware emulation
     make run TARGET=hw_emu PLATFORM=u250_xdma_201830_1
     #  * actual deployment on physical platform
