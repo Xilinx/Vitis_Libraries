@@ -32,11 +32,6 @@
         {
             "cmd_args": "-xclbin plane_wave.xclbin -data data/",
             "name": "generic launch for all flows"
-        },
-        {
-            "cmd_args": "-xclbin BUILD/plane_wave.xclbin -data data/",
-            "target": "sw_emu",
-            "name": "sw_emu launch"
         }
     ],
     "host": {
@@ -279,7 +274,6 @@
         "targets": [
             "vitis_aie_sim",
             "vitis_aie_x86sim",
-            "vitis_sw_emu",
             "vitis_hw_emu",
             "vitis_hw_build"
         ],

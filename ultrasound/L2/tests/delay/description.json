@@ -29,11 +29,6 @@
         {
             "cmd_args": "-xclbin delay.xclbin -data data/",
             "name": "generic launch for all flows"
-        },
-        {
-            "cmd_args": "-xclbin BUILD/delay.xclbin -data data/",
-            "target": "sw_emu",
-            "name": "sw_emu launch"
         }
     ],
     "host": {
@@ -138,7 +133,6 @@
                 "max_memory_MB": {
                     "vitis_aie_sim": 32768,
                     "vitis_aie_x86sim": 32768,
-                    "vitis_sw_emu": 32768,
                     "vitis_hw_emu": 32768,
                     "vitis_hw_build": 40960
                 },
@@ -148,7 +142,6 @@
         "targets": [
             "vitis_aie_sim",
             "vitis_aie_x86sim",
-            "vitis_sw_emu",
             "vitis_hw_emu",
             "vitis_hw_build"
         ],

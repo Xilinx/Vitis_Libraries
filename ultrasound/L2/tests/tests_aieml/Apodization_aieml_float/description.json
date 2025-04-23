@@ -1,0 +1,155 @@
+{
+    "name": "L2 Apodization_aieml_float Test",
+    "description": "Apodization_aieml_float Test",
+    "flow": "system",
+    "platform_allowlist": [
+        "vek280"
+    ],
+    "platform_properties": {
+        "vek280": {
+            "v++": {
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                },
+                "package": {
+                    "clflags": [
+                        "--package.defer_aie_run"
+                    ]
+                }
+            }
+        }
+    },
+    "data": [
+        "PROJECT/data"
+    ],
+    "launch": [
+        {
+            "cmd_args": "-xclbin Apodization_aieml_float.xclbin -data data/",
+            "name": "generic launch for all flows"
+        }
+    ],
+    "host": {
+        "host_exe": "host.exe",
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/src/Apodization_aieml/ps/host.cpp"
+            ],
+            "includepaths": [
+                "LIB_DIR/L1/include",
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L2/src/Apodization_aieml/aiengine"
+            ],
+            "symbols": [
+                "__PS_ENABLE_AIE__",
+                "TYPE=float"
+            ]
+        }
+    },
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/",
+                "LIB_DIR/L2/include/",
+                "LIB_DIR/L2/src/Apodization_aieml/aiengine/"
+            ],
+            "symbols": [
+                "--aie.Xpreproc -DKERNEL_TYPE=float"
+            ]
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/src/Apodization_aieml/aiengine/main.cpp",
+                    "workdir": "./Work",
+                    "name": "libadf.a",
+                    "config": "aie.cfg"
+                }
+            ]
+        }
+    ],
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/src/Apodization_aieml/pl/PLApodizationDirectionIn.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=float",
+                    "name": "PLApodizationDirectionIn"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/Apodization_aieml/pl/PLApodizationDistanceIn.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=float",
+                    "name": "PLApodizationDistanceIn"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/Apodization_aieml/pl/PLApodizationFNumberIn.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=float",
+                    "name": "PLApodizationFNumberIn"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/Apodization_aieml/pl/PLApodizationImagePointsIn.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=float",
+                    "name": "PLApodizationImagePointsIn"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/Apodization_aieml/pl/PLApodizationOneIn.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=float",
+                    "name": "PLApodizationOneIn"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/Apodization_aieml/pl/PLApodizationOut.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=float",
+                    "name": "PLApodizationOut"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/Apodization_aieml/pl/PLApodizationPiIn.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=float",
+                    "name": "PLApodizationPiIn"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/Apodization_aieml/pl/PLApodizationReferenceIn.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=float",
+                    "name": "PLApodizationReferenceIn"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/Apodization_aieml/pl/PLApodizationTwoIn.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=float",
+                    "name": "PLApodizationTwoIn"
+                }
+            ],
+            "name": "Apodization_aieml_float"
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "max_memory_MB": {
+                    "vitis_aie_sim": 32768,
+                    "vitis_aie_x86sim": 32768
+                },
+                "max_time_min": 300
+            }
+        ],
+        "targets": [
+            "vitis_aie_sim",
+            "vitis_aie_x86sim"
+        ],
+        "category": "canary"
+    },
+    "gui": true
+}

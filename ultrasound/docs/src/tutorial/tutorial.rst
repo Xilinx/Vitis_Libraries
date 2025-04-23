@@ -1,5 +1,5 @@
 .. 
-  .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+  .. Copyright © 2019–2024 Advanced Micro Devices, Inc
 
 `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -44,14 +44,14 @@ Setup Environment
    #!/bin/bash
 
    # setup vitis env
-   source <Vitis_install_path>/Vitis/2023.2/settings64.sh 
-   source <XRT_install_path>/2023.2/xbb/xrt/packages/setenv.sh
+   source <Vitis_install_path>/Vitis/2024.2/settings64.sh 
+   source <XRT_install_path>/2024.2/xbb/xrt/packages/setenv.sh
    export PLATFORM_REPO_PATHS=<path_to_platforms>
 
    # set petalinux related env
-   export SYSROOT=<path_to_platforms>/sw/versal/xilinx-versal-common-v2023.2/sysroots/aarch64-xilinx-linux/
-   export ROOTFS=<path_to_platforms>/sw/versal/xilinx-versal-common-v2023.2/rootfs.ext4
-   export K_IMAGE=<path_to_platforms>/sw/versal/xilinx-versal-common-v2023.2/Image
+   export SYSROOT=<path_to_platforms>/sw/versal/xilinx-versal-common-v2024.2/sysroots/aarch64-xilinx-linux/
+   export ROOTFS=<path_to_platforms>/sw/versal/xilinx-versal-common-v2024.2/rootfs.ext4
+   export K_IMAGE=<path_to_platforms>/sw/versal/xilinx-versal-common-v2024.2/Image
 
 Download the Vitis Ultrasound Library
 --------------------------------------
@@ -92,7 +92,6 @@ Run a L2 Example
    cd L2/tests/apodization # apodization is an example case. Please change directory to any other cases in L2/test if interested.
    make run TARGET=x86sim  # run the x86sim
    make run TARGET=aiesim  # run the aiesim
-   make run TARGET=sw_emu  # run sw_emu. Build host and run software emulation
    make run TARGET=hw_emu  # run hw_emu. Build host and run hardware emulation, this step would lauch petalinux
    make all TARGET=hw      # build hw
 
@@ -304,7 +303,6 @@ Run L3 All in AIE cases
 
    #!/bin/bash
    cd L3/demos/scanline_AllinAIE  # 1. scanline_AllinAIE 2. plane_wave are example cases. Please change directory to any other cases in L3/test if interested.
-   make run TARGET=sw_emu  # run sw_emu
    make run TARGET=hw_emu  # run hw_emu
    make all TARGET=hw      # build hw
 
@@ -448,7 +446,7 @@ Example logs of scanline_AllinAIE
 5. List of the md5sum of result and the comparison result with model output.
    Only values that meet both conditions of Error judgement are considered computational errors.
    Also, the output of mult could be converted to png format use the command like 
-   "python L3/models/data2png.py L3/tests/scanline_AllinAIE/package_sw_emu/sd_card/data/xf_output_res.txt".
+   "python L3/models/data2png.py L3/tests/scanline_AllinAIE/package_hw_emu/sd_card/data/xf_output_res.txt".
 
 .. code-block:: shell 
 

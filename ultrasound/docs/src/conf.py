@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,13 +41,13 @@ sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest_b/sphinx'))
 # -- Project information -----------------------------------------------------
 
 project = 'Vitis Ultrasound Library'
-copyright = '2023, Xilinx'
+copyright = '2024, AMD'
 author = 'Xilinx'
 
 # The short X.Y version
-version = '2023.1'
+version = '2024.2'
 # The full version, including alpha/beta/rc tags
-release = 'v2023.1'
+release = 'v2024.2'
 
 # For bottom-left nav
 try:
@@ -57,7 +57,7 @@ except NameError:
 
 #html_context['display_lower_left'] = True
 html_context['current_version'] = version
-html_context['versions'] = ['2023.1']
+html_context['versions'] = ['2024.2']
 
 # -- General configuration ---------------------------------------------------
 

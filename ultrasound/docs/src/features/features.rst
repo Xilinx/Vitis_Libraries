@@ -1,5 +1,5 @@
 .. 
-   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+   .. Copyright © 2019–2024 Advanced Micro Devices, Inc
 `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _features:
@@ -43,7 +43,7 @@ For L2/L3 cases, XRT based PS host code are provided in each directory of "<path
 Support for AIE full verification flow on VCK190 platform
 -----------------------------------------------------------
 
-This library provides the detailed example for full aie design/verification flow, which contains x86sim/aiesim/sw_emu(ps_on_x86)/hw_emu/hw. The testbench support "make run TARGET=*" from basic functional verification to final hw performance test, and also contain golden file check. Users could check performance or functional correctness through each of the verification depth, in this toolbox library for vck190 based aie design.
+This library provides the detailed example for full aie design/verification flow, which contains x86sim/aiesim/hw_emu/hw. The testbench support "make run TARGET=*" from basic functional verification to final hw performance test, and also contain golden file check. Users could check performance or functional correctness through each of the verification depth, in this toolbox library for vck190 based aie design.
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:

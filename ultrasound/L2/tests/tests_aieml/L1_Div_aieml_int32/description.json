@@ -1,0 +1,60 @@
+{
+    "name": "L1 Div for int32 Test on AIEML",
+    "description": "absV Test on AIEML",
+    "flow": "aie",
+    "gui": false,
+    "platform_allowlist": [
+        "vek280"
+    ],
+    "data": [
+        "PROJECT/data"
+    ],
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/l1-libraries_aieml",
+                "./"
+            ],
+            "symbols": [
+                "--aie.Xpreproc -DKERNEL_TYPE=int"
+            ]
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR//L2/src/L1_Div_aieml/aiengine/main.cpp",
+                    "workdir": "./Work",
+                    "name": "libadf.a",
+                    "config": "aie.cfg",
+                    "files": [
+                        "LIB_DIR/L1/include/l1-libraries_aieml/div/div.cpp"
+                    ]
+                }
+            ]
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "max_memory_MB": 32768,
+                "max_time_min": {
+                    "vitis_aie_sim": 470,
+                    "vitis_aie_x86sim": 300
+                }
+            }
+        ],
+        "targets": [
+            "vitis_aie_sim",
+            "vitis_aie_x86sim"
+        ],
+        "category": "canary"
+    },
+    "aie_types": [
+        "AIE2"
+    ]
+}

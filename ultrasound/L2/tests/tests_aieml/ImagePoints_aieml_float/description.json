@@ -1,0 +1,125 @@
+{
+    "name": "L2 ImagePoints_aieml_float Test",
+    "description": "ImagePoints_aieml_float Test",
+    "flow": "system",
+    "platform_allowlist": [
+        "vek280"
+    ],
+    "platform_properties": {
+        "vek280": {
+            "v++": {
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                },
+                "package": {
+                    "clflags": [
+                        "--package.defer_aie_run"
+                    ]
+                }
+            }
+        }
+    },
+    "data": [
+        "PROJECT/data"
+    ],
+    "launch": [
+        {
+            "cmd_args": "-xclbin ImagePoints_aieml_float.xclbin -data data/",
+            "name": "generic launch for all flows"
+        }
+    ],
+    "host": {
+        "host_exe": "host.exe",
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/src/ImagePoints_aieml/ps/host.cpp"
+            ],
+            "includepaths": [
+                "LIB_DIR/L1/include",
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L2/src/ImagePoints_aieml/aiengine"
+            ],
+            "symbols": [
+                "__PS_ENABLE_AIE__",
+                "TYPE=float"
+            ]
+        }
+    },
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/",
+                "LIB_DIR/L2/include/",
+                "LIB_DIR/L2/src/ImagePoints_aieml/aiengine/"
+            ],
+            "symbols": [
+                "--aie.Xpreproc -DKERNEL_TYPE=float",
+                "--aie.Xpreproc -DTYPE_IS_FLOAT"
+            ]
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/src/ImagePoints_aieml/aiengine/main.cpp",
+                    "workdir": "./Work",
+                    "name": "libadf.a",
+                    "config": "aie.cfg"
+                }
+            ]
+        }
+    ],
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/src/ImagePoints_aieml/pl/PLImagePointsInput1In.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=float",
+                    "name": "PLImagePointsInput1In"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/ImagePoints_aieml/pl/PLImagePointsInput2In.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=float",
+                    "name": "PLImagePointsInput2In"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/ImagePoints_aieml/pl/PLImagePointsInput3In.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=float",
+                    "name": "PLImagePointsInput3In"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/ImagePoints_aieml/pl/PLImagePointsOut.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=float",
+                    "name": "PLImagePointsOut"
+                }
+            ],
+            "name": "ImagePoints_aieml_float"
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "max_memory_MB": {
+                    "vitis_aie_sim": 32768,
+                    "vitis_aie_x86sim": 32768
+                },
+                "max_time_min": 300
+            }
+        ],
+        "targets": [
+            "vitis_aie_x86sim"
+        ],
+        "category": "canary"
+    },
+    "gui": true
+}

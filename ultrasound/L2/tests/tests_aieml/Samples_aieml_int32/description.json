@@ -1,0 +1,136 @@
+{
+    "name": "L2 Samples_aieml_int32 Test",
+    "description": "Samples_aieml_int32 Test",
+    "flow": "system",
+    "platform_allowlist": [
+        "vek280"
+    ],
+    "platform_properties": {
+        "vek280": {
+            "v++": {
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                },
+                "package": {
+                    "clflags": [
+                        "--package.defer_aie_run"
+                    ]
+                }
+            }
+        }
+    },
+    "data": [
+        "PROJECT/data"
+    ],
+    "launch": [
+        {
+            "cmd_args": "-xclbin Samples_aieml_int32.xclbin -data data/",
+            "name": "generic launch for all flows"
+        }
+    ],
+    "host": {
+        "host_exe": "host.exe",
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/src/Samples_aieml/ps/host.cpp"
+            ],
+            "includepaths": [
+                "LIB_DIR/L1/include",
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L2/src/Samples_aieml/aiengine"
+            ],
+            "symbols": [
+                "__PS_ENABLE_AIE__",
+                "TYPE=int"
+            ]
+        }
+    },
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/",
+                "LIB_DIR/L2/include/",
+                "LIB_DIR/L2/src/Samples_aieml/aiengine/"
+            ],
+            "symbols": [
+                "--aie.Xpreproc -DKERNEL_TYPE=int32"
+            ]
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/src/Samples_aieml/aiengine/main.cpp",
+                    "workdir": "./Work",
+                    "name": "libadf.a",
+                    "config": "aie.cfg"
+                }
+            ]
+        }
+    ],
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/src/Samples_aieml/pl/PLSamplesInput1In.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLSamplesInput1In"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/Samples_aieml/pl/PLSamplesInput2In.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLSamplesInput2In"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/Samples_aieml/pl/PLSamplesInput3In.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLSamplesInput3In"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/Samples_aieml/pl/PLSamplesInput4In.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLSamplesInput4In"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/Samples_aieml/pl/PLSamplesInput5In.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLSamplesInput5In"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/Samples_aieml/pl/PLSamplesOut.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLSamplesOut"
+                }
+            ],
+            "name": "Samples_aieml_int32"
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "max_memory_MB": {
+                    "vitis_aie_sim": 32768,
+                    "vitis_aie_x86sim": 32768
+                },
+                "max_time_min": 300
+            }
+        ],
+        "targets": [
+            "vitis_aie_x86sim"
+        ],
+        "category": "canary"
+    },
+    "gui": true
+}

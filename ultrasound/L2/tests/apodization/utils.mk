@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.9
+# vitis makefile-generator v2.0.10
 #
 #+-------------------------------------------------------------------------------
 # The following parameters are assigned with default values. These parameters can
@@ -23,8 +23,6 @@ REPORT := no
 PROFILE := no
 DEBUG := no
 
-#Get PLATFORM_NAME by PLATFORM
-PLATFORM_NAME = $(strip $(patsubst %.xpfm, % , $(shell basename $(PLATFORM))))
 
 #'estimate' for estimate report generation
 #'system' for system report generation
@@ -45,7 +43,7 @@ endif
 
 #Check vitis setup
 ifndef XILINX_VITIS
-  XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
+  XILINX_VITIS = /opt/xilinx/$(TOOL_VERSION)/Vitis
   export XILINX_VITIS
 endif
 
@@ -115,6 +113,8 @@ endif # 3.2
 endif # 3
 endif
 XPLATFORM := $(firstword $(XPLATFORM))
+#Get PLATFORM_NAME by PLATFORM
+PLATFORM_NAME = $(strip $(patsubst %.xpfm, % , $(shell basename $(XPLATFORM))))
 
 define MSG_PLATFORM
 No platform matched pattern '$(PLATFORM)'.
@@ -138,23 +138,22 @@ else ifeq ($(HOST_ARCH_temp), cortex-a9)
 HOST_ARCH := aarch32
 else ifneq (,$(findstring cortex-a, $(HOST_ARCH_temp)))
 HOST_ARCH := aarch64
+else ifneq (,$(findstring cortexa, $(HOST_ARCH_temp)))
+    HOST_ARCH := aarch64
 endif
 
 # Special processing for tool version/platform type
 VITIS_VER = $(shell v++ --version | grep 'v++' | sed 's/^[[:space:]]*//' | sed -e 's/^[*]* v++ v//g' | cut -d " " -f1)
 AIE_TYPE := $(shell platforminfo $(XPLATFORM) -f -j | grep "arch.:" | sed 's|"arch":||g' | sed 's|["|,]||g')
-ifeq (AIE ,$(findstring AIE, $(AIE_TYPE)))
-HAS_AIE := on
+DEVICE_ARCH := $(shell platforminfo $(XPLATFORM) -f -j | grep "architecture.*:" | sed 's|"architecture":||g' | sed 's|["|,| ]||g' | head -n 1)
+ifeq (versal ,$(findstring versal, $(DEVICE_ARCH)))
+IS_VERSAL := on
 else
-HAS_AIE := off
+IS_VERSAL := off
 endif
 # 1) for aie flow from 2022.1
-ifeq (on, $(HAS_AIE))
-ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
+ifeq (on, $(IS_VERSAL))
 LINK_TARGET_FMT := xsa
-else
-LINK_TARGET_FMT := xclbin
-endif
 else
 LINK_TARGET_FMT := xclbin
 endif
@@ -165,21 +164,11 @@ ifeq ($(TARGET),hw)
 dfx_hw := on
 endif
 endif
-# 3) for embeded sw_emu flow from 2022.2
-ps_on_x86 := off
-ifneq ($(HOST_ARCH), x86)
-ifeq ($(shell expr $(VITIS_VER) \>= 2022.2), 1)
-ifeq ($(TARGET), sw_emu)
-ps_on_x86 := on
-HOST_ARCH := x86
-endif
-endif
-endif
-# 4) for aie on x86 flow
-pcie_aie := off
+# 3) for aie on x86 flow
+pcie_versal := off
 ifeq ($(HOST_ARCH), x86)
-ifeq ($(HAS_AIE), on)
-pcie_aie := on
+ifeq ($(IS_VERSAL), on)
+pcie_versal := on
 endif
 endif
 
@@ -191,18 +180,21 @@ ifndef XILINX_XRT
 endif
 endif
 
-#check if need sd_card
+#check if need sd_card and package 
+PACKAGE_NEEDED := off
+SD_CARD_NEEDED := off
 ifeq ($(HOST_ARCH), aarch32)
 SD_CARD_NEEDED := on
 endif
 ifeq ($(HOST_ARCH), aarch64)
 SD_CARD_NEEDED := on
 endif
-ifeq ($(ps_on_x86), on)
-SD_CARD_NEEDED := on
+ifeq ($(pcie_versal), on)
+SD_CARD_NEEDED := off
+PACKAGE_NEEDED := on
 endif
-ifeq ($(pcie_aie), on)
-SD_CARD_NEEDED := on
+ifeq ($(SD_CARD_NEEDED), on)
+PACKAGE_NEEDED := on
 endif
 
 #Checks for Device Family
@@ -345,4 +337,5 @@ MV = mv -f
 CP = cp -rf
 ECHO:= @echo
 PYTHON3 ?= python3
-VITIS_PYTHON3 = LD_LIBRARY_PATH=$(XILINX_VITIS)/tps/lnx64/python-3.8.3/lib $(XILINX_VITIS)/tps/lnx64/python-3.8.3/bin/python3
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3

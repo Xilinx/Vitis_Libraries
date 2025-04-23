@@ -29,16 +29,6 @@
         {
             "cmd_args": "-xclbin scanline.xclbin -data data/",
             "name": "generic launch for all flows"
-        },
-        {
-            "cmd_args": "-xclbin BUILD/scanline.xclbin -data data/",
-            "target": "sw_emu",
-            "name": "sw_emu launch"
-        }
-    ],
-    "post_launch": [
-        {
-            "target": "sw_emu"
         }
     ],
     "host": {
@@ -58,7 +48,7 @@
                 "LIB_DIR/L3/models/include",
                 "LIB_DIR/L3/models/src/"
             ],
-            "options":  "-include LIB_DIR/L2/include/graph_scanline.hpp -include LIB_DIR/L1/include/kernels.hpp -include LIB_DIR/L1/include/kernel_imagepoints.hpp -include LIB_DIR/L1/include/kernel_focusing.hpp -include LIB_DIR/L1/include/kernel_delay.hpp -include LIB_DIR/L1/include/kernel_sample.hpp -include LIB_DIR/L1/include/kernel_interpolation.hpp -include LIB_DIR/L1/include/kernel_apodization.hpp -include LIB_DIR/L1/include/kernel_mult.hpp",
+            "options": "-include LIB_DIR/L2/include/graph_scanline.hpp -include LIB_DIR/L1/include/kernels.hpp -include LIB_DIR/L1/include/kernel_imagepoints.hpp -include LIB_DIR/L1/include/kernel_focusing.hpp -include LIB_DIR/L1/include/kernel_delay.hpp -include LIB_DIR/L1/include/kernel_sample.hpp -include LIB_DIR/L1/include/kernel_interpolation.hpp -include LIB_DIR/L1/include/kernel_apodization.hpp -include LIB_DIR/L1/include/kernel_mult.hpp",
             "symbols": [
                 "__PS_ENABLE_AIE__"
             ]
@@ -136,7 +126,6 @@
             }
         ],
         "targets": [
-            "vitis_sw_emu",
             "vitis_hw_build"
         ],
         "category": "canary"

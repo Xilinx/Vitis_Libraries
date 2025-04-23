@@ -93,7 +93,7 @@ template <class T,
 void __attribute__((noinline)) kfun_mult_pre(const T (&para_const)[LEN32b_PARA_mult_t],
                                              adf::input_buffer<T, adf::extents<LEN_IN_mult_t> >& __restrict in_interp,
                                              adf::input_buffer<T, adf::extents<LEN_IN_mult_t / 4> >& __restrict in_apod,
-                                             output_stream<accfloat>* p_out_cascade);
+                                             output_cascade<accfloat>* p_out_cascade);
 
 template <class T,
           int NUM_LINE_t,
@@ -109,8 +109,8 @@ template <class T,
 void __attribute__((noinline)) kfun_mult_cascade(const T (&para_const)[LEN32b_PARA_mult_t],
                                                  const T (&local_data_0)[NUM_DEP_SEG_t], // NUM_DEP_SEG_t
                                                  const T (&local_data_1)[NUM_DEP_SEG_t], // NUM_DEP_SEG_t
-                                                 input_stream<accfloat>* p_in_cascade,
-                                                 output_stream<accfloat>* p_out_cascade,
+                                                 input_cascade<accfloat>* p_in_cascade,
+                                                 output_cascade<accfloat>* p_out_cascade,
                                                  output_stream<T>* p_out_mult);
 
 template <class T,
@@ -128,7 +128,7 @@ template <class T,
 void __attribute__((noinline)) kfun_mult_cascade(const T (&para_const)[LEN32b_PARA_mult_t],
                                                  const T (&local_data_0)[NUM_DEP_SEG_t], // NUM_DEP_SEG_t
                                                  const T (&local_data_1)[NUM_DEP_SEG_t], // NUM_DEP_SEG_t
-                                                 input_stream<accfloat>* p_in_cascade,
+                                                 input_cascade<accfloat>* p_in_cascade,
                                                  output_stream<T>* p_out_mult);
 }
 }

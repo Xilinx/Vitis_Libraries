@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <fstream>
 #include <string>
+#include <cstring>
 
 // This is used for the PL Kernels
 #include "xrt.h"

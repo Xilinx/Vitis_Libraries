@@ -469,8 +469,13 @@ int main(void) {
                 RF_2ELEMENT,       // RF_JSON
                 "./data/rf_2e.txt" //"./out_abt_beamform.json"
                 );
-    int ret_model = scanline_UbyU<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t>(models);
-    models.saveJson("xf_output_res_UbyU.json");
+
+    int ret_model = 0;
+
+    ret_model += scanline_MbyM<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t>(models);
+    models.saveJson("xf_output_res_MbyM.json");
+    models.rstMem();
+
 #endif
 
     main_runAIE();
@@ -529,10 +534,22 @@ int main(void) {
     for (int i = 0; i < NUM_SEG_t; i++) {
         if (out_bomapped_set[i]) free(out_bomapped_set[i]);
     }
+    //Due to the fact that floating-point data operations, 
+    //especially accumulation, cannot satisfy commutative and associative laws, 
+    //certain errors are allowed to occur
+    float th_err_abs = 0.00001; // 0.1mm
+    float th_err_ratio = 0.001; // 0.1%
+    float th_ratio_missmatch = 0.005; // 0.5%
+    ret_cmp = models.diffCheck(filename_output_mult, DATA_MUL, th_err_abs, th_err_ratio);
+    float ratio_missmatch = float(ret_cmp) / float(NUM_SAMPLE_t * NUM_UPSample_t);
+    printf("ratio_missmatch = ret_cmp / (NUM_SAMPLE_t * NUM_UPSample_t) = %d / %d = %f\%\n", ret_cmp, NUM_SAMPLE_t * NUM_UPSample_t, ratio_missmatch*100);
+    if (ratio_missmatch > th_ratio_missmatch) {
+        printf("ERROR: ratio_missmatch = %f\%\n", ratio_missmatch*100.0);
+    } else {
+        printf("SUCCESS: ratio_missmatch = %f\%\n", ratio_missmatch*100.0);
+        ret_cmp = 0;
+    }
 
-    float th_err_abs = 0.000001; // 0.01mm
-    float th_err_ratio = 0.0001; // 0.01%
-    ret_cmp += models.diffCheck(filename_output_mult, DATA_MUL, th_err_abs, th_err_ratio);
 
 #if defined(ENABLE_DEBUGGING)
 

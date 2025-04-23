@@ -1,0 +1,167 @@
+{
+    "name": "L2 CatumllRom_aieml_int32 Test",
+    "description": "CatumllRom_aieml_int32 Test",
+    "flow": "system",
+    "platform_allowlist": [
+        "vek280"
+    ],
+    "platform_properties": {
+        "vek280": {
+            "v++": {
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                },
+                "package": {
+                    "clflags": [
+                        "--package.defer_aie_run"
+                    ]
+                }
+            }
+        }
+    },
+    "data": [
+        "PROJECT/data"
+    ],
+    "launch": [
+        {
+            "cmd_args": "-xclbin CatumllRom_aieml_int32.xclbin -data data/",
+            "name": "generic launch for all flows"
+        }
+    ],
+    "host": {
+        "host_exe": "host.exe",
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/src/CatumllRom_aieml/ps/host.cpp"
+            ],
+            "includepaths": [
+                "LIB_DIR/L1/include",
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L2/src/CatumllRom_aieml/aiengine"
+            ],
+            "symbols": [
+                "__PS_ENABLE_AIE__",
+                "TYPE=int"
+            ]
+        }
+    },
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/",
+                "LIB_DIR/L2/include/",
+                "LIB_DIR/L2/src/CatumllRom_aieml/aiengine/"
+            ],
+            "symbols": [
+                "--aie.Xpreproc -DKERNEL_TYPE=int32"
+            ]
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/src/CatumllRom_aieml/aiengine/main.cpp",
+                    "workdir": "./Work",
+                    "name": "libadf.a",
+                    "config": "aie.cfg"
+                }
+            ]
+        }
+    ],
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/src/CatumllRom_aieml/pl/PLCrOut.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLCrOut"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/CatumllRom_aieml/pl/PLCrPoint0In.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLCrPoint0In"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/CatumllRom_aieml/pl/PLCrPoint1In.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLCrPoint1In"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/CatumllRom_aieml/pl/PLCrPoint2In.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLCrPoint2In"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/CatumllRom_aieml/pl/PLCrPoint3In.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLCrPoint3In"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/CatumllRom_aieml/pl/PLCrT1tIn.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLCrT1tIn"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/CatumllRom_aieml/pl/PLCrT2tIn.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLCrT2tIn"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/CatumllRom_aieml/pl/PLCrT3tIn.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLCrT3tIn"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/CatumllRom_aieml/pl/PLCrTt0In.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLCrTt0In"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/CatumllRom_aieml/pl/PLCrTt1In.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLCrTt1In"
+                },
+                {
+                    "location": "LIB_DIR/L2/src/CatumllRom_aieml/pl/PLCrTt2In.cpp",
+                    "frequency": 100.0,
+                    "clflags": "-DT=int",
+                    "name": "PLCrTt2In"
+                }
+            ],
+            "name": "CatumllRom_aieml_int32"
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "max_memory_MB": {
+                    "vitis_aie_sim": 32768,
+                    "vitis_aie_x86sim": 32768
+                },
+                "max_time_min": 300
+            }
+        ],
+        "targets": [
+            "vitis_aie_sim",
+            "vitis_aie_x86sim"
+        ],
+        "category": "canary"
+    },
+    "gui": true
+}

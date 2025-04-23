@@ -26,7 +26,7 @@
             "includepaths": [
                 "LIB_DIR/L1/include/",
                 "LIB_DIR/L2/include/",
-		"$(XILINX_HLS)/include",
+                "$(XILINX_HLS)/include",
                 "LIB_DIR/L3/models/include/"
             ]
         }

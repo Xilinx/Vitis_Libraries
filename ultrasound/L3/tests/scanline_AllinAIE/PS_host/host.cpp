@@ -17,6 +17,7 @@
 #include "json.hpp"
 #include <fstream>
 #include <iostream>
+#include <unistd.h>
 
 #include "us_models.hpp"
 #include "scanline_ModuleByModule.hpp"
@@ -52,7 +53,7 @@ const int num_invoking = NUM_LINE_t * NUM_ELEMENT_t * NUM_SEG_t;
 //#define USING_JSON_AS_INPUT
 int main(int argc, char* argv[]) {
 #ifndef _SIM_SMALL_SCALE_
-    printf("[HOST]: full test software emulation of scanline will take about one hour.\n");
+    printf("[HOST]: full test emulation of scanline will take about one hour.\n");
 #endif
 
     //////////////////////////////////////////
