@@ -158,14 +158,13 @@ Command to Run L2 Cases
     cd L2/tests/vitis_case_folder
     
     # build and run one of the following using U50 platform
-    make run TARGET=sw_emu PLATFORM=/path/to/xilinx_u50_gen3x16_xdma_5_202210_1.xpfm
+    make run TARGET=hw_emu PLATFORM=/path/to/xilinx_u50_gen3x16_xdma_5_202210_1.xpfm
     
     # delete generated files
     make cleanall
 
 Here, ``TARGET`` decides the FPGA binary type.
 
-* ``sw_emu`` is for software emulation.
 * ``hw_emu`` is for hardware emulation.
 * ``hw`` is for deployment on physical card. (Compilation to the hardware binary often takes hours)
 

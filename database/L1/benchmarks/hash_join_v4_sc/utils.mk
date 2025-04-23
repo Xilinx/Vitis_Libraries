@@ -103,15 +103,6 @@ ifeq ($(TARGET),hw)
 dfx_hw := true
 endif
 endif
-# 3) for embeded sw_emu flow from 2022.2
-ps_on_x86 := false
-ifneq ($(HOST_ARCH), x86)
-ifeq ($(shell expr $(VITIS_VER) \>= 2022.2), 1)
-ifeq ($(TARGET), sw_emu)
-ps_on_x86 := true
-endif
-endif
-endif
 
 #Checks for Device Family
 ifeq ($(HOST_ARCH), aarch32)

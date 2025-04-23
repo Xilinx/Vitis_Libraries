@@ -423,7 +423,6 @@ class WrapperAPI {
 
         ////////////////////////////////////////////////////////////
         // Retrieve Result Data
-        // Shoudl not retrieve intermediate results for sw_emu
         ////////////////////////////////////////////////////////////
         /*
         cl_event ev_read;

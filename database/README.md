@@ -109,7 +109,7 @@ For all these variables, setting to `1` indicates execution while `0` for skippi
 cd L2/tests/vitis_case_folder
 
 # build and run one of the following using U280 platform
-make run TARGET=sw_emu PLATFORM=/path/to/xilinx_u280_xdma_201920_3.xpfm
+make run TARGET=hw_emu PLATFORM=/path/to/xilinx_u280_xdma_201920_3.xpfm
 
 # delete generated files
 make cleanall
@@ -117,7 +117,6 @@ make cleanall
 
 Here, `TARGET` decides the FPGA binary type
 
-* `sw_emu` is for software emulation.
 * `hw_emu` is for hardware emulation.
 * `hw` is for deployment on physical card (compilation to hardware binary often takes hours).
 

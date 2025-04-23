@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,27 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.9
+# vitis makefile-generator v2.0.10
 
 ############################## Help Section ##############################
 .PHONY: help
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
-	$(ECHO) "      Command to build xclbin application."
-	$(ECHO) ""
-	$(ECHO) "  make host TARGET=<hw/hw_emu/sw_emu/>"
-	$(ECHO) "      Command to build host application."
-	$(ECHO) ""
-	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, HOST_ARCH is either aarch32 or aarch64."
-	$(ECHO) "      a.IF Download the platform, and common-image from Xilinx Download Center(Suggested):"
+	$(ECHO) "  NOTE: For embedded platform the following setup steps are required:"
+	$(ECHO) "      a.If the platform and common-image are downloaded from Xilinx Download Center(Suggested):"
 	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
 	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
 	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
@@ -41,10 +35,10 @@ help::
 	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
 	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
 	$(ECHO) ""
-	$(ECHO) "  make clean "
+	$(ECHO) "  make clean"
 	$(ECHO) "      Command to remove the generated non-hardware files."
 	$(ECHO) ""
-	$(ECHO) "  make cleanall TARGET=<hw/hw_emu/sw_emu/>"
+	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
 
@@ -55,21 +49,24 @@ XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L1/
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
-# setting devault value
-TARGET ?= sw_emu
-HOST_ARCH ?= x86
+# setting default value
+TARGET ?= hw_emu
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_u280_gen3x16_xdma_1_202211_1
+PLATFORM := u50
 endif
 
+# add warnning for sw_emu
+ifeq ($(TARGET),sw_emu)
+$(error Error: The sw_emu target is no longer supported starting from 2025.1.)
+endif
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  u280 u50
-PLATFORM_BLOCKLIST +=  zc
+PLATFORM_ALLOWLIST += u50
+PLATFORM_BLOCKLIST += zc
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -105,17 +102,10 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 ########################## Setting up Host Variables ##########################
 
 #Inclue Required Host Source Files
-ifeq ($(ps_on_x86), on)
 HOST_SRCS += host/test_join.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D USE_HBM
-CXXFLAGS +=  -I host -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I kernel -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS +=  -I host -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I kernel -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L3/include/sw
 CXXFLAGS += -O3 
-else
-HOST_SRCS += host/test_join.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -D USE_HBM
-CXXFLAGS +=  -I host -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I kernel -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include
-CXXFLAGS += -O3 
-endif
 
 # workaround for opencv
 ifeq (,$(findstring opencv,$(CXXFLAGS)))
@@ -126,12 +116,6 @@ EXE_NAME := test_join.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
-ifeq ($(TARGET),$(filter $(TARGET),sw_emu))
-HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_join_v2.xclbin -scale 10
-ifneq ($(HOST_ARCH), x86)
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
-endif
-endif
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
 HOST_ARGS :=  -xclbin $(BUILD_DIR)/hash_join_v2.xclbin -scale 5000
 ifneq ($(HOST_ARCH), x86)
@@ -146,21 +130,10 @@ endif
 endif
 
 ########################## Kernel compiler global settings ##########################
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I kernel -I host -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I kernel -I host -I $(XFLIB_DIR)/L2/include
 
 ######################### binary container global settings ##########################
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
-VPP_FLAGS_join_kernel +=  -D KERNEL_NAME=join_kernel
-VPP_FLAGS_join_kernel += --hls.clock 300000000:join_kernel
-ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_hash_join_v2 += --clock.defaultFreqHz 300000000
-else
-VPP_LDFLAGS_hash_join_v2 += --kernel_frequency 300
-endif
-VPP_LDFLAGS_hash_join_v2_temp := --config $(CUR_DIR)/conn_u280.cfg
-VPP_LDFLAGS_hash_join_v2 += $(VPP_LDFLAGS_hash_join_v2_temp)
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
 VPP_FLAGS_join_kernel +=  -D KERNEL_NAME=join_kernel
 VPP_FLAGS_join_kernel += --hls.clock 300000000:join_kernel
 ifneq ($(HOST_ARCH_temp), x86)
@@ -181,7 +154,7 @@ VPP_LDFLAGS_hash_join_v2 += --kernel_frequency 300
 endif
 
 endif
-ifneq ($(SD_CARD_NEEDED), on)
+ifneq ($(PACKAGE_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/hash_join_v2.xclbin
 else
 BINARY_CONTAINERS += $(BUILD_DIR)/hash_join_v2_pkg.$(LINK_TARGET_FMT)
@@ -194,7 +167,8 @@ $(TEMP_DIR)/join_kernel.xo: kernel/join_kernel.cpp
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_join_kernel) $(VPP_FLAGS) -k join_kernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
 BINARY_CONTAINER_hash_join_v2_OBJS += $(TEMP_DIR)/join_kernel.xo
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_hash_join_v2_OBJS)
+
+BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_hash_join_v2_OBJS) 
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/hash_join_v2 $(VPP_LDFLAGS)  $(VPP_LDFLAGS_hash_join_v2) $(AIE_LDFLAGS)   -o $@ $^
@@ -202,18 +176,25 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^) $(CXXFLAGS) $(LDFLAGS)
 
 $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 
-############################## Preparing sdcard folder ##############################
+############################## Package final xclbin or sd_card folder (for embedded) ##############################
+# AIE_ON_X86 Flow
+ifeq ($(pcie_versal), on)
+	@echo "### ***** running AIE ON_X86 ***** ###"
+	${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
+	@echo "### ***** xclbin generation done! ***** ###"
+endif
+
 ifeq ($(SD_CARD_NEEDED), on)
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
 	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$(LIBRARY_PATH)' >> $(RUN_SCRIPT)
-ifneq ($(filter sw_emu hw_emu, $(TARGET)),)
+ifneq ($(filter hw_emu, $(TARGET)),)
 	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> $(RUN_SCRIPT)
 endif
 	@echo 'export XILINX_VITIS=/mnt' >> $(RUN_SCRIPT)
@@ -252,33 +233,23 @@ ifeq ($(dfx_hw), on)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
-# 2. PS_ON_X86 - From 2022.2, Target:sw_emu
-ifeq ($(ps_on_x86), on)
-	@echo "### ***** running PS X86 SE_EMU ***** ###"
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir $(SD_CARD) --package.emu_ps x86
-endif
-# 3. AIE_ON_X86 Flow
-ifeq ($(pcie_aie), on)
-	@echo "### ***** running AIE ON_X86 ***** ###"
-	${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
-	@echo "### ***** sd_card generation done! ***** ###"
-endif
-# 4. General Embeded flow
+# 2. General Embeded flow
 ifeq ($(dfx_hw), off)
-ifeq ($(ps_on_x86), off)
-ifeq ($(pcie_aie), off)
+ifeq ($(pcie_versal), off)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
-endif
 endif
 endif
 
 .PHONY: sd_card
 sd_card: $(SD_CARD)
 endif
+
 ############################## Setting Essential Checks and Building Rules ##############################
 RUN_DEPS += host xclbin $(EMCONFIG)
+ifeq ($(SD_CARD_NEEDED), on)
 RUN_DEPS += $(SD_CARD)
+endif
 
 .PHONY: mkflag all run
 mkflag:
@@ -292,29 +263,17 @@ run: all
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
-ifeq ($(pcie_aie), on)
+ifeq ($(pcie_versal), on)
 	cp $(AIE_WORK_DIR)/reports/dma_lock_report.json ./
 	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) $(BINARY_CONTAINERS_PKG)
-	
-endif
-	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS) 
 	
 else
-	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
-	
-endif
-endif
-#sw_emu
-ifneq (,$(filter sw_emu, $(TARGET)))
-ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS)
 	
+endif
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
@@ -344,7 +303,7 @@ endif
 
 ############################## Setting Targets ##############################
 
-.PHONY: clean cleanall emconfig gen_instances valid_params
+.PHONY: clean cleanall emconfig valid_params
 emconfig: $(EMCONFIG)
 
 .PHONY: host
@@ -361,11 +320,9 @@ else
 xclbin: check_vpp check_sysroot  $(BINARY_CONTAINERS)
 endif
 
-gen_instances: $(INSTANCE_FILES)
-	@echo "Nothing to generate."
+#################### Parameterized File Generation ##########################
 
-valid_params:
-	@echo "Nothing to validate."
+gen_instances: $(GENERATED_FILES)
 
 ############################## Cleaning Rules ##############################
 cleanh:
@@ -379,6 +336,6 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR)  $(AIE_WORK_DIR) $(AIE_PKG_DIR) $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
-	-$(RMDIR)  *.html $(INSTANCE_FILES)
+	-$(RMDIR)  *.html $(GENERATED_FILES)
 
 clean: cleanh

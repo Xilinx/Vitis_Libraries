@@ -37,7 +37,7 @@ In the 2022.1 release, database library introduced (1) GQE combines partition/bl
 
 .. note:: Known Issue
 
-   * GQE filter case sw_emu and hw_emu will fail due to a design change. This will be fixed later.
+   * GQE filter case hw_emu will fail due to a design change. This will be fixed later.
 
 
 2021.2

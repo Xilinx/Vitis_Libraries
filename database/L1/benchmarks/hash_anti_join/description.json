@@ -22,11 +22,6 @@
     },
     "launch": [
         {
-            "name": "generic launch for sw_emu flows",
-            "target": "sw_emu",
-            "cmd_args": " -xclbin BUILD/hash_anti_join.xclbin"
-        },
-        {
             "name": "generic launch for hw_emu flows",
             "target": "hw_emu",
             "cmd_args": " -xclbin BUILD/hash_anti_join.xclbin -scale 10000"
@@ -88,19 +83,16 @@
                 "max_memory_MB": {
                     "vitis_hw_build": 51200,
                     "vitis_hw_emu": 28672,
-                    "vitis_sw_emu": 10240,
                     "vitis_hw_run": 10240
                 },
                 "max_time_min": {
                     "vitis_hw_build": 720,
                     "vitis_hw_emu": 470,
-                    "vitis_sw_emu": 60,
                     "vitis_hw_run": 10
                 }
             }
         ],
         "targets": [
-            "vitis_sw_emu",
             "vitis_hw_emu",
             "vitis_hw_build",
             "vitis_hw_run"
