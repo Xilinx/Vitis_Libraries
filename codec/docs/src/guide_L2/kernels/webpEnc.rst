@@ -102,12 +102,6 @@ Building the accelerated WebP encoder
     cd L2/demos/webpEnc
     source $XILINX_VITIS/settings64.sh 
 
-* Build the accelerated WebP encoder and run software emulation with the following command:
-
-.. code-block:: bash
-
-    make run TARGET=sw_emu
-
 * Build the accelerated WebP encoder and run hardware emulation with the following command:
 
 .. code-block:: bash

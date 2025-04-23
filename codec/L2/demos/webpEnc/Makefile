@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,27 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.9
+# vitis makefile-generator v2.0.10
 
 ############################## Help Section ##############################
 .PHONY: help
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
-	$(ECHO) "      Command to build xclbin application."
-	$(ECHO) ""
-	$(ECHO) "  make host TARGET=<hw/hw_emu/sw_emu/>"
-	$(ECHO) "      Command to build host application."
-	$(ECHO) ""
-	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, HOST_ARCH is either aarch32 or aarch64."
-	$(ECHO) "      a.IF Download the platform, and common-image from Xilinx Download Center(Suggested):"
+	$(ECHO) "  NOTE: For embedded platform the following setup steps are required:"
+	$(ECHO) "      a.If the platform and common-image are downloaded from Xilinx Download Center(Suggested):"
 	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
 	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
 	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
@@ -41,10 +35,10 @@ help::
 	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
 	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
 	$(ECHO) ""
-	$(ECHO) "  make clean "
+	$(ECHO) "  make clean"
 	$(ECHO) "      Command to remove the generated non-hardware files."
 	$(ECHO) ""
-	$(ECHO) "  make cleanall TARGET=<hw/hw_emu/sw_emu/>"
+	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
 
@@ -55,22 +49,24 @@ XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
-# setting devault value
-TARGET ?= sw_emu
-HOST_ARCH ?= x86
+# setting default value
+TARGET ?= hw_emu
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_u200_gen3x16_xdma_2_202110_1
-PLATFORM_NEW := xilinx_u200_gen3x16_xdma_base_2
+PLATFORM := u200
 endif
 
+# add warnning for sw_emu
+ifeq ($(TARGET),sw_emu)
+$(error Error: The sw_emu target is no longer supported starting from 2025.1.)
+endif
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  u200
-PLATFORM_BLOCKLIST +=  zc
+PLATFORM_ALLOWLIST += u200
+PLATFORM_BLOCKLIST += zc
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -106,17 +102,10 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 ########################## Setting up Host Variables ##########################
 
 #Inclue Required Host Source Files
-ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/alpha.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/buffer.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/frame.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/idec.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/io.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/quant.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/tree.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/vp8.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/vp8l.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/webp.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/demux/anim_decode.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/demux/demux.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/alpha_processing.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/alpha_processing_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/alpha_processing_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/alpha_processing_sse41.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/cpu.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/dec.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/dec_clip_tables.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/dec_mips32.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/dec_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/dec_neon.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/dec_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/dec_sse41.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/filters.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/filters_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/filters_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_neon.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/rescaler.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/rescaler_mips32.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/rescaler_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/rescaler_neon.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/rescaler_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/upsampling.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/upsampling_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/upsampling_neon.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/upsampling_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/yuv.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/yuv_mips32.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/argb.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/argb_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/argb_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/yuv_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/yuv_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/cost.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/cost_mips32.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/cost_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/cost_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/enc.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/enc_avx2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/enc_mips32.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/enc_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/enc_neon.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/enc_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/enc_sse41.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_enc.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_enc_mips32.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_enc_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_enc_neon.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_enc_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_enc_sse41.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/alpha.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/analysis.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/backward_references.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/config.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/cost.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/delta_palettization.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/filter.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/frame.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/histogram.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/iterator.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/near_lossless.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/picture.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/picture_csp.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/picture_psnr.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/picture_rescale.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/picture_tools.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/quant.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/syntax.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/token.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/tree.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/vp8l.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/webpenc.c $(XFLIB_DIR)/L2/demos/webpEnc/host/jpegdec.c $(XFLIB_DIR)/L2/demos/webpEnc/host/metadata.c $(XFLIB_DIR)/L2/demos/webpEnc/host/pngdec.c $(XFLIB_DIR)/L2/demos/webpEnc/host/webpdec.c $(XFLIB_DIR)/L2/demos/webpEnc/host/example_util.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/mux/anim_encode.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/mux/muxedit.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/mux/muxinternal.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/mux/muxread.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/bit_reader.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/color_cache.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/filters.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/huffman.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/quant_levels_dec.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/random.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/rescaler.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/thread.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/utils.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/bit_writer.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/huffman_encode.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/quant_levels.c $(XFLIB_DIR)/L2/demos/webpEnc/host/cwebp.c $(XFLIB_DIR)/L2/demos/webpEnc/host/wicdec.c $(XFLIB_DIR)/L2/demos/webpEnc/host/create_kernel.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/kernel/oclHelper.cpp $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/kernel/oclErrorCodes.cpp $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/profiling.c 
 CXXFLAGS +=  -I $(XFLIB_DIR)/../utils/L1/include/ -I $(XFLIB_DIR)/L2/include/hw/webpEnc/ -I $(XFLIB_DIR)/L2/demos/webpEnc/host/ -I $(XFLIB_DIR)/L2/demos/webpEnc/kernel/ -I $(XFLIB_DIR)/L2/demos/webpEnc/host/src/ -I $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/ -I $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/ -I $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/ -I $(XFLIB_DIR)/L2/demos/webpEnc/host/src/mux/ -I $(XFLIB_DIR)/L2/demos/webpEnc/host/src/webp/ -I $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/
 CXXFLAGS += -O3 -fpermissive -DWEBP_NBINSTANCES=1 -DWEBPDSA=\"$(PLATFORM_NEW)\" -DHAVE_MALLOC_H -DHAVE_PTHREAD -DWEBP_HAVE_PNG -DWEBP_HAVE_TIFF -DWEBP_USE_THREAD -DWEBP_HAVE_GIF -DFPGA_DEVICE 
 LDFLAGS +=  -lrt -Wno-narrowing -DVERBOSE -L$(XILINX_VITIS)/lib/lnx64.o -lxilinxopencl -pthread -lpng
-else
-HOST_SRCS += $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/alpha.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/buffer.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/frame.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/idec.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/io.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/quant.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/tree.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/vp8.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/vp8l.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/webp.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/demux/anim_decode.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/demux/demux.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/alpha_processing.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/alpha_processing_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/alpha_processing_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/alpha_processing_sse41.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/cpu.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/dec.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/dec_clip_tables.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/dec_mips32.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/dec_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/dec_neon.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/dec_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/dec_sse41.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/filters.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/filters_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/filters_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_neon.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/rescaler.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/rescaler_mips32.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/rescaler_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/rescaler_neon.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/rescaler_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/upsampling.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/upsampling_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/upsampling_neon.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/upsampling_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/yuv.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/yuv_mips32.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/argb.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/argb_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/argb_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/yuv_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/yuv_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/cost.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/cost_mips32.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/cost_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/cost_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/enc.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/enc_avx2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/enc_mips32.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/enc_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/enc_neon.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/enc_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/enc_sse41.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_enc.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_enc_mips32.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_enc_mips_dsp_r2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_enc_neon.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_enc_sse2.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/lossless_enc_sse41.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/alpha.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/analysis.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/backward_references.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/config.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/cost.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/delta_palettization.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/filter.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/frame.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/histogram.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/iterator.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/near_lossless.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/picture.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/picture_csp.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/picture_psnr.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/picture_rescale.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/picture_tools.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/quant.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/syntax.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/token.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/tree.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/vp8l.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/webpenc.c $(XFLIB_DIR)/L2/demos/webpEnc/host/jpegdec.c $(XFLIB_DIR)/L2/demos/webpEnc/host/metadata.c $(XFLIB_DIR)/L2/demos/webpEnc/host/pngdec.c $(XFLIB_DIR)/L2/demos/webpEnc/host/webpdec.c $(XFLIB_DIR)/L2/demos/webpEnc/host/example_util.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/mux/anim_encode.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/mux/muxedit.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/mux/muxinternal.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/mux/muxread.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/bit_reader.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/color_cache.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/filters.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/huffman.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/quant_levels_dec.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/random.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/rescaler.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/thread.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/utils.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/bit_writer.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/huffman_encode.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/quant_levels.c $(XFLIB_DIR)/L2/demos/webpEnc/host/cwebp.c $(XFLIB_DIR)/L2/demos/webpEnc/host/wicdec.c $(XFLIB_DIR)/L2/demos/webpEnc/host/create_kernel.c $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/kernel/oclHelper.cpp $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/kernel/oclErrorCodes.cpp $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/profiling.c 
-CXXFLAGS +=  -I $(XFLIB_DIR)/../utils/L1/include/ -I $(XFLIB_DIR)/L2/include/hw/webpEnc/ -I $(XFLIB_DIR)/L2/demos/webpEnc/host/ -I $(XFLIB_DIR)/L2/demos/webpEnc/kernel/ -I $(XFLIB_DIR)/L2/demos/webpEnc/host/src/ -I $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dec/ -I $(XFLIB_DIR)/L2/demos/webpEnc/host/src/dsp/ -I $(XFLIB_DIR)/L2/demos/webpEnc/host/src/enc/ -I $(XFLIB_DIR)/L2/demos/webpEnc/host/src/mux/ -I $(XFLIB_DIR)/L2/demos/webpEnc/host/src/webp/ -I $(XFLIB_DIR)/L2/demos/webpEnc/host/src/utils/
-CXXFLAGS += -O3 -fpermissive -DWEBP_NBINSTANCES=1 -DWEBPDSA=\"$(PLATFORM_NEW)\" -DHAVE_MALLOC_H -DHAVE_PTHREAD -DWEBP_HAVE_PNG -DWEBP_HAVE_TIFF -DWEBP_USE_THREAD -DWEBP_HAVE_GIF -DFPGA_DEVICE 
-LDFLAGS +=  -lrt -Wno-narrowing -DVERBOSE -L$(XILINX_VITIS)/lib/lnx64.o -lxilinxopencl -pthread -lpng
-endif
 
 # workaround for opencv
 ifeq (,$(findstring opencv,$(CXXFLAGS)))
@@ -153,7 +142,7 @@ else
 VPP_LDFLAGS_kernel += --kernel_frequency 200
 endif
 
-ifneq ($(SD_CARD_NEEDED), on)
+ifneq ($(PACKAGE_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/kernel.xclbin
 else
 BINARY_CONTAINERS += $(BUILD_DIR)/kernel_pkg.$(LINK_TARGET_FMT)
@@ -171,7 +160,8 @@ $(TEMP_DIR)/webp_2_ArithmeticCoding_1.xo: $(XFLIB_DIR)/L2/demos/webpEnc/kernel/v
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_webp_2_ArithmeticCoding_1) $(VPP_FLAGS) -k webp_2_ArithmeticCoding_1 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
 BINARY_CONTAINER_kernel_OBJS += $(TEMP_DIR)/webp_2_ArithmeticCoding_1.xo
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_kernel_OBJS)
+
+BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_kernel_OBJS) 
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
@@ -179,18 +169,25 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^) $(CXXFLAGS) $(LDFLAGS)
 
 $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 
-############################## Preparing sdcard folder ##############################
+############################## Package final xclbin or sd_card folder (for embedded) ##############################
+# AIE_ON_X86 Flow
+ifeq ($(pcie_versal), on)
+	@echo "### ***** running AIE ON_X86 ***** ###"
+	${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
+	@echo "### ***** xclbin generation done! ***** ###"
+endif
+
 ifeq ($(SD_CARD_NEEDED), on)
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
 	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$(LIBRARY_PATH)' >> $(RUN_SCRIPT)
-ifneq ($(filter sw_emu hw_emu, $(TARGET)),)
+ifneq ($(filter hw_emu, $(TARGET)),)
 	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> $(RUN_SCRIPT)
 endif
 	@echo 'export XILINX_VITIS=/mnt' >> $(RUN_SCRIPT)
@@ -229,33 +226,23 @@ ifeq ($(dfx_hw), on)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
-# 2. PS_ON_X86 - From 2022.2, Target:sw_emu
-ifeq ($(ps_on_x86), on)
-	@echo "### ***** running PS X86 SE_EMU ***** ###"
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir $(SD_CARD) --package.emu_ps x86
-endif
-# 3. AIE_ON_X86 Flow
-ifeq ($(pcie_aie), on)
-	@echo "### ***** running AIE ON_X86 ***** ###"
-	${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
-	@echo "### ***** sd_card generation done! ***** ###"
-endif
-# 4. General Embeded flow
+# 2. General Embeded flow
 ifeq ($(dfx_hw), off)
-ifeq ($(ps_on_x86), off)
-ifeq ($(pcie_aie), off)
+ifeq ($(pcie_versal), off)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
-endif
 endif
 endif
 
 .PHONY: sd_card
 sd_card: $(SD_CARD)
 endif
+
 ############################## Setting Essential Checks and Building Rules ##############################
 RUN_DEPS += host xclbin $(EMCONFIG)
+ifeq ($(SD_CARD_NEEDED), on)
 RUN_DEPS += $(SD_CARD)
+endif
 
 .PHONY: mkflag all run
 mkflag:
@@ -269,29 +256,17 @@ run: all
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
-ifeq ($(pcie_aie), on)
+ifeq ($(pcie_versal), on)
 	cp $(AIE_WORK_DIR)/reports/dma_lock_report.json ./
 	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) $(BINARY_CONTAINERS_PKG)
-	
-endif
-	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS) 
 	
 else
-	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
-	
-endif
-endif
-#sw_emu
-ifneq (,$(filter sw_emu, $(TARGET)))
-ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS)
 	
+endif
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
@@ -321,7 +296,7 @@ endif
 
 ############################## Setting Targets ##############################
 
-.PHONY: clean cleanall emconfig gen_instances valid_params
+.PHONY: clean cleanall emconfig valid_params
 emconfig: $(EMCONFIG)
 
 .PHONY: host
@@ -338,11 +313,9 @@ else
 xclbin: check_vpp check_sysroot  $(BINARY_CONTAINERS)
 endif
 
-gen_instances: $(INSTANCE_FILES)
-	@echo "Nothing to generate."
+#################### Parameterized File Generation ##########################
 
-valid_params:
-	@echo "Nothing to validate."
+gen_instances: $(GENERATED_FILES)
 
 ############################## Cleaning Rules ##############################
 cleanh:
@@ -356,6 +329,6 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR)  $(AIE_WORK_DIR) $(AIE_PKG_DIR) $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
-	-$(RMDIR)  *.html $(INSTANCE_FILES)
+	-$(RMDIR)  *.html $(GENERATED_FILES)
 
 clean: cleanh

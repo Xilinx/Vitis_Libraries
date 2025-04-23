@@ -61,25 +61,17 @@ Note: Default arguments are set in Makefile, the data have only one column that 
 * **Example output(Step 4)** 
 
 ```
-    Read image successfully.
-    Found Platform
-    Platform Name: Xilinx
-    Info: Context created
-    Info: Command queue created
-    Found Device=xilinx_u50_gen3x16_xdma_201920_3
-    INFO: Importing build_dir.sw_emu.xilinx_u50_gen3x16_xdma_201920_3/kernel_resize.xclbin
-    Loading: 'build_dir.sw_emu.xilinx_u50_gen3x16_xdma_201920_3/kernel_resize.xclbin'
     Info: Program created
     Info: Kernel created
     kernel has been created
     INFO: kernel start------
     INFO: kernel end------
-    INFO: Execution time 6334.86ms
-    Info: Time in host-to-device: 14.9204ms
-    Info: Time in kernel: 6319.06ms
-    Info: Time in device-to-host: 0.475648ms
+    INFO: Execution time 15644.1ms
+    Info: Time in host-to-device: 751.56ms
+    Info: Time in kernel: 14000.9ms
+    Info: Time in device-to-host: 891.515ms
     The src image size is 512*512.
-    The dst image size is 89*27.
+    The dst image size is 64*64.
     Image resized successfully.
     PASS: no error found.
     Info: Test passed

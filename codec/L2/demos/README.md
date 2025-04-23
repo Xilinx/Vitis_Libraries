@@ -1,6 +1,6 @@
 # Benchmark Test Overview
 
-Here are benchmarks of the Vitis Codec Library using the Vitis environment and comparing with CPU. It supports software and hardware emulation as well as running hardware accelerators on the Alveo U200.
+Here are benchmarks of the Vitis Codec Library using the Vitis environment and comparing with CPU. It supports hardware emulation as well as running hardware accelerators on the Alveo U200.
 
 ## Prerequisites
 

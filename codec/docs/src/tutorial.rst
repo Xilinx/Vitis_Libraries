@@ -62,10 +62,10 @@ Setup Environment
    source <install_path_xrt>/xrt/setup.sh
    export PLATFORM_REPO_PATHS=<install_path_platforms>
    export PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1
-   export TARGET=sw_emu
+   export TARGET=hw_emu
 
-Note: The TARGET environment variable can be set as sw_emu, hw_emu and hw according to which emulation mode is expected to run.
-sw_emu is for C level emulations. hw_emu is for RTL level emulations. hw is for real on-board test. For more information about the Vitis Target please have a look at `here <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Build-Targets?tocId=8ijg9En3MQ_7CJBZrUFENw>`_.
+Note: The TARGET environment variable can be set as hw_emu and hw according to which emulation mode is expected to run.
+hw_emu is for RTL level emulations. hw is for real on-board test. For more information about the Vitis Target please have a look at `here <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Build-Targets?tocId=8ijg9En3MQ_7CJBZrUFENw>`_.
 
 Download the Vitis Graph Library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -117,7 +117,6 @@ Command to Run L2 cases
 
 Here, ``TARGET`` decides the FPGA binary type
 
-* ``sw_emu`` is for software emulation
 * ``hw_emu`` is for hardware emulation
 * ``hw`` is for deployment on physical card. (Compilation to hardware binary often takes hours.)
 
@@ -480,26 +479,25 @@ Setup environment
    cd L2/demos/jpegDec
 
    # build and run one of the following using U200 platform
-   make run TARGET=sw_emu PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+   make run TARGET=hw_emu PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
 
    # delete generated files
    make cleanall
 
 Here, ``TARGET`` decides the FPGA binary type
 
-* ``sw_emu`` is for software emulation
 * ``hw_emu`` is for hardware emulation
 * ``hw`` is for deployment on physical card. (Compilation to hardware binary often takes hours.)
 
 Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as build target.
 
-(3) Run kernel in Software-Emulation mode
+(3) Run kernel in Hardware-Emulation mode
 """"""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: shell
 
    # build and run JPEG Decoder using U200 platform
-   make run TARGET=sw_emu PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+   make run TARGET=hw_emu PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
 
 Example output:
 
@@ -657,7 +655,7 @@ To check the output yuv file, download https://sourceforge.net/projects/raw-yuvp
 Lab summary
 ^^^^^^^^^^^^^^
 
-*  L2 flow is based on Vitis flow, and the main steps include sw_emu, hw_emu, and hw
+*  L2 flow is based on Vitis flow, and the main steps include hw_emu, and hw
 
 *  Run hardware acceleration application on a device
 
@@ -696,15 +694,7 @@ Webp can be divided into two serial modules, one is for prediction and probabili
 * ``description.json``
 * ``utils.mk``
 
-(3) Software Emulation
-"""""""""""""""""""""""""
-
-.. code-block:: shell
-
-   cd L2/demos/webpEnc
-   make run TARGET=sw_emu PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1
-
-(4) Hardware Emulation
+(3) Hardware Emulation
 """""""""""""""""""""""""
 
 .. code-block:: shell

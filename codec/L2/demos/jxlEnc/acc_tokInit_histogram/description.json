@@ -306,19 +306,16 @@
                 "max_memory_MB": {
                     "vitis_hw_build": 81920,
                     "vitis_hw_emu": 40960,
-                    "vitis_sw_emu": 10240,
                     "vitis_hw_run": 10240
                 },
                 "max_time_min": {
                     "vitis_hw_build": 3200,
                     "vitis_hw_emu": 1600,
-                    "vitis_sw_emu": 120,
                     "vitis_hw_run": 10
                 }
             }
         ],
         "targets": [
-            "vitis_sw_emu",
             "vitis_hw_emu",
             "vitis_hw"
         ],

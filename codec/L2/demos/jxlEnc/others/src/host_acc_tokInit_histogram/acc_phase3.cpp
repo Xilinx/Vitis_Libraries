@@ -858,9 +858,6 @@ Status acc_histogram(LossyFrameEncoder& lossy_frame_encoder,
     //=====================================
     // std::string xclbinPath =
     //     "/wrk/xsjhdnobkup3/tianminr/jxl_debug/xf_codec/L2/demos/jxlEnc/tokInit_histogram/"
-    //     "build_dir.sw_emu.xilinx_u50_gen3x16_xdma_201920_3/jxlEnc.xclbin";
-    // std::string xclbinPath =
-    //     "/wrk/xsjhdnobkup3/tianminr/jxl_debug/xf_codec/L2/demos/jxlEnc/tokInit_histogram/"
     //     "build_dir.hw_emu.xilinx_u50_gen3x16_xdma_201920_3/jxlEnc.xclbin";
     // std::string xclbinPath =
     // "/wrk/xsjhdnobkup3/tianminr/jxl_hw/xf_codec/L2/demos/jxlEnc/tokInit_histogram/build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3/jxlEnc.xclbin";

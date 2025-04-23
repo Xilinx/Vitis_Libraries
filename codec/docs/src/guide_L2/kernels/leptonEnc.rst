@@ -60,12 +60,6 @@ Building the accelerated Lepton encoder
     cd L2/demos/leptonEnc
     source $XILINX_VITIS/settings64.sh 
 
-* Build the accelerated Lepton encoder and run software emulation with the following command:
-
-.. code-block:: bash
-
-    make run TARGET=sw_emu
-
 * Build the accelerated Lepton encoder and run hardware emulation with the following command:
 
 .. code-block:: bash

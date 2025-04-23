@@ -49,8 +49,8 @@ Note: Default arguments are set in Makefile, you can use other [pictures](https:
    Info: Context created
    Info: Command queue created
    INFO: Found Device=xilinx_u50_gen3x16_xdma_201920_3
-   INFO: Importing build_dir.sw_emu.xilinx_u50_gen3x16_xdma_201920_3/jxlEnc.xclbin
-   Loading: 'build_dir.sw_emu.xilinx_u50_gen3x16_xdma_201920_3/jxlEnc.xclbin'
+   INFO: Importing build_dir.hw_emu.xilinx_u50_gen3x16_xdma_201920_3/jxlEnc.xclbin
+   Loading: 'build_dir.hw_emu.xilinx_u50_gen3x16_xdma_201920_3/jxlEnc.xclbin'
    Info: Program created
    Info: Kernel created
    INFO: kernel has been created
