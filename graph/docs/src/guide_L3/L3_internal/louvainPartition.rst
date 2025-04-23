@@ -47,7 +47,7 @@ Ensure to run the script L3/tests/pre_launch.sh to set the path of libgraphL3.so
 
 	cd L3/tests/louvainPartition
 	make host
-	./build_dir.sw_emu.xilinx_u55c_gen3x16_xdma_2_202110_1/host.exe ./data/example-wt.txt -kernel_mode 2 -num_pars 2 -create_alveo_partitions -name example_tx
+	./build_dir.hw_emu.xilinx_u55c_gen3x16_xdma_2_202110_1/host.exe ./data/example-wt.txt -kernel_mode 2 -num_pars 2 -create_alveo_partitions -name example_tx
 
 Louvain fast Input Arguments:
 
@@ -69,4 +69,4 @@ Ensure to run the script L3/tests/pre_launch.sh to set the path of libgraphL3.so
 
 	cd L3/tests/louvainPartition
 	make host
-	./build_dir.sw_emu.xilinx_u55c_gen3x16_xdma_2_202110_1/host.exe ./data/example-wt.txt -kernel_mode 2 -num_pars 2 -create_alveo_BFS_partitions -name example_tx
+	./build_dir.hw_emu.xilinx_u55c_gen3x16_xdma_2_202110_1/host.exe ./data/example-wt.txt -kernel_mode 2 -num_pars 2 -create_alveo_BFS_partitions -name example_tx

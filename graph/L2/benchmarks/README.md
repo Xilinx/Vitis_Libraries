@@ -1,6 +1,6 @@
 # Benchmark Test Overview
 
-Here are benchmarks of the Vitis Graph Library using the Vitis environment and comparing with Spark (v3.0.0) GraphX. It supports software and hardware emulation as well as running hardware accelerators on the Alveo U250.
+Here are benchmarks of the Vitis Graph Library using the Vitis environment and comparing with Spark (v3.0.0) GraphX. It supports hardware emulation as well as running hardware accelerators on the Alveo U250.
 
 ## Prerequisites
 

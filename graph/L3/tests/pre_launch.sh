@@ -1,12 +1,12 @@
-target=sw_emu
+target=hw_emu
 
 usage(){
   echo "
 Usage:
-  -t, --target    target of build sw_emu/hw_emu/hw
+  -t, --target    target of build hw_emu/hw
   -h, --help    display this help and exit
 
-  example: ./pre_launch.sh -t sw_emu
+  example: ./pre_launch.sh -t hw_emu
 "
 }
 
@@ -36,12 +36,7 @@ File2=$curDir/../lib/libgraphL3.json
 
 if [ ! -f "$File2" ];
 then
-    if [ $target  == 'sw_emu' ];
-    then
-        echo "build libgraphL3.so for sw_emu"
-        make -C $curDir/../lib/ clean
-        make -C $curDir/../lib/ libgraphL3 TARGET=sw_emu
-    elif [ $target == 'hw_emu' ];
+    if [ $target == 'hw_emu' ];
     then
         echo "build libgraphL3.so for hw_emu"
         make -C $curDir/../lib/ clean
@@ -57,12 +52,7 @@ then
     fi
 else
     mode=$(<$File2)
-    if [ $target  == 'sw_emu' ] && ([ ! -f "$File1" ] || [ $mode != 'EMULATION_MODE' ]);
-    then
-        echo "build libgraphL3.so for sw_emu"
-        make -C $curDir/../lib/ clean
-        make -C $curDir/../lib/ libgraphL3 TARGET=sw_emu
-    elif [ $target == 'hw_emu' ] && ([ ! -f "$File1" ] || [ $mode != 'EMULATION_MODE' ]);
+    if [ $target == 'hw_emu' ] && ([ ! -f "$File1" ] || [ $mode != 'EMULATION_MODE' ]);
     then
         echo "build libgraphL3.so for hw_emu"
         make -C $curDir/../lib/ clean

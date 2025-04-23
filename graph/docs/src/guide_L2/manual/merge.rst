@@ -34,7 +34,7 @@ To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
-   ./build_dir.sw_emu.xilinx_u50_gen3x16_xdma_5_202210_1/host.exe -xclbin build_dir.sw_emu.xilinx_u50_gen3x16_xdma_5_202210_1/merge_kernel.xclbin -io merge_data/example/exapmle-wt_offset.mtx -ie merge_data/example/exapmle-wt_edge.mtx -iw merge_data/example/exapmle-wt_weight.mtx -ic merge_data/example/exapmle-wt_c.mtx -oo merge_data/example/exapmle-wt_offset_out.mtx -oe merge_data/example/exapmle-wt_edge_out.mtx -ow merge_data/example/exapmle-wt_weight_out.mtx -go merge_golden/example/exapmle-wt_offset_out.mtx -ge merge_golden/example/exapmle-wt_edge_out.mtx -gw merge_golden/example/exapmle-wt_weight_out.mtx
+   ./build_dir.hw_emu.xilinx_u50_gen3x16_xdma_5_202210_1/host.exe -xclbin build_dir.hw_emu.xilinx_u50_gen3x16_xdma_5_202210_1/merge_kernel.xclbin -io merge_data/example/exapmle-wt_offset.mtx -ie merge_data/example/exapmle-wt_edge.mtx -iw merge_data/example/exapmle-wt_weight.mtx -ic merge_data/example/exapmle-wt_c.mtx -oo merge_data/example/exapmle-wt_offset_out.mtx -oe merge_data/example/exapmle-wt_edge_out.mtx -ow merge_data/example/exapmle-wt_weight_out.mtx -go merge_golden/example/exapmle-wt_offset_out.mtx -ge merge_golden/example/exapmle-wt_edge_out.mtx -gw merge_golden/example/exapmle-wt_weight_out.mtx
 
 Merge Input Arguments:
 
@@ -59,42 +59,16 @@ Merge Input Arguments:
 
 .. code-block:: bash
 
-  num = 17, numEdges = 56, num_c_out = 4
-  Found Platform
-  Platform Name: Xilinx
-  Info: Context created
-  Info: Command queue created
-  Found Device=xilinx_u50_gen3x16_xdma_5_202210_1
-  INFO: Importing build_dir.sw_emu.xilinx_u50_gen3x16_xdma_5_202210_1/merge_kernel.xclbin
-  Loading: 'build_dir.sw_emu.xilinx_u50_gen3x16_xdma_5_202210_1/merge_kernel.xclbin'
-  Kernel Name: merge_kernel, CU Number: 0, Thread creation status: success
   Info: Program created
   Info: Kernel created
   kernel has been created
   INFO: kernel start------
-  start ComputeCount
-  start GetC, num_v=16
-  start UpdateCount, num_v=16
-  start SetIndexC, num_v=16
-  start GetC, num_v=4
-  start GetC, num_v=16
-  start GetC, num_v=16
-  start DoMergeHls
-  start LoadCountC, num_c_out=4
-  start LoadJump, num_v=16
-  start GetV, num_c_out=4
-  start GetEW, num_c_out=4
-  start HashAggregateDataflow
-  start SetV, num_c_out=4
-  start SetEW, num_c_out=4
-  SetEW: count = 14
   INFO: kernel end------
-  INFO: Execution time 14.454ms
-  Info: Time in host-to-device: 1.75013ms
-  Info: Time in kernel: 12.2135ms
-  Info: Time in device-to-host: 0.169928ms
+  INFO: Execution time 6678.5ms
+  Info: Time in host-to-device: 185.626ms
+  Info: Time in kernel: 5000.63ms
+  Info: Time in device-to-host: 83.0986ms
   Test passed
-  device process sw_emu_device done
 
 Profiling
 =========

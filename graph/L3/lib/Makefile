@@ -52,26 +52,6 @@ else ifeq ($(HOST_ARCH), aarch32)
 CXX := $(XILINX_VITIS)/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf-g++
 endif
 
-# ##################### Setting up default value of TARGET ##########################
-TARGET ?= sw_emu
-
-ifeq ($(TARGET),sw_emu)
-CXXFLAGS += -D SW_EMU_TEST
-check:
-	@echo "EMULATION_MODE: $(TARGET)" > $(CUR_DIR)/libgraphL3.json
-endif
-
-ifeq ($(TARGET),hw_emu)
-CXXFLAGS += -D HW_EMU_TEST
-check:
-	@echo "EMULATION_MODE: $(TARGET)" > $(CUR_DIR)/libgraphL3.json
-endif
-
-ifeq ($(TARGET),hw)
-check:
-	@echo "TEST_MODE: $(TARGET)" > $(CUR_DIR)/libgraphL3.json
-endif
-
 ############################## Setting up Host Variables ##############################
 CXXFLAGS += -I$(XFLIB_DIR)/L2/include
 CXXFLAGS += -I$(XFLIB_DIR)/ext/xcl2
@@ -81,7 +61,7 @@ CXXFLAGS += -I$(XFLIB_DIR)/../utils/L1/include
 
 CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -I$(XILINX_XRM)/include -std=c++14 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -pthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE -L$(XILINX_XRM)/lib -lxrm -fopenmp
-CXXFLAGS += -fmessage-length=0 -DNDEBUG -D_GLIBCXX_USE_CXX11_ABI=0
+CXXFLAGS += -fmessage-length=0 -DNDEBUG  #-D_GLIBCXX_USE_CXX11_ABI=0
 CXXFLAGS +=-I$(CUR_DIR)/src/ 
 #CXXFLAGS += -g -O0
 #CXXFLAGS += -OFAST -O3
@@ -96,11 +76,28 @@ XRM_CXXFLAGS += -I$(XILINX_XRM)/include
 XRM_LDFLAGS +=
 
 ############################## Setting Rules for so (Building Dynamic Library) ##############################
+
+#libxrm = $(XFLIB_DIR)/L3/lib/libxrm.so
+libxrm = $(CUR_DIR)/libxrm.so.1
+libxrm : $(libxrm)
+
+# ##################### Setting up default value of TARGET ##########################
+TARGET ?= hw_emu
+
+ifeq ($(TARGET),hw_emu)
+CXXFLAGS += -D HW_EMU_TEST
+LIBXRM = $(libxrm)
+check:
+	@echo "EMULATION_MODE: $(TARGET)" > $(CUR_DIR)/libgraphL3.json
+endif
+
+ifeq ($(TARGET),hw)
+check:
+	@echo "TEST_MODE: $(TARGET)" > $(CUR_DIR)/libgraphL3.json
+endif
+
 libGRAPHL3 = $(CUR_DIR)/libgraphL3.so
 libgraphL3 : $(libGRAPHL3) check
-
-libxrm = $(XFLIB_DIR)/L3/lib/libxrm.so
-libxrm : $(libxrm)
 
 #for graph partition API
 CPP_PATH += $(XFLIB_DIR)/L3/src/graphPartition/louvainPartition/ParLV.cpp
@@ -140,13 +137,15 @@ CPP_PATH += $(XFLIB_DIR)/ext/xcl2/xcl2.cpp
 
 XRMEMU_PATH += $(XFLIB_DIR)/L3/src/xrm_emu.cpp
 
-$(libGRAPHL3): ${CPP_PATH}
+$(libGRAPHL3): ${CPP_PATH} $(LIBXRM)
 	echo "target: $(TARGET)"
 	echo "libGRAPHL3: $(libGRAPHL3)"
 	mkdir -p $(CUR_DIR)
 	$(CXX) -fPIC $(CXXFLAGS) -rdynamic -shared -o $@ $^ $(LDFLAGS) -w -Wl,--export-dynamic
 $(libxrm): ${XRMEMU_PATH}
+	mkdir -p $(CUR_DIR)
 	$(CXX) -fPIC $(XRM_CXXFLAGS) -rdynamic -shared -o $@ $^ $(XRM_LDFLAGS) -w -Wl,--export-dynamic
+	ln -s $(libxrm) $(CUR_DIR)/libxrm.so
 
 ############################## Cleaning Rules ##############################
 clean:

@@ -13,7 +13,7 @@
 Getting Started
 ********************************
 
-To use Graph L3, the software and hardware requirements should be met and the shared library (**libgraphL3.so**) should be built and linked in the user application.  
+To use Graph L3, the hardware requirements should be met and the shared library (**libgraphL3.so**) should be built and linked in the user application.  
 
 Software Requirements
 #####################
@@ -57,7 +57,7 @@ To build **libgraphL3.so**, follow the following steps:
 .. code-block:: sh
 
 	cd xf_graph/L3/lib
-	./build_so.sh --target sw_emu/hw_emu/hw
+	./build_so.sh --target hw_emu/hw
   
 Choose the target type and run the script. After the build is complete, **libgraphL3.so** should be available in *Vitis_Libraries/graph/L3/lib*.
 
@@ -72,7 +72,7 @@ There are many testcases provided for L3 APIs. To run testacses, follow the foll
 	cd xf_graph/L3/tests/cosineSimilaritySSDenseInt/
     source /LOCAL PATH to VITIS/settings64.sh
     export PLATFORM=/LOCAL PATH to TARGET PLATFORM/PLATFORM.xpfm
-	make run TARGET=sw_emu/hw_emu/hw 
+	make run TARGET=hw_emu/hw 
   
 It automatically builds host.exe and xclbin file, then run the testcase of single source integer cosine similarity in dense graph. Other testcases can be performed by the same way.
 

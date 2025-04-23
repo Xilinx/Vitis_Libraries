@@ -60,12 +60,6 @@
             "cmd_args": " -xclbin LPKernel.xclbin -o csr_offsets.txt -i csr_columns.txt -label label.txt",
             "platform": "vck190",
             "name": "vck 190 launch"
-        },
-        {
-            "cmd_args": " -xclbin BUILD/LPKernel.xclbin -o PROJECT/data/csr_offsets.txt -i PROJECT/data/csr_columns.txt -label PROJECT/data/label.txt",
-            "target": "sw_emu",
-            "platform": "vck190",
-            "name": "sw_emu vck190 launch"
         }
     ],
     "host": {
@@ -162,19 +156,16 @@
                 "max_memory_MB": {
                     "vitis_hw_build": 49152,
                     "vitis_hw_emu": 32768,
-                    "vitis_sw_emu": 32768,
                     "vitis_hw_run": 32768
                 },
                 "max_time_min": {
                     "vitis_hw_build": 1200,
                     "vitis_hw_emu": 2880,
-                    "vitis_sw_emu": 60,
                     "vitis_hw_run": 10
                 }
             }
         ],
         "targets": [
-            "vitis_sw_emu",
             "vitis_hw_emu",
             "vitis_hw_build",
             "vitis_hw_run"

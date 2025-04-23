@@ -22,7 +22,7 @@ Ensure export the right $(PROJECTPATH) for the L2 pre-build U50 xclbin path, thi
 
 	cd L3/tests/louvainRun
 	make host
-	./build_dir.sw_emu.xilinx_u50_gen3x16_xdma_201920_3/host.exe -x $(PROJECTPATH)/build_dir.sw_emu.xilinx_u50_gen3x16_xdma_201920_3/kernel_louvain.xclbin -kernel_mode 1 -num_devices 1 -devices xilinx_u50_gen3x16_xdma_201920_3 -num_level 100 -num_iter 100 -load_alveo_partitions ../louvainPartition/example_tx.par.proj -setwkr 0 -driverAlone 
+	./build_dir.hw_emu.xilinx_u50_gen3x16_xdma_201920_3/host.exe -x $(PROJECTPATH)/build_dir.hw_emu.xilinx_u50_gen3x16_xdma_201920_3/kernel_louvain.xclbin -kernel_mode 1 -num_devices 1 -devices xilinx_u50_gen3x16_xdma_201920_3 -num_level 100 -num_iter 100 -load_alveo_partitions ../louvainPartition/example_tx.par.proj -setwkr 0 -driverAlone 
     
 Louvain fast Input Arguments:
 
@@ -49,7 +49,7 @@ Ensure to export the right $(PROJECTPATH) for the L2 pre-build U55C xclbin path,
 
 	cd L3/tests/louvainRun
 	make host
-	./build_dir.sw_emu.xilinx_u55c_gen3x16_xdma_base_2/host.exe -x $(PROJECTPATH)/build_dir.sw_emu.xilinx_u55c_gen3x16_xdma_base_2/kernel_louvain.xclbin -kernel_mode 2 -num_devices 1 -devices xilinx_u55c_gen3x16_xdma_base_2 -num_level 100 -num_iter 100 -load_alveo_partitions ../louvainPartition/example_tx.par.proj -setwkr 0 -driverAlone 
+	./build_dir.hw_emu.xilinx_u55c_gen3x16_xdma_base_2/host.exe -x $(PROJECTPATH)/build_dir.hw_emu.xilinx_u55c_gen3x16_xdma_base_2/kernel_louvain.xclbin -kernel_mode 2 -num_devices 1 -devices xilinx_u55c_gen3x16_xdma_base_2 -num_level 100 -num_iter 100 -load_alveo_partitions ../louvainPartition/example_tx.par.proj -setwkr 0 -driverAlone 
 
 
 
