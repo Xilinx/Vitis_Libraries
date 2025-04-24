@@ -308,7 +308,7 @@ SbmBaseImpl<TILE_OUT_HEIGHT,
 
     acc2 = ::aie::mul(first_min, hundred);
 
-    acc2 = ::aie::mac(acc2, first_min, UNIQUENESS_RATIO);
+    acc2 = ::aie::mac(acc2, first_min, (uint16_t)UNIQUENESS_RATIO);
 
     auto bcond = ::aie::le(acc1.template to_vector<int32_t>(0), acc2.template to_vector<int32_t>(0));
 

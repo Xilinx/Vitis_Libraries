@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.9
+# vitis makefile-generator v2.0.10
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -59,9 +59,13 @@ ifeq ($(PLATFORM),)
 PLATFORM := vek280
 endif
 
+# add warnning for sw_emu
+ifeq ($(TARGET),sw_emu)
+$(error Error: The sw_emu target is no longer supported starting from 2025.1.)
+endif
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  vek280 vck190 v70
-PLATFORM_BLOCKLIST +=  vck5000
+PLATFORM_ALLOWLIST += vek280 vck190 v70
+PLATFORM_BLOCKLIST += vck5000
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -81,12 +85,12 @@ RUN_DEPS :=
 
 # get global setting
 ifeq ($(HOST_ARCH), x86)
-CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
-CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
@@ -129,7 +133,7 @@ AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
 EXE_FILE_DEPS += $(AIE_CONTAINER)
-BINARY_CONTAINERS_DEPS += $(AIE_CONTAINER)
+BINARY_CONTAINERS_DEPS += $(AIE_CONTAINER)  
 AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 
 ########################## Setting up Host Variables ##########################
@@ -142,6 +146,7 @@ CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSR
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/ -L $(XFLIB_DIR)/L1/lib/sw/aarch64-linux
 LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS +=  -luuid
+
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 HOST_SRCS += $(XFLIB_DIR)/L3/tests/preprocess/8bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
@@ -150,14 +155,7 @@ CXXFLAGS +=
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/ -L $(XFLIB_DIR)/L1/lib/sw/aarch64-linux
 LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS += -luuid
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck5000/'))
-HOST_SRCS += $(XFLIB_DIR)/L3/tests/preprocess/8bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
-CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS +=  
-LDFLAGS +=  -L $(XFLIB_DIR)/L1/lib/sw/x86 -L $(OPENCV_LIB)
-LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-LDFLAGS += -luuid
+
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/v70/'))
 HOST_SRCS += $(XFLIB_DIR)/L3/tests/preprocess/8bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
@@ -166,22 +164,15 @@ CXXFLAGS +=
 LDFLAGS +=  -L $(XFLIB_DIR)/L1/lib/sw/x86 -L $(OPENCV_LIB)
 LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS += -luuid
+
 else 
-ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L3/tests/preprocess/8bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
 CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS += -luuid
-else
-HOST_SRCS += $(XFLIB_DIR)/L3/tests/preprocess/8bit_aie_8bit_pl/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
-CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-LDFLAGS +=  -L $(OPENCV_LIB)
-LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-LDFLAGS += -luuid
-endif
+
 endif
 # workaround for opencv
 ifeq (,$(findstring opencv,$(CXXFLAGS)))
@@ -193,13 +184,13 @@ EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
-HOST_ARGS := kernel.xclbin Y.png UV.png
+HOST_ARGS := kernel.xclbin 512x512.png
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw))
-HOST_ARGS := kernel.xclbin Y.png UV.png
+HOST_ARGS := kernel.xclbin 4k.jpg
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
@@ -217,12 +208,6 @@ VPP_FLAGS +=
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
 VPP_LDFLAGS +=   --clock.freqHz 400000000:Tiler_top_1  --clock.freqHz 400000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   --package.defer_aie_run
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck5000/'))
-VPP_FLAGS +=   
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
-VPP_LDFLAGS +=   --clock.freqHz 400000000:Tiler_top_1  --clock.freqHz 400000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg
-VPP_PACKAGE +=   
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/v70/'))
 VPP_FLAGS +=   
@@ -253,7 +238,8 @@ BINARY_CONTAINERS_PKG += $(BUILD_DIR)/kernel.xclbin
 endif
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_kernel_OBJS)
+
+BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_kernel_OBJS) 
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
@@ -274,17 +260,18 @@ $(EMCONFIG):
 
 ############################## Package final xclbin or sd_card folder (for embedded) ##############################
 # AIE_ON_X86 Flow
-package_x86:
-		@echo "### ***** running AIE ON_X86 ***** ###"
-		${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
-		@echo "### ***** xclbin generation done! ***** ###"
+ifeq ($(pcie_versal), on)
+	@echo "### ***** running AIE ON_X86 ***** ###"
+	${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
+	@echo "### ***** xclbin generation done! ***** ###"
+endif
 
 ifeq ($(SD_CARD_NEEDED), on)
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
 	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$(LIBRARY_PATH)' >> $(RUN_SCRIPT)
-ifneq ($(filter sw_emu hw_emu, $(TARGET)),)
+ifneq ($(filter hw_emu, $(TARGET)),)
 	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> $(RUN_SCRIPT)
 endif
 	@echo 'export XILINX_VITIS=/mnt' >> $(RUN_SCRIPT)
@@ -301,7 +288,7 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(XFLIB_DIR)/data/Y.png $(XFLIB_DIR)/data/UV.png $(custom_data_file)
+DATA_FILE := $(XFLIB_DIR)/data/512x512.png $(XFLIB_DIR)/data/HD.jpg $(XFLIB_DIR)/data/4k.jpg $(custom_data_file)
 DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
@@ -323,18 +310,11 @@ ifeq ($(dfx_hw), on)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
-# 2. PS_ON_X86 - From 2022.2, Target:sw_emu
-ifeq ($(ps_on_x86), on)
-	@echo "### ***** running PS X86 SE_EMU ***** ###"
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir $(SD_CARD) --package.emu_ps x86
-endif
-# 3. General Embeded flow
+# 2. General Embeded flow
 ifeq ($(dfx_hw), off)
-ifeq ($(ps_on_x86), off)
 ifeq ($(pcie_versal), off)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
-endif
 endif
 endif
 
@@ -347,9 +327,6 @@ ifneq (,$(filter x86sim aiesim, $(TARGET)))
 RUN_DEPS += $(AIE_CONTAINER)
 else
 RUN_DEPS += host xclbin $(EMCONFIG)
-ifeq ($(pcie_versal), on)
-RUN_DEPS += package_x86
-endif
 ifeq ($(SD_CARD_NEEDED), on)
 RUN_DEPS += $(SD_CARD)
 endif
@@ -388,19 +365,6 @@ else
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS)
 	
 endif
-else
-	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
-	
-endif
-endif
-#sw_emu
-ifneq (,$(filter sw_emu, $(TARGET)))
-ifeq ($(HOST_ARCH), x86)
-	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
-	
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 

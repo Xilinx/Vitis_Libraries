@@ -26,32 +26,12 @@
                         "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/opt/xilinx/xrt/lib"
                     ]
-                },
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
                 }
             }
         }
     },
     "gui": true,
     "launch": [
-        {
-            "target": "sw_emu",
-            "cmd_args": " LIB_DIR/data/hd.png",
-            "name": "sw_emu",
-            "ld_library_path": [
-                "$(OPENCV_LIB)",
-                "$(LD_LIBRARY_PATH)",
-                "$(XILINX_XRT)/lib"
-            ]
-        },
         {
             "target": "hw_emu",
             "cmd_args": " LIB_DIR/data/hd.png",
@@ -148,7 +128,6 @@
             }
         ],
         "targets": [
-            "vitis_sw_emu",
             "vitis_hw_emu",
             "vitis_hw"
         ],

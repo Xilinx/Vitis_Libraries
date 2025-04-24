@@ -24,25 +24,25 @@
                         "--package.defer_aie_run"
                     ]
                 }
-},
-			"host": {
-				"compiler" : {
-			   	"includepaths": [
-						"$(SYSROOT)/usr/include/xrt/", 
-						"$(SYSROOT)/usr/include/", 
-						"$(SYSROOT)/usr/include/opencv4" 
-                	], 
-            		"options": "", 
-            		"symbols": [
-                		"__PS_ENABLE_AIE__"
-            			]
-				},
-        		"linker": {
-            			"librarypaths": [
-		                	"$(SYSROOT)/usr/lib/", 
-                			"LIB_DIR/L1/lib/sw/aarch64-linux"
-            			], 
-            		"options": " -luuid"
+            },
+            "host": {
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include/xrt/",
+                        "$(SYSROOT)/usr/include/",
+                        "$(SYSROOT)/usr/include/opencv4"
+                    ],
+                    "options": "",
+                    "symbols": [
+                        "__PS_ENABLE_AIE__"
+                    ]
+                },
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib/",
+                        "LIB_DIR/L1/lib/sw/aarch64-linux"
+                    ],
+                    "options": " -luuid"
                 }
             }
         }
@@ -58,7 +58,7 @@
     "gui": false,
     "launch": [
         {
-"name": "aiesim-launch",
+            "name": "aiesim-launch",
             "target": "aiesim"
         },
         {
@@ -75,21 +75,20 @@
             "target": "hw",
             "cmd_args": "kernel.xclbin "
         }
-    ], 
-"v++": { 
+    ],
+    "v++": {
         "compiler": {
             "symbols": [],
             "clflags": [],
-			"includepaths": [
-				"LIB_DIR/L1/include/aie",
-				"LIB_DIR/L1/include/aie-ml/", 
-				"LIB_DIR/L1/include/aie-ml/dnn", 
-				"./"
-			]
-		},
-		"linker": {
-               	"ldclflags": [
-                   	]
+            "includepaths": [
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L1/include/aie-ml/",
+                "LIB_DIR/L1/include/aie-ml/dnn",
+                "./"
+            ]
+        },
+        "linker": {
+            "ldclflags": []
         }
     },
     "host": {
@@ -111,10 +110,10 @@
         "linker": {
             "librarypaths": [
                 "$(OPENCV_LIB)"
-            ], 
+            ],
             "libraries": [
                 "smartTilerStitcher"
-            ], 
+            ],
             "options": "-luuid"
         }
     },
@@ -123,7 +122,7 @@
             "includepaths": [
                 "LIB_DIR/L1/include/aie",
                 "LIB_DIR/L1/include/aie-ml/",
-		        "LIB_DIR/L1/include/aie-ml/dnn"
+                "LIB_DIR/L1/include/aie-ml/dnn"
             ]
         }
     },
@@ -144,7 +143,7 @@
     ],
     "containers": [
         {
-            "frequency": "300", 
+            "frequency": "300",
             "name": "kernel"
         }
     ],

@@ -31,8 +31,8 @@
         "argv": {
             "hls_csim": " ${XF_PROJ_ROOT}/data/ltm_input_HD.png",
             "hls_cosim": " ${XF_PROJ_ROOT}/data/ltm_input_HD.png "
-        }, 
-        "stdmath": false, 
+        },
+        "stdmath": false,
         "csimflags": " -I ${XF_PROJ_ROOT}/L1/tests/isppipeline/isppipeline_NPPC1_16UC1_16UC3 -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
     },
     "testinfo": {

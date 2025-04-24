@@ -60,17 +60,6 @@
                         "${SYSROOT}/lib"
                     ],
                     "options": "-l opencv_optflow"
-                },
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ],
-                    "options": "-l opencv_optflow"
                 }
             },
             "containers": [
@@ -93,16 +82,6 @@
     },
     "gui": true,
     "launch": [
-        {
-            "target": "sw_emu",
-            "cmd_args": "LIB_DIR/data/tvl_left.png LIB_DIR/data/tvl_right.png ",
-            "name": "sw_emu",
-            "ld_library_path": [
-                "$(OPENCV_LIB)",
-                "$(LD_LIBRARY_PATH)",
-                "$(XILINX_XRT)/lib"
-            ]
-        },
         {
             "target": "hw_emu",
             "cmd_args": "LIB_DIR/data/tvl_left.png LIB_DIR/data/tvl_right.png ",
@@ -204,19 +183,16 @@
                 "max_memory_MB": {
                     "vitis_hw_build": 65535,
                     "vitis_hw_emu": 40960,
-                    "vitis_sw_emu": 40960,
                     "vitis_hw_run": 10240
                 },
                 "max_time_min": {
                     "vitis_hw_build": 470,
                     "vitis_hw_emu": 720,
-                    "vitis_sw_emu": 470,
                     "vitis_hw_run": 30
                 }
             }
         ],
         "targets": [
-            "vitis_sw_emu",
             "vitis_hw_emu",
             "vitis_hw_build",
             "vitis_hw_run"

@@ -41,16 +41,6 @@
                         "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/lib"
                     ]
-                },
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
                 }
             }
         },
@@ -67,16 +57,6 @@
                         "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/lib"
                     ]
-                },
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
                 }
             },
             "v++": {
@@ -90,16 +70,6 @@
     },
     "gui": true,
     "launch": [
-        {
-            "target": "sw_emu",
-            "cmd_args": " LIB_DIR/data/128x128.png",
-            "name": "sw_emu",
-            "ld_library_path": [
-                "$(OPENCV_LIB)",
-                "$(LD_LIBRARY_PATH)",
-                "$(XILINX_XRT)/lib"
-            ]
-        },
         {
             "target": "hw_emu",
             "cmd_args": " LIB_DIR/data/128x128.png",
@@ -192,19 +162,16 @@
                 "max_memory_MB": {
                     "vitis_hw_build": 40960,
                     "vitis_hw_emu": 28672,
-                    "vitis_sw_emu": 10240,
                     "vitis_hw_run": 10240
                 },
                 "max_time_min": {
                     "vitis_hw_build": 470,
                     "vitis_hw_emu": 470,
-                    "vitis_sw_emu": 60,
                     "vitis_hw_run": 30
                 }
             }
         ],
         "targets": [
-            "vitis_sw_emu",
             "vitis_hw_emu",
             "vitis_hw_build",
             "vitis_hw_run"
