@@ -38,6 +38,10 @@ AMD Vitis |trade| Ultrasound library provides not only toolbox-style implementat
 
 From 23.2 release, An algorithm-end to AIE-end implementation of scanline are provided in L2 and L3 with a set of scanline C-model functions. These C-model functions show a step-by-step process for how to start from natural description of a complex algorithm to obtain an AIE-mappable implementation. You can also directly invoke the C-models in any level of AIE projects to generate the input and verify the output simultaneously and conveniently. 
 
+2025.1
+-------
+Release 25.1 added support for AIE-ML device(VEK280) with 20 new L1 APIs and 6 new L2 APIs. These APIs accommodate up to three data types (float, int32, and cint16), tailored to the characteristics of specific algorithms.
+
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:
 .. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN

@@ -21,7 +21,7 @@
 
 #Check vitis setup
 ifndef XILINX_VITIS
-  XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
+  XILINX_VITIS = /opt/xilinx/$(TOOL_VERSION)/Vitis
   export XILINX_VITIS
 endif
 

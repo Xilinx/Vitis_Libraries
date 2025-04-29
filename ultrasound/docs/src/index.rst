@@ -16,7 +16,8 @@ Current version provides:
 
 
 From 23.2 release, an algorithm-end to AIE-end implementation of scanline is provided in L2 and L3 with a set of scanline C-model functions. These C-model functions show a step-by-step process for how to start from natural description of a complex algorithm to obtain an AIE-mappable implementation. You can also directly invoke the C-models at any level of AIE projects to generate input and verify output simultaneously and conveniently. 
-Release 25.1 added support for the AIEML VEK280 device with 20 new L1 APIs and 6 new L2 APIs. These APIs accommodate up to three data types (float, int32, and cint16), tailored to the characteristics of specific algorithms.
+
+Release 25.1 added support for AIE-ML device(VEK280) with 20 new L1 APIs and 6 new L2 APIs. These APIs accommodate up to three data types (float, int32, and cint16), tailored to the characteristics of specific algorithms.
 
 .. toctree::
    :caption: Introduction

@@ -246,13 +246,13 @@ Read one betch rf data and buffer them to local for resamp.
 	- `T`: type of the operation;
 	- `LEN_OUT`: number of outputdata per invoking;
 	- `LEN_IN`: number of inputdata per invoking;
-    - `LEN_RF_IN`: no use for now;
+	- `LEN_RF_IN`: no use for now;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 	- `INTERP_LEN32b_PARA`: number of RTP data per invoking;
 - **Function params**:
-    - `para_const`: kernel_rfbuf self-used structural parameter include sampling frequency, inverse speed of sound, and so on. Its definition can be seen in L1/include/kernel_interpolation.hpp.
+	- `para_const`: kernel_rfbuf self-used structural parameter include sampling frequency, inverse speed of sound, and so on. Its definition can be seen in L1/include/kernel_interpolation.hpp.
 	- `strm_rfdata`: elements of input stream vector.
-    - `local_data`: elements of local data to temp save the input vector.
+	- `local_data`: elements of local data to temp save the input vector.
 	- `p_rfbuf_out`: elements of output vector.
 
 
@@ -276,16 +276,16 @@ Read one betch rf data and resamp, output for gen-window.
 	- `T`: type of the operation;
 	- `LEN_OUT`: number of outputdata per invoking;
 	- `LEN_IN`: number of inputdata per invoking;
-    - `LEN_RF_IN`: no use for now;
+	- `LEN_RF_IN`: no use for now;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 	- `INTERP_LEN32b_PARA`: number of RTP data per invoking;
 - **Function params**:
 	- `para_const`: kernel_rfbuf self-used structural parameter include sampling frequency, inverse speed of sound and so on. Its definition can be seen in L1/include/kernel_interpolation.hpp.
 	- `p_rfbuf_in`: elements of input rf data vector.
-    - `p_sample_in`: elements of input sample address vector.
+	- `p_sample_in`: elements of input sample address vector.
 	- `p_inside_in`: elements of input inside(bool) vector.
 	- `p_resamp_out`: elements of output result after resample.
-    - `p_inside_out`: elements of output bypassed inside(bool) vector.
+	- `p_inside_out`: elements of output bypassed inside(bool) vector.
 
 
 Kernel name: `kfun_genwin_wrapper`
@@ -306,15 +306,15 @@ Read one batch resamp data and generate window data output for interpolation.
 	- `T`: type of the operation;
 	- `LEN_OUT`: number of outputdata per invoking;
 	- `LEN_IN`: number of inputdata per invoking;
-    - `LEN_RF_IN`: no use for now;
+	- `LEN_RF_IN`: no use for now;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 	- `INTERP_LEN32b_PARA`: number of RTP data per invoking;
 - **Function params**:
 	- `para_const`: kernel_rfbuf self-used structural parameter include sampling frequency, inverse speed of sound, and so on. Its definition can be seen in L1/include/kernel_interpolation.hpp.
-    - `p_resamp_in`: elements of input resample vector.
+	- `p_resamp_in`: elements of input resample vector.
 	- `p_inside_in`: elements of input inside(bool) vector.
 	- `p_vec_out`: elements of output result after resample.
-    - `p_inside_out`: elements of output bypassed inside(bool) vector.
+	- `p_inside_out`: elements of output bypassed inside(bool) vector.
 
 
 Kernel name: `kfun_interpolation_wrapper`
@@ -334,14 +334,14 @@ Spline interpolation.
 	- `T`: type of the operation;
 	- `LEN_OUT`: number of outputdata per invoking;
 	- `LEN_IN`: number of inputdata per invoking;
-    - `LEN_RF_IN`: no use for now;
+	- `LEN_RF_IN`: no use for now;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 	- `INTERP_LEN32b_PARA`: number of RTP data per invoking;
 - **Function params**:
 	- `para_const`: kfun_interpolation_wrapper self-used structural parameter include sampling frequency, inverse speed of sound, and so on. Its definition can be seen in L1/include/kernel_interpolation.hpp.
-    - `p_vec_in`: elements of resample and window vector.
+	- `p_vec_in`: elements of resample and window vector.
 	- `p_inside_in`: elements of input inside(bool) vector.
-    - `p_interpolation`: elements of output bypassed inside(bool) vector.
+	- `p_interpolation`: elements of output bypassed inside(bool) vector.
 
 
 kernel name: `kfun_mult_pre`
@@ -885,3 +885,397 @@ This kernel create a vector and returns it `LEN` times.
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 - **Function params**:
 	- `out`: elements of the result of the operation (matrix) to be passed from the kernel.
+
+Kernel name: `AbsV` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template< typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
+    void AbsV(adf::input_buffer< T_IN >& input_vector, adf::output_buffer< T_OUT >& output);
+
+
+Element-Wise absolute values of a vector.
+
+- **Template params**:
+	- `T_IN`: type of the operation;
+	- `T_OUT`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+- **Function params**:
+	- `input_vector`: elements of the vector to be passed to the kernel.
+	- `output`: elements of the result of the operation (vector) to be passed from the kernel.
+	
+Kernel name: `CosV` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
+    void CosV(adf::input_buffer< T >& input_vector, adf::output_buffer< T >& output_vector);
+
+
+Element-Wise cosine values of a vector. Elements must be expressed in radians with the range [0...2k$\pi$] 
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+- **Function params**:
+	- `input_vector`: elements of the vector to be passed to the kernel.
+	- `output_vector`: elements of the result of the operation (vector) to be passed from the kernel.
+
+Kernel name: `Diff` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
+    void Diff(adf::input_buffer< T >& input_vector_1, adf::input_buffer< T >& input_vector_2, adf::output_buffer< T >& output_vector);
+
+
+Element-Wise difference between the of the row of a matrix and the values of a vector. The number of the column of the matrix and the entry of the vector must have the same size.
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+- **Function params**:
+	- `input_vector_1`: elements of the first matrix to be passed to the kernel.
+	- `input_vector_2`: elements of the array to be passed to the kernel.
+	- `output_vector`: elements of the result of the operation (matrix) to be passed from the kernel.
+
+Kernel name: `Div` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template < typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+    void Div(adf::input_buffer<T>& input_vector_1, adf::input_buffer<T>& input_vector_2, adf::output_buffer<T>& output_vector);
+
+
+Element-Wise division between the values of a vector and a scalar (SpeedOfSound). For every iteration (expressed by `T_LEN`), pass four times the scalar value to the stream of the scalar value.
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+- **Function params**:
+	- `input_vector_1`: elements of the first dividend vector to be passed to the kernel.
+	- `input_vector_2`: elements of the second divisor vector to be passed to the kernel.
+	- `output_vector`: elements of the result of the operation (vector) to be passed from the kernel.
+	
+Kernel name: `EqualS` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template <typename T, const unsigned T_LEN, const unsigned T_INCREMENT, const unsigned T_SIMD_DEPTH, unsigned T_SCALAR>
+    void EqualS(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
+
+
+Check whether the element of an array are equal to a specific number. An array of 0s or 1s is returned. 1 means that the element at that specific position is equal to the scalar; otherwise, 0 is returned.
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+	- `SCALAR`: scalar to which the elements of the array are compared to;
+- **Function params**:
+	- `input_vector`: elements of the vector to be passed to the kernel.
+	- `output_vector`: elements of the result of the operation (vector) to be passed from the kernel.
+
+Kernel name: `FloatToInt` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template< unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
+    void FloatToInt(adf::input_buffer< float >& input_vector, adf::output_buffer< int32 >& output_vector);
+
+
+Data type conversion from float to int.
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+	- `SCALAR`: scalar to which the elements of the array are compared to;
+- **Function params**:
+	- `input_vector`: elements of the vector to be passed to the kernel.
+	- `output_vector`: elements of the result of the operation (vector) to be passed from the kernel.
+
+Kernel name: `IntToFloat` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template< unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
+    void IntToFloat(adf::input_buffer< int32 >& input_vector, adf::output_buffer< float >& output_vector);
+
+
+Data type conversion from int to float.
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+	- `SCALAR`: scalar to which the elements of the array are compared to;
+- **Function params**:
+	- `input_vector`: elements of the vector to be passed to the kernel.
+	- `output_vector`: elements of the result of the operation (vector) to be passed from the kernel.
+
+Kernel name: `LessOrEqualThanS` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template <typename T, const unsigned T_LEN, const unsigned T_INCREMENT, const unsigned T_SIMD_DEPTH, unsigned T_SCALAR>
+    void LessOrEqualThanS(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
+
+
+Check whether the element of an array are less or equal to a specific number. An array of 0s or 1s is returned. 1 means that the element at that specific position is less or equal to the scalar. Otherwise, 0 is returned.
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+	- `SCALAR`: scalar to which the elements of the array are compared to;
+- **Function params**:
+	- `input_vector`: elements of the vector to be passed to the kernel.
+	- `output_vector`: elements of the result of the operation (vector) to be passed from the kernel.
+
+Kernel name: `Mul` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template < typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+    void Mul(adf::input_buffer<T>& input_vector_1, adf::input_buffer<T>& input_vector_2, adf::output_buffer<T>& output_vector);
+
+
+Element-Wise multiplication of two vectors. The first vector and the second one must have the same size.
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+- **Function params**:
+	- `input_vector_1`: elements of the first vector to be passed to the kernel.
+	- `input_vector_2`: elements of the second vector to be passed to the kernel.
+	- `output_vector`: elements of the result of the operation (vector) to be passed from the kernel.
+
+Kernel name: `NormAxis1` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+    void NormAxis1(adf::input_buffer<T>& input_matrix, adf::output_buffer<T>& output_vector);
+
+
+Perform row wise the euclidean norm of a matrix of the columns. Because for every row returns a number, the result is a vector of values that represent for every row the magnitude of the euclidean norm.
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+- **Function params**:
+	- `input_vector`: elements of the vector to be passed to the kernel.
+	- `output_vector`: elements of the result of the operation (vector) to be passed from the kernel.
+
+Kernel name: `Ones` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template <typename T, const unsigned T_LEN, const unsigned T_INCREMENT, const unsigned T_SIMD_DEPTH>
+    void Ones(adf::output_buffer<T>& output_vector); 
+
+
+Return a vector with all entry set to 1. 
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+- **Function params**:
+	- `output_vector`: elements of the result of the operation (vector) to be passed from the kernel.
+
+Kernel name: `outer` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
+    void Outer(adf::input_buffer< T >& input_vector_1, adf::input_buffer< T >& input_vector_2, adf::output_buffer< T >& output_matrix);
+
+
+Perform the outer product (also named cross-product or vector-product) between the two vectors. The result of this operation is a matrix, which rows are the number of the entry of the first vector and the column the number of the entry of the second one.
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+- **Function params**:
+	- `input_vector_1`: elements of the first vector to be passed to the kernel.
+	- `input_vector_2`: elements of the second vector to be passed to the kernel.
+	- `output_matrix`: elements of the result of the operation (matrix) to be passed from the kernel.
+
+Kernel name: `ReciprocalV` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+    void ReciprocalV(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
+
+
+Element-wise inverse operation of the entry of the vector.
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+- **Function params**:
+	- `input_vector`: elements of the vector to be passed to the kernel.
+	- `output_vector`: elements of the result of the operation (vector) to be passed from the kernel.
+
+Kernel name: `Sign` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+    void Sign(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
+
+
+If the input is greater than 0, return 1; if it is less than 0, return -1; if it is equal to 0, return 0.
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+	- `SCALAR`: scalar to which the elements of the array are compared to;
+- **Function params**:
+	- `input_vector`: elements of the vector to be passed to the kernel.
+	- `output_vector`: elements of the result of the operation (vector) to be passed from the kernel.
+
+Kernel name: `SqrtV` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+    void SqrtV(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
+
+
+Element-wise square root operation of the entry of the vector.
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_LEN`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+- **Function params**:
+	- `input_vector`: elements of the vector to be passed to the kernel.
+	- `output_vector`: elements of the result of the operation (vector) to be passed from the kernel.
+
+Kernel name: `SquareV` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+    void SquareV(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
+
+
+Element-wise square root operation of the entry of the vector.
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+- **Function params**:
+	- `input_vector`: elements of the vector to be passed to the kernel.
+	- `output_vector`: elements of the result of the operation (vector) to be passed from the kernel.
+
+Kernel name: `SumAxis1` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
+    void SumAxis1(adf::input_buffer< T >& input_matrix, adf::output_buffer< T >& output_vector);
+
+
+
+Perform row wise the reduce add of a matrix of the columns. Because for every row returns a number, the result is a vector of values that represent the magnitude of the reduce add operation for every row.
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+- **Function params**:
+	- `input_vector`: elements of the vector to be passed to the kernel.
+	- `output_vector`: elements of the result of the operation (vector) to be passed from the kernel.
+
+Kernel name: `Sum` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
+    void Sum(adf::input_buffer< T >& input_vector_1, adf::input_buffer< T >& input_vector_2, adf::output_buffer< T >& output_vector);
+
+
+Element-Wise addition of two vectors. The first vector and the second one must have the same size.
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+- **Function params**:
+	- `input_vector_1`: elements of the first vector to be passed to the kernel.
+	- `input_vector_2`: elements of the second vector to be passed to the kernel.
+	- `output_vector`: elements of the result of the operation (vector) to be passed from the kernel.
+
+Kernel name: `TileV` for AIE-ML
+###################################
+
+
+.. code-block::cpp
+    template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
+    void TileV(adf::input_buffer< T >& input_vector, adf::output_buffer< T >& output_matrix);
+
+
+This kernel create a vector and returns input vector for `T_LEN` times.
+
+- **Template params**:
+	- `T`: type of the operation;
+	- `T_LEN`: number of elements to be processed in the kernel per iteration;
+	- `T_INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `T_SIMD_DEPTH`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
+- **Function params**:
+	- `input_vector`: elements of the first vector to be passed to the kernel.
+	- `output_matrix`: elements of the result of the operation (matrix) to be passed from the kernel.
+
+
+

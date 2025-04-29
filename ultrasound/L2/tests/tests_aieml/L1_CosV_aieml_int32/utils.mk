@@ -20,7 +20,7 @@
 
 #Check vitis setup
 ifndef XILINX_VITIS
-  XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
+  XILINX_VITIS = /opt/xilinx/$(TOOL_VERSION)/Vitis
   export XILINX_VITIS
 endif
 
@@ -145,4 +145,5 @@ MV = mv -f
 CP = cp -rf
 ECHO:= @echo
 PYTHON3 ?= python3
-VITIS_PYTHON3 = LD_LIBRARY_PATH=$(XILINX_VITIS)/tps/lnx64/python-3.8.3/lib $(XILINX_VITIS)/tps/lnx64/python-3.8.3/bin/python3
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
