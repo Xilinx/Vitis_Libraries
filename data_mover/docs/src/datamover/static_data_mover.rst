@@ -139,7 +139,7 @@ Example of How to Run Hardware Emulation of Hardware
 
 .. ATTENTION::
    * Only HW_EMU and HW run available
-   * Kernel-to-kernel streaming is not available in software emulation; the design can only be emulated in hardware emulation.
+   * Kernel-to-kernel streaming can only be emulated in hardware emulation.
 
 Data Converter
 --------------
