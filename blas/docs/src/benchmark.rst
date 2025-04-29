@@ -127,5 +127,5 @@ Set up and build the environment using the Vitis and XRT scripts:
 
 .. code-block:: bash 
 
-    source <install path>/Vitis/2025.1/settings64.sh
+    source <install path>/2025.1/Vitis/settings64.sh
     source /opt/xilinx/xrt/setup.sh

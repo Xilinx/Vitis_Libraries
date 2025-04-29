@@ -6,10 +6,10 @@ To test l1 primitives, please follow the steps below:
   3. run case in vitis. For example: 
      
 ```console
-    source <install path>/Vitis/2023.2/settings64.sh
+    source <install path>/2025.1/Vitis/settings64.sh
     source /opt/xilinx/xrt/setup.sh
     cd L1/tests/case_folder
-    make run TARGET=<cosim/csim/csynth/vivado_syn/vivado_impl> PLATFORM=/path/to/xilinx_u250_gen3x16_xdma_3_1_202020_1.xpfm
+    make run TARGET=<cosim/csim/csynth/vivado_syn/vivado_impl> PLATFORM=/path/to/xilinx_u250_gen3x16_xdma_4_1_202210_1.xpfm
 ```
 - `csim` (high level simulation),
 - `csynth` (high level synthesis to RTL),

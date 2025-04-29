@@ -51,7 +51,7 @@ These blas benchmarks can be downloaded from [vitis libraries](https://github.co
 Setup and build envrionment using the Vitis and XRT scripts:
 
 ```
-    source <install path>/Vitis/2025.1/settings64.sh
+    source <install path>/2025.1/Vitis/settings64.sh
     source /opt/xilinx/xrt/setup.sh
 ```
 
