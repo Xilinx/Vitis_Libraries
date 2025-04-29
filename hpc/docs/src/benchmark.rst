@@ -18,7 +18,7 @@ Conjugate Gradient Algorithm
 ****************************
 
 Here are the benchmarks of the AMD Vitis |trade| HPC Library using the Vitis environment and comparing results on several FPGA and CPU platforms.
-It supports software and hardware emulation as well as running hardware accelerators on the AMD Alveo |trade| U250, U280, or U50.
+It supports hardware emulation as well as running hardware accelerators on the AMD Alveo |trade| U250, U280, or U50.
 
 GEMV-based CG
 ^^^^^^^^^^^^^^^^^^^^
