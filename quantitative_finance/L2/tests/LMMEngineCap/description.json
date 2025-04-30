@@ -54,11 +54,11 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/LMMEngineCap/kernel/lmmCapKernel.cpp",
-                    "frequency": 300.0,
+                    "frequency": 200.0,
                     "name": "lmmCapKernel"
                 }
             ],
-            "frequency": 300.0,
+            "frequency": 200.0,
             "name": "lmm_cap"
         }
     ],

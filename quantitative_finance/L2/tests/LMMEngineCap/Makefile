@@ -86,12 +86,12 @@ RUN_DEPS :=
 
 # get global setting
 ifeq ($(HOST_ARCH), x86)
-CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
-CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
@@ -126,11 +126,11 @@ LIBRARY_PATH := $(XILINX_HLS)/lnx64/lib/csim:$(XILINX_HLS)/lnx64/tools/fpo_v7_1
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/../solver/L2/include -I $(XFLIB_DIR)/L2/tests/LMMEngineCap/kernel
 
 ######################### binary container global settings ##########################
-VPP_FLAGS_lmmCapKernel += --hls.clock 300000000:lmmCapKernel
+VPP_FLAGS_lmmCapKernel += --hls.clock 200000000:lmmCapKernel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_lmm_cap += --clock.defaultFreqHz 300000000
+VPP_LDFLAGS_lmm_cap += --clock.defaultFreqHz 200000000
 else
-VPP_LDFLAGS_lmm_cap += --kernel_frequency 300
+VPP_LDFLAGS_lmm_cap += --kernel_frequency 200
 endif
 
 ifneq ($(PACKAGE_NEEDED), on)
