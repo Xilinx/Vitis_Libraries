@@ -1492,6 +1492,19 @@ void naiveBayesPredict(const int num_of_class,
 #pragma HLS bind_storage variable = result_vector type = ram_2p impl = lutram
 #pragma HLS array_partition variable = result_vector complete dim = 1
 
+    // Initialize all arrays to zero
+    for (int i = 0; i < GRP_NM; i++) {
+        for (int j = 0; j < 256 / GRP_NM; j++) {
+            for (int k = 0; k < 4096; k++) {
+                lh_vector[i][j][k] = 0;
+            }
+        }
+        for (int j = 0; j < 1024 / GRP_NM; j++) {
+            prior_vector[i][j] = 0;
+            result_vector[i][j] = 0;
+        }
+    }
+
 #endif
     internal::loadModel<CH_NM, GRP_NM>(num_of_class, num_of_term, i_theta_strm, i_prior_strm, lh_vector, prior_vector,
                                        result_vector);

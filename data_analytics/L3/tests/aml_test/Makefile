@@ -86,12 +86,12 @@ RUN_DEPS :=
 
 # get global setting
 ifeq ($(HOST_ARCH), x86)
-CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
-CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
@@ -104,7 +104,7 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 #Inclue Required Host Source Files
 HOST_SRCS += host/main.cpp $(XFLIB_DIR)/L3/src/sw/text/aml_checker.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -I kernel -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include/xf_utils_sw/ -I $(XFLIB_DIR)/L1/include/sw -I $(XFLIB_DIR)/../utils/L1/include
-CXXFLAGS += -O3 -std=c++14
+CXXFLAGS += -O3 -std=c++17
 
 # workaround for opencv
 ifeq (,$(findstring opencv,$(CXXFLAGS)))
@@ -136,31 +136,31 @@ VPP_LDFLAGS += --vivado.impl.jobs 16
 
 ######################### binary container global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-VPP_FLAGS_fuzzy_kernel += --hls.clock 300000000:fuzzy_kernel
+VPP_FLAGS_fuzzy_kernel += --hls.clock 200000000:fuzzy_kernel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_fuzzy_kernel += --clock.defaultFreqHz 300000000
+VPP_LDFLAGS_fuzzy_kernel += --clock.defaultFreqHz 200000000
 else
-VPP_LDFLAGS_fuzzy_kernel += --kernel_frequency 300
+VPP_LDFLAGS_fuzzy_kernel += --kernel_frequency 200
 endif
 VPP_LDFLAGS_fuzzy_kernel_temp := --config $(CUR_DIR)/conn_u250.cfg
 VPP_LDFLAGS_fuzzy_kernel += $(VPP_LDFLAGS_fuzzy_kernel_temp)
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/aws-vu9p-f1/'))
-VPP_FLAGS_fuzzy_kernel += --hls.clock 300000000:fuzzy_kernel
+VPP_FLAGS_fuzzy_kernel += --hls.clock 200000000:fuzzy_kernel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_fuzzy_kernel += --clock.defaultFreqHz 300000000
+VPP_LDFLAGS_fuzzy_kernel += --clock.defaultFreqHz 200000000
 else
-VPP_LDFLAGS_fuzzy_kernel += --kernel_frequency 300
+VPP_LDFLAGS_fuzzy_kernel += --kernel_frequency 200
 endif
 VPP_LDFLAGS_fuzzy_kernel_temp := --config $(CUR_DIR)/conn_aws_f1.cfg
 VPP_LDFLAGS_fuzzy_kernel += $(VPP_LDFLAGS_fuzzy_kernel_temp)
 
 else 
-VPP_FLAGS_fuzzy_kernel += --hls.clock 300000000:fuzzy_kernel
+VPP_FLAGS_fuzzy_kernel += --hls.clock 200000000:fuzzy_kernel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_fuzzy_kernel += --clock.defaultFreqHz 300000000
+VPP_LDFLAGS_fuzzy_kernel += --clock.defaultFreqHz 200000000
 else
-VPP_LDFLAGS_fuzzy_kernel += --kernel_frequency 300
+VPP_LDFLAGS_fuzzy_kernel += --kernel_frequency 200
 endif
 
 endif

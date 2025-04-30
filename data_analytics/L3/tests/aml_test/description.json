@@ -81,11 +81,11 @@
                 {
                     "name": "fuzzy_kernel",
                     "location": "PROJECT/kernel/fuzzy_kernel.cpp",
-                    "frequency": 300,
+                    "frequency": 200,
                     "num_compute_units": 1
                 }
             ],
-            "frequency": 300,
+            "frequency": 200,
             "name": "fuzzy_kernel"
         }
     ],

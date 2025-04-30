@@ -1,6 +1,6 @@
 # Log Analyzer Demo
 
-The demo is an integration frame included 3 part: Grok, GeoIP and JsonWriter. It supports software and hardware emulation as well as running hardware accelerators on the Alveo U200.
+The demo is an integration frame included 3 part: Grok, GeoIP and JsonWriter. It supports hardware emulation as well as running hardware accelerators on the Alveo U200.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ The demonstration application and kernel is built using a command line Makefile 
 Setup the build environment using the Vitis and XRT scripts:
 
 ```
-    source <install path>/Vitis/HEAD/settings64.sh
+    source <install path>/HEAD/Vitis/settings64.sh
     source /opt/xilinx/xrt/setup.sh
 ```
 
@@ -30,7 +30,7 @@ Call the Makefile. For example:
     make run TARGET=hw PLATFORM=xilinx_u200_xdma_201830_2
 ```
 
-The Makefile supports software emulation, hardware emulation and hardware targets ('hw_emu' and 'hw', respectively).
+The Makefile supports hardware emulation and hardware targets ('hw_emu' and 'hw', respectively).
 
 ## Test Data
 
@@ -41,7 +41,7 @@ To obtain full benchmark dataset, please refer to the `data/README.md`.
 
 ## Example Output
 
-The testbench of process it via the engine and compare to the expected result, displaying the worst case difference. For example, the following is the key information from the software emulation:
+The testbench of process it via the engine and compare to the expected result, displaying the worst case difference. For example, the following is the key information from the hardware emulation:
 
 ```
     ----------------------log analyzer----------------

@@ -14,7 +14,7 @@ Text Performance
 Log Analyzer
 ~~~~~~~~~~~~
 
-The `L2/demos/text/log_analyzer` case is an integration frame included with three parts: Grok, GeoIP, and JsonWriter. It supports software and hardware emulation as well as running hardware accelerators on the AMD Alveo™ U200.
+The `L2/demos/text/log_analyzer` case is an integration frame included with three parts: Grok, GeoIP, and JsonWriter. It supports hardware emulation as well as running hardware accelerators on the AMD Alveo™ U200.
 
 - Input log: http://www.almhuette-raith.at/apache-log/access.log (1.2 GB)
 - logAnalyzer Demo execute time: 0.99 s, throughput: 1.2 Gb/s
@@ -28,7 +28,7 @@ The `L2/demos/text/log_analyzer` case is an integration frame included with thre
 Duplicate Record Match
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The `L2/demos/text/dup_match` case is to achieve the function of duplicate recoed matching, which includes modules such as Index, Predicate, Pair, Score, Cluster, etc. It supports software and hardware emulation as well as running hardware accelerators on the Alveo U50.
+The `L2/demos/text/dup_match` case is to achieve the function of duplicate recoed matching, which includes modules such as Index, Predicate, Pair, Score, Cluster, etc. It supports hardware emulation as well as running hardware accelerators on the Alveo U50.
 
 - Input file: Randomly generate 10,000,000 lines (about 1 GB) of csv file, similar to `L2/demos/text/dup_match/data/test.csv` as the test input file.
 - The Demo execute time 8,215.56 s.

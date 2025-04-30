@@ -7,10 +7,10 @@ This folder contains basic test for each kernel. They are meant to discover simp
 To run the test, execute the following command:
 
 ```
-source <install path>/Vitis/2019.2/settings64.sh
+source <install path>/HEAD/Vitis/settings64.sh
 source /opt/xilinx/xrt/setup.sh
 export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
-make run TARGET=hw_emu PLATFORM=xilinx_u250_xdma_201830_2
+make run TARGET=hw_emu PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1
 ```
 
 `TARGET` can also be `hw`.

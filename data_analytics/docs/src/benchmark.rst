@@ -75,6 +75,6 @@ Specify the corresponding Vitis, XRT, and path to the platform repository by run
 
 .. code-block:: bash
 
-   source <intstall_path>/installs/lin64/Vitis/2021.1_released/settings64.sh
+   source <intstall_path>/installs/lin64/HEAD/Vitis/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms

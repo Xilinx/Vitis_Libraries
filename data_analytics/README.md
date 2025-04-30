@@ -64,7 +64,7 @@ Both types of test cases are driven by makefiles.
 For command-line developers the following settings are required before running any test case in this library:
 
 ```console
-source /opt/xilinx/Vitis/2022.1/settings64.sh
+source /opt/xilinx/HEAD/Vitis/settings64.sh
 source /opt/xilinx/xrt/setup.sh
 export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 ```

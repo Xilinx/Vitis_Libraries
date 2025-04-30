@@ -43,7 +43,7 @@ endif
 
 #Check vitis setup
 ifndef XILINX_VITIS
-  XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
+  XILINX_VITIS = /opt/xilinx/$(TOOL_VERSION)/Vitis
   export XILINX_VITIS
 endif
 
@@ -138,6 +138,8 @@ else ifeq ($(HOST_ARCH_temp), cortex-a9)
 HOST_ARCH := aarch32
 else ifneq (,$(findstring cortex-a, $(HOST_ARCH_temp)))
 HOST_ARCH := aarch64
+else ifneq (,$(findstring cortexa, $(HOST_ARCH_temp)))
+    HOST_ARCH := aarch64
 endif
 
 # Special processing for tool version/platform type
@@ -151,11 +153,7 @@ IS_VERSAL := off
 endif
 # 1) for aie flow from 2022.1
 ifeq (on, $(IS_VERSAL))
-ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
 LINK_TARGET_FMT := xsa
-else
-LINK_TARGET_FMT := xclbin
-endif
 else
 LINK_TARGET_FMT := xclbin
 endif

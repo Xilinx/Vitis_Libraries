@@ -86,12 +86,12 @@ RUN_DEPS :=
 
 # get global setting
 ifeq ($(HOST_ARCH), x86)
-CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
-CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
@@ -104,7 +104,7 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 #Inclue Required Host Source Files
 HOST_SRCS += host/test.cpp host/utils_sw/xclhost.cpp 
 CXXFLAGS +=  -I host -I host/utils_sw -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw -I $(XFLIB_DIR)/../utils/L1/include -I arrow_compile/arrow/cpp/release/thrift_ep-install/include/ -I arrow_compile/arrow/cpp/src -I arrow_compile/arrow/cpp/release/src/ -I $(XFLIB_DIR)/L1/include/sw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2
-CXXFLAGS += -O3 -std=c++14 -DXDEVICE=$(PLATFORM_NAME)
+CXXFLAGS += -O3 -std=c++17 -DXDEVICE=$(PLATFORM_NAME)
 LDFLAGS +=  -L arrow_compile/arrow/cpp/release/release/ -L arrow_compile/arrow/cpp/release/thrift_ep-install/lib
 LDFLAGS +=  -l arrow -l parquet -l thrift
 
