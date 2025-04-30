@@ -141,6 +141,7 @@ LIBRARY_PATH := $(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw))
 HOST_ARGS :=  $(XFLIB_DIR)/data/lkof_im0_256x128.png $(XFLIB_DIR)/data/lkof_im1_256x128.png
+VPP_LDFLAGS +=   --vivado.impl.strategies Performance_Explore
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
@@ -150,7 +151,6 @@ endif
 ########################## Kernel compiler global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/tests/lkdensepyrof/lkdensepyrof_NPPC1_8UC1_32UC1_URAM -I $(XFLIB_DIR)/L1/include/
-VPP_LDFLAGS +=   --vivado.impl.strategies Performance_Explore
 
 else 
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/tests/lkdensepyrof/lkdensepyrof_NPPC1_8UC1_32UC1_URAM -I $(XFLIB_DIR)/L1/include/
