@@ -191,13 +191,13 @@ class func_approx<bfloat16, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WIN
    public:
     alignas(__ALIGN_BYTE_SIZE__) float (&m_lut_ab)[kLutSize];
     alignas(__ALIGN_BYTE_SIZE__) float (&m_lut_cd)[kLutSize];
-    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&m_slopeBuff)[dummyBuffSize];
-    alignas(__ALIGN_BYTE_SIZE__) TT_DATA (&m_offsetBuff)[dummyBuffSize];
+    alignas(__ALIGN_BYTE_SIZE__) float (&m_slopeBuff)[dummyBuffSize];
+    alignas(__ALIGN_BYTE_SIZE__) float (&m_offsetBuff)[dummyBuffSize];
     // Constructor
     func_approx(float (&lut_ab)[kLutSize],
                 float (&lut_cd)[kLutSize],
-                TT_DATA (&slopeBuff)[dummyBuffSize],
-                TT_DATA (&offsetBuff)[dummyBuffSize])
+                float (&slopeBuff)[dummyBuffSize],
+                float (&offsetBuff)[dummyBuffSize])
         : m_lut_ab(lut_ab), m_lut_cd(lut_cd), m_slopeBuff(slopeBuff), m_offsetBuff(offsetBuff) {}
 
     // Register Kernel Class

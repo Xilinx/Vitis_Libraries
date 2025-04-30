@@ -27,7 +27,7 @@ Coding conventions
 #include <adf.h>
 #include "device_defs.h"
 
-// #define _DSPLIB_FUNC_APPROX_HPP_DEBUG_
+//#define _DSPLIB_FUNC_APPROX_HPP_DEBUG_
 
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
 #include "aie_api/aie_adf.hpp"

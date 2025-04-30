@@ -97,7 +97,8 @@ def update_TT_COEFF(args):
 
 def fn_update_TT_COEFF(AIE_VARIANT, TT_DATA):
     legal_set_TT_COEFF = ["int16", "cint16", "int32", "cint32", "float", "cfloat"]
-    legal_set_TT_COEFF = fn_coeff_type_update(TT_DATA, legal_set_TT_COEFF)
+    legal_set_TT_COEFF = com.fn_coeff_type_update(TT_DATA, legal_set_TT_COEFF)
+    legal_set_TT_COEFF = comFirUpd.fn_type_support_coeff_update(AIE_VARIANT, TT_DATA, legal_set_TT_COEFF)
     legal_set_TT_COEFF = comFirUpd.fn_type_aieml_support_update(
         AIE_VARIANT, TT_DATA, legal_set_TT_COEFF
     )

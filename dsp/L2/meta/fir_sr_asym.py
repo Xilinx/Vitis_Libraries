@@ -147,7 +147,6 @@ def update_TP_API(args):
     return comFirUpd.fn_update_binary("TP_API")
 
 
-
 def validate_TP_API(args):
     TP_API = args["TP_API"]
     return fn_validate_TP_API(TP_API)
@@ -162,7 +161,6 @@ def fn_validate_TP_API(TP_API):
 #######################################################
 def update_TP_USE_COEFF_RELOAD(args):
     return comFirUpd.fn_update_binary("TP_USE_COEFF_RELOAD")
-
 
 
 def validate_TP_USE_COEFF_RELOAD(args):
@@ -830,11 +828,14 @@ def fnFirMargin(TP_FIR_LEN, TT_DATA):
     return CEIL(TP_FIR_LEN, ((256 // 8) // fn_size_by_byte(TT_DATA)))
 
 
-def fnStreamReadWidth(T_D, T_C):
-    # Slight rephrasing (vs traits) to avoid templates and enable runtime check.
-    if T_D == "cint16" or T_D == "int16" or (T_D == "int32" and T_C == "int32"):
+def fnStreamReadWidth(T_D, T_C, AIE_VARIANT=1):
+    if AIE_VARIANT == com.AIE and (
+        T_D == "cint16" or T_D == "int16" or (T_D == "int32" and T_C == "int32")
+    ):
         return 128
     else:
+        # AIE-ML, AIE-MLv2
+        # or
         # int32,  int16
         # cint32,  int16
         # cint32,  int32
@@ -916,7 +917,7 @@ def fn_get_data_needed(
     m_kDataLoadVsize = (
         (256 // 8 // TT_DATA_BYTES)
         if TP_API == API_BUFFER
-        else (fnStreamReadWidth(TT_DATA, TT_COEFF) // 8 // TT_DATA_BYTES)
+        else (fnStreamReadWidth(TT_DATA, TT_COEFF, AIE_VARIANT) // 8 // TT_DATA_BYTES)
     )
     m_kInitDataNeeded = m_kArchFirLen + m_kDataLoadVsize - 1
     return m_kInitDataNeeded

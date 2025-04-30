@@ -216,18 +216,28 @@ def fn_validate_TP_DUAL_IP(TP_DUAL_IP):
 def update_TP_NUM_OUTPUTS(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TP_API = args["TP_API"]
-    return comFirUpd.fn_update_num_outputs(TP_API, AIE_VARIANT, "TP_NUM_OUTPUTS")
+    TP_DUAL_IP = args["TP_DUAL_IP"]
+    TP_SSR = args["TP_SSR"]
+    return comFirUpd.fn_update_num_outputs_sr_asym(
+        TP_API, AIE_VARIANT, TP_SSR, TP_DUAL_IP, "TP_NUM_OUTPUTS"
+    )
 
 
 def validate_TP_NUM_OUTPUTS(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TP_API = args["TP_API"]
+    TP_DUAL_IP = args["TP_DUAL_IP"]
+    TP_SSR = args["TP_SSR"]
     TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
-    return fn_validate_TP_NUM_OUTPUTS(AIE_VARIANT, TP_API, TP_NUM_OUTPUTS)
+    return fn_validate_TP_NUM_OUTPUTS(
+        AIE_VARIANT, TP_API, TP_SSR, TP_DUAL_IP, TP_NUM_OUTPUTS
+    )
 
 
-def fn_validate_TP_NUM_OUTPUTS(AIE_VARIANT, TP_API, TP_NUM_OUTPUTS):
-    param_dict = comFirUpd.fn_update_num_outputs(TP_API, AIE_VARIANT, "TP_NUM_OUTPUTS")
+def fn_validate_TP_NUM_OUTPUTS(AIE_VARIANT, TP_API, TP_SSR, TP_DUAL_IP, TP_NUM_OUTPUTS):
+    param_dict = comFirUpd.fn_update_num_outputs_sr_asym(
+        TP_API, AIE_VARIANT, TP_SSR, TP_DUAL_IP, "TP_NUM_OUTPUTS"
+    )
     return validate_legal_set(param_dict["enum"], "TP_NUM_OUTPUTS", TP_NUM_OUTPUTS)
 
 
@@ -240,14 +250,25 @@ def update_TP_SSR(args):
     TT_COEFF = args["TT_COEFF"]
     TP_API = args["TP_API"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
-    return fn_update_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN)
+    TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
+    return fn_update_TP_SSR(
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD
+    )
 
 
-def fn_update_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN):
+def fn_update_TP_SSR(
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD
+):
     legal_set_TP_SSR = find_divisors(TP_FIR_LEN, TP_SSR_max)
     for ssr_val in legal_set_TP_SSR.copy():
         param_dict_casc_len = fn_update_TP_CASC_LEN(
-            AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, ssr_val
+            AIE_VARIANT,
+            TT_DATA,
+            TT_COEFF,
+            TP_API,
+            TP_FIR_LEN,
+            ssr_val,
+            TP_USE_COEFF_RELOAD,
         )
         if ("enum" in param_dict_casc_len) and (param_dict_casc_len["enum"]) == []:
             legal_set_TP_SSR.remove(ssr_val)
@@ -263,16 +284,21 @@ def validate_TP_SSR(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
     TT_COEFF = args["TT_COEFF"]
-    TP_FIR_LEN = args["TP_FIR_LEN"]
-    TP_SSR = args["TP_SSR"]
     TP_API = args["TP_API"]
+    TP_FIR_LEN = args["TP_FIR_LEN"]
+    TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
+    TP_SSR = args["TP_SSR"]
     return fn_validate_TP_SSR(
-        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_SSR
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_SSR
     )
 
 
-def fn_validate_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_SSR):
-    param_dict = fn_update_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN)
+def fn_validate_TP_SSR(
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_SSR
+):
+    param_dict = fn_update_TP_SSR(
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD
+    )
     return validate_legal_set(param_dict["enum"], "TP_SSR", TP_SSR)
 
 
@@ -286,18 +312,26 @@ def update_TP_CASC_LEN(args):
     TP_API = args["TP_API"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_SSR = args["TP_SSR"]
+    TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     return fn_update_TP_CASC_LEN(
-        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_SSR
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_SSR, TP_USE_COEFF_RELOAD
     )
 
 
-def fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_SSR):
+def fn_update_TP_CASC_LEN(
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_SSR, TP_USE_COEFF_RELOAD
+):
+    useSrAsym = (
+        1
+        if (AIE_VARIANT == com.AIE_ML or AIE_VARIANT == com.AIE_MLv2 or TP_SSR > 1)
+        else 0
+    )
     symApiSSR = (
-        0 if (TP_SSR == 1) else TP_API
+        0 if (TP_SSR == 1 and AIE_VARIANT == com.AIE) else TP_API
     )  # Force buffer checks when not in SSR mode.
     legal_set_casc1 = list(range(TP_CASC_LEN_min, TP_CASC_LEN_max + 1))
     legal_set_casc2 = comFirUpd.fn_eliminate_casc_len_min_fir_len_each_kernel(
-        legal_set_casc1.copy(), TP_FIR_LEN, TP_SSR, TP_Rnd=1
+        legal_set_casc1.copy(), TP_FIR_LEN, TP_SSR, TP_Rnd=2
     )
     legal_set_casc3 = sr_asym.fn_eliminate_casc_len_data_needed_within_buffer_size(
         TT_DATA,
@@ -315,8 +349,18 @@ def fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP
         param_dict.update({"maximum": TP_CASC_LEN_max})
     else:
         param_dict.update({"enum": legal_set_casc3})
-
-    return param_dict
+    if useSrAsym == 1:
+        return sr_asym.fn_update_TP_CASC_LEN(
+            AIE_VARIANT,
+            TT_DATA,
+            TT_COEFF,
+            TP_API,
+            TP_FIR_LEN,
+            TP_SSR,
+            TP_USE_COEFF_RELOAD,
+        )
+    else:
+        return param_dict
 
 
 def validate_TP_CASC_LEN(args):
@@ -326,17 +370,32 @@ def validate_TP_CASC_LEN(args):
     TP_API = args["TP_API"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_SSR = args["TP_SSR"]
+    TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     TP_CASC_LEN = args["TP_CASC_LEN"]
     return fn_validate_TP_CASC_LEN(
-        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_SSR, TP_CASC_LEN
+        AIE_VARIANT,
+        TT_DATA,
+        TT_COEFF,
+        TP_API,
+        TP_FIR_LEN,
+        TP_SSR,
+        TP_USE_COEFF_RELOAD,
+        TP_CASC_LEN,
     )
 
 
 def fn_validate_TP_CASC_LEN(
-    AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_SSR, TP_CASC_LEN
+    AIE_VARIANT,
+    TT_DATA,
+    TT_COEFF,
+    TP_API,
+    TP_FIR_LEN,
+    TP_SSR,
+    TP_USE_COEFF_RELOAD,
+    TP_CASC_LEN,
 ):
     param_dict = fn_update_TP_CASC_LEN(
-        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_SSR
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_SSR, TP_USE_COEFF_RELOAD
     )
     if "enum" in param_dict:
         return validate_legal_set(param_dict["enum"], "TP_CASC_LEN", TP_CASC_LEN)

@@ -110,8 +110,10 @@ def fn_validate_data_type(TT_DATA, AIE_VARIANT):
 def update_TP_DIM(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
-    if "TP_DIM" in args and args["TP_DIM"]: TP_DIM = args["TP_DIM"]
-    else: TP_DIM = 0
+    if "TP_DIM" in args and args["TP_DIM"]:
+        TP_DIM = args["TP_DIM"]
+    else:
+        TP_DIM = 0
 
     return fn_update_TP_DIM(AIE_VARIANT, TT_DATA, TP_DIM)
 
@@ -126,11 +128,11 @@ def fn_update_TP_DIM(AIE_VARIANT, TT_DATA, TP_DIM):
     io_bytes_max = com.k_data_memory_bytes[AIE_VARIANT]
     io_samples_max = int(TP_SSR_max * io_bytes_max / data_bytes)
 
-    param_dict={
-        "name" : "TP_DIM",
-        "minimum" : TP_DIM_min,
-        "maximum" : io_samples_max,
-        "maximum_pingpong_buf" : int(io_samples_max/2)
+    param_dict = {
+        "name": "TP_DIM",
+        "minimum": TP_DIM_min,
+        "maximum": io_samples_max,
+        "maximum_pingpong_buf": int(io_samples_max / 2),
     }
 
     if (TP_DIM != 0) and (not fn_is_power_of_two(TP_DIM)):
@@ -175,11 +177,15 @@ def fn_update_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_DIM):
     data_bytes = com.fn_size_by_byte(TT_DATA)
     io_bytes_max = com.k_data_memory_bytes[AIE_VARIANT]
     io_samples_max = io_bytes_max / data_bytes
-    TP_NUM_FRAMES_max = int(TP_SSR_max * io_samples_max / TP_DIM)
-    param_dict = {"name": "TP_NUM_FRAMES", 
-                  "minimum": 1, 
-                  "maximum": TP_NUM_FRAMES_max,
-                  "maximum_pingpong_buf" : int(TP_NUM_FRAMES_max/2)}
+    # Currently TP_SSR>1 is not supported by TP_NUM_FRAMES>1
+    max_ssr = 1
+    TP_NUM_FRAMES_max = int(max_ssr * io_samples_max / TP_DIM)
+    param_dict = {
+        "name": "TP_NUM_FRAMES",
+        "minimum": 1,
+        "maximum": TP_NUM_FRAMES_max,
+        "maximum_pingpong_buf": int(TP_NUM_FRAMES_max / 2),
+    }
     return param_dict
 
 
@@ -217,31 +223,33 @@ def fn_update_ssr(AIE_VARIANT, TT_DATA, TP_DIM, TP_NUM_FRAMES):
     TP_DIM_per_kernel_min = int(2 * max_read / data_bytes)
 
     legal_set_TP_SSR = list(range(1, TP_SSR_max + 1))
-    legal_set_TP_SSR_pingpong =  list(range(1, TP_SSR_max + 1))
+    legal_set_TP_SSR_pingpong = list(range(1, TP_SSR_max + 1))
     io_bytes_max = com.k_data_memory_bytes[AIE_VARIANT]
     memory_required = data_bytes * TP_DIM * TP_NUM_FRAMES
     for ssr in legal_set_TP_SSR.copy():
         if not fn_is_power_of_two(ssr):
             legal_set_TP_SSR.remove(ssr)
             legal_set_TP_SSR_pingpong.remove(ssr)
-        elif (TP_DIM / ssr) < TP_DIM_per_kernel_min:
+        elif ((TP_DIM * TP_NUM_FRAMES) / ssr) < TP_DIM_per_kernel_min:
             legal_set_TP_SSR.remove(ssr)
             legal_set_TP_SSR_pingpong.remove(ssr)
         elif memory_required > (ssr * io_bytes_max):
             legal_set_TP_SSR.remove(ssr)
 
-        if ssr in legal_set_TP_SSR_pingpong and memory_required > (ssr * (io_bytes_max/2)):
+        if ssr in legal_set_TP_SSR_pingpong and memory_required > (
+            ssr * (io_bytes_max / 2)
+        ):
             legal_set_TP_SSR_pingpong.remove(ssr)
 
-    if TP_NUM_FRAMES>1: #Currently TP_SSR>1 is not supported by TP_NUM_FRAMES>1
-        legal_set_TP_SSR=[1]
-        legal_set_TP_SSR_pingpong=[1]
+    if TP_NUM_FRAMES > 1:  # Currently TP_SSR>1 is not supported by TP_NUM_FRAMES>1
+        legal_set_TP_SSR = [1]
+        legal_set_TP_SSR_pingpong = [1]
 
-
-    param_dict = {"name": "TP_SSR",
-                  "enum": legal_set_TP_SSR,
-                  "enum_pingpong_buf" : legal_set_TP_SSR_pingpong
-                  }
+    param_dict = {
+        "name": "TP_SSR",
+        "enum": legal_set_TP_SSR,
+        "enum_pingpong_buf": legal_set_TP_SSR_pingpong,
+    }
     return param_dict
 
 

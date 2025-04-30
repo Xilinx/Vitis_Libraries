@@ -102,24 +102,34 @@ Super Sample Rate Operation
 
 While the term Super Sample Rate strictly means the processing of more than one sample per clock cycle, in the AI Engine context, it is taken to mean an implementation using parallel kernels to improve performance at the expense of additional resource use. In the FFT, SSR operation is controlled by the ``TP_PARALLEL_POWER`` template parameter. This parameter is intended to improve performance and also allow support of point sizes beyond the limitations of a single tile. Diagram :ref:`FIGURE_FFT_CONSTRAINTS` shows an example graph with ``TP_PARALLEL_POWER`` set to 2. This results in four subframe processors in parallel each performing an FFT of ``N/2^TP_PARALLEL_POWER`` point size. These subframe outputs are then combined by ``TP_PARALLEL_POWER`` stages of radix2 to create the final result. The order of samples is described in the note for ``TP_API`` above.
 
-The ``TP_PARALLEL_POWER`` parameter  allows a trade of performance for resource use in the form of tiles used. The following table shows the tile utilization versus ``TP_PARALLEL_POWER`` assuming that all widgets co-habit with FFT processing kernels.
+The ``TP_PARALLEL_POWER`` parameter  allows a trade of performance for resource use in the form of tiles used. ``TP_CASC_LEN`` determines the number of kernels in series for each parallel lane of processing and allows another trade of performance for resource use. The following table shows the tile utilization versus ``TP_PARALLEL_POWER`` and  ``TP_CASC_LEN`` assuming that all widgets co-habit with FFT processing kernels.
 
 .. table:: FFT Resource Usage
    :align: center
 
-   +-------------------+------------------+
-   | TP_PARALLEL_POWER | Number of Tiles  |
-   +===================+==================+
-   |         0         |        1         |
-   +-------------------+------------------+
-   |         1         |        4         |
-   +-------------------+------------------+
-   |         2         |       12         |
-   +-------------------+------------------+
-   |         3         |       32         |
-   +-------------------+------------------+
-   |         4         |       80         |
-   +-------------------+------------------+
+   +-------------------+-------------+------------------+
+   | TP_PARALLEL_POWER | TP_CASC_LEN | Number of Tiles  |
+   +===================+=============+==================+
+   |         0         |     1       |        1         |
+   +-------------------+-------------+------------------+
+   |         1         |     1       |        4         |
+   +-------------------+-------------+------------------+
+   |         2         |     1       |       12         |
+   +-------------------+-------------+------------------+
+   |         3         |     1       |       32         |
+   +-------------------+-------------+------------------+
+   |         4         |     1       |       80         |
+   +-------------------+-------------+------------------+
+   |         0         |     2       |        2         |
+   +-------------------+-------------+------------------+
+   |         1         |     2       |        6         |
+   +-------------------+-------------+------------------+
+   |         2         |     2       |       16         |
+   +-------------------+-------------+------------------+
+   |         3         |     2       |       40         |
+   +-------------------+-------------+------------------+
+   |         4         |     2       |       96         |
+   +-------------------+-------------+------------------+
 
 Super Sample Rate Sample to Port Mapping
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

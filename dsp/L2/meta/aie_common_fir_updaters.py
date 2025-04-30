@@ -35,6 +35,14 @@ TP_FIR_LEN_max = 8192
 TP_SSR_min = 1
 
 
+def fn_type_support_coeff_update(AIE_VARIANT, TT_DATA, legal_set):
+    legal_set_int=legal_set
+    if AIE_VARIANT == AIE:
+        if TT_DATA == "int16":
+            legal_set_int= remove_from_set(["int16"], legal_set_int)
+    return legal_set_int
+
+
 def fn_type_aieml_support_update(AIE_VARIANT, TT_DATA, legal_set):
     legal_set_int = legal_set
     # Not aware of any restrictions yet, default to AIE-ML.
