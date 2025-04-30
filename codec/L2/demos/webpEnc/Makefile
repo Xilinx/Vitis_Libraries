@@ -86,12 +86,12 @@ RUN_DEPS :=
 
 # get global setting
 ifeq ($(HOST_ARCH), x86)
-CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
-CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
@@ -133,13 +133,13 @@ endif
 
 ######################### binary container global settings ##########################
 VPP_FLAGS_webp_IntraPredLoop2_NoOut_1 +=  -D KERNEL_NAME=webp_IntraPredLoop2_NoOut_1
-VPP_FLAGS_webp_IntraPredLoop2_NoOut_1 += --hls.clock 200000000:webp_IntraPredLoop2_NoOut_1
+VPP_FLAGS_webp_IntraPredLoop2_NoOut_1 += --hls.clock 250000000:webp_IntraPredLoop2_NoOut_1
 VPP_FLAGS_webp_2_ArithmeticCoding_1 +=  -D KERNEL_NAME=webp_2_ArithmeticCoding_1
-VPP_FLAGS_webp_2_ArithmeticCoding_1 += --hls.clock 200000000:webp_2_ArithmeticCoding_1
+VPP_FLAGS_webp_2_ArithmeticCoding_1 += --hls.clock 250000000:webp_2_ArithmeticCoding_1
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_kernel += --clock.defaultFreqHz 200000000
+VPP_LDFLAGS_kernel += --clock.defaultFreqHz 250000000
 else
-VPP_LDFLAGS_kernel += --kernel_frequency 200
+VPP_LDFLAGS_kernel += --kernel_frequency 250
 endif
 
 ifneq ($(PACKAGE_NEEDED), on)
