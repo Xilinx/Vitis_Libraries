@@ -59,7 +59,7 @@ CXXFLAGS += -I$(XFLIB_DIR)/L3/include
 CXXFLAGS += -I$(XFLIB_DIR)/L3/include/graphPartition/grappolo/include
 CXXFLAGS += -I$(XFLIB_DIR)/../utils/L1/include
 
-CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -I$(XILINX_XRM)/include -std=c++14 -Wall -Wno-unknown-pragmas -Wno-unused-label
+CXXFLAGS += -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -I$(XILINX_XRM)/include -std=c++17 -Wall -Wno-unknown-pragmas -Wno-unused-label
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -pthread -lrt -Wno-unused-label -Wno-narrowing -DVERBOSE -L$(XILINX_XRM)/lib -lxrm -fopenmp
 CXXFLAGS += -fmessage-length=0 -DNDEBUG  #-D_GLIBCXX_USE_CXX11_ABI=0
 CXXFLAGS +=-I$(CUR_DIR)/src/ 
