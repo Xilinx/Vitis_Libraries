@@ -230,7 +230,8 @@ int main(int argc, char* argv[]) {
 
     // Validate results:
     bool flag = 0;
-    int level = (1 << 8);
+    // Setting a tolerance value since reference model is not bit accurate. Value set based on experiments.
+    int level = (1 << 10);
     for (unsigned ss = 0; ss < NUM_SAMPLES_O * NITER; ss += 2) {
         if ((ss % NUM_SAMPLES_O) < (POINT_SIZE * 2)) {
             real_dtype val_g_re, val_g_im;

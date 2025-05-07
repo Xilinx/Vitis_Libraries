@@ -20,11 +20,14 @@
         "FREQ": "312500000",
         "PART": "xcvc1902-vsva2197-2MP-e-S",
         "AIE_PLIO_WIDTH": "128",
-        "VSS_MODE": "1"
+        "VSS_MODE": "1",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
     },
-    "cint32_cint16_4096_1_10_5_4_0_0_4_1_1_1_0_0_0_5_312500000_128_1_aie1_hw_checkin": {
+    "cint32_cint16_4096_1_10_5_4_0_0_rnd_sym_inf_1_1_1_0_0_0_5_312500000_128_1_1_1_aie1_hw_checkin": {
         "SSR": "5",
         "AIE_VARIANT": "1",
+        "WINDOW_VSIZE": "4096",
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "4096",
@@ -43,12 +46,15 @@
         "FREQ": "312500000",
         "PART": "xcvc1902-vsva2197-2MP-e-S",
         "AIE_PLIO_WIDTH": "128",
-        "VSS_MODE": "1"
+        "VSS_MODE": "1",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
     },
-    "cint32_cint32_4096_1_10_5_4_0_0_4_1_1_1_0_0_0_4_312500000_128_1_aie1_hw_checkin": {
+    "cint32_cint32_4096_1_10_5_4_0_0_rnd_sym_inf_1_1_1_0_0_0_4_312500000_128_1_1_1_aie1_hw_checkin": {
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint32",
         "AIE_VARIANT": "1",
+        "WINDOW_VSIZE": "4096",
         "POINT_SIZE": "4096",
         "FFT_NIFFT": "1",
         "SHIFT": "10",
@@ -66,12 +72,15 @@
         "FREQ": "312500000",
         "PART": "xcvc1902-vsva2197-2MP-e-S",
         "AIE_PLIO_WIDTH": "128",
-        "VSS_MODE": "1"
+        "VSS_MODE": "1",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
     },
-    "cint32_cint16_8192_1_10_5_4_0_0_4_1_1_1_0_0_0_4_312500000_128_1_aie1_hw_checkin": {
+    "cint32_cint16_8192_1_10_5_4_0_0_rnd_sym_inf_1_1_1_0_0_0_4_312500000_128_1_1_1_aie1_hw_checkin": {
         "POINT_SIZE": "8192",
         "PARALLEL_POWER": "1",
         "AIE_VARIANT": "1",
+        "WINDOW_VSIZE": "8192",
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "FFT_NIFFT": "1",
@@ -90,15 +99,18 @@
         "FREQ": "312500000",
         "PART": "xcvc1902-vsva2197-2MP-e-S",
         "AIE_PLIO_WIDTH": "128",
-        "VSS_MODE": "1"
+        "VSS_MODE": "1",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
     },
-    "cfloat_cfloat_4096_1_0_5_4_0_0_4_1_1_1_0_0_4_312500000_128_1_aie1_hw_checkin": {
+    "cfloat_cfloat_4096_1_0_5_4_0_0_rnd_sym_inf_1_1_1_0_0_4_312500000_128_1_1_1_aie1_hw_checkin": {
         "DATA_TYPE": "cfloat",
         "TWIDDLE_TYPE": "cfloat",
         "SHIFT": "0",
         "POINT_SIZE": "4096",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0.1",
+        "WINDOW_VSIZE": "4096",
         "FFT_NIFFT": "1",
         "STIM_TYPE": "5",
         "NITER": "4",
@@ -113,14 +125,17 @@
         "FREQ": "312500000",
         "PART": "xcvc1902-vsva2197-2MP-e-S",
         "AIE_PLIO_WIDTH": "128",
-        "VSS_MODE": "1"
+        "VSS_MODE": "1",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
     },
-    "cint32_cint32_16384_1_5_5_4_0_0_4_1_1_1_0_0_0_4_312500000_128_1_aie1_hw_checkin": {
+    "cint32_cint32_16384_1_5_5_4_0_0_rnd_sym_inf_1_1_1_0_0_0_4_312500000_128_1_1_1_aie1_hw_checkin": {
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint32",
         "SHIFT": "5",
         "POINT_SIZE": "16384",
         "AIE_VARIANT": "1",
+        "WINDOW_VSIZE": "16384",
         "FFT_NIFFT": "1",
         "STIM_TYPE": "5",
         "NITER": "4",
@@ -136,12 +151,41 @@
         "FREQ": "312500000",
         "PART": "xcvc1902-vsva2197-2MP-e-S",
         "AIE_PLIO_WIDTH": "128",
-        "VSS_MODE": "1"
+        "VSS_MODE": "1",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
     },
-    "cint32_cint16_4096_1_10_5_4_0_0_11_1_1_2_0_0_0_4_312500000_128_1_aie2_hw_checkin": {
+    "cint32_cint16_8192_1_5_5_4_0_0_rnd_sym_inf_1_1_1_0_0_0_16_312500000_128_1_1_1_aie1_hw_checkin": {
+        "DATA_TYPE": "cint32",
+        "TWIDDLE_TYPE": "cint16",
+        "SSR": "16",
+        "PARALLEL_POWER": "2",
+        "SHIFT": "5",
+        "POINT_SIZE": "8192",
+        "AIE_VARIANT": "1",
+        "WINDOW_VSIZE": "8192",
+        "FFT_NIFFT": "1",
+        "STIM_TYPE": "5",
+        "NITER": "4",
+        "API_IO": "0",
+        "USE_WIDGETS": "0",
+        "ROUND_MODE": "rnd_sym_inf",
+        "SAT_MODE": "1",
+        "DATA_SEED": "1",
+        "DIFF_TOLERANCE": "0",
+        "TWIDDLE_MODE": "0",
+        "CC_TOLERANCE": "0",
+        "FREQ": "312500000",
+        "PART": "xcvc1902-vsva2197-2MP-e-S",
+        "AIE_PLIO_WIDTH": "128",
+        "VSS_MODE": "1",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
+    },
+    "cint32_cint16_4096_1_10_5_4_0_0_rnd_sym_inf_1_1_2_0_0_0_4_312500000_128_1_1_1_aie2_hw_checkin": {
         "PART": "xcve2802-vsvh1760-2MP-e-S",
         "AIE_VARIANT": "2",
-        "ROUND_MODE": "rnd_sym_inf",
+        "WINDOW_VSIZE": "4096",
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "4096",
@@ -151,6 +195,7 @@
         "NITER": "4",
         "API_IO": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "rnd_sym_inf",
         "SAT_MODE": "1",
         "DATA_SEED": "1",
         "DIFF_TOLERANCE": "0",
@@ -159,14 +204,16 @@
         "SSR": "4",
         "FREQ": "312500000",
         "AIE_PLIO_WIDTH": "128",
-        "VSS_MODE": "1"
+        "VSS_MODE": "1",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
     },
-    "cint32_cint16_4096_1_10_5_4_0_0_11_1_1_2_0_0_0_5_312500000_128_1_aie2_hw_checkin": {
+    "cint32_cint16_4096_1_10_5_4_0_0_rnd_sym_inf_1_1_2_0_0_0_5_312500000_128_1_1_1_aie2_hw_checkin": {
         "PART": "xcve2802-vsvh1760-2MP-e-S",
         "SSR": "5",
         "AIE_PLIO_WIDTH": "128",
         "AIE_VARIANT": "2",
-        "ROUND_MODE": "rnd_sym_inf",
+        "WINDOW_VSIZE": "4096",
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "4096",
@@ -176,19 +223,22 @@
         "NITER": "4",
         "API_IO": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "rnd_sym_inf",
         "SAT_MODE": "1",
         "DATA_SEED": "1",
         "DIFF_TOLERANCE": "0",
         "TWIDDLE_MODE": "0",
         "CC_TOLERANCE": "0",
         "FREQ": "312500000",
-        "VSS_MODE": "1"
+        "VSS_MODE": "1",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
     },
-    "cint32_cint16_32768_1_10_5_4_0_0_11_1_1_2_0_0_0_4_312500000_128_1_aie2_hw_checkin": {
+    "cint32_cint16_32768_1_10_5_4_0_0_rnd_sym_inf_1_1_2_0_0_0_4_312500000_128_1_1_1_aie2_hw_checkin": {
         "PART": "xcve2802-vsvh1760-2MP-e-S",
         "POINT_SIZE": "32768",
         "AIE_VARIANT": "2",
-        "ROUND_MODE": "rnd_sym_inf",
+        "WINDOW_VSIZE": "32768",
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "FFT_NIFFT": "1",
@@ -197,6 +247,7 @@
         "NITER": "4",
         "API_IO": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "rnd_sym_inf",
         "SAT_MODE": "1",
         "DATA_SEED": "1",
         "DIFF_TOLERANCE": "0",
@@ -205,9 +256,11 @@
         "SSR": "4",
         "FREQ": "312500000",
         "AIE_PLIO_WIDTH": "128",
-        "VSS_MODE": "1"
+        "VSS_MODE": "1",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
     },
-    "cfloat_cfloat_4096_1_0_5_4_0_0_4_1_1_1_0_0_4_312500000_128_2_aie1_hw_checkin": {
+    "cfloat_cfloat_4096_1_0_5_4_0_0_rnd_sym_inf_1_1_1_0_0_4_312500000_128_2_1_1_aie1_hw_checkin": {
         "DATA_TYPE": "cfloat",
         "TWIDDLE_TYPE": "cfloat",
         "SHIFT": "0",
@@ -216,6 +269,7 @@
         "SSR": "4",
         "VSS_MODE": "2",
         "DIFF_TOLERANCE": "0.1",
+        "WINDOW_VSIZE": "4096",
         "FFT_NIFFT": "1",
         "STIM_TYPE": "5",
         "NITER": "4",
@@ -228,9 +282,11 @@
         "CC_TOLERANCE": "0",
         "FREQ": "312500000",
         "PART": "xcvc1902-vsva2197-2MP-e-S",
-        "AIE_PLIO_WIDTH": "128"
+        "AIE_PLIO_WIDTH": "128",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
     },
-    "cfloat_cfloat_8192_1_0_5_4_0_0_4_1_1_1_0_0_16_312500000_128_2_aie1_hw_checkin": {
+    "cfloat_cfloat_8192_1_0_5_4_0_0_rnd_sym_inf_1_1_1_0_0_16_312500000_128_2_1_1_aie1_hw_checkin": {
         "DATA_TYPE": "cfloat",
         "TWIDDLE_TYPE": "cfloat",
         "SHIFT": "0",
@@ -239,6 +295,7 @@
         "SSR": "16",
         "VSS_MODE": "2",
         "DIFF_TOLERANCE": "0.1",
+        "WINDOW_VSIZE": "8192",
         "FFT_NIFFT": "1",
         "STIM_TYPE": "5",
         "NITER": "4",
@@ -251,9 +308,11 @@
         "CC_TOLERANCE": "0",
         "FREQ": "312500000",
         "PART": "xcvc1902-vsva2197-2MP-e-S",
-        "AIE_PLIO_WIDTH": "128"
+        "AIE_PLIO_WIDTH": "128",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
     },
-    "cfloat_cfloat_16384_1_0_5_4_0_0_4_1_1_1_0_0_16_312500000_128_2_aie1_hw_checkin": {
+    "cfloat_cfloat_16384_1_0_5_4_0_0_rnd_sym_inf_1_1_1_0_0_16_312500000_128_2_1_1_aie1_hw_checkin": {
         "DATA_TYPE": "cfloat",
         "TWIDDLE_TYPE": "cfloat",
         "SHIFT": "0",
@@ -262,6 +321,7 @@
         "SSR": "16",
         "VSS_MODE": "2",
         "DIFF_TOLERANCE": "0.1",
+        "WINDOW_VSIZE": "16384",
         "FFT_NIFFT": "1",
         "STIM_TYPE": "5",
         "NITER": "4",
@@ -274,9 +334,11 @@
         "CC_TOLERANCE": "0",
         "FREQ": "312500000",
         "PART": "xcvc1902-vsva2197-2MP-e-S",
-        "AIE_PLIO_WIDTH": "128"
+        "AIE_PLIO_WIDTH": "128",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
     },
-    "cfloat_cfloat_32768_1_0_5_4_0_0_4_1_1_1_0_0_32_312500000_64_2_aie1_hw_checkin": {
+    "cfloat_cfloat_32768_1_0_5_4_0_0_rnd_sym_inf_1_1_1_0_0_32_312500000_64_2_1_1_aie1_hw_checkin": {
         "DATA_TYPE": "cfloat",
         "TWIDDLE_TYPE": "cfloat",
         "SHIFT": "0",
@@ -286,6 +348,7 @@
         "VSS_MODE": "2",
         "AIE_PLIO_WIDTH": "64",
         "DIFF_TOLERANCE": "0.1",
+        "WINDOW_VSIZE": "32768",
         "FFT_NIFFT": "1",
         "STIM_TYPE": "5",
         "NITER": "4",
@@ -297,18 +360,21 @@
         "TWIDDLE_MODE": "0",
         "CC_TOLERANCE": "0",
         "FREQ": "312500000",
-        "PART": "xcvc1902-vsva2197-2MP-e-S"
+        "PART": "xcvc1902-vsva2197-2MP-e-S",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
     },
-    "cfloat_cfloat_32768_1_0_5_4_0_0_4_1_1_1_0_0_64_312500000_64_2_aie1_hw_checkin": {
+    "cfloat_cfloat_8192_1_0_5_4_0_0_rnd_sym_inf_1_1_1_0_0_64_312500000_64_2_1_1_aie1_hw_checkin": {
         "DATA_TYPE": "cfloat",
         "TWIDDLE_TYPE": "cfloat",
         "SHIFT": "0",
-        "POINT_SIZE": "32768",
+        "POINT_SIZE": "8192",
         "AIE_VARIANT": "1",
         "SSR": "64",
         "VSS_MODE": "2",
         "AIE_PLIO_WIDTH": "64",
         "DIFF_TOLERANCE": "0.1",
+        "WINDOW_VSIZE": "32768",
         "FFT_NIFFT": "1",
         "STIM_TYPE": "5",
         "NITER": "4",
@@ -320,10 +386,91 @@
         "TWIDDLE_MODE": "0",
         "CC_TOLERANCE": "0",
         "FREQ": "312500000",
-        "PART": "xcvc1902-vsva2197-2MP-e-S"
+        "PART": "xcvc1902-vsva2197-2MP-e-S",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
     },
-    "cint32_cint16_4096_1_10_5_4_0_0_4_1_1_2_0_0_0_8_312500000_128_1_aie1_hw_qor": {
+    "cfloat_cfloat_4096_1_0_5_4_0_0_rnd_sym_inf_1_1_2_0_0_4_312500000_128_2_1_1_aie2_hw_checkin": {
+        "PART": "xcve2802-vsvh1760-2MP-e-S",
+        "DATA_TYPE": "cfloat",
+        "TWIDDLE_TYPE": "cfloat",
+        "SHIFT": "0",
+        "POINT_SIZE": "4096",
+        "AIE_VARIANT": "2",
+        "SSR": "4",
+        "VSS_MODE": "2",
+        "DIFF_TOLERANCE": "0.1",
+        "WINDOW_VSIZE": "4096",
+        "FFT_NIFFT": "1",
+        "STIM_TYPE": "5",
+        "NITER": "4",
+        "API_IO": "0",
+        "USE_WIDGETS": "0",
+        "ROUND_MODE": "rnd_sym_inf",
+        "SAT_MODE": "1",
+        "DATA_SEED": "1",
+        "TWIDDLE_MODE": "0",
+        "CC_TOLERANCE": "0",
+        "FREQ": "312500000",
+        "AIE_PLIO_WIDTH": "128",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
+    },
+    "cfloat_cfloat_16384_1_0_5_4_0_0_rnd_sym_inf_1_1_2_0_0_16_312500000_128_2_1_1_aie2_hw_checkin": {
+        "PART": "xcve2802-vsvh1760-2MP-e-S",
+        "DATA_TYPE": "cfloat",
+        "TWIDDLE_TYPE": "cfloat",
+        "SHIFT": "0",
+        "POINT_SIZE": "16384",
+        "AIE_VARIANT": "2",
+        "SSR": "16",
+        "VSS_MODE": "2",
+        "DIFF_TOLERANCE": "0.1",
+        "WINDOW_VSIZE": "16384",
+        "FFT_NIFFT": "1",
+        "STIM_TYPE": "5",
+        "NITER": "4",
+        "API_IO": "0",
+        "USE_WIDGETS": "0",
+        "ROUND_MODE": "rnd_sym_inf",
+        "SAT_MODE": "1",
+        "DATA_SEED": "1",
+        "TWIDDLE_MODE": "0",
+        "CC_TOLERANCE": "0",
+        "FREQ": "312500000",
+        "AIE_PLIO_WIDTH": "128",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
+    },
+    "cfloat_cfloat_65536_1_0_5_4_0_0_rnd_sym_inf_1_1_2_0_0_32_312500000_128_2_1_1_aie2_hw_checkin": {
+        "PART": "xcve2802-vsvh1760-2MP-e-S",
+        "DATA_TYPE": "cfloat",
+        "TWIDDLE_TYPE": "cfloat",
+        "SHIFT": "0",
+        "POINT_SIZE": "65536",
+        "AIE_VARIANT": "2",
+        "SSR": "32",
+        "VSS_MODE": "2",
+        "DIFF_TOLERANCE": "0.1",
+        "WINDOW_VSIZE": "65536",
+        "FFT_NIFFT": "1",
+        "STIM_TYPE": "5",
+        "NITER": "4",
+        "API_IO": "0",
+        "USE_WIDGETS": "0",
+        "ROUND_MODE": "rnd_sym_inf",
+        "SAT_MODE": "1",
+        "DATA_SEED": "1",
+        "TWIDDLE_MODE": "0",
+        "CC_TOLERANCE": "0",
+        "FREQ": "312500000",
+        "AIE_PLIO_WIDTH": "128",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
+    },
+    "cint32_cint16_4096_1_10_5_4_0_0_rnd_sym_inf_1_1_2_0_0_0_8_312500000_128_1_1_1_aie1_hw_qor": {
         "SSR": "8",
+        "WINDOW_VSIZE": "4096",
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "4096",
@@ -343,6 +490,8 @@
         "FREQ": "312500000",
         "PART": "xcvc1902-vsva2197-2MP-e-S",
         "AIE_PLIO_WIDTH": "128",
-        "VSS_MODE": "1"
+        "VSS_MODE": "1",
+        "ADD_FRONT_TRANSPOSE": "1",
+        "ADD_BACK_TRANSPOSE": "1"
     }
 }

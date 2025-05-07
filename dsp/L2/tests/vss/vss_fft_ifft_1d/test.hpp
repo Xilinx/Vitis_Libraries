@@ -49,8 +49,13 @@ class tl_graph : public graph {
     static constexpr int kPortsPerTile = API_IO == 0 ? 1 : kStreamsPerTile;
     static constexpr int ptSize = POINT_SIZE;
     static constexpr int DYN_PT_SIZE = 0;
+    static constexpr int parPow0maxSize = std::is_same<DATA_TYPE, cfloat>() ? 1024 : 4096;
     static constexpr int refParPow =
-        ptSize <= 4096 ? 0 : ptSize == 8192 ? 1 : ptSize == 16384 ? 2 : ptSize == 32768 ? 3 : ptSize == 65536 ? 4 : -1;
+        ptSize <= 2048
+            ? 0
+            : ptSize == 4096
+                  ? 1
+                  : ptSize == 8192 ? 2 : ptSize == 16384 ? 3 : ptSize == 32768 ? 4 : ptSize == 65536 ? 5 : -1;
     static constexpr int windowSize = ptSize;
     std::array<output_plio, (1 << refParPow)> back_o;
     std::array<input_plio, (1 << refParPow)> front_i;

@@ -22,6 +22,7 @@ Widget API Cast reference model
 #include "aie_api/aie_adf.hpp"
 #include "widget_api_cast_ref.hpp"
 #include "fir_ref_utils.hpp"
+//#define _DSPLIB_WIDGET_API_CAST_REF_DEBUG_
 
 namespace xf {
 namespace dsp {
@@ -657,7 +658,7 @@ void widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2,
 // Widget API Cast - Casc/Stream input 1 window output
 template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
 void widget_api_cast_ref<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>::
-    transferData(input_cascade<cacc64>* inStream0,
+    transferData(input_cascade<typename t_accType<TT_DATA>::type>* inStream0,
                  input_stream<TT_DATA>* inStream1,
                  output_buffer<TT_DATA>& outWindow0) {
     TT_DATA d_in, d_in2;
@@ -669,11 +670,12 @@ void widget_api_cast_ref<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE
     constexpr unsigned int Lsize = TP_WINDOW_VSIZE * kSampleSize / (kWriteSize);
     constexpr unsigned int kCascadeWidth = 4; // samples.
 
-    using accVect_t = ::aie::accum<cacc64, kCascadeWidth>;
+    using accVect_t = ::aie::accum<typename t_accType<TT_DATA>::type, kCascadeWidth>;
     //  using accVect_t   = ::aie::detail::accum<::aie::detail::AccumClass::CInt,
     //                                         //fnAccClass<TT_DATA>(), //int, cint, FP or CFP
     //                                         64, //acc sample width
-    //                                         kCascadeWidth>; //both cint16 and cint32 use 4 * cacc64kVectSize>;
+    //                                         kCascadeWidth>; //both cint16 and cint32 use 4 * typename
+    //                                         t_accType<TT_DATA>::typekVectSize>;
     using dataVect_t = ::aie::vector<TT_DATA, kCascadeWidth>;
     accVect_t cascAcc;
     dataVect_t cascData;
@@ -696,7 +698,15 @@ void widget_api_cast_ref<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE
     else if
         constexpr(TP_PATTERN == kSampleIntlv) {
             for (int v = 0; v < (TP_WINDOW_VSIZE / 2) / kCascadeWidth; v++) {
-                cascAcc = readincr_v4(inStream0);
+                if
+                    constexpr(std::is_same<TT_DATA, cfloat>()) {
+                        ::aie::accum<caccfloat, 8> tmp = readincr_v8(inStream0);
+                        cascAcc = tmp.extract<4>(
+                            0); // seems to be a bug in readincr_v8(instream0), so needed to use this workaround
+                    }
+                else {
+                    cascAcc = readincr_v4(inStream0);
+                }
                 cascData = cascAcc.template to_vector<TT_DATA>(0);
                 for (int i = 0; i < kCascadeWidth; i++) {
                     d_in = cascData[i]; // read input data
@@ -718,7 +728,7 @@ void widget_api_cast_ref<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE
 template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
 void widget_api_cast_ref<TT_DATA, kStreamCascAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>::
     transferData(input_stream<TT_DATA>* inStream0,
-                 input_cascade<cacc64>* inStream1,
+                 input_cascade<typename t_accType<TT_DATA>::type>* inStream1,
                  output_buffer<TT_DATA>& outWindow0) {
     TT_DATA d_in, d_in2;
     TT_DATA* outPtr0 = outWindow0.data();
@@ -729,11 +739,12 @@ void widget_api_cast_ref<TT_DATA, kStreamCascAPI, kWindowAPI, 2, TP_WINDOW_VSIZE
     constexpr unsigned int Lsize = TP_WINDOW_VSIZE * kSampleSize / (kWriteSize);
     constexpr unsigned int kCascadeWidth = 4; // samples.
 
-    using accVect_t = ::aie::accum<cacc64, kCascadeWidth>;
+    using accVect_t = ::aie::accum<typename t_accType<TT_DATA>::type, kCascadeWidth>;
     //  using accVect_t   = ::aie::detail::accum<::aie::detail::AccumClass::CInt,
     //                                         //fnAccClass<TT_DATA>(), //int, cint, FP or CFP
     //                                         64, //acc sample width
-    //                                         kCascadeWidth>; //both cint16 and cint32 use 4 * cacc64kVectSize>;
+    //                                         kCascadeWidth>; //both cint16 and cint32 use 4 * typename
+    //                                         t_accType<TT_DATA>::typekVectSize>;
     using dataVect_t = ::aie::vector<TT_DATA, kCascadeWidth>;
     accVect_t cascAcc;
     dataVect_t cascData;
@@ -756,7 +767,14 @@ void widget_api_cast_ref<TT_DATA, kStreamCascAPI, kWindowAPI, 2, TP_WINDOW_VSIZE
     else if
         constexpr(TP_PATTERN == kSampleIntlv) {
             for (int v = 0; v < (TP_WINDOW_VSIZE / 2) / kCascadeWidth; v++) {
-                cascAcc = readincr_v4(inStream1); // read and ignore - the header can come from the stream
+                if
+                    constexpr(std::is_same<TT_DATA, cfloat>()) {
+                        ::aie::accum<caccfloat, 8> tmp2 = readincr_v8(inStream1);
+                        cascAcc = tmp2.extract<4>(0);
+                    }
+                else {
+                    cascAcc = readincr_v4(inStream1);
+                }
                 cascData = cascAcc.template to_vector<TT_DATA>(0);
                 for (int i = 0; i < kCascadeWidth; i++) {
                     d_in = readincr(inStream0);
@@ -778,15 +796,16 @@ void widget_api_cast_ref<TT_DATA, kStreamCascAPI, kWindowAPI, 2, TP_WINDOW_VSIZE
 template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
 void widget_api_cast_ref<TT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>::
     transferData(input_buffer<TT_DATA>& inWindow0,
-                 output_cascade<cacc64>* outStream0,
+                 output_cascade<typename t_accType<TT_DATA>::type>* outStream0,
                  output_stream<TT_DATA>* outStream1) {
     constexpr unsigned int kCascadeWidth = 4;                        // samples.
     constexpr unsigned int kStreamWidth = 128 / 8 / sizeof(TT_DATA); // samples.
-    using accVect_t = ::aie::accum<cacc64, kCascadeWidth>;
+    using accVect_t = ::aie::accum<typename t_accType<TT_DATA>::type, kCascadeWidth>;
     //  using accVect_t   = ::aie::detail::accum<::aie::detail::AccumClass::CInt,
     //                                         //fnAccClass<TT_DATA>(), //int, cint, FP or CFP
     //                                         64, //acc sample width
-    //                                         kCascadeWidth>; //both cint16 and cint32 use 4 * cacc64kVectSize>;
+    //                                         kCascadeWidth>; //both cint16 and cint32 use 4 * typename
+    //                                         t_accType<TT_DATA>::typekVectSize>;
     using dataVect_t = ::aie::vector<TT_DATA, kCascadeWidth>;
     using streamVect_t = ::aie::vector<TT_DATA, kStreamWidth>;
 
@@ -806,7 +825,7 @@ void widget_api_cast_ref<TT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE
                 streamData[i % kStreamWidth] = temp; // read input data samplewise
                 cascData[i % kCascadeWidth] = temp;
                 if (i % kCascadeWidth == kCascadeWidth - 1) {
-                    cascAcc = ::aie::from_vector<cacc64>(cascData);
+                    cascAcc = ::aie::from_vector<typename t_accType<TT_DATA>::type>(cascData);
                     writeincr(outStream0, cascAcc);
                 }
                 if (i % kStreamWidth == kStreamWidth - 1) {
@@ -825,7 +844,7 @@ void widget_api_cast_ref<TT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE
                 if (i % 2 == 0) { // deinterlace
                     cascData[(i / 2) % kCascadeWidth] = *inPtr++;
                     if ((i / 2) % kCascadeWidth == kCascadeWidth - 1) {
-                        cascAcc = ::aie::from_vector<cacc64>(cascData);
+                        cascAcc = ::aie::from_vector<typename t_accType<TT_DATA>::type>(cascData);
                         writeincr(outStream0, cascAcc);
                     }
                 } else {
@@ -849,14 +868,15 @@ template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTER
 void widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>::
     transferData(input_buffer<TT_DATA>& inWindow0,
                  output_stream<TT_DATA>* outStream0,
-                 output_cascade<cacc64>* outStream1) {
+                 output_cascade<typename t_accType<TT_DATA>::type>* outStream1) {
     constexpr unsigned int kCascadeWidth = 4;                        // samples.
     constexpr unsigned int kStreamWidth = 128 / 8 / sizeof(TT_DATA); // samples.
-    using accVect_t = ::aie::accum<cacc64, kCascadeWidth>;
+    using accVect_t = ::aie::accum<typename t_accType<TT_DATA>::type, kCascadeWidth>;
     //  using accVect_t   = ::aie::detail::accum<::aie::detail::AccumClass::CInt,
     //                                         //fnAccClass<TT_DATA>(), //int, cint, FP or CFP
     //                                         64, //acc sample width
-    //                                         kCascadeWidth>; //both cint16 and cint32 use 4 * cacc64kVectSize>;
+    //                                         kCascadeWidth>; //both cint16 and cint32 use 4 * typename
+    //                                         t_accType<TT_DATA>::typekVectSize>;
     using dataVect_t = ::aie::vector<TT_DATA, kCascadeWidth>;
     using streamVect_t = ::aie::vector<TT_DATA, kStreamWidth>;
 
@@ -879,7 +899,7 @@ void widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE
                     writeincr(outStream0, streamData);
                 }
                 if (i % kCascadeWidth == kCascadeWidth - 1) {
-                    cascAcc = ::aie::from_vector<cacc64>(cascData);
+                    cascAcc = ::aie::from_vector<typename t_accType<TT_DATA>::type>(cascData);
                     writeincr(outStream1, cascAcc);
                 }
             }
@@ -900,7 +920,7 @@ void widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE
                 } else {
                     cascData[(i / 2) % kCascadeWidth] = *inPtr++;
                     if ((i / 2) % kCascadeWidth == kCascadeWidth - 1) {
-                        cascAcc = ::aie::from_vector<cacc64>(cascData);
+                        cascAcc = ::aie::from_vector<typename t_accType<TT_DATA>::type>(cascData);
                         writeincr(outStream1, cascAcc);
                     }
                 }

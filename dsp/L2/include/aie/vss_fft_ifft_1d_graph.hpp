@@ -177,11 +177,7 @@ class vss_fft_ifft_1d_graph : public graph {
     static constexpr unsigned int kPtSizeD2Ceil = fnCeil<kPtSizeD2, TP_SSR>();
     static constexpr unsigned int kFirstFFTShift = TP_SHIFT / 2;
     static constexpr unsigned int kSecondFFTShift = TP_SHIFT - TP_SHIFT / 2;
-    // This can be either 1 or 2 for powers of 2 point sizes.
-    static constexpr unsigned int kPointSizesEq = kPtSizeD2 / kPtSizeD1;
-    // Window size needs to be a multiple of both ptSizeD1 and ptSizeD2.
-    // The kPointSizesEq factor ensures that the calculated point size is always divisible by both.
-    static constexpr unsigned int kWindowSizeRaw = (kPtSizeD2Ceil * kPtSizeD1 * kPointSizesEq) / TP_SSR;
+    static constexpr unsigned int kWindowSizeRaw = (kPtSizeD2Ceil * kPtSizeD1) / TP_SSR;
     static constexpr unsigned int kWindowSizeCalc = kWindowSizeRaw * 2 * sizeof(TT_DATA) <= __DATA_MEM_BYTES__
                                                         ? kWindowSizeRaw
                                                         : __DATA_MEM_BYTES__ / (2 * sizeof(TT_DATA));

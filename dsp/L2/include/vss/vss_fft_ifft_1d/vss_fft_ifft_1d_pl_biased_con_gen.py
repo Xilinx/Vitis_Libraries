@@ -23,17 +23,20 @@ parser.add_argument("-s", "--ssr", type=int, help="parallelisation factor")
 parser.add_argument("-hz", "--freqhz", type=int, help="frequency of PL components. Set this to be 1/4th of the core frequency of the AIE device")
 parser.add_argument("-u", "--vss_unit", type=str, help="name of vss unit")
 parser.add_argument("-v", "--version", type=int, help="Version of IP")
+parser.add_argument("-nb", "--add_back_transpose", type=int, help="Flag that returns a packages vss including the back transpose")
 args = parser.parse_args()
 SSR = args.ssr
 fname = args.cfg_file_name
 vssName = args.vss_unit
 freqhz = args.freqhz
 ipVersion = str(args.version)
+addBackTranspose = int(args.add_back_transpose)
 f = open(f"{fname}", "w")
 
-common_begin_cfg = (f"""
+if addBackTranspose == 0:
+    common_begin_cfg = (f"""
                     
-freqhz={freqhz}:ssr_fft.ap_clk,back_transpose.ap_clk
+freqhz={freqhz}:ssr_fft.aclk
 
 [connectivity]
 # ------------------------------------------------------------
@@ -41,8 +44,30 @@ freqhz={freqhz}:ssr_fft.ap_clk,back_transpose.ap_clk
 # ------------------------------------------------------------
 
 # PL Transpose kernels:
-nk = ssr_fft_wrapper:1:ssr_fft
+nk = parallel_fft:1:ssr_fft
+
+                    
+vss = amd:dsplib:{vssName}:{ipVersion}:ssr_fft,ai_engine_0
+
+
+# ------------------------------------------------------------
+# AXI Stream Connections (PL to AIE)
+# ------------------------------------------------------------
+
+""")
+else:
+    common_begin_cfg = (f"""
+                    
+freqhz={freqhz}:ssr_fft.aclk,back_transpose.ap_clk
+
+[connectivity]
+# ------------------------------------------------------------
+# HLS PL Kernels:
+# ------------------------------------------------------------
+
+# PL Transpose kernels:
 nk= back_transpose_simple_wrapper:1:back_transpose
+nk = ssr_fft_wrapper:1:ssr_fft
 
                     
 vss = amd:dsplib:{vssName}:{ipVersion}:back_transpose,ssr_fft,ai_engine_0
@@ -72,16 +97,17 @@ else:
         f.write(text)
 
 
-comment = "# PL FFT TO PL TRANSPOSE:\n"
-f.write(comment)
-
-if(SSR == 1):
-    text = "sc = ssr_fft.outData"  + ":back_transpose.sig_i" + "\n"
-    f.write(text)
-else:
-    for i in range(SSR):
-        text = "sc = ssr_fft.outData_" + str(i) + ":back_transpose.sig_i_" + str(i) + "\n"
+if addBackTranspose == 1:
+    comment = "# PL FFT TO PL TRANSPOSE:\n"
+    f.write(comment)
+    
+    if(SSR == 1):
+        text = "sc = ssr_fft.outData"  + ":back_transpose.sig_i" + "\n"
         f.write(text)
+    else:
+        for i in range(SSR):
+            text = "sc = ssr_fft.outData_" + str(i) + ":back_transpose.sig_i_" + str(i) + "\n"
+            f.write(text)
 
 
 closing_text=(f"""

@@ -107,9 +107,13 @@ class kernelMatVecMulClass {
     static constexpr unsigned int streamVectorBuffSize = (TP_DIM_B / TP_CASC_LEN) == (768 / 8 / sizeof(TT_DATA_B))
                                                              ? (1024 / 8 / sizeof(TT_DATA_B))
                                                              : TP_DIM_B / TP_CASC_LEN;
+#ifdef __SUPPORTS_ACC64__
+    static constexpr int castBtoA = 0;
+#else
     static constexpr int castBtoA =
         (std::is_same<TT_DATA_A, cint32>::value && std::is_same<TT_DATA_B, cint16>::value) ||
         (std::is_same<TT_DATA_A, int32>::value && std::is_same<TT_DATA_B, int16>::value);
+#endif //__SUPPORTS_ACC64__
 
     static constexpr unsigned int streamLoadSize = 128 / 8 / sizeof(TT_DATA_B);
     static constexpr unsigned int streamWriteOutSize = 128 / 8 / sizeof(TT_OUT);

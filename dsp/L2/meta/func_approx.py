@@ -61,7 +61,7 @@ def fn_update_tt_data(AIE_VARIANT):
     elif AIE_VARIANT == AIE_ML:
         legal_set_TT_DATA = ["int16", "int32", "float", "bfloat16"]
     elif AIE_VARIANT == AIE_MLv2:
-        legal_set_TT_DATA = ["int16", "int32", "float", "bfloat16"]
+        legal_set_TT_DATA = ["int16", "int32", "float", "bfloat16"] 
 
     param_dict = {}
     param_dict.update({"name": "TT_DATA"})

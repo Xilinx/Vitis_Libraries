@@ -39,7 +39,8 @@ REF_INPUT_FILE = ./data/input_ref.txt
 ifeq ($(POINT_SIZE), 16)
 	PT_SIZE_PWR       := 4
 	TAG_PAR_PWR       := 0
-	REF_SSR           := 1
+	REF_SSR           := 1  
+# there is some duplication here, tag_ssr needs to be 1<<TAG_PAR_PWR
 else ifeq ($(POINT_SIZE), 32)
 	PT_SIZE_PWR       := 5
 	TAG_PAR_PWR       := 0
@@ -70,24 +71,24 @@ else ifeq ($(POINT_SIZE), 2048)
 	REF_SSR           := 1
 else ifeq ($(POINT_SIZE), 4096)
 	PT_SIZE_PWR       := 12
-	TAG_PAR_PWR       := 0
-	REF_SSR           := 1
-else ifeq ($(POINT_SIZE), 8192)
-	PT_SIZE_PWR       := 13
 	TAG_PAR_PWR       := 1
 	REF_SSR           := 2
-else ifeq ($(POINT_SIZE), 16384)
-	PT_SIZE_PWR       := 14
+else ifeq ($(POINT_SIZE), 8192)
+	PT_SIZE_PWR       := 13
 	TAG_PAR_PWR       := 2
 	REF_SSR           := 4
-else ifeq ($(POINT_SIZE), 32768)
-	PT_SIZE_PWR       := 15
+else ifeq ($(POINT_SIZE), 16384)
+	PT_SIZE_PWR       := 14
 	TAG_PAR_PWR       := 3
 	REF_SSR           := 8
-else ifeq ($(POINT_SIZE), 65536)
-	PT_SIZE_PWR       := 16
+else ifeq ($(POINT_SIZE), 32768)
+	PT_SIZE_PWR       := 15
 	TAG_PAR_PWR       := 4
 	REF_SSR           := 16
+else ifeq ($(POINT_SIZE), 65536)
+	PT_SIZE_PWR       := 16
+	TAG_PAR_PWR       := 5
+	REF_SSR           := 32
 endif
 
 ifeq ($(AIE_VARIANT), 1)

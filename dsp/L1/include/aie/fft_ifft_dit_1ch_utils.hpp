@@ -69,6 +69,10 @@ template <>
 INLINE_DECL constexpr int fnFFTCascVWidth<cint32>() {
     return 4;
 };
+template <>
+INLINE_DECL constexpr int fnFFTCascVWidth<cfloat>() {
+    return 4;
+};
 
 template <typename T_D>
 T_D INLINE_DECL unitVector(){};
@@ -325,7 +329,6 @@ void INLINE_DECL r2comb_dit<cint32, cint32, 1>(const cint32* x,
 };
 #endif //__SUPPORTS_32B_TW__ == 1
 
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 void INLINE_DECL r2comb_dit<cfloat, cfloat, 0>(const cfloat* x,
                                                const cfloat* tw,
@@ -346,7 +349,6 @@ void INLINE_DECL r2comb_dit<cfloat, cfloat, 1>(const cfloat* x,
                                                bool inv) {
     stage_radix2_dit<cfloat, cfloat, cfloat, 1, 1>(x, tw, n, shift, y, inv);
 };
-#endif //__SUPPORTS_CFLOAT__
 
 //-------------------------------------------------------------------------------------------------
 // Unroll_for replacement functions.
@@ -694,9 +696,10 @@ INLINE_DECL void readStreamIn(input_stream<TT_DATA>* __restrict inStream0, TT_DA
 // read casc/stream, write window/buffer
 
 template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_VSIZE>
-INLINE_DECL void readCascStreamIn(input_cascade<cacc64>* __restrict inStream0, // input_cascade generates a warning
-                                  input_stream<TT_DATA>* __restrict inStream1,
-                                  TT_DATA* inBuff) {
+INLINE_DECL void readCascStreamIn(
+    input_cascade<typename t_accType<TT_DATA>::type>* __restrict inStream0, // input_cascade generates a warning
+    input_stream<TT_DATA>* __restrict inStream1,
+    TT_DATA* inBuff) {
     constexpr int TP_HEADER_BYTES = __ALIGN_BYTE_SIZE__ * TP_DYN_PT_SIZE;
     constexpr unsigned int kDataReadSize = 32;
     constexpr int kSamplesIn256b = 256 / 8 / sizeof(TT_DATA);
@@ -747,9 +750,10 @@ INLINE_DECL void readCascStreamIn(input_cascade<cacc64>* __restrict inStream0, /
 //-----------------------------------------------------------------------------------------------------
 // read stream/Casc, write window/buffer
 template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_VSIZE>
-INLINE_DECL void readStreamCascIn(input_stream<TT_DATA>* __restrict inStream0,
-                                  input_cascade<cacc64>* __restrict inStream1, // input_cascade generates a warning
-                                  TT_DATA* inBuff) {
+INLINE_DECL void readStreamCascIn(
+    input_stream<TT_DATA>* __restrict inStream0,
+    input_cascade<typename t_accType<TT_DATA>::type>* __restrict inStream1, // input_cascade generates a warning
+    TT_DATA* inBuff) {
     constexpr int TP_HEADER_BYTES = __ALIGN_BYTE_SIZE__ * TP_DYN_PT_SIZE;
     constexpr unsigned int kDataReadSize = 32;
     constexpr int kSamplesIn256b = 256 / 8 / sizeof(TT_DATA);
@@ -859,9 +863,10 @@ INLINE_DECL void writeStreamOut(output_stream<TT_DATA>* __restrict outStream0, T
 //-----------------------------------------------------------------------------------------------------
 // read window, write casc/stream
 template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_VSIZE>
-INLINE_DECL void writeCascStreamOut(output_cascade<cacc64>* __restrict outStream0, // output_cascade generates a warning
-                                    output_stream<TT_DATA>* __restrict outStream1,
-                                    TT_DATA* outBuff) {
+INLINE_DECL void writeCascStreamOut(
+    output_cascade<typename t_accType<TT_DATA>::type>* __restrict outStream0, // output_cascade generates a warning
+    output_stream<TT_DATA>* __restrict outStream1,
+    TT_DATA* outBuff) {
     constexpr int TP_HEADER_BYTES = __ALIGN_BYTE_SIZE__ * TP_DYN_PT_SIZE;
     constexpr unsigned int kDataReadSize = 32;
     constexpr int kSamplesIn256b = 32 / sizeof(TT_DATA);
@@ -909,9 +914,10 @@ INLINE_DECL void writeCascStreamOut(output_cascade<cacc64>* __restrict outStream
 //-----------------------------------------------------------------------------------------------------
 // read window, write stream/casc
 template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_VSIZE>
-INLINE_DECL void writeStreamCascOut(output_stream<TT_DATA>* __restrict outStream0,
-                                    output_cascade<cacc64>* __restrict outStream1, // output_cascade generates a warning
-                                    TT_DATA* outBuff) {
+INLINE_DECL void writeStreamCascOut(
+    output_stream<TT_DATA>* __restrict outStream0,
+    output_cascade<typename t_accType<TT_DATA>::type>* __restrict outStream1, // output_cascade generates a warning
+    TT_DATA* outBuff) {
     constexpr int TP_HEADER_BYTES = __ALIGN_BYTE_SIZE__ * TP_DYN_PT_SIZE;
     constexpr unsigned int kDataReadSize = 32;
     constexpr int kSamplesIn256b = 32 / sizeof(TT_DATA);

@@ -2230,15 +2230,9 @@ class fft_ifft_dit_1ch_graph : public graph {
     static_assert(!(std::is_same<TT_TWIDDLE, cint32>::value) || __SUPPORTS_32B_TW__ == 1,
                   "ERROR: This variant of AIE does not support TT_TWIDDLE = cint32");
 
-#if __SUPPORTS_CFLOAT__ == 1
     static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value) ||
                       (std::is_same<TT_DATA, cfloat>::value),
                   "ERROR: TT_DATA is not supported");
-#else
-    // AIE variants that don't support cfloat should flag that.
-    static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value),
-                  "ERROR: TT_DATA is not supported");
-#endif //__SUPPORTS_CFLOAT__ == 0
 
     static constexpr int kParallel_factor = 1 << TP_PARALLEL_POWER;
     static constexpr int kWindowSize = TP_WINDOW_VSIZE >> TP_PARALLEL_POWER;

@@ -1,3 +1,4 @@
+# Copyright (C) 2019-2022, Xilinx, Inc.
 # Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -137,6 +138,8 @@ else ifeq ($(HOST_ARCH_temp), cortex-a9)
 HOST_ARCH := aarch32
 else ifneq (,$(findstring cortex-a, $(HOST_ARCH_temp)))
 HOST_ARCH := aarch64
+else ifneq (,$(findstring cortexa, $(HOST_ARCH_temp)))
+    HOST_ARCH := aarch64
 endif
 
 # Special processing for tool version/platform type
@@ -150,11 +153,7 @@ IS_VERSAL := off
 endif
 # 1) for aie flow from 2022.1
 ifeq (on, $(IS_VERSAL))
-ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
 LINK_TARGET_FMT := xsa
-else
-LINK_TARGET_FMT := xclbin
-endif
 else
 LINK_TARGET_FMT := xclbin
 endif
@@ -181,7 +180,7 @@ ifndef XILINX_XRT
 endif
 endif
 
-#check if need sd_card and package
+#check if need sd_card and package 
 PACKAGE_NEEDED := off
 SD_CARD_NEEDED := off
 ifeq ($(HOST_ARCH), aarch32)
@@ -268,7 +267,7 @@ endif
 $(warning [WARNING]: g++ version too old. Using g++ provided by the tool: $(CXX))
 endif
 endif
-else
+else 
 ifeq ($(HOST_ARCH), aarch64)
 CXX := $(XILINX_VITIS)/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-g++
 else ifeq ($(HOST_ARCH), aarch32)

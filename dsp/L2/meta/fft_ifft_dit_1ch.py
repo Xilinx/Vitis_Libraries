@@ -100,8 +100,6 @@ def update_TT_DATA(args):
 
 def fn_update_TT_DATA(AIE_VARIANT):
     legal_set_TT_DATA = ["cint16", "cint32", "cfloat"]
-    if AIE_VARIANT in [AIE_ML, AIE_MLv2]:
-        legal_set_TT_DATA = ["cint16", "cint32"]
     param_dict = {}
     param_dict.update({"name": "TT_DATA"})
     param_dict.update({"enum": legal_set_TT_DATA})

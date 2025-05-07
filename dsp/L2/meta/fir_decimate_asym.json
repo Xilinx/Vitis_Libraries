@@ -118,6 +118,7 @@
                 "function": "update_TP_FIR_LEN",
                 "args": [
                     "TT_DATA",
+                    "TT_COEFF",
                     "TP_API",
                     "AIE_VARIANT",
                     "TP_USE_COEFF_RELOAD"
@@ -128,6 +129,7 @@
                 "function": "validate_TP_FIR_LEN",
                 "args": [
                     "TT_DATA",
+                    "TT_COEFF",
                     "TP_API",
                     "AIE_VARIANT",
                     "TP_USE_COEFF_RELOAD"
@@ -141,12 +143,12 @@
             "updater": {
                 "file": "fir_decimate_asym.py",
                 "function": "update_TP_DECIMATE_FACTOR",
-                "args": ["AIE_VARIANT", "TP_FIR_LEN"]
+                "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_USE_COEFF_RELOAD", "TP_FIR_LEN"]
             },
             "validator": {
                 "file": "fir_decimate_asym.py",
                 "function": "validate_TP_DECIMATE_FACTOR",
-                "args": ["AIE_VARIANT", "TP_FIR_LEN"]
+                "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_USE_COEFF_RELOAD", "TP_FIR_LEN"]
             }
         },
         {

@@ -193,7 +193,6 @@ def fn_validate_TP_FIR_LEN(TT_DATA, TP_USE_COEFF_RELOAD, TP_API, TP_FIR_LEN):
     range_TP_FIR_LEN = [param_dict["minimum"], param_dict["maximum"]]
     return validate_range(range_TP_FIR_LEN, "TP_FIR_LEN", TP_FIR_LEN)
 
-
 #######################################################
 ############# TP_DUAL_IP Updater and Validator ########
 #######################################################
@@ -213,6 +212,7 @@ def fn_validate_TP_DUAL_IP(TP_DUAL_IP):
 #######################################################
 ############# TP_NUM_OUTPUTS Updater and Validator ####
 #######################################################
+
 def update_TP_NUM_OUTPUTS(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TP_API = args["TP_API"]
@@ -251,14 +251,9 @@ def update_TP_SSR(args):
     TP_API = args["TP_API"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
-    return fn_update_TP_SSR(
-        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD
-    )
+    return fn_update_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD)
 
-
-def fn_update_TP_SSR(
-    AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD
-):
+def fn_update_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD):
     legal_set_TP_SSR = find_divisors(TP_FIR_LEN, TP_SSR_max)
     for ssr_val in legal_set_TP_SSR.copy():
         param_dict_casc_len = fn_update_TP_CASC_LEN(
@@ -291,7 +286,6 @@ def validate_TP_SSR(args):
     return fn_validate_TP_SSR(
         AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_SSR
     )
-
 
 def fn_validate_TP_SSR(
     AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_SSR
@@ -414,7 +408,7 @@ def update_TP_INPUT_WINDOW_VSIZE(args):
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
-    if args["TP_INPUT_WINDOW_VSIZE"]:
+    if ("TP_INPUT_WINDOW_VSIZE" in args) and args["TP_INPUT_WINDOW_VSIZE"]:
         TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     else:
         TP_INPUT_WINDOW_VSIZE = 0
@@ -432,7 +426,7 @@ def update_TP_INPUT_WINDOW_VSIZE(args):
 def fn_update_TP_INPUT_WINDOW_VSIZE(
     AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_SSR, TP_INPUT_WINDOW_VSIZE
 ):
-    num_lanes = fnNumLanesSym(TT_DATA, TT_COEFF)
+    num_lanes = fnNumLanesSym(TT_DATA, TT_COEFF, AIE_VARIANT)
     lcm_ws = num_lanes * TP_SSR
 
     if TP_API == API_BUFFER:
@@ -448,10 +442,11 @@ def fn_update_TP_INPUT_WINDOW_VSIZE(
     else:
         TP_INPUT_WINDOW_VSIZE_max = com.TP_INPUT_WINDOW_VSIZE_max_streams
 
-    param_dict = {
-        "name": "TP_INPUT_WINDOW_VSIZE",
-        "minimum": lcm_ws,
-        "maximum": TP_INPUT_WINDOW_VSIZE_max,
+    param_dict={
+        "name" : "TP_INPUT_WINDOW_VSIZE",
+        "minimum" : lcm_ws,
+        "maximum" : TP_INPUT_WINDOW_VSIZE_max,
+        "maximum_pingpong_buf" : int(TP_INPUT_WINDOW_VSIZE_max/2)
     }
 
     if TP_INPUT_WINDOW_VSIZE != 0:
@@ -489,7 +484,7 @@ def validate_TP_INPUT_WINDOW_VSIZE(args):
 def fn_validate_input_window_size(
     AIE_VARIANT, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR
 ):
-    num_lanes = fnNumLanesSym(TT_DATA, TT_COEFF)
+    num_lanes = fnNumLanesSym(TT_DATA, TT_COEFF, AIE_VARIANT)
     lcm_ws = TP_SSR * num_lanes
     if TP_INPUT_WINDOW_VSIZE % lcm_ws != 0:
         return isError(f"TP_INPUT_WINDOW_VSIZE should be a multiple of {lcm_ws}!")
@@ -613,9 +608,9 @@ def fn_validate_coeff(TT_COEFF, TP_FIR_LEN, coeff_list, TP_USE_COEFF_RELOAD):
 
 
 # Logic derived from sr_sym_traits
-def fnNumLanesSym(TT_DATA, TT_COEFF):
+def fnNumLanesSym(TT_DATA, TT_COEFF, AIE_VARIANT):
     return (
-        fnNumLanes(TT_DATA, TT_COEFF)
+        fnNumLanes(TT_DATA, TT_COEFF, AIE_VARIANT)
         if (
             not (
                 (TT_DATA == "cint16" and TT_COEFF == "int16")
@@ -623,7 +618,7 @@ def fnNumLanesSym(TT_DATA, TT_COEFF):
             )
         )
         else (
-            fnNumLanes384b(TT_DATA, TT_COEFF)
+            fnNumLanes384b(TT_DATA, TT_COEFF, AIE_VARIANT)
             if (TT_DATA == "cint16" and TT_COEFF == "int16")
             else 2  # cint32 cint32 only has 2 lanes
         )

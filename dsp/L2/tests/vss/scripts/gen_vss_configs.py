@@ -43,7 +43,7 @@ def uut_params(cur_dir, test, fname):
     macro_body= []
     for key, value in test.items():
         if key != "PART":
-            if key in ["DATA_TYPE", "TWIDDLE_TYPE", "POINT_SIZE", "FFT_NIFFT", "SHIFT", "API_IO", "ROUND_MODE", "SAT_MODE", "TWIDDLE_MODE", "SSR", "AIE_PLIO_WIDTH", "VSS_MODE"]:
+            if key in ["DATA_TYPE", "TWIDDLE_TYPE", "POINT_SIZE", "FFT_NIFFT", "SHIFT", "API_IO", "ROUND_MODE", "SAT_MODE", "TWIDDLE_MODE", "SSR", "AIE_PLIO_WIDTH", "VSS_MODE", "ADD_FRONT_TRANSPOSE", "ADD_BACK_TRANSPOSE"]:
                 macro_body.append(
     f'''
 {key}={value}''' 

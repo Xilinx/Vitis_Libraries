@@ -23,15 +23,87 @@ parser.add_argument("-s", "--ssr", type=int, help="parallelisation factor")
 parser.add_argument("-hz", "--freqhz", type=int, help="frequency of PL components. Set this to be 1/4th of the core frequency of the AIE device")
 parser.add_argument("-u", "--vss_unit", type=str, help="name of vss unit")
 parser.add_argument("-v", "--version", type=int, help="Version of IP")
+parser.add_argument("-nf", "--add_front_transpose", type=int, help="Set flag to 1 to return a packaged vss including the back transpose. Else set to 0.")
+parser.add_argument("-nb", "--add_back_transpose", type=int, help="Set flag to 1 to return a packaged vss including the front transpose. Else set to 0.")
 args = parser.parse_args()
 SSR = args.ssr
 fname = args.cfg_file_name
 vssName = args.vss_unit
 freqhz = args.freqhz
 ipVersion = str(args.version)
+addFrontTpose=int(args.add_front_transpose)
+addBackTpose=int(args.add_back_transpose)
+
 f = open(f"{fname}", "w")
 
-common_begin_cfg = (f"""
+if addFrontTpose == 0 and addBackTpose == 0:
+    common_begin_cfg = (f"""
+                    
+freqhz={freqhz}:transpose.ap_clk
+
+[connectivity]
+# ------------------------------------------------------------
+# HLS PL Kernels:
+# ------------------------------------------------------------
+
+# PL Transpose kernels:
+nk = ifft_transpose_wrapper:1:transpose
+
+                    
+vss = amd:dsplib:{vssName}:{ipVersion}:transpose,ai_engine_0
+
+
+# ------------------------------------------------------------
+# AXI Stream Connections (PL to AIE)
+# ------------------------------------------------------------
+
+""")
+elif addBackTpose == 1 and addFrontTpose == 0:
+    common_begin_cfg = (f"""
+                    
+freqhz={freqhz}:transpose.ap_clk,back_transpose.ap_clk
+
+[connectivity]
+# ------------------------------------------------------------
+# HLS PL Kernels:
+# ------------------------------------------------------------
+
+# PL Transpose kernels:
+nk = ifft_transpose_wrapper:1:transpose
+nk = ifft_back_transpose_wrapper:1:back_transpose
+                    
+vss = amd:dsplib:{vssName}:{ipVersion}:back_transpose,transpose,ai_engine_0
+
+
+# ------------------------------------------------------------
+# AXI Stream Connections (PL to AIE)
+# ------------------------------------------------------------
+
+""") 
+elif addFrontTpose == 1 and addBackTpose == 0:
+    common_begin_cfg = (f"""
+                    
+freqhz={freqhz}:front_transpose.ap_clk,transpose.ap_clk
+
+[connectivity]
+# ------------------------------------------------------------
+# HLS PL Kernels:
+# ------------------------------------------------------------
+
+# PL Transpose kernels:
+nk = ifft_front_transpose_wrapper:1:front_transpose
+nk = ifft_transpose_wrapper:1:transpose
+        
+vss = amd:dsplib:{vssName}:{ipVersion}:front_transpose,transpose,ai_engine_0
+
+
+# ------------------------------------------------------------
+# AXI Stream Connections (PL to AIE)
+# ------------------------------------------------------------
+
+""") 
+else:
+    common_begin_cfg = (f"""
                     
 freqhz={freqhz}:front_transpose.ap_clk,transpose.ap_clk,back_transpose.ap_clk
 
@@ -60,17 +132,17 @@ vss = amd:dsplib:{vssName}:{ipVersion}:front_transpose,back_transpose,transpose,
 f.write(common_begin_cfg)
 
 
+if addFrontTpose == 1:
+    comment = "# FRONT TRANSPOSE TO AIE:\n"
+    f.write(comment)
 
-comment = "# FRONT TRANSPOSE TO AIE:\n"
-f.write(comment)
-
-if(SSR == 1):
-    text = "sc = front_transpose.sig_o" + ":ai_engine_0.fft_aie_PLIO_front_in_0" + "\n"
-    f.write(text)
-else:
-    for i in range(SSR):
-        text = "sc = front_transpose.sig_o_" + str(i) + ":ai_engine_0.fft_aie_PLIO_front_in_" + str(i) + "\n"
+    if(SSR == 1):
+        text = "sc = front_transpose.sig_o" + ":ai_engine_0.fft_aie_PLIO_front_in_0" + "\n"
         f.write(text)
+    else:
+        for i in range(SSR):
+            text = "sc = front_transpose.sig_o_" + str(i) + ":ai_engine_0.fft_aie_PLIO_front_in_" + str(i) + "\n"
+            f.write(text)
 
 
 comment = "# AIE TO PL TRANSPOSE1:\n"
@@ -95,16 +167,17 @@ else:
         text = "sc = transpose.sig_o_" + str(i) + ":ai_engine_0.fft_aie_PLIO_back_in_" + str(i) + "\n"
         f.write(text)
 
-comment = "# AIE TO PL BACK TRANSPOSE:\n"
-f.write(comment)
+if addBackTpose == 1:
+    comment = "# AIE TO PL BACK TRANSPOSE:\n"
+    f.write(comment)
 
-if(SSR == 1):
-    text = "sc = ai_engine_0.fft_aie_PLIO_back_out_0" + ":back_transpose.sig_i" + "\n"
-    f.write(text)
-else:
-    for i in range(SSR):
-        text = "sc = ai_engine_0.fft_aie_PLIO_back_out_" + str(i) + ":back_transpose.sig_i_" + str(i) + "\n"
+    if(SSR == 1):
+        text = "sc = ai_engine_0.fft_aie_PLIO_back_out_0" + ":back_transpose.sig_i" + "\n"
         f.write(text)
+    else:
+        for i in range(SSR):
+            text = "sc = ai_engine_0.fft_aie_PLIO_back_out_" + str(i) + ":back_transpose.sig_i_" + str(i) + "\n"
+            f.write(text)
 
 closing_text=(f"""
 

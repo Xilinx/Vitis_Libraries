@@ -107,7 +107,7 @@ template <typename TT_DATA_A,
 class hadamard<TT_DATA_A, TT_DATA_B, TP_DIM, TP_NUM_FRAMES, TP_SHIFT, 1, TP_SSR, TP_RND, TP_SAT> {
    private:
     static_assert(TP_RND >= ROUND_MIN && TP_RND <= ROUND_MAX, "ERROR: TP_RND is out of the supported range.");
-    static constexpr unsigned int kSamplesInVect = std::max(128 / 8 / sizeof(TT_DATA_A), 128 / 8 / sizeof(TT_DATA_B));
+    static constexpr unsigned int kSamplesInVect = MAX(128 / 8 / sizeof(TT_DATA_A), 128 / 8 / sizeof(TT_DATA_B));
     static constexpr unsigned int kVecInFrame = CEIL(TP_DIM, kSamplesInVect) / kSamplesInVect;
     static constexpr unsigned int kUNROLL = MIN(kVecInFrame, kUnrollMax);
 

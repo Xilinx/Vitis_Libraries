@@ -144,6 +144,10 @@ template <>
 struct tFFTAccBaseType<cint32> {
     using type = cacc64;
 };
+template <>
+struct tFFTAccBaseType<cfloat> {
+    using type = caccfloat;
+};
 
 template <typename TT_DATA, typename TT_COEFF>
 struct tAccBaseType {

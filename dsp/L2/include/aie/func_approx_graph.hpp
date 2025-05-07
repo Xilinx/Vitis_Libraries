@@ -31,6 +31,7 @@ the Function Approximation library element.
 
 #include "graph_utils.hpp"
 #include "func_approx.hpp"
+#include "device_defs.h"
 
 namespace xf {
 namespace dsp {
@@ -141,8 +142,9 @@ class func_approx_graph : public graph {
     // No internal buffers used when useLutAPI=1, but set to 16 as required for constructor argument
     static constexpr int internalBuffSize = (useLutAPI == 0) ? TP_WINDOW_VSIZE : 16;
     // When using linear_approx API with parallel access = 4, each 128 bits of lut values are to be duplicated.
-    static constexpr int dupe128b = useLutAPI + 1;
-    static constexpr int lutValsIn128b = 128 / 8 / sizeof(TT_LUT);
+    // static constexpr int duplicateLutEntry = useLutAPI + 1;
+    static constexpr int duplicateLutEntry = useLutAPI == 1 ? 2 : 1;
+    static constexpr int lutValsInLUTentry = __PARALLEL_LUT_WIDTH__ / 8 / sizeof(TT_LUT);
 
 // static asserts
 // TT_DATA - AIE1 - int16, int32, float
@@ -157,7 +159,7 @@ class func_approx_graph : public graph {
                   "ERROR: TT_DATA must int16, int32, or float for AIE");
 #endif //_SUPPORTS_BFLOAT16_ == 0
        // TP_COARSE_BITS - lut size < DATA_MEMORY
-    static_assert((kLutValues * sizeof(TT_LUT) * (dupe128b)) <= __DATA_MEM_BYTES__,
+    static_assert((kLutValues * sizeof(TT_LUT) * (duplicateLutEntry)) <= __DATA_MEM_BYTES__,
                   "ERROR: The required size of the lookup tables (as specified by TP_COARSE_BITS) exceeds memory.");
     // TP_FINE_BITS + TP_COARSE_BITS < 8*sizeof(TT_DATA)
     static_assert(
@@ -201,11 +203,11 @@ class func_approx_graph : public graph {
      * @brief This is the constructor function for the func_approx graph.
      **/
     func_approx_graph(const std::array<TT_LUT, kLutValues>& lut) {
-        // 128 bit duplication is carried out (if necessary), and two new identical copies of the lut are created.
-        for (int i = 0; i < (kLutValues / lutValsIn128b); i++) {
-            for (int j = 0; j < dupe128b; j++) {
-                for (int k = 0; k < lutValsIn128b; k++) {
-                    lut_ab.push_back(lut[i * lutValsIn128b + k]);
+        // 128/256 bit duplication is carried out (if necessary), and two new identical copies of the lut are created.
+        for (int i = 0; i < (kLutValues / lutValsInLUTentry); i++) {
+            for (int j = 0; j < duplicateLutEntry; j++) {
+                for (int k = 0; k < lutValsInLUTentry; k++) {
+                    lut_ab.push_back(lut[i * lutValsInLUTentry + k]);
                 }
             }
         }

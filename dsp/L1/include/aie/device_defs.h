@@ -322,6 +322,17 @@
 #define __MAX_SHIFT__ 62
 #endif
 
+//-------------------func_approx LUT tables----------------
+#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10) || (__AIE_ARCH__ == 20) || (__AIEARCH__ == 20) || \
+    (__AIE_ARCH__ == 21) || (__AIEARCH__ == 21)
+#define __PARALLEL_LUT_WIDTH__ 128
+#elif (__AIE_ARCH__ == 22) || (__AIEARCH__ == 22)
+#define __PARALLEL_LUT_WIDTH__ 256
+#else
+// deliberate error
+#define __PARALLEL_LUT_WIDTH__ -1
+#endif
+
 //----------SATURATION and ROUNDING MODES-------------------
 // AIE1 and 2 offer 3 saturation modes
 #define __SATURATION_MODES__ 3

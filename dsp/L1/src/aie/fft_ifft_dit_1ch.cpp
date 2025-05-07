@@ -1735,24 +1735,25 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_SAT,
           unsigned int TP_TWIDDLE_MODE>
-NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
-                                    TT_OUT_DATA,
-                                    TT_TWIDDLE,
-                                    TP_POINT_SIZE,
-                                    TP_FFT_NIFFT,
-                                    TP_SHIFT,
-                                    TP_START_RANK,
-                                    TP_END_RANK,
-                                    TP_DYN_PT_SIZE,
-                                    TP_WINDOW_VSIZE,
-                                    kStreamAPI,
-                                    kCascStreamAPI,
-                                    TP_ORIG_PAR_POWER,
-                                    TP_RND,
-                                    TP_SAT,
-                                    TP_TWIDDLE_MODE>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                                                              output_cascade<cacc64>* __restrict outStream0, // Cascade
-                                                              output_stream<TT_OUT_DATA>* __restrict outStream1) {
+NOINLINE_DECL void fft_ifft_dit_1ch<
+    TT_DATA,
+    TT_OUT_DATA,
+    TT_TWIDDLE,
+    TP_POINT_SIZE,
+    TP_FFT_NIFFT,
+    TP_SHIFT,
+    TP_START_RANK,
+    TP_END_RANK,
+    TP_DYN_PT_SIZE,
+    TP_WINDOW_VSIZE,
+    kStreamAPI,
+    kCascStreamAPI,
+    TP_ORIG_PAR_POWER,
+    TP_RND,
+    TP_SAT,
+    TP_TWIDDLE_MODE>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                              output_cascade<typename t_accType<TT_DATA>::type>* __restrict outStream0, // Cascade
+                              output_stream<TT_OUT_DATA>* __restrict outStream1) {
     TT_DATA* __restrict inPtr = &inBuff[0];
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
@@ -1781,24 +1782,25 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_SAT,
           unsigned int TP_TWIDDLE_MODE>
-NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
-                                    TT_OUT_DATA,
-                                    TT_TWIDDLE,
-                                    TP_POINT_SIZE,
-                                    TP_FFT_NIFFT,
-                                    TP_SHIFT,
-                                    TP_START_RANK,
-                                    TP_END_RANK,
-                                    TP_DYN_PT_SIZE,
-                                    TP_WINDOW_VSIZE,
-                                    kWindowAPI,
-                                    kCascStreamAPI,
-                                    TP_ORIG_PAR_POWER,
-                                    TP_RND,
-                                    TP_SAT,
-                                    TP_TWIDDLE_MODE>::fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
-                                                              output_cascade<cacc64>* __restrict outStream0, // Cascade
-                                                              output_stream<TT_OUT_DATA>* __restrict outStream1) {
+NOINLINE_DECL void fft_ifft_dit_1ch<
+    TT_DATA,
+    TT_OUT_DATA,
+    TT_TWIDDLE,
+    TP_POINT_SIZE,
+    TP_FFT_NIFFT,
+    TP_SHIFT,
+    TP_START_RANK,
+    TP_END_RANK,
+    TP_DYN_PT_SIZE,
+    TP_WINDOW_VSIZE,
+    kWindowAPI,
+    kCascStreamAPI,
+    TP_ORIG_PAR_POWER,
+    TP_RND,
+    TP_SAT,
+    TP_TWIDDLE_MODE>::fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
+                              output_cascade<typename t_accType<TT_DATA>::type>* __restrict outStream0, // Cascade
+                              output_stream<TT_OUT_DATA>* __restrict outStream1) {
     TT_DATA* __restrict inPtr = (TT_DATA*)inWindow0.data();
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
@@ -1825,25 +1827,26 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_SAT,
           unsigned int TP_TWIDDLE_MODE>
-NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
-                                    TT_OUT_DATA,
-                                    TT_TWIDDLE,
-                                    TP_POINT_SIZE,
-                                    TP_FFT_NIFFT,
-                                    TP_SHIFT,
-                                    TP_START_RANK,
-                                    TP_END_RANK,
-                                    TP_DYN_PT_SIZE,
-                                    TP_WINDOW_VSIZE,
-                                    kStreamAPI,
-                                    kStreamCascAPI,
-                                    TP_ORIG_PAR_POWER,
-                                    TP_RND,
-                                    TP_SAT,
-                                    TP_TWIDDLE_MODE>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                                                              output_stream<TT_OUT_DATA>* __restrict outStream0,
-                                                              output_cascade<cacc64>* __restrict outStream1 // Cascade
-                                                              ) {
+NOINLINE_DECL void fft_ifft_dit_1ch<
+    TT_DATA,
+    TT_OUT_DATA,
+    TT_TWIDDLE,
+    TP_POINT_SIZE,
+    TP_FFT_NIFFT,
+    TP_SHIFT,
+    TP_START_RANK,
+    TP_END_RANK,
+    TP_DYN_PT_SIZE,
+    TP_WINDOW_VSIZE,
+    kStreamAPI,
+    kStreamCascAPI,
+    TP_ORIG_PAR_POWER,
+    TP_RND,
+    TP_SAT,
+    TP_TWIDDLE_MODE>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                              output_stream<TT_OUT_DATA>* __restrict outStream0,
+                              output_cascade<typename t_accType<TT_DATA>::type>* __restrict outStream1 // Cascade
+                              ) {
     TT_DATA* __restrict inPtr = &inBuff[0];
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
@@ -1872,25 +1875,26 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_SAT,
           unsigned int TP_TWIDDLE_MODE>
-NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
-                                    TT_OUT_DATA,
-                                    TT_TWIDDLE,
-                                    TP_POINT_SIZE,
-                                    TP_FFT_NIFFT,
-                                    TP_SHIFT,
-                                    TP_START_RANK,
-                                    TP_END_RANK,
-                                    TP_DYN_PT_SIZE,
-                                    TP_WINDOW_VSIZE,
-                                    kWindowAPI,
-                                    kStreamCascAPI,
-                                    TP_ORIG_PAR_POWER,
-                                    TP_RND,
-                                    TP_SAT,
-                                    TP_TWIDDLE_MODE>::fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
-                                                              output_stream<TT_OUT_DATA>* __restrict outStream0,
-                                                              output_cascade<cacc64>* __restrict outStream1 // Cascade
-                                                              ) {
+NOINLINE_DECL void fft_ifft_dit_1ch<
+    TT_DATA,
+    TT_OUT_DATA,
+    TT_TWIDDLE,
+    TP_POINT_SIZE,
+    TP_FFT_NIFFT,
+    TP_SHIFT,
+    TP_START_RANK,
+    TP_END_RANK,
+    TP_DYN_PT_SIZE,
+    TP_WINDOW_VSIZE,
+    kWindowAPI,
+    kStreamCascAPI,
+    TP_ORIG_PAR_POWER,
+    TP_RND,
+    TP_SAT,
+    TP_TWIDDLE_MODE>::fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
+                              output_stream<TT_OUT_DATA>* __restrict outStream0,
+                              output_cascade<typename t_accType<TT_DATA>::type>* __restrict outStream1 // Cascade
+                              ) {
     TT_DATA* __restrict inPtr = (TT_DATA*)inWindow0.data();
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 

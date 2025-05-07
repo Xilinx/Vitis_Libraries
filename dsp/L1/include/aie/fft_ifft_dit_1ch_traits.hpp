@@ -41,6 +41,15 @@ static constexpr unsigned int kUpdWSize = 32; // Upd_w size in Bytes (256bit) - 
 static constexpr unsigned int kMaxPointSize = 4096;
 static constexpr unsigned int kMaxPointLog = 12;
 
+// return accumulator data type for aie-ml
+template <typename T_D>
+struct t_accType {
+    using type = cacc64;
+};
+template <>
+struct t_accType<cfloat> {
+    using type = cfloat;
+};
 //-------------------------------
 // I/O types
 template <typename T_D>
@@ -65,12 +74,10 @@ template <>
 struct T_inputIF<float> {
     input_window<float>* inWindow;
 };
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 struct T_inputIF<cfloat> {
     input_window<cfloat>* inWindow;
 };
-#endif //__SUPPORTS_CFLOAT__ == 1
 
 template <typename T_D>
 struct T_outputIF {};
@@ -94,12 +101,10 @@ template <>
 struct T_outputIF<float> {
     output_window<float>* outWindow;
 };
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 struct T_outputIF<cfloat> {
     output_window<cfloat>* outWindow;
 };
-#endif //__SUPPORTS_CFLOAT__ == 1
 
 //---------------------------------------
 // Configuration Defensive check functions
@@ -115,12 +120,10 @@ template <>
 INLINE_DECL constexpr bool fnCheckDataType<cint32>() {
     return true;
 };
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr bool fnCheckDataType<cfloat>() {
     return true;
 };
-#endif //__SUPPORTS_CFLOAT__ == 1
 
 template <typename TT_IN_DATA, typename TT_OUT_DATA>
 INLINE_DECL constexpr bool fnCheckDataIOType() {
@@ -142,12 +145,10 @@ template <>
 INLINE_DECL constexpr bool fnCheckDataIOType<cint32, cint32>() {
     return true;
 };
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr bool fnCheckDataIOType<cfloat, cfloat>() {
     return true;
 };
-#endif //__SUPPORTS_CFLOAT__ == 1
 
 template <typename TT_TWIDDLE>
 INLINE_DECL constexpr bool fnCheckTwiddleType() {
@@ -161,12 +162,10 @@ template <>
 INLINE_DECL constexpr bool fnCheckTwiddleType<cint32>() {
     return true;
 };
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr bool fnCheckTwiddleType<cfloat>() {
     return true;
 };
-#endif //__SUPPORTS_CFLOAT__ == 1
 
 template <typename TT_DATA, typename TT_TWIDDLE>
 INLINE_DECL constexpr bool fnCheckDataTwiddleType() {
@@ -188,12 +187,10 @@ template <>
 INLINE_DECL constexpr bool fnCheckDataTwiddleType<cint32, cint32>() {
     return true;
 };
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr bool fnCheckDataTwiddleType<cfloat, cfloat>() {
     return true;
 };
-#endif //__SUPPORTS_CFLOAT__ == 1
 
 template <unsigned int TP_POINT_SIZE>
 INLINE_DECL constexpr bool fnCheckPointSize() {
@@ -213,35 +210,23 @@ INLINE_DECL constexpr bool fnCheckShift() {
 
 template <typename TT_DATA, unsigned int TP_SHIFT>
 INLINE_DECL constexpr bool fnCheckShiftFloat() {
-#if __SUPPORTS_CFLOAT__ == 1
     return !(std::is_same<TT_DATA, cfloat>::value) || // This check traps shift != 0 when data = cfloat
            (TP_SHIFT == 0);
-#else
-    return true;
-#endif //__SUPPORTS_CFLOAT__ == 1
 };
 
 template <typename TT_DATA, unsigned int RANKS, unsigned int TP_CASC_LEN>
 INLINE_DECL constexpr bool fnCheckCascLen() {
-// equation for integer ffts is complicated by the fact that odd power of 2 point sizes start with a radix 2 stage
-#if __SUPPORTS_CFLOAT__ == 1
+    // equation for integer ffts is complicated by the fact that odd power of 2 point sizes start with a radix 2 stage
     return (TP_CASC_LEN > 0) &&
            (std::is_same<TT_DATA, cfloat>::value ? (TP_CASC_LEN <= RANKS) : (TP_CASC_LEN <= (RANKS + 1) / 2));
-#else
-    return (TP_CASC_LEN > 0) && (TP_CASC_LEN <= (RANKS + 1) / 2);
-#endif //__SUPPORTS_CFLOAT__ == 1
 }
 
 template <typename TT_DATA, unsigned int TP_POINT_SIZE, unsigned int TP_CASC_LEN>
 INLINE_DECL constexpr bool fnCheckCascLen2() {
     return true;
-// The worry here was that since cfloat 16pt requires special buffering, it will not yield to cascade, but
-// all cascade configurations possible will not run into the issue of buffer overwrite involved.
-#if __SUPPORTS_CFLOAT__ == 1
+    // The worry here was that since cfloat 16pt requires special buffering, it will not yield to cascade, but
+    // all cascade configurations possible will not run into the issue of buffer overwrite involved.
     return (TP_CASC_LEN == 1) || (!std::is_same<TT_DATA, cfloat>::value) || (TP_POINT_SIZE != 16);
-#else
-    return (TP_CASC_LEN == 1) || (TP_POINT_SIZE != 16);
-#endif //__SUPPORTS_CFLOAT__ == 1
 }
 
 // End of Defensive check functions
@@ -254,13 +239,7 @@ INLINE_DECL constexpr int fnHeapSize() {
     int retVal = 0;
     int buffsize = 0;
     // cfloat twiddles are cfloat size and cam not use half table trick.
-    if (
-#if __SUPPORTS_CFLOAT__ == 1
-        std::is_same<TT_DATA, cfloat>::value
-#else
-        false
-#endif //__SUPPORTS_CFLOAT__ == 1
-        ) {
+    if (std::is_same<TT_DATA, cfloat>::value) {
         switch (TP_POINT_SIZE) {
             case 16:
                 retVal += 5 * 32;
@@ -348,10 +327,8 @@ INLINE_DECL constexpr bool fnReuseOutputBuffer() {
     }
     if (std::is_same<TT_D, cint16>::value) {
         return false;
-#if __SUPPORTS_CFLOAT__ == 1
     } else if (std::is_same<TT_D, cfloat>::value) {
         return (T_END_RANK - T_START_RANK) % 2 == 1; // cfloat stages are radix2, stages = ranks.
-#endif
     } else if (std::is_same<TT_D, cint32>::value) {
         return (T_END_RANK / 2 - T_START_RANK / 2) % 2 == 1; // cint32 stages are radix4, so stages = ranks/2
     }
@@ -490,14 +467,12 @@ INLINE_DECL float nullElem() {
     return 0.0;
 };
 
-#if __SUPPORTS_CFLOAT__ == 1
 // Null cint32 element
 template <>
 INLINE_DECL cfloat nullElem() {
     cfloat retVal = {0.0, 0.0};
     return retVal;
 };
-#endif //__SUPPORTS_CFLOAT__ == 1
 }
 }
 }

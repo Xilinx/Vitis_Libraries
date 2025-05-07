@@ -186,7 +186,7 @@ class fft_r2comb<TT_DATA,
     }
 
     // r2comb main
-    void fft_r2comb_main(input_cascade<cacc64>* __restrict inStream0, // Cascade
+    void fft_r2comb_main(input_cascade<typename dit_1ch::t_accType<TT_DATA>::type>* __restrict inStream0, // Cascade
                          input_stream<TT_DATA>* __restrict inStream1,
                          output_stream<TT_DATA>* __restrict outStream0);
 };
@@ -248,9 +248,9 @@ class fft_r2comb<TT_DATA,
     }
 
     // r2comb main
-    void fft_r2comb_main(input_cascade<cacc64>* __restrict inStream0, // Cascade
+    void fft_r2comb_main(input_cascade<typename dit_1ch::t_accType<TT_DATA>::type>* __restrict inStream0, // Cascade
                          input_stream<TT_DATA>* __restrict inStream1,
-                         output_cascade<cacc64>* __restrict outStream0, // Cascade
+                         output_cascade<typename dit_1ch::t_accType<TT_DATA>::type>* __restrict outStream0, // Cascade
                          output_stream<TT_DATA>* __restrict outStream1);
 };
 
@@ -311,10 +311,10 @@ class fft_r2comb<TT_DATA,
     }
 
     // r2comb main
-    void fft_r2comb_main(input_cascade<cacc64>* __restrict inStream0, // Cascade
+    void fft_r2comb_main(input_cascade<typename dit_1ch::t_accType<TT_DATA>::type>* __restrict inStream0, // Cascade
                          input_stream<TT_DATA>* __restrict inStream1,
                          output_stream<TT_DATA>* __restrict outStream0,
-                         output_cascade<cacc64>* __restrict outStream1); // Cascade
+                         output_cascade<typename dit_1ch::t_accType<TT_DATA>::type>* __restrict outStream1); // Cascade
 };
 
 // Specialization for Stream/Cascade in, single Stream out
@@ -375,7 +375,7 @@ class fft_r2comb<TT_DATA,
 
     // r2comb main
     void fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                         input_cascade<cacc64>* __restrict inStream1, // Cascade
+                         input_cascade<typename dit_1ch::t_accType<TT_DATA>::type>* __restrict inStream1, // Cascade
                          output_stream<TT_DATA>* __restrict outStream0);
 };
 
@@ -437,8 +437,8 @@ class fft_r2comb<TT_DATA,
 
     // r2comb main
     void fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                         input_cascade<cacc64>* __restrict inStream1,   // Cascade
-                         output_cascade<cacc64>* __restrict outStream0, // Cascade
+                         input_cascade<typename dit_1ch::t_accType<TT_DATA>::type>* __restrict inStream1,   // Cascade
+                         output_cascade<typename dit_1ch::t_accType<TT_DATA>::type>* __restrict outStream0, // Cascade
                          output_stream<TT_DATA>* __restrict outStream1);
 };
 
@@ -500,9 +500,9 @@ class fft_r2comb<TT_DATA,
 
     // r2comb main
     void fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                         input_cascade<cacc64>* __restrict inStream1, // Cascade
+                         input_cascade<typename dit_1ch::t_accType<TT_DATA>::type>* __restrict inStream1, // Cascade
                          output_stream<TT_DATA>* __restrict outStream0,
-                         output_cascade<cacc64>* __restrict outStream1); // Cascade
+                         output_cascade<typename dit_1ch::t_accType<TT_DATA>::type>* __restrict outStream1); // Cascade
 };
 
 // Specialization for Streams in, single Window out
@@ -618,7 +618,7 @@ class fft_r2comb<TT_DATA,
     }
 
     // r2comb main
-    void fft_r2comb_main(input_cascade<cacc64>* __restrict inStream0, // Cascade
+    void fft_r2comb_main(input_cascade<typename dit_1ch::t_accType<TT_DATA>::type>* __restrict inStream0, // Cascade
                          input_stream<TT_DATA>* __restrict inStream1,
                          output_buffer<TT_DATA>& __restrict outWindow0);
 };
@@ -678,7 +678,7 @@ class fft_r2comb<TT_DATA,
 
     // r2comb main
     void fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                         input_cascade<cacc64>* __restrict inStream1, // Cascade
+                         input_cascade<typename dit_1ch::t_accType<TT_DATA>::type>* __restrict inStream1, // Cascade
                          output_buffer<TT_DATA>& __restrict outWindow0);
 };
 

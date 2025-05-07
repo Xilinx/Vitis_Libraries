@@ -101,11 +101,16 @@ The DFT has optimal throughput performance with a low point size and a higher nu
 Zero Padding Data for Alignment
 -------------------------------
 
-It is important to note that the DFT for AIE requires that each frame of input data to aligned to 256-bits, i.e., zero-padded to be a multiple of 8 for cint16 and 4 for cint32 and cfloats. Zero-padding will have no impact on the final result of the transform.
+It is important to note that the DFT requires that each frame of input data to be aligned and sized according to the following rules for maximal performance. Where necessary the input vector must be zero padded up to the size in the following rules. 
+The rules are as follows: 
+For AIE input data alignment must be on a 256-bits boundary and the input vector must be a multiple of 256-bits.
+For AIE-ML and AIE-MLv2 input data alignment must be to 256-bits for cint16 and 512-bits for cint32 and cfloat. The input vector must be sized to be a multiple of this alignment too.
+These rules also apply to output data, though the kernel will perform the necessary padding.
+For example on AIE cint16 is 32 bits so 8 can fit in 256bits. The input vector provided must therefore be a multiple of 8. If the desires point size is 17, the 17 data samples must be provided followed by 7 zeroes to pad the overall input vector to a multiple of 8. Zero-padding will have no impact on the final numerical result of the transform. 
 
-This is also a requirement when using the cascading feature of the DFT for AIE. As mentioned, each frame of data is to be split across each of the kernels. Each cascaded kernel should receive a split of the frame that has a size that is a multiple of 8 for cint16, or 4 for cint32 and cfloats. The data should be dealt out sample-by-sample among each kernel in a round-robin fashion.
+This is also a requirement when using the cascading feature of the DFT for AIE. As mentioned, each frame of data is to be split across each of the kernels. Each cascaded kernel should receive a split of the frame that has a size that is a multiple of 256-bits (AIE) or 8 samples (AIE-ML and AIE-MLv2) as in the rules described above. The data should be dealt out sample-by-sample among each kernel in a round-robin fashion.
 
-The padding requirements for AIE-ML devices are similar to that of AIE except that input data with a cint32 or cfloat ``TT_DATA_TYPE`` should be zero-padded, for alignment, to be a multiple of 512-bits (8-samples) instead of 256-bits (4-samples) for AIE. This is required to increase the performance on AIE-ML.
+When the IP is configured for SSR operation, the data provided to each port must each satisfy the above rules.
 
 For example, if ``TP_POINT_SIZE = 20`` and ``TP_CASC_LEN = 3``, this should be padded into a frame with a size that is a multiple of ``8 * TP_CASC_LEN`` for cint16, and ``4 * TP_CASC_LEN`` for cint32 and cfloats:
 

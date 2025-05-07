@@ -85,7 +85,7 @@ void mm2s_wrapper(TT_DATA mem[NITER][memSizeAct], TT_STREAM sig_o[NSTREAM]) {
     TT_SAMPLE buff[NITER][NSTREAM][(2 * memSizeAct) / NSTREAM];
 #pragma HLS array_partition variable = buff dim = 1
 #pragma HLS array_partition variable = buff dim = 2
-#pragma HLS bind_storage variable = buff type = RAM_T2P impl = uram
+#pragma HLS bind_storage variable = buff type = RAM_T2P impl = bram
 #pragma HLS dependence variable = buff type = intra false
 
     // // Front end load from DDR4 to PL BRAM:

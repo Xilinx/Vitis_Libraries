@@ -643,7 +643,7 @@ class fft_ifft_dit_1ch<TT_DATA,
         REGISTER_PARAMETER(outBuff);
     }
     void fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                 output_cascade<cacc64>* __restrict outStream0, // Cascade
+                 output_cascade<typename t_accType<TT_DATA>::type>* __restrict outStream0, // Cascade
                  output_stream<TT_OUT_DATA>* __restrict outStream1);
 };
 
@@ -719,7 +719,7 @@ class fft_ifft_dit_1ch<TT_DATA,
         REGISTER_PARAMETER(outBuff);
     }
     void fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
-                 output_cascade<cacc64>* __restrict outStream0, // Cascade
+                 output_cascade<typename t_accType<TT_DATA>::type>* __restrict outStream0, // Cascade
                  output_stream<TT_OUT_DATA>* __restrict outStream1);
 };
 
@@ -800,7 +800,7 @@ class fft_ifft_dit_1ch<TT_DATA,
     }
     void fftMain(input_stream<TT_DATA>* __restrict inStream0,
                  output_stream<TT_OUT_DATA>* __restrict outStream0,
-                 output_cascade<cacc64>* __restrict outStream1); // Cascade
+                 output_cascade<typename t_accType<TT_DATA>::type>* __restrict outStream1); // Cascade
 };
 
 // specialization of top level for iobuffer in, stream/cascade out
@@ -876,7 +876,7 @@ class fft_ifft_dit_1ch<TT_DATA,
     }
     void fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
                  output_stream<TT_OUT_DATA>* __restrict outStream0,
-                 output_cascade<cacc64>* __restrict outStream1); // Cascade
+                 output_cascade<typename t_accType<TT_DATA>::type>* __restrict outStream1); // Cascade
 };
 }
 }

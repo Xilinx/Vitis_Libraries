@@ -168,23 +168,25 @@ def fn_validate_TP_USE_COEFF_RELOAD(TP_USE_COEFF_RELOAD):
 #######################################################
 def update_TP_FIR_LEN(args):
     TT_DATA = args["TT_DATA"]
+    TT_COEFF = args["TT_COEFF"]
     TP_API = args["TP_API"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     AIE_VARIANT = args["AIE_VARIANT"]
-    if args["TP_FIR_LEN"]:
+    if "TP_FIR_LEN" in args and args["TP_FIR_LEN"]:
         TP_FIR_LEN = args["TP_FIR_LEN"]
     else:
         TP_FIR_LEN = 0
     return fn_update_TP_FIR_LEN(
-        TT_DATA, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN
+        TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN
     )
 
 
-def fn_update_TP_FIR_LEN(TT_DATA, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN):
-    if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2 or AIE_VARIANT == AIE_MLv2:
+def fn_update_TP_FIR_LEN(TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN):
+    if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2:
         firLenPerPhaseDivider = TP_DECIMATE_FACTOR_max
     else:
         firLenPerPhaseDivider = 1
+
     TP_FIR_LEN_max_int1 = comFirUpd.fn_max_fir_len_each_kernel_update(
         TT_DATA,
         TP_CASC_LEN_max,
@@ -194,7 +196,7 @@ def fn_update_TP_FIR_LEN(TT_DATA, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_F
         firLenPerPhaseDivider,
     )
 
-    if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2 or AIE_VARIANT == AIE_MLv2:
+    if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2:
         TP_FIR_LEN_min_int1 = TP_DECIMATE_FACTOR_min * TP_CASC_LEN_min
     else:
         TP_FIR_LEN_min_int1 = 1
@@ -207,16 +209,10 @@ def fn_update_TP_FIR_LEN(TT_DATA, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_F
         "maximum": TP_FIR_LEN_max_int2,
     }
 
-    if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2 or AIE_VARIANT == AIE_MLv2:
-        TP_DECIMATE_FACTOR_max_int = 4
-    else:
-        TP_DECIMATE_FACTOR_max_int = TP_DECIMATE_FACTOR_max
-    legal_set_TP_DECIMATE_FACTOR = list(
-        range(TP_DECIMATE_FACTOR_min, TP_DECIMATE_FACTOR_max_int + 1)
-    )
+    initial_legal_set_TP_DECIMATE_FACTOR=fn_det_initial_set_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF)
 
     if TP_FIR_LEN != 0:
-        for deci_fact in legal_set_TP_DECIMATE_FACTOR:
+        for deci_fact in initial_legal_set_TP_DECIMATE_FACTOR:
             if TP_FIR_LEN % deci_fact == 0:
                 return param_dict
 
@@ -236,35 +232,30 @@ def fn_update_TP_FIR_LEN(TT_DATA, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_F
 
 def validate_TP_FIR_LEN(args):
     TT_DATA = args["TT_DATA"]
+    TT_COEFF = args["TT_COEFF"]
     TP_API = args["TP_API"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     AIE_VARIANT = args["AIE_VARIANT"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     return fn_validate_TP_FIR_LEN(
-        TT_DATA, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN
+        TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN
     )
 
 
 def fn_validate_TP_FIR_LEN(
-    TT_DATA, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN
+    TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN
 ):
-    if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2 or AIE_VARIANT == AIE_MLv2:
-        TP_DECIMATE_FACTOR_max_int = 4
-    else:
-        TP_DECIMATE_FACTOR_max_int = TP_DECIMATE_FACTOR_max
-    legal_set_TP_DECIMATE_FACTOR = list(
-        range(TP_DECIMATE_FACTOR_min, TP_DECIMATE_FACTOR_max_int + 1)
-    )
+    initial_legal_set_TP_DECIMATE_FACTOR=fn_det_initial_set_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF)
 
-    for deci_fact in legal_set_TP_DECIMATE_FACTOR:
+    for deci_fact in initial_legal_set_TP_DECIMATE_FACTOR:
         if TP_FIR_LEN % deci_fact == 0:
             param_dict = fn_update_TP_FIR_LEN(
-                TT_DATA, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN
+                TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN
             )
             range_TP_FIR_LEN = [param_dict["minimum"], param_dict["maximum"]]
             return validate_range(range_TP_FIR_LEN, "TP_FIR_LEN", TP_FIR_LEN)
     return isError(
-        f"TP_FIR_LEN should be a multiple of one of the possible TP_DECIMATE_FACTOR legal set values : {legal_set_TP_DECIMATE_FACTOR}"
+        f"TP_FIR_LEN should be a multiple of one of the possible TP_DECIMATE_FACTOR legal set values : {initial_legal_set_TP_DECIMATE_FACTOR}"
     )
 
 
@@ -273,21 +264,18 @@ def fn_validate_TP_FIR_LEN(
 #######################################################
 def update_TP_DECIMATE_FACTOR(args):
     AIE_VARIANT = args["AIE_VARIANT"]
+    TT_DATA = args["TT_DATA"]
+    TT_COEFF = args["TT_COEFF"]
+    TP_API = args["TP_API"]
+    TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
-    return fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TP_FIR_LEN)
+    return fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN)
 
 
-def fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TP_FIR_LEN):
+def fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN):
 
-    if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2 or AIE_VARIANT == AIE_MLv2:
-        vector1kRegisters = 4  # AIE-ML tile contiants 4 independent 1024-bit vector registers that are used
-        TP_DECIMATE_FACTOR_max_int = vector1kRegisters
-    else:
-        TP_DECIMATE_FACTOR_max_int = TP_DECIMATE_FACTOR_max
+    legal_set_deci_factor=fn_det_initial_set_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF)
 
-    legal_set_deci_factor = list(
-        range(TP_DECIMATE_FACTOR_min, TP_DECIMATE_FACTOR_max_int + 1)
-    )
     remove_set = []
     for deci_fac in legal_set_deci_factor.copy():
         if TP_FIR_LEN % deci_fac != 0:
@@ -295,19 +283,36 @@ def fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TP_FIR_LEN):
 
     legal_set_deci_factor_1 = remove_from_set(remove_set, legal_set_deci_factor.copy())
 
+    for deci_fac in legal_set_deci_factor_1.copy():
+        param_dict_TP_SSR=fn_update_TP_SSR(
+                            AIE_VARIANT,
+                            TT_DATA,
+                            TT_COEFF,
+                            TP_API,
+                            TP_FIR_LEN,
+                            TP_USE_COEFF_RELOAD,
+                            deci_fac,
+                        )
+        if "enum" in param_dict_TP_SSR and param_dict_TP_SSR["enum"] == []:
+            legal_set_deci_factor_1.remove(deci_fac)
+
     param_dict = {"name": "TP_DECIMATE_FACTOR", "enum": legal_set_deci_factor_1}
     return param_dict
 
 
 def validate_TP_DECIMATE_FACTOR(args):
     AIE_VARIANT = args["AIE_VARIANT"]
+    TT_DATA = args["TT_DATA"]
+    TT_COEFF = args["TT_COEFF"]
+    TP_API = args["TP_API"]
+    TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
-    return fn_validate_TP_DECIMATE_FACTOR(AIE_VARIANT, TP_FIR_LEN, TP_DECIMATE_FACTOR)
+    return fn_validate_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN, TP_DECIMATE_FACTOR)
 
 
-def fn_validate_TP_DECIMATE_FACTOR(AIE_VARIANT, TP_FIR_LEN, TP_DECIMATE_FACTOR):
-    param_dict = fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TP_FIR_LEN)
+def fn_validate_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN, TP_DECIMATE_FACTOR):
+    param_dict = fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN)
     return validate_legal_set(
         param_dict["enum"], "TP_DECIMATE_FACTOR", TP_DECIMATE_FACTOR
     )
@@ -360,6 +365,22 @@ def fn_validate_decimate_factor(
         return offsetRangeCheck
     else:
         return isValid
+
+
+def fn_det_initial_set_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF):
+
+    if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2:
+        vector1kRegisters = 4  # AIE-ML tile contiants 4 independent 1024-bit vector registers that are used
+        TP_DECIMATE_FACTOR_max_int = vector1kRegisters
+    else:
+        TP_DECIMATE_FACTOR_max_int = TP_DECIMATE_FACTOR_max
+        # TP_DECIMATE_FACTOR_max_int = fn_decimate_asym_lanes(TT_DATA, TT_COEFF)
+
+    legal_set_deci_factor = list(
+        range(TP_DECIMATE_FACTOR_min, TP_DECIMATE_FACTOR_max_int + 1)
+    )
+
+    return legal_set_deci_factor
 
 
 #######################################################
@@ -486,7 +507,11 @@ def update_TP_SSR(args):
     # if we've decomposed to another type of kernel, then import that kernel and use that update function
     if uut_kernel != current_uut_kernel:
         other_kernel = importlib.import_module(uut_kernel)
-        return other_kernel.update_TP_SSR(args)
+        param_dict=other_kernel.update_TP_SSR(args)
+        if args["TP_API"] == API_BUFFER:#This check is added to match with the static assert(graph-224)
+            legal_set_TP_SSR = [1]
+            param_dict.update({"enum": legal_set_TP_SSR})
+        return param_dict
     else:
         AIE_VARIANT = args["AIE_VARIANT"]
         TT_DATA = args["TT_DATA"]
@@ -539,6 +564,7 @@ def fn_update_TP_SSR(
         legal_set_TP_SSR_eliminated = remove_from_set(
             remove_list, legal_set_TP_SSR.copy()
         )
+
         if legal_set_TP_SSR_eliminated != legal_set_TP_SSR:
             param_dict.update({"enum": legal_set_TP_SSR_eliminated})
         else:
@@ -553,6 +579,8 @@ def validate_TP_SSR(args):
     # if we've decomposed to another type of kernel, then import that kernel and use that update function
     if uut_kernel != current_uut_kernel:
         other_kernel = importlib.import_module(uut_kernel)
+        if args["TP_API"] == API_BUFFER: #This check is added to match with the static assert(graph-224)
+            return validate_legal_set([1], "TP_SSR", args["TP_SSR"])
         return other_kernel.validate_TP_SSR(args)
     else:
         AIE_VARIANT = args["AIE_VARIANT"]
@@ -835,7 +863,7 @@ def update_TP_INPUT_WINDOW_VSIZE(args):
     if uut_kernel != current_uut_kernel:
         other_kernel = importlib.import_module(uut_kernel)
         param_dict.update(other_kernel.update_TP_INPUT_WINDOW_VSIZE(args))
-        if args["TP_INPUT_WINDOW_VSIZE"]:
+        if "TP_INPUT_WINDOW_VSIZE" in args and args["TP_INPUT_WINDOW_VSIZE"]:
             TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
         else:
             TP_INPUT_WINDOW_VSIZE = 0
@@ -851,7 +879,7 @@ def update_TP_INPUT_WINDOW_VSIZE(args):
         TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
         TP_API = args["TP_API"]
         TP_SSR = args["TP_SSR"]
-        if args["TP_INPUT_WINDOW_VSIZE"]:
+        if "TP_INPUT_WINDOW_VSIZE" in args and args["TP_INPUT_WINDOW_VSIZE"]:
             TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
         else:
             TP_INPUT_WINDOW_VSIZE = 0

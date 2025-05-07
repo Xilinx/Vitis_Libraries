@@ -74,7 +74,7 @@ void s2mm_wrapper(s2mm::TT_DATA mem[NITER][memSizeAct], s2mm::TT_STREAM sig_i[NS
 
 #pragma HLS array_partition variable = buff dim = 1
 #pragma HLS array_partition variable = buff dim = 2
-#pragma HLS bind_storage variable = buff type = RAM_T2P impl = uram
+#pragma HLS bind_storage variable = buff type = RAM_T2P impl = bram
 #pragma HLS dependence variable = buff type = intra false
 
     if (NSTREAM != 1) {

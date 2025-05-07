@@ -313,6 +313,11 @@
                 "*_x86sim_qor": [
                     "vitis_aie_x86sim"
                 ]
+            },
+            "qor_db": {
+                "*_hw_database": [
+                    "vitis_aie_sim"
+                ]
             }
         }
     }

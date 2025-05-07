@@ -16,7 +16,7 @@
 #
 
 #set path_to_hdl ${root_dir}/L1/src/hw/vhdl_ssr_fft/
-set path_to_hdl ${vitis}/../../Vivado/2025.1/data/ip/xilinx/parallel_fft_v1_0/hdl/
+set path_to_hdl ${vitis}/../Vivado/data/ip/xilinx/parallel_fft_v1_0/hdl/
 set path_to_packaged "./packaged_kernel_${suffix}"
 set path_to_tmp_project "./tmp_kernel_pack_${suffix}"
 
