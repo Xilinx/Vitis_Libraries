@@ -26,7 +26,8 @@
 
 int main(void) {
     hls::stream<ap_uint<BIT_WIDTH_STREAM_FOC> > input_data_stream, output_data_stream;
-    hls::stream<ap_uint<PWM_DATA_TYPE_> > output_data_w_1, output_data_w_2, output_data_w_3;
+    // hls::stream<ap_uint<PWM_DATA_TYPE_> > output_data_w_1, output_data_w_2, output_data_w_3;
+    hls::stream<ap_uint<PWM_DATA_TYPE_3_PHASE> > output_s;
     hls::stream<ap_int<BIT_WIDTH_DATA> > input_data_w_i, output_data_w_i, voltage_in_s;
     hls::stream<ap_uint<BIT_WIDTH_LOG_STREAM_FOC> > log_in, log_out;
 
@@ -36,14 +37,15 @@ int main(void) {
     int32_t _data_ag = 0;
 
     volatile int max_sym_interval = (24 << 16), double_interval = ((24 << 16) << 1), phase_a, phase_b, phase_c;
+    volatile int scaling_interval_pwm;
     volatile unsigned int mode_ = 0;
     input_data_stream.write(64); // last 8 bit enabled
     log_in.write(32);            // last 8 bit enabled
-    voltage_modulation_inst(input_data_stream, voltage_in_s, output_data_w_1, output_data_w_2, output_data_w_3, log_in,
-                            log_out, mode_, max_sym_interval, double_interval, phase_a, phase_b, phase_c);
+    voltage_modulation_inst(input_data_stream, voltage_in_s, output_s, log_in, log_out, mode_, max_sym_interval,
+                            double_interval, scaling_interval_pwm, phase_a, phase_b, phase_c);
 
-    while (!output_data_w_1.empty()) {
-        std::cout << "VAL: " << output_data_w_1.read() << std::endl;
+    while (!output_s.empty()) {
+        std::cout << "VAL: " << output_s.read() << std::endl;
     }
 
     return 0;

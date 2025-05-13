@@ -25,30 +25,29 @@
 
 void voltage_modulation_inst(hls::stream<ap_uint<BIT_WIDTH_STREAM_FOC> >& s_axis,
                              hls::stream<ap_int<BIT_WIDTH_DATA> >& voltage_in,
-                             hls::stream<ap_uint<PWM_DATA_TYPE_> >& Va_out,
-                             hls::stream<ap_uint<PWM_DATA_TYPE_> >& Vb_out,
-                             hls::stream<ap_uint<PWM_DATA_TYPE_> >& Vc_out,
-                             //							 hls::stream< ap_uint< 96 > > &output_s,
+                             hls::stream<ap_uint<96> >& output_s,
                              hls::stream<ap_uint<BIT_WIDTH_LOG_STREAM_FOC> >& logger_stream_in,
                              hls::stream<ap_uint<BIT_WIDTH_LOG_STREAM_FOC> >& logger_stream_out,
                              volatile unsigned int& mode,
                              volatile int& max_sym_interval,
                              volatile int& double_interval,
+                             volatile int& scaling_interval_pwm,
                              volatile int& phase_a,
                              volatile int& phase_b,
                              volatile int& phase_c) {
 #pragma HLS INTERFACE mode = axis port = s_axis
 #pragma HLS INTERFACE mode = axis port = voltage_in
-#pragma HLS INTERFACE mode = axis port = Va_out
-#pragma HLS INTERFACE mode = axis port = Vb_out
-#pragma HLS INTERFACE mode = axis port = Vc_out
-//#pragma HLS INTERFACE mode=axis port=output_s
+// #pragma HLS INTERFACE mode = axis port = Va_out
+// #pragma HLS INTERFACE mode = axis port = Vb_out
+// #pragma HLS INTERFACE mode = axis port = Vc_out
+#pragma HLS INTERFACE mode = axis port = output_s
 #pragma HLS INTERFACE mode = axis port = logger_stream_in
 #pragma HLS INTERFACE mode = axis port = logger_stream_out
 
 #pragma HLS INTERFACE mode = ap_none port = mode
 #pragma HLS INTERFACE mode = ap_none port = max_sym_interval
 #pragma HLS INTERFACE mode = ap_none port = double_interval
+#pragma HLS INTERFACE mode = ap_none port = scaling_interval_pwm
 #pragma HLS INTERFACE mode = ap_none port = phase_a
 #pragma HLS INTERFACE mode = ap_none port = phase_b
 #pragma HLS INTERFACE mode = ap_none port = phase_c
@@ -56,7 +55,7 @@ void voltage_modulation_inst(hls::stream<ap_uint<BIT_WIDTH_STREAM_FOC> >& s_axis
 #pragma HLS INTERFACE mode = ap_ctrl_none port = return
 
     voltage_modulation<ap_uint<BIT_WIDTH_STREAM_FOC>, ap_uint<BIT_WIDTH_LOG_STREAM_FOC>, ap_int<BIT_WIDTH_DATA>,
-                       ap_int<BIT_WIDTH_ACCUM>, ap_uint<PWM_DATA_TYPE_> >(
-        s_axis, voltage_in, Va_out, Vb_out, Vc_out, logger_stream_in, logger_stream_out, mode, max_sym_interval,
-        double_interval, phase_a, phase_b, phase_c);
+                       ap_int<BIT_WIDTH_ACCUM>, ap_uint<PWM_DATA_TYPE_>, ap_uint<PWM_DATA_TYPE_3_PHASE> >(
+        s_axis, voltage_in, /*Va_out, Vb_out, Vc_out,*/ output_s, logger_stream_in, logger_stream_out, mode,
+        max_sym_interval, double_interval, scaling_interval_pwm, phase_a, phase_b, phase_c);
 }

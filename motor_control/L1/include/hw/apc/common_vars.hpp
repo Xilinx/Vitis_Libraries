@@ -137,7 +137,10 @@ bool CheckRange(T& v, RangeDef<T>& rg) {
 #define BIT_WIDTH_STREAM_FOC 128
 #define BIT_WIDTH_LOG_STREAM_FOC 512
 #define BIT_WIDTH_STEP_STREAM 32
+#define BIT_WIDTH_ADC 24
+
 #define PWM_DATA_TYPE_ 16
+#define PWM_DATA_TYPE_3_PHASE 96
 
 #define MIN_IA_LOGGER 0
 #define MAX_IA_LOGGER 31

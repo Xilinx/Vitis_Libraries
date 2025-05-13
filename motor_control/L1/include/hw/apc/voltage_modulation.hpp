@@ -25,17 +25,21 @@
 
 enum VMMode : unsigned int { PS_DC_REF = 0, PL_DC_REF = 1 };
 
-template <typename T_FOC, typename T_STREAM_LOG, typename WIDTH_DATA, typename WIDTH_ACCUM, typename PWM_DATA_TYPE>
+template <typename T_FOC,
+          typename T_STREAM_LOG,
+          typename WIDTH_DATA,
+          typename WIDTH_ACCUM,
+          typename PWM_DATA_TYPE,
+          typename PWM_3_PHASE>
 void voltage_modulation(hls::stream<T_FOC>& s_axis,
                         hls::stream<WIDTH_DATA>& voltage_in,
-                        hls::stream<PWM_DATA_TYPE>& Va_out,
-                        hls::stream<PWM_DATA_TYPE>& Vb_out,
-                        hls::stream<PWM_DATA_TYPE>& Vc_out,
+                        hls::stream<PWM_3_PHASE>& output_s,
                         hls::stream<T_STREAM_LOG>& logger_stream_in,
                         hls::stream<T_STREAM_LOG>& logger_stream_out,
                         volatile unsigned int& mode,
                         volatile int& max_sym_interval,
                         volatile int& double_interval,
+                        volatile int& scaling_interval_pwm,
                         volatile int& phase_a,
                         volatile int& phase_b,
                         volatile int& phase_c) {
@@ -48,13 +52,16 @@ void voltage_modulation(hls::stream<T_FOC>& s_axis,
     WIDTH_ACCUM Va_pwm, Vb_pwm, Vc_pwm;
     WIDTH_DATA Va, Vb, Vc;
     PWM_DATA_TYPE pwm_mod_a, pwm_mod_b, pwm_mod_c;
+    PWM_3_PHASE pwm_packet;
     volatile int voltage_mod_in;
     volatile int double_voltage_mod_in;
 
     const WIDTH_DATA VOLTAGE = 1365; // 1 /48 -> 1/24 not taking into account sign
     const WIDTH_DATA MIN_LIM = 0;
-    const WIDTH_DATA MAX_LIM = 65535;
-    const ap_uint<BIT_WIDTH_FRACTIONAL> HALF = 32768;
+    // const WIDTH_DATA MAX_LIM = 65535;
+    // const ap_uint<BIT_WIDTH_FRACTIONAL> HALF = 32768;
+    const WIDTH_DATA MAX_LIM = scaling_interval_pwm;
+    const ap_uint<BIT_WIDTH_FRACTIONAL> HALF = (scaling_interval_pwm >> 1);
 
     //	const WIDTH_DATA MIN_INTERVAL_VOLTAGE = -max_sym_interval;
     const WIDTH_DATA MAX_INTERVAL_VOLTAGE = max_sym_interval;
@@ -110,9 +117,13 @@ void voltage_modulation(hls::stream<T_FOC>& s_axis,
     phase_b = pwm_mod_b;
     phase_c = pwm_mod_c;
 
-    Va_out.write(pwm_mod_a);
-    Vb_out.write(pwm_mod_b);
-    Vc_out.write(pwm_mod_c);
+    // Va_out.write(pwm_mod_a);
+    // Vb_out.write(pwm_mod_b);
+    // Vc_out.write(pwm_mod_c);
+    pwm_packet.range((BIT_WIDTH_STEP_STREAM * 3) - 1, BIT_WIDTH_STEP_STREAM * 2) = pwm_mod_c;
+    pwm_packet.range((BIT_WIDTH_STEP_STREAM * 2) - 1, BIT_WIDTH_STEP_STREAM) = pwm_mod_b;
+    pwm_packet.range(BIT_WIDTH_STEP_STREAM - 1, 0) = pwm_mod_a;
+    output_s.write(pwm_packet);
 
     logger_stream_out.write(log_packet);
 }
