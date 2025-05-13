@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.9
+# vitis makefile-generator v2.0.10
 #
 #+-------------------------------------------------------------------------------
 # The following parameters are assigned with default values. These parameters can
@@ -43,7 +43,7 @@ endif
 
 #Check vitis setup
 ifndef XILINX_VITIS
-  XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
+  XILINX_VITIS = /opt/xilinx/$(TOOL_VERSION)/Vitis
   export XILINX_VITIS
 endif
 
@@ -138,6 +138,8 @@ else ifeq ($(HOST_ARCH_temp), cortex-a9)
 HOST_ARCH := aarch32
 else ifneq (,$(findstring cortex-a, $(HOST_ARCH_temp)))
 HOST_ARCH := aarch64
+else ifneq (,$(findstring cortexa, $(HOST_ARCH_temp)))
+    HOST_ARCH := aarch64
 endif
 
 # Special processing for tool version/platform type
@@ -151,11 +153,7 @@ IS_VERSAL := off
 endif
 # 1) for aie flow from 2022.1
 ifeq (on, $(IS_VERSAL))
-ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
 LINK_TARGET_FMT := xsa
-else
-LINK_TARGET_FMT := xclbin
-endif
 else
 LINK_TARGET_FMT := xclbin
 endif
