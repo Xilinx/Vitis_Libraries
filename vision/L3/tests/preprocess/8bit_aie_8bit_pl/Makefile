@@ -1,5 +1,4 @@
-# Copyright 2019-2022 Xilinx, Inc.
-#
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -184,13 +183,13 @@ EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
-HOST_ARGS := kernel.xclbin 512x512.png
+HOST_ARGS := kernel.xclbin Y.png UV.png
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw))
-HOST_ARGS := kernel.xclbin 4k.jpg
+HOST_ARGS := kernel.xclbin Y.png UV.png
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
@@ -288,7 +287,7 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(XFLIB_DIR)/data/512x512.png $(XFLIB_DIR)/data/HD.jpg $(XFLIB_DIR)/data/4k.jpg $(custom_data_file)
+DATA_FILE := $(XFLIB_DIR)/data/UV.png $(XFLIB_DIR)/data/Y.png $(custom_data_file)
 DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)

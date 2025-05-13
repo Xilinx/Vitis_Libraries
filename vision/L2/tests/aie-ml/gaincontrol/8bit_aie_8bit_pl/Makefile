@@ -1,6 +1,4 @@
-# Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
-#
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -167,13 +165,13 @@ EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
-HOST_ARGS := kernel.xclbin $(XFLIB_DIR)/data/HD.jpg 128 128
+HOST_ARGS := kernel.xclbin $(XFLIB_DIR)/data/HD.jpg 255 255 200
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw))
-HOST_ARGS := kernel.xclbin $(XFLIB_DIR)/data/4k.jpg 128 128
+HOST_ARGS := kernel.xclbin $(XFLIB_DIR)/data/4k.jpg 255 255 200
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif

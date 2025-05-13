@@ -119,7 +119,7 @@ The following table lists the contents of the Vitis vision library.
 	|                                   | makefile and tcl files to run     |
 	|                                   | tests.                            |
 	+-----------------------------------+-----------------------------------+
-	| L1/examples/build                 | Contains xf_config_params.h file, |
+	| L1/examples/<function>/config     | Contains xf_config_params.h file, |
 	|                                   | which has configurable macros and |
 	|                                   | varibales related to the particula|
 	|                                   | r example.                        |
@@ -136,7 +136,7 @@ The following table lists the contents of the Vitis vision library.
 	|                                   | , Json file and a 'build' folder. |
 	+-----------------------------------+-----------------------------------+
 	| L2/tests                          | Contains all test folders to run  |
-	|                                   | software, hardware emulations     |
+	|                                   |  hardware emulation               |
 	|                                   | and hardware build. The tests cont|
 	|                                   | ains folders with algorithm names.|
 	|                                   | Each algorithm folder further cont|
@@ -144,7 +144,7 @@ The following table lists the contents of the Vitis vision library.
 	|                                   | has makefile and config files to  |
 	|                                   | run PL tests.                     |
 	+-----------------------------------+-----------------------------------+
-	| L2/tests/aie                      | Contains all test folders to run  |
+	| L2/tests/aie-ml                   | Contains all test folders to run  |
 	|                                   | x86 simulation, hardware emulation|
 	|                                   | and hardware build. The tests cont|
 	|                                   | ains folders with algorithm names.|
@@ -154,7 +154,7 @@ The following table lists the contents of the Vitis vision library.
 	|                                   | and other required files to run   |
 	|                                   | the AIE tests                     |
 	+-----------------------------------+-----------------------------------+
-	| L2/examples/build                 | Contains xf_config_params.h file, |
+	| L2/examples/<function>/config     | Contains xf_config_params.h file, |
 	|                                   | which has configurable macros and |
 	|                                   | varibales related to the particula|
 	|                                   | r example.                        |
@@ -168,7 +168,7 @@ The following table lists the contents of the Vitis vision library.
 	|                                   | , Json file and a 'build' folder. |
 	+-----------------------------------+-----------------------------------+
 	| L3/tests                          | Contains all test folders to run  |
-	|                                   | software, hardware emulations     |
+	|                                   | hardware emulation                |
 	|                                   | and hardware build.The tests cont |
 	|                                   | ains folders with algorithm names.|
 	|                                   | Each algorithm name folder contai |
@@ -176,7 +176,7 @@ The following table lists the contents of the Vitis vision library.
 	|                                   | inside configuration folders      |
 	|                                   | makefile is present to run tests. |
 	+-----------------------------------+-----------------------------------+
-	| L3/examples/build                 | Contains xf_config_params.h file, |
+	| L3/examples/<function>/config     | Contains xf_config_params.h file, |
 	|                                   | which has configurable macros and |
 	|                                   | varibales related to the particula|
 	|                                   | r example.                        |

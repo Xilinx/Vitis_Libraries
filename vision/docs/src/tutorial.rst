@@ -162,7 +162,7 @@ Prerequisites
 
 		a) L1 flows, irrespective of the target FPGA device being PCIe or embedded.
 		b) L2/L3 flows when the target device is PCIe-based.
-		c) L2/L3 flows when performing software emulation for an embedded platform.
+		c) L2/L3 flows when performing hardware emulation for an embedded platform.
 		
 	For L2/L3 flows targeting embedded platforms (for hardware emulations and hardware build), the aarch32/aarch64 version of OpenCV shipped with their *sysroot* should be used.	
 #. libOpenCL.so must be `installed <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/OpenCL-Installable-Client-Driver-Loader>`_ if not already present.
@@ -286,7 +286,7 @@ Create and Run a Vitis Project
 ===============================
 
 In this section, you will create a Vitis project using an L2 example.
-L2/L3 functions are targeted for Vitis flows where software-emulation, hardware-emulation, and hardware build (to generate FPGA binaries) can be performed. 
+L2/L3 functions are targeted for Vitis flows where hardware-emulation, and hardware build (to generate FPGA binaries) can be performed. 
 OpenCL is used in the testbench for calling the accelerator in L2/L3.
 
 You will use the files provided in the Vitis Library at this link: https://github.com/Xilinx/Vitis_Libraries/tree/main/vision/L2/examples/customconv. 
@@ -296,11 +296,10 @@ Navigate to ``/home/project/Vitis_libraries/vision/L2/examples/customconv`` and 
 
 .. code:: c
 
-	make run TARGET=sw_emu
+	make run TARGET=hw_emu
 
 Here, `TARGET` decides the FPGA binary type:
 
-* `sw_emu` is for software emulation
 * `hw_emu` is for hardware emulation
 * `hw` is for deployment on physical card. (Compilation to hardware binary often takes hours.)
 
@@ -313,7 +312,7 @@ For an embedded device like ZCU102, the command would be
 
 .. code:: c
 
-	make run TARGET=sw_emu 
+	make run TARGET=hw_emu 
 
 
 Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as build targets.

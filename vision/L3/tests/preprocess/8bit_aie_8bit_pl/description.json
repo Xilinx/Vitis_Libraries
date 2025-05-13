@@ -137,9 +137,8 @@
         }
     },
     "data": [
-        "LIB_DIR/data/4k.jpg",
-        "LIB_DIR/data/HD.jpg",
-        "LIB_DIR/data/512x512.png"
+        "LIB_DIR/data/Y.png",
+        "LIB_DIR/data/UV.png"
     ],
     "gui": false,
     "launch": [
@@ -154,12 +153,12 @@
         {
             "name": "hwemu-launch",
             "target": "hw_emu",
-            "cmd_args": "kernel.xclbin 512x512.png"
+            "cmd_args": "kernel.xclbin Y.png UV.png"
         },
         {
             "name": "hw",
             "target": "hw",
-            "cmd_args": "kernel.xclbin 4k.jpg"
+            "cmd_args": "kernel.xclbin Y.png UV.png"
         }
     ],
     "v++": {

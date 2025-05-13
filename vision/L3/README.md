@@ -4,7 +4,7 @@ This directory contains full applications, formed by stitching a pipeline of Vit
 
 'examples' folder contains the OpenCL host code file and a C++ accel file that demonstrate the call of Vitis Vision functions to build for Vitis.
 
-'examples/config' folder has the configuration file that would help modify the default configuration of the function.
+'examples/< function >/config' folder has the configuration file that would help modify the default configuration of the function.
 
 'tests' folder has sub-folders named according to the function and the configuration it would run. Each individual folder has Makefiles and config files that would perform software emulation, hardware emulation and hardware build of the corresponding function in examples folder, based on the platform the user selects.
 
@@ -17,23 +17,13 @@ This directory contains full applications, formed by stitching a pipeline of Vit
     source < path-to-Vitis-installation-directory >/settings64.sh
     source < path-to-XRT-installation-directory >/setup.sh
     export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
-	export OPENCV_INCLUDE=< path-to-opencv-include-folder >
-	export OPENCV_LIB=< path-to-opencv-lib-folder >
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
-    make host xclbin TARGET=< sw_emu|hw_emu|hw >
-    make run TARGET=< sw_emu|hw_emu|hw >
+    export OPENCV_INCLUDE=< path-to-opencv-include-folder >
+    export OPENCV_LIB=< path-to-opencv-lib-folder >
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
+    make host xclbin TARGET=< hw_emu|hw >
+    make run TARGET=< hw_emu|hw >
 
 **For Embedded Devices:**
-
-Software Emulation:
-
-    source < path-to-Vitis-installation-directory >/settings64.sh
-    source < path-to-XRT-installation-directory >/setup.sh
-    export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
-	export OPENCV_INCLUDE=< path-to-opencv-include-folder >
-	export OPENCV_LIB=< path-to-opencv-lib-folder >
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
-    make run TARGET=sw_emu
 
 Hardware Emulation and Hardware Build:
 

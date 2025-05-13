@@ -1,4 +1,3 @@
-# Copyright (C) 2019-2022, Xilinx, Inc.
 # Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -222,7 +221,7 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(XFLIB_DIR)/data/128x128_2.png $(XFLIB_DIR)/data/128x128_1.png $(XFLIB_DIR)/data/HD2.JPG $(custom_data_file)
+DATA_FILE := $(XFLIB_DIR)/data/128x128_2.png $(XFLIB_DIR)/data/128x128_1.png $(XFLIB_DIR)/data/HD2.JPG $(XFLIB_DIR)/data/HD1.jpg  $(custom_data_file)
 DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
