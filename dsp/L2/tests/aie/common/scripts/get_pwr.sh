@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ AIE_VARIANT=$4
 PWR_DIR=./pwr_test
 VCD_DIR=${CURRENT_DIR}/${UUT_KERNEL}_sim.vcd
 
-if [ $AIE_VARIANT == 1 ]; then 
+if [ $AIE_VARIANT == 1 ]; then
     PART="XCVC1902-VSVD1760-1LP-E-S"
-    elif [ $AIE_VARIANT == 2 ]; then 
+    elif [ $AIE_VARIANT == 2 ]; then
     PART="XCVE2802-VSVH1760-1MP-E-S"
 fi
 
@@ -55,7 +55,7 @@ exit()
 
     cd $PWR_DIR
     pdm -mode py -script ./pwr_analyze.py
-    cd $CURRENT_DIR    
+    cd $CURRENT_DIR
 else
     echo "No VCD file found! Pwr analysis is not performed."
 fi

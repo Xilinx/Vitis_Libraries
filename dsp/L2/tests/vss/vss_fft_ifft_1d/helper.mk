@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ REF_INPUT_FILE = ./data/input_ref.txt
 ifeq ($(POINT_SIZE), 16)
 	PT_SIZE_PWR       := 4
 	TAG_PAR_PWR       := 0
-	REF_SSR           := 1  
+	REF_SSR           := 1
 # there is some duplication here, tag_ssr needs to be 1<<TAG_PAR_PWR
 else ifeq ($(POINT_SIZE), 32)
 	PT_SIZE_PWR       := 5
@@ -166,12 +166,7 @@ harvest_mem:
 ifeq ($(VSS_MODE), 1)
 gen_conn_cfg:
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/vss/vss_fft_ifft_1d/vss_tb_cfg_gen.py --ssr $(SSR) --cfg_file_name system.cfg --vss_unit vss_fft_ifft_1d --freqhz $(FREQ)
-else 
-ifeq ($(DATA_TYPE), cfloat)
-gen_conn_cfg:
-	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/vss/vss_fft_ifft_1d/vss_tb_cfg_gen_rtl_fft.py --ssr $(SSR) --cfg_file_name system.cfg --vss_unit vss_fft_ifft_1d --freqhz $(FREQ)
 else
 gen_conn_cfg:
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/vss/vss_fft_ifft_1d/vss_tb_cfg_gen_hls_fft.py --ssr $(SSR) --cfg_file_name system.cfg --vss_unit vss_fft_ifft_1d --freqhz $(FREQ)
-endif
 endif

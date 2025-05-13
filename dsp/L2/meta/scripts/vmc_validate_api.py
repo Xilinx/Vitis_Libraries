@@ -1,6 +1,5 @@
 #
-# Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2024-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -66,7 +65,7 @@ def ProcessVMCConfig(config_file_loc, spec):
     if temp_dict["is_valid"] == True:
         return temp_dict
     temp_dict["err_msg"] = ProcesStrFun(temp_dict["err_msg"], spec)
-    #temp_dict["param_name"] = ProcesStrFun(temp_dict["param_name"], spec)
+    # temp_dict["param_name"] = ProcesStrFun(temp_dict["param_name"], spec)
     error = {
         "label": "error",
         "description": temp_dict["err_msg"],
@@ -76,9 +75,9 @@ def ProcessVMCConfig(config_file_loc, spec):
         json.dump(error, f, indent=4)
     return temp_dict
 
-config_file_loc="/proj/xhdhdstaff4/mahajan/gradle_HEAD_mahajan/HEAD/config.json"
-#graph_dict=generate_graph_vmc(config_file_loc, "func_approx", "Function_Approximation_5a548217")
-temp_dict=validate_all_vmc(config_file_loc,"func_approx")
-#print(graph_dict["searchpaths"])
-print(temp_dict)
 
+config_file_loc = "/proj/xhdhdstaff4/mahajan/gradle_HEAD_mahajan/HEAD/config.json"
+# graph_dict=generate_graph_vmc(config_file_loc, "func_approx", "Function_Approximation_5a548217")
+temp_dict = validate_all_vmc(config_file_loc, "func_approx")
+# print(graph_dict["searchpaths"])
+print(temp_dict)

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,19 +224,21 @@ class test_graph : public graph {
                                                                               // downstream FIR with
                                                                               // margin.
 
-        if (inputBufferSize > MAX_PING_PONG_SIZE) {
+        if ((inputBufferSize > MAX_PING_PONG_SIZE) || (SINGLE_BUF == 1 && PORT_API == 0)) {
             single_buffer(firGraph.getKernels()[0].in[0]);
 #if (DUAL_IP == 1)
             single_buffer(firGraph.getKernels()[0].in[1]);
 #endif
         }
-        if (outputBufferSize > MAX_PING_PONG_SIZE) {
+        printf("INFO: Single Buffer Constraint applied to input buffers of kernel 0.\n");
+
+        if ((outputBufferSize > MAX_PING_PONG_SIZE) || (SINGLE_BUF == 1 && PORT_API == 0)) {
             single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[0]);
 #if (NUM_OUTPUTS == 2)
             single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[1]);
 #endif
         }
-
+        printf("INFO: Single Buffer Constraint applied to output buffers of kernel %d.\n", CASC_LEN * P_SSR);
 #endif
 // location<kernel>(*firGraph.getKernels()) = tile(1, 1);
 

@@ -18,12 +18,12 @@
             "description": "specifies the device type",
             "validator": {
                 "file": "conv_corr.py",
-                "function": "validate_AIE_VARIANT", 
+                "function": "validate_AIE_VARIANT",
                 "args": []
             },
             "updater": {
                 "file": "conv_corr.py",
-                "function": "update_AIE_VARIANT", 
+                "function": "update_AIE_VARIANT",
                 "args": []
             }
         },
@@ -34,28 +34,43 @@
             "validator": {
                 "file": "conv_corr.py",
                 "function": "validate_TP_API",
-                "args": []
+                "args": ["AIE_VARIANT"]
             },
             "updater": {
                 "file": "conv_corr.py",
                 "function": "update_TP_API",
-                "args": []
+                "args": ["AIE_VARIANT"]
             }
         },
         {
             "name": "TT_DATA_F",
             "type": "typename",
             "description": "The type of individual data samples input to port F.",
-            "enum":["int8", "int16", "int32", "float", "bfloat16", "cfloat", "cint16", "cint32"],
+            "enum": [
+                "int8",
+                "int16",
+                "int32",
+                "float",
+                "bfloat16",
+                "cfloat",
+                "cint16",
+                "cint32"
+            ],
             "validator": {
                 "file": "conv_corr.py",
                 "function": "validate_TT_DATA_F",
-                "args": ["AIE_VARIANT", "TP_API"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TP_API"
+                ]
             },
             "updater": {
                 "file": "conv_corr.py",
                 "function": "update_TT_DATA_F",
-                "args": ["AIE_VARIANT", "TP_API"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TP_API"
+                ]
             }
         },
         {
@@ -65,12 +80,20 @@
             "validator": {
                 "file": "conv_corr.py",
                 "function": "validate_TT_DATA_G",
-                "args": ["AIE_VARIANT", "TT_DATA_F", "TP_API"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_F",
+                    "TP_API"
+                ]
             },
             "updater": {
                 "file": "conv_corr.py",
                 "function": "update_TT_DATA_G",
-                "args": ["AIE_VARIANT", "TT_DATA_F", "TP_API"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_F",
+                    "TP_API"
+                ]
             }
         },
         {
@@ -80,12 +103,18 @@
             "validator": {
                 "file": "conv_corr.py",
                 "function": "validate_TT_DATA_OUT",
-                "args": ["TT_DATA_F", "TT_DATA_G"]
+                "args": [
+                    "TT_DATA_F",
+                    "TT_DATA_G"
+                ]
             },
             "updater": {
                 "file": "conv_corr.py",
                 "function": "update_TT_DATA_OUT",
-                "args": ["TT_DATA_F", "TT_DATA_G"]
+                "args": [
+                    "TT_DATA_F",
+                    "TT_DATA_G"
+                ]
             }
         },
         {
@@ -110,12 +139,16 @@
             "validator": {
                 "file": "conv_corr.py",
                 "function": "validate_TP_COMPUTE_MODE",
-                "args": ["TP_API"]
+                "args": [
+                    "TP_API"
+                ]
             },
             "updater": {
                 "file": "conv_corr.py",
                 "function": "update_TP_COMPUTE_MODE",
-                "args": ["TP_API"]
+                "args": [
+                    "TP_API"
+                ]
             }
         },
         {
@@ -125,12 +158,20 @@
             "validator": {
                 "file": "conv_corr.py",
                 "function": "validate_TP_F_LEN",
-                "args": ["TT_DATA_F", "AIE_VARIANT", "TP_API"]
+                "args": [
+                    "TT_DATA_F",
+                    "AIE_VARIANT",
+                    "TP_API"
+                ]
             },
             "updater": {
                 "file": "conv_corr.py",
                 "function": "update_TP_F_LEN",
-                "args": ["TT_DATA_F", "AIE_VARIANT", "TP_API"]
+                "args": [
+                    "TT_DATA_F",
+                    "AIE_VARIANT",
+                    "TP_API"
+                ]
             }
         },
         {
@@ -140,12 +181,22 @@
             "validator": {
                 "file": "conv_corr.py",
                 "function": "validate_TP_G_LEN",
-                "args": ["AIE_VARIANT", "TP_API", "TT_DATA_G", "TP_F_LEN"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TP_API",
+                    "TT_DATA_G",
+                    "TP_F_LEN"
+                ]
             },
             "updater": {
                 "file": "conv_corr.py",
                 "function": "update_TP_G_LEN",
-                "args": ["AIE_VARIANT", "TP_API", "TT_DATA_G", "TP_F_LEN"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TP_API",
+                    "TT_DATA_G",
+                    "TP_F_LEN"
+                ]
             }
         },
         {
@@ -170,12 +221,18 @@
             "validator": {
                 "file": "conv_corr.py",
                 "function": "validate_TP_CASC_LEN",
-                "args": ["TP_G_LEN", "TP_API"]
+                "args": [
+                    "TP_G_LEN",
+                    "TP_API"
+                ]
             },
             "updater": {
                 "file": "conv_corr.py",
                 "function": "update_TP_CASC_LEN",
-                "args": ["TP_G_LEN", "TP_API"]
+                "args": [
+                    "TP_G_LEN",
+                    "TP_API"
+                ]
             }
         },
         {
@@ -185,12 +242,26 @@
             "validator": {
                 "file": "conv_corr.py",
                 "function": "validate_TP_PHASES",
-                "args": ["AIE_VARIANT", "TT_DATA_F", "TT_DATA_G", "TP_G_LEN", "TP_CASC_LEN", "TP_API"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_F",
+                    "TT_DATA_G",
+                    "TP_G_LEN",
+                    "TP_CASC_LEN",
+                    "TP_API"
+                ]
             },
             "updater": {
                 "file": "conv_corr.py",
                 "function": "update_TP_PHASES",
-                "args": ["AIE_VARIANT", "TT_DATA_F", "TT_DATA_G", "TP_G_LEN", "TP_CASC_LEN", "TP_API"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_F",
+                    "TT_DATA_G",
+                    "TP_G_LEN",
+                    "TP_CASC_LEN",
+                    "TP_API"
+                ]
             }
         },
         {
@@ -200,12 +271,18 @@
             "validator": {
                 "file": "conv_corr.py",
                 "function": "validate_TP_SHIFT",
-                "args": ["AIE_VARIANT", "TT_DATA_OUT"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_OUT"
+                ]
             },
             "updater": {
                 "file": "conv_corr.py",
                 "function": "update_TP_SHIFT",
-                "args": ["AIE_VARIANT", "TT_DATA_OUT"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_OUT"
+                ]
             }
         },
         {
@@ -215,12 +292,16 @@
             "validator": {
                 "file": "conv_corr.py",
                 "function": "validate_TP_RND",
-                "args": ["AIE_VARIANT"]
+                "args": [
+                    "AIE_VARIANT"
+                ]
             },
             "updater": {
                 "file": "conv_corr.py",
                 "function": "update_TP_RND",
-                "args": ["AIE_VARIANT"]
+                "args": [
+                    "AIE_VARIANT"
+                ]
             }
         },
         {
@@ -229,28 +310,32 @@
             "type": "uint",
             "validator": {
                 "file": "conv_corr.py",
-                "function": "validate_TP_SAT", 
+                "function": "validate_TP_SAT",
                 "args": []
             },
             "updater": {
                 "file": "conv_corr.py",
-                "function": "update_TP_SAT", 
+                "function": "update_TP_SAT",
                 "args": []
             }
         },
-		{
+        {
             "name": "TP_USE_RTP_VECTOR_LENGTHS",
             "description": "Selects Vector Lengths of F and G as Real Time Mode: 0 - no RTP F and G LEN, 1 - RTP port based ",
             "type": "uint",
             "validator": {
                 "file": "conv_corr.py",
-                "function": "validate_TP_USE_RTP_VECTOR_LENGTHS", 
-                "args": ["TP_API"]
+                "function": "validate_TP_USE_RTP_VECTOR_LENGTHS",
+                "args": [
+                    "TP_API"
+                ]
             },
             "updater": {
                 "file": "conv_corr.py",
-                "function": "update_TP_USE_RTP_VECTOR_LENGTHS", 
-                "args": ["TP_API"]
+                "function": "update_TP_USE_RTP_VECTOR_LENGTHS",
+                "args": [
+                    "TP_API"
+                ]
             }
         }
     ],

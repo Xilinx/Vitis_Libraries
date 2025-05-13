@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,12 +38,12 @@ endif
 SSR_SAMPLES 		:= $(shell echo $$(( 	$(SAMPLES_IN_VECT) * $(UUT_SSR)		)))
 IN_FRAME_SIZE 		:= $(shell echo $$((   (($(POINT_SIZE) + $(SAMPLES_IN_VECT) - 1) / $(SAMPLES_IN_VECT)) * $(SAMPLES_IN_VECT) )))
 OUT_FRAME_SIZE 		:= $(shell echo $$((   (($(POINT_SIZE) + $(SSR_SAMPLES) - 1) / $(SSR_SAMPLES)) * $(SSR_SAMPLES) )))
-	
+
 IN_WINDOW_VSIZE 	:= $(shell echo $$(( 	$(IN_FRAME_SIZE) * $(NUM_FRAMES)		)))
 OUT_WINDOW_VSIZE 	:= $(shell echo $$(( 	$(OUT_FRAME_SIZE) * $(NUM_FRAMES)		)))
 NO_PAD_WINDOW_VSIZE := $(shell echo $$(( 	$(POINT_SIZE) 	 * $(NUM_FRAMES)		)))
 
-PARAM_MAP = DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) CASC_LEN $(CASC_LEN) NUM_FRAMES $(NUM_FRAMES) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) API_IO $(API_IO) AIE_VARIANT $(AIE_VARIANT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) UUT_SSR $(UUT_SSR) 
+PARAM_MAP = DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) CASC_LEN $(CASC_LEN) NUM_FRAMES $(NUM_FRAMES) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) API_IO $(API_IO) AIE_VARIANT $(AIE_VARIANT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) UUT_SSR $(UUT_SSR)
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 
 $(HELPER):create_input sim_ref prep_x86_out

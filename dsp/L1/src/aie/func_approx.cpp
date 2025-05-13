@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ template <typename TT_DATA,
 NOINLINE_DECL void
 func_approx<TT_DATA, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE, TP_SHIFT, TP_RND, TP_SAT>::
     funcApproxMain(input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_DATA>& __restrict outWindow) {
-    set_rnd_mode<TP_RND>();
+    set_rnd_mode<rnd_floor>();
     set_sat_mode<TP_SAT>();
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
     using compVect_t = ::aie::vector<complex_tt_data_t<TT_DATA>, kSamplesInVect>;
@@ -84,7 +84,8 @@ func_approx<TT_DATA, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSI
         chess_prepare_for_pipelining chess_loop_range((TP_WINDOW_VSIZE / (kSamplesInVect)), ) {
             // dataVect = *inPtr++;
             // shift down data to get LUT address
-            idxVect = ::aie::downshift(*inPtr++, TP_FINE_BITS);
+            // idxVect = ::aie::downshift(*inPtr++, TP_FINE_BITS);
+            idxVect = ::aie::detail::shift<TT_DATA, kSamplesInVect>::run(*inPtr++, 0, TP_FINE_BITS);
             if
                 constexpr(sizeof(TT_DATA) == 2) {
 #pragma unroll(kSamplesInVect)
@@ -110,6 +111,7 @@ func_approx<TT_DATA, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSI
         }
     inPtr -= (TP_WINDOW_VSIZE / kSamplesInVect);
     chess_separator();
+    set_rnd_mode<TP_RND>();
 
     for (int i = 0; i < (TP_WINDOW_VSIZE / (kSamplesInVect)); i++)
         chess_prepare_for_pipelining chess_loop_range((TP_WINDOW_VSIZE / (kSamplesInVect)), ) {
@@ -136,7 +138,7 @@ template <unsigned int TP_COARSE_BITS,
 NOINLINE_DECL void
 func_approx<float, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE, TP_SHIFT, TP_RND, TP_SAT>::
     funcApproxMain(input_buffer<float>& __restrict inWindow, output_buffer<float>& __restrict outWindow) {
-    set_rnd_mode<TP_RND>();
+    set_rnd_mode<rnd_floor>();
     set_sat_mode<TP_SAT>();
     typedef float TT_DATA;
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
@@ -164,7 +166,8 @@ func_approx<float, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE
             // cast vector to int16 and downshift to find LUT index
             intDataVect =
                 ::aie::to_fixed<int32, kSamplesInVect>(dataVect, TP_FINE_BITS + TP_COARSE_BITS - TP_DOMAIN_MODE);
-            idxVect = ::aie::downshift(intDataVect, TP_FINE_BITS);
+            idxVect = ::aie::detail::shift<int32, kSamplesInVect>::run(intDataVect, 0, TP_FINE_BITS);
+// idxVect = ::aie::downshift(intDataVect, TP_FINE_BITS);
 
 #pragma unroll(kSamplesInVect)
             for (int j = 0; j < kSamplesInVect; j++) {
@@ -173,6 +176,8 @@ func_approx<float, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE
             }
         }
     chess_separator();
+    set_rnd_mode<TP_RND>();
+
     inPtr -= (TP_WINDOW_VSIZE / kSamplesInVect);
 
     dataVect = *inPtr++;

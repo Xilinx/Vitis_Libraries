@@ -37,14 +37,12 @@
             "updater": {
                 "file": "dds_mixer.py",
                 "function": "update_TT_DATA",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "dds_mixer.py",
                 "function": "validate_TT_DATA",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
@@ -63,7 +61,7 @@
                 "function": "validate_TP_MIXER_MODE",
                 "args": [
                     "TT_DATA"
-                 ]
+                ]
             }
         },
         {
@@ -88,13 +86,13 @@
             "updater": {
                 "file": "dds_mixer.py",
                 "function": "update_TP_API",
-                "args": [
-                ]},
+                "args": []
+            },
             "validator": {
                 "file": "dds_mixer.py",
                 "function": "validate_TP_API",
-                "args": [
-                ]}
+                "args": []
+            }
         },
         {
             "name": "TP_INPUT_WINDOW_VSIZE",
@@ -130,13 +128,15 @@
                 "function": "update_TP_USE_PHASE_RELOAD",
                 "args": [
                     "TP_SSR"
-                ]},
+                ]
+            },
             "validator": {
                 "file": "dds_mixer.py",
                 "function": "validate_TP_USE_PHASE_RELOAD",
                 "args": [
                     "TP_SSR"
-                ]}
+                ]
+            }
         },
         {
             "name": "TP_PHASE_RELOAD_API",
@@ -147,12 +147,16 @@
             "updater": {
                 "file": "dds_mixer.py",
                 "function": "update_TP_PHASE_RELOAD_API",
-                "args" : ["TP_USE_PHASE_RELOAD"]
+                "args": [
+                    "TP_USE_PHASE_RELOAD"
+                ]
             },
             "validator": {
                 "file": "dds_mixer.py",
                 "function": "validate_TP_PHASE_RELOAD_API",
-                "args" : ["TP_USE_PHASE_RELOAD"]
+                "args": [
+                    "TP_USE_PHASE_RELOAD"
+                ]
             }
         },
         {
@@ -166,13 +170,15 @@
                 "function": "update_TP_USE_PHASE_INC_RELOAD",
                 "args": [
                     "TP_SSR"
-                ]},
+                ]
+            },
             "validator": {
                 "file": "dds_mixer.py",
                 "function": "validate_TP_USE_PHASE_INC_RELOAD",
                 "args": [
                     "TP_SSR"
-                ]}
+                ]
+            }
         },
         {
             "name": "phaseInc",
@@ -181,13 +187,13 @@
             "updater": {
                 "file": "dds_mixer.py",
                 "function": "update_phaseInc",
-                "args": [
-                ]},
+                "args": []
+            },
             "validator": {
                 "file": "dds_mixer.py",
                 "function": "validate_phaseInc",
-                "args": [
-                ]}
+                "args": []
+            }
         },
         {
             "name": "initialPhaseOffset",
@@ -196,13 +202,13 @@
             "updater": {
                 "file": "dds_mixer.py",
                 "function": "update_initialPhaseOffset",
-                "args": [
-                ]},
+                "args": []
+            },
             "validator": {
                 "file": "dds_mixer.py",
                 "function": "validate_initialPhaseOffset",
-                "args": [
-                ]}
+                "args": []
+            }
         },
         {
             "name": "TP_RND",
@@ -213,13 +219,15 @@
                 "function": "update_TP_RND",
                 "args": [
                     "AIE_VARIANT"
-                ]},
+                ]
+            },
             "validator": {
                 "file": "dds_mixer.py",
                 "function": "validate_TP_RND",
                 "args": [
                     "AIE_VARIANT"
-                ]}            
+                ]
+            }
         },
         {
             "name": "TP_SAT",
@@ -230,13 +238,15 @@
                 "function": "update_TP_SAT",
                 "args": [
                     "TP_MIXER_MODE"
-                ]},
+                ]
+            },
             "validator": {
                 "file": "dds_mixer.py",
                 "function": "validate_TP_SAT",
                 "args": [
                     "TP_MIXER_MODE"
-                ]}
+                ]
+            }
         }
     ],
     "ports": {

@@ -1,7 +1,7 @@
 
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ use Cwd 'chdir';
 use Getopt::Long;
 use File::Basename;
 use Term::ReadLine;
-use File::Copy;  
+use File::Copy;
 
 my $usage = "
 This script will convert an array of data txt files into or from dual streams.
@@ -109,9 +109,9 @@ if ( ($zip) and ($findOutType ne "") ) {
     } elsif ($type eq "cint16" and $findOutType eq "cint16") {
         $type = "cint16";
     } elsif ($type eq "cint16" and $findOutType eq "int16") {
-        $type = "cint16";     
+        $type = "cint16";
     } elsif ($type eq "cint16" and $findOutType eq "int32") {
-        $type = "cint32"; 
+        $type = "cint32";
     } elsif ($type eq "int16" and $findOutType eq "int16") {
         $type = "int16";
     } elsif ($type eq "int16" and $findOutType eq "cint16") {
@@ -120,29 +120,29 @@ if ( ($zip) and ($findOutType ne "") ) {
         $type = "int32";
 
     }
-    # print "Output type is $type\n"; 
+    # print "Output type is $type\n";
 }
 
-# Define properties for each data type  
-my %type_properties = (  
-    'uint8'     => { numParts => 1, partSize => 8  },  
-    'uint16'    => { numParts => 1, partSize => 16 },  
-    'uint32'    => { numParts => 1, partSize => 32 },  
-    'int8'      => { numParts => 1, partSize => 8  },  
-    'int16'     => { numParts => 1, partSize => 16 },  
-    'int32'     => { numParts => 1, partSize => 32 },  
-    'float'     => { numParts => 1, partSize => 32 },  
-    'bfloat16'  => { numParts => 1, partSize => 16 },  
-    'cint8'     => { numParts => 2, partSize => 8  },  
-    'cint16'    => { numParts => 2, partSize => 16 },  
-    'cint32'    => { numParts => 2, partSize => 32 },  
-    'cfloat'    => { numParts => 2, partSize => 32 },  
-    'cbfloat16' => { numParts => 2, partSize => 16 },  
-); 
+# Define properties for each data type
+my %type_properties = (
+    'uint8'     => { numParts => 1, partSize => 8  },
+    'uint16'    => { numParts => 1, partSize => 16 },
+    'uint32'    => { numParts => 1, partSize => 32 },
+    'int8'      => { numParts => 1, partSize => 8  },
+    'int16'     => { numParts => 1, partSize => 16 },
+    'int32'     => { numParts => 1, partSize => 32 },
+    'float'     => { numParts => 1, partSize => 32 },
+    'bfloat16'  => { numParts => 1, partSize => 16 },
+    'cint8'     => { numParts => 2, partSize => 8  },
+    'cint16'    => { numParts => 2, partSize => 16 },
+    'cint32'    => { numParts => 2, partSize => 32 },
+    'cfloat'    => { numParts => 2, partSize => 32 },
+    'cbfloat16' => { numParts => 2, partSize => 16 },
+);
 
 
-# Get properties for the data type  
-my $partsPerSample = $type_properties{$type}{numParts};  
+# Get properties for the data type
+my $partsPerSample = $type_properties{$type}{numParts};
 my $sampleSizeBits = $type_properties{$type}{numParts} * $type_properties{$type}{partSize};
 
 my $samplesPerLine = $plioWidth / $sampleSizeBits;
@@ -158,7 +158,7 @@ my $linesPerStream = $streamWidth / $plioWidth;
 my $linesPerSample = 1;
 if ($plioWidth < $sampleSizeBits) {
   $linesPerSample = 2;
-} 
+}
 my $data_type_size_bytes = $sampleSizeBits / 8;
 
 
@@ -175,123 +175,123 @@ my @subFilesFinal;
 my @subFilesFinalH;
 my @files;
 
-if ($split) {  
-    my @files;  
-  
-    if ($x_pos > 0 and $y_pos == 0) {  
-        # One number suffix (uut_output_0.txt)  
-        @files = map { "./${fileName}_$_.txt" } (0...$x_pos-1);  
-    } elsif ($x_pos > 0 and $y_pos > 0) {  
-        # Two number suffix (uut_output_0_0.txt)  
-        for my $x (0...$x_pos-1) {  
-            push @files, map { "./data/${fileName}_${x}_$_.txt" } 0...$y_pos-1;  
-        }  
+if ($split) {
+    my @files;
+
+    if ($x_pos > 0 and $y_pos == 0) {
+        # One number suffix (uut_output_0.txt)
+        @files = map { "./${fileName}_$_.txt" } (0...$x_pos-1);
+    } elsif ($x_pos > 0 and $y_pos > 0) {
+        # Two number suffix (uut_output_0_0.txt)
+        for my $x (0...$x_pos-1) {
+            push @files, map { "./data/${fileName}_${x}_$_.txt" } 0...$y_pos-1;
+        }
     }  else {
-        @files = "./data/${fileName}.txt" ;  
+        @files = "./data/${fileName}.txt" ;
     }
-  
-    for my $file (@files) {  
-        # Open the original file for reading  
-        open my $fh_in, '<', $file or die "Can't open file $file for reading: $!";  
-  
-        # Extract the base name without extension  
-        my ($base_name) = $file =~ /(.*)\.txt/;  
-  
-        # Construct new filenames with suffixes _0 and _1  
-        my $file_0 = "${base_name}_0.txt";  
-        my $file_1 = "${base_name}_1.txt";  
-  
+
+    for my $file (@files) {
+        # Open the original file for reading
+        open my $fh_in, '<', $file or die "Can't open file $file for reading: $!";
+
+        # Extract the base name without extension
+        my ($base_name) = $file =~ /(.*)\.txt/;
+
+        # Construct new filenames with suffixes _0 and _1
+        my $file_0 = "${base_name}_0.txt";
+        my $file_1 = "${base_name}_1.txt";
+
         if ($dualStreams) {
-            # Open new files for writing  
-            open my $fh_out_0, '>', $file_0 or die "Can't open file $file_0 for writing: $!";  
-            open my $fh_out_1, '>', $file_1 or die "Can't open file $file_1 for writing: $!";  
-    
-            my $line_counter = 0;  
-            my $current_fh = $fh_out_0; # Start writing to file_0  
-    
-            # Read from the original file and write to the new files  
-            while (my $line = <$fh_in>) {  
-                print $current_fh $line;  
-                $line_counter++;  
-    
-                # Check if we've written $linesPerStream lines, then switch filehandles  
-                if ($line_counter == $linesPerStream) {  
+            # Open new files for writing
+            open my $fh_out_0, '>', $file_0 or die "Can't open file $file_0 for writing: $!";
+            open my $fh_out_1, '>', $file_1 or die "Can't open file $file_1 for writing: $!";
+
+            my $line_counter = 0;
+            my $current_fh = $fh_out_0; # Start writing to file_0
+
+            # Read from the original file and write to the new files
+            while (my $line = <$fh_in>) {
+                print $current_fh $line;
+                $line_counter++;
+
+                # Check if we've written $linesPerStream lines, then switch filehandles
+                if ($line_counter == $linesPerStream) {
                     # if dualStream = 0, then keep writing to file 0
-                    $current_fh = (($current_fh == $fh_out_0)) ? $fh_out_1 : $fh_out_0;  
-                    $line_counter = 0; # Reset the line counter  
-                }  
-            }  
-            close $fh_out_0;  
-            close $fh_out_1;  
-            close $fh_in;  
+                    $current_fh = (($current_fh == $fh_out_0)) ? $fh_out_1 : $fh_out_0;
+                    $line_counter = 0; # Reset the line counter
+                }
+            }
+            close $fh_out_0;
+            close $fh_out_1;
+            close $fh_in;
         } else {
-            open my $fh_out_0, '>', $file_0 or die "Can't open file $file_0 for writing: $!";  
-            # Copy the file  
-            copy($file, $file_0) or die "Copy failed: $!";  
+            open my $fh_out_0, '>', $file_0 or die "Can't open file $file_0 for writing: $!";
+            # Copy the file
+            copy($file, $file_0) or die "Copy failed: $!";
 
         }
-  
-        # Close the filehandles  
-    }  
-}  
 
-if ($zip) {  
-    my @files;      
-    if ($x_pos > 0 and $y_pos == 0) {  
-        # One number suffix (uut_output_0.txt)  
-        @files = map { "./data/${fileName}_$_.txt" } (0...$x_pos-1);  
-    } elsif ($x_pos > 0 and $y_pos > 0) {  
-        # Two number suffix (uut_output_0_0.txt)  
-        for my $x (0...$x_pos-1) {  
-            push @files, map { "./data/${fileName}_${x}_$_.txt" } 0...$y_pos-1;  
-        }  
+        # Close the filehandles
+    }
+}
+
+if ($zip) {
+    my @files;
+    if ($x_pos > 0 and $y_pos == 0) {
+        # One number suffix (uut_output_0.txt)
+        @files = map { "./data/${fileName}_$_.txt" } (0...$x_pos-1);
+    } elsif ($x_pos > 0 and $y_pos > 0) {
+        # Two number suffix (uut_output_0_0.txt)
+        for my $x (0...$x_pos-1) {
+            push @files, map { "./data/${fileName}_${x}_$_.txt" } 0...$y_pos-1;
+        }
     }  else {
         # Single stream in -> copy file <file>.txt to <file>_0.txt
         @files = "./data/${fileName}.txt";
     }
-  
-    for my $file (@files) {  
-        # Extract the base name without extension  
-        my ($base_name) = $file =~ /(.*)\.txt/;  
-  
-        # Construct filenames with suffixes _0 and _1  
-        my $file_0 = "${base_name}_0.txt";  
-        my $file_1 = "${base_name}_1.txt";  
+
+    for my $file (@files) {
+        # Extract the base name without extension
+        my ($base_name) = $file =~ /(.*)\.txt/;
+
+        # Construct filenames with suffixes _0 and _1
+        my $file_0 = "${base_name}_0.txt";
+        my $file_1 = "${base_name}_1.txt";
 
         if ($dualStreams) {
-            # Open the split files for reading  
-            open my $fh_in_0, '<', $file_0 or die "Can't open file $file_0 for reading: $!";  
-            open my $fh_in_1, '<', $file_1 or die "Can't open file $file_1 for reading: $!";  
-    
-            # Open the output file for writing  
-            open my $fh_out, '>', $file or die "Can't open file $file for writing: $!";  
-    
-            my $line_counter = 0;  
-            my $current_fh = $fh_in_0; # Start reading from file_0  
-    
-            # Read from the split files and write to the output file  
-            while (1) {  
-                my $line = <$current_fh>;  
-                last unless defined $line; # Exit loop if no more lines  
-    
-                print $fh_out $line;  
-                $line_counter++;  
-    
-                # Check if we've read $linesPerStream lines, then switch filehandles  
-                if ($line_counter == $linesPerStream) {  
-                    $current_fh = ($current_fh == $fh_in_0) ? $fh_in_1 : $fh_in_0;  
-                    $line_counter = 0; # Reset the line counter  
-                }  
-            }  
-    
-            # Close the filehandles  
-            close $fh_in_0;  
-            close $fh_in_1;  
-            close $fh_out;  
+            # Open the split files for reading
+            open my $fh_in_0, '<', $file_0 or die "Can't open file $file_0 for reading: $!";
+            open my $fh_in_1, '<', $file_1 or die "Can't open file $file_1 for reading: $!";
+
+            # Open the output file for writing
+            open my $fh_out, '>', $file or die "Can't open file $file for writing: $!";
+
+            my $line_counter = 0;
+            my $current_fh = $fh_in_0; # Start reading from file_0
+
+            # Read from the split files and write to the output file
+            while (1) {
+                my $line = <$current_fh>;
+                last unless defined $line; # Exit loop if no more lines
+
+                print $fh_out $line;
+                $line_counter++;
+
+                # Check if we've read $linesPerStream lines, then switch filehandles
+                if ($line_counter == $linesPerStream) {
+                    $current_fh = ($current_fh == $fh_in_0) ? $fh_in_1 : $fh_in_0;
+                    $line_counter = 0; # Reset the line counter
+                }
+            }
+
+            # Close the filehandles
+            close $fh_in_0;
+            close $fh_in_1;
+            close $fh_out;
         } else {
             # Single stream out -> copy file <file>_0.txt to <file>.txt
-            copy($file_0, $file) or die "Copy failed: $!";  
+            copy($file_0, $file) or die "Copy failed: $!";
 
         }
-    }  
-}  
+    }
+}

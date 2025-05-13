@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,36 +37,44 @@ static constexpr unsigned int useAIEffts() {
     return 0;
 }
 
+// Returns the point size of the first set of FFTs of the decomposed FFT.
 template <unsigned int TP_POINT_SIZE, unsigned int TP_VSS_MODE, unsigned TP_SSR>
 constexpr unsigned int fnPtSizeD1() {
     unsigned int ptSizeD1 = -1;
     if (TP_VSS_MODE == usePLffts()) {
         ptSizeD1 = TP_POINT_SIZE / TP_SSR;
     } else if (TP_VSS_MODE == useAIEffts()) {
+        // While this is simply the sqrt(point size) for perfect powers of 2 point sizes, for other point sizes like
+        // 512, it can be decomposed either as 16 x 32 or 32 x 16.
+        // Since the first set of FFT tiles will also contain the twiddle rotations, we choose the ffts with higher
+        // performance to be placed on the same kernel as the twiddle rotators to better balance the performance with
+        // the second set of FFTs
+        // This is counter-intuitively the larger of the two numbers due to lesser overheads in larger point sizes
+        // (determined based on experiments on the standalone fft).
         ptSizeD1 = TP_POINT_SIZE == 65536
                        ? 256
                        : TP_POINT_SIZE == 32768
-                             ? 128
+                             ? 256
                              : TP_POINT_SIZE == 16384
                                    ? 128
                                    : TP_POINT_SIZE == 8192
-                                         ? 64
+                                         ? 128
                                          : TP_POINT_SIZE == 4096
                                                ? 64
                                                : TP_POINT_SIZE == 2048
-                                                     ? 32
+                                                     ? 64
                                                      : TP_POINT_SIZE == 1024
                                                            ? 32
                                                            : TP_POINT_SIZE == 512
-                                                                 ? 16
+                                                                 ? 32
                                                                  : TP_POINT_SIZE == 256
                                                                        ? 16
                                                                        : TP_POINT_SIZE == 128
-                                                                             ? 8
+                                                                             ? 16
                                                                              : TP_POINT_SIZE == 64
                                                                                    ? 8
                                                                                    : TP_POINT_SIZE == 32
-                                                                                         ? 4
+                                                                                         ? 8
                                                                                          : TP_POINT_SIZE == 16 ? 4 : 0;
     }
     return ptSizeD1;

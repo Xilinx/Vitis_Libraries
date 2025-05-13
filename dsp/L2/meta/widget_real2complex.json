@@ -82,12 +82,20 @@
             "updater": {
                 "file": "widget_real2complex.py",
                 "function": "update_TP_WINDOW_VSIZE",
-                "args": ["AIE_VARIANT", "TT_DATA", "TT_OUT_DATA"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_OUT_DATA"
+                ]
             },
             "validator": {
                 "file": "widget_real2complex.py",
                 "function": "validate_TP_WINDOW_VSIZE",
-                "args": ["AIE_VARIANT", "TT_DATA", "TT_OUT_DATA" ]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_OUT_DATA"
+                ]
             }
         }
     ],

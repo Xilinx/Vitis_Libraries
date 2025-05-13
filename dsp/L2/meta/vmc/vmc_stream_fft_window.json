@@ -1,5 +1,5 @@
 {
-  "low_level_file":"fft_window.json",
+  "low_level_file": "fft_window.json",
   "ip_name": "vmc_stream_fft_window",
   "block_info": {
     "label": "Window Function Stream",
@@ -10,29 +10,29 @@
       "key": "TT_DATA",
       "name": "data_type",
       "default": "cint16",
-            "label": "Input/Output data type:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+      "label": "Input/Output data type:",
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
     {
-      "key": "TT_COEFF",  
+      "key": "TT_COEFF",
       "name": "coeff_type",
       "description": "The type of individual coefficients of the FFT window function",
       "default": "int16",
       "label": "Function coefficient data type:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
-      {
+    {
       "key": "weights",
       "name": "coeff",
       "description": "The window function coefficients",
       "element_type": "coeff_type",
-      "default": "[1, zeros(1,63)]",      
+      "default": "[1, zeros(1,63)]",
       "type": "vector",
       "label": "Function coefficients:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
     {
       "key": "TP_POINT_SIZE",
@@ -40,87 +40,93 @@
       "description": "The number of coefficients in the FFT window function",
       "default": 64,
       "label": "FFT/IFFT point size:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
-    { 
+    {
       "key": "TP_DYN_PT_SIZE",
       "name": "is_dyn_pt_size",
       "description": "Select this option to enable dynamic point size operation.",
       "default": false,
       "label": "Use dynamic point size",
-            "tablabel": "Main",
-            "parameterType":"checkbox"
+      "tablabel": "Main",
+      "parameterType": "checkbox"
     },
     {
       "key": "TP_WINDOW_VSIZE",
       "name": "input_window_size",
-      "description": "The number of samples in the input window",
+      "description": "Enter the number of samples in the input window",
       "default": 64,
       "label": "Input frame size (Number of Samples):",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
     {
       "key": "TP_SHIFT",
       "name": "shift_val",
-      "description": "The power of 2 shift down applied to the product of sample and coefficient",
+      "description": "Specify how many bits to right-shift the product of the sample and the coefficient.",
       "default": 0,
       "label": "Scale output down by 2^:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
-      {
-      "key" :"TP_SSR",
+    {
+      "key": "TP_SSR",
       "name": "ssr",
       "description": "Specify number of data input/output in parallel",
       "default": 2,
       "label": "SSR: ",
-            "tablabel": "Main",
-            "parameterType":"edit"
-      },
-      {
+      "tablabel": "Main",
+      "parameterType": "edit"
+    },
+    {
       "key": "TP_RND",
       "name": "rnd_mode",
       "description": "Select a rounding mode from the dropdown menu.",
       "default": "Round symmetrical to infinity",
       "label": "Rounding mode:",
-            "tablabel": "Main",
-          "parameterType": "popup"
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
     {
       "key": "TP_SAT",
       "name": "sat_mode",
       "description": "Select a saturation mode from the dropdown menu.",
-      "enum": [0, 1, 3],
-      "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
+      "enum": [
+        0,
+        1,
+        3
+      ],
+      "enum_str": [
+        "0-None",
+        "1-Asymmetric",
+        "3-Symmetric"
+      ],
       "default": 0,
       "label": "Saturation mode:",
-            "tablabel": "Main",
-            "parameterType":"popup"
-    },	
-	{
-	  "key": "AIE_VARIANT",
-	  "name": "AIE_VARIANT",
+      "tablabel": "Main",
+      "parameterType": "popup"
+    },
+    {
+      "key": "AIE_VARIANT",
+      "name": "AIE_VARIANT",
       "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
       "default": 1,
-	  "label": "AIE Variant:",
+      "label": "AIE Variant:",
       "tablabel": "Main",
-      "parameterType":"edit"
+      "parameterType": "edit"
     },
-    {	
-		"key":"TP_API",
-		"name": "TP_API",
-		"description": "The form of IO: 0 for windows, 1 for streams",
-		"type": "uint",
-		"default": 1,
-		"label": "API:",
-		"tablabel": "Main",
-		"visible": "off",
-		"parameterType":"edit"
-     }
-
-    
+    {
+      "key": "TP_API",
+      "name": "TP_API",
+      "description": "The form of IO: 0 for windows, 1 for streams",
+      "type": "uint",
+      "default": 1,
+      "label": "API:",
+      "tablabel": "Main",
+      "visible": "off",
+      "parameterType": "edit"
+    }
   ],
   "generator": {
     "file": "vmc_stream_fft_window.py",

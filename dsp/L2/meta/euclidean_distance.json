@@ -18,44 +18,29 @@
             "description": "specifies the device type",
             "validator": {
                 "file": "euclidean_distance.py",
-                "function": "validate_AIE_VARIANT", 
+                "function": "validate_AIE_VARIANT",
                 "args": []
             },
             "updater": {
                 "file": "euclidean_distance.py",
-                "function": "update_AIE_VARIANT", 
+                "function": "update_AIE_VARIANT",
                 "args": []
             }
         },
         {
-            "name": "TT_DATA_P",
+            "name": "TT_DATA",
             "type": "typename",
-            "description": "The type of individual data samples input to port P.",
+            "description": "The type of individual data samples input and output to input_ports and Output_port .",
             "enum":["float", "bfloat16"],
             "validator": {
                 "file": "euclidean_distance.py",
-                "function": "validate_TT_DATA_P",
+                "function": "validate_TT_DATA",
                 "args": ["AIE_VARIANT"]
             },
             "updater": {
                 "file": "euclidean_distance.py",
-                "function": "update_TT_DATA_P",
+                "function": "update_TT_DATA",
                 "args": ["AIE_VARIANT"]
-            }
-        },
-        {
-            "name": "TT_DATA_Q",
-            "type": "typename",
-            "description": "The type of individual data samples input to port Q.",
-            "validator": {
-                "file": "euclidean_distance.py",
-                "function": "validate_TT_DATA_Q",
-                "args": ["AIE_VARIANT", "TT_DATA_P"]
-            },
-            "updater": {
-                "file": "euclidean_distance.py",
-                "function": "update_TT_DATA_Q",
-                "args": ["AIE_VARIANT", "TT_DATA_P"]
             }
         },
         {
@@ -65,12 +50,12 @@
             "validator": {
                 "file": "euclidean_distance.py",
                 "function": "validate_TT_DATA_OUT",
-                "args": ["TT_DATA_P", "TT_DATA_Q"]
+                "args": ["TT_DATA"]
             },
             "updater": {
                 "file": "euclidean_distance.py",
                 "function": "update_TT_DATA_OUT",
-                "args": ["TT_DATA_P", "TT_DATA_Q"]
+                "args": ["TT_DATA"]
             }
         },
         {
@@ -89,77 +74,32 @@
             }
         },
         {
-            "name": "TP_LEN_P",
+            "name": "TP_LEN",
             "type": "uint",
-            "description": "The number of input samples at port P.",
+            "description": "The number of input samples at input and output port .",
             "validator": {
                 "file": "euclidean_distance.py",
-                "function": "validate_TP_LEN_P",
-                "args": ["TT_DATA_P", "AIE_VARIANT", "TP_API"]
+                "function": "validate_TP_LEN",
+                "args": ["TT_DATA", "AIE_VARIANT", "TP_API"]
             },
             "updater": {
                 "file": "euclidean_distance.py",
-                "function": "update_TP_LEN_P",
-                "args": ["TT_DATA_P", "AIE_VARIANT", "TP_API"]
+                "function": "update_TP_LEN",
+                "args": ["TT_DATA", "AIE_VARIANT", "TP_API"]
             }
         },
         {
-            "name": "TP_LEN_Q",
+            "name": "TP_DIM",
             "type": "uint",
-            "description": "The number of input samples at port Q.",
+            "description": "The Dimension of Plane i.e., 1D or 2D or 3D or 4D .",
             "validator": {
                 "file": "euclidean_distance.py",
-                "function": "validate_TP_LEN_Q",
-                "args": ["AIE_VARIANT", "TP_API", "TT_DATA_Q", "TP_LEN_P"]
-            },
-            "updater": {
-                "file": "euclidean_distance.py",
-                "function": "update_TP_LEN_Q",
-                "args": ["AIE_VARIANT", "TP_API", "TT_DATA_Q", "TP_LEN_P"]
-            }
-        },
-        {
-            "name": "TP_DIM_P",
-            "type": "uint",
-            "description": "The number of input samples at port P.",
-            "validator": {
-                "file": "euclidean_distance.py",
-                "function": "validate_TP_DIM_P",
+                "function": "validate_TP_DIM",
                 "args": []
             },
             "updater": {
                 "file": "euclidean_distance.py",
-                "function": "update_TP_DIM_P",
-                "args": []
-            }
-        },
-        {
-            "name": "TP_DIM_Q",
-            "type": "uint",
-            "description": "The number of input samples at port Q.",
-            "validator": {
-                "file": "euclidean_distance.py",
-                "function": "validate_TP_DIM_Q",
-                "args": ["TP_DIM_P"]
-            },
-            "updater": {
-                "file": "euclidean_distance.py",
-                "function": "update_TP_DIM_Q",
-                "args": ["TP_DIM_P"]
-            }
-        },
-        {
-            "name": "TP_NUM_FRAMES",
-            "description": "The number of frames to be processed per input window of data",
-            "type": "uint",
-            "validator": {
-                "file": "euclidean_distance.py",
-                "function": "validate_TP_NUM_FRAMES",
-                "args": []
-            },
-            "updater": {
-                "file": "euclidean_distance.py",
-                "function": "update_TP_NUM_FRAMES",
+                "function": "update_TP_DIM",
                 "args": []
             }
         },
@@ -185,12 +125,16 @@
             "validator": {
                 "file": "euclidean_distance.py",
                 "function": "validate_TP_RND",
-                "args": ["AIE_VARIANT"]
+                "args": [
+                    "AIE_VARIANT"
+                ]
             },
             "updater": {
                 "file": "euclidean_distance.py",
                 "function": "update_TP_RND",
-                "args": ["AIE_VARIANT"]
+                "args": [
+                    "AIE_VARIANT"
+                ]
             }
         },
         {
@@ -199,12 +143,12 @@
             "type": "uint",
             "validator": {
                 "file": "euclidean_distance.py",
-                "function": "validate_TP_SAT", 
+                "function": "validate_TP_SAT",
                 "args": []
             },
             "updater": {
                 "file": "euclidean_distance.py",
-                "function": "update_TP_SAT", 
+                "function": "update_TP_SAT",
                 "args": []
             }
         }

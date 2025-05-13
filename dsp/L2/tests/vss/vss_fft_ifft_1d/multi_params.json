@@ -12,7 +12,7 @@
         "ROUND_MODE": "rnd_sym_inf",
         "SAT_MODE": "1",
         "DATA_SEED": "1",
-        "AIE_VARIANT": "2",
+        "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "TWIDDLE_MODE": "0",
         "CC_TOLERANCE": "0",

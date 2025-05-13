@@ -1,19 +1,19 @@
 {
-    "low_level_file":"fir_decimate_sym.json",
+  "low_level_file": "fir_decimate_sym.json",
   "ip_name": "vmc_fir_decimate_sym",
   "block_info": {
     "label": "FIR Symmetric Decimation",
     "description": "FIR Symmetric Decimation filter block for AI Engines."
   },
-   "parameters": [
+  "parameters": [
     {
       "key": "TT_DATA",
       "name": "data_type",
       "description": "Select the input or output data type from the dropdown.",
       "default": "cint16",
-            "label": "Input/Output data type:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+      "label": "Input/Output data type:",
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
     {
       "key": "TT_COEFF",
@@ -21,8 +21,8 @@
       "description": "Select the data type for the filter coefficients from the dropdown.",
       "default": "int16",
       "label": "Filter coefficients data type:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
     {
       "key": "TP_USE_COEFF_RELOAD",
@@ -30,140 +30,146 @@
       "description": "Select this option to enable coefficient reloading at runtime.",
       "default": false,
       "label": "Specify filter coefficients via input port",
-            "tablabel": "Main",
-            "parameterType":"checkbox",
-            "disable":"coeff",
-            "enable":""
+      "tablabel": "Main",
+      "parameterType": "checkbox",
+      "disable": "coeff",
+      "enable": ""
     },
     {
       "key": "TP_DUAL_IP",
       "name": "dual_ip",
       "description": "This option allows two inputs to connect to the FIR, enhancing throughput. When disabled, only a single input connects to the FIR kernel.",
       "default": false,
-"label": "Provide second set of input ports",
-            "tablabel": "Main",
-            "parameterType":"checkbox"
+      "label": "Provide second set of input ports",
+      "tablabel": "Main",
+      "parameterType": "checkbox"
     },
     {
       "key": "TP_NUM_OUTPUTS",
       "name": "num_outputs",
-      "description": "The number of output ports. Windows API output an exact copy of the data. Stream API interleaves the output data with a 128-bit pattern.",
+      "description": "Enable a second set of output ports. Both outputs contain the same data.",
       "default": false,
       "label": "Provide second set of output ports",
-            "tablabel": "Main",
-            "parameterType":"checkbox"
+      "tablabel": "Main",
+      "parameterType": "checkbox"
     },
-      {
-      "key":"coeff",
+    {
+      "key": "coeff",
       "name": "coeff",
       "description": "Enter the FIR filter coefficients.",
       "element_type": "coef_type",
-      "default":"[1, zeros(1,15)]",
+      "default": "[1, zeros(1,15)]",
       "label": "Filter coefficients:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
     {
-      "key":"TP_FIR_LEN",
+      "key": "TP_FIR_LEN",
       "name": "fir_length",
-      "description": "Specify fir length for coefficient reloading",
+      "description": "Specify FIR length for coefficient reloading",
       "default": 32,
-            "label": "Filter length:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "label": "Filter length:",
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
     {
-      "key":"TP_DECIMATE_FACTOR",
+      "key": "TP_DECIMATE_FACTOR",
       "name": "decimate_factor",
       "description": "Enter the value of the decimation factor",
       "default": 2,
       "label": "Decimation factor:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
-      {
-      "key":"TP_INPUT_WINDOW_VSIZE",
+    {
+      "key": "TP_INPUT_WINDOW_VSIZE",
       "name": "input_window_size",
       "description": "The number of samples in the input window API used for the filter function. The number of samples in the output window will depend on the FIR filter parameters.",
       "default": 256,
       "label": "Input window size (Number of samples):",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
     {
       "key": "TP_SHIFT",
       "name": "shift_val",
-      "description": "The power of 2 shift-down is applied to the accumulation of the FIR before output.",
+      "description": "Specify how many bits to right-shift the accumulation of the FIR before output.",
       "default": 0,
       "label": "Scale output down by 2^:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
-      {
+    {
       "key": "TP_RND",
       "name": "rnd_mode",
       "description": "Select a rounding mode from the dropdown.",
       "default": "Round to positive infinity",
       "label": "Rounding mode:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
     {
       "key": "TP_SAT",
       "name": "sat_mode",
       "description": "Select a saturation mode from the dropdown.",
-      "enum": [0, 1, 3],
-      "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
+      "enum": [
+        0,
+        1,
+        3
+      ],
+      "enum_str": [
+        "0-None",
+        "1-Asymmetric",
+        "3-Symmetric"
+      ],
       "default": 0,
       "label": "Saturation mode:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
     {
       "key": "TP_CASC_LEN",
       "name": "casc_length",
-      "description": "The length of cascaded kernels",
+      "description": "Specify the number of kernels to cascade in series to increase throughput.",
       "default": 1,
       "label": "Number of cascade stages:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
-	{
-	  "key": "AIE_VARIANT",
-	  "name": "AIE_VARIANT",
+    {
+      "key": "AIE_VARIANT",
+      "name": "AIE_VARIANT",
       "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
       "default": 1,
-	  "label": "AIE Variant:",
+      "label": "AIE Variant:",
       "tablabel": "Main",
-      "parameterType":"edit"
+      "parameterType": "edit"
     },
-     {	
-		"key":"TP_API",
-		"name": "TP_API",
-		"description": "The form of IO: 0 for windows, 1 for streams",
-		"type": "uint",
-		"default": 0,
-		"label": "API:",
-		"tablabel": "Main",
-		"visible": "off",
-		"parameterType":"edit"
-     },
-     {		
-	"key":"TP_SSR",
-        "name": "ssr",
-        "description": "TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput.",
-        "type": "uint",      
-        "default": 1,
-        "label": "SSR:",
-        "tablabel": "Main",
-        "visible": "off",
-        "parameterType":"edit"
-     }
-
+    {
+      "key": "TP_API",
+      "name": "TP_API",
+      "description": "The form of IO: 0 for windows, 1 for streams",
+      "type": "uint",
+      "default": 0,
+      "label": "API:",
+      "tablabel": "Main",
+      "visible": "off",
+      "parameterType": "edit"
+    },
+    {
+      "key": "TP_SSR",
+      "name": "ssr",
+      "description": "Specify number of data input/output in parallel for a single channel.",
+      "type": "uint",
+      "default": 1,
+      "label": "SSR:",
+      "tablabel": "Main",
+      "visible": "off",
+      "parameterType": "edit"
+    }
   ],
   "generator": {
     "file": "vmc_fir_decimate_sym.py",
     "function": "vmc_generate_graph"
   }
-
 }

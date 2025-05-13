@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ ifeq ($(T_DATA_A), int16)
 	else ifeq ($(T_DATA_B), cint32)
 		T_DATA_OUT := cint32
 	endif
-    
+
 else ifeq ($(T_DATA_A), int32)
 	ifeq ($(T_DATA_B), int16)
 		T_DATA_OUT := int32

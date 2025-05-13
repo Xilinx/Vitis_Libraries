@@ -1,130 +1,136 @@
 {
-    "low_level_file":"mixed_radix_fft.json",
+    "low_level_file": "mixed_radix_fft.json",
     "ip_name": "vmc_mixed_radix_fft",
     "block_info": {
-    "label": "Mixed-Radix FFT",
-    "description": "Mixed-Radix FFT block targeted for AI Engines."
+        "label": "Mixed-Radix FFT",
+        "description": "Mixed-Radix FFT block targeted for AI Engines."
     },
     "parameters": [
-    {
-        "key": "AIE_VARIANT",
-        "name": "AIE_VARIANT",
-        "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
-        "default": 1,
-        "label": "AIE Variant:",
-        "tablabel": "Main",
-        "parameterType":"edit"
-    },
-    {
-        "key": "TT_DATA",
-        "name": "data_type",
-        "description": "The data type of individual samples input to and output from the FFT function.",
-        "default": "cint16",
-        "label": "Input/Output data type:",
-        "tablabel": "Main",
-        "parameterType":"popup"
-    },
-    {
-        "key": "TT_TWIDDLE",
-        "name": "twiddle_type",
-        "description": "Select the twiddle factor data type from the dropdown",
-        "default": "cint16",
-        "label": "Twiddle factor data type:",
-        "tablabel": "Main",
-        "parameterType":"popup"
-    },
-    {
-        "key": "TP_DYN_PT_SIZE",
-        "name": "dyn_pt_size",
-        "description": "Indicates whether to use dynamic (1) or static (0) point size.",
-        "default": 0,
-        "label": "Dynamic (1) or static (0) point size:",
-        "tablabel": "Main",
-        "parameterType":"edit"
-    },
-    {
-        "key": "TP_POINT_SIZE",
-        "name": "point_size",
-        "description": "Enter the number of samples in the transform",
-        "default": 64,
-        "label": "FFT size:",
-        "tablabel": "Main",
-        "parameterType":"edit"
-    },  
-     {		
-	"key":"TP_FFT_NIFFT",
-        "name": "TP_FFT_NIFFT",
-        "description": "Selects whether the transform to perform is an FFT (1) or IFFT (0)",
-        "type": "uint",      
-        "default": 1,
-        "label": "FFT_NIFFT:",
-        "tablabel": "Main",
-        "visible": "off",
-        "parameterType":"edit"
-     },
-
-    {
-        "key": "TP_WINDOW_VSIZE",
-        "name": "input_window_size",
-        "description": "Enter the number of samples in the input window",
-        "default": 64,
-        "label": "Input window size (Number of samples):",
-        "tablabel": "Main",
-        "parameterType":"edit"
-    },
-    {
-        "key": "TP_CASC_LEN",
-        "name": "casc_length",
-        "description": "The length of cascaded kernels",
-        "default": 1,
-        "label": "Number of cascade stages:",
-        "tablabel": "Main",
-        "parameterType":"edit"
-    },
-    {	
-		"key":"TP_API",
-		"name": "TP_API",
-		"description": "The form of IO: 0 for windows, 1 for streams",
-		"type": "uint",
-		"default": 0,
-		"label": "API:",
-		"tablabel": "Main",
-		"visible": "off",
-		"parameterType":"edit"
-     },
-    {
-        "key": "TP_SHIFT",
-        "name": "shift_val",
-        "description": "A power of 2 shift-down is applied to the FFT accumulation before output.",
-        "default": 0,
-        "label": "Scale output down by 2^:",
-        "tablabel": "Main",
-        "parameterType":"edit"
-    },
-    {
-        "key": "TP_RND",
-        "name": "rnd_mode",
-        "description": "Select a rounding mode from the dropdown",
-        "default": "Round symmetrical to infinity",
-        "label": "Rounding mode:",
-        "tablabel": "Main",
-        "parameterType": "popup"
-    },
-    {
-        "key": "TP_SAT",
-        "name": "sat_mode",
-        "description": "Select a saturation mode from the dropdown.",
-        "enum": [0, 1, 3],
-        "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
-        "default": 0,
-        "label": "Saturation mode:",
-        "tablabel": "Main",
-        "parameterType":"popup"
-    }
-
+        {
+            "key": "AIE_VARIANT",
+            "name": "AIE_VARIANT",
+            "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
+            "default": 1,
+            "label": "AIE Variant:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TT_DATA",
+            "name": "data_type",
+            "description": "Select the input/output data type from the dropdown menu.",
+            "default": "cint16",
+            "label": "Input/Output data type:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TT_TWIDDLE",
+            "name": "twiddle_type",
+            "description": "Select the twiddle factor data type from the dropdown",
+            "default": "cint16",
+            "label": "Twiddle factor data type:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_DYN_PT_SIZE",
+            "name": "dyn_pt_size",
+            "description": "Indicates whether to use dynamic (1) or static (0) point size.",
+            "default": 0,
+            "label": "Dynamic (1) or static (0) point size:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_POINT_SIZE",
+            "name": "point_size",
+            "description": "Enter the number of samples in the transform",
+            "default": 64,
+            "label": "FFT size:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_FFT_NIFFT",
+            "name": "TP_FFT_NIFFT",
+            "description": "Selects whether the transform to perform is an FFT (1) or IFFT (0)",
+            "type": "uint",
+            "default": 1,
+            "label": "FFT_NIFFT:",
+            "tablabel": "Main",
+            "visible": "off",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_WINDOW_VSIZE",
+            "name": "input_window_size",
+            "description": "Enter the number of samples in the input window",
+            "default": 64,
+            "label": "Input window size (Number of samples):",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_CASC_LEN",
+            "name": "casc_length",
+            "description": "Specify the number of kernels to cascade in series to increase throughput.",
+            "default": 1,
+            "label": "Number of cascade stages:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_API",
+            "name": "TP_API",
+            "description": "The form of IO: 0 for windows, 1 for streams",
+            "type": "uint",
+            "default": 0,
+            "label": "API:",
+            "tablabel": "Main",
+            "visible": "off",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_SHIFT",
+            "name": "shift_val",
+            "description": "Specify how many bits to right-shift the FFT accumulation before output.",
+            "default": 0,
+            "label": "Scale output down by 2^:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_RND",
+            "name": "rnd_mode",
+            "description": "Select a rounding mode from the dropdown",
+            "default": "Round symmetrical to infinity",
+            "label": "Rounding mode:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_SAT",
+            "name": "sat_mode",
+            "description": "Select a saturation mode from the dropdown.",
+            "enum": [
+                0,
+                1,
+                3
+            ],
+            "enum_str": [
+                "0-None",
+                "1-Asymmetric",
+                "3-Symmetric"
+            ],
+            "default": 0,
+            "label": "Saturation mode:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        }
     ],
     "generator": {
-    "file": "vmc_mixed_radix_fft.py",
-    "function": "vmc_generate_graph"
+        "file": "vmc_mixed_radix_fft.py",
+        "function": "vmc_generate_graph"
     }
 }

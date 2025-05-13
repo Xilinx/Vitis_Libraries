@@ -39,13 +39,16 @@
             "updater": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "update_TT_DATA",
-                "args": ["AIE_VARIANT"]
+                "args": [
+                    "AIE_VARIANT"
+                ]
             },
             "validator": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TT_DATA",
-                "args": ["AIE_VARIANT"]
-
+                "args": [
+                    "AIE_VARIANT"
+                ]
             }
         },
         {
@@ -133,12 +136,12 @@
             "updater": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "update_TP_DYN_PT_SIZE",
-                "args": [ ]
+                "args": []
             },
             "validator": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TP_DYN_PT_SIZE",
-                "args": [ ]
+                "args": []
             }
         },
         {
@@ -214,13 +217,13 @@
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "update_TP_WINDOW_VSIZE",
                 "args": [
-                    "AIE_VARIANT", 
-                    "TT_DATA", 
-                    "TT_TWIDDLE", 
-                    "TT_OUT_DATA", 
-                    "TP_API", 
-                    "TP_PARALLEL_POWER", 
-                    "TP_POINT_SIZE", 
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_TWIDDLE",
+                    "TT_OUT_DATA",
+                    "TP_API",
+                    "TP_PARALLEL_POWER",
+                    "TP_POINT_SIZE",
                     "TP_DYN_PT_SIZE"
                 ]
             },
@@ -228,13 +231,13 @@
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TP_WINDOW_VSIZE",
                 "args": [
-                    "AIE_VARIANT", 
-                    "TT_DATA", 
-                    "TT_TWIDDLE", 
-                    "TT_OUT_DATA", 
-                    "TP_API", 
-                    "TP_PARALLEL_POWER", 
-                    "TP_POINT_SIZE", 
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_TWIDDLE",
+                    "TT_OUT_DATA",
+                    "TP_API",
+                    "TP_PARALLEL_POWER",
+                    "TP_POINT_SIZE",
                     "TP_DYN_PT_SIZE"
                 ]
             }

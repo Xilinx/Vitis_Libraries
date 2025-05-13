@@ -37,12 +37,16 @@
             "updater": {
                 "file": "fft_window.py",
                 "function": "update_TT_DATA",
-                "args" :["AIE_VARIANT"]
+                "args": [
+                    "AIE_VARIANT"
+                ]
             },
             "validator": {
                 "file": "fft_window.py",
                 "function": "validate_TT_DATA",
-                "args" :["AIE_VARIANT"]
+                "args": [
+                    "AIE_VARIANT"
+                ]
             }
         },
         {
@@ -76,12 +80,12 @@
             "updater": {
                 "file": "fft_window.py",
                 "function": "update_TP_API",
-                "args": [   ]
+                "args": []
             },
             "validator": {
                 "file": "fft_window.py",
                 "function": "validate_TP_API",
-                "args": [ ]
+                "args": []
             }
         },
         {
@@ -91,12 +95,16 @@
             "updater": {
                 "file": "fft_window.py",
                 "function": "update_TP_SSR",
-                "args": ["TP_API" ]
+                "args": [
+                    "TP_API"
+                ]
             },
             "validator": {
                 "file": "fft_window.py",
                 "function": "validate_TP_SSR",
-                "args": ["TP_API" ]
+                "args": [
+                    "TP_API"
+                ]
             }
         },
         {
@@ -106,14 +114,12 @@
             "updater": {
                 "file": "fft_window.py",
                 "function": "update_TP_DYN_PT_SIZE",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "fft_window.py",
                 "function": "validate_TP_DYN_PT_SIZE",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
@@ -149,14 +155,22 @@
                 "file": "fft_window.py",
                 "function": "update_TP_WINDOW_VSIZE",
                 "args": [
-                    "AIE_VARIANT", "TT_DATA", "TP_POINT_SIZE", "TP_SSR", "TP_DYN_PT_SIZE"
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_POINT_SIZE",
+                    "TP_SSR",
+                    "TP_DYN_PT_SIZE"
                 ]
             },
             "validator": {
                 "file": "fft_window.py",
                 "function": "validate_TP_WINDOW_VSIZE",
                 "args": [
-                    "AIE_VARIANT", "TT_DATA", "TP_POINT_SIZE", "TP_SSR", "TP_DYN_PT_SIZE"
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_POINT_SIZE",
+                    "TP_SSR",
+                    "TP_DYN_PT_SIZE"
                 ]
             }
         },
@@ -187,13 +201,15 @@
                 "file": "fft_window.py",
                 "function": "update_TP_RND",
                 "args": [
-                    "AIE_VARIANT"]
+                    "AIE_VARIANT"
+                ]
             },
             "validator": {
                 "file": "fft_window.py",
                 "function": "validate_TP_RND",
                 "args": [
-                    "AIE_VARIANT"                ]
+                    "AIE_VARIANT"
+                ]
             }
         },
         {
@@ -209,7 +225,7 @@
                 "file": "fft_window.py",
                 "function": "validate_TP_SAT",
                 "args": []
-                        }
+            }
         },
         {
             "name": "weights",

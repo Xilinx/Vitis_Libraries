@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -212,7 +212,7 @@ def fn_update_TP_DIM_A(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A)
         "name": "TP_DIM_A",
         "minimum": tileA,
         "maximum": int(FLOOR(TP_DIM_A_max, tileA)),
-        "maximum_pingpong_buf": int(FLOOR(TP_DIM_A_max/2, tileA))
+        "maximum_pingpong_buf": int(FLOOR(TP_DIM_A_max / 2, tileA)),
     }
 
     if TP_DIM_A != 0 and (TP_DIM_A % tileA != 0):
@@ -290,11 +290,12 @@ def fn_update_TP_DIM_B(
     TP_DIM_B_max_out = max_buffer_sample_out * TP_SSR / TP_DIM_A
     TP_DIM_B_max = min(TP_DIM_B_max_in, TP_DIM_B_max_out)
 
-    param_dict = {"name": "TP_DIM_B",
-                  "minimum": tileB,
-                  "maximum": int(TP_DIM_B_max),
-                  "maximum_pingpong_buf": int(TP_DIM_B_max/2)
-                  }
+    param_dict = {
+        "name": "TP_DIM_B",
+        "minimum": tileB,
+        "maximum": int(TP_DIM_B_max),
+        "maximum_pingpong_buf": int(TP_DIM_B_max / 2),
+    }
 
     if TP_DIM_B != 0 and (TP_DIM_B % tileB != 0):
         TP_DIM_B_act = round(TP_DIM_B / tileB) * tileB
@@ -370,11 +371,12 @@ def fn_update_TP_DIM_AB(
     TP_DIM_AB_max2 = (max_buffer_sample_b * TP_CASC) / TP_DIM_B
     TP_DIM_AB_max = min(TP_DIM_AB_max1, TP_DIM_AB_max2)
 
-    param_dict = {"name": "TP_DIM_AB",
-                  "minimum": tileAB,
-                  "maximum": int(TP_DIM_AB_max),
-                  "maximum_pingpong_buf": int(TP_DIM_AB_max/2)
-                  }
+    param_dict = {
+        "name": "TP_DIM_AB",
+        "minimum": tileAB,
+        "maximum": int(TP_DIM_AB_max),
+        "maximum_pingpong_buf": int(TP_DIM_AB_max / 2),
+    }
 
     if TP_DIM_AB != 0 and (TP_DIM_AB % tileAB != 0):
         TP_DIM_AB_act = round(TP_DIM_AB / tileAB) * tileAB
@@ -428,23 +430,40 @@ def update_TP_SSR(args):
     TP_DIM_A = args["TP_DIM_A"]
     TP_DIM_AB = args["TP_DIM_AB"]
     TP_DIM_B = args["TP_DIM_B"]
-    return fn_update_ssr(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_AB, TP_DIM_B)
+    return fn_update_ssr(
+        AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_AB, TP_DIM_B
+    )
 
 
-def fn_update_ssr(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_AB, TP_DIM_B):
+def fn_update_ssr(
+    AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_AB, TP_DIM_B
+):
     buffer_size = k_data_memory_bytes[AIE_VARIANT]
-    ssrMinForA = max(1,fn_size_by_byte(TT_DATA_A) * TP_DIM_A * TP_DIM_AB / (TP_CASC_max * buffer_size))
-    ssrMinForOut = max(1,fn_size_by_byte(TT_OUT_DATA) * TP_DIM_A * TP_DIM_B / (buffer_size))
+    ssrMinForA = max(
+        1,
+        fn_size_by_byte(TT_DATA_A) * TP_DIM_A * TP_DIM_AB / (TP_CASC_max * buffer_size),
+    )
+    ssrMinForOut = max(
+        1, fn_size_by_byte(TT_OUT_DATA) * TP_DIM_A * TP_DIM_B / (buffer_size)
+    )
 
-    ssrMinForA_pingpong = max(1,fn_size_by_byte(TT_DATA_A) * TP_DIM_A * TP_DIM_AB / (TP_CASC_max * buffer_size/2))
-    ssrMinForOut_pingpong = max(1,fn_size_by_byte(TT_OUT_DATA) * TP_DIM_A * TP_DIM_B / (buffer_size/2))
+    ssrMinForA_pingpong = max(
+        1,
+        fn_size_by_byte(TT_DATA_A)
+        * TP_DIM_A
+        * TP_DIM_AB
+        / (TP_CASC_max * buffer_size / 2),
+    )
+    ssrMinForOut_pingpong = max(
+        1, fn_size_by_byte(TT_OUT_DATA) * TP_DIM_A * TP_DIM_B / (buffer_size / 2)
+    )
     minSsr_pingpong = max(ssrMinForA_pingpong, ssrMinForOut_pingpong)
 
     (tileA, tileAB, tileB) = getTilingScheme(TT_DATA_A, TT_DATA_B, AIE_VARIANT)
     minSsr = max(ssrMinForA, ssrMinForOut)
     maxSsr = min(TP_SSR_max, TP_DIM_A / tileA)
 
-    legal_set_TP_SSR = find_divisors(TP_DIM_A, int(CEIL(maxSsr,1)))
+    legal_set_TP_SSR = find_divisors(TP_DIM_A, int(CEIL(maxSsr, 1)))
     legal_set_TP_SSR_pingpong = legal_set_TP_SSR.copy()
 
     for k in legal_set_TP_SSR.copy():
@@ -452,10 +471,11 @@ def fn_update_ssr(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_D
             legal_set_TP_SSR.remove(k)
         if (k > maxSsr) or (k < minSsr_pingpong):
             legal_set_TP_SSR_pingpong.remove(k)
-    param_dict = {"name": "TP_SSR",
-                  "enum": legal_set_TP_SSR,
-                  "enum_pingpong_buf": legal_set_TP_SSR_pingpong
-                  }
+    param_dict = {
+        "name": "TP_SSR",
+        "enum": legal_set_TP_SSR,
+        "enum_pingpong_buf": legal_set_TP_SSR_pingpong,
+    }
     return param_dict
 
 
@@ -468,11 +488,31 @@ def validate_TP_SSR(args):
     TP_DIM_AB = args["TP_DIM_AB"]
     TP_DIM_B = args["TP_DIM_B"]
     TP_SSR = args["TP_SSR"]
-    return fn_validate_ssr(AIE_VARIANT, TT_DATA_A,TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_AB, TP_DIM_B, TP_SSR)
+    return fn_validate_ssr(
+        AIE_VARIANT,
+        TT_DATA_A,
+        TT_DATA_B,
+        TT_OUT_DATA,
+        TP_DIM_A,
+        TP_DIM_AB,
+        TP_DIM_B,
+        TP_SSR,
+    )
 
 
-def fn_validate_ssr(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_AB, TP_DIM_B, TP_SSR):
-    param_dict = fn_update_ssr(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_AB, TP_DIM_B)
+def fn_validate_ssr(
+    AIE_VARIANT,
+    TT_DATA_A,
+    TT_DATA_B,
+    TT_OUT_DATA,
+    TP_DIM_A,
+    TP_DIM_AB,
+    TP_DIM_B,
+    TP_SSR,
+):
+    param_dict = fn_update_ssr(
+        AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_AB, TP_DIM_B
+    )
     legal_set_TP_SSR = param_dict["enum"]
     return validate_legal_set(legal_set_TP_SSR, "TP_SSR", TP_SSR)
 
@@ -498,18 +538,27 @@ def fn_update_TP_CASC(
 ):
     buffer_size = k_data_memory_bytes[AIE_VARIANT]
 
-    cascMinForA = max(1,fn_size_by_byte(TT_DATA_A) * TP_DIM_A * TP_DIM_AB / (TP_SSR * buffer_size))
-    cascMinForB = max(1,fn_size_by_byte(TT_DATA_B) * TP_DIM_B * TP_DIM_AB / (buffer_size))
+    cascMinForA = max(
+        1, fn_size_by_byte(TT_DATA_A) * TP_DIM_A * TP_DIM_AB / (TP_SSR * buffer_size)
+    )
+    cascMinForB = max(
+        1, fn_size_by_byte(TT_DATA_B) * TP_DIM_B * TP_DIM_AB / (buffer_size)
+    )
 
-    cascMinForA_pingpong = max(1,fn_size_by_byte(TT_DATA_A) * TP_DIM_A * TP_DIM_AB / (TP_SSR * buffer_size/2))
-    cascMinForB_pingpong = max(1,fn_size_by_byte(TT_DATA_B) * TP_DIM_B * TP_DIM_AB / (buffer_size/2))
+    cascMinForA_pingpong = max(
+        1,
+        fn_size_by_byte(TT_DATA_A) * TP_DIM_A * TP_DIM_AB / (TP_SSR * buffer_size / 2),
+    )
+    cascMinForB_pingpong = max(
+        1, fn_size_by_byte(TT_DATA_B) * TP_DIM_B * TP_DIM_AB / (buffer_size / 2)
+    )
     minCasc_pingpong = max(cascMinForA_pingpong, cascMinForB_pingpong)
 
     (tileA, tileAB, tileB) = getTilingScheme(TT_DATA_A, TT_DATA_B, AIE_VARIANT)
     minCasc = max(cascMinForA, cascMinForB)
     maxCasc = min(TP_SSR_max, TP_DIM_AB / tileAB)
 
-    legal_set_TP_CASC = find_divisors(TP_DIM_AB, int(CEIL(maxCasc,1)))
+    legal_set_TP_CASC = find_divisors(TP_DIM_AB, int(CEIL(maxCasc, 1)))
     legal_set_TP_CASC_pingpong = legal_set_TP_CASC.copy()
 
     for k in legal_set_TP_CASC.copy():
@@ -518,10 +567,11 @@ def fn_update_TP_CASC(
         if (k > maxCasc) or (k < minCasc_pingpong):
             legal_set_TP_CASC_pingpong.remove(k)
 
-    param_dict = {"name": "TP_CASC_LEN",
-                  "enum": legal_set_TP_CASC,
-                  "enum_pingpong_buf": legal_set_TP_CASC_pingpong
-                  }
+    param_dict = {
+        "name": "TP_CASC_LEN",
+        "enum": legal_set_TP_CASC,
+        "enum_pingpong_buf": legal_set_TP_CASC_pingpong,
+    }
     return param_dict
 
 

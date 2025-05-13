@@ -1,4 +1,20 @@
 #!/bin/perl
+#
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 use strict;
 use warnings;
@@ -24,7 +40,7 @@ my($exp1) = new Expect; #Set exp for Expect
 
 
 
-if ($ARGV[2] eq '') { 
+if ($ARGV[2] eq '') {
      $status="PASS";
 }
 else {
@@ -32,11 +48,11 @@ else {
 }
 
 
-if ($ARGV[3] eq '') { 
+if ($ARGV[3] eq '') {
      $delay=100;
 }
 else {
-     $timeoutlevel=$ARGV[3];    
+     $timeoutlevel=$ARGV[3];
      $delay= $timeout[int($timeoutlevel)-1];
 }
 
@@ -52,7 +68,7 @@ my $booted = 0;
         printf "\nINFO: Linux kernel booted successfully\n";
         last;
     }
-    
+
     if( $exp->expect(120, 'ZynqMP>')) {
         printf "\nERROR: Linux kernel boot failed\n";
         $exit_val=1;
@@ -65,7 +81,7 @@ my $booted = 0;
         sleep(10);
         exit($exit_val);
     }
-    
+
     if( $exp->expect(30, 'Simulation engine failed to start')) {
         printf "\nERROR: [Simtcl 6-50] Simulation engine failed to start: Simulation exited with status non-0 code\n";
         $exit_val=1;
@@ -77,7 +93,7 @@ my $booted = 0;
         $exp->soft_close();
         exit($exit_val);
     }
-    
+
     my $status = $exp->exitstatus();
     if( defined($status)) {
         printf "\nERROR: Simulation engine disconnected before booting the kernel.\n";
@@ -90,13 +106,13 @@ my $booted = 0;
         $exp->soft_close();
         exit($exit_val);
     }
-    
+
 	sleep(10);
-	
+
 #	$exp-> send( "echo 'INFO: Embedded host run completed.'");
 #   sleep(10);
 	#last;
-    
+
     $i=$i+1;
 
   }
@@ -112,7 +128,7 @@ if( $booted == 0) {
     $exit_val = 2;
     exit($exit_val);
 }
-  
+
 #| Execute commands if system is up and running:
 $exp-> send( "mount /dev/mmcblk0p1 /mnt\r");
 $exp-> send( "cd /mnt\r");
@@ -125,7 +141,7 @@ if( $exp-> expect(int($delay)*45, "Embedded host run completed" )) {
     $k=1;
     #last;
 }
-    
+
 	#$j=$j+1;
     #sleep(10);
 #}
@@ -166,7 +182,7 @@ if($k==1) {
 # }else{
     # printf "ERROR: Linux kernel boot failed\n";
     # printf "\n";
-        # $exit_val=1;   
+        # $exit_val=1;
 # }
 
 print "\nINFO: Exiting QEMU \n";

@@ -19,7 +19,7 @@
             "key": "TT_DATA",
             "name": "data_type",
             "type": "typename",
-            "description": "Data type of individual I/O data samples.",
+            "description": "Select the input/output data type from the dropdown menu.",
             "default": "int16",
             "label": "Input/Output data type:",
             "tablabel": "Main",
@@ -28,7 +28,7 @@
         {
             "key": "TP_DIM",
             "name": "sample_size",
-            "description": "The number of input samples.",
+            "description": "Enter the number of input samples.",
             "default": 32,
             "label": "Input frame size (samples):",
             "tablabel": "Main",
@@ -46,7 +46,7 @@
         {
             "key": "TP_CASC_LEN",
             "name": "casc_length",
-            "description": "The number of kernels to be used to split up and cascade the function.",
+            "description": "Specify the number of kernels to cascade in series to increase throughput.",
             "default": 1,
             "label": "Number of cascade stages:",
             "tablabel": "Main",
@@ -55,25 +55,30 @@
         {
             "key": "TP_ASCENDING",
             "name": "sort_order",
-            "description": "sort input samples list in descending or ascending order.",
-            "enum": [0, 1],
-            "enum_str": ["Descending", "Ascending"],
+            "description": "Sort input samples list in descending or ascending order.",
+            "enum": [
+                0,
+                1
+            ],
+            "enum_str": [
+                "Descending",
+                "Ascending"
+            ],
             "default": 0,
             "label": "Sort order:",
             "tablabel": "Main",
             "parameterType": "popup"
         },
-	{		
-	"key":"TP_SSR",
-        "name": "ssr",
-        "description": "TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput.",
-        "type": "uint",      
-        "default": 1,
-        "label": "SSR:",
-        "tablabel": "Main",
-        "parameterType":"edit"
-     	}
-
+        {
+            "key": "TP_SSR",
+            "name": "ssr",
+            "description": "Specify the number of parallel input/output data paths for a single channel.",
+            "type": "uint",
+            "default": 1,
+            "label": "SSR:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        }
     ],
     "generator": {
         "file": "vmc_bitonic_sort.py",

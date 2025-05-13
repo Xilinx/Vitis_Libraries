@@ -1,5 +1,6 @@
 ..
-   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -53,8 +54,68 @@ To see details on the ports for the Matrix-Vector Multiply, see :ref:`API_REFERE
 Design Notes
 ============
 
-The matrix-vector multiplication kernel requires the matrix data in a column-major format where the columns are stored contiguously in memory and ``TP_DIM_A_LEADING = 1``.
-Setting ``TP_DIM_A_LEADING`` to 0, indicates to the graph that the data is in a row-major format and DMA buffer descriptors will be to set the write access of the kernel input so that a transpose can be achieved. This feature is currently only compatible with int32, cint16 and float data types for a single frame per buffer ``NUM_FRAMES = 1``. If multiple frames are required or the data type is int16, cint32 or cfloat, the matrix data must be transposed to a column-major format with the template parameter ``TP_DIM_A_LEADING`` being set to 1.
+Reloadable Matrix Inputs via Run-Time Programmable (RTP) Ports
+--------------------------------------------------------------
+The template parameter ``TP_USE_MATRIX_RELOAD`` enables the matrix data to be supplied to each kernel through an RTP port, allowing the matrix data to be dynamically updated at runtime. When this parameter is set to 1, the following considerations apply:
+
+**Matrix Splitting Across Kernels**:
+- The matrix data must be split across the SSR ranks and cascade chain kernels. Each kernel receives a portion of the matrix based on the values of ``TP_SSR`` and ``TP_CASC_LEN``.
+- For example, if ``TP_SSR = 2`` and ``TP_CASC_LEN = 3``, the matrix will be divided into ``2 * 3 = 6`` parts. The columns of the matrix will be split by ``TP_CASC_LEN`` and the rows by ``TP_SSR``. Each part is sent to a specific kernel via its corresponding RTP port.
+
+**Matrix Format**:
+- The matrix must be provided in a column-major format, where columns are stored contiguously in memory. This ensures compatibility with the kernel's processing requirements.
+- If the matrix is not in column-major format, it must be transposed before being supplied to the RTP ports.
+
+**RTP Port Connections**:
+- The RTP ports for the matrix are defined as ``matrixA`` in the graph. The number of RTP ports is equal to ``TP_SSR * TP_CASC_LEN``.
+- Users must ensure that the correct portion of the matrix is sent to each RTP port. For example, the matrix data for the kernel at index ``(ssrIdx * TP_CASC_LEN) + cascIdx`` should be sent to ``matrixA[(ssrIdx * TP_CASC_LEN) + cascIdx]``.
+
+**Runtime Updates**:
+- The matrix data can be updated at runtime using the graph's `update()` method. This method takes the new matrix data as an argument and updates the corresponding RTP ports.
+- The `update()` method must be called after the graph has been initialized but before the kernels start processing data.
+
+**Interface Type for Vector B and Output**:
+- The ``TP_API`` parameter can be used to select the interface type for the vector B input and the output. Setting ``TP_API = 1`` enables a streaming interface, while ``TP_API = 0`` uses an IO-buffer interface for vector B input and output.
+
+**Dual Input and Multiple Outputs**:
+- Additional parameters, ``TP_DUAL_IP`` and ``TP_NUM_OUTPUTS``, control the number of input and output ports when a streaming interface is used for vector B (``TP_API = 1``). If ``TP_DUAL_IP = 0``, each kernel receives a single vector B input. If ``TP_DUAL_IP = 1``, two stream inputs are provided (supported only for AIE devices). For ``TP_NUM_OUTPUTS``, a value of 1 results in a single stream output per SSR rank, while a value of 2 provides two stream outputs per SSR rank.
+
+Note that ``TP_API``, ``TP_DUAL_IP``, and ``TP_NUM_OUTPUTS`` can only be used when ``TP_USE_MATRIX_RELOAD = 1``. Otherwise, their default values must be 0, 0, and 1, respectively.
+
+By leveraging RTP ports, users can dynamically modify the matrix input data during runtime, enabling greater flexibility and adaptability in applications where the matrix values may change frequently. This approach is particularly useful in scenarios where the matrix dimensions and kernel configurations are designed to optimize memory usage and processing efficiency.
+
+
+Leading matrix dimension
+------------------------
+It is recommended that the matrix data be in a column-major format where the columns are stored contiguously in memory and ``TP_DIM_A_LEADING = 1``. This ensures optimal performance and compatibility with most configurations.
+
+For example:
+
+- In a column-major format, a 4x8 matrix:
+
+    ::
+
+            [1  5  9  13]
+            [2  6  10 14]
+            [3  7  11 15]
+            [4  8  12 16]
+
+    is stored in memory as: ``[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]``.
+
+- In a row-major format, the same matrix:
+
+    ::
+
+            [1  2  3  4]
+            [5  6  7  8]
+            [9  10 11 12]
+            [13 14 15 16]
+
+    is stored in memory as: ``[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]``.
+
+If ``TP_DIM_A_LEADING`` is set to 0, indicating row-major format, the graph will configure DMA buffer descriptors to transpose the data for the kernel. However, this feature is only compatible with ``TT_DATA_A`` being ``int32``, ``cint16``, or ``float`` for a single frame per buffer (``TP_NUM_FRAMES = 1``). For other cases, including ``int16``, ``cint32``, or ``cfloat``, the matrix data must be transposed to a column-major format, and ``TP_DIM_A_LEADING`` must be set to 1.
+
+Additionally, when ``TP_USE_MATRIX_RELOAD = 1``, the matrix data must always be in column-major format, and ``TP_DIM_A_LEADING`` must be set to 1.
 
 Maximum matrix dimensions per kernel
 ------------------------------------
@@ -118,25 +179,13 @@ For example, a GEMV design with an ``TP_SSR > 1`` and ``TP_CASC_LEN > 1`` where 
 Code Example
 ============
 
-The following code example shows how the matrix_vector_mul_graph class can be used within a user super-graph. This example shows a 32x16 cint16 matrix multiplied by a cint16 vector of length 16.
+The following code example demonstrates the usage of the `matrix_vector_mul_graph` class within a user-defined super-graph. It illustrates the multiplication of a 32x16 `cint16` matrix with a `cint16` vector of length 16, showcasing the setup and connection of input/output ports and template parameters.
 
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_matvec.hpp
     :language: cpp
     :lines: 17-
 
 
-.. |image1| image:: ./media/image1.png
-.. |image2| image:: ./media/image2.png
-.. |image3| image:: ./media/image4.png
-.. |image4| image:: ./media/image2.png
-.. |image6| image:: ./media/image2.png
-.. |image7| image:: ./media/image5.png
-.. |image8| image:: ./media/image6.png
-.. |image9| image:: ./media/image7.png
-.. |image10| image:: ./media/image2.png
-.. |image11| image:: ./media/image2.png
-.. |image12| image:: ./media/image2.png
-.. |image13| image:: ./media/image2.png
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:
 .. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN

@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,20 +45,20 @@ $(HELPER): create_input sim_ref prep_x86_out
 
 create_input:
 	@echo helper.mk stage:	create_input
-	@echo NUM_PORTS $(NUM_PORTS) 
+	@echo NUM_PORTS $(NUM_PORTS)
 	@echo LOC_INPUT_FILE_A $(LOC_INPUT_FILE_A)
 	@echo LOC_INPUT_FILE_B $(LOC_INPUT_FILE_B)
 
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(WINDOW_VSIZE_A) $(NITER) $(SEED) $(STIM_TYPE) 0 0 $(T_DATA_A) $(API_IO) 1 0 0 0 0 0 64 ;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(WINDOW_VSIZE_B) $(NITER) $(SEED) $(STIM_TYPE) 0 0 $(T_DATA_B) $(API_IO) 1 0 0 0 0 0 64 ;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -file $(LOC_INPUT_FILE_A) --rows $(DIM_A_SIZE) --cols 1 --ssrSplit $(UUT_SSR) --casc $(CASC_LEN) --split -type $(T_DATA_A) --NITER $(NITER) --plioWidth 64 
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -file $(LOC_INPUT_FILE_A) --rows $(DIM_A_SIZE) --cols 1 --ssrSplit $(UUT_SSR) --casc $(CASC_LEN) --split -type $(T_DATA_A) --NITER $(NITER) --plioWidth 64
 
 	echo Input ready
 
 sim_ref:
 	@echo helper.mk stage:	sim_ref
-	make UUT_KERNEL=kronecker_ref UUT_SIM_FILE=./data/ref_output.txt run TARGET=x86sim TAG=REF 
- 
+	make UUT_KERNEL=kronecker_ref UUT_SIM_FILE=./data/ref_output.txt run TARGET=x86sim TAG=REF
+
 prep_x86_out:
 	@echo helper.mk stage:	prep_x86_out
 	@x86_out_files=`ls $(HELPER_CUR_DIR)/x86simulator_output/data`;\

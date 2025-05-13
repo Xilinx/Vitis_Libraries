@@ -1,5 +1,5 @@
 {
-  "low_level_file":"dds_mixer.json",
+  "low_level_file": "dds_mixer.json",
   "ip_name": "vmc_stream_dds",
   "block_info": {
     "label": "DDS Stream",
@@ -9,11 +9,11 @@
     {
       "key": "TT_DATA",
       "name": "data_type",
-      "description": "Select the output data type from the dropdown",
+      "description": "Select the output data type from the dropdown menu.",
       "default": "cint16",
       "label": "Output data type:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
     {
       "key": "TP_INPUT_WINDOW_VSIZE",
@@ -21,8 +21,8 @@
       "description": "Enter the number of samples in output window",
       "default": 32,
       "label": "Samples per frame:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
     {
       "key": "TP_SSR",
@@ -30,127 +30,123 @@
       "description": "Specify number of data input/output in parallel for a single channel.",
       "default": 1,
       "label": "SSR: ",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
     {
       "key": "TP_PHASE_RELOAD_API",
-	    "name": "PHASE_RELOAD_API",
-            "description": "specifies whether phase_offset reload, if used, is to be non-blocking (RTP) or blocking (iobuffer).",
-            "default": false,
-	    "label": "phase_offset reload",
-            "tablabel": "Main",
-            "parameterType":"checkbox"
+      "name": "PHASE_RELOAD_API",
+      "description": "specifies whether phase_offset reload, if used, is to be non-blocking (RTP) or blocking (iobuffer).",
+      "default": false,
+      "label": "phase_offset reload",
+      "tablabel": "Main",
+      "parameterType": "checkbox"
     },
     {
       "key": "TP_USE_PHASE_RELOAD",
-	    "name": "USE_PHASE_RELOAD",
-            "description": "specifies if initial phase is to be implemented as a reloadable RTP port or not.",
-            "default": false,
-	    "label": "Reload initial phase via input port",
-            "tablabel": "Main",
-            "parameterType":"checkbox"
+      "name": "USE_PHASE_RELOAD",
+      "description": "specifies if initial phase is to be implemented as a reloadable RTP port or not.",
+      "default": false,
+      "label": "Reload initial phase via input port",
+      "tablabel": "Main",
+      "parameterType": "checkbox"
     },
     {
       "key": "phaseInc",
       "name": "phase_increment",
-      "description": "Enter the phase increment between samples.",
+      "description": "Enter the phase increment value for each sample.",
       "default": 0,
-            "label": "Phase increment:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "label": "Phase increment:",
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
     {
       "key": "TP_USE_PHASE_INC_RELOAD",
-	    "name": "phase_increment_reload",
-            "description": "specifies if phase_increment can be reloaded at runtime.",
-            "default": false,
-	    "label": "phase_increment reload at runtime ",
-            "tablabel": "Main",
-            "parameterType":"checkbox"
+      "name": "phase_increment_reload",
+      "description": "specifies if phase_increment can be reloaded at runtime.",
+      "default": false,
+      "label": "phase_increment reload at runtime ",
+      "tablabel": "Main",
+      "parameterType": "checkbox"
     },
     {
-      "key" : "initialPhaseOffset" ,
+      "key": "initialPhaseOffset",
       "name": "initial_phase_offset",
       "description": "The initial phase offset.",
       "default": 0,
-            "label": "Initial phase offset:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "label": "Initial phase offset:",
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
     {
       "key": "TP_RND",
       "name": "rnd_mode",
       "description": "Select a rounding mode from the dropdown.",
       "default": "Round to positive infinity",
-          "label": "Rounding mode:",
-            "tablabel": "Main",
-          "parameterType": "popup"
+      "label": "Rounding mode:",
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
     {
       "key": "TP_SAT",
       "name": "sat_mode",
       "description": "Select a saturation mode from the dropdown.",
-      "enum": [0, 1, 3],
-      "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
+      "enum": [
+        0,
+        1,
+        3
+      ],
+      "enum_str": [
+        "0-None",
+        "1-Asymmetric",
+        "3-Symmetric"
+      ],
       "default": 0,
       "label": "Saturation mode:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
     {
       "key": "vmc_sample_time",
       "name": "vmc_sample_time",
-      "description": "Sample time for the block output port(s)",
+      "description": "Enter the sample time (in seconds)",
       "default": -1,
       "type": "double",
-            "label": "Sample time:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "label": "Sample time:",
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
-	{
-	"key": "AIE_VARIANT",
-	"name": "AIE_VARIANT",
+    {
+      "key": "AIE_VARIANT",
+      "name": "AIE_VARIANT",
       "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
       "default": 1,
       "label": "AIE Variant:",
       "tablabel": "Main",
-      "parameterType":"edit"
+      "parameterType": "edit"
     },
-     {	
-		"key":"TP_API",
-		"name": "TP_API",
-		"description": "The form of IO: 0 for windows, 1 for streams",
-		"type": "uint",
-		"default": 1,
-		"label": "API:",
-		"tablabel": "Main",
-		"visible": "off",
-		"parameterType":"edit"
-     },
-     {		
-	"key":"initialPhaseOffset",
-        "name": "initialPhaseOffset",
-        "description": "specifies the initial value of the phase accumulator, creating a phase offset.",
-        "type": "uint",      
-        "default": 0,
-        "label": "Initial PhaseOffset:",
-        "tablabel": "Main",
-        "visible": "off",
-        "parameterType":"edit"
-     },
-     {		
-	"key":"TP_MIXER_MODE",
-        "name": "MIXER_MODE",
-        "description": "describes the mode of operation of the dds/mixer. Mixer_mode 0 means DDS block",
-        "type": "uint",      
-        "default": 0,
-        "label": "Mixer Mode:",
-        "tablabel": "Main",
-        "visible": "off",
-        "parameterType":"edit"
-     }
-
+    {
+      "key": "TP_API",
+      "name": "TP_API",
+      "description": "The form of IO: 0 for windows, 1 for streams",
+      "type": "uint",
+      "default": 1,
+      "label": "API:",
+      "tablabel": "Main",
+      "visible": "off",
+      "parameterType": "edit"
+    },
+    {
+      "key": "TP_MIXER_MODE",
+      "name": "MIXER_MODE",
+      "description": "describes the mode of operation of the dds/mixer. Mixer_mode 0 means DDS block",
+      "type": "uint",
+      "default": 0,
+      "label": "Mixer Mode:",
+      "tablabel": "Main",
+      "visible": "off",
+      "parameterType": "edit"
+    }
   ],
   "generator": {
     "file": "vmc_stream_dds.py",

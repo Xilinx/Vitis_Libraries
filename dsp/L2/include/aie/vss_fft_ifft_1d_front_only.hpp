@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,31 +85,28 @@ class create_par_kernels_vss_decomp {
 /**
  * @ingroup fft_graphs
  *
- * @brief vss_fft_ifft_1d is a single-channel, decomposed FFT that contains the AIE sub-part of the VSS FFT offering.
+ * @brief vss_fft_ifft_1d is a single-channel, decomposed FFT that contains the AIE sub-part of the VSS FFT Mode 2
+ *offering.
  *
  * These are the templates to configure the single-channel decimation-in-time class.
  * @tparam TT_DATA describes the type of individual data samples input to and
  *         output from the transform function. \n
- *         This is a typename and must be one of the following: \n
- *         cint32, cfloat.
+ *         This is a typename and must be cfloat for this VSS Mode. \n
  * @tparam TT_TWIDDLE describes the type of twiddle factors of the transform. \n
- *         It must be one of the following: cint16, cint32, cfloat
- *         and must also satisfy the following rules:
- *         - 32 bit types are only supported when TT_DATA is also a 32 bit type,
- *         - TT_TWIDDLE must be an integer type if TT_DATA is an integer type
- *         - TT_TWIDDLE must be cfloat type if TT_DATA is a float type.
+ *         It must be cfloat for this VSS Mode.
  * @tparam TP_POINT_SIZE is an unsigned integer which describes the number of samples in
  *         the transform. \n This must be 2^N where N is an integer in the range
- *         4 to 16 inclusive.
- * @tparam TP_FFT_NIFFT selects whether the transform to perform is an FFT (1) or IFFT (0).
- * @tparam TP_SHIFT selects the power of 2 to scale the result by prior to output.
+ *         5 to 16 inclusive for AIE devices and 6 to 16 inclusive for AIE-ML devices.
+ * @tparam TP_FFT_NIFFT selects whether the transform to perform is an FFT (1) or IFFT (0). Inverse FFT is not supported
+ *for VSS Mode 2.
+ * @tparam TP_SHIFT is not applicable for this VSS Mode.
  * @tparam TP_API is an unsigned integer to select window (0) or stream (1) interfaces.
  *         When stream I/O is selected, one sample is taken from, or output to, a stream and the next sample
  *         from or two the next stream. Two streams minimum are used. In this example, even samples are
  *         read from input stream[0] and odd samples from input stream[1].
  * @tparam TP_SSR is an unsigned integer to describe the number of parallel computational paths into which the
  *implementation will be split to improve the performance.
- *         Higher SSR relates to higher performance.
+ *         Higher SSR relates to higher performance. For VSS MODE = 2, SSR needs to be set to be a power of 2.
  * @tparam TP_RND describes the selection of rounding to be applied during the
  *         shift down stage of processing. \n
  *         Although, TP_RND accepts unsigned integer values descriptive macros are recommended where

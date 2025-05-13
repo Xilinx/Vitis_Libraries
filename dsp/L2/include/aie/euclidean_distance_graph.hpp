@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,6 @@ using namespace adf;
 
 alignas(__ALIGN_BYTE_SIZE__) extern const int8 sqrtLUT0[1024];
 alignas(__ALIGN_BYTE_SIZE__) extern const int8 sqrtLUT1[1024];
-#define FIXED_DIM 4
 
 namespace xf {
 namespace dsp {
@@ -60,23 +59,12 @@ namespace euclidean_distance {
  * @brief euclidean_distance of input vectors P and Q
  *
  * These are the templates to configure the Euclidean Distance:
- * @tparam TT_DATA_P describes the type of individual data samples of point P with N Dimensions to input to the
+ * @tparam TT_DATA describes the type of individual data samples of point P and Q with N Dimensions to input to the
  *function. \n
  *         This is a typename and must be one of the following: \n
  *         float and bfloat16.
- * @tparam TT_DATA_Q describes the type of individual data samples of point Q with N Dimensions to input to the
- *function. \n
- *         This is a typename and must be one of the following: \n
- *         float and bfloat16.
- * @tparam TT_DATA_OUT describes the type individual data samples at the function output. \n
- *         This is a typename and must be one of the following: \n
- *         float and bfloat16.TP_LEN_P
- * @tparam TP_LEN_P describes the number of samples in vector P. \n
- * @tparam TP_LEN_Q describes the number of samples in vector Q. \n
- * @tparam TP_DIM_P describes the Dimension of plane for the point P. \n
- *         This is a constant and must be nearest power of 2. the following are: \n
- *         4, 8, 16, 32, 64.....2^N;
- * @tparam TP_DIM_Q describes the number of samples in vector Q. \n
+ * @tparam TP_LEN describes the number of samples of input (Points P and Q) and ouput vector. \n
+ * @tparam TP_DIM describes the Dimension of plane for the point P and Q. \n
  *         This is a constant and must be nearest power of 2. the following are: \n
  *         4, 8, 16, 32, 64.....2^N;
  * @tparam TP_API describes whether to use streams (1) or windows (0). \n
@@ -106,22 +94,17 @@ namespace euclidean_distance {
  *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds
  *         an n-bit signed value in the range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  *
- * @tparam TP_NUM_FRAMES describes the number of frames
+ * @tparam TP_IS_OUTPUT_SQUARED describes about ED's output is either SQUAED or SQRT as per user request.
  *
  **/
-// TT_DATA_P, TT_DATA_Q, TT_DATA_OUT, TP_LEN_P, TP_LEN_Q, TP_DIM_P, TP_DIM_Q, TP_API, TP_RND,
-// TP_SAT, TP_NUM_FRAMES, TP_IS_OUTPUT_SQUARED
-template <typename TT_DATA_P,
-          typename TT_DATA_Q,
+// TT_DATA, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT, TP_IS_OUTPUT_SQUARED
+template <typename TT_DATA,
           typename TT_DATA_OUT,
-          unsigned int TP_LEN_P,
-          unsigned int TP_LEN_Q,
-          unsigned int TP_DIM_P,
-          unsigned int TP_DIM_Q,
+          unsigned int TP_LEN,
+          unsigned int TP_DIM,
           unsigned int TP_API,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_NUM_FRAMES,
           unsigned int TP_IS_OUTPUT_SQUARED>
 
 class euclidean_distance_graph : public graph {
@@ -139,35 +122,25 @@ class euclidean_distance_graph : public graph {
     // Parameter value defensive and legality checks
 
     // defensive check for Input data types
-    static_assert(fnCheckDataTypesOfInputs<TT_DATA_P, TT_DATA_Q>(),
+    static_assert(fnCheckDataTypesOfInputs<TT_DATA>(),
                   " Assertion Failed : \n"
-                  "            ERROR: TT_DATA_P and TT_DATA_Q are not a supported Input Data type combination.");
+                  "            ERROR: TT_DATA is not a supported Input Data type.");
 
-    // defensive check for Output data type
-    static_assert(
-        fnCheckDataTypeOfOutput<TT_DATA_P, TT_DATA_Q, TT_DATA_OUT>(),
-        " Assertion Failed : \n"
-        "            ERROR: output data type 'TT_DATA_OUT' is not a supported one as per input data type combination");
-
-    // defensive check for TP_LEN_P and TP_LEN_Q should be always same
-    static_assert(TP_LEN_P == TP_LEN_Q,
-                  " Assertion Failed : \n"
-                  "             ERROR: Lengths of points P and Q should be same to compute ED.");
-
-    // defensive check for Q sig length should be always less than or equal to P Sig Length
-    static_assert(TP_DIM_P == TP_DIM_Q,
-                  " Assertion Failed : \n"
-                  "           ERROR: Dimensions of P and Q should be always same/equal to compute ED.");
+    // defensive check for Lengths of F and G should be in the given range of Min and Max
+    static_assert(fnCheckLenOfData<TT_DATA, TP_LEN>(),
+                  " Assertion Failed : \n "
+                  "             ERROR: TP_LEN should be granuality of Min data_load on AIE i.e. "
+                  "[(256/samplesize<TT_DATA>())] \n                   [float   - (8*N) ] \n   [bfloat16  - (16*N)  ]] "
+                  "\n  where N is Integer > 1] and \n            TP_LEN "
+                  "should be greater than or equal to minimum length [((256/samplesize<TT_DATA>())*2)] based on "
+                  "given data type i.e.\n                 '[Data Type-    MIN    MAX]' \n                 "
+                  "'--------------------------' \n                 '[float    -    16    2048]' \n                 "
+                  "'[bfloat16 -    32    4096]'  ");
 
     // defensive check for Dimension of point P should not be greater than 4
-    static_assert(fnCheckforDimension<TP_DIM_P>(),
+    static_assert(fnCheckforDimension<TP_DIM>(),
                   " Assertion Failed : \n"
                   "               ERROR: Dimension of point P should be less than or equal to 4 as per kernel design.");
-
-    // defensive check for Dimension of point Q should not be greater than 4
-    static_assert(fnCheckforDimension<TP_DIM_Q>(),
-                  " Assertion Failed : \n"
-                  "              ERROR: Dimension of point Q should be less than or equal to 4 as per kernel design.");
 
     // defensive check for API Port is whether iobuffer or stream.
     static_assert(TP_API == 0,
@@ -179,12 +152,6 @@ class euclidean_distance_graph : public graph {
 
     // defensive check for SATURATION Mode which should be in the range i.e. SAT_MODE_MIN <TP_SAT< SAT_MODE_MAX
     static_assert(fnValidateSatMode<TP_SAT>(), "ERROR: Illegal saturation mode.");
-
-    // defensive check for num of frames i.e., TP_NUM_FRAMES restricted to 1 to maintain the better performance for time
-    // being.
-    static_assert(TP_NUM_FRAMES == 1,
-                  " Assertion Failed : \n"
-                  "           ERROR: 'TP_NUM_FRAMES' should be always equal to 1 (ONE) for current version of ED.");
 
     // defensive check for output of ED i.e either SQRT Res or SQUARED Res
     static_assert(TP_IS_OUTPUT_SQUARED <= 1,
@@ -212,8 +179,10 @@ class euclidean_distance_graph : public graph {
     /**
         * The array of kernels that will be created and mapped onto AIE tiles.
     **/
-    // kernel m_ED_Squared;
     kernel m_EDKernels[kNumOfKernels];
+
+    // DIM is fixed to '4' for compute ED.
+    static constexpr int kDim = kFixedDimOfED;
 
     /**
  * Access function to get pointer to kernel (or first kernel in a chained and/or PHASE configurations).
@@ -234,22 +203,22 @@ class euclidean_distance_graph : public graph {
                                                   bfloat16, TT_DATA_OUT>::type TT_INTERNAL_DATA_TYPE;
                 edSqrtLut0 = parameter::array(sqrtLUT0); // LUT0 of SQRT
                 edSqrtLut1 = parameter::array(sqrtLUT1); // LUT1 of SQRT
-                m_EDKernels[0] = kernel::create_object<euclidean_distance_squared<
-                    TT_DATA_P, TT_DATA_Q, TT_INTERNAL_DATA_TYPE, TP_LEN_P, TP_LEN_Q, TP_DIM_P, TP_DIM_Q, TP_API, TP_RND,
-                    TP_SAT, TP_NUM_FRAMES, TP_IS_OUTPUT_SQUARED> >(); // SQUARED
-                m_EDKernels[1] =
-                    kernel::create_object<euclidean_distance_sqrt<TT_INTERNAL_DATA_TYPE, TT_DATA_OUT, TP_LEN_P,
-                                                                  TP_NUM_FRAMES, TP_IS_OUTPUT_SQUARED> >(); // SQRT
+                m_EDKernels[0] = kernel::create_object<
+                    euclidean_distance_squared<TT_DATA, TT_INTERNAL_DATA_TYPE, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT,
+                                               TP_IS_OUTPUT_SQUARED> >(); // SQUARED
+                m_EDKernels[1] = kernel::create_object<
+                    euclidean_distance<TT_INTERNAL_DATA_TYPE, TT_DATA_OUT, TP_LEN, TP_IS_OUTPUT_SQUARED> >(); // SQRT
             }
         else {
-            m_EDKernels[0] = kernel::create_object<
-                euclidean_distance_squared<TT_DATA_P, TT_DATA_Q, TT_DATA_OUT, TP_LEN_P, TP_LEN_Q, TP_DIM_P, TP_DIM_Q,
-                                           TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_IS_OUTPUT_SQUARED> >(); // SQUARED
+            // ED_squared() is default
+            m_EDKernels[0] =
+                kernel::create_object<euclidean_distance_squared<TT_DATA, TT_DATA_OUT, TP_LEN, TP_DIM, TP_API, TP_RND,
+                                                                 TP_SAT, TP_IS_OUTPUT_SQUARED> >(); // SQUARED
         }
 #else
-        m_EDKernels[0] = kernel::create_object<
-            euclidean_distance_squared<TT_DATA_P, TT_DATA_Q, TT_DATA_OUT, TP_LEN_P, TP_LEN_Q, TP_DIM_P, TP_DIM_Q,
-                                       TP_API, TP_RND, TP_SAT, TP_NUM_FRAMES, TP_IS_OUTPUT_SQUARED> >(); // SQUARED
+        m_EDKernels[0] =
+            kernel::create_object<euclidean_distance_squared<TT_DATA, TT_DATA_OUT, TP_LEN, TP_DIM, TP_API, TP_RND,
+                                                             TP_SAT, TP_IS_OUTPUT_SQUARED> >(); // SQUARED
 #endif
 
         if
@@ -257,8 +226,8 @@ class euclidean_distance_graph : public graph {
                 // make connections
                 connect<>(inWindowP, m_EDKernels[0].in[0]);
                 connect<>(inWindowQ, m_EDKernels[0].in[1]);
-                dimensions(m_EDKernels[0].in[0]) = {(TP_LEN_P * FIXED_DIM) * TP_NUM_FRAMES};
-                dimensions(m_EDKernels[0].in[1]) = {(TP_LEN_Q * FIXED_DIM) * TP_NUM_FRAMES};
+                dimensions(m_EDKernels[0].in[0]) = {(TP_LEN * kDim)};
+                dimensions(m_EDKernels[0].in[1]) = {(TP_LEN * kDim)};
 
 #if (__HAS_ACCUM_PERMUTES__ == 0)
                 if
@@ -269,28 +238,30 @@ class euclidean_distance_graph : public graph {
                     }
 #endif
 
+                // connect ED_squared() to ED()
                 if
                     constexpr(TP_IS_OUTPUT_SQUARED == 0) {
 #if (__HAS_ACCUM_PERMUTES__ == 0)
                         connect<>(m_EDKernels[0].out[0], m_EDKernels[1].in[0]);
-                        dimensions(m_EDKernels[0].out[0]) = {(TP_LEN_P * TP_NUM_FRAMES)};
-                        dimensions(m_EDKernels[1].in[0]) = {(TP_LEN_P * TP_NUM_FRAMES)};
+                        dimensions(m_EDKernels[0].out[0]) = {TP_LEN};
+                        dimensions(m_EDKernels[1].in[0]) = {TP_LEN};
 
                         // connect final kernel output to output of the graph
                         connect<>(m_EDKernels[1].out[0], outWindow);
-                        dimensions(m_EDKernels[1].out[0]) = {(TP_LEN_P * TP_NUM_FRAMES)};
+                        dimensions(m_EDKernels[1].out[0]) = {TP_LEN};
 #else
                         // connect final kernel output to output of the graph
                         connect<>(m_EDKernels[0].out[0], outWindow);
-                        dimensions(m_EDKernels[0].out[0]) = {(TP_LEN_P * TP_NUM_FRAMES)};
+                        dimensions(m_EDKernels[0].out[0]) = {(TP_LEN)};
 #endif
                     }
                 else {
                     // connect final kernel output to output of the graph
                     connect<>(m_EDKernels[0].out[0], outWindow);
-                    dimensions(m_EDKernels[0].out[0]) = {(TP_LEN_P * TP_NUM_FRAMES)};
+                    dimensions(m_EDKernels[0].out[0]) = {TP_LEN};
                 }
             }
+
         // Specify mapping constraints
         runtime<ratio>(m_EDKernels[0]) = 0.5; // Nominal figure. The real figure requires knowledge of the sample rate.
         // Source files
@@ -312,9 +283,9 @@ class euclidean_distance_graph : public graph {
     }; // constructor
 };
 
-} // namespace euclidean_distance
-} // namespace aie
-} // namespace dsp
-} // namespace xf
+} // End of namespace euclidean_distance {
+} // End of namespace aie {
+} // End of namespace dsp {
+} // End of namespace xf {
 
 #endif // _DSPLIB_EUCLIDEAN_DISTANCE_GRAPH_HPP_

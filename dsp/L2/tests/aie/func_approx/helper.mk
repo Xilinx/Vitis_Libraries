@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@
 
 HELPER_CUR_DIR ?= .
 HELPER_ROOT_DIR ?= ./../../../../
-PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) COARSE_BITS $(COARSE_BITS) FINE_BITS $(FINE_BITS) DOMAIN_MODE $(DOMAIN_MODE) WINDOW_VSIZE $(WINDOW_VSIZE) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) 
-EXTRA_PARAM_MAP =  STIM_TYPE $(STIM_TYPE) DIFF_TOLERANCE $(DIFF_TOLERANCE) CC_TOLERANCE $(CC_TOLERANCE) NITER $(NITER) FUNC_CHOICE $(FUNC_CHOICE) 
+PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) COARSE_BITS $(COARSE_BITS) FINE_BITS $(FINE_BITS) DOMAIN_MODE $(DOMAIN_MODE) WINDOW_VSIZE $(WINDOW_VSIZE) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE)
+EXTRA_PARAM_MAP =  STIM_TYPE $(STIM_TYPE) DIFF_TOLERANCE $(DIFF_TOLERANCE) CC_TOLERANCE $(CC_TOLERANCE) NITER $(NITER) FUNC_CHOICE $(FUNC_CHOICE)
 INPUT_WINDOW_VSIZE = $(shell echo $$(($(WINDOW_VSIZE)*$(NUM_INPUTS))))
 DATA_SEED ?= 0
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
@@ -35,7 +35,7 @@ sim_ref:
 gen_input:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP);
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/func_approx/gen_input_approx.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DATA_TYPE) $(COARSE_BITS) $(FINE_BITS) $(DOMAIN_MODE) 64
-	
+
 diff:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)
 

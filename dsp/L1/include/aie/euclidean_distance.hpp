@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,36 +57,26 @@ namespace euclidean_distance {
 //-----------------------------------------------------------------------------------------------------
 // Single kernel specialization for io bufer
 
-template <typename TT_DATA_P,
-          typename TT_DATA_Q,
+template <typename TT_DATA,
           typename TT_DATA_OUT,
-          unsigned int TP_LEN_P,
-          unsigned int TP_LEN_Q,
-          unsigned int TP_DIM_P,
-          unsigned int TP_DIM_Q,
+          unsigned int TP_LEN,
+          unsigned int TP_DIM,
           unsigned int TP_API,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_NUM_FRAMES,
           unsigned int TP_IS_OUTPUT_SQUARED>
 class euclidean_distance_squared {
    private:
     // constants derived from configuration parameters
 
     // number of multiplications per lane for main intrinsic
-    static constexpr unsigned int m_kMuls = fnGetNumofMULs<TT_DATA_P, TT_DATA_Q>();
+    static constexpr unsigned int m_kMuls = fnGetNumofMULs<TT_DATA>();
 
     // number of lanes that intrinsic would operate
-    static constexpr unsigned int m_kLanes = fnGetNumofLanes<TT_DATA_P, TT_DATA_Q>();
-
-    // number of points that intrinsic would operate
-    static constexpr unsigned int m_kPoints = fnGetNumofPoints<TT_DATA_P, TT_DATA_Q>();
+    static constexpr unsigned int m_kLanes = fnGetNumofLanes<TT_DATA>();
 
     // load max possible elements each time based on sample size from memory that aie would operate
-    static constexpr unsigned int m_kVecLoadP = (kMaxBitsLoadOnAie / (fnSampleSizeOfpointP<TT_DATA_P>()));
-
-    // load max possible elements each time based on sample size from memory that aie would operate
-    static constexpr unsigned int m_kVecLoadQ = (kMaxBitsLoadOnAie / (fnSampleSizeOfpointQ<TT_DATA_Q>()));
+    static constexpr unsigned int m_kVecLoad = (kMaxBitsLoadOnAie / (fnSampleSize<TT_DATA>()));
 
    public:
     // Constructor of euclidean_distance class
@@ -94,37 +84,35 @@ class euclidean_distance_squared {
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(euclidean_distance_squared::euclideanDistMain); }
     // Euclidean_Distance
-    void euclideanDistMain(input_buffer<TT_DATA_P>& __restrict inWindowP,
-                           input_buffer<TT_DATA_Q>& __restrict inWindowQ,
-                           output_buffer<TT_DATA_OUT>& __restrict inSquared);
+    void euclideanDistMain(input_buffer<TT_DATA>& __restrict inWindowP,
+                           input_buffer<TT_DATA>& __restrict inWindowQ,
+                           output_buffer<TT_DATA_OUT>& __restrict squaredOut);
 };
 
 //-----------------------------------------------------------------------------------------------------
 // Single kernel specialization for io bufer
 
-template <typename TT_DATA_IN,
-          typename TT_DATA_OUT,
-          unsigned int TP_LEN,
-          unsigned int TP_NUM_FRAMES,
-          unsigned int TP_IS_OUTPUT_SQUARED>
-class euclidean_distance_sqrt {
+template <typename TT_DATA, typename TT_DATA_OUT, unsigned int TP_LEN, unsigned int TP_IS_OUTPUT_SQUARED>
+class euclidean_distance {
    private:
     // constants derived from configuration parameters
 
     // number of lanes that intrinsic would operate
-    static constexpr unsigned int m_kLanes = fnGetNumofLanes<TT_DATA_OUT, TT_DATA_OUT>();
+    static constexpr unsigned int m_kLanes = fnGetNumofLanes<TT_DATA_OUT>();
+
+    // load max possible elements each time based on sample size from memory that aie would operate
+    static constexpr unsigned int m_kVecLoad = (kMaxBitsLoadOnAie / (fnSampleSize<TT_DATA>()));
 
     // number of samples as per data type.
-    static constexpr unsigned int m_ksampleSize = (fnSampleSizeOfpointP<TT_DATA_OUT>());
+    static constexpr unsigned int m_ksampleSize = (fnSampleSize<TT_DATA_OUT>());
 
    public:
     // Constructor of euclidean_distance class
-    euclidean_distance_sqrt() {}
+    euclidean_distance() {}
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(euclidean_distance_sqrt::euclideanDistMain); }
+    static void registerKernelClass() { REGISTER_FUNCTION(euclidean_distance::euclideanDistMain); }
     // Euclidean_Distance
-    void euclideanDistMain(input_buffer<TT_DATA_IN>& __restrict inWindowSquared,
-                           output_buffer<TT_DATA_OUT>& __restrict outWindow);
+    void euclideanDistMain(input_buffer<TT_DATA>& __restrict squaredIn, output_buffer<TT_DATA_OUT>& __restrict sqrtOut);
 };
 
 } // namespace euclidean_distance

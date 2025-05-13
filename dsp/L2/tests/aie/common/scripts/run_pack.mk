@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# usage -> in the test directory of a specific function do:
+# 			make -f ../common/scripts/run_pack.mk all_pack PARAMS=<test from multi_params> TARGET=<x86sim or aiesim> PLATFORM=<vck190 or vek280> PARAMS_FILE=<name of multi_params file>
+#
+# 			If no TARGET or PLATFORM are specified, the script will gather these parameters from the PARAMS name if it contains x86sim / hw and vck190 / vek280 respectively
 #
 
 PARAMS ?=test_0_tool_canary_aie

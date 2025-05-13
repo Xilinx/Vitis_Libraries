@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,26 +22,26 @@ set NUM_OF_SAMPLES          [lindex $argv 4]
 set NITER                   [lindex $argv 5]
 
 # percentage threshold for detecting stability in latency (set optional argv 6 to overwrite)
-set stabilityThreshold 5  
-# Add "USE_OUTPUTS_IF_NO_INPUTS" as final argument to script to ignore warnings if no input file exists, 
-# and calculate throughput from only the output file timestamps. 
+set stabilityThreshold 5
+# Add "USE_OUTPUTS_IF_NO_INPUTS" as final argument to script to ignore warnings if no input file exists,
+# and calculate throughput from only the output file timestamps.
 # If input exists, latency and throughput will be calculated as normal
-set USE_OUTPUTS_IF_NO_INPUTS 0  
-if {[llength $argv] >= 7} {  
-    set arg7 [lindex $argv 6]  
-    if {$arg7 == "USE_OUTPUTS_IF_NO_INPUTS"} {  
-        set USE_OUTPUTS_IF_NO_INPUTS 1  
-    } else {  
-        set stabilityThreshold $arg7  
-    }  
-}   
-# Check if a "USE_OUTPUTS_IF_NO_INPUTS" argument was passed as the optional eighth argument  
-if {[llength $argv] == 8} {  
-    set arg8 [lindex $argv 7]  
-    if {$arg8 == "USE_OUTPUTS_IF_NO_INPUTS"} {  
-        set USE_OUTPUTS_IF_NO_INPUTS 1  
-    }  
-} 
+set USE_OUTPUTS_IF_NO_INPUTS 0
+if {[llength $argv] >= 7} {
+    set arg7 [lindex $argv 6]
+    if {$arg7 == "USE_OUTPUTS_IF_NO_INPUTS"} {
+        set USE_OUTPUTS_IF_NO_INPUTS 1
+    } else {
+        set stabilityThreshold $arg7
+    }
+}
+# Check if a "USE_OUTPUTS_IF_NO_INPUTS" argument was passed as the optional eighth argument
+if {[llength $argv] == 8} {
+    set arg8 [lindex $argv 7]
+    if {$arg8 == "USE_OUTPUTS_IF_NO_INPUTS"} {
+        set USE_OUTPUTS_IF_NO_INPUTS 1
+    }
+}
 
 
 set statusFile              [open $STATUS_FILE a]
@@ -67,8 +67,8 @@ set fexist2 [file exist $fileOut]
 # Input file does not exist but USE_OUTPUTS_IF_NO_INPUTS is set -> calculate throughput from output file timestamps
 # Input file does not exist and USE_OUTPUTS_IF_NO_INPUTS is NOT set -> give error message, exit script
 if {$fexist1} {
-    set inputsFile [open $fileIn r]   
-    puts $fileIn     
+    set inputsFile [open $fileIn r]
+    puts $fileIn
 } elseif {$USE_OUTPUTS_IF_NO_INPUTS} {
     set OUTPUTS_ONLY 1
     puts "Calculating throught from output file timestamps. No inputs exist"
@@ -80,8 +80,8 @@ if {$fexist1} {
 }
 if {$fexist2} {
     # remove lines containing "TLAST" from output file, create new output file
-    exec sed {/TLAST/d} $fileOut > $fileOutTemp    
-    set outputsFileNew [open $fileOutTemp r]    
+    exec sed {/TLAST/d} $fileOut > $fileOutTemp
+    set outputsFileNew [open $fileOutTemp r]
 } else {
     puts "Cannot find timestamped input file $T_OUT_FILE. This should be located at $AIESIM_OUT_DIR/$T_OUT_FILE"
     puts "Please check arguments to the get_latency.tcl file"
@@ -100,21 +100,21 @@ if {$OUTPUTS_ONLY == 0} {
     # get number of lines for in/out files
     set numLinesInput [lindex [exec wc -l $fileIn] 0]
     set numLinesOutput [lindex [exec wc -l $fileOutTemp] 0]
-    
+
     # get the number of lines in the file per each iteration
     set numLinesInputIteration [expr $numLinesInput/$NITER]
     set numLinesOutputIteration [expr $numLinesOutput/$NITER]
     set inLineCount 0
     set outLineCount 0
 
-    # loop through input file, get timestamp value from first line of each iteration 
-    while {[gets $inputsFile inLine] != -1} { 
-        incr inLineCount 
+    # loop through input file, get timestamp value from first line of each iteration
+    while {[gets $inputsFile inLine] != -1} {
+        incr inLineCount
         # if first time stamp of an iteration
         if {[expr ($inLineCount) % ($numLinesInputIteration)] == 1} {
             # lines containing the timestamp in format: "T tsVal tsUnit"
             set tsVal [lindex [split $inLine] 1]
-            set tsUnit [lindex [split $inLine " "] 2] 
+            set tsUnit [lindex [split $inLine " "] 2]
 
             # default tsUnit of tsVal to ns
             if {$tsUnit == "us"} {
@@ -126,16 +126,16 @@ if {$OUTPUTS_ONLY == 0} {
             } else {
                 lappend tsIn [lindex [split $inLine] 1]
             }
-        }   
+        }
     }
     # repeat for output file
-    while {[gets $outputsFileNew outLine] != -1} { 
-        incr outLineCount 
+    while {[gets $outputsFileNew outLine] != -1} {
+        incr outLineCount
         # if first time stamp of an iteration
         if {[expr ($outLineCount) % ($numLinesOutputIteration)] == 1} {
             # lines containing the timestamp in format: "T tsVal tsUnit"
             set tsVal [lindex [split $outLine] 1]
-            set tsUnit [lindex [split $outLine " "] 2] 
+            set tsUnit [lindex [split $outLine " "] 2]
 
             # default tsUnit of tsVal to ns
             if {$tsUnit == "us"} {
@@ -162,14 +162,14 @@ if {$OUTPUTS_ONLY == 0} {
             # ignore first iteration as calculation requires timestamp of previous iteration
             if {$tempTS != 0} {
                 lappend throughputValues [expr 1000* $NUM_OF_SAMPLES /($inTime - $tempTS)]
-            }       
-            set tempTS $inTime   
+            }
+            set tempTS $inTime
         }
 
         # Set tcl floating point precision
-        set tcl_precision 2 
+        set tcl_precision 2
         set itNum 0
-        set tempLatency 0    
+        set tempLatency 0
         foreach latency $latencyValues throughput $throughputValues {
             incr itNum
             if {$itNum >= $minNumberOfIterations} {
@@ -180,12 +180,12 @@ if {$OUTPUTS_ONLY == 0} {
                     set stableLatency $latency
                     set stableThroughout $throughput
                     lappend stableItNum $itNum
-                }  
-            } 
-            set tempLatency $latency  
+                }
+            }
+            set tempLatency $latency
         }
-        # # Print results for all iterations 
-        set itNum 0         
+        # # Print results for all iterations
+        set itNum 0
         foreach latency $latencyValues inTime $tsIn outTime $tsOut throughput $throughputValues {
             incr itNum
             puts $logFile [format "Iteration %2d    ts_in: %5d      ts_out: %5d ns      latency: %4d ns       throughput: %4d MSa/s" $itNum $inTime $outTime $latency $throughput]
@@ -194,12 +194,12 @@ if {$OUTPUTS_ONLY == 0} {
         puts $logFile "If no iterations are stable, a latency and throughput value of -1 will be reported in the status file. Please run for more iterations or increase stabilityThreshold (optional 7th argument to get_latency.tcl)"
         puts $logFile "Reported Latency:        $stableLatency ns\nReported Throughput:     $stableThroughout MSa/s"
         close $inputsFile
-        close $outputsFileNew 
+        close $outputsFileNew
 
 
     } else {
         puts   "Number of first samples from each iteration in input and output files not equal"
-    }    
+    }
 # Only output file (no input) - such as DDS Mixer Mode 0
 # In this case, throughput is calculated using output timestamps. No latency can be measured
 } elseif {$OUTPUTS_ONLY == 1} {
@@ -211,13 +211,13 @@ if {$OUTPUTS_ONLY == 0} {
     set numLinesOutputIteration [expr $numLinesOutput/$NITER]
 
     # repeat for output file
-    while {[gets $outputsFileNew outLine] != -1} { 
-        incr outLineCount 
+    while {[gets $outputsFileNew outLine] != -1} {
+        incr outLineCount
         # if first time stamp of an iteration
         if {[expr ($outLineCount) % ($numLinesOutputIteration)] == 1} {
             # lines containing the timestamp in format: "T tsVal tsUnit"
             set tsVal [lindex [split $outLine] 1]
-            set tsUnit [lindex [split $outLine " "] 2] 
+            set tsUnit [lindex [split $outLine " "] 2]
 
             # default tsUnit of tsVal to ns
             if {$tsUnit == "us"} {
@@ -237,14 +237,14 @@ if {$OUTPUTS_ONLY == 0} {
     foreach outTime $tsOut {
         if {$outTime != 0} {
             lappend throughputValues [expr 1000* $NUM_OF_SAMPLES /($outTime - $tempTS)]
-        }       
-        set tempTS $outTime   
+        }
+        set tempTS $outTime
     }
 
     # Set tcl floating point precision
-    set tcl_precision 2 
+    set tcl_precision 2
     set itNum 0
-    set tempThroughput 0    
+    set tempThroughput 0
     foreach throughput $throughputValues {
         incr itNum
 
@@ -255,12 +255,12 @@ if {$OUTPUTS_ONLY == 0} {
             if {[expr 100*$throughputDiff./$throughput.] < $stabilityThreshold} {
                 set stableThroughout $throughput
                 lappend stableItNum $itNum
-            }  
-        } 
-        set tempThroughput $throughput  
+            }
+        }
+        set tempThroughput $throughput
     }
-        # # Print results for all iterations 
-    set itNum 0         
+        # # Print results for all iterations
+    set itNum 0
     foreach throughput $throughputValues {
         incr itNum
         puts $logFile [format "Iteration %2d throughput: %4d MSa/s" $itNum $throughput]
@@ -268,13 +268,13 @@ if {$OUTPUTS_ONLY == 0} {
     puts $logFile "\nLatency:        $stableLatency ns\nThroughput:     $stableThroughout MSa/s"
     puts $logFile "Stable Iterations = $stableItNum"
 
-    close $outputsFileNew 
+    close $outputsFileNew
 
 } else {
     puts  "Files not found for latency calculation"
 }
 
 puts $statusFile "    Latency:              $stableLatency ns\n    Throughput:           $stableThroughout MSa/s"
-file delete -force "$fileOutTemp"  
+file delete -force "$fileOutTemp"
 close $statusFile
 close $logFile

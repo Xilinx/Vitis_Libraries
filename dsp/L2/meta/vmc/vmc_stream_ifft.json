@@ -1,164 +1,172 @@
 {
-  "low_level_file":"fft_ifft_dit_1ch.json",
+  "low_level_file": "fft_ifft_dit_1ch.json",
   "ip_name": "vmc_stream_ifft",
   "block_info": {
     "label": "IFFT Stream",
     "description": "Stream-based IFFT block for AI Engines. The specified value for SSR parameter should be a power of two."
   },
   "parameters": [
-      {
+    {
       "key": "TT_DATA",
       "name": "data_type",
-      "description": "The type of individual data samples input to the fft function",
+      "description": "Select the input data type from the dropdown menu.",
       "default": "cint16",
-            "label": "Input data type:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+      "label": "Input data type:",
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
-      {
+    {
       "key": "TT_OUT_DATA",
       "name": "data_out_type",
-      "description": "The type of individual data samples output from the fft function",
+      "description": "Select the output data type from the dropdown menu.",
       "default": "cint16",
-            "label": "Output data type:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+      "label": "Output data type:",
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
     {
       "key": "TT_TWIDDLE",
       "name": "twiddle_type",
-      "description": "The type of individual data samples input to and output of the filter function",
+      "description": "Select the twiddle factor data type from the dropdown.",
       "default": "cint16",
       "label": "Twiddle factor data type:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
-      {
+    {
       "key": "TP_POINT_SIZE",
       "name": "point_size",
-      "description": "The number of samples in the transform",
+      "description": "Enter the number of samples in the transform",
       "default": 64,
       "label": "IFFT size:",
-          "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
     {
       "key": "TP_WINDOW_VSIZE",
       "name": "input_window_size",
-      "description": "The number of samples in the input window",
+      "description": "Enter the number of samples in the input window",
       "default": 64,
-       "label": "Input frame size (Number of Samples):",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "label": "Input frame size (Number of Samples):",
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
-      {
+    {
       "key": "TP_SHIFT",
       "name": "shift_val",
-      "description": "The power of 2 shift down applied to the accumulation of FIR before output",
+      "description": "Specify how many bits to right-shift the accumulation of IFFT before output.",
       "default": 0,
       "label": "Scale output down by 2^:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
     {
       "key": "TP_RND",
       "name": "rnd_mode",
-      "description": "The rounding to be applied during the shift down stage of processing.",
+      "description": "Select a rounding mode from the dropdown",
       "default": "Round symmetrical to infinity",
-	"label": "Rounding mode:",
-            "tablabel": "Main",
-          "parameterType": "popup"
+      "label": "Rounding mode:",
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
     {
       "key": "TP_SAT",
       "name": "sat_mode",
-      "description": "Saturation mode.",
-      "enum": [0, 1, 3],
-      "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
+      "description": "Select a saturation mode from the dropdown",
+      "enum": [
+        0,
+        1,
+        3
+      ],
+      "enum_str": [
+        "0-None",
+        "1-Asymmetric",
+        "3-Symmetric"
+      ],
       "default": 0,
       "label": "Saturation mode:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
     {
-      "key":"TP_PARALLEL_POWER",
+      "key": "TP_PARALLEL_POWER",
       "name": "ssr",
-      "description": "The number of input channels for SSR. The specified value should be of the form 2^N",
+      "description": "Specify the number of parallel input/output channels. The specified value should be of the form 2^N",
       "default": 2,
       "type": "uint",
-            "label": "SSR: ",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "label": "SSR: ",
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
     {
       "key": "TP_TWIDDLE_MODE",
       "name": "twiddle_mode",
-      "description": "Twiddle amplitude mode.",
+      "description": "Specify the twiddle amplitude mode.",
       "default": 0,
-       "label": "Twiddle Mode:",
-       "tablabel": "Main",
-       "parameterType":"edit"
+      "label": "Twiddle Mode:",
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
     {
       "key": "TP_USE_WIDGETS",
       "name": "use_ssr_widget_kernels",
+      "description": "Specify whether to use additional widget kernels for stream to window conversion.",
       "default": false,
-            "label": "Use Widget for SSR Kernels",
-            "tablabel": "Main",
-            "parameterType":"checkbox"
+      "label": "Use Widget for SSR Kernels",
+      "tablabel": "Main",
+      "parameterType": "checkbox"
     },
     {
       "key": "TP_CASC_LEN",
       "name": "casc_length",
-      "description": "The length of cascaded kernels",
+      "description": "Specify the number of kernels to cascade in series to increase throughput.",
       "default": 1,
       "label": "Number of cascade stages:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
-	{
-	  "key": "AIE_VARIANT",
-	  "name": "AIE_VARIANT",
+    {
+      "key": "AIE_VARIANT",
+      "name": "AIE_VARIANT",
       "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
       "default": 1,
-	  "label": "AIE Variant:",
+      "label": "AIE Variant:",
       "tablabel": "Main",
-      "parameterType":"edit"
+      "parameterType": "edit"
     },
-    {		
-	"key":"TP_FFT_NIFFT",
-        "name": "TP_FFT_NIFFT",
-        "description": "Selects whether the transform to perform is an FFT (1) or IFFT (0)",
-        "type": "uint",      
-        "default": 1,
-        "label": "FFT_NIFFT:",
-        "tablabel": "Main",
-        "visible": "off",
-        "parameterType":"edit"
-     },
-	{	
-		"key":"TP_API",
-		"name": "TP_API",
-		"description": "The form of IO: 0 for windows, 1 for streams",
-		"type": "uint",
-		"default": 1,
-		"label": "API:",
-		"tablabel": "Main",
-		"visible": "off",
-		"parameterType":"edit"
-     },
-	{	
-		"key":"TP_DYN_PT_SIZE",
-		"name": "TP_DYN_PT_SIZE",
-		"description": "Determines if point size can change at run-time",
-		"type": "uint",
-		"default": 0,
-		"label": "API:",
-		"tablabel": "Main",
-		"visible": "off",
-		"parameterType":"edit"
-     }
-
+    {
+      "key": "TP_FFT_NIFFT",
+      "name": "transform_fft_nifft",
+      "description": "Selects whether the transform to perform is an FFT (1) or IFFT (0)",
+      "type": "uint",
+      "default": 0,
+      "label": "FFT_NIFFT:",
+      "tablabel": "Main",
+      "visible": "off",
+      "parameterType": "edit"
+    },
+    {
+      "key": "TP_API",
+      "name": "TP_API",
+      "description": "The form of IO: 0 for windows, 1 for streams",
+      "type": "uint",
+      "default": 1,
+      "label": "API:",
+      "tablabel": "Main",
+      "visible": "off",
+      "parameterType": "edit"
+    },
+    {
+      "key": "TP_DYN_PT_SIZE",
+      "name": "TP_DYN_PT_SIZE",
+      "description": "Determines if point size can change at run-time",
+      "type": "uint",
+      "default": 0,
+      "label": "Dynamic (1) or static (0) point size::",
+      "tablabel": "Main",
+      "visible": "off",
+      "parameterType": "edit"
+    }
   ],
   "generator": {
     "file": "vmc_stream_ifft.py",

@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -181,7 +181,7 @@ def update_TP_FIR_LEN(args):
     TP_API = args["TP_API"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     AIE_VARIANT = args["AIE_VARIANT"]
-    if args["TP_FIR_LEN"]:
+    if "TP_FIR_LEN" in args and args["TP_FIR_LEN"]:
         TP_FIR_LEN = args["TP_FIR_LEN"]
     else:
         TP_FIR_LEN = 0
@@ -439,7 +439,15 @@ def update_TP_SSR(args):
     # if we've decomposed to another type of kernel, then import that kernel and use that validate function
     if uut_kernel != current_uut_kernel:
         other_kernel = importlib.import_module(uut_kernel)
-        return other_kernel.update_TP_SSR(nargs)
+        param_dict = other_kernel.update_TP_SSR(nargs)
+        if args["TP_API"] == API_BUFFER:  # SSR not supported on Buffer API.
+            legal_set_TP_SSR = [1]
+            if "min" in param_dict:
+                del param_dict["min"]
+            if "max" in param_dict:
+                del param_dict["max"]
+            param_dict.update({"enum": legal_set_TP_SSR})
+        return param_dict
     else:
         AIE_VARIANT = args["AIE_VARIANT"]
         TP_API = args["TP_API"]
@@ -480,6 +488,9 @@ def validate_TP_SSR(args):
     # if we've decomposed to another type of kernel, then import that kernel and use that validate function
     if uut_kernel != current_uut_kernel:
         other_kernel = importlib.import_module(uut_kernel)
+        if args["TP_API"] == API_BUFFER:  # SSR not supported on Buffer API.
+            legal_set_TP_SSR = [1]
+            return validate_legal_set(legal_set_TP_SSR, "TP_SSR", args["TP_SSR"])
         return other_kernel.validate_TP_SSR(nargs)
     else:
         AIE_VARIANT = args["AIE_VARIANT"]
@@ -754,7 +765,7 @@ def update_TP_INPUT_WINDOW_VSIZE(args):
             factor_TP_INPUT_WINDOW_VSIZE, TP_INPUT_WINDOW_VSIZE, param_dict
         )
     else:
-        if args["TP_INPUT_WINDOW_VSIZE"]:
+        if "TP_INPUT_WINDOW_VSIZE" in args and args["TP_INPUT_WINDOW_VSIZE"]:
             TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
         else:
             TP_INPUT_WINDOW_VSIZE = 0
@@ -794,21 +805,21 @@ def fn_update_TP_INPUT_WINDOW_VSIZE(
     else:
         TP_INPUT_WINDOW_VSIZE_max = com.TP_INPUT_WINDOW_VSIZE_max_streams
 
-    param_dict = {
-        "name": TP_INPUT_WINDOW_VSIZE,
-        "minimum": TP_INPUT_WINDOW_VSIZE_min,
-        "maximum": TP_INPUT_WINDOW_VSIZE_max,
-    }
-
     streamRptFactor = 4
     windowSizeMultiplier = (
         (fnNumLanes(TT_DATA, TT_COEFF, TP_API))
         if TP_API == API_BUFFER
         else (fnNumLanes(TT_DATA, TT_COEFF, TP_API) * streamRptFactor)
     )
-
     factor_window_size = windowSizeMultiplier * TP_SSR
     lcm_ws = find_lcm_list([factor_window_size, factor_TP_INPUT_WINDOW_VSIZE])
+
+    param_dict = {
+        "name": TP_INPUT_WINDOW_VSIZE,
+        "minimum": CEIL(TP_INPUT_WINDOW_VSIZE_min, lcm_ws),
+        "maximum": TP_INPUT_WINDOW_VSIZE_max,
+    }
+
     return deci_asym.fn_update_factor_TP_INPUT_VSIZE(
         lcm_ws, TP_INPUT_WINDOW_VSIZE, param_dict
     )

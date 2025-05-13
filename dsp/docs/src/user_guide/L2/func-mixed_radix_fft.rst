@@ -1,5 +1,6 @@
 ..
-   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -202,18 +203,6 @@ Configuration for Performance Versus Resource
 
 At present, only one configuration parameter ``TP_CASC_LEN`` will affect this design tradeoff. ``TP_CASC_LEN`` can be set from 1 up to the number of stages required. The number of stages required will be determined by the ``TP_POINT_SIZE`` parameter. The number of stages is A+B+C+D where A is the power of 3, B is the power of 5, C is the power of 4, and D is the power of 2 required to decompose the point size. e.g., a point size of 432 = 3*3*3*2*2*2*2. Radix4 stages are used in preference to radix2 stages, so this will result in three stages of radix3 and two of radix4. The total number of stages in this example is therefore 5. When the point size is a multiple of 8, but not 16, radix2 stages are used, so a point size of 216 would decompose to 3*3*3*2*2*2 resulting in six stages total.
 
-.. |image1| image:: ./media/image1.png
-.. |image2| image:: ./media/image2.png
-.. |image3| image:: ./media/image4.png
-.. |image4| image:: ./media/image2.png
-.. |image6| image:: ./media/image2.png
-.. |image7| image:: ./media/image5.png
-.. |image8| image:: ./media/image6.png
-.. |image9| image:: ./media/image7.png
-.. |image10| image:: ./media/image2.png
-.. |image11| image:: ./media/image2.png
-.. |image12| image:: ./media/image2.png
-.. |image13| image:: ./media/image2.png
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:
 .. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN

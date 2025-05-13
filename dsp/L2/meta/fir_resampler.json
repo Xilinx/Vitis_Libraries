@@ -38,14 +38,18 @@
         "cfloat"
       ],
       "updater": {
-        "file"    : "fir_resampler.py",
+        "file": "fir_resampler.py",
         "function": "update_TT_DATA",
-        "args"    : ["AIE_VARIANT"]
+        "args": [
+          "AIE_VARIANT"
+        ]
       },
       "validator": {
-        "file"    : "fir_resampler.py",
+        "file": "fir_resampler.py",
         "function": "validate_TT_DATA",
-        "args"    : ["AIE_VARIANT"]
+        "args": [
+          "AIE_VARIANT"
+        ]
       }
     },
     {
@@ -63,12 +67,18 @@
       "updater": {
         "file": "fir_resampler.py",
         "function": "update_TT_COEFF",
-        "args": ["TT_DATA", "AIE_VARIANT"]
+        "args": [
+          "TT_DATA",
+          "AIE_VARIANT"
+        ]
       },
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TT_COEFF",
-        "args": ["TT_DATA", "AIE_VARIANT"]
+        "args": [
+          "TT_DATA",
+          "AIE_VARIANT"
+        ]
       }
     },
     {
@@ -76,14 +86,14 @@
       "description": "The form of IO: 0 for windows, 1 for streams",
       "type": "uint",
       "updater": {
-        "file"    : "fir_resampler.py",
+        "file": "fir_resampler.py",
         "function": "update_TP_API",
-        "args"    : []
+        "args": []
       },
       "validator": {
-        "file"    : "fir_resampler.py",
+        "file": "fir_resampler.py",
         "function": "validate_TP_API",
-        "args"    : []
+        "args": []
       }
     },
     {
@@ -106,42 +116,66 @@
       "updater": {
         "file": "fir_resampler.py",
         "function": "update_TP_FIR_LEN",
-        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_USE_COEFF_RELOAD"]
+        "args": [
+          "AIE_VARIANT",
+          "TT_DATA",
+          "TT_COEFF",
+          "TP_API",
+          "TP_USE_COEFF_RELOAD"
+        ]
       },
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_FIR_LEN",
-        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_USE_COEFF_RELOAD"]
+        "args": [
+          "AIE_VARIANT",
+          "TT_DATA",
+          "TT_COEFF",
+          "TP_API",
+          "TP_USE_COEFF_RELOAD"
+        ]
       }
     },
     {
       "name": "TP_INTERPOLATE_FACTOR",
       "description": "The integer upsample rate of the filter",
       "type": "uint",
-       "updater": {
+      "updater": {
         "file": "fir_resampler.py",
         "function": "update_TP_INTERPOLATE_FACTOR",
-        "args": ["AIE_VARIANT", "TP_FIR_LEN"]
+        "args": [
+          "AIE_VARIANT",
+          "TP_FIR_LEN"
+        ]
       },
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_INTERPOLATE_FACTOR",
-        "args": ["AIE_VARIANT", "TP_FIR_LEN"]
+        "args": [
+          "AIE_VARIANT",
+          "TP_FIR_LEN"
+        ]
       }
     },
     {
       "name": "TP_PARA_INTERP_POLY",
-      "description" : "Number of parallel polyphases to decompose interpolator over.",
-      "type" : "uint",
+      "description": "Number of parallel polyphases to decompose interpolator over.",
+      "type": "uint",
       "updater": {
         "file": "fir_polyphase_decomposer.py",
         "function": "update_TP_PARA_INTERP_POLY",
-        "args": ["TP_FIR_LEN", "TP_INTERPOLATE_FACTOR"]
+        "args": [
+          "TP_FIR_LEN",
+          "TP_INTERPOLATE_FACTOR"
+        ]
       },
       "validator": {
         "file": "fir_polyphase_decomposer.py",
         "function": "validate_TP_PARA_INTERP_POLY",
-        "args": ["TP_FIR_LEN", "TP_INTERPOLATE_FACTOR"]
+        "args": [
+          "TP_FIR_LEN",
+          "TP_INTERPOLATE_FACTOR"
+        ]
       }
     },
     {
@@ -151,13 +185,20 @@
       "updater": {
         "file": "fir_resampler.py",
         "function": "update_TP_DECIMATE_FACTOR",
-        "args": ["AIE_VARIANT", "TP_FIR_LEN", "TP_INTERPOLATE_FACTOR"]
-
+        "args": [
+          "AIE_VARIANT",
+          "TP_FIR_LEN",
+          "TP_INTERPOLATE_FACTOR"
+        ]
       },
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_DECIMATE_FACTOR",
-        "args": ["AIE_VARIANT", "TP_FIR_LEN", "TP_INTERPOLATE_FACTOR"]
+        "args": [
+          "AIE_VARIANT",
+          "TP_FIR_LEN",
+          "TP_INTERPOLATE_FACTOR"
+        ]
       }
     },
     {
@@ -167,12 +208,18 @@
       "updater": {
         "file": "fir_resampler.py",
         "function": "update_TP_PARA_DECI_POLY",
-        "args": ["TP_FIR_LEN", "TP_DECIMATE_FACTOR"]
+        "args": [
+          "TP_FIR_LEN",
+          "TP_DECIMATE_FACTOR"
+        ]
       },
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_PARA_DECI_POLY",
-        "args": ["TP_FIR_LEN", "TP_DECIMATE_FACTOR"]
+        "args": [
+          "TP_FIR_LEN",
+          "TP_DECIMATE_FACTOR"
+        ]
       }
     },
     {
@@ -201,19 +248,19 @@
       "description": "The number of output ports. Windows API output an exact copy of the data. Stream API interleaves the output data with a 128-bit pattern.",
       "type": "uint",
       "updater": {
-          "file": "fir_resampler.py",
-          "function": "update_TP_NUM_OUTPUTS",
-          "args": [
-              "TP_API",
-              "AIE_VARIANT"
-          ]
+        "file": "fir_resampler.py",
+        "function": "update_TP_NUM_OUTPUTS",
+        "args": [
+          "TP_API",
+          "AIE_VARIANT"
+        ]
       },
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_NUM_OUTPUTS",
         "args": [
-            "TP_API",
-            "AIE_VARIANT"
+          "TP_API",
+          "AIE_VARIANT"
         ]
       }
     },
@@ -222,24 +269,26 @@
       "description": "TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput.",
       "type": "uint",
       "updater": {
-          "file": "fir_resampler.py",
-          "function": "update_TP_SSR",
-          "args": [
-              "TP_API",
-              "TP_INTERPOLATE_FACTOR",
-              "TP_DECIMATE_FACTOR",
-              "TP_PARA_INTERP_POLY",
-              "TP_PARA_DECI_POLY"          ]
+        "file": "fir_resampler.py",
+        "function": "update_TP_SSR",
+        "args": [
+          "TP_API",
+          "TP_INTERPOLATE_FACTOR",
+          "TP_DECIMATE_FACTOR",
+          "TP_PARA_INTERP_POLY",
+          "TP_PARA_DECI_POLY"
+        ]
       },
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_SSR",
         "args": [
-            "TP_API",
-            "TP_INTERPOLATE_FACTOR",
-            "TP_DECIMATE_FACTOR",
-            "TP_PARA_INTERP_POLY",
-            "TP_PARA_DECI_POLY"        ]
+          "TP_API",
+          "TP_INTERPOLATE_FACTOR",
+          "TP_DECIMATE_FACTOR",
+          "TP_PARA_INTERP_POLY",
+          "TP_PARA_DECI_POLY"
+        ]
       }
     },
     {
@@ -249,12 +298,32 @@
       "updater": {
         "file": "fir_resampler.py",
         "function": "update_TP_CASC_LEN",
-        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_SSR", "TP_INTERPOLATE_FACTOR","TP_DECIMATE_FACTOR", "TP_USE_COEFF_RELOAD"]
+        "args": [
+          "AIE_VARIANT",
+          "TT_DATA",
+          "TT_COEFF",
+          "TP_API",
+          "TP_FIR_LEN",
+          "TP_SSR",
+          "TP_INTERPOLATE_FACTOR",
+          "TP_DECIMATE_FACTOR",
+          "TP_USE_COEFF_RELOAD"
+        ]
       },
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_CASC_LEN",
-        "args": ["AIE_VARIANT","TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_SSR", "TP_INTERPOLATE_FACTOR","TP_DECIMATE_FACTOR", "TP_USE_COEFF_RELOAD"]
+        "args": [
+          "AIE_VARIANT",
+          "TT_DATA",
+          "TT_COEFF",
+          "TP_API",
+          "TP_FIR_LEN",
+          "TP_SSR",
+          "TP_INTERPOLATE_FACTOR",
+          "TP_DECIMATE_FACTOR",
+          "TP_USE_COEFF_RELOAD"
+        ]
       }
     },
     {
@@ -264,12 +333,32 @@
       "updater": {
         "file": "fir_resampler.py",
         "function": "update_TP_INPUT_WINDOW_VSIZE",
-        "args": ["TT_DATA", "TT_COEFF", "TP_FIR_LEN", "TP_API", "TP_INTERPOLATE_FACTOR", "TP_DECIMATE_FACTOR", "TP_PARA_INTERP_POLY", "TP_PARA_DECI_POLY", "AIE_VARIANT"]
+        "args": [
+          "TT_DATA",
+          "TT_COEFF",
+          "TP_FIR_LEN",
+          "TP_API",
+          "TP_INTERPOLATE_FACTOR",
+          "TP_DECIMATE_FACTOR",
+          "TP_PARA_INTERP_POLY",
+          "TP_PARA_DECI_POLY",
+          "AIE_VARIANT"
+        ]
       },
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_INPUT_WINDOW_VSIZE",
-        "args": ["TT_DATA", "TT_COEFF", "TP_FIR_LEN", "TP_API", "TP_INTERPOLATE_FACTOR", "TP_DECIMATE_FACTOR", "TP_PARA_INTERP_POLY", "TP_PARA_DECI_POLY", "AIE_VARIANT"]
+        "args": [
+          "TT_DATA",
+          "TT_COEFF",
+          "TP_FIR_LEN",
+          "TP_API",
+          "TP_INTERPOLATE_FACTOR",
+          "TP_DECIMATE_FACTOR",
+          "TP_PARA_INTERP_POLY",
+          "TP_PARA_DECI_POLY",
+          "AIE_VARIANT"
+        ]
       }
     },
     {
@@ -279,12 +368,18 @@
       "updater": {
         "file": "fir_resampler.py",
         "function": "update_TP_SHIFT",
-        "args": ["AIE_VARIANT", "TT_DATA"]
+        "args": [
+          "AIE_VARIANT",
+          "TT_DATA"
+        ]
       },
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_SHIFT",
-        "args": ["AIE_VARIANT", "TT_DATA"]
+        "args": [
+          "AIE_VARIANT",
+          "TT_DATA"
+        ]
       }
     },
     {
@@ -294,12 +389,16 @@
       "updater": {
         "file": "fir_resampler.py",
         "function": "update_TP_RND",
-        "args": ["AIE_VARIANT"]
+        "args": [
+          "AIE_VARIANT"
+        ]
       },
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_RND",
-        "args": ["AIE_VARIANT"]
+        "args": [
+          "AIE_VARIANT"
+        ]
       }
     },
     {
@@ -323,16 +422,22 @@
       "updater": {
         "file": "fir_resampler.py",
         "function": "update_coeff",
-        "args": ["TT_COEFF", "TP_FIR_LEN"]
+        "args": [
+          "TT_COEFF",
+          "TP_FIR_LEN"
+        ]
       },
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_coeff",
-        "args" : ["TP_USE_COEFF_RELOAD", "TT_COEFF", "TP_FIR_LEN"]
+        "args": [
+          "TP_USE_COEFF_RELOAD",
+          "TT_COEFF",
+          "TP_FIR_LEN"
+        ]
       }
     }
   ],
-
   "ports": {
     "file": "fir_resampler.py",
     "function": "info_ports"

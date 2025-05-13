@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -117,13 +117,9 @@ proc get_param_map {libElement} {
         "USE_PHASE_INC_RELOAD" "TP_USE_PHASE_INC_RELOAD"
         "USE_MATRIX_RELOAD" "TP_USE_MATRIX_RELOAD"
         "USE_RTP_VECTOR_LENGTHS" "TP_USE_RTP_VECTOR_LENGTHS"
-        "DATA_P" "TT_DATA_P"
-        "DATA_Q" "TT_DATA_Q"
-        "DATA_OUT" "TT_DATA_OUT"
-        "LEN_P" "TP_LEN_P"
-        "LEN_Q" "TP_LEN_Q"
-        "DIM_P" "TP_DIM_P"
-        "DIM_Q" "TP_DIM_Q"
+        "DATA" "TT_DATA"
+        "LEN" "TP_LEN"
+        "DIM" "TP_DIM"
         "IS_OUTPUT_SQUARED" "TP_IS_OUTPUT_SQUARED"
     }
     return $param_map

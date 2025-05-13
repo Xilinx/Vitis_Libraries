@@ -19,14 +19,12 @@
             "updater": {
                 "file": "hadamard.py",
                 "function": "update_AIE_VARIANT",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "hadamard.py",
                 "function": "validate_AIE_VARIANT",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
@@ -44,14 +42,12 @@
             "updater": {
                 "file": "hadamard.py",
                 "function": "update_TT_DATA_A",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "hadamard.py",
                 "function": "validate_TT_DATA_A",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
@@ -109,15 +105,12 @@
             "validator": {
                 "file": "hadamard.py",
                 "function": "validate_TP_SSR",
-                "args": [
-
-                ]
+                "args": []
             },
             "updater": {
                 "file": "hadamard.py",
                 "function": "update_TP_SSR",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
@@ -223,14 +216,12 @@
             "updater": {
                 "file": "hadamard.py",
                 "function": "update_TP_SAT",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "hadamard.py",
                 "function": "validate_TP_SAT",
-                "args": [
-                ]
+                "args": []
             }
         }
     ],

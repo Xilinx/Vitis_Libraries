@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# from ctypes import sizeof
+# from socket import TIPC_SUB_SERVICE
 import aie_common as com
 from aie_common import *
 from aie_common_fir import *
@@ -216,7 +218,8 @@ def fn_validate_TP_FIR_LEN(TT_DATA, TP_USE_COEFF_RELOAD, TP_FIR_LEN):
 ############# TP_DUAL_IP Updater and Validator ########
 #######################################################
 def update_TP_DUAL_IP(args):
-    return comFirUpd.fn_update_binary("TP_DUAL_IP")
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return comFirUpd.fn_update_dual_ip_sr_asym(AIE_VARIANT, "TP_DUAL_IP")
 
 
 def validate_TP_DUAL_IP(args):

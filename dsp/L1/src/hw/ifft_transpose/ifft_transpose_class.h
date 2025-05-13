@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,27 +32,27 @@ class midTransposeCls {
             TP_POINT_SIZE == 65536
                 ? 256
                 : TP_POINT_SIZE == 32768
-                      ? 128
+                      ? 256
                       : TP_POINT_SIZE == 16384
                             ? 128
                             : TP_POINT_SIZE == 8192
-                                  ? 64
+                                  ? 128
                                   : TP_POINT_SIZE == 4096
                                         ? 64
                                         : TP_POINT_SIZE == 2048
-                                              ? 32
+                                              ? 64
                                               : TP_POINT_SIZE == 1024
                                                     ? 32
                                                     : TP_POINT_SIZE == 512
-                                                          ? 16
+                                                          ? 32
                                                           : TP_POINT_SIZE == 256
                                                                 ? 16
                                                                 : TP_POINT_SIZE == 128
-                                                                      ? 8
+                                                                      ? 16
                                                                       : TP_POINT_SIZE == 64
                                                                             ? 8
                                                                             : TP_POINT_SIZE == 32
-                                                                                  ? 4
+                                                                                  ? 8
                                                                                   : TP_POINT_SIZE == 16 ? 4 : 0;
         return sqrtVal;
     }

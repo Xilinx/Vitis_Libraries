@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,10 @@ namespace corr_example {
 #define G_LEN_CORR 32
 #define SHIFT_CORR 7
 #define API_CORR 0
+#define NUM_FRAMES_CORR 1
 #define CASC_LEN_CORR 1
 #define PHASES_CORR 1
+#define USE_RTP_VECTOR_LENGTHS_CORR 0
 
 class test_corr : public adf::graph {
    public:
@@ -46,8 +48,10 @@ class test_corr : public adf::graph {
                                              G_LEN_CORR,
                                              SHIFT_CORR,
                                              API_CORR,
+                                             NUM_FRAMES_CORR,
                                              CASC_LEN_CORR,
-                                             PHASES_CORR>
+                                             PHASES_CORR,
+                                             USE_RTP_VECTOR_LENGTHS_CORR>
         corr;
     test_corr() {
         for (int i = 0; i < PHASES_CORR; i++) {

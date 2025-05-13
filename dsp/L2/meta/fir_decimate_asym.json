@@ -17,16 +17,16 @@
             "type": "uint",
             "description": "Specifies the device type.",
             "updater": {
-              "file": "fir_sr_asym.py",
-              "function": "update_AIE_VARIANT",
-              "args": []
+                "file": "fir_sr_asym.py",
+                "function": "update_AIE_VARIANT",
+                "args": []
             },
             "validator": {
-              "file": "fir_sr_asym.py",
-              "function": "validate_AIE_VARIANT",
-              "args": []
+                "file": "fir_sr_asym.py",
+                "function": "validate_AIE_VARIANT",
+                "args": []
             }
-          },
+        },
         {
             "name": "TT_DATA",
             "description": "The type of individual data samples input to and output of the filter function",
@@ -42,12 +42,16 @@
             "updater": {
                 "file": "fir_sr_asym.py",
                 "function": "update_TT_DATA",
-                "args": ["AIE_VARIANT"]
+                "args": [
+                    "AIE_VARIANT"
+                ]
             },
             "validator": {
-            "file": "fir_sr_asym.py",
-            "function": "validate_TT_DATA",
-            "args": ["AIE_VARIANT"]
+                "file": "fir_sr_asym.py",
+                "function": "validate_TT_DATA",
+                "args": [
+                    "AIE_VARIANT"
+                ]
             }
         },
         {
@@ -143,12 +147,26 @@
             "updater": {
                 "file": "fir_decimate_asym.py",
                 "function": "update_TP_DECIMATE_FACTOR",
-                "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_USE_COEFF_RELOAD", "TP_FIR_LEN"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_COEFF",
+                    "TP_API",
+                    "TP_USE_COEFF_RELOAD",
+                    "TP_FIR_LEN"
+                ]
             },
             "validator": {
                 "file": "fir_decimate_asym.py",
                 "function": "validate_TP_DECIMATE_FACTOR",
-                "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_USE_COEFF_RELOAD", "TP_FIR_LEN"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_COEFF",
+                    "TP_API",
+                    "TP_USE_COEFF_RELOAD",
+                    "TP_FIR_LEN"
+                ]
             }
         },
         {
@@ -158,20 +176,24 @@
             "updater": {
                 "file": "fir_decimate_asym.py",
                 "function": "update_TP_PARA_DECI_POLY",
-                "args": ["AIE_VARIANT",
-                        "TT_DATA",
-                        "TT_COEFF",
-                        "TP_API",
-                        "TP_DECIMATE_FACTOR"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_COEFF",
+                    "TP_API",
+                    "TP_DECIMATE_FACTOR"
+                ]
             },
             "validator": {
                 "file": "fir_decimate_asym.py",
                 "function": "validate_TP_PARA_DECI_POLY",
-                "args": ["AIE_VARIANT",
-                        "TT_DATA",
-                        "TT_COEFF",
-                        "TP_API",
-                        "TP_DECIMATE_FACTOR"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_COEFF",
+                    "TP_API",
+                    "TP_DECIMATE_FACTOR"
+                ]
             }
         },
         {
@@ -223,12 +245,28 @@
             "updater": {
                 "file": "fir_decimate_asym.py",
                 "function": "update_TP_SSR",
-                "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD", "TP_DECIMATE_FACTOR"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_COEFF",
+                    "TP_API",
+                    "TP_FIR_LEN",
+                    "TP_USE_COEFF_RELOAD",
+                    "TP_DECIMATE_FACTOR"
+                ]
             },
             "validator": {
                 "file": "fir_decimate_asym.py",
                 "function": "validate_TP_SSR",
-                "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD", "TP_DECIMATE_FACTOR"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_COEFF",
+                    "TP_API",
+                    "TP_FIR_LEN",
+                    "TP_USE_COEFF_RELOAD",
+                    "TP_DECIMATE_FACTOR"
+                ]
             }
         },
         {
@@ -238,28 +276,32 @@
             "updater": {
                 "file": "fir_decimate_asym.py",
                 "function": "update_TP_CASC_LEN",
-                "args": ["AIE_VARIANT",
-                         "TT_DATA",
-                         "TT_COEFF",
-                         "TP_API",
-                         "TP_FIR_LEN",
-                         "TP_USE_COEFF_RELOAD",
-                         "TP_DECIMATE_FACTOR",
-                         "TP_PARA_DECI_POLY",
-                         "TP_SSR"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_COEFF",
+                    "TP_API",
+                    "TP_FIR_LEN",
+                    "TP_USE_COEFF_RELOAD",
+                    "TP_DECIMATE_FACTOR",
+                    "TP_PARA_DECI_POLY",
+                    "TP_SSR"
+                ]
             },
             "validator": {
                 "file": "fir_decimate_asym.py",
                 "function": "validate_TP_CASC_LEN",
-                "args": ["AIE_VARIANT",
-                         "TT_DATA",
-                         "TT_COEFF",
-                         "TP_API",
-                         "TP_FIR_LEN",
-                         "TP_USE_COEFF_RELOAD",
-                         "TP_DECIMATE_FACTOR",
-                         "TP_PARA_DECI_POLY",
-                         "TP_SSR"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_COEFF",
+                    "TP_API",
+                    "TP_FIR_LEN",
+                    "TP_USE_COEFF_RELOAD",
+                    "TP_DECIMATE_FACTOR",
+                    "TP_PARA_DECI_POLY",
+                    "TP_SSR"
+                ]
             }
         },
         {
@@ -276,7 +318,8 @@
                     "TP_FIR_LEN",
                     "TP_DECIMATE_FACTOR",
                     "TP_API",
-                    "TP_SSR"                ]
+                    "TP_SSR"
+                ]
             },
             "validator": {
                 "file": "fir_decimate_asym.py",
@@ -288,7 +331,8 @@
                     "TP_FIR_LEN",
                     "TP_DECIMATE_FACTOR",
                     "TP_API",
-                    "TP_SSR"                ]
+                    "TP_SSR"
+                ]
             }
         },
         {
@@ -299,14 +343,16 @@
                 "file": "fir_decimate_asym.py",
                 "function": "update_TP_SHIFT",
                 "args": [
-                    "AIE_VARIANT", "TT_DATA"
+                    "AIE_VARIANT",
+                    "TT_DATA"
                 ]
             },
             "validator": {
                 "file": "fir_decimate_asym.py",
                 "function": "validate_TP_SHIFT",
                 "args": [
-                    "AIE_VARIANT", "TT_DATA"
+                    "AIE_VARIANT",
+                    "TT_DATA"
                 ]
             }
         },
@@ -317,12 +363,16 @@
             "updater": {
                 "file": "fir_decimate_asym.py",
                 "function": "update_TP_RND",
-                "args": ["AIE_VARIANT"]
+                "args": [
+                    "AIE_VARIANT"
+                ]
             },
             "validator": {
                 "file": "fir_decimate_asym.py",
                 "function": "validate_TP_RND",
-                "args": ["AIE_VARIANT"]
+                "args": [
+                    "AIE_VARIANT"
+                ]
             }
         },
         {
@@ -346,22 +396,28 @@
             "updater": {
                 "file": "fir_decimate_asym.py",
                 "function": "update_coeff",
-                "args": ["TT_COEFF", "TP_FIR_LEN"]
+                "args": [
+                    "TT_COEFF",
+                    "TP_FIR_LEN"
+                ]
             },
             "validator": {
                 "file": "fir_decimate_asym.py",
                 "function": "validate_coeff",
-                "args": ["TP_USE_COEFF_RELOAD", "TT_COEFF", "TP_FIR_LEN"]
+                "args": [
+                    "TP_USE_COEFF_RELOAD",
+                    "TT_COEFF",
+                    "TP_FIR_LEN"
+                ]
             }
         }
     ],
-
     "ports": {
         "file": "fir_decimate_asym.py",
         "function": "info_ports"
-      },
+    },
     "generator": {
         "file": "fir_decimate_asym.py",
         "function": "generate_graph"
-      }
+    }
 }

@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# from ctypes import sizeof
 import aie_common as com
 from aie_common import *
 import math
@@ -61,7 +62,7 @@ def fn_update_tt_data(AIE_VARIANT):
     elif AIE_VARIANT == AIE_ML:
         legal_set_TT_DATA = ["int16", "int32", "float", "bfloat16"]
     elif AIE_VARIANT == AIE_MLv2:
-        legal_set_TT_DATA = ["int16", "int32", "float", "bfloat16"] 
+        legal_set_TT_DATA = ["int16", "int32", "float", "bfloat16"]
 
     param_dict = {}
     param_dict.update({"name": "TT_DATA"})

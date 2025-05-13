@@ -1,5 +1,6 @@
 ..
-   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -141,7 +142,7 @@ Increase the number of iterations the simulation runs for to achieve a stable st
 Power Analysis
 --------------
 
-For DSPLIB elements, a naming convention 'VCD' can be used to harvest dynamic power consumption. Once 'VCD' string is added within the test name, VCD file of the simulation data is captured and PDM (Power Design Manager) calculates power metrics. User can find detailed power reports in `pwr_test` folder under their corresponding test result directory. Dynamic power result can also be found in the `logs/status_<config_details>.txt` file. 
+For DSPLIB elements, a naming convention 'VCD' can be used to harvest dynamic power consumption. Once 'VCD' string is added within the test name, VCD file of the simulation data is captured and PDM (Power Design Manager) calculates power metrics. User can find detailed power reports in `pwr_test` folder under their corresponding test result directory. Dynamic power result can also be found in the `logs/status_<config_details>.txt` file.
 
 .. _CONFIGURATION_PARAMETERS:
 
@@ -335,6 +336,23 @@ For the Convolution / Correlation library element the list of configurable param
     +------------------------+----------------+----------------+--------------------------------------+
     | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NUM_FRAMES             |    unsigned    |    1           | Number of frames in a window.        |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | CASC_LEN               |    unsigned    |    1           | cascaded length to set the number    |
+    |                        |                |                | of tiles used in chain of conv/corr. |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | PHASES                 |    unsigned    |    1           | Phases to set number of parallel     |
+    |                        |                |                | cascaded chains of conv/corr.        |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | USE_RTP_VECTOR_LENGTHS |    unsigned    |    0           | RTP parameter of F and G Lengths     |
+    |                        |                |                |                                      |
+    |                        |                |                | 0 - Static **G_LEN**                 |
+    |                        |                |                |                                      |
+    |                        |                |                | 1 - Dynamic **G_LEN**                |
+    |                        |                |                |                                      |
+    |                        |                |                |  **F_LEN** is static in both cases   |
     +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE_F            |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
     |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
@@ -717,54 +735,54 @@ For the Function Approximation library element, use the list of configurable par
 
 .. table:: Function Approximation configuration parameters
 
-    +------------------------+----------------+----------------+--------------------------------------+  
-    |     **Name**           |    **Type**    |  **Default**   |   **Description**                    |  
-    +========================+================+================+======================================+  
-    | DATA_TYPE              | typename       | cint16         | Data type.                           |  
-    +------------------------+----------------+----------------+--------------------------------------+  
-    | COARSE_BITS            | unsigned       | 8              | Number of bits used for coarse       |  
-    |                        |                |                | lookup. Determines the number of     |  
-    |                        |                |                | linear sections in the lookup table. |  
-    +------------------------+----------------+----------------+--------------------------------------+  
-    | FINE_BITS              | unsigned       | 7              | Number of bits used for              |  
-    |                        |                |                | interpolation between lookup         |  
-    |                        |                |                | sections.                            |  
-    +------------------------+----------------+----------------+--------------------------------------+  
-    | DOMAIN_MODE            | unsigned       | 0              | Describes normalized input, x,       |  
-    |                        |                |                | domain.                              |  
-    +------------------------+----------------+----------------+--------------------------------------+  
-    | FUNC_CHOICE            | unsigned       | 0              | Sets which utility function is used  |  
-    |                        |                |                | to create lookup table values. Each  |  
-    |                        |                |                | utility function provides            |  
-    |                        |                |                | approximations for a specific        |  
-    |                        |                |                | function. The following values and   |  
-    |                        |                |                | functions are enumerated for         |  
-    |                        |                |                | FUNC_CHOICE:                         |  
-    |                        |                |                | 0 - SQRT_FUNC                        |  
-    |                        |                |                | 1 - INVSQRT_FUNC                     |  
-    |                        |                |                | 2 - LOG_FUNC                         |  
-    |                        |                |                | 3 - EXP_FUNC                         |  
-    |                        |                |                | 4 - INV_FUNC                         |  
-    +------------------------+----------------+----------------+--------------------------------------+  
-    | SHIFT                  | unsigned       | 0              | See :ref:`COMMON_CONFIG_PARAMETERS`. |   
-    +------------------------+----------------+----------------+--------------------------------------+  
-    | WINDOW_VSIZE           | unsigned       | 6              | See :ref:`COMMON_CONFIG_PARAMETERS`. |  
-    +------------------------+----------------+----------------+--------------------------------------+  
-    | ROUND_MODE             | unsigned       | 0              | See :ref:`COMMON_CONFIG_PARAMETERS`. |  
-    +------------------------+----------------+----------------+--------------------------------------+  
-    | SAT_MODE               | unsigned       | 1              | See :ref:`COMMON_CONFIG_PARAMETERS`. |  
-    +------------------------+----------------+----------------+--------------------------------------+  
-    | NITER                  | unsigned       | 4              | See :ref:`COMMON_CONFIG_PARAMETERS`. |  
-    +------------------------+----------------+----------------+--------------------------------------+  
-    | STIM_TYPE              | unsigned       | 0              | This parameter drives the input data |  
-    |                        |                |                | stimulus differently from other      |  
-    |                        |                |                | library elements, as a different     |  
-    |                        |                |                | input generation script is used.     |  
-    |                        |                |                | STIM_TYPE = 0 provides random data   |  
-    |                        |                |                | in the selected DOMAIN_MODE.         |  
-    |                        |                |                | STIM_TYPE = 1 provides incrementing  |  
-    |                        |                |                | data across the entire domain for    |  
-    |                        |                |                | the selected DOMAIN_MODE.            |  
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   **Description**                    |
+    +========================+================+================+======================================+
+    | DATA_TYPE              | typename       | cint16         | Data type.                           |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | COARSE_BITS            | unsigned       | 8              | Number of bits used for coarse       |
+    |                        |                |                | lookup. Determines the number of     |
+    |                        |                |                | linear sections in the lookup table. |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | FINE_BITS              | unsigned       | 7              | Number of bits used for              |
+    |                        |                |                | interpolation between lookup         |
+    |                        |                |                | sections.                            |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DOMAIN_MODE            | unsigned       | 0              | Describes normalized input, x,       |
+    |                        |                |                | domain.                              |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | FUNC_CHOICE            | unsigned       | 0              | Sets which utility function is used  |
+    |                        |                |                | to create lookup table values. Each  |
+    |                        |                |                | utility function provides            |
+    |                        |                |                | approximations for a specific        |
+    |                        |                |                | function. The following values and   |
+    |                        |                |                | functions are enumerated for         |
+    |                        |                |                | FUNC_CHOICE:                         |
+    |                        |                |                | 0 - SQRT_FUNC                        |
+    |                        |                |                | 1 - INVSQRT_FUNC                     |
+    |                        |                |                | 2 - LOG_FUNC                         |
+    |                        |                |                | 3 - EXP_FUNC                         |
+    |                        |                |                | 4 - INV_FUNC                         |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SHIFT                  | unsigned       | 0              | See :ref:`COMMON_CONFIG_PARAMETERS`. |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | WINDOW_VSIZE           | unsigned       | 6              | See :ref:`COMMON_CONFIG_PARAMETERS`. |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | ROUND_MODE             | unsigned       | 0              | See :ref:`COMMON_CONFIG_PARAMETERS`. |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SAT_MODE               | unsigned       | 1              | See :ref:`COMMON_CONFIG_PARAMETERS`. |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  | unsigned       | 4              | See :ref:`COMMON_CONFIG_PARAMETERS`. |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | STIM_TYPE              | unsigned       | 0              | This parameter drives the input data |
+    |                        |                |                | stimulus differently from other      |
+    |                        |                |                | library elements, as a different     |
+    |                        |                |                | input generation script is used.     |
+    |                        |                |                | STIM_TYPE = 0 provides random data   |
+    |                        |                |                | in the selected DOMAIN_MODE.         |
+    |                        |                |                | STIM_TYPE = 1 provides incrementing  |
+    |                        |                |                | data across the entire domain for    |
+    |                        |                |                | the selected DOMAIN_MODE.            |
     +------------------------+----------------+----------------+--------------------------------------+
 
 .. _CONFIGURATION_PARAMETERS_HADAMARD:
@@ -898,6 +916,9 @@ For the Matrix Multiply (GeMM) library element, use the following list of config
     | T_DATA_B               |    typename    |    cint16      | Input B Data Type.                   |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
+    | DATA_OUT_TYPE          |    typename    |    cint16      | Output Data Type.                    |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
     | P_DIM_A                |    unsigned    |    16          | Input A Dimension.                   |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
@@ -914,6 +935,9 @@ For the Matrix Multiply (GeMM) library element, use the following list of config
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | P_CASC_LEN             |    unsigned    |    1           | Cascade length.                      |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | UUT_SSR                |    unsigned    |    1           |  Super Sample Rate.                  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | P_DIM_A_LEADING        |    unsigned    |    0           | ROW_MAJOR = 0                        |
@@ -988,11 +1012,31 @@ For the Matrix Vector Multiply (GeMV) library element, use the following list of
     | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
+    | UUT_SSR                |    unsigned    |    1           |  Super Sample Rate.                  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
     | CASC_LEN               |    unsigned    |    1           | Cascade length.                      |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | NUM_FRAMES             |    unsigned    |    1           | The number of batches of input data  |
     |                        |                |                | that will be processed per iteration.|
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIM_A_LEADING          |    unsigned    |    1           | COL_MAJOR = 1                        |
+    |                        |                |                | ROW MAJOR = 0                        |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | USE_MATRIX_RELOAD      |    unsigned    |    0           | 0 - Matrix A via iobuffer            |
+    |                        |                |                | 1 - reloadable Matrix A via RTP ports|
+    +------------------------+----------------+----------------+--------------------------------------+
+    | API_IO                 |    unsigned    |    0           | 0 - Vector B via iobuffer            |
+    |                        |                |                | 1 - Vector B via stream, only when   |
+    |                        |                |                | reloadable Matrix A via RTP port     |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DUAL_IP                |    unsigned    |    0           | 0 - single vector input per kernel   |
+    |                        |                |                | 1 - dual vector inputs per kernel    |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NUM_OUTPUTS            |    unsigned    |    1           | 1 - single output per SSR rank       |
+    |                        |                |                | 2 - dual outputs per SSR rank,       |
+    |                        |                |                | stream only                          |
     +------------------------+----------------+----------------+--------------------------------------+
     | NITER                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
@@ -1243,18 +1287,6 @@ For the Widgets library elements, use the following list of configurable paramet
 
 .. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
 
-.. |image1| image:: ./media/image1.png
-.. |image2| image:: ./media/image2.png
-.. |image3| image:: ./media/image4.png
-.. |image4| image:: ./media/image2.png
-.. |image6| image:: ./media/image2.png
-.. |image7| image:: ./media/image5.png
-.. |image8| image:: ./media/image6.png
-.. |image9| image:: ./media/image7.png
-.. |image10| image:: ./media/image2.png
-.. |image11| image:: ./media/image2.png
-.. |image12| image:: ./media/image2.png
-.. |image13| image:: ./media/image2.png
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:
 .. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN

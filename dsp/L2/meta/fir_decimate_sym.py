@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# from ctypes import sizeof
+# from socket import TIPC_SUB_SERVICE
 import aie_common as com
 from aie_common import *
 from aie_common_fir import *
@@ -84,7 +86,7 @@ def update_TT_DATA(args):
 
 
 def fn_update_TT_DATA():
-    legal_set_TT_DATA = ["int16", "int32", "cint16", "cint32", "float"]
+    legal_set_TT_DATA = ["int16", "int32", "cint16", "cint32"]
     param_dict = {"name": "TT_DATA", "enum": legal_set_TT_DATA}
     return param_dict
 
@@ -110,19 +112,36 @@ def update_TT_COEFF(args):
 
 
 def fn_update_TT_COEFF(AIE_VARIANT, TT_DATA):
-    legal_set_TT_COEFF = ["int16", "int32", "cint16", "cint32", "float", "cfloat"]
-    legal_set_TT_COEFF = fn_coeff_type_update(TT_DATA, legal_set_TT_COEFF)
+    legal_set_TT_COEFF = ["int16", "int32", "cint16", "cint32"]
 
     remove_set = []
-    if AIE_VARIANT == AIE and TT_DATA == "int16":
-        remove_set.append("int16")
+    if AIE_VARIANT == AIE:
+        if TT_DATA == "int16":
+            remove_set.append("int16")
+            remove_set.append("cint16")  # This is added due to num-of-lane being zero
+            remove_set.append("cint32")  # This is added due to num-of-lane being zero
+        elif TT_DATA == "int32":
+            remove_set.append("cint16")  # This is added due to num-of-lane being zero
+            remove_set.append("cint32")  # This is added due to num-of-lane being zero
+    elif AIE_VARIANT == AIE_ML:
+        if TT_DATA == "int16":
+            remove_set.append("cint16")  # This is added due to num-of-lane being zero
+            remove_set.append("cint32")  # This is added due to num-of-lane being zero
+        elif TT_DATA == "int32":
+            remove_set.append("cint16")  # This is added due to num-of-lane being zero
+            remove_set.append("cint32")  # This is added due to num-of-lane being zero
+    elif AIE_VARIANT == AIE_MLv2:
+        if TT_DATA == "int16":
+            remove_set.append("cint16")  # This is added due to num-of-lane being zero
+            remove_set.append("cint32")  # This is added due to num-of-lane being zero
+        elif TT_DATA == "int32":
+            remove_set.append("cint16")  # This is added due to num-of-lane being zero
+            remove_set.append("cint32")  # This is added due to num-of-lane being zero
 
     if TT_DATA == "int32":
         remove_set.append("int16")
     elif TT_DATA == "cint32":
         remove_set.append("int16")
-    elif TT_DATA == "float":
-        remove_set.append("float")
 
     legal_set_TT_COEFF = remove_from_set(remove_set, legal_set_TT_COEFF.copy())
 
@@ -183,7 +202,7 @@ def update_TP_FIR_LEN(args):
     TT_COEFF = args["TT_COEFF"]
     TP_API = args["TP_API"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
-    if args["TP_FIR_LEN"]:
+    if "TP_FIR_LEN" in args and args["TP_FIR_LEN"]:
         TP_FIR_LEN = args["TP_FIR_LEN"]
     else:
         TP_FIR_LEN = 0
@@ -602,7 +621,7 @@ def update_TP_INPUT_WINDOW_VSIZE(args):
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
     AIE_VARIANT = args["AIE_VARIANT"]
-    if args["TP_INPUT_WINDOW_VSIZE"]:
+    if "TP_INPUT_WINDOW_VSIZE" in args and args["TP_INPUT_WINDOW_VSIZE"]:
         TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     else:
         TP_INPUT_WINDOW_VSIZE = 0

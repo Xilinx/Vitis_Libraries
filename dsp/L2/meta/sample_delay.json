@@ -63,30 +63,48 @@
             "type": "uint",
             "description": "Upper bound of the the requested sample delay on RTP port",
             "updater": {
-            "file": "sample_delay.py",
-            "function": "update_TP_MAX_DELAY",
-            "args": ["AIE_VARIANT", "TT_DATA", "TP_API"]
+                "file": "sample_delay.py",
+                "function": "update_TP_MAX_DELAY",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_API"
+                ]
             },
             "validator": {
                 "file": "sample_delay.py",
                 "function": "validate_TP_MAX_DELAY",
-                "args": ["AIE_VARIANT", "TT_DATA", "TP_API"]
-                }
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_API"
+                ]
+            }
         },
         {
             "name": "TP_WINDOW_VSIZE",
             "type": "uint",
             "description": "Size of I/O window in IOBUFF interface. Not used when the IO interface is AXI-4 streams",
             "updater": {
-            "file": "sample_delay.py",
-            "function": "update_TP_WINDOW_VSIZE",
-            "args": ["AIE_VARIANT", "TT_DATA", "TP_API", "TP_MAX_DELAY"]
+                "file": "sample_delay.py",
+                "function": "update_TP_WINDOW_VSIZE",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_API",
+                    "TP_MAX_DELAY"
+                ]
             },
             "validator": {
                 "file": "sample_delay.py",
                 "function": "validate_TP_WINDOW_VSIZE",
-                "args": ["AIE_VARIANT", "TT_DATA", "TP_API", "TP_MAX_DELAY"]
-                }
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_API",
+                    "TP_MAX_DELAY"
+                ]
+            }
         }
     ],
     "ports": {

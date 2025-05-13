@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ ifeq ($(DYN_PT_SIZE), 1)
 		HEADER_SIZE := 32
 	else ifeq ($(AIE_VARIANT), 22)
 		HEADER_SIZE := 64
-	else 
+	else
 		HEADER_SIZE := 0
 	endif
 endif
@@ -108,7 +108,7 @@ create_input:
 	@echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_mrfft_header.tcl $(INPUT_HEADER_FILE) $(WINDOW_VSIZE) $(NITER) $(DYN_PT_SIZE) $(POINT_SIZE) $(DATA_TYPE) $(DATA_SEED) $(STIM_TYPE);
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_mrfft_header.tcl $(INPUT_HEADER_FILE) $(WINDOW_VSIZE) $(NITER) $(DYN_PT_SIZE) $(POINT_SIZE) $(DATA_TYPE) $(DATA_SEED) $(STIM_TYPE);
 	@echo perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k $(HEADER_SIZE) -w ${WINDOW_VSIZE} --plioWidth ${PLIO_WIDTH};
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k $(HEADER_SIZE) -w ${WINDOW_VSIZE} --plioWidth ${PLIO_WIDTH}; 
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k $(HEADER_SIZE) -w ${WINDOW_VSIZE} --plioWidth ${PLIO_WIDTH};
 	echo Input ready
 
 sim_ref:

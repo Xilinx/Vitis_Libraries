@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 #
 set usage "
 For generating random stimulus for data files.
@@ -176,32 +177,32 @@ proc randBFloat16 {seed sampleType} {
     set minbfp16 1.1754944e-4
     set bias 127
     set mask_sign "0x80000000"
-    set mask_exp "0x7F800000" 
+    set mask_exp "0x7F800000"
     set mask_mantissa "0x007F8000"
     set shiftbits31 31
     set shiftbits23 23
     set shiftbits7 7
     set shiftbits16 16
-    
+
     set range [expr {($maxbfp16+1) - ($minbfp16)}]; #range
     set fpSample [expr {($minbfp16) + (rand() * $range)}]; # gen. of random float32 value
     set fpinhex [format %f $fpSample]; # formatted to float i.e. 6 decimal values
     # Generate the equivalent Hexadecimal number of fp32
-    binary scan [binary format R $fpinhex] H* hex 
+    binary scan [binary format R $fpinhex] H* hex
     set float_int [expr 0x$hex]; # get integer value which is equivalent to above Hexadecimal value.
     # convert back bfloat16 integer to a float32 approxiation
     set sign [expr {($float_int & $mask_sign ) >> $shiftbits31}]
     set exponent [expr {(($float_int & $mask_exp) >> $shiftbits23)-$bias}]
     #Ensure exponent is non-negative
     if {($exponent < 0)} {
-      set exponent 0  
+      set exponent 0
     }
     set mantissa [expr {(1 + [expr { double([expr {(($float_int & $mask_mantissa) >> $shiftbits16)}])/ [expr {(1 << $shiftbits7)}] }])}]
     set bfloat16_int [expr {((1-[expr {(2*$sign)}]) * ([expr {$mantissa}]) * ([expr {(1<<$exponent)}]))}]
     set nextSample [expr { ($bfloat16_int)}]
-    
+
     return $nextSample
-   
+
 }
 
 proc incInt {seed sampleType} {
@@ -340,24 +341,24 @@ proc generateSample {stimType sampleSeed sample_idx samples sampleType comp} {
 
     if { $stimType == 0 } {
         set integerType 1
-        
+
         if {($sampleType eq "float") || ($sampleType eq "cfloat") || ($sampleType eq "bfloat16")} {
             set integerType 0
         }
-        if {($sampleType eq "float")} {            
+        if {($sampleType eq "float")} {
             #puts "float"
             set nextSample [randFloat $sampleSeed $sampleType]
-        } elseif {$sampleType eq "cfloat"} {            
+        } elseif {$sampleType eq "cfloat"} {
             #puts "cfloat"
             set nextSample [randFloat $sampleSeed $sampleType]
-        } elseif {$sampleType eq "bfloat16"} {            
+        } elseif {$sampleType eq "bfloat16"} {
             #puts "bfloat16"
             set nextSample [randBFloat16 $sampleSeed $sampleType]
         } else {
             # Random
             #puts "int16"
             set nextSample [randInt $sampleSeed $sampleType]
-        }    
+        }
     } elseif { $stimType == 3 } {
         # Impulse
         if {$sample_idx == 0} {
@@ -577,7 +578,7 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
 #    puts $padding
 #    puts $dataPartsPerLine
 #    puts $dataStimType
-   
+
 set MaxNumBitsPerRead 256
 set data_samples [getDataSamples $tt_data]
 set data_Load [expr ($MaxNumBitsPerRead/$data_samples)]
@@ -595,10 +596,10 @@ set CountPad 0
         ###################################################################################
         # Zero padding to the data based on conv/corr computation Mode i.e. FULL/SAME/VALID
         ###################################################################################
-        
+
         if {($tt_data eq "float") || ($tt_data eq "cfloat") || ($tt_data eq "bfloat16") } {
             set padZeros 0.0
-        } else {    
+        } else {
             set padZeros 0
         }
          if { $convcorrMode eq 0 } {
@@ -628,7 +629,7 @@ set CountPad 0
          set PaddedLen [expr ($left_padd_Count + $samplesPerFrame + $right_padd_Count)]
          set ReqPaddedLen [expr (([ceil $PaddedLen $data_Load])*$data_Load) ]
          set AdjustedPaddLen [expr ($ReqPaddedLen - $PaddedLen)]
-         
+
          if {$left_padd_Count > 0 || $right_padd_Count > 0 } {
             if {$left_padd_Count > 0 } {
                set LenOfPad $left_padd_Count
@@ -636,7 +637,7 @@ set CountPad 0
                set LenOfPad $right_padd_Count
             } else {
                set LenOfPad 0
-            }            
+            }
             set cnt [expr ($LenOfPad/$samplesPerLine) ]
             set LeftOverSamplestoBePadded [expr ($LenOfPad-($cnt*$samplesPerLine))]
             if {$LeftOverSamplestoBePadded eq 0} {
@@ -645,9 +646,9 @@ set CountPad 0
             } else {
             set First_NonZeroSamples [expr ($samplesPerLine-$LeftOverSamplestoBePadded)]
             set CountPad [expr ($dataPartsPerLine-$LeftOverSamplestoBePadded)]
-            }           
+            }
          }
-         
+
           if {$left_padd_Count > 0} {
            for {set indx 0} {$indx < [expr ($left_padd_Count / $samplesPerLine)]} { incr indx} {
             for {set comp 0} {$comp < $dataPartsPerLine} {incr comp} {
@@ -679,7 +680,7 @@ set CountPad 0
               if {([expr ($First_NonZeroSamples+$LeftOverSamplestoBePadded)]) eq $samplesPerLine } {
                     puts $output_file ""
                 }
-             }                
+             }
          }
         for {set sample_idx $First_NonZeroSamples} {$sample_idx < $samplesPerFrame / $samplesPerLine} {incr sample_idx} {
             for {set comp 0} {$comp < $dataPartsPerLine} {incr comp} {
@@ -706,9 +707,9 @@ set CountPad 0
                 }
             }
         }
-        for {set sindx 0} {$sindx < [expr $LeftOverSamplestoBePadded*($dataPartsPerLine/$samplesPerLine)]} { incr sindx} { 
+        for {set sindx 0} {$sindx < [expr $LeftOverSamplestoBePadded*($dataPartsPerLine/$samplesPerLine)]} { incr sindx} {
            set comp 0
-              set nextSample [generateSample  $dataStimType $nextSample $sindx $samplesPerFrame $tt_data $comp] 
+              set nextSample [generateSample  $dataStimType $nextSample $sindx $samplesPerFrame $tt_data $comp]
               if {$samplesPerLine > 1} {
                        puts -nonewline $output_file "$nextSample "
                     } else {
@@ -722,7 +723,7 @@ set CountPad 0
               if {([expr ($First_NonZeroSamples+$LeftOverSamplestoBePadded)]) eq $samplesPerLine } {
                     puts $output_file ""
                 }
-             }                
+             }
         if {$right_padd_Count > 0} {
             for {set indx 0} {$indx < [expr ($right_padd_Count / $samplesPerLine)]} { incr indx} {
                 for {set comp 0} {$comp < $dataPartsPerLine} {incr comp} {
@@ -738,8 +739,8 @@ set CountPad 0
                 }
             }
         }
-      
-        for {set indx 0} {$indx < $CountPad} { incr indx} {     
+
+        for {set indx 0} {$indx < $CountPad} { incr indx} {
             for {set comp 0} {$comp < $dataPartsPerLine} {incr comp} {
                 if {$comp < 7 && $dataPartsPerLine eq 8} {
                     puts -nonewline $output_file "$padZeros "

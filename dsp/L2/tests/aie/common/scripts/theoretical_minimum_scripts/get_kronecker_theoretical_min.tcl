@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -99,9 +99,9 @@ set kAieMacsPerCyclePerKernel   [expr {128 / $dataTypeSize_A / $dataTypeSize_B}]
 
 
 if {($Api==0)} {
-    set kVecPerCalc [expr {32/$dataTypeSize_out}]        
+    set kVecPerCalc [expr {32/$dataTypeSize_out}]
 } else {
-    set kVecPerCalc [expr {16/$dataTypeSize_out}] 
+    set kVecPerCalc [expr {16/$dataTypeSize_out}]
 }
 
 # Min cycle count (no overhead)

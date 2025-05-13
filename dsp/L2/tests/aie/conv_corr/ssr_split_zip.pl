@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -96,22 +96,22 @@ if ( ($split and $zip) or ((not $split) and (not $zip)) ) {
     die "ERROR: need only split or zip. -h for usage"
 }
 
-# Define properties for each data type  
-my %type_properties = (  
-    'int8'      => { numParts => 1, partSize => 8  },  
-    'int16'     => { numParts => 1, partSize => 16 },  
-    'int32'     => { numParts => 1, partSize => 32 },  
-    'float'     => { numParts => 1, partSize => 32 },  
-    'bfloat16'  => { numParts => 1, partSize => 16 },  
-    'cint8'     => { numParts => 2, partSize => 8  },  
-    'cint16'    => { numParts => 2, partSize => 16 },  
-    'cint32'    => { numParts => 2, partSize => 32 },  
-    'cfloat'    => { numParts => 2, partSize => 32 },  
-    'cbfloat16' => { numParts => 2, partSize => 16 },  
-);  
-  
-# Get properties for the data type  
-my $partsPerSample = $type_properties{$type}{numParts};  
+# Define properties for each data type
+my %type_properties = (
+    'int8'      => { numParts => 1, partSize => 8  },
+    'int16'     => { numParts => 1, partSize => 16 },
+    'int32'     => { numParts => 1, partSize => 32 },
+    'float'     => { numParts => 1, partSize => 32 },
+    'bfloat16'  => { numParts => 1, partSize => 16 },
+    'cint8'     => { numParts => 2, partSize => 8  },
+    'cint16'    => { numParts => 2, partSize => 16 },
+    'cint32'    => { numParts => 2, partSize => 32 },
+    'cfloat'    => { numParts => 2, partSize => 32 },
+    'cbfloat16' => { numParts => 2, partSize => 16 },
+);
+
+# Get properties for the data type
+my $partsPerSample = $type_properties{$type}{numParts};
 my $sampleSizeBits = $type_properties{$type}{numParts} * $type_properties{$type}{partSize};
 
 my $samplesPerLine = $plioWidth / $sampleSizeBits;
@@ -125,7 +125,7 @@ my $partsPerLine = $plioWidth / $type_properties{$type}{partSize};
 my $linesPerSample = 1;
 if ($plioWidth < $sampleSizeBits) {
   $linesPerSample = 2;
-} 
+}
 
 my $dual_gran;
 my $data_type_size_bytes = $sampleSizeBits / 8;
@@ -340,13 +340,13 @@ if ($split) {
       # Convert lines into an array of parts
       # print("partsPerLine = $partsPerLine, samplesPerLine = $samplesPerLine, linesPerSample = $linesPerSample\n");
       for my $lineIdx (@lineRange) {
-        push @all_parts, $lines[$lineIdx] =~ /-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;  
+        push @all_parts, $lines[$lineIdx] =~ /-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
       }
       # Convert parts into samples
-      for (my $i = 0; $i < @all_parts; $i += $partsPerSample) {  
-          my $sample = join(' ', @all_parts[$i .. $i + $partsPerSample - 1]);  
-          $samples[$sampleIdx] = $sample;    
-          $sampleIdx++;      
+      for (my $i = 0; $i < @all_parts; $i += $partsPerSample) {
+          my $sample = join(' ', @all_parts[$i .. $i + $partsPerSample - 1]);
+          $samples[$sampleIdx] = $sample;
+          $sampleIdx++;
       }
 
       $headersIdx = 0;
@@ -420,17 +420,17 @@ if ($split) {
   my $numSSRSamples = @ssrSamples;
   #print "numSSRSamples = $numSSRSamples\n";
   my @outFile;
-  my @ssrParts;  
+  my @ssrParts;
 
   # Convert zipped samples back into parts
-  foreach my $ssrSample (@ssrSamples) {  
-      push @ssrParts, split(' ', $ssrSample);  
-  }  
+  foreach my $ssrSample (@ssrSamples) {
+      push @ssrParts, split(' ', $ssrSample);
+  }
   # Convert parts back into lines
-  for (my $i = 0; $i < @ssrParts; $i += $partsPerLine) {  
-      my $line = join(' ', @ssrParts[$i .. $i + $partsPerLine - 1]) . " \n";  
-      push @outFile, $line;  
-  }  
+  for (my $i = 0; $i < @ssrParts; $i += $partsPerLine) {
+      my $line = join(' ', @ssrParts[$i .. $i + $partsPerLine - 1]) . " \n";
+      push @outFile, $line;
+  }
 
   # newly re-arranged lines to result file
   print $fileH @outFile;

@@ -86,14 +86,12 @@
             "updater": {
                 "file": "outer_tensor.py",
                 "function": "update_TP_API",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "outer_tensor.py",
                 "function": "validate_TP_API",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
@@ -103,14 +101,12 @@
             "updater": {
                 "file": "outer_tensor.py",
                 "function": "update_TP_SSR",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "outer_tensor.py",
                 "function": "validate_TP_SSR",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
@@ -136,7 +132,8 @@
                     "TT_DATA_A",
                     "TT_DATA_B",
                     "TP_API",
-                    "TP_SSR"                ]
+                    "TP_SSR"
+                ]
             }
         },
         {
@@ -152,7 +149,8 @@
                     "TT_DATA_B",
                     "TP_API",
                     "TP_SSR",
-                    "TP_DIM_A"                ]
+                    "TP_DIM_A"
+                ]
             },
             "validator": {
                 "file": "outer_tensor.py",
@@ -163,7 +161,8 @@
                     "TT_DATA_B",
                     "TP_API",
                     "TP_SSR",
-                    "TP_DIM_A"                ]
+                    "TP_DIM_A"
+                ]
             }
         },
         {
@@ -225,13 +224,15 @@
             "updater": {
                 "file": "outer_tensor.py",
                 "function": "update_TP_RND",
-                "args": ["AIE_VARIANT"
+                "args": [
+                    "AIE_VARIANT"
                 ]
             },
             "validator": {
                 "file": "outer_tensor.py",
                 "function": "validate_TP_RND",
-                "args": ["AIE_VARIANT"
+                "args": [
+                    "AIE_VARIANT"
                 ]
             }
         },
@@ -242,14 +243,12 @@
             "updater": {
                 "file": "outer_tensor.py",
                 "function": "update_TP_SAT",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "outer_tensor.py",
                 "function": "validate_TP_SAT",
-                "args": [
-                ]
+                "args": []
             }
         }
     ],

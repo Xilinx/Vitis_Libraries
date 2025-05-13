@@ -1,62 +1,60 @@
 {
-  "low_level_file":"sample_delay.json",
+  "low_level_file": "sample_delay.json",
   "ip_name": "vmc_sample_delay",
   "block_info": {
     "label": "Vectorized Sample Delay",
     "description": "Vectorized Sample Delay block targeted for AI Engines."
   },
   "parameters": [
-      {
-          "key": "TT_DATA",
+    {
+      "key": "TT_DATA",
       "name": "data_type",
-          "type": "typename",
-          "description": "Select the input/output data type from the dropdown.",
+      "type": "typename",
+      "description": "Select the input/output data type from the dropdown.",
       "default": "int8",
       "label": "Input/Output data type:",
-              "tablabel": "Main",
-              "parameterType":"popup"
-      },
-      {
-          "key": "TP_WINDOW_VSIZE",
+      "tablabel": "Main",
+      "parameterType": "popup"
+    },
+    {
+      "key": "TP_WINDOW_VSIZE",
       "name": "input_window_size",
-      "description": "The number of samples in the input window",
+      "description": "Enter the number of samples in the input window",
       "default": 256,
       "label": "Input window size (Number of samples):",
-              "tablabel": "Main",
-              "parameterType":"edit"
-      },
-      {
-          "key": "TP_MAX_DELAY",
+      "tablabel": "Main",
+      "parameterType": "edit"
+    },
+    {
+      "key": "TP_MAX_DELAY",
       "name": "max_sample_delay",
-          "description": "Upper bound of the requested sample delay on the RTP port.",
+      "description": "Upper bound of the requested sample delay on the reloadable port.",
       "default": 256,
       "label": "Maximum sample delay:",
-              "tablabel": "Main",
-              "parameterType":"edit"
-      },
-	{
-	  "key": "AIE_VARIANT",
-	  "name": "AIE_VARIANT",
+      "tablabel": "Main",
+      "parameterType": "edit"
+    },
+    {
+      "key": "AIE_VARIANT",
+      "name": "AIE_VARIANT",
       "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
       "default": 1,
       "label": "AIE Variant:",
       "tablabel": "Main",
-      "parameterType":"edit"
-      },
-     {	
-		"key":"TP_API",
-		"name": "TP_API",
-		"description": "The form of IO: 0 for windows, 1 for streams",
-		"type": "uint",
-		"default": 0,
-		"label": "API:",
-		"tablabel": "Main",
-		"visible": "off",
-		"parameterType":"edit"
-     }
-
+      "parameterType": "edit"
+    },
+    {
+      "key": "TP_API",
+      "name": "TP_API",
+      "description": "The form of IO: 0 for windows, 1 for streams",
+      "type": "uint",
+      "default": 0,
+      "label": "API:",
+      "tablabel": "Main",
+      "visible": "off",
+      "parameterType": "edit"
+    }
   ],
-
   "generator": {
     "file": "vmc_sample_delay.py",
     "function": "vmc_generate_graph"

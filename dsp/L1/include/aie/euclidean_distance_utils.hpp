@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,27 +41,17 @@ namespace aie {
 namespace euclidean_distance {
 
 // Return type of default accumulator used in euclidean_distance
-template <typename TT_DATA_P, typename TT_DATA_Q>
+template <typename TT_DATA>
 struct tEDAccType {
     using type = accfloat;
-};
-
-// Return type of default output data type used in euclidean_distance
-template <typename TT_DATA_P, typename TT_DATA_Q>
-struct outType {
-    using type = float;
 };
 
 // Retun type of accumulator and output data type for AIE-1
 #if (__HAS_ACCUM_PERMUTES__ == 1)
 // float
 template <>
-struct tEDAccType<float, float> {
+struct tEDAccType<float> {
     using type = accfloat;
-};
-template <>
-struct outType<float, float> {
-    using type = float;
 };
 
 #endif // __HAS_ACCUM_PERMUTES__ == 1 for AIE
@@ -70,31 +60,20 @@ struct outType<float, float> {
 #if (__HAS_ACCUM_PERMUTES__ == 0)
 // float
 template <>
-struct tEDAccType<float, float> {
+struct tEDAccType<float> {
     using type = accfloat;
-};
-template <>
-struct outType<float, float> {
-    using type = float;
 };
 
 // bfloat16
 template <>
-struct tEDAccType<bfloat16, bfloat16> {
+struct tEDAccType<bfloat16> {
     using type = accfloat;
-};
-template <>
-struct outType<bfloat16, bfloat16> {
-    using type = bfloat16;
 };
 
 #endif // __HAS_ACCUM_PERMUTES__ == 0 for AIE-ML
 
-template <typename T_D_A, typename T_D_B>
-using tEDAccType_t = typename tEDAccType<T_D_A, T_D_B>::type;
-
-template <typename T_D_A, typename T_D_B>
-using outType_t = typename outType<T_D_A, T_D_B>::type;
+template <typename T_D>
+using tEDAccType_t = typename tEDAccType<T_D>::type;
 
 // Function to return the 1024 bit vector i.e. Y reg.
 template <typename TT_DATA>
@@ -172,12 +151,12 @@ INLINE_DECL void upd_W_buff(::aie::vector<TT_DATA, 1024 / 8 / sizeof(TT_DATA)>& 
 };
 
 // T_acc struct with ::aie::accum
-template <typename TT_DATA_P, typename TT_DATA_Q>
+template <typename TT_DATA>
 struct T_acc_ED {
-    using v_type = ::aie::accum<tEDAccType_t<TT_DATA_P, TT_DATA_Q>, fnEDNumLanes<TT_DATA_P, TT_DATA_Q>()>;
+    using v_type = ::aie::accum<tEDAccType_t<TT_DATA>, fnEDNumLanes<TT_DATA>()>;
     v_type val, uval;
-    static constexpr unsigned getLanes() { return (fnEDNumLanes<TT_DATA_P, TT_DATA_Q>()); };
-    static constexpr unsigned getSize() { return getAccSize<TT_DATA_P, TT_DATA_Q>(); };
+    static constexpr unsigned getLanes() { return (fnEDNumLanes<TT_DATA>()); };
+    static constexpr unsigned getSize() { return getAccSize<TT_DATA>(); };
 };
 
 } // namespace euclidean_distance {

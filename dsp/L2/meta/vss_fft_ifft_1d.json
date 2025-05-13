@@ -40,7 +40,6 @@
                 "file": "vss_fft_ifft_1d.py",
                 "function": "validate_FREQHZ",
                 "args": []
-
             }
         },
         {

@@ -19,14 +19,12 @@
             "updater": {
                 "file": "dft.py",
                 "function": "update_AIE_VARIANT",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "dft.py",
                 "function": "validate_AIE_VARIANT",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
@@ -76,22 +74,19 @@
                 ]
             }
         },
-                {
+        {
             "name": "TP_POINT_SIZE",
             "description": "The number of samples in the transform.",
             "type": "uint",
             "updater": {
                 "file": "dft.py",
                 "function": "update_TP_POINT_SIZE",
-                "args": [
-
-                ]
+                "args": []
             },
             "validator": {
                 "file": "dft.py",
                 "function": "validate_TP_POINT_SIZE",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
@@ -102,10 +97,10 @@
                 "file": "dft.py",
                 "function": "update_TP_SSR",
                 "args": [
-                        "AIE_VARIANT",
-                        "TP_POINT_SIZE",
-                        "TT_DATA"
-                                    ]
+                    "AIE_VARIANT",
+                    "TP_POINT_SIZE",
+                    "TT_DATA"
+                ]
             },
             "validator": {
                 "file": "dft.py",
@@ -114,7 +109,7 @@
                     "AIE_VARIANT",
                     "TP_POINT_SIZE",
                     "TT_DATA"
-                                ]
+                ]
             }
         },
         {
@@ -125,23 +120,23 @@
                 "file": "dft.py",
                 "function": "update_TP_CASC_LEN",
                 "args": [
-                    "AIE_VARIANT" ,
-                    "TT_DATA" ,
-                    "TT_TWIDDLE" ,
-                    "TP_POINT_SIZE" ,
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_TWIDDLE",
+                    "TP_POINT_SIZE",
                     "TP_SSR"
-                    ]
+                ]
             },
             "validator": {
                 "file": "dft.py",
                 "function": "validate_TP_CASC_LEN",
                 "args": [
-                    "AIE_VARIANT" ,
-                    "TT_DATA" ,
-                    "TT_TWIDDLE" ,
-                    "TP_POINT_SIZE" ,
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_TWIDDLE",
+                    "TP_POINT_SIZE",
                     "TP_SSR"
-                    ]
+                ]
             }
         },
         {
@@ -152,8 +147,8 @@
                 "file": "dft.py",
                 "function": "update_TP_NUM_FRAMES",
                 "args": [
-                    "AIE_VARIANT" ,
-                    "TT_DATA" ,
+                    "AIE_VARIANT",
+                    "TT_DATA",
                     "TP_POINT_SIZE"
                 ]
             },
@@ -161,8 +156,8 @@
                 "file": "dft.py",
                 "function": "validate_TP_NUM_FRAMES",
                 "args": [
-                    "AIE_VARIANT" ,
-                    "TT_DATA" ,
+                    "AIE_VARIANT",
+                    "TT_DATA",
                     "TP_POINT_SIZE"
                 ]
             }
@@ -214,14 +209,12 @@
             "updater": {
                 "file": "dft.py",
                 "function": "update_TP_SAT",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "dft.py",
                 "function": "validate_TP_SAT",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
@@ -231,14 +224,12 @@
             "updater": {
                 "file": "dft.py",
                 "function": "update_TP_API",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "dft.py",
                 "function": "validate_TP_API",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
@@ -248,14 +239,12 @@
             "updater": {
                 "file": "dft.py",
                 "function": "update_TP_FFT_NIFFT",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "dft.py",
                 "function": "validate_TP_FFT_NIFFT",
-                "args": [
-                ]
+                "args": []
             }
         }
     ],
@@ -263,7 +252,6 @@
         "file": "dft.py",
         "function": "info_ports"
     },
-
     "generator": {
         "file": "dft.py",
         "function": "generate_graph"

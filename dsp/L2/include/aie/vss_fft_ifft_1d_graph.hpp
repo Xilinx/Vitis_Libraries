@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,14 @@ namespace dsp {
 namespace aie {
 namespace fft {
 namespace vss_1d {
+
+template <unsigned int num>
+static constexpr unsigned int isPowerOf2() {
+    if (num == 2 || num == 4 || num == 8 || num == 16 || num == 32 || num == 64)
+        return true;
+    else
+        return false;
+}
 
 template <typename TT_DATA,
           typename TT_TWIDDLE,
@@ -85,7 +93,8 @@ class create_par_kernels_vss_decomp {
 /**
  * @ingroup fft_graphs
  *
- * @brief vss_fft_ifft_1d is a single-channel, decomposed FFT that contains the AIE sub-part of the VSS FFT offering.
+ * @brief vss_fft_ifft_1d is a single-channel, decomposed FFT that contains the AIE sub-part of the VSS FFT Mode 1
+ *offering.
  *
  * These are the templates to configure the single-channel decimation-in-time class.
  * @tparam TT_DATA describes the type of individual data samples input to and
@@ -100,7 +109,7 @@ class create_par_kernels_vss_decomp {
  *         - TT_TWIDDLE must be cfloat type if TT_DATA is a float type.
  * @tparam TP_POINT_SIZE is an unsigned integer which describes the number of samples in
  *         the transform. \n This must be 2^N where N is an integer in the range
- *         4 to 16 inclusive.
+ *         8 to 16 inclusive for AIE devices and 10 to 16 inclusive for AIE-ML devices.
  * @tparam TP_FFT_NIFFT selects whether the transform to perform is an FFT (1) or IFFT (0).
  * @tparam TP_SHIFT selects the power of 2 to scale the result by prior to output.
  * @tparam TP_API is an unsigned integer to select window (0) or stream (1) interfaces.
@@ -177,14 +186,31 @@ class vss_fft_ifft_1d_graph : public graph {
     static constexpr unsigned int kPtSizeD2Ceil = fnCeil<kPtSizeD2, TP_SSR>();
     static constexpr unsigned int kFirstFFTShift = TP_SHIFT / 2;
     static constexpr unsigned int kSecondFFTShift = TP_SHIFT - TP_SHIFT / 2;
-    static constexpr unsigned int kWindowSizeRaw = (kPtSizeD2Ceil * kPtSizeD1) / TP_SSR;
-    static constexpr unsigned int kWindowSizeCalc = kWindowSizeRaw * 2 * sizeof(TT_DATA) <= __DATA_MEM_BYTES__
-                                                        ? kWindowSizeRaw
-                                                        : __DATA_MEM_BYTES__ / (2 * sizeof(TT_DATA));
+    static constexpr unsigned int kWindowSizeRaw1 = (kPtSizeD2Ceil * kPtSizeD1) / TP_SSR; // ;
+    static constexpr unsigned int kWindowSizeCalc1 = kWindowSizeRaw1 * 2 * sizeof(TT_DATA) <= __DATA_MEM_BYTES__
+                                                         ? kWindowSizeRaw1
+                                                         : __DATA_MEM_BYTES__ / (2 * sizeof(TT_DATA));
+    static constexpr unsigned int kWindowSizeRaw2 = (kPtSizeD2 * fnCeil<kPtSizeD1, TP_SSR>()) / TP_SSR; // ;
+    static constexpr unsigned int kWindowSizeCalc2 = kWindowSizeRaw2 * 2 * sizeof(TT_DATA) <= __DATA_MEM_BYTES__
+                                                         ? kWindowSizeRaw2
+                                                         : __DATA_MEM_BYTES__ / (2 * sizeof(TT_DATA));
     static constexpr unsigned int kRotFanSize =
         TP_POINT_SIZE / TP_SSR * sizeof(TT_TWIDDLE) <= __DATA_MEM_BYTES__ ? 1 : fnNumLanes<TT_TWIDDLE, TT_TWIDDLE>();
     static constexpr int kInv = TP_FFT_NIFFT == 1 ? -1 : 1;
+    // This static assert may trigger only for point sizes that are not perfect square numbers.
+    // The window size for the front and back FFTs need to be equal and they also need to be a divisible by the front
+    // and back point sizes.
+    // For some values of SSR, choosing a common window size would mean that the twiddle rotator kernels would not start
+    // and end their operation in a deterministic way
+    // and would need runtime checks to determine the operation.
+    // The front AIE kernels form the throughput bottleneck for the system, so rather than reducing the overall
+    // throughput with run-time code,
+    // the user can choose a different value of SSR for better efficiency.
 
+    static_assert((kPtSizeD1 == kPtSizeD2) || ((kWindowSizeRaw1 * 2 * sizeof(TT_DATA) <= __DATA_MEM_BYTES__) &&
+                                                   (kWindowSizeRaw2 * 2 * sizeof(TT_DATA) <= __DATA_MEM_BYTES__) ||
+                                               isPowerOf2<TP_SSR>()),
+                  "The given combination of point size and SSR is not supported. Please use a different value of SSR.");
     void createTwidRotKernels() {
         std::array<std::array<TT_TWIDDLE, kRotFanSize>, kPtSizeD2> twRotTmp;
         std::array<std::array<TT_TWIDDLE, kPtSizeD2Ceil / TP_SSR * kRotFanSize>, TP_SSR> twRot;
@@ -214,7 +240,7 @@ class vss_fft_ifft_1d_graph : public graph {
                    kPtSizeD1 / kRotFanSize * sizeof(TT_TWIDDLE));
         }
 
-        create_par_kernels_vss_decomp<TT_DATA, TT_TWIDDLE, kWindowSizeCalc, TP_SSR - 1, TP_SSR, kPtSizeD1, kPtSizeD2,
+        create_par_kernels_vss_decomp<TT_DATA, TT_TWIDDLE, kWindowSizeCalc1, TP_SSR - 1, TP_SSR, kPtSizeD1, kPtSizeD2,
                                       TP_FFT_NIFFT, kIntDynPtSize, TP_RND, TP_SAT, kPtSizeD2Ceil,
                                       kRotFanSize>::create(m_fftTwRotKernels, twRot, twMain);
     }
@@ -228,7 +254,7 @@ class vss_fft_ifft_1d_graph : public graph {
                            kFirstFFTShift,
                            kIntCascLen,
                            kIntDynPtSize,
-                           kWindowSizeCalc,
+                           kWindowSizeCalc1,
                            TP_API,
                            kIntParPow,
                            kIntUseWidg,
@@ -245,7 +271,7 @@ class vss_fft_ifft_1d_graph : public graph {
                            kSecondFFTShift,
                            kIntCascLen,
                            kIntDynPtSize,
-                           kWindowSizeCalc,
+                           kWindowSizeCalc2,
                            TP_API,
                            kIntParPow,
                            kIntUseWidg,
@@ -262,10 +288,10 @@ class vss_fft_ifft_1d_graph : public graph {
         for (int i = 0; i < TP_SSR; i++) {
             connect<>(front_i[i], frontFFTGraph[i].in[0]);
             connect<>(frontFFTGraph[i].out[0], m_fftTwRotKernels[i].in[0]);
-            dimensions(m_fftTwRotKernels[i].in[0]) = {kWindowSizeCalc + kHeaderBytes / sizeof(TT_DATA)};
+            dimensions(m_fftTwRotKernels[i].in[0]) = {kWindowSizeCalc1 + kHeaderBytes / sizeof(TT_DATA)};
 
             connect<>(m_fftTwRotKernels[i].out[0], front_o[i]);
-            dimensions(m_fftTwRotKernels[i].out[0]) = {kWindowSizeCalc + kHeaderBytes / sizeof(TT_DATA)};
+            dimensions(m_fftTwRotKernels[i].out[0]) = {kWindowSizeCalc1 + kHeaderBytes / sizeof(TT_DATA)};
 
             connect<>(back_i[i], backFFTGraph[i].in[0]);
             connect<>(backFFTGraph[i].out[0], back_o[i]);

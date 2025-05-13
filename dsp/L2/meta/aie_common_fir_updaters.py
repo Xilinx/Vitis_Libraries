@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# Common utility variables and functions used accross FIR elements.
 
 import aie_common as com
 from aie_common import *
@@ -36,10 +37,10 @@ TP_SSR_min = 1
 
 
 def fn_type_support_coeff_update(AIE_VARIANT, TT_DATA, legal_set):
-    legal_set_int=legal_set
+    legal_set_int = legal_set
     if AIE_VARIANT == AIE:
         if TT_DATA == "int16":
-            legal_set_int= remove_from_set(["int16"], legal_set_int)
+            legal_set_int = remove_from_set(["int16"], legal_set_int)
     return legal_set_int
 
 
@@ -124,8 +125,8 @@ def fn_update_num_outputs_sr_asym(TP_API, AIE_VARIANT, TP_SSR, TP_DUAL_IP, param
         # When 2 inputs, does 1 output make sense? No.
         if TP_DUAL_IP == 0:
             legal_set = remove_from_set([2], legal_set)
-        else: 
-            legal_set=remove_from_set([1], legal_set)
+        else:
+            legal_set = remove_from_set([1], legal_set)
 
     # Constraint copied from graph. Can this be removed?
     if TP_API == API_BUFFER and TP_SSR > 1:

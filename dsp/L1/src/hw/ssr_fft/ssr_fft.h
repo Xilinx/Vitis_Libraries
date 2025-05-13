@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 #include "math.h"
 #include <ap_fixed.h>
 
-#define __SSR_FFT_DEBUG__
+//#define __SSR_FFT_DEBUG__
 struct cfloat_set {
     std::complex<float> data1;
     std::complex<float> data2;
@@ -28,7 +28,8 @@ class ssrFFTClass {
    public:
     static constexpr int nBtfls = POINT_SIZE / 2;
     static constexpr unsigned int nStages =
-        POINT_SIZE == 32 ? 5 : POINT_SIZE == 16 ? 4 : POINT_SIZE == 8 ? 3 : POINT_SIZE == 4 ? 2 : 0;
+        POINT_SIZE == 64 ? 6
+                         : POINT_SIZE == 32 ? 5 : POINT_SIZE == 16 ? 4 : POINT_SIZE == 8 ? 3 : POINT_SIZE == 4 ? 2 : 0;
     std::complex<float> scBuff[nStages][nBtfls];
     typedef cfloat_set TT_DATA;
     typedef hls::stream<TT_DATA> TT_STREAM;
@@ -39,7 +40,7 @@ class ssrFFTClass {
                    std::complex<float>* outData1,
                    std::complex<float>* outData2) {
         // TT_DATA outData;
-        //#pragma HLS inline
+        // #pragma HLS inline
         std::complex<float> prod;
 #pragma HLS BIND_OP variable = prod op = fmul impl = maxdsp
 #pragma HLS BIND_OP variable = prod op = fadd impl = maxdsp

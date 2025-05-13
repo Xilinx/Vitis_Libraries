@@ -21,26 +21,11 @@ Please select relevant options:
 
 Please describe the tests that you ran to verify your changes. Please also list any relevant details for your test configuration.
 
-- [ ] "checkin" test suite
-- [ ] VMC smoke test
-- [ ] other test suite
-- [ ] PR regression only
-
-
-**Detailed description**:
-
-## Checklist:
-
-- [ ] Jenkins dashboard tests show all expected tests pass:
-    http://xcoengvm229015:5000/Libraries/xf_dsp
-- [ ] Jenkins dashboard tests don't show unexpected regressions
-    http://xcoengvm229015:5000/Libraries/xf_dsp
-- [ ] PR standardization tests don't show unexpected failures
 
 ## Is there any known issue introduced?:
 
-- [ ] Yes, not critical and issue is cracked with: <CR/ADL>
-- [ ] Yes, workaround provided and issue is tracker with: <CR/ADL>
+- [ ] Yes, not critical and issue is tracked with: <issue>
+- [ ] Yes, workaround provided and issue is tracker with: <issue>
 - [ ] No.
 
 ## Tips:
@@ -48,4 +33,10 @@ Please describe the tests that you ran to verify your changes. Please also list 
 - Rerun the PR Jenkins run with a comment, e.g.:  `jenkinstest caselist=["L2/tests/aie/*"] targets=vitis_aie_x86sim`
 
 
+## License
+
+ Copyright (C) 2019-2022, Xilinx, Inc.
+ Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+
+Terms and Conditions <https://www.amd.com/en/corporate/copyright>
 

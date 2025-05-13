@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -169,28 +169,28 @@ proc randBFloat16 {seed sampleType} {
     set minbfp16 1.1754944e-4
     set bias 127
     set mask_sign "0x80000000"
-    set mask_exp "0x7F800000" 
+    set mask_exp "0x7F800000"
     set mask_mantissa "0x007F8000"
     set shiftbits31 31
     set shiftbits23 23
     set shiftbits7 7
     set shiftbits16 16
-    
+
     set range [expr {($maxbfp16+1) - ($minbfp16)}]; #range
     set fpSample [expr {($minbfp16) + (rand() * $range)}]; # gen. of random float32 value
     set fpinhex [format %f $fpSample]; # formatted to float i.e. 6 decimal values
-    
+
     #Generate the equivalent Hexadecimal number of fp32
-    binary scan [binary format R $fpinhex] H* hex 
+    binary scan [binary format R $fpinhex] H* hex
     set float_int [expr 0x$hex]; # get integer value which is equivalent to above Hexadecimal value.
-    
+
     # convert back bfloat16 integer to a float32 approxiation
     set sign [expr {($float_int & $mask_sign ) >> $shiftbits31}]
     set exponent [expr {(($float_int & $mask_exp) >> $shiftbits23)-$bias}]
     set mantissa [expr {(1 + [expr { double([expr {(($float_int & $mask_mantissa) >> $shiftbits16)}])/ [expr {(1 << $shiftbits7)}] }])}]
     set bfloat16_int [expr {((1-[expr {(2*$sign)}]) * ([expr {$mantissa}]) * ([expr {(1<<$exponent)}]))}]
     set nextSample [expr { ($bfloat16_int)}]
-    
+
     return $nextSample
 }
 
@@ -221,21 +221,21 @@ proc generateSample {stimType sampleSeed sample_idx samples sampleType comp} {
 
     if { $stimType == 0 } {
         set integerType 1
-        
+
         if {($sampleType eq "float") || ($sampleType eq "cfloat") || ($sampleType eq "bfloat16")} {
             set integerType 0
         }
-        if {($sampleType eq "float") || ($sampleType eq "cfloat")} {            
+        if {($sampleType eq "float") || ($sampleType eq "cfloat")} {
             #puts "float"
             set nextSample [randFloat $sampleSeed $sampleType]
-        } elseif {$sampleType eq "bfloat16"} {            
+        } elseif {$sampleType eq "bfloat16"} {
             #puts "bfloat16"
             set nextSample [randBFloat16 $sampleSeed $sampleType]
         } else {
             # Random
             #puts "int16"
             set nextSample [randInt $sampleSeed $sampleType]
-        }    
+        }
     } elseif { $stimType == 3 } {
         # Impulse
         if {$sample_idx == 0} {

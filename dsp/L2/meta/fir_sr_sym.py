@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -193,6 +193,7 @@ def fn_validate_TP_FIR_LEN(TT_DATA, TP_USE_COEFF_RELOAD, TP_API, TP_FIR_LEN):
     range_TP_FIR_LEN = [param_dict["minimum"], param_dict["maximum"]]
     return validate_range(range_TP_FIR_LEN, "TP_FIR_LEN", TP_FIR_LEN)
 
+
 #######################################################
 ############# TP_DUAL_IP Updater and Validator ########
 #######################################################
@@ -212,6 +213,7 @@ def fn_validate_TP_DUAL_IP(TP_DUAL_IP):
 #######################################################
 ############# TP_NUM_OUTPUTS Updater and Validator ####
 #######################################################
+
 
 def update_TP_NUM_OUTPUTS(args):
     AIE_VARIANT = args["AIE_VARIANT"]
@@ -251,9 +253,14 @@ def update_TP_SSR(args):
     TP_API = args["TP_API"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
-    return fn_update_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD)
+    return fn_update_TP_SSR(
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD
+    )
 
-def fn_update_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD):
+
+def fn_update_TP_SSR(
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD
+):
     legal_set_TP_SSR = find_divisors(TP_FIR_LEN, TP_SSR_max)
     for ssr_val in legal_set_TP_SSR.copy():
         param_dict_casc_len = fn_update_TP_CASC_LEN(
@@ -286,6 +293,7 @@ def validate_TP_SSR(args):
     return fn_validate_TP_SSR(
         AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_SSR
     )
+
 
 def fn_validate_TP_SSR(
     AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_SSR
@@ -442,11 +450,11 @@ def fn_update_TP_INPUT_WINDOW_VSIZE(
     else:
         TP_INPUT_WINDOW_VSIZE_max = com.TP_INPUT_WINDOW_VSIZE_max_streams
 
-    param_dict={
-        "name" : "TP_INPUT_WINDOW_VSIZE",
-        "minimum" : lcm_ws,
-        "maximum" : TP_INPUT_WINDOW_VSIZE_max,
-        "maximum_pingpong_buf" : int(TP_INPUT_WINDOW_VSIZE_max/2)
+    param_dict = {
+        "name": "TP_INPUT_WINDOW_VSIZE",
+        "minimum": lcm_ws,
+        "maximum": TP_INPUT_WINDOW_VSIZE_max,
+        "maximum_pingpong_buf": int(TP_INPUT_WINDOW_VSIZE_max / 2),
     }
 
     if TP_INPUT_WINDOW_VSIZE != 0:

@@ -1,5 +1,5 @@
 {
-  "low_level_file":"fir_interpolate_asym.json",
+  "low_level_file": "fir_interpolate_asym.json",
   "ip_name": "vmc_fir_interpolate_asym",
   "block_info": {
     "label": "FIR Interpolation",
@@ -12,8 +12,8 @@
       "description": "Select the input or output data type from the dropdown.",
       "default": "cint16",
       "label": "Input/Output data type:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
     {
       "key": "TT_COEFF",
@@ -21,156 +21,163 @@
       "description": "Select the data type for the filter coefficients from the dropdown",
       "default": "int16",
       "label": "Filter coefficients data type:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
-    { 
+    {
       "key": "TP_USE_COEFF_RELOAD",
       "name": "use_coeff_reload",
       "description": "Select this option to enable coefficient reloading at runtime",
       "default": false,
       "label": "Specify filter coefficients via input port",
-            "tablabel": "Main",
-            "parameterType":"checkbox",
-            "disable":"coeff",
-            "enable":"fir_length"
+      "tablabel": "Main",
+      "parameterType": "checkbox",
+      "disable": "coeff",
+      "enable": "fir_length"
     },
     {
       "key": "TP_NUM_OUTPUTS",
       "name": "num_outputs",
-      "description": "The number of output ports. Windows API output an exact copy of the data. Stream API interleaves the output data with a 128-bit pattern.",
+      "description": "Enable a second set of output ports. Both outputs contain the same data.",
       "default": false,
       "label": "Provide second set of output ports",
-            "tablabel": "Main",
-            "parameterType":"checkbox"
+      "tablabel": "Main",
+      "parameterType": "checkbox"
     },
-      {
-      "key":"coeff",
+    {
+      "key": "coeff",
       "name": "coeff",
       "description": "Enter the FIR filter coefficients.",
       "element_type": "coef_type",
-      "default":"[1, zeros(1,31)]",
+      "default": "[1, zeros(1,31)]",
       "label": "Filter coefficients:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
     {
-      "key":"TP_FIR_LEN",
+      "key": "TP_FIR_LEN",
       "name": "fir_length",
-      "description": "Specify fir length for coefficient reloading",
+      "description": "Specify FIR length for coefficient reloading",
       "default": 32,
-            "label": "Filter length:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "label": "Filter length:",
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
-      {
-      "key":"TP_INTERPOLATE_FACTOR",
+    {
+      "key": "TP_INTERPOLATE_FACTOR",
       "name": "interpolate_factor",
       "description": "Enter the value of the interpolation factor.",
       "default": 2,
       "label": "Interpolation factor:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
-      {
-      "key":"TP_INPUT_WINDOW_VSIZE",
+    {
+      "key": "TP_INPUT_WINDOW_VSIZE",
       "name": "input_window_size",
       "description": "Enter the number of samples in the input window. The number of samples in the output window will depend on the FIR filter parametersEnter the number of samples in the input window. The number of samples in the output window will depend on the FIR filter parameters.",
       "default": 256,
       "label": "Input window size (Number of samples):",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
     {
       "key": "TP_SHIFT",
       "name": "shift_val",
-      "description": "A power of 2 shift-down is applied to the FIR accumulation before output.",
+      "description": "Specify how many bits to right-shift the accumulation of the FIR before output.",
       "default": 0,
       "label": "Scale output down by 2^:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
-      {
+    {
       "key": "TP_RND",
       "name": "rnd_mode",
       "description": "Select a rounding mode from the dropdown.",
       "default": "Round to positive infinity",
       "label": "Rounding mode:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
     {
       "key": "TP_SAT",
       "name": "sat_mode",
       "description": "Select a saturation mode from the dropdown.",
-      "enum": [0, 1, 3],
-      "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
+      "enum": [
+        0,
+        1,
+        3
+      ],
+      "enum_str": [
+        "0-None",
+        "1-Asymmetric",
+        "3-Symmetric"
+      ],
       "default": 0,
       "label": "Saturation mode:",
-            "tablabel": "Main",
-            "parameterType":"popup"
+      "tablabel": "Main",
+      "parameterType": "popup"
     },
-      {
+    {
       "key": "TP_PARA_INTERP_POLY",
       "name": "interp_poly",
-      "description": "The number of parallel polyphases to decompose over",
+      "description": "Specify the number of interpolator polyphases that will be split up and executed in a series of pipelined cascade stages, resulting in additional output paths.",
       "default": 1,
       "label": "Number of interpolator polyphases:",
-        "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
     {
       "key": "TP_CASC_LEN",
       "name": "casc_length",
-      "description": "The length of cascaded kernels",
+      "description": "Specify the number of kernels to cascade in series to increase throughput.",
       "default": 1,
       "label": "Number of cascade stages:",
-            "tablabel": "Main",
-            "parameterType":"edit"
+      "tablabel": "Main",
+      "parameterType": "edit"
     },
-	{
-	  "key": "AIE_VARIANT",
-	  "name": "AIE_VARIANT",
+    {
+      "key": "AIE_VARIANT",
+      "name": "AIE_VARIANT",
       "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
       "default": 1,
-	 "label": "AIE Variant:",
+      "label": "AIE Variant:",
       "tablabel": "Main",
-      "parameterType":"edit"
+      "parameterType": "edit"
     },
-     {	
-		"key":"TP_API",
-		"name": "TP_API",
-		"description": "The form of IO: 0 for windows, 1 for streams",
-		"type": "uint",
-		"default": 0,
-		"label": "API:",
-		"tablabel": "Main",
-		"visible": "off",
-		"parameterType":"edit"
-     },
-     {		
-	"key":"TP_DUAL_IP",
-        "name": "dual_ip",
-        "description": "TP_DUAL_IP allows 2 stream inputs to be connected to FIR, increasing available throughput. When set to 0, single stream input will be connected to FIR kernel, when set to 1, both input stream ports will be used.",
-        "type": "uint",      
-        "default": 0,
-        "label": "Dual IP:",
-        "tablabel": "Main",
-        "visible": "off",
-        "parameterType":"edit"
-     },
-     {		
-	"key":"TP_SSR",
-        "name": "ssr",
-        "description": "TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput.",
-        "type": "uint",      
-        "default": 1,
-        "label": "SSR:",
-        "tablabel": "Main",
-        "visible": "off",
-        "parameterType":"edit"
-     }
-
+    {
+      "key": "TP_API",
+      "name": "TP_API",
+      "description": "The form of IO: 0 for windows, 1 for streams",
+      "type": "uint",
+      "default": 0,
+      "label": "API:",
+      "tablabel": "Main",
+      "visible": "off",
+      "parameterType": "edit"
+    },
+    {
+      "key": "TP_DUAL_IP",
+      "name": "dual_ip",
+      "description": "This option allows 2 stream inputs to be connected to FIR, increasing available throughput. When set to 0, single stream input will be connected to FIR kernel, when set to 1, both input stream ports will be used.",
+      "type": "uint",
+      "default": 0,
+      "label": "Dual IP:",
+      "tablabel": "Main",
+      "visible": "off",
+      "parameterType": "edit"
+    },
+    {
+      "key": "TP_SSR",
+      "name": "ssr",
+      "description": "Specify the number of parallel input/output data paths for a single channel.",
+      "type": "uint",
+      "default": 1,
+      "label": "SSR:",
+      "tablabel": "Main",
+      "visible": "off",
+      "parameterType": "edit"
+    }
   ],
   "generator": {
     "file": "vmc_fir_interpolate_asym.py",

@@ -42,12 +42,16 @@
             "updater": {
                 "file": "fir_interpolate_hb.py",
                 "function": "update_TT_DATA",
-                "args": ["AIE_VARIANT"]
+                "args": [
+                    "AIE_VARIANT"
+                ]
             },
             "validator": {
                 "file": "fir_interpolate_hb.py",
                 "function": "validate_TT_DATA",
-                "args": ["AIE_VARIANT"]
+                "args": [
+                    "AIE_VARIANT"
+                ]
             }
         },
         {
@@ -65,12 +69,18 @@
             "updater": {
                 "file": "fir_interpolate_hb.py",
                 "function": "update_TT_COEFF",
-                "args": ["AIE_VARIANT", "TT_DATA"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA"
+                ]
             },
             "validator": {
                 "file": "fir_interpolate_hb.py",
                 "function": "validate_TT_COEFF",
-                "args": ["AIE_VARIANT", "TT_DATA"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA"
+                ]
             }
         },
         {
@@ -80,12 +90,12 @@
             "updater": {
                 "file": "fir_interpolate_hb.py",
                 "function": "update_TP_API",
-                "args": [ ]
+                "args": []
             },
             "validator": {
                 "file": "fir_interpolate_hb.py",
                 "function": "validate_TP_API",
-                "args": [ ]
+                "args": []
             }
         },
         {
@@ -110,12 +120,20 @@
             "updater": {
                 "file": "fir_interpolate_hb.py",
                 "function": "update_TP_FIR_LEN",
-                "args": ["TT_DATA", "TP_API", "TP_USE_COEFF_RELOAD"]
+                "args": [
+                    "TT_DATA",
+                    "TP_API",
+                    "TP_USE_COEFF_RELOAD"
+                ]
             },
             "validator": {
                 "file": "fir_interpolate_hb.py",
                 "function": "validate_TP_FIR_LEN",
-                "args": ["TT_DATA", "TP_API", "TP_USE_COEFF_RELOAD"]
+                "args": [
+                    "TT_DATA",
+                    "TP_API",
+                    "TP_USE_COEFF_RELOAD"
+                ]
             }
         },
         {
@@ -140,12 +158,28 @@
             "updater": {
                 "file": "fir_interpolate_hb.py",
                 "function": "update_TP_SSR",
-                "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD", "TP_PARA_INTERP_POLY"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_COEFF",
+                    "TP_API",
+                    "TP_FIR_LEN",
+                    "TP_USE_COEFF_RELOAD",
+                    "TP_PARA_INTERP_POLY"
+                ]
             },
             "validator": {
                 "file": "fir_interpolate_hb.py",
                 "function": "validate_TP_SSR",
-                "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD", "TP_PARA_INTERP_POLY"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_COEFF",
+                    "TP_API",
+                    "TP_FIR_LEN",
+                    "TP_USE_COEFF_RELOAD",
+                    "TP_PARA_INTERP_POLY"
+                ]
             }
         },
         {
@@ -155,19 +189,37 @@
             "updater": {
                 "file": "fir_interpolate_hb.py",
                 "function": "update_TP_CASC_LEN",
-                "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD", "TP_PARA_INTERP_POLY", "TP_SSR"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_COEFF",
+                    "TP_API",
+                    "TP_FIR_LEN",
+                    "TP_USE_COEFF_RELOAD",
+                    "TP_PARA_INTERP_POLY",
+                    "TP_SSR"
+                ]
             },
             "validator": {
                 "file": "fir_interpolate_hb.py",
                 "function": "validate_TP_CASC_LEN",
-                "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD", "TP_PARA_INTERP_POLY", "TP_SSR"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TT_COEFF",
+                    "TP_API",
+                    "TP_FIR_LEN",
+                    "TP_USE_COEFF_RELOAD",
+                    "TP_PARA_INTERP_POLY",
+                    "TP_SSR"
+                ]
             }
         },
         {
             "name": "TP_DUAL_IP",
             "description": "TP_DUAL_IP allows 2 stream inputs to be connected to FIR, increasing available throughput. When set to 0, single stream input will be connected to FIR kernel, when set to 1, both input stream ports will be used.",
             "type": "uint",
-             "updater": {
+            "updater": {
                 "file": "fir_interpolate_hb.py",
                 "function": "update_TP_DUAL_IP",
                 "args": [
@@ -189,12 +241,18 @@
             "updater": {
                 "file": "fir_interpolate_hb.py",
                 "function": "update_TP_NUM_OUTPUTS",
-                "args": ["TP_PARA_INTERP_POLY", "TP_DUAL_IP"]
+                "args": [
+                    "TP_PARA_INTERP_POLY",
+                    "TP_DUAL_IP"
+                ]
             },
             "validator": {
                 "file": "fir_interpolate_hb.py",
                 "function": "validate_TP_NUM_OUTPUTS",
-                "args": ["TP_PARA_INTERP_POLY", "TP_DUAL_IP"]
+                "args": [
+                    "TP_PARA_INTERP_POLY",
+                    "TP_DUAL_IP"
+                ]
             }
         },
         {
@@ -209,7 +267,8 @@
                     "TT_COEFF",
                     "TP_FIR_LEN",
                     "TP_API",
-                    "TP_SSR"                ]
+                    "TP_SSR"
+                ]
             },
             "validator": {
                 "file": "fir_interpolate_hb.py",
@@ -219,7 +278,8 @@
                     "TT_COEFF",
                     "TP_FIR_LEN",
                     "TP_API",
-                    "TP_SSR"                ]
+                    "TP_SSR"
+                ]
             }
         },
         {
@@ -250,12 +310,18 @@
             "updater": {
                 "file": "fir_interpolate_hb.py",
                 "function": "update_TP_SHIFT",
-                "args": ["AIE_VARIANT", "TT_DATA"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA"
+                ]
             },
             "validator": {
                 "file": "fir_interpolate_hb.py",
                 "function": "validate_TP_SHIFT",
-                "args": ["AIE_VARIANT", "TT_DATA"]
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA"
+                ]
             }
         },
         {
@@ -265,52 +331,61 @@
             "updater": {
                 "file": "fir_interpolate_hb.py",
                 "function": "update_TP_RND",
-                "args": ["AIE_VARIANT"]
+                "args": [
+                    "AIE_VARIANT"
+                ]
             },
             "validator": {
                 "file": "fir_interpolate_hb.py",
                 "function": "validate_TP_RND",
-                "args": ["AIE_VARIANT"]
+                "args": [
+                    "AIE_VARIANT"
+                ]
             }
         },
         {
-        "name": "TP_SAT",
-        "description": "Saturation mode.",
-        "type": "uint",
-        "updater": {
-            "file": "fir_interpolate_hb.py",
-            "function": "update_TP_SAT"
+            "name": "TP_SAT",
+            "description": "Saturation mode.",
+            "type": "uint",
+            "updater": {
+                "file": "fir_interpolate_hb.py",
+                "function": "update_TP_SAT"
             },
-        "validator": {
-            "file": "fir_interpolate_hb.py",
-            "function": "validate_TP_SAT"
+            "validator": {
+                "file": "fir_interpolate_hb.py",
+                "function": "validate_TP_SAT"
             }
         },
         {
-        "name": "coeff",
-        "description": "The filter coefficients.",
-        "element_type": "TT_COEFF",
-        "type": "vector",
-        "updater": {
-            "file": "fir_interpolate_hb.py",
-            "function": "update_coeff",
-            "args": ["TT_COEFF", "TP_FIR_LEN"]
-        },
-        "validator": {
-            "file": "fir_interpolate_hb.py",
-            "function": "validate_coeff",
-            "args": ["TP_USE_COEFF_RELOAD", "TT_COEFF", "TP_FIR_LEN"]
+            "name": "coeff",
+            "description": "The filter coefficients.",
+            "element_type": "TT_COEFF",
+            "type": "vector",
+            "updater": {
+                "file": "fir_interpolate_hb.py",
+                "function": "update_coeff",
+                "args": [
+                    "TT_COEFF",
+                    "TP_FIR_LEN"
+                ]
+            },
+            "validator": {
+                "file": "fir_interpolate_hb.py",
+                "function": "validate_coeff",
+                "args": [
+                    "TP_USE_COEFF_RELOAD",
+                    "TT_COEFF",
+                    "TP_FIR_LEN"
+                ]
+            }
         }
-        }
-  ],
-
-  "ports": {
-    "file": "fir_interpolate_hb.py",
-    "function": "info_ports"
-  },
-  "generator": {
-    "file": "fir_interpolate_hb.py",
-    "function": "generate_graph"
+    ],
+    "ports": {
+        "file": "fir_interpolate_hb.py",
+        "function": "info_ports"
+    },
+    "generator": {
+        "file": "fir_interpolate_hb.py",
+        "function": "generate_graph"
     }
 }
-

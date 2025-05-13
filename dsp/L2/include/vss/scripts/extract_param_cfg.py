@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,15 +17,20 @@
 import configparser
 import sys
 import string
+
 parser = configparser.ConfigParser()
 
 CUR_DIR = sys.argv[1]
-PARAM   = sys.argv[2]
+PARAM = sys.argv[2]
 PARAM_HEAD = sys.argv[3]
 PARAMS_FILE = sys.argv[4]
 
-with open(f'{CUR_DIR}/{PARAMS_FILE}') as stream:
-    parser.read_string("[top]\n" + stream.read())  # Workaround because configparser complains about headerless configurations
-
-hls_config = dict(parser.items(str(PARAM_HEAD)))
-print(hls_config[PARAM.lower()])
+with open(f"{CUR_DIR}/{PARAMS_FILE}") as stream:
+    parser.read_string(
+        "[top]\n" + stream.read()
+    )  # Workaround because configparser complains about headerless configurations
+try:
+    hls_config = dict(parser.items(str(PARAM_HEAD)))
+    print(hls_config[PARAM.lower()])
+except KeyError:
+    print("-1")

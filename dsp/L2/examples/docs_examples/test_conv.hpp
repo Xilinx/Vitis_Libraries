@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,10 @@ namespace conv_example {
 #define G_LEN_CONV 32
 #define SHIFT_CONV 7
 #define API_CONV 0
+#define NUM_FRAMES_CONV 1
 #define CASC_LEN_CONV 1
 #define PHASES_CONV 1
+#define USE_RTP_VECTOR_LENGTHS_CONV 0
 
 class test_conv : public adf::graph {
    public:
@@ -46,8 +48,10 @@ class test_conv : public adf::graph {
                                              G_LEN_CONV,
                                              SHIFT_CONV,
                                              API_CONV,
+                                             NUM_FRAMES_CONV,
                                              CASC_LEN_CONV,
-                                             PHASES_CONV>
+                                             PHASES_CONV,
+                                             USE_RTP_VECTOR_LENGTHS_CONV>
         conv;
     test_conv() {
         for (int i = 0; i < PHASES_CONV; i++) {

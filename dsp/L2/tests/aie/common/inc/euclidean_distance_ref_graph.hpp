@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 
 /*
     This file captures the definition of 'L2' graph level class for
-    euclidean_distance reference model graph.
+    Euclidean Distance reference model graph.
 */
 
 #include <adf.h>
@@ -35,53 +35,59 @@ namespace dsp {
 namespace aie {
 namespace euclidean_distance {
 
-// TT_DATA_P, TT_DATA_Q, TT_DATA_OUT, TP_LEN_P, TP_LEN_Q, TP_DIM_P, TP_DIM_Q, TP_API, TP_RND,
-// TP_SAT, TP_NUM_FRAMES, TP_IS_OUTPUT_SQUARED
-template <typename TT_DATA_P,
-          typename TT_DATA_Q,
+// TT_DATA, TT_DATA_OUT, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT, TP_IS_OUTPUT_SQUARED
+template <typename TT_DATA,
           typename TT_DATA_OUT,
-          unsigned int TP_LEN_P,
-          unsigned int TP_LEN_Q,
-          unsigned int TP_DIM_P,
-          unsigned int TP_DIM_Q,
+          unsigned int TP_LEN,
+          unsigned int TP_DIM,
           unsigned int TP_API,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_NUM_FRAMES,
           unsigned int TP_IS_OUTPUT_SQUARED>
 class euclidean_distance_ref_graph : public graph {
    public:
+    /**
+     * @cond NOCOMMENTS
+     */
     // Defensive configuration legality checks
 
     // defensive check for Input data types
-    static_assert(fnCheckDataTypesOfInputs<TT_DATA_P, TT_DATA_Q>(),
+    static_assert(fnCheckDataTypesOfInputs<TT_DATA>(),
                   " Assertion Failed : \n"
-                  "              ERROR: TT_DATA_P and TT_DATA_Q are not a supported combination ");
+                  "            ERROR: TT_DATA is not a supported Input Data type.");
 
-    // defensive check for Output data type
-    static_assert(fnCheckDataTypeOfOutput<TT_DATA_P, TT_DATA_Q, TT_DATA_OUT>(),
+    // defensive check for Lengths of F and G should be in the given range of Min and Max
+    static_assert(fnCheckLenOfData<TT_DATA, TP_LEN>(),
+                  " Assertion Failed : \n "
+                  "             ERROR: TP_LEN should be granuality of Min data_load on AIE i.e. "
+                  "[(256/samplesize<TT_DATA>())] \n                   [float   - (8*N) ] \n   [bfloat16  - (16*N)  ]] "
+                  "\n  where N is Integer > 1] and \n            TP_LEN "
+                  "should be greater than or equal to minimum length [((256/samplesize<TT_DATA>())*2)] based on "
+                  "given data type i.e.\n                 '[Data Type-    MIN    MAX]' \n                 "
+                  "'--------------------------' \n                 '[float    -    16    2048]' \n                 "
+                  "'[bfloat16 -    32    4096]'  ");
+
+    // defensive check for Dimension of point P should not be greater than 4
+    static_assert(fnCheckforDimension<TP_DIM>(),
                   " Assertion Failed : \n"
-                  "            ERROR: TT_DATA_P and TT_DATA_Q are not a supported combination for TT_DATA_OUT.");
+                  "               ERROR: Dimension of point P should be less than or equal to 4 as per kernel design.");
 
     // defensive check for API Port is whether iobuffer or stream.
     static_assert(TP_API == 0,
                   " Assertion Failed : \n"
-                  "ERROR: TP_API must be 0 for 'iobuffer' and no 'Stream' support for ED. ");
+                  "            ERROR: TP_API must be 0 for 'iobuffer'. ");
 
     // defensive check for SATURATION Mode which should be in the range i.e. SAT_MODE_MIN <TP_SAT< SAT_MODE_MAX
-    static_assert(TP_SAT >= SAT_MODE_MIN && TP_SAT <= SAT_MODE_MAX,
+    static_assert(TP_SAT >= kMinSaturationMode && TP_SAT <= kMaxSaturationMode,
                   " Assertion Failed : \n"
                   "             ERROR: TP_SAT is out of supported range");
-    static_assert(TP_SAT != 2,
+    static_assert(TP_SAT != kUnSuppportedSaturationMode,
                   " Assertion Failed : \n"
                   "              ERROR: TP_SAT is invalid. Valid values of TP_SAT are 0, 1, and 3");
 
-    // defensive check for num of frames i.e., TP_NUM_FRAMES restricted to 1 to maintain the better performance for time
-    // being.
-    static_assert(TP_NUM_FRAMES == 1,
-                  " Assertion Failed : \n"
-                  "            ERROR: 'TP_NUM_FRAMES' should be always equal to 1 (ONE) for ED.");
-
+    /**
+    * @endcond
+        */
     /**
        * The input P data to the function.
    **/
@@ -93,54 +99,51 @@ class euclidean_distance_ref_graph : public graph {
     input_port inWindowQ;
 
     /**
-        * An API of TT_DATA type.
+        * Output port to write the data out
     **/
     output_port outWindow;
 
     /**
         * The array of kernels that will be created and mapped onto AIE tiles.
     **/
-    kernel m_euclidean_distance_ref;
+    kernel m_ED_ref_kernel;
 
     // DIM is fixed to '4' for compute ED.
-    static constexpr int kDim = FIXED_DIM_ED;
+    static constexpr int kDim = kFixedDimOfED;
 
-    // Constructor
+    /**
+        * @brief This is the constructor function for the euclidean_distance_ref graph.
+    **/
     euclidean_distance_ref_graph() {
         // Create EUCLIDEAN_DISTANCE class
-        printf("\n EUCLIDEAN_DISTANCE Ref\n");
-        m_euclidean_distance_ref = kernel::create_object<
-            euclidean_distance_ref<TT_DATA_P, TT_DATA_Q, TT_DATA_OUT, TP_LEN_P, TP_LEN_Q, TP_DIM_P, TP_DIM_Q, TP_API,
-                                   TP_RND, TP_SAT, TP_NUM_FRAMES, TP_IS_OUTPUT_SQUARED> >();
+        m_ED_ref_kernel = kernel::create_object<euclidean_distance_ref<TT_DATA, TT_DATA_OUT, TP_LEN, TP_DIM, TP_API,
+                                                                       TP_RND, TP_SAT, TP_IS_OUTPUT_SQUARED> >();
 #ifdef _DSPLIB_EUCLIDEAN_DISTANCE_REF_DEBUG_
         printf("==========================================\n");
         printf("== EUCLIDEAN_DISTANCE REF KERNEL Graph ===\n");
         printf("==========================================\n");
-        printf("TP_LEN_P                = %d\n", TP_LEN_P);
-        printf("TP_LEN_Q                = %d\n", TP_LEN_Q);
-        printf("TP_DIM_P                = %d\n", TP_DIM_P);
-        printf("TP_DIM_Q                = %d\n", TP_DIM_Q);
-        printf("TP_API                  = %d\n", TP_API);
-        printf("TP_RND                  = %d\n", TP_RND);
-        printf("TP_SAT                  = %d\n", TP_SAT);
-        printf("TP_NUM_FRAMES           = %d\n", TP_NUM_FRAMES);
-        printf("TP_IS_OUTPUT_SQUARED    = %d\n", TP_IS_OUTPUT_SQUARED);
+        printf("LEN                 = %d \n", LEN);
+        printf("DIM                 = %d \n", DIM);
+        printf("API                   = %d \n", API_IO);
+        printf("RND                   = %d \n", RND);
+        printf("SAT                   = %d \n", SAT);
+        printf("IS_OUTPUT_SQUARED     = %d \n", IS_OUTPUT_SQUARED);
 
 #endif
         // make connections
-        connect<>(inWindowP, m_euclidean_distance_ref.in[0]);
-        dimensions(m_euclidean_distance_ref.in[0]) = {(TP_LEN_P * kDim) * TP_NUM_FRAMES};
-        connect<>(inWindowQ, m_euclidean_distance_ref.in[1]);
-        dimensions(m_euclidean_distance_ref.in[1]) = {(TP_LEN_Q * kDim) * TP_NUM_FRAMES};
+        connect<>(inWindowP, m_ED_ref_kernel.in[0]);
+        dimensions(m_ED_ref_kernel.in[0]) = {(TP_LEN * kDim)};
+        connect<>(inWindowQ, m_ED_ref_kernel.in[1]);
+        dimensions(m_ED_ref_kernel.in[1]) = {(TP_LEN * kDim)};
 
-        connect<>(m_euclidean_distance_ref.out[0], outWindow);
-        dimensions(m_euclidean_distance_ref.out[0]) = {TP_LEN_P * TP_NUM_FRAMES};
+        connect<>(m_ED_ref_kernel.out[0], outWindow);
+        dimensions(m_ED_ref_kernel.out[0]) = {TP_LEN};
 
-        runtime<ratio>(m_euclidean_distance_ref) = 0.8;
+        runtime<ratio>(m_ED_ref_kernel) = 0.8;
 
         // Source files
-        source(m_euclidean_distance_ref) = "euclidean_distance_ref.cpp";
-        headers(m_euclidean_distance_ref) = {"euclidean_distance_ref.hpp"};
+        source(m_ED_ref_kernel) = "euclidean_distance_ref.cpp";
+        headers(m_ED_ref_kernel) = {"euclidean_distance_ref.hpp"};
 
         printf("===================================================\n");
         printf("== END of EUCLIDEAN_DISTANCE REF KERNEL Graph =====\n");

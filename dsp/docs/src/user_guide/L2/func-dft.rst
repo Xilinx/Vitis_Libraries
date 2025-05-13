@@ -1,5 +1,6 @@
 ..
-   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -101,12 +102,12 @@ The DFT has optimal throughput performance with a low point size and a higher nu
 Zero Padding Data for Alignment
 -------------------------------
 
-It is important to note that the DFT requires that each frame of input data to be aligned and sized according to the following rules for maximal performance. Where necessary the input vector must be zero padded up to the size in the following rules. 
-The rules are as follows: 
+It is important to note that the DFT requires that each frame of input data to be aligned and sized according to the following rules for maximal performance. Where necessary the input vector must be zero padded up to the size in the following rules.
+The rules are as follows:
 For AIE input data alignment must be on a 256-bits boundary and the input vector must be a multiple of 256-bits.
 For AIE-ML and AIE-MLv2 input data alignment must be to 256-bits for cint16 and 512-bits for cint32 and cfloat. The input vector must be sized to be a multiple of this alignment too.
 These rules also apply to output data, though the kernel will perform the necessary padding.
-For example on AIE cint16 is 32 bits so 8 can fit in 256bits. The input vector provided must therefore be a multiple of 8. If the desires point size is 17, the 17 data samples must be provided followed by 7 zeroes to pad the overall input vector to a multiple of 8. Zero-padding will have no impact on the final numerical result of the transform. 
+For example on AIE cint16 is 32 bits so 8 can fit in 256bits. The input vector provided must therefore be a multiple of 8. If the desires point size is 17, the 17 data samples must be provided followed by 7 zeroes to pad the overall input vector to a multiple of 8. Zero-padding will have no impact on the final numerical result of the transform.
 
 This is also a requirement when using the cascading feature of the DFT for AIE. As mentioned, each frame of data is to be split across each of the kernels. Each cascaded kernel should receive a split of the frame that has a size that is a multiple of 256-bits (AIE) or 8 samples (AIE-ML and AIE-MLv2) as in the rules described above. The data should be dealt out sample-by-sample among each kernel in a round-robin fashion.
 
@@ -157,18 +158,6 @@ The following code example shows how the dft_graph class can be used within a us
     :language: cpp
     :lines: 17-
 
-.. |image1| image:: ./media/image1.png
-.. |image2| image:: ./media/image2.png
-.. |image3| image:: ./media/image4.png
-.. |image4| image:: ./media/image2.png
-.. |image6| image:: ./media/image2.png
-.. |image7| image:: ./media/image5.png
-.. |image8| image:: ./media/image6.png
-.. |image9| image:: ./media/image7.png
-.. |image10| image:: ./media/image2.png
-.. |image11| image:: ./media/image2.png
-.. |image12| image:: ./media/image2.png
-.. |image13| image:: ./media/image2.png
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:
 .. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN

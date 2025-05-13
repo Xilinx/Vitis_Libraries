@@ -16,14 +16,12 @@
             "updater": {
                 "file": "matrix_mult.py",
                 "function": "update_AIE_VARIANT",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "matrix_mult.py",
                 "function": "validate_AIE_VARIANT",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
@@ -41,13 +39,15 @@
             "updater": {
                 "file": "matrix_mult.py",
                 "function": "update_TT_DATA_A",
-                "args": ["AIE_VARIANT"
+                "args": [
+                    "AIE_VARIANT"
                 ]
             },
             "validator": {
                 "file": "matrix_mult.py",
                 "function": "validate_TT_DATA_A",
-                "args": ["AIE_VARIANT"
+                "args": [
+                    "AIE_VARIANT"
                 ]
             }
         },
@@ -66,12 +66,18 @@
             "updater": {
                 "file": "matrix_mult.py",
                 "function": "update_TT_DATA_B",
-                "args": ["TT_DATA_A", "AIE_VARIANT"]
+                "args": [
+                    "TT_DATA_A",
+                    "AIE_VARIANT"
+                ]
             },
             "validator": {
                 "file": "matrix_mult.py",
                 "function": "validate_TT_DATA_B",
-                "args": ["TT_DATA_A", "AIE_VARIANT"]
+                "args": [
+                    "TT_DATA_A",
+                    "AIE_VARIANT"
+                ]
             }
         },
         {
@@ -89,12 +95,18 @@
             "updater": {
                 "file": "matrix_mult.py",
                 "function": "update_TT_OUT_DATA",
-                "args": ["TT_DATA_A", "TT_DATA_B"]
+                "args": [
+                    "TT_DATA_A",
+                    "TT_DATA_B"
+                ]
             },
             "validator": {
                 "file": "matrix_mult.py",
                 "function": "validate_TT_OUT_DATA",
-                "args": ["TT_DATA_A", "TT_DATA_B"]
+                "args": [
+                    "TT_DATA_A",
+                    "TT_DATA_B"
+                ]
             }
         },
         {
@@ -109,7 +121,7 @@
                     "TT_DATA_A",
                     "TT_DATA_B",
                     "TT_OUT_DATA"
-                   ]
+                ]
             },
             "validator": {
                 "file": "matrix_mult.py",
@@ -184,13 +196,27 @@
             "updater": {
                 "file": "matrix_mult.py",
                 "function": "update_TP_SSR",
-                "args": [ "AIE_VARIANT", "TT_DATA_A", "TT_DATA_B", "TT_OUT_DATA", "TP_DIM_A", "TP_DIM_AB", "TP_DIM_B"
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TT_OUT_DATA",
+                    "TP_DIM_A",
+                    "TP_DIM_AB",
+                    "TP_DIM_B"
                 ]
             },
             "validator": {
                 "file": "matrix_mult.py",
                 "function": "validate_TP_SSR",
-                "args": ["AIE_VARIANT", "TT_DATA_A", "TT_DATA_B", "TT_OUT_DATA", "TP_DIM_A", "TP_DIM_AB", "TP_DIM_B"
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TT_OUT_DATA",
+                    "TP_DIM_A",
+                    "TP_DIM_AB",
+                    "TP_DIM_B"
                 ]
             }
         },
@@ -203,13 +229,27 @@
                 "file": "matrix_mult.py",
                 "function": "update_TP_CASC_LEN",
                 "args": [
-                    "AIE_VARIANT", "TT_DATA_A", "TT_DATA_B", "TP_DIM_A", "TP_DIM_B", "TP_DIM_AB", "TP_SSR"                ]
+                    "AIE_VARIANT",
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TP_DIM_A",
+                    "TP_DIM_B",
+                    "TP_DIM_AB",
+                    "TP_SSR"
+                ]
             },
             "validator": {
                 "file": "matrix_mult.py",
                 "function": "validate_TP_CASC_LEN",
                 "args": [
-                    "AIE_VARIANT", "TT_DATA_A", "TT_DATA_B", "TP_DIM_A", "TP_DIM_B", "TP_DIM_AB", "TP_SSR"                ]
+                    "AIE_VARIANT",
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TP_DIM_A",
+                    "TP_DIM_B",
+                    "TP_DIM_AB",
+                    "TP_SSR"
+                ]
             }
         },
         {
@@ -223,7 +263,7 @@
                 "args": [
                     "TP_DIM_A",
                     "TP_DIM_AB"
-                               ]
+                ]
             },
             "validator": {
                 "file": "matrix_mult.py",
@@ -264,9 +304,9 @@
                 "file": "matrix_mult.py",
                 "function": "update_TP_DIM_A_LEADING"
             },
-              "validator": {
-                  "file": "matrix_mult.py",
-                  "function": "validate_TP_DIM_A_LEADING"
+            "validator": {
+                "file": "matrix_mult.py",
+                "function": "validate_TP_DIM_A_LEADING"
             }
         },
         {
@@ -276,11 +316,11 @@
             "updater": {
                 "file": "matrix_mult.py",
                 "function": "update_TP_DIM_B_LEADING"
-                        },
-              "validator": {
-                  "file": "matrix_mult.py",
-                  "function": "validate_TP_DIM_B_LEADING"
-                            }
+            },
+            "validator": {
+                "file": "matrix_mult.py",
+                "function": "validate_TP_DIM_B_LEADING"
+            }
         },
         {
             "name": "TP_DIM_OUT_LEADING",
@@ -289,14 +329,14 @@
             "updater": {
                 "file": "matrix_mult.py",
                 "function": "update_TP_DIM_OUT_LEADING"
-
             },
-              "validator": {
-                  "file": "matrix_mult.py",
-                  "function": "validate_TP_DIM_OUT_LEADING",
-                  "args" : ["TP_DIM_A_LEADING",
-                            "TP_DIM_B_LEADING"
-    ]
+            "validator": {
+                "file": "matrix_mult.py",
+                "function": "validate_TP_DIM_OUT_LEADING",
+                "args": [
+                    "TP_DIM_A_LEADING",
+                    "TP_DIM_B_LEADING"
+                ]
             }
         },
         {
@@ -441,13 +481,13 @@
             "description": "Saturation mode.",
             "type": "uint",
             "updater": {
-              "file": "matrix_mult.py",
-              "function": "update_TP_SAT"
+                "file": "matrix_mult.py",
+                "function": "update_TP_SAT"
             },
             "validator": {
                 "file": "matrix_mult.py",
                 "function": "validate_TP_SAT"
-              }
+            }
         }
     ],
     "ports": {

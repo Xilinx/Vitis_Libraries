@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,21 +15,22 @@
 # limitations under the License.
 #
 import json
+
+
 def generate_testbench(args):
-    print("generate_tb",args)
-    macro_body= []
+    print("generate_tb", args)
+    macro_body = []
     for key, value in args.items():
-            macro_body.append(
-f'''
+        macro_body.append(
+            f"""
 #ifndef {key}
 #define {key} {value}
 #endif
-''' 
-)
-    macro_body_str="".join(macro_body)
-     # Use formatted multi-line string to avoid a lot of \n and \t
-    return (
-f'''
+"""
+        )
+    macro_body_str = "".join(macro_body)
+    # Use formatted multi-line string to avoid a lot of \n and \t
+    return f"""
 /*
  * Copyright (C) 2023, Advanced Micro Devices, Inc.
  *
@@ -54,7 +55,7 @@ f'''
 //------------------------------------------------------------------------------
 // UUT DEFAULT CONFIGURATION
 {macro_body_str}
- 
+
 // END OF UUT CONFIGURATION
 //------------------------------------------------------------------------------
-''')
+"""

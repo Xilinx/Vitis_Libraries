@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ HELPER_ROOT_DIR ?= ./../../../../
 DIFF_TOLERANCE ?= 4
 DIFF_MODE ?= ABS
 CC_TOLERANCE ?= 0
-# INPUT_FILE ?= 
+# INPUT_FILE ?=
 UUT_SSR_INPUT_WINDOW_VSIZE ?=
 SPLIT_ZIP_FILE ?=
 PARAM_MAP = DATA_TYPE $(DATA_TYPE) \
@@ -61,7 +61,7 @@ ifneq ($(UUT_SSR), 1)
 		endif
 		ifeq ($(DATA_TYPE), cfloat)
 			DIFF_TOLERANCE := 0.8
-		endif	
+		endif
 	else
 		ifeq ($(DATA_TYPE), cfloat)
 			DIFF_TOLERANCE := 450
@@ -71,13 +71,13 @@ ifneq ($(UUT_SSR), 1)
 		endif
 		ifeq ($(DATA_TYPE), cint16)
 			DIFF_TOLERANCE := 520
-		endif	
+		endif
 	endif
 endif
 
 diff:
 	@echo executing diff.tcl with new diff_tolerances
-	@echo helper.mk stage:  diff 
+	@echo helper.mk stage:  diff
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) $(DIFF_MODE)
 	@echo diff script done
 

@@ -40,12 +40,16 @@
       "updater": {
         "file": "fir_tdm.py",
         "function": "update_TT_DATA",
-        "args": ["AIE_VARIANT"]
+        "args": [
+          "AIE_VARIANT"
+        ]
       },
       "validator": {
         "file": "fir_tdm.py",
         "function": "validate_TT_DATA",
-        "args": ["AIE_VARIANT"]
+        "args": [
+          "AIE_VARIANT"
+        ]
       }
     },
     {
@@ -63,12 +67,18 @@
       "updater": {
         "file": "fir_tdm.py",
         "function": "update_TT_OUT_DATA",
-        "args": ["AIE_VARIANT", "TT_DATA"]
+        "args": [
+          "AIE_VARIANT",
+          "TT_DATA"
+        ]
       },
       "validator": {
         "file": "fir_tdm.py",
         "function": "validate_TT_OUT_DATA",
-        "args": ["AIE_VARIANT", "TT_DATA"]
+        "args": [
+          "AIE_VARIANT",
+          "TT_DATA"
+        ]
       }
     },
     {
@@ -86,12 +96,18 @@
       "validator": {
         "file": "fir_tdm.py",
         "function": "validate_TT_COEFF",
-        "args": ["TT_DATA", "AIE_VARIANT"]
+        "args": [
+          "TT_DATA",
+          "AIE_VARIANT"
+        ]
       },
       "updater": {
         "file": "fir_tdm.py",
         "function": "update_TT_COEFF",
-        "args": ["TT_DATA", "AIE_VARIANT"]
+        "args": [
+          "TT_DATA",
+          "AIE_VARIANT"
+        ]
       }
     },
     {
@@ -114,12 +130,20 @@
       "updater": {
         "file": "fir_tdm.py",
         "function": "update_TP_FIR_LEN",
-        "args": ["TT_DATA", "TT_COEFF", "TP_API"]
+        "args": [
+          "TT_DATA",
+          "TT_COEFF",
+          "TP_API"
+        ]
       },
       "validator": {
         "file": "fir_tdm.py",
         "function": "validate_TP_FIR_LEN",
-        "args": ["TT_DATA", "TT_COEFF", "TP_API"]
+        "args": [
+          "TT_DATA",
+          "TT_COEFF",
+          "TP_API"
+        ]
       }
     },
     {
@@ -155,12 +179,22 @@
       "updater": {
         "file": "fir_tdm.py",
         "function": "update_TP_TDM_CHANNELS",
-        "args": ["TT_DATA", "TT_COEFF", "TP_FIR_LEN", "AIE_VARIANT"]
+        "args": [
+          "TT_DATA",
+          "TT_COEFF",
+          "TP_FIR_LEN",
+          "AIE_VARIANT"
+        ]
       },
       "validator": {
         "file": "fir_tdm.py",
         "function": "validate_TP_TDM_CHANNELS",
-        "args": ["TT_DATA", "TT_COEFF", "TP_FIR_LEN", "AIE_VARIANT"]
+        "args": [
+          "TT_DATA",
+          "TT_COEFF",
+          "TP_FIR_LEN",
+          "AIE_VARIANT"
+        ]
       }
     },
     {
@@ -170,12 +204,22 @@
       "updater": {
         "file": "fir_tdm.py",
         "function": "update_TP_SSR",
-        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_TDM_CHANNELS"]
+        "args": [
+          "AIE_VARIANT",
+          "TT_DATA",
+          "TT_COEFF",
+          "TP_TDM_CHANNELS"
+        ]
       },
       "validator": {
         "file": "fir_tdm.py",
         "function": "validate_TP_SSR",
-        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_TDM_CHANNELS"]
+        "args": [
+          "AIE_VARIANT",
+          "TT_DATA",
+          "TT_COEFF",
+          "TP_TDM_CHANNELS"
+        ]
       }
     },
     {
@@ -185,12 +229,22 @@
       "updater": {
         "file": "fir_tdm.py",
         "function": "update_TP_CASC_LEN",
-        "args": ["TT_DATA", "TT_COEFF", "TP_FIR_LEN", "AIE_VARIANT"]
+        "args": [
+          "TT_DATA",
+          "TT_COEFF",
+          "TP_FIR_LEN",
+          "AIE_VARIANT"
+        ]
       },
       "validator": {
         "file": "fir_tdm.py",
         "function": "validate_TP_CASC_LEN",
-        "args": ["TT_DATA", "TT_COEFF", "TP_FIR_LEN", "AIE_VARIANT"]
+        "args": [
+          "TT_DATA",
+          "TT_COEFF",
+          "TP_FIR_LEN",
+          "AIE_VARIANT"
+        ]
       }
     },
     {
@@ -200,12 +254,30 @@
       "updater": {
         "file": "fir_tdm.py",
         "function": "update_TP_INPUT_WINDOW_VSIZE",
-        "args": ["TT_DATA", "TT_OUT_DATA", "TT_COEFF", "TP_FIR_LEN", "TP_API", "TP_SSR", "TP_TDM_CHANNELS", "AIE_VARIANT"]
+        "args": [
+          "TT_DATA",
+          "TT_OUT_DATA",
+          "TT_COEFF",
+          "TP_FIR_LEN",
+          "TP_API",
+          "TP_SSR",
+          "TP_TDM_CHANNELS",
+          "AIE_VARIANT"
+        ]
       },
       "validator": {
         "file": "fir_tdm.py",
         "function": "validate_TP_INPUT_WINDOW_VSIZE",
-        "args": ["TT_DATA", "TT_OUT_DATA", "TT_COEFF", "TP_FIR_LEN", "TP_API", "TP_SSR", "TP_TDM_CHANNELS", "AIE_VARIANT"]
+        "args": [
+          "TT_DATA",
+          "TT_OUT_DATA",
+          "TT_COEFF",
+          "TP_FIR_LEN",
+          "TP_API",
+          "TP_SSR",
+          "TP_TDM_CHANNELS",
+          "AIE_VARIANT"
+        ]
       }
     },
     {
@@ -215,12 +287,18 @@
       "updater": {
         "file": "fir_tdm.py",
         "function": "update_TP_SHIFT",
-        "args": ["AIE_VARIANT", "TT_DATA"]
+        "args": [
+          "AIE_VARIANT",
+          "TT_DATA"
+        ]
       },
       "validator": {
         "file": "fir_tdm.py",
         "function": "validate_TP_SHIFT",
-        "args": ["AIE_VARIANT", "TT_DATA"]
+        "args": [
+          "AIE_VARIANT",
+          "TT_DATA"
+        ]
       }
     },
     {
@@ -230,12 +308,16 @@
       "updater": {
         "file": "fir_tdm.py",
         "function": "update_TP_RND",
-        "args": ["AIE_VARIANT"]
+        "args": [
+          "AIE_VARIANT"
+        ]
       },
       "validator": {
         "file": "fir_tdm.py",
         "function": "validate_TP_RND",
-        "args": ["AIE_VARIANT"]
+        "args": [
+          "AIE_VARIANT"
+        ]
       }
     },
     {
@@ -274,16 +356,25 @@
       "updater": {
         "file": "fir_tdm.py",
         "function": "update_coeff",
-        "args": ["TP_TDM_CHANNELS", "TT_COEFF", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD"]
+        "args": [
+          "TP_TDM_CHANNELS",
+          "TT_COEFF",
+          "TP_FIR_LEN",
+          "TP_USE_COEFF_RELOAD"
+        ]
       },
       "validator": {
         "file": "fir_tdm.py",
         "function": "validate_coeff",
-        "args": ["TP_TDM_CHANNELS", "TT_COEFF", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD"]
+        "args": [
+          "TP_TDM_CHANNELS",
+          "TT_COEFF",
+          "TP_FIR_LEN",
+          "TP_USE_COEFF_RELOAD"
+        ]
       }
     }
   ],
-
   "ports": {
     "file": "fir_tdm.py",
     "function": "info_ports"

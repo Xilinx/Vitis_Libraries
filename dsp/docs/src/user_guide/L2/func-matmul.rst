@@ -1,5 +1,6 @@
 ..
-   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -169,10 +170,10 @@ Multiplying a 16x16 matrix (with 4x4 tiling) with a 16x16 matrix (with 4x2 tilin
 Output Data Type
 ----------------
 
-The Matrix-Multiplication graph class can specify the data type of the output matrix with the template parameter, ``TT_OUT_DATA``. This can allow a 32-bit output type when both inputs are 16-bit. 
-For example, ``TT_OUT_DATA`` can be set to cint32, when ``TT_DATA_A`` is int16 and ``TT_DATA_B`` is cint16. 
+The Matrix-Multiplication graph class can specify the data type of the output matrix with the template parameter, ``TT_OUT_DATA``. This can allow a 32-bit output type when both inputs are 16-bit.
+For example, ``TT_OUT_DATA`` can be set to cint32, when ``TT_DATA_A`` is int16 and ``TT_DATA_B`` is cint16.
 
-``TT_OUT_DATA`` must be the same or greater precision than both of the input types. The default ``TT_OUT_DATA`` values for each input type combination are listed in the tables below. 
+``TT_OUT_DATA`` must be the same or greater precision than both of the input types. The default ``TT_OUT_DATA`` values for each input type combination are listed in the tables below.
 
 Tiling Schemes and Data Type Combinations
 -----------------------------------------
@@ -556,18 +557,6 @@ The following code example shows how the matrix_multiply_graph class can be used
     :language: cpp
     :lines: 17-
 
-.. |image1| image:: ./media/image1.png
-.. |image2| image:: ./media/image2.png
-.. |image3| image:: ./media/image4.png
-.. |image4| image:: ./media/image2.png
-.. |image6| image:: ./media/image2.png
-.. |image7| image:: ./media/image5.png
-.. |image8| image:: ./media/image6.png
-.. |image9| image:: ./media/image7.png
-.. |image10| image:: ./media/image2.png
-.. |image11| image:: ./media/image2.png
-.. |image12| image:: ./media/image2.png
-.. |image13| image:: ./media/image2.png
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:
 .. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN

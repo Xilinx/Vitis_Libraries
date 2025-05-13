@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,7 +184,7 @@ class fft_window_graph : public graph {
                 kernel::create_object<fft_window<TT_DATA, TT_COEFF, kKernelPtSize, kKernelWindowVsize, TP_SHIFT, TP_API,
                                                  TP_SSR, TP_DYN_PT_SIZE, TP_RND, TP_SAT> >(kernel_weights[i]);
             // Specify mapping constraints
-            runtime<ratio>(m_kernels[i]) = 0.1; // Nominal figure. The real figure requires knowledge of the sample
+            runtime<ratio>(m_kernels[i]) = 0.8; // Nominal figure. The real figure requires knowledge of the sample
                                                 // rate.
             // Source files
             source(m_kernels[i]) = "fft_window.cpp";

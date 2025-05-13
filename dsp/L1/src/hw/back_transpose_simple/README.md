@@ -12,3 +12,10 @@ Output stream 2: 8 24 40 56 9 25 ... 59
 Output stream 3: 12 28 44 60 13 29 ... 63
 
 i.e, Upon interleaving the output data from all the streams, you get the all the input data from input stream 0, followed by the input data from input stream 1 and so on.
+
+## License
+
+ Copyright (C) 2019-2022, Xilinx, Inc.
+ Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+
+Terms and Conditions <https://www.amd.com/en/corporate/copyright>

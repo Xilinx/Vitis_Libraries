@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ proc generateNumbersOfRadix {sampleSeed sampleType pointsize} {
             set nR5 [expr ($nR5 + 1)]
         } elseif {$r eq 3.0} { ;# catches case (allows for smaller numbers)
             set radix 1
-        } 
+        }
 
         set mult_incr [expr ($mult_incr * $radix)]
         #puts $mult_incr
@@ -168,7 +168,7 @@ proc generateNumbersOfRadix {sampleSeed sampleType pointsize} {
                 set radix 5
             } elseif {$r eq 3.0} { ;# catches case (allows for smaller numbers)
                 set radix 1
-            } 
+            }
             puts "GOT POINTSIZE [expr ($mult_incr / 5)]"
         }
     }

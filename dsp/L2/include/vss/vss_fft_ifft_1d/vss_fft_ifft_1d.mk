@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ AIE_HDR    = config.h
 LIBADF     = libadf.a
 VSSFILE    = ${VSS}/${VSS}.vss
 RTL_FFT_XO = fft_xo/parallel_fft.xo
-HLS_FFT_XO    = ssr_fft_wrapper/ssr_fft_wrapper.xo 
+HLS_FFT_XO    = ssr_fft_wrapper/ssr_fft_wrapper.xo
 HLS_FFT_XO_CFG   = ssr_fft_config.cfg
 AIE_TL           = aie.cpp
 
@@ -82,27 +82,36 @@ DATA_TYPE := $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/
 ADD_FRONT_TRANSPOSE := $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py ${HELPER_CUR_DIR} "ADD_FRONT_TRANSPOSE" "APP_PARAMS" ${PARAMS_CFG})
 ADD_BACK_TRANSPOSE := $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py ${HELPER_CUR_DIR} "ADD_BACK_TRANSPOSE" "APP_PARAMS" ${PARAMS_CFG})
 
+ifeq ($(VSS_MODE), -1)
+VSS_MODE := 1
+endif
+ifeq ($(ADD_FRONT_TRANSPOSE), -1)
+ADD_FRONT_TRANSPOSE := 1
+endif
+ifeq ($(ADD_BACK_TRANSPOSE), -1)
+ADD_BACK_TRANSPOSE := 1
+endif
 
 ifeq ($(VSS_MODE), 1)
 AIE_TL = aie.cpp
 else
 AIE_TL = aie_front_only.cpp
-endif  
+endif
 
 ifeq ($(VSS_MODE), 2)
 ifeq ($(DATA_TYPE), cfloat)
 PL_FFT_XO = ${RTL_FFT_XO}
-else 
+else
 PL_FFT_XO = ${HLS_FFT_XO}
-endif 
+endif
 endif
 
 .PHONY: meta_check
 
-meta_check: 
+meta_check:
 #	create config.json file from cfg
 	$(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/include/vss/scripts/create_config_json.py ${HELPER_CUR_DIR} ${PARAMS_CFG}
-# call metadata checks 
+# call metadata checks
 	$(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/meta/scripts/metadata_checker.py --ip vss_fft_ifft_1d
 
 ifeq ($(VSS_MODE), 1)
@@ -120,7 +129,7 @@ ${VSSCFG}: ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d_con
 	$(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d_con_gen.py  --ssr $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py $(HELPER_CUR_DIR) "SSR" "APP_PARAMS" $(PARAMS_CFG)) --cfg_file_name ${VSSCFG} --vss_unit ${VSS} --version 1 --freqhz ${hls_freq} --add_front_transpose ${ADD_FRONT_TRANSPOSE} --add_back_transpose ${ADD_BACK_TRANSPOSE}
 
 ${VSSFILE}: $(VSS_DEPS)
-	echo $(HLS_FFT_XO) 
+	echo $(HLS_FFT_XO)
 	v++ --link --mode vss --part $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py $(HELPER_CUR_DIR) "PART" "top" $(PARAMS_CFG)) --save-temps  --out_dir ${VSS} --config $^
 
 endif
@@ -128,18 +137,6 @@ endif
 ifeq ($(VSS_MODE), 2)
 VSS_DEPS :=
 # the order in dependencies is important in this makefile
-ifeq ($(DATA_TYPE), cfloat)
-VSS_DEPS += ${VSSCFG} ${LIBADF} ${RTL_FFT_XO}
-ifeq ($(ADD_BACK_TRANSPOSE), 1)
-VSS_DEPS += ${BACK_XO_SPEC}
-endif
-${RTL_FFT_XO}:
-	${XILINX_VIVADO}/bin/vivado -mode batch -source ${HELPER_ROOT_DIR}/L2/include/vss/scripts/xo_scripts/gen_xo.tcl -tclargs ./fft_xo/parallel_fft.xo parallel_fft hw_emu ${HELPER_ROOT_DIR} ${SSR} ${XILINX_VITIS}
-${VSSCFG}: ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d_hdl_con_gen.py
-	$(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d_hdl_con_gen.py  --ssr $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py $(HELPER_CUR_DIR) "SSR" "APP_PARAMS" $(PARAMS_CFG)) --cfg_file_name ${VSSCFG} --vss_unit ${VSS} --version 1 --freqhz ${hls_freq} --add_back_transpose ${ADD_BACK_TRANSPOSE}
-${VSSFILE}: $(VSS_DEPS)
-	v++ --link --mode vss --part $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py $(HELPER_CUR_DIR) "PART" "top" $(PARAMS_CFG)) --save-temps  --out_dir ${VSS} --config $^
-else
 VSS_DEPS += ${VSSCFG} ${LIBADF} ${HLS_FFT_XO}
 ifeq ($(ADD_BACK_TRANSPOSE), 1)
 VSS_DEPS += ${BACK_XO_SPEC}
@@ -149,17 +146,15 @@ ${VSSCFG}: ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d_pl_
 
 ${VSSFILE}: $(VSS_DEPS)
 	v++ --link --mode vss --part $(shell $(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_param_cfg.py $(HELPER_CUR_DIR) "PART" "top" $(PARAMS_CFG)) --save-temps  --out_dir ${VSS} --config $^
-
-endif
 endif
 
-${AIE_HDR}: $(PARAMS_CFG) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/gen_tb_from_cfg.py 
+${AIE_HDR}: $(PARAMS_CFG) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/gen_tb_from_cfg.py
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/gen_tb_from_cfg.py $(HELPER_ROOT_DIR) $(HELPER_CUR_DIR) ${PARAMS_CFG}
 
 ${AIE_PARAMS}: $(PARAMS_CFG) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_aie_cfg.py
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_aie_cfg.py $(HELPER_CUR_DIR)  ${PARAMS_CFG}
 
-${HPARAMS}: $(PARAMS_CFG) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_hls_cfg.py 
+${HPARAMS}: $(PARAMS_CFG) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_hls_cfg.py
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/include/vss/scripts/extract_hls_cfg.py $(HELPER_CUR_DIR) ${HPARAMS} ${PARAMS_CFG}
 
 ${LIBADF}: ${AIE_HDR} ${AIE_PARAMS}

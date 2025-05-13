@@ -19,14 +19,12 @@
             "updater": {
                 "file": "func_approx.py",
                 "function": "update_AIE_VARIANT",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "func_approx.py",
                 "function": "validate_AIE_VARIANT",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
@@ -117,7 +115,7 @@
                 "file": "func_approx.py",
                 "function": "update_TP_WINDOW_VSIZE",
                 "args": [
-                    "AIE_VARIANT" ,
+                    "AIE_VARIANT",
                     "TT_DATA"
                 ]
             },
@@ -125,7 +123,7 @@
                 "file": "func_approx.py",
                 "function": "validate_TP_WINDOW_VSIZE",
                 "args": [
-                    "AIE_VARIANT" ,
+                    "AIE_VARIANT",
                     "TT_DATA"
                 ]
             }
@@ -138,7 +136,7 @@
                 "file": "func_approx.py",
                 "function": "update_TP_SHIFT",
                 "args": [
-                    "AIE_VARIANT" ,
+                    "AIE_VARIANT",
                     "TT_DATA"
                 ]
             },
@@ -146,7 +144,7 @@
                 "file": "func_approx.py",
                 "function": "validate_TP_SHIFT",
                 "args": [
-                    "AIE_VARIANT" ,
+                    "AIE_VARIANT",
                     "TT_DATA"
                 ]
             }
@@ -158,12 +156,16 @@
             "updater": {
                 "file": "func_approx.py",
                 "function": "update_TP_RND",
-                "args": ["AIE_VARIANT"]
-              },
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            },
             "validator": {
-              "file": "func_approx.py",
-              "function": "validate_TP_RND",
-              "args": ["AIE_VARIANT"]
+                "file": "func_approx.py",
+                "function": "validate_TP_RND",
+                "args": [
+                    "AIE_VARIANT"
+                ]
             }
         },
         {
@@ -171,13 +173,13 @@
             "description": "Saturation mode.",
             "type": "uint",
             "updater": {
-              "file": "func_approx.py",
-              "function": "update_TP_SAT"
+                "file": "func_approx.py",
+                "function": "update_TP_SAT"
             },
             "validator": {
                 "file": "func_approx.py",
                 "function": "validate_TP_SAT"
-              }
+            }
         },
         {
             "name": "lookup_values",

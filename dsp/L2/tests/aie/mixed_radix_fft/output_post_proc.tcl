@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ if {($tt_data eq "cint32" || $tt_data eq "cfloat")} {
     set dataLineOfZeros "0 0 "
 } elseif {($tt_data eq "float")} {
     set dataLineOfZeros "0 0 "
-} 
+}
 set inPtsFile [open $inPtSizefile r]
 set tmpOutFile [open "tmpOutFile.txt" w]
 set rawOutFile [open $outputFile r+]

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,27 +39,27 @@ static constexpr unsigned int fnPtSizeD1() {
         TP_POINT_SIZE == 65536
             ? 256
             : TP_POINT_SIZE == 32768
-                  ? 128
+                  ? 256
                   : TP_POINT_SIZE == 16384
                         ? 128
                         : TP_POINT_SIZE == 8192
-                              ? 64
+                              ? 128
                               : TP_POINT_SIZE == 4096
                                     ? 64
                                     : TP_POINT_SIZE == 2048
-                                          ? 32
+                                          ? 64
                                           : TP_POINT_SIZE == 1024
                                                 ? 32
                                                 : TP_POINT_SIZE == 512
-                                                      ? 16
+                                                      ? 32
                                                       : TP_POINT_SIZE == 256
                                                             ? 16
                                                             : TP_POINT_SIZE == 128
-                                                                  ? 8
+                                                                  ? 16
                                                                   : TP_POINT_SIZE == 64
                                                                         ? 8
                                                                         : TP_POINT_SIZE == 32
-                                                                              ? 4
+                                                                              ? 8
                                                                               : TP_POINT_SIZE == 16 ? 4 : 0;
     return sqrtVal;
 }
@@ -231,7 +231,7 @@ int main(int argc, char* argv[]) {
     // Validate results:
     bool flag = 0;
     // Setting a tolerance value since reference model is not bit accurate. Value set based on experiments.
-    int level = (1 << 10);
+    int level = (1 << 11);
     for (unsigned ss = 0; ss < NUM_SAMPLES_O * NITER; ss += 2) {
         if ((ss % NUM_SAMPLES_O) < (POINT_SIZE * 2)) {
             real_dtype val_g_re, val_g_im;

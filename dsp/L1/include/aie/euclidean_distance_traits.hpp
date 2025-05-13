@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,11 @@ static constexpr unsigned int kMaxBitsRegV = 128;                             //
 static constexpr unsigned int kMaxBitsLoadOnAie = 256;                        // Max number of bits Load on AIE
 static constexpr unsigned int kMaxBytesLoadOnAie = 32;                        // Max number of bytes (256/8) Load on AIE
 static constexpr unsigned int kMaxBufferLenOnAieInBytes = __DATA_MEM_BYTES__; // Max buffer Length
+static constexpr unsigned int kShiftFactor2 = 2;                              // MulFactor2
 static constexpr unsigned int kBuffSize16Byte = 16;                           // 128-bit buffer size in Bytes
+static constexpr unsigned int kBuffSize32Byte = 32;                           // 256-bit buffer size in Bytes
+static constexpr unsigned int kBuffSize64Byte = 64;                           // 512-bit buffer size in Bytes
+static constexpr unsigned int kBuffSize128Byte = 128;                         // 1024-bit buffer size in Bytes
 
 static constexpr unsigned int kUnrollFactor = 8;      // Unroll Factor
 static constexpr unsigned int kFixedDimOfED = 4;      // Unroll Factor
@@ -64,26 +68,20 @@ static constexpr unsigned int kVecSizeOfAccum32 = 32; // v32accfloat
 static constexpr unsigned int kUpshiftFactor2 = 2;    // v32accfloat
 
 // Function to return the default lanes based on choosen architecture
-template <typename TT_DATA_P, typename TT_DATA_Q>
+template <typename TT_DATA>
 INLINE_DECL constexpr unsigned int fnEDNumLanes() {
     return 16; // defualt return for AIE2
 };
 
 // Function to return the default MULS/MACS based on choosen architecture
-template <typename TT_DATA_P, typename TT_DATA_Q>
+template <typename TT_DATA>
 INLINE_DECL constexpr unsigned int fnEDNumMuls() {
     return 256; // defualt return for AIE2
 };
 
 // Function to return the default sample size of P data
-template <typename TT_DATA_P>
-INLINE_DECL constexpr unsigned int fnSampleSizeOfpointP() {
-    return 8; // defualt sample size is 8
-};
-
-// Function to return the default sample size of Q Data
-template <typename TT_DATA_Q>
-INLINE_DECL constexpr unsigned int fnSampleSizeOfpointQ() {
+template <typename TT_DATA>
+INLINE_DECL constexpr unsigned int fnSampleSize() {
     return 8; // defualt sample size is 8
 };
 
@@ -91,13 +89,13 @@ INLINE_DECL constexpr unsigned int fnSampleSizeOfpointQ() {
 // function to return the number of acc's lanes for a type combo
 #if (__HAS_ACCUM_PERMUTES__ == 1)
 template <>
-INLINE_DECL constexpr unsigned int fnEDNumLanes<float, float>() {
+INLINE_DECL constexpr unsigned int fnEDNumLanes<float>() {
     return 8;
 }; //
 
 // function to return the number of multiplications for a type combo
 template <>
-INLINE_DECL constexpr unsigned int fnEDNumMuls<float, float>() {
+INLINE_DECL constexpr unsigned int fnEDNumMuls<float>() {
     return 8;
 }; //
 #endif
@@ -105,219 +103,176 @@ INLINE_DECL constexpr unsigned int fnEDNumMuls<float, float>() {
 #if (__HAS_ACCUM_PERMUTES__ == 0)
 // AIE-2
 template <>
-INLINE_DECL constexpr unsigned int fnEDNumLanes<float, float>() {
+INLINE_DECL constexpr unsigned int fnEDNumLanes<float>() {
     return 16;
 }; //
 template <>
-INLINE_DECL constexpr unsigned int fnEDNumLanes<bfloat16, bfloat16>() {
+INLINE_DECL constexpr unsigned int fnEDNumLanes<bfloat16>() {
     return 16;
 }; //
 
 // function to return the number of multiplications for a type combo
 template <>
-INLINE_DECL constexpr unsigned int fnEDNumMuls<float, float>() {
+INLINE_DECL constexpr unsigned int fnEDNumMuls<float>() {
     return 16;
 }; //
 template <>
-INLINE_DECL constexpr unsigned int fnEDNumMuls<bfloat16, bfloat16>() {
+INLINE_DECL constexpr unsigned int fnEDNumMuls<bfloat16>() {
     return 16;
 }; //
 #endif
 
 // function to return number of samples for given data type of P Data
 template <>
-INLINE_DECL constexpr unsigned int fnSampleSizeOfpointP<float>() {
+INLINE_DECL constexpr unsigned int fnSampleSize<float>() {
     return 32;
 }; //
 
 #if (__HAS_ACCUM_PERMUTES__ == 0)
 template <>
-INLINE_DECL constexpr unsigned int fnSampleSizeOfpointP<bfloat16>() {
-    return 16;
-}; //
-#endif
-
-// function to return number of samples for given data type of Q Data
-template <>
-INLINE_DECL constexpr unsigned int fnSampleSizeOfpointQ<float>() {
-    return 32;
-}; //
-
-#if (__HAS_ACCUM_PERMUTES__ == 0)
-template <>
-INLINE_DECL constexpr unsigned int fnSampleSizeOfpointQ<bfloat16>() {
+INLINE_DECL constexpr unsigned int fnSampleSize<bfloat16>() {
     return 16;
 }; //
 #endif
 
 // Function returns number of columns used by MUL/MACs in Euclidean Distance
-template <typename TT_DATA_P, typename TT_DATA_Q>
+template <typename TT_DATA>
 INLINE_DECL constexpr unsigned int fnGetNumofMULs() {
-    return fnEDNumMuls<TT_DATA_P, TT_DATA_Q>();
+    return fnEDNumMuls<TT_DATA>();
 };
 
 // Function to return the number of lanes based on given data types
-template <typename TT_DATA_P, typename TT_DATA_Q>
+template <typename TT_DATA>
 INLINE_DECL constexpr unsigned int fnGetNumofLanes() {
-    return fnEDNumLanes<TT_DATA_P, TT_DATA_Q>();
+    return fnEDNumLanes<TT_DATA>();
 };
 
 // Function to return the number of points based on given data types
-template <typename TT_DATA_P, typename TT_DATA_Q>
+template <typename TT_DATA>
 INLINE_DECL constexpr unsigned int fnGetNumofPoints() {
-    return (fnEDNumMuls<TT_DATA_P, TT_DATA_Q>() / fnEDNumLanes<TT_DATA_P, TT_DATA_Q>());
+    return (fnEDNumMuls<TT_DATA>() / fnEDNumLanes<TT_DATA>());
 };
 
-// Function to return the number of points based on given data types
-template <typename TT_DATA_P>
-INLINE_DECL constexpr unsigned int fnGetNumOfPdataSamples() {
-    return fnSampleSizeOfpointP<TT_DATA_P>();
+// Function to return Maximum supported length based on given DATA TYPE.
+template <typename TT_DATA>
+INLINE_DECL constexpr unsigned int getMaxLen() {
+    return (kMaxBufferLenOnAieInBytes >> kShiftFactor2 / sizeof(TT_DATA));
 };
 
-// Function to return the number of G Sig. samples to read based on given data types
-template <typename TT_DATA_Q>
-INLINE_DECL constexpr unsigned int fnGetNumOfQdataSamples() {
-    return fnSampleSizeOfpointQ<TT_DATA_Q>();
+// Function to return Minimum supported length based on given DATA TYPE.
+template <typename TT_DATA>
+INLINE_DECL constexpr unsigned int getMinLen() {
+    return (((kMaxBitsLoadOnAie << 1) / fnSampleSize<TT_DATA>()));
 };
 
-// 8x8 16x8 16x16 32x16 c16x16 c16x32 c16xc16 c32x16 c32xc16
+// Function to return true or false by checking given length is in range or not
+template <typename TT_DATA, unsigned int sigLen>
+constexpr bool isLenInRange() {
+    unsigned int minDataLoad = (kMaxBitsLoadOnAie / fnSampleSize<TT_DATA>());
+    bool checkLen = false;
+
+    if ((sigLen >= getMinLen<TT_DATA>()) && (sigLen <= getMaxLen<TT_DATA>())) {
+        checkLen = (((sigLen % minDataLoad) == 0) ? true : false);
+    }
+    return checkLen;
+};
+
+// float and bfloat16 are only the supported data types
 // Configuration Defensive check functions
 //----------------------------------------------------------------------
-// Check Output data type whether its complex if any input is complex
-template <typename TT_DATA_P, typename TT_DATA_Q, typename TT_DATA_OUT>
-INLINE_DECL constexpr bool fnCheckDataOutType() {
-    return false;
-};
 
-template <>
-INLINE_DECL constexpr bool fnCheckDataOutType<float, float, float>() {
-    return true;
-};
-template <>
-INLINE_DECL constexpr bool fnCheckDataOutType<float, float, cfloat>() {
-    return false;
-};
-template <>
-INLINE_DECL constexpr bool fnCheckDataOutType<float, cfloat, float>() {
-    return false;
-};
-
-template <>
-INLINE_DECL constexpr bool fnCheckDataOutType<cfloat, float, float>() {
-    return false;
-};
-
-template <>
-INLINE_DECL constexpr bool fnCheckDataOutType<cfloat, cfloat, float>() {
-    return false;
-};
-
-template <>
-INLINE_DECL constexpr bool fnCheckDataOutType<float, cfloat, cfloat>() {
-    return false;
-};
-
-template <>
-INLINE_DECL constexpr bool fnCheckDataOutType<cfloat, float, cfloat>() {
-    return false;
-};
-
-template <>
-INLINE_DECL constexpr bool fnCheckDataOutType<cfloat, cfloat, cfloat>() {
-    return false;
-};
-
-#if (__HAS_ACCUM_PERMUTES__ == 0)
-template <>
-INLINE_DECL constexpr bool fnCheckDataOutType<bfloat16, bfloat16, bfloat16>() {
-    return true;
-};
-
-template <>
-INLINE_DECL constexpr bool fnCheckDataOutType<bfloat16, bfloat16, float>() {
-    return true;
-};
-
-template <>
-INLINE_DECL constexpr bool fnCheckDataOutType<bfloat16, float, float>() {
-    return false;
-};
-
-template <>
-INLINE_DECL constexpr bool fnCheckDataOutType<float, bfloat16, float>() {
-    return false;
-};
-
-template <>
-INLINE_DECL constexpr bool fnCheckDataOutType<float, bfloat16, bfloat16>() {
-    return false;
-};
-
-template <>
-INLINE_DECL constexpr bool fnCheckDataOutType<bfloat16, float, bfloat16>() {
-    return false;
-};
-#endif
-
-template <typename TT_DATA_P, typename TT_DATA_Q>
+// Configuration Defensive check function for input data types whether supported or not
+template <typename TT_DATA>
 INLINE_DECL constexpr bool fnCheckDataTypesOfInputs() {
     return false;
 };
 #if (__HAS_ACCUM_PERMUTES__ == 1)
 template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<float, float>() {
-    return true;
+INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<int8>() {
+    return false;
+};
+template <>
+INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<int16>() {
+    return false;
 };
 
 template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<bfloat16, bfloat16>() {
+INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<int32>() {
+    return false;
+};
+template <>
+INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<float>() {
+    return true;
+};
+template <>
+INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<cint16>() {
+    return false;
+};
+template <>
+INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<cint32>() {
+    return false;
+};
+template <>
+INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<cfloat>() {
     return false;
 };
 #endif
 
 #if (__HAS_ACCUM_PERMUTES__ == 0)
 template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<bfloat16, bfloat16>() {
-    return true;
+INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<int8>() {
+    return false;
 };
-
 template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<float, float>() {
-    return true;
-};
-
-template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<bfloat16, float>() {
+INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<int16>() {
     return false;
 };
 
 template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<float, bfloat16>() {
+INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<int32>() {
     return false;
+};
+template <>
+INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<float>() {
+    return true;
+};
+template <>
+INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<cint16>() {
+    return false;
+};
+template <>
+INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<cint32>() {
+    return false;
+};
+template <>
+INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<cfloat>() {
+    return false;
+};
+template <>
+INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<bfloat16>() {
+    return true;
 };
 #endif
-
-// Configuration Defensive check function to check TT_OUT is complex if any one input is complex
-template <typename TT_DATA_P, typename TT_DATA_Q, typename TT_DATA_OUT>
-INLINE_DECL constexpr bool fnCheckDataTypeOfOutput() {
-    return (fnCheckDataOutType<TT_DATA_P, TT_DATA_Q, TT_DATA_OUT>() ? 1 : 0);
+// Configuration Defensive check function to check Length of F Signal and G Signal
+template <typename TT_DATA, unsigned int TP_SIG_LEN>
+INLINE_DECL constexpr bool fnCheckLenOfData() {
+    return (isLenInRange<TT_DATA, TP_SIG_LEN>() ? true : false);
 }
 
 // Function which return true or false if Given Number is power of 2 or not
 template <unsigned int TP_DATA>
 INLINE_DECL constexpr bool isPowerOfTwo() {
-    return (((TP_DATA) && !(TP_DATA & (TP_DATA - 1))) ? 1 : 0);
+    return (((TP_DATA) && !(TP_DATA & (TP_DATA - 1))) ? true : false);
 };
 
 // Function which return true or false if Given Dimension is less than or equal to 4
 template <unsigned int TP_DIM>
 INLINE_DECL constexpr bool fnCheckforDimension() {
-    return ((TP_DIM <= 4) ? 1 : 0);
+    return ((TP_DIM <= kFixedDimOfED) ? true : false);
 };
-
-} // namespace euclidean_distance {
-} // namespace aie {
-} // namespace dsp {
-} // namespace xf {
+} //  End of namespace euclidean_distance {
+} //  End of namespace aie {
+} //  End of namespace dsp {
+} // End of  namespace xf {
 
 #endif // _DSPLIB_EUCLIDEAN_DISTANCE_TRAITS_HPP_

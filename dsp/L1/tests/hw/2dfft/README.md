@@ -6,8 +6,8 @@ Let's take a 16x16 points (the shortest length allowed for HLS FFT) 2-D FFT for 
 
 If we describe the 2-D input matrix (`inMat[row][col]`) as:
 
-col0 | col1 | col2 | col3 
---- | --- | --- | --- 
+col0 | col1 | col2 | col3
+--- | --- | --- | ---
 a | b | c | d
 e | f | g | h
 i | j | k | l
@@ -16,9 +16,16 @@ m | n | o | p
 
 The result 2-D matrix should be:
 
-col0 | col1 | col2 | col3 
---- | --- | --- | --- 
+col0 | col1 | col2 | col3
+--- | --- | --- | ---
 A | B | C | D
 E | F | G | H
 I | J | K | L
 M | N | O | P
+
+## License
+
+ Copyright (C) 2019-2022, Xilinx, Inc.
+ Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+
+Terms and Conditions <https://www.amd.com/en/corporate/copyright>

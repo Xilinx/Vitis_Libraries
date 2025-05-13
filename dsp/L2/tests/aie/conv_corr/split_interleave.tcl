@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 #
 set usage "
 For generating single file by deinterleave the data from the different input files based on Num_of_Phases.
@@ -89,7 +90,7 @@ if {$using_plio_class == 0} {
     }
 }
 
-#open Input file to read 
+#open Input file to read
 set fd [open $input_filename r]
 
 # Open all files and store the file handles in a list
@@ -108,12 +109,12 @@ while {[gets $fd line] >= 0} {
     foreach element $line {
        set output_file [lindex $fileHandles [expr {$filenum % $filecount }]]
        puts -nonewline $output_file "$element "
-       
+
        if {($count == 1) || ($count == 3)} {
           incr filenum
-       } 
+       }
        incr count
-    }    
+    }
 }
 
 # close all files
@@ -127,30 +128,30 @@ for {set phaseIndex 0} {$phaseIndex < $filecount} {incr phaseIndex} {
     set fdout [open $outfilename r]
     set singleline [gets $fdout]
     close $fdout
-    
+
     set outlines ""
     set presentline ""
     set count 0
     set singleline [string trim $singleline]
     set elements [split $singleline " "]
-    
+
     foreach element $elements {
         if {$count == $dataPartsPerLine} {
             append outlines "\n"
             set count 0
         }
-        
+
         append outlines "$element "
         incr count
     }
-    
+
     append outlines "\n"
-    
+
     #write the output lines back to the same file
     set fdin [open $outfilename w]
     puts -nonewline $fdin $outlines
     close $fdin
-}    
+}
 
 puts "interleave Ends: \n"
 puts "\n"

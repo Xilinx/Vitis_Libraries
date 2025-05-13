@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,17 +37,13 @@ namespace euclidean_distance {
 
 //-----------------------------------------------------------
 // EUCLIDEAN_DISTANCE reference model class
-template <typename TT_DATA_P,
-          typename TT_DATA_Q,
+template <typename TT_DATA,
           typename TT_DATA_OUT,
-          unsigned int TP_LEN_P,
-          unsigned int TP_LEN_Q,
-          unsigned int TP_DIM_P,
-          unsigned int TP_DIM_Q,
+          unsigned int TP_LEN,
+          unsigned int TP_DIM,
           unsigned int TP_API,
           unsigned int TP_RND,
           unsigned int TP_SAT,
-          unsigned int TP_NUM_FRAMES,
           unsigned int TP_IS_OUTPUT_SQUARED>
 class euclidean_distance_ref {
    private:
@@ -59,8 +55,8 @@ class euclidean_distance_ref {
     static void registerKernelClass() { REGISTER_FUNCTION(euclidean_distance_ref::euclidean_distanceMain); }
 
     // Declaration of Euclidean Distance Main Function call.
-    void euclidean_distanceMain(input_buffer<TT_DATA_P>& inWindowP,
-                                input_buffer<TT_DATA_Q>& inWindowQ,
+    void euclidean_distanceMain(input_buffer<TT_DATA>& inWindowP,
+                                input_buffer<TT_DATA>& inWindowQ,
                                 output_buffer<TT_DATA_OUT>& outWindow);
 };
 

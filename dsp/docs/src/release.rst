@@ -1,5 +1,6 @@
 ..
-   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -12,6 +13,15 @@ Release Notes
 .. toctree::
    :hidden:
    :maxdepth: 1
+
+2025.1
+======
+
+The following features have been added to the library in this release:
+
+* **Matrix-Vector Multiplication** - Added support for reloadable matrix A inputs via RTP ports. These inputs can be used with either IO buffer or streaming Vector B and outputs.
+
+* **Matrix Multiplication** - Introduced a new template parameter `TT_OUT_DATA` to specify the data type of the output.
 
 2024.2
 ======

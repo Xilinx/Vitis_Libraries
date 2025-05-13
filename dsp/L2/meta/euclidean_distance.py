@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -84,9 +84,9 @@ def fn_validate_AIE_VARIANT(AIE_VARIANT):
   return(com.validate_legal_set(legal_set_AIE_VARIANT, "AIE_VARIANT", AIE_VARIANT))
 
 #######################################################
-########## TT_DATA_P Updater and Validator ############
+########## TT_DATA Updater and Validator ############
 #######################################################
-def update_TT_DATA_P(args):
+def update_TT_DATA(args):
   AIE_VARIANT = args["AIE_VARIANT"]
   return fn_update_data_type_p(AIE_VARIANT)
 
@@ -97,58 +97,30 @@ def fn_update_data_type_p(AIE_VARIANT):
      valid_types=["float", "bfloat16"]
 
   param_dict={
-    "name" : "TT_DATA_P",
+    "name" : "TT_DATA",
     "enum" : valid_types
   }
   return param_dict
 
-def validate_TT_DATA_P(args):
-  TT_DATA_P = args["TT_DATA_P"]
+def validate_TT_DATA(args):
+  TT_DATA = args["TT_DATA"]
   AIE_VARIANT = args["AIE_VARIANT"]
-  return fn_validate_data_type_p(TT_DATA_P, AIE_VARIANT)
+  return fn_validate_data_type_p(TT_DATA, AIE_VARIANT)
 
-def fn_validate_data_type_p(TT_DATA_P, AIE_VARIANT):
+def fn_validate_data_type_p(TT_DATA, AIE_VARIANT):
   param_dict = fn_update_data_type_p(AIE_VARIANT)
-  return (com.validate_legal_set(param_dict["enum"], "TT_DATA_P", TT_DATA_P))
+  return (com.validate_legal_set(param_dict["enum"], "TT_DATA", TT_DATA))
 
-
-#######################################################
-########## TT_DATA_Q Updater and Validator ############
-#######################################################
-def update_TT_DATA_Q(args):
-  AIE_VARIANT = args["AIE_VARIANT"]
-  TT_DATA_P = args["TT_DATA_P"]
-  return fn_update_data_type_q(AIE_VARIANT, TT_DATA_P)
-
-def fn_update_data_type_q(AIE_VARIANT, TT_DATA_P):
-  valid_types = fn_get_valid_in_data_types(TT_DATA_P, AIE_VARIANT)
-
-  param_dict={
-    "name" : "TT_DATA_Q",
-    "enum" : valid_types
-  }
-  return param_dict
-
-def validate_TT_DATA_Q(args):
-  TT_DATA_P = args["TT_DATA_P"]
-  TT_DATA_Q = args["TT_DATA_Q"]
-  AIE_VARIANT = args["AIE_VARIANT"]
-  return fn_validate_data_type_q(TT_DATA_P, TT_DATA_Q, AIE_VARIANT)
-
-def fn_validate_data_type_q(TT_DATA_P, TT_DATA_Q, AIE_VARIANT):
-  param_dict = fn_update_data_type_q(AIE_VARIANT, TT_DATA_P)
-  return (com.validate_legal_set(param_dict["enum"], "TT_DATA_Q", TT_DATA_Q))
 
 #######################################################
 ######### TT_DATA_OUT Updater and Validator ###########
 #######################################################
 def update_TT_DATA_OUT(args):
-  TT_DATA_P = args["TT_DATA_P"]
-  TT_DATA_Q = args["TT_DATA_Q"]
-  return fn_update_data_type_out(TT_DATA_P, TT_DATA_Q)
+  TT_DATA = args["TT_DATA"]
+  return fn_update_data_type_out(TT_DATA)
 
-def fn_update_data_type_out(TT_DATA_P, TT_DATA_Q):
-  valid_types = fn_get_valid_out_data_types(TT_DATA_P, TT_DATA_Q)
+def fn_update_data_type_out(TT_DATA):
+  valid_types = fn_get_valid_out_data_types(TT_DATA)
   param_dict={
     "name" : "TT_DATA_OUT",
     "enum" : valid_types
@@ -156,14 +128,13 @@ def fn_update_data_type_out(TT_DATA_P, TT_DATA_Q):
   return param_dict
 
 def validate_TT_DATA_OUT(args):
-  TT_DATA_P = args["TT_DATA_P"]
-  TT_DATA_Q = args["TT_DATA_Q"]
+  TT_DATA = args["TT_DATA"]
   TT_DATA_OUT = args["TT_DATA_OUT"]
-  return fn_validate_data_type_out(TT_DATA_OUT, TT_DATA_P, TT_DATA_Q)
+  return fn_validate_data_type_out(TT_DATA_OUT, TT_DATA)
 
-def fn_validate_data_type_out(TT_DATA_OUT, TT_DATA_P, TT_DATA_Q):
-  param_dict = fn_update_data_type_out(TT_DATA_P, TT_DATA_Q)
-  return (com.validate_legal_set(param_dict["enum"], "TT_DATA_OUT", TT_DATA_OUT))
+def fn_validate_data_type_out(TT_DATA_OUT, TT_DATA):
+  param_dict = fn_update_data_type_out(TT_DATA)
+  return (com.validate_legal_set(param_dict["enum"], "TT_DATA_OUT", TT_DATA_OUT))  
 
 #######################################################
 ############# TP_API Updater and Validator ############
@@ -187,154 +158,69 @@ def fn_validate_api(TP_API):
   return(com.validate_legal_set(param_dict["enum"], "TP_API", TP_API))
 
 #######################################################
-########### TP_LEN_P Updater and Validator ############
+########### TP_LEN Updater and Validator ############
 #######################################################
-def update_TP_LEN_P(args):
+def update_TP_LEN(args):
   AIE_VARIANT = args["AIE_VARIANT"]
   TP_API = args["TP_API"]
-  TT_DATA_P = args["TT_DATA_P"]
-  TP_LEN_P = args["TP_LEN_P"] if args["TP_LEN_P"] else 0
-  return fn_update_len_p(TP_LEN_P, TT_DATA_P, TP_API, AIE_VARIANT)
+  TT_DATA = args["TT_DATA"]
+  TP_LEN = args["TP_LEN"] if args["TP_LEN"] else 0
+  return fn_update_len(TP_LEN, TT_DATA, TP_API, AIE_VARIANT)
 
-def fn_update_len_p(TP_LEN_P, TT_DATA_P, TP_API, AIE_VARIANT):
-  elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA_P)
-  TP_LEN_P_max = com.k_data_memory_bytes[AIE_VARIANT] >> 2 // (com.fn_size_by_byte(TT_DATA_P))
+def fn_update_len(TP_LEN, TT_DATA, TP_API, AIE_VARIANT):
+  elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA)
+  TP_LEN_max = com.k_data_memory_bytes[AIE_VARIANT] >> 2 // (com.fn_size_by_byte(TT_DATA))
 
   param_dict={
-    "name" : "TP_LEN_P",
+    "name" : "TP_LEN",
     "minimum" : elems_per_load,
-    "maximum" : TP_LEN_P_max if TP_API == com.API_BUFFER else 2**31
+    "maximum" : TP_LEN_max if TP_API == com.API_BUFFER else 2**31
   }
 
-  TP_LEN_P_act = TP_LEN_P + (elems_per_load-(TP_LEN_P % elems_per_load))
-  if TP_LEN_P_act < param_dict["minimum"]: param_dict["actual"] = param_dict["minimum"]
-  elif TP_LEN_P_act > param_dict["maximum"]: param_dict["actual"] = param_dict["maximum"]
-  else: param_dict["actual"] = TP_LEN_P_act
+  TP_LEN_act = TP_LEN + (elems_per_load-(TP_LEN % elems_per_load))
+  if TP_LEN_act < param_dict["minimum"]: param_dict["actual"] = param_dict["minimum"]
+  elif TP_LEN_act > param_dict["maximum"]: param_dict["actual"] = param_dict["maximum"]
+  else: param_dict["actual"] = TP_LEN_act
   return param_dict
 
-def validate_TP_LEN_P(args):
+def validate_TP_LEN(args):
   AIE_VARIANT = args["AIE_VARIANT"]
   TP_API = args["TP_API"]
-  TT_DATA_P = args["TT_DATA_P"]
-  TP_LEN_P = args["TP_LEN_P"]
-  return fn_validate_len_p(AIE_VARIANT, TT_DATA_P, TP_API, TP_LEN_P)
+  TT_DATA = args["TT_DATA"]
+  TP_LEN = args["TP_LEN"]
+  return fn_validate_len(AIE_VARIANT, TT_DATA, TP_API, TP_LEN)
 
-def fn_validate_len_p(AIE_VARIANT, TT_DATA_P, TP_API, TP_LEN_P):
-  elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA_P)
-  param_dict = fn_update_len_p(TP_LEN_P, TT_DATA_P, TP_API, AIE_VARIANT)
-  range_TP_LEN_P = [param_dict["minimum"], param_dict["maximum"]]
+def fn_validate_len(AIE_VARIANT, TT_DATA, TP_API, TP_LEN):
+  elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA)
+  param_dict = fn_update_len(TP_LEN, TT_DATA, TP_API, AIE_VARIANT)
+  range_TP_LEN = [param_dict["minimum"], param_dict["maximum"]]
 
-  if TP_LEN_P % elems_per_load != 0:
-    return com.isError(f"TP_LEN_P should be divisible by {elems_per_load}.")
+  if TP_LEN % elems_per_load != 0:
+    return com.isError(f"TP_LEN should be divisible by {elems_per_load}.")
 
-  return (com.validate_range(range_TP_LEN_P, "TP_LEN_P", TP_LEN_P))
+  return (com.validate_range(range_TP_LEN, "TP_LEN", TP_LEN))
 
-#######################################################
-########### TP_LEN_Q Updater and Validator ############
-#######################################################
-def update_TP_LEN_Q(args):
-  AIE_VARIANT = args["AIE_VARIANT"]
-  TP_API = args["TP_API"]
-  TT_DATA_Q = args["TT_DATA_Q"]
-  TP_LEN_Q = args["TP_LEN_Q"] if args["TP_LEN_Q"] else 0
-  return fn_update_len_q(TP_LEN_Q, TT_DATA_Q, TP_API, AIE_VARIANT)
-
-def fn_update_len_q(TP_LEN_Q, TT_DATA_Q, TP_API, AIE_VARIANT):
-  elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA_Q)
-  TP_LEN_Q_max = com.k_data_memory_bytes[AIE_VARIANT] >> 2 // (com.fn_size_by_byte(TT_DATA_Q))
-
-  param_dict={
-    "name" : "TP_LEN_Q",
-    "minimum" : elems_per_load,
-    "maximum" : TP_LEN_Q_max if TP_API == com.API_BUFFER else 2**31
-  }
-  TP_LEN_Q_act = TP_LEN_Q + (elems_per_load-(TP_LEN_Q % elems_per_load))
-  if TP_LEN_Q_act < param_dict["minimum"]: param_dict["actual"] = param_dict["minimum"]
-  elif TP_LEN_Q_act > param_dict["maximum"]: param_dict["actual"] = param_dict["maximum"]
-  else: param_dict["actual"] = TP_LEN_Q_act
-  return param_dict
-
-def validate_TP_LEN_Q(args):
-  AIE_VARIANT = args["AIE_VARIANT"]
-  TP_API = args["TP_API"]
-  TT_DATA_Q = args["TT_DATA_Q"]
-  TP_LEN_Q = args["TP_LEN_Q"]
-  return fn_validate_len_q(AIE_VARIANT, TT_DATA_Q, TP_API, TP_LEN_Q)
-
-def fn_validate_len_q(AIE_VARIANT, TT_DATA_Q, TP_API, TP_LEN_Q):
-  elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA_Q)
-  param_dict = fn_update_len_q(TP_LEN_Q, TT_DATA_Q, TP_API, AIE_VARIANT)
-  range_TP_LEN_Q = [param_dict["minimum"], param_dict["maximum"]]
-
-  if TP_LEN_Q % elems_per_load != 0:
-    return com.isError(f"TP_LEN_Q should be divisible by {elems_per_load}.")
-
-  return (com.validate_range(range_TP_LEN_Q, "TP_LEN_Q", TP_LEN_Q))
 
 #######################################################
-########### TP_DIM_P Updater and Validator ###########
+########### TP_DIM Updater and Validator ###########
 #######################################################
 
-def update_TP_DIM_P(args):
-  TP_DIM_P = args["TP_DIM_P"]
-  return fn_update_dim_p(TP_DIM_P)
+def update_TP_DIM(args):
+  TP_DIM = args["TP_DIM"]
+  return fn_update_dim(TP_DIM)
 
-def fn_update_dim_p(TP_DIM_P):
+def fn_update_dim(TP_DIM):
   param_dict ={}
-  param_dict.update({"name" : "TP_DIM_P"})
+  param_dict.update({"name" : "TP_DIM"})
   param_dict.update({"minimum" : TP_DIM_MIN})
   param_dict.update({"maximum" : TP_DIM_MAX})
   return param_dict
 
-def validate_TP_DIM_P(args):
-  TP_DIM_P = args["TP_DIM_P"]
-  param_dict = fn_update_dim_p(TP_DIM_P)
-  range_TP_DIM_P=[param_dict["minimum"], param_dict["maximum"]]
-  return (com.validate_range(range_TP_DIM_P, "TP_DIM_P", TP_DIM_P))
-
-#######################################################
-########### TP_DIM_Q Updater and Validator ###########
-#######################################################
-def update_TP_DIM_Q(args):
-  TP_DIM_Q = args["TP_DIM_Q"]
-  TP_DIM_P = args["TP_DIM_P"]
-  return fn_update_dim_q(TP_DIM_Q, TP_DIM_P)
-
-def fn_update_dim_q(TP_DIM_Q, TP_DIM_P):
-  param_dict ={}
-  param_dict.update({"name" : "TP_DIM_Q"})
-  param_dict.update({"minimum" : TP_DIM_P})
-  param_dict.update({"maximum" : TP_DIM_P})
-  return param_dict
-
-def validate_TP_DIM_Q(args):
-  TP_DIM_Q = args["TP_DIM_Q"]
-  param_dict = update_TP_DIM_Q(args)
-  range_TP_DIM_Q=[param_dict["minimum"], param_dict["maximum"]]
-  return (com.validate_range(range_TP_DIM_Q, "TP_DIM_Q", TP_DIM_Q))
-
-#######################################################
-########## TP_NUM_FRAMES Updater and Validator ########
-#######################################################
-def update_TP_NUM_FRAMES(args):
-  return fn_update_num_frames()
-
-def fn_update_num_frames():
-  param_dict={
-    "name" : "TP_NUM_FRAMES",
-    "minimum" : TP_NUM_FRAMES_MIN,
-    "maximum" : TP_NUM_FRAMES_MAX
-  }
-  return param_dict
-
-def validate_TP_NUM_FRAMES(args):
-  TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
-  return fn_validate_num_frames(TP_NUM_FRAMES)
-
-def fn_validate_num_frames(TP_NUM_FRAMES):
-  param_dict = fn_update_num_frames()
-  range_TP_NUM_FRAMES = [param_dict["minimum"], param_dict["maximum"]]
-  return com.validate_range(range_TP_NUM_FRAMES, "TP_NUM_FRAMES", TP_NUM_FRAMES)
+def validate_TP_DIM(args):
+  TP_DIM = args["TP_DIM"]
+  param_dict = fn_update_dim(TP_DIM)
+  range_TP_DIM=[param_dict["minimum"], param_dict["maximum"]]
+  return (com.validate_range(range_TP_DIM, "TP_DIM", TP_DIM))
 
 #######################################################
 ######### TP_IS_OUTPUT_SQUARED Updater and Validator #########
@@ -392,26 +278,7 @@ def validate_TP_SAT(args):
   TP_SAT = args["TP_SAT"]
   return com.fn_validate_satMode(TP_SAT)
 
-#######################################################
-############# TP_API Updater and Validator ############
-#######################################################
-def update_TP_API(args):
-  return fn_update_api()
 
-def fn_update_api():
-  param_dict={
-    "name" : "TP_API",
-    "enum" : [com.API_BUFFER, com.API_STREAM]
-  }
-  return param_dict
-
-def validate_TP_API(args):
-  TP_API = args["TP_API"]
-  return fn_validate_api(TP_API)
-
-def fn_validate_api(TP_API):
-  param_dict = fn_update_api()
-  return(com.validate_legal_set(param_dict["enum"], "TP_API", TP_API))
 
 #######################################################
 # Utility Functions
@@ -424,37 +291,38 @@ def fn_get_valid_in_data_types(TT_DATA, AIE_VARIANT):
         if (TT_DATA == "bfloat16"):   return ["bfloat16"]
     return []
 
-#### Valid input data types ####
-def fn_get_valid_out_data_types(TT_DATA_P, TT_DATA_Q):   # Don't feel too good with these functions but it's where we're at.
-    if (TT_DATA_P == "float")       and (TT_DATA_Q == "float"):     return ["float"]
-    if (TT_DATA_P == "bfloat16")    and (TT_DATA_Q == "bfloat16"):  return ["bfloat16"]
-    return []
-
-def getNumLanes(TT_DATA_P, TT_DATA_Q, AIE_VARIANT=1):
+def getNumLanes(TT_DATA, AIE_VARIANT=1):
     if AIE_VARIANT == com.AIE:
         if (
-            (TT_DATA_P == "float" and  TT_DATA_Q == "float")  
+            (TT_DATA == "float")  
           ):
             return 8
         else:
             return 0
     if AIE_VARIANT == com.AIE_ML or AIE_VARIANT == com.AIE_MLv2:
         if (
-            (TT_DATA_P == "float" and TT_DATA_Q == "float") or
-            (TT_DATA_P == "bfloat16" and TT_DATA_Q == "bfloat16")
+            (TT_DATA == "float" ) or
+            (TT_DATA == "bfloat16")
             ) :
             return 16
         else:
             return 0
+#### Valid output data types ####
+def fn_get_valid_out_data_types(TT_DATA):   # Don't feel too good with these functions but it's where we're at.
+    if (TT_DATA == "float") :     return ["float"]
+    if (TT_DATA == "bfloat16"):  return ["bfloat16"]
+    return []
+
+
 
 ########################## Ports ###########################
-def get_port_info(portname, dir, dataType, dim, numFrames, apiType, vectorLength):
+def get_port_info(portname, dir, dataType, dim, apiType, vectorLength):
     return [{
         "name" : f"{portname}[{idx}]",
         "type" : f"{apiType}",
         "direction": f"{dir}",
         "data_type": dataType,
-        "window_size" : com.fn_input_window_size((dim*numFrames), dataType),
+        "window_size" : com.fn_input_window_size((dim), dataType),
         "margin_size" : 0
     } for idx in range(vectorLength)]
 
@@ -463,50 +331,42 @@ def info_ports(args):
     for upper software to correctly connect the IP.
     Some IP has a configurable number of ports according to parameter set,
     so port information has to be implemented as a function"""
-    TT_DATA_P = args["TT_DATA_P"]
-    TT_DATA_Q = args["TT_DATA_Q"]
-    TT_DATA_OUT = args["TT_DATA_OUT"]
-    TP_LEN_P = args["TP_LEN_P"]
-    TP_LEN_Q = args["TP_LEN_Q"]
-    TP_DIM_P = args["TP_DIM_P"]
-    TP_DIM_Q = args["TP_DIM_Q"]
+    TT_DATA = args["TT_DATA"]
+    TP_LEN = args["TP_LEN"]
+    TP_DIM = args["TP_DIM"]
     TP_API = args["TP_API"]
     TP_RND = args["TP_RND"]
     TP_SAT = args["TP_SAT"]
-    TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
     TP_IS_OUTPUT_SQUARED = args["TP_IS_OUTPUT_SQUARED"]
     AIE_VARIANT = args["AIE_VARIANT"]
 
-    inDataLen =  (TP_LEN_P*TP_DIM_P*TP_NUM_FRAMES)
-    outDataLen = (TP_LEN_P*TP_NUM_FRAMES)
+    inDataLen =  (TP_LEN*TP_DIM)
+    outDataLen = (TP_LEN)
 
     if (TP_API == com.API_BUFFER) :
         portsInP = get_port_info(
             portname = "inP",
             dir = "in",
-            dataType = TT_DATA_P,
+            dataType = TT_DATA,
             dim = inDataLen,
-            numFrames = TP_NUM_FRAMES,
             apiType = "window",
-            vectorLength = TP_LEN_P
+            vectorLength = TP_LEN
         )
         portsInQ = get_port_info(
             portname = "inQ",
             dir = "in",
-            dataType = TT_DATA_Q,
+            dataType = TT_DATA,
             dim = inDataLen,
-            numFrames = TP_NUM_FRAMES,
             apiType = "window",
-            vectorLength = TP_LEN_P
+            vectorLength = TP_LEN
         )
         portsOut = get_port_info(
             portname = "out",
             dir = "out",
-            dataType = TT_DATA_OUT,
+            dataType = TT_DATA,
             dim = outDataLen,
-            numFrames = TP_NUM_FRAMES,
             apiType = "window",
-            vectorLength = TP_LEN_P
+            vectorLength = TP_LEN
         )
         pass
 
@@ -518,17 +378,12 @@ def generate_graph(graphname, args):
     if graphname == "":
         graphname = "default_graphname"
 
-    TT_DATA_P = args["TT_DATA_P"]
-    TT_DATA_Q = args["TT_DATA_Q"]
-    TT_DATA_OUT = args["TT_DATA_OUT"]
-    TP_LEN_P = args["TP_LEN_P"]
-    TP_LEN_Q = args["TP_LEN_Q"]
-    TP_DIM_P = args["TP_DIM_P"]
-    TP_DIM_Q = args["TP_DIM_Q"]
+    TT_DATA = args["TT_DATA"]
+    TP_LEN = args["TP_LEN"]
+    TP_DIM = args["TP_DIM"]
     TP_API = args["TP_API"]
     TP_RND = args["TP_RND"]
     TP_SAT = args["TP_SAT"]
-    TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
     TP_IS_OUTPUT_SQUARED = args["TP_IS_OUTPUT_SQUARED"]
     AIE_VARIANT = args["AIE_VARIANT"]
 
@@ -545,17 +400,12 @@ public:
   std::array<adf::port<output>, 1> out;
 
   xf::dsp::aie::euclidean_distance::euclidean_distance_graph<
-    {TT_DATA_P}, // TT_DATA_P
-    {TT_DATA_Q}, // TT_DATA_Q
-    {TT_DATA_OUT}, // TT_DATA_OUT
-    {TP_LEN_P}, // TP_LEN_P
-    {TP_LEN_Q}, //TP_LEN_Q
-    {TP_DIM_P}, // TP_DIM_P
-    {TP_DIM_Q}, //TP_DIM_Q
+    {TT_DATA}, // TT_DATA
+    {TP_LEN}, // TP_LEN
+    {TP_DIM}, // TP_DIM
     {TP_API}, //TP_API
     {TP_RND}, //TP_RND
     {TP_SAT}, // TP_SAT
-    {TP_NUM_FRAMES}, // TP_NUM_FRAMES
     {TP_IS_OUTPUT_SQUARED}, //TP_IS_OUTPUT_SQUARED
     > euclidean_distance_graph;
 
@@ -567,7 +417,7 @@ public:
     adf::connect<> net_in(inP, euclidean_distance_graph.inP[0]);
     adf::connect<> net_in(inQ, euclidean_distance_graph.inQ[1]);
     adf::connect<> net_out(euclidean_distance_graph.out, out[0]);
-   
+
   }}
 }};
 """)

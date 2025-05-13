@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,28 +59,21 @@ class test_graph : public graph {
         printf(QUOTE(UUT_GRAPH));
         printf("\n");
         printf("=============================================================\n");
-        printf("Data type of Point P.  = ");
-        printf(QUOTE(DATA_P));
-        printf("\n");
-        printf("Data type of Point Q.  = ");
-        printf(QUOTE(DATA_Q));
+        printf("Data type of Point P, Q and Output of ED.  = ");
+        printf(QUOTE(DATA));
         printf("\n");
         printf("Data type of euclidean_distance Output.  = ");
         printf(QUOTE(DATA_OUT));
         printf("\n");
-        printf("LEN_P                 = %d \n", LEN_P);
-        printf("LEN_Q                 = %d \n", LEN_Q);
-        printf("DIM_P                 = %d \n", DIM_P);
-        printf("DIM_Q                 = %d \n", DIM_Q);
+        printf("LEN                 = %d \n", LEN);
+        printf("DIM                 = %d \n", DIM);
         printf("API                   = %d \n", API_IO);
         printf("RND                   = %d \n", RND);
         printf("SAT                   = %d \n", SAT);
-        printf("NUM_FRAMES            = %d \n", NUM_FRAMES);
         printf("IS_OUTPUT_SQUARED     = %d \n", IS_OUTPUT_SQUARED);
 
         // euclidean_distance sub-graph
-        dsplib::euclidean_distance::UUT_GRAPH<DATA_P, DATA_Q, DATA_OUT, LEN_P, LEN_Q, DIM_P, DIM_Q, API_IO, RND, SAT,
-                                              NUM_FRAMES, IS_OUTPUT_SQUARED>
+        dsplib::euclidean_distance::UUT_GRAPH<DATA, DATA_OUT, LEN, DIM, API_IO, RND, SAT, IS_OUTPUT_SQUARED>
             euclidean_distanceGraph;
 
         // Make connections:

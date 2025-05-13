@@ -1,5 +1,6 @@
 ..
-   Copyright © 2019–2024 Advanced Micro Devices, Inc
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -47,9 +48,9 @@ AMD documentation is organized around a set of standard design processes to help
    -  :ref:`DFT`
 
    -  :ref:`FFT_IFFT`
-   
+
    -  :ref:`FFT_2D`
-   
+
    -  :ref:`FFT_WINDOW`
 
    -  :ref:`FILTERS`
@@ -65,7 +66,7 @@ AMD documentation is organized around a set of standard design processes to help
    -  :ref:`MATRIX_MULTIPLY`
 
    -  :ref:`MATRIX_VECTOR_MULTIPLY`
-   
+
    -  :ref:`MIXED_RADIX_FFT`
 
    -  :ref:`OUTER_TENSOR_PRODUCT`

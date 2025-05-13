@@ -19,7 +19,7 @@
         "variant": "AIE_MLv2",
         "enum": [0, 1, 2, 3, 8, 9, 10, 11,12],
         "enum_str": ["Floor", "Ceiling", "Round symmetrical to floor", "Round symmetrical to ceiling", "Round to negative infinity", "Round to positive infinity", "Round symmetrical to zero", "Round symmetrical to infinity", "Round convergent to even", "Round convergent to odd"]
-  
+
       }
  ],
 "RoundingModesFFT": [
@@ -43,7 +43,7 @@
         "variant": "AIE_MLv2",
         "enum": [8, 9, 10, 11,12],
         "enum_str": ["Round to negative infinity", "Round to positive infinity", "Round symmetrical to zero", "Round symmetrical to infinity", "Round convergent to even", "Round convergent to odd"]
-  
+
         }
 
 

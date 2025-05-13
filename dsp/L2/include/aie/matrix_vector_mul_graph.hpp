@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -264,12 +264,36 @@ class create_casc_kernel<1,
  *         chain of cascaded kernels will be the same across all SSR ranks.
  * @tparam TP_DIM_A_LEADING describes the leading dimension of the Matrix A data.
  *         If TP_DIM_A_LEADING=1, the columns of the matrix are contiguous in memory. This is the only supported order
- *         of Matrix A input data when doing the computation. \n
- *         However, if TP_DIM_A_LEADING=0, the rows of the matrix input are contiguous in memory and will be transposed
- *         at the input ports for each kernel using DMA Buffer Descriptors.
- *         This feature is currently only supported when TT_DATA_A is cint16, int32 or float, and NUM_FRAMES=1. \n
- *         If TT_DATA_A is int16, cint32 or cfloat or NUM_FRAMES > 1, the input matrix data must be transposed outwith
- *         the graph port connection to a column major order, and TP_DIM_A_LEADING must be set to 1. \n
+ *         of Matrix A input data for computation. \n
+ *         If TP_DIM_A_LEADING=0, the rows of the matrix input are contiguous in memory and will be transposed
+ *         at the input ports for each kernel using DMA Buffer Descriptors. \n
+ *         Note: This feature is only supported when TT_DATA_A is cint16, int32, or float, and TP_NUM_FRAMES=1. \n
+ *         For other TT_DATA_A types or when TP_NUM_FRAMES > 1, the input matrix data must be transposed externally
+ *         to a column-major order, and TP_DIM_A_LEADING must be set to 1.
+ * @tparam TP_USE_MATRIX_RELOAD describes whether the input Matrix A is provided via an RTP port. This allows the user
+ *         to provide and reload Matrix values at runtime. The matrix provided to the RTP will be used for successive
+ *         iterations until updated with new values. The columns of the RTP matrix input must be contiguous
+ *         in memory (TP_DIM_A_LEADING = 1). The matrix data must be split according to TP_SSR and TP_CASC_LEN
+ *         requirements, and each kernel in the design must receive its correct portion of the matrix via the RTP
+ *         ports. \n
+ *         Supported values: \n
+ *         0 - iobuffer A port(s) \n
+ *         1 - RTP A port(s) \n
+ * @tparam TP_API describes the interface of the vector input (iobuffer or stream) when using reloadable matrix inputs
+ *         (TP_USE_MATRIX_RELOAD = 1). If TP_USE_MATRIX_RELOAD = 0, the vector must be provided via iobuffer port(s)
+ *         (TP_API = 0). \n
+ *         Supported values: \n
+ *         0 - iobuffer B port(s) - supported for TP_USE_MATRIX_RELOAD = 0 and TP_USE_MATRIX_RELOAD = 1 \n
+ *         1 - stream B port(s) - supported only for TP_USE_MATRIX_RELOAD = 1 \n
+ * @tparam TP_DUAL_IP describes whether dual inputs are used for the Vector B port(s) when TP_API = 1 and
+ *TP_USE_MATRIX_RELOAD = 1. \n
+ *         Supported values: \n
+ *         0 - single vector input port (stream or iobuffer) for each kernel \n
+ *         1 - dual vector input stream ports for each kernel. Only supported when TP_API = 1 on AIE devices.
+ * @tparam TP_NUM_OUTPUTS describes the number of outputs used when TP_API = 1 and TP_USE_MATRIX_RELOAD = 1. \n
+ *         Supported values: \n
+ *         0 - single stream or iobuffer output port \n
+ *         1 - dual output stream ports per TP_SSR rank. Only supported when TP_API = 1 on AIE devices.
  **/
 template <typename TT_DATA_A,
           typename TT_DATA_B,
@@ -319,6 +343,9 @@ class matrix_vector_mul_graph : public graph {
      *TP_NUM_FRAMES.
      **/
     port_conditional_array<input, (TP_USE_MATRIX_RELOAD == 0), (TP_SSR * TP_CASC_LEN)> inA;
+    /**
+     * RTP port input for Matrix A when TP_USE_MATRIX_RELOAD = 1.
+     **/
     port_conditional_array<input, (TP_USE_MATRIX_RELOAD == 1), (TP_SSR * TP_CASC_LEN)> matrixA;
     /**
      * Input to the function, Vector B.

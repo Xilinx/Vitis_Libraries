@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -181,7 +181,9 @@ def update_TP_FIR_LEN(args):
     )
 
 
-def fn_update_TP_FIR_LEN(TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN):
+def fn_update_TP_FIR_LEN(
+    TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN
+):
     if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2:
         firLenPerPhaseDivider = TP_DECIMATE_FACTOR_max
     else:
@@ -209,7 +211,9 @@ def fn_update_TP_FIR_LEN(TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, AIE_VAR
         "maximum": TP_FIR_LEN_max_int2,
     }
 
-    initial_legal_set_TP_DECIMATE_FACTOR=fn_det_initial_set_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF)
+    initial_legal_set_TP_DECIMATE_FACTOR = fn_det_initial_set_TP_DECIMATE_FACTOR(
+        AIE_VARIANT, TT_DATA, TT_COEFF
+    )
 
     if TP_FIR_LEN != 0:
         for deci_fact in initial_legal_set_TP_DECIMATE_FACTOR:
@@ -245,7 +249,9 @@ def validate_TP_FIR_LEN(args):
 def fn_validate_TP_FIR_LEN(
     TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, AIE_VARIANT, TP_FIR_LEN
 ):
-    initial_legal_set_TP_DECIMATE_FACTOR=fn_det_initial_set_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF)
+    initial_legal_set_TP_DECIMATE_FACTOR = fn_det_initial_set_TP_DECIMATE_FACTOR(
+        AIE_VARIANT, TT_DATA, TT_COEFF
+    )
 
     for deci_fact in initial_legal_set_TP_DECIMATE_FACTOR:
         if TP_FIR_LEN % deci_fact == 0:
@@ -269,12 +275,18 @@ def update_TP_DECIMATE_FACTOR(args):
     TP_API = args["TP_API"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
-    return fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN)
+    return fn_update_TP_DECIMATE_FACTOR(
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN
+    )
 
 
-def fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN):
+def fn_update_TP_DECIMATE_FACTOR(
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN
+):
 
-    legal_set_deci_factor=fn_det_initial_set_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF)
+    legal_set_deci_factor = fn_det_initial_set_TP_DECIMATE_FACTOR(
+        AIE_VARIANT, TT_DATA, TT_COEFF
+    )
 
     remove_set = []
     for deci_fac in legal_set_deci_factor.copy():
@@ -284,15 +296,15 @@ def fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_
     legal_set_deci_factor_1 = remove_from_set(remove_set, legal_set_deci_factor.copy())
 
     for deci_fac in legal_set_deci_factor_1.copy():
-        param_dict_TP_SSR=fn_update_TP_SSR(
-                            AIE_VARIANT,
-                            TT_DATA,
-                            TT_COEFF,
-                            TP_API,
-                            TP_FIR_LEN,
-                            TP_USE_COEFF_RELOAD,
-                            deci_fac,
-                        )
+        param_dict_TP_SSR = fn_update_TP_SSR(
+            AIE_VARIANT,
+            TT_DATA,
+            TT_COEFF,
+            TP_API,
+            TP_FIR_LEN,
+            TP_USE_COEFF_RELOAD,
+            deci_fac,
+        )
         if "enum" in param_dict_TP_SSR and param_dict_TP_SSR["enum"] == []:
             legal_set_deci_factor_1.remove(deci_fac)
 
@@ -308,11 +320,29 @@ def validate_TP_DECIMATE_FACTOR(args):
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
-    return fn_validate_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN, TP_DECIMATE_FACTOR)
+    return fn_validate_TP_DECIMATE_FACTOR(
+        AIE_VARIANT,
+        TT_DATA,
+        TT_COEFF,
+        TP_API,
+        TP_USE_COEFF_RELOAD,
+        TP_FIR_LEN,
+        TP_DECIMATE_FACTOR,
+    )
 
 
-def fn_validate_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN, TP_DECIMATE_FACTOR):
-    param_dict = fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN)
+def fn_validate_TP_DECIMATE_FACTOR(
+    AIE_VARIANT,
+    TT_DATA,
+    TT_COEFF,
+    TP_API,
+    TP_USE_COEFF_RELOAD,
+    TP_FIR_LEN,
+    TP_DECIMATE_FACTOR,
+):
+    param_dict = fn_update_TP_DECIMATE_FACTOR(
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN
+    )
     return validate_legal_set(
         param_dict["enum"], "TP_DECIMATE_FACTOR", TP_DECIMATE_FACTOR
     )
@@ -507,8 +537,10 @@ def update_TP_SSR(args):
     # if we've decomposed to another type of kernel, then import that kernel and use that update function
     if uut_kernel != current_uut_kernel:
         other_kernel = importlib.import_module(uut_kernel)
-        param_dict=other_kernel.update_TP_SSR(args)
-        if args["TP_API"] == API_BUFFER:#This check is added to match with the static assert(graph-224)
+        param_dict = other_kernel.update_TP_SSR(args)
+        if (
+            args["TP_API"] == API_BUFFER
+        ):  # This check is added to match with the static assert(graph-224)
             legal_set_TP_SSR = [1]
             param_dict.update({"enum": legal_set_TP_SSR})
         return param_dict
@@ -579,7 +611,9 @@ def validate_TP_SSR(args):
     # if we've decomposed to another type of kernel, then import that kernel and use that update function
     if uut_kernel != current_uut_kernel:
         other_kernel = importlib.import_module(uut_kernel)
-        if args["TP_API"] == API_BUFFER: #This check is added to match with the static assert(graph-224)
+        if (
+            args["TP_API"] == API_BUFFER
+        ):  # This check is added to match with the static assert(graph-224)
             return validate_legal_set([1], "TP_SSR", args["TP_SSR"])
         return other_kernel.validate_TP_SSR(args)
     else:

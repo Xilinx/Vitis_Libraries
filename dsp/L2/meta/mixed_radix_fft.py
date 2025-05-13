@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,11 +19,7 @@ import aie_common as com
 # import json
 # import sys
 
-k_minpoint_size={
-    com.AIE: 8,
-    com.AIE_ML: 16,
-    com.AIE_MLv2: 16
-}
+k_minpoint_size = {com.AIE: 8, com.AIE_ML: 16, com.AIE_MLv2: 16}
 
 TP_POINT_SIZE_max = 3300
 
@@ -64,40 +60,54 @@ def fn_get_radix_stages(TP_POINT_SIZE, radix):
 
 def fn_get_num_stages(TP_POINT_SIZE):
     r4_stages = 0
-    r2_stages = fn_get_radix_stages(TP_POINT_SIZE,2)
-    r3_stages = fn_get_radix_stages(TP_POINT_SIZE,3)
-    r5_stages = fn_get_radix_stages(TP_POINT_SIZE,5)
+    r2_stages = fn_get_radix_stages(TP_POINT_SIZE, 2)
+    r3_stages = fn_get_radix_stages(TP_POINT_SIZE, 3)
+    r5_stages = fn_get_radix_stages(TP_POINT_SIZE, 5)
 
-    if (r2_stages >= 4):
+    if r2_stages >= 4:
         r4_stages = r2_stages // 2
         r2_stages = r2_stages % 2
 
-    return (r2_stages , r3_stages , r4_stages , r5_stages)
+    return (r2_stages, r3_stages, r4_stages, r5_stages)
+
 
 def calc_total_num_stages(TP_POINT_SIZE):
-  r2_stages, r3_stages, r4_stages, r5_stages= fn_get_num_stages(TP_POINT_SIZE)
-  return r2_stages + r3_stages + r4_stages + r5_stages
+    r2_stages, r3_stages, r4_stages, r5_stages = fn_get_num_stages(TP_POINT_SIZE)
+    return r2_stages + r3_stages + r4_stages + r5_stages
+
 
 def calc_mul_num_stages(TP_POINT_SIZE):
-  r2_stages, r3_stages, r4_stages, r5_stages= fn_get_num_stages(TP_POINT_SIZE)
-  if TP_POINT_SIZE == 2**r2_stages * 3**r3_stages * 4**r4_stages * 5**r5_stages:
-    return True
-  else: return False
+    r2_stages, r3_stages, r4_stages, r5_stages = fn_get_num_stages(TP_POINT_SIZE)
+    if TP_POINT_SIZE == 2**r2_stages * 3**r3_stages * 4**r4_stages * 5**r5_stages:
+        return True
+    else:
+        return False
+
 
 def check_point_size_common_mul(AIE_VARIANT, TP_POINT_SIZE):
-    common_mult=k_minpoint_size[AIE_VARIANT]
+    common_mult = k_minpoint_size[AIE_VARIANT]
     if TP_POINT_SIZE % common_mult == 0:
         return True
     return False
 
-def fn_get_nearest_valid_pt_size(AIE_VARIANT,TP_POINT_SIZE):
-  offset = 0
-  while(True):
-    if calc_total_num_stages(abs(TP_POINT_SIZE - offset)) and calc_mul_num_stages(abs(TP_POINT_SIZE - offset)) and check_point_size_common_mul(AIE_VARIANT, abs(TP_POINT_SIZE - offset)):
-      return abs(TP_POINT_SIZE - offset)
-    elif calc_total_num_stages(TP_POINT_SIZE + offset) and calc_mul_num_stages(TP_POINT_SIZE + offset) and check_point_size_common_mul(AIE_VARIANT, (TP_POINT_SIZE + offset)):
-      return TP_POINT_SIZE + offset
-    offset += 1
+
+def fn_get_nearest_valid_pt_size(AIE_VARIANT, TP_POINT_SIZE):
+    offset = 0
+    while True:
+        if (
+            calc_total_num_stages(abs(TP_POINT_SIZE - offset))
+            and calc_mul_num_stages(abs(TP_POINT_SIZE - offset))
+            and check_point_size_common_mul(AIE_VARIANT, abs(TP_POINT_SIZE - offset))
+        ):
+            return abs(TP_POINT_SIZE - offset)
+        elif (
+            calc_total_num_stages(TP_POINT_SIZE + offset)
+            and calc_mul_num_stages(TP_POINT_SIZE + offset)
+            and check_point_size_common_mul(AIE_VARIANT, (TP_POINT_SIZE + offset))
+        ):
+            return TP_POINT_SIZE + offset
+        offset += 1
+
 
 #######################################################
 ########### AIE_VARIANT Updater and Validator #########
@@ -187,36 +197,38 @@ def fn_validate_twiddle_type(AIE_VARIANT, TT_TWIDDLE, TT_DATA):
 ######## TP_POINT_SIZE Updater and Validator ##########
 #######################################################
 def update_TP_POINT_SIZE(args):
-  AIE_VARIANT = args["AIE_VARIANT"]
-  TT_DATA = args["TT_DATA"]
-  # TP_API = args["TP_API"] // does this affect point size?
-  TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
- 
-  if "TP_POINT_SIZE" in args and args["TP_POINT_SIZE"]:
-     TP_POINT_SIZE = args["TP_POINT_SIZE"] 
-  else: TP_POINT_SIZE = 0
-  return fn_update_point_size(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_DYN_PT_SIZE)
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TT_DATA = args["TT_DATA"]
+    # TP_API = args["TP_API"] // does this affect point size?
+    TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
+
+    if "TP_POINT_SIZE" in args and args["TP_POINT_SIZE"]:
+        TP_POINT_SIZE = args["TP_POINT_SIZE"]
+    else:
+        TP_POINT_SIZE = 0
+    return fn_update_point_size(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_DYN_PT_SIZE)
+
 
 def fn_update_point_size(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_DYN_PT_SIZE):
     TP_POINT_SIZE_min = k_minpoint_size[AIE_VARIANT]
     TP_POINT_SIZE_max = com.k_data_memory_bytes[AIE_VARIANT] // com.fn_size_by_byte(
         TT_DATA
     )
-    TP_POINT_SIZE_max_pp=int(TP_POINT_SIZE_max/2)
+    TP_POINT_SIZE_max_pp = int(TP_POINT_SIZE_max / 2)
 
     if TP_DYN_PT_SIZE == 1:
-      if AIE_VARIANT == com.AIE:
-        TP_POINT_SIZE_max = 480
-        TP_POINT_SIZE_max_pp = 480
-      else:
-        TP_POINT_SIZE_max = 1920
-        TP_POINT_SIZE_max_pp = 1920
+        if AIE_VARIANT == com.AIE:
+            TP_POINT_SIZE_max = 480
+            TP_POINT_SIZE_max_pp = 480
+        else:
+            TP_POINT_SIZE_max = 1920
+            TP_POINT_SIZE_max_pp = 1920
 
-    param_dict ={
-        "name" : "TP_POINT_SIZE",
-        "minimum" : TP_POINT_SIZE_min,
-        "maximum" : TP_POINT_SIZE_max,
-        "maximum_pingpong_buf" : TP_POINT_SIZE_max_pp
+    param_dict = {
+        "name": "TP_POINT_SIZE",
+        "minimum": TP_POINT_SIZE_min,
+        "maximum": TP_POINT_SIZE_max,
+        "maximum_pingpong_buf": TP_POINT_SIZE_max_pp,
     }
 
     TP_POINT_SIZE_act = fn_get_nearest_valid_pt_size(AIE_VARIANT, TP_POINT_SIZE)
@@ -245,7 +257,11 @@ def fn_validate_point_size(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_DYN_PT_SIZE):
     )
     range_TP_POINT_SIZE = [param_dict["minimum"], param_dict["maximum"]]
 
-    if calc_total_num_stages(TP_POINT_SIZE) == 0 or not (calc_mul_num_stages(TP_POINT_SIZE)) or not(check_point_size_common_mul(AIE_VARIANT, TP_POINT_SIZE)):
+    if (
+        calc_total_num_stages(TP_POINT_SIZE) == 0
+        or not (calc_mul_num_stages(TP_POINT_SIZE))
+        or not (check_point_size_common_mul(AIE_VARIANT, TP_POINT_SIZE))
+    ):
         return com.isError(f"Point size ({TP_POINT_SIZE}) does not factorize.")
     return com.validate_range(range_TP_POINT_SIZE, "TP_POINT_SIZE", TP_POINT_SIZE)
 
@@ -259,9 +275,12 @@ def update_TP_WINDOW_VSIZE(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
 
-    if "TP_WINDOW_VSIZE" in args and args["TP_WINDOW_VSIZE"]: TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
-    else: TP_WINDOW_VSIZE = 0
+    if "TP_WINDOW_VSIZE" in args and args["TP_WINDOW_VSIZE"]:
+        TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
+    else:
+        TP_WINDOW_VSIZE = 0
     return fn_update_window_vsize(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_WINDOW_VSIZE)
+
 
 def fn_update_window_vsize(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_WINDOW_VSIZE):
     TP_WINDOW_VSIZE_min = TP_POINT_SIZE
@@ -269,13 +288,13 @@ def fn_update_window_vsize(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_WINDOW_VSIZE)
     num_frames = com.k_data_memory_bytes[AIE_VARIANT] // frame_bytes
     TP_WINDOW_VSIZE_max = num_frames * TP_POINT_SIZE
 
-    param_dict ={
-        "name" : "TP_WINDOW_VSIZE",
-        "minimum" : TP_WINDOW_VSIZE_min,
-        "maximum" : TP_WINDOW_VSIZE_max,
-        "maximum_pingpong_buf" : int(TP_WINDOW_VSIZE_max/2)
+    param_dict = {
+        "name": "TP_WINDOW_VSIZE",
+        "minimum": TP_WINDOW_VSIZE_min,
+        "maximum": TP_WINDOW_VSIZE_max,
+        "maximum_pingpong_buf": int(TP_WINDOW_VSIZE_max / 2),
     }
-    TP_WINDOW_VSIZE_act = round(TP_WINDOW_VSIZE/TP_POINT_SIZE) * TP_POINT_SIZE
+    TP_WINDOW_VSIZE_act = round(TP_WINDOW_VSIZE / TP_POINT_SIZE) * TP_POINT_SIZE
 
     if TP_WINDOW_VSIZE_act < param_dict["minimum"]:
         param_dict["actual"] = param_dict["minimum"]
@@ -415,13 +434,14 @@ def update_TP_RND(args):
 
 def fn_update_rnd(AIE_VARIANT):
     legal_set_TP_RND = com.fn_get_legalSet_roundMode(AIE_VARIANT)
-    illegal_rnd_modes=[0, 1, 2, 3]
-    legal_set_TP_RND=com.remove_from_set(illegal_rnd_modes, legal_set_TP_RND)
+    illegal_rnd_modes = [0, 1, 2, 3]
+    legal_set_TP_RND = com.remove_from_set(illegal_rnd_modes, legal_set_TP_RND)
 
-    param_dict={}
-    param_dict.update({"name" : "TP_RND"})
-    param_dict.update({"enum" : legal_set_TP_RND})
+    param_dict = {}
+    param_dict.update({"name": "TP_RND"})
+    param_dict.update({"enum": legal_set_TP_RND})
     return param_dict
+
 
 def validate_TP_RND(args):
     AIE_VARIANT = args["AIE_VARIANT"]
@@ -493,12 +513,13 @@ def update_TP_CASC_LEN(args):
 
 
 def fn_update_casc_len(TP_POINT_SIZE, TP_DYN_PT_SIZE):
-  param_dict={
-    "name" : "TP_CASC_LEN",
-    "minimum" : 1,
-    "maximum" : 1 if TP_DYN_PT_SIZE else calc_total_num_stages(TP_POINT_SIZE)
-  }
-  return param_dict
+    param_dict = {
+        "name": "TP_CASC_LEN",
+        "minimum": 1,
+        "maximum": 1 if TP_DYN_PT_SIZE else calc_total_num_stages(TP_POINT_SIZE),
+    }
+    return param_dict
+
 
 def validate_TP_CASC_LEN(args):
     TP_CASC_LEN = args["TP_CASC_LEN"]

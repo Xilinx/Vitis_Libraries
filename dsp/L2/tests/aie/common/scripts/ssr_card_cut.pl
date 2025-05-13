@@ -1,7 +1,7 @@
 
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ use File::Basename;
 use Term::ReadLine;
 my $usage = "
 This script will split an input text file of matrice samples into an SSR*CASC_LEN number of files. SSR will be split along column, CASC_LEN will be split across row:
-ssr_matrix_split.pl -f input.txt --rows 16 --cols 24 --ssrSplit 2 --casc 3 --columnMajor --split -t int32  
+ssr_matrix_split.pl -f input.txt --rows 16 --cols 24 --ssrSplit 2 --casc 3 --columnMajor --split -t int32
     The above will output data/input_0.txt data/input_1.txt, where input_0.txt has samples 0, 2, 4, 6, 8.. and input_1.txt has samples 1, 3, 5...
 options:
     -f|--file=s                                       => filepath containing data to be split or resultant filepath containing interleaved data.
@@ -106,9 +106,9 @@ if ( ($zip) and ($findOutType ne "") ) {
     } elsif ($type eq "cint16" and $findOutType eq "cint16") {
         $type = "cint16";
     } elsif ($type eq "cint16" and $findOutType eq "int16") {
-        $type = "cint16";     
+        $type = "cint16";
     } elsif ($type eq "cint16" and $findOutType eq "int32") {
-        $type = "cint32"; 
+        $type = "cint32";
     } elsif ($type eq "int16" and $findOutType eq "int16") {
         $type = "int16";
     } elsif ($type eq "int16" and $findOutType eq "cint16") {
@@ -117,29 +117,29 @@ if ( ($zip) and ($findOutType ne "") ) {
         $type = "int32";
 
     }
-    # print "Output type is $type\n"; 
+    # print "Output type is $type\n";
 }
 
-# Define properties for each data type  
-my %type_properties = (  
-    'uint8'     => { numParts => 1, partSize => 8  },  
-    'uint16'    => { numParts => 1, partSize => 16 },  
-    'uint32'    => { numParts => 1, partSize => 32 },  
-    'int8'      => { numParts => 1, partSize => 8  },  
-    'int16'     => { numParts => 1, partSize => 16 },  
-    'int32'     => { numParts => 1, partSize => 32 },  
-    'float'     => { numParts => 1, partSize => 32 },  
-    'bfloat16'  => { numParts => 1, partSize => 16 },  
-    'cint8'     => { numParts => 2, partSize => 8  },  
-    'cint16'    => { numParts => 2, partSize => 16 },  
-    'cint32'    => { numParts => 2, partSize => 32 },  
-    'cfloat'    => { numParts => 2, partSize => 32 },  
-    'cbfloat16' => { numParts => 2, partSize => 16 },  
-); 
+# Define properties for each data type
+my %type_properties = (
+    'uint8'     => { numParts => 1, partSize => 8  },
+    'uint16'    => { numParts => 1, partSize => 16 },
+    'uint32'    => { numParts => 1, partSize => 32 },
+    'int8'      => { numParts => 1, partSize => 8  },
+    'int16'     => { numParts => 1, partSize => 16 },
+    'int32'     => { numParts => 1, partSize => 32 },
+    'float'     => { numParts => 1, partSize => 32 },
+    'bfloat16'  => { numParts => 1, partSize => 16 },
+    'cint8'     => { numParts => 2, partSize => 8  },
+    'cint16'    => { numParts => 2, partSize => 16 },
+    'cint32'    => { numParts => 2, partSize => 32 },
+    'cfloat'    => { numParts => 2, partSize => 32 },
+    'cbfloat16' => { numParts => 2, partSize => 16 },
+);
 
 
-# Get properties for the data type  
-my $partsPerSample = $type_properties{$type}{numParts};  
+# Get properties for the data type
+my $partsPerSample = $type_properties{$type}{numParts};
 my $sampleSizeBits = $type_properties{$type}{numParts} * $type_properties{$type}{partSize};
 
 my $samplesPerLine = $plioWidth / $sampleSizeBits;
@@ -153,7 +153,7 @@ my $partsPerLine = $plioWidth / $type_properties{$type}{partSize};
 my $linesPerSample = 1;
 if ($plioWidth < $sampleSizeBits) {
   $linesPerSample = 2;
-} 
+}
 my $data_type_size_bytes = $sampleSizeBits / 8;
 
 
@@ -169,23 +169,23 @@ my @subFilesH;
 my @subFilesFinal;
 my @subFilesFinalH;
 if ($split) {
-  # Read the file into an array  
-  # Open the input file  
+  # Read the file into an array
+  # Open the input file
   open(fileH, "<", $file)
       or die "cannot open $file : $!";
   # Create array of data parts
   my @dataParts;
-  while (my $line = <fileH>) {  
-      chomp $line;  
-      push @dataParts, split ' ', $line;  
-  } 
+  while (my $line = <fileH>) {
+      chomp $line;
+      push @dataParts, split ' ', $line;
+  }
 
     # Open a bunch of files in an array of file handles with a specific filename
-    my @subArrays;  
+    my @subArrays;
     for my $cascIdx (@cascRange){
       for my $ssrIdx (@ssrRange){
           my $fileIdx = $cascIdx + ($ssrIdx)*$casc;
-          $subArrays[$fileIdx] = [];  
+          $subArrays[$fileIdx] = [];
       }
     }
     my $rowNum = 0;
@@ -200,8 +200,8 @@ if ($split) {
     my $colsPerCasc = $cols/$casc;
     my $partNum = 0;
     my $colIdx = 0;
-    for (my $i = 0; $i < @dataParts; $i++) {  
-        my $part = $dataParts[$i];        
+    for (my $i = 0; $i < @dataParts; $i++) {
+        my $part = $dataParts[$i];
 
         my $ssrIndex = $rowNum/$rowsPerSSR;
         my $cascIndex = $colNum/$colsPerCasc;
@@ -211,10 +211,10 @@ if ($split) {
         # print "colNum = $colNum ->";
         # print "fileIdx = $fileIdx\n\n";
 
-        push @{$subArrays[$fileIdx]}, $part;  
-        if($colMajor) { 
+        push @{$subArrays[$fileIdx]}, $part;
+        if($colMajor) {
             # new row with each sample
-            if ($partNum % $partsPerSample == ($partsPerSample - 1)) { 
+            if ($partNum % $partsPerSample == ($partsPerSample - 1)) {
                 $rowNum = $rowNum + 1;
             }
             if ($rowNum == ($rows)) {
@@ -226,7 +226,7 @@ if ($split) {
             }
         } else {
             # new row with each sample
-            if ($partNum % $partsPerSample == ($partsPerSample - 1)) { 
+            if ($partNum % $partsPerSample == ($partsPerSample - 1)) {
                 $colNum = $colNum + 1;
             }
             if ($colNum == ($cols)) {
@@ -237,43 +237,43 @@ if ($split) {
                 $rowNum = 0;
             }
         }
-        $partNum++;   
+        $partNum++;
 
     }
-  # Assuming @subArrays is an array of array references  
+  # Assuming @subArrays is an array of array references
     for my $cascIdx (@cascRange){
         for my $ssrIdx (@ssrRange){
             my $fileIdx = $cascIdx + ($ssrIdx)*$casc;
             $subFiles[$fileIdx] = "${fileDir}${fileName}_${ssrIdx}_${cascIdx}${fileExt}";
-            print "Writing to $subFiles[$fileIdx]\n";  
-                
-            open(my $subFileH, ">", $subFiles[$fileIdx]) or die "Cannot open $subFiles[$fileIdx]: $!";  
-                
-            my @ssrParts = @{$subArrays[$fileIdx]};  
-                
-            # Convert parts back into lines and print directly to the file  
-            for (my $i = 0; $i < @ssrParts; $i += $partsPerLine) {  
-                my $line = join(' ', @ssrParts[$i .. $i + $partsPerLine - 1]) . " \n";  
-                print $subFileH $line;  
-            }  
-                
-            close($subFileH) or die "Cannot close $subFiles[$fileIdx]: $!";  
-      }  
-  } 
+            print "Writing to $subFiles[$fileIdx]\n";
+
+            open(my $subFileH, ">", $subFiles[$fileIdx]) or die "Cannot open $subFiles[$fileIdx]: $!";
+
+            my @ssrParts = @{$subArrays[$fileIdx]};
+
+            # Convert parts back into lines and print directly to the file
+            for (my $i = 0; $i < @ssrParts; $i += $partsPerLine) {
+                my $line = join(' ', @ssrParts[$i .. $i + $partsPerLine - 1]) . " \n";
+                print $subFileH $line;
+            }
+
+            close($subFileH) or die "Cannot close $subFiles[$fileIdx]: $!";
+      }
+  }
 
     # When input is a vector to be split over cascade, it is cloned for each ssr
     print "ssrClone is $ssrClone\n";
-    foreach my $subFile (@subFiles) {  
-        for (my $i = 1; $i < $ssrClone; $i++) {  
+    foreach my $subFile (@subFiles) {
+        for (my $i = 1; $i < $ssrClone; $i++) {
             # print "ssr is $i\n";
-            my $cloneFile = $subFile;  
+            my $cloneFile = $subFile;
             print $subFile;
-            $cloneFile =~ s/_0_/_${i}_/; # replace "_0." with "_$i."  
+            $cloneFile =~ s/_0_/_${i}_/; # replace "_0." with "_$i."
             print $cloneFile;
-            system("cp $subFile $cloneFile"); # clone the file  
-        }  
-    }  
-        
+            system("cp $subFile $cloneFile"); # clone the file
+        }
+    }
+
 
 
     close(fileH)
@@ -287,39 +287,39 @@ if ($zip) {
     # This is required since SSR splits input stream on a sample-by-sample basis.
 
     my @files = map { "./data/uut_output_$_.txt"} (0...$ssrSplit-1);
-    my @filehandles;  
-    my $outfile = $file; # output file 
+    my @filehandles;
+    my $outfile = $file; # output file
 
-    # open all files  
-    for my $file (@files) {  
-        open my $fh, '<', $file or die "Can't open file $file: $!";  
-        push @filehandles, $fh;  
-    }  
-    
-    # open output file  
-    open my $outfh, '>', $outfile or die "Can't open output file $outfile: $!";  
-    
-    # read and write lines  
-    while (1) {  
-        my $eof_count = 0;  
-        for my $fh (@filehandles) {  
-            for (1..$num_lines) {  
-                my $line = <$fh>;  
-                if (defined $line) {  
-                    print $outfh $line;  
-                } else {  
-                    $eof_count++;  
-                    last;  
-                }  
-            }  
-        }  
-        last if $eof_count == scalar @filehandles; # exit loop if all files are at EOF  
-    }  
-    
-    # close all files  
-    for my $fh (@filehandles) {  
-        close $fh;  
-    }  
-    close $outfh; 
+    # open all files
+    for my $file (@files) {
+        open my $fh, '<', $file or die "Can't open file $file: $!";
+        push @filehandles, $fh;
+    }
+
+    # open output file
+    open my $outfh, '>', $outfile or die "Can't open output file $outfile: $!";
+
+    # read and write lines
+    while (1) {
+        my $eof_count = 0;
+        for my $fh (@filehandles) {
+            for (1..$num_lines) {
+                my $line = <$fh>;
+                if (defined $line) {
+                    print $outfh $line;
+                } else {
+                    $eof_count++;
+                    last;
+                }
+            }
+        }
+        last if $eof_count == scalar @filehandles; # exit loop if all files are at EOF
+    }
+
+    # close all files
+    for my $fh (@filehandles) {
+        close $fh;
+    }
+    close $outfh;
 ;}
 

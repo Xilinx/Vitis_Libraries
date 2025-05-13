@@ -18,27 +18,27 @@ static constexpr unsigned int fnPtSizeD1() {
         TP_POINT_SIZE == 65536
             ? 256
             : TP_POINT_SIZE == 32768
-                  ? 128
+                  ? 256
                   : TP_POINT_SIZE == 16384
                         ? 128
                         : TP_POINT_SIZE == 8192
-                              ? 64
+                              ? 128
                               : TP_POINT_SIZE == 4096
                                     ? 64
                                     : TP_POINT_SIZE == 2048
-                                          ? 32
+                                          ? 64
                                           : TP_POINT_SIZE == 1024
                                                 ? 32
                                                 : TP_POINT_SIZE == 512
-                                                      ? 16
+                                                      ? 32
                                                       : TP_POINT_SIZE == 256
                                                             ? 16
                                                             : TP_POINT_SIZE == 128
-                                                                  ? 8
+                                                                  ? 16
                                                                   : TP_POINT_SIZE == 64
                                                                         ? 8
                                                                         : TP_POINT_SIZE == 32
-                                                                              ? 4
+                                                                              ? 8
                                                                               : TP_POINT_SIZE == 16 ? 4 : 0;
     return sqrtVal;
 }

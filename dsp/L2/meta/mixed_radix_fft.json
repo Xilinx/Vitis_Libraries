@@ -36,7 +36,7 @@
             ],
             "updater": {
                 "file": "mixed_radix_fft.py",
-                "function": "update_TT_DATA"           
+                "function": "update_TT_DATA"
             },
             "validator": {
                 "file": "mixed_radix_fft.py",
@@ -56,14 +56,16 @@
                 "file": "mixed_radix_fft.py",
                 "function": "update_TT_TWIDDLE",
                 "args": [
-                     "AIE_VARIANT", "TT_DATA"
+                    "AIE_VARIANT",
+                    "TT_DATA"
                 ]
             },
             "validator": {
                 "file": "mixed_radix_fft.py",
                 "function": "validate_TT_TWIDDLE",
                 "args": [
-                    "AIE_VARIANT", "TT_DATA"
+                    "AIE_VARIANT",
+                    "TT_DATA"
                 ]
             }
         },
@@ -153,14 +155,16 @@
                 "file": "mixed_radix_fft.py",
                 "function": "update_TP_CASC_LEN",
                 "args": [
-                    "TP_POINT_SIZE", "TP_DYN_PT_SIZE"
+                    "TP_POINT_SIZE",
+                    "TP_DYN_PT_SIZE"
                 ]
             },
             "validator": {
                 "file": "mixed_radix_fft.py",
                 "function": "validate_TP_CASC_LEN",
                 "args": [
-                    "TP_POINT_SIZE", "TP_DYN_PT_SIZE"
+                    "TP_POINT_SIZE",
+                    "TP_DYN_PT_SIZE"
                 ]
             }
         },
@@ -171,12 +175,16 @@
             "updater": {
                 "file": "mixed_radix_fft.py",
                 "function": "update_TP_API",
-                "args": ["TP_DYN_PT_SIZE"]
+                "args": [
+                    "TP_DYN_PT_SIZE"
+                ]
             },
             "validator": {
                 "file": "mixed_radix_fft.py",
                 "function": "validate_TP_API",
-                "args": ["TP_DYN_PT_SIZE"]
+                "args": [
+                    "TP_DYN_PT_SIZE"
+                ]
             }
         },
         {

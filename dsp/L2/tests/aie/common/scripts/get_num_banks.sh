@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ num_banks=0
 target_fname="*mapping_analysis_report.txt"
 grep Memory\ Bank\ Report $loc/reports/$target_fname -A 10000 | grep MG\( -A 10000 | tail -n +3 > temp.txt
 
-tr -s \  < temp.txt > f.txt 
+tr -s \  < temp.txt > f.txt
 cut -d" " -f1,2,4 f.txt | sort -u > f1.txt
 cat f1.txt | cut -d" " -f1|sort -u |tail -n +2 >sort_key.txt
 while read -r line
