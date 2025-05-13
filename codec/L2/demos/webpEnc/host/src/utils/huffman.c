@@ -175,17 +175,21 @@ int VP8LBuildHuffmanTable(HuffmanCode* const root_table,
             for (; count[len] > 0; --count[len]) {
                 HuffmanCode code;
                 if ((key & mask) != low) {
-                    table += table_size;
+                    if (root_table != NULL) table += table_size;
                     table_bits = NextTableBitSize(count, len, root_bits);
                     table_size = 1 << table_bits;
                     total_size += table_size;
                     low = key & mask;
-                    root_table[low].bits = (uint8_t)(table_bits + root_bits);
-                    root_table[low].value = (uint16_t)((table - root_table) - low);
+                    if (root_table != NULL) {
+                        root_table[low].bits = (uint8_t)(table_bits + root_bits);
+                        root_table[low].value = (uint16_t)((table - root_table) - low);
+                    }
                 }
-                code.bits = (uint8_t)(len - root_bits);
-                code.value = (uint16_t)sorted[symbol++];
-                ReplicateValue(&table[key >> root_bits], step, table_size, code);
+                if (root_table != NULL) {
+                    code.bits = (uint8_t)(len - root_bits);
+                    code.value = (uint16_t)sorted[symbol++];
+                    ReplicateValue(&table[key >> root_bits], step, table_size, code);
+                }
                 key = GetNextKey(key, len);
             }
         }
@@ -199,4 +203,36 @@ int VP8LBuildHuffmanTable(HuffmanCode* const root_table,
 
     WebPSafeFree(sorted);
     return total_size;
+}
+
+int VP8LHuffmanTablesAllocate(int size, HuffmanTables* huffman_tables) {
+  // Have 'segment' point to the first segment for now, 'root'.
+  HuffmanTablesSegment* const root = &huffman_tables->root;
+  huffman_tables->curr_segment = root;
+  // Allocate root.
+  root->start = (HuffmanCode*)WebPSafeMalloc(size, sizeof(*root->start));
+  if (root->start == NULL) return 0;
+  root->curr_table = root->start;
+  root->next = NULL;
+  root->size = size;
+  return 1;
+}
+
+void VP8LHuffmanTablesDeallocate(HuffmanTables* const huffman_tables) {
+  HuffmanTablesSegment *current, *next;
+  if (huffman_tables == NULL) return;
+  // Free the root node.
+  current = &huffman_tables->root;
+  next = current->next;
+  WebPSafeFree(current->start);
+  current->start = NULL;
+  current->next = NULL;
+  current = next;
+  // Free the following nodes.
+  while (current != NULL) {
+    next = current->next;
+    WebPSafeFree(current->start);
+    WebPSafeFree(current);
+    current = next;
+  }
 }
