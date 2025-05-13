@@ -277,3 +277,97 @@ This graph is used to compute the chordal version of the Catmull-Rom. It is call
 	- `P6`: Fourth point to be interpolated;
 - **Graph Outputs**:
 	- `C`: A vector with the result of the interpolation
+
+Graph name: `TestGraphApodization` for AIE-ML
+###########################################
+
+This graph is used to calculate the apodization for the reception. The graph suppots int32 and float data types.
+
+- **Graph Inputs**:
+	- `image_points`:  the result of Image Points;
+	- `apodization_reference`:  X-Y-Z vector that represents the positions of our apodization reference;
+	- `apodization_direction`:  X-Y-Z values of propagation of the spherical emitted;
+	- `two`: constant value of 2;
+	- `apodization_distance`: Result of Focusing;
+	- `f_number`: The selected F number for the application;
+	- `one`: constant value of 1;
+	- `pi`: constant value of pi;
+- **Graph Outputs**:
+	- `output_apodization`:  A vector that represents the Hanning Window for the reference point chosen;
+
+Graph name: `TestGraphCatmullRom` for AIE-ML
+###########################################
+
+This graph is used to compute the chordal version of the Catmull-Rom with supporting for int32, float and cint16 data types.
+
+- **Graph Inputs**:
+	- `point_0`: Input rf points to be interpolated;
+	- `point_1`: Input rf points to be interpolated;
+	- `point_2`: Input rf points to be interpolated;
+	- `point_3`: Input rf points to be interpolated;
+	- `t1t`: The coefficient used for interpolation;
+	- `t2t`: The coefficient used for interpolation;
+	- `t3t`: The coefficient used for interpolation;
+	- `tt0`: The coefficient used for interpolation;
+	- `tt1`: The coefficient used for interpolation;
+	- `tt2`: The coefficient used for interpolation;
+- **Graph Outputs**:
+	- `output_catmull_rom`: A vector with the result of the interpolation;
+
+Graph name: `TestGraphDelay` for AIE-ML
+###########################################
+
+This graph is used to compute the transmit delay. It returns an array of values that represent the transmission time for every incremental point of the investigation. The graph suppots int32 and float data types.
+
+- **Graph Inputs**:
+	- `image_points_from_pl_1`: the result of Image Points;
+	- `image_points_from_pl_2`: the result of Image Points;
+	- `tx_def_ref_point`: X-Y-Z array with the reference point of the investigation for that iteration;
+	- `tx_def_delay_distance_1`: X-Y-Z array that represents the absolute distance with respect to the focus;
+	- `tx_def_delay_distance_2`: X-Y-Z array that represents the absolute distance with respect to the focus;
+	- `tx_def_focal_point`: X-Y-Z array that represent our focus;
+	- `t_start`: The starting time of emission;
+	- `direction`: X-Y-Z values of propagation of the spherical or planar wave emitted;
+	- `speed_of_sound`: The speed of sound used in tests is 1540 m/s;
+- **Graph Outputs**:
+	- `delay_output`: A vector that represents the time delay per point to analyze;
+
+Graph name: `TestGraphFocusing` for AIE-ML
+###########################################
+
+This graph is used to compute the distance of our reference apodization point for the dynamic apodization with respect to the image points. This version is used in SA to create a dynamic apodization also in transmission and not only in reception. The graph suppots int32 and float data types.
+
+- **Graph Inputs**:
+	- `apo_ref_0`: X component of the vector of apodization reference;
+	- `xdc_def_0`: X component of the Image Points result;
+	- `apo_ref_1`: Y component of the vector of apodization reference;
+	- `xdc_def_1`: Y component of the Image Points result;
+- **Graph Outputs**:
+	- `out`: A vector that represents apodization distance in transmission;
+
+Graph name: `TestGraphImagePoints` for AIE-ML
+###########################################
+
+The Image Points graph is used to create a matrix, which represents the part of investigation made by the specific emission of the Ultrasound Probe. The rows of this matrix have incremental values, which represents our values used to compute delay for the **virtual sources**. It is dependent on the investigation depth and the incremental investigation that you want to perform (based on our sampling frquency). The graph suppots int32 and float data types.
+
+- **Graph Inputs**:
+	- `start_position`: the position that you start the investigation in cartesian coordinate;
+	- `directions`: X-Y-Z values of propagation of the spherical or planar wave emitted;
+	- `samples_arange`: array with the index of the rf-data;
+- **Graph Outputs**:
+	- `output_matrix`: A Nx4 matrix that represents the points to analyze;
+
+Graph name: `TestGraphSamples` for AIE-ML
+###########################################
+
+This graph is used to compute the delay in reception for every transducer. It also sums the delay in transmission to obtain the valid samples for the interpolation. The graph only suppots int32 data type.
+
+- **Graph Inputs**:
+	- `image_points`: Result of Image Points;
+	- `delay`: Result of Delay;
+	- `xdc_def_positions`: X-Y-Z vector that represents the positions of our transducers in the probe;
+	- `sampling_frequency`: The sampling frequency of the probe;
+	- `speed_of_sound`: The speed of sound used in tests is 1540 m/s;
+- **Graph Outputs**:
+	- `output_vector`: A vector that represents our valid entries in the rf-data vector;
+

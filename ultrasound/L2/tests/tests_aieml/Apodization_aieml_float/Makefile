@@ -130,7 +130,7 @@ AIE_PKG_DIR = $(AIE_WORK_DIR)
 
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/ -I $(XFLIB_DIR)/L2/include/ -I $(XFLIB_DIR)/L2/src/Apodization_aieml/aiengine/
 
-AIE_CXXFLAGS +=  --aie.Xpreproc -DKERNEL_TYPE=float
+AIE_CXXFLAGS +=  --aie.Xpreproc -DKERNEL_TYPE=float --aie.Xpreproc -DTYPE_IS_FLOAT
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 

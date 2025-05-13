@@ -23,7 +23,9 @@ With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
 AIE Card
 ~~~~~~~~~~~~~~~~~~~~~
 
-Hardware modules and kernels are designed to work with vck190 cards.
+Hardware modules and kernels are designed to work with vck190 cards. From 2025.1 release, a set of new-added L1 and L2 APIs can be emulated on the VEK280 device which is based on AIE-ML architecture.
+
+
 
 * `vck190 <https://www.xilinx.com/products/boards-and-kits/vck190.html>`_
 

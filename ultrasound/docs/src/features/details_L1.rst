@@ -906,7 +906,7 @@ Element-Wise absolute values of a vector.
 - **Function params**:
 	- `input_vector`: elements of the vector to be passed to the kernel.
 	- `output`: elements of the result of the operation (vector) to be passed from the kernel.
-	
+
 Kernel name: `CosV` for AIE-ML
 ###################################
 
@@ -968,7 +968,7 @@ Element-Wise division between the values of a vector and a scalar (SpeedOfSound)
 	- `input_vector_1`: elements of the first dividend vector to be passed to the kernel.
 	- `input_vector_2`: elements of the second divisor vector to be passed to the kernel.
 	- `output_vector`: elements of the result of the operation (vector) to be passed from the kernel.
-	
+
 Kernel name: `EqualS` for AIE-ML
 ###################################
 

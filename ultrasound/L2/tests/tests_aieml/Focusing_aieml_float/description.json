@@ -55,7 +55,8 @@
                 "LIB_DIR/L2/src/Focusing_aieml/aiengine/"
             ],
             "symbols": [
-                "--aie.Xpreproc -DKERNEL_TYPE=float"
+                "--aie.Xpreproc -DKERNEL_TYPE=float",
+                "--aie.Xpreproc -DTYPE_IS_FLOAT"
             ]
         }
     },
