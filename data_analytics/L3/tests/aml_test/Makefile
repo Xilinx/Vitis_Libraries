@@ -136,31 +136,31 @@ VPP_LDFLAGS += --vivado.impl.jobs 16
 
 ######################### binary container global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-VPP_FLAGS_fuzzy_kernel += --hls.clock 200000000:fuzzy_kernel
+VPP_FLAGS_fuzzy_kernel += --hls.clock 150000000:fuzzy_kernel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_fuzzy_kernel += --clock.defaultFreqHz 200000000
+VPP_LDFLAGS_fuzzy_kernel += --clock.defaultFreqHz 150000000
 else
-VPP_LDFLAGS_fuzzy_kernel += --kernel_frequency 200
+VPP_LDFLAGS_fuzzy_kernel += --kernel_frequency 150
 endif
 VPP_LDFLAGS_fuzzy_kernel_temp := --config $(CUR_DIR)/conn_u250.cfg
 VPP_LDFLAGS_fuzzy_kernel += $(VPP_LDFLAGS_fuzzy_kernel_temp)
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/aws-vu9p-f1/'))
-VPP_FLAGS_fuzzy_kernel += --hls.clock 200000000:fuzzy_kernel
+VPP_FLAGS_fuzzy_kernel += --hls.clock 150000000:fuzzy_kernel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_fuzzy_kernel += --clock.defaultFreqHz 200000000
+VPP_LDFLAGS_fuzzy_kernel += --clock.defaultFreqHz 150000000
 else
-VPP_LDFLAGS_fuzzy_kernel += --kernel_frequency 200
+VPP_LDFLAGS_fuzzy_kernel += --kernel_frequency 150
 endif
 VPP_LDFLAGS_fuzzy_kernel_temp := --config $(CUR_DIR)/conn_aws_f1.cfg
 VPP_LDFLAGS_fuzzy_kernel += $(VPP_LDFLAGS_fuzzy_kernel_temp)
 
 else 
-VPP_FLAGS_fuzzy_kernel += --hls.clock 200000000:fuzzy_kernel
+VPP_FLAGS_fuzzy_kernel += --hls.clock 150000000:fuzzy_kernel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_fuzzy_kernel += --clock.defaultFreqHz 200000000
+VPP_LDFLAGS_fuzzy_kernel += --clock.defaultFreqHz 150000000
 else
-VPP_LDFLAGS_fuzzy_kernel += --kernel_frequency 200
+VPP_LDFLAGS_fuzzy_kernel += --kernel_frequency 150
 endif
 
 endif
