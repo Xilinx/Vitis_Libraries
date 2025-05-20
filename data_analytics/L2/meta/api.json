@@ -50,12 +50,12 @@
                 "ports": [
                     {
                         "name": "data",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< 512 > *"
                     },
                     {
                         "name": "kcenters",
-                        "direction": "",
+                        "direction": "output",
                         "type": "ap_uint< 512 > *"
                     }
                 ]
@@ -104,12 +104,12 @@
                 "ports": [
                     {
                         "name": "input",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< WAxi > *"
                     },
                     {
                         "name": "output",
-                        "direction": "",
+                        "direction": "output",
                         "type": "ap_uint< WAxi > *"
                     }
                 ]
@@ -158,12 +158,12 @@
                 "ports": [
                     {
                         "name": "input",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< WAxi > *"
                     },
                     {
                         "name": "output",
-                        "direction": "",
+                        "direction": "output",
                         "type": "ap_uint< WAxi > *"
                     }
                 ]
@@ -212,12 +212,12 @@
                 "ports": [
                     {
                         "name": "input",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< WAxi > *"
                     },
                     {
                         "name": "output",
-                        "direction": "",
+                        "direction": "output",
                         "type": "ap_uint< WAxi > *"
                     }
                 ]
@@ -276,22 +276,22 @@
                 "ports": [
                     {
                         "name": "cfg_in_buff",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< 64 > *"
                     },
                     {
                         "name": "msg_in_buff",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< 64 > *"
                     },
                     {
                         "name": "len_in_buff",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< 16 > *"
                     },
                     {
                         "name": "out_buff",
-                        "direction": "",
+                        "direction": "output",
                         "type": "ap_uint< 32 > *"
                     }
                 ]

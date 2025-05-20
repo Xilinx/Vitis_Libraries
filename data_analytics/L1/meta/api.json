@@ -41,39 +41,39 @@
                     },
                     {
                         "name": "MAX_CAT_BITS",
-                        "type": "unsigned",
+                        "type": "unsigned int",
                         "description": "The category max bit number"
                     }
                 ],
                 "ports": [
                     {
                         "name": "dstrm_batch",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< WD > >[MAX_FEA_NUM],"
                     },
                     {
                         "name": "estrm_batch",
-                        "direction": "",
+                        "direction": "intput",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "treeStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 512 > > &"
                     },
                     {
                         "name": "treeTag",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "predictionsStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< MAX_CAT_BITS > > &"
                     },
                     {
                         "name": "predictionsTag",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -117,28 +117,33 @@
                 "ports": [
                     {
                         "name": "ddr",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< _WAxi > *"
                     },
                     {
                         "name": "offset",
-                        "direction": "",
+                        "direction": "input",
                         "type": "const ap_uint< 32 >"
                     },
                     {
                         "name": "rows",
-                        "direction": "",
+                        "direction": "input",
                         "type": "const ap_uint< 32 >"
                     },
                     {
                         "name": "cols",
-                        "direction": "",
+                        "direction": "input",
                         "type": "const ap_uint< 32 >"
                     },
                     {
-                        "name": "vec_strm",
-                        "direction": "",
-                        "type": "hls::stream<ap_uint<_WAxi> >& "
+                        "name": "data",
+                        "direction": "output",
+                        "type": "hls::stream<ap_uint<_WData> >[_WAxi / _WData]"
+                    },
+                    {
+                        "name": "eData",
+                        "direction": "output",
+                        "type": "hls::stream<bool>& "
                     }
                 ]
             },
@@ -181,37 +186,37 @@
                 "ports": [
                     {
                         "name": "num_of_class",
-                        "direction": "",
+                        "direction": "input",
                         "type": "const int"
                     },
                     {
                         "name": "num_of_term",
-                        "direction": "",
+                        "direction": "input",
                         "type": "const int"
                     },
                     {
                         "name": "i_data_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > >[1<< WL],"
                     },
                     {
                         "name": "i_e_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool >[1<< WL],"
                     },
                     {
                         "name": "o_terms_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< int > &"
                     },
                     {
                         "name": "o_data0_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > >[1<< WL],"
                     },
                     {
                         "name": "o_data1_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > >[1<< WL]"
                     }
                 ]
@@ -250,42 +255,42 @@
                 "ports": [
                     {
                         "name": "num_of_class",
-                        "direction": "",
+                        "direction": "input",
                         "type": "const int"
                     },
                     {
                         "name": "num_of_term",
-                        "direction": "",
+                        "direction": "input",
                         "type": "const int"
                     },
                     {
                         "name": "i_theta_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "i_prior_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "i_data_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 32 > >[CH_NM]"
                     },
                     {
                         "name": "i_e_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "o_class_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 10 > > &"
                     },
                     {
                         "name": "o_e_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -317,54 +322,54 @@
                     },
                     {
                         "name": "WD",
-                        "type": "unsigned",
+                        "type": "unsigned int",
                         "description": "The width of data type MType, can get by sizeof(MType)"
                     },
                     {
                         "name": "StreamN",
-                        "type": "unsigned",
+                        "type": "unsigned int",
                         "description": "The stream number of input sample stream vector"
                     },
                     {
                         "name": "SampleDepth",
-                        "type": "unsigned",
+                        "type": "unsigned int",
                         "description": "stream depth number of one input sample"
                     }
                 ],
                 "ports": [
                     {
                         "name": "cols",
-                        "direction": "",
+                        "direction": "input",
                         "type": "const int"
                     },
                     {
                         "name": "sample_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< MType >[StreamN]"
                     },
                     {
                         "name": "e_sample_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "weight_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 512 > > &"
                     },
                     {
                         "name": "eTag",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "predictionsStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 1 > > &"
                     },
                     {
                         "name": "predictionsTagStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -422,37 +427,37 @@
                 "ports": [
                     {
                         "name": "sampleStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< sizeof(DT)*8 > >[DV],"
                     },
                     {
                         "name": "endSampleStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "centers",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< sizeof(DT)*8 *DV >[KU][uramDepth],"
                     },
                     {
                         "name": "dims",
-                        "direction": "",
+                        "direction": "input",
                         "type": "const int"
                     },
                     {
                         "name": "kcluster",
-                        "direction": "",
+                        "direction": "input",
                         "type": "const int"
                     },
                     {
                         "name": "tagStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 32 > > &"
                     },
                     {
                         "name": "endTagStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -486,17 +491,17 @@
                 "ports": [
                     {
                         "name": "csv_buf",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< 128 > *"
                     },
                     {
                         "name": "schema",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< 8 > *"
                     },
                     {
                         "name": "o_obj_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< Object > &"
                     }
                 ]
@@ -560,17 +565,17 @@
                 "ports": [
                     {
                         "name": "json_buf",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< 128 > *"
                     },
                     {
                         "name": "schema",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< 8 > *"
                     },
                     {
                         "name": "o_obj_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<ObjectEx>&"
                     }
                 ]
@@ -598,17 +603,17 @@
                 "ports": [
                     {
                         "name": "field_type",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int[17]"
                     },
                     {
                         "name": "ddr_buff",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint<64>*"
                     },
                     {
                         "name": "obj_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<Object>&"
                     }
                 ]
@@ -636,12 +641,12 @@
                 "ports": [
                     {
                         "name": "obj_strm",
-                        "direction": "",
+                        "direction": "intpu",
                         "type": "hls::stream< Object > &"
                     },
                     {
                         "name": "ddr_buff",
-                        "direction": "",
+                        "direction": "output",
                         "type": "ap_uint< 64 > *"
                     }
                 ]
@@ -669,17 +674,17 @@
                 "ports": [
                     {
                         "name": "ddr_obj",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint<88>*"
                     },
                     {
                         "name": "schema",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint<8>[16]"
                     },
                     {
                         "name": "ddr_buff",
-                        "direction": "",
+                        "direction": "output",
                         "type": "ap_uint<64>*"
                     }
                 ]
@@ -722,42 +727,42 @@
                 "ports": [
                     {
                         "name": "len1_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< BITS > > &"
                     },
                     {
                         "name": "query_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "len2_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< BITS > > &"
                     },
                     {
                         "name": "input_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "max_ed_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< BITS > > &"
                     },
                     {
                         "name": "i_e_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "o_e_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "o_match_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -791,32 +796,32 @@
                 "ports": [
                     {
                         "name": "bitSetBuff",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< 32 > *"
                     },
                     {
                         "name": "instrBuff",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< 64 > *"
                     },
                     {
                         "name": "msgBuff",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< 32 > *"
                     },
                     {
                         "name": "lenMsg",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     },
                     {
                         "name": "match",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< 2 > &"
                     },
                     {
                         "name": "offsetBuff",
-                        "direction": "",
+                        "direction": "output",
                         "type": "ap_uint< 16 > *"
                     }
                 ]
@@ -850,32 +855,32 @@
                 "ports": [
                     {
                         "name": "bitSetBuff",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< 32 > *"
                     },
                     {
                         "name": "instrBuff",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< 64 > *"
                     },
                     {
                         "name": "msgBuff",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< 32 > *"
                     },
                     {
                         "name": "lenMsg",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     },
                     {
                         "name": "match",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< 2 > &"
                     },
                     {
                         "name": "offsetBuff",
-                        "direction": "",
+                        "direction": "output",
                         "type": "ap_uint< 16 > *"
                     }
                 ]
