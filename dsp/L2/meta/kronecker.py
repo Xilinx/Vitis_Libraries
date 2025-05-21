@@ -189,7 +189,7 @@ def update_TP_DIM_A_ROWS(args):
     TT_DATA_A = args["TT_DATA_A"]
     TT_DATA_B = args["TT_DATA_B"]
     TP_API = args["TP_API"]
-    if args["TP_DIM_A_ROWS"]:
+    if "TP_DIM_A_ROWS" in args and args["TP_DIM_A_ROWS"]:
         TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
     else:
         TP_DIM_A_ROWS = 0
@@ -227,6 +227,7 @@ def fn_update_TP_DIM_A_ROWS(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_
         TP_DIM_A_ROWS_max = TP_WINDOW_VSIZE_max_size / TP_DIM_A_COLS_SSR
 
     param_dict.update({"maximum": int(FLOOR(TP_DIM_A_ROWS_max, VEC_SIZE))})
+    param_dict.update({"maximum_pingpong_buf": int(FLOOR(TP_DIM_A_ROWS_max/2, VEC_SIZE))})
 
     if TP_DIM_A_ROWS != 0 and (TP_DIM_A_ROWS % VEC_SIZE != 0):
         TP_DIM_A_ROWS_act = round(TP_DIM_A_ROWS / VEC_SIZE) * VEC_SIZE
@@ -279,7 +280,7 @@ def update_TP_DIM_A_COLS(args):
     TP_SSR = args["TP_SSR"]
     TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
 
-    if args["TP_DIM_A_COLS"]:
+    if "TP_DIM_A_COLS" in args and args["TP_DIM_A_COLS"]:
         TP_DIM_A_COLS = args["TP_DIM_A_COLS"]
     else:
         TP_DIM_A_COLS = 0
@@ -307,12 +308,15 @@ def fn_update_TP_DIM_A_COLS(
         TP_DIM_A_COLS_max = (TP_WINDOW_VSIZE_max_size * TP_SSR) / (
             TP_DIM_A_ROWS * TP_DIM_B_ROWS * TP_DIM_B_COLS
         )
-
+  
     elif TP_API == API_STREAM:
         TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(TT_DATA_A)
         TP_DIM_A_COLS_max = (TP_WINDOW_VSIZE_max_size * TP_SSR) / (TP_DIM_A_ROWS)
 
-    param_dict.update({"maximum": int(FLOOR(TP_DIM_A_COLS_max, TP_SSR))})
+
+    param_dict.update({"maximum" :  int(FLOOR(TP_DIM_A_COLS_max, TP_SSR))})
+    param_dict.update({"maximum_pingpong_buf" :  int(FLOOR(TP_DIM_A_COLS_max/2, TP_SSR))})
+
 
     if TP_DIM_A_COLS != 0 and (TP_DIM_A_COLS % TP_SSR != 0):
         TP_DIM_A_COLS_act = round(TP_DIM_A_COLS / TP_SSR) * TP_SSR
@@ -366,7 +370,7 @@ def update_TP_DIM_B_ROWS(args):
     TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
     TP_DIM_A_COLS = args["TP_DIM_A_COLS"]
 
-    if args["TP_DIM_B_ROWS"]:
+    if "TP_DIM_B_ROWS" in args and args["TP_DIM_B_ROWS"]:
         TP_DIM_B_ROWS = args["TP_DIM_B_ROWS"]
     else:
         TP_DIM_B_ROWS = 0
@@ -397,7 +401,7 @@ def fn_update_TP_DIM_B_ROWS(
     TP_WINDOW_VSIZE_max = k_data_memory_bytes[AIE_VARIANT]
 
     param_dict = {"name": "TP_DIM_B_ROWS", "minimum": VEC_SIZE}
-
+  
     TP_DIM_B_COLS = 1
     if TP_API == API_BUFFER:
         # minimum possible values
@@ -413,6 +417,7 @@ def fn_update_TP_DIM_B_ROWS(
         TP_DIM_B_ROWS_max = TP_WINDOW_VSIZE_max_size / (TP_DIM_B_COLS)
 
     param_dict.update({"maximum": int(FLOOR(TP_DIM_B_ROWS_max, VEC_SIZE))})
+    param_dict.update({"maximum_pingpong_buf" : int(FLOOR(TP_DIM_B_ROWS_max/2, VEC_SIZE))})
 
     if TP_DIM_B_ROWS != 0 and (TP_DIM_B_ROWS % VEC_SIZE != 0):
         TP_DIM_B_ROWS_act = round(TP_DIM_B_ROWS / VEC_SIZE) * VEC_SIZE
@@ -531,9 +536,11 @@ def fn_update_TP_DIM_B_COLS(
         TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(TT_DATA_B)
         TP_DIM_B_COLS_max = TP_WINDOW_VSIZE_max_size / TP_DIM_B_ROWS
 
-    param_dict.update({"maximum": int(TP_DIM_B_COLS_max)})
-    return param_dict
+    param_dict.update({"maximum" : int(TP_DIM_B_COLS_max)})
+    param_dict.update({"maximum_pingpong_buf" : int(TP_DIM_B_COLS_max/2)})
+    
 
+    return param_dict
 
 def validate_TP_DIM_B_COLS(args):
     AIE_VARIANT = args["AIE_VARIANT"]
@@ -609,7 +616,7 @@ def update_TP_NUM_FRAMES(args):
         TP_DIM_B_COLS,
     )
 
-
+  
 def fn_update_TP_NUM_FRAMES(
     AIE_VARIANT,
     TT_DATA_A,
@@ -644,7 +651,7 @@ def fn_update_TP_NUM_FRAMES(
         TP_NUM_FRAMES_max = min(TP_NUM_FRAMES_max1, TP_NUM_FRAMES_max2)
 
     param_dict.update({"maximum": int(TP_NUM_FRAMES_max)})
-
+    param_dict.update({"maximum_pingpong_buf" : int(TP_NUM_FRAMES_max/2)})
     return param_dict
 
 

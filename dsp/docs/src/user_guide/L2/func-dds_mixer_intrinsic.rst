@@ -22,7 +22,7 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The DDS/Mixer is supported on AIE only. For other devices, please use the DDS/Mixer LUT library element.
+The DDS/Mixer is supported on AIE devices only. For other devices, please use the DDS/Mixer LUT library element.
 
 Supported Types
 ===============

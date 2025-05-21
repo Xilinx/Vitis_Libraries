@@ -23,15 +23,13 @@ scripts_dir = os.path.dirname(os.path.abspath(__file__))
 called_dir = os.getcwd()
 
 configTranslatePath = f"{scripts_dir}/config_translation.tcl"
-no_validation_params = ["weights", "coeff"]
 
 L2_dir = f"{scripts_dir}/../../../.."
 meta_scripts_path = f"{L2_dir}/meta/scripts"
 sys.path.insert(0, meta_scripts_path)
 from metadata_api import *
 
-no_validation_params = ["weights", "coeff"]
-
+no_validation_params = ["weights", "coeff", "lookup_values"]
 
 def load_defaults(file_path):
     defaults = {}

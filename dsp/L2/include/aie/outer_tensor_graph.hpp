@@ -170,15 +170,6 @@ class outer_tensor_graph : public graph {
      * @brief This is the constructor function for the outer_tensor graph.
      **/
     outer_tensor_graph() {
-        printf("Graph constructor...\n");
-        printf("kKernelOutSize = %d\n", kKernelOutSize);
-        printf("TP_DIM_A = %d, TP_DIM_B= %d\n", TP_DIM_A, TP_DIM_B);
-        printf("TP_NUM_FRAMES = %d\n", TP_NUM_FRAMES);
-        printf("TP_SHIFT = %d\n", TP_SHIFT);
-        printf("TP_API = %d\n", TP_API);
-        printf("TP_SSR = %d\n", TP_SSR);
-        printf("TP_SAT = %d,\nTP_RND= %d\n", TP_SAT, TP_RND);
-        printf("Graph constructor...\n");
         for (int i = 0; i < TP_SSR; i++) {
             m_kernels[i] =
                 kernel::create_object<outer_tensor<TT_DATA_A, TT_DATA_B, kKernelASize, kKernelBSize, TP_NUM_FRAMES,

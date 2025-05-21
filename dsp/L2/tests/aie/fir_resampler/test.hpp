@@ -216,17 +216,19 @@ class test_graph : public graph {
                                                                               // considered unless there's a downstream
                                                                               // FIR with margin.
 
-        if (inputBufferSize > MAX_PING_PONG_SIZE) {
+        if ((inputBufferSize > MAX_PING_PONG_SIZE) || (SINGLE_BUF == 1 && PORT_API == 0)) {
             single_buffer(firGraph.getKernels()[0].in[0]);
 #if (DUAL_IP == 1)
             single_buffer(firGraph.getKernels()[0].in[1]);
 #endif
+            printf("INFO: Single Buffer Constraint applied to input buffers of kernel 0.\n");
         }
-        if (outputBufferSize > MAX_PING_PONG_SIZE) {
+        if ((outputBufferSize > MAX_PING_PONG_SIZE) || (SINGLE_BUF == 1 && PORT_API == 0)) {
             single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[0]);
 #if (NUM_OUTPUTS == 2)
             single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[1]);
 #endif
+            printf("INFO: Single Buffer Constraint applied to output buffers of kernel %d.\n", CASC_LEN - 1);
         }
 
 #endif

@@ -204,22 +204,12 @@
       "updater": {
         "file": "fir_tdm.py",
         "function": "update_TP_SSR",
-        "args": [
-          "AIE_VARIANT",
-          "TT_DATA",
-          "TT_COEFF",
-          "TP_TDM_CHANNELS"
-        ]
+        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_TDM_CHANNELS", "TP_FIR_LEN"]
       },
       "validator": {
         "file": "fir_tdm.py",
         "function": "validate_TP_SSR",
-        "args": [
-          "AIE_VARIANT",
-          "TT_DATA",
-          "TT_COEFF",
-          "TP_TDM_CHANNELS"
-        ]
+        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_TDM_CHANNELS", "TP_FIR_LEN"]
       }
     },
     {
@@ -229,22 +219,12 @@
       "updater": {
         "file": "fir_tdm.py",
         "function": "update_TP_CASC_LEN",
-        "args": [
-          "TT_DATA",
-          "TT_COEFF",
-          "TP_FIR_LEN",
-          "AIE_VARIANT"
-        ]
+        "args": ["TT_DATA", "TT_COEFF", "TP_FIR_LEN", "AIE_VARIANT", "TP_TDM_CHANNELS", "TP_SSR"]
       },
       "validator": {
         "file": "fir_tdm.py",
         "function": "validate_TP_CASC_LEN",
-        "args": [
-          "TT_DATA",
-          "TT_COEFF",
-          "TP_FIR_LEN",
-          "AIE_VARIANT"
-        ]
+        "args": ["TT_DATA", "TT_COEFF", "TP_FIR_LEN", "AIE_VARIANT", "TP_TDM_CHANNELS", "TP_SSR"]
       }
     },
     {

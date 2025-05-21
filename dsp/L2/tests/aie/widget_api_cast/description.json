@@ -4,10 +4,53 @@
     "gui": false,
     "flow": "aie",
     "platform_allowlist": [
-        "vck190"
+        "vck190",
+        "vek280"
     ],
+    "part_allowlist": [
+        "xcvr1602-vsva2488-2LP-e-S-es1",
+        "xc2ve3858-ssva2112-2LP-e-S"
+    ],
+    "part_alias": {
+        "xc2ve3858-ssva2112-2LP-e-S": "aie_mlv2"
+    },
     "platform_properties": {
         "vck190": {
+            "param_set": [
+                "*_aie1_*"
+            ],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            }
+        },
+        "vek280": {
+            "param_set": [
+                "*_aie2_*"
+            ],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            }
+        }
+    },
+    "part_properties": {
+        "xcvr1602-vsva2488-2LP-e-S-es1": {
+            "param_set": [
+                "*canary_aie"
+            ],
             "v++": {
                 "compiler": {
                     "clflags": []
@@ -18,9 +61,43 @@
                     ]
                 }
             },
+            "aiecompiler": {
+                "compiler": {
+                    "customized_params": {
+                        "default": {
+                            "COMPILER_ARGS": "",
+                            "AIE_VARIANT": "1",
+                            "FIFO_THRESHOLD": " "
+                        }
+                    }
+                }
+            }
+        },
+        "xc2ve3858-ssva2112-2LP-e-S": {
             "param_set": [
-                "*_aie1_*"
-            ]
+                "*_aie22_*"
+            ],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            },
+            "aiecompiler": {
+                "compiler": {
+                    "customized_params": {
+                        "default": {
+                            "COMPILER_ARGS": " --aie.Xpreproc=-D_AIE_API_WORKAROUND_CR_1223259_=1",
+                            "AIE_VARIANT": "22",
+                            "FIFO_THRESHOLD": "--aie.swfifo-threshold=120 "
+                        }
+                    }
+                }
+            }
         }
     },
     "pre_build": [
@@ -208,6 +285,11 @@
                 ],
                 "*_x86sim_qor": [
                     "vitis_aie_x86sim"
+                ]
+            },
+            "qor_db": {
+                "*_hw_database": [
+                    "vitis_aie_sim"
                 ]
             }
         }

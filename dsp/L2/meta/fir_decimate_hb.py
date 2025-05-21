@@ -161,7 +161,7 @@ def update_TP_FIR_LEN(args):
     TT_DATA = args["TT_DATA"]
     TP_API = args["TP_API"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
-    if args["TP_FIR_LEN"]:
+    if "TP_FIR_LEN" in args and args["TP_FIR_LEN"]:
         TP_FIR_LEN = args["TP_FIR_LEN"]
     else:
         TP_FIR_LEN = 0
@@ -231,23 +231,48 @@ def fn_halfband_len(TP_FIR_LEN):
 ########## TP_PARA_DECI_POLY Updater and Validator ####
 #######################################################
 def update_TP_PARA_DECI_POLY(args):
-    return fn_update_TP_PARA_DECI_POLY()
+    AIE_VARIANT=args["AIE_VARIANT"]
+    TT_DATA=args["TT_DATA"]
+    TT_COEFF=args["TT_COEFF"]
+    TP_API=args["TP_API"]
+    TP_FIR_LEN=args["TP_FIR_LEN"]
+    TP_USE_COEFF_RELOAD=args["TP_USE_COEFF_RELOAD"]
+
+    return fn_update_TP_PARA_DECI_POLY(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD)
 
 
-def fn_update_TP_PARA_DECI_POLY():
+def fn_update_TP_PARA_DECI_POLY(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD):
     legal_set_TP_PARA_DECI_POLY = [1, 2]
 
+    param_dict_casc_len=fn_update_TP_CASC_LEN(
+    AIE_VARIANT,
+    TT_DATA,
+    TT_COEFF,
+    TP_API,
+    TP_FIR_LEN,
+    TP_USE_COEFF_RELOAD,
+    TP_PARA_DECI_POLY=1, #PARA_DECIPOLY=1 results in TP_SSR=1, it must be ensured not to affect casc_len update
+    TP_SSR=1)
+
+    if "enum" in param_dict_casc_len and param_dict_casc_len["enum"] in [None, []]:
+        legal_set_TP_PARA_DECI_POLY = [2]
     param_dict = {"name": "TP_PARA_DECI_POLY", "enum": legal_set_TP_PARA_DECI_POLY}
     return param_dict
 
 
 def validate_TP_PARA_DECI_POLY(args):
+    AIE_VARIANT=args["AIE_VARIANT"]
+    TT_DATA=args["TT_DATA"]
+    TT_COEFF=args["TT_COEFF"]
+    TP_API=args["TP_API"]
+    TP_FIR_LEN=args["TP_FIR_LEN"]
+    TP_USE_COEFF_RELOAD=args["TP_USE_COEFF_RELOAD"]
     TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
-    return fn_validate_TP_PARA_DECI_POLY(TP_PARA_DECI_POLY)
+    return fn_validate_TP_PARA_DECI_POLY(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_PARA_DECI_POLY)
 
 
-def fn_validate_TP_PARA_DECI_POLY(TP_PARA_DECI_POLY):
-    param_dict = fn_update_TP_PARA_DECI_POLY()
+def fn_validate_TP_PARA_DECI_POLY(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_PARA_DECI_POLY):
+    param_dict = fn_update_TP_PARA_DECI_POLY(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD)
     return validate_legal_set(
         param_dict["enum"], "TP_PARA_DECI_POLY", TP_PARA_DECI_POLY
     )
@@ -540,12 +565,13 @@ def fn_eliminate_casc_len_data_needed_within_buffer_size_ml(
 def update_TP_DUAL_IP(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TP_API = args["TP_API"]
-    return fn_update_TP_DUAL_IP(AIE_VARIANT, TP_API)
+    TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
+    return fn_update_TP_DUAL_IP(AIE_VARIANT, TP_API, TP_PARA_DECI_POLY)
 
 
-def fn_update_TP_DUAL_IP(AIE_VARIANT, TP_API):
+def fn_update_TP_DUAL_IP(AIE_VARIANT, TP_API, TP_PARA_DECI_POLY):
     legal_set_TP_DUAL_IP = [0, 1]
-    if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2:
+    if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2 or (TP_PARA_DECI_POLY==2 and TP_API==0):
         legal_set_TP_DUAL_IP = [0]
 
     param_dict = {"name": "TP_DUAL_IP", "enum": legal_set_TP_DUAL_IP}
@@ -555,12 +581,13 @@ def fn_update_TP_DUAL_IP(AIE_VARIANT, TP_API):
 def validate_TP_DUAL_IP(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TP_API = args["TP_API"]
+    TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
     TP_DUAL_IP = args["TP_DUAL_IP"]
-    return fn_validate_TP_DUAL_IP(AIE_VARIANT, TP_API, TP_DUAL_IP)
+    return fn_validate_TP_DUAL_IP(AIE_VARIANT, TP_API, TP_PARA_DECI_POLY, TP_DUAL_IP)
 
 
-def fn_validate_TP_DUAL_IP(AIE_VARIANT, TP_API, TP_DUAL_IP):
-    param_dict = fn_update_TP_DUAL_IP(AIE_VARIANT, TP_API)
+def fn_validate_TP_DUAL_IP(AIE_VARIANT, TP_API, TP_PARA_DECI_POLY, TP_DUAL_IP):
+    param_dict = fn_update_TP_DUAL_IP(AIE_VARIANT, TP_API, TP_PARA_DECI_POLY)
     return validate_legal_set(param_dict["enum"], "TP_DUAL_IP", TP_DUAL_IP)
 
 
@@ -599,7 +626,7 @@ def update_TP_INPUT_WINDOW_VSIZE(args):
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
-    if args["TP_INPUT_WINDOW_VSIZE"]:
+    if "TP_INPUT_WINDOW_VSIZE" in args and args["TP_INPUT_WINDOW_VSIZE"]:
         TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     else:
         TP_INPUT_WINDOW_VSIZE = 0

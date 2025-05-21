@@ -54,11 +54,13 @@
             "maximum": 1,
             "updater": {
                 "file": "widget_api_cast.py",
-                "function": "update_TP_IN_API"
+                "function": "update_TP_IN_API",
+                "args": []
             },
             "validator": {
                 "file": "widget_api_cast.py",
-                "function": "validate_TP_IN_API"
+                "function": "validate_TP_IN_API",
+                "args": []
             }
         },
         {
@@ -69,11 +71,13 @@
             "maximum": 1,
             "updater": {
                 "file": "widget_api_cast.py",
-                "function": "update_TP_OUT_API"
+                "function": "update_TP_OUT_API",
+                "args": []
             },
             "validator": {
                 "file": "widget_api_cast.py",
-                "function": "validate_TP_OUT_API"
+                "function": "validate_TP_OUT_API",
+                "args": []
             }
         },
         {
@@ -86,14 +90,14 @@
                 "file": "widget_api_cast.py",
                 "function": "update_TP_NUM_INPUTS",
                 "args": [
-                    "TP_IN_API"
+                    "AIE_VARIANT", "TT_DATA", "TP_IN_API", "TP_OUT_API"
                 ]
             },
             "validator": {
                 "file": "widget_api_cast.py",
                 "function": "validate_TP_NUM_INPUTS",
                 "args": [
-                    "TP_IN_API"
+                    "AIE_VARIANT", "TT_DATA", "TP_IN_API", "TP_OUT_API"
                 ]
             }
         },
@@ -120,11 +124,13 @@
             "maximum": 4,
             "updater": {
                 "file": "widget_api_cast.py",
-                "function": "update_TP_NUM_OUTPUT_CLONES"
+                "function": "update_TP_NUM_OUTPUT_CLONES",
+                "args": ["AIE_VARIANT", "TP_IN_API", "TP_OUT_API"]
             },
             "validator": {
                 "file": "widget_api_cast.py",
-                "function": "validate_TP_NUM_OUTPUT_CLONES"
+                "function": "validate_TP_NUM_OUTPUT_CLONES",
+                "args": ["AIE_VARIANT", "TP_IN_API", "TP_OUT_API"]
             }
         },
         {
@@ -135,11 +141,13 @@
             "maximum": 2,
             "updater": {
                 "file": "widget_api_cast.py",
-                "function": "update_TP_PATTERN"
+                "function": "update_TP_PATTERN",
+                "args":["TP_IN_API", "TP_OUT_API", "TP_NUM_INPUTS", "TP_NUM_OUTPUT_CLONES"]
             },
             "validator": {
                 "file": "widget_api_cast.py",
-                "function": "validate_TP_PATTERN"
+                "function": "validate_TP_PATTERN",
+                "args":["TP_IN_API", "TP_OUT_API", "TP_NUM_INPUTS", "TP_NUM_OUTPUT_CLONES"]
             }
         },
         {

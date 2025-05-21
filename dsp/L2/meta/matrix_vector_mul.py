@@ -453,7 +453,7 @@ def fn_validate_TP_SSR(
 
 #######################################################
 ############ TP_CASC_LEN Updater and Validator ########
-#######################################################
+##################################################2#####
 def update_TP_CASC_LEN(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA_A = args["TT_DATA_A"]
@@ -494,11 +494,11 @@ def fn_update_TP_CASC_LEN(
             > max_buffer_sample_in / 2
         ) or ((TP_DIM_B / k) % (256 / 8 / fn_size_by_byte(TT_DATA_B)) != 0):
             legal_set_tp_casc_pingpong.remove(k)
-        if (TP_API and (TP_DIM_B * TP_NUM_FRAMES) / (k * TP_SSR)) > (
+        if (TP_API and (TP_DIM_B * TP_NUM_FRAMES) / (k)) > (
             1024 // 8 // fn_size_by_byte(TT_DATA_B)
         ):
-            legal_set_tp_casc.remove(k)
-            legal_set_tp_casc_pingpong.remove(k)
+            if k in legal_set_tp_casc: legal_set_tp_casc.remove(k)
+            if k in legal_set_tp_casc_pingpong: legal_set_tp_casc_pingpong.remove(k)
 
     param_dict = {
         "name": "TP_CASC_LEN",

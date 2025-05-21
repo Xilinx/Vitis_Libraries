@@ -123,7 +123,7 @@ def fn_update_TP_WINDOW_VSIZE(AIE_VARIANT, TT_DATA, TT_OUT_DATA):
     byte_limit = max(byte_size_in, byte_size_out)
     sample_limit = int(max_buffer_byte / byte_limit)
 
-    param_dict = {"name": "TP_WINDOW_VSIZE", "minimum": 16, "maximum": sample_limit}
+    param_dict = {"name": "TP_WINDOW_VSIZE", "minimum": 16, "maximum": sample_limit, "maximum_pingpong_buf": int(sample_limit/2)}
     return param_dict
 
 

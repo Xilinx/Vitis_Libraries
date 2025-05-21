@@ -25,9 +25,9 @@ The graph entry point is as follows:
 Device Support
 ==============
 
-The Convolution/Correlation library element supports AIE and AIE-ML devices for all features, with the following differences:
+The Convolution/Correlation library element supports AIE, AIE-ML and AIE-MLv2 devices for all features, with the following differences:
 
-- The available round modes and the enumerated values of round modes differ between AIE and AIE-ML devices. See :ref:`COMPILING_AND_SIMULATING`.
+- The available round modes and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
 
 Supported Input Data Types
 ==========================
@@ -300,7 +300,7 @@ The IO Buffer interface supports all data type combinations. See :ref:`CONV_CORR
 
 Streaming Interface
 -------------------
-The Convolution/Correlation operation via streaming is supported only on AIE-1 devices. Streaming support is **not available** on **AIE-ML** and **AIE-MLv2** devices.
+The Convolution/Correlation operation via streaming is supported only on AIE devices. Streaming support is **not available** on **AIE-ML** and **AIE-MLv2** devices.
 
 | ``TP_API`` - **1** indicates **STREAM** interface.
 

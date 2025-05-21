@@ -101,6 +101,15 @@ class test_graph : public graph {
             connect<>(inA[i].out[0], kroneckerGraph.inA[i]);
             connect<>(inB[i].out[0], kroneckerGraph.inB[i]);
             connect<>(kroneckerGraph.out[i], out[i].in[0]);
+#if (SINGLE_BUF == 1) // Single buffer constraint applies for both stream and buffer implementations
+            single_buffer(kroneckerGraph.getKernels()[i].in[0]);
+            single_buffer(kroneckerGraph.getKernels()[i].in[1]);
+            printf("INFO: Single Buffer Constraint applied to the inputs of kernel %d.\n", i);
+#if (API_IO == 0) // Single buffer constraint applies for buffer implementations
+            single_buffer(kroneckerGraph.getKernels()[i].out[0]);
+            printf("INFO: Single Buffer Constraint applied to the output buffer of kernel %d.\n", i);
+#endif
+#endif
         }
 #else  // using ref model
         // files names

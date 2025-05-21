@@ -226,35 +226,53 @@ def fn_validate_TP_FIR_LEN(
 #######################################################
 def update_TP_INTERPOLATE_FACTOR(args):
     AIE_VARIANT = args["AIE_VARIANT"]
+    TT_DATA = args["TT_DATA"]
+    TT_COEFF = args["TT_COEFF"]
+    TP_API = args["TP_API"]
+    TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
-    return fn_update_TP_INTERPOLATE_FACTOR(AIE_VARIANT, TP_FIR_LEN)
+    return fn_update_TP_INTERPOLATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN)
 
 
-def fn_update_TP_INTERPOLATE_FACTOR(AIE_VARIANT, TP_FIR_LEN):
+def fn_update_TP_INTERPOLATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN):
     param_dict_int = comFirUpd.fn_update_interpolate_factor(
         AIE_VARIANT, "TP_INTERPOLATE_FACTOR"
     )
     if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2:
-        TP_INTERPOLATE_FACTOR_max = min(TP_FIR_LEN, param_dict_int["maximum"])
-        legal_set_interp_fact = find_divisors(TP_FIR_LEN, TP_INTERPOLATE_FACTOR_max)
-        param_dict = {"name": "TP_INTERPOLATE_FACTOR", "enum": legal_set_interp_fact}
+        legal_set_interp_factor = find_divisors(TP_FIR_LEN, param_dict_int["maximum"])
     else:
-        param_dict = param_dict_int
-    # return param_dict
-    return param_dict_int
+        legal_set_interp_factor=list(range(param_dict_int["minimum"], param_dict_int["maximum"]+1))
+
+    # legal_set_interp_factor = find_divisors(TP_FIR_LEN, param_dict_int["maximum"])
+
+    for interp_fact in legal_set_interp_factor.copy():
+        param_dict_dec_factor= fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, interp_fact)
+        if param_dict_dec_factor["enum"] in[None, []]:
+            legal_set_interp_factor.remove(interp_fact)
+            
+    param_dict = {
+        "name": "TP_INTERPOLATE_FACTOR",
+        "enum": legal_set_interp_factor   
+    }
+    
+    return param_dict
 
 
 def validate_TP_INTERPOLATE_FACTOR(args):
     TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
     AIE_VARIANT = args["AIE_VARIANT"]
+    TT_DATA = args["TT_DATA"]
+    TT_COEFF = args["TT_COEFF"]
+    TP_API = args["TP_API"]
+    TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     return fn_validate_TP_INTERPOLATE_FACTOR(
-        TP_FIR_LEN, TP_INTERPOLATE_FACTOR, AIE_VARIANT
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN, TP_INTERPOLATE_FACTOR
     )
 
 
-def fn_validate_TP_INTERPOLATE_FACTOR(TP_FIR_LEN, TP_INTERPOLATE_FACTOR, AIE_VARIANT):
-    param_dict = fn_update_TP_INTERPOLATE_FACTOR(AIE_VARIANT, TP_FIR_LEN)
+def fn_validate_TP_INTERPOLATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN, TP_INTERPOLATE_FACTOR):
+    param_dict = fn_update_TP_INTERPOLATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN)
     if "enum" in param_dict:
         return validate_legal_set(
             param_dict["enum"], "TP_INTERPOLATE_FACTOR", TP_INTERPOLATE_FACTOR
@@ -276,6 +294,7 @@ def update_TP_PARA_INTERP_POLY(args):
 
 
 def fn_update_TP_PARA_INTERP_POLY(TP_FIR_LEN, TP_INTERPOLATE_FACTOR):
+
     if TP_FIR_LEN % TP_INTERPOLATE_FACTOR == 0:
         legal_set_para_interp_poly = [1, TP_INTERPOLATE_FACTOR]
     else:
@@ -308,12 +327,16 @@ def fn_validate_TP_PARA_INTERP_POLY(
 #######################################################
 def update_TP_DECIMATE_FACTOR(args):
     AIE_VARIANT = args["AIE_VARIANT"]
+    TT_DATA = args["TT_DATA"]
+    TT_COEFF = args["TT_COEFF"]
+    TP_API = args["TP_API"]
+    TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
-    return fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TP_FIR_LEN, TP_INTERPOLATE_FACTOR)
+    return fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_INTERPOLATE_FACTOR)
 
 
-def fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TP_FIR_LEN, TP_INTERPOLATE_FACTOR):
+def fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_INTERPOLATE_FACTOR):
     AIE_ML_MAX_DF = 8
     if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2:
         TP_DECIMATE_FACTOR_max_temp = int(FLOOR(TP_FIR_LEN / TP_INTERPOLATE_FACTOR, 1))
@@ -321,10 +344,27 @@ def fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TP_FIR_LEN, TP_INTERPOLATE_FACTOR)
     else:
         TP_DECIMATE_FACTOR_max_int = TP_DECIMATE_FACTOR_max
 
+    # legal_set_dec_factor=find_divisors(TP_FIR_LEN, TP_DECIMATE_FACTOR_max_int)
+    legal_set_dec_factor=list(range(TP_DECIMATE_FACTOR_min, TP_DECIMATE_FACTOR_max_int+1))
+
+    for dec_fact in legal_set_dec_factor.copy():
+        param_dict_casc_len= fn_update_TP_CASC_LEN(
+            AIE_VARIANT,
+            TT_DATA,
+            TT_COEFF,
+            TP_API,
+            TP_FIR_LEN,
+            TP_SSR=1,
+            TP_INTERPOLATE_FACTOR=TP_INTERPOLATE_FACTOR,
+            TP_DECIMATE_FACTOR=dec_fact,
+            TP_USE_COEFF_RELOAD=TP_USE_COEFF_RELOAD,
+        )
+        if param_dict_casc_len["enum"] in[None, []]:
+            legal_set_dec_factor.remove(dec_fact)
+
     param_dict = {
         "name": "TP_DECIMATE_FACTOR",
-        "minimum": TP_DECIMATE_FACTOR_min,
-        "maximum": TP_DECIMATE_FACTOR_max_int,
+        "enum": legal_set_dec_factor   
     }
 
     return param_dict
@@ -332,22 +372,23 @@ def fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TP_FIR_LEN, TP_INTERPOLATE_FACTOR)
 
 def validate_TP_DECIMATE_FACTOR(args):
     AIE_VARIANT = args["AIE_VARIANT"]
+    TT_DATA = args["TT_DATA"]
+    TT_COEFF = args["TT_COEFF"]
+    TP_API = args["TP_API"]
+    TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
     TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
     return fn_validate_TP_DECIMATE_FACTOR(
-        AIE_VARIANT, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR
     )
 
 
-def fn_validate_TP_DECIMATE_FACTOR(
-    AIE_VARIANT, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR
+def fn_validate_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR
 ):
-    param_dict = fn_update_TP_DECIMATE_FACTOR(
-        AIE_VARIANT, TP_FIR_LEN, TP_INTERPOLATE_FACTOR
-    )
-    range_deci_fact = [param_dict["minimum"], param_dict["maximum"]]
-    return validate_range(range_deci_fact, "TP_DECIMATE_FACTOR", TP_DECIMATE_FACTOR)
+    param_dict = fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_INTERPOLATE_FACTOR)
+    legal_set_deci_fact = param_dict["enum"]
+    return validate_legal_set(legal_set_deci_fact, "TP_DECIMATE_FACTOR", TP_DECIMATE_FACTOR)
 
 
 #######################################################
@@ -563,7 +604,6 @@ def fn_update_TP_CASC_LEN(
     legal_set_casc_len_temp1 = comFirUpd.fn_eliminate_casc_len_min_fir_len_each_kernel(
         legal_set_casc_len.copy(), TP_FIR_LEN, TP_SSR, TP_INTERPOLATE_FACTOR
     )
-
     remove_set = []
     for casc_len in legal_set_casc_len_temp1.copy():
         streamingVectorRegisterCheck = fn_check_samples_can_fit_streaming(
@@ -714,7 +754,7 @@ def update_TP_INPUT_WINDOW_VSIZE(args):
     TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
     AIE_VARIANT = args["AIE_VARIANT"]
     TP_SSR = 1
-    if args["TP_INPUT_WINDOW_VSIZE"]:
+    if "TP_INPUT_WINDOW_VSIZE" in args and args["TP_INPUT_WINDOW_VSIZE"]:
         TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     else:
         TP_INPUT_WINDOW_VSIZE = 0

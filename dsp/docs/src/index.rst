@@ -44,7 +44,7 @@ Currently, there are no L3 software APIs. The recommended entry point for all li
 
 For more information, refer to :ref:`INTRODUCTION`.
 
-The Vitis AIE DSP Library provides a SSR FFT implementations, various SSR Finite Impulse Response (FIR) filters, SSR Direct Digital Synthesis (DDS), and General Matrix Multiply (GeMM) implementation. For a full list of available DSP functions, refer to :ref:`DSP_LIB_FUNC`.
+The Vitis AIE DSP Library includes a Fast Fourier transform (FFT), Finite Impulse Response (FIR) filters, Direct Digital Synthesis (DDS), General Matrix Multiply (GeMM) implementation, as well as many others. For a full list of available DSP functions, refer to :ref:`DSP_LIB_FUNC`.
 
 .. toctree::
    :caption: Introduction
@@ -78,6 +78,7 @@ The Vitis AIE DSP Library provides a SSR FFT implementations, various SSR Finite
    Convolution / Correlation <rst/group_conv_corr_graph.rst>
    DDS Mixer <rst/group_dds_graph.rst>
    DFT <rst/group_dft_graph.rst>
+   Euclidean Distance <rst/group_euclidean_distance_graph.rst>
    FFT IFFT <rst/group_fft_graphs.rst>
    2D FFT IFFT <rst/group_fft_ifft_2dgraphs.rst>
    FFT Window <rst/group_fft_window.rst>

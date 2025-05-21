@@ -31,12 +31,12 @@
                 "ports": [
                     {
                         "name": "fftInStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< T_in >[ssr_fft_param_struct::R]"
                     },
                     {
                         "name": "fftOutStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >[ssr_fft_param_struct::R]"
                     }
                 ],
@@ -79,12 +79,12 @@
                 "ports": [
                     {
                         "name": "fftInStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< T_in >[ssr_fft_param_struct::R]"
                     },
                     {
                         "name": "fftOutStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >[ssr_fft_param_struct::R]"
                     }
                 ],
@@ -122,12 +122,12 @@
                 "ports": [
                     {
                         "name": "fftInStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< T_in >[ssr_fft_param_struct::R]"
                     },
                     {
                         "name": "fftOutStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >[ssr_fft_param_struct::R]"
                     }
                 ],
@@ -170,12 +170,12 @@
                 "ports": [
                     {
                         "name": "fftInStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< T_in >[ssr_fft_param_struct::R]"
                     },
                     {
                         "name": "fftOutStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >[ssr_fft_param_struct::R]"
                     }
                 ],
@@ -248,12 +248,12 @@
                 "ports": [
                     {
                         "name": "p_memWideStreamIn",
-                        "direction": "",
+                        "direction": "input",
                         "type": "typename WideTypeDefs< t_memWidth, T_elemType >::WideIFStreamType &"
                     },
                     {
                         "name": "p_memWideStreamOut",
-                        "direction": "",
+                        "direction": "output",
                         "type": "typename WideTypeDefs< t_memWidth, typename FFTIOTypes< t_ssrFFTParamsColProc, typename FFTIOTypes< t_ssrFFTParamsRowProc, T_elemType >::T_outType >::T_outType >::WideIFStreamType &"
                     }
                 ],
@@ -326,12 +326,12 @@
                 "ports": [
                     {
                         "name": "p_memWideStreamIn",
-                        "direction": "",
+                        "direction": "input",
                         "type": "typename WideTypeDefs< t_memWidth, T_elemType >::WideIFStreamType &"
                     },
                     {
                         "name": "p_memWideStreamOut",
-                        "direction": "",
+                        "direction": "output",
                         "type": "typename WideTypeDefs< t_memWidth, typename FFTIOTypes< t_ssrFFTParamsColProc, typename FFTIOTypes< t_ssrFFTParamsRowProc, T_elemType >::T_outType >::T_outType >::WideIFStreamType &"
                     }
                 ],

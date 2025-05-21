@@ -135,6 +135,14 @@ class test_graph : public graph {
         std::string filenameOut = QUOTE(OUTPUT_FILE);
         out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_64_bits, filenameOut);
         connect<>(funcApproxGraph.out[0], out[0].in[0]);
+#ifdef USING_UUT
+#if (SINGLE_BUF == 1)
+        printf("DEBUG1.\n");
+        single_buffer(funcApproxGraph.getKernels()[0].in[0]);
+        single_buffer(funcApproxGraph.getKernels()[0].out[0]);
+        printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel.\n");
+#endif
+#endif
 
         printf("========================\n");
     };

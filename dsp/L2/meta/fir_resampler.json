@@ -143,18 +143,12 @@
       "updater": {
         "file": "fir_resampler.py",
         "function": "update_TP_INTERPOLATE_FACTOR",
-        "args": [
-          "AIE_VARIANT",
-          "TP_FIR_LEN"
-        ]
+        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_USE_COEFF_RELOAD", "TP_FIR_LEN"]
       },
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_INTERPOLATE_FACTOR",
-        "args": [
-          "AIE_VARIANT",
-          "TP_FIR_LEN"
-        ]
+        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_USE_COEFF_RELOAD", "TP_FIR_LEN"]
       }
     },
     {
@@ -185,20 +179,13 @@
       "updater": {
         "file": "fir_resampler.py",
         "function": "update_TP_DECIMATE_FACTOR",
-        "args": [
-          "AIE_VARIANT",
-          "TP_FIR_LEN",
-          "TP_INTERPOLATE_FACTOR"
-        ]
+        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD", "TP_INTERPOLATE_FACTOR"]
+
       },
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_DECIMATE_FACTOR",
-        "args": [
-          "AIE_VARIANT",
-          "TP_FIR_LEN",
-          "TP_INTERPOLATE_FACTOR"
-        ]
+        "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD", "TP_INTERPOLATE_FACTOR"]
       }
     },
     {

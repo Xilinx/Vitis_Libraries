@@ -170,17 +170,23 @@ class test_graph : public graph {
         const int MAX_PING_PONG_SIZE = __DATA_MEM_BYTES__ / 2;
         const int bufferSize =
             (PORT_API == 1 ? 0 : ((FIR_LEN * TDM_CHANNELS) + INPUT_WINDOW_VSIZE / P_SSR) * sizeof(DATA_TYPE));
-        if (bufferSize > MAX_PING_PONG_SIZE) {
-            for (int i = 0; i < P_SSR * CASC_LEN; i++) {
-                single_buffer(firGraph.getKernels(i)->in[0]);
+        if ((bufferSize > MAX_PING_PONG_SIZE) || (SINGLE_BUF == 1 && PORT_API == 0)) {
+            for (int ssr = 0; ssr < P_SSR; ssr++) {
+                for (int casc_len = 0; casc_len < CASC_LEN; casc_len++) {
+                    single_buffer(firGraph.getKernels(CASC_LEN * ssr + casc_len)->in[0]);
+                    if (DUAL_IP == 1) {
+                        single_buffer(firGraph.getKernels(CASC_LEN * ssr + casc_len)->in[1]);
+                    }
+                    printf("INFO: Single Buffer Constraint applied to input buffers of kernel %d.\n",
+                           CASC_LEN * ssr + casc_len);
+                }
+                single_buffer(firGraph.getKernels()[CASC_LEN * ssr + CASC_LEN - 1].out[0]);
+                if (NUM_OUTPUTS == 2) {
+                    single_buffer(firGraph.getKernels()[CASC_LEN * ssr + CASC_LEN - 1].out[1]);
+                }
+                printf("INFO: Single Buffer Constraint applied to output buffers of kernel %d.\n",
+                       CASC_LEN * ssr + CASC_LEN - 1);
             }
-            // single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[0]);
-            // if (DUAL_IP == 1) {
-            //     single_buffer(firGraph.getKernels()->in[1]);
-            // }
-            // if (NUM_OUTPUTS == 2) {
-            //     single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[1]);
-            // }
         }
 #endif
 

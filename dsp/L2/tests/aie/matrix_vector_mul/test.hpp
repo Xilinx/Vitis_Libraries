@@ -103,6 +103,14 @@ class test_graph : public graph {
                 std::string filenameInMatrix = QUOTE(INPUT_FILE_A);
                 filenameInMatrix.insert(filenameInMatrix.length() - 4,
                                         ("_" + std::to_string(ssr) + "_" + std::to_string(casc)));
+
+#if (SINGLE_BUF == 1)
+                single_buffer(matrix_vector_mulGraph.getKernels()[(ssr * CASC_LEN) + casc].in[0]);
+                single_buffer(matrix_vector_mulGraph.getKernels()[(ssr * CASC_LEN) + casc].in[1]);
+                printf("INFO: Single Buffer Constraint applied to input buffers of kernel %d.\n",
+                       ((ssr * CASC_LEN) + casc));
+#endif
+
 // iobuffer A
 #if (USE_MATRIX_RELOAD == 0)
                 inA[casc + ssr * CASC_LEN] = input_plio::create("PLIO_in_A" + std::to_string(casc + ssr * CASC_LEN),
@@ -138,6 +146,11 @@ class test_graph : public graph {
                     connect<>(inB[bPortIdx].out[0], matrix_vector_mulGraph.inB[bPortIdx]);
                 }
             }
+#if (SINGLE_BUF == 1)
+            single_buffer(matrix_vector_mulGraph.getKernels()[(ssr * CASC_LEN) + (CASC_LEN - 1)].out[0]);
+            printf("INFO: Single Buffer Constraint applied the output buffer of kernel %d.\n",
+                   (ssr * CASC_LEN) + (CASC_LEN - 1));
+#endif
         }
         //////////////////////////////////////////////// UUT out////////////////////////////////////////////////////////
 

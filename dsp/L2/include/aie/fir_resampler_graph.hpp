@@ -211,14 +211,14 @@ class fir_resampler_graph : public graph {
     static constexpr unsigned int kMemoryModuleSize = __DATA_MEM_BYTES__;
     static constexpr unsigned int inBufferSize = ((TP_FIR_LEN + TP_INPUT_WINDOW_VSIZE) * sizeof(TT_DATA));
     // Requested Input Window buffer exceeds memory module size
-    static_assert(TP_API != 0 || inBufferSize < kMemoryModuleSize,
+    static_assert(TP_API != 0 || inBufferSize <= kMemoryModuleSize,
                   "ERROR: Input Window size (based on requested window size and FIR length margin) exceeds Memory "
                   "Module size of 32kB for AIE-1 and 64kB for AIE-ML devices.");
 
     static constexpr unsigned int outBufferSize =
         (TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / TP_DECIMATE_FACTOR);
     // Requested Output Window buffer exceeds memory module size
-    static_assert(TP_API != 0 || outBufferSize < kMemoryModuleSize,
+    static_assert(TP_API != 0 || outBufferSize <= kMemoryModuleSize,
                   "ERROR: Input Window size (based on requested window size and FIR length margin) exceeds Memory "
                   "Module size of 32kB");
     // SSR is decomposition is currently unavailable

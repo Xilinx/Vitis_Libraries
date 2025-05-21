@@ -23,12 +23,12 @@ The graph entry point is the following:
 
 Device Support
 ==============
-The mixed_radix_fft supports AIE and AIE-ML devices.
+The mixed_radix_fft supports AIE, AIE-ML and AIE-MLv2 devices.
 
 All features are supported on these variants with minor differences as follows:
 
-- ``TP_POINT_SIZE``: The width of vectors used for calculations differs by AI Engine variant. The point size ``TP_POINT_SIZE`` must be a multiple of the number of samples processed in an atomic vectorized butterfly operation. This is 16 for AIE and 32 for AIE-ML.
-- ``TP_RND``: Supported round modes differ between AIE and AIE-ML devices as for all library elements.
+- ``TP_POINT_SIZE``: The width of vectors used for calculations differs by AI Engine variant. The point size ``TP_POINT_SIZE`` must be a multiple of the number of samples processed in an atomic vectorized butterfly operation. This is 16 for AIE, 32 for AIE-ML and 64 for AIE-MLv2.
+- ``TP_RND``: Supported round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices as for all library elements.
 - Number of ports: When configured for ``TP_API=1`` (stream IO), AIE will require 2 input ports (sample interleaved - even samples on the first port) and 2 output ports similarly interleaved. AIE-ML accepts one stream only.
 - ``TP_DYN_PT_SIZE``: the dynamic (run-time) point-size feature is supported on AIE only.
 

@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _DSPLIB_TEST_HPP_
-#define _DSPLIB_TEST_HPP_
+#ifndef _DSPLIB_TEST_FA_HPP_
+#define _DSPLIB_TEST_FA_HPP_
 
 // This file holds the definition of the test harness for the Function Approximation graph.
 
@@ -73,4 +73,4 @@ class test_func_approx : public graph {
 };
 };
 
-#endif // _DSPLIB_TEST_HPP_
+#endif // _DSPLIB_TEST_FA_HPP_

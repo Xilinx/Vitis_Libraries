@@ -26,15 +26,15 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The `func_approx` library element supports AIE and AIE-ML.
+The `func_approx` library element supports AIE, AIE-ML and AIE-MLv2.
 
-- Round modes available and the enumerated values of round modes differ between AIE1 and AIE-ML. See :ref:`COMPILING_AND_SIMULATING`.
+- Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
 
 Supported Types
 ===============
 
 The input and output data type for the Function Approximation must be real-valued and is controlled by the ``TT_DATA`` template parameter.
-In AIE, this parameter can be configured as `int16`, `int32`, or `float`. In AIE-ML, this parameter can be configured as `int16`, `int32`, `float`, or `bfloat16`.
+For AIE devices, this parameter can be configured as `int16`, `int32`, or `float`. For AIE-ML and AIE-MLv2, this parameter can be configured as `int16`, `int32`, `float`, or `bfloat16`.
 
 Template Parameters
 ===================
@@ -121,7 +121,7 @@ The provided lookup table should be populated as below:
     slope[0], offset[0], slope[1], offset[1], ... slope[2^TP_COARSE_BITS - 1], offset[2^TP_COARSE_BITS - 1]
 
 A single lookup will require `sizeof(TT_DATA) * 2 * 2^TP_COARSE_BITS` bytes of memory. For performance reasons, a duplicate of the lookup is created by the `func_approx` graph.
-Configurations for AIE-ML with a data type of `int16` or `bfloat16` will use the AI Engine API for improved parallel lookups. However, this requires an additional duplication within each lookup table.
+Configurations for AIE-ML or AIE-MLv2 devices with a data type of `int16` or `bfloat16` will use the AI Engine API for improved parallel lookups. However, this requires an additional duplication within each lookup table.
 This duplication will be done within the graph but must be accounted for when calculating the memory required for the provided lookup tables. Users must provide the lookup table, without any duplication, as a constructor argument to the graph.
 
 Input Domain Modes

@@ -23,9 +23,37 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_cint16_71_0_15_256_1_16_0_1_0_0_0_2_1_2_0_1_1_1_1_0_0_0_1_aie1_hw_checkin": {
+        "DATA_TYPE": "cint16",
+        "COEFF_TYPE": "cint16",
+        "FIR_LEN": "71",
+        "SHIFT": "15",
+        "CASC_LEN": "1",
+        "INPUT_WINDOW_VSIZE": "256",
+        "USE_COEFF_RELOAD": "0",
+        "NUM_OUTPUTS": "2",
+        "SINGLE_BUF": "1",
+        "UPSHIFT_CT": "0",
+        "AIE_VARIANT": "1",
+        "NITER": "16",
+        "ROUND_MODE": "0",
+        "DUAL_IP": "0",
+        "PORT_API": "0",
+        "INTERPOLATE_FACTOR": "2",
+        "DECIMATE_FACTOR": "1",
+        "USE_CUSTOM_CONSTRAINT": "0",
+        "UUT_SSR": "1",
+        "UUT_PARA_INTERP_POLY": "1",
+        "UUT_PARA_DECI_POLY": "1",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "COEFF_STIM_TYPE": "0",
         "SAT_MODE": "0"
     },
-    "cint16_int16_11_0_15_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_11_0_15_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "11",
@@ -49,9 +77,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_63_0_16_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_63_0_16_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "63",
@@ -75,9 +104,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_19_0_16_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint32_cint32_19_0_16_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "cint32",
         "FIR_LEN": "19",
@@ -101,9 +131,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_16_256_1_16_1_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_7_0_16_256_1_16_1_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -128,9 +159,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_16_256_1_16_1_1_0_0_0_2_1_1_0_1_1_1_1_0_0_1_aie1_hw_checkin": {
+    "cint16_int16_7_0_16_256_1_16_1_1_0_0_0_2_1_1_0_1_1_1_1_0_0_1_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -154,9 +186,10 @@
         "UUT_PARA_DECI_POLY": "1",
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
-        "COEFF_STIM_TYPE": "0"
+        "COEFF_STIM_TYPE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_16_256_2_16_1_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_int16_7_0_16_256_2_16_1_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -181,9 +214,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_16_256_2_16_1_1_0_0_0_2_1_1_0_1_1_1_1_0_0_1_aie2_hw_checkin": {
+    "cint16_int16_7_0_16_256_2_16_1_1_0_0_0_2_1_1_0_1_1_1_1_0_0_1_0_aie2_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -207,9 +241,10 @@
         "UUT_PARA_DECI_POLY": "1",
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
-        "COEFF_STIM_TYPE": "0"
+        "COEFF_STIM_TYPE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_23_0_16_128_1_16_0_1_0_0_1_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_cint16_23_0_16_128_1_16_0_1_0_0_1_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "23",
@@ -233,9 +268,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_15_0_16_128_1_16_0_1_1_0_1_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_cint16_15_0_16_128_1_16_0_1_1_0_1_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "15",
@@ -259,9 +295,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_43_0_16_128_1_16_0_3_0_0_1_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_cint16_43_0_16_128_1_16_0_3_0_0_1_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "43",
@@ -285,9 +322,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_83_0_16_128_1_16_0_3_1_0_1_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_cint16_83_0_16_128_1_16_0_3_1_0_1_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "83",
@@ -311,9 +349,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_43_0_16_128_1_16_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_cint16_43_0_16_128_1_16_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "43",
@@ -337,9 +376,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_83_0_16_128_1_16_0_3_1_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_cint16_83_0_16_128_1_16_0_3_1_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "83",
@@ -363,9 +403,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_71_0_15_256_1_16_0_1_0_0_0_2_1_2_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_cint16_71_0_15_256_1_16_0_1_0_0_0_2_1_2_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "71",
@@ -389,9 +430,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_23_0_15_256_1_16_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_23_0_15_256_1_16_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "23",
@@ -415,9 +457,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_23_0_15_256_1_16_0_1_1_1_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_23_0_15_256_1_16_0_1_1_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "23",
@@ -441,9 +484,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_23_0_15_256_1_16_0_1_1_1_0_2_1_2_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_23_0_15_256_1_16_0_1_1_1_0_2_1_2_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "23",
@@ -467,9 +511,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_23_0_15_256_1_16_0_1_0_1_0_2_1_2_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_23_0_15_256_1_16_0_1_0_1_0_2_1_2_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "23",
@@ -493,9 +538,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_2047_1_25_512_1_16_0_8_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_2047_1_25_512_1_16_0_8_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "2047",
@@ -519,9 +565,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_19_1_16_256_1_16_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_19_1_16_256_1_16_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "19",
@@ -545,9 +592,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_31_0_15_256_1_16_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_31_0_15_256_1_16_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "31",
@@ -571,9 +619,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_83_1_16_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "int16_int16_83_1_16_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "int16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "83",
@@ -597,9 +646,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_63_0_16_256_1_16_0_1_1_1_0_2_1_2_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint32_cint32_63_0_16_256_1_16_0_1_1_1_0_2_1_2_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "cint32",
         "FIR_LEN": "63",
@@ -623,9 +673,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_128_1_16_0_1_0_1_0_2_1_1_0_1_2_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_47_0_15_128_1_16_0_1_0_1_0_2_1_1_0_1_2_1_1_0_0_0_0_aie1_hw_checkin": {
         "UUT_SSR": "1",
         "UUT_PARA_INTERP_POLY": "2",
         "DATA_TYPE": "cint16",
@@ -649,9 +700,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_256_1_16_0_1_0_1_0_2_1_1_0_2_2_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_47_0_15_256_1_16_0_1_0_1_0_2_1_1_0_2_2_1_1_0_0_0_0_aie1_hw_checkin": {
         "UUT_SSR": "2",
         "UUT_PARA_INTERP_POLY": "2",
         "DATA_TYPE": "cint16",
@@ -675,9 +727,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_384_1_16_0_1_0_1_0_2_1_1_0_3_2_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_47_0_15_384_1_16_0_1_0_1_0_2_1_1_0_3_2_1_1_0_0_0_0_aie1_hw_checkin": {
         "UUT_SSR": "3",
         "UUT_PARA_INTERP_POLY": "2",
         "DATA_TYPE": "cint16",
@@ -701,9 +754,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_128_1_16_0_1_0_1_1_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_47_0_15_128_1_16_0_1_0_1_1_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "UUT_SSR": "1",
         "UUT_PARA_INTERP_POLY": "1",
         "DATA_TYPE": "cint16",
@@ -727,9 +781,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_128_1_16_0_1_0_1_1_2_1_1_0_1_2_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_47_0_15_128_1_16_0_1_0_1_1_2_1_1_0_1_2_1_1_0_0_0_0_aie1_hw_checkin": {
         "UUT_SSR": "1",
         "UUT_PARA_INTERP_POLY": "2",
         "DATA_TYPE": "cint16",
@@ -753,9 +808,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_256_1_16_0_1_0_1_1_2_1_1_0_2_2_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_47_0_15_256_1_16_0_1_0_1_1_2_1_1_0_2_2_1_1_0_0_0_0_aie1_hw_checkin": {
         "UUT_SSR": "2",
         "UUT_PARA_INTERP_POLY": "2",
         "DATA_TYPE": "cint16",
@@ -779,9 +835,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_384_1_16_0_1_0_1_1_2_1_1_0_3_2_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_47_0_15_384_1_16_0_1_0_1_1_2_1_1_0_3_2_1_1_0_0_0_0_aie1_hw_checkin": {
         "UUT_SSR": "3",
         "UUT_PARA_INTERP_POLY": "2",
         "DATA_TYPE": "cint16",
@@ -805,9 +862,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int32_43_0_15_2560_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "int16_int32_43_0_15_2560_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "int16",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "43",
@@ -831,9 +889,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int32_31_0_15_2560_1_16_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int32_31_0_15_2560_1_16_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "31",
@@ -857,9 +916,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_31_0_15_2560_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_cint32_31_0_15_2560_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint32",
         "FIR_LEN": "31",
@@ -883,9 +943,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int32_23_0_15_256_1_16_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int32_23_0_15_256_1_16_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "23",
@@ -909,9 +970,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int32_23_0_15_256_1_16_0_1_1_1_0_2_1_2_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int32_23_0_15_256_1_16_0_1_1_1_0_2_1_2_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "23",
@@ -935,9 +997,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "float_float_11_0_0_2560_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "float_float_11_0_0_2560_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "float",
         "COEFF_TYPE": "float",
         "SHIFT": "0",
@@ -962,9 +1025,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_float_11_0_0_1280_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cfloat_float_11_0_0_1280_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cfloat",
         "COEFF_TYPE": "float",
         "SHIFT": "0",
@@ -989,9 +1053,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_float_31_0_0_1280_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cfloat_float_31_0_0_1280_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cfloat",
         "COEFF_TYPE": "float",
         "SHIFT": "0",
@@ -1016,9 +1081,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_11_1_16_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_11_1_16_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "11",
@@ -1042,9 +1108,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_15_1_16_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_15_1_16_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "15",
@@ -1068,9 +1135,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_19_1_16_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_19_1_16_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "19",
@@ -1094,9 +1162,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_23_1_16_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_23_1_16_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "23",
@@ -1120,9 +1189,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_27_1_16_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_27_1_16_256_1_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "27",
@@ -1146,9 +1216,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_43_1_16_256_1_16_0_1_1_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_43_1_16_256_1_16_0_1_1_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "43",
@@ -1172,9 +1243,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_1_16_256_1_16_0_1_1_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_checkin": {
+    "cint16_int16_47_1_16_256_1_16_0_1_1_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_checkin": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "47",
@@ -1198,9 +1270,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_11_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_int16_11_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -1224,9 +1297,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_79_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_int16_79_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -1250,9 +1324,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_159_0_16_2560_2_16_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_int16_159_0_16_2560_2_16_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -1276,9 +1351,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_19_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "int16_int16_19_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "int16",
         "COEFF_TYPE": "int16",
@@ -1302,9 +1378,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_159_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "int16_int16_159_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "int16",
         "COEFF_TYPE": "int16",
@@ -1328,9 +1405,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_159_0_16_2560_2_16_0_5_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "int16_int16_159_0_16_2560_2_16_0_5_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "int16",
         "COEFF_TYPE": "int16",
@@ -1354,9 +1432,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_15_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_cint16_15_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -1380,9 +1459,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_139_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_cint16_139_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -1406,9 +1486,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_159_0_16_2560_2_2_0_6_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_cint16_159_0_16_2560_2_2_0_6_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -1432,9 +1513,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_15_0_16_2560_2_4_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "int16_int16_15_0_16_2560_2_4_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "NITER": "4",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -1458,9 +1540,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_83_0_16_2560_2_4_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "int16_int16_83_0_16_2560_2_4_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "NITER": "4",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -1484,9 +1567,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_111_0_16_2560_2_4_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "int16_int16_111_0_16_2560_2_4_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "NITER": "4",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -1510,9 +1594,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_11_0_16_2560_2_4_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_int16_11_0_16_2560_2_4_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "NITER": "4",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -1536,9 +1621,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_15_0_16_2560_2_4_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_cint16_15_0_16_2560_2_4_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "NITER": "4",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -1562,9 +1648,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_43_0_16_128_2_4_0_3_0_0_1_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_cint16_43_0_16_128_2_4_0_3_0_0_1_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "NITER": "4",
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
@@ -1588,9 +1675,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_43_0_16_128_2_4_0_3_0_1_1_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_cint16_43_0_16_128_2_4_0_3_0_1_1_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "NITER": "4",
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
@@ -1614,9 +1702,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_128_2_16_0_1_0_1_0_2_1_1_0_1_2_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_int16_47_0_15_128_2_16_0_1_0_1_0_2_1_1_0_1_2_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "UUT_SSR": "1",
         "UUT_PARA_INTERP_POLY": "2",
@@ -1640,9 +1729,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_128_2_16_0_1_0_1_1_2_1_1_0_1_2_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_int16_47_0_15_128_2_16_0_1_0_1_1_2_1_1_0_1_2_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "UUT_SSR": "1",
         "UUT_PARA_INTERP_POLY": "2",
@@ -1666,9 +1756,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_95_0_15_256_2_16_0_3_0_1_1_2_1_1_0_2_2_1_1_0_0_0_aie2_hw_checkin": {
+    "int16_int16_95_0_15_256_2_16_0_3_0_1_1_2_1_1_0_2_2_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "UUT_SSR": "2",
         "UUT_PARA_INTERP_POLY": "2",
@@ -1692,9 +1783,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_384_2_16_0_1_0_1_1_2_1_1_0_3_2_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_int16_47_0_15_384_2_16_0_1_0_1_1_2_1_1_0_3_2_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "UUT_SSR": "3",
         "UUT_PARA_INTERP_POLY": "2",
@@ -1718,9 +1810,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_128_2_16_0_1_0_0_0_2_1_1_0_1_2_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_int16_47_0_15_128_2_16_0_1_0_0_0_2_1_1_0_1_2_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "UUT_SSR": "1",
         "UUT_PARA_INTERP_POLY": "2",
@@ -1744,9 +1837,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_143_0_15_256_2_16_0_3_0_0_0_2_1_1_0_2_2_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_cint16_143_0_15_256_2_16_0_3_0_0_0_2_1_1_0_2_2_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "UUT_SSR": "2",
         "UUT_PARA_INTERP_POLY": "2",
@@ -1770,9 +1864,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_287_0_15_384_2_16_0_2_0_0_0_2_1_1_0_3_2_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_cint16_287_0_15_384_2_16_0_2_0_0_0_2_1_1_0_3_2_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "UUT_SSR": "3",
         "UUT_PARA_INTERP_POLY": "2",
@@ -1796,9 +1891,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_128_2_16_0_1_0_0_1_2_1_1_0_1_2_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_int16_47_0_15_128_2_16_0_1_0_0_1_2_1_1_0_1_2_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "UUT_SSR": "1",
         "UUT_PARA_INTERP_POLY": "2",
@@ -1822,9 +1918,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_199_0_15_256_2_16_0_3_0_0_1_2_1_1_0_2_2_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_int16_199_0_15_256_2_16_0_3_0_0_1_2_1_1_0_2_2_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "UUT_SSR": "2",
         "UUT_PARA_INTERP_POLY": "2",
@@ -1848,9 +1945,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_191_0_15_384_2_16_0_2_0_0_1_2_1_1_0_3_2_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_int16_191_0_15_384_2_16_0_2_0_0_1_2_1_1_0_3_2_1_1_0_0_0_0_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "UUT_SSR": "3",
         "UUT_PARA_INTERP_POLY": "2",
@@ -1874,9 +1972,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int32_47_0_15_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "int16_int32_47_0_15_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "int16",
@@ -1900,9 +1999,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_83_0_15_768_2_16_0_1_0_0_0_2_1_1_0_2_2_1_1_0_0_0_aie2_hw_checkin": {
+    "int32_int16_83_0_15_768_2_16_0_1_0_0_0_2_1_1_0_2_2_1_1_0_0_0_0_aie2_hw_checkin": {
         "UUT_SSR": "2",
         "UUT_PARA_INTERP_POLY": "2",
         "INPUT_WINDOW_VSIZE": "768",
@@ -1926,9 +2026,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_35_0_15_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "int32_int32_35_0_15_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "int32",
@@ -1952,9 +2053,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int32_35_0_15_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint32_int32_35_0_15_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "cint32",
@@ -1978,9 +2080,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int16_47_0_15_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint32_int16_47_0_15_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "cint32",
@@ -2004,9 +2107,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_31_0_15_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint32_cint16_31_0_15_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "cint32",
@@ -2030,9 +2134,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_19_0_15_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint32_cint32_19_0_15_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "cint32",
@@ -2056,9 +2161,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int32_19_0_15_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_int32_19_0_15_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "cint16",
@@ -2082,9 +2188,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_19_0_15_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_cint32_19_0_15_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "cint16",
@@ -2108,9 +2215,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "float_float_19_0_0_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "float_float_19_0_0_768_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "float",
@@ -2135,9 +2243,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int32_47_0_15_768_2_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "int16_int32_47_0_15_768_2_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "int16",
@@ -2161,9 +2270,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_43_0_15_768_2_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "int32_int16_43_0_15_768_2_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "int32",
@@ -2187,9 +2297,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_35_0_15_768_2_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "int32_int32_35_0_15_768_2_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "int32",
@@ -2213,9 +2324,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int32_35_0_15_768_2_16_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint32_int32_35_0_15_768_2_16_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "cint32",
@@ -2239,9 +2351,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int16_47_0_15_768_2_16_0_2_0_1_0_2_1_1_0_2_2_1_1_0_0_0_aie2_hw_checkin": {
+    "cint32_int16_47_0_15_768_2_16_0_2_0_1_0_2_1_1_0_2_2_1_1_0_0_0_0_aie2_hw_checkin": {
         "UUT_SSR": "2",
         "UUT_PARA_INTERP_POLY": "2",
         "INPUT_WINDOW_VSIZE": "768",
@@ -2265,9 +2378,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_31_0_15_768_2_16_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint32_cint16_31_0_15_768_2_16_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "cint32",
@@ -2291,9 +2405,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_19_0_15_768_2_16_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint32_cint32_19_0_15_768_2_16_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "cint32",
@@ -2317,9 +2432,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int32_19_0_15_768_2_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_int32_19_0_15_768_2_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "cint16",
@@ -2343,9 +2459,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_19_0_15_768_2_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "cint16_cint32_19_0_15_768_2_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "cint16",
@@ -2369,9 +2486,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "float_float_19_0_0_768_2_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_checkin": {
+    "float_float_19_0_0_768_2_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "float",
@@ -2396,9 +2514,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_11_0_16_2560_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_int16_11_0_16_2560_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -2422,9 +2541,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_79_0_16_2560_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_int16_79_0_16_2560_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -2448,9 +2568,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_159_0_16_2560_22_16_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_int16_159_0_16_2560_22_16_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -2474,9 +2595,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_19_0_16_2560_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "int16_int16_19_0_16_2560_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "int16",
         "COEFF_TYPE": "int16",
@@ -2500,9 +2622,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_159_0_16_2560_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "int16_int16_159_0_16_2560_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "int16",
         "COEFF_TYPE": "int16",
@@ -2526,9 +2649,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_159_0_16_2560_22_16_0_5_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "int16_int16_159_0_16_2560_22_16_0_5_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "int16",
         "COEFF_TYPE": "int16",
@@ -2552,9 +2676,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_15_0_16_2560_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_cint16_15_0_16_2560_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -2578,9 +2703,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_139_0_16_2560_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_cint16_139_0_16_2560_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -2604,9 +2730,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_159_0_16_2560_22_2_0_6_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_cint16_159_0_16_2560_22_2_0_6_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -2630,9 +2757,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_15_0_16_2560_22_4_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "int16_int16_15_0_16_2560_22_4_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "NITER": "4",
         "AIE_VARIANT": "22",
         "PORT_API": "1",
@@ -2656,9 +2784,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_83_0_16_2560_22_4_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "int16_int16_83_0_16_2560_22_4_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "NITER": "4",
         "AIE_VARIANT": "22",
         "PORT_API": "1",
@@ -2682,9 +2811,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_111_0_16_2560_22_4_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "int16_int16_111_0_16_2560_22_4_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "NITER": "4",
         "AIE_VARIANT": "22",
         "PORT_API": "1",
@@ -2708,9 +2838,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_11_0_16_2560_22_4_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_int16_11_0_16_2560_22_4_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "NITER": "4",
         "AIE_VARIANT": "22",
         "PORT_API": "1",
@@ -2734,9 +2865,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_15_0_16_2560_22_4_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_cint16_15_0_16_2560_22_4_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "NITER": "4",
         "AIE_VARIANT": "22",
         "PORT_API": "1",
@@ -2760,9 +2892,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_43_0_16_128_22_4_0_3_0_0_1_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_cint16_43_0_16_128_22_4_0_3_0_0_1_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "NITER": "4",
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cint16",
@@ -2786,9 +2919,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_43_0_16_128_22_4_0_3_0_1_1_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_cint16_43_0_16_128_22_4_0_3_0_1_1_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "NITER": "4",
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cint16",
@@ -2812,9 +2946,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_128_22_16_0_1_0_1_0_2_1_1_0_1_2_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_int16_47_0_15_128_22_16_0_1_0_1_0_2_1_1_0_1_2_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "UUT_SSR": "1",
         "UUT_PARA_INTERP_POLY": "2",
@@ -2838,9 +2973,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_128_22_16_0_1_0_1_1_2_1_1_0_1_2_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_int16_47_0_15_128_22_16_0_1_0_1_1_2_1_1_0_1_2_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "UUT_SSR": "1",
         "UUT_PARA_INTERP_POLY": "2",
@@ -2864,9 +3000,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_95_0_15_256_22_16_0_3_0_1_1_2_1_1_0_2_2_1_1_0_0_0_aie22_hw_checkin": {
+    "int16_int16_95_0_15_256_22_16_0_3_0_1_1_2_1_1_0_2_2_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "UUT_SSR": "2",
         "UUT_PARA_INTERP_POLY": "2",
@@ -2890,9 +3027,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_384_22_16_0_1_0_1_1_2_1_1_0_3_2_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_int16_47_0_15_384_22_16_0_1_0_1_1_2_1_1_0_3_2_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "UUT_SSR": "3",
         "UUT_PARA_INTERP_POLY": "2",
@@ -2916,9 +3054,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_128_22_16_0_1_0_0_0_2_1_1_0_1_2_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_int16_47_0_15_128_22_16_0_1_0_0_0_2_1_1_0_1_2_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "UUT_SSR": "1",
         "UUT_PARA_INTERP_POLY": "2",
@@ -2942,9 +3081,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_143_0_15_256_22_16_0_3_0_0_0_2_1_1_0_2_2_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_cint16_143_0_15_256_22_16_0_3_0_0_0_2_1_1_0_2_2_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "UUT_SSR": "2",
         "UUT_PARA_INTERP_POLY": "2",
@@ -2968,9 +3108,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_287_0_15_384_22_16_0_2_0_0_0_2_1_1_0_3_2_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_cint16_287_0_15_384_22_16_0_2_0_0_0_2_1_1_0_3_2_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "UUT_SSR": "3",
         "UUT_PARA_INTERP_POLY": "2",
@@ -2994,9 +3135,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_128_22_16_0_1_0_0_1_2_1_1_0_1_2_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_int16_47_0_15_128_22_16_0_1_0_0_1_2_1_1_0_1_2_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "UUT_SSR": "1",
         "UUT_PARA_INTERP_POLY": "2",
@@ -3020,9 +3162,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_199_0_15_256_22_16_0_3_0_0_1_2_1_1_0_2_2_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_int16_199_0_15_256_22_16_0_3_0_0_1_2_1_1_0_2_2_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "UUT_SSR": "2",
         "UUT_PARA_INTERP_POLY": "2",
@@ -3046,9 +3189,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_191_0_15_384_22_16_0_2_0_0_1_2_1_1_0_3_2_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_int16_191_0_15_384_22_16_0_2_0_0_1_2_1_1_0_3_2_1_1_0_0_0_0_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "UUT_SSR": "3",
         "UUT_PARA_INTERP_POLY": "2",
@@ -3072,9 +3216,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int32_47_0_15_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "int16_int32_47_0_15_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "int16",
@@ -3098,9 +3243,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_83_0_15_768_22_16_0_1_0_0_0_2_1_1_0_2_2_1_1_0_0_0_aie22_hw_checkin": {
+    "int32_int16_83_0_15_768_22_16_0_1_0_0_0_2_1_1_0_2_2_1_1_0_0_0_0_aie22_hw_checkin": {
         "UUT_SSR": "2",
         "UUT_PARA_INTERP_POLY": "2",
         "INPUT_WINDOW_VSIZE": "768",
@@ -3124,9 +3270,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_35_0_15_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "int32_int32_35_0_15_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "int32",
@@ -3150,9 +3297,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int32_35_0_15_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint32_int32_35_0_15_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "cint32",
@@ -3176,9 +3324,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int16_47_0_15_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint32_int16_47_0_15_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "cint32",
@@ -3202,9 +3351,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_31_0_15_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint32_cint16_31_0_15_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "cint32",
@@ -3228,9 +3378,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_19_0_15_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint32_cint32_19_0_15_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "cint32",
@@ -3254,9 +3405,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int32_19_0_15_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_int32_19_0_15_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "cint16",
@@ -3280,9 +3432,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_19_0_15_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_cint32_19_0_15_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "cint16",
@@ -3306,9 +3459,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "float_float_19_0_0_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "float_float_19_0_0_768_22_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "0",
         "DATA_TYPE": "float",
@@ -3333,9 +3487,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int32_47_0_15_768_22_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "int16_int32_47_0_15_768_22_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "int16",
@@ -3359,9 +3514,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_43_0_15_768_22_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "int32_int16_43_0_15_768_22_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "int32",
@@ -3385,9 +3541,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_35_0_15_768_22_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "int32_int32_35_0_15_768_22_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "int32",
@@ -3411,9 +3568,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int32_35_0_15_768_22_16_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint32_int32_35_0_15_768_22_16_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "cint32",
@@ -3437,9 +3595,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int16_47_0_15_768_22_16_0_2_0_1_0_2_1_1_0_2_2_1_1_0_0_0_aie22_hw_checkin": {
+    "cint32_int16_47_0_15_768_22_16_0_2_0_1_0_2_1_1_0_2_2_1_1_0_0_0_0_aie22_hw_checkin": {
         "UUT_SSR": "2",
         "UUT_PARA_INTERP_POLY": "2",
         "INPUT_WINDOW_VSIZE": "768",
@@ -3463,9 +3622,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_31_0_15_768_22_16_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint32_cint16_31_0_15_768_22_16_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "cint32",
@@ -3489,9 +3649,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_19_0_15_768_22_16_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint32_cint32_19_0_15_768_22_16_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "cint32",
@@ -3515,9 +3676,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int32_19_0_15_768_22_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_int32_19_0_15_768_22_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "cint16",
@@ -3541,9 +3703,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_19_0_15_768_22_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "cint16_cint32_19_0_15_768_22_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "cint16",
@@ -3567,9 +3730,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "float_float_19_0_0_768_22_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie22_hw_checkin": {
+    "float_float_19_0_0_768_22_16_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie22_hw_checkin": {
         "INPUT_WINDOW_VSIZE": "768",
         "PORT_API": "1",
         "DATA_TYPE": "float",
@@ -3594,9 +3758,37 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
+    },
+    "cint16_cint16_71_0_15_256_1_16_0_1_0_0_0_2_1_2_0_1_1_1_1_0_0_0_1_aie1_hw_qor": {
+        "DATA_TYPE": "cint16",
+        "COEFF_TYPE": "cint16",
+        "FIR_LEN": "71",
+        "SHIFT": "15",
+        "CASC_LEN": "1",
+        "INPUT_WINDOW_VSIZE": "256",
+        "USE_COEFF_RELOAD": "0",
+        "NUM_OUTPUTS": "2",
+        "SINGLE_BUF": "1",
+        "UPSHIFT_CT": "0",
+        "AIE_VARIANT": "1",
+        "NITER": "16",
+        "ROUND_MODE": "0",
+        "DUAL_IP": "0",
+        "PORT_API": "0",
+        "INTERPOLATE_FACTOR": "2",
+        "DECIMATE_FACTOR": "1",
+        "USE_CUSTOM_CONSTRAINT": "0",
+        "UUT_SSR": "1",
+        "UUT_PARA_INTERP_POLY": "1",
+        "UUT_PARA_DECI_POLY": "1",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "COEFF_STIM_TYPE": "0",
         "SAT_MODE": "0"
     },
-    "cint16_int16_11_0_15_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_11_0_15_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "11",
@@ -3620,9 +3812,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_15_0_15_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_15_0_15_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "15",
@@ -3646,9 +3839,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_23_0_15_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_23_0_15_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "23",
@@ -3672,9 +3866,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_27_0_15_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_27_0_15_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "27",
@@ -3698,9 +3893,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_43_0_15_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_43_0_15_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "43",
@@ -3724,9 +3920,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_15_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_47_0_15_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "47",
@@ -3750,9 +3947,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_11_1_16_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_11_1_16_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "11",
@@ -3776,9 +3974,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_15_1_16_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_15_1_16_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "15",
@@ -3802,9 +4001,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_19_1_16_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_19_1_16_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "19",
@@ -3828,9 +4028,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_23_1_16_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_23_1_16_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "23",
@@ -3854,9 +4055,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_27_1_16_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_27_1_16_256_1_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "27",
@@ -3880,9 +4082,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_11_1_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_11_1_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "11",
@@ -3906,9 +4109,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_15_1_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_15_1_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "15",
@@ -3932,9 +4136,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_19_1_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_19_1_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "19",
@@ -3958,9 +4163,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_23_1_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_23_1_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "23",
@@ -3984,9 +4190,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_27_1_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_27_1_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "27",
@@ -4010,9 +4217,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_43_1_16_256_1_8_0_1_1_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_43_1_16_256_1_8_0_1_1_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "43",
@@ -4036,9 +4244,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_1_16_256_1_8_0_1_1_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_47_1_16_256_1_8_0_1_1_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "47",
@@ -4062,9 +4271,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_1023_1_15_512_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_1023_1_15_512_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "NITER": "8",
@@ -4088,9 +4298,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_2047_1_15_512_1_8_0_2_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_2047_1_15_512_1_8_0_2_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "NITER": "8",
@@ -4114,9 +4325,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_3071_1_15_512_1_8_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_3071_1_15_512_1_8_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "NITER": "8",
@@ -4140,9 +4352,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_4095_1_15_512_1_8_0_4_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_4095_1_15_512_1_8_0_4_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "NITER": "8",
@@ -4166,9 +4379,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_5119_1_15_512_1_8_0_5_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_5119_1_15_512_1_8_0_5_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "NITER": "8",
@@ -4192,9 +4406,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_6143_1_15_512_1_8_0_6_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_6143_1_15_512_1_8_0_6_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "NITER": "8",
@@ -4218,9 +4433,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -4244,9 +4460,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_11_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_11_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "11",
@@ -4270,9 +4487,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_15_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_15_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "15",
@@ -4296,9 +4514,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_19_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_19_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "19",
@@ -4322,9 +4541,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_27_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_27_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "27",
@@ -4348,9 +4568,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "99",
@@ -4374,9 +4595,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "239",
@@ -4400,9 +4622,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_16_256_1_8_0_1_0_0_1_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_7_0_16_256_1_8_0_1_0_0_1_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -4426,9 +4649,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_11_0_16_256_1_8_0_1_0_0_1_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_11_0_16_256_1_8_0_1_0_0_1_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "11",
@@ -4452,9 +4676,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_15_0_16_256_1_8_0_1_0_0_1_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_15_0_16_256_1_8_0_1_0_0_1_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "15",
@@ -4478,9 +4703,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_19_0_16_256_1_8_0_1_0_0_1_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_19_0_16_256_1_8_0_1_0_0_1_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "19",
@@ -4504,9 +4730,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_27_0_16_256_1_8_0_1_0_0_1_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_27_0_16_256_1_8_0_1_0_0_1_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "27",
@@ -4530,9 +4757,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_99_0_16_256_1_8_0_1_0_0_1_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_99_0_16_256_1_8_0_1_0_0_1_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "99",
@@ -4556,9 +4784,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_239_0_16_256_1_8_0_1_0_0_1_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_239_0_16_256_1_8_0_1_0_0_1_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "239",
@@ -4582,9 +4811,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_7_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -4608,9 +4838,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_24_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_7_0_24_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -4634,9 +4865,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_16_256_1_8_1_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_7_0_16_256_1_8_1_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -4660,9 +4892,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_24_256_1_8_2_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_7_0_24_256_1_8_2_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -4686,9 +4919,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_16_256_1_8_3_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_7_0_16_256_1_8_3_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -4712,9 +4946,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_24_256_1_8_4_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_7_0_24_256_1_8_4_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -4738,9 +4973,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_16_256_1_8_5_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_7_0_16_256_1_8_5_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -4764,9 +5000,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_24_256_1_8_6_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_7_0_24_256_1_8_6_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -4790,9 +5027,10 @@
         "UUT_PARA_DECI_POLY": "1",
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
-        "COEFF_STIM_TYPE": "0"
+        "COEFF_STIM_TYPE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_24_256_1_8_6_1_0_0_0_2_1_1_0_1_1_1_1_0_0_1_aie1_hw_qor": {
+    "cint16_int16_7_0_24_256_1_8_6_1_0_0_0_2_1_1_0_1_1_1_1_0_0_1_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -4816,9 +5054,10 @@
         "UUT_PARA_DECI_POLY": "1",
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
-        "COEFF_STIM_TYPE": "0"
+        "COEFF_STIM_TYPE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_24_256_1_8_6_1_0_0_0_2_1_1_0_1_1_1_1_0_0_3_aie1_hw_qor": {
+    "cint16_int16_7_0_24_256_1_8_6_1_0_0_0_2_1_1_0_1_1_1_1_0_0_3_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -4842,9 +5081,10 @@
         "UUT_PARA_DECI_POLY": "1",
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
-        "COEFF_STIM_TYPE": "0"
+        "COEFF_STIM_TYPE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_16_32_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_7_0_16_32_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -4868,9 +5108,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_16_64_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_7_0_16_64_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -4894,9 +5135,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_16_128_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_7_0_16_128_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -4920,9 +5162,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_7_0_16_512_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_7_0_16_512_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -4946,9 +5189,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_99_0_16_256_1_8_0_2_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_99_0_16_256_1_8_0_2_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "99",
@@ -4972,9 +5216,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_99_0_16_256_1_8_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_99_0_16_256_1_8_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "99",
@@ -4998,9 +5243,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_99_0_16_256_1_8_0_4_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_99_0_16_256_1_8_0_4_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "99",
@@ -5024,9 +5270,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_99_0_16_256_1_8_0_5_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_99_0_16_256_1_8_0_5_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "99",
@@ -5050,9 +5297,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_cint16_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "7",
@@ -5076,9 +5324,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_23_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_cint16_23_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "23",
@@ -5102,9 +5351,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_27_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_cint16_27_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "27",
@@ -5128,9 +5378,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_cint16_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "99",
@@ -5154,9 +5405,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_cint16_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "239",
@@ -5180,9 +5432,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "int32_int16_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "int32",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -5206,9 +5459,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_15_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "int32_int16_15_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "int32",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "15",
@@ -5232,9 +5486,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_19_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "int32_int16_19_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "int32",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "19",
@@ -5258,9 +5513,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "int32_int16_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "int32",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "99",
@@ -5284,9 +5540,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int16_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "int32_int16_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "int32",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "239",
@@ -5310,9 +5567,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "int32_int32_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "int32",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "7",
@@ -5336,9 +5594,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_23_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "int32_int32_23_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "int32",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "23",
@@ -5362,9 +5621,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_27_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "int32_int32_27_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "int32",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "27",
@@ -5388,9 +5648,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "int32_int32_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "int32",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "99",
@@ -5414,9 +5675,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "int32_int32_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "int32",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "239",
@@ -5440,9 +5702,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int32_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "int16_int32_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "int16",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "7",
@@ -5466,9 +5729,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int32_23_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "int16_int32_23_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "int16",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "23",
@@ -5492,9 +5756,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int32_27_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "int16_int32_27_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "int16",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "27",
@@ -5518,9 +5783,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int32_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "int16_int32_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "int16",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "99",
@@ -5544,9 +5810,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int32_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "int16_int32_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "int16",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "239",
@@ -5570,9 +5837,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int32_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int32_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "7",
@@ -5596,9 +5864,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int32_15_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int32_15_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "15",
@@ -5622,9 +5891,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int32_19_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int32_19_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "19",
@@ -5648,9 +5918,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int32_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int32_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "99",
@@ -5674,9 +5945,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int32_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int32_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "239",
@@ -5700,9 +5972,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_cint32_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint32",
         "FIR_LEN": "7",
@@ -5726,9 +5999,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_23_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_cint32_23_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint32",
         "FIR_LEN": "23",
@@ -5752,9 +6026,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_27_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_cint32_27_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint32",
         "FIR_LEN": "27",
@@ -5778,9 +6053,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_cint32_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint32",
         "FIR_LEN": "99",
@@ -5804,9 +6080,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint32_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_cint32_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint32",
         "FIR_LEN": "239",
@@ -5830,9 +6107,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int16_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_int16_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "7",
@@ -5856,9 +6134,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int16_11_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_int16_11_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "11",
@@ -5882,9 +6161,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int16_15_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_int16_15_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "15",
@@ -5908,9 +6188,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int16_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_int16_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "99",
@@ -5934,9 +6215,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int16_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_int16_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "239",
@@ -5960,9 +6242,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_cint16_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "7",
@@ -5986,9 +6269,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_11_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_cint16_11_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "11",
@@ -6012,9 +6296,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_15_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_cint16_15_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "15",
@@ -6038,9 +6323,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_cint16_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "99",
@@ -6064,9 +6350,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_cint16_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "239",
@@ -6090,9 +6377,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int32_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_int32_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "7",
@@ -6116,9 +6404,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int32_11_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_int32_11_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "11",
@@ -6142,9 +6431,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int32_15_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_int32_15_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "15",
@@ -6168,9 +6458,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int32_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_int32_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "99",
@@ -6194,9 +6485,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_int32_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_int32_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "int32",
         "FIR_LEN": "239",
@@ -6220,9 +6512,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_cint32_7_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "cint32",
         "FIR_LEN": "7",
@@ -6246,9 +6539,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_11_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_cint32_11_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "cint32",
         "FIR_LEN": "11",
@@ -6272,9 +6566,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_15_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_cint32_15_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "cint32",
         "FIR_LEN": "15",
@@ -6298,9 +6593,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_cint32_99_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "cint32",
         "FIR_LEN": "99",
@@ -6324,9 +6620,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint32_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_cint32_239_0_16_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cint32",
         "COEFF_TYPE": "cint32",
         "FIR_LEN": "239",
@@ -6350,9 +6647,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "float_float_7_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "float_float_7_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "float",
         "COEFF_TYPE": "float",
         "FIR_LEN": "7",
@@ -6377,9 +6675,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "float_float_15_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "float_float_15_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "float",
         "COEFF_TYPE": "float",
         "FIR_LEN": "15",
@@ -6404,9 +6703,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "float_float_19_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "float_float_19_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "float",
         "COEFF_TYPE": "float",
         "FIR_LEN": "19",
@@ -6431,9 +6731,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "float_float_99_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "float_float_99_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "float",
         "COEFF_TYPE": "float",
         "FIR_LEN": "99",
@@ -6458,9 +6759,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "float_float_239_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "float_float_239_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "float",
         "COEFF_TYPE": "float",
         "FIR_LEN": "239",
@@ -6485,9 +6787,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_float_7_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cfloat_float_7_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cfloat",
         "COEFF_TYPE": "float",
         "FIR_LEN": "7",
@@ -6512,9 +6815,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_float_11_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cfloat_float_11_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cfloat",
         "COEFF_TYPE": "float",
         "FIR_LEN": "11",
@@ -6539,9 +6843,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_float_15_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cfloat_float_15_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cfloat",
         "COEFF_TYPE": "float",
         "FIR_LEN": "15",
@@ -6566,9 +6871,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_float_99_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cfloat_float_99_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cfloat",
         "COEFF_TYPE": "float",
         "FIR_LEN": "99",
@@ -6593,9 +6899,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_float_239_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cfloat_float_239_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cfloat",
         "COEFF_TYPE": "float",
         "FIR_LEN": "239",
@@ -6620,9 +6927,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_cfloat_7_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cfloat_cfloat_7_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cfloat",
         "COEFF_TYPE": "cfloat",
         "NITER": "8",
@@ -6647,9 +6955,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_cfloat_11_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cfloat_cfloat_11_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cfloat",
         "COEFF_TYPE": "cfloat",
         "NITER": "8",
@@ -6674,9 +6983,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_cfloat_15_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cfloat_cfloat_15_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cfloat",
         "COEFF_TYPE": "cfloat",
         "NITER": "8",
@@ -6702,9 +7012,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_cfloat_99_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cfloat_cfloat_99_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cfloat",
         "COEFF_TYPE": "cfloat",
         "NITER": "8",
@@ -6729,9 +7040,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cfloat_cfloat_239_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie1_hw_qor": {
+    "cfloat_cfloat_239_0_0_256_1_8_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie1_hw_qor": {
         "DATA_TYPE": "cfloat",
         "COEFF_TYPE": "cfloat",
         "NITER": "8",
@@ -6757,9 +7069,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_71_0_32_7680_1_8_0_3_1_1_0_2_1_2_0_3_2_1_1_0_0_0_aie1_hw_qor": {
+    "int32_int32_71_0_32_7680_1_8_0_3_1_1_0_2_1_2_0_3_2_1_1_0_0_0_0_aie1_hw_qor": {
         "NITER": "8",
         "PORT_API": "1",
         "COEFF_TYPE": "int32",
@@ -6783,9 +7096,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_127_0_16_5120_1_8_0_1_0_1_0_2_1_1_0_4_2_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_127_0_16_5120_1_8_0_1_0_1_0_2_1_1_0_4_2_1_1_0_0_0_0_aie1_hw_qor": {
         "NITER": "8",
         "PORT_API": "1",
         "COEFF_TYPE": "int16",
@@ -6809,9 +7123,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_95_0_32_2560_1_8_0_3_0_1_0_2_1_1_0_2_2_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_cint16_95_0_32_2560_1_8_0_3_0_1_0_2_1_1_0_2_2_1_1_0_0_0_0_aie1_hw_qor": {
         "NITER": "8",
         "PORT_API": "1",
         "COEFF_TYPE": "cint16",
@@ -6835,9 +7150,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int32_int32_71_0_32_7680_1_8_0_3_1_1_1_2_1_2_0_3_2_1_1_0_0_0_aie1_hw_qor": {
+    "int32_int32_71_0_32_7680_1_8_0_3_1_1_1_2_1_2_0_3_2_1_1_0_0_0_0_aie1_hw_qor": {
         "NITER": "8",
         "PORT_API": "1",
         "COEFF_TYPE": "int32",
@@ -6861,9 +7177,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_127_0_16_5120_1_8_0_1_0_1_1_2_1_1_0_4_2_1_1_0_0_0_aie1_hw_qor": {
+    "cint16_int16_127_0_16_5120_1_8_0_1_0_1_1_2_1_1_0_4_2_1_1_0_0_0_0_aie1_hw_qor": {
         "NITER": "8",
         "PORT_API": "1",
         "COEFF_TYPE": "int16",
@@ -6887,9 +7204,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint32_cint16_95_0_32_2560_1_8_0_3_0_1_1_2_1_1_0_2_2_1_1_0_0_0_aie1_hw_qor": {
+    "cint32_cint16_95_0_32_2560_1_8_0_3_0_1_1_2_1_1_0_2_2_1_1_0_0_0_0_aie1_hw_qor": {
         "NITER": "8",
         "PORT_API": "1",
         "COEFF_TYPE": "cint16",
@@ -6913,9 +7231,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_11_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_11_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -6939,9 +7258,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_19_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_19_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -6965,9 +7285,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_23_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_23_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -6991,9 +7312,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_27_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_27_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -7017,9 +7339,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_43_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_43_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -7043,9 +7366,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_79_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_79_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -7069,9 +7393,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_159_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_159_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -7095,9 +7420,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_159_0_16_2560_2_16_0_2_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_159_0_16_2560_2_16_0_2_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -7121,9 +7447,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_159_0_16_2560_2_16_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_159_0_16_2560_2_16_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -7147,9 +7474,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_159_0_16_2560_2_16_0_4_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_159_0_16_2560_2_16_0_4_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -7173,9 +7501,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_159_0_16_2560_2_16_0_5_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_159_0_16_2560_2_16_0_5_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -7199,9 +7528,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_159_0_16_2560_2_16_0_6_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_159_0_16_2560_2_16_0_6_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -7225,9 +7555,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_159_0_16_2560_2_16_0_7_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_159_0_16_2560_2_16_0_7_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -7251,9 +7582,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_159_0_16_2560_2_16_0_8_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_159_0_16_2560_2_16_0_8_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
@@ -7277,9 +7609,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_11_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_11_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -7303,9 +7636,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_19_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_19_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -7329,9 +7663,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_23_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_23_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -7355,9 +7690,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_27_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_27_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -7381,9 +7717,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_43_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_43_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -7407,9 +7744,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_79_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_79_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -7433,9 +7771,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_159_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_159_0_16_2560_2_16_0_1_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -7459,9 +7798,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_159_0_16_2560_2_8_0_2_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_159_0_16_2560_2_8_0_2_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -7485,9 +7825,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_159_0_16_2560_2_8_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_159_0_16_2560_2_8_0_3_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -7511,9 +7852,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_159_0_16_2560_2_8_0_4_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_159_0_16_2560_2_8_0_4_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -7537,9 +7879,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_159_0_16_2560_2_8_0_5_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_159_0_16_2560_2_8_0_5_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -7563,9 +7906,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_159_0_16_2560_2_8_0_6_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_159_0_16_2560_2_8_0_6_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -7589,9 +7933,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_159_0_16_2560_2_16_0_7_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_159_0_16_2560_2_16_0_7_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -7615,9 +7960,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_159_0_16_2560_2_16_0_8_0_0_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_159_0_16_2560_2_16_0_8_0_0_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
@@ -7641,9 +7987,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_11_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "int16_int16_11_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -7667,9 +8014,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_15_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "int16_int16_15_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -7693,9 +8041,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_19_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "int16_int16_19_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -7719,9 +8068,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_23_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "int16_int16_23_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -7745,9 +8095,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_27_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "int16_int16_27_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -7771,9 +8122,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_43_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "int16_int16_43_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -7797,9 +8149,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_47_0_16_2560_2_8_0_2_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "int16_int16_47_0_16_2560_2_8_0_2_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -7823,9 +8176,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_95_0_16_2560_2_8_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "int16_int16_95_0_16_2560_2_8_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -7849,9 +8203,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_107_0_16_2560_2_8_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "int16_int16_107_0_16_2560_2_8_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -7875,9 +8230,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "int16_int16_179_0_16_2560_2_8_0_5_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "int16_int16_179_0_16_2560_2_8_0_5_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -7901,9 +8257,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_11_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_11_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -7927,9 +8284,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_15_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_15_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -7953,9 +8311,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_19_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_19_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -7979,9 +8338,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_23_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_23_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8005,9 +8365,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_27_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_27_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8031,9 +8392,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_43_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_43_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8057,9 +8419,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_47_0_16_2560_2_8_0_2_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_47_0_16_2560_2_8_0_2_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8083,9 +8446,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_95_0_16_2560_2_8_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_95_0_16_2560_2_8_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8109,9 +8473,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_107_0_16_2560_2_8_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_107_0_16_2560_2_8_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8135,9 +8500,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_int16_179_0_16_2560_2_8_0_5_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_int16_179_0_16_2560_2_8_0_5_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8161,9 +8527,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_11_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_11_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8187,9 +8554,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_15_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_15_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8213,9 +8581,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_19_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_19_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8239,9 +8608,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_23_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_23_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8265,9 +8635,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_27_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_27_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8291,9 +8662,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_43_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_43_0_16_2560_2_8_0_1_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8317,9 +8689,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_51_0_16_2560_2_8_0_2_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_51_0_16_2560_2_8_0_2_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8343,9 +8716,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_99_0_16_2560_2_8_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_99_0_16_2560_2_8_0_3_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8369,9 +8743,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_111_0_16_2560_2_8_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_111_0_16_2560_2_8_0_4_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8395,9 +8770,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     },
-    "cint16_cint16_183_0_16_2560_2_8_0_5_0_1_0_2_1_1_0_1_1_1_1_0_0_0_aie2_hw_qor": {
+    "cint16_cint16_183_0_16_2560_2_8_0_5_0_1_0_2_1_1_0_1_1_1_1_0_0_0_0_aie2_hw_qor": {
         "NITER": "8",
         "AIE_VARIANT": "2",
         "PORT_API": "1",
@@ -8421,6 +8797,7 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "SAT_MODE": "0"
+        "SAT_MODE": "0",
+        "SINGLE_BUF": "0"
     }
 }

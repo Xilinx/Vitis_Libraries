@@ -83,6 +83,12 @@ class test_graph : public graph {
 #define CASC_LEN 1
 // Report out for AIE Synthesizer QoR harvest
 // Nothing to report
+#if (SINGLE_BUF == 1)
+        single_buffer(widgetGraph.in);
+        single_buffer(widgetGraph.out);
+        printf("INFO: Single Buffer Constraint applied to input and output buffers of the kernel.\n");
+
+#endif
 #endif
         printf("========================\n");
     };

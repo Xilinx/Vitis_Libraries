@@ -96,6 +96,19 @@ class bitonic_sort_recur {
  * @tparam TP_NUM_FRAMES describes the number of lists to sort per call to the kernel.
  * @tparam TP_ASCENDING describes whether to sort the list in descending (0) or ascending (1) order.
  * @tparam TP_CASC_LEN describes the number of tiles to cascade computation across to increase throughput. \n
+ * @tparam TP_SSR describes the number of bitonic_sort tiles that will be placed in parallel to split the list. \n
+ *         The resulting kernels will independently split TP_SSR sub-lists, which will then be passed through a tree of
+ *         merge sort kernels.
+ *         This allows support for greater list sizes than a single kernel (by a factor of TP_SSR) and performance
+ *         improvements can be observed on larger sizes of TP_DIM. \n
+ *         The design will contain TP_SSR bitonic_kernels plus (TP_SSR - 1) merge_sort kernels.
+ *         Connections between the bitonic_sort and merge_sort kernels are done internally.
+ *         The bitonic_sort graph will have TP_SSR inputs (via iobuffer) and a single streaming output.
+ * @tparam TP_INDEX
+ *         This parameter is for internal use regarding the recursion of the parallel power feature. \n
+ *         It is recommended
+ *         to miss this parameter from the configuration and rely instead on default values. If this parameter is set
+ *         by the user, the behaviour of the library unit is undefined.
  **/
 template <typename TT_DATA,
           unsigned int TP_DIM,

@@ -28,7 +28,7 @@ Device Support
 
 The Hadamard supports AIE and AIE-ML devices.
 
-- Round modes available and the enumerated values of round modes differ between AIE and AIE-ML devices. See :ref:`COMPILING_AND_SIMULATING`.
+- Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
 
 
 Supported Types

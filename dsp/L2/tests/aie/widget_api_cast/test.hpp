@@ -112,6 +112,27 @@ class test_graph : public graph {
         // the array since
         // the windows then share banks and contention occurs.
         location<kernel>(*widgetGraph.getKernels()) = tile(1, 1);
+
+#if (SINGLE_BUF == 1)
+
+#if (IN_API == 0)
+        single_buffer(widgetGraph.getKernels()[0].in[0]);
+#if (NUM_INPUTS == 2)
+        single_buffer(widgetGraph.getKernels()[0].in[1]);
+#endif
+        printf("INFO: Single Buffer Constraint applied to input buffers of kernel.\n");
+#endif
+
+#if (OUT_API == 0)
+        single_buffer(widgetGraph.getKernels()[0].out[0]);
+#if (NUM_OUTPUT_CLONES == 2)
+        single_buffer(widgetGraph.getKernels()[0].out[1]);
+#endif
+        printf("INFO: Single Buffer Constraint applied to output buffers of kernel.\n");
+#endif
+
+#endif
+
 #endif
     };
 };

@@ -29,7 +29,7 @@ The graph entry point is the following:
 
 Device Support
 ==============
-The Matrix-Vector Multiply supports AIE and AIE-ML devices.
+The Matrix-Vector Multiply supports AIE, AIE-ML and AIE-MLv2 devices.
 
 Supported Types
 ===============
@@ -63,7 +63,7 @@ The template parameter ``TP_USE_MATRIX_RELOAD`` enables the matrix data to be su
 - For example, if ``TP_SSR = 2`` and ``TP_CASC_LEN = 3``, the matrix will be divided into ``2 * 3 = 6`` parts. The columns of the matrix will be split by ``TP_CASC_LEN`` and the rows by ``TP_SSR``. Each part is sent to a specific kernel via its corresponding RTP port.
 
 **Matrix Format**:
-- The matrix must be provided in a column-major format, where columns are stored contiguously in memory. This ensures compatibility with the kernel's processing requirements.
+- The matrix must be provided in a column-major format, where the elements of the columns are stored contiguously in memory. This ensures compatibility with the kernel's processing requirements.
 - If the matrix is not in column-major format, it must be transposed before being supplied to the RTP ports.
 
 **RTP Port Connections**:
@@ -87,7 +87,7 @@ By leveraging RTP ports, users can dynamically modify the matrix input data duri
 
 Leading matrix dimension
 ------------------------
-It is recommended that the matrix data be in a column-major format where the columns are stored contiguously in memory and ``TP_DIM_A_LEADING = 1``. This ensures optimal performance and compatibility with most configurations.
+It is recommended that the matrix data be in a column-major format where the elements of columns are stored contiguously in memory and ``TP_DIM_A_LEADING = 1``. This ensures optimal performance and compatibility with most configurations.
 
 For example:
 
@@ -120,7 +120,7 @@ Additionally, when ``TP_USE_MATRIX_RELOAD = 1``, the matrix data must always be 
 Maximum matrix dimensions per kernel
 ------------------------------------
 
-The maximum memory accessible by a kernel is 32 kB for AIE and 64kB for AIE-ML. The maximum matrix dimensions per kernel are limited by the memory requirements and how much memory is available.
+The maximum memory accessible by a kernel is 32 kB for AIE devices and 64kB for AIE-ML and AIE-MLv2 devices. The maximum matrix dimensions per kernel are limited by the memory requirements and how much memory is available.
 
 A matrix_vector_mul design needs to allocate memory for the following:
 

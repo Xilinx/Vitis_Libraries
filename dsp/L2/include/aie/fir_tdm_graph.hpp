@@ -128,6 +128,20 @@ using namespace adf;
  *         - ``TT_OUT_DATA`` must be same or greater precision, e.g. 32-bit ``TT_OUT_DATA``, when ``TT_DATA`` is 16-bit.
  *         - ``TT_OUT_DATA`` must be an integer type if ``TT_DATA`` is an integer type
  *         - ``TT_OUT_DATA`` must be a float type if ``TT_DATA`` is a float type.
+ * @tparam TP_USE_COEFF_RELOAD allows the user to select if runtime coefficient
+ *         reloading should be used. \n When defining the parameter:
+ *         - 0 = static coefficients, defined in filter constructor,
+ *         - 1 = reloadable coefficients, passed as argument to runtime function. \n
+ *         \n
+ *         Note: when used, async port: ```port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), (TP_SSR *
+ *TP_CASC_LEN)> coeff;```
+ *         will be added to the FIR. \n
+ *         \n
+ *         Note: the size of the port array is equal to the total number of kernels  (TP_SSR * TP_CASC_LEN).  \n
+ *         \n
+ *         Note: each port should contain portion of the coefficient array contents. \n
+ *         To get the contents for each port, please use a helper method ``extractTaps`` of the ``fir_tdm_graph`` class.
+ *\n
  **/
 
 template <typename TT_DATA,
@@ -402,7 +416,9 @@ class fir_tdm_graph : public graph {
     /**
     * @brief Access function to get number taps per RTP port.
     * Number of taps each RTP port handles may differ when `TP_SSR > 1` and/or when `TP_CASC_LEN > 1`.
-    **/
+     * @param[in] kernelNo      an index to the kernel position in the array of TDM kernels (i.e. in the array of
+    *`TP_SSR * TP_CASC_LEN`).
+     **/
     int getTapsPerRtpPort(int kernelNo) {
         // split over cascaded kernels
         int kernelPosition = kernelNo % TP_CASC_LEN;
@@ -411,8 +427,12 @@ class fir_tdm_graph : public graph {
     };
 
     /**
-    * @brief Access function to get a vector of taps per RTP port.
-    * Number of taps each RTP port handles may differ when `TP_SSR > 1` and/or when `TP_CASC_LEN > 1`.
+     * @brief Access function to get a vector of taps per RTP port.
+     * Number of taps each RTP port handles may differ when `TP_SSR > 1` and/or when `TP_CASC_LEN > 1`.
+    * @param[in] taps     an std::vector of coefficients of TT_COEFF type for all channels (i.e. std::vector of
+    *`TP_FIR_LEN * TP_TDM_CHANNELS`).
+    * @param[in] kernelNo an index to the kernel position in the array of TDM kernels (i.e. in the array of `TP_SSR *
+    *TP_CASC_LEN`).
     **/
     static std::vector<TT_COEFF> extractTaps(const std::vector<TT_COEFF>& taps, unsigned int kernelNo) {
         // return the total number of RTP ports.

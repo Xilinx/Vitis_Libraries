@@ -45,7 +45,7 @@ PARAMS ?= test_0_tool_canary_aie
 PARAMS_FILE ?= multi_params.json 
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST += vck190
+PLATFORM_ALLOWLIST += vck190 vek280 xcvr1602-vsva2488-2LP-e-S-es1 xc2ve3858-ssva2112-2LP-e-S
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk
@@ -70,7 +70,59 @@ AIE_PKG_DIR ?= Work
 
 # Setting customized_params in aiecompiler
 
-    
+ifneq (,$(shell echo $(XPLATFORM) | awk '/xcvr1602-vsva2488-2LP-e-S-es1/'))
+            
+COMPILER_ARGS ?= 
+AIE_VARIANT ?= 1
+FIFO_THRESHOLD ?=  
+TAG ?= UUT
+UUT_KERNEL ?= widget_api_cast
+REF_KERNEL ?= widget_api_cast_ref
+UUT_GRAPH ?= widget_api_cast_graph
+REF_GRAPH ?= widget_api_cast_ref_graph
+UUT_SIM_FILE ?= ./data/uut_output.txt
+REF_SIM_FILE ?= ./data/ref_output.txt
+UUT_SIM_FILE2 ?= ./data/uut_output_2.txt
+REF_SIM_FILE2 ?= ./data/ref_output_2.txt
+UUT_WINDOW_VSIZE ?= WINDOW_VSIZE
+REF_WINDOW_VSIZE ?= $$((WINDOW_VSIZE*2))
+DIFF_TOLERANCE ?= 0
+CC_TOLERANCE ?= 0
+LOC_INPUT_FILE ?= ./data/input.txt
+UUT_TARGET_COMPILE_ARGS ?= --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off" 
+REF_TARGET_COMPILE_ARGS ?= 
+PREPROC_ARGS ?= --aie.Xpreproc=-DINPUT_FILE=$(LOC_INPUT_FILE)
+USING_REF ?= 
+USING_UUT ?= --aie.Xpreproc=-DUSING_UUT=1
+TAG_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$($(TAG)_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$($(TAG)_SIM_FILE) --aie.Xpreproc=-DOUTPUT_FILE2=$($(TAG)_SIM_FILE2) $(PREPROC_ARGS) $(USING_$(TAG))
+
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/xc2ve3858-ssva2112-2LP-e-S/'))
+            
+COMPILER_ARGS ?=  --aie.Xpreproc=-D_AIE_API_WORKAROUND_CR_1223259_=1
+AIE_VARIANT ?= 22
+FIFO_THRESHOLD ?= --aie.swfifo-threshold=120 
+TAG ?= UUT
+UUT_KERNEL ?= widget_api_cast
+REF_KERNEL ?= widget_api_cast_ref
+UUT_GRAPH ?= widget_api_cast_graph
+REF_GRAPH ?= widget_api_cast_ref_graph
+UUT_SIM_FILE ?= ./data/uut_output.txt
+REF_SIM_FILE ?= ./data/ref_output.txt
+UUT_SIM_FILE2 ?= ./data/uut_output_2.txt
+REF_SIM_FILE2 ?= ./data/ref_output_2.txt
+UUT_WINDOW_VSIZE ?= WINDOW_VSIZE
+REF_WINDOW_VSIZE ?= $$((WINDOW_VSIZE*2))
+DIFF_TOLERANCE ?= 0
+CC_TOLERANCE ?= 0
+LOC_INPUT_FILE ?= ./data/input.txt
+UUT_TARGET_COMPILE_ARGS ?= --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off" 
+REF_TARGET_COMPILE_ARGS ?= 
+PREPROC_ARGS ?= --aie.Xpreproc=-DINPUT_FILE=$(LOC_INPUT_FILE)
+USING_REF ?= 
+USING_UUT ?= --aie.Xpreproc=-DUSING_UUT=1
+TAG_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$($(TAG)_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$($(TAG)_SIM_FILE) --aie.Xpreproc=-DOUTPUT_FILE2=$($(TAG)_SIM_FILE2) $(PREPROC_ARGS) $(USING_$(TAG))
+
+else             
 TAG ?= UUT
 AIE_VARIANT ?= 1
 UUT_KERNEL ?= widget_api_cast
@@ -93,6 +145,7 @@ USING_REF ?=
 USING_UUT ?= --aie.Xpreproc=-DUSING_UUT=1
 TAG_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$($(TAG)_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$($(TAG)_SIM_FILE) --aie.Xpreproc=-DOUTPUT_FILE2=$($(TAG)_SIM_FILE2) $(PREPROC_ARGS) $(USING_$(TAG))
 
+endif
 ############################ setting AIE Compiler ###########################
 ifneq ($(filter aiesim , $(TARGET)),)
 AIETARGET := hw
@@ -112,8 +165,21 @@ AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
+ifneq (,$(shell echo $(XPLATFORM) | awk '/xcvr1602-vsva2488-2LP-e-S-es1/'))
+        
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
 AIE_CXXFLAGS += --aie.verbose $($(TAG)_TARGET_COMPILE_ARGS) $(TAG_PREPROC_ARGS)
+
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/xc2ve3858-ssva2112-2LP-e-S/'))
+        
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
+AIE_CXXFLAGS += --aie.verbose $($(TAG)_TARGET_COMPILE_ARGS) $(TAG_PREPROC_ARGS)
+
+else         
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
+AIE_CXXFLAGS += --aie.verbose $($(TAG)_TARGET_COMPILE_ARGS) $(TAG_PREPROC_ARGS)
+
+endif
 
 AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 

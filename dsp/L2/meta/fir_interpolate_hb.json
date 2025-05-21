@@ -143,12 +143,12 @@
             "updater": {
                 "file": "fir_interpolate_hb.py",
                 "function": "update_TP_PARA_INTERP_POLY",
-                "args": []
+                "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD"]
             },
             "validator": {
                 "file": "fir_interpolate_hb.py",
                 "function": "validate_TP_PARA_INTERP_POLY",
-                "args": []
+                "args": ["AIE_VARIANT", "TT_DATA", "TT_COEFF", "TP_API", "TP_FIR_LEN", "TP_USE_COEFF_RELOAD"]
             }
         },
         {
@@ -223,14 +223,14 @@
                 "file": "fir_interpolate_hb.py",
                 "function": "update_TP_DUAL_IP",
                 "args": [
-                    "AIE_VARIANT"
+                    "AIE_VARIANT", "TP_API", "TP_PARA_INTERP_POLY"
                 ]
             },
             "validator": {
                 "file": "fir_interpolate_hb.py",
                 "function": "validate_TP_DUAL_IP",
                 "args": [
-                    "AIE_VARIANT"
+                    "AIE_VARIANT", "TP_API", "TP_PARA_INTERP_POLY"
                 ]
             }
         },
@@ -291,7 +291,9 @@
                 "function": "update_TP_UPSHIFT_CT",
                 "args": [
                     "TT_DATA",
-                    "AIE_VARIANT"
+                    "TT_COEFF",
+                    "AIE_VARIANT",
+                    "TP_PARA_INTERP_POLY"
                 ]
             },
             "validator": {
@@ -299,7 +301,9 @@
                 "function": "validate_TP_UPSHIFT_CT",
                 "args": [
                     "TT_DATA",
-                    "AIE_VARIANT"
+                    "TT_COEFF",
+                    "AIE_VARIANT",
+                    "TP_PARA_INTERP_POLY"
                 ]
             }
         },

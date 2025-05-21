@@ -11,16 +11,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+POINT_SIZE := 4096
+SSR        := 4
+DATA_TYPE  := cint32
+NITER      := 4
+
 vss:
 	make -f ${DSPLIB_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d.mk clean vss HELPER_CUR_DIR=./ HELPER_ROOT_DIR=${DSPLIB_ROOT_DIR} PARAMS_CFG=my_params.cfg
 
 example_xclbin:
-	v++ -c -DNSTREAM=4 -DPOINT_SIZE=4096 -DNITER=4 -t hw_emu --platform ${PLATFORM} --save-temps   -I ${DSPLIB_ROOT_DIR}//xf_dsp/L1/include/hw -k s2mm_wrapper -o s2mm_wrapper.xo ${DSPLIB_ROOT_DIR}/L1/tests/hw/s2mm/s2mm.cpp
-	v++ -c -DNSTREAM=4 -DPOINT_SIZE=4096 -DNITER=4 -t hw_emu --platform ${PLATFORM} --save-temps   -I ${DSPLIB_ROOT_DIR}//xf_dsp/L1/include/hw -k mm2s_wrapper -o mm2s_wrapper.xo ${DSPLIB_ROOT_DIR}/L1/tests/hw/mm2s/mm2s.cpp
+	v++ -c -DNSTREAM=$(SSR) -DPOINT_SIZE=$(POINT_SIZE) -DNITER=$(NITER) -t hw_emu --platform ${PLATFORM} --save-temps   -I ${DSPLIB_ROOT_DIR}//xf_dsp/L1/include/hw -k s2mm_wrapper -o s2mm_wrapper.xo ${DSPLIB_ROOT_DIR}/L1/tests/hw/s2mm/s2mm.cpp
+	v++ -c -DNSTREAM=$(SSR) -DPOINT_SIZE=$(POINT_SIZE) -DNITER=$(NITER) -t hw_emu --platform ${PLATFORM} --save-temps   -I ${DSPLIB_ROOT_DIR}//xf_dsp/L1/include/hw -k mm2s_wrapper -o mm2s_wrapper.xo ${DSPLIB_ROOT_DIR}/L1/tests/hw/mm2s/mm2s.cpp
 	v++ -l -g -t hw_emu --platform ${PLATFORM} --config system.cfg  -o kernel_pkg.xsa mm2s_wrapper.xo s2mm_wrapper.xo vss_fft_ifft_1d/vss_fft_ifft_1d.vss
 
 example_host:
-	$(XILINX_VITIS)/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-g++ -o host.elf host.cpp --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label   -I -I${XILINX_VITIS}/aietools/include  -D __PS_ENABLE_AIE__  -I ${DSPLIB_ROOT_DIR}/L2/include/aie -I ${DSPLIB_ROOT_DIR}/xf_dsp/L1/include/aie -I ${DSPLIB_ROOT_DIR}//xf_dsp/L1/src/aie -I ${DSPLIB_ROOT_DIR}/xf_dsp/L1/tests/aie/inc -I ${DSPLIB_ROOT_DIR}//xf_dsp/L1/tests/aie/src -I PROJECT -I ${DSPLIB_ROOT_DIR}/xf_dsp/L1/include/hw -DPOINT_SIZE=4096  -DNITER=4   -DSSR=4 -DTT_DATA=cint32  -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil  -L ${XILINX_VITIS}/aietools/lib/aarch64.o  -ladf_api_xrt
+	$(XILINX_VITIS)/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-g++ -o host.elf host.cpp --sysroot=$(SYSROOT) -I$(SYSROOT)/usr/include/xrt -I/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label   -I -I${XILINX_VITIS}/aietools/include  -D __PS_ENABLE_AIE__  -I ${DSPLIB_ROOT_DIR}/L2/include/aie -I ${DSPLIB_ROOT_DIR}/xf_dsp/L1/include/aie -I ${DSPLIB_ROOT_DIR}//xf_dsp/L1/src/aie -I ${DSPLIB_ROOT_DIR}/xf_dsp/L1/tests/aie/inc -I ${DSPLIB_ROOT_DIR}//xf_dsp/L1/tests/aie/src -I PROJECT -I ${DSPLIB_ROOT_DIR}/xf_dsp/L1/include/hw -DPOINT_SIZE=$(POINT_SIZE)  -DNITER=$(NITER)   -DSSR=$(SSR) -DTT_DATA=$(DATA_TYPE)  -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil  -L ${XILINX_VITIS}/aietools/lib/aarch64.o  -ladf_api_xrt -L ${SYSROOT}/usr/lib/  -L$(XILINX_XRT)/lib
+
 
 example_sd_card:
 	emconfigutil --platform ${PLATFORM} --od ./
@@ -35,6 +41,8 @@ all: vss example_xclbin example_host example_sd_card example_run
 
 help:
 	echo "Makefile Usage:"
+	echo "  make -f example.mk vss PLATFORM=<path/to/platform> DSPLIB_ROOT_DIR=<path/to/dsp/library/root>"
+	echo "      Command to generate the vss according to the parameters defined in my_params.cfg. Required arguments are PLATFORM and DSPLIB_ROOT_DIR."
 	echo "  make -f example.mk all PLATFORM=<path/to/platform> DSPLIB_ROOT_DIR=<path/to/dsp/library/root>"
-	echo "      Command to generate the full vss according to the parameters defined in my_params.cfg. Required arguments are PLATFORM and DSPLIB_ROOT_DIR"
+	echo "      Command to generate the vss, compile the host, create the sd_card and run hardware emulation. Please edit the example.mk to pass the parameters to the host and testbench components."
 	echo ""

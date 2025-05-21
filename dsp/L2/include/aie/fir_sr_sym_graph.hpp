@@ -314,7 +314,6 @@ class fir_sr_sym_graph : public graph {
         // - 1 or 2 input ports for first kernel,
         // - only 1 input port for remaining kernels in the cascade.
         //
-        printf("ssrOutputPath, ssrInnerPhase : D(ssrDataPhase) C(ssrCoeffPhase) Starts at kernelStartingIndex:\n");
         for (unsigned int ssrOutputPath = 0; ssrOutputPath < TP_SSR; ssrOutputPath++) {
             for (unsigned int ssrInnerPhase = 0; ssrInnerPhase < TP_SSR; ssrInnerPhase++) {
                 // Taking definition from inside ssr_kernels to avoid duplication
@@ -328,8 +327,6 @@ class fir_sr_sym_graph : public graph {
                     lastSSRKernel::getSSRDataPhase(ssrOutputPath, ssrInnerPhase + 1, TP_SSR), ssrOutputPath, TP_SSR,
                     TP_CASC_LEN);
                 kernel* firstKernelOfNextCascadeChain = m_firKernels + nextChainKernelStartingIndex;
-                printf("%d, %d : D(%d) C(%d) Starts at %d\n", ssrOutputPath, ssrInnerPhase, ssrDataPhase, ssrCoeffPhase,
-                       kernelStartingIndex);
 
                 input_connections(in[ssrDataPhase], firstKernelOfCascadeChain, ssrOutputPath, ssrInnerPhase);
 
@@ -337,11 +334,6 @@ class fir_sr_sym_graph : public graph {
 
                 // Connect SSR Inner phases cascade ports together.
                 if (ssrInnerPhase != TP_SSR - 1) {
-                    printf(
-                        "cascade between ssrInnerPhase (%d) kernels. d(%d) c(%d)\nStartingIndex=%d, "
-                        "nextChainKernelStartingIndex=%d, nextChainDataPhase=%d\n",
-                        ssrInnerPhase, ssrDataPhase, ssrCoeffPhase, kernelStartingIndex, nextChainKernelStartingIndex,
-                        lastSSRKernel::getSSRDataPhase(ssrOutputPath, ssrInnerPhase + 1, TP_SSR));
                     connect<cascade>(lastKernelOfCascadeChain->out[0],
                                      firstKernelOfNextCascadeChain->in[CASC_IN_PORT_POS]);
                 }

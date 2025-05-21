@@ -35,13 +35,13 @@ sys.path.insert(1, os.path.join(tools_dir, "share/doxyrest_b/sphinx"))
 # -- Project information -----------------------------------------------------
 
 project = "Vitis DSP Library"
-copyright = "2019-2022, Xilinx Inc. 2022-2024, Advanced Micro Devices, Inc."
+copyright = "2019-2022, Xilinx Inc. 2022-2025, Advanced Micro Devices, Inc."
 author = "Xilinx Inc."
 
 # The short X.Y version
-version = "2024.2"
+version = "2025.1"
 # The full version, including alpha/beta/rc tags
-release = "v2024.2"
+release = "v2025.1"
 
 
 # -- General configuration ---------------------------------------------------

@@ -24,7 +24,7 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The Sample Delay supports both AIE and AIE-ML devices.
+The Sample Delay supports AIE, AIE-ML and AIE-MLv2.
 
 Supported Types
 ===============

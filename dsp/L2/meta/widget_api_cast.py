@@ -83,9 +83,9 @@ def validate_TP_IN_API(args):
 
 
 def fn_validate_TP_IN_API(TP_IN_API):
-    legal_set_TP_IN_API = [0, 1]
-    return com.validate_legal_set(legal_set_TP_IN_API, "TP_IN_API", TP_IN_API)
-
+    param_dict=fn_update_TP_IN_API()
+    legal_set_TP_IN_API=param_dict["enum"]
+    return(com.validate_legal_set(legal_set_TP_IN_API, "TP_IN_API", TP_IN_API))
 
 #######################################################
 ############# TP_OUT_API Updater and Validator ########
@@ -99,42 +99,55 @@ def fn_update_TP_OUT_API():
     param_dict = {"name": "TP_OUT_API", "enum": legal_set_TP_OUT_API}
     return param_dict
 
-
 def validate_TP_OUT_API(args):
     TP_OUT_API = args["TP_OUT_API"]
     return fn_validate_TP_OUT_API(TP_OUT_API)
 
 
 def fn_validate_TP_OUT_API(TP_OUT_API):
-    legal_set_TP_OUT_API = [0, 1]
-    return com.validate_legal_set(legal_set_TP_OUT_API, "TP_OUT_API", TP_OUT_API)
-
+    param_dict=fn_update_TP_OUT_API()
+    legal_set_TP_OUT_API=param_dict["enum"]
+    return(com.validate_legal_set(legal_set_TP_OUT_API, "TP_OUT_API", TP_OUT_API))
 
 #######################################################
 ############# TP_NUM_INPUTS Updater and Validator #####
 #######################################################
 def update_TP_NUM_INPUTS(args):
-    TP_IN_API = args["TP_IN_API"]
-    return fn_update_TP_NUM_INPUTS(TP_IN_API)
+    AIE_VARIANT=args["AIE_VARIANT"]
+    TT_DATA=args["TT_DATA"]
+    TP_IN_API=args["TP_IN_API"]
+    TP_OUT_API=args["TP_OUT_API"]
+    return fn_update_TP_NUM_INPUTS(AIE_VARIANT, TT_DATA, TP_IN_API, TP_OUT_API)
+  
+def fn_update_TP_NUM_INPUTS(AIE_VARIANT, TT_DATA, TP_IN_API, TP_OUT_API):
+    legal_set_TP_NUM_INPUTS=[1,2]
+    if TP_IN_API==0:
+      legal_set_TP_NUM_INPUTS=[1]
+    else:
+      if AIE_VARIANT in [com.AIE_ML, com.AIE_MLv2]:
+        legal_set_TP_NUM_INPUTS=[1]
 
-
-def fn_update_TP_NUM_INPUTS(TP_IN_API):
-    legal_set_TP_NUM_INPUTS = [1, 2]
-    if TP_IN_API == 0:
-        legal_set_TP_NUM_INPUTS = [1]
-    param_dict = {"name": "TP_NUM_INPUTSs", "enum": legal_set_TP_NUM_INPUTS}
+    #int16 is not supported for multiple stream to multiple window operation
+    if (TP_IN_API==1 and TP_OUT_API==0 and TT_DATA=="int16"): 
+      legal_set_TP_NUM_INPUTS=[1]
+  
+    param_dict={
+      "name" : "TP_NUM_INPUTSs",
+      "enum" : legal_set_TP_NUM_INPUTS
+     }
     return param_dict
 
-
 def validate_TP_NUM_INPUTS(args):
-    TP_IN_API = args["TP_IN_API"]
-    TP_NUM_INPUTS = args["TP_NUM_INPUTS"]
-    return fn_validate_TP_NUM_INPUTS(TP_IN_API, TP_NUM_INPUTS)
+    AIE_VARIANT=args["AIE_VARIANT"]
+    TT_DATA=args["TT_DATA"]
+    TP_IN_API=args["TP_IN_API"]
+    TP_OUT_API=args["TP_OUT_API"]
+    TP_NUM_INPUTS=args["TP_NUM_INPUTS"]
+    return fn_validate_TP_NUM_INPUTS(AIE_VARIANT, TT_DATA, TP_IN_API, TP_OUT_API, TP_NUM_INPUTS)
 
-
-def fn_validate_TP_NUM_INPUTS(TP_IN_API, TP_NUM_INPUTS):
-    param_dict = fn_update_TP_NUM_INPUTS(TP_IN_API)
-    return com.validate_legal_set(param_dict["enum"], "TP_NUM_INPUTS", TP_NUM_INPUTS)
+def fn_validate_TP_NUM_INPUTS(AIE_VARIANT, TT_DATA, TP_IN_API, TP_OUT_API, TP_NUM_INPUTS):
+    param_dict=fn_update_TP_NUM_INPUTS(AIE_VARIANT, TT_DATA, TP_IN_API, TP_OUT_API)
+    return(com.validate_legal_set(param_dict["enum"], "TP_NUM_INPUTS", TP_NUM_INPUTS))
 
 
 #######################################################
@@ -163,47 +176,72 @@ def fn_validate_TP_WINDOW_VSIZE(TP_WINDOW_VSIZE):
 ###### TP_NUM_OUTPUT_CLONES Updater and Validator #####
 #######################################################
 def update_TP_NUM_OUTPUT_CLONES(args):
-    return fn_update_TP_NUM_OUTPUT_CLONES()
+  AIE_VARIANT=args["AIE_VARIANT"]
+  TP_OUT_API=args["TP_OUT_API"]
+  TP_IN_API=args["TP_IN_API"]
+  return fn_update_TP_NUM_OUTPUT_CLONES(AIE_VARIANT, TP_IN_API, TP_OUT_API)
 
+def fn_update_TP_NUM_OUTPUT_CLONES(AIE_VARIANT, TP_IN_API, TP_OUT_API):
+  TP_NUM_OUTPUT_CLONES_max=4
+  if TP_IN_API==0:
+    TP_NUM_OUTPUT_CLONES_max=3
 
-def fn_update_TP_NUM_OUTPUT_CLONES():
-    param_dict = {"name": "TP_NUM_OUTPUT_CLONES", "minimum": 1, "maximum": 4}
-    return param_dict
+  if TP_OUT_API==1 and AIE_VARIANT in [com.AIE_ML, com.AIE_MLv2]:
+    TP_NUM_OUTPUT_CLONES_max=1
 
+  param_dict={
+    "name" : "TP_NUM_OUTPUT_CLONES",
+    "minimum" : 1,
+    "maximum" : TP_NUM_OUTPUT_CLONES_max
+   }
+  return param_dict
 
 def validate_TP_NUM_OUTPUT_CLONES(args):
-    TP_NUM_OUTPUT_CLONES = args["TP_NUM_OUTPUT_CLONES"]
-    return fn_validate_TP_NUM_OUTPUT_CLONES(TP_NUM_OUTPUT_CLONES)
+  AIE_VARIANT=args["AIE_VARIANT"]
+  TP_OUT_API=args["TP_OUT_API"]
+  TP_IN_API=args["TP_IN_API"]  
+  TP_NUM_OUTPUT_CLONES=args["TP_NUM_OUTPUT_CLONES"]
+  return fn_validate_TP_NUM_OUTPUT_CLONES(AIE_VARIANT, TP_IN_API, TP_OUT_API, TP_NUM_OUTPUT_CLONES)
 
-
-def fn_validate_TP_NUM_OUTPUT_CLONES(TP_NUM_OUTPUT_CLONES):
-    range_TP_NUM_OUTPUT_CLONES = [1, 4]
-    return com.validate_range(
-        range_TP_NUM_OUTPUT_CLONES, "TP_NUM_OUTPUT_CLONES", TP_NUM_OUTPUT_CLONES
-    )
+def fn_validate_TP_NUM_OUTPUT_CLONES(AIE_VARIANT, TP_IN_API, TP_OUT_API, TP_NUM_OUTPUT_CLONES):
+  param_dict=fn_update_TP_NUM_OUTPUT_CLONES(AIE_VARIANT, TP_IN_API, TP_OUT_API)
+  range_TP_NUM_OUTPUT_CLONES=[param_dict["minimum"], param_dict["maximum"]]
+  return(com.validate_range(range_TP_NUM_OUTPUT_CLONES, "TP_NUM_OUTPUT_CLONES", TP_NUM_OUTPUT_CLONES))
 
 
 #######################################################
 ###### TP_PATTERN Updater and Validator ###############
 #######################################################
 def update_TP_PATTERN(args):
-    return fn_update_TP_PATTERN()
+    TP_IN_API=args["TP_IN_API"]
+    TP_OUT_API=args["TP_OUT_API"]
+    TP_NUM_INPUTS=args["TP_NUM_INPUTS"]
+    TP_NUM_OUTPUT_CLONES=args["TP_NUM_OUTPUT_CLONES"]
+    return fn_update_TP_PATTERN(TP_IN_API, TP_OUT_API, TP_NUM_INPUTS, TP_NUM_OUTPUT_CLONES)
 
-
-def fn_update_TP_PATTERN():
-    param_dict = {"name": "TP_PATTERN", "minimum": 0, "maximum": 2}
+def fn_update_TP_PATTERN(TP_IN_API, TP_OUT_API, TP_NUM_INPUTS, TP_NUM_OUTPUT_CLONES):
+    TP_PATTERN_max=0
+    if (TP_IN_API==1 and TP_NUM_INPUTS==2) or (TP_OUT_API==1 and TP_NUM_OUTPUT_CLONES==2):
+      TP_PATTERN_max=2
+    param_dict={
+      "name" : "TP_PATTERN",
+      "minimum" : 0,
+      "maximum" : TP_PATTERN_max
+     }
     return param_dict
 
-
 def validate_TP_PATTERN(args):
-    TP_PATTERN = args["TP_PATTERN"]
-    return fn_validate_TP_PATTERN(TP_PATTERN)
+    TP_IN_API=args["TP_IN_API"]
+    TP_OUT_API=args["TP_OUT_API"]
+    TP_NUM_INPUTS=args["TP_NUM_INPUTS"]
+    TP_NUM_OUTPUT_CLONES=args["TP_NUM_OUTPUT_CLONES"]
+    TP_PATTERN=args["TP_PATTERN"]
+    return fn_validate_TP_PATTERN(TP_IN_API, TP_OUT_API, TP_NUM_INPUTS, TP_NUM_OUTPUT_CLONES, TP_PATTERN)
 
-
-def fn_validate_TP_PATTERN(TP_PATTERN):
-    range_TP_PATTERN = [0, 2]
-    return com.validate_range(range_TP_PATTERN, "TP_PATTERN", TP_PATTERN)
-
+def fn_validate_TP_PATTERN(TP_IN_API, TP_OUT_API, TP_NUM_INPUTS, TP_NUM_OUTPUT_CLONES, TP_PATTERN):
+    param_dict=fn_update_TP_PATTERN(TP_IN_API, TP_OUT_API, TP_NUM_INPUTS, TP_NUM_OUTPUT_CLONES)
+    range_TP_PATTERN=[param_dict["minimum"], param_dict["maximum"]]
+    return(com.validate_range(range_TP_PATTERN, "TP_PATTERN", TP_PATTERN))
 
 #######################################################
 ###### TP_HEADER_BYTES Updater and Validator ##########

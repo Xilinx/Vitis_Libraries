@@ -24,7 +24,7 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The DFT supports both AIE and AIE-ML devices for all features with the following exception
+The DFT supports AIE, AIE-ML and AIE-MLv2 for all features with the following exception
 
 - cfloat is not supported for ``TT_DATA`` on AIE-ML.
 
@@ -33,7 +33,7 @@ Supported Types
 
 The data type of the DFT is controlled by the ``TT_DATA`` template parameter.
 
-The DFT on AIE supports the following types for ``TT_DATA``: cint16, cint32 or cfloat. On AIE-ML the data must be of an integer type as floats are not supported; ``TT_DATA`` can be cint16 or cint32. The data type of the output will be equal to that of ``TT_DATA``.
+The DFT on AIE devices supports the following types for ``TT_DATA``: cint16, cint32 or cfloat. On AIE-ML and AIE-MLv2 devices, the data must be of an integer type as floats are not supported; ``TT_DATA`` can be cint16 or cint32. The data type of the output will be equal to that of ``TT_DATA``.
 
 The data type of the DFT coefficients is specified by the template parameter ``TT_TWIDDLE``. However, this is currently determined by the input data type. If ``TT_DATA`` is an integer type (cint16 or cint32), ``TT_TWIDDLE`` must be set to cint16. If ``TT_DATA`` is set to cfloat then ``TT_TWIDDLE`` must also be cfloat.
 
@@ -89,9 +89,9 @@ Maximum Point Size
 
 .. note:: The maximum ``TP_POINT_SIZE`` that can be used depends on the data type, the number of kernels in cascade, and the available data memory per kernel. Each frame of data in the IO-buffer should be zero-padded for alignment.
 
-The DFT on AIE supports values of ``TP_POINT_SIZE`` from 4 to 88 (4 to 60 for cfloat ``TP_DATA_TYPE``) for a single kernel.
+AIE devices support values of ``TP_POINT_SIZE`` from 4 to 88 (4 to 60 for cfloat ``TP_DATA_TYPE``) for a single kernel.
 
-On AIE-ML, the larger data memory per kernel allows for ``TP_POINT_SIZE`` support from 4 up to 120.
+On AIE-ML and AIE-MLv2 devices, the larger data memory per kernel allows for ``TP_POINT_SIZE`` support from 4 up to 120.
 
 This can be exceeded by using a number of kernels in cascade via the ``TP_CASC_LEN`` template parameter or by using multiple SSR paths ``TP_SSR``. The memory required for each frame of input and output data, and coefficient matrix will be divided across the kernels ``TP_CASC_LEN * TP_SSR`` kernels.
 

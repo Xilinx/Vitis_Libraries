@@ -16,6 +16,7 @@ For all library elements, the recommended manner to use an instance of each libr
 - `Convolution / Correlation <../../rst/group_conv_corr_graph.html>`_
 - `DDS Mixer <../../rst/group_dds_graph.html>`_
 - `DFT <../../rst/group_dft_graph.html>`_
+- `Euclidean Distance <../../rst/group_euclidean_distance_graph.html>`_
 - `FFT IFFT <../../rst/group_fft_graphs.html>`_
 - `2D FFT IFFT <../../rst/group_fft_ifft_2dgraphs.html>`_
 - `FFT Window <../../rst/group_fft_window.html>`_

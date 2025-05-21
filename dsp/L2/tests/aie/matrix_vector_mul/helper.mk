@@ -63,7 +63,7 @@ get_stats:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE_A) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output matVecMul $(NITER)
 
 get_status:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) SINGLE_BUF $(SINGLE_BUF)
 
 prep_x86_out:
 	@x86_out_files=`ls $(HELPER_CUR_DIR)/x86simulator_output/data`;\

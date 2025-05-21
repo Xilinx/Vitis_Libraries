@@ -99,16 +99,6 @@
 // #warning AIE Architecture does not supports cfloats
 #endif
 
-// cfloat support (emulated)
-#if (__AIE_ARCH__ == 20) || (__AIEARCH__ == 20)
-#define __SUPPORTS_EMULATED_CFLOAT__ 1
-// #warning Supports emulated cfloats
-
-#else
-#define __SUPPORTS_EMULATED_CFLOAT__ 0
-// #warning AIE Architecture does not supports cfloats
-#endif
-
 // FFT 32 bit twiddle support
 #if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
 #define __SUPPORTS_32B_TW__ 1

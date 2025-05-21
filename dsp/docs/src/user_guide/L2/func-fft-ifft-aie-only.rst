@@ -26,12 +26,12 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The fft_ifft_dit_1ch supports AIE and AIE-ML devices. All features are supported on these variants with the following differences:
+The fft_ifft_dit_1ch supports AIE, AIE-ML and AIE-MLv2 devices. All features are supported on these variants with the following differences:
 
-- ``TT_DATA`` and ``TT_TWIDDLE``. AIE-ML does not support cfloat type.
-- ``TT_TWIDDLE``: AIE supports cint32. AIE-ML does not.
-- ``TP_RND``: Supported round modes differ between AIE and AIE-ML as for all library elements.
-- Number of ports: When configured for ``TP_API=1`` (stream IO), AIE will require 2 input ports (sample interleaved - even samples on the first port) and 2 output ports similarly interleaved for each lane of processing. The number of lanes is ``2^TP_PARALLEL_FACTOR``. AIE-ML accepts one stream only per kernel.
+- ``TT_DATA`` and ``TT_TWIDDLE``. AIE-ML and AIE-MLv2 devices do not support cfloat type.
+- ``TT_TWIDDLE``: AIE supports cint32. AIE-ML and AIE-MLv2 devices do not.
+- ``TP_RND``: Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
+- Number of ports: When configured for ``TP_API=1`` (stream IO), AIE will require 2 input ports (sample interleaved - even samples on the first port) and 2 output ports similarly interleaved for each lane of processing. The number of lanes is ``2^TP_PARALLEL_FACTOR``. AIE-ML and AIE-MLv2 devices accept one stream only per kernel.
 
 Supported Types
 ===============
@@ -47,7 +47,7 @@ For guidance on configuration with some example scenarios, see :ref:`FFT_CONFIGU
 
 See also :ref:`PARAMETER_LEGALITY_NOTES` regarding legality checking of parameters.
 
-.. note::  Window interfaces are now referred to as IO-buffers. IO-buffers are conceptually the same as windows. Graph connections between windows and IO-buffers are supported. More details on IO-buffers can be found in  `UG1079 Input and Output Buffers <https://docs.xilinx.com/r/en-US/ug1079-ai-engine-kernel-coding/Input-and-Output-Buffers>`_. For backwards compatibility, template parameters which refer to windows, e.g., ``TP_WINDOW_VSIZE``, remain unchanged.
+.. note::  Window interfaces are now referred to as IO-buffers. IO-buffers are conceptually the same as windows. Graph connections between windows and IO-buffers are supported. More details on IO-buffers can be found in  `UG1079 Input and Output Buffers <https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Input-and-Output-Buffers>`_. For backwards compatibility, template parameters which refer to windows, e.g., ``TP_WINDOW_VSIZE``, remain unchanged.
 
 Access Functions
 ================
@@ -135,8 +135,8 @@ The ``TP_PARALLEL_POWER`` parameter  allows a trade of performance for resource 
 Super Sample Rate Sample to Port Mapping
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When the Super Sample Rate operation is used, data is input and output using multiple ports. These multiple ports on input or output act as one channel. The mapping of samples to ports is that each successive sample should be passed to a different port in a round-robin fashion, e.g., with ``TP_PARALLEL_POWER`` set to 1, sample 0 should be sent to input port 0, sample 1 to input port 1, sample 2 to input port 2, sample 3 to input port 0, and so on.
-Super Sample Rate operation (``TP_PARALLEL_POWER``>0) supports both  IO-buffer IO (``TP_API`` == 0) or stream input (``TP_API`` == 1). For IO-buffer IO, there is one port per lane of processing (number of lanes= 2^ ``TP_PARALLEL_POWER``). For stream IO the number of ports is the number of lanes multiplied by the number of streams per tile (2 for AIE, 1 for AIE-ML).
+When the Super Sample Rate operation is used, data is input and output using multiple ports. These multiple ports on input or output act as one channel. The mapping of samples to ports is that each successive sample should be passed to a different port in a round-robin fashion, e.g., with ``TP_PARALLEL_POWER`` set to 1, sample 0 should be sent to input port 0, sample 1 to input port 1, sample 2 to input port 2, sample 3 to input port 3, sample 4 to input port 0, and so on.
+Super Sample Rate operation (``TP_PARALLEL_POWER``>0) supports both  IO-buffer IO (``TP_API`` == 0) or stream input (``TP_API`` == 1). For IO-buffer IO, there is one port per lane of processing (number of lanes= 2^ ``TP_PARALLEL_POWER``). For stream IO the number of ports is the number of lanes multiplied by the number of streams per tile (2 for AIE, 1 for AIE-ML or AIE-MLv2).
 
 .. table:: FFT Number of Ports Examples
    :align: center
@@ -144,7 +144,7 @@ Super Sample Rate operation (``TP_PARALLEL_POWER``>0) supports both  IO-buffer I
    +-------------------+------------------+------------------+------------------+------------------+
    | TP_PARALLEL_POWER | Number of Ports                                                           |
    +-------------------+------------------+------------------+------------------+------------------+
-   |                   | AIE                                 | AIE-ML                              |
+   |                   | AIE                                 | AIE-ML or AIE-MLv2                  |
    +-------------------+------------------+------------------+------------------+------------------+
    |                   | Stream(note 1)   |      Buffer      |      Stream      |      Buffer      |
    +===================+==================+==================+==================+==================+

@@ -21,15 +21,20 @@ Compiling and Simulating
 Library Element Unit Test
 --------------------------
 
-Each library element category comes supplied with a test harness. It is located in the `L2/tests/aie/<library_element>` directory. The test harness consists of JSON, C++ files, as well as a Makefile.
+Each library element category comes supplied with a test harness. 
 
-JSON description of the test harness, defined in `L2/tests/aie/<library_element>/description.json`, has been used to generate the Makefile. In addition, the `description.json` file defines the parameters of the test harness, e.g., a list of supported platforms.
+For AI Engine library elements, it is located in the `L2/tests/aie/<library_element>` directory and consists of JSON, C++ files, as well as a Makefile.
+For VSS library elements, it is located in the `L2/tests/vss/<library_element>` directory and contains a host file, some helper python scripts, along with the JSON, C++ files and Makefiles. 
+
+JSON description of the test harness, defined in `L2/tests/<vss/aie>/<library_element>/description.json`, has been used to generate the Makefile. In addition, the `description.json` file defines the parameters of the test harness, e.g., a list of supported platforms.
 
 Each Makefile uses a set of values for each of the library element parameters that are stored in in a JSON file in `L2/tests/aie/<library_element>/multi_params.json`. The set of parameters are combined in a form of a named test case, with default name being: `test_0_tool_canary_aie`. The set of parameters can be edited as required to configure the library element for your needs.
 
 C++ files serve as an example of how to use the library element subgraph in the context of a super-graph. These test harnesses (graphs) can be found in the `L2/tests/aie/<library_element>/test.hpp` and `L2/tests/aie/<library_element>/test.cpp` file.
 
-Although it is recommended that only L2 (graphs) library elements are instantiated directly in the user code, the kernels underlying the graphs can be found in the `L1/include/aie/<library_element>.hpp` and the `L1/src/aie/<library_element>.cpp` files.
+Although for AI Engine library elements, it is recommended that only L2 (graphs) library elements are instantiated directly in the user code, the kernels underlying the graphs can be found in the `L1/include/aie/<library_element>.hpp` and the `L1/src/aie/<library_element>.cpp` files.
+
+For VSS library elements, it is recommended to use the top level VSS Makefile found in `L2/include/vss/<library_element>` as the entry point. 
 
 The test harness run consists of several steps that result in a simulated and validated design. These include:
 
@@ -154,7 +159,7 @@ Library Element Configuration Parameters
 Common Configuration Parameters
 -------------------------------
 
-Many library elements perform arithmetic and offer a scaling feature exposed as TP_SHIFT. During this operation, rounding and saturation can occur, configured according to parameters TP_RND and TP_SAT. The modes and values for TP_RND are different on AIE compared to AIE-ML as captured in the following table.
+Many library elements perform arithmetic and offer a scaling feature exposed as TP_SHIFT. During this operation, rounding and saturation can occur, configured according to parameters TP_RND and TP_SAT. The modes and values for TP_RND are  the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices, as captured in the following table.
 
 .. table:: Common Configuration Parameters
 
@@ -167,7 +172,7 @@ Many library elements perform arithmetic and offer a scaling feature exposed as 
     | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
     |                        |                |                |                                      |
     |                        |                |                +------------------+-------------------+
-    |                        |                |                |     AIE          |    AIE-ML         |
+    |                        |                |                |     AIE          | AIE-ML or AIE-MLv2|
     |                        |                |                +------------------+-------------------+
     |                        |                |                |                  |                   |
     |                        |                |                | 0 - rnd_floor*   | 0 - rnd_floor*    |
@@ -236,6 +241,8 @@ Many library elements perform arithmetic and offer a scaling feature exposed as 
     |                        |                |                | 1: AIE                               |
     |                        |                |                |                                      |
     |                        |                |                | 2: AIE-ML                            |
+    |                        |                |                |                                      |
+    |                        |                |                | 22: AIE-MLv2                         |
     +------------------------+----------------+----------------+--------------------------------------+
 
 .. _CONFIGURATION_PARAMETERS_BITONIC_SORT:
@@ -273,7 +280,7 @@ For the Bitonic Sort library element, use the following list of configurable par
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
 
 .. _CONFIGURATION_PARAMETERS_CONV_CORR:
 
@@ -495,7 +502,52 @@ For the DFT library element, use the following list of configurable parameters a
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
+
+.. _CONFIGURATION_PARAMETERS_EUCLIDEAN_DISTANCE:
+
+Euclidean Distance Configuration Parameters
+-------------------------------------------
+
+For the Euclidean Distance library element, use the following list of configurable parameters and default values.
+
+.. table:: Euclidean Distance Configuration Parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | DATA                   |    typename    |    float       | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DATA_OUT               |    typename    |    float       | Output Data Type.                    |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | LEN                    |    unsigned    |    32          | Number of samples in input buffers.  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIM                    |    unsigned    |   3            | Number of dimensions in input        |
+    |                        |                |                | samples.                             |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
+    |                        |                |                |                                      |
+    |                        |                |                | 0: window                            |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | RND                    |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SAT                    |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | IS_OUTPUT_SQUARED      |    unsigned    |    0           | Compute output as:                   |
+    |                        |                |                |                                      |
+    |                        |                |                | 0: SQUARE_ROOT                       |
+    |                        |                |                |                                      |
+    |                        |                |                | 1: SQUARED                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
 
 .. _CONFIGURATION_PARAMETERS_FFT:
 
@@ -561,7 +613,7 @@ For the FFT/iFFT library element, use the following list of configurable paramet
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
 
 .. _CONFIGURATION_PARAMETERS_FFT_WINDOW:
 
@@ -628,7 +680,7 @@ For the FFT Window library element, use the following list of configurable param
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
 
 .. _CONFIGURATION_PARAMETERS_FILTERS:
 
@@ -722,7 +774,7 @@ The following list consists of configurable parameters for FIR library elements 
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
 
 .. note:: Not all dsplib elements support all of the above configurable parameters. Unsupported parameters which are not used have no impact on execution, e.g., the `INTERPOLATE_FACTOR` parameter is only supported by interpolation filters and will be ignored by other library elements.
 
@@ -835,7 +887,7 @@ For the Hadamard Product library element, use the list of configurable parameter
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
 
 .. _CONFIGURATION_PARAMETERS_KRONECKER:
 
@@ -896,7 +948,7 @@ For the Kronecker library element the list of configurable parameters and defaul
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
 
 .. _CONFIGURATION_PARAMETERS_GEMM:
 
@@ -980,7 +1032,7 @@ For the Matrix Multiply (GeMM) library element, use the following list of config
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
 
 .. _CONFIGURATION_PARAMETERS_GEMV:
 
@@ -1054,7 +1106,7 @@ For the Matrix Vector Multiply (GeMV) library element, use the following list of
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
 
 .. _CONFIGURATION_PARAMETERS_MRFFT:
 
@@ -1113,7 +1165,7 @@ For the Mixed Radix library element, use the following list of configurable para
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
 
 
 .. _CONFIGURATION_PARAMETERS_OUTER_TENSOR:
@@ -1170,7 +1222,7 @@ For the Outer Tensor library element, use the following list of configurable par
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
 
 .. _CONFIGURATION_PARAMETERS_SAMPLE_DELAY:
 
@@ -1281,11 +1333,8 @@ For the Widgets library elements, use the following list of configurable paramet
     |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
 
-
-
-.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:

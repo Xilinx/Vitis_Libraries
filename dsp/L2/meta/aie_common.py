@@ -195,6 +195,8 @@ k_integer_types = ["int8", "int16", "int32"]
 def fn_is_integral(type):
     return type in k_integral_types
 
+def fn_is_integer(type):
+    return type in k_integer_types
 
 def fn_is_floating_point(type):
     return type in k_floating_point_types
@@ -587,6 +589,11 @@ def fn_int_check_update(TT_DATA, legal_set):
         legal_set_int = remove_from_set(k_integral_types, legal_set_int)
     return legal_set_int
 
+def fn_integer_check_update(TT_DATA, legal_set):
+    legal_set_int = legal_set
+    if not (fn_is_integer(TT_DATA)):
+        legal_set_int = remove_from_set(k_integer_types, legal_set_int)
+    return legal_set_int
 
 def fn_float_check_update(TT_DATA, legal_set):
     legal_set_int = legal_set

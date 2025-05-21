@@ -297,7 +297,7 @@ INLINE_DECL void kernelMatVecMulClass<TT_DATA_A,
 
     for (int frame = 0; frame < TP_NUM_FRAMES; frame++) {
 #pragma unroll(TP_DIM_B / (streamLoadSize*(TP_DUAL_IP + 1)))
-        for (int bdx = 0; bdx < (TP_DIM_B / (streamLoadSize * (TP_DUAL_IP + 1))); bdx++) {
+        for (int bdx = 0; bdx < ((TP_DIM_B / TP_CASC_LEN) / (streamLoadSize * (TP_DUAL_IP + 1))); bdx++) {
             // printf("bdx = %d\n", bdx);
             inVecStream = readincr_v<streamLoadSize, aie_stream_resource_in::a>(inInterface.inStreamB);
             vBuff.template insert((TP_DUAL_IP + 1) * bdx, inVecStream);

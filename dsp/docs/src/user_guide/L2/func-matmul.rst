@@ -10,7 +10,7 @@
 Matrix Multiply
 ===============
 
-The DSPLib contains one Matrix Multiply/GEMM (General Matrix Multiply) solution for AIE and AIE-ML. The GEMM has two input ports connected to two windows of data. The inputs are denoted as Matrix A (inA) and Matrix B (inB). Matrix A has a ``TP_DIM_A`` template parameter to describe the number of rows in Matrix A. The number of columns in Matrix A must be equal to the number of rows in Matrix. This is denoted with the ``TP_DIM_AB`` template parameter. The number of columns in Matrix B is denoted by ``TP_DIM_B``.
+The DSPLib contains one Matrix Multiply/GEMM (General Matrix Multiply) solution for AIE, AIE-ML and AIE-MLv2. The GEMM has two input ports connected to two windows of data. The inputs are denoted as Matrix A (inA) and Matrix B (inB). Matrix A has a ``TP_DIM_A`` template parameter to describe the number of rows in Matrix A. The number of columns in Matrix A must be equal to the number of rows in Matrix. This is denoted with the ``TP_DIM_AB`` template parameter. The number of columns in Matrix B is denoted by ``TP_DIM_B``.
 
 An output port connects to a window, where the data for the output matrix will be stored. The output matrix will have (``TP_DIM_A``) rows and (``TP_DIM_B``) columns. The data type of both input matrices can be configured, and the data type of the output is derived from the inputs.
 
@@ -25,15 +25,15 @@ The graph entry point is the following:
 
 Device Support
 ==============
-The Matrix Multiply supports AIE and AIE-ML devices.
 
+The Matrix Multiply supports AIE, AIE-ML and AIE-MLv2 devices.
 
 Supported Types
 ===============
 
 The Matrix Multiply supports a matrix of elements of integer type (int16, cint16, int32, or cint32) multiplied by a matrix of elements of integer type. It also supports a matrix of elements of float type (float, cfloat) multiplied by a matrix of elements of float type. However, a mix of integer types and float types are not supported.
 
-The Matrix Multiply for AIE-ML supports integer types (int16, int32, cint16, and cint32) but does not support floating-point types (float, cfloat).
+The Matrix Multiply for AIE-ML and AIE-MLv2 devices supports integer types (int16, int32, cint16, and cint32) but does not support floating-point types (float, cfloat).
 
 Template Parameters
 ===================
@@ -259,6 +259,34 @@ The following table specifies the tiling scheme used for a given data type combi
    |cint32   |       cint32 |   1x2  |   2x8 |   cint32     |
    +---------+--------------+--------+-------+--------------+
 
+The following table specifies the tiling scheme used for a given data type combination and the corresponding output data type for AIE-ML devices:
+
+.. _table-tile-pattern-AIE-MLv2:
+.. table:: Matrix Multiply Tiling Pattern Combination for AIE-MLv2
+   :align: center
+
+   +------------------------+----------------+--------------+
+   |Input Type Combination  |  Tiling Scheme |  Output Type |
+   +=========+==============+========+=======+==============+
+   | A       |        B     |    A   |    B  |              |
+   +---------+--------------+--------+-------+--------------+
+   |int16    |       int16  |    4x4 |   4x8 |   int16      |
+   +---------+--------------+--------+-------+--------------+
+   |int16    |       int32  |    4x4 |   4x8 |   int32      |
+   +---------+--------------+--------+-------+--------------+
+   |cint16   |       int16  |    4x4 |   4x8 |  cint16      |
+   +---------+--------------+--------+-------+--------------+
+   |cint16   |       cint16 |    1x4 |   4x8 |  cint16      |
+   +---------+--------------+--------+-------+--------------+
+   |int32    |       int16  |    4x2 |   2x8 |   int32      |
+   +---------+--------------+--------+-------+--------------+
+   |int32    |       int32  |    4x2 |   2x8 |    int32     |
+   +---------+--------------+--------+-------+--------------+
+   |cint32   |       cint16 |    1x2 |   2x8 |  cint32      |
+   +---------+--------------+--------+-------+--------------+
+   |cint32   |       cint32 |    1x2 |   2x8 |   cint32     |
+   +---------+--------------+--------+-------+--------------+
+
 Tiling Parameters
 -----------------
 
@@ -267,12 +295,12 @@ When used with ``TP_DIM_A_LEADING``, ``TP_DIM_B_LEADING``, or ``TP_DIM_OUT_LEADI
 
 If the additional kernels are not selected, then the matrix multiply kernels assume incoming data is in the correct format, as specified above.
 
-The tiling imposes a restriction that the matrix dimensions need to be multiples of the tile dimensions. If you require dimensions that do not satisfy these requirements, pad the matrices up to the closet multiple of the tile dimensions in table :ref:`table-tile-pattern-AIE` or :ref:`table-tile-pattern-AIE-ML` with zeroes for AIE and AIE-ML devices respectively.
+The tiling imposes a restriction that the matrix dimensions need to be multiples of the tile dimensions. If you require dimensions that do not satisfy these requirements, pad the matrices up to the closet multiple of the tile dimensions in table :ref:`table-tile-pattern-AIE`, :ref:`table-tile-pattern-AIE-ML`  or :ref:`table-tile-pattern-AIE-MLv2` with zeroes for AIE, AIE-ML or AIE-MLv2 devices respectively.
 
 Maximum matrix dimensions per kernel
 ------------------------------------
 
-The maximum memory accessible by an AI Engine kernel is 32 kB x 4 for AIE. The maximum matrix dimensions per kernel is limited by the memory requirements and how much memory is available.
+The maximum memory accessible by an AI Engine kernel is 32 kB x 4 for AIE devices and 64 kB x 4 for AIE-ML and AIE-MLv2 devices. The maximum matrix dimensions per kernel is limited by the memory requirements and how much memory is available.
 A matrix_mult design needs to allocate memory for the following:
 
 * Window Size A: Input matrix A of size ``(TP_DIM_A / TP_SSR) x (TP_DIM_AB / TP_CASC_LEN) x sizeof(TT_DATA_A)``.
@@ -546,7 +574,7 @@ The tiling kernels' function is to convert between the arrangement of matrix ele
 - 'tilerA' - This is an array of ``TP_CASC_LEN * TP_SSR`` kernels which connect 1:1 with the A input port of the matrix multiply kernels.
 - 'tilerB' - This is an array of ``TP_CASC_LEN * TP_SSR`` kernels which connect 1:1 with the B input port of the matrix multiply kernels.
 
-.. note:: For some combinations of the template parameters, the log will give out an error message "ERROR: shouldn't be here". This combination of factors is not supported by the AIE Compiler. A possible workaround is to pad up the matrices with zeroes so that their dimensions become the closest multiple of 8 for cint32 data types, 16 for cint16/int16 data types, and 32 for int16 data types.
+.. note:: Some combinations of the template parameters are not supported. A possible workaround is to pad up the matrices with zeroes so that their dimensions become the closest multiple of 8 for cint32 data types, 16 for cint16/int16 data types, and 32 for int16 data types.
 
 Code Example
 ============

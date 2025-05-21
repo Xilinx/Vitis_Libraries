@@ -263,16 +263,17 @@ class create_casc_kernel<1,
  *         The Vector B inputs across a
  *         chain of cascaded kernels will be the same across all SSR ranks.
  * @tparam TP_DIM_A_LEADING describes the leading dimension of the Matrix A data.
- *         If TP_DIM_A_LEADING=1, the columns of the matrix are contiguous in memory. This is the only supported order
+ *         If TP_DIM_A_LEADING=1, the elements of the matrix columns are contiguous in memory. This is the only
+ *supported order
  *         of Matrix A input data for computation. \n
- *         If TP_DIM_A_LEADING=0, the rows of the matrix input are contiguous in memory and will be transposed
+ *         If TP_DIM_A_LEADING=0, the elements of the matrix rows are contiguous in memory and will be transposed
  *         at the input ports for each kernel using DMA Buffer Descriptors. \n
  *         Note: This feature is only supported when TT_DATA_A is cint16, int32, or float, and TP_NUM_FRAMES=1. \n
  *         For other TT_DATA_A types or when TP_NUM_FRAMES > 1, the input matrix data must be transposed externally
  *         to a column-major order, and TP_DIM_A_LEADING must be set to 1.
  * @tparam TP_USE_MATRIX_RELOAD describes whether the input Matrix A is provided via an RTP port. This allows the user
  *         to provide and reload Matrix values at runtime. The matrix provided to the RTP will be used for successive
- *         iterations until updated with new values. The columns of the RTP matrix input must be contiguous
+ *         iterations until updated with new values. The column elements of the RTP matrix input must be contiguous
  *         in memory (TP_DIM_A_LEADING = 1). The matrix data must be split according to TP_SSR and TP_CASC_LEN
  *         requirements, and each kernel in the design must receive its correct portion of the matrix via the RTP
  *         ports. \n
@@ -327,12 +328,11 @@ class matrix_vector_mul_graph : public graph {
     kernel* getKernels() { return m_mat_vec_mulKernels; };
 
     /**
-     * Input to the function, Matrix A. This should stored in a column major format (TP_DIM_A_LEADING_A = 1) where each
-     *column of data is
-     * stored contiguously in memory. Row major format (TP_DIM_A_LEADING = 0) will be transposed using DMA buffer
-     *descriptors.
+     * Input to the function, Matrix A. This should stored in a column major format (TP_DIM_A_LEADING_A = 1) where the
+     * column elements are stored contiguously in memory. Row major format (TP_DIM_A_LEADING = 0) will be transposed
+     * using DMA buffer descriptors.
      * However, this is only supported when TT_DATA_A is cint16, int32, or float and NUM_FRAMES = 1. Configurations with
-     *other TT_DATA_A types and NUM_FRAMES > 1,
+     * other TT_DATA_A types and NUM_FRAMES > 1,
      * are not supported by the DMA transpose feature and must be input in column major format (TP_DIM_A_LEADING=1). \n
      * The dimensions of the matrix are specified by template parameters TP_DIM_A (number of rows),
      * and TP_DIM_B (number of columns). \n
@@ -390,6 +390,9 @@ class matrix_vector_mul_graph : public graph {
         static_assert(
             TP_DIM_A_LEADING == 1 || TP_NUM_FRAMES == 1,
             "ERROR: TP_DIM_A_LEADING = 0 (Row major data) is not supported for batch processing (TP_NUM_FRAMES > 1)");
+        static_assert((TP_DIM_B / TP_CASC_LEN) * sizeof(TT_DATA_B) * 8 <= 1024 || !(TP_API),
+                      "ERROR: (TP_DIM_B / TP_CASC_LEN) * sizeof(TT_DATA_B) * 8 must be less than or equal to 1024-bits "
+                      "when Vector B is a stream (TP_API = 1).");
         static_assert(TP_DIM_A_LEADING == 1 || TP_USE_MATRIX_RELOAD == 0,
                       "ERROR: TP_DIM_A_LEADING = 0 (Row major data) is not supported when reloadable matrices are used "
                       "(TP_USE_MATRIX_RELOAD=1)");

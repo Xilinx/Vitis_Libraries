@@ -338,6 +338,16 @@ class create_casc_kernel<2,
  *         giving an overall higher throughput.   \n
  *         A TP_PHASES of 1 means just one output leg and 1 input phase, and is the backwards compatible option. \n
  *         The number of AIEs used is given by ``TP_PHASES*TP_CASC_LEN``. \n
+ * @tparam TP_USE_RTP_VECTOR_LENGTHS allows the user to select if runtime vector lengths
+ *         should be used. \n When defining the parameter:
+ *         - 0 = static vector lengths, defined through class template parameters,
+ *         - 1 = runtime configurable vector lengths, passed as argument to runtime function. \n
+ *         \n
+ *         Note: when used, async port: ```port_conditional_array<input, (TP_USE_RTP_VECTOR_LENGTHS == 1), 1>
+ *rtpVecLen;```
+ *         will be added to the graph. \n
+ *         \n
+ *         Note: Conv/corr graph only support G vector. \n
  *
  **/
 

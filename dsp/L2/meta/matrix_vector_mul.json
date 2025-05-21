@@ -204,6 +204,7 @@
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA_A",
+                    "TT_DATA_B",
                     "TP_DIM_A",
                     "TP_DIM_B",
                     "TP_NUM_FRAMES"
@@ -215,6 +216,7 @@
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA_A",
+                    "TT_DATA_B",
                     "TP_DIM_A",
                     "TP_DIM_B",
                     "TP_NUM_FRAMES"

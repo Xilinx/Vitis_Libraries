@@ -29,6 +29,8 @@ namespace corr_example {
 #define G_LEN_CORR 32
 #define SHIFT_CORR 7
 #define API_CORR 0
+#define RND_CORR 0
+#define SAT_CORR 1
 #define NUM_FRAMES_CORR 1
 #define CASC_LEN_CORR 1
 #define PHASES_CORR 1
@@ -48,6 +50,8 @@ class test_corr : public adf::graph {
                                              G_LEN_CORR,
                                              SHIFT_CORR,
                                              API_CORR,
+                                             RND_CORR,
+                                             SAT_CORR,
                                              NUM_FRAMES_CORR,
                                              CASC_LEN_CORR,
                                              PHASES_CORR,

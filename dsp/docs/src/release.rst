@@ -19,9 +19,42 @@ Release Notes
 
 The following features have been added to the library in this release:
 
-* **Matrix-Vector Multiplication** - Added support for reloadable matrix A inputs via RTP ports. These inputs can be used with either IO buffer or streaming Vector B and outputs.
+* **Bitonic Sort** - Added support for Super Sample Rate (SSR).
+
+SSR offers parallel execution which improves performance and allows larger lists to be operated on.
+
+* **Convolution / Correlation** - Added support for Run Time Programmable (RTP) configuration of vector G length to buffer implementation.
+
+Buffer implementation supports vector G length to be passed during runtime.
+
+* **DDS Mixer / DDS Mixer Lut** - Added support for Run Time Programmable (RTP) configuration of Phase Increment, and runtime configuration of Phase Offset and Phase Increment using Buffer port.
+
+Both DDS Mixer and DDS Mixer LUT now support iobuffer input for Phase offset and RTP input for Phase Increment in addition to existing input options, allowing flexible configuration from PS or PL.
+
+* **Euclidean Distance** - New library element.
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and class name**                                                |
++=======================================+=============================================================================+
+| Euclidean Distance                    |  xf::dsp::aie::euclidean_distance                                           |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This element adds an implementation of the euclidean distance (ED) algorithm.
+
+Supports AIE and AIE-ML (EA) devices.
+
+* **FIR TDM** - Added support for Run Time Programmable (RTP) configuration of FIR coefficients.
+
+* **Matrix-Vector Multiplication** - Added support for:
+
+      - Run Time Programmable (RTP) configuration of matrix A inputs. Input Matrix A can be configured as a buffer (``inA``) or as an RTP port (``matrixA``).
+
+      - Streaming Interface of vector B inputs. Input ``inB`` can now be configured as a buffer or a stream port.
+
 
 * **Matrix Multiplication** - Introduced a new template parameter `TT_OUT_DATA` to specify the data type of the output.
+
+* **FFT** - Introduces a new VSS implementation of Super Sample Rate FFTs.
 
 2024.2
 ======

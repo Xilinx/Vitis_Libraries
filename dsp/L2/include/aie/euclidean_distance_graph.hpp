@@ -63,11 +63,16 @@ namespace euclidean_distance {
  *function. \n
  *         This is a typename and must be one of the following: \n
  *         float and bfloat16.
+ * @tparam TT_DATA_OUT describes the type of individual data samples of output from the function. \n
+ *         This is a typename and must be one of the following: \n
+ *         float and bfloat16.
  * @tparam TP_LEN describes the number of samples of input (Points P and Q) and ouput vector. \n
  * @tparam TP_DIM describes the Dimension of plane for the point P and Q. \n
  *         This is a constant and must be nearest power of 2. the following are: \n
  *         4, 8, 16, 32, 64.....2^N;
- * @tparam TP_API describes whether to use streams (1) or windows (0). \n
+ * @tparam TP_API describes whether to use streams (1) or windows (0).
+ *         \n
+ *         Note: Streaming interface is currently not supported. \n
  * @tparam TP_RND describes the selection of rounding to be applied during the
  *         shift down stage of processing. \n
  *         Although, TP_RND accepts unsigned integer values descriptive macros are recommended where
@@ -85,7 +90,8 @@ namespace euclidean_distance {
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         \n
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML and AIE-MLv2 device.
+ *\n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
  *         TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.

@@ -205,17 +205,33 @@ class test_graph : public graph {
                 : (INPUT_SAMPLES * 2) *
                       sizeof(DATA_TYPE); // Due to interpolation, output buffer may be of greater size than input buffer
 
-        if (inputBufferSize > MAX_PING_PONG_SIZE) {
-            single_buffer(firGraph.getKernels()->in[0]);
-            if
-                constexpr(DUAL_IP == 1) { single_buffer(firGraph.getKernels()->in[1]); }
-        }
-        if (outputBufferSize > MAX_PING_PONG_SIZE) {
-            single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[0]);
-#if (NUM_OUTPUTS == 2)
-            single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[1]);
+        if ((inputBufferSize > MAX_PING_PONG_SIZE) || (SINGLE_BUF == 1 && PORT_API == 0)) {
+            for (int ssr = 0; ssr < P_SSR; ssr++) {
+                single_buffer(firGraph.in[ssr]);
+#if (DUAL_IP == 1)
+                single_buffer(firGraph.in2[ssr]);
+
 #endif
+            }
+            printf("INFO: Single Buffer Constraint applied to input buffers of kernel 0.\n");
         }
+
+        if ((outputBufferSize > MAX_PING_PONG_SIZE) || (SINGLE_BUF == 1 && PORT_API == 0)) {
+            for (int ssr = 0; ssr < P_SSR; ssr++) {
+                single_buffer(firGraph.out[ssr]);
+#if (NUM_OUTPUTS == 2)
+                single_buffer(firGraph.out2[ssr]);
+#endif
+#if (P_PARA_INTERP_POLY == 2)
+                single_buffer(firGraph.out3[ssr]);
+#if (NUM_OUTPUTS == 2)
+                single_buffer(firGraph.out4[ssr]);
+#endif
+#endif
+            }
+            printf("INFO: Single Buffer Constraint applied to output buffers of kernel %d.\n", P_SSR * CASC_LEN - 1);
+        }
+
 #endif
 
 #ifdef USING_UUT

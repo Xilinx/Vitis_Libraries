@@ -29,10 +29,10 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The TDM FIR filter supports both AIE and AIE-ML devices for all features with the following exceptions:
+The TDM FIR filter supports AIE, AIE-ML and AIE-MLv2 for all features with the following exceptions:
 
 - The ``cfloat`` data type is not supported on AIE-ML device
-- Round modes available and the enumerated values of round modes differ between AIE and AIE-ML devices. See :ref:`COMPILING_AND_SIMULATING`.
+- Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
 
 Supported Types
 ===============
@@ -69,7 +69,7 @@ The following table lists the supported combinations of data type and coefficien
    +----------------------+------------+-----------+------------+-----------+------------+-----------+------------+
    | 1. Complex coefficients are not supported for real-only data types.                                          |
    | 2. A mix of float and integer types is not supported.                                                        |
-   | 3. The cfloat data type is not supported on AIE-ML device.                                                   |
+   | 3. The cfloat data type is not supported on AIE-ML or AIE-MLv2 devices.                                      |
    +--------------------------------------------------------------------------------------------------------------+
 
 Template Parameters
@@ -128,6 +128,57 @@ where:
 - N - FIR Length, i.e. number of taps on each channel (``TP_FIR_LEN``),
 - M - Number of TDM Channels  (``TP_TDM_CHANNELS``).
 
+Reloadable Coefficients
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Reloadable coefficients are available through the use of a runtime programmable (RTP) Asynchronous input port, programmed by the processor subsystem (PS) at runtime.
+Reloadable configurations do not require the coefficient array to be passed to the constructor at compile time.
+Instead, the graph's `update()` (refer to `UG1079 Run-Time Parameter Update/Read Mechanisms <https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Runtime-Parameter-Update/Read-Mechanisms>`_ for usage instructions) method is used to input the coefficient array.
+
+.. note:: Graph's `update()` method must be called after graph has been initialized, but before kernel starts operation on data samples.
+
+Reloadable coefficients are available for single- and multi- kernel configuration, e.g. using Cascade (``TP_CASC_LEN``) and/or Super Sample Rate (``TP_SSR``) modes of operation.
+
+TDM Channels of will be split by ``TP_SSR`` and FIR taps (for each channel) will be split by ``TP_CASC_LEN``. Each part is sent to a specific kernel via its corresponding RTP port.
+
+For more details on multi-kernel modes, refer to: :ref:`FIR_TDM_CASCADE_OPERATION` and :ref:`FIR_TDM_SSR_OPERATION`.
+
+.. _RTP_PORTS_FOR_TDM_FIR:
+
+Reloadable Coefficients - Number of ports
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The total number of RTP ports created by a TDM FIR will be given by the formula:
+
+``TotalRtpPorts =  (TP_SSR * TP_CASC_LEN)``
+
+For example, if ``TP_SSR = 2`` and ``TP_CASC_LEN = 3``, the coefficient array will be divided into ``2 * 3 = 6`` parts.
+
+FIR TDM graph class provides a helper method: ``getTotalRtpPorts()`` to get number of RTP ports. For more details, refer to: :ref:`API_REFERENCE`.
+
+.. _RTP_ARRAY_SIZE_FOR_TDM_FIR:
+
+Reloadable Coefficients - Array Size
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The array size is equal to the length of the FIR multiplied by number of channels and divided equally by AI Engine kernels used, i.e.:
+
+``TapsPerRtpPort = (TP_FIR_LEN * TP_TDM_CHANNELS) / (TP_SSR * TP_CASC_LEN)``
+
+For example, if ``TP_FIR_LEN = 6`` and ``TP_TDM_CHANNELS = 16``, if ``TP_SSR = 2`` and ``TP_CASC_LEN = 3``, the coefficient array will be divided into ``2 * 3 = 6`` parts.
+
+FIR TDM graph class provides a helper method: ``getTapsPerRtpPort(int kernelNo)`` to get number of FIR taps per RTP port. For more details, refer to: :ref:`API_REFERENCE`.
+
+
+.. _RTP_ARRAY_SIZE_FOR_TDM_FIR:
+
+Reloadable Coefficients - Array Contents
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+TDM Channels of will be split by ``TP_SSR`` and FIR taps (for each channel) will be split by ``TP_CASC_LEN``. Each part is sent to a specific kernel via its corresponding RTP port.
+
+FIR TDM graph class provides a helper method: ``extractTaps(const std::vector<TT_COEFF>& taps, unsigned int kernelNo)`` to get coefficients for a given kernel. For more details, refer to: :ref:`API_REFERENCE`.
+
 .. _BUFFER_API_FIRS:
 
 IO Buffer Interface for Filters
@@ -159,7 +210,7 @@ margin will be implemented as a separate buffer, internal to the kernel that ope
 
 As a result, the input buffers will not be extended by margin data.
 
-.. note:: Internal Margin handling is not supported on AIE-ML device.
+.. note:: Internal Margin handling is not supported on AIE-ML and AIE-MLv2 devices.
 
 Maximizing Throughput
 ^^^^^^^^^^^^^^^^^^^^^
@@ -194,7 +245,7 @@ Maximum Window Size
 
 Window buffer is mapped into a local memory in the area surrounding the kernel that accesses it.
 
-A local memory storage is 32 kB (64 kB for AIE-ML devices), and the maximum size of the `ping-pong` window buffer should not exceed this limit.
+A local memory storage is 32 kB (64 kB for AIE-ML and AIE-MLv2 devices), and the maximum size of the `ping-pong` window buffer should not exceed this limit.
 
 .. note:: Input buffers may be extended by margin data, which can significantly reduce the maximum window size.
 
@@ -238,6 +289,9 @@ Streaming Interface for Filters
 -------------------------------
 
 Streaming interfaces are not supported by TDM FIR.
+
+
+.. _FIR_TDM_CASCADE_OPERATION:
 
 Cascaded kernels
 ----------------

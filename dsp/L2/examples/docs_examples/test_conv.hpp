@@ -29,6 +29,8 @@ namespace conv_example {
 #define G_LEN_CONV 32
 #define SHIFT_CONV 7
 #define API_CONV 0
+#define RND_CONV 0
+#define SAT_CONV 1
 #define NUM_FRAMES_CONV 1
 #define CASC_LEN_CONV 1
 #define PHASES_CONV 1
@@ -48,6 +50,8 @@ class test_conv : public adf::graph {
                                              G_LEN_CONV,
                                              SHIFT_CONV,
                                              API_CONV,
+                                             RND_CONV,
+                                             SAT_CONV,
                                              NUM_FRAMES_CONV,
                                              CASC_LEN_CONV,
                                              PHASES_CONV,

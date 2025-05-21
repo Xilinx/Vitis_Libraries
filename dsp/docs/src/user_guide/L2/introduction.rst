@@ -47,6 +47,8 @@ AMD documentation is organized around a set of standard design processes to help
 
    -  :ref:`DFT`
 
+   -  :ref:`EUCLIDEAN_DISTANCE`
+
    -  :ref:`FFT_IFFT`
 
    -  :ref:`FFT_2D`

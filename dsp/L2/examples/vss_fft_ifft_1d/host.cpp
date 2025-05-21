@@ -39,27 +39,27 @@ static constexpr unsigned int fnPtSizeD1() {
         TP_POINT_SIZE == 65536
             ? 256
             : TP_POINT_SIZE == 32768
-                  ? 128
+                  ? 256
                   : TP_POINT_SIZE == 16384
                         ? 128
                         : TP_POINT_SIZE == 8192
-                              ? 64
+                              ? 128
                               : TP_POINT_SIZE == 4096
                                     ? 64
                                     : TP_POINT_SIZE == 2048
-                                          ? 32
+                                          ? 64
                                           : TP_POINT_SIZE == 1024
                                                 ? 32
                                                 : TP_POINT_SIZE == 512
-                                                      ? 16
+                                                      ? 32
                                                       : TP_POINT_SIZE == 256
                                                             ? 16
                                                             : TP_POINT_SIZE == 128
-                                                                  ? 8
+                                                                  ? 16
                                                                   : TP_POINT_SIZE == 64
                                                                         ? 8
                                                                         : TP_POINT_SIZE == 32
-                                                                              ? 4
+                                                                              ? 8
                                                                               : TP_POINT_SIZE == 16 ? 4 : 0;
     return sqrtVal;
 }
@@ -81,8 +81,6 @@ static const char* STR_INFO = "INFO:    ";
 typedef int32_t TT_DATA; // Assume int32 data for I/O data (will be cint32)
 
 static constexpr int32_t NUM_ITER = -1; // Let the graph run and have s2mm terminate things
-static constexpr int32_t LOOP_CNT = NITER;
-static constexpr int32_t LOOP_SEL = 0; // ID of loop to capture by DDR SNK PL HLS block
 static constexpr unsigned NSTREAM = SSR;
 static constexpr unsigned samplesPerRead = 2;
 

@@ -104,23 +104,17 @@ def fn_update_tp_coarse_bits(AIE_VARIANT, TT_DATA):
         if TT_DATA == "int16" or TT_DATA == "bfloat16":
             lut128bitDuplication = 2
 
-    lutSectionMax = int(
-        dataMemoryVariant
-        / (
-            fn_size_by_byte(TT_DATA)
-            * numLuts
-            * valuesPerLutSection
-            * lut128bitDuplication
-        )
-    )
+    lutSectionMax=int(dataMemoryVariant/(fn_size_by_byte(TT_DATA) * numLuts * valuesPerLutSection * lut128bitDuplication))
+    lutSectionMax_pp=int((dataMemoryVariant/2)/(fn_size_by_byte(TT_DATA) * numLuts * valuesPerLutSection * lut128bitDuplication))
     TP_COARSE_BITS_max = int(math.log2(lutSectionMax))
+    TP_COARSE_BITS_max_pp = int(math.log2(lutSectionMax_pp))
 
-    param_dict = {}
-    param_dict.update({"name": "TP_COARSE_BITS"})
-    param_dict.update({"minimum": 1})
-    param_dict.update({"maximum": TP_COARSE_BITS_max})
+    param_dict={}
+    param_dict.update({"name" : "TP_COARSE_BITS"})
+    param_dict.update({"minimum" : 1})
+    param_dict.update({"maximum" : TP_COARSE_BITS_max})
+    param_dict.update({"maximum_pingpong_buf" : TP_COARSE_BITS_max_pp})
     return param_dict
-
 
 def validate_TP_COARSE_BITS(args):
     TP_COARSE_BITS = args["TP_COARSE_BITS"]
@@ -200,15 +194,13 @@ def update_TP_WINDOW_VSIZE(args):
 
 
 def fn_update_tp_numFrames(AIE_VARIANT, TT_DATA):
-    TP_WINDOW_VSIZE_max = int(
-        k_data_memory_bytes[AIE_VARIANT] / (fn_size_by_byte(TT_DATA))
-    )
-
-    param_dict = {}
-    param_dict.update({"name": "TP_WINDOW_VSIZE"})
-    param_dict.update({"minimum": 16})
-    param_dict.update({"maximum": TP_WINDOW_VSIZE_max})
-
+    TP_WINDOW_VSIZE_max= int(k_data_memory_bytes[AIE_VARIANT]/(fn_size_by_byte(TT_DATA)))
+    TP_WINDOW_VSIZE_max_pp= int(TP_WINDOW_VSIZE_max/2)
+    param_dict={}
+    param_dict.update({"name" : "TP_WINDOW_VSIZE"})
+    param_dict.update({"minimum" : 16})
+    param_dict.update({"maximum" : TP_WINDOW_VSIZE_max})
+    param_dict.update({"maximum_pingpong_buf" : TP_WINDOW_VSIZE_max_pp})
     return param_dict
 
 

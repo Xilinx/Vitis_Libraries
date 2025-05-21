@@ -10,10 +10,15 @@
 Benchmark/QoR
 =============
 
-This section provides the L2 performance benchmarks and Quality of Results (QoR) for the AI Engine (AIE) digital signal processing (DSP) library elements with various configurations. The results are extracted from a hardware emulation based simulations.
+This section provides the L2 performance benchmarks and Quality of Results (QoR) for the AI Engine digital signal processing (DSP) library elements with various configurations. The results are extracted from a hardware emulation based simulations.
 
-The device used for AIE benchmarking is the xcvc1902-vsva2197-2MP-e-S, and the device used for AIE-ML is the xcve2802-vsvh1760-2MP-e-S.
-The benchmark results are obtained using these devices wth an AIE clock frequency of 1.25 GHz and 64-bit PLIOs at 625 MHz.
+The devices used for benchmarking are:
+
+- AIE: xcvc1902-vsva2197-2MP-e-S,
+- AIE-ML is the xcve2802-vsvh1760-2MP-e-S.
+- AIE-MLv2 is the xc2ve3858-ssva2112-2LP-e-S.
+
+The benchmark results are obtained using these devices wth an AI Engine clock frequency of 1.25 GHz (AIE and AIE-ML devices) or 1.05 GHz (AIE-MLv2 device) and 64-bit PLIOs at 625 MHz.
 
 The metrics reported for each case are:
 
@@ -24,7 +29,7 @@ The metrics reported for each case are:
 - **DATA_MEMORY**: Total data memory in bytes used by the design.
 - **PROGRAM_MEMORY**: Program memory in bytes used by each kernel.
 
-The AIE_VARIANT parameter refers to the type of AI Engine that is used for each particular case in the benchmark results, this may be AIE or AIE-ML.
+The AIE_VARIANT parameter refers to the type of AI Engine that is used for each particular case in the benchmark results, this may be AIE, AIE-ML or AIE-MLv2.
 
 The PROGRAM_MEMORY metrics are harvested for each kernel the design consists of. For example, a finite impulse response (FIR) configured to be implemented on two tiles (CASC_LEN=2) will have two sets of figures displayed in the following table (space delimited).
 
@@ -50,237 +55,201 @@ Bitonic Sort
 
 The following table gives results for the Bitonic Sort with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_BITONIC_SORT`.
 
-:download:`bitonic_sort_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/bitonic_sort_benchmark.csv>`
-
-.. csv-table:: Bitonic Sort benchmark
-   :file: ../../csv_data_files/L2/bitonic_sort_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+:download:`bitonic_sort_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/bitonic_sort_benchmark.csv>`
 
 Convolution / Correlation
 =========================
 
 The following table gives results for the Convolution / Correlation with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_CONV_CORR`.
 
-:download:`conv_corr_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/conv_corr_benchmark.csv>`
-
-.. csv-table:: Convolution / Correlation benchmark
-   :file: ../../csv_data_files/L2/conv_corr_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+:download:`conv_corr_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/conv_corr_benchmark.csv>`
 
 DDS/Mixer
 =========
 
-The following table gives the results for the DDS/Mixer and DDS/Mixer LUT with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_DDS_MIXER`.
+The following table gives the results for the DDS/Mixer with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_DDS_MIXER`.
 
-:download:`dds_mixer_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/dds_mixer_benchmark.csv>`
+:download:`dds_mixer_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/dds_mixer_benchmark.csv>`
 
-.. csv-table:: DDS/Mixer benchmark
-   :file: ../../csv_data_files/L2/dds_mixer_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+DDS/Mixer LUT
+=============
+
+The following table gives the results for the DDS/Mixer LUT with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_DDS_MIXER`.
+
+:download:`dds_mixer_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/dds_mixer_lut_benchmark.csv>`
 
 DFT
 ===
 
 The following table gives results for the DFT function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_DFT`.
 
-:download:`dft_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/dft_benchmark.csv>`
-
-.. csv-table:: DFT benchmark
-   :file: ../../csv_data_files/L2/dft_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+:download:`dft_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/dft_benchmark.csv>`
 
 The following table gives an extended dataset for DFT function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_DFT`.
-:download:`dft_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/dft_database.csv>`
+
+:download:`dft_database.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/dft_database.csv>`
+
+Euclidean Distance
+==================
+
+The following table gives results for the Euclidean Distance with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_EUCLIDEAN_DISTANCE`.
+
+:download:`euclidean_distance_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/euclidean_distance_benchmark.csv>`
 
 FFT IFFT DIT 1CH
 ================
 
 The following table gives results for the FFT/IFFT function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FFT`.
 
-:download:`fft_ifft_dit_1ch_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/fft_ifft_dit_1ch_benchmark.csv>`
-
-.. csv-table:: FFT IFFT DIT 1CH benchmark
-   :file: ../../csv_data_files/L2/fft_ifft_dit_1ch_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+:download:`fft_ifft_dit_1ch_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/fft_ifft_dit_1ch_benchmark.csv>`
 
 FFT IFFT 2D
 ===========
 
 The following table gives results for the FFT IFFT 2D function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FFT`.
 
-:download:`fft_ifft_2d_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/fft_ifft_2d_benchmark.csv>`
-
-.. csv-table:: FFT IFFT 2D benchmark
-   :file: ../../csv_data_files/L2/fft_ifft_2d_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+:download:`fft_ifft_2d_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/fft_ifft_2d_benchmark.csv>`
 
 FFT Window
 ==========
 
 The following table gives results for the FFT Window function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FFT`.
 
-:download:`fft_window_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/fft_window_benchmark.csv>`
+:download:`fft_window_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/fft_window_benchmark.csv>`
 
-.. csv-table:: FFT Window benchmark
-   :file: ../../csv_data_files/L2/fft_window_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+FIR Decimate Asymmetric
+=======================
 
-Filters
-=======
+The following table gives results for the FIR Decimate Asymmetric filter with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FILTERS`.
 
-The following table gives results for FIR filter with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FILTERS`.
+:download:`fir_decimate_asym_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/fir_decimate_asym_benchmark.csv>`
 
-:download:`fir_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/fir_benchmark.csv>`
+FIR Decimate Halfband
+=====================
 
-.. csv-table:: FIR benchmark
-   :file: ../../csv_data_files/L2/fir_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+The following table gives results for the FIR Decimate Halfband filter with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FILTERS`.
+
+:download:`fir_decimate_hb_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/fir_decimate_hb_benchmark.csv>`
+
+FIR Decimate Symmetric
+======================
+
+The following table gives results for the FIR Decimate Symmetric filter with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FILTERS`.
+
+:download:`fir_decimate_sym_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/fir_decimate_sym_benchmark.csv>`
+
+FIR Interpolate Asymmetric
+==========================
+
+The following table gives results for the FIR Interpolate Asymmetric filter with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FILTERS`.
+
+:download:`fir_interpolate_asym_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/fir_interpolate_asym_benchmark.csv>`
+
+FIR Interpolate Halfband
+========================
+
+The following table gives results for the FIR Interpolate Halfband filter with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FILTERS`.
+
+:download:`fir_interpolate_hb_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/fir_interpolate_hb_benchmark.csv>`
+
+FIR Resampler
+=============
+
+The following table gives results for the FIR Resampler filter with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FILTERS`.
+
+:download:`fir_resampler_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/fir_resampler_benchmark.csv>`
+
+FIR Single Rate Symmetric
+=========================
+
+The following table gives results for the FIR Single Rate Symmetric filter with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FILTERS`.
+
+:download:`fir_sr_sym_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/fir_sr_sym_benchmark.csv>`
+
+FIR Single Rate Asymmetric
+==========================
+
+The following table gives results for the FIR Single Rate Asymmetric filter with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FILTERS`.
+
+:download:`fir_sr_asym_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/fir_sr_asym_benchmark.csv>`
 
 FIR TDM
 =======
 
 The following table gives results for TDM FIR filter with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FILTERS`.
 
-:download:`fir_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/fir_tdm_benchmark.csv>`
-
-.. csv-table:: FIR benchmark
-   :file: ../../csv_data_files/L2/fir_tdm_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+:download:`fir_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/fir_tdm_benchmark.csv>`
 
 Function Approximation
 ======================
 
-The following table gives results for the Function Approximation with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FUNC_APPROX`
+The following table gives results for the Function Approximation with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FUNC_APPROX`.
 
-:download:`func_approx_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/func_approx_benchmark.csv>`
-
-.. csv-table:: Function Approximation benchmark
-   :file: ../../csv_data_files/L2/func_approx_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+:download:`func_approx_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/func_approx_benchmark.csv>`
 
 Hadamard Product
 ================
 
-The following table gives results for the Hadamard Product with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_HADAMARD`
+The following table gives results for the Hadamard Product with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_HADAMARD`.
 
-:download:`hadamard_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/hadamard_benchmark.csv>`
-
-.. csv-table:: Hadamard benchmark
-   :file: ../../csv_data_files/L2/hadamard_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+:download:`hadamard_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/hadamard_benchmark.csv>`
 
 Kronecker
 =========
 
 The following table gives results for the Kronecker with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_KRONECKER`.
 
-:download:`kronecker_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/kronecker_benchmark.csv>`
-
-.. csv-table:: Kronecker benchmark
-   :file: ../../csv_data_files/L2/kronecker_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+:download:`kronecker_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/kronecker_benchmark.csv>`
 
 Matrix Multiply
 ===============
 
 The following table gives results for the Matrix Multiply function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_GEMM`.
 
-:download:`matrix_mult_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/matrix_mult_benchmark.csv>`
-
-.. csv-table:: Matrix Multiply benchmark
-   :file: ../../csv_data_files/L2/matrix_mult_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+:download:`matrix_mult_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/matrix_mult_benchmark.csv>`
 
 Matrix Vector Multiply
 ======================
 
 The following table gives results for the Matrix Vector Multiply function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_GEMV`.
 
-:download:`matrix_vector_mul_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/matrix_vector_mul_benchmark.csv>`
-
-.. csv-table:: Matrix Vector Multiply benchmark
-   :file: ../../csv_data_files/L2/matrix_vector_mul_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+:download:`matrix_vector_mul_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/matrix_vector_mul_benchmark.csv>`
 
 Mixed Radix FFT
 ===============
 
 The following table gives results for the Mixed Radix FFT function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_MRFFT`.
 
-:download:`mixed_radix_fft_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/mixed_radix_fft_benchmark.csv>`
-
-.. csv-table:: Mixed Radix FFT benchmark
-   :file: ../../csv_data_files/L2/mixed_radix_fft_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+:download:`mixed_radix_fft_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/mixed_radix_fft_benchmark.csv>`
 
 Outer Tensor
 ============
 
 The following table gives results for the Outer Tensor with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_OUTER_TENSOR`.
 
-:download:`outer_tensor_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/outer_tensor_benchmark.csv>`
-
-.. csv-table:: Outer Tensor benchmark
-   :file: ../../csv_data_files/L2/outer_tensor_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+:download:`outer_tensor_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/outer_tensor_benchmark.csv>`
 
 Sample Delay
 ============
 
 The following table gives results for the Sample Delay with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_SAMPLE_DELAY`.
 
-:download:`sample_delay_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/sample_delay_benchmark.csv>`
+:download:`sample_delay_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/sample_delay_benchmark.csv>`
 
-.. csv-table:: Sample Delay benchmark
-   :file: ../../csv_data_files/L2/sample_delay_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+Widget Real to Complex
+======================
 
-Widgets
-=======
+The following table gives results for the Widget Real to Complex with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_WIDGETS`.
 
-The following table gives results for the Widgets with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_WIDGETS`.
+:download:`widget_real2complex_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/widget_real2complex_benchmark.csv>`
 
-:download:`widget_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2024.2/dsp/docs/src/csv_data_files/L2/widget_benchmark.csv>`
+.. |image13| image:: ./media/image2.png
 
-.. csv-table:: Widgets benchmark
-   :file: ../../csv_data_files/L2/widget_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
+Widget API Cast
+===============
 
+The following table gives results for the Widget API Cast with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_WIDGETS`.
+
+:download:`widget_api_cast_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/widget_api_cast_benchmark.csv>`
 
 .. |image13| image:: ./media/image2.png

@@ -190,12 +190,34 @@ class test_graph : public graph {
         const int MAX_PING_PONG_SIZE = __DATA_MEM_BYTES__ / 2;
         if (PORT_API == 0) {
             const int bufferSize = ((FIR_LEN + INPUT_SAMPLES) * sizeof(DATA_TYPE));
-            if (bufferSize > MAX_PING_PONG_SIZE) {
-                single_buffer(firGraph.getKernels()->in[0]);
-                if
-                    constexpr(DUAL_IP == 1) { single_buffer(firGraph.getKernels()->in[1]); }
+            if ((bufferSize > MAX_PING_PONG_SIZE) || (SINGLE_BUF == 1)) {
+                for (unsigned int ssr = 0; ssr < P_SSR; ++ssr) {
+                    for (unsigned int i = 0; i < P_SSR; ++i) {
+                        single_buffer(firGraph.getKernels()[ssr * P_SSR * CASC_LEN + CASC_LEN * i].in[0]);
+                    }
+
+                    single_buffer(firGraph.in[ssr * P_PARA_DECI_POLY]);
+                    printf("INFO: Single Buffer Constraint applied to input buffers of kernel %d.\n",
+                           ssr * P_PARA_DECI_POLY);
+#if (P_PARA_DECI_POLY == 2)
+                    single_buffer(firGraph.in[ssr * P_PARA_DECI_POLY + 1]);
+                    printf("INFO: Single Buffer Constraint applied to input buffers of kernel %d.\n",
+                           ssr * P_PARA_DECI_POLY + 1);
+#endif
+
+#if (DUAL_IP == 1)
+                    single_buffer(firGraph.in2[ssr]);
+#endif
+
+                    single_buffer(firGraph.out[ssr]);
+#if (NUM_OUTPUTS == 2)
+                    single_buffer(firGraph.out2[ssr]);
+#endif
+                    printf("INFO: Single Buffer Constraint applied to output buffers of kernel %d.\n", ssr);
+                }
             }
         }
+
 #endif
 
 #ifdef USING_UUT
@@ -215,5 +237,4 @@ class test_graph : public graph {
 }
 }
 };
-
 #endif // _DSPLIB_TEST_HPP_

@@ -143,22 +143,14 @@ class kronecker_graph : public graph {
     static constexpr unsigned int kWindowVsizeB = CEIL((sizeMatB * TP_NUM_FRAMES), vecSizeB);
     static constexpr unsigned int kWindowVsizeOut = CEIL((sizeMatOut * TP_NUM_FRAMES), vecSizeOut);
 
-/**
-  * @endcond
-  */
-// Configuration legality checks
-#if (__SUPPORTS_CFLOAT__ == 1) || (__SUPPORTS_EMULATED_CFLOAT__ == 1)
+    /**
+      * @endcond
+      */
+
     static_assert((std::is_same<TT_DATA_A, int16>::value) || (std::is_same<TT_DATA_A, int32>::value) ||
                       (std::is_same<TT_DATA_A, cint16>::value) || (std::is_same<TT_DATA_A, cint32>::value) ||
                       (std::is_same<TT_DATA_A, float>::value) || (std::is_same<TT_DATA_A, cfloat>::value),
                   "ERROR: TT_DATA_A is not supported");
-#else
-    // AIE variants that don't support cfloat should flag that.
-    static_assert((std::is_same<TT_DATA_A, int16>::value) || (std::is_same<TT_DATA_A, int32>::value) ||
-                      (std::is_same<TT_DATA_A, cint16>::value) || (std::is_same<TT_DATA_A, cint32>::value) ||
-                      (std::is_same<TT_DATA_A, float>::value),
-                  "ERROR: TT_DATA_A is not supported");
-#endif // (__SUPPORTS_CFLOAT__ == 1) || (__SUPPORTS_EMULATED_CFLOAT__ == 1)
 
     static_assert(TP_DIM_A_ROWS % vecSizeA == 0, "ERROR: TP_DIM_A_ROWS must be an integer multiple of vecSizeA");
     static_assert(TP_DIM_B_ROWS % vecSizeB == 0, "ERROR: TP_DIM_A_ROWS must be an integer multiple of vecSizeB");

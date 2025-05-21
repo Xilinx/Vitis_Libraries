@@ -2173,9 +2173,8 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
  *introduce errors
  *         - 1: 0.5 amplitude. Twiddle values are 1/2 that of mode 0 so as to avoid twiddle saturation. However,
  *twiddles are one bit less precise versus mode 0.
- * @tparam TT_DATA_OUT describes the type of individual data samples output from the transform function. \n
+ * @tparam TT_OUT_DATA describes the type of individual data samples output from the transform function. \n
  *         This is a typename and must be cint16 / cint32 if TT_DATA is cint16 / cint32 or cfloat if TT_DATA is cfloat.
- *         For real-only operation, consider use of the widget_real2complex library element.
  * @tparam TP_INDEX
  *         This parameter is for internal use regarding the recursion of the parallel power feature. \n
  *         It is recommended

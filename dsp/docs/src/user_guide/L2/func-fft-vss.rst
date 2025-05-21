@@ -10,7 +10,7 @@
 VSS FFT/IFFT
 ============
 
-This library element implements a single-channel DIT FFT using both AI Engine tiles and programmable logic to extract higher performance for larger point sizes. The VSS offers two modes of implementing the FFT: Mode 1 and Mode 2. Mode 1 performs user more AIE tiles compared to Mode 2. It also allows more fine-tuning on the value of SSR. Mode 2 uses more PL compute resources compared to mode 1. It also user lesser PL memory than Mode 1. The two modes thus offer different trade-offs between performance and resource utilization.
+This library element implements a single-channel DIT FFT using both AI Engine tiles and programmable logic to extract higher performance for larger point sizes. The VSS offers two modes of implementing the FFT: Mode 1 and Mode 2. Mode 1 performs more computation on AIE tiles compared to Mode 2. It also allows more fine-tuning on the value of SSR. Mode 2 uses more PL compute resources compared to mode 1. It also user lesser PL memory than Mode 1. The two modes thus offer different trade-offs between performance and resource utilization.
 
 Entry Point
 ===========
@@ -22,11 +22,11 @@ Please edit the parameters in the ``cfg`` file and provide it as input to the ``
 Device Support
 ==============
 
-The VSS FFT can generate VSS products for both AIE and AIE-ML devices. The VSS is generated for the ``part`` that the user provides in the input cfg file. All features are supported on the two variants with the following differences:
+The VSS FFT can generate VSS products for AIE, AIE-ML and AIE-MLv2. The VSS is generated for the ``part`` that the user provides in the input cfg file. All features are supported on the two variants with the following differences:
 
 - ``DATA_TYPE`` and ``TWIDDLE_TYPE``. AIE-ML does not support cfloat type.
 - ``TWIDDLE_TYPE``: AIE supports cint32. AIE-ML does not.
-- ``ROUND_MODE``: Supported round modes differ between AIE and AIE-ML devices as for all library elements.
+- ``ROUND_MODE``: Supported round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices as for all library elements.
 
 Supported Parameters
 ====================

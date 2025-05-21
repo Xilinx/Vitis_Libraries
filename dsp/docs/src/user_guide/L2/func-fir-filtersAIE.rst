@@ -54,10 +54,10 @@ Additionally, each FIR filter has been placed in its unique FIR type namespace. 
 Device Support
 ==============
 
-The FIR filters support both AIE and AIE-ML devices for all features with the following exceptions:
+The FIR filters support AIE, AIE-ML and AIE-MLv2 for all features with the following exceptions:
 
 - The ``cfloat`` data type is not supported on AIE-ML device
-- Round modes available and the enumerated values of round modes differ between AIE and AIE-ML devices. See :ref:`COMPILING_AND_SIMULATING`.
+- Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
 
 Supported Types
 ===============
@@ -94,8 +94,8 @@ The following table lists the supported combinations of data type and coefficien
    | 1. Complex coefficients are not supported for real-only data types.                                          |
    | 2. A mix of float and integer types is not supported.                                                        |
    | 3. The rate-changing FIR variants, i.e., fir_decimate_asym, fir_decimate_sym, fir_interpolate_asym,          |
-   |    and fir_resampler only support int16 data and int16 coeff type combination on an AIE-ML device.           |
-   | 4. The cfloat data type is not supported on AIE-ML device.                                                   |
+   |    and fir_resampler only support int16 data and int16 coeff type combination on AIE-ML or AIE-MLv2 devices. |
+   | 4. The cfloat data type is not supported on AIE-ML or AIE-MLv2 devices.                                      |
    +--------------------------------------------------------------------------------------------------------------+
 
 Template Parameters
@@ -155,15 +155,15 @@ Reloadable Coefficients
 
 Reloadable coefficients are available through the use of a runtime programmable (RTP) Asynchronous input port, programmed by the processor subsystem (PS) at runtime.
 Reloadable configurations do not require the coefficient array to be passed to the constructor at compile time.
-Instead, the graph's `update()` (refer to `UG1079 Run-Time Parameter Update/Read Mechanisms <https://docs.xilinx.com/r/en-US/ug1079-ai-engine-kernel-coding/Run-Time-Parameter-Update/Read-Mechanisms>`_ for usage instructions) method is used to input the coefficient array.
+Instead, the graph's `update()` (refer to `UG1079 Run-Time Parameter Update/Read Mechanisms <https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Run-Time-Parameter-Update/Read-Mechanisms>`_ for usage instructions) method is used to input the coefficient array.
 Graph's `update()` method takes an argument of either scalar or an array type.
-Please refer to `UG1079 Run-Time Parameter Support Summary <https://docs.xilinx.com/r/en-US/ug1079-ai-engine-kernel-coding/Run-Time-Parameter-Support-Summary>`_.
+Please refer to `UG1079 Run-Time Parameter Support Summary <https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Run-Time-Parameter-Support-Summary>`_.
 
 .. note:: Graph's `update()` method must be called after graph has been initialized, but before kernel starts operation on data samples.
 
 .. note:: SSR configurations don't offer support for symmetry. Therefore, RTP array size should be determined using: :ref:`RTP_ARRAY_SIZE_FOR_SSR_CASES`.
 
-.. note:: AIE-ML device does not offer HW support for symmetry. Therefore, RTP array size should be determined using:  :ref:`RTP_ARRAY_SIZE_FOR_SSR_CASES`.
+.. note:: AIE-ML and AIE-MLv2 devices do not offer HW support for symmetry. Therefore, RTP array size should be determined using:  :ref:`RTP_ARRAY_SIZE_FOR_SSR_CASES`.
 
 .. _RTP_ARRAY_SIZE_FOR_NON_SSR_CASES:
 
@@ -264,15 +264,15 @@ In each iteration run, the kernel operates on a set number of samples from the w
 Buffer synchronization requirements introduce a fixed overhead when a kernel is triggered.
 Therefore, to maximize throughput, the window size should be set to the maximum that the system will allow.
 
-For example, a four tap single-rate symmetric FIR with a `2560` sample input/output window operating on ``int32`` data with ``int16`` implemented on AIE  can produce an output window buffer in `354` clock cycles, which, taking into account kernel's startup overhead (around `40` lock cycles), equates to a throughput of close to `6500 MSa/s` (based on 1 GHz AIE clock).
+For example, a four tap single-rate symmetric FIR with a `2560` sample input/output window operating on ``int32`` data with ``int16`` implemented on AIE device can produce an output window buffer in `354` clock cycles, which, taking into account kernel's startup overhead (around `40` lock cycles), equates to a throughput of close to `6500 MSa/s` (based on 1 GHz AI Engine clock).
 
-.. note:: To achieve maximum performance, the producer and consumer kernels should be placed in adjacent AIE tiles, so the window buffers can be accessed without a requirement for a MM2S/S2MM direct memory access (DMA) stream conversions.
+.. note:: To achieve maximum performance, the producer and consumer kernels should be placed in adjacent AI Engine tiles, so the window buffers can be accessed without a requirement for a MM2S/S2MM direct memory access (DMA) stream conversions.
 
 **Latency**
 
 Latency of a window-based FIR is predominantly due to the buffering in the input and output windows. Other factors which affect latency are data and type and FIR length, though these tend to have a lesser effect.
 
-For example, a 16 tap single-rate symmetric FIR with a `512` sample input/output window operating on ``cint16`` data with ``int16`` coefficients implemented on AIE will need around `2.56 us` (based on 1 GHz AIE clock) before the first full window of output samples is available for the consumer to read.
+For example, a 16 tap single-rate symmetric FIR with a `512` sample input/output window operating on ``cint16`` data with ``int16`` coefficients implemented on AIE device will need around `2.56 us` (based on 1 GHz AI Engine clock) before the first full window of output samples is available for the consumer to read.
 Subsequent iterations will produce output data with reduced latency, due to the nature of the ping-pong buffering and pipelined operations.
 
 To minimize the latency, the buffer size should be set to the minimum size that meets the required throughput.
@@ -282,7 +282,7 @@ To minimize the latency, the buffer size should be set to the minimum size that 
 Multiple Buffer Ports
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. note:: AIE-ML devices only support a single input/output port.
+.. note:: AIE-ML and AIE-MLv2 devices only support a single input/output port.
 
 **Multiple Input Ports**
 
@@ -308,7 +308,7 @@ Maximum Window Size
 ^^^^^^^^^^^^^^^^^^^
 
 | Window buffer is mapped into a local memory in the area surrounding the kernel that accesses it.
-| A local memory storage is 32 kB (64 kB for AIE-ML devices), and the maximum size of the `ping-pong` window buffer should not exceed this limit.
+| A local memory storage is 32 kB (64 kB for AIE-ML and AIE-MLv2 devices), and the maximum size of the `ping-pong` window buffer should not exceed this limit.
 
 .. _SINGLE_BUFFER_CONSTRAINT:
 
@@ -334,9 +334,9 @@ Streaming interfaces can be configured to connect single or dual stream inputs (
 
 In general, stream based filters require less or no data buffering and therefore have less memory requirements and lower latency than window API filters.
 
-.. note:: AIE-ML devices only support a single input/output port.
+.. note:: AIE-ML and AIE-MLv2 devices only support a single input/output port.
 
-.. note:: AIE-ML devices cannot take advantage of the symmetry of FIRS; therefore the FIRs implementation is always based on an asymmetric design.
+.. note:: AIE-ML and AIE-MLv2 devices cannot take advantage of the symmetry of FIRS; therefore the FIRs implementation is always based on an asymmetric design.
 
 **Asymmetric FIRs**
 
@@ -344,7 +344,7 @@ Asymmetric FIRs (single-rate, as well as rate-changing FIRs) will use input and 
 As a result, there is no need for input/output buffering, hence Asymmetric FIRs offer very low latency and very low memory footprint.
 In addition, due to the lack of memory requirements, such designs can operate on a very large number of samples within each kernel iteration (``TP_INPUT_WINDOW_VSIZE`` is limited to ``2^31 - 1``) achieving maximum performance and maximum throughput.
 
-For example, a single kernel (``TP_CASC_LEN = 1``), 16 tap single-rate asymmetric FIR implemented on AIE, that is using ``cint16`` data with frame size of `25600` and ``int16`` coefficients, is offering throughput of `998 MSa/s` (based on 1 GHz AIE clock) and latency as low as tens of nanoseconds.
+For example, a single kernel (``TP_CASC_LEN = 1``), 16 tap single-rate asymmetric FIR implemented on AIE device, that is using ``cint16`` data with frame size of `25600` and ``int16`` coefficients, is offering throughput of `998 MSa/s` (based on 1 GHz AI Engine clock) and latency as low as tens of nanoseconds.
 
 **Hybrid Streaming interface for Symmetric and Half-band FIRs in non-SSR mode**
 
@@ -354,13 +354,13 @@ Output data will be sent directly out through a stream port.
 Such designs allow a more flexible connection and mapping onto AI Engine tiles.
 Latency is reduced, when compared to a window based equivalent, but is much greater than compared with an asymmetric design. Lack of an output buffer also reduces the memory requirements.
 
-For example, a 16 tap single-rate symmetric FIR implemented on AIE with a `512` sample input/output window operating on ``cint16`` data and ``int16`` coefficients achieves a throughput of `978 MSa/s` (based on 1 GHz AIE clock) and will need around `1.4 us` before a full window of samples is available for the consumer to read.
+For example, a 16 tap single-rate symmetric FIR implemented on AIE device with a `512` sample input/output window operating on ``cint16`` data and ``int16`` coefficients achieves a throughput of `978 MSa/s` (based on 1 GHz AI Engine clock) and will need around `1.4 us` before a full window of samples is available for the consumer to read.
 
 **Symmetric and Half-band FIRs in SSR mode**
 
 When operating in a SSR mode, i.e. ``TP_SSR``, ``TP_PARA_INTERP_POLY`` or ``TP_PARA_DECI_POLY`` are greater than 1, all Symmetric and Half-band FIRs, in addition to all Asymmetric FIRs, will operate on input and output streams directly, offering very low latency and a minimal memory footprint.
 
-For example, a 32 tap, single-rate symmetric FIR implemented on AIE with a SSR set to 2 (``TP_SSR = 2``), using ``cint16`` data with frame size of `25600` and ``int16`` coefficients achieves throughput of `1998 MSa/s` (based on 1 GHz AIE clock) and latency as low as tens of nanoseconds.
+For example, a 32 tap, single-rate symmetric FIR implemented on AIE device with a SSR set to 2 (``TP_SSR = 2``), using ``cint16`` data with frame size of `25600` and ``int16`` coefficients achieves throughput of `1998 MSa/s` (based on 1 GHz AI Engine clock) and latency as low as tens of nanoseconds.
 
 .. _FIR_STREAM_OUTPUT:
 
@@ -534,7 +534,7 @@ More details are provided in the :ref:`API_REFERENCE`.
 Super Sample Rate
 -----------------
 
-The term Super Sample Rate strictly means the processing of more than one sample per clock cycle. Because the AIE is a vector processor, almost every operation is SSR by this definition, making it superfluous. Therefore, in the AI Engine context, SSR is taken to mean an implementation using multiple computation paths to improve performance at the expense of additional resource use.
+The term Super Sample Rate strictly means the processing of more than one sample per clock cycle. Because the AI Engine is a vector processor, almost every operation is SSR by this definition, making it superfluous. Therefore, in the AI Engine context, SSR is taken to mean an implementation using multiple computation paths to improve performance at the expense of additional resource use.
 
 .. _SSR_OPERATION_MODES:
 
@@ -609,7 +609,7 @@ The number of input/output ports created by a FIR will be given by the formula:
 
 * Number of output ports: ``NUM_OUTPUT_PORTS  = TP_PARA_INTERP_POLY x TP_SSR x TP_NUM_OUTPUTS``
 
-Therefore, the maximum throughput achievable for a given data type, e.g., cint16 and 1 GHz AIE Clock, can be estimated with:
+Therefore, the maximum throughput achievable for a given data type, e.g., cint16 and 1 GHz AI Engine Clock, can be estimated with:
 
 * maximum theoretical sample rate at input: ``THROUGHPUT_IN  = NUM_INPUT_PORTS x 1 GSa/s``,
 
@@ -631,7 +631,7 @@ The FIR graph will try to split the requested FIR workload among the FIR kernels
 
 In such a scenario, the bandwidth will be limited by the amount of ports, but the AI Engine tile utilization ratio (often defined as ratio of VMAC operations to cycles without VMAC operation) might be reduced.
 
-For example, a 32 tap Single Rate FIR operating on a ``cint16`` data type and ``int16`` coefficients with ``TP_SSR`` set to 2 and a cascade length ``TP_CASC_LEN`` set to 2 will perform at the bandwidth close to `2 GSa/s` (2 output stream paths). Each of the kernels will be tasked with computing only eight coefficients. The design will use eight FIR kernels mapped to eight AIE tiles to achieve that.
+For example, a 32 tap Single Rate FIR operating on a ``cint16`` data type and ``int16`` coefficients with ``TP_SSR`` set to 2 and a cascade length ``TP_CASC_LEN`` set to 2 will perform at the bandwidth close to `2 GSa/s` (2 output stream paths). Each of the kernels will be tasked with computing only eight coefficients. The design will use eight FIR kernels mapped to eight AI Engine tiles to achieve that.
 However, a similarly configured FIR, a 32 tap Single Rate FIR operating on ``cint16`` data type and ``int16`` coefficients with ``TP_SSR`` set to 2, but without further cascade configuration (``TP_CASC_LEN`` set to 1) would also perform at the bandwidth close to `2 GSa/s` but only consume four kernels to achieve that.
 
 **Rate-changing FIR Throughput**

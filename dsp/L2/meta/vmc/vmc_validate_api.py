@@ -103,12 +103,3 @@ def ProcessVMCConfig(config_file_loc, spec):
     # temp_dict["param_name"] = ProcesStrFun(temp_dict["param_name"], spec)
     return temp_dict
 
-
-# 1-3 for validation config.json
-# config_file_loc="/proj/xhdhdstaff4/mahajan/gradle_2025.1_mahajan/2025.1/src/products/fourier/ext/xf_dsp/simulink/xmc_aie_lib/Bitonic_Sort_dc101551/config.json"
-# temp_dict=ProcessVMCConfig(config_file_loc,"bitonic_sort")
-# print(temp_dict)
-
-# generate graph
-# graph_dict=generate_graph_vmc(config_file_loc, "fft_ifft_dit_1ch", "FFT_f64e0876")
-# print(graph_dict["searchpaths"])

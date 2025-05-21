@@ -30,6 +30,7 @@ class ssrFFTClass {
     static constexpr unsigned int nStages =
         POINT_SIZE == 64 ? 6
                          : POINT_SIZE == 32 ? 5 : POINT_SIZE == 16 ? 4 : POINT_SIZE == 8 ? 3 : POINT_SIZE == 4 ? 2 : 0;
+
     std::complex<float> scBuff[nStages][nBtfls];
     typedef cfloat_set TT_DATA;
     typedef hls::stream<TT_DATA> TT_STREAM;
