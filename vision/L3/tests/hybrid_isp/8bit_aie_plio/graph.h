@@ -66,7 +66,7 @@ class TopPipelineGraph : public adf::graph {
 
         std::stringstream sso, ss1;
         sso << "DataOut" << (start_core_idx + CORE_IDX);
-        ss1 << "Data-Out" << (start_core_idx + CORE_IDX);
+        ss1 << "Data_Out" << (start_core_idx + CORE_IDX);
         std::stringstream do0, do1;
         do0 << "data/outputDEM_" << (start_core_idx + CORE_IDX) << ".txt";
         do1 << "data/outputAWB_" << (start_core_idx + CORE_IDX) << ".txt";

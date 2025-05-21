@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.10
+# vitis makefile-generator v2.0.9
 #
 #+-------------------------------------------------------------------------------
 # The following parameters are assigned with default values. These parameters can
@@ -43,7 +43,7 @@ endif
 
 #Check vitis setup
 ifndef XILINX_VITIS
-  XILINX_VITIS = /opt/xilinx/$(TOOL_VERSION)/Vitis
+  XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
   export XILINX_VITIS
 endif
 
@@ -138,8 +138,6 @@ else ifeq ($(HOST_ARCH_temp), cortex-a9)
 HOST_ARCH := aarch32
 else ifneq (,$(findstring cortex-a, $(HOST_ARCH_temp)))
 HOST_ARCH := aarch64
-else ifneq (,$(findstring cortexa, $(HOST_ARCH_temp)))
-    HOST_ARCH := aarch64
 endif
 
 # Special processing for tool version/platform type
@@ -153,7 +151,11 @@ IS_VERSAL := off
 endif
 # 1) for aie flow from 2022.1
 ifeq (on, $(IS_VERSAL))
+ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
 LINK_TARGET_FMT := xsa
+else
+LINK_TARGET_FMT := xclbin
+endif
 else
 LINK_TARGET_FMT := xclbin
 endif
@@ -164,7 +166,17 @@ ifeq ($(TARGET),hw)
 dfx_hw := on
 endif
 endif
-# 3) for aie on x86 flow
+# 3) for embeded sw_emu flow from 2022.2
+ps_on_x86 := off
+ifneq ($(HOST_ARCH), x86)
+ifeq ($(shell expr $(VITIS_VER) \>= 2022.2), 1)
+ifeq ($(TARGET), sw_emu)
+ps_on_x86 := on
+HOST_ARCH := x86
+endif
+endif
+endif
+# 4) for aie on x86 flow
 pcie_versal := off
 ifeq ($(HOST_ARCH), x86)
 ifeq ($(IS_VERSAL), on)
@@ -188,6 +200,9 @@ SD_CARD_NEEDED := on
 endif
 ifeq ($(HOST_ARCH), aarch64)
 SD_CARD_NEEDED := on
+endif
+ifeq ($(ps_on_x86), on)
+SD_CARD_NEEDED := off
 endif
 ifeq ($(pcie_versal), on)
 SD_CARD_NEEDED := off
@@ -337,5 +352,4 @@ MV = mv -f
 CP = cp -rf
 ECHO:= @echo
 PYTHON3 ?= python3
-TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
-VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(XILINX_VITIS)/tps/lnx64/python-3.8.3/lib $(XILINX_VITIS)/tps/lnx64/python-3.8.3/bin/python3

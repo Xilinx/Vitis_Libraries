@@ -22,8 +22,8 @@
 // hardcode these values to set the graph window sizes
 static constexpr int NUM_TILES = 1;
 using DATA_TYPE = uint8_t;
-static constexpr int TILE_WIDTH = 128;
-static constexpr int TILE_HEIGHT = 32;
+static constexpr int TILE_WIDTH = 1920;
+static constexpr int TILE_HEIGHT = 2;
 static constexpr int TILE_ELEMENTS = TILE_WIDTH * TILE_HEIGHT;
 static constexpr int TILE_WINDOW_SIZE = TILE_ELEMENTS * sizeof(DATA_TYPE);
 static constexpr int TILE_WINDOW_SIZE_UV = TILE_WINDOW_SIZE / 2;

@@ -1,6 +1,6 @@
 {
     "name": "Xilinx resize downscale 8bit_aie_224x224_pl_1ch AIE-ML Test",
-    "description": "resize normalize AIE-ML function example",
+    "description": "resize downscale AIE-ML function example",
     "flow": "system",
     "platform_allowlist": [
         "vek280"
@@ -46,7 +46,7 @@
         {
             "name": "hw",
             "target": "hw",
-            "cmd_args": "kernel.xclbin LIB_DIR/data/4k.jpg"
+            "cmd_args": "kernel.xclbin LIB_DIR/data/HD.jpg"
         }
     ],
     "host": {

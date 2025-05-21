@@ -114,8 +114,8 @@ std::string find_binary_file(const std::string& _device_name, const std::string&
         if (strcmp(xcl_mode, "true") == 0) {
             /* if it's true, then check if xcl_target is set */
             if (xcl_target == NULL) {
-                /* default if emulation but not specified is software emulation */
-                mode = "sw_emu";
+                /* default if emulation but not specified is hardware emulation */
+                mode = "hw_emu";
             } else {
                 /* otherwise, it's what ever is specified in XCL_TARGET */
                 mode = xcl_target;

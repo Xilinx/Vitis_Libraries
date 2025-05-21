@@ -778,7 +778,7 @@ This ISP includes following blocks:
 *  Quantization and Dithering: Quantization and Dithering performs the uniform quantization to also reduce higher bit depth to lower bit depths.
 *  Gamma correction: Gamma correction improves the overall brightness of image.
 *  Color space conversion: Converting RGB image to YUV422(YUYV) image for HDMI display purpose. RGB2YUYV converts the RGB image into Y channel for every pixel and U and V for alternate pixels.
-
+*  Resize: Resolution Conversion is the method used to resize the source image to the size of the destination image. Different types of interpolation techniques can be used in resize function, namely: Nearest-neighbor, Bilinear, and Area interpolation. The type of interpolation can be passed as a template parameter to the API.
 |isp-20211|
 
 Current design example demonstrates how to use ISP functions in a pipeline. 
@@ -787,48 +787,293 @@ User can dynamically configure the below parameters to the pipeline.
 
 .. table::  Runtime parameters for the pipeline
 
-   +---------------+------------------------------------------------------+
-   | Parameter     | Description                                          |
-   +===============+======================================================+
-   | rgain         | To configure gain value for the red channel.         |
-   |               |                                                      |
-   +---------------+------------------------------------------------------+
-   | bgain         | To configure gain value for the blue channel.        |
-   |               |                                                      |
-   +---------------+------------------------------------------------------+
-   | gamma_lut     | Lookup table for gamma values.first 256 will be R,   |
-   |               | next 256 values are G gamma and last 256 values are  | 
-   |               | B values                                             | 
-   +---------------+------------------------------------------------------+
-   | mode_reg      | Flag to enable/disable AWB algorithm                 |
-   +---------------+------------------------------------------------------+
-   | pawb          | %top and %bottom pixels are ignored while computing  |
-   |               | min and max to improve quality.                      |
-   +---------------+------------------------------------------------------+
-   | rows          | The number of rows in the image or height of the     |
-   |               | image.                                               |
-   +---------------+------------------------------------------------------+
-   | cols          | The number of columns in the image or width of the   |
-   |               | image.                                               |
-   +---------------+------------------------------------------------------+
+   +-----------------------------+-----------------------------------------------------------------+
+   | Parameter                   | Description                                                     |
+   +=============================+=================================================================+
+   | common_config               | unsigned integer 32-bit value.                                  |
+   |                             | [31:16] height, [15:0] width                                    |
+   |                             | height range [2160 to 128]                                      | 
+   |                             | width range [3840 to 128]                                       |
+   +-----------------------------+-----------------------------------------------------------------+
+   | blc_config_1                | unsigned integer  32-bit value.                                 |
+   |                             | Black level value                                               |
+   |                             | Range [65535 to 0]                                              |
+   +-----------------------------+-----------------------------------------------------------------+
+   | blc_config_2                | unsigned integer.                                               |
+   |                             | Multiplication factor for blacklevel correction;                |
+   |                             | which is computed as                                            | 
+   |                             | (unsigned int)((maxlevel/(maxlevel-blacklevel)) *               |
+   |                             |                 65536)                                          |
+   |                             | Range [65535 to 0]                                              | 
+   |                             | maxlevel for 16 bit = 65535                                     | 
+   |                             | maxlevel for 8 bit = 255                                        | 
+   +-----------------------------+-----------------------------------------------------------------+
+   | resize_config               | unsigned integer 32-bit value                                   |               
+   |                             | [31:16] new_height, [15:0] new_width                            |
+   |                             | new_height range [2160 to 128]                                  | 
+   |                             | new_width range [3840 to 128]                                   | 
+   +-----------------------------+-----------------------------------------------------------------+
+   | gain_control_config_1       | unsigned integer 32-bit value                                   |
+   |                             | [31:16] bgain, [15:0] rgain                                     |
+   |                             | bgain range [1024 to 0]                                         | 
+   |                             | rgain range [1024 to 0]                                         | 
+   +-----------------------------+-----------------------------------------------------------------+
+   | gain_control_config_2       | unsigned integer 32-bit value                                   |
+   |                             | [17 : 16] bformat, [15:0] ggain                                 |
+   |                             | ggain range [1024 to 0]                                         | 
+   |                             | bformat range [3 to 0] 0 - XF_BAYER_BG                          |                           
+   |                             | 1 - XF_BAYER_GB                                                 |   
+   |                             | 2 - XF_BAYER_GR                                                 |   
+   |                             | 3 - XF_BAYER_RG                                                 |
+   +-----------------------------+-----------------------------------------------------------------+
+   | awb_config                  | unsigned integer 32-bit value                                   |
+   |                             | Threshold value, which is used in gray world white              |
+   |                             | balance method to compute average pixel values below            |
+   |                             | the threshold value.                                            |
+   |                             | Range [65535 to 0]                                              | 
+   +-----------------------------+-----------------------------------------------------------------+
+   | gamma_lut                   | unsigned char [256 * 3]                                         |
+   |                             | Lookup table for gamma values.first 256 will be R,              |
+   |                             | next 256 values  +                                              |
+   |                             | are G gamma and last 256 values are B values                    |
+   +-----------------------------+-----------------------------------------------------------------+
+   | ccm_config_1                | signed integer.                                                 |
+   |                             | ccm_matrix                                                      |
+   |                             | Computed as (signed int)(ccm_matrix_float * 1048576)            |
+   |                             | ccm_matrix_float is a 3×3 float matrix                          |
+   +-----------------------------+-----------------------------------------------------------------+
+   | ccm_config_2                | signed integer.                                                 |
+   |                             | offsetarray                                                     |
+   |                             | Computed as(signed int)(offsetarray_float * 1048576)            |
+   |                             | offsetarray_float is floating point array of size 3             |
+   +-----------------------------+-----------------------------------------------------------------+
+   | ltm_config                  | 32-bit value. [31:16] block_height                              |
+   |                             | [15:0] block_width                                              |
+   |                             | block_height range [32 to (Image-width / 2)]                    | 
+   |                             | block_width range [32 to (Image-width / 2)]                     | 
+   +-----------------------------+-----------------------------------------------------------------+
+   | pipeline_config_info        | unsigned integer 32-bit value.                                  |                 
+   |                             | bit - 0           -> IN_TYPE,0 -Pipeline processing single(Mono)|
+   |                             |                      or 1 - multi-channel(Color) frames         |                                                
+   |                             | bit - [3 : 1]     -> IN_BW_MODE, Input frame bit-depth info     | 
+   |                             |                       0 - 8 bit, 1 - 10 bit, 2 - 12 bit,        |
+   |                             |                       3 - 14 bit, 4 - 16 bit, 5 - 24 bit        |     
+   |                             | bit - 4           -> OUT_TYPE, OUT_C_TYPE : (Optional )         |  
+   |                             | bit - [7 : 5]     -> OUT_BW_MODE, output frame bit-depth info   | 
+   |                             |                       0 - 8 bit, 1 - 10 bit, 2 - 12 bit,        |
+   |                             |                       3 - 14 bit, 4 - 16 bit, 5 - 24 bit        |     
+   |                             | bit - [11 : 8]    -> NPC, xf::cv::log2<XF_NPPCX>::fvalue        |
+   |                             | bit - [16 : 12]   -> NUM_STREAMS(Not configurable               |
+   |                             |                                   currently),                   |     
+   |                             | bit - [31 : 17]   -> Reserved,                                  |    
+   +-----------------------------+-----------------------------------------------------------------+
+   | max_supported_size          | unsigned integer 32-bit value                                   |
+   |                             | [31:16] MAX_HEIGHT                                              |
+   |                             | [15:0] MAX_WIDTH                                                |
+   |                             | MAX_HEIGHT range [2160 to 128]                                  | 
+   |                             | MAX_WIDTH range [3840 to 128]                                   | 
+   +-----------------------------+-----------------------------------------------------------------+
+   | funcs_available             | unsigned integer 32-bit value                                   |
+   |                             | Compile time bypass.(READ REGISTER)                             |  
+   |                             | set corresponding bit to '0' to prevent the function            |
+   |                             | from compiling.                                                 |
+   |                             | set corresponding bit to '1' to compile the module.             |
+   |                             | bit - 0           ->  HDR_MODE(Not available in this example),  |        
+   |                             | bit - 1           ->  HDR_EN(Not available in this example),    |        
+   |                             | bit - 2           ->  RGBIR_EN(Not configurable                 |
+   |                             |                                   currently),                   |         
+   |                             | bit - 3           ->  AEC_EN(Not available in this              |
+   |                             |                                      example),                  |        
+   |                             | bit - 4           ->  BLC_EN,                                   |        
+   |                             | bit - 5           ->  BPC_EN (Not available in this example),   |        
+   |                             | bit - 6           ->  DEGAMMA_EN(Not available in this example),|           
+   |                             | bit - 7           ->  LSC_EN(Not available in this example),    |        
+   |                             | bit - 8           ->  GAIN_EN,                                  |        
+   |                             | bit - 9           ->  DEMOSAIC_EN(Not configurable              |
+   |                             |                                   currently),                   |           
+   |                             | bit - 10          ->  AWB_EN,                                   |        
+   |                             | bit - 11          ->  CCM_EN,                                   |        
+   |                             | bit - 12          ->  TM_EN,                                    |     
+   |                             | bit - [14 : 13]   ->  TM_TYPE,                                  |        
+   |                             | bit - 15          ->  GAMMA_EN,                                 |        
+   |                             | bit - 16          ->  3DLUT_EN(Not available in this example),  |       
+   |                             | bit - 17          ->  CSC_EN(Not configurable                   |
+   |                             |                                   currently),                   |        
+   |                             | bit - 18          ->  BAYER_STATS_EN(Not configurable           |
+   |                             |                                   currently),                   |              
+   |                             | bit - 19          ->  LUMA_STATS_EN(Not configurable            |
+   |                             |                                   currently),                   |              
+   |                             | bit - 20          ->  RGB_STATS_EN(Not configurable             |
+   |                             |                                   currently),                   |              
+   |                             | bit - 21          ->  CLAHE_EN(Not configurable                 |
+   |                             |                                   currently),                   |        
+   |                             | bit - 22          ->  MEDIAN_EN(Not configurable                |
+   |                             |                                   currently),                   |           
+   |                             | bit - 23          ->  RESIZE_EN(Not configurable                |
+   |                             |                                   currently),                   |           
+   |                             | bit - [31 : 24]   ->  Reserved,                                 |                                                     
+   +-----------------------------+-----------------------------------------------------------------+
+   | funcs_bypassable            | unsigned integer 32-bit value.(READ REGISTER)                   |  
+   |                             | set corresponding bit to '1' to get bypass module at            |
+   |                             | run time feature.                                               | 
+   |                             | set corresponding bit to '0' to not to have bypass              |
+   |                             | module at run time feature.                                     |                 
+   |                             | bit - 0           ->  ISP_BYPASS_EN(Not available in this       |
+   |                             |                                      example),                  |
+   |                             | bit - 1           ->  HDR_BYPASS_EN(Not available in this       |
+   |                             |                                      example),                  |                                                                     
+   |                             | bit - 2           ->  RGBIR_BYPASS_EN(Not configurable          |
+   |                             |                                   currently),                   |                                                     
+   |                             | bit - 3           ->  AEC_BYPASS_EN(Not available in this       |
+   |                             |                                      example),                  |                                                                   
+   |                             | bit - 4           ->  BLC_BYPASS_EN,                            |                                                                   
+   |                             | bit - 5           ->  BPC_BYPASS_EN(Not available in this       |
+   |                             |                                      example),                  |                                                                   
+   |                             | bit - 6           ->  DEGAMMA_BYPASS_EN(Not available in this   |
+   |                             |                                      example),                  |                                                                     
+   |                             | bit - 7           ->  LSC_BYPASS_EN(Not available in this       |
+   |                             |                                      example),                  |                                                                   
+   |                             | bit - 8           ->  GAIN_BYPASS_EN,                           |                                                                  
+   |                             | bit - 9           ->  DEMOSAIC_BYPASS_EN(Not configurable       |
+   |                             |                                   currently),                   |                                                                          
+   |                             | bit - 10          ->  AWB_BYPASS_EN,                            |                                                                   
+   |                             | bit - 11          ->  CCM_BYPASS_EN,                            |                                                                   
+   |                             | bit - 12          ->  TM_BYPASS_EN,                             |                                
+   |                             | bit - [14 : 13]   ->  Reserved,                                 |                       
+   |                             | bit - 15          ->  GAMMA_BYPASS_EN,                          |                                                                       
+   |                             | bit - 16          ->  3DLUT_BYPASS_EN(Not available in this     |
+   |                             |                                      example),                  |                                                                      
+   |                             | bit - 17          ->  CSC_BYPASS_EN(Not configurable            |
+   |                             |                                   currently),                   |                                                                   
+   |                             | bit - 18          ->  BAYER_STATS_BYPASS_EN(Not configurable    |
+   |                             |                                   currently),                   |                                                                             
+   |                             | bit - 19          ->  LUMA_STATS_BYPASS_EN(Not configurable     |
+   |                             |                                   currently),                   |                                                                        
+   |                             | bit - 20          ->  RGB_STATS_BYPASS_EN(Not configurable      |
+   |                             |                                   currently),                   |                                                                         
+   |                             | bit - 21          ->  CLAHE_BYPASS_EN(Not configurable          |
+   |                             |                                   currently),                   |                                                                       
+   |                             | bit - 22          ->  MEDIAN_BYPASS_EN(Not configurable         |
+   |                             |                                   currently),                   |                                                                      
+   |                             | bit - 23          ->  RESIZE_BYPASS_EN(Not available in this    |
+   |                             |                                      example),                  |                                                                      
+   |                             | bit - [31 : 24]   ->  Reserved,                                 |                                                                                          
+   +-----------------------------+-----------------------------------------------------------------+
+   | funcs_bypass_config         | unsigned integer 32-bit value (WRITE REGISTER)                  |                                             
+   |                             | bit - 0           ->  BYPASS_ISP(Not available in this          |
+   |                             |                                      example),                  |                                                    
+   |                             | bit - 1           ->  BYPASS_HDR(Not available in this          |
+   |                             |                                      example),                  |                                                      
+   |                             | bit - 2           ->  BYPASS_RGBIR(Not configurable             |
+   |                             |                                   currently),                   |                                                       
+   |                             | bit - 3           ->  BYPASS_AEC(Not available in this          |
+   |                             |                                      example),                  |                                                    
+   |                             | bit - 4           ->  BYPASS_BLC,                               |                                                    
+   |                             | bit - 5           ->  BYPASS_BPC(Not available in this          |
+   |                             |                                      example),                  |                                                    
+   |                             | bit - 6           ->  BYPASS_DEGAMMA(Not available in this      |
+   |                             |                                      example),                  |                                                       
+   |                             | bit - 7           ->  BYPASS_LSC(Not available in this          |
+   |                             |                                      example),                  |                                                    
+   |                             | bit - 8           ->  BYPASS_GAIN,                              |                                                    
+   |                             | bit - 9           ->  BYPASS_DEMOSAIC(Not configurable          |
+   |                             |                                   currently),                   |                                                          
+   |                             | bit - 10          ->  BYPASS_AWB,                               |                                                    
+   |                             | bit - 11          ->  BYPASS_CCM,                               |                                                    
+   |                             | bit - 12          ->  BYPASS_TM,                                |                                                    
+   |                             | bit - [14 : 13]   ->  Reserved,                                 |                                                 
+   |                             | bit - 15          ->  BYPASS_GAMMA,                             |                                                       
+   |                             | bit - 16          ->  BYPASS_3DLUT(Not available in this        |
+   |                             |                                      example),                  |                                                       
+   |                             | bit - 17          ->  BYPASS_CSC(Not configurable               |
+   |                             |                                   currently),                   |                                                    
+   |                             | bit - 18          ->  BYPASS_BAYER_STATS(Not configurable       |
+   |                             |                                   currently),                   |                                                             
+   |                             | bit - 19          ->  BYPASS_LUMA_STATS(Not configurable        |
+   |                             |                                   currently),                   |                                                          
+   |                             | bit - 20          ->  BYPASS_RGB_STATS(Not configurable         |
+   |                             |                                   currently),                   |                                                          
+   |                             | bit - 21          ->  BYPASS_CLAHE(Not configurable             |
+   |                             |                                   currently),                   |                                                       
+   |                             | bit - 22          ->  BYPASS_MEDIAN(Not configurable            |
+   |                             |                                   currently),                   |                                                       
+   |                             | bit - 23          ->  BYPASS_RESIZE(Not available in this       |
+   |                             |                                      example),                  |                                                       
+   |                             | bit - [31 : 24]   ->  Reserved,                                 |                                                                               
+   +-----------------------------+-----------------------------------------------------------------+
 
 User can also use below compile time parameters to the pipeline.
 
 .. table::  Compiletime parameters for the pipeline
 
-   +-----------------+------------------------------------------------------+
-   | Parameter       | Description                                          |
-   +=================+======================================================+
-   | XF_HEIGHT       | Maximum height of input and output image             |
-   +-----------------+------------------------------------------------------+
-   | XF_WIDTH        | Maximum width of input and output image              |
-   |                 | (Must be a multiple of NPC)                          |
-   +-----------------+------------------------------------------------------+
-   |XF_BAYER_PATTERN | The Bayer format of the RAW input image.             |
-   |                 | supported formats are RGGB,BGGR,GBRG,GRBG.           |
-   +-----------------+------------------------------------------------------+
-   | XF_SRC_T        |Input pixel type,Supported pixel widths are 8,10,12,16|
-   +-----------------+------------------------------------------------------+
+   +-----------------------+--------------------------------------------------------+
+   | Parameter             | Description                                            |
+   +=======================+========================================================+
+   | XF_HEIGHT             | Maximum height of input and output image               |
+   |                       | range [2160 to 128]                                    | 
+   +-----------------------+--------------------------------------------------------+
+   | XF_WIDTH              | Maximum width of input and output image                |
+   |                       | (Must be a multiple of NPC)                            |
+   |                       | range [2160 to 128]                                    | 
+   +-----------------------+--------------------------------------------------------+
+   | XF_NPPCX              | Number of pixels to be processed per cycle; possible   |
+   |                       | options are XF_NPPC1 and XF_NPPC8 for 1, 2, 4, 8       |
+   |                       | pixel operations respectively.                         |
+   +-----------------------+--------------------------------------------------------+
+   | IN_TYPE               | Input pixel type,Supported pixel widths are            |
+   |                       | XF_8UC1, XF_10UC1, XF_12UC1, XF_16UC1                  |
+   +-----------------------+--------------------------------------------------------+
+   | XF_GTM_T              | Input pixel type,Supported pixel widths are XF_8UC3    |
+   +-----------------------+--------------------------------------------------------+
+   | OUT_TYPE              | output pixel type,Supported pixel widths are           |
+   |                       | XF_8UC1, XF_10UC1, XF_12UC1, XF_16UC1                  |
+   +-----------------------+--------------------------------------------------------+
+   | XF_USE_URAM           | Enable to map storage structures to UltraRAM.          |
+   +-----------------------+--------------------------------------------------------+
+   | WB_TYPE               | White balance type. Supported types are 0 - Gray world |
+   |                       | and 1 - simple.                                        | 
+   +-----------------------+--------------------------------------------------------+
+   | SCALE_FACTOR          | The SCALE_FACTOR must be power of 2 & less than or     |
+   |                       | equal to 2^(output PIXEL_BITWIDTH)                     |
+   +-----------------------+--------------------------------------------------------+
+   | MAX_REPRESENTED_VALUE | The MAX_REPRESENTED_VALUE must be equal to             |
+   |                       | equal to 2^(input PIXEL_BITWIDTH)                      |  
+   +-----------------------+--------------------------------------------------------+
+   | INTERPOLATION         | Type of interpolation, either 0 - XF_INTERPOLATION_NN  |
+   |                       | (nearest neighbor) or 1 - XF_INTERPOLATION_BILINEAR    |
+   |                       | (linear interpolation)                                 |
+   +-----------------------+--------------------------------------------------------+
+   | XF_NEWHEIGHT          | Maximum Height of output image for which the hardware  |
+   |                       | kernel would be built.                                 |
+   |                       | range [2160 to 128]                                    | 
+   +-----------------------+--------------------------------------------------------+
+   | XF_NEWWIDTH           | Maximum Width of output image for which the hardware   |
+   |                       | kernel would be built (must be a multiple of 8).       |
+   |                       | range [2160 to 128]                                    | 
+   +-----------------------+--------------------------------------------------------+
+   | MAXDOWNSCALE          | Set to 2 for all 1 pixel modes, and for upscale in x   |
+   |                       | direction. When down scaling in x direction in         |
+   |                       | 8-pixel mode, please set this parameter to the next    |
+   |                       | highest integer value of the down scale factor i.e.,   |
+   |                       | if downscaling from 1920 columns to 1280 columns, set  |
+   |                       | to 2. For 1920 to 640, set to 3.                       |
+   +-----------------------+--------------------------------------------------------+
+   | MUL_VALUE_WIDTH       | Width of multiplication factor (16).                   |
+   +-----------------------+--------------------------------------------------------+
+   | FL_POS                | Number of fractional bits in multiplication factor(15).|
+   +-----------------------+--------------------------------------------------------+
+   | USE_DSP               | Enables usage of DSP for multiplication.               |
+   +-----------------------+--------------------------------------------------------+
+   | BLOCK_HEIGHT          | Max block height the image is divided into.            |
+   |                       | This can be any positive integer greater than or       |
+   |                       | equal to 32 and less than input image height.          |
+   +-----------------------+--------------------------------------------------------+
+   | BLOCK_WIDTH           | Max block width the image is divided into.             |
+   |                       | This can be any positive integer greater than or       |
+   |                       | equal to 32 and less than input image width.           |
+   +-----------------------+--------------------------------------------------------+
+   | BIL_T                 | BILINEAR INTERPOLATE TYPE. XF_32FC3                    |
+   +-----------------------+--------------------------------------------------------+
    
 
 
@@ -836,87 +1081,193 @@ The following example demonstrates the ISP pipeline with above list of functions
 
 .. code:: c
 
-			void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
-					ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-					int height,
-					int width,
-					uint16_t rgain,
-					uint16_t bgain,
-					unsigned char gamma_lut[256 * 3],
-					unsigned char mode_reg,
-					uint16_t pawb) {
+			void ISPPipeline_accel(InVideoStrm_t& s_axis_video,
+                       OutVideoStrm_t& m_axis_video,
+                       unsigned int common_config,
+   #if XF_BLC_EN
+                        unsigned int blc_config_1,
+                        unsigned int blc_config_2,
+   #endif
 
-			#pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
-			#pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2
+                        unsigned int resize_config,
 
-			#pragma HLS ARRAY_PARTITION variable=hist0_awb complete dim=1
-			#pragma HLS ARRAY_PARTITION variable=hist1_awb complete dim=1
+   #if XF_GAIN_EN
+                        unsigned int gain_control_config_1,
+                        unsigned int gain_control_config_2,
+   #endif
+   #if XF_AWB_EN
+                        unsigned int awb_config,
+   #endif
+   #if XF_GAMMA_EN
+                        unsigned char gamma_lut[256 * 3],
+   #endif
+   #if XF_CCM_EN
+                        signed int ccm_config_1[3][3],
+                        signed int ccm_config_2[3],
+   #endif
+   #if (XF_TM_TYPE == 0)
+                        uint32_t ltm_config,
+   #endif
+                        unsigned int& pipeline_config_info,
+                        unsigned int& max_supported_size,
+                        unsigned int& funcs_available,
+                        unsigned int& funcs_bypassable,
+                        unsigned int funcs_bypass_config) {
+   // clang-format off
+   #pragma HLS INTERFACE axis port=s_axis_video register
+   #pragma HLS INTERFACE axis port=m_axis_video register
+   #pragma HLS INTERFACE s_axilite port=common_config bundle=CTRL offset=0x00010
 
-					if (!flag) {
-						ISPpipeline(img_inp, img_out, height, width, hist0_awb, hist1_awb, igain_0, igain_1, rgain, bgain, gamma_lut,
-									mode_reg, pawb);
-						flag = 1;
+   #pragma HLS INTERFACE s_axilite port=resize_config bundle=CTRL offset=0x00078 
 
-					} else {
-						ISPpipeline(img_inp, img_out, height, width, hist1_awb, hist0_awb, igain_1, igain_0, rgain, bgain, gamma_lut,
-									mode_reg, pawb);
-						flag = 0;
-					}
-					}
-				
-			void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
-						ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-						unsigned short height,
-						unsigned short width,
-						uint32_t hist0[3][HIST_SIZE],
-						uint32_t hist1[3][HIST_SIZE],
-						int gain0[3],
-						int gain1[3],
-						uint16_t rgain,
-						uint16_t bgain,
-						unsigned char gamma_lut[256 * 3],
-						unsigned char mode_reg,
-						uint16_t pawb) {
-				
-				#pragma HLS INLINE OFF
-					
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0> imgInput1(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1> imgInput2(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2> bpc_out(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_3> gain_out(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0> demosaic_out(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_1> impop(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2> ltm_in(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3> lsc_out(height, width);
-					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_4> _dst(height, width);
-					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_5> aecin(height, width);
-					xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_6> _imgOutput(height, width);
+   #if XF_GAIN_EN
+   #pragma HLS INTERFACE s_axilite port=gain_control_config_1 bundle=CTRL offset=0x00038
+   #pragma HLS INTERFACE s_axilite port=gain_control_config_2 bundle=CTRL offset=0x00040
+   #endif
+   #if XF_AWB_EN
+   #pragma HLS INTERFACE s_axilite port=awb_config	bundle=CTRL offset=0x00020
+   #endif
+   #if XF_GAMMA_EN
+   #pragma HLS INTERFACE s_axilite port=gamma_lut bundle=CTRL offset=0x02000
+   #endif
+   #if XF_CCM_EN
+   #pragma HLS INTERFACE s_axilite port=ccm_config_1 bundle=CTRL offset=0x04000
+   #pragma HLS INTERFACE s_axilite port=ccm_config_2 bundle=CTRL offset=0x04100
+   #endif
+   #if XF_BLC_EN
+   #pragma HLS INTERFACE s_axilite port=blc_config_1 bundle=CTRL offset=0x00028 
+   #pragma HLS INTERFACE s_axilite port=blc_config_2 bundle=CTRL offset=0x00030 
+   #endif
+   #if (XF_TM_TYPE == 0)
+   #pragma HLS INTERFACE s_axilite port=ltm_config bundle=CTRL offset=0x00058 
+   #endif
 
-				
-				#pragma HLS DATAFLOW
-					
-					const int Q_VAL = 1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC));
-					float thresh = (float)pawb / 256;
-					float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
-					float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
-               unsigned int blc_config_1 = (int)(mul_fact * 65536); // mul_fact int Q16_16 format
-               unsigned int blc_config_2 = BLACK_LEVEL;
 
-					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0>(img_inp, imgInput1);
-					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1>(imgInput1, imgInput2, blc_config_2,blc_config_1);
-					xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_3>(imgInput2, gain_out, rgain, bgain);
-					xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_IN_3, XF_CV_DEPTH_OUT_0>(gain_out, demosaic_out);
-					function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_2>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,height, width, mode_reg, thresh);																			   
-					xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2, XF_CV_DEPTH_OUT_3>(ltm_in, lsc_out);
-					if (XF_DST_T == XF_8UC3) {
-						fifo_copy<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3, XF_CV_DEPTH_OUT_5>(lsc_out, aecin, height, width);
-					} else {
-						xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC, XF_CV_DEPTH_OUT_3, XF_CV_DEPTH_OUT_5>(lsc_out, aecin);
-					}
-					xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_5, XF_CV_DEPTH_OUT_4>(aecin, _dst, gamma_lut);		
-					xf::cv::rgb2yuyv<XF_LTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_4, XF_CV_DEPTH_OUT_6>(_dst, _imgOutput);
-					xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_6>(_imgOutput, img_out);
-				}
+   #pragma HLS INTERFACE s_axilite port=pipeline_config_info bundle=CTRL offset=0x00080 
+   #pragma HLS INTERFACE mode=ap_none port=pipeline_config_info 
+   #pragma HLS INTERFACE s_axilite port=max_supported_size bundle=CTRL offset=0x00090 
+   #pragma HLS INTERFACE mode=ap_none port=max_supported_size 
+   #pragma HLS INTERFACE s_axilite port=funcs_available bundle=CTRL offset=0x000a0 
+   #pragma HLS INTERFACE mode=ap_none port=funcs_available 
+   #pragma HLS INTERFACE s_axilite port=funcs_bypassable bundle=CTRL offset=0x000b0 
+   #pragma HLS INTERFACE mode=ap_none port=funcs_bypassable 
+   #pragma HLS INTERFACE s_axilite port=funcs_bypass_config bundle=CTRL offset=0x000c0
+   #pragma HLS INTERFACE s_axilite port=return bundle=CTRL
+      // clang-format on
+      // extracting height and width  //
+      uint16_t height, width;
+      height = (uint16_t)(common_config >> 16);
+      width = (uint16_t)(common_config);
+
+      // extracting new_height and new_width  //
+      uint16_t new_height, new_width;
+      new_height = (uint16_t)(resize_config >> 16);
+      new_width = (uint16_t)(resize_config);
+
+   #if XF_GAIN_EN
+      // extracting rgain and bgain   //
+      uint16_t rgain, bgain;
+      bgain = (uint16_t)(gain_control_config_1 >> 16);
+      rgain = (uint16_t)(gain_control_config_1);
+
+      uint16_t bformat;
+      bformat = (uint16_t)(gain_control_config_2 >> 16);
+
+      uint16_t ggain;
+      ggain = (uint16_t)(gain_control_config_2);
+   #endif
+
+   #if XF_AWB_EN
+      //  awb specific data   //
+      float inputMin = 0.0f;
+      float inputMax = (1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX))) - 1; // 65535.0f;
+      float outputMin = 0.0f;
+      float outputMax = (1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX))) - 1; // 65535.0f;
+   // clang-format off
+
+   #pragma HLS ARRAY_PARTITION variable=hist0_awb    complete dim=1
+   #pragma HLS ARRAY_PARTITION variable=hist1_awb    complete dim=1
+   #endif
+
+   #if (XF_TM_TYPE == 0)
+   uint32_t block_height = (uint16_t)(ltm_config >> 16);;
+   uint32_t block_width= (uint16_t)(ltm_config);
+   #pragma HLS ARRAY_PARTITION variable=omin dim=1 complete
+   #pragma HLS ARRAY_PARTITION variable=omin dim=2 cyclic factor=2
+   #pragma HLS ARRAY_PARTITION variable=omin dim=3 cyclic factor=2
+
+   #pragma HLS ARRAY_PARTITION variable=omax dim=1 complete
+   #pragma HLS ARRAY_PARTITION variable=omax dim=2 cyclic factor=2
+   #pragma HLS ARRAY_PARTITION variable=omax dim=3 cyclic factor=2
+
+   #endif
+      // clang-format on
+
+      max_supported_size = (XF_WIDTH << MAX_WIDTH_INDEX) | (XF_HEIGHT << MAX_HEIGHT_INDEX);
+
+      pipeline_config_info = (IN_C_TYPE << IN_C_TYPE_INDEX) | (IN_BW_MODE << IN_BW_MODE_INDEX) |
+                              (OUT_C_TYPE << OUT_C_TYPE_INDEX) | (OUT_BW_MODE << OUT_BW_MODE_INDEX) |
+                              (NPPCX << NPPCX_INDEX) | (NUM_STREAMS << NUM_STREAMS_INDEX);
+
+      funcs_available = (XF_BLC_EN << XF_BLC_EN_INDEX) | (XF_GAIN_EN << XF_GAIN_EN_INDEX) |
+                        (XF_AWB_EN << XF_AWB_EN_INDEX) | (XF_CCM_EN << XF_CCM_EN_INDEX) | (XF_TM_EN << XF_TM_EN_INDEX) |
+                        (XF_TM_TYPE << XF_TM_TYPE_INDEX) | (XF_GAMMA_EN << XF_GAMMA_EN_INDEX);
+
+      funcs_bypassable = (XF_BLC_BYPASS_EN << XF_BLC_EN_INDEX) | (XF_GAIN_BYPASS_EN << XF_GAIN_EN_INDEX) |
+                        (XF_AWB_BYPASS_EN << XF_AWB_EN_INDEX) | (XF_CCM_BYPASS_EN << XF_CCM_EN_INDEX) |
+                        (XF_GAMMA_BYPASS_EN << XF_GAMMA_EN_INDEX);
+      if (!flag) {
+         ISPpipeline(s_axis_video, m_axis_video, height, width,
+
+                     new_height, new_width,
+
+   #if XF_BLC_EN
+                     blc_config_1, blc_config_2,
+   #endif
+   #if XF_GAIN_EN
+                     rgain, bgain, ggain, bformat,
+   #endif
+   #if XF_AWB_EN
+                     hist0_awb, awb_config, inputMin, inputMax, outputMin, outputMax, hist1_awb,
+   #endif
+   #if XF_GAMMA_EN
+                     gamma_lut,
+   #endif
+   #if XF_CCM_EN
+                     ccm_config_1, ccm_config_2,
+   #endif
+   #if (XF_TM_TYPE == 0)
+                     block_height, block_width, omin[0], omax[0], omin[1], omax[1],
+   #endif
+                     funcs_bypass_config);
+         flag = 1;
+      } else {
+         ISPpipeline(s_axis_video, m_axis_video, height, width,
+
+                     new_height, new_width,
+
+   #if XF_BLC_EN
+                     blc_config_1, blc_config_2,
+   #endif
+   #if XF_GAIN_EN
+                     rgain, bgain, ggain, bformat,
+   #endif
+   #if XF_AWB_EN
+                     hist1_awb, awb_config, inputMin, inputMax, outputMin, outputMax, hist0_awb,
+   #endif
+   #if XF_GAMMA_EN
+                     gamma_lut,
+   #endif
+   #if XF_CCM_EN
+                     ccm_config_1, ccm_config_2,
+   #endif
+   #if (XF_TM_TYPE == 0)
+                     block_height, block_width, omin[0], omax[0], omin[1], omax[1],
+   #endif
+                     funcs_bypass_config);
+         flag = 0;
+      }
+   }
 				
 .. _isp-201hdr:
 				
@@ -2435,6 +2786,9 @@ The input to the accel is a 12bit non-linearized full-HD (1920x1080) image.
 
 .. _isp-24bit:
 .. include:: include/isp_24bit_api.rst
+
+.. isp_autogain:
+.. include:: include/isp_autogain_api.rst
 
 .. |pp_image1| image:: ./images/letterbox.PNG
    :class: image 

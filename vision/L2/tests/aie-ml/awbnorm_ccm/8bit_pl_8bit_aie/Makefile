@@ -122,7 +122,7 @@ else
 AIETARGET := x86sim
 endif
 
-AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM)   --aie.pl-freq 300 
+AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM)   --aie.pl-freq 400 
 AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
@@ -166,13 +166,13 @@ EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
-HOST_ARGS := kernel.xclbin $(XFLIB_DIR)/data/HD.jpg $(XFLIB_DIR)/data/HD.jpg 0.5
+HOST_ARGS := kernel.xclbin $(XFLIB_DIR)/data/HD.jpg
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw))
-HOST_ARGS := kernel.xclbin $(XFLIB_DIR)/data/4k.jpg $(XFLIB_DIR)/data/4k.jpg 0.5
+HOST_ARGS := kernel.xclbin $(XFLIB_DIR)/data/4k.jpg
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
@@ -182,7 +182,7 @@ endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
 VPP_FLAGS +=   
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml -I $(XFLIB_DIR)/L1/include/aie-ml/dnn -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include/
-VPP_LDFLAGS +=   --clock.freqHz 300000000:Tiler_top_1  --clock.freqHz 300000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg
+VPP_LDFLAGS +=   --clock.freqHz 400000000:Tiler_top_1  --clock.freqHz 400000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   --package.defer_aie_run
 
 else 

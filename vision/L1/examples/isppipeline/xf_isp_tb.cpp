@@ -433,6 +433,11 @@ int main(int argc, char** argv) {
     float gamma_val_r = 0.5f, gamma_val_g = 0.8f, gamma_val_b = 0.8f;
     compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_config);
 
+    uint32_t ltm_config;
+    uint32_t block_height = 32;
+    uint32_t block_width = 32;
+    ltm_config = (block_height << 16 | block_width);
+
     // ccm matrix
 
     // ccm matrix
@@ -574,6 +579,9 @@ int main(int argc, char** argv) {
 #endif
 #if XF_CCM_EN
                           ccm_matrix_int, offsetarray_int,
+#endif
+#if (XF_TM_TYPE == 0)
+                          ltm_config,
 #endif
                           pipeline_config_info, max_supported_size, funcs_available, funcs_bypassable,
                           funcs_bypass_config);

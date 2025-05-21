@@ -16,7 +16,13 @@
 #include "xf_isp_accel_config.h"
 
 static bool flag = 0;
+#if (XF_TM_TYPE == 0)
+static constexpr int MinMaxVArrSize = LTMTile<BLOCK_HEIGHT, BLOCK_WIDTH, XF_HEIGHT, XF_WIDTH, NPPCX>::MinMaxVArrSize;
+static constexpr int MinMaxHArrSize = LTMTile<BLOCK_HEIGHT, BLOCK_WIDTH, XF_HEIGHT, XF_WIDTH, NPPCX>::MinMaxHArrSize;
 
+static XF_CTUNAME(BIL_T, NPPCX) omin[2][MinMaxVArrSize][MinMaxHArrSize];
+static XF_CTUNAME(BIL_T, NPPCX) omax[2][MinMaxVArrSize][MinMaxHArrSize];
+#endif
 /************************************************************************************
  * Function:    AXIVideo2BayerMat
  * Parameters:  Multiple bayerWindow.getval AXI Stream, User Stream, Image Resolution
@@ -490,6 +496,14 @@ void ISPpipeline(InVideoStrm_t& s_axis_video,
                  signed int ccm_matrix[3][3],
                  signed int offsetarray[3],
 #endif
+#if (XF_TM_TYPE == 0)
+                 uint32_t blk_height,
+                 uint32_t blk_width,
+                 XF_CTUNAME(BIL_T, NPPCX) omin_r[MinMaxVArrSize][MinMaxHArrSize],
+                 XF_CTUNAME(BIL_T, NPPCX) omax_r[MinMaxVArrSize][MinMaxHArrSize],
+                 XF_CTUNAME(BIL_T, NPPCX) omin_w[MinMaxVArrSize][MinMaxHArrSize],
+                 XF_CTUNAME(BIL_T, NPPCX) omax_w[MinMaxVArrSize][MinMaxHArrSize],
+#endif
                  unsigned int funcs_bypass_config) {
 // clang-format off
 #pragma HLS INLINE OFF
@@ -572,11 +586,18 @@ void ISPpipeline(InVideoStrm_t& s_axis_video,
         colorcorrectionmatrix_out_mat, xf_QuatizationDithering_out_mat, height, width);
 
 #else
+#if (XF_TM_TYPE == 0)
+
+    xf::cv::LTM<OUT_TYPE, XF_GTM_T, BLOCK_HEIGHT, BLOCK_WIDTH, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_IN,
+                XF_CV_DEPTH_OUT>::process(colorcorrectionmatrix_out_mat, blk_height, blk_width, omin_r, omax_r, omin_w,
+                                          omax_w, xf_QuatizationDithering_out_mat);
+#elif (XF_TM_TYPE == 2)
     constexpr int Q_VAL = 1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX)); /* Used in xf_QuatizationDithering */
 
     function_xf_QuatizationDithering<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, SCALE_FACTOR, Q_VAL, XF_NPPCX,
                                      XF_USE_URAM, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(
         colorcorrectionmatrix_out_mat, xf_QuatizationDithering_out_mat, height, width, funcs_bypass_config);
+#endif
 #endif
 #elif (XF_AWB_EN == 1)
 #if (T_8U)
@@ -584,11 +605,18 @@ void ISPpipeline(InVideoStrm_t& s_axis_video,
         AWB_out_mat, xf_QuatizationDithering_out_mat, height, width);
 
 #else
+#if (XF_TM_TYPE == 0)
+
+    xf::cv::LTM<OUT_TYPE, XF_GTM_T, BLOCK_HEIGHT, BLOCK_WIDTH, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_IN,
+                XF_CV_DEPTH_OUT>::process(AWB_out_mat, blk_height, blk_width, omin_r, omax_r, omin_w, omax_w,
+                                          xf_QuatizationDithering_out_mat);
+#elif (XF_TM_TYPE == 2)
     constexpr int Q_VAL = 1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX)); /* Used in xf_QuatizationDithering */
 
     function_xf_QuatizationDithering<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, SCALE_FACTOR, Q_VAL, XF_NPPCX,
                                      XF_USE_URAM, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(
         AWB_out_mat, xf_QuatizationDithering_out_mat, height, width, funcs_bypass_config);
+#endif
 #endif
 #else
 #if (T_8U)
@@ -596,11 +624,18 @@ void ISPpipeline(InVideoStrm_t& s_axis_video,
         demosaicing_out_mat, xf_QuatizationDithering_out_mat, height, width);
 
 #else
+#if (XF_TM_TYPE == 0)
+
+    xf::cv::LTM<OUT_TYPE, XF_GTM_T, BLOCK_HEIGHT, BLOCK_WIDTH, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_IN,
+                XF_CV_DEPTH_OUT>::process(demosaicing_out_mat, blk_height, blk_width, omin_r, omax_r, omin_w, omax_w,
+                                          xf_QuatizationDithering_out_mat);
+#elif (XF_TM_TYPE == 2)
     constexpr int Q_VAL = 1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX)); /* Used in xf_QuatizationDithering */
 
     function_xf_QuatizationDithering<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, SCALE_FACTOR, Q_VAL, XF_NPPCX,
                                      XF_USE_URAM, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(
         demosaicing_out_mat, xf_QuatizationDithering_out_mat, height, width, funcs_bypass_config);
+#endif
 #endif
 #endif
 
@@ -651,6 +686,9 @@ void ISPPipeline_accel(InVideoStrm_t& s_axis_video,
                        signed int ccm_config_1[3][3],
                        signed int ccm_config_2[3],
 #endif
+#if (XF_TM_TYPE == 0)
+                       uint32_t ltm_config,
+#endif
                        unsigned int& pipeline_config_info,
                        unsigned int& max_supported_size,
                        unsigned int& funcs_available,
@@ -680,6 +718,9 @@ void ISPPipeline_accel(InVideoStrm_t& s_axis_video,
 #if XF_BLC_EN
 #pragma HLS INTERFACE s_axilite port=blc_config_1 bundle=CTRL offset=0x00028 
 #pragma HLS INTERFACE s_axilite port=blc_config_2 bundle=CTRL offset=0x00030 
+#endif
+#if (XF_TM_TYPE == 0)
+#pragma HLS INTERFACE s_axilite port=ltm_config bundle=CTRL offset=0x00058 
 #endif
 
 
@@ -723,10 +764,23 @@ void ISPPipeline_accel(InVideoStrm_t& s_axis_video,
     float inputMax = (1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX))) - 1; // 65535.0f;
     float outputMin = 0.0f;
     float outputMax = (1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX))) - 1; // 65535.0f;
-                                                                       // clang-format off
+// clang-format off
 
 #pragma HLS ARRAY_PARTITION variable=hist0_awb    complete dim=1
 #pragma HLS ARRAY_PARTITION variable=hist1_awb    complete dim=1
+#endif
+
+#if (XF_TM_TYPE == 0)
+uint32_t block_height = (uint16_t)(ltm_config >> 16);;
+uint32_t block_width= (uint16_t)(ltm_config);
+#pragma HLS ARRAY_PARTITION variable=omin dim=1 complete
+#pragma HLS ARRAY_PARTITION variable=omin dim=2 cyclic factor=2
+#pragma HLS ARRAY_PARTITION variable=omin dim=3 cyclic factor=2
+
+#pragma HLS ARRAY_PARTITION variable=omax dim=1 complete
+#pragma HLS ARRAY_PARTITION variable=omax dim=2 cyclic factor=2
+#pragma HLS ARRAY_PARTITION variable=omax dim=3 cyclic factor=2
+
 #endif
     // clang-format on
 
@@ -763,6 +817,9 @@ void ISPPipeline_accel(InVideoStrm_t& s_axis_video,
 #if XF_CCM_EN
                     ccm_config_1, ccm_config_2,
 #endif
+#if (XF_TM_TYPE == 0)
+                    block_height, block_width, omin[0], omax[0], omin[1], omax[1],
+#endif
                     funcs_bypass_config);
         flag = 1;
     } else {
@@ -784,6 +841,9 @@ void ISPPipeline_accel(InVideoStrm_t& s_axis_video,
 #endif
 #if XF_CCM_EN
                     ccm_config_1, ccm_config_2,
+#endif
+#if (XF_TM_TYPE == 0)
+                    block_height, block_width, omin[0], omax[0], omin[1], omax[1],
 #endif
                     funcs_bypass_config);
         flag = 0;

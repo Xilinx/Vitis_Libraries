@@ -48,7 +48,7 @@
                 "max_memory_MB": {
                     "vivado_syn": 16384,
                     "hls_csim": 10240,
-                    "hls_cosim": 61440,
+                    "hls_cosim": 102400,
                     "vivado_impl": 16384,
                     "hls_csynth": 10240
                 },

@@ -186,6 +186,9 @@ This ISP pipeline includes 19 modules, as follows:
     | USE_HDR_FUSION   | Flag to enable or disable HDR     |
     |                  | fusion module.                    |
     +------------------+-----------------------------------+
+    | USE_HDR          | Flag to enable or disable HDR     |
+    |                  | module.                           |
+    +------------------+-----------------------------------+
     | USE_GTM          | Flag to enable or disable GTM     |
     |                  | module.                           |
     +------------------+-----------------------------------+
@@ -232,8 +235,14 @@ This ISP pipeline includes 19 modules, as follows:
     | XF_BAYER_PATTERN        | The Bayer format of the RAW input |
     |                         | image. Using XF_BAYER_RG format.  |
     +-------------------------+-----------------------------------+
-    | XF_SRC_T                | Input pixel type. Supported pixel |
-    |                         | width is 16.                      |
+    | IN_TYPE                 | Input pixel type. Supported pixel |
+    |                         | width is 8,10,12,16.              |
+    +-------------------------+-----------------------------------+
+    | XF_GTM_T                | Tonemapping pixel type. Supported |
+    |                         | pixel width is 8.                 |
+    +-------------------------+-----------------------------------+
+    | OUT_TYPE                | Output pixel type. Supported      |
+    |                         | pixel width is 8,10,12,16.        |
     +-------------------------+-----------------------------------+
     | DGAMMA_KP               | Configurable number of knee       |
     |                         | points in degamma.                |
@@ -255,7 +264,7 @@ This ISP pipeline includes 19 modules, as follows:
     |                         | equal to 32 and less than input   |
     |                         | image height.                     |
     +-------------------------+-----------------------------------+
-    | XF_NPPC                 | Number of pixels processed per    |
+    | XF_NPPCX                | Number of pixels processed per    |
     |                         | cycle.                            |
     +-------------------------+-----------------------------------+
     | NO_EXPS                 | Number of exposure frames to be   |
@@ -266,6 +275,15 @@ This ISP pipeline includes 19 modules, as follows:
     |                         | values for wr_hls.                |
     |                         | W_B_SIZE should be 2^bit depth.   |
     +-------------------------+-----------------------------------+
+    | SIN_CHANNEL_IN_TYPE     | Single channel type. It's pixel   | 
+    |                         | value is XF_8UC1                  |
+    +-------------------------+-----------------------------------+
+    | AEC_SIN_CHANNEL_TYPE    | Single channel type. It's pixel   | 
+    |                         | value is XF_16UC1                 |
+    +-------------------------+-----------------------------------+
+    | WB_TYPE                 | White balance type. Supported     |
+    |                         | types are Gray world and simple.  |
+    +-------------------------+-----------------------------------+
 
 
 
@@ -273,49 +291,52 @@ The following example demonstrates the top-level ISP pipeline:
 
 .. code:: c
 
-            void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,                 /* Array2xfMat */
-                                   ap_uint<OUTPUT_PTR_WIDTH>* img_out,                /* xfMat2Array */
-                                   ap_uint<OUTPUT_PTR_WIDTH>* img_out_ir,             /* xfMat2Array */
-                                   int height,                                        /* HDR, rgbir2bayer, fifo_copy */
-                                   int width,                                         /* HDR, rgbir2bayer, fifo_copy */
-                                   short wr_hls[NO_EXPS * XF_NPPC * W_B_SIZE],        /* HDR */                                   
-                                   uint16_t rgain,                                    /* gaincontrol */
-                                   uint16_t bgain,                                    /* gaincontrol */
-                                   char R_IR_C1_wgts[25],                             /* rgbir2bayer */
-                                   char R_IR_C2_wgts[25],                             /* rgbir2bayer */
-                                   char B_at_R_wgts[25],                              /* rgbir2bayer */
-                                   char IR_at_R_wgts[9],                              /* rgbir2bayer */
-                                   char IR_at_B_wgts[9],                              /* rgbir2bayer */
-                                   char sub_wgts[4],                                  /* rgbir2bayer */
-                                   int blk_height,                                    /* LTM */
-                                   int blk_width,                                     /* LTM */
-                                   float c1,                                          /* gtm */
-                                   float c2,                                          /* gtm */
-                                   unsigned char gamma_lut[256 * 3],                  /* gammacorrection */
-                                   ap_uint<LUT_PTR_WIDTH>* lut,                       /* lut3d */
-                                   int lutDim,                                         /* lut3d */
-                                   uint16_t pawb,                                      /* used to calculate thresh which is used in function_awb */
-                                   unsigned short bayerp,
-                                   int params_decompand[3][4][3],
-                                   ap_ufixed<32, 16> params_degamma[3][DEGAMMA_KP][3]){                                       
-            // clang-format off
-            #pragma HLS INTERFACE m_axi port=img_inp          offset=slave bundle=gmem1
+            void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,           /* Array2xfMat */
+                       ap_uint<OUTPUT_PTR_WIDTH>* img_out,          /* xfMat2Array */
+                       ap_uint<OUTPUT_PTR_WIDTH>* img_out_ir,       /* xfMat2Array */
+                       int height,                                  /* Height of the image */
+                       int width,                                   /* Width of the image */
+                       short wr_hls[NO_EXPS * XF_NPPCX * W_B_SIZE], /* HDR */
+                       int params_decompand[3][4][3],               /* Decompand */
+                       char R_IR_C1_wgts[25],                       /* rgbir2bayer */
+                       char R_IR_C2_wgts[25],                       /* rgbir2bayer */
+                       char B_at_R_wgts[25],                        /* rgbir2bayer */
+                       char IR_at_R_wgts[9],                        /* rgbir2bayer */
+                       char IR_at_B_wgts[9],                        /* rgbir2bayer */
+                       char sub_wgts[4],                            /* rgbir2bayer */
+                       uint16_t pawb,         /* used to calculate thresh which is used in function_awb */
+                       unsigned short bayerp, /* hdr_decompand, degamma */
+                       uint32_t params_degamma[3][DEGAMMA_KP][3], /*degamma*/
+                       uint16_t rgain,                            /* gaincontrol */
+                       uint16_t bgain,                            /* gaincontrol */
+                       int blk_height,                            /* LTM */
+                       int blk_width,                             /* LTM */
+                       uint32_t c1,                               /* gtm */
+                       uint32_t c2,                               /* gtm */
+                       unsigned char gamma_lut[256 * 3],          /* gammacorrection */
+                       ap_uint<LUT_PTR_WIDTH>* lut,               /* lut3d */
+                       int lutDim,
+                       signed int ccm_config_1[3][3],
+                       signed int ccm_config_2[3],
+                       unsigned short ggain) { /* lut3d */
+                                               // clang-format off
+
+            #pragma HLS INTERFACE m_axi port=img_inp          offset=slave bundle=gmem1 
             #pragma HLS INTERFACE m_axi port=img_out          offset=slave bundle=gmem2
             #pragma HLS INTERFACE m_axi port=img_out_ir       offset=slave bundle=gmem3
-            #pragma HLS INTERFACE m_axi port=R_IR_C1_wgts     offset=slave bundle=gmem4
-            #pragma HLS INTERFACE m_axi port=R_IR_C2_wgts     offset=slave bundle=gmem5
-            #pragma HLS INTERFACE m_axi port=B_at_R_wgts      offset=slave bundle=gmem6
-            #pragma HLS INTERFACE m_axi port=IR_at_R_wgts     offset=slave bundle=gmem7
-            #pragma HLS INTERFACE m_axi port=IR_at_B_wgts     offset=slave bundle=gmem8
-            #pragma HLS INTERFACE m_axi port=sub_wgts         offset=slave bundle=gmem9
-            #pragma HLS INTERFACE m_axi port=gamma_lut        offset=slave bundle=gmem10
-            #pragma HLS INTERFACE m_axi port=wr_hls           offset=slave bundle=gmem11
-            #pragma HLS INTERFACE m_axi port=lut              offset=slave bundle=gmem12
-
-            #pragma HLS INTERFACE m_axi port=params_decompand offset=slave bundle=gmem13
-            #pragma HLS INTERFACE m_axi port=params_degamma   offset=slave bundle=gmem14
-            #pragma HLS INTERFACE m_axi port=img_out_decom    offset=slave bundle=gmem15
-            #pragma HLS INTERFACE m_axi port=img_out_deggama  offset=slave bundle=gmem16
+            #pragma HLS INTERFACE m_axi port=wr_hls           offset=slave bundle=gmem4
+            #pragma HLS INTERFACE m_axi port=params_decompand offset=slave bundle=gmem5
+            #pragma HLS INTERFACE m_axi port=R_IR_C1_wgts     offset=slave bundle=gmem6
+            #pragma HLS INTERFACE m_axi port=R_IR_C2_wgts     offset=slave bundle=gmem7
+            #pragma HLS INTERFACE m_axi port=B_at_R_wgts      offset=slave bundle=gmem8
+            #pragma HLS INTERFACE m_axi port=IR_at_R_wgts     offset=slave bundle=gmem9
+            #pragma HLS INTERFACE m_axi port=IR_at_B_wgts     offset=slave bundle=gmem10
+            #pragma HLS INTERFACE m_axi port=sub_wgts         offset=slave bundle=gmem11
+            #pragma HLS INTERFACE m_axi port=params_degamma   offset=slave bundle=gmem12
+            #pragma HLS INTERFACE m_axi port=gamma_lut        offset=slave bundle=gmem13
+            #pragma HLS INTERFACE m_axi port=lut              offset=slave bundle=gmem14
+            #pragma HLS INTERFACE m_axi port=ccm_config_1     bundle=gmem15 offset=slave
+            #pragma HLS INTERFACE m_axi port=ccm_config_2     bundle=gmem16 offset=slave
 
             #pragma HLS ARRAY_PARTITION variable=hist0_awb    complete dim=1
             #pragma HLS ARRAY_PARTITION variable=hist1_awb    complete dim=1
@@ -325,55 +346,56 @@ The following example demonstrates the top-level ISP pipeline:
             #pragma HLS ARRAY_PARTITION variable=omax dim=1   complete
             #pragma HLS ARRAY_PARTITION variable=omax dim=2   cyclic factor=2
             #pragma HLS ARRAY_PARTITION variable=omax dim=3   cyclic factor=2
-            // clang-format on
+               // clang-format on
 
-            static short wr_hls_tmp[NO_EXPS * XF_NPPC * W_B_SIZE];
+               static short wr_hls_tmp[NO_EXPS * XF_NPPCX * W_B_SIZE];
 
             WR_HLS_INIT_LOOP:
-               for (int k = 0; k < XF_NPPC; k++) {
+               for (int k = 0; k < XF_NPPCX; k++) {
             // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=XF_NPPC max=XF_NPPC
+            #pragma HLS LOOP_TRIPCOUNT min=XF_NPPCX max=XF_NPPCX
                   // clang-format on
                   for (int i = 0; i < NO_EXPS; i++) {
             // clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=NO_EXPS max=NO_EXPS
-                     // clang-format on
-                     for (int j = 0; j < (W_B_SIZE); j++) {
+                        // clang-format on
+                        for (int j = 0; j < (W_B_SIZE); j++) {
             // clang-format off
             #pragma HLS LOOP_TRIPCOUNT min=W_B_SIZE max=W_B_SIZE
-                        // clang-format on
-                        wr_hls_tmp[(i + k * NO_EXPS) * W_B_SIZE + j] = wr_hls[(i + k * NO_EXPS) * W_B_SIZE + j];
-                     }
+                           // clang-format on
+                           wr_hls_tmp[(i + k * NO_EXPS) * W_B_SIZE + j] = wr_hls[(i + k * NO_EXPS) * W_B_SIZE + j];
+                        }
                   }
-              }
-             
+               }
 
-            if (!flag) {
-                   ISPpipeline(img_inp, img_out, img_out_ir, height, width, wr_hls_tmp, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts,
-                        IR_at_R_wgts, IR_at_B_wgts, sub_wgts, params_decompand, params_degamma, bayerp, rgain, bgain,
-                        hist0_awb, hist1_awb, igain_0, igain_1, pawb, gamma_lut, omin[0], omax[0], omin[1], omax[1],
-                        blk_height, blk_width, mean2, mean1, L_max2, L_max1, L_min2, L_min1, c1, c2, lut, lutDim, hist0_aec,
-                        hist1_aec, img_out_decom, img_out_deggama);
-                   flag = 1;
+               if (!flag) {
+                  ISPpipeline(img_inp, img_out, img_out_ir, height, width, wr_hls_tmp, params_decompand, R_IR_C1_wgts,
+                              R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, hist0_aec, hist1_aec, pawb, bayerp,
+                              params_degamma, rgain, bgain, hist0_awb, hist1_awb, igain_0, igain_1, omin[0], omax[0], omin[1],
+                              omax[1], blk_height, blk_width, mean2, mean1, L_max2, L_max1, L_min2, L_min1, c1, c2, gamma_lut,
+                              lut, lutDim, ccm_config_1, ccm_config_2, ggain);
 
-            } else {
-                   ISPpipeline(img_inp, img_out, img_out_ir, height, width, wr_hls_tmp, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts,
-                       IR_at_R_wgts, IR_at_B_wgts, sub_wgts, params_decompand, params_degamma, bayerp, rgain, bgain,
-                       hist1_awb, hist0_awb, igain_1, igain_0, pawb, gamma_lut, omin[1], omax[1], omin[0], omax[0],
-                       blk_height, blk_width, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2, lut, lutDim, hist1_aec,
-                       hist0_aec, img_out_decom, img_out_deggama);
-                   flag = 0;
+                  flag = 1;
+
+               } else {
+                  ISPpipeline(img_inp, img_out, img_out_ir, height, width, wr_hls_tmp, params_decompand, R_IR_C1_wgts,
+                              R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, hist1_aec, hist0_aec, pawb, bayerp,
+                              params_degamma, rgain, bgain, hist1_awb, hist0_awb, igain_1, igain_0, omin[1], omax[1], omin[0],
+                              omax[0], blk_height, blk_width, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2, gamma_lut,
+                              lut, lutDim, ccm_config_1, ccm_config_2, ggain);
+
+                  flag = 0;
+               }
             }
-           }
 
 Create and Launch Kernel in the Testbench:
-===========================================
 
-The histogram needs two frames to populate the histogram array and to get correct results in the
-auto exposure frame. Auto white balance, GTM and other tone-mapping functions need
-one extra frame in each to populate its parameters and apply those parameters to
-get a correct image. For the specific example below, four iterations
-are needed because the AEC, AWB, and LTM modules are selected.
+
+-  The histogram needs two frames to populate the histogram array and to get correct results in the
+   auto exposure frame. Auto white balance, GTM and other tone-mapping functions need
+   one extra frame in each to populate its parameters and apply those parameters to
+   get a correct image. For the specific example below, four iterations
+   are needed because the AEC, AWB, and LTM modules are selected.
 
 
 .. code:: c
@@ -382,83 +404,94 @@ are needed because the AEC, AWB, and LTM modules are selected.
         OCL_CHECK(err, cl::Kernel kernel(program, "ISPPipeline_accel", &err));
 
         int loop_count = 4;
-        for (int i = 0; i < loop_count; i++) {
-            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inVec,          // buffer on the FPGA
-                                            CL_TRUE,                   // blocking call
-                                            0,                         // buffer offset in bytes
-                                            vec_in_size_bytes,         // Size in bytes
-                                            gamma_lut));
+      for (int i = 0; i < loop_count; i++) {
+         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inVec,      // buffer on the FPGA
+                                             CL_TRUE,           // blocking call
+                                             0,                 // buffer offset in bytes
+                                             vec_in_size_bytes, // Size in bytes
+                                             gamma_lut));
 
-            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_R_IR_C1,        // buffer on the FPGA
-                                            CL_TRUE,                   // blocking call
-                                            0,                         // buffer offset in bytes
-                                            filter1_in_size_bytes,     // Size in bytes
-                                            R_IR_C1_wgts));
+         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_R_IR_C1,        // buffer on the FPGA
+                                             CL_TRUE,               // blocking call
+                                             0,                     // buffer offset in bytes
+                                             filter1_in_size_bytes, // Size in bytes
+                                             R_IR_C1_wgts));
 
-            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_R_IR_C2,        // buffer on the FPGA
-                                            CL_TRUE,                   // blocking call
-                                            0,                         // buffer offset in bytes
-                                            filter1_in_size_bytes,     // Size in bytes
-                                            R_IR_C2_wgts));
+         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_R_IR_C2,        // buffer on the FPGA
+                                             CL_TRUE,               // blocking call
+                                             0,                     // buffer offset in bytes
+                                             filter1_in_size_bytes, // Size in bytes
+                                             R_IR_C2_wgts));
 
-            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_B_at_R,         // buffer on the FPGA
-                                            CL_TRUE,                   // blocking call
-                                            0,                         // buffer offset in bytes
-                                            filter1_in_size_bytes,     // Size in bytes
-                                            B_at_R_wgts));
+         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_B_at_R,         // buffer on the FPGA
+                                             CL_TRUE,               // blocking call
+                                             0,                     // buffer offset in bytes
+                                             filter1_in_size_bytes, // Size in bytes
+                                             B_at_R_wgts));
 
-            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_IR_at_R,        // buffer on the FPGA
-                                            CL_TRUE,                   // blocking call
-                                            0,                         // buffer offset in bytes
-                                            filter2_in_size_bytes,     // Size in bytes
-                                            IR_at_R_wgts));
+         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_IR_at_R,        // buffer on the FPGA
+                                             CL_TRUE,               // blocking call
+                                             0,                     // buffer offset in bytes
+                                             filter2_in_size_bytes, // Size in bytes
+                                             IR_at_R_wgts));
 
-            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_IR_at_B,        // buffer on the FPGA
-                                            CL_TRUE,                   // blocking call
-                                            0,                         // buffer offset in bytes
-                                            filter2_in_size_bytes,     // Size in bytes
-                                            IR_at_B_wgts)); 
+         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_IR_at_B,        // buffer on the FPGA
+                                             CL_TRUE,               // blocking call
+                                             0,                     // buffer offset in bytes
+                                             filter2_in_size_bytes, // Size in bytes
+                                             IR_at_B_wgts));
 
-            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_sub_wgts,        // buffer on the FPGA
-                                            CL_TRUE,                    // blocking call
-                                            0,                          // buffer offset in bytes
-                                            sub_wgts_in_size_bytes,     // Size in bytes
-                                            sub_wgts));
+         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_sub_wgts,        // buffer on the FPGA
+                                             CL_TRUE,                // blocking call
+                                             0,                      // buffer offset in bytes
+                                             sub_wgts_in_size_bytes, // Size in bytes
+                                             sub_wgts));
 
-            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_decompand_params,        // buffer on the FPGA
-                                            CL_TRUE,                            // blocking call
-                                            0,                                  // buffer offset in bytes
-                                            decompand_params_in_size_bytes,     // Size in bytes
-                                            params_decomand));
+         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_decompand_params,        // buffer on the FPGA
+                                             CL_TRUE,                        // blocking call
+                                             0,                              // buffer offset in bytes
+                                             decompand_params_in_size_bytes, // Size in bytes
+                                             params_decomand));
 
-            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_degamma_params,          // buffer on the FPGA
-                                            CL_TRUE,                            // blocking call
-                                            0,                                  // buffer offset in bytes
-                                            degamma_params_in_size_bytes,       // Size in bytes
-                                            params_degamma));
+         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_degamma_params,        // buffer on the FPGA
+                                             CL_TRUE,                      // blocking call
+                                             0,                            // buffer offset in bytes
+                                             degamma_params_in_size_bytes, // Size in bytes
+                                             params_degamma));
 
-            if (USE_HDR_FUSION) {
-               OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inVec_Weights,        // buffer on the FPGA
-                                                CL_TRUE,                        // blocking call
-                                                0,                              // buffer offset in bytes
-                                                vec_weight_size_bytes,          // Size in bytes
-                                                wr_hls));
+         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_ccm_matrix_int,     // buffer on the FPGA
+                                             CL_TRUE,                   // blocking call
+                                             0,                         // buffer offset in bytes
+                                             ccm_matrix_int_size_bytes, // Size in bytes
+                                             ccm_matrix_int));
 
-               OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, 
-                              image_in_size_bytes, interleaved_img.data));
-            }
+         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_offsetarray_int,     // buffer on the FPGA
+                                             CL_TRUE,                    // blocking call
+                                             0,                          // buffer offset in bytes
+                                             offsetarray_int_size_bytes, // Size in bytes
+                                             offsetarray_int));
 
-            else {
-               OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, 
-                              image_in_size_bytes, out_img_12bit.data));
-           } 
+         if (USE_HDR_FUSION) {
+               OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inVec_Weights,  // buffer on the FPGA
+                                                   CL_TRUE,               // blocking call
+                                                   0,                     // buffer offset in bytes
+                                                   vec_weight_size_bytes, // Size in bytes
+                                                   wr_hls));
 
-               OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inLut,                // buffer on the FPGA
-                                            CL_TRUE,                            // blocking call
-                                            0,                                  // buffer offset in bytes
-                                            lut_in_size_bytes,                  // Size in bytes
-                                            casted_lut,                         // Pointer to the data to copy
-                                            nullptr));
+               OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, image_in_size_bytes, interleaved_img.data));
+
+         }
+
+         else {
+               OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, image_in_size_bytes, out_img_12bit.data));
+         }
+
+         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inLut,      // buffer on the FPGA
+                                             CL_TRUE,           // blocking call
+                                             0,                 // buffer offset in bytes
+                                             lut_in_size_bytes, // Size in bytes
+                                             casted_lut,        // Pointer to the data to copy
+                                             nullptr));
         // Profiling Objects
         cl_ulong start = 0;
         cl_ulong end = 0;

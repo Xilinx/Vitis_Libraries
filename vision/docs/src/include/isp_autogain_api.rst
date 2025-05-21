@@ -72,10 +72,10 @@ This ISP autogain pipeline includes 9 modules, as follows:
     +-------------------------+-----------------------------------------------------------+
     | ccm_config_1            | ccm_matrix Fixed-point Q(12,20)                           |
     |                         | Computed as (signed int)(ccm_matrix_float * 1048576)      |
-    +-------------------------+---------------------------------------------------------- +
-    | ccm_config_2            | offsetarray Fixed-point Q(12,20)                         |
+    +-------------------------+-----------------------------------------------------------+
+    | ccm_config_2            | offsetarray Fixed-point Q(12,20)                          |
     |                         | Computed as (signed int)(offsetarray_float * 1048576)     |
-   +--------------------------+-----------------------------------------------------------+
+    +-------------------------+-----------------------------------------------------------+
     | bformat                 | Input Bayer pattern. XF_BAYER_BG, XF_BAYER_GB,            |
     |                         | XF_BAYER_GR, and XF_BAYER_RG are the supported            |
     |                         | values.                                                   |
@@ -143,13 +143,13 @@ The following example demonstrates the top-level ISP pipeline:
             }
 
 Create and Launch Kernel in the Testbench:
-===========================================
 
-Histogram needs 1 frame to populate the bins and next frame to process the bin values 
-to compute the autogain and to get correct results in the auto exposure frame. 
-Auto white balance, GTM and other tone-mapping functions need one extra frame in each 
-to populate its parameters and apply those parameters to get a correct image. For the 
-specific example below, 3  iterations are needed because the AWB module is selected.
+
+-  Histogram needs 1 frame to populate the bins and next frame to process the bin values 
+   to compute the autogain and to get correct results in the auto exposure frame. 
+   Auto white balance, GTM and other tone-mapping functions need one extra frame in each 
+   to populate its parameters and apply those parameters to get a correct image. For the 
+   specific example below, 3  iterations are needed because the AWB module is selected.
 
 
 .. code:: c

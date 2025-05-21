@@ -554,17 +554,12 @@ Below is the top-level/wrapper function with all necessary glue logic.
 Evaluating the Functionality
 =============================
 
-You can build the kernels and test the functionality through software
-emulation, hardware emulation, and running directly on supported
+You can build the kernels and test the functionality through hardware emulation, and running directly on supported
 hardware with the FPGA. 
-
-**Software Emulation**: Software emulation is equivalent to running a C-simulation of the
-kernel. The time for compilation is minimal, and is therefore
-recommended to be the first step in testing the kernel.
 
 **Hardware Emulation**: Hardware emulation runs the test on the generated RTL after synthesis of
 the C/C++ code. The simulation, since being done on RTL requires longer
-to complete when compared to software emulation. 
+to complete.
 
 **Testing on the Hardware**: To test on hardware, the kernel must be compiled into a bitstream
 (building for hardware). This would consume some time since the C/C++ code must be converted to

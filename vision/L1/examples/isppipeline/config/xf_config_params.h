@@ -40,6 +40,7 @@
 #include "imgproc/xf_quantizationdithering.hpp"
 #include "imgproc/xf_gammacorrection.hpp"
 #include "imgproc/xf_resize.hpp"
+#include "imgproc/xf_ltm.hpp"
 
 //  XF_CV_DEPTHS for all the pipeline functions
 
@@ -110,6 +111,9 @@ enum max_supported_size_index { MAX_WIDTH_INDEX = 0, MAX_HEIGHT_INDEX = 16 };
 #define FL_POS 15
 #define USE_DSP 1
 #define XF_CCM_TYPE XF_CCM_bt2020_bt709
+static constexpr int BLOCK_HEIGHT = 32;
+static constexpr int BLOCK_WIDTH = 32;
+static constexpr int BIL_T = XF_32FC3;
 
 // --------------------------------------------------------------------
 // Macros definitions
@@ -166,7 +170,7 @@ typedef hls::stream<OutVideoStrmBus_t> OutVideoStrm_t;
 #define XF_AWB_EN 1
 #define XF_CCM_EN 1
 #define XF_TM_EN 1   // In this pipeline "XF_TM_EN" is fixed to '1"
-#define XF_TM_TYPE 2 // LTM = 0,gtm = 1,xf_QuatizationDithering = 2. In this pipeline "XF_TM_TYPE" is fixed to  "2"
+#define XF_TM_TYPE 2 // LTM = 0,gtm = 1,xf_QuatizationDithering = 2. In this pipeline only LTM and xf_QuatizationDithering are supported.
 #define XF_GAMMA_EN 1
 
 // Below flags are only informative for the host/driver to know which of the kernels in the pipeline can be bypassable
@@ -202,7 +206,9 @@ void ISPPipeline_accel(InVideoStrm_t& s_axis_video,
                        unsigned int blc_config_1,
                        unsigned int blc_config_2,
 #endif
+
                        unsigned int resize_config,
+
 #if XF_GAIN_EN
                        unsigned int gain_control_config_1,
                        unsigned int gain_control_config_2,
@@ -216,6 +222,9 @@ void ISPPipeline_accel(InVideoStrm_t& s_axis_video,
 #if XF_CCM_EN
                        signed int ccm_config_1[3][3],
                        signed int ccm_config_2[3],
+#endif
+#if (XF_TM_TYPE == 0)
+                       uint32_t ltm_config,
 #endif
                        unsigned int& pipeline_config_info,
                        unsigned int& max_supported_size,

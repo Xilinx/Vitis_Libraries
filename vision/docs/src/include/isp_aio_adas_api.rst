@@ -325,13 +325,13 @@ The following example demonstrates the top-level ISP pipeline:
 
 
 Create and Launch Kernel in the Testbench:
-============================================
 
-Histogram needs two frames to populate the histogram and to get correct
-auto white balance results. GTM and other tone-mapping functions need
-three frames to populate its parameters and apply those parameters to
-get a corrected image. For the specific example below, three iterations
-are needed because the GTM function is selected.
+
+-  Histogram needs two frames to populate the histogram and to get correct
+   auto white balance results. GTM and other tone-mapping functions need
+   three frames to populate its parameters and apply those parameters to
+   get a corrected image. For the specific example below, three iterations
+   are needed because the GTM function is selected.
 
 
 .. code:: c

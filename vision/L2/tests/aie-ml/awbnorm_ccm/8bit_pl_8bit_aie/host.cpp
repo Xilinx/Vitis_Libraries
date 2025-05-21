@@ -38,7 +38,7 @@
 
 int main(int argc, char** argv) {
     try {
-        if (argc != 6) {
+        if (argc < 3) {
             std::stringstream errorMessage;
             errorMessage << argv[0] << " <xclbin> <inputImage1> <input_width> <input_height> <iterations> ";
             std::cerr << errorMessage.str();
@@ -155,14 +155,16 @@ int main(int argc, char** argv) {
             stitcher.aie2host_nb(dst_hndl, dst.size(), tiles_sz);
 #if !__X86_DEVICE__
             std::cout << "Graph running for " << (tiles_sz[0] * tiles_sz[1]) << " iterations.\n";
-            for (int i = 1; i <= tiles_sz[0] * tiles_sz[1]; i++) {
-                std::cout << "Running graph iteration : " << i << std::endl;
-                std::cout << "...";
+            gHndl.run(tiles_sz[0] * tiles_sz[1]);
+            gHndl.wait();
+/*for (int i = 1; i <= tiles_sz[0] * tiles_sz[1]; i++) {
+    std::cout << "Running graph iteration : " << i << std::endl;
+    std::cout << "...";
 
-                gHndl.run(1);
-                gHndl.wait();
-                std::cout << "[DONE iteration] : " << i << std::endl;
-            }
+    gHndl.run(1);
+    gHndl.wait();
+    std::cout << "[DONE iteration] : " << i << std::endl;
+}*/
 #endif
 
             tiler1.wait();

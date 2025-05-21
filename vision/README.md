@@ -16,8 +16,6 @@ The Vitis Vision library is designed to work with Zynq™, Zynq Ultrascale+™, 
 
    b. L2/L3 flow when the target device is PCIe based.
 
-   c. L2/L3 flow when performing software emulation for an embedded platform.
-
     For L2/L3 flow targeting embedded platforms (for hardware emulation and hardware build), aarch32/aarch64 version OpenCV shipped within their *sysroot* should be used.
 
 * libOpenCL.so must be [installed](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/OpenCL-Installable-Client-Driver-Loader) if not present.
@@ -117,7 +115,6 @@ The Vitis library is organized into L1, L2, and L3 folders to facilitate various
        Makefiles and sources in ``L2/examples`` and ``L2/tests`` facilitate building XCLBIN file from various sources (HDL, HLS or XO files) of kernels with host code written in OpenCL/XRT frame work targeting a device.
 	   This flow supports:
 
-* Software emulation to check the functionality
 * Hardware emulation to check RTL level simulation
 * Build and test on hardware
 

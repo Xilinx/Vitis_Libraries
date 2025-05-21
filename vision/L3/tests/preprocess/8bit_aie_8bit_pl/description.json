@@ -4,10 +4,10 @@
     "flow": "system",
     "platform_allowlist": [
         "vek280",
-        "vck190",
         "v70"
     ],
     "platform_blocklist": [
+        "vck190",
         "vck5000"
     ],
     "platform_properties": {
