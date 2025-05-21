@@ -1,7 +1,7 @@
 {
     "name": "RocksDB Compaction Acceleration",
     "description": "RocksDB compaction comparison acceleration",
-    "flow": "vitis",
+    "flow": "system",
     "gui": false,
     "type": "application",
     "platform_type": "pcie",
