@@ -36,6 +36,11 @@ Release Note
 
 Motor Control Library is an open-sourced library written in C/C++ for accelerating developments of motor control applications. It now covers four algorithm-level L1 APIs including FOC, SVPWM_DUTY, PWM_GEN, and QEI. Operator-level APIs, such as Clarke transform and its inverse transform, Park transform and its inverse transform, and PID are also implemented.
 
+2025.1
+-------
+
+In 2025.1 release, a new version of PWM, IP_PWM_V2, is provided, which is a new implementation of the PWM generation algorithm. And the IP_VOLTAGE_MODULATION is also updated to support the new PWM generation algorithm.
+
 2024.2
 -------
 
