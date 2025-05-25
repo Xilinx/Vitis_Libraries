@@ -45,10 +45,10 @@ int main() {
     writeComplexVec2toFile<Type>(A3, fin);
     writeComplexVec2toFile<Type>(Q3, fin);
     std::cout << "Matrix_A3: \n";
-    //A3.print();
+    // A3.print();
 
     std::cout << "QRDecomposition with Householder_3 \n";
-    //A3.qrd_householder_4(Q3, R3);
+    // A3.qrd_householder_4(Q3, R3);
     A3.qrd_householder(Q3, R3);
     // std::cout << "Matrix_Q3: \n";
     // Q3.print();
@@ -69,12 +69,12 @@ int main() {
     ComplexMatrix<Type> QR3(A3);
     QR3.matrix_mul(Q3, R3);
     QR3.diff(A);
-    //QR3.print();
-    //A.print();
+    // QR3.print();
+    // A.print();
 
     std::cout << std::endl;
     std::cout << "3. Check diffCompelxMatrix \n";
-    //int errs = diffComplexLowerTriangularMatrix(QR3, A3);
+    // int errs = diffComplexLowerTriangularMatrix(QR3, A3);
     int errs = diffComplexMatrix(QR3, A);
 
     return 0;

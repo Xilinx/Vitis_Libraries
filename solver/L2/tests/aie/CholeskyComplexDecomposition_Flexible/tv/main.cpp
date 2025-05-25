@@ -31,46 +31,46 @@ int main() {
     ComplexMatrix<Type> A(M, N);
     ComplexMatrix<Type> L(M, N);
 
-    //generate random matrix L
-    //std::cout << "Generate lower triangular matrixL \n";
+    // generate random matrix L
+    // std::cout << "Generate lower triangular matrixL \n";
     for (int i = 0; i < M; i++) {
         float dataR;
         float dataI;
-        for (int j = 0; j <i; j++) {
+        for (int j = 0; j < i; j++) {
             dataR = A.random_float(1, 4, 0);
             dataI = A.random_float(1, 4, 0);
-            L.elem(i,j).real(dataR);
-            L.elem(i,j).imag(dataI);
+            L.elem(i, j).real(dataR);
+            L.elem(i, j).imag(dataI);
         }
         dataR = A.random_float(1, 4, 0);
         L.elem(i, i).real(dataR);
         L.elem(i, i).imag(0.0);
-        for(int j=i+1; j<N; j++){
+        for (int j = i + 1; j < N; j++) {
             L.elem(i, j).real(0.0);
             L.elem(i, j).imag(0.0);
         }
     }
-    //L.print();
+    // L.print();
 
     std::cout << "Gernerate matrix A: \n";
     ComplexMatrix<Type> LT(L);
     LT.conj_transpose();
     A.matrix_mul(L, LT);
-    //A.print();
+    // A.print();
     writeComplexVec2toFile<Type>(A, fin);
 
     ComplexMatrix<Type> Agld(A);
     ComplexMatrix<Type> Aout(A);
 
-    //A.cholesky_opt_1();
+    // A.cholesky_opt_1();
     A.cholesky_opt_6();
     std::cout << "Output matrix L : \n";
-    //A.print();
+    // A.print();
     std::cout << "Golden matrix L : \n";
-    //L.print();
+    // L.print();
     writeComplexVec2toFile<Type>(A, fgld);
 
-    std::cout << "Verify Cholesky: Diff gld - out"<< std::endl;
+    std::cout << "Verify Cholesky: Diff gld - out" << std::endl;
     int errs = diffComplexLowerTriangularMatrix(L, A);
 
     return 0;

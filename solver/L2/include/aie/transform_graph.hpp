@@ -65,7 +65,6 @@ class Transform_Graph : public adf::graph {
      * @brief This is the constructor function for the Transform_Graph.
      **/
     Transform_Graph() {
-
         k0 = kernel::create(transform<rowA_num, colA_num, colB_num>);
         headers(k0) = {"lstqr_kernel.hpp"};
         // source file

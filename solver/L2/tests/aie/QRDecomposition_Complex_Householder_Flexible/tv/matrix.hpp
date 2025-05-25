@@ -429,7 +429,7 @@ class ComplexMatrix {
             T diag = 0;
             T invDiag = 1;
             for (int i = 0; i < j; i++) {
-                elem(i, j)={0.0, 0.0};
+                elem(i, j) = {0.0, 0.0};
             }
 
             cdiv(j);
@@ -456,21 +456,21 @@ class ComplexMatrix {
         for (int b = 0; b < N; b += BlkSize) {
             for (int c = 0; c < BlkSize; c++) {
                 int j = b + c;
-                for(int i=0; i<j; i++){
-                    elem(i,j) = {0.0, 0.0};
+                for (int i = 0; i < j; i++) {
+                    elem(i, j) = {0.0, 0.0};
                 }
-                //std::cout << "BLK_ID=" << b << "_" << c << ", columnId=" << j << std::endl;
+                // std::cout << "BLK_ID=" << b << "_" << c << ", columnId=" << j << std::endl;
                 for (int k = b; (k < j); k++) {
                     cmod(j, k);
-                    //std::cout << "FLOW0: j=" << j << ", k=" << k << ", cmod_" << j << "_" << k << std::endl;
+                    // std::cout << "FLOW0: j=" << j << ", k=" << k << ", cmod_" << j << "_" << k << std::endl;
                 }
                 cdiv(j);
-                //std::cout << "j=" << j << ", cdiv_" << j << std::endl;
+                // std::cout << "j=" << j << ", cdiv_" << j << std::endl;
             }
             for (int p = BlkSize + b; p < N; p++) {
                 for (int k = b; k < BlkSize + b; k++) {
                     cmod(p, k);
-                    //std::cout << "FLOW1: j=" << p << ", k=" << k << ", cmod_" << p << "_" << k << std::endl;
+                    // std::cout << "FLOW1: j=" << p << ", k=" << k << ", cmod_" << p << "_" << k << std::endl;
                 }
             }
         }

@@ -21,7 +21,7 @@
 #include <cstring>
 #include "matrix.hpp"
 
-using namespace std; 
+using namespace std;
 void printMatrix(std::string file0, std::string file1, int row0, int col0, int row1, int col1) {
     ifstream fd0, fd1;
     char c = 'T';
@@ -138,8 +138,8 @@ int diffComplexMatrix(ComplexMatrix<T>& A, ComplexMatrix<T>& B) {
     ComplexMatrix<T> Diff(A.M, A.N, 0.0);
     Diff.matrix_sub(A, B);
     for (int j = 0; j < A.N; j++) {
-        for (int i = 0; i < A.M; i ++) {
-            if( (Diff.elem(i,j).real() > 0.009)||(Diff.elem(i,j).imag() > 0.009)) {
+        for (int i = 0; i < A.M; i++) {
+            if ((Diff.elem(i, j).real() > 0.009) || (Diff.elem(i, j).imag() > 0.009)) {
                 errs += 1;
             }
         }
@@ -154,8 +154,8 @@ int diffComplexLowerTriangularMatrix(ComplexMatrix<T>& A, ComplexMatrix<T>& B) {
     ComplexMatrix<T> Diff(A.M, A.N, 0.0);
     Diff.matrix_sub(A, B);
     for (int j = 0; j < A.N; j++) {
-        for (int i = j; i < A.M; i ++) {
-            if( (Diff.elem(i,j).real() > 0.009)||(Diff.elem(i,j).imag() > 0.009)) {
+        for (int i = j; i < A.M; i++) {
+            if ((Diff.elem(i, j).real() > 0.009) || (Diff.elem(i, j).imag() > 0.009)) {
                 errs += 1;
             }
         }
@@ -169,11 +169,11 @@ void writeComplextoFile(ComplexMatrix<T>& X, std::string filename0) {
     ofstream myfile0;
     myfile0.open(filename0.c_str());
     if (!myfile0) {
-            std::cout << "[ERROR]: file " << filename0 << "could not be opened !" << std::endl;
-            exit(1);
-        }
+        std::cout << "[ERROR]: file " << filename0 << "could not be opened !" << std::endl;
+        exit(1);
+    }
     for (int j = 0; j < X.N; j++) {
-        for (int i = 0; i < X.M; i ++) {
+        for (int i = 0; i < X.M; i++) {
             myfile0 << X.elem(i + 0, j).real() << " ";
             myfile0 << X.elem(i + 0, j).imag() << " " << std::endl;
         }
@@ -186,9 +186,9 @@ void writeComplexVec2toFile(ComplexMatrix<T>& X, std::string filename0) {
     ofstream myfile0;
     myfile0.open(filename0.c_str(), std::ios::app);
     if (!myfile0) {
-            std::cout << "[ERROR]: file " << filename0 << " could not be opened !" << std::endl;
-            exit(1);
-        }
+        std::cout << "[ERROR]: file " << filename0 << " could not be opened !" << std::endl;
+        exit(1);
+    }
     for (int j = 0; j < X.N; j++) {
         for (int i = 0; i < X.M; i += 2) {
             myfile0 << X.elem(i + 0, j).real() << " ";
@@ -264,8 +264,8 @@ void writeComplexToFiles_backwords(ComplexMatrix<T>& X, std::string filename0, s
     ofstream myfile1;
     myfile0.open(filename0.c_str());
     myfile1.open(filename1.c_str());
-    for (int j = X.N-1; j >= 0; j--) {
-        for (int i = X.M-1; i >= 0; i --) {
+    for (int j = X.N - 1; j >= 0; j--) {
+        for (int i = X.M - 1; i >= 0; i--) {
             myfile0 << X.elem(i, j).real() << " " << std::endl;
             myfile1 << X.elem(i, j).imag() << " " << std::endl;
         }
@@ -280,8 +280,8 @@ void writeCVec4File2_backwords(ComplexMatrix<T>& A, ComplexMatrix<T>& B, std::st
     ofstream myfile1;
     myfile0.open(filename0.c_str());
     myfile1.open(filename1.c_str());
-    for (int j = A.N-1; j >= 0; j--) {
-        for (int i = A.M-1; i >= 0; i -= 4) {
+    for (int j = A.N - 1; j >= 0; j--) {
+        for (int i = A.M - 1; i >= 0; i -= 4) {
             myfile0 << A.elem(i - 0, j).real() << " ";
             myfile1 << A.elem(i - 0, j).imag() << " ";
             myfile0 << A.elem(i - 1, j).real() << " ";
@@ -293,8 +293,8 @@ void writeCVec4File2_backwords(ComplexMatrix<T>& A, ComplexMatrix<T>& B, std::st
             myfile1 << A.elem(i - 3, j).imag() << " " << std::endl;
         }
     }
-    for (int j = B.N-1; j >= 0; j--) {
-        for (int i = B.M-1; i >=0; i -= 4) {
+    for (int j = B.N - 1; j >= 0; j--) {
+        for (int i = B.M - 1; i >= 0; i -= 4) {
             myfile0 << B.elem(i - 0, j).real() << " ";
             myfile1 << B.elem(i - 0, j).imag() << " ";
             myfile0 << B.elem(i - 1, j).real() << " ";

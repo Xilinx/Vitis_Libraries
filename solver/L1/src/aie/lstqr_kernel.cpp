@@ -694,9 +694,9 @@ void transform(input_stream<cfloat>* __restrict in0,
 
     // transfer upper triangular marix R
     for (int j = 0; j < N; j++) {
-        numBlk = (j+1) / 4;
-        numElm = j+1 - 4 * numBlk;
-        for (int i = 0; i < numBlk; i ++) {
+        numBlk = (j + 1) / 4;
+        numElm = j + 1 - 4 * numBlk;
+        for (int i = 0; i < numBlk; i++) {
             v4int32 tmpv_0 = READINCRW(WSS_rsrc1, in0);
             v4int32 tmpv_1 = READINCRW(WSS_rsrc2, in1);
             tmpv = upd_v(tmpv, 0, tmpv_0);
@@ -709,7 +709,7 @@ void transform(input_stream<cfloat>* __restrict in0,
             WRITEINCRW(WMS_rsrc1, out0, tmpv_0);
             WRITEINCRW(WMS_rsrc2, out1, tmpv_1);
         }
-        for (int i = numBlk; i < numBlk+1; i ++) {
+        for (int i = numBlk; i < numBlk + 1; i++) {
             v4int32 tmpv_0 = READINCRW(WSS_rsrc1, in0);
             v4int32 tmpv_1 = READINCRW(WSS_rsrc2, in1);
             tmpv = upd_v(tmpv, 0, tmpv_0);
@@ -724,7 +724,7 @@ void transform(input_stream<cfloat>* __restrict in0,
                 WRITEINCR(MS_rsrc2, out1, tmpI.i);
             }
         }
-        for (int i = numBlk+1; i < M/4; i ++) {
+        for (int i = numBlk + 1; i < M / 4; i++) {
             v4int32 tmpv_0 = READINCRW(WSS_rsrc1, in0);
             v4int32 tmpv_1 = READINCRW(WSS_rsrc2, in1);
         }
@@ -733,7 +733,7 @@ void transform(input_stream<cfloat>* __restrict in0,
     numBlk = N / 4;
     numElm = N - 4 * numBlk;
     for (int j = 0; j < K; j++) {
-        for (int i = 0; i < numBlk; i ++) {
+        for (int i = 0; i < numBlk; i++) {
             v4int32 tmpv_0 = READINCRW(WSS_rsrc1, in0);
             v4int32 tmpv_1 = READINCRW(WSS_rsrc2, in1);
             tmpv = upd_v(tmpv, 0, tmpv_0);
@@ -746,7 +746,7 @@ void transform(input_stream<cfloat>* __restrict in0,
             WRITEINCRW(WMS_rsrc1, out0, tmpv_0);
             WRITEINCRW(WMS_rsrc2, out1, tmpv_1);
         }
-        for (int i = numBlk; i < numBlk+1; i ++) {
+        for (int i = numBlk; i < numBlk + 1; i++) {
             v4int32 tmpv_0 = READINCRW(WSS_rsrc1, in0);
             v4int32 tmpv_1 = READINCRW(WSS_rsrc2, in1);
             tmpv = upd_v(tmpv, 0, tmpv_0);
@@ -761,7 +761,7 @@ void transform(input_stream<cfloat>* __restrict in0,
                 WRITEINCR(MS_rsrc2, out1, tmpI.i);
             }
         }
-        for (int i = numBlk+1; i < M/4; i ++) {
+        for (int i = numBlk + 1; i < M / 4; i++) {
             v4int32 tmpv_0 = READINCRW(WSS_rsrc1, in0);
             v4int32 tmpv_1 = READINCRW(WSS_rsrc2, in1);
         }
@@ -770,18 +770,18 @@ void transform(input_stream<cfloat>* __restrict in0,
 
 template <int M, int N, int K>
 void backSubstitution(input_stream<float>* __restrict matRC_0,
-                          input_stream<float>* __restrict matRC_1,
-                          output_stream<float>* __restrict matXC_0,
-                          output_stream<float>* __restrict matXC_1,
-                          const int column_id) {
-    const int L = (N+3)/4;
-    int numCol = N-column_id-1;
-    int numRblk = numCol / 4; 
-    int numRelm = numCol - numRblk* 4; 
-    int numTrans = (N-column_id-1)*(N-column_id)/2;
-    int numTblk = numTrans/4; 
-    int numTelm = numTrans - numTblk*4;
-    int numCblk = 0; 
+                      input_stream<float>* __restrict matRC_1,
+                      output_stream<float>* __restrict matXC_0,
+                      output_stream<float>* __restrict matXC_1,
+                      const int column_id) {
+    const int L = (N + 3) / 4;
+    int numCol = N - column_id - 1;
+    int numRblk = numCol / 4;
+    int numRelm = numCol - numRblk * 4;
+    int numTrans = (N - column_id - 1) * (N - column_id) / 2;
+    int numTblk = numTrans / 4;
+    int numTelm = numTrans - numTblk * 4;
+    int numCblk = 0;
     int numCelm = 0;
     v4float v4Rreal[L];
     v4float v4Rimag[L];
@@ -807,103 +807,103 @@ void backSubstitution(input_stream<float>* __restrict matRC_0,
     cfloat cmod = cdiag * aie::conj(cdiag);
     float mod = cmod.real;
 
-    for(int i=0; i<numRblk; i++) chess_prepare_for_pipelining {
-        v4float tmpv_0 = as_v4float(READINCRW(WSS_rsrc1, matRC_0));
-        v4float tmpv_1 = as_v4float(READINCRW(WSS_rsrc2, matRC_1));
-        v4Rreal[i] = tmpv_0;
-        v4Rimag[i] = tmpv_1;
-    }
-    for(int i=0; i<numRelm; i++) chess_prepare_for_pipelining {
-        rR.i = READINCR(SS_rsrc1, matRC_0);
-        rI.i = READINCR(SS_rsrc2, matRC_1);
-        tmpRvec[i] = rR.f;
-        tmpIvec[i] = rI.f;
-    }
+    for (int i = 0; i < numRblk; i++) chess_prepare_for_pipelining {
+            v4float tmpv_0 = as_v4float(READINCRW(WSS_rsrc1, matRC_0));
+            v4float tmpv_1 = as_v4float(READINCRW(WSS_rsrc2, matRC_1));
+            v4Rreal[i] = tmpv_0;
+            v4Rimag[i] = tmpv_1;
+        }
+    for (int i = 0; i < numRelm; i++) chess_prepare_for_pipelining {
+            rR.i = READINCR(SS_rsrc1, matRC_0);
+            rI.i = READINCR(SS_rsrc2, matRC_1);
+            tmpRvec[i] = rR.f;
+            tmpIvec[i] = rI.f;
+        }
     tmpRv = tmpRvec;
     tmpIv = tmpIvec;
     v4Rreal[numRblk] = tmpRv;
     v4Rimag[numRblk] = tmpIv;
-    for(int k=0; k<numTblk; k++) chess_prepare_for_pipelining {
-        v4int32 tmpv_0 = READINCRW(WSS_rsrc1, matRC_0);
-        v4int32 tmpv_1 = READINCRW(WSS_rsrc2, matRC_1);
-        WRITEINCRW(WMS_rsrc1, matXC_0, tmpv_0);
-        WRITEINCRW(WMS_rsrc2, matXC_1, tmpv_1);
-    }
-    for(int k=0; k<numTelm; k++) chess_prepare_for_pipelining {
-        int tmp0 = READINCR(SS_rsrc1, matRC_0);
-        int tmp1 = READINCR(SS_rsrc2, matRC_1);
-        WRITEINCR(MS_rsrc1, matXC_0, tmp0);
-        WRITEINCR(MS_rsrc2, matXC_1, tmp1);
-    }
-
-    for(int k=0; k<K; k++) {
-        numCblk = (column_id)/4;
-        numCelm = column_id - numCblk*4;
-        for(int i=0; i<numCblk; i++) chess_prepare_for_pipelining {
+    for (int k = 0; k < numTblk; k++) chess_prepare_for_pipelining {
             v4int32 tmpv_0 = READINCRW(WSS_rsrc1, matRC_0);
             v4int32 tmpv_1 = READINCRW(WSS_rsrc2, matRC_1);
             WRITEINCRW(WMS_rsrc1, matXC_0, tmpv_0);
             WRITEINCRW(WMS_rsrc2, matXC_1, tmpv_1);
         }
-        for(int i=0; i<numCelm; i++) chess_prepare_for_pipelining {
+    for (int k = 0; k < numTelm; k++) chess_prepare_for_pipelining {
             int tmp0 = READINCR(SS_rsrc1, matRC_0);
             int tmp1 = READINCR(SS_rsrc2, matRC_1);
             WRITEINCR(MS_rsrc1, matXC_0, tmp0);
             WRITEINCR(MS_rsrc2, matXC_1, tmp1);
         }
+
+    for (int k = 0; k < K; k++) {
+        numCblk = (column_id) / 4;
+        numCelm = column_id - numCblk * 4;
+        for (int i = 0; i < numCblk; i++) chess_prepare_for_pipelining {
+                v4int32 tmpv_0 = READINCRW(WSS_rsrc1, matRC_0);
+                v4int32 tmpv_1 = READINCRW(WSS_rsrc2, matRC_1);
+                WRITEINCRW(WMS_rsrc1, matXC_0, tmpv_0);
+                WRITEINCRW(WMS_rsrc2, matXC_1, tmpv_1);
+            }
+        for (int i = 0; i < numCelm; i++) chess_prepare_for_pipelining {
+                int tmp0 = READINCR(SS_rsrc1, matRC_0);
+                int tmp1 = READINCR(SS_rsrc2, matRC_1);
+                WRITEINCR(MS_rsrc1, matXC_0, tmp0);
+                WRITEINCR(MS_rsrc2, matXC_1, tmp1);
+            }
         cR.i = READINCR(SS_rsrc1, matRC_0);
         cI.i = READINCR(SS_rsrc2, matRC_1);
         cfloat c;
         c.real = cR.f;
         c.imag = cI.f;
-        cdata = c*cdiag; 
+        cdata = c * cdiag;
         cdata = cdata * aie::inv(mod);
-        
+
         outR.f = cdata.real;
         outI.f = cdata.imag;
         WRITEINCR(MS_rsrc1, matXC_0, outR.i);
         WRITEINCR(MS_rsrc2, matXC_1, outI.i);
-        for(int i=0; i<numRblk; i++) chess_prepare_for_pipelining {
-            v4float tmpv_0 = as_v4float(READINCRW(WSS_rsrc1, matRC_0));
-            v4float tmpv_1 = as_v4float(READINCRW(WSS_rsrc2, matRC_1));
-            aie::vector<float, 4> cRvec = tmpv_0;
-            aie::vector<float, 4> cIvec = tmpv_1;
-            aie::vector<float, 4> rRvec = v4Rreal[i];
-            aie::vector<float, 4> rIvec = v4Rimag[i];
+        for (int i = 0; i < numRblk; i++) chess_prepare_for_pipelining {
+                v4float tmpv_0 = as_v4float(READINCRW(WSS_rsrc1, matRC_0));
+                v4float tmpv_1 = as_v4float(READINCRW(WSS_rsrc2, matRC_1));
+                aie::vector<float, 4> cRvec = tmpv_0;
+                aie::vector<float, 4> cIvec = tmpv_1;
+                aie::vector<float, 4> rRvec = v4Rreal[i];
+                aie::vector<float, 4> rIvec = v4Rimag[i];
 
-            aie::accum<accfloat, 4> accRvec;
-            aie::accum<accfloat, 4> accIvec;
-            accRvec.from_vector(cRvec);
-            accIvec.from_vector(cIvec);
-            accRvec = aie::msc(accRvec, rRvec, outR.f);
-            accRvec = aie::mac(accRvec, rIvec, outI.f);
-            accIvec = aie::msc(accIvec, rRvec, outI.f);
-            accIvec = aie::msc(accIvec, rIvec, outR.f);
-            cRvec = accRvec.to_vector<float>();
-            cIvec = accIvec.to_vector<float>();
+                aie::accum<accfloat, 4> accRvec;
+                aie::accum<accfloat, 4> accIvec;
+                accRvec.from_vector(cRvec);
+                accIvec.from_vector(cIvec);
+                accRvec = aie::msc(accRvec, rRvec, outR.f);
+                accRvec = aie::mac(accRvec, rIvec, outI.f);
+                accIvec = aie::msc(accIvec, rRvec, outI.f);
+                accIvec = aie::msc(accIvec, rIvec, outR.f);
+                cRvec = accRvec.to_vector<float>();
+                cIvec = accIvec.to_vector<float>();
 
-            WRITEINCRW(WMS_rsrc1, matXC_0, as_v4int32(cRvec));
-            WRITEINCRW(WMS_rsrc2, matXC_1,  as_v4int32(cIvec));
-        }
+                WRITEINCRW(WMS_rsrc1, matXC_0, as_v4int32(cRvec));
+                WRITEINCRW(WMS_rsrc2, matXC_1, as_v4int32(cIvec));
+            }
         tmpRvec = v4Rreal[numRblk];
         tmpIvec = v4Rimag[numRblk];
-        for(int i=0; i<numRelm; i++) chess_prepare_for_pipelining {
-            cR.i = READINCR(SS_rsrc1, matRC_0);
-            cI.i = READINCR(SS_rsrc2, matRC_1);
-            float rijR = tmpRvec[i];
-            float rijI = tmpIvec[i];
-            cfloat c;
-            c.real = cR.f;
-            c.imag = cI.f;
-            cfloat rij;
-            rij.real = rijR;
-            rij.imag = rijI;
-            c = c - rij*cdata;
-            cR.f = c.real;
-            cI.f = c.imag;
-            WRITEINCR(MS_rsrc1, matXC_0, cR.i);
-            WRITEINCR(MS_rsrc2, matXC_1, cI.i);
-        }
+        for (int i = 0; i < numRelm; i++) chess_prepare_for_pipelining {
+                cR.i = READINCR(SS_rsrc1, matRC_0);
+                cI.i = READINCR(SS_rsrc2, matRC_1);
+                float rijR = tmpRvec[i];
+                float rijI = tmpIvec[i];
+                cfloat c;
+                c.real = cR.f;
+                c.imag = cI.f;
+                cfloat rij;
+                rij.real = rijR;
+                rij.imag = rijI;
+                c = c - rij * cdata;
+                cR.f = c.real;
+                cI.f = c.imag;
+                WRITEINCR(MS_rsrc1, matXC_0, cR.i);
+                WRITEINCR(MS_rsrc2, matXC_1, cI.i);
+            }
     }
 } // end_backSubstitution
 

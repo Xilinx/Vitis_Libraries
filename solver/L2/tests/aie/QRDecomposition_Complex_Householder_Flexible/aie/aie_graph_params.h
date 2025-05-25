@@ -18,8 +18,8 @@
 #ifndef __TEST_PARAMS_H__
 #define __TEST_PARAMS_H__
 
-//const unsigned int ROW = 8;
-//const unsigned int COL = 8;
+// const unsigned int ROW = 8;
+// const unsigned int COL = 8;
 const unsigned int ROW = 64;
 const unsigned int COL = 32;
 // const unsigned int ROW = 256;
@@ -27,11 +27,11 @@ const unsigned int COL = 32;
 // const unsigned int ROW = 512;
 // const unsigned int COL = 256;
 const int BlkNum = 4;
-const int CoreNum = COL/BlkNum;
+const int CoreNum = COL / BlkNum;
 const int row_num = ROW;
 const int col_num = COL;
 
-std::string fin  = "data/in_"  + std::to_string(ROW) + "_" + std::to_string(COL) + ".txt";
+std::string fin = "data/in_" + std::to_string(ROW) + "_" + std::to_string(COL) + ".txt";
 std::string fgld = "data/gld_" + std::to_string(ROW) + "_" + std::to_string(COL) + ".txt";
 std::string fout = "data/out_" + std::to_string(ROW) + "_" + std::to_string(COL) + ".txt";
 

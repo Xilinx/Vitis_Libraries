@@ -3,7 +3,6 @@
     "api_list": [
         {
             "api_name": "xf::solver::qrd",
-            "target_domain": "PL",
             "family": "Versal ACAP",
             "spec": {
                 "schema": "vitis_library_api_spec_schema-1.0",
@@ -100,11 +99,11 @@
                     }
                 ],
                 "visible": true
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::qrd_float",
-            "target_domain": "PL",
             "family": "Versal ACAP",
             "spec": {
                 "schema": "vitis_library_api_spec_schema-1.0",
@@ -201,7 +200,8 @@
                     }
                 ],
                 "visible": true
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::back_substitute_recip",
@@ -382,17 +382,17 @@
                 "ports": [
                     {
                         "name": "matrixAStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< InputType > &"
                     },
                     {
                         "name": "matrixBStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< OutputType > &"
                     },
                     {
                         "name": "is_singular",
-                        "direction": "",
+                        "direction": "output",
                         "type": "int &"
                     }
                 ],
@@ -524,11 +524,11 @@
                     },
                     {
                         "name": "InputType",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "OutputType",
-                        "type": "class"
+                        "type": "typename"
                     }
                 ],
                 "ports": [],
@@ -566,11 +566,11 @@
                     },
                     {
                         "name": "InputType",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "OutputType",
-                        "type": "class"
+                        "type": "typename"
                     }
                 ],
                 "ports": [],
@@ -608,11 +608,11 @@
                     },
                     {
                         "name": "InputType",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "OutputType",
-                        "type": "class"
+                        "type": "typename"
                     }
                 ],
                 "ports": [],
@@ -650,11 +650,11 @@
                     },
                     {
                         "name": "InputType",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "OutputType",
-                        "type": "class"
+                        "type": "typename"
                     }
                 ],
                 "ports": [],
@@ -693,7 +693,7 @@
                     },
                     {
                         "name": "InputType",
-                        "type": "class",
+                        "type": "typename",
                         "description": "Input data type",
                         "enum": [
                             "float",
@@ -703,7 +703,7 @@
                     },
                     {
                         "name": "OutputType",
-                        "type": "class",
+                        "type": "typename",
                         "description": "Output data type",
                         "enum": [
                             "float",
@@ -725,11 +725,11 @@
                     }
                 ],
                 "visible": true
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::choleskyInverse",
-            "target_domain": "PL",
             "spec": {
                 "schema": "vitis_library_api_spec_schema-1.0",
                 "api_name": "xf::solver::choleskyInverse",
@@ -754,7 +754,7 @@
                     },
                     {
                         "name": "InputType",
-                        "type": "class",
+                        "type": "typename",
                         "description": "Input data type",
                         "enum": [
                             "float",
@@ -764,7 +764,7 @@
                     },
                     {
                         "name": "OutputType",
-                        "type": "class",
+                        "type": "typename",
                         "description": "Output data type",
                         "enum": [
                             "float",
@@ -791,7 +791,8 @@
                     }
                 ],
                 "visible": true
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::matrixMultiplyDefault",
@@ -811,11 +812,11 @@
                 "parameters": [
                     {
                         "name": "TransposeFormA",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "TransposeFormB",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "RowsA",
@@ -877,11 +878,11 @@
                 "parameters": [
                     {
                         "name": "TransposeFormA",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "TransposeFormB",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "RowsA",
@@ -943,11 +944,11 @@
                 "parameters": [
                     {
                         "name": "TransposeFormA",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "TransposeFormB",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "RowsA",
@@ -1009,11 +1010,11 @@
                 "parameters": [
                     {
                         "name": "TransposeFormA",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "TransposeFormB",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "RowsA",
@@ -1075,11 +1076,11 @@
                 "parameters": [
                     {
                         "name": "TransposeFormA",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "TransposeFormB",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "RowsA",
@@ -1141,11 +1142,11 @@
                 "parameters": [
                     {
                         "name": "TransposeFormA",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "TransposeFormB",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "RowsA",
@@ -1207,12 +1208,12 @@
                 "parameters": [
                     {
                         "name": "TransposeFormA1",
-                        "type": "class",
+                        "type": "typename",
                         "description": "Defines if the first matix is transposed before the multiplication. Valid values are: NoTranspose, Transpose, ConjugateTranspose"
                     },
                     {
                         "name": "TransposeFormA2",
-                        "type": "class",
+                        "type": "typename",
                         "description": "Defines if the second matix is transposed before the multiplication."
                     },
                     {
@@ -1254,12 +1255,12 @@
                 "ports": [
                     {
                         "name": "matrixAStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< InputType > &"
                     },
                     {
                         "name": "matrixCStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< OutputType > &"
                     }
                 ],
@@ -1347,7 +1348,6 @@
         },
         {
             "api_name": "xf::solver::qrInverse",
-            "target_domain": "PL",
             "spec": {
                 "schema": "vitis_library_api_spec_schema-1.0",
                 "api_name": "xf::solver::qrInverse",
@@ -1372,7 +1372,7 @@
                     },
                     {
                         "name": "InputType",
-                        "type": "class",
+                        "type": "typename",
                         "description": "Input data type",
                         "enum": [
                             "float",
@@ -1381,7 +1381,7 @@
                     },
                     {
                         "name": "OutputType",
-                        "type": "class",
+                        "type": "typename",
                         "description": "Output data type",
                         "enum": [
                             "float",
@@ -1407,7 +1407,8 @@
                     }
                 ],
                 "visible": true
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::qrf_require_extra_pass",
@@ -1453,7 +1454,7 @@
                 "parameters": [
                     {
                         "name": "T",
-                        "type": "class"
+                        "type": "typename"
                     }
                 ],
                 "ports": [],
@@ -1775,17 +1776,17 @@
                 "ports": [
                     {
                         "name": "matrixAStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< InputType > &"
                     },
                     {
                         "name": "matrixQStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< OutputType > &"
                     },
                     {
                         "name": "matrixRStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< OutputType > &"
                     }
                 ],
@@ -2003,7 +2004,7 @@
                     },
                     {
                         "name": "SVDTraits",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "InputType",
@@ -2045,7 +2046,7 @@
                     },
                     {
                         "name": "SVDTraits",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "InputType",
@@ -2087,7 +2088,7 @@
                     },
                     {
                         "name": "SVDTraits",
-                        "type": "class"
+                        "type": "typename"
                     },
                     {
                         "name": "InputType",
@@ -2135,7 +2136,7 @@
                     },
                     {
                         "name": "InputType",
-                        "type": "class",
+                        "type": "typename",
                         "description": "Input data type",
                         "enum": [
                             "float",
@@ -2145,7 +2146,7 @@
                     },
                     {
                         "name": "OutputType",
-                        "type": "class",
+                        "type": "typename",
                         "description": "Output data type",
                         "enum": [
                             "float",
@@ -2199,12 +2200,12 @@
                 "ports": [
                     {
                         "name": "matA",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "input_stream<float>* "
                     },
                     {
                         "name": "matL",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "output_stream<float>* "
                     }
                 ],
@@ -2235,22 +2236,22 @@
                 "ports": [
                     {
                         "name": "matA_real",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "input_stream<float>* "
                     },
                     {
                         "name": "matA_imag",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "input_stream<float>* "
                     },
                     {
                         "name": "matL_real",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "output_stream<float>* "
                     },
                     {
                         "name": "matL_imag",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "output_stream<float>* "
                     }
                 ],
@@ -2297,27 +2298,27 @@
                 "ports": [
                     {
                         "name": "current_column",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "in_0",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "input_stream_cfloat* "
                     },
                     {
                         "name": "in_1",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "input_stream_cfloat* "
                     },
                     {
                         "name": "out_0",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "output_stream_cfloat* "
                     },
                     {
                         "name": "out_1",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "output_stream_cfloat* "
                     }
                 ],
@@ -2329,6 +2330,5 @@
             },
             "target_domain": "AIE"
         }
-    ],
-    "target_domain": ""
+    ]
 }

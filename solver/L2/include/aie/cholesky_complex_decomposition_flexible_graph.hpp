@@ -17,7 +17,8 @@
 
 /**
  * @file cholesky_complex_decomposition_flexible_graph.hpp
- * @brief This file captures the definition of the `L2` graph level class for the flexible Cholesky Decomposition with cfloat
+ * @brief This file captures the definition of the `L2` graph level class for the flexible Cholesky Decomposition with
+ *cfloat
  *data type.
  **/
 
@@ -47,7 +48,7 @@ class CholeskyFlexibleGraph : public adf::graph {
     /**
      * kernel instance.
      * The chain of kernels that will be created and mapped on AIE tiles.
-     * Number of kernels (`CoreNum`) will be connected with each other in series. 
+     * Number of kernels (`CoreNum`) will be connected with each other in series.
      **/
     kernel k[CoreNum];
 

@@ -42,28 +42,28 @@
                 "ports": [
                     {
                         "name": "m",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "n",
-                        "direction": "",
-                        "type": "it lda,"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "A",
-                        "direction": "",
-                        "type": "T *ta"
+                        "direction": "input",
+                        "type": "T *"
                     },
                     {
                         "name": "lda",
-                        "direction": "",
-                        "type": "T *ta"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "tau",
-                        "direction": "",
-                        "type": "T *ta"
+                        "direction": "output",
+                        "type": "T *"
                     }
                 ],
                 "visible": false
@@ -148,43 +148,48 @@
                 ],
                 "ports": [
                     {
+                        "name": "m",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
                         "name": "A",
-                        "direction": "",
-                        "type": "int m, T *"
+                        "direction": "input",
+                        "type": "T *"
                     },
                     {
                         "name": "S",
-                        "direction": "",
-                        "type": "int lda, T *"
+                        "direction": "output",
+                        "type": "T *"
                     },
                     {
                         "name": "U",
-                        "direction": "",
+                        "direction": "output",
                         "type": "T *"
                     },
                     {
                         "name": "V",
-                        "direction": "",
-                        "type": "int ldu, T *"
+                        "direction": "output",
+                        "type": "T *"
                     },
                     {
                         "name": "lda",
-                        "direction": "",
-                        "type": "int ldv, int &info"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "ldu",
-                        "direction": "",
-                        "type": "int ldv, int &info"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "ldv",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "info",
-                        "direction": "",
+                        "direction": "output",
                         "type": "int &"
                     }
                 ],
@@ -238,32 +243,32 @@
                 "ports": [
                     {
                         "name": "m",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "n",
-                        "direction": "",
-                        "type": "i"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "A",
-                        "direction": "",
+                        "direction": "input",
                         "type": "T *"
                     },
                     {
                         "name": "S",
-                        "direction": "",
-                        "type": "T *U, T *"
+                        "direction": "output",
+                        "type": "T *"
                     },
                     {
                         "name": "U",
-                        "direction": "",
-                        "type": "T *V"
+                        "direction": "output",
+                        "type": "T *"
                     },
                     {
                         "name": "V",
-                        "direction": "",
+                        "direction": "output",
                         "type": "T *"
                     }
                 ],
@@ -307,28 +312,28 @@
                 "ports": [
                     {
                         "name": "n",
-                        "direction": "",
-                        "type": "i"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "A",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "inout",
+                        "type": "T *"
                     },
                     {
                         "name": "lda",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "pivot",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "output",
+                        "type": "int"
                     },
                     {
                         "name": "info",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "output",
+                        "type": "int &"
                     }
                 ],
                 "visible": true
@@ -371,23 +376,23 @@
                 "ports": [
                     {
                         "name": "n",
-                        "direction": "",
-                        "type": "i"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "A",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "inout",
+                        "type": "T*"
                     },
                     {
                         "name": "lda",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "info",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "output",
+                        "type": "int&"
                     }
                 ],
                 "visible": true
@@ -430,22 +435,22 @@
                 "ports": [
                     {
                         "name": "m",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "A",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "T *"
                     },
                     {
                         "name": "lda",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "info",
-                        "direction": "",
+                        "direction": "output",
                         "type": "int &"
                     }
                 ],
@@ -489,38 +494,38 @@
                 "ports": [
                     {
                         "name": "n",
-                        "direction": "",
-                        "type": "i"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "A",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "inout",
+                        "type": "T*"
                     },
                     {
                         "name": "b",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "B",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "inout",
+                        "type": "T*"
                     },
                     {
                         "name": "lda",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "ldb",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "info",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "output",
+                        "type": "int&"
                     }
                 ],
                 "visible": true
@@ -563,22 +568,22 @@
                 "ports": [
                     {
                         "name": "m",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "A",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "T *"
                     },
                     {
                         "name": "lda",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "info",
-                        "direction": "",
+                        "direction": "output",
                         "type": "int &"
                     }
                 ],
@@ -621,39 +626,29 @@
                 ],
                 "ports": [
                     {
-                        "name": "T",
-                        "direction": "",
-                        "type": "unsigned int n,"
-                    },
-                    {
-                        "name": "NMAX",
-                        "direction": "",
-                        "type": "*rhs"
-                    },
-                    {
-                        "name": "NCU",
-                        "direction": "",
-                        "type": "*rhs"
+                        "name": "n",
+                        "direction": "input",
+                        "type": "unsigned int,"
                     },
                     {
                         "name": "matDiagLow",
-                        "direction": "",
-                        "type": "*rhs"
+                        "direction": "inout",
+                        "type": "T*"
                     },
                     {
                         "name": "matDiag",
-                        "direction": "",
-                        "type": "*rhs"
+                        "direction": "inout",
+                        "type": "T*"
                     },
                     {
                         "name": "matDiagUp",
-                        "direction": "",
-                        "type": "*rhs"
+                        "direction": "inout",
+                        "type": "T*"
                     },
                     {
                         "name": "rhs",
-                        "direction": "",
-                        "type": "*"
+                        "direction": "inout",
+                        "type": "T*"
                     }
                 ],
                 "visible": false
@@ -696,38 +691,38 @@
                 "ports": [
                     {
                         "name": "n",
-                        "direction": "",
-                        "type": "i"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "A",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "inout",
+                        "type": "T*"
                     },
                     {
                         "name": "b",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "B",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "inout",
+                        "type": "T*"
                     },
                     {
                         "name": "lda",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "ldb",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "info",
-                        "direction": "",
-                        "type": "fo"
+                        "direction": "output",
+                        "type": "int*"
                     }
                 ],
                 "visible": true
@@ -829,37 +824,37 @@
                 "ports": [
                     {
                         "name": "m",
-                        "direction": "",
-                        "type": "char uplo, int"
+                        "direction": "input",
+                        "type": "char"
                     },
                     {
                         "name": "A",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "T *"
                     },
                     {
                         "name": "b",
-                        "direction": "",
+                        "direction": "int",
                         "type": "int"
                     },
                     {
                         "name": "B",
-                        "direction": "",
-                        "type": "int &info"
+                        "direction": "inout",
+                        "type": "int"
                     },
                     {
                         "name": "lda",
-                        "direction": "",
-                        "type": "int &info"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "ldb",
-                        "direction": "",
-                        "type": "int &info"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "info",
-                        "direction": "",
+                        "direction": "output",
                         "type": "int &"
                     }
                 ],
@@ -902,33 +897,38 @@
                 ],
                 "ports": [
                     {
+                        "name": "m",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
                         "name": "A",
-                        "direction": "",
-                        "type": "int m, T *"
+                        "direction": "input",
+                        "type": "T *"
                     },
                     {
                         "name": "S",
-                        "direction": "",
-                        "type": "int lda, T *"
+                        "direction": "output",
+                        "type": "T *"
                     },
                     {
                         "name": "U",
-                        "direction": "",
+                        "direction": "output",
                         "type": "T *"
                     },
                     {
                         "name": "lda",
-                        "direction": "",
-                        "type": "int ldu, int &info"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "ldu",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "info",
-                        "direction": "",
+                        "direction": "output",
                         "type": "int &"
                     }
                 ],
@@ -966,13 +966,13 @@
                 "ports": [
                     {
                         "name": "matA_data",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::input_plio",
                         "data_type": "float"
                     },
                     {
                         "name": "matL_data",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::output_plio",
                         "data_type": "float"
                     }
@@ -1015,25 +1015,25 @@
                 "ports": [
                     {
                         "name": "matA_real_data",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::input_plio",
                         "data_type": "float"
                     },
                     {
                         "name": "matA_imag_data",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::input_plio",
                         "data_type": "float"
                     },
                     {
                         "name": "matL_real_data",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::output_plio",
                         "data_type": "float"
                     },
                     {
                         "name": "matL_imag_data",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::output_plio",
                         "data_type": "float"
                     }
@@ -1087,25 +1087,25 @@
                 "ports": [
                     {
                         "name": "in_0",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::input_plio",
                         "data_type": "cfloat"
                     },
                     {
                         "name": "in_1",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::input_plio",
                         "data_type": "cfloat"
                     },
                     {
                         "name": "out_0",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::output_plio",
                         "data_type": "cfloat"
                     },
                     {
                         "name": "out_1",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::output_plio",
                         "data_type": "cfloat"
                     }
@@ -1159,25 +1159,25 @@
                 "ports": [
                     {
                         "name": "in_0",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::input_plio",
                         "data_type": "cfloat"
                     },
                     {
                         "name": "in_1",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::input_plio",
                         "data_type": "cfloat"
                     },
                     {
                         "name": "out_0",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::output_plio",
                         "data_type": "cfloat"
                     },
                     {
                         "name": "out_1",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::output_plio",
                         "data_type": "cfloat"
                     }
@@ -1231,25 +1231,25 @@
                 "ports": [
                     {
                         "name": "in_0",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::input_plio",
                         "data_type": "cfloat"
                     },
                     {
                         "name": "in_1",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::input_plio",
                         "data_type": "cfloat"
                     },
                     {
                         "name": "out_0",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::output_plio",
                         "data_type": "cfloat"
                     },
                     {
                         "name": "out_1",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::output_plio",
                         "data_type": "cfloat"
                     }
@@ -1298,25 +1298,25 @@
                 "ports": [
                     {
                         "name": "in_0",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::input_plio",
                         "data_type": "cfloat"
                     },
                     {
                         "name": "in_1",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::input_plio",
                         "data_type": "cfloat"
                     },
                     {
                         "name": "out_0",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::output_plio",
                         "data_type": "cfloat"
                     },
                     {
                         "name": "out_1",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::output_plio",
                         "data_type": "cfloat"
                     }

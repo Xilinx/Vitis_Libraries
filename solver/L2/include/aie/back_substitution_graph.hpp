@@ -43,12 +43,13 @@ using namespace adf;
  **/
 template <int rowA_num, int colA_num, int rowB_num, int colB_num>
 class BackSubstitution_Graph : public adf::graph {
-   private: 
+   private:
     /**
      * kernel instance.
      * The chain of kernels that will be created and mapped on AIE tiles.
      **/
     kernel k0[colA_num];
+
    public:
     /**
      * The input data to the function.
@@ -92,8 +93,8 @@ class BackSubstitution_Graph : public adf::graph {
             fifo_depth(net03) = 16;
         }
 
-        connect<stream> net10(k0[colA_num-1].out[0], dout0);
-        connect<stream> net11(k0[colA_num-1].out[1], dout1);
+        connect<stream> net10(k0[colA_num - 1].out[0], dout0);
+        connect<stream> net11(k0[colA_num - 1].out[1], dout1);
         fifo_depth(net10) = 16;
         fifo_depth(net11) = 16;
     }

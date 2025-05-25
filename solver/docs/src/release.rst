@@ -18,6 +18,15 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2025.1
+------
+
+In this release, two APIs running on AIE Engine is added
+
+* Flexible QRD (QR decomposition), for complex float matrix input (using Householdere transformation method).
+* Flexible cholesky decomposition, for complex float matrix input. 
+
+
 2024.1
 ------
 

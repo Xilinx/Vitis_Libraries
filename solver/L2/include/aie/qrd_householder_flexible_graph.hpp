@@ -47,7 +47,7 @@ class QRDHouseholderComplexFlexibleGraph : public adf::graph {
     /**
      * kernel instance.
      * The chain of kernels that will be created and mapped on AIE tiles.
-     * Number of kernels (`CoreNum`) will be connected with each other in series. 
+     * Number of kernels (`CoreNum`) will be connected with each other in series.
      **/
     kernel k[CoreNum];
 
