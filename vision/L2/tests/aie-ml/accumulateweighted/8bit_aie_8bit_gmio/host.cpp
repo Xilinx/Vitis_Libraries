@@ -192,7 +192,7 @@ int main(int argc, char** argv) {
         std::cout << "Average frames per second : " << (((float)1000000 / (float)tt.count()) * (float)iterations)
                   << " fps" << std::endl;
 
-        std::cout << "Test passed" << std::endl;
+        std::cout << "*****Test passed*****" << std::endl;
         return 0;
     } catch (std::exception& e) {
         const char* errorMessage = e.what();

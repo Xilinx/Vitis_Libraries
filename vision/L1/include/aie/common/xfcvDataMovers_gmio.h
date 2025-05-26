@@ -199,30 +199,30 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
     }
     //}
 
-    void free_buffer() {
-        if (bool(mImageBOHndl)) {
+    /*    void free_buffer() {
+            if (bool(mImageBOHndl)) {
+                mImageBOHndl = {};
+            }
             mImageBOHndl = {};
-        }
-        mImageBOHndl = {};
-    }
+        }*/
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == TILER)>::type* = nullptr>
-    void alloc_buffer() {
+    void alloc_buffer(int grp_id = 0) {
         if (!bool(mImageBOHndl)) {
             assert(tileImgSize(mchannels) > 0);
             std::cout << "Allocating image device buffer (Tiler), "
                       << " Size : " << tileImgSize(mchannels) << " bytes" << std::endl;
-            mImageBOHndl = xrt::aie::bo(gpDhdl, (tileImgSize(mchannels)), xrt::bo::flags::normal, 0);
+            mImageBOHndl = xrt::aie::bo(gpDhdl, (tileImgSize(mchannels)), xrt::bo::flags::normal, grp_id);
         }
     }
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == STITCHER)>::type* = nullptr>
-    void alloc_buffer() {
+    void alloc_buffer(int grp_id = 0) {
         if (!bool(mImageBOHndl)) {
             assert(tileImgSize(mchannels) > 0);
             std::cout << "Allocating image device buffer (Stitcher), "
                       << " Size : " << tileImgSize(mchannels) << " bytes" << std::endl;
-            mImageBOHndl = xrt::aie::bo(gpDhdl, tileImgSize(mchannels), xrt::bo::flags::normal, 0);
+            mImageBOHndl = xrt::aie::bo(gpDhdl, tileImgSize(mchannels), xrt::bo::flags::normal, grp_id);
         }
     }
 
@@ -234,6 +234,15 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
     }
 
    public:
+    void free_buffer() {
+        if (bool(mImageBOHndl)) {
+            // xrtBOFree(mImageBOHndl);
+            mImageBOHndl = {};
+            // __mImageBOHndl = {};
+        }
+        mImageBOHndl = {};
+        // __mImageBOHndl = {};
+    }
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == TILER)>::type* = nullptr>
     void start(std::array<std::string, CORES> portNames) {
         for (int i = 0; i < CORES; i++) {
@@ -260,7 +269,7 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
     }
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == STITCHER)>::type* = nullptr>
-    void wait(std::array<std::string, CORES> portNames) {
+    void wait(std::array<std::string, CORES> portNames, int img_type = 0) {
         for (int i = 0; i < CORES; i++) {
             mImageBOHndl_run[i]->wait();
         }
@@ -269,7 +278,7 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
         copy();
         CtypeToCVMatType<DATA_TYPE> type;
         if (mpImage != nullptr) {
-            cv::Mat dst(mImageSize[0], mImageSize[1], type.type, mpImgData);
+            cv::Mat dst(mImageSize[0], mImageSize[1], img_type, mpImgData);
 
             // TODO: saturation to be done based on the mat type ???
             if (mpImage->type() == CV_8U) {
@@ -430,7 +439,8 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
     std::array<uint16_t, 2> host2aie_nb(DATA_TYPE* img_data,
                                         const cv::Size& img_size,
                                         std::array<std::string, CORES> portNames,
-                                        const xfcvDataMoverParams& params = xfcvDataMoverParams()) {
+                                        const xfcvDataMoverParams& params = xfcvDataMoverParams(),
+                                        int grp_id = 0) {
         int old_img_buffer_size = imgSize();
         if (params.mOutputImgSize == cv::Size(0, 0)) {
             bool bRecompute = false;
@@ -458,7 +468,7 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
         }
 
         // Allocate buffer
-        alloc_buffer();
+        alloc_buffer(grp_id);
 
         // Copy input data to device buffer
         copy();
@@ -474,18 +484,19 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == TILER)>::type* = nullptr>
     std::array<uint16_t, 2> host2aie_nb(cv::Mat& img,
                                         std::array<std::string, CORES> portNames,
-                                        const xfcvDataMoverParams& params = xfcvDataMoverParams()) {
+                                        const xfcvDataMoverParams& params = xfcvDataMoverParams(),
+                                        int grp_id = 0) {
         CtypeToCVMatType<DATA_TYPE> cType;
         if (cType.type == img.type()) {
-            return host2aie_nb((DATA_TYPE*)img.data, img.size(), portNames, params);
+            return host2aie_nb((DATA_TYPE*)img.data, img.size(), portNames, params, grp_id);
         } else if (cType.type < img.type()) {
             cv::Mat temp;
             img.convertTo(temp, cType.type);
-            return host2aie_nb((DATA_TYPE*)temp.data, img.size(), portNames, params);
+            return host2aie_nb((DATA_TYPE*)temp.data, img.size(), portNames, params, grp_id);
         } else {
             std::vector<DATA_TYPE> imgData;
             imgData.assign(img.data, img.data + img.total());
-            return host2aie_nb(imgData.data(), img.size(), portNames, params);
+            return host2aie_nb(imgData.data(), img.size(), portNames, params, grp_id);
         }
     }
 
@@ -526,7 +537,8 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
     void aie2host_nb(DATA_TYPE* img_data,
                      const cv::Size& img_size,
                      std::array<uint16_t, 2> tiles,
-                     std::array<std::string, CORES> portNames) {
+                     std::array<std::string, CORES> portNames,
+                     int grp_id = 0) {
         int old_img_buffer_size = imgSize();
 
         mpImgData = (DATA_TYPE*)img_data;
@@ -541,25 +553,28 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
         }
 
         // Allocate buffer
-        alloc_buffer();
+        alloc_buffer(grp_id);
 
         // Start the kernel
         start(portNames);
     }
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == STITCHER)>::type* = nullptr>
-    void aie2host_nb(cv::Mat& img, std::array<uint16_t, 2> tiles, std::array<std::string, CORES> portNames) {
+    void aie2host_nb(cv::Mat& img,
+                     std::array<uint16_t, 2> tiles,
+                     std::array<std::string, CORES> portNames,
+                     int grp_id = 0) {
         mpImage = &img;
 
         CtypeToCVMatType<DATA_TYPE> cType;
 
         if (cType.type == img.type()) {
-            return aie2host_nb((DATA_TYPE*)img.data, img.size(), tiles, portNames);
+            return aie2host_nb((DATA_TYPE*)img.data, img.size(), tiles, portNames, grp_id);
         }
 
         DATA_TYPE* imgData = (DATA_TYPE*)malloc(img.size().height * img.size().width * sizeof(DATA_TYPE) * mchannels);
 
-        aie2host_nb(imgData, img.size(), tiles, portNames);
+        aie2host_nb(imgData, img.size(), tiles, portNames, grp_id);
     }
 
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == TILER)>::type* = nullptr>

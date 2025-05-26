@@ -169,7 +169,7 @@ int main(int argc, char** argv) {
         gHndl.end(0);
 #endif
 
-        std::cout << "Test passed" << std::endl;
+        std::cout << "***Test passed***" << std::endl;
         return 0;
     } catch (std::exception& e) {
         const char* errorMessage = e.what();

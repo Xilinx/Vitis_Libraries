@@ -21,6 +21,9 @@
 // tile dimensions are normally computed by tiler but we need to
 // hardcode these values to set the graph window sizes
 using DATA_TYPE = uint8_t;
+#define VF 32
+#define NO_INSTANCES 4
+#define NO_CORES 2
 
 // 1920x1080 -> 7680x4320
 // resize 1st pass image_resolution (1920x1080 -> 1920x4320)
@@ -29,10 +32,10 @@ static constexpr int IMAGE_HEIGHT_IN = 1080;
 static constexpr int IMAGE_WIDTH_OUT = 1920;
 static constexpr int IMAGE_HEIGHT_OUT = 4320;
 
-static constexpr int TILE_WIDTH_IN = 256;
-static constexpr int TILE_HEIGHT_IN = (IMAGE_HEIGHT_IN / ((IMAGE_HEIGHT_OUT / 16)) + 4);
 static constexpr int TILE_WIDTH_OUT = 256;
 static constexpr int TILE_HEIGHT_OUT = 16;
+static constexpr int TILE_WIDTH_IN = 256;
+static constexpr int TILE_HEIGHT_IN = (IMAGE_HEIGHT_IN / ((IMAGE_HEIGHT_OUT / TILE_HEIGHT_OUT)) + 4);
 
 static constexpr int CHANNELS = 4;
 static constexpr int TILE_ELEMENTS_IN = (TILE_WIDTH_IN * TILE_HEIGHT_IN * CHANNELS);
@@ -46,10 +49,10 @@ static constexpr int IMAGE_HEIGHT_IN2 = 1920;
 static constexpr int IMAGE_WIDTH_OUT2 = 4320;
 static constexpr int IMAGE_HEIGHT_OUT2 = 7680;
 
-static constexpr int TILE_WIDTH_IN2 = 256;
-static constexpr int TILE_HEIGHT_IN2 = (IMAGE_HEIGHT_IN2 / ((IMAGE_HEIGHT_OUT2 / 16)) + 4);
 static constexpr int TILE_WIDTH_OUT2 = 256;
 static constexpr int TILE_HEIGHT_OUT2 = 16;
+static constexpr int TILE_WIDTH_IN2 = 256;
+static constexpr int TILE_HEIGHT_IN2 = (IMAGE_HEIGHT_IN2 / ((IMAGE_HEIGHT_OUT2 / TILE_HEIGHT_OUT2)) + 4);
 
 static constexpr int TILE_ELEMENTS_IN2 = (TILE_WIDTH_IN2 * TILE_HEIGHT_IN2 * CHANNELS);
 static constexpr int TILE_WINDOW_SIZE_IN2 = (TILE_ELEMENTS_IN2 * sizeof(DATA_TYPE)) + xf::cv::aie::METADATA_SIZE;

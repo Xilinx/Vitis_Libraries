@@ -17,22 +17,18 @@
 #include "kernels.h"
 #include "imgproc/xf_resize_bicubic.hpp"
 
-void ResizeRunner::run(adf::input_buffer<uint8_t>& input,
-                       adf::output_buffer<uint8_t>& output,
+void ResizeRunner::run(adf::input_buffer<DATA_TYPE>& input,
+                       adf::output_buffer<DATA_TYPE>& metadata,
+                       adf::output_buffer<DATA_TYPE>& output,
                        int channels,
-                       uint32_t scale_x,
                        uint32_t scale_y,
                        int img_height_in,
                        int img_height_out,
-                       int tile_height_out,
-                       int tile_width_out,
-                       int line_stride_in,
-                       int img_width_out,
                        float scale_y_f) {
-    uint8_t* img_in_ptr = (uint8_t*)::aie::begin(input);
-    uint8_t* img_out_ptr = (uint8_t*)::aie::begin(output);
+    DATA_TYPE* img_in_ptr = (DATA_TYPE*)::aie::begin(input);
+    DATA_TYPE* metadata_ptr = (DATA_TYPE*)::aie::begin(metadata);
+    DATA_TYPE* img_out_ptr = (DATA_TYPE*)::aie::begin(output);
 
-    xf::cv::aie::Resizebicubic resize(mwtsY);
-    resize.runImpl(img_in_ptr, img_out_ptr, channels, scale_x, scale_y, img_height_in, img_height_out, tile_height_out,
-                   tile_width_out, line_stride_in, img_width_out, scale_y_f);
+    xf::cv::aie::Resizebicubic<DATA_TYPE, VF> resize(mwtsY);
+    resize.runImpl(img_in_ptr, metadata_ptr, img_out_ptr, channels, scale_y, img_height_in, img_height_out, scale_y_f);
 }

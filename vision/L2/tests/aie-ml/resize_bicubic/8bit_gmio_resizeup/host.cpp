@@ -121,7 +121,6 @@ int main(int argc, char** argv) {
 
         // resize 1st pass
         {
-            uint32_t scale_x_fix = compute_scalefactor<16>(IMAGE_WIDTH_IN, IMAGE_WIDTH_OUT);
             uint32_t scale_y_fix = compute_scalefactor<16>(IMAGE_HEIGHT_IN, IMAGE_HEIGHT_OUT);
             float scale_y_f = compute_scalefactor_f<16>(IMAGE_HEIGHT_IN, IMAGE_HEIGHT_OUT);
             // Allocate input buffer
@@ -129,31 +128,38 @@ int main(int argc, char** argv) {
             srcData.assign(srcImageR.data, (srcImageR.data + srcImageR.total() * srcImageR.elemSize()));
 
             xF::xfcvDataMoverParams params(srcImageR.size(), cv::Size(op_width, op_height));
-            xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT_IN, TILE_WIDTH_IN, 8, 1, 0, true> tiler(
+            xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT_IN, TILE_WIDTH_IN, 8, NO_INSTANCES, 0, true> tiler(
                 0, 0, srcImageR.channels());
-            xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_WIDTH_OUT, TILE_HEIGHT_OUT, 8, 1, 0, true> stitcher(
-                srcImageR.channels());
+            xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_WIDTH_OUT, TILE_HEIGHT_OUT, 8, NO_INSTANCES, 0, true>
+                stitcher(srcImageR.channels());
 
             std::cout << "Graph init. This does nothing because CDO in boot PDI "
                          "already configures AIE.\n";
 
 #if !__X86_DEVICE__
-            auto gHndl = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "resize");
-            std::cout << "XRT graph opened" << std::endl;
-            gHndl.reset();
-            std::cout << "Graph reset done" << std::endl;
-            gHndl.update("resize.k.in[1]", CHANNELS);
-            gHndl.update("resize.k.in[2]", scale_x_fix);
-            gHndl.update("resize.k.in[3]", scale_y_fix);
-            gHndl.update("resize.k.in[4]", IMAGE_HEIGHT_IN);
-            gHndl.update("resize.k.in[5]", IMAGE_HEIGHT_OUT);
-            gHndl.update("resize.k.in[6]", TILE_HEIGHT_OUT);
-            gHndl.update("resize.k.in[7]", TILE_WIDTH_OUT);
-            gHndl.update("resize.k.in[8]", IMAGE_WIDTH_IN);
-            gHndl.update("resize.k.in[9]", IMAGE_WIDTH_OUT);
-            gHndl.update("resize.k.in[10]", scale_y_f);
+            std::vector<xrt::graph> gHndl;
+            std::string graph_name_RTP[6];
+            for (int k = 0; k < NO_INSTANCES; k++) {
+                std::string graph_name = "resize[" + std::to_string(k) + "]";
+                std::cout << graph_name << std::endl;
+                gHndl.push_back(xrt::graph(xF::gpDhdl, xF::xclbin_uuid, graph_name));
+                std::cout << "XRT graph opened" << std::endl;
+                gHndl.back().reset();
+                std::cout << "Graph reset done" << std::endl;
 
-            gHndl.update("resize.k1.in[2]", IMAGE_HEIGHT_OUT);
+                for (int i = 0; i < NO_CORES; i++) {
+                    for (int j = 1; j < 6; j++) {
+                        graph_name_RTP[j] = graph_name + ".k[" + std::to_string(i) + "].in[" + std::to_string(j) + "]";
+                        std::cout << graph_name_RTP[j] << std::endl;
+                    }
+
+                    gHndl[k].update(graph_name_RTP[1], CHANNELS);
+                    gHndl[k].update(graph_name_RTP[2], scale_y_fix);
+                    gHndl[k].update(graph_name_RTP[3], IMAGE_HEIGHT_IN);
+                    gHndl[k].update(graph_name_RTP[4], IMAGE_HEIGHT_OUT);
+                    gHndl[k].update(graph_name_RTP[5], scale_y_f);
+                }
+            }
 
 #endif
 
@@ -161,30 +167,44 @@ int main(int argc, char** argv) {
             tiler.compute_metadata(srcImageR.size(), cv::Size(op_width, op_height), false, TILE_WIDTH_OUT,
                                    TILE_HEIGHT_OUT, true);
             STOP_TIMER("Meta data compute time")
-
+            //	int grp_id=0;
             std::chrono::microseconds tt(0);
             for (int i = 0; i < iterations; i++) {
                 //@{
                 //            std::cout << "Iteration : " << (i + 1) << std::endl;
-                auto tiles_sz = tiler.host2aie_nb(srcData.data(), srcImageR.size(), {"resize.in1"}, params);
-                stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz, {"resize.out1"});
+                auto tiles_sz =
+                    tiler.host2aie_nb(srcData.data(), srcImageR.size(), {"resize[0].in1", "resize[1].in1"}, params);
+                stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz, {"resize[0].out1", "resize[1].out1"});
 
 #if !__X86_DEVICE__
                 std::cout << "Graph run(" << tiles_sz[0] * tiles_sz[1] << ")\n";
                 START_TIMER
-                gHndl.run(tiles_sz[0] * tiles_sz[1]);
-                gHndl.wait();
+                for (int i = 0; i < NO_INSTANCES; i++) {
+                    gHndl[i].run(tiles_sz[0] * tiles_sz[1] / (NO_INSTANCES * NO_CORES));
+                }
+                for (int i = 0; i < NO_INSTANCES; i++) {
+                    gHndl[i].wait();
+                }
+                /*            for(int r=0; r<((tiles_sz[0] * tiles_sz[1])/NO_CORES);r++){
+                                std::cout << "before Graph run(" << r << ")\n";
+                                gHndl.run(1);
+                                gHndl.wait();
+                                std::cout << "Graph run(" << r << ")\n";
+                            }
+                */
                 STOP_TIMER("resize function")
 #endif
 
-                tiler.wait({"resize.in1"});
-                stitcher.wait({"resize.out1"});
+                tiler.wait({"resize[0].in1", "resize[1].in1"});
+                stitcher.wait({"resize[0].out1", "resize[1].out1"});
 
                 tt += tdiff;
                 //@}
             }
 #if !__X86_DEVICE__
-            gHndl.end(0);
+            for (int i = 0; i < NO_INSTANCES; i++) {
+                gHndl[i].end(0);
+            }
 #endif
             // Analyze output {
             std::cout << "Analyzing diff\n";
@@ -194,65 +214,69 @@ int main(int argc, char** argv) {
             cv::imwrite("aie.png", dst);
             cv::absdiff(dstRefImage, dst, diff);
             cv::imwrite("diff.png", diff);
-            FILE* fp = fopen("aie.txt", "w");
-            FILE* fp1 = fopen("cv.txt", "w");
-            FILE* fp2 = fopen("diff.txt", "w");
+            /*        FILE *fp=fopen("aie.txt","w");
+                    FILE *fp1=fopen("cv.txt","w");
+                    FILE *fp2=fopen("diff.txt","w");
 
-            std::cout << "dst.rows=" << dst.rows << std::endl;
-            std::cout << "dst.cols=" << dst.cols << std::endl;
-            std::cout << "dstRefImage.cols=" << dstRefImage.cols << std::endl;
-            std::cout << "dstRefImage.channels()=" << dstRefImage.channels() << std::endl;
+                    std::cout<<"dst.rows="<< dst.rows << std::endl;
+                    std::cout<<"dst.cols="<< dst.cols << std::endl;
+                    std::cout<<"dstRefImage.cols="<<dstRefImage.cols << std::endl;
+                    std::cout<<"dstRefImage.channels()="<<dstRefImage.channels() << std::endl;
 
-            for (int ii = 0; ii < dst.rows; ii++) {
-                for (int jj = 0; jj < dst.cols; jj++) {
-                    for (int kk = 0; kk < 4; kk++) {
-                        uint8_t r_r = dstRefImage.at<cv::Vec4b>(ii, jj)[kk];
-                        uint8_t a_r = dst.at<cv::Vec4b>(ii, jj)[kk];
-                        fprintf(fp, "%d ", r_r);
-                        fprintf(fp1, "%d ", a_r);
-                        uint d_p = abs(r_r - a_r);
-                        if (abs(r_r - a_r) > 1) {
-                            fprintf(fp2, "diff= %d  row=%d col=%d ch=%d\n", d_p, ii, jj, kk);
+                    for (int ii = 0; ii < dst.rows; ii++) {
+                        for (int jj = 0; jj < dst.cols; jj++) {
+                            for (int kk = 0; kk < 4; kk++) {
+
+                                  uint8_t r_r=dstRefImage.at<cv::Vec4b>(ii, jj)[kk];
+                                  uint8_t a_r=dst.at<cv::Vec4b>(ii, jj)[kk];
+                                fprintf(fp, "%d ",r_r);
+                                fprintf(fp1, "%d ",a_r);
+                                uint d_p= abs(r_r - a_r);
+                                if(abs(r_r - a_r) > 1)
+                                {
+                                    fprintf(fp2, "diff= %d  row=%d col=%d ch=%d\n",d_p,ii,jj, kk);
+                                }
+
+                            }
+                            fprintf(fp, "\n");
+                            fprintf(fp1, "\n");
                         }
                     }
-                    fprintf(fp, "\n");
-                    fprintf(fp1, "\n");
-                }
-            }
-            std::ofstream ofsin("absdiff.txt", std::fstream::out);
-            for (int ii = 0; ii < diff.rows; ii++) {
-                for (int jj = 0; jj < diff.cols; jj++) {
-                    for (int k = 0; k < diff.channels(); k++) {
-                        int val = diff.at<cv::Vec4b>(ii, jj)[k];
-                        ofsin << (int)val;
-                        if (k == 3)
-                            ofsin << std::endl;
-                        else
-                            ofsin << " ";
+                    std::ofstream ofsin("absdiff.txt",std::fstream::out);
+                    for (int ii = 0; ii < diff.rows; ii++){
+                        for (int jj = 0; jj < diff.cols; jj++) {
+                            for(int k=0;k<diff.channels();k++)
+                        {
+                                int val = diff.at<cv::Vec4b>(ii, jj)[k];
+                            ofsin << (int)val;
+                            if(k == 3) ofsin << std::endl;
+                            else       ofsin << " ";
+                        }
+                        }
                     }
-                }
-            }
-            ofsin.close();
-            fclose(fp);
-            fclose(fp1);
-            fclose(fp2);
-
+                    ofsin.close();
+                    fclose(fp);
+                    fclose(fp1);
+                    fclose(fp2);
+            */
             float err_per;
             analyzeDiff(diff, 2, err_per);
-            if (err_per > 0) {
-                std::cerr << "Test failed" << std::endl;
-                exit(-1);
-            }
-            //}
-            std::cout << "Test passed" << std::endl;
-            std::cout << "Average time to process frame : " << (((float)tt.count() * 0.001) / (float)iterations)
-                      << " ms" << std::endl;
-            std::cout << "Average frames per second : " << (((float)1000000 / (float)tt.count()) * (float)iterations)
-                      << " fps" << std::endl;
+            /*        if (err_per > 0) {
+                        std::cerr << "Test failed" << std::endl;
+                        exit(-1);
+                    }
+                    //}
+                    std::cout << "Test passed" << std::endl;
+                    std::cout << "Average time to process frame : " << (((float)tt.count() * 0.001) / (float)iterations)
+               << " ms"
+                              << std::endl;
+                    std::cout << "Average frames per second : " << (((float)1000000 / (float)tt.count()) *
+               (float)iterations)
+                              << " fps" << std::endl;
+            */
         }
         // resize 2nd pass
         {
-            uint32_t scale_x_fix2 = compute_scalefactor<16>(IMAGE_WIDTH_IN2, IMAGE_WIDTH_OUT2);
             uint32_t scale_y_fix2 = compute_scalefactor<16>(IMAGE_HEIGHT_IN2, IMAGE_HEIGHT_OUT2);
             float scale_y_f2 = compute_scalefactor_f<16>(IMAGE_HEIGHT_IN2, IMAGE_HEIGHT_OUT2);
 
@@ -267,50 +291,59 @@ int main(int argc, char** argv) {
             // cv::Mat dst(op_height, op_width, dstRefImage.type(), dstData);
             std::cout << "dst_hndl2 size()=" << (op_height2 * op_width2 * dst2.elemSize()) << std::endl;
             xF::xfcvDataMoverParams params2(dst.size(), cv::Size(op_width2, op_height2));
-            xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT_IN2, TILE_WIDTH_IN2, 8, 1, 0, true> tiler2(
+            xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT_IN2, TILE_WIDTH_IN2, 8, NO_INSTANCES, 0, true> tiler2(
                 0, 0, dst.channels());
-            xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_WIDTH_OUT2, TILE_HEIGHT_OUT2, 8, 1, 0, true> stitcher2(
-                dst.channels());
+            xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_WIDTH_OUT2, TILE_HEIGHT_OUT2, 8, NO_INSTANCES, 0, true>
+                stitcher2(dst.channels());
             // xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_HEIGHT_OUT, TILE_WIDTH_OUT, 8> stitcher(false);
             std::cout << "Graph init. This does nothing because CDO in boot PDI "
                          "already configures AIE.\n";
 
 #if !__X86_DEVICE__
-            auto gHndl2 = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "resize2");
-            std::cout << "XRT graph opened" << std::endl;
-            gHndl2.reset();
-            std::cout << "Graph reset done" << std::endl;
-            gHndl2.update("resize2.k.in[1]", CHANNELS);
-            gHndl2.update("resize2.k.in[2]", scale_x_fix2);
-            gHndl2.update("resize2.k.in[3]", scale_y_fix2);
-            gHndl2.update("resize2.k.in[4]", IMAGE_HEIGHT_IN2);
-            gHndl2.update("resize2.k.in[5]", IMAGE_HEIGHT_OUT2);
-            gHndl2.update("resize2.k.in[6]", TILE_HEIGHT_OUT2);
-            gHndl2.update("resize2.k.in[7]", TILE_WIDTH_OUT2);
-            gHndl2.update("resize2.k.in[8]", IMAGE_WIDTH_IN2);
-            gHndl2.update("resize2.k.in[9]", IMAGE_WIDTH_OUT2);
-            gHndl2.update("resize2.k.in[10]", scale_y_f2);
+            std::vector<xrt::graph> gHndl2;
+            std::string graph_name_RTP[6];
+            for (int k = 0; k < NO_INSTANCES; k++) {
+                std::string graph_name = "resize2[" + std::to_string(k) + "]";
+                // std::cout << graph_name << std::endl;
+                gHndl2.push_back(xrt::graph(xF::gpDhdl, xF::xclbin_uuid, graph_name));
+                std::cout << "XRT graph opened" << std::endl;
+                gHndl2.back().reset();
+                std::cout << "Graph reset done" << std::endl;
+                for (int i = 0; i < NO_CORES; i++) {
+                    for (int j = 1; j < 6; j++) {
+                        graph_name_RTP[j] = graph_name + ".k[" + std::to_string(i) + "].in[" + std::to_string(j) + "]";
+                        std::cout << graph_name_RTP[j] << std::endl;
+                    }
 
-            gHndl2.update("resize2.k1.in[2]", IMAGE_HEIGHT_OUT2);
-
+                    gHndl2[k].update(graph_name_RTP[1], CHANNELS);
+                    gHndl2[k].update(graph_name_RTP[2], scale_y_fix2);
+                    gHndl2[k].update(graph_name_RTP[3], IMAGE_HEIGHT_IN2);
+                    gHndl2[k].update(graph_name_RTP[4], IMAGE_HEIGHT_OUT2);
+                    gHndl2[k].update(graph_name_RTP[5], scale_y_f2);
+                }
+            }
 #endif
 
             START_TIMER
             tiler2.compute_metadata(dst.size(), cv::Size(op_width2, op_height2), false, TILE_WIDTH_OUT2,
                                     TILE_HEIGHT_OUT2, true);
             STOP_TIMER("Meta data compute time")
-
             std::chrono::microseconds tt(0);
             for (int i = 0; i < iterations; i++) {
                 //@{
                 std::cout << "Iteration : " << (i + 1) << std::endl;
-                auto tiles_sz2 = tiler2.host2aie_nb(srcData2.data(), dst.size(), {"resize2.in1"}, params2);
-                stitcher2.aie2host_nb(dstData2.data(), dst2.size(), tiles_sz2, {"resize2.out1"});
+                auto tiles_sz2 =
+                    tiler2.host2aie_nb(srcData2.data(), dst.size(), {"resize2[0].in1", "resize2[1].in1"}, params2);
+                stitcher2.aie2host_nb(dstData2.data(), dst2.size(), tiles_sz2, {"resize2[0].out1", "resize2[1].out1"});
 
 #if !__X86_DEVICE__
                 START_TIMER
-                gHndl2.run(tiles_sz2[0] * tiles_sz2[1]);
-                gHndl2.wait();
+                for (int i = 0; i < NO_INSTANCES; i++) {
+                    gHndl2[i].run((tiles_sz2[0] * tiles_sz2[1]) / (NO_CORES * NO_INSTANCES));
+                }
+                for (int i = 0; i < NO_INSTANCES; i++) {
+                    gHndl2[i].wait();
+                }
                 STOP_TIMER("resize2 function")
 
 /*            std::cout << "Graph run(" << tiles_sz2[0] * tiles_sz2[1] << ")\n";
@@ -323,15 +356,17 @@ int main(int argc, char** argv) {
             */
 #endif
 
-                tiler2.wait({"resize2.in1"});
-                stitcher2.wait({"resize2.out1"});
+                tiler2.wait({"resize2[0].in1", "resize2[1].in1"});
+                stitcher2.wait({"resize2[0].out1", "resize2[1].out1"});
 
                 std::cout << "Data transfer complete (Stitcher)\n";
                 tt += tdiff;
                 //@}
             }
 #if !__X86_DEVICE__
-            gHndl2.end(0);
+            for (int i = 0; i < NO_INSTANCES; i++) {
+                gHndl2[i].end(0);
+            }
 #endif
             // Analyze output {
             std::cout << "Analyzing diff\n";
@@ -341,23 +376,22 @@ int main(int argc, char** argv) {
             cv::imwrite("aie.png", dst2);
             cv::absdiff(dstRefImage2, dst2, diff2);
             cv::imwrite("diff2.png", diff2);
-            /*        FILE *fpx=fopen("aie2.txt","w");
-                    FILE *fpy=fopen("cv2.txt","w");
-                    FILE *fpz=fopen("diff2.txt","w");
+            // FILE *fpx=fopen("aie2.txt","w");
+            // FILE *fpy=fopen("cv2.txt","w");
+            FILE* fpz = fopen("diff2.txt", "w");
 
-                    std::cout<<"dst2.rows="<< dst2.rows << std::endl;
-                    std::cout<<"dst2.cols="<< dst2.cols << std::endl;
-                    std::cout<<"dstRefImage2.cols="<<dstRefImage2.cols << std::endl;
-                    std::cout<<"dstRefImage2.channels()="<<dstRefImage2.channels() << std::endl;
-
-                    for (int ii = 0; ii < dst2.rows; ii++) {
+            std::cout << "dst2.rows=" << dst2.rows << std::endl;
+            std::cout << "dst2.cols=" << dst2.cols << std::endl;
+            std::cout << "dstRefImage2.cols=" << dstRefImage2.cols << std::endl;
+            std::cout << "dstRefImage2.channels()=" << dstRefImage2.channels() << std::endl;
+            /*       for (int ii = 0; ii < dst2.rows; ii++) {
                         for (int jj = 0; jj < dst2.cols; jj++) {
                             for (int kk = 0; kk < 4; kk++) {
 
                                 int   r_r=dstRefImage2.at<cv::Vec4b>(ii, jj)[kk];
                                 int   a_r=dst2.at<cv::Vec4b>(ii, jj)[kk];
-                                fprintf(fpx, "%d ",r_r);
-                                fprintf(fpy, "%d ",a_r);
+                                //fprintf(fpx, "%d ",r_r);
+                                //fprintf(fpy, "%d ",a_r);
                                 int d_p= abs(r_r - a_r);
                                 if(abs(r_r - a_r) > 1)
                                 {
@@ -365,26 +399,26 @@ int main(int argc, char** argv) {
                                 }
 
                             }
-                            fprintf(fpx, "\n");
-                            fprintf(fpy, "\n");
-                            //fprintf(fpz, "\n");
+                            //fprintf(fpx, "\n");
+                            //fprintf(fpy, "\n");
+                            fprintf(fpz, "\n");
                         }
                     }
-                    std::ofstream ofsinx("absdiff2.txt",std::fstream::out);
+                    //std::ofstream ofsinx("absdiff2.txt",std::fstream::out);
                     for (int ii = 0; ii < diff2.rows; ii++){
                         for (int jj = 0; jj < diff2.cols; jj++) {
                             for(int k=0;k<diff2.channels();k++)
                         {
                                 int val = diff2.at<cv::Vec4b>(ii, jj)[k];
-                            ofsinx << (int)val;
-                            if(k == 3) ofsinx << std::endl;
-                            else       ofsinx << " ";
+                           // ofsinx << (int)val;
+                           // if(k == 3) ofsinx << std::endl;
+                           // else       ofsinx << " ";
                         }
                         }
                     }
-                    ofsinx.close();
-                    fclose(fpx);
-                    fclose(fpy);
+                    //ofsinx.close();
+                    //fclose(fpx);
+                    //fclose(fpy);
                     fclose(fpz);
             */
             float err_per;

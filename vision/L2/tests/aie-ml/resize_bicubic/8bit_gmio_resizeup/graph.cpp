@@ -17,8 +17,8 @@
 #include "graph.h"
 
 // instantiate adf dataflow graph
-resizeGraph resize;
-resizeGraph2 resize2;
+resizeGraph resize[NO_INSTANCES] = {{6, 0, 0}, {8, 0, 1}};
+resizeGraph2 resize2[NO_INSTANCES] = {{6, 0, 2}, {8, 0, 3}};
 
 // initialize and run the dataflow graph
 #if defined(__AIESIM__) || defined(__X86SIM__)
@@ -52,13 +52,12 @@ int main(int argc, char** argv) {
         dataIn[i] = rand() % 256;
     }
 
-    resize.init();
-    resize.updateInputOutputSize(IMAGE_WIDTH_IN, IMAGE_HEIGHT_IN, IMAGE_WIDTH_OUT, IMAGE_HEIGHT_OUT);
-    resize.update(resize.outputStride, IMAGE_HEIGHT_OUT);
-    resize.in1.gm2aie_nb(inputData, BLOCK_SIZE_in_Bytes);
-    resize.run(1);
-    resize.out1.aie2gm_nb(outputData, BLOCK_SIZE_out_Bytes);
-    resize.out1.wait();
+    resize[0].init();
+    resize[0].updateInputOutputSize(IMAGE_WIDTH_IN, IMAGE_HEIGHT_IN, IMAGE_WIDTH_OUT, IMAGE_HEIGHT_OUT);
+    resize[0].in1.gm2aie_nb(inputData, BLOCK_SIZE_in_Bytes);
+    resize[0].run(1);
+    resize[0].out1.aie2gm_nb(outputData, BLOCK_SIZE_out_Bytes);
+    resize[0].out1.wait();
 
     // Compare the results
 
@@ -78,7 +77,7 @@ int main(int argc, char** argv) {
     fclose(fp);
     std::cout << "Test passed!" << std::endl;
 
-    resize.end();
+    resize[0].end();
     return 0;
 }
 #endif

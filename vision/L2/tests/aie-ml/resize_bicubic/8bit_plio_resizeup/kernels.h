@@ -28,24 +28,17 @@ class ResizeRunner {
    public:
     ResizeRunner(uint32_t (&wtsy)[LUT_DEPTH]) : mwtsY(wtsy) {}
     void run(adf::input_buffer<uint8_t>& input,
+             adf::output_buffer<uint8_t>& metadata,
              adf::output_buffer<uint8_t>& output,
              int channels,
-             uint32_t scale_x,
              uint32_t scale_y,
              int img_height_in,
              int img_height_out,
-             int tile_height_out,
-             int tile_width_out,
-             int line_stride_in,
-             int img_width_out,
              float scale_y_f);
     static void registerKernelClass() {
         REGISTER_FUNCTION(ResizeRunner::run);
         REGISTER_PARAMETER(mwtsY);
     }
 };
-void transpose_api(adf::input_buffer<uint8_t>& input_metadata,
-                   adf::input_buffer<uint8_t>& input_data,
-                   adf::output_buffer<uint8_t>& output,
-                   int outputStride);
+void transpose_api(adf::input_buffer<uint8_t>& input_metadata, adf::output_buffer<uint8_t>& output);
 #endif

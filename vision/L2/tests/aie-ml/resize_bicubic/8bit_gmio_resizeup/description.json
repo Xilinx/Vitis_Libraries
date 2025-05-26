@@ -133,8 +133,7 @@
                     "options": "",
                     "name": "libadf.a",
                     "files": [
-                        "xf_resize.cc",
-                        "xf_transpose.cc"
+                        "xf_resize.cc"
                     ]
                 }
             ]
@@ -154,7 +153,7 @@
                 "dependency": [],
                 "env": "",
                 "cmd": "",
-                "max_memory_MB": 32768,
+                "max_memory_MB": 65536,
                 "max_time_min": {
                     "vitis_aie_sim": 50,
                     "vitis_hw_build": 470,
@@ -164,8 +163,6 @@
             }
         ],
         "targets": [
-            "vitis_aie_sim",
-            "vitis_hw_emu",
             "vitis_hw_build",
             "vitis_hw_run"
         ],

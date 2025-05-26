@@ -19,10 +19,10 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<aiesim/hw_emu/hw> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<aiesim/hw_emu/hw> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
 	$(ECHO) "  NOTE: For embedded platform the following setup steps are required:"
@@ -50,7 +50,7 @@ CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
 # setting default value
-TARGET ?= aiesim
+TARGET ?= hw
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
@@ -213,7 +213,7 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER):  $(XFLIB_DIR)/L2/tests/aie-ml/resize_bicubic/8bit_gmio_resizedown_8ktohd/graph.cpp xf_transpose.cc xf_resize.cc 
+$(AIE_CONTAINER):  $(XFLIB_DIR)/L2/tests/aie-ml/resize_bicubic/8bit_gmio_resizedown_8ktohd/graph.cpp xf_resize.cc 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
