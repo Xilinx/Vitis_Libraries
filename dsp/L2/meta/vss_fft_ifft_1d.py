@@ -48,7 +48,7 @@ def update_PART(args):
 
 
 def fn_update_PART():
-    legal_set_PART = ["xcvc1902-vsva2197-2MP-e-S", "xcve2802-vsvh1760-2MP-e-S"]
+    legal_set_PART = ["xcvc1902-vsva2197-2MP-e-S", "xcve2802-vsvh1760-2MP-e-S", "xc2ve3858-ssva2112-2LP-e-S"]
 
     param_dict = {}
     param_dict.update({"name": "PART"})
@@ -113,6 +113,9 @@ def fn_update_DATA_TYPE(DATA_TYPE, PART):
         legal_set_DATA_TYPE = ["cfloat", "cint32"]
     elif "xcve2802-vsvh1760-2MP-e-S" in PART:
         legal_set_DATA_TYPE = ["cfloat", "cint32"]
+    elif "xc2ve3858-ssva2112-2LP-e-S" in PART:
+        legal_set_DATA_TYPE = ["cfloat", "cint32"]
+
 
     param_dict = {}
     param_dict.update({"name": "DATA_TYPE"})
@@ -148,7 +151,7 @@ def fn_update_TWIDDLE_TYPE(PART, TWIDDLE_TYPE, DATA_TYPE):
     if DATA_TYPE in ["cint32"]:
         if PART in ["xcvc1902-vsva2197-2MP-e-S"]:
             legal_set_TWIDDLE_TYPE = ["cint16", "cint32"]
-        elif PART in ["xcve2802-vsvh1760-2MP-e-S"]:
+        else:
             legal_set_TWIDDLE_TYPE = ["cint16"]
     elif DATA_TYPE in ["cfloat"]:
         legal_set_TWIDDLE_TYPE = ["cfloat"]
@@ -268,7 +271,7 @@ def update_API_IO(args):
 
 
 def fn_update_API_IO():
-    legal_set_API_IO = [0, 1]
+    legal_set_API_IO = [0]
 
     param_dict = {}
     param_dict.update({"name": "API_IO"})
@@ -299,7 +302,7 @@ def update_RND(args):
 def fn_update_RND(PART):
     if PART in ["xcvc1902-vsva2197-2MP-e-S"]:
         remove_set = [k_rnd_mode_map_aie["rnd_ceil"], k_rnd_mode_map_aie["rnd_floor"]]
-    elif PART in ["xcve2802-vsvh1760-2MP-e-S"]:
+    else:
         remove_set = [
             k_rnd_mode_map_aie_ml["rnd_ceil"],
             k_rnd_mode_map_aie_ml["rnd_floor"],

@@ -31,7 +31,7 @@ The VSS FFT can generate VSS products for AIE, AIE-ML and AIE-MLv2. The VSS is g
 Supported Parameters
 ====================
 
-The complete list of supported parameters for the VSS FFT is shown in the L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_pararms.cfg. Please edit only the parameters in this file to configure the VSS FFT. Please see API reference on vss_fft_ifft_1d_graph.hpp for details on the AI Engine configurable parameters for VSS Mode 1 and see the vss_fft_ifft_1d_front_only_graph.hpp for the parameters for VSS Mode 2.
+The complete list of required parameters for the VSS FFT is shown in L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_params.cfg. Please edit the parameters in this file to configure the VSS FFT. The user can add to the [aie] section of the cfg file for other options that they want to pass directly to the aiecompiler. Please see API reference on vss_fft_ifft_1d_graph.hpp for details on the AI Engine configurable parameters for VSS Mode 1 and see the vss_fft_ifft_1d_front_only_graph.hpp for the parameters for VSS Mode 2.
 
 +----------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | [Category] Parameter             | Description                                                                                                                                |

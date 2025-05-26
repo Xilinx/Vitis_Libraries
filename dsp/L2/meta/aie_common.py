@@ -25,7 +25,7 @@ AIE_MLv2 = 22
 API_BUFFER = 0
 API_STREAM = 1
 ### Data memory definitions ###
-k_part2aievar_map = {"xcvc1902-vsva2197-2MP-e-S": 1, "xcve2802-vsvh1760-2MP-e-S": 2}
+k_part2aievar_map = {"xcvc1902-vsva2197-2MP-e-S": 1, "xcve2802-vsvh1760-2MP-e-S": 2, "xc2ve3858-ssva2112-2LP-e-S": 22}
 
 ### Data memory definitions ###
 k_aie_variant = {AIE: "AIE", AIE_ML: "AIE-ML", AIE_MLv2: "AIE-MLv2"}
