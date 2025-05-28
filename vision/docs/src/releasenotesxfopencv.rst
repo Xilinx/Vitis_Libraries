@@ -8,7 +8,7 @@
 .. _releasenotes-xfopencv:
 
 .. 
-   Copyright 2024 Advanced Micro Devices, Inc
+   Copyright 2025 Advanced Micro Devices, Inc
   
 .. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -24,25 +24,15 @@ This section describes new features, changes to the existing library, and known 
 
 **PL additions/enhancements:** :
 
-	• New Functions:
-		• Added autogain function
-		• Created new L3 example of ISP with autogain
-		
 	• Updates:
-    		• Added NPC2 support for Remap function
-    		• Corrected Preprocess API in documentation
-    		• Updated output format of initUndistoredRectifyMapInverse to 32SC1 (fixed point). Updated L3 stereopipeline example accordingly.
+    		• Corrected ISP pipeline API in documentation
     
 **AIE additions/enhancements:** :
 
 	• New Functions:
-		• Added NV12-resize function	    
+		• Added Bicubic-resize function	    
 
 	• Updates:
-		• Added g-gain parameter in gain correction. Updated Hybrid-ISP in L3 accordingly.
-    		• Fixed yuy2-filter2d GMIO hw-emu hang issue
-    		• Fixed TopK hang issue
-    		• Updated computeMetadata function in GMIO datamovers
 		• Minor bug fixes
 
 .. _known-issues:

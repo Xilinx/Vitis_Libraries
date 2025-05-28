@@ -8,7 +8,7 @@ The Vitis Vision library is designed to work with Zynq™, Zynq Ultrascale+™, 
 
 ### Prerequisites
 
-* Valid installation of [Vitis™ 2024.2](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-the-Vitis-Software-Platform) or later version and the corresponding licenses.
+* Valid installation of [Vitis™ 2025.1](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-the-Vitis-Software-Platform) or later version and the corresponding licenses.
 * Xilinx Runtime ([XRT](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Xilinx-Runtime-and-Platforms)) must be installed. XRT provides software interface to AMD FPGAs.
 * Install [OpenCV-4.4.0]((https://github.com/opencv/opencv/tree/4.4.0)) x86 libraries (with compatible ``libjpeg.so``). x86 libs have to be used for:
 
@@ -19,7 +19,7 @@ The Vitis Vision library is designed to work with Zynq™, Zynq Ultrascale+™, 
     For L2/L3 flow targeting embedded platforms (for hardware emulation and hardware build), aarch32/aarch64 version OpenCV shipped within their *sysroot* should be used.
 
 * libOpenCL.so must be [installed](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/OpenCL-Installable-Client-Driver-Loader) if not present.
-* [Install the card](https://docs.xilinx.com/r/en-US/ug1301-getting-started-guide-alveo-accelerator-cards) for which the platform is supported in Vitis 2024.2 or later versions.
+* [Install the card](https://docs.xilinx.com/r/en-US/ug1301-getting-started-guide-alveo-accelerator-cards) for which the platform is supported in Vitis 2025.1 or later versions.
 * If targeting an embedded platform, [install]((https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Embedded-Platforms?tocId=hfE7LFeS8mU4dexvgPL31Q)) it and set up the [evaluation board](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/444006775/Zynq+UltraScale+MPSoC).
 
 #### OpenCV Installation Guidance
@@ -156,7 +156,7 @@ For questions and to get help on this project or your own projects, visit the [X
 
 The source for this project is licensed under the [Apache License](http://www.apache.org/licenses/LICENSE-2.0)
 
-    Copyright (C) 2024, Advanced Micro Devices, Inc.
+    Copyright (C) 2025, Advanced Micro Devices, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -181,24 +181,13 @@ This library is written by developers at
 
 **PL additions/enhancements:** :
 
-    • New Functions:
-        • Added autogain function
-        • Created new L3 example of ISP with autogain
     • Updates:
-        • Added NPC2 support for Remap function
-        • Corrected preprocess API in documentation
-        • Updated output format of initUndistoredRectifyMapInverse to 32SC1 (fixed point). Updated L3 stereopipeline example accordingly.
+        • Corrected ISP pipeline parameters in documentation
 
 **AIE additions/enhancements:** :
 
     • New Functions:
-	    • Added NV12-resize function	    
-    • Updates:
-	    • Added g-gain parameter in gain correction. Updated Hybrid-ISP in L3 accordingly.
-	    • Added yuy2-filter2d GMIO testcase
-	    • Fixed TopK hang issue
-	    • Updated computeMetadata function in GMIO datamovers	    
-	    • Minor bug fixes
+	    • Added Bicubic Resize function
 
 **Known issues**
 

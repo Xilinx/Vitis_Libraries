@@ -117,85 +117,76 @@ const auto wtsY = WtsArray<LUT_DEPTH>();
 
 class resizeGraph : public adf::graph {
    private:
-    kernel k;
-    kernel k1;
+    kernel k[NO_CORES];
 
    public:
     input_plio in1;
     output_plio out1;
-    output_plio out2;
 
-    port<input> channels;
-    port<input> scalex;
-    port<input> scaley;
-    port<input> scaley_f;
-    port<input> img_h_in;
-    port<input> img_w_in;
-    port<input> line_stride_in;
-    port<input> img_h_out;
-    port<input> img_w_out;
-    port<input> tile_h_out;
-    port<input> tile_w_out;
-    port<input> outputStride;
+    port<input> channels[NO_CORES];
+    port<input> scaley[NO_CORES];
+    port<input> scaley_f[NO_CORES];
+    port<input> img_h_in[NO_CORES];
+    port<input> img_h_out[NO_CORES];
 
     shared_buffer<DATA_TYPE> mtx_in1;
-    resizeGraph() {
-        k = kernel::create_object<ResizeRunner>(wtsY.arr);
-        k1 = kernel::create(transpose_api);
+    shared_buffer<DATA_TYPE> mtx_out1;
 
-        //		in1 = input_plio::create("DataIn0", adf::plio_32_bits, "data/input_rgba.txt");
-        //		in1 = input_plio::create("DataIn0", adf::plio_32_bits, "data/tile0.txt");
-        //		in1 = input_plio::create("DataIn0", adf::plio_32_bits, "data/mem.txt");
-        //		 in1 = input_plio::create("DataIn0", adf::plio_32_bits, "data/resize_in_64x32.txt");
-        in1 = input_plio::create("DataIn0", adf::plio_128_bits, "data/resize_in.txt");
+    resizeGraph(int tile_col, int tile_row, int CORE_IDX) {
+        int mt_col = tile_col;
 
-        //		in1 = input_plio::create("DataIn0", adf::plio_128_bits,
-        //"data/resize_in_64x8_concat_4tiles.txt");
-        out1 = output_plio::create("DataOut0", adf::plio_128_bits, "data/output.txt");
-        // resize
-        /*        connect<>(in1.out[0], k.in[0]);
-                connect<>(k.out[0], out1.in[0]);
-                        adf::dimensions(k.in[0]) = {TILE_WINDOW_SIZE_IN};
-                        adf::dimensions(k.out[0]) = {TILE_WINDOW_SIZE_OUT};
-        */
-        mtx_in1 = shared_buffer<DATA_TYPE>::create({TILE_WINDOW_SIZE_OUT}, 1, 2);
+        std::stringstream ssi;
+        ssi << "DataIn" << (0 + CORE_IDX);
+        in1 = input_plio::create(ssi.str().c_str(), adf::plio_128_bits, "data/resize_in_256x16.txt");
+
+        std::stringstream sso;
+        sso << "DataOut" << (0 + CORE_IDX);
+        out1 = output_plio::create(sso.str().c_str(), adf::plio_128_bits, "data/output.txt");
+
+        // Create Memtile blocks
+        mtx_in1 = shared_buffer<DATA_TYPE>::create({TILE_WINDOW_SIZE_IN * NO_CORES}, 1, NO_CORES);
+        mtx_out1 = shared_buffer<DATA_TYPE>::create({TILE_WINDOW_SIZE_OUT * NO_CORES}, (2 * NO_CORES), 1);
         num_buffers(mtx_in1) = 2;
-        connect<>(in1.out[0], k.in[0]);
-        connect<>(k.out[0], mtx_in1.in[0]);
-        adf::dimensions(k.in[0]) = {TILE_WINDOW_SIZE_IN};
-        adf::dimensions(k.out[0]) = {TILE_WINDOW_SIZE_OUT};
+        num_buffers(mtx_out1) = 2;
+        location<buffer>(mtx_in1) = {address(mt_col, 0, 0), address(mt_col, 0, (TILE_WINDOW_SIZE_IN * NO_CORES * 4))};
+        location<buffer>(mtx_out1) = {address(mt_col, 0, (TILE_WINDOW_SIZE_IN * NO_CORES * 8)),
+                                      address(mt_col, 0, (TILE_WINDOW_SIZE_IN * NO_CORES * 12))};
+        // plio ports to mem-tile1
+        connect<stream>(in1.out[0], mtx_in1.in[0]);
+        write_access(mtx_in1.in[0]) = buffer_descriptor((TILE_WINDOW_SIZE_IN * NO_CORES) / 4, 0, {1}, {});
+        connect<stream>(mtx_out1.out[0], out1.in[0]);
+        read_access(mtx_out1.out[0]) = buffer_descriptor((TILE_WINDOW_SIZE_OUT * NO_CORES) / 4, 0, {1}, {});
 
-        write_access(mtx_in1.in[0]) = buffer_descriptor((TILE_WINDOW_SIZE_OUT) / 4, 0, {1}, {});
-        read_access(mtx_in1.out[0]) = buffer_descriptor(METADATA_SIZE / 4, 0, {1}, {});
-        read_access(mtx_in1.out[1]) = buffer_descriptor((TILE_WINDOW_SIZE_OUT - METADATA_SIZE) / 4, METADATA_SIZE / 4,
-                                                        {1, TILE_WIDTH_OUT * CHANNELS / 4, 1}, {1, TILE_HEIGHT_OUT});
+        for (int i = 0; i < NO_CORES; i++) {
+            k[i] = kernel::create_object<ResizeRunner>(wtsY.arr);
 
-        connect<>(mtx_in1.out[0], k1.in[0]);
-        adf::dimensions(k1.in[0]) = {METADATA_SIZE};
-        connect<>(mtx_in1.out[1], k1.in[1]);
-        adf::dimensions(k1.in[1]) = {TILE_ELEMENTS_OUT};
+            connect<>(mtx_in1.out[i], k[i].in[0]);
+            adf::dimensions(k[i].in[0]) = {TILE_WINDOW_SIZE_IN};
+            read_access(mtx_in1.out[i]) =
+                buffer_descriptor(((TILE_WINDOW_SIZE_IN) / 4), (i * (TILE_WINDOW_SIZE_IN / 4)), {1}, {});
 
-        connect<>(k1.out[0], out1.in[0]);
-        adf::dimensions(k1.out[0]) = {TILE_WINDOW_SIZE_OUT};
+            connect<>(k[i].out[0], mtx_out1.in[i * 2]);
+            adf::dimensions(k[i].out[0]) = {METADATA_SIZE};
+            write_access(mtx_out1.in[i * 2]) =
+                buffer_descriptor(METADATA_SIZE / 4, (i * TILE_WINDOW_SIZE_OUT / 4), {1}, {});
 
-        connect<parameter>(channels, async(k.in[1]));
-        connect<parameter>(scalex, async(k.in[2]));
-        connect<parameter>(scaley, async(k.in[3]));
-        connect<parameter>(img_h_in, async(k.in[4]));
-        connect<parameter>(img_h_out, async(k.in[5]));
-        connect<parameter>(tile_h_out, async(k.in[6]));
-        connect<parameter>(tile_w_out, async(k.in[7]));
-        connect<parameter>(line_stride_in, async(k.in[8]));
-        connect<parameter>(img_w_out, async(k.in[9]));
-        connect<parameter>(scaley_f, async(k.in[10]));
+            connect<>(k[i].out[1], mtx_out1.in[i * 2 + 1]);
+            adf::dimensions(k[i].out[1]) = {TILE_ELEMENTS_OUT};
+            write_access(mtx_out1.in[i * 2 + 1]) = buffer_descriptor(
+                (TILE_WINDOW_SIZE_OUT - METADATA_SIZE) / 4, ((i * TILE_WINDOW_SIZE_OUT / 4) + (METADATA_SIZE / 4)),
+                {1, TILE_HEIGHT_OUT * CHANNELS / 4, 1}, {1, TILE_WIDTH_OUT});
+            // rtps
+            connect<parameter>(channels[i], async(k[i].in[1]));
+            connect<parameter>(scaley[i], async(k[i].in[2]));
+            connect<parameter>(img_h_in[i], async(k[i].in[3]));
+            connect<parameter>(img_h_out[i], async(k[i].in[4]));
+            connect<parameter>(scaley_f[i], async(k[i].in[5]));
+            // specify kernel sources
+            source(k[i]) = "xf_resize.cc";
+            location<kernel>(k[i]) = tile(tile_col, i);
 
-        connect<parameter>(outputStride, async(k1.in[2]));
-        // specify kernel sources
-        source(k) = "xf_resize.cc";
-        source(k1) = "xf_transpose.cc";
-
-        runtime<ratio>(k) = 0.5;
-        runtime<ratio>(k1) = 0.5;
+            runtime<ratio>(k[i]) = 0.5;
+        } // cores
     }
 
     void updateInputOutputSize(int width_in, int height_in, int width_out, int height_out) {
@@ -203,129 +194,103 @@ class resizeGraph : public adf::graph {
         uint32_t scale_y_fix = compute_scalefactor<16>(height_in, height_out);
         float scale_y_f1 = compute_scalefactor_f<16>(height_in, height_out);
 
-        update(channels, CHANNELS);
-        update(scalex, scale_x_fix);
-        update(scaley, scale_y_fix);
-        update(img_h_in, height_in);
-        update(img_h_out, height_out);
-        update(tile_h_out, TILE_HEIGHT_OUT);
-        update(tile_w_out, TILE_WIDTH_OUT);
-        update(line_stride_in, width_in);
-        update(img_w_out, width_out);
-        update(scaley_f, scale_y_f1);
+        for (int i = 0; i < NO_CORES; i++) {
+            update(channels[i], CHANNELS);
+            update(scaley[i], scale_y_fix);
+            update(img_h_in[i], height_in);
+            update(img_h_out[i], height_out);
+            update(scaley_f[i], scale_y_f1);
+        }
     }
 };
 class resizeGraph2 : public adf::graph {
    private:
-    kernel k;
-    kernel k1;
+    kernel k[NO_CORES];
 
    public:
     input_plio in1;
     output_plio out1;
-    output_plio out2;
 
-    port<input> channels;
-    port<input> scalex;
-    port<input> scaley;
-    port<input> scale_y_f2;
-    port<input> img_h_in;
-    port<input> img_w_in;
-    port<input> line_stride_in;
-    port<input> img_h_out;
-    port<input> img_w_out;
-    port<input> tile_h_out;
-    port<input> tile_w_out;
-    port<input> outputStride;
+    port<input> channels[NO_CORES];
+    port<input> scaley[NO_CORES];
+    port<input> scaley_f[NO_CORES];
+    port<input> img_h_in[NO_CORES];
+    port<input> img_h_out[NO_CORES];
 
     shared_buffer<DATA_TYPE> mtx_in1;
-    resizeGraph2() {
-        k = kernel::create_object<ResizeRunner>(wtsY.arr);
-        k1 = kernel::create(transpose_api);
+    shared_buffer<DATA_TYPE> mtx_out1;
 
-        //		in1 = input_plio::create("DataIn0", adf::plio_32_bits, "data/input_rgba.txt");
-        //		in1 = input_plio::create("DataIn0", adf::plio_32_bits, "data/tile0.txt");
-        //		in1 = input_plio::create("DataIn0", adf::plio_32_bits, "data/mem.txt");
-        //		 in1 = input_plio::create("DataIn0", adf::plio_32_bits, "data/resize_in_64x32.txt");
-        in1 = input_plio::create("DataIn1", adf::plio_128_bits, "data/resize_in_64x8.txt");
+    resizeGraph2(int tile_col, int tile_row, int CORE_IDX) {
+        int mt_col = tile_col;
+        std::stringstream ssi;
+        ssi << "DataIn" << (0 + CORE_IDX);
+        in1 = input_plio::create(ssi.str().c_str(), adf::plio_128_bits, "data/resize_in_256x16.txt");
 
-        //		in1 = input_plio::create("DataIn0", adf::plio_128_bits,
-        //"data/resize_in_64x8_concat_4tiles.txt");
-        out1 = output_plio::create("DataOut1", adf::plio_128_bits, "data/output.txt");
-        // resize
-        /*         connect<>(in1.out[0], k.in[0]);
-                connect<>(k.out[0], out1.in[0]);
-                        adf::dimensions(k.in[0]) = {TILE_WINDOW_SIZE_IN};
-                        adf::dimensions(k.out[0]) = {TILE_WINDOW_SIZE_OUT};
-         */
-        mtx_in1 = shared_buffer<DATA_TYPE>::create({TILE_WINDOW_SIZE_OUT2}, 1, 2);
+        std::stringstream sso;
+        sso << "DataOut" << (0 + CORE_IDX);
+        out1 = output_plio::create(sso.str().c_str(), adf::plio_128_bits, "data/output.txt");
+
+        // Create Memtile blocks
+        mtx_in1 = shared_buffer<DATA_TYPE>::create({TILE_WINDOW_SIZE_IN2 * NO_CORES}, 1, NO_CORES);
+        mtx_out1 = shared_buffer<DATA_TYPE>::create({TILE_WINDOW_SIZE_OUT2 * NO_CORES}, (2 * NO_CORES), 1);
         num_buffers(mtx_in1) = 2;
-        connect<>(in1.out[0], k.in[0]);
-        connect<>(k.out[0], mtx_in1.in[0]);
-        adf::dimensions(k.in[0]) = {TILE_WINDOW_SIZE_IN2};
-        adf::dimensions(k.out[0]) = {TILE_WINDOW_SIZE_OUT2};
+        num_buffers(mtx_out1) = 2;
 
-        write_access(mtx_in1.in[0]) = buffer_descriptor((TILE_WINDOW_SIZE_OUT2) / 4, 0, {1}, {});
-        read_access(mtx_in1.out[0]) = buffer_descriptor(METADATA_SIZE / 4, 0, {1}, {});
-        read_access(mtx_in1.out[1]) = buffer_descriptor((TILE_WINDOW_SIZE_OUT2 - METADATA_SIZE) / 4, METADATA_SIZE / 4,
-                                                        {1, TILE_WIDTH_OUT2 * CHANNELS / 4, 1}, {1, TILE_HEIGHT_OUT2});
+        location<buffer>(mtx_in1) = {address(mt_col, 1, 0), address(mt_col, 1, (TILE_WINDOW_SIZE_IN * NO_CORES * 4))};
+        location<buffer>(mtx_out1) = {address(mt_col, 1, (TILE_WINDOW_SIZE_IN * NO_CORES * 8)),
+                                      address(mt_col, 1, (TILE_WINDOW_SIZE_IN * NO_CORES * 12))};
 
-        connect<>(mtx_in1.out[0], k1.in[0]);
-        adf::dimensions(k1.in[0]) = {METADATA_SIZE};
-        connect<>(mtx_in1.out[1], k1.in[1]);
-        adf::dimensions(k1.in[1]) = {TILE_ELEMENTS_OUT2};
+        // plio ports to mem-tile1
+        connect<stream>(in1.out[0], mtx_in1.in[0]);
+        write_access(mtx_in1.in[0]) = buffer_descriptor((TILE_WINDOW_SIZE_IN2 * NO_CORES) / 4, 0, {1}, {});
 
-        connect<>(k1.out[0], out1.in[0]);
-        adf::dimensions(k1.out[0]) = {TILE_WINDOW_SIZE_OUT2};
+        connect<stream>(mtx_out1.out[0], out1.in[0]);
+        read_access(mtx_out1.out[0]) = buffer_descriptor((TILE_WINDOW_SIZE_OUT2 * NO_CORES) / 4, 0, {1}, {});
 
-        connect<parameter>(channels, async(k.in[1]));
-        connect<parameter>(scalex, async(k.in[2]));
-        connect<parameter>(scaley, async(k.in[3]));
-        connect<parameter>(img_h_in, async(k.in[4]));
-        connect<parameter>(img_h_out, async(k.in[5]));
-        connect<parameter>(tile_h_out, async(k.in[6]));
-        connect<parameter>(tile_w_out, async(k.in[7]));
-        connect<parameter>(line_stride_in, async(k.in[8]));
-        connect<parameter>(img_w_out, async(k.in[9]));
-        connect<parameter>(scale_y_f2, async(k.in[10]));
+        for (int i = 0; i < NO_CORES; i++) {
+            k[i] = kernel::create_object<ResizeRunner>(wtsY.arr);
 
-        connect<parameter>(outputStride, async(k1.in[2]));
-        // specify kernel sources
-        source(k) = "xf_resize.cc";
-        source(k1) = "xf_transpose.cc";
+            connect<>(mtx_in1.out[i], k[i].in[0]);
+            adf::dimensions(k[i].in[0]) = {TILE_WINDOW_SIZE_IN2};
+            read_access(mtx_in1.out[i]) =
+                buffer_descriptor(((TILE_WINDOW_SIZE_IN2) / 4), (i * (TILE_WINDOW_SIZE_IN2 / 4)), {1}, {});
 
-        runtime<ratio>(k) = 0.5;
-        runtime<ratio>(k1) = 0.5;
-        // location constraints
-        //-------------------------------
-        // location<kernel>(k)    = tile(26, 0);
-        // location<stack>(k)     = address(26, 0, 2048);
+            connect<>(k[i].out[0], mtx_out1.in[i * 2]);
+            adf::dimensions(k[i].out[0]) = {METADATA_SIZE};
+            write_access(mtx_out1.in[i * 2]) =
+                buffer_descriptor(METADATA_SIZE / 4, (i * TILE_WINDOW_SIZE_OUT2 / 4), {1}, {});
 
-        /*		location<parameter>(lut[0])  = address(2, 3, 0x0);
-                        location<parameter>(lut[1])  = address(2, 3, 0x4000);
-                        location<parameter>(lut[2])  = address(2, 3, 0x8000);
+            connect<>(k[i].out[1], mtx_out1.in[i * 2 + 1]);
+            adf::dimensions(k[i].out[1]) = {TILE_ELEMENTS_OUT2};
+            write_access(mtx_out1.in[i * 2 + 1]) = buffer_descriptor(
+                (TILE_WINDOW_SIZE_OUT2 - METADATA_SIZE) / 4, ((i * TILE_WINDOW_SIZE_OUT2 / 4) + (METADATA_SIZE / 4)),
+                {1, TILE_HEIGHT_OUT2 * CHANNELS / 4, 1}, {1, TILE_WIDTH_OUT2});
+            // rtps
+            connect<parameter>(channels[i], async(k[i].in[1]));
+            connect<parameter>(scaley[i], async(k[i].in[2]));
+            connect<parameter>(img_h_in[i], async(k[i].in[3]));
+            connect<parameter>(img_h_out[i], async(k[i].in[4]));
+            connect<parameter>(scaley_f[i], async(k[i].in[5]));
+            // specify kernel sources
+            source(k[i]) = "xf_resize.cc";
+            location<kernel>(k[i]) = tile(tile_col, i + 3);
 
-                        location<buffer>(k.in[0] ) = {address(26, 0, 16384*3-1024*3-640), address(2, 3,
-           16384*4-1024*3-640)};
-                        location<buffer>(k.out[0]) = {address(26, 0, 16384*3-1024-640),   address(2, 3,
-           16384*4-1024-640)};
-         */
+            runtime<ratio>(k[i]) = 0.5;
+        } // cores
     }
 
     void updateInputOutputSize(int width_in, int height_in, int width_out, int height_out) {
         uint32_t scale_x_fix = compute_scalefactor<16>(width_in, width_out);
         uint32_t scale_y_fix = compute_scalefactor<16>(height_in, height_out);
-        uint32_t scale_y_fix2 = compute_scalefactor<16>(height_in, height_out);
-        update(channels, CHANNELS);
-        update(scalex, scale_x_fix);
-        update(scaley, scale_y_fix);
-        update(img_h_in, height_in);
-        update(img_h_out, height_out);
-        update(tile_h_out, TILE_HEIGHT_OUT);
-        update(tile_w_out, TILE_WIDTH_OUT);
-        update(line_stride_in, width_in);
-        update(img_w_out, width_out);
-        update(scale_y_f2, scale_y_fix2);
+        float scale_y_f1 = compute_scalefactor_f<16>(height_in, height_out);
+
+        for (int i = 0; i < NO_CORES; i++) {
+            update(channels[i], CHANNELS);
+            update(scaley[i], scale_y_fix);
+            update(img_h_in[i], height_in);
+            update(img_h_out[i], height_out);
+            update(scaley_f[i], scale_y_f1);
+        }
     }
 };
 #endif

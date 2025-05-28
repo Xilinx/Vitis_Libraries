@@ -122,7 +122,6 @@ int main(int argc, char** argv) {
 
         // resize 1st pass
         {
-            uint32_t scale_x_fix = compute_scalefactor<16>(IMAGE_WIDTH_IN, IMAGE_WIDTH_OUT);
             uint32_t scale_y_fix = compute_scalefactor<16>(IMAGE_HEIGHT_IN, IMAGE_HEIGHT_OUT);
             float scale_y_f = compute_scalefactor_f<16>(IMAGE_HEIGHT_IN, IMAGE_HEIGHT_OUT);
 
@@ -134,32 +133,36 @@ int main(int argc, char** argv) {
             memcpy(srcData, srcImageR.data, (srcImageR.total() * srcImageR.elemSize()));
             std::cout << "dst_hndl size()=" << (op_height * op_width * srcImageR.elemSize()) << std::endl;
             xF::xfcvDataMoverParams params(srcImageR.size(), cv::Size(op_width, op_height));
-            xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT_IN, TILE_WIDTH_IN, 8, 1, 16, false, true> tiler(
-                0, 0, false, 4);
-            xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_WIDTH_OUT, TILE_HEIGHT_OUT, 8, 1, 16, false, true> stitcher(
-                false);
+            xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT_IN, TILE_WIDTH_IN, 8, NO_INSTANCES, 16, false, true>
+                tiler(0, 0, false, 4);
+            xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_WIDTH_OUT, TILE_HEIGHT_OUT, 8, NO_INSTANCES, 16, false, true>
+                stitcher(false);
             // xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_HEIGHT_OUT, TILE_WIDTH_OUT, 8> stitcher(false);
             std::cout << "Graph init. This does nothing because CDO in boot PDI "
                          "already configures AIE.\n";
 
 #if !__X86_DEVICE__
-            auto gHndl = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "resize");
-            std::cout << "XRT graph opened" << std::endl;
-            gHndl.reset();
-            std::cout << "Graph reset done" << std::endl;
-            gHndl.update("resize.k.in[1]", CHANNELS);
-            gHndl.update("resize.k.in[2]", scale_x_fix);
-            gHndl.update("resize.k.in[3]", scale_y_fix);
-            gHndl.update("resize.k.in[4]", IMAGE_HEIGHT_IN);
-            gHndl.update("resize.k.in[5]", IMAGE_HEIGHT_OUT);
-            gHndl.update("resize.k.in[6]", TILE_HEIGHT_OUT);
-            gHndl.update("resize.k.in[7]", TILE_WIDTH_OUT);
-            gHndl.update("resize.k.in[8]", IMAGE_WIDTH_IN);
-            gHndl.update("resize.k.in[9]", IMAGE_WIDTH_OUT);
-            gHndl.update("resize.k.in[10]", scale_y_f);
-
-            gHndl.update("resize.k1.in[2]", IMAGE_HEIGHT_OUT);
-
+            std::vector<xrt::graph> gHndl;
+            std::string graph_name_RTP[6];
+            for (int k = 0; k < NO_INSTANCES; k++) {
+                std::string graph_name = "resize[" + std::to_string(k) + "]";
+                std::cout << graph_name << std::endl;
+                gHndl.push_back(xrt::graph(xF::gpDhdl, xF::xclbin_uuid, graph_name));
+                // std::cout << "XRT graph opened" << std::endl;
+                gHndl.back().reset();
+                // std::cout << "Graph reset done" << std::endl;
+                for (int i = 0; i < NO_CORES; i++) {
+                    for (int j = 1; j < 6; j++) {
+                        graph_name_RTP[j] = graph_name + ".k[" + std::to_string(i) + "].in[" + std::to_string(j) + "]";
+                        // std::cout << graph_name_RTP[j] << std::endl;
+                    }
+                    gHndl[k].update(graph_name_RTP[1], CHANNELS);
+                    gHndl[k].update(graph_name_RTP[2], scale_y_fix);
+                    gHndl[k].update(graph_name_RTP[3], IMAGE_HEIGHT_IN);
+                    gHndl[k].update(graph_name_RTP[4], IMAGE_HEIGHT_OUT);
+                    gHndl[k].update(graph_name_RTP[5], scale_y_f);
+                }
+            }
 #endif
 
             START_TIMER
@@ -168,7 +171,7 @@ int main(int argc, char** argv) {
             STOP_TIMER("Meta data compute time")
 
             std::chrono::microseconds tt(0);
-            for (int i = 0; i < iterations; i++) {
+            for (int iter = 0; iter < iterations; iter++) {
                 //@{
                 //            std::cout << "Iteration : " << (i + 1) << std::endl;
                 START_TIMER
@@ -177,13 +180,14 @@ int main(int argc, char** argv) {
 
 #if !__X86_DEVICE__
                 //            std::cout << "Graph run(" << tiles_sz[0] * tiles_sz[1] << ")\n";
-                gHndl.run(tiles_sz[0] * tiles_sz[1]);
-//             for(int r=0; r<(tiles_sz[0] * tiles_sz[1]);r++){
-// //                std::cout << "before Graph run(" << r << ")\n";
-//                 gHndl.run(1);
-//                 gHndl.wait();
-// //                std::cout << "Graph run(" << r << ")\n";
-//             }
+                // START_TIMER
+                for (int i = 0; i < NO_INSTANCES; i++) {
+                    gHndl[i].run(tiler.tilesPerCore(i) / NO_CORES);
+                }
+                for (int i = 0; i < NO_INSTANCES; i++) {
+                    gHndl[i].wait();
+                }
+// STOP_TIMER("resize function")
 #endif
 
                 tiler.wait();
@@ -195,7 +199,9 @@ int main(int argc, char** argv) {
                 //@}
             }
 #if !__X86_DEVICE__
-            gHndl.end(0);
+            for (int i = 0; i < NO_INSTANCES; i++) {
+                gHndl[i].end(0);
+            }
 #endif
             // Analyze output {
             std::cout << "Analyzing diff\n";
@@ -205,7 +211,7 @@ int main(int argc, char** argv) {
             cv::imwrite("aie.png", dst);
             cv::absdiff(dstRefImage, dst, diff);
             cv::imwrite("diff.png", diff);
-            FILE* fp = fopen("aie.txt", "w");
+            /*FILE* fp = fopen("aie.txt", "w");
             FILE* fp1 = fopen("cv.txt", "w");
             FILE* fp2 = fopen("diff.txt", "w");
 
@@ -247,7 +253,7 @@ int main(int argc, char** argv) {
             fclose(fp);
             fclose(fp1);
             fclose(fp2);
-
+*/
             float err_per;
             analyzeDiff(diff, 2, err_per);
             if (err_per > 0) {
@@ -263,7 +269,6 @@ int main(int argc, char** argv) {
         }
         // resize 2nd pass
         {
-            uint32_t scale_x_fix2 = compute_scalefactor<16>(IMAGE_WIDTH_IN2, IMAGE_WIDTH_OUT2);
             uint32_t scale_y_fix2 = compute_scalefactor<16>(IMAGE_HEIGHT_IN2, IMAGE_HEIGHT_OUT2);
             float scale_y_f2 = compute_scalefactor_f<16>(IMAGE_HEIGHT_IN2, IMAGE_HEIGHT_OUT2);
 
@@ -281,32 +286,37 @@ int main(int argc, char** argv) {
             // cv::Mat dst(op_height, op_width, dstRefImage.type(), dstData);
             std::cout << "dst_hndl2 size()=" << (op_height2 * op_width2 * dst2.elemSize()) << std::endl;
             xF::xfcvDataMoverParams params2(dst.size(), cv::Size(op_width2, op_height2));
-            xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT_IN2, TILE_WIDTH_IN2, 8, 1, 16, false, true> tiler2(
-                0, 0, false, 4);
-            xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_WIDTH_OUT2, TILE_HEIGHT_OUT2, 8, 1, 16, false, true>
+            xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT_IN2, TILE_WIDTH_IN2, 8, NO_INSTANCES, 16, false, true>
+                tiler2(0, 0, false, 4);
+            xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_WIDTH_OUT2, TILE_HEIGHT_OUT2, 8, NO_INSTANCES, 16, false,
+                               true>
                 stitcher2(false);
             // xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_HEIGHT_OUT, TILE_WIDTH_OUT, 8> stitcher(false);
             std::cout << "Graph init. This does nothing because CDO in boot PDI "
                          "already configures AIE.\n";
 
 #if !__X86_DEVICE__
-            auto gHndl2 = xrt::graph(xF::gpDhdl, xF::xclbin_uuid, "resize2");
-            std::cout << "XRT graph opened" << std::endl;
-            gHndl2.reset();
-            std::cout << "Graph reset done" << std::endl;
-            gHndl2.update("resize2.k.in[1]", CHANNELS);
-            gHndl2.update("resize2.k.in[2]", scale_x_fix2);
-            gHndl2.update("resize2.k.in[3]", scale_y_fix2);
-            gHndl2.update("resize2.k.in[4]", IMAGE_HEIGHT_IN2);
-            gHndl2.update("resize2.k.in[5]", IMAGE_HEIGHT_OUT2);
-            gHndl2.update("resize2.k.in[6]", TILE_HEIGHT_OUT2);
-            gHndl2.update("resize2.k.in[7]", TILE_WIDTH_OUT2);
-            gHndl2.update("resize2.k.in[8]", IMAGE_WIDTH_IN2);
-            gHndl2.update("resize2.k.in[9]", IMAGE_WIDTH_OUT2);
-            gHndl2.update("resize2.k.in[10]", scale_y_f2);
-
-            gHndl2.update("resize2.k1.in[2]", IMAGE_HEIGHT_OUT2);
-
+            std::vector<xrt::graph> gHndl2;
+            std::string graph_name_RTP[6];
+            for (int k = 0; k < NO_INSTANCES; k++) {
+                std::string graph_name = "resize2[" + std::to_string(k) + "]";
+                // std::cout << graph_name << std::endl;
+                gHndl2.push_back(xrt::graph(xF::gpDhdl, xF::xclbin_uuid, graph_name));
+                // std::cout << "XRT graph opened" << std::endl;
+                gHndl2.back().reset();
+                // std::cout << "Graph reset done" << std::endl;
+                for (int i = 0; i < NO_CORES; i++) {
+                    for (int j = 1; j < 6; j++) {
+                        graph_name_RTP[j] = graph_name + ".k[" + std::to_string(i) + "].in[" + std::to_string(j) + "]";
+                        // std::cout << graph_name_RTP[j] << std::endl;
+                    }
+                    gHndl2[k].update(graph_name_RTP[1], CHANNELS);
+                    gHndl2[k].update(graph_name_RTP[2], scale_y_fix2);
+                    gHndl2[k].update(graph_name_RTP[3], IMAGE_HEIGHT_IN2);
+                    gHndl2[k].update(graph_name_RTP[4], IMAGE_HEIGHT_OUT2);
+                    gHndl2[k].update(graph_name_RTP[5], scale_y_f2);
+                }
+            }
 #endif
 
             START_TIMER
@@ -317,22 +327,18 @@ int main(int argc, char** argv) {
             std::chrono::microseconds tt(0);
             for (int i = 0; i < iterations; i++) {
                 //@{
-                std::cout << "Iteration : " << (i + 1) << std::endl;
+                // std::cout << "Iteration : " << (i + 1) << std::endl;
                 START_TIMER
                 auto tiles_sz2 = tiler2.host2aie_nb(&src_hndl2, dst.size(), params2);
                 stitcher2.aie2host_nb(&dst_hndl2, dst2.size(), tiles_sz2);
 
 #if !__X86_DEVICE__
-                gHndl2.run(tiles_sz2[0] * tiles_sz2[1]);
-                gHndl2.wait();
-/*            std::cout << "Graph run(" << tiles_sz2[0] * tiles_sz2[1] << ")\n";
-            for(int r=0; r<(tiles_sz2[0] * tiles_sz2[1]);r++){
-//                std::cout << "before Graph run(" << r << ")\n";
-                gHndl2.run(1);
-                gHndl2.wait();
-//                std::cout << "Graph run(" << r << ")\n";
-            }
-            */
+                for (int i = 0; i < NO_INSTANCES; i++) {
+                    gHndl2[i].run(tiler2.tilesPerCore(i) / NO_CORES);
+                }
+                for (int i = 0; i < NO_INSTANCES; i++) {
+                    gHndl2[i].wait();
+                }
 #endif
 
                 tiler2.wait();
@@ -344,7 +350,9 @@ int main(int argc, char** argv) {
                 //@}
             }
 #if !__X86_DEVICE__
-            gHndl2.end(0);
+            for (int i = 0; i < NO_INSTANCES; i++) {
+                gHndl2[i].end(0);
+            }
 #endif
             // Analyze output {
             std::cout << "Analyzing diff\n";

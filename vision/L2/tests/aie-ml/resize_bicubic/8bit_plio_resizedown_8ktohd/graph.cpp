@@ -17,18 +17,17 @@
 #include "graph.h"
 
 // instantiate adf dataflow graph
-resizeGraph resize;
-resizeGraph2 resize2;
+resizeGraph resize[NO_INSTANCES] = {{6, 0, 0}, {8, 0, 1}, {10, 0, 2}, {12, 0, 3}};
+resizeGraph2 resize2[NO_INSTANCES] = {{6, 0, 4}, {8, 0, 5}, {10, 0, 6}, {12, 0, 7}};
 
 // initialize and run the dataflow graph
 #if defined(__AIESIM__) || defined(__X86SIM__)
 int main(int argc, char** argv) {
-    resize.init();
-    resize.updateInputOutputSize(IMAGE_WIDTH_IN, IMAGE_HEIGHT_IN, IMAGE_WIDTH_OUT, IMAGE_HEIGHT_OUT);
-    resize.update(resize.outputStride, IMAGE_HEIGHT_OUT);
-    resize.run(1);
-    resize.wait();
-    resize.end();
+    resize[0].init();
+    resize[0].updateInputOutputSize(IMAGE_WIDTH_IN, IMAGE_HEIGHT_IN, IMAGE_WIDTH_OUT, IMAGE_HEIGHT_OUT);
+    resize[0].run(1);
+    resize[0].wait();
+    resize[0].end();
 
     return 0;
 }

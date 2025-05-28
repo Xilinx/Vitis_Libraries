@@ -38,6 +38,9 @@ void maskGenTrack_api(adf::input_buffer<uint8_t>& input1,
     xf::cv::aie::xfSetTileOutTHeight(img_out_ptr, 1);
     xf::cv::aie::xfSetTileOutOffset_L(img_out_ptr, 0);
     xf::cv::aie::xfSetTileOutOffset_U(img_out_ptr, 0);
+    xf::cv::aie::xfSetTileWidth(img_out_ptr, 16);
+    xf::cv::aie::xfSetTileOutPosV(img_out_ptr, 0);
+    xf::cv::aie::xfSetTileOutPosH(img_out_ptr, 0);
 
     uint8_t* in_ptr_1 = (uint8_t*)xf::cv::aie::xfGetImgDataPtr(img_in_ptr_1);
     uint8_t* in_ptr_2 = (uint8_t*)xf::cv::aie::xfGetImgDataPtr(img_in_ptr_2);

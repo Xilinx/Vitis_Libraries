@@ -122,7 +122,7 @@ else
 AIETARGET := x86sim
 endif
 
-AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM)   --aie.pl-freq 300 --aie.Xpreproc=-DAIE_API_DISABLE_ALIGNMENT_ASSERTIONS
+AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM)   --aie.pl-freq 300 
 AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
@@ -130,7 +130,7 @@ AIE_PKG_DIR = $(AIE_WORK_DIR)
 
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/
 
-AIE_CXXFLAGS +=  --aie.stacksize=32000
+AIE_CXXFLAGS +=  --aie.stacksize=32000  --aie.Xpreproc=-DAIE_API_DISABLE_ALIGNMENT_ASSERTIONS
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 

@@ -720,6 +720,7 @@ int main(int argc, char** argv) {
         //////////////////////////////////////////
         uint8_t rgain = 64;
         uint8_t bgain = 64;
+        uint8_t ggain = 64;
         uint8_t black_level = 32;
         const int MaxLevel = 255; // 8b input value
         float MulValue1 = (float)((float)MaxLevel / (MaxLevel - black_level));
@@ -806,7 +807,7 @@ int main(int argc, char** argv) {
                      "already configures AIE.\n";
 
         std::vector<xrt::graph> gHndl;
-        std::string graph_name_RTP[6];
+        std::string graph_name_RTP[7];
 
         for (int i = 0; i < CORES; i++) {
             std::string graph_name = "TOP[" + std::to_string(i) + "]";
@@ -816,7 +817,7 @@ int main(int argc, char** argv) {
             std::cout << "XRT graph opened" << std::endl;
             gHndl.back().reset();
             std::cout << "Graph reset done" << std::endl;
-            for (int j = 1; j < 6; j++) {
+            for (int j = 1; j < 7; j++) {
                 graph_name_RTP[j] = graph_name + ".k[0]." + "in[" + std::to_string(j) + "]";
             }
 
@@ -825,6 +826,7 @@ int main(int argc, char** argv) {
             gHndl[i].update(graph_name_RTP[3], MulValue);
             gHndl[i].update(graph_name_RTP[4], rgain);
             gHndl[i].update(graph_name_RTP[5], bgain);
+            gHndl[i].update(graph_name_RTP[6], ggain);
         }
 #endif
 

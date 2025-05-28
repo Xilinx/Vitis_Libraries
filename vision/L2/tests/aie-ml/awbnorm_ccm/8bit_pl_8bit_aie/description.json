@@ -71,12 +71,12 @@
         {
             "name": "hwemu-launch",
             "target": "hw_emu",
-            "cmd_args": "kernel.xclbin LIB_DIR/data/HD.jpg"
+            "cmd_args": "kernel.xclbin LIB_DIR/data/HD.jpg 1920 1080 1"
         },
         {
             "name": "hw",
             "target": "hw",
-            "cmd_args": "kernel.xclbin LIB_DIR/data/4k.jpg"
+            "cmd_args": "kernel.xclbin LIB_DIR/data/4k.jpg 3840 2160 1"
         }
     ],
     "v++": {

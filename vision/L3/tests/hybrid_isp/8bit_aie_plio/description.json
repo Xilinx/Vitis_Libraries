@@ -132,7 +132,8 @@
                 "LIB_DIR/L1/include/aie-ml/"
             ],
             "clflags": [
-                "--aie.stacksize=32000"
+                "--aie.stacksize=32000",
+                "--aie.Xpreproc=-DAIE_API_DISABLE_ALIGNMENT_ASSERTIONS"
             ]
         }
     },
@@ -186,7 +187,7 @@
                     "vitis_aie_sim": 50,
                     "vitis_aie_x86sim": 50,
                     "vitis_hw_build": 470,
-                    "vitis_hw_emu": 200,
+                    "vitis_hw_emu": 500,
                     "vitis_hw_run": 30
                 }
             }

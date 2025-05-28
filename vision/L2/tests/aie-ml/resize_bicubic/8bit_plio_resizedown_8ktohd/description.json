@@ -138,8 +138,7 @@
                     "options": "",
                     "name": "libadf.a",
                     "files": [
-                        "xf_resize.cc",
-                        "xf_transpose.cc"
+                        "xf_resize.cc"
                     ]
                 }
             ]
@@ -170,8 +169,6 @@
             }
         ],
         "targets": [
-            "vitis_aie_sim",
-            "vitis_hw_emu",
             "vitis_hw_build",
             "vitis_hw_run"
         ],

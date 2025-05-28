@@ -195,7 +195,7 @@ int main(int argc, char** argv) {
         std::cout << "XRT graph opened" << std::endl;
         gHndl1.reset();
         gHndl2.reset();
-/*std::cout << "Graph reset done" << std::endl;*/
+        std::cout << "Graph reset done" << std::endl;
 #endif
 
         std::chrono::microseconds tt(0);
@@ -281,7 +281,7 @@ int main(int argc, char** argv) {
         cv::imwrite("diff.png", diff);
 
         float err_per;
-        analyzeDiff(diff, 4, err_per);
+        analyzeDiff(diff, 2, err_per);
         if (err_per > 0) {
             std::cerr << "Test failed" << std::endl;
             exit(-1);
