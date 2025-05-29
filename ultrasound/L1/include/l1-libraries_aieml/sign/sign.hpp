@@ -27,26 +27,23 @@ from Advanced Micro Devices, Inc.
 #include <aie_api/aie.hpp>
 #include <aie_api/utils.hpp>
 
-namespace us{
-namespace L1{
+namespace us {
+namespace L1 {
 
 template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
 void Sign(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
 void SignInternalBuffer(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
-
 
 // nested called
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_Sign(T *input_vector, T *output_vector);
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_Sign(T* input_vector, T* output_vector);
 
 // retrocompatibility
 
 template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
 void sign(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
-
 }
 }

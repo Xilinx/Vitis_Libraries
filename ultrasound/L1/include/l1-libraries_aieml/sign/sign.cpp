@@ -23,83 +23,73 @@ from Advanced Micro Devices, Inc.
 */
 #include "sign.hpp"
 
-namespace us{
-namespace L1{
+namespace us {
+namespace L1 {
 
 template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
-void Sign(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector){
-
+void Sign(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector) {
     aie::vector<T, T_SIMD_DEPTH> op = aie::zeros<T, T_SIMD_DEPTH>();
-	aie::vector< T, T_SIMD_DEPTH > res = aie::zeros< T, T_SIMD_DEPTH >();
+    aie::vector<T, T_SIMD_DEPTH> res = aie::zeros<T, T_SIMD_DEPTH>();
 
-	auto iter_in = aie::begin_vector< T_SIMD_DEPTH >(input_vector);
-	auto iter_out = aie::begin_vector< T_SIMD_DEPTH >(output_vector);
+    auto iter_in = aie::begin_vector<T_SIMD_DEPTH>(input_vector);
+    auto iter_out = aie::begin_vector<T_SIMD_DEPTH>(output_vector);
 
     // sign function
-    for (unsigned int i = 0; i < T_LEN; i += T_INCREMENT)
-   		chess_prepare_for_pipelining {
-		op = *iter_in;
+    for (unsigned int i = 0; i < T_LEN; i += T_INCREMENT) chess_prepare_for_pipelining {
+            op = *iter_in;
 
-        for (unsigned int j = 0; j < T_INCREMENT; ++j)
-       		chess_prepare_for_pipelining {
-            if (op[j] == 0)
-                res[j] = (T)0;
-            else
-                res[j] = (T)(op[j] < 0 ? -1 : 1);
+            for (unsigned int j = 0; j < T_INCREMENT; ++j) chess_prepare_for_pipelining {
+                    if (op[j] == 0)
+                        res[j] = (T)0;
+                    else
+                        res[j] = (T)(op[j] < 0 ? -1 : 1);
+                }
+
+            *iter_out = res;
+
+            iter_out++;
+            iter_in++;
         }
-
-        *iter_out = res;
-
-		iter_out++;
-		iter_in++;
-    }
 };
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void SignInternalBuffer(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector){
-
-	T* buffer_in = (T*)input_vector.data();
-	T* buffer_out = (T*)output_vector.data();
-	m_Sign< T, T_LEN, T_INCREMENT, T_SIMD_DEPTH >(buffer_in, buffer_out);
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void SignInternalBuffer(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector) {
+    T* buffer_in = (T*)input_vector.data();
+    T* buffer_out = (T*)output_vector.data();
+    m_Sign<T, T_LEN, T_INCREMENT, T_SIMD_DEPTH>(buffer_in, buffer_out);
 }
 
-
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_Sign(T *input_vector, T *output_vector){
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_Sign(T* input_vector, T* output_vector) {
     aie::vector<T, T_SIMD_DEPTH> op = aie::zeros<T, T_SIMD_DEPTH>();
-	aie::vector< T, T_SIMD_DEPTH > res = aie::zeros< T, T_SIMD_DEPTH >();
+    aie::vector<T, T_SIMD_DEPTH> res = aie::zeros<T, T_SIMD_DEPTH>();
 
-	auto iter_in = aie::begin_vector< T_SIMD_DEPTH >(input_vector);
-	auto iter_out = aie::begin_vector< T_SIMD_DEPTH >(output_vector);
+    auto iter_in = aie::begin_vector<T_SIMD_DEPTH>(input_vector);
+    auto iter_out = aie::begin_vector<T_SIMD_DEPTH>(output_vector);
 
     // sign function
-    for (unsigned int i = 0; i < T_LEN; i += T_INCREMENT)
-   		chess_prepare_for_pipelining {
-		op = *iter_in;
+    for (unsigned int i = 0; i < T_LEN; i += T_INCREMENT) chess_prepare_for_pipelining {
+            op = *iter_in;
 
-        for (unsigned int j = 0; j < T_INCREMENT; ++j)
-       		chess_prepare_for_pipelining {
-            if (op[j] == 0)
-                res[j] = (T)0;
-            else
-                res[j] = (T)(op[j] < 0 ? -1 : 1);
+            for (unsigned int j = 0; j < T_INCREMENT; ++j) chess_prepare_for_pipelining {
+                    if (op[j] == 0)
+                        res[j] = (T)0;
+                    else
+                        res[j] = (T)(op[j] < 0 ? -1 : 1);
+                }
+
+            *iter_out = res;
+
+            iter_out++;
+            iter_in++;
         }
-
-        *iter_out = res;
-
-		iter_out++;
-		iter_in++;
-    }
 }
 
 // retrocompatibility
 
 template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
-void sign(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector){
+void sign(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector) {
     Sign<T, T_LEN, T_INCREMENT, T_SIMD_DEPTH>(input_vector, output_vector);
 }
-
 }
 }

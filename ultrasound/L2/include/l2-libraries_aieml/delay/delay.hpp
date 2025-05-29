@@ -37,12 +37,10 @@ from Advanced Micro Devices, Inc.
 #include "l1-libraries_aieml/sum_axis_1/sum_axis_1.hpp"
 #include "l1-libraries_aieml/tile_v/tile_v.hpp"
 
-
 #include "common_defines.hpp"
 
-
-//template< typename T >
-//void Delay(
+// template< typename T >
+// void Delay(
 //
 //		adf::input_buffer< T >& image_points_from_pl_1,
 //		adf::input_buffer< T >& image_points_from_pl_2,
@@ -58,36 +56,33 @@ from Advanced Micro Devices, Inc.
 //
 //);
 
-namespace us{
-namespace L2{
+namespace us {
+namespace L2 {
 
-template< typename T >
+template <typename T>
 void Delay1(
 
-		adf::input_buffer< T >& image_points_from_pl_1,
-		adf::input_buffer< T >& tx_def_ref_point,
-		adf::input_buffer< T >& tx_def_delay_distance_1,
-		adf::input_buffer< T >& direction,
+    adf::input_buffer<T>& image_points_from_pl_1,
+    adf::input_buffer<T>& tx_def_ref_point,
+    adf::input_buffer<T>& tx_def_delay_distance_1,
+    adf::input_buffer<T>& direction,
 
-		adf::output_buffer< T >& sign_delay_output
+    adf::output_buffer<T>& sign_delay_output
 
-);
+    );
 
-
-template< typename T >
+template <typename T>
 void Delay2(
 
-		adf::input_buffer< T >& sign_delay_input,
-		adf::input_buffer< T >& image_points_from_pl_2,
-		adf::input_buffer< T >& tx_def_delay_distance_2,
-		adf::input_buffer< T >& tx_def_focal_point,
-		adf::input_buffer< T >& t_start,
-		adf::input_buffer< T >& speed_of_sound,
+    adf::input_buffer<T>& sign_delay_input,
+    adf::input_buffer<T>& image_points_from_pl_2,
+    adf::input_buffer<T>& tx_def_delay_distance_2,
+    adf::input_buffer<T>& tx_def_focal_point,
+    adf::input_buffer<T>& t_start,
+    adf::input_buffer<T>& speed_of_sound,
 
-		adf::output_buffer< T >& delay_output
+    adf::output_buffer<T>& delay_output
 
-);
-
+    );
 }
 }
-

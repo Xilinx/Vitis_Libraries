@@ -27,8 +27,8 @@ from Advanced Micro Devices, Inc.
 #include <aie_api/aie.hpp>
 #include <aie_api/utils.hpp>
 
-namespace us{
-namespace L1{
+namespace us {
+namespace L1 {
 
 template <typename T, const unsigned T_LEN, const unsigned T_INCREMENT, const unsigned T_SIMD_DEPTH, unsigned T_SCALAR>
 void LessOrEqualThanS(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
@@ -36,17 +36,14 @@ void LessOrEqualThanS(adf::input_buffer<T>& input_vector, adf::output_buffer<T>&
 template <typename T, const unsigned T_LEN, const unsigned T_INCREMENT, const unsigned T_SIMD_DEPTH, unsigned T_SCALAR>
 void LessOrEqualThanSInternalBuffer(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
 
-
 // nested called
 
 template <typename T, const unsigned T_LEN, const unsigned T_INCREMENT, const unsigned T_SIMD_DEPTH, unsigned T_SCALAR>
-void m_LessOrEqualThanS(T *input_vector, T *output_vector);
-
+void m_LessOrEqualThanS(T* input_vector, T* output_vector);
 
 // retrocompatibility
 
 template <typename T, const unsigned T_LEN, const unsigned T_INCREMENT, const unsigned T_SIMD_DEPTH, unsigned T_SCALAR>
 void lessOrEqualThanS(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& __restrict output_vector);
-
 }
 }

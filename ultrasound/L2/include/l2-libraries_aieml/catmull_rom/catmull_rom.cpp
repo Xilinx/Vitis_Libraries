@@ -26,136 +26,124 @@ from Advanced Micro Devices, Inc.
 #include "l1-libraries_aieml/mul/mul.cpp"
 #include "l1-libraries_aieml/sum/sum.cpp"
 
-namespace us{
-namespace L2{
+namespace us {
+namespace L2 {
 
-template< typename T >
+template <typename T>
 void CatmullRomA1A2(
 
-		adf::input_buffer< T >& point_0,
-		adf::input_buffer< T >& point_1,
-		adf::input_buffer< T >& point_2,
-		adf::input_buffer< T >& t1t,
-		adf::input_buffer< T >& tt0,
-		adf::input_buffer< T >& t2t,
-		adf::input_buffer< T >& tt1,
+    adf::input_buffer<T>& point_0,
+    adf::input_buffer<T>& point_1,
+    adf::input_buffer<T>& point_2,
+    adf::input_buffer<T>& t1t,
+    adf::input_buffer<T>& tt0,
+    adf::input_buffer<T>& t2t,
+    adf::input_buffer<T>& tt1,
 
-		adf::output_buffer< T >& output_a1,
-		adf::output_buffer< T >& output_a2
+    adf::output_buffer<T>& output_a1,
+    adf::output_buffer<T>& output_a2
 
-){
+    ) {
+    T* point_0_buffer = (T*)point_0.data();
+    T* point_1_buffer = (T*)point_1.data();
+    T* point_2_buffer = (T*)point_2.data();
+    T* t1t_buffer = (T*)t1t.data();
+    T* tt0_buffer = (T*)tt0.data();
+    T* t2t_buffer = (T*)t2t.data();
+    T* tt1_buffer = (T*)tt1.data();
 
-	T* point_0_buffer = (T*)point_0.data();
-	T* point_1_buffer = (T*)point_1.data();
-	T* point_2_buffer = (T*)point_2.data();
-	T* t1t_buffer = (T*)t1t.data();
-	T* tt0_buffer = (T*)tt0.data();
-	T* t2t_buffer = (T*)t2t.data();
-	T* tt1_buffer = (T*)tt1.data();
+    T* output_a1_buffer = (T*)output_a1.data();
+    T* output_a2_buffer = (T*)output_a2.data();
 
-	T* output_a1_buffer = (T*)output_a1.data();
-	T* output_a2_buffer = (T*)output_a2.data();
+    T buffer_out_v_1[LEN];
+    T buffer_out_v_2[LEN];
+    T buffer_out_v_3[LEN];
 
-	T buffer_out_v_1[LEN];
-	T buffer_out_v_2[LEN];
-	T buffer_out_v_3[LEN];
+    // A1
+    us::L1::m_Mul<T, LEN, INCREMENT_V, SIMD_DEPTH>(t1t_buffer, point_0_buffer, buffer_out_v_1);
+    us::L1::m_Mul<T, LEN, INCREMENT_V, SIMD_DEPTH>(tt0_buffer, point_1_buffer, buffer_out_v_2);
+    us::L1::m_Sum<T, LEN, INCREMENT_V, SIMD_DEPTH>(buffer_out_v_1, buffer_out_v_2, output_a1_buffer);
 
-    //A1
-	us::L1::m_Mul< T, LEN, INCREMENT_V, SIMD_DEPTH >(t1t_buffer, point_0_buffer, buffer_out_v_1);
-	us::L1::m_Mul< T, LEN, INCREMENT_V, SIMD_DEPTH >(tt0_buffer, point_1_buffer, buffer_out_v_2);
-	us::L1::m_Sum< T, LEN, INCREMENT_V, SIMD_DEPTH >(buffer_out_v_1, buffer_out_v_2, output_a1_buffer);
-
-    //A2
-	us::L1::m_Mul< T, LEN, INCREMENT_V, SIMD_DEPTH >(t2t_buffer, point_1_buffer, buffer_out_v_1);
-	us::L1::m_Mul< T, LEN, INCREMENT_V, SIMD_DEPTH >(tt1_buffer, point_2_buffer, buffer_out_v_2);
-	us::L1::m_Sum< T, LEN, INCREMENT_V, SIMD_DEPTH >(buffer_out_v_1, buffer_out_v_2, output_a2_buffer);
-
+    // A2
+    us::L1::m_Mul<T, LEN, INCREMENT_V, SIMD_DEPTH>(t2t_buffer, point_1_buffer, buffer_out_v_1);
+    us::L1::m_Mul<T, LEN, INCREMENT_V, SIMD_DEPTH>(tt1_buffer, point_2_buffer, buffer_out_v_2);
+    us::L1::m_Sum<T, LEN, INCREMENT_V, SIMD_DEPTH>(buffer_out_v_1, buffer_out_v_2, output_a2_buffer);
 }
 
-template< typename T >
+template <typename T>
 void CatmullRomA3B1(
 
-		adf::input_buffer< T >& output_a1,
-		adf::input_buffer< T >& output_a2,
-		adf::input_buffer< T >& point_2,
-		adf::input_buffer< T >& point_3,
-		adf::input_buffer< T >& t3t,
-		adf::input_buffer< T >& tt2,
-		adf::input_buffer< T >& t2t,
-		adf::input_buffer< T >& tt0,
+    adf::input_buffer<T>& output_a1,
+    adf::input_buffer<T>& output_a2,
+    adf::input_buffer<T>& point_2,
+    adf::input_buffer<T>& point_3,
+    adf::input_buffer<T>& t3t,
+    adf::input_buffer<T>& tt2,
+    adf::input_buffer<T>& t2t,
+    adf::input_buffer<T>& tt0,
 
-		adf::output_buffer< T >& output_a3,
-		adf::output_buffer< T >& output_b1
-){
+    adf::output_buffer<T>& output_a3,
+    adf::output_buffer<T>& output_b1) {
+    T* output_a1_buffer = (T*)output_a1.data();
+    T* output_a2_buffer = (T*)output_a2.data();
+    T* point_2_buffer = (T*)point_2.data();
+    T* point_3_buffer = (T*)point_3.data();
+    T* t3t_buffer = (T*)t3t.data();
+    T* tt2_buffer = (T*)tt2.data();
+    T* t2t_buffer = (T*)t2t.data();
+    T* tt0_buffer = (T*)tt0.data();
 
-	T* output_a1_buffer = (T*)output_a1.data();
-	T* output_a2_buffer = (T*)output_a2.data();
-	T* point_2_buffer = (T*)point_2.data();
-	T* point_3_buffer = (T*)point_3.data();
-	T* t3t_buffer = (T*)t3t.data();
-	T* tt2_buffer = (T*)tt2.data();
-	T* t2t_buffer = (T*)t2t.data();
-	T* tt0_buffer = (T*)tt0.data();
+    T* output_a3_buffer = (T*)output_a3.data();
+    T* output_b1_buffer = (T*)output_b1.data();
 
-	T* output_a3_buffer = (T*)output_a3.data();
-	T* output_b1_buffer = (T*)output_b1.data();
+    T buffer_out_v_1[LEN];
+    T buffer_out_v_2[LEN];
+    T buffer_out_v_3[LEN];
 
-	T buffer_out_v_1[LEN];
-	T buffer_out_v_2[LEN];
-	T buffer_out_v_3[LEN];
+    // A3
+    us::L1::m_Mul<T, LEN, INCREMENT_V, SIMD_DEPTH>(t3t_buffer, point_2_buffer, buffer_out_v_1);
+    us::L1::m_Mul<T, LEN, INCREMENT_V, SIMD_DEPTH>(tt2_buffer, point_3_buffer, buffer_out_v_2);
+    us::L1::m_Sum<T, LEN, INCREMENT_V, SIMD_DEPTH>(buffer_out_v_1, buffer_out_v_2, output_a3_buffer);
 
-    //A3
-	us::L1::m_Mul< T, LEN, INCREMENT_V, SIMD_DEPTH >(t3t_buffer, point_2_buffer, buffer_out_v_1);
-	us::L1::m_Mul< T, LEN, INCREMENT_V, SIMD_DEPTH >(tt2_buffer, point_3_buffer, buffer_out_v_2);
-	us::L1::m_Sum< T, LEN, INCREMENT_V, SIMD_DEPTH >(buffer_out_v_1, buffer_out_v_2, output_a3_buffer);
-
-    //B1
-	us::L1::m_Mul< T, LEN, INCREMENT_V, SIMD_DEPTH >(t2t_buffer, output_a1_buffer, buffer_out_v_1);
-	us::L1::m_Mul< T, LEN, INCREMENT_V, SIMD_DEPTH >(tt0_buffer, output_a2_buffer, buffer_out_v_2);
-	us::L1::m_Sum< T, LEN, INCREMENT_V, SIMD_DEPTH >(buffer_out_v_1, buffer_out_v_2, output_b1_buffer);
-
-
+    // B1
+    us::L1::m_Mul<T, LEN, INCREMENT_V, SIMD_DEPTH>(t2t_buffer, output_a1_buffer, buffer_out_v_1);
+    us::L1::m_Mul<T, LEN, INCREMENT_V, SIMD_DEPTH>(tt0_buffer, output_a2_buffer, buffer_out_v_2);
+    us::L1::m_Sum<T, LEN, INCREMENT_V, SIMD_DEPTH>(buffer_out_v_1, buffer_out_v_2, output_b1_buffer);
 }
 
-template< typename T >
+template <typename T>
 void CatmullRomB2C(
 
-		adf::input_buffer< T >& output_a2,
-		adf::input_buffer< T >& output_a3,
-		adf::input_buffer< T >& output_b1,
-		adf::input_buffer< T >& t3t,
-		adf::input_buffer< T >& tt1,
-		adf::input_buffer< T >& t2t,
+    adf::input_buffer<T>& output_a2,
+    adf::input_buffer<T>& output_a3,
+    adf::input_buffer<T>& output_b1,
+    adf::input_buffer<T>& t3t,
+    adf::input_buffer<T>& tt1,
+    adf::input_buffer<T>& t2t,
 
-		adf::output_buffer< T >& output_catmull_rom
-){
+    adf::output_buffer<T>& output_catmull_rom) {
+    T* output_a2_buffer = (T*)output_a2.data();
+    T* output_a3_buffer = (T*)output_a3.data();
+    T* output_b1_buffer = (T*)output_b1.data();
+    T* t3t_buffer = (T*)t3t.data();
+    T* tt1_buffer = (T*)tt1.data();
+    T* t2t_buffer = (T*)t2t.data();
 
-	T* output_a2_buffer = (T*)output_a2.data();
-	T* output_a3_buffer = (T*)output_a3.data();
-	T* output_b1_buffer = (T*)output_b1.data();
-	T* t3t_buffer = (T*)t3t.data();
-	T* tt1_buffer = (T*)tt1.data();
-	T* t2t_buffer = (T*)t2t.data();
+    T* output_catmull_rom_buffer = (T*)output_catmull_rom.data();
 
-	T* output_catmull_rom_buffer = (T*)output_catmull_rom.data();
+    T buffer_out_v_1[LEN];
+    T buffer_out_v_2[LEN];
+    T buffer_out_v_3[LEN];
 
-	T buffer_out_v_1[LEN];
-	T buffer_out_v_2[LEN];
-	T buffer_out_v_3[LEN];
+    // B2
+    us::L1::m_Mul<T, LEN, INCREMENT_V, SIMD_DEPTH>(t3t_buffer, output_a2_buffer, buffer_out_v_1);
+    us::L1::m_Mul<T, LEN, INCREMENT_V, SIMD_DEPTH>(tt1_buffer, output_a3_buffer, buffer_out_v_2);
+    us::L1::m_Sum<T, LEN, INCREMENT_V, SIMD_DEPTH>(buffer_out_v_1, buffer_out_v_2, buffer_out_v_3);
 
-    //B2
-	us::L1::m_Mul< T, LEN, INCREMENT_V, SIMD_DEPTH >(t3t_buffer, output_a2_buffer, buffer_out_v_1);
-	us::L1::m_Mul< T, LEN, INCREMENT_V, SIMD_DEPTH >(tt1_buffer, output_a3_buffer, buffer_out_v_2);
-	us::L1::m_Sum< T, LEN, INCREMENT_V, SIMD_DEPTH >(buffer_out_v_1, buffer_out_v_2, buffer_out_v_3);
-
-    //C - Output
-	us::L1::m_Mul< T, LEN, INCREMENT_V, SIMD_DEPTH >(t2t_buffer, output_b1_buffer, buffer_out_v_1);
-	us::L1::m_Mul< T, LEN, INCREMENT_V, SIMD_DEPTH >(tt1_buffer, buffer_out_v_3, buffer_out_v_2);
-	us::L1::m_Sum< T, LEN, INCREMENT_V, SIMD_DEPTH >(buffer_out_v_1, buffer_out_v_2, output_catmull_rom_buffer);
-
-
-}
-
+    // C - Output
+    us::L1::m_Mul<T, LEN, INCREMENT_V, SIMD_DEPTH>(t2t_buffer, output_b1_buffer, buffer_out_v_1);
+    us::L1::m_Mul<T, LEN, INCREMENT_V, SIMD_DEPTH>(tt1_buffer, buffer_out_v_3, buffer_out_v_2);
+    us::L1::m_Sum<T, LEN, INCREMENT_V, SIMD_DEPTH>(buffer_out_v_1, buffer_out_v_2, output_catmull_rom_buffer);
 }
 }
-
+}

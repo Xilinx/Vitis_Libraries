@@ -33,98 +33,90 @@ from Advanced Micro Devices, Inc.
 #include "l1-libraries_aieml/sum_axis_1/sum_axis_1.cpp"
 #include "l1-libraries_aieml/tile_v/tile_v.cpp"
 
+namespace us {
+namespace L2 {
 
-namespace us{
-namespace L2{
-
-template< typename T >
+template <typename T>
 void Delay1(
 
-		adf::input_buffer< T >& image_points_from_pl_1,
-		adf::input_buffer< T >& tx_def_ref_point,
-		adf::input_buffer< T >& tx_def_delay_distance_1,
-		adf::input_buffer< T >& direction,
+    adf::input_buffer<T>& image_points_from_pl_1,
+    adf::input_buffer<T>& tx_def_ref_point,
+    adf::input_buffer<T>& tx_def_delay_distance_1,
+    adf::input_buffer<T>& direction,
 
-		adf::output_buffer< T >& sign_delay_output
+    adf::output_buffer<T>& sign_delay_output
 
-){
+    ) {
+    T* image_points_from_pl_1_buffer = (T*)image_points_from_pl_1.data();
+    T* tx_def_delay_distance_1_buffer = (T*)tx_def_delay_distance_1.data();
+    T* tx_def_ref_point_buffer = (T*)tx_def_ref_point.data();
+    T* direction_buffer = (T*)direction.data();
 
-	T* image_points_from_pl_1_buffer = (T*)image_points_from_pl_1.data();
-	T* tx_def_delay_distance_1_buffer = (T*)tx_def_delay_distance_1.data();
-	T* tx_def_ref_point_buffer = (T*)tx_def_ref_point.data();
-	T* direction_buffer = (T*)direction.data();
+    T* sign_delay_output_buffer = (T*)sign_delay_output.data();
 
-	T* sign_delay_output_buffer = (T*)sign_delay_output.data();
+    T buffer_out_v_1[LEN];
+    T buffer_out_v_2[LEN];
+    T buffer_out_m_1[LEN * M_COLUMNS];
+    T buffer_out_m_2[LEN * M_COLUMNS];
+    T buffer_out_m_3[LEN * M_COLUMNS];
 
-	T buffer_out_v_1[LEN];
-	T buffer_out_v_2[LEN];
-	T buffer_out_m_1[LEN*M_COLUMNS];
-	T buffer_out_m_2[LEN*M_COLUMNS];
-	T buffer_out_m_3[LEN*M_COLUMNS];
-
-	//DiffMV
-	us::L1::m_Diff< T, LEN, INCREMENT_M, SIMD_DEPTH >(image_points_from_pl_1_buffer, tx_def_ref_point_buffer, buffer_out_m_1);
-	//TileV
-	us::L1::m_TileV< T, LEN, INCREMENT_M, SIMD_DEPTH >(direction_buffer, buffer_out_m_2);
-	//MulMM
-	us::L1::m_Mul< T, LEN, INCREMENT_M, SIMD_DEPTH >(buffer_out_m_1, buffer_out_m_2, buffer_out_m_3);
-	//SumAxis1
-	us::L1::m_SumAxis1< T, LEN, 1, M_COLUMNS >(buffer_out_m_3, buffer_out_v_1);
-	//AbsV
-	us::L1::m_AbsV< T, T, LEN, INCREMENT_V, SIMD_DEPTH >(buffer_out_v_1, buffer_out_v_2);
-	//DiffVS
-	us::L1::m_Diff< T, LEN, INCREMENT_V, SIMD_DEPTH >(buffer_out_v_2, tx_def_delay_distance_1_buffer, buffer_out_v_1);
-	//Sign
-	us::L1::m_Sign< T, LEN, INCREMENT_V, SIMD_DEPTH >(buffer_out_v_1, sign_delay_output_buffer);
-
+    // DiffMV
+    us::L1::m_Diff<T, LEN, INCREMENT_M, SIMD_DEPTH>(image_points_from_pl_1_buffer, tx_def_ref_point_buffer,
+                                                    buffer_out_m_1);
+    // TileV
+    us::L1::m_TileV<T, LEN, INCREMENT_M, SIMD_DEPTH>(direction_buffer, buffer_out_m_2);
+    // MulMM
+    us::L1::m_Mul<T, LEN, INCREMENT_M, SIMD_DEPTH>(buffer_out_m_1, buffer_out_m_2, buffer_out_m_3);
+    // SumAxis1
+    us::L1::m_SumAxis1<T, LEN, 1, M_COLUMNS>(buffer_out_m_3, buffer_out_v_1);
+    // AbsV
+    us::L1::m_AbsV<T, T, LEN, INCREMENT_V, SIMD_DEPTH>(buffer_out_v_1, buffer_out_v_2);
+    // DiffVS
+    us::L1::m_Diff<T, LEN, INCREMENT_V, SIMD_DEPTH>(buffer_out_v_2, tx_def_delay_distance_1_buffer, buffer_out_v_1);
+    // Sign
+    us::L1::m_Sign<T, LEN, INCREMENT_V, SIMD_DEPTH>(buffer_out_v_1, sign_delay_output_buffer);
 }
 
-
-template< typename T >
+template <typename T>
 void Delay2(
 
-		adf::input_buffer< T >& sign_delay_input,
-		adf::input_buffer< T >& image_points_from_pl_2,
-		adf::input_buffer< T >& tx_def_delay_distance_2,
-		adf::input_buffer< T >& tx_def_focal_point,
-		adf::input_buffer< T >& t_start,
-		adf::input_buffer< T >& speed_of_sound,
+    adf::input_buffer<T>& sign_delay_input,
+    adf::input_buffer<T>& image_points_from_pl_2,
+    adf::input_buffer<T>& tx_def_delay_distance_2,
+    adf::input_buffer<T>& tx_def_focal_point,
+    adf::input_buffer<T>& t_start,
+    adf::input_buffer<T>& speed_of_sound,
 
-		adf::output_buffer< T >& delay_output
+    adf::output_buffer<T>& delay_output
 
-){
+    ) {
+    T* sign_delay_input_buffer = (T*)sign_delay_input.data();
+    T* image_points_from_pl_2_buffer = (T*)image_points_from_pl_2.data();
+    T* tx_def_delay_distance_2_buffer = (T*)tx_def_delay_distance_2.data();
+    T* tx_def_focal_point_buffer = (T*)tx_def_focal_point.data();
+    T* t_start_buffer = (T*)t_start.data();
+    T* speed_of_sound_buffer = (T*)speed_of_sound.data();
 
-	T* sign_delay_input_buffer = (T*)sign_delay_input.data();
-	T* image_points_from_pl_2_buffer = (T*)image_points_from_pl_2.data();
-	T* tx_def_delay_distance_2_buffer = (T*)tx_def_delay_distance_2.data();
-	T* tx_def_focal_point_buffer = (T*)tx_def_focal_point.data();
-	T* t_start_buffer = (T*)t_start.data();
-	T* speed_of_sound_buffer = (T*)speed_of_sound.data();
+    T* delay_output_buffer = (T*)delay_output.data();
 
-	T* delay_output_buffer = (T*)delay_output.data();
+    T buffer_out_v_1[LEN];
+    T buffer_out_v_2[LEN];
+    T buffer_out_v_3[LEN];
+    T buffer_out_m_1[LEN * M_COLUMNS];
 
-	T buffer_out_v_1[LEN];
-	T buffer_out_v_2[LEN];
-	T buffer_out_v_3[LEN];
-	T buffer_out_m_1[LEN*M_COLUMNS];
-
-	//DiffMV
-	us::L1::m_Diff< T, LEN, INCREMENT_M, SIMD_DEPTH >(image_points_from_pl_2_buffer, tx_def_focal_point_buffer, buffer_out_m_1);
-	//NormAxis1
-	us::L1::m_NormAxis1< T, LEN, 1, M_COLUMNS >(buffer_out_m_1, buffer_out_v_1);
-//	//MulVV
-	us::L1::m_Mul< T, LEN, INCREMENT_V, SIMD_DEPTH >(sign_delay_input_buffer, buffer_out_v_1, buffer_out_v_3);
-//	//SumVS
-	us::L1::m_Sum< T, LEN, INCREMENT_V, SIMD_DEPTH >(buffer_out_v_3, tx_def_delay_distance_2_buffer, buffer_out_v_1);
-//	//DivVS
-	us::L1::m_Div< T, LEN, INCREMENT_V, SIMD_DEPTH >(buffer_out_v_1, speed_of_sound_buffer, buffer_out_v_2);
-//	//DiffVS
-	us::L1::m_Diff< T, LEN, INCREMENT_V, SIMD_DEPTH >(buffer_out_v_2, t_start_buffer, delay_output_buffer);
-
-
-}
-
+    // DiffMV
+    us::L1::m_Diff<T, LEN, INCREMENT_M, SIMD_DEPTH>(image_points_from_pl_2_buffer, tx_def_focal_point_buffer,
+                                                    buffer_out_m_1);
+    // NormAxis1
+    us::L1::m_NormAxis1<T, LEN, 1, M_COLUMNS>(buffer_out_m_1, buffer_out_v_1);
+    //	//MulVV
+    us::L1::m_Mul<T, LEN, INCREMENT_V, SIMD_DEPTH>(sign_delay_input_buffer, buffer_out_v_1, buffer_out_v_3);
+    //	//SumVS
+    us::L1::m_Sum<T, LEN, INCREMENT_V, SIMD_DEPTH>(buffer_out_v_3, tx_def_delay_distance_2_buffer, buffer_out_v_1);
+    //	//DivVS
+    us::L1::m_Div<T, LEN, INCREMENT_V, SIMD_DEPTH>(buffer_out_v_1, speed_of_sound_buffer, buffer_out_v_2);
+    //	//DiffVS
+    us::L1::m_Diff<T, LEN, INCREMENT_V, SIMD_DEPTH>(buffer_out_v_2, t_start_buffer, delay_output_buffer);
 }
 }
-
-
+}

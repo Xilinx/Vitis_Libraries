@@ -28,49 +28,43 @@ from Advanced Micro Devices, Inc.
 #include "common_defines.hpp"
 
 class TestGraphImagePoints : public adf::graph {
+   public:
+    adf::input_plio start_position;
+    adf::input_plio directions;
+    adf::input_plio samples_arange;
+    adf::output_plio output_matrix;
 
-	public:
-		adf::input_plio  start_position;
-		adf::input_plio  directions;
-		adf::input_plio  samples_arange;
-		adf::output_plio output_matrix;
-
-
-		TestGraphImagePoints(){
-
+    TestGraphImagePoints() {
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 #if (defined(TYPE_IS_FLOAT))
-			start_position  = adf::input_plio::create("start_position", adf::plio_32_bits,"data/start_position.txt");
-			directions  = adf::input_plio::create("directions", adf::plio_32_bits,"data/directions.txt");
+        start_position = adf::input_plio::create("start_position", adf::plio_32_bits, "data/start_position.txt");
+        directions = adf::input_plio::create("directions", adf::plio_32_bits, "data/directions.txt");
 #else
-			start_position  = adf::input_plio::create("start_position", adf::plio_32_bits,"data/start_position_int32.txt");
-			directions  = adf::input_plio::create("directions", adf::plio_32_bits,"data/directions_int32.txt");
+        start_position = adf::input_plio::create("start_position", adf::plio_32_bits, "data/start_position_int32.txt");
+        directions = adf::input_plio::create("directions", adf::plio_32_bits, "data/directions_int32.txt");
 #endif
-			samples_arange = adf::input_plio::create("samples_arange", adf::plio_32_bits,"data/samples_arange.txt");
-			output_matrix =  adf::output_plio::create("output_matrix", adf::plio_32_bits,"data/output_matrix.txt");
+        samples_arange = adf::input_plio::create("samples_arange", adf::plio_32_bits, "data/samples_arange.txt");
+        output_matrix = adf::output_plio::create("output_matrix", adf::plio_32_bits, "data/output_matrix.txt");
 
-			m_image_points_kernel = adf::kernel::create(ImagePoints< KERNEL_TYPE >);
-			adf::connect(start_position.out[0], m_image_points_kernel.in[0]);
-			adf::connect(directions.out[0], m_image_points_kernel.in[1]);
-			adf::connect(samples_arange.out[0], m_image_points_kernel.in[2]);
-			adf::connect(m_image_points_kernel.out[0], output_matrix.in[0]);
+        m_image_points_kernel = adf::kernel::create(ImagePoints<KERNEL_TYPE>);
+        adf::connect(start_position.out[0], m_image_points_kernel.in[0]);
+        adf::connect(directions.out[0], m_image_points_kernel.in[1]);
+        adf::connect(samples_arange.out[0], m_image_points_kernel.in[2]);
+        adf::connect(m_image_points_kernel.out[0], output_matrix.in[0]);
 
-			adf::dimensions(m_image_points_kernel.in[0]) = {LEN};
-			adf::dimensions(m_image_points_kernel.in[1]) = {LEN};
-			adf::dimensions(m_image_points_kernel.in[2]) = {LEN};
-			adf::dimensions(m_image_points_kernel.out[0]) = {LEN*M_COLUMNS};
+        adf::dimensions(m_image_points_kernel.in[0]) = {LEN};
+        adf::dimensions(m_image_points_kernel.in[1]) = {LEN};
+        adf::dimensions(m_image_points_kernel.in[2]) = {LEN};
+        adf::dimensions(m_image_points_kernel.out[0]) = {LEN * M_COLUMNS};
 
-			adf::source(m_image_points_kernel) = "l2-libraries_aieml/image_points/image_points.cpp";
+        adf::source(m_image_points_kernel) = "l2-libraries_aieml/image_points/image_points.cpp";
 
-			adf::runtime< adf::ratio >(m_image_points_kernel) = 0.6;
+        adf::runtime<adf::ratio>(m_image_points_kernel) = 0.6;
 
 #endif
+    }
 
-		}
-
-	private:
-		adf::kernel m_image_points_kernel;
-
+   private:
+    adf::kernel m_image_points_kernel;
 };
-

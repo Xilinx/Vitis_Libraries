@@ -28,46 +28,43 @@ from Advanced Micro Devices, Inc.
 #include <aie_api/utils.hpp>
 #include "common_defines.hpp"
 
-namespace us{
-namespace L1{
+namespace us {
+namespace L1 {
 
-
-template< typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void AbsV(adf::input_buffer< T_IN >& input_vector, adf::output_buffer< T_OUT >& output);
+template <typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void AbsV(adf::input_buffer<T_IN>& input_vector, adf::output_buffer<T_OUT>& output);
 
 // nested called
 
-template< typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_AbsV(adf::input_buffer< int32 >& input_vector, adf::output_buffer< int32 >& output);
+template <typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_AbsV(adf::input_buffer<int32>& input_vector, adf::output_buffer<int32>& output);
 
-template< typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_AbsV(adf::input_buffer< int16 >& input_vector, adf::output_buffer< int16 >& output);
+template <typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_AbsV(adf::input_buffer<int16>& input_vector, adf::output_buffer<int16>& output);
 
-template< typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_AbsV(adf::input_buffer< float >& input_vector, adf::output_buffer< float >& output);
+template <typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_AbsV(adf::input_buffer<float>& input_vector, adf::output_buffer<float>& output);
 
-template< typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_AbsV(adf::input_buffer< cint16 >& input_vector, adf::output_buffer< int32 >& output);
+template <typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_AbsV(adf::input_buffer<cint16>& input_vector, adf::output_buffer<int32>& output);
 
 //-----------------------------
 
-template< typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void AbsVInternalBuffer(adf::input_buffer< T_IN >& input_vector, adf::output_buffer< T_OUT >& output);
-
+template <typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void AbsVInternalBuffer(adf::input_buffer<T_IN>& input_vector, adf::output_buffer<T_OUT>& output);
 
 // nested called
 
-template< typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
+template <typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
 void m_AbsV(int32* input_vector, int32* output);
 
-template< typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
+template <typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
 void m_AbsV(int16* input_vector, int16* output);
 
-template< typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
+template <typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
 void m_AbsV(float* input_vector, float* output);
 
-template< typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
+template <typename T_IN, typename T_OUT, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
 void m_AbsV(cint16* input_vector, int32* output);
-
 }
 }

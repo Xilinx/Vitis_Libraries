@@ -28,18 +28,15 @@ from Advanced Micro Devices, Inc.
 #include "l1-libraries_aieml/square_v/square_v.hpp"
 #include "l1-libraries_aieml/sum/sum.hpp"
 
-namespace us{
-namespace L2{
+namespace us {
+namespace L2 {
 
-template< typename T >
-void Focusing(
-		adf::input_buffer< T >& apo_ref_0,
-		adf::input_buffer< T >& xdc_def_0,
-		adf::input_buffer< T >& apo_ref_1,
-		adf::input_buffer< T >& xdc_def_1,
+template <typename T>
+void Focusing(adf::input_buffer<T>& apo_ref_0,
+              adf::input_buffer<T>& xdc_def_0,
+              adf::input_buffer<T>& apo_ref_1,
+              adf::input_buffer<T>& xdc_def_1,
 
-		adf::output_buffer< T >& focusing_output
-);
-
+              adf::output_buffer<T>& focusing_output);
 }
 }

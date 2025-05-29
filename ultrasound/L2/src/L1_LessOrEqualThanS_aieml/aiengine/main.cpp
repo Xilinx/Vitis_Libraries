@@ -31,11 +31,10 @@ TestGraph less_or_equal_than_s_graph;
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    less_or_equal_than_s_graph.init();
+    less_or_equal_than_s_graph.run(2);
+    less_or_equal_than_s_graph.end();
 
-	less_or_equal_than_s_graph.init();
-	less_or_equal_than_s_graph.run(2);
-	less_or_equal_than_s_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

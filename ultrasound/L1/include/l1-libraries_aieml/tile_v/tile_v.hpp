@@ -27,25 +27,23 @@ from Advanced Micro Devices, Inc.
 #include <aie_api/aie.hpp>
 #include <aie_api/utils.hpp>
 
-namespace us{
-namespace L1{
+namespace us {
+namespace L1 {
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void TileV(adf::input_buffer< T >& input_vector, adf::output_buffer< T >& output_matrix);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void TileV(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_matrix);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void TileVInternalBuffer(adf::input_buffer< T >& input_vector, adf::output_buffer< T >& output_matrix);
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void TileVInternalBuffer(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_matrix);
 
 // nested called
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_TileV(T *input_vector, T *output_matrix);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_TileV(T* input_vector, T* output_matrix);
 
 // retrocompatibility
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void tileV(adf::input_buffer< T >& input_vector, adf::output_buffer< T >& output_matrix);
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void tileV(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_matrix);
 }
 }

@@ -28,35 +28,27 @@ from Advanced Micro Devices, Inc.
 #include "common_defines.hpp"
 
 class TestGraph : public adf::graph {
+   public:
+    adf::input_plio in;
+    adf::output_plio out;
 
-	public:
-		adf::input_plio  in;
-		adf::output_plio out;
-
-
-		TestGraph(){
-
+    TestGraph() {
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_ones_kernel = adf::kernel::create(us::L1::Ones<KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH>);
+        adf::connect(m_ones_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_ones_kernel.out[0]) = {LEN};
 
-			m_ones_kernel = adf::kernel::create(us::L1::Ones< KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH >);
-			adf::connect(m_ones_kernel.out[0], out.in[0]);
+        adf::source(m_ones_kernel) = "ones/ones.cpp";
 
-			adf::dimensions(m_ones_kernel.out[0]) = {LEN};
-
-			adf::source(m_ones_kernel) = "ones/ones.cpp";
-
-			adf::runtime< adf::ratio >(m_ones_kernel) = RUNTIME_RATIO_V;
+        adf::runtime<adf::ratio>(m_ones_kernel) = RUNTIME_RATIO_V;
 
 #endif
+    }
 
-		}
-
-	private:
-		adf::kernel m_ones_kernel;
-
+   private:
+    adf::kernel m_ones_kernel;
 };
-

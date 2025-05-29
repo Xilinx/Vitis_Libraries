@@ -28,65 +28,55 @@ from Advanced Micro Devices, Inc.
 #include "common_defines.hpp"
 
 class TestGraphDiv : public adf::graph {
+   public:
+    adf::input_plio in_1;
+    adf::input_plio in_2;
+    adf::output_plio out;
 
-	public:
-		adf::input_plio  in_1;
-		adf::input_plio  in_2;
-		adf::output_plio out;
-
-
-		TestGraphDiv(){
-
+    TestGraphDiv() {
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__)) && !TEST_BUFFER
 
+        in_1 = adf::input_plio::create("data_in_1", adf::plio_32_bits, "data/input_1.txt");
+        in_2 = adf::input_plio::create("data_in_2", adf::plio_32_bits, "data/input_2.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			in_1  = adf::input_plio::create("data_in_1", adf::plio_32_bits,"data/input_1.txt");
-			in_2  = adf::input_plio::create("data_in_2", adf::plio_32_bits,"data/input_2.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_div_kernel = adf::kernel::create(us::L1::Div<KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH>);
+        adf::connect(in_1.out[0], m_div_kernel.in[0]);
+        adf::connect(in_2.out[0], m_div_kernel.in[1]);
+        adf::connect(m_div_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_div_kernel.in[0]) = {LEN};
+        adf::dimensions(m_div_kernel.in[1]) = {LEN};
+        adf::dimensions(m_div_kernel.out[0]) = {LEN};
 
-			m_div_kernel = adf::kernel::create(us::L1::Div< KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH >);
-			adf::connect(in_1.out[0], m_div_kernel.in[0]);
-			adf::connect(in_2.out[0], m_div_kernel.in[1]);
-			adf::connect(m_div_kernel.out[0], out.in[0]);
+        adf::source(m_div_kernel) = "div/div.cpp";
 
-			adf::dimensions(m_div_kernel.in[0]) = {LEN};
-			adf::dimensions(m_div_kernel.in[1]) = {LEN};
-			adf::dimensions(m_div_kernel.out[0]) = {LEN};
-
-			adf::source(m_div_kernel) = "div/div.cpp";
-
-			adf::runtime< adf::ratio >(m_div_kernel) = RUNTIME_RATIO_V;
+        adf::runtime<adf::ratio>(m_div_kernel) = RUNTIME_RATIO_V;
 
 #endif
 
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__)) && TEST_BUFFER
 
+        in_1 = adf::input_plio::create("data_in_1", adf::plio_32_bits, "data/input_1.txt");
+        in_2 = adf::input_plio::create("data_in_2", adf::plio_32_bits, "data/input_2.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			in_1  = adf::input_plio::create("data_in_1", adf::plio_32_bits,"data/input_1.txt");
-			in_2  = adf::input_plio::create("data_in_2", adf::plio_32_bits,"data/input_2.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_div_kernel = adf::kernel::create(us::L1::DivInternalBuffer<KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH>);
+        adf::connect(in_1.out[0], m_div_kernel.in[0]);
+        adf::connect(in_2.out[0], m_div_kernel.in[1]);
+        adf::connect(m_div_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_div_kernel.in[0]) = {LEN};
+        adf::dimensions(m_div_kernel.in[1]) = {LEN};
+        adf::dimensions(m_div_kernel.out[0]) = {LEN};
 
-			m_div_kernel = adf::kernel::create(us::L1::DivInternalBuffer< KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH >);
-			adf::connect(in_1.out[0], m_div_kernel.in[0]);
-			adf::connect(in_2.out[0], m_div_kernel.in[1]);
-			adf::connect(m_div_kernel.out[0], out.in[0]);
+        adf::source(m_div_kernel) = "div/div.cpp";
 
-			adf::dimensions(m_div_kernel.in[0]) = {LEN};
-			adf::dimensions(m_div_kernel.in[1]) = {LEN};
-			adf::dimensions(m_div_kernel.out[0]) = {LEN};
-
-			adf::source(m_div_kernel) = "div/div.cpp";
-
-			adf::runtime< adf::ratio >(m_div_kernel) = RUNTIME_RATIO_V;
+        adf::runtime<adf::ratio>(m_div_kernel) = RUNTIME_RATIO_V;
 
 #endif
+    }
 
-		}
-
-	private:
-		adf::kernel m_div_kernel;
-
+   private:
+    adf::kernel m_div_kernel;
 };
-

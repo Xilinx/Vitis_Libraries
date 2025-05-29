@@ -39,17 +39,18 @@ from Advanced Micro Devices, Inc.
 #define SPEED_OF_SOUND 1540
 #define INVERSE_SPEED_OF_SOUND 0.000649350649
 
+template <typename T>
+void Samples(adf::input_buffer<T>& image_points,
+             adf::input_buffer<T>& delay,
+             adf::input_buffer<T>& xdc_def_positions,
+             adf::input_buffer<T>& sampling_frequency,
+             adf::input_buffer<T>& speed_of_sound,
+             adf::output_buffer<T>& output_vector);
 
-template< typename T >
-void Samples(
-    adf::input_buffer< T >& image_points, adf::input_buffer< T >& delay, adf::input_buffer< T >& xdc_def_positions,
-	adf::input_buffer< T >& sampling_frequency, adf::input_buffer< T >& speed_of_sound,
-    adf::output_buffer< T >& output_vector
-    );
-
-//template< typename T >
-//void Samples(
-//	    adf::input_buffer< T >& image_points, adf::input_buffer< T >& delay, adf::input_buffer< T >& xdc_def_positions,/*
+// template< typename T >
+// void Samples(
+//	    adf::input_buffer< T >& image_points, adf::input_buffer< T >& delay, adf::input_buffer< T >&
+// xdc_def_positions,/*
 //		adf::input_buffer< T >& sampling_frequency,*/ adf::input_buffer< T >& speed_of_sound,
 //	    adf::output_buffer< T >& output_vector
 //    );

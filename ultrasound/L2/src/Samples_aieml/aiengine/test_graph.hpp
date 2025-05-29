@@ -28,55 +28,49 @@ from Advanced Micro Devices, Inc.
 #include "common_defines.hpp"
 
 class TestGraphSamples : public adf::graph {
+   public:
+    adf::input_plio image_points;
+    adf::input_plio delay;
+    adf::input_plio xdc_def_positions;
+    adf::input_plio sampling_frequency;
+    adf::input_plio speed_of_sound;
+    adf::output_plio output_vector;
 
-	public:
-		adf::input_plio  image_points;
-		adf::input_plio  delay;
-		adf::input_plio  xdc_def_positions;
-		adf::input_plio  sampling_frequency;
-		adf::input_plio  speed_of_sound;
-		adf::output_plio output_vector;
-
-
-		TestGraphSamples(){
-
+    TestGraphSamples() {
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
+        image_points = adf::input_plio::create("image_points", adf::plio_32_bits, "data/image_points.txt");
+        delay = adf::input_plio::create("delay", adf::plio_32_bits, "data/delay.txt");
+        xdc_def_positions =
+            adf::input_plio::create("xdc_def_positions", adf::plio_32_bits, "data/xdc_def_positions.txt");
+        sampling_frequency =
+            adf::input_plio::create("sampling_frequency", adf::plio_32_bits, "data/sampling_frequency.txt");
+        speed_of_sound = adf::input_plio::create("speed_of_sound", adf::plio_32_bits, "data/speed_of_sound.txt");
+        output_vector = adf::output_plio::create("output_vector", adf::plio_32_bits, "data/output_vector.txt");
 
-			image_points  = adf::input_plio::create("image_points", adf::plio_32_bits,"data/image_points.txt");
-			delay  = adf::input_plio::create("delay", adf::plio_32_bits,"data/delay.txt");
-			xdc_def_positions = adf::input_plio::create("xdc_def_positions", adf::plio_32_bits,"data/xdc_def_positions.txt");
-			sampling_frequency = adf::input_plio::create("sampling_frequency", adf::plio_32_bits,"data/sampling_frequency.txt");
-			speed_of_sound = adf::input_plio::create("speed_of_sound", adf::plio_32_bits,"data/speed_of_sound.txt");
-			output_vector =  adf::output_plio::create("output_vector", adf::plio_32_bits,"data/output_vector.txt");
+        m_samples_kernel = adf::kernel::create(Samples<KERNEL_TYPE>);
 
-			m_samples_kernel = adf::kernel::create(Samples< KERNEL_TYPE >);
+        adf::connect(image_points.out[0], m_samples_kernel.in[0]);
+        adf::connect(delay.out[0], m_samples_kernel.in[1]);
+        adf::connect(xdc_def_positions.out[0], m_samples_kernel.in[2]);
+        adf::connect(sampling_frequency.out[0], m_samples_kernel.in[3]);
+        adf::connect(speed_of_sound.out[0], m_samples_kernel.in[4]);
+        adf::connect(m_samples_kernel.out[0], output_vector.in[0]);
 
-			adf::connect(image_points.out[0], m_samples_kernel.in[0]);
-			adf::connect(delay.out[0], m_samples_kernel.in[1]);
-			adf::connect(xdc_def_positions.out[0], m_samples_kernel.in[2]);
-			adf::connect(sampling_frequency.out[0], m_samples_kernel.in[3]);
-			adf::connect(speed_of_sound.out[0], m_samples_kernel.in[4]);
-			adf::connect(m_samples_kernel.out[0], output_vector.in[0]);
+        adf::dimensions(m_samples_kernel.in[0]) = {LEN * M_COLUMNS};
+        adf::dimensions(m_samples_kernel.in[1]) = {LEN};
+        adf::dimensions(m_samples_kernel.in[2]) = {LEN * M_COLUMNS};
+        adf::dimensions(m_samples_kernel.in[3]) = {LEN};
+        adf::dimensions(m_samples_kernel.in[4]) = {LEN};
+        adf::dimensions(m_samples_kernel.out[0]) = {LEN};
 
+        adf::source(m_samples_kernel) = "l2-libraries_aieml/samples/samples.cpp";
 
-			adf::dimensions(m_samples_kernel.in[0]) = {LEN * M_COLUMNS};
-			adf::dimensions(m_samples_kernel.in[1]) = {LEN};
-			adf::dimensions(m_samples_kernel.in[2]) = {LEN * M_COLUMNS};
-			adf::dimensions(m_samples_kernel.in[3]) = {LEN};
-			adf::dimensions(m_samples_kernel.in[4]) = {LEN};
-			adf::dimensions(m_samples_kernel.out[0]) = {LEN};
-
-			adf::source(m_samples_kernel) = "l2-libraries_aieml/samples/samples.cpp";
-
-			adf::runtime< adf::ratio >(m_samples_kernel) = 0.5;
+        adf::runtime<adf::ratio>(m_samples_kernel) = 0.5;
 
 #endif
+    }
 
-		}
-
-	private:
-		adf::kernel m_samples_kernel;
-
+   private:
+    adf::kernel m_samples_kernel;
 };
-

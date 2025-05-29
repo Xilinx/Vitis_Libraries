@@ -26,17 +26,15 @@ from Advanced Micro Devices, Inc.
 
 using namespace adf;
 
-
 TestGraph outer_graph;
 
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    outer_graph.init();
+    outer_graph.run(2);
+    outer_graph.end();
 
-	outer_graph.init();
-	outer_graph.run(2);
-	outer_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

@@ -23,19 +23,16 @@ from Advanced Micro Devices, Inc.
 */
 #include <hls_stream.h>
 
-extern "C"{
-
+extern "C" {
 
 //#define T float
 #define int32 int
 #define cint16 int
 
-void PLCrPoint3In(T* mem, hls::stream<T>& s, int size){
-    for(unsigned i = 0; i < size; ++i){
-#pragma HLS PIPELINE II=1
+void PLCrPoint3In(T* mem, hls::stream<T>& s, int size) {
+    for (unsigned i = 0; i < size; ++i) {
+#pragma HLS PIPELINE II = 1
         s.write(mem[i]);
     }
 }
-
-
 }

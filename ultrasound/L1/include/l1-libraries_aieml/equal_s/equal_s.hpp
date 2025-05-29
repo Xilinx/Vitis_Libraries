@@ -27,8 +27,8 @@ from Advanced Micro Devices, Inc.
 #include <aie_api/aie.hpp>
 #include <aie_api/utils.hpp>
 
-namespace us{
-namespace L1{
+namespace us {
+namespace L1 {
 
 template <typename T, const unsigned T_LEN, const unsigned T_INCREMENT, const unsigned T_SIMD_DEPTH, unsigned T_SCALAR>
 void EqualS(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
@@ -36,17 +36,14 @@ void EqualS(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_ve
 template <typename T, const unsigned T_LEN, const unsigned T_INCREMENT, const unsigned T_SIMD_DEPTH, unsigned T_SCALAR>
 void EqualSInternalBuffer(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
 
-
 // nested called
 
 template <typename T, const unsigned T_LEN, const unsigned T_INCREMENT, const unsigned T_SIMD_DEPTH, unsigned T_SCALAR>
-void m_EqualS(T *input_vector, T *output_vector);
-
+void m_EqualS(T* input_vector, T* output_vector);
 
 // retrocompatibility
 
 template <typename T, const unsigned T_LEN, const unsigned T_INCREMENT, const unsigned T_SIMD_DEPTH, unsigned T_SCALAR>
 void equalS(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& __restrict output_vector);
-
 }
 }

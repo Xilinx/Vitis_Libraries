@@ -29,43 +29,35 @@ from Advanced Micro Devices, Inc.
 #include "l1-libraries_aieml/square_v/square_v.cpp"
 #include "l1-libraries_aieml/sum/sum.cpp"
 
+namespace us {
+namespace L2 {
 
-namespace us{
-namespace L2{
+template <typename T>
+void Focusing(adf::input_buffer<T>& apo_ref_0,
+              adf::input_buffer<T>& xdc_def_0,
+              adf::input_buffer<T>& apo_ref_1,
+              adf::input_buffer<T>& xdc_def_1,
 
+              adf::output_buffer<T>& focusing_output) {
+    T* apo_ref_0_b_in = (T*)apo_ref_0.data();
+    T* apo_ref_1_b_in = (T*)apo_ref_1.data();
+    T* xdc_def_0_b_in = (T*)xdc_def_0.data();
+    T* xdc_def_1_b_in = (T*)xdc_def_1.data();
 
-template< typename T >
-void Focusing(
-		adf::input_buffer< T >& apo_ref_0,
-		adf::input_buffer< T >& xdc_def_0,
-		adf::input_buffer< T >& apo_ref_1,
-		adf::input_buffer< T >& xdc_def_1,
+    T* focusing_output_b_out = (T*)focusing_output.data();
 
-		adf::output_buffer< T >& focusing_output
-){
+    T buffer_out1[LEN_FOCUSING];
+    T buffer_out2[LEN_FOCUSING];
+    T buffer_out3[LEN_FOCUSING];
+    T buffer_out4[LEN_FOCUSING];
 
-	T* apo_ref_0_b_in = (T*)apo_ref_0.data();
-	T* apo_ref_1_b_in = (T*)apo_ref_1.data();
-	T* xdc_def_0_b_in = (T*)xdc_def_0.data();
-	T* xdc_def_1_b_in = (T*)xdc_def_1.data();
+    us::L1::m_Diff<T, LEN_FOCUSING, INCREMENT_V, SIMD_DEPTH>(apo_ref_0_b_in, xdc_def_0_b_in, buffer_out1);
+    us::L1::m_Diff<T, LEN_FOCUSING, INCREMENT_V, SIMD_DEPTH>(apo_ref_1_b_in, xdc_def_1_b_in, buffer_out2);
+    us::L1::m_SquareV<T, LEN_FOCUSING, INCREMENT_V, SIMD_DEPTH>(buffer_out1, buffer_out3);
+    us::L1::m_SquareV<T, LEN_FOCUSING, INCREMENT_V, SIMD_DEPTH>(buffer_out2, buffer_out4);
+    us::L1::m_Sum<T, LEN_FOCUSING, INCREMENT_V, SIMD_DEPTH>(buffer_out3, buffer_out4, buffer_out1);
 
-	T* focusing_output_b_out = (T*)focusing_output.data();
-
-	T buffer_out1[LEN_FOCUSING];
-	T buffer_out2[LEN_FOCUSING];
-	T buffer_out3[LEN_FOCUSING];
-	T buffer_out4[LEN_FOCUSING];
-
-	us::L1::m_Diff< T, LEN_FOCUSING, INCREMENT_V, SIMD_DEPTH >(apo_ref_0_b_in, xdc_def_0_b_in, buffer_out1);
-	us::L1::m_Diff< T, LEN_FOCUSING, INCREMENT_V, SIMD_DEPTH >(apo_ref_1_b_in, xdc_def_1_b_in, buffer_out2);
-	us::L1::m_SquareV< T, LEN_FOCUSING, INCREMENT_V, SIMD_DEPTH >(buffer_out1, buffer_out3);
-	us::L1::m_SquareV< T, LEN_FOCUSING, INCREMENT_V, SIMD_DEPTH >(buffer_out2, buffer_out4);
-	us::L1::m_Sum< T, LEN_FOCUSING, INCREMENT_V, SIMD_DEPTH >(buffer_out3, buffer_out4, buffer_out1);
-
-	us::L1::m_SqrtV< T, LEN_FOCUSING, INCREMENT_V, SIMD_DEPTH >(buffer_out1, focusing_output_b_out);
-
+    us::L1::m_SqrtV<T, LEN_FOCUSING, INCREMENT_V, SIMD_DEPTH>(buffer_out1, focusing_output_b_out);
 };
-
 }
 }
-

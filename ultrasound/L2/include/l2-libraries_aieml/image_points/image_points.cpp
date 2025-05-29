@@ -27,33 +27,27 @@ from Advanced Micro Devices, Inc.
 #include "l1-libraries_aieml/outer/outer.cpp"
 #include "l1-libraries_aieml/sum/sum.cpp"
 
+template <typename T>
+void ImagePoints(adf::input_buffer<T>& start_position,
+                 adf::input_buffer<T>& directions,
+                 adf::input_buffer<T>& samples_arange,
+                 adf::output_buffer<T>& output_matrix) {
+    T* start_position_buffer = (T*)start_position.data();
+    T* directions_buffer = (T*)directions.data();
+    T* samples_arange_buffer = (T*)samples_arange.data();
+    T* output_matrix_buffer = (T*)output_matrix.data();
 
-template< typename T >
-void ImagePoints(
-    adf::input_buffer< T >& start_position, adf::input_buffer< T >& directions, adf::input_buffer< T >& samples_arange, 
-    adf::output_buffer< T >& output_matrix
-    ){
+    T buffer_out_v_1[LEN];
+    T buffer_out_v_2[LEN];
+    T buffer_out_m_1[LEN * M_COLUMNS];
+    T buffer_out_m_2[LEN * M_COLUMNS];
 
-	T* start_position_buffer = (T*)start_position.data();
-	T* directions_buffer = (T*)directions.data();
-	T* samples_arange_buffer = (T*)samples_arange.data();
-	T* output_matrix_buffer = (T*)output_matrix.data();
-
-
-	T buffer_out_v_1[LEN];
-	T buffer_out_v_2[LEN];
-	T buffer_out_m_1[LEN*M_COLUMNS];
-	T buffer_out_m_2[LEN*M_COLUMNS];
-
-	// ones
-	us::L1::m_Ones< T, LEN, INCREMENT_V, SIMD_DEPTH >(buffer_out_v_1);
-	// outer 1
-	us::L1::m_Outer< T, LEN, M_COLUMNS, M_COLUMNS >(buffer_out_v_1, start_position_buffer, buffer_out_m_1);
-	// outer 2
-	us::L1::m_Outer< T, LEN, M_COLUMNS, M_COLUMNS >(samples_arange_buffer, directions_buffer, buffer_out_m_2);
-	// sumMM
-	us::L1::m_Sum< T, LEN, INCREMENT_M, SIMD_DEPTH >(buffer_out_m_1, buffer_out_m_2, output_matrix_buffer);
-
-
+    // ones
+    us::L1::m_Ones<T, LEN, INCREMENT_V, SIMD_DEPTH>(buffer_out_v_1);
+    // outer 1
+    us::L1::m_Outer<T, LEN, M_COLUMNS, M_COLUMNS>(buffer_out_v_1, start_position_buffer, buffer_out_m_1);
+    // outer 2
+    us::L1::m_Outer<T, LEN, M_COLUMNS, M_COLUMNS>(samples_arange_buffer, directions_buffer, buffer_out_m_2);
+    // sumMM
+    us::L1::m_Sum<T, LEN, INCREMENT_M, SIMD_DEPTH>(buffer_out_m_1, buffer_out_m_2, output_matrix_buffer);
 }
-

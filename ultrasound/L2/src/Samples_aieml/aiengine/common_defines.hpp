@@ -27,13 +27,10 @@ from Advanced Micro Devices, Inc.
 #define SIMD_DEPTH 8
 #define INCREMENT_V SIMD_DEPTH
 #define M_COLUMNS 4
-//matrix are nx4, thus with 8 level parallelism we process 2 rows per time
-#define INCREMENT_M (SIMD_DEPTH/M_COLUMNS)
+// matrix are nx4, thus with 8 level parallelism we process 2 rows per time
+#define INCREMENT_M (SIMD_DEPTH / M_COLUMNS)
 #define RUNTIME_RATIO_V 0.125
 #define RUNTIME_RATIO_M 0.5
 
 //#define TEST_BUFFER 1
 //#define KERNEL_TYPE int32 // int32, float, cint16, bfloat16
-
-
-

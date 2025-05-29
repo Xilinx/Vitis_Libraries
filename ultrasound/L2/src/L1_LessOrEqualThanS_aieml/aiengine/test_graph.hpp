@@ -28,59 +28,50 @@ from Advanced Micro Devices, Inc.
 #include "common_defines.hpp"
 
 class TestGraph : public adf::graph {
+   public:
+    adf::input_plio in;
+    adf::output_plio out;
 
-	public:
-		adf::input_plio  in;
-		adf::output_plio out;
-
-
-		TestGraph(){
-
+    TestGraph() {
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__)) && !TEST_BUFFER
 
+        in = adf::input_plio::create("data_in", adf::plio_32_bits, "data/input.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			in  = adf::input_plio::create("data_in", adf::plio_32_bits,"data/input.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_less_or_equal_than_s_kernel =
+            adf::kernel::create(us::L1::LessOrEqualThanS<KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH, (int32)1>);
+        adf::connect(in.out[0], m_less_or_equal_than_s_kernel.in[0]);
+        adf::connect(m_less_or_equal_than_s_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_less_or_equal_than_s_kernel.in[0]) = {LEN};
+        adf::dimensions(m_less_or_equal_than_s_kernel.out[0]) = {LEN};
 
-			m_less_or_equal_than_s_kernel = adf::kernel::create(us::L1::LessOrEqualThanS< KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH, (int32) 1 >);
-			adf::connect(in.out[0], m_less_or_equal_than_s_kernel.in[0]);
-			adf::connect(m_less_or_equal_than_s_kernel.out[0], out.in[0]);
+        adf::source(m_less_or_equal_than_s_kernel) = "less_or_equal_than_s/less_or_equal_than_s.cpp";
 
-			adf::dimensions(m_less_or_equal_than_s_kernel.in[0]) = {LEN};
-			adf::dimensions(m_less_or_equal_than_s_kernel.out[0]) = {LEN};
-
-			adf::source(m_less_or_equal_than_s_kernel) = "less_or_equal_than_s/less_or_equal_than_s.cpp";
-
-			adf::runtime< adf::ratio >(m_less_or_equal_than_s_kernel) = RUNTIME_RATIO_V;
+        adf::runtime<adf::ratio>(m_less_or_equal_than_s_kernel) = RUNTIME_RATIO_V;
 
 #endif
 
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__)) && TEST_BUFFER
 
+        in = adf::input_plio::create("data_in", adf::plio_32_bits, "data/input.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			in  = adf::input_plio::create("data_in", adf::plio_32_bits,"data/input.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_less_or_equal_than_s_kernel = adf::kernel::create(
+            us::L1::LessOrEqualThanSInternalBuffer<KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH, (int32)1>);
+        adf::connect(in.out[0], m_less_or_equal_than_s_kernel.in[0]);
+        adf::connect(m_less_or_equal_than_s_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_less_or_equal_than_s_kernel.in[0]) = {LEN};
+        adf::dimensions(m_less_or_equal_than_s_kernel.out[0]) = {LEN};
 
-			m_less_or_equal_than_s_kernel = adf::kernel::create(us::L1::LessOrEqualThanSInternalBuffer< KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH, (int32) 1 >);
-			adf::connect(in.out[0], m_less_or_equal_than_s_kernel.in[0]);
-			adf::connect(m_less_or_equal_than_s_kernel.out[0], out.in[0]);
+        adf::source(m_less_or_equal_than_s_kernel) = "less_or_equal_than_s/less_or_equal_than_s.cpp";
 
-			adf::dimensions(m_less_or_equal_than_s_kernel.in[0]) = {LEN};
-			adf::dimensions(m_less_or_equal_than_s_kernel.out[0]) = {LEN};
-
-			adf::source(m_less_or_equal_than_s_kernel) = "less_or_equal_than_s/less_or_equal_than_s.cpp";
-
-			adf::runtime< adf::ratio >(m_less_or_equal_than_s_kernel) = RUNTIME_RATIO_V;
-
+        adf::runtime<adf::ratio>(m_less_or_equal_than_s_kernel) = RUNTIME_RATIO_V;
 
 #endif
+    }
 
-		}
-
-	private:
-		adf::kernel m_less_or_equal_than_s_kernel;
-
+   private:
+    adf::kernel m_less_or_equal_than_s_kernel;
 };
-

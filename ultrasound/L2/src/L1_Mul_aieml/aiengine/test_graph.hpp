@@ -28,185 +28,154 @@ from Advanced Micro Devices, Inc.
 #include "common_defines.hpp"
 
 class TestGraphMul : public adf::graph {
+   public:
+    adf::input_plio in_1;
+    adf::input_plio in_2;
+    adf::output_plio out;
 
-	public:
-		adf::input_plio  in_1;
-		adf::input_plio  in_2;
-		adf::output_plio out;
-
-
-		TestGraphMul(){
-
+    TestGraphMul() {
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__)) && !TEST_BUFFER
 
+        in_1 = adf::input_plio::create("data_in_1", adf::plio_32_bits, "data/input_1.txt");
+        in_2 = adf::input_plio::create("data_in_2", adf::plio_32_bits, "data/input_2.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			in_1  = adf::input_plio::create("data_in_1", adf::plio_32_bits,"data/input_1.txt");
-			in_2  = adf::input_plio::create("data_in_2", adf::plio_32_bits,"data/input_2.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_mul_kernel = adf::kernel::create(us::L1::Mul<KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH>);
+        adf::connect(in_1.out[0], m_mul_kernel.in[0]);
+        adf::connect(in_2.out[0], m_mul_kernel.in[1]);
+        adf::connect(m_mul_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_mul_kernel.in[0]) = {LEN};
+        adf::dimensions(m_mul_kernel.in[1]) = {LEN};
+        adf::dimensions(m_mul_kernel.out[0]) = {LEN};
 
-			m_mul_kernel = adf::kernel::create(us::L1::Mul< KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH >);
-			adf::connect(in_1.out[0], m_mul_kernel.in[0]);
-			adf::connect(in_2.out[0], m_mul_kernel.in[1]);
-			adf::connect(m_mul_kernel.out[0], out.in[0]);
+        adf::source(m_mul_kernel) = "mul/mul.cpp";
 
-			adf::dimensions(m_mul_kernel.in[0]) = {LEN};
-			adf::dimensions(m_mul_kernel.in[1]) = {LEN};
-			adf::dimensions(m_mul_kernel.out[0]) = {LEN};
-
-			adf::source(m_mul_kernel) = "mul/mul.cpp";
-
-			adf::runtime< adf::ratio >(m_mul_kernel) = RUNTIME_RATIO_V;
+        adf::runtime<adf::ratio>(m_mul_kernel) = RUNTIME_RATIO_V;
 
 #endif
 
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__)) && TEST_BUFFER
 
+        in_1 = adf::input_plio::create("data_in_1", adf::plio_32_bits, "data/input_1.txt");
+        in_2 = adf::input_plio::create("data_in_2", adf::plio_32_bits, "data/input_2.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			in_1  = adf::input_plio::create("data_in_1", adf::plio_32_bits,"data/input_1.txt");
-			in_2  = adf::input_plio::create("data_in_2", adf::plio_32_bits,"data/input_2.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_mul_kernel = adf::kernel::create(us::L1::MulInternalBuffer<KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH>);
+        adf::connect(in_1.out[0], m_mul_kernel.in[0]);
+        adf::connect(in_2.out[0], m_mul_kernel.in[1]);
+        adf::connect(m_mul_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_mul_kernel.in[0]) = {LEN};
+        adf::dimensions(m_mul_kernel.in[1]) = {LEN};
+        adf::dimensions(m_mul_kernel.out[0]) = {LEN};
 
-			m_mul_kernel = adf::kernel::create(us::L1::MulInternalBuffer< KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH >);
-			adf::connect(in_1.out[0], m_mul_kernel.in[0]);
-			adf::connect(in_2.out[0], m_mul_kernel.in[1]);
-			adf::connect(m_mul_kernel.out[0], out.in[0]);
+        adf::source(m_mul_kernel) = "mul/mul.cpp";
 
-			adf::dimensions(m_mul_kernel.in[0]) = {LEN};
-			adf::dimensions(m_mul_kernel.in[1]) = {LEN};
-			adf::dimensions(m_mul_kernel.out[0]) = {LEN};
-
-			adf::source(m_mul_kernel) = "mul/mul.cpp";
-
-			adf::runtime< adf::ratio >(m_mul_kernel) = RUNTIME_RATIO_V;
+        adf::runtime<adf::ratio>(m_mul_kernel) = RUNTIME_RATIO_V;
 
 #endif
+    }
 
-		}
-
-	private:
-		adf::kernel m_mul_kernel;
-
+   private:
+    adf::kernel m_mul_kernel;
 };
 
 class TestGraphMulMM : public adf::graph {
+   public:
+    adf::input_plio in_1;
+    adf::input_plio in_2;
+    adf::output_plio out;
 
-	public:
-		adf::input_plio  in_1;
-		adf::input_plio  in_2;
-		adf::output_plio out;
-
-
-		TestGraphMulMM(){
-
+    TestGraphMulMM() {
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
+        in_1 = adf::input_plio::create("data_in_1", adf::plio_32_bits, "data/input_1.txt");
+        in_2 = adf::input_plio::create("data_in_2", adf::plio_32_bits, "data/input_2.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			in_1  = adf::input_plio::create("data_in_1", adf::plio_32_bits,"data/input_1.txt");
-			in_2  = adf::input_plio::create("data_in_2", adf::plio_32_bits,"data/input_2.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_mul_kernel = adf::kernel::create(us::L1::mulMM<KERNEL_TYPE, LEN * M_COLUMNS, INCREMENT_M, SIMD_DEPTH>);
+        adf::connect(in_1.out[0], m_mul_kernel.in[0]);
+        adf::connect(in_2.out[0], m_mul_kernel.in[1]);
+        adf::connect(m_mul_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_mul_kernel.in[0]) = {LEN * M_COLUMNS};
+        adf::dimensions(m_mul_kernel.in[1]) = {LEN * M_COLUMNS};
+        adf::dimensions(m_mul_kernel.out[0]) = {LEN * M_COLUMNS};
 
-			m_mul_kernel = adf::kernel::create(us::L1::mulMM< KERNEL_TYPE, LEN * M_COLUMNS, INCREMENT_M, SIMD_DEPTH >);
-			adf::connect(in_1.out[0], m_mul_kernel.in[0]);
-			adf::connect(in_2.out[0], m_mul_kernel.in[1]);
-			adf::connect(m_mul_kernel.out[0], out.in[0]);
+        adf::source(m_mul_kernel) = "mul/mul.cpp";
 
-			adf::dimensions(m_mul_kernel.in[0]) = {LEN * M_COLUMNS};
-			adf::dimensions(m_mul_kernel.in[1]) = {LEN * M_COLUMNS};
-			adf::dimensions(m_mul_kernel.out[0]) = {LEN * M_COLUMNS};
-
-			adf::source(m_mul_kernel) = "mul/mul.cpp";
-
-			adf::runtime< adf::ratio >(m_mul_kernel) = RUNTIME_RATIO_V;
+        adf::runtime<adf::ratio>(m_mul_kernel) = RUNTIME_RATIO_V;
 
 #endif
+    }
 
-		}
-
-	private:
-		adf::kernel m_mul_kernel;
-
+   private:
+    adf::kernel m_mul_kernel;
 };
 
 class TestGraphMulVV : public adf::graph {
+   public:
+    adf::input_plio in_1;
+    adf::input_plio in_2;
+    adf::output_plio out;
 
-	public:
-		adf::input_plio  in_1;
-		adf::input_plio  in_2;
-		adf::output_plio out;
-
-
-		TestGraphMulVV(){
-
+    TestGraphMulVV() {
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
+        in_1 = adf::input_plio::create("data_in_1", adf::plio_32_bits, "data/input_1.txt");
+        in_2 = adf::input_plio::create("data_in_2", adf::plio_32_bits, "data/input_2.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			in_1  = adf::input_plio::create("data_in_1", adf::plio_32_bits,"data/input_1.txt");
-			in_2  = adf::input_plio::create("data_in_2", adf::plio_32_bits,"data/input_2.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_mul_kernel = adf::kernel::create(us::L1::mulVV<KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH>);
+        adf::connect(in_1.out[0], m_mul_kernel.in[0]);
+        adf::connect(in_2.out[0], m_mul_kernel.in[1]);
+        adf::connect(m_mul_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_mul_kernel.in[0]) = {LEN};
+        adf::dimensions(m_mul_kernel.in[1]) = {LEN};
+        adf::dimensions(m_mul_kernel.out[0]) = {LEN};
 
-			m_mul_kernel = adf::kernel::create(us::L1::mulVV< KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH >);
-			adf::connect(in_1.out[0], m_mul_kernel.in[0]);
-			adf::connect(in_2.out[0], m_mul_kernel.in[1]);
-			adf::connect(m_mul_kernel.out[0], out.in[0]);
+        adf::source(m_mul_kernel) = "mul/mul.cpp";
 
-			adf::dimensions(m_mul_kernel.in[0]) = {LEN};
-			adf::dimensions(m_mul_kernel.in[1]) = {LEN};
-			adf::dimensions(m_mul_kernel.out[0]) = {LEN};
-
-			adf::source(m_mul_kernel) = "mul/mul.cpp";
-
-			adf::runtime< adf::ratio >(m_mul_kernel) = RUNTIME_RATIO_V;
+        adf::runtime<adf::ratio>(m_mul_kernel) = RUNTIME_RATIO_V;
 
 #endif
+    }
 
-		}
-
-	private:
-		adf::kernel m_mul_kernel;
-
+   private:
+    adf::kernel m_mul_kernel;
 };
 
-
 class TestGraphMulVS : public adf::graph {
+   public:
+    adf::input_plio in_1;
+    adf::input_plio in_2;
+    adf::output_plio out;
 
-	public:
-		adf::input_plio  in_1;
-		adf::input_plio  in_2;
-		adf::output_plio out;
-
-
-		TestGraphMulVS(){
-
+    TestGraphMulVS() {
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
+        in_1 = adf::input_plio::create("data_in_1", adf::plio_32_bits, "data/input_1.txt");
+        in_2 = adf::input_plio::create("data_in_2", adf::plio_32_bits, "data/input_2.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			in_1  = adf::input_plio::create("data_in_1", adf::plio_32_bits,"data/input_1.txt");
-			in_2  = adf::input_plio::create("data_in_2", adf::plio_32_bits,"data/input_2.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_mul_kernel = adf::kernel::create(us::L1::mulVS<KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH>);
+        adf::connect(in_1.out[0], m_mul_kernel.in[0]);
+        adf::connect(in_2.out[0], m_mul_kernel.in[1]);
+        adf::connect(m_mul_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_mul_kernel.in[0]) = {LEN};
+        adf::dimensions(m_mul_kernel.in[1]) = {LEN};
+        adf::dimensions(m_mul_kernel.out[0]) = {LEN};
 
-			m_mul_kernel = adf::kernel::create(us::L1::mulVS< KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH >);
-			adf::connect(in_1.out[0], m_mul_kernel.in[0]);
-			adf::connect(in_2.out[0], m_mul_kernel.in[1]);
-			adf::connect(m_mul_kernel.out[0], out.in[0]);
+        adf::source(m_mul_kernel) = "mul/mul.cpp";
 
-			adf::dimensions(m_mul_kernel.in[0]) = {LEN};
-			adf::dimensions(m_mul_kernel.in[1]) = {LEN};
-			adf::dimensions(m_mul_kernel.out[0]) = {LEN};
-
-			adf::source(m_mul_kernel) = "mul/mul.cpp";
-
-			adf::runtime< adf::ratio >(m_mul_kernel) = RUNTIME_RATIO_V;
+        adf::runtime<adf::ratio>(m_mul_kernel) = RUNTIME_RATIO_V;
 
 #endif
+    }
 
-		}
-
-	private:
-		adf::kernel m_mul_kernel;
-
+   private:
+    adf::kernel m_mul_kernel;
 };

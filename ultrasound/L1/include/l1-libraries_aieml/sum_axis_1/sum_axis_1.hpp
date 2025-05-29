@@ -27,25 +27,23 @@ from Advanced Micro Devices, Inc.
 #include <aie_api/aie.hpp>
 #include <aie_api/utils.hpp>
 
-namespace us{
-namespace L1{
+namespace us {
+namespace L1 {
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void SumAxis1(adf::input_buffer< T >& input_matrix, adf::output_buffer< T >& output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void SumAxis1(adf::input_buffer<T>& input_matrix, adf::output_buffer<T>& output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void SumAxis1InternalBuffer(adf::input_buffer< T >& input_matrix, adf::output_buffer< T >& output_vector);
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void SumAxis1InternalBuffer(adf::input_buffer<T>& input_matrix, adf::output_buffer<T>& output_vector);
 
 // nested called
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_SumAxis1(T *input_matrix, T *output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_SumAxis1(T* input_matrix, T* output_vector);
 
 // retrocompatibility
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void sum_axis_1(adf::input_buffer< T >& input_matrix, adf::output_buffer< T >& output_vector);
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void sum_axis_1(adf::input_buffer<T>& input_matrix, adf::output_buffer<T>& output_vector);
 }
 }

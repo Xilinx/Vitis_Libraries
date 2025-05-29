@@ -44,11 +44,10 @@ TestGraphSumVV sum_graph;
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    sum_graph.init();
+    sum_graph.run(2);
+    sum_graph.end();
 
-	sum_graph.init();
-	sum_graph.run(2);
-	sum_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

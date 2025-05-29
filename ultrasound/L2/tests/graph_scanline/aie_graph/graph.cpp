@@ -534,22 +534,22 @@ int main(void) {
     for (int i = 0; i < NUM_SEG_t; i++) {
         if (out_bomapped_set[i]) free(out_bomapped_set[i]);
     }
-    //Due to the fact that floating-point data operations, 
-    //especially accumulation, cannot satisfy commutative and associative laws, 
-    //certain errors are allowed to occur
-    float th_err_abs = 0.00001; // 0.1mm
-    float th_err_ratio = 0.001; // 0.1%
+    // Due to the fact that floating-point data operations,
+    // especially accumulation, cannot satisfy commutative and associative laws,
+    // certain errors are allowed to occur
+    float th_err_abs = 0.00001;       // 0.1mm
+    float th_err_ratio = 0.001;       // 0.1%
     float th_ratio_missmatch = 0.005; // 0.5%
     ret_cmp = models.diffCheck(filename_output_mult, DATA_MUL, th_err_abs, th_err_ratio);
     float ratio_missmatch = float(ret_cmp) / float(NUM_SAMPLE_t * NUM_UPSample_t);
-    printf("ratio_missmatch = ret_cmp / (NUM_SAMPLE_t * NUM_UPSample_t) = %d / %d = %f\%\n", ret_cmp, NUM_SAMPLE_t * NUM_UPSample_t, ratio_missmatch*100);
+    printf("ratio_missmatch = ret_cmp / (NUM_SAMPLE_t * NUM_UPSample_t) = %d / %d = %f\%\n", ret_cmp,
+           NUM_SAMPLE_t * NUM_UPSample_t, ratio_missmatch * 100);
     if (ratio_missmatch > th_ratio_missmatch) {
-        printf("ERROR: ratio_missmatch = %f\%\n", ratio_missmatch*100.0);
+        printf("ERROR: ratio_missmatch = %f\%\n", ratio_missmatch * 100.0);
     } else {
-        printf("SUCCESS: ratio_missmatch = %f\%\n", ratio_missmatch*100.0);
+        printf("SUCCESS: ratio_missmatch = %f\%\n", ratio_missmatch * 100.0);
         ret_cmp = 0;
     }
-
 
 #if defined(ENABLE_DEBUGGING)
 

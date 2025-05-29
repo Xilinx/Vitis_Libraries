@@ -27,26 +27,23 @@ from Advanced Micro Devices, Inc.
 #include <aie_api/aie.hpp>
 #include <aie_api/utils.hpp>
 
-namespace us{
-namespace L1{
+namespace us {
+namespace L1 {
 
 template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
 void Ones(adf::output_buffer<T>& output_vector);
 
-
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void OnesInternalBuffer(adf::output_buffer< T >& output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void OnesInternalBuffer(adf::output_buffer<T>& output_vector);
 
 // nested called
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_Ones(T *output_vector);
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_Ones(T* output_vector);
 
 // retrocompatibility
 
 template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
 void ones(adf::output_buffer<T>& output_vector);
-
 }
 }

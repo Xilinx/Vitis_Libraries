@@ -31,11 +31,10 @@ TestGraph abs_v_graph;
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    abs_v_graph.init();
+    abs_v_graph.run(2);
+    abs_v_graph.end();
 
-	abs_v_graph.init();
-	abs_v_graph.run(2);
-	abs_v_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

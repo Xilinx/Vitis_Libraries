@@ -24,20 +24,16 @@ from Advanced Micro Devices, Inc.
 
 #include <hls_stream.h>
 
-extern "C"{
-
+extern "C" {
 
 //#define T float
 #define int32 int
 #define cint16 int
 
-
-void PLCrOut(T* mem, hls::stream<T>& s, int size){
-    for(unsigned i = 0; i < size; ++i){
-#pragma HLS PIPELINE II=1
+void PLCrOut(T* mem, hls::stream<T>& s, int size) {
+    for (unsigned i = 0; i < size; ++i) {
+#pragma HLS PIPELINE II = 1
         mem[i] = s.read();
     }
 }
-
-
 }

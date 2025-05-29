@@ -28,186 +28,154 @@ from Advanced Micro Devices, Inc.
 #include "common_defines.hpp"
 
 class TestGraphDiff : public adf::graph {
+   public:
+    adf::input_plio in_1;
+    adf::input_plio in_2;
+    adf::output_plio out;
 
-	public:
-		adf::input_plio  in_1;
-		adf::input_plio  in_2;
-		adf::output_plio out;
-
-
-		TestGraphDiff(){
-
+    TestGraphDiff() {
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__)) && !TEST_BUFFER
 
+        in_1 = adf::input_plio::create("data_in_1", adf::plio_32_bits, "data/input_1.txt");
+        in_2 = adf::input_plio::create("data_in_2", adf::plio_32_bits, "data/input_2.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			in_1  = adf::input_plio::create("data_in_1", adf::plio_32_bits,"data/input_1.txt");
-			in_2  = adf::input_plio::create("data_in_2", adf::plio_32_bits,"data/input_2.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_diff_kernel = adf::kernel::create(us::L1::Diff<KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH>);
+        adf::connect(in_1.out[0], m_diff_kernel.in[0]);
+        adf::connect(in_2.out[0], m_diff_kernel.in[1]);
+        adf::connect(m_diff_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_diff_kernel.in[0]) = {LEN};
+        adf::dimensions(m_diff_kernel.in[1]) = {LEN};
+        adf::dimensions(m_diff_kernel.out[0]) = {LEN};
 
-			m_diff_kernel = adf::kernel::create(us::L1::Diff< KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH >);
-			adf::connect(in_1.out[0], m_diff_kernel.in[0]);
-			adf::connect(in_2.out[0], m_diff_kernel.in[1]);
-			adf::connect(m_diff_kernel.out[0], out.in[0]);
+        adf::source(m_diff_kernel) = "diff/diff.cpp";
 
-			adf::dimensions(m_diff_kernel.in[0]) = {LEN};
-			adf::dimensions(m_diff_kernel.in[1]) = {LEN};
-			adf::dimensions(m_diff_kernel.out[0]) = {LEN};
-
-			adf::source(m_diff_kernel) = "diff/diff.cpp";
-
-			adf::runtime< adf::ratio >(m_diff_kernel) = RUNTIME_RATIO_V;
+        adf::runtime<adf::ratio>(m_diff_kernel) = RUNTIME_RATIO_V;
 
 #endif
 
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__)) && TEST_BUFFER
 
+        in_1 = adf::input_plio::create("data_in_1", adf::plio_32_bits, "data/input_1.txt");
+        in_2 = adf::input_plio::create("data_in_2", adf::plio_32_bits, "data/input_2.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			in_1  = adf::input_plio::create("data_in_1", adf::plio_32_bits,"data/input_1.txt");
-			in_2  = adf::input_plio::create("data_in_2", adf::plio_32_bits,"data/input_2.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_diff_kernel = adf::kernel::create(us::L1::DiffInternalBuffer<KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH>);
+        adf::connect(in_1.out[0], m_diff_kernel.in[0]);
+        adf::connect(in_2.out[0], m_diff_kernel.in[1]);
+        adf::connect(m_diff_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_diff_kernel.in[0]) = {LEN};
+        adf::dimensions(m_diff_kernel.in[1]) = {LEN};
+        adf::dimensions(m_diff_kernel.out[0]) = {LEN};
 
-			m_diff_kernel = adf::kernel::create(us::L1::DiffInternalBuffer< KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH >);
-			adf::connect(in_1.out[0], m_diff_kernel.in[0]);
-			adf::connect(in_2.out[0], m_diff_kernel.in[1]);
-			adf::connect(m_diff_kernel.out[0], out.in[0]);
+        adf::source(m_diff_kernel) = "diff/diff.cpp";
 
-			adf::dimensions(m_diff_kernel.in[0]) = {LEN};
-			adf::dimensions(m_diff_kernel.in[1]) = {LEN};
-			adf::dimensions(m_diff_kernel.out[0]) = {LEN};
-
-			adf::source(m_diff_kernel) = "diff/diff.cpp";
-
-			adf::runtime< adf::ratio >(m_diff_kernel) = RUNTIME_RATIO_V;
-
+        adf::runtime<adf::ratio>(m_diff_kernel) = RUNTIME_RATIO_V;
 
 #endif
+    }
 
-		}
-
-	private:
-		adf::kernel m_diff_kernel;
-
+   private:
+    adf::kernel m_diff_kernel;
 };
 
 class TestGraphDiffMM : public adf::graph {
+   public:
+    adf::input_plio in_1;
+    adf::input_plio in_2;
+    adf::output_plio out;
 
-	public:
-		adf::input_plio  in_1;
-		adf::input_plio  in_2;
-		adf::output_plio out;
-
-
-		TestGraphDiffMM(){
-
+    TestGraphDiffMM() {
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
+        in_1 = adf::input_plio::create("data_in_1", adf::plio_32_bits, "data/input_1.txt");
+        in_2 = adf::input_plio::create("data_in_2", adf::plio_32_bits, "data/input_2.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			in_1  = adf::input_plio::create("data_in_1", adf::plio_32_bits,"data/input_1.txt");
-			in_2  = adf::input_plio::create("data_in_2", adf::plio_32_bits,"data/input_2.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_diff_kernel = adf::kernel::create(us::L1::diffMM<KERNEL_TYPE, LEN * M_COLUMNS, INCREMENT_M, SIMD_DEPTH>);
+        adf::connect(in_1.out[0], m_diff_kernel.in[0]);
+        adf::connect(in_2.out[0], m_diff_kernel.in[1]);
+        adf::connect(m_diff_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_diff_kernel.in[0]) = {LEN * M_COLUMNS};
+        adf::dimensions(m_diff_kernel.in[1]) = {LEN * M_COLUMNS};
+        adf::dimensions(m_diff_kernel.out[0]) = {LEN * M_COLUMNS};
 
-			m_diff_kernel = adf::kernel::create(us::L1::diffMM< KERNEL_TYPE, LEN * M_COLUMNS, INCREMENT_M, SIMD_DEPTH >);
-			adf::connect(in_1.out[0], m_diff_kernel.in[0]);
-			adf::connect(in_2.out[0], m_diff_kernel.in[1]);
-			adf::connect(m_diff_kernel.out[0], out.in[0]);
+        adf::source(m_diff_kernel) = "diff/diff.cpp";
 
-			adf::dimensions(m_diff_kernel.in[0]) = {LEN * M_COLUMNS};
-			adf::dimensions(m_diff_kernel.in[1]) = {LEN * M_COLUMNS};
-			adf::dimensions(m_diff_kernel.out[0]) = {LEN * M_COLUMNS};
-
-			adf::source(m_diff_kernel) = "diff/diff.cpp";
-
-			adf::runtime< adf::ratio >(m_diff_kernel) = RUNTIME_RATIO_M;
+        adf::runtime<adf::ratio>(m_diff_kernel) = RUNTIME_RATIO_M;
 
 #endif
+    }
 
-		}
-
-	private:
-		adf::kernel m_diff_kernel;
-
+   private:
+    adf::kernel m_diff_kernel;
 };
 
 class TestGraphDiffVV : public adf::graph {
+   public:
+    adf::input_plio in_1;
+    adf::input_plio in_2;
+    adf::output_plio out;
 
-	public:
-		adf::input_plio  in_1;
-		adf::input_plio  in_2;
-		adf::output_plio out;
-
-
-		TestGraphDiffVV(){
-
+    TestGraphDiffVV() {
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
+        in_1 = adf::input_plio::create("data_in_1", adf::plio_32_bits, "data/input_1.txt");
+        in_2 = adf::input_plio::create("data_in_2", adf::plio_32_bits, "data/input_2.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			in_1  = adf::input_plio::create("data_in_1", adf::plio_32_bits,"data/input_1.txt");
-			in_2  = adf::input_plio::create("data_in_2", adf::plio_32_bits,"data/input_2.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_diff_kernel = adf::kernel::create(us::L1::diffVV<KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH>);
+        adf::connect(in_1.out[0], m_diff_kernel.in[0]);
+        adf::connect(in_2.out[0], m_diff_kernel.in[1]);
+        adf::connect(m_diff_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_diff_kernel.in[0]) = {LEN};
+        adf::dimensions(m_diff_kernel.in[1]) = {LEN};
+        adf::dimensions(m_diff_kernel.out[0]) = {LEN};
 
-			m_diff_kernel = adf::kernel::create(us::L1::diffVV< KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH >);
-			adf::connect(in_1.out[0], m_diff_kernel.in[0]);
-			adf::connect(in_2.out[0], m_diff_kernel.in[1]);
-			adf::connect(m_diff_kernel.out[0], out.in[0]);
+        adf::source(m_diff_kernel) = "diff/diff.cpp";
 
-			adf::dimensions(m_diff_kernel.in[0]) = {LEN};
-			adf::dimensions(m_diff_kernel.in[1]) = {LEN};
-			adf::dimensions(m_diff_kernel.out[0]) = {LEN};
-
-			adf::source(m_diff_kernel) = "diff/diff.cpp";
-
-			adf::runtime< adf::ratio >(m_diff_kernel) = RUNTIME_RATIO_V;
+        adf::runtime<adf::ratio>(m_diff_kernel) = RUNTIME_RATIO_V;
 
 #endif
+    }
 
-		}
-
-	private:
-		adf::kernel m_diff_kernel;
-
+   private:
+    adf::kernel m_diff_kernel;
 };
 
-
 class TestGraphDiffVS : public adf::graph {
+   public:
+    adf::input_plio in_1;
+    adf::input_plio in_2;
+    adf::output_plio out;
 
-	public:
-		adf::input_plio  in_1;
-		adf::input_plio  in_2;
-		adf::output_plio out;
-
-
-		TestGraphDiffVS(){
-
+    TestGraphDiffVS() {
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
+        in_1 = adf::input_plio::create("data_in_1", adf::plio_32_bits, "data/input_1.txt");
+        in_2 = adf::input_plio::create("data_in_2", adf::plio_32_bits, "data/input_2.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			in_1  = adf::input_plio::create("data_in_1", adf::plio_32_bits,"data/input_1.txt");
-			in_2  = adf::input_plio::create("data_in_2", adf::plio_32_bits,"data/input_2.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_diff_kernel = adf::kernel::create(us::L1::diffVS<KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH>);
+        adf::connect(in_1.out[0], m_diff_kernel.in[0]);
+        adf::connect(in_2.out[0], m_diff_kernel.in[1]);
+        adf::connect(m_diff_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_diff_kernel.in[0]) = {LEN};
+        adf::dimensions(m_diff_kernel.in[1]) = {LEN};
+        adf::dimensions(m_diff_kernel.out[0]) = {LEN};
 
-			m_diff_kernel = adf::kernel::create(us::L1::diffVS< KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH >);
-			adf::connect(in_1.out[0], m_diff_kernel.in[0]);
-			adf::connect(in_2.out[0], m_diff_kernel.in[1]);
-			adf::connect(m_diff_kernel.out[0], out.in[0]);
+        adf::source(m_diff_kernel) = "diff/diff.cpp";
 
-			adf::dimensions(m_diff_kernel.in[0]) = {LEN};
-			adf::dimensions(m_diff_kernel.in[1]) = {LEN};
-			adf::dimensions(m_diff_kernel.out[0]) = {LEN};
-
-			adf::source(m_diff_kernel) = "diff/diff.cpp";
-
-			adf::runtime< adf::ratio >(m_diff_kernel) = RUNTIME_RATIO_V;
+        adf::runtime<adf::ratio>(m_diff_kernel) = RUNTIME_RATIO_V;
 
 #endif
+    }
 
-		}
-
-	private:
-		adf::kernel m_diff_kernel;
-
+   private:
+    adf::kernel m_diff_kernel;
 };

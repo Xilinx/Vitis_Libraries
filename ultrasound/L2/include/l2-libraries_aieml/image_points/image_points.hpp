@@ -33,11 +33,8 @@ from Advanced Micro Devices, Inc.
 
 #include "common_defines.hpp"
 
-
-template< typename T >
-void ImagePoints(
-    adf::input_buffer< T >& start_position, adf::input_buffer< T >& directions, adf::input_buffer< T >& samples_arange, 
-    adf::output_buffer< T >& output_matrix
-    );
-
-
+template <typename T>
+void ImagePoints(adf::input_buffer<T>& start_position,
+                 adf::input_buffer<T>& directions,
+                 adf::input_buffer<T>& samples_arange,
+                 adf::output_buffer<T>& output_matrix);

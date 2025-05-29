@@ -31,11 +31,10 @@ TestGraph equal_s_graph;
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    equal_s_graph.init();
+    equal_s_graph.run(2);
+    equal_s_graph.end();
 
-	equal_s_graph.init();
-	equal_s_graph.run(2);
-	equal_s_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

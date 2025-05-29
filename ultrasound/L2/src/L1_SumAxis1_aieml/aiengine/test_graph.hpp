@@ -27,60 +27,51 @@ from Advanced Micro Devices, Inc.
 #include "sum_axis_1/sum_axis_1.hpp"
 #include "common_defines.hpp"
 
-
-
 class TestGraph : public adf::graph {
+   public:
+    adf::input_plio in;
+    adf::output_plio out;
 
-	public:
-		adf::input_plio  in;
-		adf::output_plio out;
-
-
-		TestGraph(){
-
+    TestGraph() {
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__)) && !TEST_BUFFER
 
+        in = adf::input_plio::create("data_in", adf::plio_32_bits, "data/input.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			in = adf::input_plio::create("data_in", adf::plio_32_bits,"data/input.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_sum_axis_1_kernel =
+            adf::kernel::create(us::L1::sum_axis_1<KERNEL_TYPE, LEN, (M_COLUMNS / M_COLUMNS), M_COLUMNS>);
+        adf::connect(in.out[0], m_sum_axis_1_kernel.in[0]);
+        adf::connect(m_sum_axis_1_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_sum_axis_1_kernel.in[0]) = {LEN * M_COLUMNS};
+        adf::dimensions(m_sum_axis_1_kernel.out[0]) = {LEN};
 
-			m_sum_axis_1_kernel = adf::kernel::create(us::L1::sum_axis_1< KERNEL_TYPE, LEN, (M_COLUMNS/M_COLUMNS), M_COLUMNS >);
-			adf::connect(in.out[0], m_sum_axis_1_kernel.in[0]);
-			adf::connect(m_sum_axis_1_kernel.out[0], out.in[0]);
+        adf::source(m_sum_axis_1_kernel) = "sum_axis_1/sum_axis_1.cpp";
 
-			adf::dimensions(m_sum_axis_1_kernel.in[0]) = {LEN*M_COLUMNS};
-			adf::dimensions(m_sum_axis_1_kernel.out[0]) = {LEN};
-
-			adf::source(m_sum_axis_1_kernel) = "sum_axis_1/sum_axis_1.cpp";
-
-			adf::runtime< adf::ratio >(m_sum_axis_1_kernel) = RUNTIME_RATIO_M;
+        adf::runtime<adf::ratio>(m_sum_axis_1_kernel) = RUNTIME_RATIO_M;
 
 #endif
 
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__)) && TEST_BUFFER
 
+        in = adf::input_plio::create("data_in", adf::plio_32_bits, "data/input.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 
-			in = adf::input_plio::create("data_in", adf::plio_32_bits,"data/input.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        m_sum_axis_1_kernel =
+            adf::kernel::create(us::L1::SumAxis1InternalBuffer<KERNEL_TYPE, LEN, (M_COLUMNS / M_COLUMNS), M_COLUMNS>);
+        adf::connect(in.out[0], m_sum_axis_1_kernel.in[0]);
+        adf::connect(m_sum_axis_1_kernel.out[0], out.in[0]);
 
+        adf::dimensions(m_sum_axis_1_kernel.in[0]) = {LEN * M_COLUMNS};
+        adf::dimensions(m_sum_axis_1_kernel.out[0]) = {LEN};
 
-			m_sum_axis_1_kernel = adf::kernel::create(us::L1::SumAxis1InternalBuffer< KERNEL_TYPE, LEN, (M_COLUMNS/M_COLUMNS), M_COLUMNS >);
-			adf::connect(in.out[0], m_sum_axis_1_kernel.in[0]);
-			adf::connect(m_sum_axis_1_kernel.out[0], out.in[0]);
+        adf::source(m_sum_axis_1_kernel) = "sum_axis_1/sum_axis_1.cpp";
 
-			adf::dimensions(m_sum_axis_1_kernel.in[0]) = {LEN*M_COLUMNS};
-			adf::dimensions(m_sum_axis_1_kernel.out[0]) = {LEN};
-
-			adf::source(m_sum_axis_1_kernel) = "sum_axis_1/sum_axis_1.cpp";
-
-			adf::runtime< adf::ratio >(m_sum_axis_1_kernel) = RUNTIME_RATIO_M;
+        adf::runtime<adf::ratio>(m_sum_axis_1_kernel) = RUNTIME_RATIO_M;
 
 #endif
+    }
 
-		}
-
-	private:
-		adf::kernel m_sum_axis_1_kernel;
-
+   private:
+    adf::kernel m_sum_axis_1_kernel;
 };

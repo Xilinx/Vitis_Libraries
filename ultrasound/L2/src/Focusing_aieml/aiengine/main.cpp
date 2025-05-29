@@ -31,11 +31,10 @@ TestGraphFocusing foc_graph;
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    foc_graph.init();
+    foc_graph.run(1);
+    foc_graph.end();
 
-	foc_graph.init();
-	foc_graph.run(1);
-	foc_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

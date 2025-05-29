@@ -28,169 +28,166 @@ from Advanced Micro Devices, Inc.
 #include "common_defines.hpp"
 
 class TestGraphApodization : public adf::graph {
+   public:
+    adf::input_plio image_points;
+    adf::input_plio apodization_reference;
+    adf::input_plio apodization_direction;
+    adf::input_plio two;
+    adf::input_plio apodization_distance;
+    adf::input_plio f_number;
+    adf::input_plio one;
+    adf::input_plio pi;
 
-	public:
-		adf::input_plio  image_points;
-		adf::input_plio  apodization_reference;
-		adf::input_plio  apodization_direction;
-		adf::input_plio  two;
-		adf::input_plio  apodization_distance;
-		adf::input_plio  f_number;
-		adf::input_plio  one;
-		adf::input_plio  pi;
+    adf::output_plio output_apodization;
 
-		adf::output_plio output_apodization;
-
-
-		TestGraphApodization(){
-
+    TestGraphApodization() {
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__)) && !TEST_BUFFER
 
+        image_points = adf::input_plio::create("image_points", adf::plio_32_bits, "data/image_points.txt");
+        apodization_reference =
+            adf::input_plio::create("apodization_reference", adf::plio_32_bits, "data/apodization_reference.txt");
+        apodization_direction =
+            adf::input_plio::create("apodization_direction", adf::plio_32_bits, "data/apodization_direction.txt");
+        two = adf::input_plio::create("two", adf::plio_32_bits, "data/two.txt");
+        apodization_distance =
+            adf::input_plio::create("apodization_distance", adf::plio_32_bits, "data/apodization_distance.txt");
+        f_number = adf::input_plio::create("f_number", adf::plio_32_bits, "data/f_number.txt");
+        one = adf::input_plio::create("one", adf::plio_32_bits, "data/one.txt");
+        pi = adf::input_plio::create("pi", adf::plio_32_bits, "data/pi.txt");
 
-			image_points  = adf::input_plio::create("image_points", adf::plio_32_bits,"data/image_points.txt");
-			apodization_reference  = adf::input_plio::create("apodization_reference", adf::plio_32_bits,"data/apodization_reference.txt");
-			apodization_direction  = adf::input_plio::create("apodization_direction", adf::plio_32_bits,"data/apodization_direction.txt");
-			two  = adf::input_plio::create("two", adf::plio_32_bits,"data/two.txt");
-			apodization_distance = adf::input_plio::create("apodization_distance", adf::plio_32_bits,"data/apodization_distance.txt");
-			f_number = adf::input_plio::create("f_number", adf::plio_32_bits,"data/f_number.txt");
-			one = adf::input_plio::create("one", adf::plio_32_bits,"data/one.txt");
-			pi = adf::input_plio::create("pi", adf::plio_32_bits,"data/pi.txt");
+        output_apodization =
+            adf::output_plio::create("output_apodization", adf::plio_32_bits, "data/output_apodization.txt");
 
-			output_apodization  = adf::output_plio::create("output_apodization", adf::plio_32_bits,"data/output_apodization.txt");
+        m_apodization_1_kernel = adf::kernel::create(us::L2::Apodization1<KERNEL_TYPE>);
+        m_apodization_2_kernel = adf::kernel::create(us::L2::Apodization2<KERNEL_TYPE>);
+        m_apodization_output_kernel = adf::kernel::create(us::L2::ApodizationOutput<KERNEL_TYPE>);
 
-			m_apodization_1_kernel = adf::kernel::create(us::L2::Apodization1< KERNEL_TYPE >);
-			m_apodization_2_kernel = adf::kernel::create(us::L2::Apodization2< KERNEL_TYPE >);
-			m_apodization_output_kernel = adf::kernel::create(us::L2::ApodizationOutput< KERNEL_TYPE >);
+        adf::connect(image_points.out[0], m_apodization_1_kernel.in[0]);
+        adf::connect(apodization_reference.out[0], m_apodization_1_kernel.in[1]);
+        adf::connect(apodization_direction.out[0], m_apodization_1_kernel.in[2]);
+        // adf::connect(m_apodization_1_kernel.out[0], output_apodization.in[0]);
 
-			adf::connect(image_points.out[0], m_apodization_1_kernel.in[0]);
-			adf::connect(apodization_reference.out[0], m_apodization_1_kernel.in[1]);
-			adf::connect(apodization_direction.out[0], m_apodization_1_kernel.in[2]);
-			//adf::connect(m_apodization_1_kernel.out[0], output_apodization.in[0]);
+        adf::connect(m_apodization_1_kernel.out[0], m_apodization_2_kernel.in[0]);
+        adf::connect(two.out[0], m_apodization_2_kernel.in[1]);
+        adf::connect(apodization_distance.out[0], m_apodization_2_kernel.in[2]);
+        adf::connect(f_number.out[0], m_apodization_2_kernel.in[3]);
+        adf::connect(one.out[0], m_apodization_2_kernel.in[4]);
+        // adf::connect(m_apodization_2_kernel.out[0], output_apodization.in[0]);
 
-			adf::connect(m_apodization_1_kernel.out[0], m_apodization_2_kernel.in[0]);
-			adf::connect(two.out[0], m_apodization_2_kernel.in[1]);
-			adf::connect(apodization_distance.out[0], m_apodization_2_kernel.in[2]);
-			adf::connect(f_number.out[0], m_apodization_2_kernel.in[3]);
-			adf::connect(one.out[0], m_apodization_2_kernel.in[4]);
-			//adf::connect(m_apodization_2_kernel.out[0], output_apodization.in[0]);
+        adf::connect(m_apodization_2_kernel.out[0], m_apodization_output_kernel.in[0]);
+        adf::connect(one.out[0], m_apodization_output_kernel.in[1]);
+        adf::connect(pi.out[0], m_apodization_output_kernel.in[2]);
+        adf::connect(two.out[0], m_apodization_output_kernel.in[3]);
 
-			adf::connect(m_apodization_2_kernel.out[0], m_apodization_output_kernel.in[0]);
-			adf::connect(one.out[0], m_apodization_output_kernel.in[1]);
-			adf::connect(pi.out[0], m_apodization_output_kernel.in[2]);
-			adf::connect(two.out[0], m_apodization_output_kernel.in[3]);
+        adf::connect(m_apodization_output_kernel.out[0], output_apodization.in[0]);
 
-			adf::connect(m_apodization_output_kernel.out[0], output_apodization.in[0]);
+        adf::dimensions(m_apodization_1_kernel.in[0]) = {LEN * M_COLUMNS};
+        adf::dimensions(m_apodization_1_kernel.in[1]) = {LEN * M_COLUMNS};
+        adf::dimensions(m_apodization_1_kernel.in[2]) = {LEN * M_COLUMNS};
+        adf::dimensions(m_apodization_1_kernel.out[0]) = {LEN};
 
-			adf::dimensions(m_apodization_1_kernel.in[0]) = {LEN*M_COLUMNS};
-			adf::dimensions(m_apodization_1_kernel.in[1]) = {LEN*M_COLUMNS};
-			adf::dimensions(m_apodization_1_kernel.in[2]) = {LEN*M_COLUMNS};
-			adf::dimensions(m_apodization_1_kernel.out[0]) = {LEN};
+        adf::dimensions(m_apodization_2_kernel.in[0]) = {LEN};
+        adf::dimensions(m_apodization_2_kernel.in[1]) = {LEN};
+        adf::dimensions(m_apodization_2_kernel.in[2]) = {LEN};
+        adf::dimensions(m_apodization_2_kernel.in[3]) = {LEN};
+        adf::dimensions(m_apodization_2_kernel.in[4]) = {LEN};
+        adf::dimensions(m_apodization_2_kernel.out[0]) = {LEN};
 
-			adf::dimensions(m_apodization_2_kernel.in[0]) = {LEN};
-			adf::dimensions(m_apodization_2_kernel.in[1]) = {LEN};
-			adf::dimensions(m_apodization_2_kernel.in[2]) = {LEN};
-			adf::dimensions(m_apodization_2_kernel.in[3]) = {LEN};
-			adf::dimensions(m_apodization_2_kernel.in[4]) = {LEN};
-			adf::dimensions(m_apodization_2_kernel.out[0]) = {LEN};
+        adf::dimensions(m_apodization_output_kernel.in[0]) = {LEN};
+        adf::dimensions(m_apodization_output_kernel.in[1]) = {LEN};
+        adf::dimensions(m_apodization_output_kernel.in[2]) = {LEN};
+        adf::dimensions(m_apodization_output_kernel.in[3]) = {LEN};
+        adf::dimensions(m_apodization_output_kernel.out[0]) = {LEN};
 
-			adf::dimensions(m_apodization_output_kernel.in[0]) = {LEN};
-			adf::dimensions(m_apodization_output_kernel.in[1]) = {LEN};
-			adf::dimensions(m_apodization_output_kernel.in[2]) = {LEN};
-			adf::dimensions(m_apodization_output_kernel.in[3]) = {LEN};
-			adf::dimensions(m_apodization_output_kernel.out[0]) = {LEN};
+        adf::source(m_apodization_1_kernel) = "l2-libraries_aieml/apodization/apodization.cpp";
 
-			adf::source(m_apodization_1_kernel) = "l2-libraries_aieml/apodization/apodization.cpp";
+        adf::runtime<adf::ratio>(m_apodization_1_kernel) = 1;
 
-			adf::runtime< adf::ratio >(m_apodization_1_kernel) = 1;
+        adf::source(m_apodization_2_kernel) = "l2-libraries_aieml/apodization/apodization.cpp";
 
-			adf::source(m_apodization_2_kernel) = "l2-libraries_aieml/apodization/apodization.cpp";
+        adf::runtime<adf::ratio>(m_apodization_2_kernel) = 1;
 
-			adf::runtime< adf::ratio >(m_apodization_2_kernel) = 1;
+        adf::source(m_apodization_output_kernel) = "l2-libraries_aieml/apodization/apodization.cpp";
 
-			adf::source(m_apodization_output_kernel) = "l2-libraries_aieml/apodization/apodization.cpp";
-
-			adf::runtime< adf::ratio >(m_apodization_output_kernel) = 1;
-
-
+        adf::runtime<adf::ratio>(m_apodization_output_kernel) = 1;
 
 #endif
 
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__)) && TEST_BUFFER
 
+        image_points = adf::input_plio::create("image_points", adf::plio_32_bits, "data/image_points.txt");
+        apodization_reference =
+            adf::input_plio::create("apodization_reference", adf::plio_32_bits, "data/apodization_reference.txt");
+        apodization_direction =
+            adf::input_plio::create("apodization_direction", adf::plio_32_bits, "data/apodization_direction.txt");
+        two = adf::input_plio::create("two", adf::plio_32_bits, "data/two.txt");
+        apodization_distance =
+            adf::input_plio::create("apodization_distance", adf::plio_32_bits, "data/apodization_distance.txt");
+        f_number = adf::input_plio::create("f_number", adf::plio_32_bits, "data/f_number.txt");
+        one = adf::input_plio::create("one", adf::plio_32_bits, "data/one.txt");
+        pi = adf::input_plio::create("pi", adf::plio_32_bits, "data/pi.txt");
 
-			image_points  = adf::input_plio::create("image_points", adf::plio_32_bits,"data/image_points.txt");
-			apodization_reference  = adf::input_plio::create("apodization_reference", adf::plio_32_bits,"data/apodization_reference.txt");
-			apodization_direction  = adf::input_plio::create("apodization_direction", adf::plio_32_bits,"data/apodization_direction.txt");
-			two  = adf::input_plio::create("two", adf::plio_32_bits,"data/two.txt");
-			apodization_distance = adf::input_plio::create("apodization_distance", adf::plio_32_bits,"data/apodization_distance.txt");
-			f_number = adf::input_plio::create("f_number", adf::plio_32_bits,"data/f_number.txt");
-			one = adf::input_plio::create("one", adf::plio_32_bits,"data/one.txt");
-			pi = adf::input_plio::create("pi", adf::plio_32_bits,"data/pi.txt");
+        output_apodization =
+            adf::output_plio::create("output_apodization", adf::plio_32_bits, "data/output_apodization.txt");
 
-			output_apodization  = adf::output_plio::create("output_apodization", adf::plio_32_bits,"data/output_apodization.txt");
+        m_apodization_1_kernel = adf::kernel::create(us::L2::Apodization1<KERNEL_TYPE>);
+        m_apodization_2_kernel = adf::kernel::create(us::L2::Apodization2<KERNEL_TYPE>);
+        m_apodization_output_kernel = adf::kernel::create(us::L2::ApodizationOutput<KERNEL_TYPE>);
 
-			m_apodization_1_kernel = adf::kernel::create(us::L2::Apodization1< KERNEL_TYPE >);
-			m_apodization_2_kernel = adf::kernel::create(us::L2::Apodization2< KERNEL_TYPE >);
-			m_apodization_output_kernel = adf::kernel::create(us::L2::ApodizationOutput< KERNEL_TYPE >);
+        adf::connect(image_points.out[0], m_apodization_1_kernel.in[0]);
+        adf::connect(apodization_reference.out[0], m_apodization_1_kernel.in[1]);
+        adf::connect(apodization_direction.out[0], m_apodization_1_kernel.in[2]);
+        // adf::connect(m_apodization_1_kernel.out[0], output_apodization.in[0]);
 
-			adf::connect(image_points.out[0], m_apodization_1_kernel.in[0]);
-			adf::connect(apodization_reference.out[0], m_apodization_1_kernel.in[1]);
-			adf::connect(apodization_direction.out[0], m_apodization_1_kernel.in[2]);
-			//adf::connect(m_apodization_1_kernel.out[0], output_apodization.in[0]);
+        adf::connect(m_apodization_1_kernel.out[0], m_apodization_2_kernel.in[0]);
+        adf::connect(two.out[0], m_apodization_2_kernel.in[1]);
+        adf::connect(apodization_distance.out[0], m_apodization_2_kernel.in[2]);
+        adf::connect(f_number.out[0], m_apodization_2_kernel.in[3]);
+        adf::connect(one.out[0], m_apodization_2_kernel.in[4]);
+        // adf::connect(m_apodization_2_kernel.out[0], output_apodization.in[0]);
 
-			adf::connect(m_apodization_1_kernel.out[0], m_apodization_2_kernel.in[0]);
-			adf::connect(two.out[0], m_apodization_2_kernel.in[1]);
-			adf::connect(apodization_distance.out[0], m_apodization_2_kernel.in[2]);
-			adf::connect(f_number.out[0], m_apodization_2_kernel.in[3]);
-			adf::connect(one.out[0], m_apodization_2_kernel.in[4]);
-			//adf::connect(m_apodization_2_kernel.out[0], output_apodization.in[0]);
+        adf::connect(m_apodization_2_kernel.out[0], m_apodization_output_kernel.in[0]);
+        adf::connect(one.out[0], m_apodization_output_kernel.in[1]);
+        adf::connect(pi.out[0], m_apodization_output_kernel.in[2]);
+        adf::connect(two.out[0], m_apodization_output_kernel.in[3]);
 
-			adf::connect(m_apodization_2_kernel.out[0], m_apodization_output_kernel.in[0]);
-			adf::connect(one.out[0], m_apodization_output_kernel.in[1]);
-			adf::connect(pi.out[0], m_apodization_output_kernel.in[2]);
-			adf::connect(two.out[0], m_apodization_output_kernel.in[3]);
+        adf::connect(m_apodization_output_kernel.out[0], output_apodization.in[0]);
 
-			adf::connect(m_apodization_output_kernel.out[0], output_apodization.in[0]);
+        adf::dimensions(m_apodization_1_kernel.in[0]) = {LEN * M_COLUMNS};
+        adf::dimensions(m_apodization_1_kernel.in[1]) = {LEN * M_COLUMNS};
+        adf::dimensions(m_apodization_1_kernel.in[2]) = {LEN * M_COLUMNS};
+        adf::dimensions(m_apodization_1_kernel.out[0]) = {LEN};
 
-			adf::dimensions(m_apodization_1_kernel.in[0]) = {LEN*M_COLUMNS};
-			adf::dimensions(m_apodization_1_kernel.in[1]) = {LEN*M_COLUMNS};
-			adf::dimensions(m_apodization_1_kernel.in[2]) = {LEN*M_COLUMNS};
-			adf::dimensions(m_apodization_1_kernel.out[0]) = {LEN};
+        adf::dimensions(m_apodization_2_kernel.in[0]) = {LEN};
+        adf::dimensions(m_apodization_2_kernel.in[1]) = {LEN};
+        adf::dimensions(m_apodization_2_kernel.in[2]) = {LEN};
+        adf::dimensions(m_apodization_2_kernel.in[3]) = {LEN};
+        adf::dimensions(m_apodization_2_kernel.in[4]) = {LEN};
+        adf::dimensions(m_apodization_2_kernel.out[0]) = {LEN};
 
-			adf::dimensions(m_apodization_2_kernel.in[0]) = {LEN};
-			adf::dimensions(m_apodization_2_kernel.in[1]) = {LEN};
-			adf::dimensions(m_apodization_2_kernel.in[2]) = {LEN};
-			adf::dimensions(m_apodization_2_kernel.in[3]) = {LEN};
-			adf::dimensions(m_apodization_2_kernel.in[4]) = {LEN};
-			adf::dimensions(m_apodization_2_kernel.out[0]) = {LEN};
+        adf::dimensions(m_apodization_output_kernel.in[0]) = {LEN};
+        adf::dimensions(m_apodization_output_kernel.in[1]) = {LEN};
+        adf::dimensions(m_apodization_output_kernel.in[2]) = {LEN};
+        adf::dimensions(m_apodization_output_kernel.in[3]) = {LEN};
+        adf::dimensions(m_apodization_output_kernel.out[0]) = {LEN};
 
-			adf::dimensions(m_apodization_output_kernel.in[0]) = {LEN};
-			adf::dimensions(m_apodization_output_kernel.in[1]) = {LEN};
-			adf::dimensions(m_apodization_output_kernel.in[2]) = {LEN};
-			adf::dimensions(m_apodization_output_kernel.in[3]) = {LEN};
-			adf::dimensions(m_apodization_output_kernel.out[0]) = {LEN};
+        adf::source(m_apodization_1_kernel) = "l2-libraries_aieml/apodization/apodization.cpp";
 
-			adf::source(m_apodization_1_kernel) = "l2-libraries_aieml/apodization/apodization.cpp";
+        adf::runtime<adf::ratio>(m_apodization_1_kernel) = 1;
 
-			adf::runtime< adf::ratio >(m_apodization_1_kernel) = 1;
+        adf::source(m_apodization_2_kernel) = "l2-libraries_aieml/apodization/apodization.cpp";
 
-			adf::source(m_apodization_2_kernel) = "l2-libraries_aieml/apodization/apodization.cpp";
+        adf::runtime<adf::ratio>(m_apodization_2_kernel) = 1;
 
-			adf::runtime< adf::ratio >(m_apodization_2_kernel) = 1;
+        adf::source(m_apodization_output_kernel) = "l2-libraries_aieml/apodization/apodization.cpp";
 
-			adf::source(m_apodization_output_kernel) = "l2-libraries_aieml/apodization/apodization.cpp";
-
-			adf::runtime< adf::ratio >(m_apodization_output_kernel) = 1;
-
-
+        adf::runtime<adf::ratio>(m_apodization_output_kernel) = 1;
 
 #endif
+    }
 
-		}
-
-	private:
-		adf::kernel m_apodization_1_kernel;
-		adf::kernel m_apodization_2_kernel;
-		adf::kernel m_apodization_output_kernel;
-
+   private:
+    adf::kernel m_apodization_1_kernel;
+    adf::kernel m_apodization_2_kernel;
+    adf::kernel m_apodization_output_kernel;
 };

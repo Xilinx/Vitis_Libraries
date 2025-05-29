@@ -23,8 +23,8 @@ from Advanced Micro Devices, Inc.
 */
 #include "ones.hpp"
 
-namespace us{
-namespace L1{
+namespace us {
+namespace L1 {
 
 template <typename T, const unsigned T_LEN, const unsigned T_INCREMENT, const unsigned T_SIMD_DEPTH>
 void Ones(adf::output_buffer<T>& output_vector) {
@@ -38,20 +38,16 @@ void Ones(adf::output_buffer<T>& output_vector) {
     }
 };
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void OnesInternalBuffer(adf::output_buffer< T >& output_vector){
-
-	T* buffer_out = (T*)output_vector.data();
-	m_Ones< T, T_LEN, T_INCREMENT, T_SIMD_DEPTH >(buffer_out);
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void OnesInternalBuffer(adf::output_buffer<T>& output_vector) {
+    T* buffer_out = (T*)output_vector.data();
+    m_Ones<T, T_LEN, T_INCREMENT, T_SIMD_DEPTH>(buffer_out);
 }
-
 
 // nested called
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_Ones(T *output_vector){
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_Ones(T* output_vector) {
     aie::vector<T, T_SIMD_DEPTH> res = aie::broadcast<T, T_SIMD_DEPTH>(1);
 
     for (unsigned i = 0; i < T_LEN; i += T_INCREMENT) {
@@ -60,13 +56,11 @@ void m_Ones(T *output_vector){
     }
 }
 
-
 // retrocompatibility
 
 template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
-void ones(adf::output_buffer<T>& output_vector){
+void ones(adf::output_buffer<T>& output_vector) {
     Ones<T, T_LEN, T_INCREMENT, T_SIMD_DEPTH>(output_vector);
 }
-
 }
 }

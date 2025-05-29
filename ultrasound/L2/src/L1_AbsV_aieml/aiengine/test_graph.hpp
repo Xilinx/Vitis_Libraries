@@ -27,89 +27,81 @@ from Advanced Micro Devices, Inc.
 #include "abs_v/abs_v.hpp"
 #include "common_defines.hpp"
 
-
 class TestGraph : public adf::graph {
+   public:
+    adf::input_plio in;
+    adf::output_plio out;
 
-	public:
-		adf::input_plio  in;
-		adf::output_plio out;
-
-
-		TestGraph(){
-
+    TestGraph() {
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__)) && !TEST_BUFFER
 
-
 #if (defined(TYPE_IS_CINT16))
-			in  = adf::input_plio::create("data_in", adf::plio_32_bits,"data/input_16c.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output_16c.txt");
+        in = adf::input_plio::create("data_in", adf::plio_32_bits, "data/input_16c.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output_16c.txt");
 #elif (defined(TYPE_IS_BFLOAT))
-			in  = adf::input_plio::create("data_in", adf::plio_32_bits,"data/input_16c.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output_16c.txt");
+        in = adf::input_plio::create("data_in", adf::plio_32_bits, "data/input_16c.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output_16c.txt");
 #elif (defined(TYPE_IS_FLOAT))
-			in  = adf::input_plio::create("data_in", adf::plio_32_bits,"data/input_32f.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output_32f.txt");
+        in = adf::input_plio::create("data_in", adf::plio_32_bits, "data/input_32f.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output_32f.txt");
 #else
-			in  = adf::input_plio::create("data_in", adf::plio_32_bits,"data/input.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        in = adf::input_plio::create("data_in", adf::plio_32_bits, "data/input.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 #endif
 
 #if (defined(TYPE_IS_CINT16))
-			m_abs_v_kernel = adf::kernel::create(us::L1::AbsV< KERNEL_TYPE, int32, LEN, INCREMENT_V, SIMD_DEPTH >);
+        m_abs_v_kernel = adf::kernel::create(us::L1::AbsV<KERNEL_TYPE, int32, LEN, INCREMENT_V, SIMD_DEPTH>);
 #else
-			m_abs_v_kernel = adf::kernel::create(us::L1::AbsV< KERNEL_TYPE, KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH >);
+        m_abs_v_kernel = adf::kernel::create(us::L1::AbsV<KERNEL_TYPE, KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH>);
 #endif
-			adf::connect(in.out[0], m_abs_v_kernel.in[0]);
-			adf::connect(m_abs_v_kernel.out[0], out.in[0]);
+        adf::connect(in.out[0], m_abs_v_kernel.in[0]);
+        adf::connect(m_abs_v_kernel.out[0], out.in[0]);
 
-			adf::dimensions(m_abs_v_kernel.in[0]) = {LEN};
-			adf::dimensions(m_abs_v_kernel.out[0]) = {LEN};
+        adf::dimensions(m_abs_v_kernel.in[0]) = {LEN};
+        adf::dimensions(m_abs_v_kernel.out[0]) = {LEN};
 
-			adf::source(m_abs_v_kernel) = "abs_v/abs_v.cpp";
+        adf::source(m_abs_v_kernel) = "abs_v/abs_v.cpp";
 
-			adf::runtime< adf::ratio >(m_abs_v_kernel) = RUNTIME_RATIO_V;
+        adf::runtime<adf::ratio>(m_abs_v_kernel) = RUNTIME_RATIO_V;
 
 #endif
 
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__)) && TEST_BUFFER
 
-
 #if (defined(TYPE_IS_CINT16))
-			in  = adf::input_plio::create("data_in", adf::plio_32_bits,"data/input_16c.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output_16c.txt");
+        in = adf::input_plio::create("data_in", adf::plio_32_bits, "data/input_16c.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output_16c.txt");
 #elif (defined(TYPE_IS_BFLOAT))
-			in  = adf::input_plio::create("data_in", adf::plio_32_bits,"data/input_16c.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output_16c.txt");
+        in = adf::input_plio::create("data_in", adf::plio_32_bits, "data/input_16c.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output_16c.txt");
 #elif (defined(TYPE_IS_FLOAT))
-			in  = adf::input_plio::create("data_in", adf::plio_32_bits,"data/input_32f.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output_32f.txt");
+        in = adf::input_plio::create("data_in", adf::plio_32_bits, "data/input_32f.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output_32f.txt");
 #else
-			in  = adf::input_plio::create("data_in", adf::plio_32_bits,"data/input.txt");
-			out = adf::output_plio::create("data_out", adf::plio_32_bits,"data/output.txt");
+        in = adf::input_plio::create("data_in", adf::plio_32_bits, "data/input.txt");
+        out = adf::output_plio::create("data_out", adf::plio_32_bits, "data/output.txt");
 #endif
 
 #if (defined(TYPE_IS_CINT16))
-			m_abs_v_kernel = adf::kernel::create(us::L1::AbsVInternalBuffer< KERNEL_TYPE, int32, LEN, INCREMENT_V, SIMD_DEPTH >);
+        m_abs_v_kernel =
+            adf::kernel::create(us::L1::AbsVInternalBuffer<KERNEL_TYPE, int32, LEN, INCREMENT_V, SIMD_DEPTH>);
 #else
-			m_abs_v_kernel = adf::kernel::create(us::L1::AbsVInternalBuffer< KERNEL_TYPE, KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH >);
+        m_abs_v_kernel =
+            adf::kernel::create(us::L1::AbsVInternalBuffer<KERNEL_TYPE, KERNEL_TYPE, LEN, INCREMENT_V, SIMD_DEPTH>);
 #endif
-			adf::connect(in.out[0], m_abs_v_kernel.in[0]);
-			adf::connect(m_abs_v_kernel.out[0], out.in[0]);
+        adf::connect(in.out[0], m_abs_v_kernel.in[0]);
+        adf::connect(m_abs_v_kernel.out[0], out.in[0]);
 
-			adf::dimensions(m_abs_v_kernel.in[0]) = {LEN};
-			adf::dimensions(m_abs_v_kernel.out[0]) = {LEN};
+        adf::dimensions(m_abs_v_kernel.in[0]) = {LEN};
+        adf::dimensions(m_abs_v_kernel.out[0]) = {LEN};
 
-			adf::source(m_abs_v_kernel) = "abs_v/abs_v.cpp";
+        adf::source(m_abs_v_kernel) = "abs_v/abs_v.cpp";
 
-			adf::runtime< adf::ratio >(m_abs_v_kernel) = RUNTIME_RATIO_V;
-
+        adf::runtime<adf::ratio>(m_abs_v_kernel) = RUNTIME_RATIO_V;
 
 #endif
+    }
 
-		}
-
-	private:
-		adf::kernel m_abs_v_kernel;
-
+   private:
+    adf::kernel m_abs_v_kernel;
 };
-

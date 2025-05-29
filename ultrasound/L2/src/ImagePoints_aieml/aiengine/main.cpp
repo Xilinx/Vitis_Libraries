@@ -24,20 +24,17 @@ from Advanced Micro Devices, Inc.
 #include <adf.h>
 #include "test_graph.hpp"
 
-
 using namespace adf;
 
 TestGraphImagePoints image_points_graph;
 
-
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    image_points_graph.init();
+    image_points_graph.run(2);
+    image_points_graph.end();
 
-	image_points_graph.init();
-	image_points_graph.run(2);
-	image_points_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

@@ -27,55 +27,65 @@ from Advanced Micro Devices, Inc.
 #include <aie_api/aie.hpp>
 #include <aie_api/utils.hpp>
 
-namespace us{
-namespace L1{
+namespace us {
+namespace L1 {
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void Outer(adf::input_buffer< T >& input_vector_1, adf::input_buffer< T >& input_vector_2, adf::output_buffer< T >& output_matrix);
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void Outer(adf::input_buffer<T>& input_vector_1,
+           adf::input_buffer<T>& input_vector_2,
+           adf::output_buffer<T>& output_matrix);
 
 // nested called
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-inline void m_Outer(adf::input_buffer< int32 >& input_vector_1, adf::input_buffer< int32 >& input_vector_2, adf::output_buffer< int32 >& output_matrix);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+inline void m_Outer(adf::input_buffer<int32>& input_vector_1,
+                    adf::input_buffer<int32>& input_vector_2,
+                    adf::output_buffer<int32>& output_matrix);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-inline void m_Outer(adf::input_buffer< int16 >& input_vector_1, adf::input_buffer< int16 >& input_vector_2, adf::output_buffer< int16 >& output_matrix);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+inline void m_Outer(adf::input_buffer<int16>& input_vector_1,
+                    adf::input_buffer<int16>& input_vector_2,
+                    adf::output_buffer<int16>& output_matrix);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-inline void m_Outer(adf::input_buffer< float >& input_vector_1, adf::input_buffer< float >& input_vector_2, adf::output_buffer< float >& output_matrix);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+inline void m_Outer(adf::input_buffer<float>& input_vector_1,
+                    adf::input_buffer<float>& input_vector_2,
+                    adf::output_buffer<float>& output_matrix);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-inline void m_Outer(adf::input_buffer< bfloat16 >& input_vector_1, adf::input_buffer< bfloat16 >& input_vector_2, adf::output_buffer< bfloat16 >& output_matrix);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+inline void m_Outer(adf::input_buffer<bfloat16>& input_vector_1,
+                    adf::input_buffer<bfloat16>& input_vector_2,
+                    adf::output_buffer<bfloat16>& output_matrix);
 
 //----------------------------------------------------------
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void OuterInternalBuffer(adf::input_buffer< T >& input_vector_1, adf::input_buffer< T >& input_vector_2, adf::output_buffer< T >& output_matrix);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void OuterInternalBuffer(adf::input_buffer<T>& input_vector_1,
+                         adf::input_buffer<T>& input_vector_2,
+                         adf::output_buffer<T>& output_matrix);
 
 // nested called
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_Outer(T *input_vector_1, T *input_vector_2, T *output_matrix);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_Outer(T* input_vector_1, T* input_vector_2, T* output_matrix);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_Outer(int32 *input_vector_1, int32 *input_vector_2, int32 *output_matrix);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_Outer(int32* input_vector_1, int32* input_vector_2, int32* output_matrix);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_Outer(int16 *input_vector_1, int16 *input_vector_2, int16 *output_matrix);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_Outer(int16* input_vector_1, int16* input_vector_2, int16* output_matrix);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_Outer(float *input_vector_1, float *input_vector_2, float *output_matrix);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_Outer(float* input_vector_1, float* input_vector_2, float* output_matrix);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_Outer(bfloat16 *input_vector_1, bfloat16 *input_vector_2, bfloat16 *output_matrix);
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_Outer(bfloat16* input_vector_1, bfloat16* input_vector_2, bfloat16* output_matrix);
 
 // retrocompatibility
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void outer(adf::input_buffer< T >& input_vector_1, adf::input_buffer< T >& input_vector_2, adf::output_buffer< T >& output_matrix);
-
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void outer(adf::input_buffer<T>& input_vector_1,
+           adf::input_buffer<T>& input_vector_2,
+           adf::output_buffer<T>& output_matrix);
 }
 }

@@ -44,11 +44,10 @@ TestGraphMulVV mul_graph;
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    mul_graph.init();
+    mul_graph.run(2);
+    mul_graph.end();
 
-	mul_graph.init();
-	mul_graph.run(2);
-	mul_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

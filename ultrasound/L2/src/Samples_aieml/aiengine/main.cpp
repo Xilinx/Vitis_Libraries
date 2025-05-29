@@ -24,20 +24,17 @@ from Advanced Micro Devices, Inc.
 #include <adf.h>
 #include "test_graph.hpp"
 
-
 using namespace adf;
 
 TestGraphSamples samples_graph;
 
-
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    samples_graph.init();
+    samples_graph.run(2);
+    samples_graph.end();
 
-	samples_graph.init();
-	samples_graph.run(2);
-	samples_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

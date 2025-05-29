@@ -31,11 +31,10 @@ TestGraph sign_graph;
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    sign_graph.init();
+    sign_graph.run(2);
+    sign_graph.end();
 
-	sign_graph.init();
-	sign_graph.run(2);
-	sign_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

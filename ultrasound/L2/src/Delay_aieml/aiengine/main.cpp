@@ -31,11 +31,10 @@ TestGraphDelay delay_graph;
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    delay_graph.init();
+    delay_graph.run(1);
+    delay_graph.end();
 
-	delay_graph.init();
-	delay_graph.run(1);
-	delay_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

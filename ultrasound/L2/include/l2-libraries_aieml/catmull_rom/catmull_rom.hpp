@@ -28,52 +28,48 @@ from Advanced Micro Devices, Inc.
 #include "l1-libraries_aieml/mul/mul.hpp"
 #include "l1-libraries_aieml/sum/sum.hpp"
 
-namespace us{
-namespace L2{
+namespace us {
+namespace L2 {
 
-template< typename T >
+template <typename T>
 void CatmullRomA1A2(
 
-		adf::input_buffer< T >& point_0,
-		adf::input_buffer< T >& point_1,
-		adf::input_buffer< T >& point_2,
-		adf::input_buffer< T >& t1t,
-		adf::input_buffer< T >& tt0,
-		adf::input_buffer< T >& t2t,
-		adf::input_buffer< T >& tt1,
+    adf::input_buffer<T>& point_0,
+    adf::input_buffer<T>& point_1,
+    adf::input_buffer<T>& point_2,
+    adf::input_buffer<T>& t1t,
+    adf::input_buffer<T>& tt0,
+    adf::input_buffer<T>& t2t,
+    adf::input_buffer<T>& tt1,
 
-		adf::output_buffer< T >& output_a1,
-		adf::output_buffer< T >& output_a2
-);
+    adf::output_buffer<T>& output_a1,
+    adf::output_buffer<T>& output_a2);
 
-template< typename T >
+template <typename T>
 void CatmullRomA3B1(
 
-		adf::input_buffer< T >& output_a1,
-		adf::input_buffer< T >& output_a2,
-		adf::input_buffer< T >& point_2,
-		adf::input_buffer< T >& point_3,
-		adf::input_buffer< T >& t3t,
-		adf::input_buffer< T >& tt2,
-		adf::input_buffer< T >& t2t,
-		adf::input_buffer< T >& tt0,
+    adf::input_buffer<T>& output_a1,
+    adf::input_buffer<T>& output_a2,
+    adf::input_buffer<T>& point_2,
+    adf::input_buffer<T>& point_3,
+    adf::input_buffer<T>& t3t,
+    adf::input_buffer<T>& tt2,
+    adf::input_buffer<T>& t2t,
+    adf::input_buffer<T>& tt0,
 
-		adf::output_buffer< T >& output_a3,
-		adf::output_buffer< T >& output_b1
-);
+    adf::output_buffer<T>& output_a3,
+    adf::output_buffer<T>& output_b1);
 
-template< typename T >
+template <typename T>
 void CatmullRomB2C(
 
-		adf::input_buffer< T >& output_a2,
-		adf::input_buffer< T >& output_a3,
-		adf::input_buffer< T >& output_b1,
-		adf::input_buffer< T >& t3t,
-		adf::input_buffer< T >& tt1,
-		adf::input_buffer< T >& t2t,
+    adf::input_buffer<T>& output_a2,
+    adf::input_buffer<T>& output_a3,
+    adf::input_buffer<T>& output_b1,
+    adf::input_buffer<T>& t3t,
+    adf::input_buffer<T>& tt1,
+    adf::input_buffer<T>& t2t,
 
-		adf::output_buffer< T >& output_catmull_rom
-);
-
+    adf::output_buffer<T>& output_catmull_rom);
 }
 }

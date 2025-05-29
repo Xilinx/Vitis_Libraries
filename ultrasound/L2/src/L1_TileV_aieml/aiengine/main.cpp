@@ -31,11 +31,10 @@ TestGraph tile_v_graph;
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    tile_v_graph.init();
+    tile_v_graph.run(1);
+    tile_v_graph.end();
 
-	tile_v_graph.init();
-	tile_v_graph.run(1);
-	tile_v_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

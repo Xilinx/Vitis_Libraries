@@ -23,122 +23,95 @@ from Advanced Micro Devices, Inc.
 */
 #include <float_to_int/float_to_int.hpp>
 
-namespace us{
-namespace L1{
+namespace us {
+namespace L1 {
 
+template <unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void FloatToInt(adf::input_buffer<float>& input_vector, adf::output_buffer<int32>& output_vector) {
+    aie::vector<float, T_SIMD_DEPTH> op = aie::zeros<float, T_SIMD_DEPTH>();
+    aie::vector<int32, T_SIMD_DEPTH> res = aie::zeros<int32, T_SIMD_DEPTH>();
 
-template< unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void FloatToInt(adf::input_buffer< float >& input_vector, adf::output_buffer< int32 >& output_vector){
+    auto iter_in = aie::begin_vector<T_SIMD_DEPTH>(input_vector);
+    auto iter_out = aie::begin_vector<T_SIMD_DEPTH>(output_vector);
 
-	aie::vector< float, T_SIMD_DEPTH > op = aie::zeros< float, T_SIMD_DEPTH >();
-	aie::vector< int32, T_SIMD_DEPTH > res = aie::zeros< int32, T_SIMD_DEPTH >();
+    for (unsigned int i = 0; i < T_LEN; i += T_INCREMENT) chess_prepare_for_pipelining {
+            op = *iter_in;
+            res = aie::to_fixed(op, 0);
+            *iter_out = res;
 
-	auto iter_in = aie::begin_vector< T_SIMD_DEPTH >(input_vector);
-	auto iter_out = aie::begin_vector< T_SIMD_DEPTH >(output_vector);
-
-	for(unsigned int i = 0; i < T_LEN; i += T_INCREMENT)
-		chess_prepare_for_pipelining{
-
-		op = *iter_in;
-		res = aie::to_fixed(op, 0);
-		*iter_out = res;
-
-		iter_in++;
-		iter_out++;
-
-	}
-
+            iter_in++;
+            iter_out++;
+        }
 }
 
+template <unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void BfloatToInt16(adf::input_buffer<bfloat16>& input_vector, adf::output_buffer<int16>& output_vector) {
+    aie::vector<bfloat16, T_SIMD_DEPTH> op = aie::zeros<bfloat16, T_SIMD_DEPTH>();
+    aie::vector<int16, T_SIMD_DEPTH> res = aie::zeros<int16, T_SIMD_DEPTH>();
 
-template< unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void BfloatToInt16(adf::input_buffer< bfloat16 >& input_vector, adf::output_buffer< int16 >& output_vector){
-	aie::vector< bfloat16, T_SIMD_DEPTH > op = aie::zeros< bfloat16, T_SIMD_DEPTH >();
-	aie::vector< int16, T_SIMD_DEPTH > res = aie::zeros< int16, T_SIMD_DEPTH >();
+    auto iter_in = aie::begin_vector<T_SIMD_DEPTH>(input_vector);
+    auto iter_out = aie::begin_vector<T_SIMD_DEPTH>(output_vector);
 
-	auto iter_in = aie::begin_vector< T_SIMD_DEPTH >(input_vector);
-	auto iter_out = aie::begin_vector< T_SIMD_DEPTH >(output_vector);
+    for (unsigned int i = 0; i < T_LEN; i += T_INCREMENT) chess_prepare_for_pipelining {
+            op = *iter_in;
+            res = aie::to_fixed(op, 0);
+            *iter_out = res;
 
-	for(unsigned int i = 0; i < T_LEN; i += T_INCREMENT)
-		chess_prepare_for_pipelining{
-
-		op = *iter_in;
-		res = aie::to_fixed(op, 0);
-		*iter_out = res;
-		
-		iter_in++;
-		iter_out++;
-
-	}
+            iter_in++;
+            iter_out++;
+        }
 }
 
 //----------------------------------------------------------
 
-template< unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void FloatToIntInternalBuffer(adf::input_buffer< float >& input_vector, adf::output_buffer< int32 >& output_vector){
-	float* buffer_in = (float*)input_vector.data();
-	int32* buffer_out = (int32*)output_vector.data();
-	m_FloatToInt< T_LEN, T_INCREMENT, T_SIMD_DEPTH >(buffer_in, buffer_out);
-
+template <unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void FloatToIntInternalBuffer(adf::input_buffer<float>& input_vector, adf::output_buffer<int32>& output_vector) {
+    float* buffer_in = (float*)input_vector.data();
+    int32* buffer_out = (int32*)output_vector.data();
+    m_FloatToInt<T_LEN, T_INCREMENT, T_SIMD_DEPTH>(buffer_in, buffer_out);
 }
 
-template< unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void BfloatToInt16InternalBuffer(adf::input_buffer< float >& input_vector, adf::output_buffer< int32 >& output_vector){
-	bfloat16* buffer_in = (bfloat16*)input_vector.data();
-	int16* buffer_out = (int16*)output_vector.data();
-	m_BfloatToInt16< T_LEN, T_INCREMENT, T_SIMD_DEPTH >(buffer_in, buffer_out);
-
+template <unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void BfloatToInt16InternalBuffer(adf::input_buffer<float>& input_vector, adf::output_buffer<int32>& output_vector) {
+    bfloat16* buffer_in = (bfloat16*)input_vector.data();
+    int16* buffer_out = (int16*)output_vector.data();
+    m_BfloatToInt16<T_LEN, T_INCREMENT, T_SIMD_DEPTH>(buffer_in, buffer_out);
 }
 
-template< unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_FloatToInt(float *input_vector, int32 *output_vector){
+template <unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_FloatToInt(float* input_vector, int32* output_vector) {
+    aie::vector<float, T_SIMD_DEPTH> op = aie::zeros<float, T_SIMD_DEPTH>();
+    aie::vector<int32, T_SIMD_DEPTH> res = aie::zeros<int32, T_SIMD_DEPTH>();
 
-	aie::vector< float, T_SIMD_DEPTH > op = aie::zeros< float, T_SIMD_DEPTH >();
-	aie::vector< int32, T_SIMD_DEPTH > res = aie::zeros< int32, T_SIMD_DEPTH >();
+    auto iter_in = aie::begin_vector<T_SIMD_DEPTH>(input_vector);
+    auto iter_out = aie::begin_vector<T_SIMD_DEPTH>(output_vector);
 
-	auto iter_in = aie::begin_vector< T_SIMD_DEPTH >(input_vector);
-	auto iter_out = aie::begin_vector< T_SIMD_DEPTH >(output_vector);
+    for (unsigned int i = 0; i < T_LEN; i += T_INCREMENT) chess_prepare_for_pipelining {
+            op = *iter_in;
+            res = aie::to_fixed(op, 0);
+            *iter_out = res;
 
-	for(unsigned int i = 0; i < T_LEN; i += T_INCREMENT)
-		chess_prepare_for_pipelining{
-
-		op = *iter_in;
-		res = aie::to_fixed(op, 0);
-		*iter_out = res;
-
-		iter_in++;
-		iter_out++;
-
-	}
-
+            iter_in++;
+            iter_out++;
+        }
 }
 
-template< unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_BfloatToInt16(bfloat16 *input_vector, int16 *output_vector){
+template <unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_BfloatToInt16(bfloat16* input_vector, int16* output_vector) {
+    aie::vector<bfloat16, T_SIMD_DEPTH> op = aie::zeros<bfloat16, T_SIMD_DEPTH>();
+    aie::vector<int16, T_SIMD_DEPTH> res = aie::zeros<int16, T_SIMD_DEPTH>();
 
-	aie::vector< bfloat16, T_SIMD_DEPTH > op = aie::zeros< bfloat16, T_SIMD_DEPTH >();
-	aie::vector< int16, T_SIMD_DEPTH > res = aie::zeros< int16, T_SIMD_DEPTH >();
+    auto iter_in = aie::begin_vector<T_SIMD_DEPTH>(input_vector);
+    auto iter_out = aie::begin_vector<T_SIMD_DEPTH>(output_vector);
 
-	auto iter_in = aie::begin_vector< T_SIMD_DEPTH >(input_vector);
-	auto iter_out = aie::begin_vector< T_SIMD_DEPTH >(output_vector);
+    for (unsigned int i = 0; i < T_LEN; i += T_INCREMENT) chess_prepare_for_pipelining {
+            op = *iter_in;
+            res = aie::to_fixed(op, 0);
+            *iter_out = res;
 
-	for(unsigned int i = 0; i < T_LEN; i += T_INCREMENT)
-		chess_prepare_for_pipelining{
-
-		op = *iter_in;
-		res = aie::to_fixed(op, 0);
-		*iter_out = res;
-		
-		iter_in++;
-		iter_out++;
-
-	}
-
-}
-
-
+            iter_in++;
+            iter_out++;
+        }
 }
 }
-
-
-
+}

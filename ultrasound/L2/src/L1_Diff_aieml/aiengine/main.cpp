@@ -44,11 +44,10 @@ TestGraphDiffVV diff_graph;
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    diff_graph.init();
+    diff_graph.run(2);
+    diff_graph.end();
 
-	diff_graph.init();
-	diff_graph.run(2);
-	diff_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

@@ -31,11 +31,10 @@ TestGraph norm_axis_1_graph;
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    norm_axis_1_graph.init();
+    norm_axis_1_graph.run(2);
+    norm_axis_1_graph.end();
 
-	norm_axis_1_graph.init();
-	norm_axis_1_graph.run(2);
-	norm_axis_1_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

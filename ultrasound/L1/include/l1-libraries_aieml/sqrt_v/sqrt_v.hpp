@@ -28,56 +28,53 @@ from Advanced Micro Devices, Inc.
 #include <aie_api/utils.hpp>
 #include <type_traits>
 
-namespace us{
-namespace L1{
+namespace us {
+namespace L1 {
 
-template < typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
 inline void SqrtV(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
-
 
 // nested called
 
-template < typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
 inline void m_SqrtV(adf::input_buffer<int32>& input_vector, adf::output_buffer<int32>& output_vector);
 
-template < typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
 inline void m_SqrtV(adf::input_buffer<int16>& input_vector, adf::output_buffer<int16>& output_vector);
 
-template < typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
 inline void m_SqrtV(adf::input_buffer<float>& input_vector, adf::output_buffer<float>& output_vector);
 
-template < typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
 inline void m_SqrtV(adf::input_buffer<bfloat16>& input_vector, adf::output_buffer<bfloat16>& output_vector);
 
 //-----------------------------
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
 void SqrtVInternalBuffer(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
 
 // nested called
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_SqrtV(T *input_vector, T *output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_SqrtV(T* input_vector, T* output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_SqrtV(int32 *input_vector, int32 *output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_SqrtV(int32* input_vector, int32* output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_SqrtV(int16 *input_vector, int16 *output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_SqrtV(int16* input_vector, int16* output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_SqrtV(float *input_vector, float *output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_SqrtV(float* input_vector, float* output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_SqrtV(bfloat16 *input_vector, bfloat16 *output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_SqrtV(bfloat16* input_vector, bfloat16* output_vector);
 
 //-----------------------------
 
-//retrcompatibility
+// retrcompatibility
 
-
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void sqrtV(adf::input_buffer< T >& input_vector, adf::output_buffer< T >& output_vector);
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void sqrtV(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
 }
 }

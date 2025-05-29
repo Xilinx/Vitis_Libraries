@@ -31,11 +31,10 @@ TestGraph square_v_graph;
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    square_v_graph.init();
+    square_v_graph.run(2);
+    square_v_graph.end();
 
-	square_v_graph.init();
-	square_v_graph.run(2);
-	square_v_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

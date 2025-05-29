@@ -31,11 +31,10 @@ TestGraphCatmullRom catmull_rom_graph;
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    catmull_rom_graph.init();
+    catmull_rom_graph.run(1);
+    catmull_rom_graph.end();
 
-	catmull_rom_graph.init();
-	catmull_rom_graph.run(1);
-	catmull_rom_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

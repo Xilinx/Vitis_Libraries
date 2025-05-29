@@ -27,48 +27,47 @@ from Advanced Micro Devices, Inc.
 #include <aie_api/aie.hpp>
 #include <aie_api/utils.hpp>
 
-namespace us{
-namespace L1{
+namespace us {
+namespace L1 {
 
-template < typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
 inline void NormAxis1(adf::input_buffer<T>& input_matrix, adf::output_buffer<T>& output_vector);
 
 // nested called
 
-template < typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
 inline void m_NormAxis1(adf::input_buffer<int32>& input_matrix, adf::output_buffer<int32>& output_vector);
 
-template < typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
 inline void m_NormAxis1(adf::input_buffer<int16>& input_matrix, adf::output_buffer<int16>& output_vector);
 
-template < typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
 inline void m_NormAxis1(adf::input_buffer<float>& input_matrix, adf::output_buffer<float>& output_vector);
 
-template < typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
+template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
 inline void m_NormAxis1(adf::input_buffer<bfloat16>& input_matrix, adf::output_buffer<bfloat16>& output_vector);
 
 // --------------------
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
 void NormAxis1InternalBuffer(adf::input_buffer<T>& input_matrix, adf::output_buffer<T>& output_vector);
-
 
 // nested called
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_NormAxis1(T *input_matrix, T *output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_NormAxis1(T* input_matrix, T* output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_NormAxis1(int32 *input_matrix, int32 *output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_NormAxis1(int32* input_matrix, int32* output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_NormAxis1(int16 *input_matrix, int32 *output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_NormAxis1(int16* input_matrix, int32* output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_NormAxis1(float *input_matrix, float *output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_NormAxis1(float* input_matrix, float* output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_NormAxis1(bfloat16 *input_matrix, bfloat16 *output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_NormAxis1(bfloat16* input_matrix, bfloat16* output_vector);
 
 // --------------------
 
@@ -76,6 +75,5 @@ void m_NormAxis1(bfloat16 *input_matrix, bfloat16 *output_vector);
 
 template <typename T, const unsigned int T_LEN, const unsigned int T_INCREMENT, const unsigned T_SIMD_DEPTH>
 void norm_axis_1(adf::input_buffer<T>& input_matrix, adf::output_buffer<T>& output_vector);
-
 }
 }

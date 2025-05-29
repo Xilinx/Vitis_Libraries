@@ -23,23 +23,20 @@ from Advanced Micro Devices, Inc.
 */
 #include <hls_stream.h>
 
-extern "C"{
-
+extern "C" {
 
 //#define T float
 #define int32 int
 #define SIMD_DEPTH 4
 
-void PLDelayDirectionIn(hls::stream<T>& s, int size){
-
+void PLDelayDirectionIn(hls::stream<T>& s, int size) {
 #if SIMD_DEPTH == 4
-	T ref[SIMD_DEPTH] = {0, 0, 1, 0};
+    T ref[SIMD_DEPTH] = {0, 0, 1, 0};
 #endif
 
-    for(unsigned i = 0; i < size; ++i){
-#pragma HLS PIPELINE II=1
+    for (unsigned i = 0; i < size; ++i) {
+#pragma HLS PIPELINE II = 1
         s.write(ref[i % SIMD_DEPTH]);
     }
 }
-
 }

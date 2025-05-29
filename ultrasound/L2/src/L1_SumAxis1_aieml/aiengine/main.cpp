@@ -31,11 +31,10 @@ TestGraph sum_axis_1_graph;
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    sum_axis_1_graph.init();
+    sum_axis_1_graph.run(2);
+    sum_axis_1_graph.end();
 
-	sum_axis_1_graph.init();
-	sum_axis_1_graph.run(2);
-	sum_axis_1_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

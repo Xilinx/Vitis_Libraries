@@ -23,91 +23,90 @@ from Advanced Micro Devices, Inc.
 */
 #include "sum.hpp"
 
-namespace us{
-namespace L1{
+namespace us {
+namespace L1 {
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void Sum(adf::input_buffer< T >& input_vector_1, adf::input_buffer< T >& input_vector_2, adf::output_buffer< T >& output_vector){
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void Sum(adf::input_buffer<T>& input_vector_1,
+         adf::input_buffer<T>& input_vector_2,
+         adf::output_buffer<T>& output_vector) {
+    aie::vector<T, T_SIMD_DEPTH> op_1 = aie::zeros<T, T_SIMD_DEPTH>();
+    aie::vector<T, T_SIMD_DEPTH> op_2 = aie::zeros<T, T_SIMD_DEPTH>();
+    aie::vector<T, T_SIMD_DEPTH> res = aie::zeros<T, T_SIMD_DEPTH>();
 
-	aie::vector< T, T_SIMD_DEPTH > op_1 = aie::zeros< T, T_SIMD_DEPTH >();
-	aie::vector< T, T_SIMD_DEPTH > op_2 = aie::zeros< T, T_SIMD_DEPTH >();
-	aie::vector< T, T_SIMD_DEPTH > res = aie::zeros< T, T_SIMD_DEPTH >();
+    auto iter_in_1 = aie::begin_vector<T_SIMD_DEPTH>(input_vector_1);
+    auto iter_in_2 = aie::begin_vector<T_SIMD_DEPTH>(input_vector_2);
+    auto iter_out = aie::begin_vector<T_SIMD_DEPTH>(output_vector);
 
-	auto iter_in_1 = aie::begin_vector< T_SIMD_DEPTH >(input_vector_1);
-	auto iter_in_2 = aie::begin_vector< T_SIMD_DEPTH >(input_vector_2);
-	auto iter_out = aie::begin_vector< T_SIMD_DEPTH >(output_vector);
+    for (unsigned int i = 0; i < T_LEN; i += T_INCREMENT) chess_prepare_for_pipelining {
+            op_1 = *iter_in_1;
+            op_2 = *iter_in_2;
 
-	for(unsigned int i = 0; i < T_LEN; i += T_INCREMENT)
-		chess_prepare_for_pipelining {
-		op_1 = *iter_in_1;
-		op_2 = *iter_in_2;
+            res = aie::add(op_1, op_2);
 
-		res = aie::add(op_1, op_2);
+            *iter_out = res;
 
-		*iter_out = res;
-
-		iter_out++;
-		iter_in_1++;
-		iter_in_2++;
-	}
-
+            iter_out++;
+            iter_in_1++;
+            iter_in_2++;
+        }
 }
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void SumInternalBuffer(adf::input_buffer< T >& input_vector_1, adf::input_buffer< T >& input_vector_2, adf::output_buffer< T >& output_vector){
-
-	T* buffer_in_1 = (T*)input_vector_1.data();
-	T* buffer_in_2 = (T*)input_vector_2.data();
-	T* buffer_out = (T*)output_vector.data();
-	m_Sum< T, T_LEN, T_INCREMENT, T_SIMD_DEPTH >(buffer_in_1, buffer_in_2, buffer_out);
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void SumInternalBuffer(adf::input_buffer<T>& input_vector_1,
+                       adf::input_buffer<T>& input_vector_2,
+                       adf::output_buffer<T>& output_vector) {
+    T* buffer_in_1 = (T*)input_vector_1.data();
+    T* buffer_in_2 = (T*)input_vector_2.data();
+    T* buffer_out = (T*)output_vector.data();
+    m_Sum<T, T_LEN, T_INCREMENT, T_SIMD_DEPTH>(buffer_in_1, buffer_in_2, buffer_out);
 }
 
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_Sum(T* input_vector_1, T* input_vector_2, T* output_vector) {
+    aie::vector<T, T_SIMD_DEPTH> op_1 = aie::zeros<T, T_SIMD_DEPTH>();
+    aie::vector<T, T_SIMD_DEPTH> op_2 = aie::zeros<T, T_SIMD_DEPTH>();
+    aie::vector<T, T_SIMD_DEPTH> res = aie::zeros<T, T_SIMD_DEPTH>();
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_Sum(T *input_vector_1, T *input_vector_2, T *output_vector){
+    auto iter_in_1 = aie::begin_vector<T_SIMD_DEPTH>(input_vector_1);
+    auto iter_in_2 = aie::begin_vector<T_SIMD_DEPTH>(input_vector_2);
+    auto iter_out = aie::begin_vector<T_SIMD_DEPTH>(output_vector);
 
-	aie::vector< T, T_SIMD_DEPTH > op_1 = aie::zeros< T, T_SIMD_DEPTH >();
-	aie::vector< T, T_SIMD_DEPTH > op_2 = aie::zeros< T, T_SIMD_DEPTH >();
-	aie::vector< T, T_SIMD_DEPTH > res = aie::zeros< T, T_SIMD_DEPTH >();
+    for (unsigned int i = 0; i < T_LEN; i += T_INCREMENT) chess_prepare_for_pipelining {
+            op_1 = *iter_in_1;
+            op_2 = *iter_in_2;
 
-	auto iter_in_1 = aie::begin_vector< T_SIMD_DEPTH >(input_vector_1);
-	auto iter_in_2 = aie::begin_vector< T_SIMD_DEPTH >(input_vector_2);
-	auto iter_out = aie::begin_vector< T_SIMD_DEPTH >(output_vector);
+            res = aie::add(op_1, op_2);
 
-	for(unsigned int i = 0; i < T_LEN; i += T_INCREMENT)
-		chess_prepare_for_pipelining {
-		op_1 = *iter_in_1;
-		op_2 = *iter_in_2;
+            *iter_out = res;
 
-		res = aie::add(op_1, op_2);
-
-		*iter_out = res;
-
-		iter_out++;
-		iter_in_2++;
-		iter_in_1++;
-	}
-
+            iter_out++;
+            iter_in_2++;
+            iter_in_1++;
+        }
 }
-
 
 // retrocompatibility
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void sumVV(adf::input_buffer< T >& input_vector_1, adf::input_buffer< T >& input_vector_2, adf::output_buffer< T >& output_vector){
-	Sum<T, T_LEN, T_INCREMENT, T_SIMD_DEPTH>(input_vector_1, input_vector_2, output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void sumVV(adf::input_buffer<T>& input_vector_1,
+           adf::input_buffer<T>& input_vector_2,
+           adf::output_buffer<T>& output_vector) {
+    Sum<T, T_LEN, T_INCREMENT, T_SIMD_DEPTH>(input_vector_1, input_vector_2, output_vector);
 }
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void sumMM(adf::input_buffer< T >& input_matrix_1, adf::input_buffer< T >& input_matrix_2, adf::output_buffer< T >& output_matrix){
-	Sum<T, T_LEN, T_INCREMENT, T_SIMD_DEPTH>(input_matrix_1, input_matrix_2, output_matrix);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void sumMM(adf::input_buffer<T>& input_matrix_1,
+           adf::input_buffer<T>& input_matrix_2,
+           adf::output_buffer<T>& output_matrix) {
+    Sum<T, T_LEN, T_INCREMENT, T_SIMD_DEPTH>(input_matrix_1, input_matrix_2, output_matrix);
 }
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void sumVS(adf::input_buffer< T >& input_vector, adf::input_buffer< T >& input_scalar, adf::output_buffer< T >& output_vector){
-	Sum<T, T_LEN, T_INCREMENT, T_SIMD_DEPTH>(input_vector, input_scalar, output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void sumVS(adf::input_buffer<T>& input_vector,
+           adf::input_buffer<T>& input_scalar,
+           adf::output_buffer<T>& output_vector) {
+    Sum<T, T_LEN, T_INCREMENT, T_SIMD_DEPTH>(input_vector, input_scalar, output_vector);
 }
-
 }
 }

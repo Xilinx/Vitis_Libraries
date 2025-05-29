@@ -34,47 +34,43 @@ from Advanced Micro Devices, Inc.
 #include "l1-libraries_aieml/cos_v/cos_v.hpp"
 #include "l1-libraries_aieml/less_or_equal_than_s/less_or_equal_than_s.hpp"
 
-namespace us{
-namespace L2{
+namespace us {
+namespace L2 {
 
-
-template< typename T >
+template <typename T>
 void Apodization1(
 
-		adf::input_buffer< T >& image_points,
-		adf::input_buffer< T >& apodization_reference,
-		adf::input_buffer< T >& apodization_direction,
+    adf::input_buffer<T>& image_points,
+    adf::input_buffer<T>& apodization_reference,
+    adf::input_buffer<T>& apodization_direction,
 
-		adf::output_buffer< T >& apo_depth_output
+    adf::output_buffer<T>& apo_depth_output
 
-);
+    );
 
-template< typename T >
+template <typename T>
 void Apodization2(
 
-		adf::input_buffer< T >& apo_depth,
-		adf::input_buffer< T >& two,
-		adf::input_buffer< T >& apo_distance,
-		adf::input_buffer< T >& f_number,
-		adf::input_buffer< T >& one,
+    adf::input_buffer<T>& apo_depth,
+    adf::input_buffer<T>& two,
+    adf::input_buffer<T>& apo_distance,
+    adf::input_buffer<T>& f_number,
+    adf::input_buffer<T>& one,
 
-		adf::output_buffer< T >& index_output
+    adf::output_buffer<T>& index_output
 
-);
+    );
 
-template< typename T >
+template <typename T>
 void ApodizationOutput(
 
-		adf::input_buffer< T >& index_from_apo_2,
-		adf::input_buffer< T >& one,
-		adf::input_buffer< T >& pi,
-		adf::input_buffer< T >& two,
+    adf::input_buffer<T>& index_from_apo_2,
+    adf::input_buffer<T>& one,
+    adf::input_buffer<T>& pi,
+    adf::input_buffer<T>& two,
 
-		adf::output_buffer< T >& output_hanning
+    adf::output_buffer<T>& output_hanning
 
-);
-
+    );
 }
 }
-
-

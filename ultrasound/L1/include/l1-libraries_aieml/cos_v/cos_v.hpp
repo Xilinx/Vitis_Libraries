@@ -28,56 +28,53 @@ from Advanced Micro Devices, Inc.
 #include <aie_api/utils.hpp>
 #include <type_traits>
 
-namespace us{
-namespace L1{
+namespace us {
+namespace L1 {
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void CosV(adf::input_buffer< T >& input_vector, adf::output_buffer< T >& output_vector);
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void CosV(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
 
 // nested called
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-inline void m_CosV(adf::input_buffer< int32 >& input_vector, adf::output_buffer< int32 >& output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+inline void m_CosV(adf::input_buffer<int32>& input_vector, adf::output_buffer<int32>& output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-inline void m_CosV(adf::input_buffer< int16 >& input_vector, adf::output_buffer< int16 >& output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+inline void m_CosV(adf::input_buffer<int16>& input_vector, adf::output_buffer<int16>& output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-inline void m_CosV(adf::input_buffer< float >& input_vector, adf::output_buffer< float >& output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+inline void m_CosV(adf::input_buffer<float>& input_vector, adf::output_buffer<float>& output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-inline void m_CosV(adf::input_buffer< bfloat16 >& input_vector, adf::output_buffer< bfloat16 >& output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+inline void m_CosV(adf::input_buffer<bfloat16>& input_vector, adf::output_buffer<bfloat16>& output_vector);
 
 //----------------------------------------------
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void CosVInternalBuffer(adf::input_buffer< T >& input_vector, adf::output_buffer< T >& output_vector);
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void CosVInternalBuffer(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
 
 // nested called
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_CosV(T *input_vector, T *output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_CosV(T* input_vector, T* output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_CosV(int32 *input_vector, int32 *output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_CosV(int32* input_vector, int32* output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_CosV(int16 *input_vector, int16 *output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_CosV(int16* input_vector, int16* output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_CosV(float *input_vector, float *output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_CosV(float* input_vector, float* output_vector);
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_CosV(bfloat16 *input_vector, bfloat16 *output_vector);
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_CosV(bfloat16* input_vector, bfloat16* output_vector);
 
 //----------------------------------------------
 
 // retrocompatibility
 
-template< typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void cosV(adf::input_buffer< T >& input_vector, adf::output_buffer< T >& output_vector);
-
+template <typename T, unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void cosV(adf::input_buffer<T>& input_vector, adf::output_buffer<T>& output_vector);
 }
 }

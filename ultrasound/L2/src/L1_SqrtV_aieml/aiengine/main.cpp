@@ -31,11 +31,10 @@ TestGraph sqrt_v_graph;
 #if (defined(__AIESIM__) || defined(__X86SIM__) || defined(__ADF_FRONTEND__))
 
 int main(void) {
+    sqrt_v_graph.init();
+    sqrt_v_graph.run(2);
+    sqrt_v_graph.end();
 
-	sqrt_v_graph.init();
-	sqrt_v_graph.run(2);
-	sqrt_v_graph.end();
-
-	return 0;
+    return 0;
 }
 #endif

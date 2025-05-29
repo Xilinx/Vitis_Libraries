@@ -27,29 +27,27 @@ from Advanced Micro Devices, Inc.
 #include <aie_api/aie.hpp>
 #include <aie_api/utils.hpp>
 
-namespace us{
-namespace L1{
+namespace us {
+namespace L1 {
 
+template <unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void FloatToInt(adf::input_buffer<float>& input_vector, adf::output_buffer<int32>& output_vector);
 
-template< unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void FloatToInt(adf::input_buffer< float >& input_vector, adf::output_buffer< int32 >& output_vector);
-
-template< unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void BfloatToInt16(adf::input_buffer< bfloat16 >& input_vector, adf::output_buffer< int16 >& output_vector);
+template <unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void BfloatToInt16(adf::input_buffer<bfloat16>& input_vector, adf::output_buffer<int16>& output_vector);
 
 //----------------------------------------------------------
 
-template< unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void FloatToIntInternalBuffer(adf::input_buffer< float >& input_vector, adf::output_buffer< int32 >& output_vector);
+template <unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void FloatToIntInternalBuffer(adf::input_buffer<float>& input_vector, adf::output_buffer<int32>& output_vector);
 
-template< unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void BfloatToInt16InternalBuffer(adf::input_buffer< bfloat16 >& input_vector, adf::output_buffer< int16 >& output_vector);
+template <unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void BfloatToInt16InternalBuffer(adf::input_buffer<bfloat16>& input_vector, adf::output_buffer<int16>& output_vector);
 
-template< unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_FloatToInt(float *input_vector, int32 *output_vector);
+template <unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_FloatToInt(float* input_vector, int32* output_vector);
 
-template< unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH >
-void m_BfloatToInt16(bfloat16 *input_vector, int16 *output_vector);
-
+template <unsigned int T_LEN, unsigned int T_INCREMENT, unsigned int T_SIMD_DEPTH>
+void m_BfloatToInt16(bfloat16* input_vector, int16* output_vector);
 }
 }
