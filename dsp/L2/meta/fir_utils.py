@@ -51,16 +51,6 @@ def fn_get_coeff_size(args):
     return coeff_size
 
 
-def fn_get_fir_length_sym(args):
-    use_coeff_reload = args["TP_USE_COEFF_RELOAD"]
-    if use_coeff_reload:
-        fir_length = args["TP_FIR_LEN"]
-    else:
-        coeff_size = fn_get_coeff_size(args)  # 16
-        fir_length = (coeff_size) * 2
-    return fir_length
-
-
 def fn_get_fir_length(args):
     use_coeff_reload = args["TP_USE_COEFF_RELOAD"]
     if use_coeff_reload:

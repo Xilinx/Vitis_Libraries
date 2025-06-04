@@ -38,7 +38,7 @@ def generate_graph_vmc(configuration, ip_name, graph_name):
         if "_hb" in ip_name:
             config_args["TP_FIR_LEN"] = fn_get_fir_length_hb(config_args)
         elif "_sym" in ip_name:
-            config_args["TP_FIR_LEN"] = fn_get_fir_length_sym(config_args)
+            config_args["TP_FIR_LEN"] = config_args["TP_FIR_LEN"]
         elif "_tdm" in ip_name:
             config_args["TP_FIR_LEN"] = config_args["TP_FIR_LEN"]
         else:
@@ -59,7 +59,7 @@ def validate_all_vmc(configuration, ip_name):
         if "_hb" in ip_name:
             config_args["TP_FIR_LEN"] = fn_get_fir_length_hb(config_args)
         elif "_sym" in ip_name:
-            config_args["TP_FIR_LEN"] = fn_get_fir_length_sym(config_args)
+            config_args["TP_FIR_LEN"] = config_args["TP_FIR_LEN"]
         elif "_tdm" in ip_name:
             config_args["TP_FIR_LEN"] = config_args["TP_FIR_LEN"]
         else:
