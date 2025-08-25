@@ -1,109 +1,109 @@
 [
     {
-        "lib": "blas", 
+        "lib": "blas",
         "dependsOn": [
             "hpc"
         ]
-    }, 
+    },
     {
-        "lib": "codec", 
+        "lib": "codec",
         "dependsOn": [
-            "utils", 
-            "database", 
+            "utils",
+            "database",
             "quantitative_finance"
         ]
-    }, 
+    },
     {
-        "lib": "data_analytics", 
+        "lib": "data_analytics",
         "dependsOn": [
-            "utils", 
-            "data_compression", 
-            "security", 
-            "graph", 
+            "utils",
+            "data_compression",
+            "security",
+            "graph",
             "database"
         ]
-    }, 
+    },
     {
-        "lib": "data_compression", 
+        "lib": "data_compression",
         "dependsOn": [
             "security"
         ]
-    }, 
+    },
     {
-        "lib": "data_mover", 
+        "lib": "data_mover",
         "dependsOn": [
             "utils"
         ]
-    }, 
+    },
     {
-        "lib": "database", 
+        "lib": "database",
         "dependsOn": [
             "utils"
         ]
-    }, 
+    },
     {
-        "lib": "dsp", 
+        "lib": "dsp",
         "dependsOn": [
-            "utils", 
+            "utils",
             "data_mover"
         ]
-    }, 
+    },
     {
-        "lib": "graph", 
+        "lib": "graph",
         "dependsOn": [
-            "utils", 
-            "database", 
+            "utils",
+            "database",
             "quantitative_finance"
         ]
-    }, 
+    },
     {
-        "lib": "hpc", 
+        "lib": "hpc",
         "dependsOn": [
-            "blas", 
+            "blas",
             "sparse"
         ]
-    }, 
+    },
     {
-        "lib": "motor_control", 
+        "lib": "motor_control",
         "dependsOn": []
-    }, 
+    },
     {
-        "lib": "quantitative_finance", 
+        "lib": "quantitative_finance",
         "dependsOn": [
-            "utils", 
+            "utils",
             "solver"
         ]
-    }, 
+    },
     {
-        "lib": "security", 
+        "lib": "security",
         "dependsOn": [
             "utils"
         ]
-    }, 
+    },
     {
-        "lib": "solver", 
+        "lib": "solver",
         "dependsOn": [
-            "utils", 
+            "utils",
             "dsp"
         ]
-    }, 
+    },
     {
-        "lib": "sparse", 
+        "lib": "sparse",
         "dependsOn": [
-            "blas", 
+            "blas",
             "hpc"
         ]
-    }, 
+    },
     {
-        "lib": "ultrasound", 
+        "lib": "ultrasound",
         "dependsOn": []
-    }, 
+    },
     {
-        "lib": "utils", 
+        "lib": "utils",
         "dependsOn": []
-    }, 
+    },
     {
-        "lib": "vision", 
+        "lib": "vision",
         "dependsOn": []
     }
 ]

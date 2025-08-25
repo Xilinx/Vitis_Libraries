@@ -90,15 +90,14 @@ def update_TT_OUT_DATA(args):
 def fn_update_TT_OUT_DATA(AIE_VARIANT, TT_DATA):
     legal_set_TT_OUT_DATA = comFirUpd.fn_update_tt_data(AIE_VARIANT)["enum"]
 
-    legal_set_TT_OUT_DATA = comFirUpd.fn_greater_precision_data_in_out_update(
-        TT_DATA, legal_set_TT_OUT_DATA.copy()
-    )
     legal_set_TT_OUT_DATA = fn_float_check_update(TT_DATA, legal_set_TT_OUT_DATA.copy())
     legal_set_TT_OUT_DATA = fn_complex_check_update(
         TT_DATA, legal_set_TT_OUT_DATA.copy()
     )
     legal_set_TT_OUT_DATA = fn_int_check_update(TT_DATA, legal_set_TT_OUT_DATA.copy())
-    legal_set_TT_OUT_DATA = fn_integer_check_update(TT_DATA, legal_set_TT_OUT_DATA.copy())
+    legal_set_TT_OUT_DATA = fn_integer_check_update(
+        TT_DATA, legal_set_TT_OUT_DATA.copy()
+    )
     if TT_DATA == "cfloat":
         legal_set_TT_OUT_DATA = remove_from_set(["float"], legal_set_TT_OUT_DATA)
 
@@ -128,10 +127,12 @@ def update_TT_COEFF(args):
     TT_DATA = args["TT_DATA"]
     return fn_update_tt_coeff(AIE_VARIANT, TT_DATA)
 
+
 def fn_update_tt_coeff(AIE_VARIANT, TT_DATA):
-    param_dict=comFirUpd.fn_update_tt_coeff(AIE_VARIANT, TT_DATA)
+    param_dict = comFirUpd.fn_update_tt_coeff(AIE_VARIANT, TT_DATA)
     param_dict["enum"] = fn_integer_check_update(TT_DATA, param_dict["enum"].copy())
     return param_dict
+
 
 def validate_TT_COEFF(args):
     AIE_VARIANT = args["AIE_VARIANT"]
@@ -360,7 +361,9 @@ def fn_update_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_TDM_CHANNELS, TP_FIR_LEN
     legal_set_ssr = find_divisors(TP_TDM_CHANNELS / lanes, TP_SSR_max)
 
     for ssr in legal_set_ssr.copy():
-        param_dict_casc_len=fn_update_TP_CASC_LEN(TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, ssr)
+        param_dict_casc_len = fn_update_TP_CASC_LEN(
+            TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, ssr
+        )
         if "enum" in param_dict_casc_len and param_dict_casc_len["enum"] == []:
             legal_set_ssr.remove(ssr)
 
@@ -375,11 +378,17 @@ def validate_TP_SSR(args):
     TP_TDM_CHANNELS = args["TP_TDM_CHANNELS"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_SSR = args["TP_SSR"]
-    return fn_validate_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_TDM_CHANNELS, TP_FIR_LEN, TP_SSR)
+    return fn_validate_TP_SSR(
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_TDM_CHANNELS, TP_FIR_LEN, TP_SSR
+    )
 
 
-def fn_validate_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_TDM_CHANNELS, TP_FIR_LEN, TP_SSR):
-    param_dict = fn_update_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_TDM_CHANNELS, TP_FIR_LEN)
+def fn_validate_TP_SSR(
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_TDM_CHANNELS, TP_FIR_LEN, TP_SSR
+):
+    param_dict = fn_update_TP_SSR(
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_TDM_CHANNELS, TP_FIR_LEN
+    )
     return validate_legal_set(param_dict["enum"], "TP_SSR", TP_SSR)
 
 
@@ -393,31 +402,43 @@ def update_TP_CASC_LEN(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TP_TDM_CHANNELS = args["TP_TDM_CHANNELS"]
     TP_SSR = args["TP_SSR"]
-    return fn_update_TP_CASC_LEN(TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, TP_SSR)
+    return fn_update_TP_CASC_LEN(
+        TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, TP_SSR
+    )
 
 
-def fn_update_TP_CASC_LEN(TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, TP_SSR):
+def fn_update_TP_CASC_LEN(
+    TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, TP_SSR
+):
     fir_len = int(calc_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT))
     TP_CASC_LEN_max_int = min(TP_CASC_LEN_max, fir_len)
 
-    kMaxTapsPerKernel=k_data_memory_bytes[AIE_VARIANT]/com.fn_size_by_byte(TT_COEFF)
-    TP_CASC_LEN_min_taps_per_kernel=((fir_len * TP_TDM_CHANNELS) / TP_SSR) / kMaxTapsPerKernel
+    kMaxTapsPerKernel = k_data_memory_bytes[AIE_VARIANT] / com.fn_size_by_byte(TT_COEFF)
+    TP_CASC_LEN_min_taps_per_kernel = (
+        (fir_len * TP_TDM_CHANNELS) / TP_SSR
+    ) / kMaxTapsPerKernel
 
-    if TP_CASC_LEN_min_taps_per_kernel%1 == 0:
-        TP_CASC_LEN_min_taps_per_kernel=int(TP_CASC_LEN_min_taps_per_kernel)
+    if TP_CASC_LEN_min_taps_per_kernel % 1 == 0:
+        TP_CASC_LEN_min_taps_per_kernel = int(TP_CASC_LEN_min_taps_per_kernel)
     else:
-        TP_CASC_LEN_min_taps_per_kernel=int((TP_CASC_LEN_min_taps_per_kernel+1)//1) #ceiling the result
-        
+        TP_CASC_LEN_min_taps_per_kernel = int(
+            (TP_CASC_LEN_min_taps_per_kernel + 1) // 1
+        )  # ceiling the result
+
     TP_CASC_LEN_min_int = max(TP_CASC_LEN_min_taps_per_kernel, TP_CASC_LEN_min)
-    
+
     legal_set_casc_len_temp1 = list(range(TP_CASC_LEN_min_int, TP_CASC_LEN_max_int + 1))
     legal_set_casc_len_temp2 = comFirUpd.fn_eliminate_casc_len_min_fir_len_each_kernel(
         legal_set_casc_len_temp1.copy(), TP_FIR_LEN, TP_SSR=1
     )
 
     param_dict = {"name": "TP_CASC_LEN"}
-    if (legal_set_casc_len_temp1 == legal_set_casc_len_temp2) and legal_set_casc_len_temp1 != []:
-        param_dict.update({"minimum": TP_CASC_LEN_min_int, "maximum": TP_CASC_LEN_max_int})
+    if (
+        legal_set_casc_len_temp1 == legal_set_casc_len_temp2
+    ) and legal_set_casc_len_temp1 != []:
+        param_dict.update(
+            {"minimum": TP_CASC_LEN_min_int, "maximum": TP_CASC_LEN_max_int}
+        )
     else:
         param_dict.update({"enum": legal_set_casc_len_temp2})
     return param_dict
@@ -436,8 +457,12 @@ def validate_TP_CASC_LEN(args):
     )
 
 
-def fn_validate_TP_CASC_LEN(TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, TP_SSR, TP_CASC_LEN):
-    param_dict = fn_update_TP_CASC_LEN(TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, TP_SSR)
+def fn_validate_TP_CASC_LEN(
+    TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, TP_SSR, TP_CASC_LEN
+):
+    param_dict = fn_update_TP_CASC_LEN(
+        TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, TP_SSR
+    )
     if "enum" in param_dict:
         return validate_legal_set(param_dict["enum"], "TP_CASC_LEN", TP_CASC_LEN)
     else:
@@ -515,14 +540,12 @@ def fn_update_TP_INPUT_WINDOW_VSIZE(
         (fnNumLanes(TT_DATA, TT_COEFF, tpApiInt, AIE_VARIANT))
         if tpApiInt == API_BUFFER
         # Need to take unrolloing into account
-        else (
-            fnNumLanes(TT_DATA, TT_COEFF, tpApiInt, AIE_VARIANT) * streamRptFactor
-        )
+        else (fnNumLanes(TT_DATA, TT_COEFF, tpApiInt, AIE_VARIANT) * streamRptFactor)
     )
 
     factor_ws = find_lcm(TP_SSR * windowSizeMultiplier, TP_TDM_CHANNELS)
 
-    TP_INPUT_WINDOW_VSIZE_min_int=CEIL(TP_INPUT_WINDOW_VSIZE_min, factor_ws)
+    TP_INPUT_WINDOW_VSIZE_min_int = CEIL(TP_INPUT_WINDOW_VSIZE_min, factor_ws)
 
     param_dict = {
         "name": "TP_INPUT_WINDOW_VSIZE",

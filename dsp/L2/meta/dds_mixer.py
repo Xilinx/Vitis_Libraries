@@ -541,7 +541,7 @@ def gen_ports_code(args):
     )
     out_ports = f"  std::array<adf::port<output>, {TP_SSR}> out;\n"
 
-    return in1_ports + in2_ports + in3_ports + out_ports  # concat strings
+    return in1_ports + in2_ports + in3_ports + in4_ports + out_ports  # concat strings
 
 
 def gen_ports_connections(args):
