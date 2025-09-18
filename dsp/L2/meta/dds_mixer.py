@@ -493,17 +493,17 @@ def info_ports(args):
     if TP_USE_PHASE_RELOAD == 1:
         if TP_PHASE_RELOAD_API == 0:
             in3_ports = com.get_parameter_port_info(
-                "PhaseRTP", "in", "int32", TP_SSR, 1, "async"
+                "PhaseRTP", "in", "uint32", TP_SSR, 1, "async"
             )
         else:
             in3_ports = com.get_parameter_port_info(
-                "PhaseRTP", "in", "int32", TP_SSR, 1
+                "PhaseRTP", "in", "uint32", TP_SSR, 1
             )
     else:
         in3_ports = []
     if TP_USE_PHASE_INC_RELOAD == 1:
         in4_ports = com.get_parameter_port_info(
-            "PhaseIncRTP", "in", "int32", TP_SSR, 1, "async"
+            "PhaseIncRTP", "in", "uint32", TP_SSR, 1, "async"
         )
     else:
         in4_ports = []
