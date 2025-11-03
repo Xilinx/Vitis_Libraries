@@ -1,9 +1,7 @@
 [
     {
         "lib": "blas", 
-        "dependsOn": [
-            "hpc"
-        ]
+        "dependsOn": []
     }, 
     {
         "lib": "codec", 

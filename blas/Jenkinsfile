@@ -1,3 +1,2 @@
 @Library('pipeline-library')_
-VitisLibPipeline ( libname:'xf_blas',
-                   upstream_dependencies:'xf_hpc,next,../hpc')
+VitisLibPipeline ( libname:'xf_blas' )
