@@ -1,17 +1,18 @@
 .. 
-   Copyright 2019-2021 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 .. meta::
    :xlnxdocumentclass: Document
@@ -28,16 +29,14 @@ Requirements
 Software Platform
 ~~~~~~~~~~~~~~~~~
 
-Supported operating systems are RHEL/CentOS 7.4, 7.5 and Ubuntu 16.04.4 LTS, 18.04.1 LTS.
+Supported operating systems are HEL8.10, RHEL9.2,RHEL9.3,RHEL9.4,RHEL9.5 and Ubuntu  22.04.3 LTS, 22.04.4 LTS, 22.04.5 LTS.
 
-*GCC 5.0 or above* is required for C++11/C++14 support.
-With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
-`devtoolset-6 <https://www.softwarecollections.org/en/scls/rhscl/devtoolset-6/>`_.
+And C++14 should be enabled during compilation.
 
 Development Tools
 ~~~~~~~~~~~~~~~~~
 
-This library is designed to work with AMD Vitis |trade| 2022.2,
+This library is designed to work with AMD Vitis |trade| 2022.2 and later,
 and a matching version of XRT should be installed.
 
 

@@ -10,15 +10,13 @@ Check the [comprehensive HTML document](https://docs.xilinx.com/r/en-US/Vitis_Li
 
 ### Software Platform
 
-Supported operating systems are RHEL/CentOS 7.4, 7.5 and Ubuntu 16.04.4 LTS, 18.04.1 LTS.
+Supported operating systems are RHEL8.10, RHEL9.2,RHEL9.3,RHEL9.4,RHEL9.5 and Ubuntu 22.04.3 LTS, 22.04.4 LTS, 22.04.5 LTS.
 
-*GCC 5.0 or above* is required for C++11/C++14 support.
-With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
-[devtoolset-6](https://www.softwarecollections.org/en/scls/rhscl/devtoolset-6/).
+And C++14 should be enabled during compilation.
 
 ### Development Tools
 
-This library is designed to work with Vitis 2022.2,
+This library is designed to work with Vitis 2022.2 and later,
 and a matching version of XRT should be installed.
 
 ## Source Files and Application Development
@@ -52,7 +50,7 @@ Recommended design flow is shown as follows:
 Setup the build environment using the Vitis script, and set the installation folder of platform files via `PLATFORM_REPO_PATHS` variable.
 
 ```console
-source /opt/xilinx/Vitis/2022.2/settings64.sh
+source /opt/xilinx/2025.2/Vitis/settings64.sh
 export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 ```
 
@@ -68,20 +66,23 @@ The recommend flow to evaluate and test L1 components is described as follows us
 A top level C/C++ testbench (typically `algorithm_name.cpp`) prepares the input data, passes them to the design under test,
 then performs any output data post processing and validation checks.
 
-A Makefile is used to drive this flow with available steps including:
+A Makefile is used to drive this flow with `make run TARGET=<TARGET> PLATFORM=<PLATFORM>`
 
-* `CSIM` (high level simulation),
-* `CSYNTH` (high level synthesis to RTL),
-* `COSIM` (cosimulation between software testbench and generated RTL),
-* `VIVADO_SYN` (synthesis by Vivado) and
-* `VIVADO_IMPL` (implementation by Vivado).
+`TARGET` can be any of the following values:
+
+- `csim` (high level simulation)
+- `csynth` (high level synthesis to RTL)
+- `cosim` (cosimulation between software testbench and generated RTL)
+- `vivado_syn` (synthesis by Vivado)
+- `vivado_impl` (implementation by Vivado)
 
 The flow is launched from the shell by calling `make` with variables set as in the example below:
 
 ```console
-cd L1/tests/specific_algorithm/
-make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 \
-         PLATFORM=/path/to/xilinx_u200_xdma_201830_2.xpfm
+    . /opt/xilinx/xrt/setup.sh
+    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
+    cd L1/tests/specific_algorithm/
+    make run TARGET=csim  PLATFORM=u250_xdma_201830_1 # Only run C++ simulation on U250 card
 ```
 
 To enable more than C++ simulation, just switch other steps to `1` in `make` command line.
@@ -97,7 +98,7 @@ The output files of interest can be located at the location of the test project 
 Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
 
     Copyright (C) 2019-2022, Xilinx, Inc.
-    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+    Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
