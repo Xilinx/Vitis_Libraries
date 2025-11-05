@@ -32,7 +32,8 @@ one.
 
 ## Copyright and Trademark Notice; Disclaimer
 
-(c) Copyright 2019 Xilinx, Inc.
+Copyright (C) 2019-2022, Xilinx, Inc.
+Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 
 Xilinx, the Xilinx logo, Artix, ISE, Kintex, Spartan, Virtex, Zynq, and other designated brands included herein
 are trademarks of Xilinx in the United States and other countries.
