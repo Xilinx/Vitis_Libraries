@@ -19,7 +19,6 @@ limitations under the License.
 #include <string>
 
 // This is used for the PL Kernels
-#include "xrt.h"
 #include "experimental/xrt_kernel.h"
 
 // Using the ADF API that call XRT API

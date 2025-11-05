@@ -1,5 +1,5 @@
 .. 
-   .. Copyright © 2019–2024 Advanced Micro Devices, Inc
+   .. Copyright © 2022–2025 Advanced Micro Devices, Inc
 
 `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 

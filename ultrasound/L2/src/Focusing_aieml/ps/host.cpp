@@ -35,7 +35,6 @@ from Advanced Micro Devices, Inc.
 #include <cmath>
 
 // This is used for the PL Kernels
-#include "xrt.h"
 #include "experimental/xrt_kernel.h"
 
 // Using the ADF API that call XRT API
