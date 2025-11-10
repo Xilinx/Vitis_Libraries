@@ -1,1 +1,0 @@
-set_param hls.enable_block_condition_simplification false

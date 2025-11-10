@@ -1,5 +1,0 @@
-set_property -dict [list CONFIG.ECC_EN {false} CONFIG.ECC_SCRUB_EN {false}] [get_bd_cells hmss_0]
-#hbm_memory_subsystem::ra_master_interface [get_bd_intf_pins /merge_kernel/m_axi_gmem2] [get_bd_cells /hmss_0]
-#hbm_memory_subsystem::ra_master_interface [get_bd_intf_pins /merge_kernel/m_axi_gmem3] [get_bd_cells /hmss_0]
-#hbm_memory_subsystem::ra_master_interface [get_bd_intf_pins /merge_kernel/m_axi_gmem6] [get_bd_cells /hmss_0]
-#hbm_memory_subsystem::ra_master_interface [get_bd_intf_pins /merge_kernel/m_axi_gmem7] [get_bd_cells /hmss_0]

@@ -1,6 +1,0 @@
-"bool column":0 1
-"int column":1 1
-"float column":2 1
-"double column":3 1
-"date column":4 1
-"string column":5 1

@@ -1,1 +1,0 @@
--create_alveo_BFS_partitions ./data/example-wt.mtx -num_pars 2 -par_prune 1 -name ref_example -time_par 0.008105 -time_save 0.000000 -server_par 1 2 

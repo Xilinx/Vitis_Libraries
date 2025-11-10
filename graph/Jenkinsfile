@@ -1,3 +1,0 @@
-@Library('pipeline-library')_
-VitisLibPipeline ( libname:'xf_graph',
-                   upstream_dependencies:'xf_utils_hw,next,../utils; xf_database,next,../database; xf_fintech,next,../quantitative_finance')

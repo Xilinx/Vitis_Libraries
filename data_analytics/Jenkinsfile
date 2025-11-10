@@ -1,3 +1,0 @@
-@Library('pipeline-library')_
-VitisLibPipeline ( libname:'xf_DataAnalytics',
-                   upstream_dependencies:'xf_utils_hw,next,../utils; xf_compression,next,../data_compression; xf_security,next,../security; xf_graph,next,../graph; xf_database,next,../database')

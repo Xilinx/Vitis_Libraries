@@ -1,3 +1,0 @@
-@Library('pipeline-library')_
-VitisLibPipeline ( libname:'xf_sparse',
-                   upstream_dependencies:'xf_blas,next,../blas; xf_hpc,next,../hpc')
