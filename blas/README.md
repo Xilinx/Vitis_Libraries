@@ -28,15 +28,14 @@ Modules and APIs in this library work with Alveo U280 or U250 or U200 or U50.
 
 ### Software Platform
 
-Supported operating systems are RHEL/CentOS 7.4, 7.5 and Ubuntu 16.04.4 LTS, 18.04.1 LTS.
+Supported operating systems are RHEL8.10, RHEL9.2,RHEL9.3,RHEL9.4,RHEL9.5 and Ubuntu 22.04.3 LTS, 22.04.4 LTS, 22.04.5 LTS.
 
-_GCC 5.0 or above_ is required for C++11/C++14 support.
-With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
-[devtoolset-6](https://www.softwarecollections.org/en/scls/rhscl/devtoolset-6/).
+And C++14 should be enabled during compilation.
+
 
 ### Development Tools
 
-This library is designed to work with Vitis 2022.2,
+This library is designed to work with Vitis 2022.2 and later,
 and a matching version of XRT should be installed.
 
 ## Source Files and Application Development
@@ -71,22 +70,27 @@ HLS cases can only be found in `L1/tests` folder, and are created to test module
 Setup and build envrionment using the Vitis and XRT scripts:
 
 ```
-    source <install path>/Vitis/2023.2/settings64.sh
+    source <install path>/2025.2/Vitis/settings64.sh
     source /opt/xilinx/xrt/setup.sh
 ```
 
 ### HLS Cases Command Line Flow
+
+
+A Makefile is used to drive this flow with `make run TARGET=<TARGET> PLATFORM=<PLATFORM>`
 
 ```console
 cd L1/tests/case_folder/
 make run TARGET=<cosim/csim/csynth/vivado_syn/vivado_impl> PLATFORM=/path/to/xilinx_u250_gen3x16_xdma_3_1_202020_1.xpfm
 ```
 
-- `csim` (high level simulation),
-- `csynth` (high level synthesis to RTL),
-- `cosim` (cosimulation between software testbench and generated RTL),
-- `vivado_syn` (synthesis by Vivado) and
-- `vivado_impl` (implementation by Vivado).
+`TARGET` can be any of the following values:
+
+- `csim` (high level simulation)
+- `csynth` (high level synthesis to RTL)
+- `cosim` (cosimulation between software testbench and generated RTL)
+- `vivado_syn` (synthesis by Vivado)
+- `vivado_impl` (implementation by Vivado)
 
 ### Vitis Cases Command Line Flow
 
@@ -95,7 +99,7 @@ make run TARGET=<cosim/csim/csynth/vivado_syn/vivado_impl> PLATFORM=/path/to/xil
 ```console
 cd L2/tests/vitis_case_folder
 
-# build and run one of the following using U280 platform
+# build and run one of the following using U250 platform
 make run TARGET=hw_emu PLATFORM=/path/to/xilinx_u250_gen3x16_xdma_3_1_202020_1.xpfm
 
 # delete generated files
@@ -107,7 +111,7 @@ make cleanall
 ```console
 cd L3/tests/vitis_case_folder
 
-# build and run one of the following using U280 platform
+# build and run one of the following using U250 platform
 make run TARGET=hw_emu PLATFORM=/path/to/xilinx_u250_gen3x16_xdma_3_1_202020_1.xpfm
 
 # delete generated files
@@ -134,7 +138,7 @@ For more details of the blas library, please refer to [blas Library Documentatio
 Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
 
     Copyright (C) 2019-2022, Xilinx, Inc.
-    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+    Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
