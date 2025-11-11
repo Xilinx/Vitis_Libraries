@@ -1,4 +1,5 @@
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+.. Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 
 .. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -18,11 +19,11 @@ Requirements
 Software Platform
 =================
 
-The supported operating systems are RHEL/CentOS 7.4, 7.5, and Ubuntu® 16.04.4 LTS, 18.04.1 LTS.
+The supported operating systems are RHEL8.10, RHEL9.2,RHEL9.3,RHEL9.4,RHEL9.5 and Ubuntu22.04.3 LTS,22.04.4 LTS,22.04.5 LTS.
 
-*GCC 5.0 or above* is required for C++11/C++14 support. With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via `devtoolset-6 <https://www.softwarecollections.org/en/scls/rhscl/devtoolset-6/>`_.
+And C++14 should be enabled during compilation.
 
 Development Tools
 =================
 
-This library is designed to work with AMD Vitis™ 2023.1, and a matching version of XRT should be installed.
+This library is designed to work with AMD Vitis™ 2023.1 and later, and a matching version of XRT should be installed.
