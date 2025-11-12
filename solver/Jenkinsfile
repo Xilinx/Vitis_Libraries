@@ -1,3 +1,3 @@
 @Library('pipeline-library')_
 VitisLibPipeline ( libname:'xf_solver',
-                   upstream_dependencies:'xf_utils_hw,next,../utils;xf_dsp,next,../dsp')
+                   upstream_dependencies:'xf_utils_hw,next,../utils; xf_dsp,dev,../dsp; dsplib_internal_scripts,main,../dsplib_internal_scripts')

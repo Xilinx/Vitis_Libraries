@@ -1,0 +1,4312 @@
+{
+    "test_0_tool_canary_aie": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "2",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_8_1_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_8_3_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_16_1_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_16_1_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_16_3_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_16_3_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_24_1_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_24_1_3_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "3",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_24_3_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_24_3_3_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "3",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_32_1_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_32_1_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_32_1_4_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_32_3_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_32_3_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_32_3_4_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_64_1_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_64_1_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_64_1_4_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_64_1_8_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_64_3_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_64_3_4_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_64_3_8_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_80_1_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_80_1_5_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "5",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_80_3_5_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "5",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_128_1_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_128_1_4_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_128_1_8_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_128_3_4_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_128_3_8_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_256_1_4_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_256_1_8_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_256_3_8_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_4_1_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "4",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_4_3_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "4",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_8_1_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_8_1_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_8_3_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_8_3_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_16_1_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_16_1_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_16_1_4_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_16_3_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_16_3_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_16_3_4_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_24_1_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_24_1_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_24_1_3_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "3",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_24_1_6_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "6",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_24_3_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_24_3_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_24_3_3_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "3",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_24_3_6_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "6",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_32_1_1_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_32_1_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_32_1_4_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_32_1_8_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_32_3_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_32_3_4_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_32_3_8_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_64_1_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_64_1_4_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_64_1_8_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_64_3_4_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_64_3_8_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_80_1_2_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_80_1_4_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_80_1_5_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "5",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_80_3_4_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_80_3_5_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "5",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_128_1_4_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_128_1_8_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_128_3_8_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_256_1_8_4_42_0_01_aie1_hw_checkin": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_8_1_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_8_3_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_16_1_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_16_1_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_16_3_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_16_3_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_24_1_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_24_1_3_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "3",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_24_3_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_24_3_3_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "3",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_32_1_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_32_1_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_32_1_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_32_3_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_32_3_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_32_3_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_64_1_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_64_1_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_64_1_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_64_1_8_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_64_3_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_64_3_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_64_3_8_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_80_1_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_80_1_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_80_1_5_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "5",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_80_3_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_80_3_5_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "5",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_128_1_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_128_1_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_128_1_8_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_128_3_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_128_3_8_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_256_1_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_256_1_8_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_256_3_8_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_4_1_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "4",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_4_3_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "4",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_8_1_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_8_1_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_8_3_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_8_3_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_16_1_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_16_1_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_16_1_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_16_3_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_16_3_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_16_3_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_24_1_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_24_1_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_24_1_3_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "3",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_24_1_6_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "6",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_24_3_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_24_3_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_24_3_3_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "3",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_24_3_6_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "6",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_32_1_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_32_1_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_32_1_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_32_1_8_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_32_3_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_32_3_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_32_3_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_32_3_8_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_64_1_1_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_64_1_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_64_1_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_64_1_8_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_64_3_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_64_3_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_64_3_8_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_80_1_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_80_1_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_80_1_5_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "5",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_80_3_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_80_3_5_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "5",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_128_1_2_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_128_1_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_128_1_8_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_128_3_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_128_3_8_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_256_1_4_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_256_1_8_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_256_3_8_4_42_0_01_aie2_hw_checkin": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_16_1_1_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_16_3_1_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_32_1_1_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_32_1_2_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_32_3_1_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_32_3_2_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_64_1_1_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_64_1_2_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_64_1_4_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_64_3_2_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_64_3_4_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_80_1_1_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_80_1_5_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "5",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_80_3_5_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "5",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_128_1_2_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_128_1_4_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_128_1_8_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_128_3_4_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_128_3_8_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_256_1_4_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_256_1_8_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_256_3_8_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_8_1_1_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_8_3_1_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_16_1_1_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_16_1_2_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_16_3_1_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_16_3_2_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_24_1_1_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_24_1_3_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "3",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_24_3_1_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_24_3_3_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "3",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_32_1_1_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_32_1_2_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_32_1_4_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_32_3_1_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_32_3_2_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_32_3_4_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_64_1_1_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_64_1_2_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_64_1_4_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_64_1_8_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_64_3_2_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_64_3_4_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_64_3_8_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_80_1_2_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_80_1_5_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "5",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_80_3_5_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "5",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_128_1_2_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_128_1_4_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_128_1_8_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_128_3_4_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_128_3_8_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_256_1_4_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_256_1_8_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_256_3_8_4_42_0_01_aie22_hw_checkin": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "4",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_8_1_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_8_3_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_16_1_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_16_1_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_16_3_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_16_3_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_24_1_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_24_1_3_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "3",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_24_3_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_24_3_3_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "3",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_32_1_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_32_1_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_32_1_4_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_32_3_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_32_3_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_32_3_4_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_64_1_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_64_1_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_64_1_4_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_64_1_8_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_64_3_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_64_3_4_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_64_3_8_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_80_1_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_80_1_5_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "5",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_80_3_5_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "5",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_128_1_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_128_1_4_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_128_1_8_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_128_3_4_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_128_3_8_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_256_1_4_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_256_1_8_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_float_256_3_8_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_4_1_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "4",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_4_3_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "4",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_8_1_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_8_1_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_8_3_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_8_3_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_16_1_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_16_1_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_16_1_4_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_16_3_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_16_3_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_16_3_4_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_24_1_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_24_1_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_24_1_3_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "3",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_24_1_6_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "6",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_24_3_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_24_3_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_24_3_3_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "3",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_24_3_6_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "6",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_32_1_1_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_32_1_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_32_1_4_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_32_1_8_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_32_3_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_32_3_4_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_32_3_8_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_64_1_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_64_1_4_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_64_1_8_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_64_3_4_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_64_3_8_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_80_1_2_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_80_1_4_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_80_1_5_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "5",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_80_3_4_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_80_3_5_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "5",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_128_1_4_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_128_1_8_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_128_3_8_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_1_cfloat_256_1_8_16_42_0_01_aie1_hw_qor": {
+        "AIE_VARIANT": "1",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_8_1_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_8_3_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_16_1_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_16_1_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_16_3_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_16_3_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_24_1_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_24_1_3_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "3",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_24_3_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_24_3_3_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "3",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_32_1_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_32_1_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_32_1_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_32_3_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_32_3_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_32_3_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_64_1_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_64_1_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_64_1_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_64_1_8_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_64_3_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_64_3_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_64_3_8_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_80_1_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_80_1_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_80_1_5_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "5",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_80_3_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_80_3_5_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "5",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_128_1_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_128_1_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_128_1_8_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_128_3_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_128_3_8_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_256_1_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_256_1_8_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_float_256_3_8_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_4_1_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "4",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_4_3_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "4",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_8_1_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_8_1_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_8_3_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_8_3_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_16_1_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_16_1_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_16_1_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_16_3_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_16_3_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_16_3_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_24_1_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_24_1_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_24_1_3_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "3",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_24_1_6_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "6",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_24_3_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_24_3_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_24_3_3_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "3",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_24_3_6_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "6",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_32_1_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_32_1_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_32_1_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_32_1_8_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_32_3_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_32_3_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_32_3_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_32_3_8_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_64_1_1_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_64_1_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_64_1_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_64_1_8_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_64_3_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_64_3_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_64_3_8_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_80_1_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_80_1_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_80_1_5_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "5",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_80_3_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_80_3_5_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "5",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_128_1_2_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_128_1_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_128_1_8_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_128_3_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_128_3_8_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_256_1_4_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_256_1_8_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_2_cfloat_256_3_8_16_42_0_01_aie2_hw_qor": {
+        "AIE_VARIANT": "2",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_16_1_1_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_16_3_1_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_32_1_1_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_32_1_2_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_32_3_1_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_32_3_2_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_64_1_1_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_64_1_2_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_64_1_4_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_64_3_2_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_64_3_4_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_80_1_1_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_80_1_5_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "5",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_80_3_5_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "5",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_128_1_2_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_128_1_4_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_128_1_8_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_128_3_4_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_128_3_8_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_256_1_4_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_256_1_8_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_float_256_3_8_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "float",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_8_1_1_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_8_3_1_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "8",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_16_1_1_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_16_1_2_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_16_3_1_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_16_3_2_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "16",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_24_1_1_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_24_1_3_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "3",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_24_3_1_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_24_3_3_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "24",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "3",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_32_1_1_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_32_1_2_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_32_1_4_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_32_3_1_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_32_3_2_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_32_3_4_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "32",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_64_1_1_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "1",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_64_1_2_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_64_1_4_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_64_1_8_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_64_3_2_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_64_3_4_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_64_3_8_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "64",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_80_1_2_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_80_1_5_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "5",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_80_3_5_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "80",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "5",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_128_1_2_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "2",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_128_1_4_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_128_1_8_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_128_3_4_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_128_3_8_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "128",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_256_1_4_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "4",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_256_1_8_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "1",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    },
+    "test_1_22_cfloat_256_3_8_16_42_0_01_aie22_hw_qor": {
+        "AIE_VARIANT": "22",
+        "DATA_TYPE": "cfloat",
+        "DIM_SIZE": "256",
+        "NUM_FRAMES": "3",
+        "GRID_DIM": "8",
+        "NITER": "16",
+        "DATA_SEED": "42",
+        "DIFF_TOLERANCE": "0.01"
+    }
+}

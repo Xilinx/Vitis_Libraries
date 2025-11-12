@@ -1,0 +1,188 @@
+{
+    "schema": "vitis_library_api_spec_schema-1.0",
+    "api_name": "xf::dsp::aie::qrd::qrd_graph",
+    "display_name": "qrd_graph",
+    "header_file_name": "qrd_graph.hpp",
+    "search_paths": [
+        "L1/include/aie",
+        "L1/src/aie",
+        "L1/tests/aie/inc",
+        "L1/tests/aie/src",
+        "L2/include/aie",
+        "L2/tests/aie/common/inc"
+    ],
+    "parameters": [
+        {
+            "name": "AIE_VARIANT",
+            "description": "specifies the device type",
+            "type": "uint",
+            "updater": {
+                "file": "qrd.py",
+                "function": "update_AIE_VARIANT",
+                "args": []
+            },
+            "validator": {
+                "file": "qrd.py",
+                "function": "validate_AIE_VARIANT",
+                "args": []
+            }
+        },
+        {
+            "name": "TT_DATA",
+            "description": "The type of individual data samples input to port A.",
+            "type": "typename",
+            "enum": [
+                "cfloat",
+                "float"
+            ],
+            "updater": {
+                "file": "qrd.py",
+                "function": "update_TT_DATA",
+                "args": []
+            },
+            "validator": {
+                "file": "qrd.py",
+                "function": "validate_TT_DATA",
+                "args": []
+            }
+        },
+        {
+            "name": "TP_DIM_ROWS",
+            "description": "Row dimension of the input matrix.",
+            "type": "uint",
+            "updater": {
+                "file": "qrd.py",
+                "function": "update_TP_DIM_ROWS",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA"
+                ]
+            },
+            "validator": {
+                "file": "qrd.py",
+                "function": "validate_TP_DIM_ROWS",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA"
+                ]
+            }
+        },
+                {
+            "name": "TP_DIM_COLS",
+            "description": "Column dimension of the input matrix.",
+            "type": "uint",
+            "updater": {
+                "file": "qrd.py",
+                "function": "update_TP_DIM_COLS",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_DIM_ROWS"
+                ]
+            },
+            "validator": {
+                "file": "qrd.py",
+                "function": "validate_TP_DIM_COLS",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_DIM_ROWS"
+                ]
+            }
+        },
+        {
+            "name": "TP_NUM_FRAMES",
+            "description": "The number of operations per call to the kernel.",
+            "type": "uint",
+            "updater": {
+                "file": "qrd.py",
+                "function": "update_TP_NUM_FRAMES",
+                "args": [
+                    "AIE_VARIANT",
+                    "TP_DIM_ROWS",
+                    "TP_DIM_COLS",
+                    "TT_DATA"
+                ]
+            },
+            "validator": {
+                "file": "qrd.py",
+                "function": "validate_TP_NUM_FRAMES",
+                "args": [
+                    "AIE_VARIANT",
+                    "TP_DIM_ROWS",
+                    "TP_DIM_COLS",
+                    "TT_DATA"
+                ]
+            }
+        },   
+        {
+            "name": "TP_CASC_LEN",
+            "description": "The number of cascaded kernels to be used to perform the function.",
+            "type": "uint",
+            "validator": {
+                "file": "qrd.py",
+                "function": "validate_TP_CASC_LEN",
+                "args": []
+            },
+            "updater": {
+                "file": "qrd.py",
+                "function": "update_TP_CASC_LEN",
+                "args": []
+            }
+        },
+        {
+            "name": "TP_DIM_A_LEADING",
+            "description": "Describes which dimension of the Matrix A input data is contigious in memory. TP_DIM_A_LEADING=1 is row major, and TP_DIM_A_LEADING=0 is column major.",
+            "type": "uint",
+            "validator": {
+                "file": "qrd.py",
+                "function": "validate_TP_DIM_A_LEADING",
+                "args": ["AIE_VARIANT", "TT_DATA"] 
+            },
+            "updater": {
+                "file": "qrd.py",
+                "function": "update_TP_DIM_A_LEADING",
+                "args": ["AIE_VARIANT", "TT_DATA"] 
+            }
+        },
+        {
+            "name": "TP_DIM_Q_LEADING",
+            "description": "Describes which dimension of the Matrix Q output data is contigious in memory. TP_DIM_Q_LEADING=1 is row major, and TP_DIM_Q_LEADING=0 is column major.",
+            "type": "uint",
+            "validator": {
+                "file": "qrd.py",
+                "function": "validate_TP_DIM_Q_LEADING",
+                "args": ["AIE_VARIANT", "TT_DATA"] 
+            },
+            "updater": {
+                "file": "qrd.py",
+                "function": "update_TP_DIM_Q_LEADING",
+                "args": ["AIE_VARIANT", "TT_DATA"] 
+            }
+        },
+        {
+            "name": "TP_DIM_R_LEADING",
+            "description": "Describes which dimension of the Matrix Q output data is contigious in memory. TP_DIM_R_LEADING=1 is row major, and TP_DIM_R_LEADING=0 is column major.",
+            "type": "uint",
+            "validator": {
+                "file": "qrd.py",
+                "function": "validate_TP_DIM_R_LEADING",
+                "args": ["AIE_VARIANT", "TT_DATA"] 
+            },
+            "updater": {
+                "file": "qrd.py",
+                "function": "update_TP_DIM_R_LEADING",
+                "args": ["AIE_VARIANT", "TT_DATA"] 
+            }
+        }
+
+    ],
+    "ports": {
+        "file": "qrd.py",
+        "function": "info_ports"
+    },
+    "generator": {
+        "file": "qrd.py",
+        "function": "generate_graph"
+    }
+}

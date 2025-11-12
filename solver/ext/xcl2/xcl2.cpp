@@ -1,5 +1,6 @@
 /**********
-Copyright (c) 2018, Xilinx, Inc.
+Copyright (c) 2018-2022, Xilinx, Inc.
+Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,

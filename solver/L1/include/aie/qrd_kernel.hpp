@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _XF_SOLVER_QRD_KERNEL_HPP_
-#define _XF_SOLVER_QRD_KERNEL_HPP_
+#ifndef _SOLVERLIB_QRD_KERNEL_HPP_
+#define _SOLVERLIB_QRD_KERNEL_HPP_
 #include <aie_api/aie.hpp>
 #include <adf.h>
 

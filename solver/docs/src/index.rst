@@ -1,7 +1,8 @@
-.. 
-   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
-
-`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+..
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+   
+   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Solver, Library, Vitis Solver Library, overview, matrix, linear, eigenvalue
@@ -9,13 +10,22 @@
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
+====================
 Vitis Solver Library
 ====================
 
-AMD Vitis |trade| Solver Library provides a collection of matrix decomposition operations, linear solvers, and eigenvalue solvers on PL and AI Engine. You can see it as containing two sub libraries:
+AMD Vitis |trade| Solver Library (SolverLib) provides a collection of matrix decomposition operations, linear solvers, and eigenvalue solvers on PL and AI Engine.
+
+The SolverLib contains:
+
+- :ref:`INTRODUCTION_PL`.
+
+- :ref:`INTRODUCTION_AIE`.
+
+.. _INTRODUCTION_PL:
 
 PL Solver library
------------------
+=================
 
 Currently, the Vitis PL Solver library includes the following operations for dense matrix:
  
@@ -34,16 +44,17 @@ Currently, the Vitis PL Solver library includes the following operations for den
 * Eigenvalue solver
    * Jacobi eigenvalue solver for symmetric matrix
 
+.. _INTRODUCTION_AIE:
 
-AI Engine Solver library
-------------
+AI Engine Solver Library
+========================
 
 Currently, the Vitis AIE Solver Library provides the following operations on AI Engine.
+The AMD Vitis AI Engine Solver library encapsulates several solver algorithms, optimized to take full advantage of the processing power of AMD Versal |trade| Adaptive SoC devices, which contain an array of AI Engines.
 
 * Matrix decomposition
    * Cholesky decomposition for symmetric positive definite matrix
-   * QR decomposition for general matrix
-
+   * QR decomposition (Gram-Schmidt method)
 
 .. toctree::
    :caption: Introduction
@@ -65,7 +76,17 @@ Currently, the Vitis AIE Solver Library provides the following operations on AI 
    :caption: AIE Solver Library User Guide
    :maxdepth: 2
 
-   L2 AIE User Guide <guide_L2_AIE/L2_AIE.rst>
+   Introduction <user_guide/L2/introduction.rst>
+   Solver Library Functions <user_guide/L2/solver-lib-func.rst>
+   Compiling and Simulating <user_guide/L2/compiling-and-simulating.rst>
+   Benchmark/QoR <user_guide/L2/benchmark.rst>
+
+.. toctree::
+   :caption: API Reference
+
+   API Reference Overview <user_guide/L2/api-reference.rst>
+   Cholesky <rst/group_cholesky.rst>
+   QRD <rst/group_qrd_graph.rst>
 
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN

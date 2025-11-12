@@ -1,16 +1,30 @@
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 ------------------------------------------------------------------------
 Sphinx Template for GitHub based HTML documentation
 ------------------------------------------------------------------------
 03/06/2020 - Imported new stylesheets developed by the Web team
-•	New css and js files added to support Xilinx look & feel
-•	Updated layout.html to accomodate the header, footer and other elements on the page.
-•	Moved the footer information from footer.html file to layout.html file to accomodate the Xilinx footer.
-•	Updated conf.py to generate last modified date on all HTML pages.
+ï¿½	New css and js files added to support Xilinx look & feel
+ï¿½	Updated layout.html to accomodate the header, footer and other elements on the page.
+ï¿½	Moved the footer information from footer.html file to layout.html file to accomodate the Xilinx footer.
+ï¿½	Updated conf.py to generate last modified date on all HTML pages.
 
 02/24/2020 - Udpated look & feel elements
-•	Updates themes.css file to remove All Caps fonts style for headings.
-•	Updated conf.py file to remove 'View on GitHub' link on the left navigation .
-•	Updated layout.html to remove the meta tags. Meta tags are now expected to be added to each .rst file. For example:
+ï¿½	Updates themes.css file to remove All Caps fonts style for headings.
+ï¿½	Updated conf.py file to remove 'View on GitHub' link on the left navigation .
+ï¿½	Updated layout.html to remove the meta tags. Meta tags are now expected to be added to each .rst file. For example:
 .. meta::
    :keywords: Vitis, Library, <library name>, Xilinx
    :description: <Provide a brief description of the file>
@@ -18,13 +32,13 @@ Sphinx Template for GitHub based HTML documentation
    :xlnxdocumenttype: Tutorials
 
 10/04/2019 - Updated as per suggestions from Daniel
-•	Left align Xilinx logo.
-•	Shift over the “Developers , Support, Forums” to align with the end of the left column.
-•	Set a max char width for the left column so it isn’t so wide.
-•	Reduce font size of the copyright footer text. 
+ï¿½	Left align Xilinx logo.
+ï¿½	Shift over the ï¿½Developers , Support, Forumsï¿½ to align with the end of the left column.
+ï¿½	Set a max char width for the left column so it isnï¿½t so wide.
+ï¿½	Reduce font size of the copyright footer text. 
 
 09/24/2019 - Initial version
-•	Xilinx.com branding and look & feel shared by the Web team.
-•	references to .js and .css files used by Xilinx.com.
-•	meta data that can help users search these pages using the Xilinx.com search. 
-•	Link to GitHub source file.
+ï¿½	Xilinx.com branding and look & feel shared by the Web team.
+ï¿½	references to .js and .css files used by Xilinx.com.
+ï¿½	meta data that can help users search these pages using the Xilinx.com search. 
+ï¿½	Link to GitHub source file.

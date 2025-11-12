@@ -1,10 +1,9 @@
-
-.. 
+..
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+   
+   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
    
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
-
-`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
-
 .. meta::
    :keywords: SYEVJ, Eigenvalue, Solver, Jacobi, Eigen
    :description: Symmetric Matrix Jacobi based Eigen Value Decomposition (SYEVJ).
