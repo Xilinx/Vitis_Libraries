@@ -506,7 +506,7 @@ void ispStats(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
            "ROI bottom-right coordinates should be less than input image");
     assert(((roi_tlx < roi_brx) && (roi_tly < roi_bry)) &&
            "ROI top-left coordinates should be less bottom-right coordinates");
-    assert((((roi_brx - roi_tlx + 1) % zone_col_num) == 0 && ((roi_bry - roi_tly + 1) % zone_row_num) == 0) &&
+    assert((((roi_brx - roi_tlx + 1) % zone_row_num) == 0 && ((roi_bry - roi_tly + 1) % zone_col_num) == 0) &&
            "ROI Sub-zones should be divisible by N(zone_row_num) x M (zone_row_num) setting");
     assert(((zone_col_num >= 0) && (zone_col_num <= 8)) &&
            "Number of sub-zones columns should be greater than or equal to 0 but less than or equal to 8");
