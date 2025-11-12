@@ -8,7 +8,6 @@ syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/gaussiandifference/xf_gaussian_di
 syn.top=gaussian_diff_accel
 tb.file=${XF_PROJ_ROOT}/L1/examples/gaussiandifference/xf_gaussian_diff_tb.cpp
 tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/gaussiandifference/xf_gaussian_diff_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/gaussiandifference/gaussiandifference_NPPC1_8UC1_8UC1_FILTER_SIZE_1_7_FILTER_SIZE_2_7 -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
-tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/gaussiandifference/xf_gaussian_diff_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/gaussiandifference/gaussiandifference_NPPC1_8UC1_8UC1_FILTER_SIZE_1_7_FILTER_SIZE_2_7 -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
 
 csim.argv=  ${XF_PROJ_ROOT}/data/128x128.png
 csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d

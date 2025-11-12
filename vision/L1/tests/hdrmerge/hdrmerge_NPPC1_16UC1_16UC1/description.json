@@ -4,8 +4,6 @@
     "flow": "hls",
     "platform_allowlist": [
         "u200",
-        "zcu102",
-        "zcu104",
         "zc706"
     ],
     "platform_blocklist": [],

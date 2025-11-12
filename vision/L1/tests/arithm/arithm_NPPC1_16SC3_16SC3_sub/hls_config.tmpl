@@ -8,7 +8,6 @@ syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/arithm/xf_arithm_accel.cpp, -I ${
 syn.top=arithm_accel
 tb.file=${XF_PROJ_ROOT}/L1/examples/arithm/xf_arithm_tb.cpp
 tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/arithm/xf_arithm_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/arithm/arithm_NPPC1_16SC3_16SC3_sub -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
-tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/arithm/xf_arithm_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/arithm/arithm_NPPC1_16SC3_16SC3_sub -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
 
 csim.argv=  ${XF_PROJ_ROOT}/data/128x128_1.png  ${XF_PROJ_ROOT}/data/128x128_2.png
 csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d

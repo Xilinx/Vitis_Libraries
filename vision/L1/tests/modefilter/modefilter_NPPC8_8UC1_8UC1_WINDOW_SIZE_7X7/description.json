@@ -4,10 +4,7 @@
     "flow": "hls",
     "platform_allowlist": [
         "u200",
-        "zcu102",
-        "zcu104",
         "zc706",
-        "aws-vu9p-f1",
         "vck190"
     ],
     "platform_blocklist": [],

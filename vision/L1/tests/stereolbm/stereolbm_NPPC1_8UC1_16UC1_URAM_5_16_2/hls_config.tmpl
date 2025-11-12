@@ -8,7 +8,6 @@ syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/stereolbm/xf_stereolbm_accel.cpp,
 syn.top=stereolbm_accel
 tb.file=${XF_PROJ_ROOT}/L1/examples/stereolbm/xf_stereolbm_tb.cpp
 tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/stereolbm/xf_stereolbm_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/stereolbm/stereolbm_NPPC1_8UC1_16UC1_URAM_5_16_2 -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
-tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/stereolbm/xf_stereolbm_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/stereolbm/stereolbm_NPPC1_8UC1_16UC1_URAM_5_16_2 -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
 
 csim.argv=  ${XF_PROJ_ROOT}/data/left.png  ${XF_PROJ_ROOT}/data/right.png
 csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_calib3d -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d

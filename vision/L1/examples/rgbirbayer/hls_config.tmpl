@@ -8,7 +8,6 @@ syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/accumulate/xf_rgbir_accel.cpp, -I
 syn.top=rgbir_accel
 tb.file=${XF_PROJ_ROOT}/L1/examples/accumulate/xf_rgbir_tb.cpp
 tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/accumulate/xf_rgbir_tb.cpp, -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ 
-tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/accumulate/xf_rgbir_tb.cpp, -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/config -I${XF_PROJ_ROOT}/L1/include -I ./
 
 csim.argv= 
 csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core

@@ -8,7 +8,6 @@ syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/convertbitdepth/xf_convert_bitdep
 syn.top=convert_bitdepth_accel
 tb.file=${XF_PROJ_ROOT}/L1/examples/convertbitdepth/xf_convert_bitdepth_tb.cpp
 tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/convertbitdepth/xf_convert_bitdepth_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/convertbitdepth/convertbitdepth_NPPC1_32SC1_8UC1_32S_TO_8U -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
-tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/convertbitdepth/xf_convert_bitdepth_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/convertbitdepth/convertbitdepth_NPPC1_32SC1_8UC1_32S_TO_8U -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
 
 csim.argv=  ${XF_PROJ_ROOT}/data/128x128.png
 csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d

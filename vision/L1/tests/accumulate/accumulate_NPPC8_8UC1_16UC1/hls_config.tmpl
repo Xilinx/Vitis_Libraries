@@ -8,7 +8,6 @@ syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/accumulate/xf_accumulate_image_ac
 syn.top=accumulate_accel
 tb.file=${XF_PROJ_ROOT}/L1/examples/accumulate/xf_accumulate_image_tb.cpp
 tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/accumulate/xf_accumulate_image_tb.cpp,-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/tests/accumulate/accumulate_NPPC8_8UC1_16UC1 -I ./ -D__SDSVHLS__ -std=c++0x
-tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/accumulate/xf_accumulate_image_tb.cpp,-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/tests/accumulate/accumulate_NPPC8_8UC1_16UC1 -I ./ -D__SDSVHLS__ -std=c++0x
 
 csim.argv=  ${XF_PROJ_ROOT}/data/128x128_1.png  ${XF_PROJ_ROOT}/data/128x128_2.png
 csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core

@@ -8,7 +8,6 @@ syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/cvtcolor/xf_cvt_color_accel_gen_v
 syn.top=cvtcolor_iyuv2rgb
 tb.file=${XF_PROJ_ROOT}/L1/examples/cvtcolor/xf_cvt_color_tb_gen_vitis.cpp
 tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/cvtcolor/xf_cvt_color_tb_gen_vitis.cpp,-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
-tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/cvtcolor/xf_cvt_color_tb_gen_vitis.cpp,-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
 
 csim.argv= ${XF_PROJ_ROOT}/data/cvtcolor/IYUV2RGB/input/testcase1_RGBA2IYUV_Y.png ${XF_PROJ_ROOT}/data/cvtcolor/IYUV2RGB/input/testcase1_RGBA2IYUV_U.png ${XF_PROJ_ROOT}/data/cvtcolor/IYUV2RGB/input/testcase1_RGBA2IYUV_V.png ${XF_PROJ_ROOT}/data/cvtcolor/IYUV2RGB/output/testcase1_ocv.png 
 csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d

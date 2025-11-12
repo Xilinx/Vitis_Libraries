@@ -5,9 +5,7 @@
     ],
     "flow": "system",
     "platform_allowlist": [
-        "zcu104",
         "vck190",
-        "zcu102",
         "u50"
     ],
     "platform_blocklist": [

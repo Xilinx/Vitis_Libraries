@@ -3,9 +3,7 @@
     "description": "HLS case",
     "flow": "hls",
     "platform_allowlist": [
-        "u200",
-        "zcu102",
-        "zcu104"
+        "u200"
     ],
     "platform_blocklist": [],
     "part_allowlist": [],

@@ -6,8 +6,7 @@
     "flow": "system",
     "platform_allowlist": [
         "vck190",
-        "u200",
-        "aws-vu9p-f1"
+        "u200"
     ],
     "platform_blocklist": [
         "u280",

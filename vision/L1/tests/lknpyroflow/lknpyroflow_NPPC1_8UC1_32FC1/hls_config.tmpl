@@ -8,7 +8,6 @@ syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/lknpyroflow/xf_dense_npyr_optical
 syn.top=dense_non_pyr_of_accel
 tb.file=${XF_PROJ_ROOT}/L1/examples/lknpyroflow/xf_dense_npyr_optical_flow_tb.cpp
 tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/lknpyroflow/xf_dense_npyr_optical_flow_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/lknpyroflow/lknpyroflow_NPPC1_8UC1_32FC1 -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
-tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/lknpyroflow/xf_dense_npyr_optical_flow_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/lknpyroflow/lknpyroflow_NPPC1_8UC1_32FC1 -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
 
 csim.argv=  ${XF_PROJ_ROOT}/data/lkof_im0_512x512.png  ${XF_PROJ_ROOT}/data/lkof_im1_512x512.png
 csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d

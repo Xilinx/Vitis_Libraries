@@ -5,13 +5,11 @@
     ],
     "flow": "system",
     "platform_allowlist": [
-        "zcu104",
-        "aws-vu9p-f1"
+	"vck190"
     ],
     "platform_blocklist": [
         "u280",
-        "u250",
-        "vck190"
+        "u250"
     ],
     "platform_properties": {
         "aws-vu9p-f1": {

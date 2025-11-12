@@ -8,7 +8,6 @@ syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/colorcorrectionmatrix/xf_ccm_acce
 syn.top=ccm_accel
 tb.file=${XF_PROJ_ROOT}/L1/examples/colorcorrectionmatrix/xf_ccm_tb.cpp
 tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/colorcorrectionmatrix/xf_ccm_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/colorcorrectionmatrix/colorcorrectionmatrix_NPPC1_16UC3_16UC3_CCM_yuv_rgb_709 -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
-tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/colorcorrectionmatrix/xf_ccm_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/colorcorrectionmatrix/colorcorrectionmatrix_NPPC1_16UC3_16UC3_CCM_yuv_rgb_709 -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
 
 csim.argv=  ${XF_PROJ_ROOT}/data/ltm_input.png
 csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d

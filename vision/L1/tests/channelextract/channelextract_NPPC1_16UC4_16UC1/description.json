@@ -5,9 +5,6 @@
     "platform_allowlist": [
         "u200",
         "u50",
-        "zcu102",
-        "zcu104",
-        "aws-vu9p-f1",
         "vck190"
     ],
     "platform_blocklist": [],

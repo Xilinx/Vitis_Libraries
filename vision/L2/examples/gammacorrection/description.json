@@ -5,7 +5,6 @@
     ],
     "flow": "system",
     "platform_allowlist": [
-        "zcu104",
         "u200"
     ],
     "platform_blocklist": [

@@ -5,7 +5,7 @@
     ],
     "flow": "system",
     "platform_allowlist": [
-        "zcu104"
+	"vck190"
     ],
     "platform_blocklist": [
         "u280",

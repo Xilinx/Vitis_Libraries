@@ -8,7 +8,6 @@ syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/clahe/xf_clahe_accel.cpp,-I${XF_P
 syn.top=clahe_accel
 tb.file=${XF_PROJ_ROOT}/L1/examples/clahe/xf_clahe_tb.cpp
 tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/clahe/xf_clahe_tb.cpp,-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/clahe/config -I ./ -D__SDSVHLS__ -std=c++0x
-tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/clahe/xf_clahe_tb.cpp,-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/clahe/config -I ./ -D__SDSVHLS__ -std=c++0x
 
 csim.argv= ${XF_PROJ_ROOT}/data/4k_1.jpg 
 csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core

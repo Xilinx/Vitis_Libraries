@@ -8,7 +8,6 @@ syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/distancetransform/xf_distancetran
 syn.top=distancetransform_accel
 tb.file=${XF_PROJ_ROOT}/L1/examples/distancetransform/xf_distancetransform_tb.cpp
 tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/distancetransform/xf_distancetransform_tb.cpp, -I ${XF_PROJ_ROOT}/L1/examples/distancetransform/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
-tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/distancetransform/xf_distancetransform_tb.cpp, -I ${XF_PROJ_ROOT}/L1/examples/distancetransform/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
 
 csim.argv= ${XF_PROJ_ROOT}/data/img_hd_bw.png 
 csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
