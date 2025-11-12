@@ -502,7 +502,7 @@ void ispStats(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && "ROWS and COLS should be greater than input image");
-    assert(((roi_brx < _src.cols) && (roi_bry < _src.rows)) &&
+    assert(((roi_brx < _src.rows) && (roi_bry < _src.cols)) &&
            "ROI bottom-right coordinates should be less than input image");
     assert(((roi_tlx < roi_brx) && (roi_tly < roi_bry)) &&
            "ROI top-left coordinates should be less bottom-right coordinates");
