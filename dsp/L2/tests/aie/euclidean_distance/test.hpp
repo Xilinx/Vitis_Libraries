@@ -62,9 +62,6 @@ class test_graph : public graph {
         printf("Data type of Point P, Q and Output of ED.  = ");
         printf(QUOTE(DATA));
         printf("\n");
-        printf("Data type of euclidean_distance Output.  = ");
-        printf(QUOTE(DATA_OUT));
-        printf("\n");
         printf("LEN                 = %d \n", LEN);
         printf("DIM                 = %d \n", DIM);
         printf("API                   = %d \n", API_IO);
@@ -73,7 +70,7 @@ class test_graph : public graph {
         printf("IS_OUTPUT_SQUARED     = %d \n", IS_OUTPUT_SQUARED);
 
         // euclidean_distance sub-graph
-        dsplib::euclidean_distance::UUT_GRAPH<DATA, DATA_OUT, LEN, DIM, API_IO, RND, SAT, IS_OUTPUT_SQUARED>
+        dsplib::euclidean_distance::UUT_GRAPH<DATA, LEN, DIM, API_IO, RND, SAT, IS_OUTPUT_SQUARED>
             euclidean_distanceGraph;
 
         // Make connections:

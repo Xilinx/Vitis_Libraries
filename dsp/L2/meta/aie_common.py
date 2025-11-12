@@ -20,6 +20,8 @@ import os
 AIE = 1
 AIE_ML = 2
 AIE_MLv2 = 22
+#
+AIE_2P = 21
 
 # Define kernel interface
 API_BUFFER = 0
@@ -33,7 +35,7 @@ k_aie_variant = {AIE: "AIE", AIE_ML: "AIE-ML", AIE_MLv2: "AIE-MLv2"}
 ### Data memory definitions ###
 k_tile_io_streams = {AIE: 2, AIE_ML: 1, AIE_MLv2: 1}
 ### Data memory definitions ###
-k_min_read_write_bytes = {AIE: 128 // 8, AIE_ML: 256 // 8}
+k_min_read_write_bytes = {AIE: 128 // 8, AIE_ML: 256 // 8, AIE_MLv2: 256 // 8}
 
 # Max size of a Memory Module (Group) read
 k_max_read_write_bytes = {AIE: 256 // 8, AIE_ML: 256 // 8, AIE_MLv2: 512 // 8}
@@ -144,6 +146,7 @@ k_base_type_map = {
     "cint32": "int32",
     "cfloat": "float",
     "bfloat16": "bfloat16",
+    "cbfloat16": "bfloat16",
 }
 
 k_base_type_size_map = {"int8": 1, "int16": 2, "int32": 4, "float": 4, "bfloat16": 2}
@@ -415,8 +418,24 @@ def get_parameter_enum_info(portname, default, enum_list, vectorLength=None):
         for idx in range((vectorLength if vectorLength else 1))
     ]  # do just one port if vectorLength=None
 
+def validate_rnd_mode(AIE_VARIANT, legal_set, param_value):
+    if AIE_VARIANT == AIE:
+        rnd_mode_map = k_rnd_mode_map_aie
+    elif AIE_VARIANT == AIE_ML:
+        rnd_mode_map = k_rnd_mode_map_aie_ml
+    elif AIE_VARIANT == AIE_MLv2:
+        rnd_mode_map = k_rnd_mode_map_aie_mlv2
+
+    if param_value in rnd_mode_map.keys():
+        param_value = rnd_mode_map[param_value]
+    return validate_legal_set(legal_set, "TP_RND", param_value)
+    
 
 def validate_legal_set(legal_set, param_name, param_value):
+    if not legal_set:
+        return isError(
+            f"{param_name} ({param_value}) is not in the legal set of {legal_set}. Legal set for {param_name} has been restricted by upstream parameters and is empty."
+        )
     if param_value in legal_set:
         return isValid
     else:

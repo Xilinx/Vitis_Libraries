@@ -104,8 +104,12 @@
       "default": 1,
       "type": "uint",
       "label": "SSR: ",
+      "enum": [
+                "Inherit from number of input columns",
+                "<Specify SSR number>" 
+            ],
       "tablabel": "Main",
-      "parameterType": "edit"
+      "parameterType": "combobox"
     },
     {
       "key": "TP_TWIDDLE_MODE",

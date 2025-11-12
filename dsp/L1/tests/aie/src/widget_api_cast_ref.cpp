@@ -670,12 +670,8 @@ void widget_api_cast_ref<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE
     constexpr unsigned int Lsize = TP_WINDOW_VSIZE * kSampleSize / (kWriteSize);
     constexpr unsigned int kCascadeWidth = 4; // samples.
 
+    using accTag = typename t_accType<TT_DATA>::type;
     using accVect_t = ::aie::accum<typename t_accType<TT_DATA>::type, kCascadeWidth>;
-    //  using accVect_t   = ::aie::detail::accum<::aie::detail::AccumClass::CInt,
-    //                                         //fnAccClass<TT_DATA>(), //int, cint, FP or CFP
-    //                                         64, //acc sample width
-    //                                         kCascadeWidth>; //both cint16 and cint32 use 4 * typename
-    //                                         t_accType<TT_DATA>::typekVectSize>;
     using dataVect_t = ::aie::vector<TT_DATA, kCascadeWidth>;
     accVect_t cascAcc;
     dataVect_t cascData;
@@ -685,8 +681,9 @@ void widget_api_cast_ref<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE
         constexpr(TP_HEADER_BYTES > 0) {
             for (int i = 0; i < TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
                 if (i % kCascadeWidth == 0)
-                    cascAcc = readincr_v4(inStream0); // read and ignore - the header can come from the stream
-                d_in = readincr(inStream1);           // read header from one stream only
+                    // cascAcc = readincr_v4(inStream0); // read and ignore - the header can come from the stream
+                    cascAcc = readincr_v<kCascadeWidth, accTag>(inStream0);
+                d_in = readincr(inStream1); // read header from one stream only
                 *outPtr0++ = d_in;
             }
         }
@@ -705,7 +702,8 @@ void widget_api_cast_ref<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE
                             0); // seems to be a bug in readincr_v8(instream0), so needed to use this workaround
                     }
                 else {
-                    cascAcc = readincr_v4(inStream0);
+                    cascAcc = readincr_v<kCascadeWidth, accTag>(inStream0);
+                    //                    cascAcc = readincr_v4(inStream0);
                 }
                 cascData = cascAcc.template to_vector<TT_DATA>(0);
                 for (int i = 0; i < kCascadeWidth; i++) {
@@ -739,12 +737,8 @@ void widget_api_cast_ref<TT_DATA, kStreamCascAPI, kWindowAPI, 2, TP_WINDOW_VSIZE
     constexpr unsigned int Lsize = TP_WINDOW_VSIZE * kSampleSize / (kWriteSize);
     constexpr unsigned int kCascadeWidth = 4; // samples.
 
+    using accTag = typename t_accType<TT_DATA>::type;
     using accVect_t = ::aie::accum<typename t_accType<TT_DATA>::type, kCascadeWidth>;
-    //  using accVect_t   = ::aie::detail::accum<::aie::detail::AccumClass::CInt,
-    //                                         //fnAccClass<TT_DATA>(), //int, cint, FP or CFP
-    //                                         64, //acc sample width
-    //                                         kCascadeWidth>; //both cint16 and cint32 use 4 * typename
-    //                                         t_accType<TT_DATA>::typekVectSize>;
     using dataVect_t = ::aie::vector<TT_DATA, kCascadeWidth>;
     accVect_t cascAcc;
     dataVect_t cascData;
@@ -754,8 +748,10 @@ void widget_api_cast_ref<TT_DATA, kStreamCascAPI, kWindowAPI, 2, TP_WINDOW_VSIZE
         constexpr(TP_HEADER_BYTES > 0) {
             for (int i = 0; i < TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
                 if (i % kCascadeWidth == 0)
-                    cascAcc = readincr_v4(inStream1); // read and ignore - the header can come from the stream
-                d_in = readincr(inStream0);           // read header from one stream only
+                    //                    cascAcc = readincr_v4(inStream1); // read and ignore - the header can come
+                    //                    from the stream
+                    cascAcc = readincr_v<kCascadeWidth, accTag>(inStream1);
+                d_in = readincr(inStream0); // read header from one stream only
                 *outPtr0++ = d_in;
             }
         }
@@ -773,7 +769,7 @@ void widget_api_cast_ref<TT_DATA, kStreamCascAPI, kWindowAPI, 2, TP_WINDOW_VSIZE
                         cascAcc = tmp2.extract<4>(0);
                     }
                 else {
-                    cascAcc = readincr_v4(inStream1);
+                    cascAcc = readincr_v<kCascadeWidth, accTag>(inStream1); // readincr_v4(inStream1);
                 }
                 cascData = cascAcc.template to_vector<TT_DATA>(0);
                 for (int i = 0; i < kCascadeWidth; i++) {
@@ -801,11 +797,6 @@ void widget_api_cast_ref<TT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE
     constexpr unsigned int kCascadeWidth = 4;                        // samples.
     constexpr unsigned int kStreamWidth = 128 / 8 / sizeof(TT_DATA); // samples.
     using accVect_t = ::aie::accum<typename t_accType<TT_DATA>::type, kCascadeWidth>;
-    //  using accVect_t   = ::aie::detail::accum<::aie::detail::AccumClass::CInt,
-    //                                         //fnAccClass<TT_DATA>(), //int, cint, FP or CFP
-    //                                         64, //acc sample width
-    //                                         kCascadeWidth>; //both cint16 and cint32 use 4 * typename
-    //                                         t_accType<TT_DATA>::typekVectSize>;
     using dataVect_t = ::aie::vector<TT_DATA, kCascadeWidth>;
     using streamVect_t = ::aie::vector<TT_DATA, kStreamWidth>;
 

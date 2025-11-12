@@ -129,6 +129,19 @@
             }
         },
         {
+            "name": "TP_USE_LUT_RELOAD",
+            "description": "Flag to indicate if LUT reloading is used",
+            "type": "uint",
+            "updater": {
+                "file": "func_approx.py",
+                "function": "update_TP_USE_LUT_RELOAD"
+            },
+            "validator": {
+                "file": "func_approx.py",
+                "function": "validate_TP_USE_LUT_RELOAD"
+            }
+        },
+        {
             "name": "TP_SHIFT",
             "description": "The power of 2 shift down applied to the accumulation of FIR before output",
             "type": "uint",
@@ -190,14 +203,22 @@
                 "file": "func_approx.py",
                 "function": "update_lookup_values",
                 "args": [
-                    "TP_COARSE_BITS"
+                    "TP_COARSE_BITS",
+                    "TP_DOMAIN_MODE",
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_USE_LUT_RELOAD"
                 ]
             },
             "validator": {
                 "file": "func_approx.py",
                 "function": "validate_lookup_values",
                 "args": [
-                    "TP_COARSE_BITS"
+                    "TP_COARSE_BITS",
+                    "TP_DOMAIN_MODE",
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_USE_LUT_RELOAD"
                 ]
             }
         }

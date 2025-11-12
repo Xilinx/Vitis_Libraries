@@ -24,13 +24,12 @@ decomposed fft .
 
 #include <adf.h>
 #include <vector>
-#include "utils.hpp"
 
 #include "config.h"
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
-#define NITER 2
+#define NITER 1
 #define AIE_GRAPH vss_fft_ifft_1d_graph
 
 #include QUOTE(AIE_GRAPH.hpp)
@@ -46,7 +45,8 @@ class tl_graph : public graph {
    private:
    public:
     static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
-    static constexpr int kPortsPerTile = API_IO == 0 ? 1 : kStreamsPerTile;
+    static constexpr int kWindowAPI = 0;
+    static constexpr int kPortsPerTile = kWindowAPI == 0 ? 1 : kStreamsPerTile;
     std::array<input_plio, SSR> back_i;
     std::array<output_plio, SSR> back_o;
     std::array<input_plio, SSR> front_i;
@@ -62,7 +62,7 @@ class tl_graph : public graph {
         printf("Point size           = %d \n", POINT_SIZE);
         printf("FFT/nIFFT            = %d \n", FFT_NIFFT);
         printf("Final scaling Shift  = %d \n", SHIFT);
-        printf("API_IO               = %d \n", API_IO);
+        printf("API_IO               = %d \n", kWindowAPI);
         printf("Round mode           = %d \n", ROUND_MODE);
         printf("Saturation mode      = %d \n", SAT_MODE);
         printf("Data type            = ");
@@ -73,7 +73,7 @@ class tl_graph : public graph {
         printf("\n");
         printf("========================\n");
         adf::plio_type aiePlioWidth = AIE_PLIO_WIDTH == 64 ? adf::plio_64_bits : adf::plio_128_bits;
-        xf::dsp::aie::fft::vss_1d::AIE_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, API_IO, SSR,
+        xf::dsp::aie::fft::vss_1d::AIE_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, kWindowAPI, SSR,
                                              ROUND_MODE, SAT_MODE, TWIDDLE_MODE>
             fftGraph;
         for (int i = 0; i < SSR; i++) {

@@ -31,12 +31,28 @@ CAPTURE:
         for (int cc = 0, addr = 0; cc < (memSizeAct) / NSTREAM; cc++) {
 #pragma HLS pipeline II = 1
             for (int ss = 0; ss < NSTREAM; ss++) {
-                TT_SAMPLE val1, val0;
-                (val1, val0) = sig_i[ss].read();
-                buff[ll][ss][addr + 0] = val0;
-                buff[ll][ss][addr + 1] = val1;
+                TT_SAMPLE val3, val2, val1, val0;
+                if (samplesPerRead == 2) {
+                    (val1, val0) = sig_i[ss].read();
+                    buff[ll][ss][addr + 0] = val0;
+                    buff[ll][ss][addr + 1] = val1;
+                } else {
+                    (val3, val2, val1, val0) = sig_i[ss].read();
+                    buff[ll][ss][addr + 0] = val0;
+                    buff[ll][ss][addr + 1] = val1;
+                    buff[ll][ss][addr + 2] = val2;
+                    buff[ll][ss][addr + 3] = val3;
+                    // printf("buff[%d][%d][%d] = %d, %d\n", ll, ss, addr+0, buff[ll][ss][addr+0] >> 16,
+                    // buff[ll][ss][addr+0] % (1<<15));
+                    // printf("buff[%d][%d][%d] = %d, %d\n", ll, ss, addr+1, buff[ll][ss][addr+1] >> 16,
+                    // buff[ll][ss][addr+1] % (1<<15));
+                    // printf("buff[%d][%d][%d] = %d, %d\n", ll, ss, addr+2, buff[ll][ss][addr+2] >> 16,
+                    // buff[ll][ss][addr+2] % (1<<15));
+                    // printf("buff[%d][%d][%d] = %d, %d\n", ll, ss, addr+3, buff[ll][ss][addr+3] >> 16,
+                    // buff[ll][ss][addr+3] % (1<<15));
+                }
             } // ss
-            addr = addr + 2;
+            addr = addr + samplesPerRead;
         } // cc
     }     // ll
 }
@@ -50,15 +66,36 @@ void read_buffer(TT_DATA mem[NITER][memSizeAct],
     for (int nn = 0; nn < NITER; nn++) {
         for (int rr = 0, mm = 0, ss0 = 0, addr0 = 0; rr < memSizeAct; rr++) {
 #pragma HLS PIPELINE II = 1
-            int ss1 = (ss0 == NSTREAM - 1) ? 0 : ss0 + 1;
-            int addr1 = (ss0 == NSTREAM - 1) ? addr0 + 1 : addr0;
-            TT_SAMPLE val0 = buff[nn][ss0][addr0];
-            TT_SAMPLE val1 = buff[nn][ss1][addr1];
-            if (ss0 == NSTREAM - 1 || ss1 == NSTREAM - 1) {
-                addr0 += 1;
+            if (samplesPerRead == 2) {
+                int ss1 = (ss0 == NSTREAM - 1) ? 0 : ss0 + 1;
+                int addr1 = (ss0 == NSTREAM - 1) ? addr0 + 1 : addr0;
+                TT_SAMPLE val0 = buff[nn][ss0][addr0];
+                TT_SAMPLE val1 = buff[nn][ss1][addr1];
+                if (ss0 == NSTREAM - 1 || ss1 == NSTREAM - 1) {
+                    addr0 += 1;
+                }
+                mem[nn][mm++] = (val1, val0);
+            } else {
+                int ss1 = (ss0 == NSTREAM - 1) ? 0 : ss0 + 1;
+                int ss2 = (ss0 >= NSTREAM - 2) ? ss0 + 2 - NSTREAM : ss0 + 2;
+                int ss3 = (ss0 >= NSTREAM - 3) ? ss0 + 3 - NSTREAM : ss0 + 3;
+                int addr1 = (ss0 == NSTREAM - 1) ? addr0 + 1 : addr0;
+                int addr2 = (ss0 >= NSTREAM - 2) ? addr0 + 1 : addr0;
+                int addr3 = (ss0 >= NSTREAM - 3) ? addr0 + 1 : addr0;
+                TT_SAMPLE val0 = buff[nn][ss0][addr0];
+                TT_SAMPLE val1 = buff[nn][ss1][addr1];
+                TT_SAMPLE val2 = buff[nn][ss2][addr2];
+                TT_SAMPLE val3 = buff[nn][ss3][addr3];
+                // printf("reading [%d,%d] from %d %d %d\n", val0>>16, val0 % (1<<15), nn, ss0, addr0);
+                // printf("reading [%d,%d] from %d %d %d\n", val1>>16, val1 % (1<<15), nn, ss1, addr1);
+                // printf("reading [%d,%d] from %d %d %d\n", val2>>16, val2 % (1<<15), nn, ss2, addr2);
+                // printf("reading [%d,%d] from %d %d %d\n", val3>>16, val3 % (1<<15), nn, ss3, addr3);
+                if (ss0 == NSTREAM - 1 || ss1 == NSTREAM - 1 || ss2 == NSTREAM - 1 || ss3 == NSTREAM - 1) {
+                    addr0 += 1;
+                }
+                mem[nn][mm++] = (val3, val2, val1, val0);
             }
-            mem[nn][mm++] = (val1, val0);
-            ss0 = (ss0 + 2 > NSTREAM - 1) ? ss0 + 2 - NSTREAM : ss0 + 2;
+            ss0 = (ss0 + samplesPerRead > NSTREAM - 1) ? ss0 + samplesPerRead - NSTREAM : ss0 + samplesPerRead;
         }
     }
 }

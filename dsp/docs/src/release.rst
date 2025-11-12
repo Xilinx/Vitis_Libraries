@@ -14,6 +14,45 @@ Release Notes
    :hidden:
    :maxdepth: 1
 
+2025.2
+======
+
+The following features have been added to the library in this release:
+
+* **Cumulative Sum** - New library element.
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and class name**                                                |
++=======================================+=============================================================================+
+| Cumulative Sum                        |  xf::dsp::aie::cumsum                                                       |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This element adds an implementation of the cumsum() algorithm.
+
+Supports AIE, AIE-ML and AIE-MLv2 devices.
+
+* **Function Approximation** - Added support for Run Time Programmable (RTP) configuration of the lookup tables that determine the function approximation.
+
+* **Bitonic Sort** - Disallowing inefficient configurations. Super Sample Rate (SSR) and use of cascades are now mutually exclusive. SSR=16 disallowed.
+
+* **Euclidean Distance** -
+      - Removed a template parameter called ``TT_DATA_OUT`` from the ED library element, since the input and output data types must be the same by definition.
+      - Added support for AIE-MLv2 device.
+
+* **Packet Graph Switch** - New library graph element.
+
++---------------------+--------------------------------+
+| **Function**        | **Namespace and class name**   |
++=====================+================================+
+| Packet Switch Graph | xf::dsp::aie::pkt_switch_graph |
++---------------------+--------------------------------+
+
+This element adds an implementation of a packet switch graph that can route multiple input packet streams to a wrapped instance of another graph, and then route the output from the wrapped graph to multiple output packet streams.
+
+Supports AIE, AIE-ML and AIE-MLv2 devices.
+
+Supported IP: FIR TDM.
+
 2025.1
 ======
 

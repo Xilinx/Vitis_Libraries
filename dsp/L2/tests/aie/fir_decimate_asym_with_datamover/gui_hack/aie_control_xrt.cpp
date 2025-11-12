@@ -56,7 +56,7 @@ class InitializeAIEControlXRT {
         adf::initializeConfigurations(nullptr, 0, 0, 0, GraphConfigurations, NUM_GRAPH, nullptr, 0, nullptr, 0, nullptr,
                                       0, nullptr, 0, nullptr, 0, nullptr, 0, nullptr, 0, nullptr, 0, PLIOConfigurations,
                                       NUM_PLIO, nullptr, 0, 0, nullptr, false, exclude_pl_control, false, nullptr, true,
-                                      0, 2);
+                                      0, 0, 2);
     }
 } initAIEControlXRT;
 

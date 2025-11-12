@@ -190,15 +190,20 @@ def fn_validate_TP_DOMAIN_MODE(TP_DOMAIN_MODE):
 def update_TP_WINDOW_VSIZE(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
-    return fn_update_tp_numFrames(AIE_VARIANT, TT_DATA)
+    return fn_update_tp_window_vsize(AIE_VARIANT, TT_DATA)
 
 
-def fn_update_tp_numFrames(AIE_VARIANT, TT_DATA):
+def fn_update_tp_window_vsize(AIE_VARIANT, TT_DATA):
     TP_WINDOW_VSIZE_max= int(k_data_memory_bytes[AIE_VARIANT]/(fn_size_by_byte(TT_DATA)))
     TP_WINDOW_VSIZE_max_pp= int(TP_WINDOW_VSIZE_max/2)
+    # valgrind warnings for bfloat16 cases when TP_WINDOW_VSIZE < 128
+    if TT_DATA == "bfloat16":
+        TP_WINDOW_VSIZE_min = 128
+    else:
+        TP_WINDOW_VSIZE_min = 32
     param_dict={}
     param_dict.update({"name" : "TP_WINDOW_VSIZE"})
-    param_dict.update({"minimum" : 16})
+    param_dict.update({"minimum" : TP_WINDOW_VSIZE_min})
     param_dict.update({"maximum" : TP_WINDOW_VSIZE_max})
     param_dict.update({"maximum_pingpong_buf" : TP_WINDOW_VSIZE_max_pp})
     return param_dict
@@ -209,6 +214,30 @@ def validate_TP_WINDOW_VSIZE(args):
     param_dict = update_TP_WINDOW_VSIZE(args)
     range_TP_WINDOW_VSIZE = [param_dict["minimum"], param_dict["maximum"]]
     return validate_range(range_TP_WINDOW_VSIZE, "TP_WINDOW_VSIZE", TP_WINDOW_VSIZE)
+
+# TP_USE_LUT_RELOAD Updater and Validator
+#######################################################
+def update_TP_USE_LUT_RELOAD(args):
+    return fn_update_tp_USE_LUT_RELOAD()
+
+def fn_update_tp_USE_LUT_RELOAD():
+    legal_set = [0, 1]
+
+    param_dict = {}
+    param_dict.update({"name": "TP_USE_LUT_RELOAD"})
+    param_dict.update({"enum": legal_set})
+    return param_dict
+
+
+def validate_TP_USE_LUT_RELOAD(args):
+    TP_USE_LUT_RELOAD = args["TP_USE_LUT_RELOAD"]
+    return fn_validate_TP_USE_LUT_RELOAD(TP_USE_LUT_RELOAD)
+
+
+def fn_validate_TP_USE_LUT_RELOAD(TP_USE_LUT_RELOAD):
+    param_dict = fn_update_tp_USE_LUT_RELOAD()
+    legal_set_TP_USE_LUT_RELOAD = param_dict["enum"]
+    return validate_legal_set(legal_set_TP_USE_LUT_RELOAD, "TP_USE_LUT_RELOAD", TP_USE_LUT_RELOAD)
 
 
 #######################################################
@@ -305,25 +334,44 @@ def fn_validate_TP_SAT(TP_SAT):
 #######################################################
 def update_lookup_values(args):
     TP_COARSE_BITS = args["TP_COARSE_BITS"]
-    return fn_update_lut_values(TP_COARSE_BITS)
+    TP_DOMAIN_MODE = args["TP_DOMAIN_MODE"]
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TT_DATA = args["TT_DATA"]
+    TP_USE_LUT_RELOAD = args["TP_USE_LUT_RELOAD"]
+    return fn_update_lut_values(TP_COARSE_BITS, TP_DOMAIN_MODE, AIE_VARIANT, TT_DATA, TP_USE_LUT_RELOAD)
 
 
-def fn_update_lut_values(TP_COARSE_BITS):
+def fn_update_lut_values(TP_COARSE_BITS, TP_DOMAIN_MODE, AIE_VARIANT, TT_DATA, TP_USE_LUT_RELOAD):
     valuesInLut = 2 << TP_COARSE_BITS
+    if TP_DOMAIN_MODE == 1:
+        valuesInLut /= 2
+    
+    # Check for LUT duplication - occurs with linear_approx API on AIE-ML/AIE-MLv2 with int16/bfloat16 when LUT reload is enabled
+    if TP_USE_LUT_RELOAD == 1:
+        if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2:
+            if TT_DATA == "int16" or TT_DATA == "bfloat16":
+                valuesInLut = 2 * valuesInLut
+    
     param_dict = {}
     param_dict.update({"name": "lookup_values"})
-    param_dict.update({"len": valuesInLut})
+    param_dict.update({"len": int(valuesInLut)})
     return param_dict
 
 
 def validate_lookup_values(args):
     lut = args["lookup_values"]
     TP_COARSE_BITS = args["TP_COARSE_BITS"]
-    return fn_validate_lut_values(TP_COARSE_BITS, lut)
+    TP_DOMAIN_MODE = args["TP_DOMAIN_MODE"]
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TT_DATA = args["TT_DATA"]
+    TP_USE_LUT_RELOAD = args["TP_USE_LUT_RELOAD"]
+    return fn_validate_lut_values(TP_COARSE_BITS, TP_DOMAIN_MODE, AIE_VARIANT, TT_DATA, TP_USE_LUT_RELOAD, lut)
 
 
-def fn_validate_lut_values(TP_COARSE_BITS, lut_list):
-    param_dict = fn_update_lut_values(TP_COARSE_BITS)
+def fn_validate_lut_values(TP_COARSE_BITS, TP_DOMAIN_MODE, AIE_VARIANT, TT_DATA, TP_USE_LUT_RELOAD, lut_list):
+    if TP_USE_LUT_RELOAD == 1:
+        return isValid
+    param_dict = fn_update_lut_values(TP_COARSE_BITS, TP_DOMAIN_MODE, AIE_VARIANT, TT_DATA, TP_USE_LUT_RELOAD)
     len_lut = param_dict["len"]
     return validate_LUT_len(lut_list, len_lut)
 
@@ -341,10 +389,29 @@ def info_ports(args):
     TP_FINE_BITS = args["TP_FINE_BITS"]
     TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
     TP_SHIFT = args["TP_SHIFT"]
-
+    TP_DOMAIN_MODE = args["TP_DOMAIN_MODE"]
+    AIE_VARIANT = args["AIE_VARIANT"]
     in_ports = get_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE, 1, 0)
     out_ports = get_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE, 1, 0)
-    return in_ports + out_ports
+    lut_type_str = (
+        f"float"
+        if TT_DATA == "bfloat16"
+        else f"{TT_DATA}"
+    )
+
+    lut_len = (2 << TP_COARSE_BITS)
+    if TP_DOMAIN_MODE == 1:
+        lut_len = lut_len / 2
+    # Inner LUT duplication when using linear_approx API. Only for int16/bfloat16 on AIE-ML and AIE-MLv2
+    if (AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2) and (TT_DATA == "int16" or TT_DATA == "bfloat16"):
+        lut_len = 2 * lut_len
+    # If rtp, there are two identical rtp LUT ports
+    lut_ports = (
+        get_parameter_port_info("rtpLut", "in", lut_type_str, 2, lut_len, "async")
+        if (args["TP_USE_LUT_RELOAD"] == 1)
+        else []
+    )
+    return in_ports + lut_ports + out_ports
 
     ######### Parameter Range Generator ############
 
@@ -395,39 +462,90 @@ def generate_graph(graphname, args):
     TP_SHIFT = args["TP_SHIFT"]
     TP_RND = args["TP_RND"]
     TP_SAT = args["TP_SAT"]
+    TP_USE_LUT_RELOAD = args["TP_USE_LUT_RELOAD"]
     lookup_list = args["lookup_values"]
-
+    
     lookup_vector = fn_get_lookup_vector(TT_DATA, lookup_list)
-
+    constr_args_str = f"m_luts_ab" if TP_USE_LUT_RELOAD == 0 else ""
+    rtp_lut_declare_str = (
+        f"rtp_port_array rtpLut;"
+        if TP_USE_LUT_RELOAD == 1
+        else "//No RTP LUT port"
+    )
+    rtp_lut_connect_str = (
+        f"adf::connect<>(rtpLut[i], func_approx_graph.rtpLut[i]);"
+        if TP_USE_LUT_RELOAD == 1
+        else "//No RTP LUT port"
+    )
+    lut_type_str = (
+        f"float"
+        if TT_DATA == "bfloat16"
+        else f"{TT_DATA}"
+    )
     code = f"""
 
 class {graphname} : public adf::graph {{
 public:
-  // ports
-  std::array<adf::port<input>, 1> in;
-  std::array<adf::port<output>, 1> out;
+    // ports
+    std::array<adf::port<input>, 1> in;
+    std::array<adf::port<output>, 1> out;
+    
+    
+    static constexpr int sectionTotal = 1 << {TP_COARSE_BITS};
+    static constexpr int sectionWidth = 1 << {TP_FINE_BITS};
+    static constexpr int ignoreTopDomainBit = ({TP_DOMAIN_MODE} == 1) ? 1 : 0;
+    static constexpr int lutSize =
+        (sectionTotal * 2) / (ignoreTopDomainBit + 1); // Each section has two values (slope and offset)
+    std::array<{lut_type_str}, {len(lookup_list)}> m_luts_ab = {lookup_vector};
 
-  static constexpr int sectionTotal = 1 << COARSE_BITS;
-  static constexpr int sectionWidth = 1 << FINE_BITS;
-  static constexpr int lutSize = sectionTotal * 2;
-  std::vector<DATA_TYPE> m_luts_ab, m_luts_cd;
+    using funcApproxClass = xf::dsp::aie::func_approx::func_approx_graph<
+        {TT_DATA}, // TT_DATA
+        {TP_COARSE_BITS}, // TP_COARSE_BITS
+        {TP_FINE_BITS}, // TP_FINE_BITS
+        {TP_DOMAIN_MODE}, // TP_DOMAIN_MODE
+        {TP_WINDOW_VSIZE}, // TP_WINDOW_VSIZE
+        {TP_SHIFT}, // TP_SHIFT
+        {TP_RND}, //TP_RND
+        {TP_SAT}, //TP_SAT
+        {TP_USE_LUT_RELOAD} //TP_USE_LUT_RELOAD
+        >;
+    
+    static constexpr int rtpPortNumber = funcApproxClass::getTotalRtpPorts();
+    using rtp_port_array = std::array<adf::port<input>, rtpPortNumber>;
+    {rtp_lut_declare_str}
 
-  xf::dsp::aie::func_approx<
-    {TT_DATA}, // TT_DATA
-    {TP_COARSE_BITS}, // TP_COARSE_BITS
-    {TP_FINE_BITS}, // TP_FINE_BITS
-    {TP_DOMAIN_MODE}, // TP_DOMAIN_MODE
-    {TP_WINDOW_VSIZE}, // TP_WINDOW_VSIZE
-    {TP_SHIFT}, // TP_SHIFT
-    {TP_RND}, //TP_RND
-    {TP_SAT} //TP_SAT
-    > func_approx_graph;
+    funcApproxClass func_approx_graph;
 
-    m_luts_ab = {lookup_vector};
+    static constexpr unsigned int getTotalRtpPorts() {{
+        return funcApproxClass::getTotalRtpPorts();
+    }};
+    
+    template<typename TopGraph>
+    void update_rtp(TopGraph& top, const std::array<{lut_type_str}, lutSize>& m_luts_ab, rtp_port_array rtpLut) {{
+        func_approx_graph.update_rtp(top, m_luts_ab, rtpLut);
+    }};
+    /**
+     * Access function to get pointer to kernel.
+     **/
+    kernel* getKernels() {{
+        return func_approx_graph.getKernels(); 
+    }};
+    // Constructor using lut passed as an argument
+    {graphname}(const std::array<{lut_type_str}, lutSize>& m_luts_ab) : func_approx_graph(m_luts_ab) {{
+        create_connections();
+    }}
+    // Constructor using internal lut
+    {graphname}() : func_approx_graph({constr_args_str}) {{
+        create_connections();
+    }}
 
-    {graphname}() : func_approx_graph(m_luts_ab) {{
-      adf::connect<> net_in(in[0], func_approx_graph.in[0]);
-      adf::connect<> net_out(func_approx_graph.out[0], out[0]);
+    void create_connections() {{
+        adf::kernel *approx_kernels = func_approx_graph.getKernels();
+        adf::connect<> net_in(in[0], func_approx_graph.in[0]);
+        adf::connect<> net_out(func_approx_graph.out[0], out[0]);
+        for (int i=0; i < rtpPortNumber; i++) {{
+            {rtp_lut_connect_str}
+        }}
     }}
 
 }};
@@ -435,7 +553,7 @@ public:
     out = {}
     out["graph"] = code
     out["port_info"] = info_ports(args)
-    out["headerfile"] = ["func_approx_graph.hpp"]
+    out["headerfile"] = "func_approx_graph.hpp"
     out["searchpaths"] = [
         "L2/include/aie",
         "L2/tests/aie/common/inc",
@@ -451,7 +569,7 @@ public:
 # _aie refers to AIE IP (L2 graph top level)
 def update_params(args):
     out = {}
-    out["headerfile"] = ["func_approx_graph.hpp"]
+    out["headerfile"] = "func_approx_graph.hpp"
     out["searchpaths"] = [
         "L2/include/aie",
         "L2/tests/aie/common/inc",

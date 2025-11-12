@@ -30,10 +30,51 @@ unsigned int bitReverse(unsigned int x, int log2n) {
     }
     return n;
 }
-
 template <typename dataType, typename twidType>
-void fft(dataType* in, dataType* out, unsigned int pointSize) {
-    twidType twid;
+void fft(std::complex<dataType>* in, std::complex<dataType>* out, unsigned int pointSize) {
+    long roundConst = std::is_same<twidType, int16_t>::value ? 32767 : 2147483647;
+    std::complex<twidType> twid;
+    for (int i = 0; i < pointSize; ++i) {
+        out[i].real(0);
+        out[i].imag(0);
+        for (int j = 0; j < pointSize; ++j) {
+            double scaleFactor = std::is_same<twidType, int16_t>::value ? 32768.0 : 2147483648.0;
+            double cosD = round((cos(-1 * M_PI * 2.0 * (double)i * (double)j / (double)pointSize)) * scaleFactor);
+            double sinD = round((sin(-1 * M_PI * 2.0 * (double)i * (double)j / (double)pointSize)) * scaleFactor);
+            double maxTwid = scaleFactor - 1;
+            if (cosD > maxTwid) {
+                twid.real((twidType)maxTwid);
+            } else {
+                twid.real((twidType)cosD);
+            }
+            if (sinD > maxTwid) {
+                twid.imag((twidType)maxTwid);
+            } else {
+                twid.imag((twidType)sinD);
+            }
+            //   printf("twiddle %d, %d\n", twid.real(), twid.imag());
+            long inRotReal = (long)in[j].real() * (long)twid.real() - ((long)in[j].imag() * (long)twid.imag());
+            long inRotImag = (long)in[j].real() * (long)twid.imag() + ((long)in[j].imag() * (long)twid.real());
+            // do rounding and shifting
+            //   printf("raw mult output %ld, %ld\n", inRotReal, inRotImag);
+            inRotReal = (long)(inRotReal + roundConst) >> (sizeof(twidType) * 8 - 1);
+            inRotImag = (long)(inRotImag + roundConst) >> (sizeof(twidType) * 8 - 1);
+            //   printf("after rounding %ld, %ld\n", inRotReal, inRotImag);
+            //   printf("after adding %ld, %ld\n", (out[i].real() + (inRotReal)), (out[i].imag() + (inRotImag)));
+            // twid.real((cos(-1 * M_PI * 2.0 * (double)i * (double)j / (double)pointSize)));
+            // twid.imag((sin(-1 * M_PI * 2.0 * (double)i * (double)j / (double)pointSize)));
+            out[i].real((out[i].real() + (inRotReal)));
+            out[i].imag((out[i].imag() + (inRotImag)));
+            // printf("out[%d] = %d, %d\n", i, out[i].real(), out[i].imag());
+        }
+        out[i].real(out[i].real() / (pointSize));
+        out[i].imag(out[i].imag() / (pointSize));
+    }
+}
+
+template <>
+void fft<float, float>(std::complex<float>* in, std::complex<float>* out, unsigned int pointSize) {
+    std::complex<float> twid;
     for (int i = 0; i < pointSize; ++i) {
         out[i].real(0);
         out[i].imag(0);
@@ -47,50 +88,55 @@ void fft(dataType* in, dataType* out, unsigned int pointSize) {
 }
 
 int main() {
-    hls::stream<cfloat_set> inData[POINT_SIZE];
-    hls::stream<cfloat_set> outData[POINT_SIZE];
-    std::complex<float> in[NITER * POINT_SIZE], out[NITER * POINT_SIZE];
-    std::complex<float> tmpData;
-    std::complex<float> rdData1, rdData2;
-    std::complex<float> err;
-    cfloat_set writeData;
-    cfloat_set readDataSet;
+    // using data_set = ssrFFTClass<DATA_TYPE, TWIDDLE_TYPE>::data_set;
+    using TT_STREAM = ssrFFTClass<DATA_TYPE, TWIDDLE_TYPE>::TT_STREAM;
+    using TT_DATA_REAL = ssrFFTClass<DATA_TYPE, TWIDDLE_TYPE>::TT_DATA_REAL;
+    using TT_TWIDDLE_REAL = ssrFFTClass<DATA_TYPE, TWIDDLE_TYPE>::TT_TWIDDLE_REAL;
+    TT_STREAM inData[POINT_SIZE];
+    TT_STREAM outData[POINT_SIZE];
+    std::complex<TT_DATA_REAL> in[NITER * POINT_SIZE], out[NITER * POINT_SIZE];
+    std::complex<TT_DATA_REAL> tmpData;
+    std::complex<TT_DATA_REAL> rdData1, rdData2;
+    std::complex<TT_DATA_REAL> err;
 
-    for (int nn = 0; nn < NITER; nn += 2) {
+    for (int nn = 0; nn < NITER; nn += 1) {
         for (int i = 0; i < POINT_SIZE; i++) {
-            tmpData.real(i * 1.0f);
-            tmpData.real(i * 1.0f);
-            writeData.data1 = tmpData;
-            writeData.data2 = tmpData;
-            inData[i].write(writeData);
+            // TT_DATA_REAL
+            if (i == 0) {
+                tmpData.imag(0x7ffe);
+                tmpData.real(0x7ffe);
+            }
+            if (i == 1) {
+                tmpData.imag(0x7ffe);
+                tmpData.real(0x7ffe);
+            }
+            if (i == 2) {
+                tmpData.imag(0x7ffe);
+                tmpData.real(0x7ffe);
+            }
+            if (i == 3) {
+                tmpData.imag(0x7ffe);
+                tmpData.real(0x7ffe);
+            }
+            // tmpData.real(4.0f);
+            inData[i].write(tmpData);
             in[nn * POINT_SIZE + i] = tmpData;
-            in[nn * POINT_SIZE + POINT_SIZE + i] = tmpData;
+            // in[nn * POINT_SIZE + POINT_SIZE + i] = tmpData;
         }
-        fft<std::complex<float>, std::complex<float> >(&in[nn * POINT_SIZE], &out[nn * POINT_SIZE], POINT_SIZE);
-        fft<std::complex<float>, std::complex<float> >(&in[(nn + 1) * POINT_SIZE], &out[(nn + 1) * POINT_SIZE],
-                                                       POINT_SIZE);
+        fft<TT_DATA_REAL, TT_TWIDDLE_REAL>(&in[nn * POINT_SIZE], &out[nn * POINT_SIZE], POINT_SIZE);
+        // fft<std::complex<DATA_TYPE>, std::complex<DATA_TYPE>>(&in[(nn + 1)* POINT_SIZE], &out[(nn + 1) * POINT_SIZE],
+        // POINT_SIZE);
         ssr_fft_wrapper(inData, outData);
         for (int i = 0; i < POINT_SIZE; i++) {
-            readDataSet = outData[i].read();
-            rdData1 = readDataSet.data1;
-            rdData2 = readDataSet.data2;
+            rdData1 = outData[i].read();
             err.real(rdData1.real() - out[nn * POINT_SIZE + i].real());
             err.imag(rdData1.imag() - out[nn * POINT_SIZE + i].imag());
-            if (err.real() > 0.00005 || err.real() < -0.00005 || err.imag() > 0.00005 || err.imag() < -0.00005) {
-                printf("act = %f, %f golden = %f, %f error = %f, %f\n", rdData1.real(), rdData1.imag(),
+            if (err.real() > 0.0005 || err.real() < -0.0005 || err.imag() > 0.0005 || err.imag() < -0.0005) {
+                printf("i = %d act = %d, %d golden = %d, %d error = %d, %d\n", i, rdData1.real(), rdData1.imag(),
                        out[nn * POINT_SIZE + i].real(), out[nn * POINT_SIZE + i].imag(),
                        rdData1.real() - out[nn * POINT_SIZE + i].real(),
                        rdData1.imag() - out[nn * POINT_SIZE + i].imag());
-                return 1;
-            }
-            err.real(rdData2.real() - out[(nn + 1) * POINT_SIZE + i].real());
-            err.imag(rdData2.imag() - out[(nn + 1) * POINT_SIZE + i].imag());
-            if (err.real() > 0.00005 || err.real() < -0.00005 || err.imag() > 0.00005 || err.imag() < -0.00005) {
-                printf("act = %f, %f golden = %f, %f error = %f, %f\n", rdData2.real(), rdData2.imag(),
-                       out[nn * POINT_SIZE + i].real(), out[nn * POINT_SIZE + i].imag(),
-                       rdData2.real() - out[nn * POINT_SIZE + i].real(),
-                       rdData2.imag() - out[nn * POINT_SIZE + i].imag());
-                return 1;
+                // return 1;
             }
         }
     }

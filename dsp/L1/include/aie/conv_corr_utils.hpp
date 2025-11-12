@@ -689,16 +689,19 @@ auto getRearrangeOffsets(unsigned int streamsPerCore, unsigned int TP_PHASES, un
     return BuffOffsetShuffle{xBuffOffsetLow, xBuffOffsetHi, yBuffOffsetLow, yBuffOffsetHi, select, xsquare, ysquare};
 };
 
-template <typename TT_DATA_F, typename TT_DATA_G>
+template <typename TT_DATA_F,
+          typename TT_DATA_G,
+          unsigned int TP_PHASES,
+          unsigned int TP_G_LEN,
+          unsigned int TP_FUNCT_TYPE,
+          unsigned int streamsPerCore>
 INLINE_DECL void gDataReArrange(
     ::aie::vector<TT_DATA_G, (kMaxSamplesInShuffleVec / sizeof(TT_DATA_G))>* g_buff_ptr,
-    ::aie::vector<TT_DATA_G, (kMaxSamplesInShuffleVec / sizeof(TT_DATA_G))>* g_rearrange_ptr,
-    unsigned int streamsPerCore,
-    unsigned int TP_PHASES,
-    unsigned int TP_G_LEN,
-    unsigned int TP_FUNCT_TYPE) {
-    constexpr int kVsize = kBuffSize64Byte / sizeof(TT_DATA_G);  // vector size with 512-bit buffer interms of Bytes
-    constexpr int kVsize1 = kBuffSize16Byte / sizeof(TT_DATA_G); // vector size with 128-bit buffer interms of Bytes
+    ::aie::vector<TT_DATA_G, (kMaxSamplesInShuffleVec / sizeof(TT_DATA_G))>* g_rearrange_ptr) {
+    static constexpr int kVsize =
+        kBuffSize64Byte / sizeof(TT_DATA_G); // vector size with 512-bit buffer interms of Bytes
+    static constexpr int kVsize1 =
+        kBuffSize16Byte / sizeof(TT_DATA_G); // vector size with 128-bit buffer interms of Bytes
 
     // Alias for for different size of vectors to define.
     using buff_vector = ::aie::vector<TT_DATA_G, kVsize>;
@@ -711,14 +714,14 @@ INLINE_DECL void gDataReArrange(
     t_vect __aie_dm_resource_a* ppin_alias = (t_vect __aie_dm_resource_a*)g_buff_ptr;
 
     static constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>();
-    unsigned int reqNumBuff =
+    static constexpr unsigned int reqNumBuff =
         ((TP_PHASES > ((kBuffSize16Byte >> 1) / sizeof(TT_DATA_G))) ? ((TP_G_LEN / TP_PHASES) / kLanes)
                                                                     : (CEIL(TP_G_LEN, kVsize) / kVsize));
-    unsigned int buffPtrInc = (CEIL(TP_PHASES, kVsize1) / kVsize1);
-    unsigned int maxBuffIndx = (TP_G_LEN < kVsize) ? kMaxIndexOf16ByteVector : kMaxIndexOf32ByteVector;
+    static constexpr unsigned int buffPtrInc = (CEIL(TP_PHASES, kVsize1) / kVsize1);
+    static constexpr unsigned int maxBuffIndx = (TP_G_LEN < kVsize) ? kMaxIndexOf16ByteVector : kMaxIndexOf32ByteVector;
     auto[xbuffOffset, xbuffOffsetHi, ybuffOffset, ybuffOffsetHi, select, xsquare, ysquare] =
         getRearrangeOffsets<TT_DATA_G>(streamsPerCore, TP_PHASES, TP_FUNCT_TYPE);
-    unsigned int numrd = (TP_PHASES > TWO_PHASES) ? (TWO_PHASES / streamsPerCore) : 1;
+    static constexpr unsigned int numrd = (TP_PHASES > TWO_PHASES) ? (TWO_PHASES / streamsPerCore) : 1;
 
     buff_vector buff[reqNumBuff];
     buff_vector aShuffleBuff[reqNumBuff];

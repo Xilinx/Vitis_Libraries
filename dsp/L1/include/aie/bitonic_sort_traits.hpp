@@ -17,6 +17,8 @@
 #ifndef _DSPLIB_BITONIC_SORT_TRAITS_HPP_
 #define _DSPLIB_BITONIC_SORT_TRAITS_HPP_
 
+#include "device_defs.h"
+
 /*
 This file contains sets of overloaded, templatized and specialized templatized functions which
 encapsulate properties of the intrinsics used by the main kernal class. Specifically,
@@ -52,123 +54,6 @@ struct transposeType<32> {
 };
 template <int vecSize>
 using transposeType_t = typename transposeType<vecSize>::type;
-
-template <unsigned int powerOf2>
-INLINE_DECL constexpr unsigned int fnLog2() {
-    if
-        constexpr(powerOf2 == 32768) { return 15; }
-    else if
-        constexpr(powerOf2 == 16384) { return 14; }
-    else if
-        constexpr(powerOf2 == 8192) { return 13; }
-    else if
-        constexpr(powerOf2 == 4096) { return 12; }
-    else if
-        constexpr(powerOf2 == 2048) { return 11; }
-    else if
-        constexpr(powerOf2 == 1024) { return 10; }
-    else if
-        constexpr(powerOf2 == 512) { return 9; }
-    else if
-        constexpr(powerOf2 == 256) { return 8; }
-    else if
-        constexpr(powerOf2 == 128) { return 7; }
-    else if
-        constexpr(powerOf2 == 64) { return 6; }
-    else if
-        constexpr(powerOf2 == 32) { return 5; }
-    else if
-        constexpr(powerOf2 == 16) { return 4; }
-    else if
-        constexpr(powerOf2 == 8) { return 3; }
-    else if
-        constexpr(powerOf2 == 4) { return 2; }
-    else if
-        constexpr(powerOf2 == 2) { return 1; }
-    else if
-        constexpr(powerOf2 == 1) { return 0; }
-    else {
-        return -1;
-    }
-};
-
-template <unsigned int logBase2>
-INLINE_DECL constexpr unsigned int fnPwr2() {
-    if
-        constexpr(logBase2 == 15) { return 32768; }
-    else if
-        constexpr(logBase2 == 14) { return 16384; }
-    else if
-        constexpr(logBase2 == 13) { return 8192; }
-    else if
-        constexpr(logBase2 == 12) { return 4096; }
-    else if
-        constexpr(logBase2 == 11) { return 2048; }
-    else if
-        constexpr(logBase2 == 10) { return 1024; }
-    else if
-        constexpr(logBase2 == 9) { return 512; }
-    else if
-        constexpr(logBase2 == 8) { return 256; }
-    else if
-        constexpr(logBase2 == 7) { return 128; }
-    else if
-        constexpr(logBase2 == 6) { return 64; }
-    else if
-        constexpr(logBase2 == 5) { return 32; }
-    else if
-        constexpr(logBase2 == 4) { return 16; }
-    else if
-        constexpr(logBase2 == 3) { return 8; }
-    else if
-        constexpr(logBase2 == 2) { return 4; }
-    else if
-        constexpr(logBase2 == 1) { return 2; }
-    else if
-        constexpr(logBase2 == 0) { return 1; }
-    else {
-        return -1;
-    }
-};
-
-template <unsigned int logBase16>
-INLINE_DECL constexpr uint64 fnPwr16() {
-    if
-        constexpr(logBase16 == 15) { return 0x1000000000000000u; }
-    else if
-        constexpr(logBase16 == 14) { return 0x100000000000000u; }
-    else if
-        constexpr(logBase16 == 13) { return 0x10000000000000u; }
-    else if
-        constexpr(logBase16 == 12) { return 0x1000000000000u; }
-    else if
-        constexpr(logBase16 == 11) { return 0x100000000000u; }
-    else if
-        constexpr(logBase16 == 10) { return 0x10000000000u; }
-    else if
-        constexpr(logBase16 == 9) { return 0x1000000000u; }
-    else if
-        constexpr(logBase16 == 8) { return 0x100000000u; }
-    else if
-        constexpr(logBase16 == 7) { return 0x10000000u; }
-    else if
-        constexpr(logBase16 == 6) { return 0x1000000u; }
-    else if
-        constexpr(logBase16 == 5) { return 0x100000u; }
-    else if
-        constexpr(logBase16 == 4) { return 0x10000u; }
-    else if
-        constexpr(logBase16 == 3) { return 0x1000u; }
-    else if
-        constexpr(logBase16 == 2) { return 0x100u; }
-    else if
-        constexpr(logBase16 == 1) { return 0x10u; }
-    else if
-        constexpr(logBase16 == 0) { return 0x1u; }
-    else {
-        return -1;
-    }
-};
 
 template <int stride>
 INLINE_DECL constexpr uint32 fnGetInterleave() {
@@ -306,7 +191,6 @@ INLINE_DECL constexpr uint64 getMinMaxIdx() {
     }
 };
 
-// TODO: Optimize this
 template <unsigned int TP_ASCEND>
 INLINE_DECL int getMinMaxIdxRegRuntime(int& i, int& j, int& k) {
     uint64 stride = k & (-(1 << (i - j)));
@@ -314,7 +198,6 @@ INLINE_DECL int getMinMaxIdxRegRuntime(int& i, int& j, int& k) {
     return stride + k + (1 - TP_ASCEND) * (1 << (i - j));
 };
 
-// TODO: Optimize this
 template <unsigned int TP_ASCEND>
 INLINE_DECL int getMinMaxIdxHandRuntime(int& i, int& k) {
     uint64 stride = k & (-(1 << i));

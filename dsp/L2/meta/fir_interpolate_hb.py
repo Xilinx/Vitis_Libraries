@@ -175,7 +175,7 @@ def fn_update_TP_FIR_LEN(TT_DATA, TP_API, TP_USE_COEFF_RELOAD, TP_FIR_LEN):
     )
     TP_FIR_LEN_max_int2 = min(TP_FIR_LEN_max_int1, TP_FIR_LEN_max)
     TP_FIR_LEN_max_int = int(FLOOR((TP_FIR_LEN_max_int2 + 1), 4) - 1)
-    
+
     param_dict = {
         "name": "TP_FIR_LEN",
         "minimum": TP_FIR_LEN_min_int,
@@ -254,7 +254,7 @@ def fn_update_TP_PARA_INTERP_POLY(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR
     )
 
     if "enum" in param_dict_casc_len and param_dict_casc_len["enum"] in [None, []]:
-        legal_set_TP_PARA_INTERP_POLY = [2] #If so, eliminate the option   
+        legal_set_TP_PARA_INTERP_POLY = [2] #If so, eliminate the option
 
     param_dict = {"name": "TP_PARA_INTERP_POLY", "enum": legal_set_TP_PARA_INTERP_POLY}
     return param_dict

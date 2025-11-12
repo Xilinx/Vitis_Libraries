@@ -153,10 +153,9 @@ class create_casc_kernel_recur {
     // graph scoping of large (>256 twiddle tables)
     static void create(kernel (&fftKernels)[TP_CASC_LEN], int* startRanks, int* endRanks) {
         static constexpr int kRawRanksPerKernel =
-            std::is_same<TT_DATA, cfloat>::value ? (TP_END_RANK / dim) : (TP_END_RANK / dim / 2) * 2;
-        static constexpr unsigned int kRanksPerKernel = std::is_same<TT_DATA, cfloat>::value
-                                                            ? kRawRanksPerKernel
-                                                            : (kRawRanksPerKernel < 2 ? 2 : kRawRanksPerKernel);
+            fnIsFloat<TT_DATA>() ? (TP_END_RANK / dim) : (TP_END_RANK / dim / 2) * 2;
+        static constexpr unsigned int kRanksPerKernel =
+            fnIsFloat<TT_DATA>() ? kRawRanksPerKernel : (kRawRanksPerKernel < 2 ? 2 : kRawRanksPerKernel);
         static constexpr int kRawStartRank = (int)TP_END_RANK - (int)kRanksPerKernel;
         static constexpr unsigned int TP_START_RANK = kRawStartRank < 0 ? 0 : kRawStartRank;
 
@@ -276,17 +275,16 @@ class create_casc_kernel {
                                                           ? 5
                                                           : (TP_POINT_SIZE == 16) ? 4
                                                                                   : 0; // 0 is an error trap effectively
-        static constexpr unsigned int kIntConfig = std::is_same<TT_DATA, cfloat>::value ? 0 : 1;
+        static constexpr unsigned int kIntConfig = fnIsFloat<TT_DATA>() ? 0 : 1;
         static constexpr unsigned int TP_END_RANK = (kIntConfig == 1) ? fnCeil<TP_END_RANK_RAW, 2>() : TP_END_RANK_RAW;
         static_assert(fnCheckCascLen<TT_DATA, TP_END_RANK, TP_CASC_LEN>(), "Error: TP_CASC_LEN is invalid");
         static_assert(
             fnCheckCascLen2<TT_DATA, TP_POINT_SIZE, TP_CASC_LEN>(),
             "Error: 16 point float FFT does not support cascade"); // due to need for ping/pang/pong complication
         static constexpr int kRawRanksPerKernel =
-            std::is_same<TT_DATA, cfloat>::value ? (TP_END_RANK / TP_CASC_LEN) : (TP_END_RANK / TP_CASC_LEN / 2) * 2;
-        static constexpr unsigned int TP_RANKS_PER_KERNEL = std::is_same<TT_DATA, cfloat>::value
-                                                                ? kRawRanksPerKernel
-                                                                : (kRawRanksPerKernel < 2 ? 2 : kRawRanksPerKernel);
+            fnIsFloat<TT_DATA>() ? (TP_END_RANK / TP_CASC_LEN) : (TP_END_RANK / TP_CASC_LEN / 2) * 2;
+        static constexpr unsigned int TP_RANKS_PER_KERNEL =
+            fnIsFloat<TT_DATA>() ? kRawRanksPerKernel : (kRawRanksPerKernel < 2 ? 2 : kRawRanksPerKernel);
         static constexpr unsigned int TP_START_RANK = (int)TP_END_RANK - (int)TP_RANKS_PER_KERNEL;
 
         startRanks[dim - 1] = TP_START_RANK;
@@ -366,7 +364,7 @@ class create_casc_kernel<1,
                                                           ? 5
                                                           : (TP_POINT_SIZE == 16) ? 4
                                                                                   : 0; // 0 is an error trap effectively
-        static constexpr unsigned int kIntConfig = std::is_same<TT_DATA, cfloat>::value ? 0 : 1;
+        static constexpr unsigned int kIntConfig = fnIsFloat<TT_DATA>() ? 0 : 1;
         static constexpr unsigned int TP_END_RANK = (kIntConfig == 1) ? fnCeil<TP_END_RANK_RAW, 2>() : TP_END_RANK_RAW;
         static constexpr unsigned int TP_START_RANK = 0;
         if
@@ -816,7 +814,7 @@ class fft_ifft_dit_1ch_base_graph : public graph {
         // Twiddle graph scoping
         // Attach graph scoped tables as required
 
-        constexpr int kOddPowerAdj = std::is_same<TT_TWIDDLE, cfloat>::value ? 0 : fnOddPower<TP_POINT_SIZE>();
+        constexpr int kOddPowerAdj = fnIsFloat<TT_TWIDDLE>() ? 0 : fnOddPower<TP_POINT_SIZE>();
 
         for (int k = 0; k < TP_CASC_LEN; ++k) {
             if (std::is_same<TT_TWIDDLE, cfloat>::value) {
@@ -838,7 +836,30 @@ class fft_ifft_dit_1ch_base_graph : public graph {
                 }
                 // Integer section differs from cfloat because of half table optimization i.e. largest twiddle table is
                 // half-size.
-            } else if (std::is_same<TT_TWIDDLE, cint16>::value) {
+            }
+#ifdef _SUPPORTS_CBFLOAT16_
+            else if (std::is_same<TT_TWIDDLE, cbfloat16>::value) {
+                if (TP_POINT_SIZE == 4096 && (TP_DYN_PT_SIZE == 1 || startRanks[k] <= 11) && endRanks[k] > 11) {
+                    fft_lut1[k] = parameter::array(fft_lut_tw2048_cbfloat16);
+                    connect<>(fft_lut1[k], m_fftKernels[k]);
+                }
+                if (TP_POINT_SIZE >= 2048 && (TP_DYN_PT_SIZE == 1 || startRanks[k] <= 10) && endRanks[k] > 10) {
+                    fft_lut2[k] = parameter::array(fft_lut_tw1024_cbfloat16);
+                    connect<>(fft_lut2[k], m_fftKernels[k]);
+                }
+                if (TP_POINT_SIZE >= 1024 && (TP_DYN_PT_SIZE == 1 || startRanks[k] <= 9) && endRanks[k] > 9) {
+                    fft_lut3[k] = parameter::array(fft_lut_tw512_cbfloat16);
+                    connect<>(fft_lut3[k], m_fftKernels[k]);
+                }
+                if (TP_POINT_SIZE >= 512 && (TP_DYN_PT_SIZE == 1 || startRanks[k] <= 8) && endRanks[k] > 8) {
+                    fft_lut4[k] = parameter::array(fft_lut_tw256_cbfloat16);
+                    connect<>(fft_lut4[k], m_fftKernels[k]);
+                }
+                // Integer section differs from cfloat because of half table optimization i.e. largest twiddle table is
+                // half-size.
+            }
+#endif //_SUPPORTS_CBFLOAT16_
+            else if (std::is_same<TT_TWIDDLE, cint16>::value) {
                 if (TP_POINT_SIZE == 4096 && (TP_DYN_PT_SIZE == 1 || startRanks[k] - kOddPowerAdj <= 11) &&
                     endRanks[k] - kOddPowerAdj > 11) {
                     if (TP_TWIDDLE_MODE == 0) {
@@ -972,8 +993,8 @@ class fft_ifft_dit_1ch_base_graph : public graph {
         fft_buf256 = parameter::array(fft_256_tmp1);
         fft_buf128 = parameter::array(fft_128_tmp1);
         for (int k = 0; k < TP_CASC_LEN; ++k) {
-            int numStages = std::is_same<TT_DATA, cfloat>::value ? (endRanks[k] - startRanks[k])
-                                                                 : (endRanks[k] / 2 - startRanks[k] / 2);
+            int numStages =
+                fnIsFloat<TT_DATA>() ? (endRanks[k] - startRanks[k]) : (endRanks[k] / 2 - startRanks[k] / 2);
             bool evenStages = false;
             if (numStages % 2 == 0 || TP_DYN_PT_SIZE == 1) { // When dynamic, point size can be even or odd at runtime
                                                              // so it is not safe to numStages since that is based on
@@ -2087,13 +2108,13 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
  * These are the templates to configure the single-channel decimation-in-time class.
  * @tparam TT_DATA describes the type of individual data samples input to the transform function. \n
  *         This is a typename and must be one of the following: \n
- *         cint16, cint32, cfloat.
+ *         cint16, cint32, cfloat, cbfloat16.
  *         For real-only operation, consider use of the widget_real2complex library element.
  * @tparam TT_TWIDDLE describes the type of twiddle factors of the transform. \n
- *         It must be one of the following: cint16, cint32, cfloat
+ *         It must be one of the following: cint16, cint32, cfloat, cbfloat16
  *         and must also satisfy the following rules:
  *         - TT_TWIDDLE must be an integer type if TT_DATA is an integer type
- *         - TT_TWIDDLE must be cfloat type if TT_DATA is a float type.
+ *         - TT_TWIDDLE must match TT_DATA for floating point types.
  * @tparam TP_POINT_SIZE is an unsigned integer which describes the number of samples in
  *         the transform. \n This must be 2^N where N is an integer in the range
  *         4 to 16 inclusive. \n When TP_DYN_PT_SIZE is set, TP_POINT_SIZE describes the maximum
@@ -2128,9 +2149,11 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
  *         As a result, the overheads inferred during kernel triggering are reduced and overall performance
  *         is increased.
  * @tparam TP_API is an unsigned integer to select window (0) or stream (1) interfaces. \n
- *         When stream I/O is selected, one sample is taken from, or output to, a stream and the next sample
- *         from or two the next stream. Two streams minimum are used. In this example, even samples are
+ *         On AIE variants with 2 streams per tile, such as AIE1, when stream I/O is selected, one sample is taken
+ *         from, or output to, a stream and the next sample from or to the next stream.
+ *         For AIE1 two streams minimum are used. In this example, even samples are
  *         read from input stream[0] and odd samples from input stream[1].
+ *         For single stream operation, simply configure for iobuffers, but connect a single stream.
  * @tparam TP_PARALLEL_POWER is an unsigned integer to describe N where 2^N is the numbers of subframe processors
  *         to use, so as to achieve higher throughput. \n
  *         The default is 0. With TP_PARALLEL_POWER set to 2, 4 subframe processors will be used, each of which
@@ -2168,13 +2191,14 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
  *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
  *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
  *range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
- * @tparam TP_TWIDDLE_MODE describes the magnitude of integer twiddles. It has no effect for cfloat. \n
+ * @tparam TP_TWIDDLE_MODE describes the magnitude of integer twiddles. It has no effect for cfloat nor cbfloat. \n
  *         - 0: Max amplitude. Values at 2^15 (for TT_TWIDDLE=cint16) and 2^31 (TT_TWIDDLE=cint32) will saturate and so
  *introduce errors
  *         - 1: 0.5 amplitude. Twiddle values are 1/2 that of mode 0 so as to avoid twiddle saturation. However,
  *twiddles are one bit less precise versus mode 0.
  * @tparam TT_OUT_DATA describes the type of individual data samples output from the transform function. \n
- *         This is a typename and must be cint16 / cint32 if TT_DATA is cint16 / cint32 or cfloat if TT_DATA is cfloat.
+ *         This is a typename and must be cint16 / cint32 if TT_DATA is cint16 / cint32 or match TT_DATA for floating
+ *point types.
  * @tparam TP_INDEX
  *         This parameter is for internal use regarding the recursion of the parallel power feature. \n
  *         It is recommended
@@ -2230,7 +2254,12 @@ class fft_ifft_dit_1ch_graph : public graph {
                   "ERROR: This variant of AIE does not support TT_TWIDDLE = cint32");
 
     static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value) ||
-                      (std::is_same<TT_DATA, cfloat>::value),
+                      (std::is_same<TT_DATA, cfloat>::value)
+#ifdef _SUPPORTS_CBFLOAT16_
+                      ||
+                      (std::is_same<TT_DATA, cbfloat16>::value)
+#endif //_SUPPORTS_CBFLOAT16_
+                      ,
                   "ERROR: TT_DATA is not supported");
 
     static constexpr int kParallel_factor = 1 << TP_PARALLEL_POWER;

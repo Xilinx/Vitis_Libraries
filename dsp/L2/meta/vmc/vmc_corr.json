@@ -1,0 +1,207 @@
+{
+    "low_level_file": "conv_corr.json",
+    "ip_name": "vmc_corr",
+    "block_info": {
+        "label": "Correlation",
+        "description": "Correlation block targeted for AI Engines."
+    },
+    "parameters": [
+        {
+            "key": "AIE_VARIANT",
+            "name": "AIE_VARIANT",
+            "description": "Specifies the device type: 1-AIE, 2-AIE-ML, 22-AIE-ML-V2",
+            "default": 1,
+            "label": "AIE Variant:",
+            "tablabel": "Main",
+            "visible": "off",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_API",
+            "name": "api",
+            "description": "IO interface: 0 for windows, 1 for streams",
+            "type": "uint",
+            "default": 0,
+            "label": "api:",
+            "tablabel": "Main",
+            "visible": "off",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TT_DATA_F",
+            "name": "data_type_f",
+            "description": "describes the type of individual data samples of signal F to input to the function.",
+            "default": "int16",
+            "label": "F input data type:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TT_DATA_G",
+            "name": "data_type_g",
+            "type": "typename",
+            "description": "describes the type of individual data samples of signal G to input to the function.",
+            "enum": [
+                "int8",
+                "int16",
+                "int32",
+                "cint16",
+                "float",
+                "cfloat",
+                "bfloat16"
+            ],
+            "default": "int16",
+            "label": "G input data type:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TT_DATA_OUT",
+            "name": "data_type_out",
+            "type": "typename",
+            "description": "describes the type of individual data samples at the function output.",
+            "enum": [
+                "int8",
+                "int16",
+                "int32",
+                "cint16",
+                "cint32",
+                "float",
+                "cfloat",
+                "bfloat16"
+            ],
+            "default": "int32",
+            "label": "Output data type:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_FUNCT_TYPE",
+            "name": "function_type",
+            "description": "describes the selection of function i.e correlation.",
+            "type": "uint",
+            "default": 0,
+            "label": "function_type:",
+            "tablabel": "Main",
+            "visible": "off",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_COMPUTE_MODE",
+            "name": "compute_mode",
+            "description": "describes the computation mode of correlation. we have 3 modes which are Full(0), Same(1), Valid(2).",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "enum_str": [
+                "Full (0)",
+                "Same (1)",
+                "Valid (2)"
+            ],
+            "default": 0,
+            "label": "Computation mode:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_F_LEN",
+            "name": "f_sample_size",
+            "description": "describes the number of samples in vector F.",
+            "default": 32,
+            "label": "F input length:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_G_LEN",
+            "name": "g_sample_size",
+            "description": "describes the number of samples in vector G.",
+            "default": 32,
+            "label": "G input length:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_USE_RTP_VECTOR_LENGTHS",
+            "name": "USE_RTP_VECTOR_LENGTHS",
+            "description": "enable runtime parameter input port to specify G input length at runtime",
+            "default": false,
+            "label": "Specify G input length via input port",
+            "callback": "xmcDisplayRtpPortGLengthAcceptableRangeCallback(gcbh);",
+            "tablabel": "Main",
+            "parameterType": "checkbox"
+        },
+        {
+            "key": "TP_NUM_FRAMES",
+            "name": "num_frames",
+            "description": "describes the number of frames of input data samples that occur within each input window of data.",
+            "default": 1,
+            "label": "Number of frames:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_SHIFT",
+            "name": "shift_output",
+            "description": "describes the number of bits to downshift.",
+            "default": 0,
+            "label": "Scale output down by 2^:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_RND",
+            "name": "rnd_mode",
+            "description": "describes the selection of rounding to be applied during the shift down stage of processing.",
+            "default": "Floor",
+            "label": "Rounding mode:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_SAT",
+            "name": "sat_mode",
+            "description": "describes the selection of saturation to be applied during the shift down stage of processing.",
+            "enum": [
+                0,
+                1,
+                3
+            ],
+            "enum_str": [
+                "None",
+                "Saturate",
+                "Symmetric"
+            ],
+            "default": 0,
+            "label": "Saturation mode:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_PHASES",
+            "name": "no_of_kernels",
+            "description": "Specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput.",
+            "default": 1,
+            "label": "SSR:",
+            "visible": "off",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_CASC_LEN",
+            "name": "casc_length",
+            "description": "describes the number of AIE processors to split the operation over.",
+            "default": 1,
+            "label": "Number of cascade stages:",
+            "visible": "off",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        }
+    ],
+    "generator": {
+        "file": "vmc_corr.py",
+        "function": "vmc_generate_graph"
+    }
+}

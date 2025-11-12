@@ -100,7 +100,7 @@ class create_par_kernels_vss_decomp {
  * @tparam TT_DATA describes the type of individual data samples input to and
  *         output from the transform function. \n
  *         This is a typename and must be one of the following: \n
- *         cint32, cfloat.
+ *         cint32, cfloat, cint16.
  * @tparam TT_TWIDDLE describes the type of twiddle factors of the transform. \n
  *         It must be one of the following: cint16, cint32, cfloat
  *         and must also satisfy the following rules:
@@ -181,7 +181,7 @@ class vss_fft_ifft_1d_graph : public graph {
     static constexpr unsigned int kIntCascLen = 1;
     static constexpr unsigned int kIntUseWidg = 0;
     static constexpr unsigned int kHeaderBytes = kIntDynPtSize > 0 ? 32 : 0;
-    static constexpr unsigned int kPtSizeD1 = fnPtSizeD1<TP_POINT_SIZE, useAIEffts(), TP_SSR>();
+    static constexpr unsigned int kPtSizeD1 = fnPtSizeD1<TP_POINT_SIZE, modeAIEffts, TP_SSR>();
     static constexpr unsigned int kPtSizeD2 = TP_POINT_SIZE / kPtSizeD1;
     static constexpr unsigned int kPtSizeD2Ceil = fnCeil<kPtSizeD2, TP_SSR>();
     static constexpr unsigned int kFirstFFTShift = TP_SHIFT / 2;
@@ -197,6 +197,23 @@ class vss_fft_ifft_1d_graph : public graph {
     static constexpr unsigned int kRotFanSize =
         TP_POINT_SIZE / TP_SSR * sizeof(TT_TWIDDLE) <= __DATA_MEM_BYTES__ ? 1 : fnNumLanes<TT_TWIDDLE, TT_TWIDDLE>();
     static constexpr int kInv = TP_FFT_NIFFT == 1 ? -1 : 1;
+    static constexpr unsigned int kSamplesPerRead =
+        128 / (sizeof(TT_DATA) * 8); // 128 is the width of data read by subsequent PL kernels
+    static constexpr bool kUseBDTranspose =
+        (sizeof(TT_DATA) <= __MAX_BD_DSIZE_TPOSE__) && (kWindowSizeRaw1 * 2 * sizeof(TT_DATA) <= __DATA_MEM_BYTES__)
+            ? true
+            : false;
+    static constexpr bool kUseMemTileTranspose =
+        __HAS_MEM_TILE__ == 1 && (kWindowSizeRaw2 * 2 * sizeof(TT_DATA) > __DATA_MEM_BYTES__) ? true : false;
+    static constexpr bool kUseBDTiling = sizeof(TT_DATA) <= __MAX_BD_DSIZE_TILING__ ? true : false;
+    static constexpr bool kUseMemTileTiling = __HAS_MEM_TILE__ == 1 ? true : false;
+#if __HAS_MEM_TILE__ == 1
+    adf::shared_buffer<TT_DATA> memTileFrontIn[TP_SSR];
+    adf::shared_buffer<TT_DATA> memTileFrontOut[TP_SSR];
+    adf::shared_buffer<TT_DATA> memTileBackIn[TP_SSR];
+    adf::shared_buffer<TT_DATA> memTileBackOut[TP_SSR];
+#endif
+
     // This static assert may trigger only for point sizes that are not perfect square numbers.
     // The window size for the front and back FFTs need to be equal and they also need to be a divisible by the front
     // and back point sizes.
@@ -285,16 +302,146 @@ class vss_fft_ifft_1d_graph : public graph {
      **/
     vss_fft_ifft_1d_graph() {
         createTwidRotKernels();
-        for (int i = 0; i < TP_SSR; i++) {
-            connect<>(front_i[i], frontFFTGraph[i].in[0]);
-            connect<>(frontFFTGraph[i].out[0], m_fftTwRotKernels[i].in[0]);
-            dimensions(m_fftTwRotKernels[i].in[0]) = {kWindowSizeCalc1 + kHeaderBytes / sizeof(TT_DATA)};
+        for (int ss = 0; ss < TP_SSR; ss++) {
+            connect<>(frontFFTGraph[ss].out[0], m_fftTwRotKernels[ss].in[0]);
+            dimensions(m_fftTwRotKernels[ss].in[0]) = {kWindowSizeCalc1 + kHeaderBytes / sizeof(TT_DATA)};
 
-            connect<>(m_fftTwRotKernels[i].out[0], front_o[i]);
-            dimensions(m_fftTwRotKernels[i].out[0]) = {kWindowSizeCalc1 + kHeaderBytes / sizeof(TT_DATA)};
+            if
+                constexpr(kUseBDTranspose) {
+                    connect<>(front_i[ss], frontFFTGraph[ss].in[0]);
+                    connect<>(backFFTGraph[ss].out[0], back_o[ss]);
+                    write_access(frontFFTGraph[ss].getKernels()->in[0]) =
+                        adf::tiling({.buffer_dimension = {(kPtSizeD1), (kPtSizeD2 / TP_SSR)},
+                                     .tiling_dimension = {1, (1)},
+                                     .offset = {0, 0},
+                                     .tile_traversal = {{.dimension = 1, .stride = 1, .wrap = (kPtSizeD2 / TP_SSR)},
+                                                        {.dimension = 0, .stride = 1, .wrap = (kPtSizeD1)}}});
+                    read_access(backFFTGraph[ss].getKernels()->out[0]) = adf::tiling( // 16, 64
+                        {.buffer_dimension = {(kPtSizeD2), (kPtSizeD1 / TP_SSR)},
+                         .tiling_dimension = {1, (1)},
+                         .offset = {0, 0},
+                         .tile_traversal = {{.dimension = 1, .stride = 1, .wrap = (kPtSizeD1 / TP_SSR)},
+                                            {.dimension = 0, .stride = 1, .wrap = kPtSizeD2}}});
+                }
+#if __HAS_MEM_TILE__ == 1
+            else if
+                constexpr(kUseMemTileTranspose) {
+                    // Connect through memtile for transpose operation when MEM runs out of space
+                    memTileFrontIn[ss] = adf::shared_buffer<TT_DATA>::create({(kPtSizeD1), (kPtSizeD2 / TP_SSR)}, 1, 1);
+                    num_buffers(memTileFrontIn[ss]) = 2;
+                    write_access(memTileFrontIn[ss].in[0]) =
+                        adf::tiling({.buffer_dimension = {(kPtSizeD1), (kPtSizeD2 / TP_SSR)},
+                                     .tiling_dimension = {1, (1)},
+                                     .offset = {0, 0},
+                                     .tile_traversal = {{.dimension = 1, .stride = 1, .wrap = (kPtSizeD2 / TP_SSR)},
+                                                        {.dimension = 0, .stride = 1, .wrap = (kPtSizeD1)}}});
+                    read_access(memTileFrontIn[ss].out[0]) =
+                        adf::tiling({.buffer_dimension = {(kPtSizeD1), (kPtSizeD2 / TP_SSR)},
+                                     .tiling_dimension = {(kPtSizeD1), (kPtSizeD2 / TP_SSR)},
+                                     .offset = {0, 0}});
+                    connect<>(front_i[ss], memTileFrontIn[ss].in[0]);
+                    connect<>(memTileFrontIn[ss].out[0], frontFFTGraph[ss].in[0]);
 
-            connect<>(back_i[i], backFFTGraph[i].in[0]);
-            connect<>(backFFTGraph[i].out[0], back_o[i]);
+                    memTileBackOut[ss] = adf::shared_buffer<TT_DATA>::create({(kPtSizeD2), (kPtSizeD1 / TP_SSR)}, 1, 1);
+                    num_buffers(memTileBackOut[ss]) = 2;
+                    write_access(memTileBackOut[ss].in[0]) =
+                        adf::tiling({.buffer_dimension = {(kPtSizeD1), (kPtSizeD2 / TP_SSR)},
+                                     .tiling_dimension = {(kPtSizeD1), (kPtSizeD2 / TP_SSR)},
+                                     .offset = {0, 0}});
+                    read_access(memTileBackOut[ss].out[0]) =
+                        adf::tiling({.buffer_dimension = {(kPtSizeD2), (kPtSizeD1 / TP_SSR)},
+                                     .tiling_dimension = {1, (1)},
+                                     .offset = {0, 0},
+                                     .tile_traversal = {{.dimension = 1, .stride = 1, .wrap = (kPtSizeD1 / TP_SSR)},
+                                                        {.dimension = 0, .stride = 1, .wrap = kPtSizeD2}}});
+                    connect<>(backFFTGraph[ss].out[0], memTileBackOut[ss].in[0]);
+                    connect<>(memTileBackOut[ss].out[0], back_o[ss]);
+                }
+#endif
+            else {
+                connect<>(front_i[ss], frontFFTGraph[ss].in[0]);
+                connect<>(backFFTGraph[ss].out[0], back_o[ss]);
+            }
+            if
+                constexpr(kUseBDTiling) {
+                    read_access(m_fftTwRotKernels[ss].out[0]) =
+                        adf::tiling({.buffer_dimension = {(kPtSizeD1), (kPtSizeD2 / TP_SSR)},
+                                     .tiling_dimension = {1, kSamplesPerRead},
+                                     .offset = {0, 0},
+                                     .tile_traversal = {
+                                         {.dimension = 0, .stride = 1, .wrap = kPtSizeD1},
+                                         {.dimension = 1,
+                                          .stride = kSamplesPerRead,
+                                          .wrap = ((kPtSizeD2 / TP_SSR / kSamplesPerRead))},
+                                     }});
+
+                    write_access(backFFTGraph[ss].getKernels()->in[0]) =
+                        adf::tiling({.buffer_dimension = {(kPtSizeD2), (kPtSizeD1 / TP_SSR)},
+                                     .tiling_dimension = {1, kSamplesPerRead},
+                                     .offset = {0, 0},
+                                     .tile_traversal = {{.dimension = 0, .stride = 1, .wrap = kPtSizeD2},
+                                                        {.dimension = 1,
+                                                         .stride = kSamplesPerRead,
+                                                         .wrap = ((kPtSizeD1 / TP_SSR) / kSamplesPerRead)}}});
+                    dimensions(m_fftTwRotKernels[ss].out[0]) = {kWindowSizeCalc1 + kHeaderBytes / sizeof(TT_DATA)};
+                    connect<>(m_fftTwRotKernels[ss].out[0], front_o[ss]);
+                    dimensions(backFFTGraph[ss].in[0]) = {kWindowSizeCalc1 + kHeaderBytes / sizeof(TT_DATA)};
+                    connect<>(back_i[ss], backFFTGraph[ss].in[0]);
+                }
+#if __HAS_MEM_TILE__ == 1
+            else if
+                constexpr(kUseMemTileTiling) {
+                    // Connect through memtile where available and when DMA BDs cannot do the trick
+                    // Front AIEs to Middle transpose
+                    memTileFrontOut[ss] =
+                        adf::shared_buffer<TT_DATA>::create({(kPtSizeD1), (kPtSizeD2 / TP_SSR)}, 1, 1);
+                    num_buffers(memTileFrontOut[ss]) = 2;
+                    connect<>(m_fftTwRotKernels[ss].out[0], memTileFrontOut[ss].in[0]);
+                    connect<>(memTileFrontOut[ss].out[0], front_o[ss]);
+                    dimensions(m_fftTwRotKernels[ss].out[0]) = {kWindowSizeCalc1 + kHeaderBytes / sizeof(TT_DATA)};
+                    write_access(memTileFrontOut[ss].in[0]) =
+                        tiling({.buffer_dimension = {(kPtSizeD1), (kPtSizeD2 / TP_SSR)},
+                                .tiling_dimension = {(kPtSizeD1), (kPtSizeD2 / TP_SSR)},
+                                .offset = {0, 0}});
+                    read_access(memTileFrontOut[ss].out[0]) =
+                        adf::tiling({.buffer_dimension = {(kPtSizeD1), (kPtSizeD2 / TP_SSR)},
+                                     .tiling_dimension = {1, kSamplesPerRead},
+                                     .offset = {0, 0},
+                                     .tile_traversal = {
+                                         {.dimension = 0, .stride = 1, .wrap = kPtSizeD1},
+                                         {.dimension = 1,
+                                          .stride = kSamplesPerRead,
+                                          .wrap = ((kPtSizeD2 / TP_SSR / kSamplesPerRead))},
+                                     }});
+
+                    // Middle transpose to back BDs
+                    memTileBackIn[ss] = adf::shared_buffer<TT_DATA>::create({(kPtSizeD2), (kPtSizeD1 / TP_SSR)}, 1, 1);
+                    num_buffers(memTileBackIn[ss]) = 2;
+                    write_access(memTileBackIn[ss].in[0]) =
+                        tiling({.buffer_dimension = {(kPtSizeD2), (kPtSizeD1 / TP_SSR)},
+                                .tiling_dimension = {1, kSamplesPerRead},
+                                .offset = {0, 0},
+                                .tile_traversal = {
+                                    {.dimension = 0, .stride = 1, .wrap = kPtSizeD2},
+                                    {.dimension = 1,
+                                     .stride = kSamplesPerRead,
+                                     .wrap = ((kPtSizeD1 / TP_SSR / kSamplesPerRead))},
+                                }});
+                    read_access(memTileBackIn[ss].out[0]) =
+                        adf::tiling({.buffer_dimension = {(kPtSizeD2), (kPtSizeD1 / TP_SSR)},
+                                     .tiling_dimension = {(kPtSizeD2), (kPtSizeD1 / TP_SSR)},
+                                     .offset = {0, 0}});
+                    connect<>(back_i[ss], memTileBackIn[ss].in[0]);
+                    connect<>(memTileBackIn[ss].out[0], backFFTGraph[ss].in[0]);
+                    dimensions(backFFTGraph[ss].in[0]) = {kWindowSizeCalc1 + kHeaderBytes / sizeof(TT_DATA)};
+                }
+#endif
+            else {
+                connect<>(m_fftTwRotKernels[ss].out[0], front_o[ss]);
+                dimensions(m_fftTwRotKernels[ss].out[0]) = {kWindowSizeCalc1 + kHeaderBytes / sizeof(TT_DATA)};
+                connect<>(back_i[ss], backFFTGraph[ss].in[0]);
+                dimensions(backFFTGraph[ss].in[0]) = {kWindowSizeCalc1 + kHeaderBytes / sizeof(TT_DATA)};
+            }
         }
     };
 };

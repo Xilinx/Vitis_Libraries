@@ -52,3 +52,12 @@
 #else
 #define DUAL_INPUT_SAMPLES 0
 #endif
+
+#if defined(USING_UUT)
+#if (USE_PKT_SWITCHING == 1)
+#undef INPUT_FILE
+#define INPUT_FILE ./data/input_pkts.csv
+#undef OUTPUT_FILE
+#define OUTPUT_FILE ./data/output_pkts.txt
+#endif
+#endif

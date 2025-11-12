@@ -91,21 +91,25 @@ def fn_validate_TP_IN_API(TP_IN_API):
 ############# TP_OUT_API Updater and Validator ########
 #######################################################
 def update_TP_OUT_API(args):
-    return fn_update_TP_OUT_API()
+    TP_IN_API = args["TP_IN_API"]
+    return fn_update_TP_OUT_API(TP_IN_API)
 
 
-def fn_update_TP_OUT_API():
+def fn_update_TP_OUT_API(TP_IN_API):
     legal_set_TP_OUT_API = [0, 1]
+    if TP_IN_API == 1:
+        legal_set_TP_OUT_API = [0]
     param_dict = {"name": "TP_OUT_API", "enum": legal_set_TP_OUT_API}
     return param_dict
 
 def validate_TP_OUT_API(args):
+    TP_IN_API = args["TP_IN_API"]
     TP_OUT_API = args["TP_OUT_API"]
-    return fn_validate_TP_OUT_API(TP_OUT_API)
+    return fn_validate_TP_OUT_API(TP_IN_API, TP_OUT_API)
 
 
-def fn_validate_TP_OUT_API(TP_OUT_API):
-    param_dict=fn_update_TP_OUT_API()
+def fn_validate_TP_OUT_API(TP_IN_API, TP_OUT_API):
+    param_dict=fn_update_TP_OUT_API(TP_IN_API)
     legal_set_TP_OUT_API=param_dict["enum"]
     return(com.validate_legal_set(legal_set_TP_OUT_API, "TP_OUT_API", TP_OUT_API))
 

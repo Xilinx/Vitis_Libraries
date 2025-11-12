@@ -437,6 +437,9 @@ class fir_sr_sym_graph : public graph {
      *
      **/
     port_conditional_array<input, (TP_DUAL_IP == 1), TP_SSR> in2;
+
+    using rtp_port_array = port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), (TP_SSR * TP_SSR * TP_CASC_LEN)>;
+
     /**
      * The conditional array of input async ports used to pass run-time programmable (RTP) coefficients.
      * This port_conditional_array is (generated when TP_USE_COEFF_RELOAD == 1) an array of input ports, which size is

@@ -1,7 +1,7 @@
 
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,10 @@ int ceil(int x, int y) {
 }
 
 void dut() {
-    using TT_STREAM = backTransposeCls<POINT_SIZE, SSR>::TT_STREAM;
-    using TT_SAMPLE = backTransposeCls<POINT_SIZE, SSR>::TT_SAMPLE;
-    constexpr int SAMPLES_PER_READ = backTransposeCls<POINT_SIZE, SSR>::SAMPLES_PER_READ;
+    static constexpr unsigned kVssMode = 1;
+    using TT_STREAM = backTransposeCls<POINT_SIZE, SSR, kVssMode>::TT_STREAM;
+    using TT_SAMPLE = backTransposeCls<POINT_SIZE, SSR, kVssMode>::TT_SAMPLE;
+    constexpr int SAMPLES_PER_READ = backTransposeCls<POINT_SIZE, SSR, kVssMode>::SAMPLES_PER_READ;
     constexpr int NSTREAM = SSR;
     TT_STREAM sig_i[NSTREAM], sig_o[NSTREAM];
     typedef ap_uint<32> real_32; // Equals two 'cint32' samples
@@ -39,9 +40,9 @@ void dut() {
     TT_SAMPLE rdData2 = 0;
 
     // Load stream stimulus:
-    int ptSizeCeil = ceil(POINT_SIZE, NSTREAM);                        // 65
-    unsigned numStores = backTransposeCls<POINT_SIZE, SSR>::numStores; // 7
-    int ptSizeD1 = backTransposeCls<POINT_SIZE, SSR>::ptSizeD1;
+    int ptSizeCeil = ceil(POINT_SIZE, NSTREAM);                                  // 65
+    unsigned numStores = backTransposeCls<POINT_SIZE, SSR, kVssMode>::numStores; // 7
+    int ptSizeD1 = backTransposeCls<POINT_SIZE, SSR, kVssMode>::ptSizeD1;
     int ptSizeD2 = POINT_SIZE / ptSizeD1;
     int totRows = ceil(ptSizeD2, NSTREAM);
     int memSize = ptSizeD1 * totRows;
@@ -50,7 +51,7 @@ void dut() {
     TT_SAMPLE mem2d[ptSizeD2][ptSizeD1];
     TT_SAMPLE memOutProc[memSize];
     TT_SAMPLE mem2dTmp[totRows][ptSizeD1];
-    int numReads = backTransposeCls<POINT_SIZE, SSR>::numRows * ptSizeD1; // 8 * 2
+    int numReads = backTransposeCls<POINT_SIZE, SSR, kVssMode>::numRows * ptSizeD1; // 8 * 2
     TT_SAMPLE memOut[memSize];
     int NITER = 4;
     int ddTmp = 1;

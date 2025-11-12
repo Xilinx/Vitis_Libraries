@@ -36,6 +36,8 @@ int main(void) {
     conv_corr_TestHarness.run(NITER / 2);
     conv_corr_TestHarness
         .wait(); // Async : the kernel execution waits for the first update to happen for parameter initialization
+    conv_corr_TestHarness.update(conv_corr_TestHarness.rtpVecLen[0], conv_corr_TestHarness.m_inVecLen, 2);
+    conv_corr_TestHarness.run(NITER / 2);
 #else
 #if (API_IO == 1)
     conv_corr_TestHarness.update(conv_corr_TestHarness.rtpVecLen[0], conv_corr_TestHarness.m_inVecLen, 2);
@@ -47,13 +49,15 @@ int main(void) {
     conv_corr_TestHarness.run(NITER / 2);
     conv_corr_TestHarness
         .wait(); // Async : the kernel execution waits for the first update to happen for parameter initialization
+    conv_corr_TestHarness.update(conv_corr_TestHarness.rtpVecLen[0], conv_corr_TestHarness.m_inVecLen, 2);
+    conv_corr_TestHarness.run(NITER / 2);
 #endif
 #endif
 #else
 #ifdef USING_UUT
     conv_corr_TestHarness.run(NITER);
 #else
-#if (API_PORT == 1)
+#if (API_IO == 1)
     conv_corr_TestHarness.run(1);
 #else
     conv_corr_TestHarness.run(NITER);

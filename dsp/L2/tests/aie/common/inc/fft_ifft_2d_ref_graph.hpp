@@ -66,10 +66,23 @@ class fft_ifft_2d_ref_graph : public graph {
     port<output> out[kNumOutPorts];
     kernel m_tposeKernels;
     static constexpr unsigned int kIsRealDataD1 =
-        (std::is_same<TT_DATA_D1, int16>::value || std::is_same<TT_DATA_D1, bfloat16>::value) ? 1 : 0;
+        (std::is_same<TT_DATA_D1, int16>::value || std::is_same<TT_DATA_D1, bfloat16>::value) ||
+                (std::is_same<TT_DATA_D1, int32>::value || std::is_same<TT_DATA_D1, float>::value)
+            ? 1
+            : 0;
+    typedef typename std::conditional_t<
+        std::is_same<TT_DATA_D1, int16>::value,
+        cint16,
+        std::conditional_t<
+            std::is_same<TT_DATA_D1, int32>::value,
+            cint32,
+            std::conditional_t<std::is_same<TT_DATA_D1, bfloat16>::value,
+                               cbfloat16,
+                               std::conditional_t<std::is_same<TT_DATA_D1, float>::value, cfloat, TT_DATA_D1> > > >
+        t_inTypeFrontGraph;
     typedef typename std::conditional_t<
         kIsRealDataD1,
-        fft_dit_2ch_real::fft_dit_2ch_real_ref_graph<TT_DATA_D2,
+        fft_dit_2ch_real::fft_dit_2ch_real_ref_graph<t_inTypeFrontGraph,
                                                      TT_TWIDDLE,
                                                      TP_POINT_SIZE_D1,
                                                      TP_FFT_NIFFT,
@@ -79,7 +92,8 @@ class fft_ifft_2d_ref_graph : public graph {
                                                      TP_API,
                                                      TP_RND,
                                                      TP_SAT,
-                                                     TP_TWIDDLE_MODE>,
+                                                     TP_TWIDDLE_MODE,
+                                                     TT_DATA_D2>,
         dit_1ch::fft_ifft_dit_1ch_ref_graph<TT_DATA_D1,
                                             TT_TWIDDLE,
                                             TP_POINT_SIZE_D1,

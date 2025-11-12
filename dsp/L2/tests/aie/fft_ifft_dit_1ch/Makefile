@@ -70,8 +70,29 @@ AIE_PKG_DIR ?= Work
 
 # Setting customized_params in aiecompiler
 
-ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
+ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
             
+COMPILER_ARGS ?= 
+AIE_VARIANT ?= 1
+FIFO_THRESHOLD ?= 
+TAG ?= UUT
+UUT_KERNEL ?= fft_ifft_dit_1ch
+REF_KERNEL ?= fft_ifft_dit_1ch_ref
+UUT_GRAPH ?= fft_ifft_dit_1ch_graph
+REF_GRAPH ?= fft_ifft_dit_1ch_ref_graph
+STACKSIZE_VAL ?= 720
+UUT_SIM_FILE ?= ./data/uut_output.txt
+REF_SIM_FILE ?= ./data/ref_output.txt
+INPUT_FILE ?= ./data/input.txt
+UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.pnll="off" --aie.stacksize=$(STACKSIZE_VAL)
+REF_TARGET_COMPILE_ARGS ?= 
+PREPROC_ARGS ?= --aie.Xpreproc=-DINPUT_FILE=$(INPUT_FILE)
+REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) 
+UUT_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1
+
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
+            
+AIE_VARIANT ?= 2
 FIFO_THRESHOLD ?=  
 TAG ?= UUT
 UUT_KERNEL ?= fft_ifft_dit_1ch
@@ -164,7 +185,12 @@ AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
-ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
+ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
+        
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
+AIE_CXXFLAGS += --aie.verbose  $($(TAG)_TARGET_COMPILE_ARGS)  $($(TAG)_PREPROC_ARGS)
+
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
         
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
 AIE_CXXFLAGS += --aie.verbose  $($(TAG)_TARGET_COMPILE_ARGS)  $($(TAG)_PREPROC_ARGS)

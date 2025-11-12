@@ -279,14 +279,21 @@ def update_TP_NUM_FRAMES(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
     TP_POINT_SIZE = args["TP_POINT_SIZE"]
-    return fn_update_tp_numFrames(AIE_VARIANT, TT_DATA, TP_POINT_SIZE)
+    TP_CASC_LEN = args["TP_CASC_LEN"]
+    TP_SSR = args["TP_SSR"]
+    return fn_update_tp_numFrames(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_CASC_LEN, TP_SSR)
 
 
-def fn_update_tp_numFrames(AIE_VARIANT, TT_DATA, TP_POINT_SIZE):
+def fn_update_tp_numFrames(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_CASC_LEN, TP_SSR):
 
-    TP_NUM_FRAMES_max = int(
-        k_data_memory_bytes[AIE_VARIANT] / (fn_size_by_byte(TT_DATA) * TP_POINT_SIZE)
+    TP_NUM_FRAMES_max_input = int(
+        k_data_memory_bytes[AIE_VARIANT] / (fn_size_by_byte(TT_DATA) * (TP_POINT_SIZE/TP_CASC_LEN))
     )
+    TP_NUM_FRAMES_max_output = int(
+        k_data_memory_bytes[AIE_VARIANT] / (fn_size_by_byte(TT_DATA) * (TP_POINT_SIZE/TP_SSR))
+    )
+
+    TP_NUM_FRAMES_max = min(TP_NUM_FRAMES_max_input, TP_NUM_FRAMES_max_output)
     TP_NUM_FRAMES_max_pingpong_buf = int(TP_NUM_FRAMES_max / 2)
 
     param_dict = {}
@@ -303,11 +310,13 @@ def validate_TP_NUM_FRAMES(args):
     TT_DATA = args["TT_DATA"]
     TP_POINT_SIZE = args["TP_POINT_SIZE"]
     TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
-    return fn_validate_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_NUM_FRAMES)
+    TP_CASC_LEN = args["TP_CASC_LEN"]
+    TP_SSR = args["TP_SSR"]
+    return fn_validate_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_NUM_FRAMES, TP_CASC_LEN, TP_SSR)
 
 
-def fn_validate_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_NUM_FRAMES):
-    param_dict = fn_update_tp_numFrames(AIE_VARIANT, TT_DATA, TP_POINT_SIZE)
+def fn_validate_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_NUM_FRAMES, TP_CASC_LEN, TP_SSR):
+    param_dict = fn_update_tp_numFrames(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_CASC_LEN, TP_SSR)
     range_TP_NUM_FRAMES = [param_dict["minimum"], param_dict["maximum"]]
     return validate_range(range_TP_NUM_FRAMES, "TP_NUM_FRAMES", TP_NUM_FRAMES)
 

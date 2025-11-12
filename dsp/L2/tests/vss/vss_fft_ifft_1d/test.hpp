@@ -47,18 +47,20 @@ class tl_graph : public graph {
    public:
     static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
     static constexpr int kPortsPerTile = API_IO == 0 ? 1 : kStreamsPerTile;
-    static constexpr int ptSize = POINT_SIZE;
     static constexpr int DYN_PT_SIZE = 0;
     static constexpr int parPow0maxSize = std::is_same<DATA_TYPE, cfloat>() ? 1024 : 4096;
-    static constexpr int refParPow =
-        ptSize <= 2048
+    static constexpr int kRefParPow =
+        POINT_SIZE <= 2048
             ? 0
-            : ptSize == 4096
+            : POINT_SIZE == 4096
                   ? 1
-                  : ptSize == 8192 ? 2 : ptSize == 16384 ? 3 : ptSize == 32768 ? 4 : ptSize == 65536 ? 5 : -1;
-    static constexpr int windowSize = ptSize;
-    std::array<output_plio, (1 << refParPow)> back_o;
-    std::array<input_plio, (1 << refParPow)> front_i;
+                  : POINT_SIZE == 8192
+                        ? 2
+                        : POINT_SIZE == 16384 ? 3 : POINT_SIZE == 32768 ? 4 : POINT_SIZE == 65536 ? 5 : -1;
+    static constexpr int kWindowSize = POINT_SIZE;
+    static constexpr int kAPI = 0; // window api
+    std::array<output_plio, (1 << kRefParPow)> back_o;
+    std::array<input_plio, (1 << kRefParPow)> front_i;
     // Constructor
     tl_graph() {
         printf("========================\n");
@@ -85,10 +87,10 @@ class tl_graph : public graph {
         printf("========================\n");
 
         xf::dsp::aie::fft::dit_1ch::UUT_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, CASC_LEN,
-                                              DYN_PT_SIZE, windowSize, API_IO, refParPow, USE_WIDGETS, ROUND_MODE,
+                                              DYN_PT_SIZE, kWindowSize, kAPI, kRefParPow, USE_WIDGETS, ROUND_MODE,
                                               SAT_MODE, TWIDDLE_MODE>
             fftGraph;
-        for (int i = 0; i < (1 << refParPow); i++) {
+        for (int i = 0; i < (1 << kRefParPow); i++) {
             std::string filenameOut = QUOTE(OUTPUT_FILE);
             std::string filenameIn = QUOTE(INPUT_FILE);
 

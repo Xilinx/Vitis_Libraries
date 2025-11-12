@@ -66,6 +66,7 @@ class fir_interpolate_hb_ref_graph : public graph {
     using dual_ip_port = typename std::conditional_t<(TP_DUAL_IP == DUAL_IP_DUAL), ssr_port_array<input>, no_port>;
     using dual_op_port = typename std::conditional_t<(TP_NUM_OUTPUTS == 2), ssr_port_array<output>, no_port>;
     using rtp_port = typename std::conditional_t<(TP_USE_COEFF_RELOAD == 1), port<input>, no_port>;
+    using rtp_port_array = typename std::array<rtp_port, 1>;
     using widget_kernel_in = typename std::conditional<(TP_DUAL_IP == 1 && TP_API == 1), kernel, empty>::type;
     using widget_kernel_out = typename std::conditional<(TP_NUM_OUTPUTS == 2), kernel, empty>::type;
 
@@ -73,7 +74,7 @@ class fir_interpolate_hb_ref_graph : public graph {
     ssr_port_array<output> out;
     dual_ip_port in2;
     dual_op_port out2;
-    std::array<rtp_port, 1> coeff;
+    rtp_port_array coeff;
 
     // FIR Kernel
     kernel m_firKernel;

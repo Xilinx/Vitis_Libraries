@@ -1,7 +1,7 @@
 
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,16 @@ int ceil(int x, int y) {
 }
 
 void dut() {
-    using TT_STREAM_IN = backTransposeSimpleCls<POINT_SIZE, SSR>::TT_STREAM_IN;
-    using TT_STREAM_OUT = backTransposeSimpleCls<POINT_SIZE, SSR>::TT_STREAM_OUT;
-    using TT_SAMPLE = backTransposeSimpleCls<POINT_SIZE, SSR>::TT_SAMPLE;
-    constexpr int SAMPLES_PER_READ = backTransposeSimpleCls<POINT_SIZE, SSR>::SAMPLES_PER_READ;
+    using TT_STREAM_IN = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::t_stream_in;
+    using TT_STREAM_OUT = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::t_stream_out;
+    using TT_SAMPLE = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::t_sample;
+    using TT_DATA = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::t_data;
+    constexpr int SAMPLES_PER_READ = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::kSamplesPerRead;
     constexpr int NSTREAM_IN = SSR;
     constexpr int NSTREAM_OUT = NSTREAM_IN * SAMPLES_PER_READ;
     TT_STREAM_IN sig_i[NSTREAM_IN];
     TT_STREAM_OUT sig_o[NSTREAM_IN];
-    typedef ap_uint<32> real_32; // Equals two 'cint32' samples
+    typedef ap_uint<DATAWIDTH / 2> real_dtype; // Equals two 'cint32' samples
 
     // Configure the same as 'host.cpp' for top level application:
     int curData1, curData2, curData3, curData4;
@@ -42,8 +43,8 @@ void dut() {
     TT_SAMPLE rdData2 = 0;
 
     // Load stream stimulus:
-    unsigned numStores = backTransposeSimpleCls<POINT_SIZE, SSR>::numStores; // 7
-    int ptSizeD1 = backTransposeSimpleCls<POINT_SIZE, SSR>::ptSizeD1;
+    unsigned numStores = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::kNumStores; // 7
+    int ptSizeD1 = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::kPtSizeD1;
     int ptSizeD2 = POINT_SIZE / ptSizeD1;
     int memSize = POINT_SIZE;
 
@@ -51,7 +52,6 @@ void dut() {
     TT_SAMPLE mem2d[ptSizeD2][ptSizeD1];
     TT_SAMPLE memOutProc[memSize];
     TT_SAMPLE mem2dTmp[ptSizeD2][ptSizeD1];
-    int numReads = backTransposeSimpleCls<POINT_SIZE, SSR>::numRows * ptSizeD1; // 8 * 2
     TT_SAMPLE memOut[memSize];
     int NITER = 4;
     int ddTmp = 1;
@@ -60,7 +60,7 @@ void dut() {
         if (mm < POINT_SIZE) {
             curData1 = ddTmp;
             curData2 = ddTmp++;
-            mem[mm] = (real_32(curData2), real_32(curData1));
+            mem[mm] = (real_dtype(curData2), real_dtype(curData1));
         } else {
             mem[mm] = (0, 0);
             mem[mm + 1] = (0, 0);
@@ -70,31 +70,29 @@ void dut() {
     for (int i = 0; i < NITER; i++) {
         for (int pp = 0; pp < POINT_SIZE / NSTREAM_IN; pp += SAMPLES_PER_READ) { // 1024
             for (int dd = 0; dd < NSTREAM_IN; dd++) {                            // 5
-                rdData1 = mem[pp * NSTREAM_IN + dd];                             // 16+40+0 = 56
-                rdData2 = mem[pp * NSTREAM_IN + dd + NSTREAM_IN];                // 16+40+0 = 56
-                curData1 = rdData1 % (1 << 31);
-                curData2 = rdData1 >> 32;
-                curData3 = rdData2 % (1 << 31);
-                curData4 = rdData2 >> 32;
-
-                // sig_i[dd].write((real_32(curData4), real_32(curData3), real_32(curData2), real_32(curData1)));
-                sig_i[dd].write((real_32(curData4), real_32(curData3), real_32(curData2), real_32(curData1)));
-                std::cout << "input stream id: " << (dd) << "\tread data value 0 \t" << (curData1) << ", " << (curData2)
-                          << ", " << (curData3) << ", " << (curData4) << "\n";
+                TT_DATA inDat = 0;
+                for (int samp = 0; samp < SAMPLES_PER_READ; samp++) {
+                    TT_DATA rdData = mem[pp * NSTREAM_IN + dd + NSTREAM_IN * samp];
+                    inDat += (TT_DATA)((TT_DATA)(rdData) << (DATAWIDTH * samp));
+                }
+                sig_i[dd].write(inDat);
+                for (int samp = 0; samp < SAMPLES_PER_READ; samp++) {
+                    TT_SAMPLE tmpSamp = inDat((samp + 1) * DATAWIDTH - 1, samp * DATAWIDTH);
+                }
             }
         }
-        back_transpose_core_wrapper(sig_i, sig_o);
+        back_transpose_simple_wrapper(sig_i, sig_o);
 
         int rdPos = 0;
-        for (int pp = 0; pp < POINT_SIZE / NSTREAM_IN / SAMPLES_PER_READ; pp++) { // 8
+        for (int pp = 0; pp < POINT_SIZE / NSTREAM_IN / SAMPLES_PER_READ; pp++) {
             rdPos = pp * NSTREAM_OUT;
-            for (int dd = 0; dd < NSTREAM_IN; dd++) {  // 5
-                (rdData1, rdData2) = sig_o[dd].read(); // o write into 0, 8,  16, 32
-                memOut[rdPos] = rdData2;               // 0,  16, 32, 48,
-                memOut[rdPos + NSTREAM_IN] = rdData1;  // 0,  16, 32, 48,
+            for (int dd = 0; dd < NSTREAM_IN; dd++) {
+                TT_DATA outData = sig_o[dd].read();
+                for (int samp = 0; samp < SAMPLES_PER_READ; samp++) {
+                    TT_SAMPLE tmp = outData((samp + 1) * DATAWIDTH - 1, samp * DATAWIDTH);
+                    memOut[rdPos + NSTREAM_IN * samp] = outData((samp + 1) * DATAWIDTH - 1, samp * DATAWIDTH);
+                }
                 rdPos++;
-                std::cout << "ss " << (dd) << "\t[" << (rdData1 >> 32) << ", " << (rdData1 % (1 << 31)) << "\t["
-                          << (rdData2 >> 32) << ", " << (rdData2 % (1 << 31)) << "\t\n";
             }
         } // POINT_SIZE
 
@@ -102,9 +100,7 @@ void dut() {
         for (int rr = 0; rr < ptSizeD2; rr++) {
             for (int cc = 0; cc < ptSizeD1; cc++) {
                 mem2d[rr][cc] = memOut[rr * ptSizeD1 + cc];
-                // printf("rr = %d cc = %d mem = [%d, %d]\n", rr, cc, mem2d[rr][cc]  >> 32, mem2d[rr][cc] % (1 << 31));
             }
-            // printf("\n");
         }
 
         for (int rr = 0; rr < ptSizeD1; rr++) {

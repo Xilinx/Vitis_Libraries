@@ -32,6 +32,7 @@ help::
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
 
+
 ############################## Setting up Project Variables ##############################
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
@@ -59,6 +60,7 @@ BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(PLATFORM_NAME)
 
 include $(XFLIB_DIR)/L2/tests/aie/common/scripts/params.mk
 
+
 RUN_DEPS :=
 
 # aie template
@@ -70,6 +72,7 @@ AIE_PKG_DIR ?= Work
 
 # Setting customized_params in aiecompiler
 
+
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
             
 FIFO_THRESHOLD ?=  
@@ -78,7 +81,7 @@ UUT_KERNEL ?= fft_ifft_dit_1ch
 REF_KERNEL ?= fft_ifft_dit_1ch_ref
 UUT_GRAPH ?= fft_ifft_2d_graph
 REF_GRAPH ?= fft_ifft_2d_ref_graph
-STACKSIZE_VAL ?= 600
+STACKSIZE_VAL ?= 950
 UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 INPUT_FILE ?= ./data/input.txt
@@ -132,6 +135,8 @@ else
 AIETARGET := x86sim
 endif
 
+
+
 ifeq (,$(PLATFORM)) 
 AIE_CXXFLAGS += --part=$(XPLATFORM)
 else
@@ -143,6 +148,8 @@ AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
+
+
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
         
@@ -162,11 +169,15 @@ endif
 
 AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 
+
+
 ############################## Setting Rules for AIE (Building Kernels) ##################
 $(AIE_CONTAINER): pre_build test.cpp uut_config.h $(XFLIB_DIR)/L1/src/aie/fft_r2comb.cpp $(XFLIB_DIR)/L1/src/aie/fft_ifft_dit_1ch.cpp 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
+
+
 
 ############################## Setting Essential Checks and Building Rules ##############################
 ifneq (,$(filter x86sim aiesim, $(TARGET)))
@@ -201,6 +212,7 @@ ifeq ($(TARGET), aiesim)
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./
 endif
 
+
 ############################## Setting Targets ##############################
 .PHONY: pre_build
 pre_build:
@@ -224,6 +236,7 @@ uut_config.h: $(XFLIB_DIR)/L2/tests/aie/common/scripts/tb_gen.py
 valid_params:
 
 gen_instances: $(GENERATED_FILES)
+
 
 ############################## Cleaning Rules ##############################
 clean:

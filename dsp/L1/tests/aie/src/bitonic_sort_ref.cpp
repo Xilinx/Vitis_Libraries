@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 /*
-Outer Tensor Product reference model
+Bitonic Sort reference model
 */
 #include "device_defs.h"
 #include "bitonic_sort_ref.hpp"

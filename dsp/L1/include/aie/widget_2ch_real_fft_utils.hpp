@@ -64,6 +64,19 @@ INLINE_DECL void disentangle(::aie::vector<cbfloat16, 8>& vectForw,
     outPtr[k] = ::aie::mul(::aie::add(vectForw, vectBack), kHalfReal);
     outPtr[kNumVecs / 2 + k] = ::aie::mul(::aie::sub(vectForw, vectBack), kMinusHalfJ);
 };
+
+template <>
+INLINE_DECL void disentangle(::aie::vector<cfloat, 4>& vectForw,
+                             ::aie::vector<cfloat, 4>& vectBack,
+                             ::aie::vector<cfloat, 4>* __restrict(&outPtr),
+                             int& k,
+                             const int& kNumVecs) {
+    constexpr cfloat kMinusHalfJ = {0.0, -0.5};
+    constexpr cfloat kHalfReal = {0.5, 0.0};
+
+    outPtr[k] = ::aie::mul(::aie::add(vectForw, vectBack), kHalfReal);
+    outPtr[kNumVecs / 2 + k] = ::aie::mul(::aie::sub(vectForw, vectBack), kMinusHalfJ);
+};
 }
 }
 }

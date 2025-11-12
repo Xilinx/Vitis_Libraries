@@ -529,7 +529,7 @@ class conv_corr_graph : public graph {
                 // make connections
                 connect<>(inF[0], m_conv_corr[0][0].in[0]);
                 connect<>(inG, m_conv_corr[0][0].in[1]);
-                dimensions(m_conv_corr[0][0].in[0]) = {kpaddedFsigLen * TP_NUM_FRAMES};
+                dimensions(m_conv_corr[0][0].in[0]) = {TP_F_LEN * TP_NUM_FRAMES};
                 dimensions(m_conv_corr[0][0].in[1]) = {TP_G_LEN * TP_NUM_FRAMES};
 
                 // connect final kernel output to output of the graph

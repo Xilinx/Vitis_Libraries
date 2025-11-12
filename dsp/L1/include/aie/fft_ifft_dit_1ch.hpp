@@ -254,7 +254,7 @@ class fft_ifft_dit_1ch_legality {
     static_assert(TP_FFT_NIFFT == 0 || TP_FFT_NIFFT == 1, "ERROR: TP_FFT_NIFFT must be 0 (reverse) or 1 (forward)");
     static_assert(fnCheckShift<TP_SHIFT>(), "ERROR: TP_SHIFT is out of range (0 to 60)");
     static_assert(fnCheckShiftFloat<TT_DATA, TP_SHIFT>(),
-                  "ERROR: TP_SHIFT is ignored for data type cfloat so must be set to 0");
+                  "ERROR: TP_SHIFT is ignored for data type cfloat or cbfloat so must be set to 0");
     static_assert(TP_WINDOW_VSIZE % TP_POINT_SIZE == 0, "ERROR: TP_WINDOW_SIZE must be a multiple of TP_POINT_SIZE");
     static_assert(TP_WINDOW_VSIZE / TP_POINT_SIZE >= 1, "ERROR: TP_WINDOW_SIZE must be a multiple of TP_POINT_SIZE");
     static_assert((TP_DYN_PT_SIZE == 0) || (TP_POINT_SIZE != 16),

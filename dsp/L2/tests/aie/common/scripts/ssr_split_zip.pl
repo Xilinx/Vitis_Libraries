@@ -285,10 +285,13 @@ if ($split) {
   my @ssrSamples; #the zipped array
   my @ssrLines; #The zipped output file/array.
   my $numDataSamples;
-
   print "Will write to $file\n";
   open(my $fileH, ">", $file)
     or die "cannot open $file : $!";
+  print $fileH "File Empty\n"; # Initial content
+
+  # The actual writing happens in the for loop below, which will overwrite the initial content.
+  seek($fileH, 0, 0); # Move file pointer to start before overwriting
 
   for my $ssrIdx (@ssrRange){
     for my $dualIdx (@dualRange){

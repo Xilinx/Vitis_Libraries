@@ -108,19 +108,10 @@ def update_DATA_TYPE(args):
 
 
 def fn_update_DATA_TYPE(DATA_TYPE, PART):
-    legal_set_DATA_TYPE = ["cfloat", "cint32"]
-    if "xcvc1902-vsva2197-2MP-e-S" in PART:
-        legal_set_DATA_TYPE = ["cfloat", "cint32"]
-    elif "xcve2802-vsvh1760-2MP-e-S" in PART:
-        legal_set_DATA_TYPE = ["cfloat", "cint32"]
-    elif "xc2ve3858-ssva2112-2LP-e-S" in PART:
-        legal_set_DATA_TYPE = ["cfloat", "cint32"]
-
-
+    legal_set_DATA_TYPE = ["cfloat", "cint32", "cint16"]
     param_dict = {}
     param_dict.update({"name": "DATA_TYPE"})
     param_dict.update({"enum": legal_set_DATA_TYPE})
-
     return param_dict
 
 
@@ -147,19 +138,19 @@ def update_TWIDDLE_TYPE(args):
 
 
 def fn_update_TWIDDLE_TYPE(PART, TWIDDLE_TYPE, DATA_TYPE):
-    legal_set_TWIDDLE_TYPE = ["cint16", "cint32"]
+    legal_set_TWIDDLE_TYPE = ["cint16", "cint32", "cfloat"]
     if DATA_TYPE in ["cint32"]:
         if PART in ["xcvc1902-vsva2197-2MP-e-S"]:
             legal_set_TWIDDLE_TYPE = ["cint16", "cint32"]
         else:
             legal_set_TWIDDLE_TYPE = ["cint16"]
+    elif DATA_TYPE in ["cint16"]:
+        legal_set_TWIDDLE_TYPE = ["cint16"]
     elif DATA_TYPE in ["cfloat"]:
         legal_set_TWIDDLE_TYPE = ["cfloat"]
-
     param_dict = {}
     param_dict.update({"name": "TWIDDLE_TYPE"})
     param_dict.update({"enum": legal_set_TWIDDLE_TYPE})
-
     return param_dict
 
 
@@ -167,11 +158,11 @@ def validate_TWIDDLE_TYPE(args):
     PART = args["PART"]
     DATA_TYPE = args["DATA_TYPE"]
     TWIDDLE_TYPE = args["TWIDDLE_TYPE"]
-    return fn_validate_twiddle_type(PART, DATA_TYPE, TWIDDLE_TYPE)
+    return fn_validate_twiddle_type(PART, TWIDDLE_TYPE, DATA_TYPE)
 
 
-def fn_validate_twiddle_type(PART, DATA_TYPE, TWIDDLE_TYPE):
-    param_dict = fn_update_TWIDDLE_TYPE(PART, DATA_TYPE, TWIDDLE_TYPE)
+def fn_validate_twiddle_type(PART, TWIDDLE_TYPE, DATA_TYPE):
+    param_dict = fn_update_TWIDDLE_TYPE(PART, TWIDDLE_TYPE, DATA_TYPE)
     legal_set_TWIDDLE_TYPE = param_dict["enum"]
     return validate_legal_set(legal_set_TWIDDLE_TYPE, "TWIDDLE_TYPE", TWIDDLE_TYPE)
 
@@ -180,26 +171,47 @@ def fn_validate_twiddle_type(PART, DATA_TYPE, TWIDDLE_TYPE):
 ########### TP_DYN_PT_SIZE Updater and Validator ######
 #######################################################
 def update_POINT_SIZE(args):
-    return fn_update_POINT_SIZE()
+    VSS_MODE = args["VSS_MODE"]
+    PART = args["PART"]
+    return fn_update_POINT_SIZE(VSS_MODE, PART)
 
 
-def fn_update_POINT_SIZE():
+def fn_update_POINT_SIZE(VSS_MODE, PART):
+    legal_set_POINT_SIZE = [64]
+    min_point_size_pwr_aie1 = 4
+    min_point_size_pwr_aie2 = 5
+    # add code that updates legalset with powers of two from 4 to 65536 in a for loop
+    if VSS_MODE == 1:
+        if PART == "xcvc1902-vsva2197-2MP-e-S":
+            for i in range(2*min_point_size_pwr_aie1, 17): # factor of 2 appears because the overall point size of vss in mode 1 is square of point size of aie kernel
+                legal_set_POINT_SIZE.append(2 ** i)
+        else:
+            for i in range(2*min_point_size_pwr_aie2, 17):
+                legal_set_POINT_SIZE.append(2 ** i)
+    elif VSS_MODE == 2:
+        if PART == "xcvc1902-vsva2197-2MP-e-S":
+            for i in range(min_point_size_pwr_aie1+1, 17): # adding 1 because overall point size of vss in mode 2 is ssr*(point size of aie kernel). Minimum ssr in this mode is 2.
+                legal_set_POINT_SIZE.append(2 ** i)
+        else:
+            for i in range(min_point_size_pwr_aie2+1, 17):
+                legal_set_POINT_SIZE.append(2 ** i)
     param_dict = {}
     param_dict.update({"name": "POINT_SIZE"})
-    param_dict.update({"minimum": 32})
-    param_dict.update({"maximum": 65536})
+    param_dict.update({"enum": legal_set_POINT_SIZE})
     return param_dict
 
 
 def validate_POINT_SIZE(args):
     POINT_SIZE = args["POINT_SIZE"]
-    return fn_validate_POINT_SIZE(POINT_SIZE)
+    VSS_MODE = args["VSS_MODE"]
+    PART = args["PART"]
+    return fn_validate_POINT_SIZE(POINT_SIZE, VSS_MODE, PART)
 
 
-def fn_validate_POINT_SIZE(POINT_SIZE):
-    param_dict = fn_update_POINT_SIZE()
-    legal_range_POINT_SIZE = [param_dict["minimum"], param_dict["maximum"]]
-    return validate_range(legal_range_POINT_SIZE, "POINT_SIZE", int(POINT_SIZE))
+def fn_validate_POINT_SIZE(POINT_SIZE, VSS_MODE, PART):
+    param_dict = fn_update_POINT_SIZE(VSS_MODE, PART)
+    legal_set_POINT_SIZE = param_dict["enum"]
+    return validate_legal_set(legal_set_POINT_SIZE, "POINT_SIZE", int(POINT_SIZE))
 
 
 #######################################################
@@ -235,32 +247,37 @@ def fn_validate_FFT_NIFFT(FFT_NIFFT):
 #######################################################
 def update_SHIFT(args):
     DATA_TYPE = args["DATA_TYPE"]
-    return fn_update_shift_val(DATA_TYPE)
+    VSS_MODE = args["VSS_MODE"]
+    SSR = args["SSR"]
+    return fn_update_shift_val(DATA_TYPE, VSS_MODE, SSR)
 
 
-def fn_update_shift_val(DATA_TYPE):
+def fn_update_shift_val(DATA_TYPE, VSS_MODE, SSR):
     param_dict = {}
     param_dict.update({"name": "SHIFT"})
     param_dict.update({"minimum": SHIFT_min})
     if DATA_TYPE == "cfloat":
         param_dict.update({"maximum": SHIFT_min})
     else:
+        if VSS_MODE == 2:
+            min_shift_vss2  = fn_log2(int(SSR))
+            param_dict.update({"minimum": min_shift_vss2})
         param_dict.update({"maximum": SHIFT_max})
-
     return param_dict
 
 
 def validate_SHIFT(args):
     SHIFT = args["SHIFT"]
     DATA_TYPE = args["DATA_TYPE"]
-    return fn_validate_shift_val(DATA_TYPE, SHIFT)
+    VSS_MODE = args["VSS_MODE"]
+    SSR = args["SSR"]
+    return fn_validate_shift_val(DATA_TYPE, SHIFT, VSS_MODE, SSR)
 
 
-def fn_validate_shift_val(DATA_TYPE, SHIFT):
-    res = fn_validate_minmax_value("SHIFT", int(SHIFT), int(SHIFT_min), int(SHIFT_max))
-    if res["is_valid"] == False:
-        return res
-    return fn_float_no_shift(DATA_TYPE, int(SHIFT))
+def fn_validate_shift_val(DATA_TYPE, SHIFT, VSS_MODE, SSR):
+    param_dict = fn_update_shift_val(DATA_TYPE, VSS_MODE, SSR)
+    legal_range_SHIFT = [param_dict["minimum"], param_dict["maximum"]]
+    return validate_range(legal_range_SHIFT, "SHIFT", int(SHIFT))
 
 
 #######################################################
@@ -271,7 +288,7 @@ def update_API_IO(args):
 
 
 def fn_update_API_IO():
-    legal_set_API_IO = [0]
+    legal_set_API_IO = [0, 1]
 
     param_dict = {}
     param_dict.update({"name": "API_IO"})
@@ -437,43 +454,44 @@ def update_SSR(args):
     POINT_SIZE = args["POINT_SIZE"]
     PART = args["PART"]
     DATA_TYPE = args["DATA_TYPE"]
-    FFT_NIFFT = args["FFT_NIFFT"]
-    return fn_update_ssr(POINT_SIZE, PART, DATA_TYPE, FFT_NIFFT)
+    VSS_MODE = args["VSS_MODE"]
+    return fn_update_ssr(POINT_SIZE, PART, DATA_TYPE, VSS_MODE)
 
-
-def fn_update_ssr(POINT_SIZE, PART, DATA_TYPE, FFT_NIFFT):
+def fn_update_ssr(POINT_SIZE, PART, DATA_TYPE, VSS_MODE):
     range_SSR = [2, 64]
     param_dict = {}
     param_dict.update({"name": "SSR"})
-    legal_set_TP_SSR = list(range(range_SSR[0], range_SSR[1] + 1))
-    remove_list = []
-    for cur_ssr in legal_set_TP_SSR:
-        if (
-            legal_ssr_point_size(POINT_SIZE, cur_ssr, PART, DATA_TYPE) == False
-            or fn_update_VSS_MODE(DATA_TYPE, FFT_NIFFT, cur_ssr, POINT_SIZE)["enum"]
-            == []
-        ):  # Second condition is to make sure that the downstream parameter does not lead to an empty configuration if the SSR value is chosen.
-            remove_list.append(cur_ssr)
-    legal_set_TP_SSR_eliminated = remove_from_set(remove_list, legal_set_TP_SSR.copy())
-    if legal_set_TP_SSR_eliminated == legal_set_TP_SSR:
-        param_dict.update({"minimum": range_SSR[0]})
-        param_dict.update({"maximum": range_SSR[1]})
+    if VSS_MODE == 2:
+        # create a list with powers of two from 2 to 64
+        legal_set_TP_SSR = [2**i for i in range(1, 7)]
+        param_dict.update({"enum": legal_set_TP_SSR})
     else:
-        param_dict.update({"enum": legal_set_TP_SSR_eliminated})
+        legal_set_TP_SSR = list(range(range_SSR[0], range_SSR[1] + 1))
+        remove_list = []
+        for cur_ssr in legal_set_TP_SSR:
+            if (
+                legal_ssr_point_size(POINT_SIZE, cur_ssr, PART, DATA_TYPE) == False
+            ):  # Second condition is to make sure that the downstream parameter does not lead to an empty configuration if the SSR value is chosen.
+                remove_list.append(cur_ssr)
+        legal_set_TP_SSR_eliminated = remove_from_set(remove_list, legal_set_TP_SSR.copy())
+        if legal_set_TP_SSR_eliminated == legal_set_TP_SSR:
+            param_dict.update({"minimum": range_SSR[0]})
+            param_dict.update({"maximum": range_SSR[1]})
+        else:
+            param_dict.update({"enum": legal_set_TP_SSR_eliminated})
     return param_dict
-
 
 def validate_SSR(args):
     SSR = args["SSR"]
     POINT_SIZE = args["POINT_SIZE"]
     PART = args["PART"]
     DATA_TYPE = args["DATA_TYPE"]
-    FFT_NIFFT = args["FFT_NIFFT"]
-    return fn_validate_ssr(SSR, POINT_SIZE, PART, DATA_TYPE, FFT_NIFFT)
+    VSS_MODE = args["VSS_MODE"]
+    return fn_validate_ssr(SSR, POINT_SIZE, PART, DATA_TYPE, VSS_MODE)
 
 
-def fn_validate_ssr(SSR, POINT_SIZE, PART, DATA_TYPE, FFT_NIFFT):
-    param_dict = fn_update_ssr(POINT_SIZE, PART, DATA_TYPE, FFT_NIFFT)
+def fn_validate_ssr(SSR, POINT_SIZE, PART, DATA_TYPE, VSS_MODE):
+    param_dict = fn_update_ssr(POINT_SIZE, PART, DATA_TYPE, VSS_MODE)
     if "enum" in param_dict:
         return validate_legal_set(param_dict["enum"], "SSR", int(SSR))
     else:
@@ -517,26 +535,11 @@ def fn_validate_AIE_PLIO_WIDTH(AIE_PLIO_WIDTH):
 
 
 def update_VSS_MODE(args):
-    DATA_TYPE = args["DATA_TYPE"]
-    FFT_NIFFT = args["FFT_NIFFT"]
-    SSR = args["SSR"]
-    POINT_SIZE = args["POINT_SIZE"]
-    return fn_update_VSS_MODE(DATA_TYPE, FFT_NIFFT, SSR, POINT_SIZE)
+    return fn_update_VSS_MODE()
 
 
-def fn_update_VSS_MODE(DATA_TYPE, FFT_NIFFT, SSR, POINT_SIZE):
+def fn_update_VSS_MODE():
     legal_set = [1, 2]
-    if (
-        FFT_NIFFT == 0
-        or DATA_TYPE in ["cint32"]
-        or fn_is_power_of_two(SSR) != 0
-        or (POINT_SIZE % SSR != 0)
-    ):
-        legal_set = [1]
-        if SSR < 4:
-            legal_set = []
-    elif SSR == 2:
-        legal_set = [2]
     param_dict = {}
     param_dict.update({"name": "VSS_MODE"})
     param_dict.update({"enum": legal_set})
@@ -545,15 +548,11 @@ def fn_update_VSS_MODE(DATA_TYPE, FFT_NIFFT, SSR, POINT_SIZE):
 
 def validate_VSS_MODE(args):
     VSS_MODE = args["VSS_MODE"]
-    DATA_TYPE = args["DATA_TYPE"]
-    FFT_NIFFT = args["FFT_NIFFT"]
-    SSR = args["SSR"]
-    POINT_SIZE = args["POINT_SIZE"]
-    return fn_validate_VSS_MODE(VSS_MODE, DATA_TYPE, FFT_NIFFT, SSR, POINT_SIZE)
+    return fn_validate_VSS_MODE(VSS_MODE)
 
 
-def fn_validate_VSS_MODE(VSS_MODE, DATA_TYPE, FFT_NIFFT, SSR, POINT_SIZE):
-    param_dict = fn_update_VSS_MODE(DATA_TYPE, FFT_NIFFT, SSR, POINT_SIZE)
+def fn_validate_VSS_MODE(VSS_MODE):
+    param_dict = fn_update_VSS_MODE()
     legal_set_VSS_MODE = param_dict["enum"]
     return validate_legal_set(legal_set_VSS_MODE, "VSS_MODE", int(VSS_MODE))
 
@@ -570,7 +569,7 @@ def generate_cfg(aie_graph_name, args):
 freqhz={FREQ}
 
 [aie]
-enable-partition=0:35:fft_aie
+enable-partition=5:26:fft_aie
 """
 
     macro_body = []

@@ -38,12 +38,20 @@ parser.add_argument(
     type=int,
     help="Flag that returns a packages vss with the back transpose. If set to 0, the vss will not include the back transpose block.",
 )
+parser.add_argument(
+    "-l",
+    "--aie_obj_name",
+    type=str,
+    help="Name of the AIE object. Found in the input cfg file.",
+)
+
 args = parser.parse_args()
 SSR = args.ssr
 fname = args.cfg_file_name
 vssName = args.vss_unit
 freqhz = args.freqhz
 ipVersion = str(args.version)
+aieName = str(args.aie_obj_name)
 addBackTranspose = int(args.add_back_transpose)
 
 f = open(f"{fname}", "w")
@@ -103,16 +111,12 @@ comment = "# AIE FFT TO PL FFT:\n"
 f.write(comment)
 
 if SSR == 1:
-    text = "sc = ai_engine_0.fft_aie_PLIO_front_out_0" + ":ssr_fft.s_axis0_din" + "\n"
+    text = f"sc = ai_engine_0.{aieName}_PLIO_front_out_0:ssr_fft.s_axis0_din\n"
     f.write(text)
 else:
     for i in range(SSR):
         text = (
-            "sc = ai_engine_0.fft_aie_PLIO_front_out_"
-            + str(i)
-            + ":ssr_fft.s_axis"
-            + str(i)
-            + "_din\n"
+            f"sc = ai_engine_0.{aieName}_PLIO_front_out_{i}:ssr_fft.s_axis{i}_din\n"
         )
         f.write(text)
 
@@ -126,11 +130,7 @@ if addBackTranspose == 1:
     else:
         for i in range(SSR):
             text = (
-                "sc = ssr_fft.m_axis"
-                + str(i)
-                + "_dout:back_transpose.sig_i_"
-                + str(i)
-                + "\n"
+                f"sc = ssr_fft.m_axis{i}_dout:back_transpose.sig_i_{i}\n"
             )
             f.write(text)
 

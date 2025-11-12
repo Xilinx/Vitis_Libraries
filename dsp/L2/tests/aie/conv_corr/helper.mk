@@ -247,8 +247,8 @@ create_input:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/gen_input.tcl $(LOC_INPUT_FILE_F) $(F_LEN) $(NITER_UUT) $(SEED_DATA_F) $(STIM_TYPE_F) 0 0 $(DATA_F) $(API_IO) 1 0 0 $(DATA_G) 0 0 ; \
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/gen_input_f32_bf16.tcl $(LOC_INPUT_FILE_G) $(G_LEN) $(NITER_UUT) $(SEED_DATA_G) $(STIM_TYPE_G) 0 0 $(DATA_G) $(API_IO) 1 0 0 $(DATA_G) 0 0 $(NUM_FRAMES) 1; \
     else \
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/gen_padded_input.tcl $(LOC_INPUT_FILE_F) $(F_LEN) $(NITER_UUT) $(SEED_DATA_F) $(STIM_TYPE_F) 0 0 $(DATA_F) $(API_IO) 1 0 0 $(DATA_G) 0 0 $(COMPUTE_MODE) $(G_LEN) $(AIE_VARIANT) $(NUM_FRAMES) ; \
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/gen_input_f32_bf16.tcl $(LOC_INPUT_FILE_G) $(G_LEN) $(NITER_UUT) $(SEED_DATA_G) $(STIM_TYPE_G) 0 0 $(DATA_G) $(API_IO) 1 0 0 $(DATA_G) 0 0 $(NUM_FRAMES) 0 ; \
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_F) $(F_LEN) $(NITER_UUT) $(SEED_DATA_F) $(STIM_TYPE_F) 0 0 $(DATA_F) 0 1 0 0 0 0 0 64;\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_G) $(G_LEN) $(NITER_UUT) $(SEED_DATA_G) $(STIM_TYPE_G) 0 0 $(DATA_G) 0 1 0 0 0 0 0 32;\
 	fi; \
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/split_interleave.tcl $(LOC_INPUT_FILE_F) $(DATA_F) $(PHASES) ; \
     echo Input ready
@@ -272,9 +272,9 @@ prep_aie_out:
 	done
 
 get_diff:
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_OUT) --ssr $(PHASES) --zip --dual 0 -k 0 -w ${OUT_DATA_LEN} ;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_OUT) --ssr 1 --zip --dual 0 -k 0 -w ${OUT_DATA_LEN} ;\
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/align_stream_output.tcl $(REF_SIM_FILE) $(UUT_SIM_FILE) $(PHASES) $(CASC_LEN) $(REF_F_LEN) $(G_LEN) 1 $(API_IO) $(DATA_G);\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_OUT) --ssr $(PHASES) --zip --dual 0 -k 0 -w $(OUT_DATA_LEN) --plioWidth 64 ;\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_OUT) --ssr 1 --zip --dual 0 -k 0 -w $(OUT_DATA_LEN) --plioWidth 64 ;\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/align_stream_output.tcl $(REF_SIM_FILE) $(UUT_SIM_FILE) $(PHASES) $(CASC_LEN) $(REF_F_LEN) $(G_LEN) 1 $(API_IO) $(DATA_G) ;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl $(UUT_SIM_FILE) $(REF_SIM_FILE) ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) PERCENT
 
 get_latency:
@@ -282,7 +282,7 @@ get_latency:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_inData_F_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(F_LEN) $(NITER_UUT)
 
 get_stats:
-	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(F_LEN) 1 $(STATUS_FILE) ./aiesimulator_output "conv_corrMain" $(NITER_UUT)
+	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(F_LEN) 1 $(STATUS_FILE) ./aiesimulator_output "conv_corr" $(NITER_UUT)
 
 get_status:
 	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) SINGLE_BUF $(SINGLE_BUF)

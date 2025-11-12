@@ -368,6 +368,57 @@ For the Convolution / Correlation library element the list of configurable param
     |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
     +------------------------+----------------+----------------+--------------------------------------+
 
+.. _CONFIGURATION_PARAMETERS_CUMSUM:
+
+Cumulative Sum configuration parameters
+--------------------------------------------------
+
+For the Cumulative Sum library element the list of configurable parameters and default values is presented below.
+
+.. table:: Cumulative Sum configuration parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | DATA_TYPE              |    typename    |                | Data Type of input.                  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DATA_OUT_TYPE          |    typename    |                | Data Type of output.                 |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIM_A                  |    unsigned    |    16          | First dimension size                 |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIM_B                  |    unsigned    |    1           | Second dimension size                |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NUM_FRAMES             |    unsigned    |    1           | Number of vectors to be processed    |
+    |                        |                |                | for each call to the IP.             |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | MODE                   |    unsigned    |    0           | Mode of operation                    |
+    |                        |                |                | 0 - sum along first dimension        |
+    |                        |                |                | 1 - sum along second dimension       |
+    |                        |                |                | 2 - sum along first dimension        |
+    |                        |                |                | (reduced range, higher performance)  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SHIFT                  |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | STIM_TYPE              |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
+    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    8           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    
+
 .. _CONFIGURATION_PARAMETERS_DDS_MIXER:
 
 DDS/Mixer Configuration Parameters
@@ -519,13 +570,10 @@ For the Euclidean Distance library element, use the following list of configurab
     | DATA                   |    typename    |    float       | Data Type.                           |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DATA_OUT               |    typename    |    float       | Output Data Type.                    |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
     | LEN                    |    unsigned    |    32          | Number of samples in input buffers.  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DIM                    |    unsigned    |   3            | Number of dimensions in input        |
+    | DIM                    |    unsigned    |    3           | Number of dimensions in input        |
     |                        |                |                | samples.                             |
     +------------------------+----------------+----------------+--------------------------------------+
     | API_IO                 |    unsigned    |    0           | Graph's port API.                    |

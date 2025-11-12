@@ -41,6 +41,18 @@ static constexpr unsigned int kUpdWSize = 32; // Upd_w size in Bytes (256bit) - 
 static constexpr unsigned int kMaxPointSize = 4096;
 static constexpr unsigned int kMaxPointLog = 12;
 
+template <typename T_D>
+INLINE_DECL constexpr bool fnIsFloat() {
+    bool retVal = false;
+    retVal = std::is_same<T_D, cfloat>::value
+#ifdef _SUPPORTS_CBFLOAT16_
+                     || std::is_same<T_D, cbfloat16>::value
+#endif //_SUPPORTS_CBFLOAT16_
+                 ? true
+                 : false;
+    return retVal;
+}
+
 // return accumulator data type for aie-ml
 template <typename T_D>
 struct t_accType {
@@ -50,6 +62,13 @@ template <>
 struct t_accType<cfloat> {
     using type = cfloat;
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+struct t_accType<cbfloat16> {
+    using type = cbfloat16;
+};
+#endif //_SUPPORTS_CBFLOAT16_
+
 //-------------------------------
 // I/O types
 template <typename T_D>
@@ -78,6 +97,18 @@ template <>
 struct T_inputIF<cfloat> {
     input_window<cfloat>* inWindow;
 };
+#ifdef _SUPPORTS_BFLOAT16_
+template <>
+struct T_inputIF<bfloat16> {
+    input_window<bfloat16>* inWindow;
+};
+#endif //_SUPPORTS_BFLOAT16_
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+struct T_inputIF<cbfloat16> {
+    input_window<cbfloat16>* inWindow;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 template <typename T_D>
 struct T_outputIF {};
@@ -105,6 +136,18 @@ template <>
 struct T_outputIF<cfloat> {
     output_window<cfloat>* outWindow;
 };
+#ifdef _SUPPORTS_BFLOAT16_
+template <>
+struct T_outputIF<bfloat16> {
+    output_window<bfloat16>* outWindow;
+};
+#endif //_SUPPORTS_BFLOAT16_
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+struct T_outputIF<cbfloat16> {
+    output_window<cbfloat16>* outWindow;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 //---------------------------------------
 // Configuration Defensive check functions
@@ -124,6 +167,12 @@ template <>
 INLINE_DECL constexpr bool fnCheckDataType<cfloat>() {
     return true;
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+INLINE_DECL constexpr bool fnCheckDataType<cbfloat16>() {
+    return true;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 template <typename TT_IN_DATA, typename TT_OUT_DATA>
 INLINE_DECL constexpr bool fnCheckDataIOType() {
@@ -149,6 +198,12 @@ template <>
 INLINE_DECL constexpr bool fnCheckDataIOType<cfloat, cfloat>() {
     return true;
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+INLINE_DECL constexpr bool fnCheckDataIOType<cbfloat16, cbfloat16>() {
+    return true;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 template <typename TT_TWIDDLE>
 INLINE_DECL constexpr bool fnCheckTwiddleType() {
@@ -166,6 +221,12 @@ template <>
 INLINE_DECL constexpr bool fnCheckTwiddleType<cfloat>() {
     return true;
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+INLINE_DECL constexpr bool fnCheckTwiddleType<cbfloat16>() {
+    return true;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 template <typename TT_DATA, typename TT_TWIDDLE>
 INLINE_DECL constexpr bool fnCheckDataTwiddleType() {
@@ -191,6 +252,12 @@ template <>
 INLINE_DECL constexpr bool fnCheckDataTwiddleType<cfloat, cfloat>() {
     return true;
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+INLINE_DECL constexpr bool fnCheckDataTwiddleType<cbfloat16, cbfloat16>() {
+    return true;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 template <unsigned int TP_POINT_SIZE>
 INLINE_DECL constexpr bool fnCheckPointSize() {
@@ -210,15 +277,14 @@ INLINE_DECL constexpr bool fnCheckShift() {
 
 template <typename TT_DATA, unsigned int TP_SHIFT>
 INLINE_DECL constexpr bool fnCheckShiftFloat() {
-    return !(std::is_same<TT_DATA, cfloat>::value) || // This check traps shift != 0 when data = cfloat
+    return !(fnIsFloat<TT_DATA>()) || // This check traps shift != 0 when data = cfloat
            (TP_SHIFT == 0);
 };
 
 template <typename TT_DATA, unsigned int RANKS, unsigned int TP_CASC_LEN>
 INLINE_DECL constexpr bool fnCheckCascLen() {
     // equation for integer ffts is complicated by the fact that odd power of 2 point sizes start with a radix 2 stage
-    return (TP_CASC_LEN > 0) &&
-           (std::is_same<TT_DATA, cfloat>::value ? (TP_CASC_LEN <= RANKS) : (TP_CASC_LEN <= (RANKS + 1) / 2));
+    return ((TP_CASC_LEN > 0) && fnIsFloat<TT_DATA>() ? (TP_CASC_LEN <= RANKS) : (TP_CASC_LEN <= (RANKS + 1) / 2));
 }
 
 template <typename TT_DATA, unsigned int TP_POINT_SIZE, unsigned int TP_CASC_LEN>
@@ -226,7 +292,7 @@ INLINE_DECL constexpr bool fnCheckCascLen2() {
     return true;
     // The worry here was that since cfloat 16pt requires special buffering, it will not yield to cascade, but
     // all cascade configurations possible will not run into the issue of buffer overwrite involved.
-    return (TP_CASC_LEN == 1) || (!std::is_same<TT_DATA, cfloat>::value) || (TP_POINT_SIZE != 16);
+    return (TP_CASC_LEN == 1) || (!(fnIsFloat<TT_DATA>())) || (TP_POINT_SIZE != 16);
 }
 
 // End of Defensive check functions
@@ -238,7 +304,7 @@ template <typename TT_DATA, typename TT_TWIDDLE, unsigned int TP_POINT_SIZE>
 INLINE_DECL constexpr int fnHeapSize() {
     int retVal = 0;
     int buffsize = 0;
-    // cfloat twiddles are cfloat size and cam not use half table trick.
+    // cfloat twiddles are cfloat size and can not use half table trick.
     if (std::is_same<TT_DATA, cfloat>::value) {
         switch (TP_POINT_SIZE) {
             case 16:
@@ -324,14 +390,18 @@ template <typename TT_D, int T_START_RANK, int T_END_RANK, int T_DYN>
 INLINE_DECL constexpr bool fnReuseOutputBuffer() {
     if (T_DYN == 1) {
         return false;
+    } else {
+        if (std::is_same<TT_D, cint16>::value) {
+            return false;
+        } else if (fnIsFloat<TT_D>()) {
+            return (T_END_RANK - T_START_RANK) % 2 == 1; // cfloat stages are radix2, stages = ranks.
+        } else if (std::is_same<TT_D, cint32>::value) {
+            return (T_END_RANK / 2 - T_START_RANK / 2) % 2 == 1; // cint32 stages are radix4, so stages = ranks/2
+        } else {
+            return false; // should never be reached.
+        }
     }
-    if (std::is_same<TT_D, cint16>::value) {
-        return false;
-    } else if (std::is_same<TT_D, cfloat>::value) {
-        return (T_END_RANK - T_START_RANK) % 2 == 1; // cfloat stages are radix2, stages = ranks.
-    } else if (std::is_same<TT_D, cint32>::value) {
-        return (T_END_RANK / 2 - T_START_RANK / 2) % 2 == 1; // cint32 stages are radix4, so stages = ranks/2
-    }
+    return false; // should never be reached, but this avoids a warning.
 };
 
 // To reduce Data Memory required, the input window can be re-used as a temporary buffer of samples,
@@ -473,6 +543,19 @@ INLINE_DECL cfloat nullElem() {
     cfloat retVal = {0.0, 0.0};
     return retVal;
 };
+#ifdef _SUPPORTS_BFLOAT16_
+template <>
+INLINE_DECL bfloat16 nullElem() {
+    return 0.0;
+};
+#endif //_SUPPORTS_BFLOAT16_
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+INLINE_DECL cbfloat16 nullElem() {
+    cbfloat16 retVal = {0.0, 0.0};
+    return retVal;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 }
 }
 }

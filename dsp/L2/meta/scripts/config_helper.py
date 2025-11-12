@@ -453,6 +453,17 @@ if not (NO_INSTANCE) and not (test_config_helper):
         test_config_helper,
     )
 
+    if is_vss_object:
+        print_with_condition(
+            "\nUse the cfg file to as an input to your VSS generator makefile."
+            f"\nFor example, make -f vss_fft_ifft_1d.mk PARAMS_CFG={out_inst}_{IP_in_use}_{instanceName}.{ext_name}"
+            "\n"
+            "\nPlease note that the makefile might also require other build parameters. The help target in the vss generator will contain details about any other parameters. \n",
+            test_config_helper,
+        )
+ 
+        
     if PRINT_GRAPH:
         print_with_condition("\nHere is your configured instance:", test_config_helper)
         print_with_condition(instance_out[out_inst])
+    

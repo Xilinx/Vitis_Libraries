@@ -46,7 +46,8 @@ class tl_graph : public graph {
    private:
    public:
     static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
-    static constexpr int kPortsPerTile = API_IO == 0 ? 1 : kStreamsPerTile;
+    static constexpr int kWindowAPI = 0;
+    static constexpr int kPortsPerTile = kWindowAPI == 0 ? 1 : kStreamsPerTile;
     std::array<input_plio, SSR> front_i;
     std::array<output_plio, SSR> front_o;
 
@@ -72,7 +73,7 @@ class tl_graph : public graph {
         printf("========================\n");
         adf::plio_type aiePlioWidth = AIE_PLIO_WIDTH == 64 ? adf::plio_64_bits : adf::plio_128_bits;
         // FIR sub-graph
-        xf::dsp::aie::fft::vss_1d::AIE_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, API_IO, SSR,
+        xf::dsp::aie::fft::vss_1d::AIE_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, kWindowAPI, SSR,
                                              ROUND_MODE, SAT_MODE, TWIDDLE_MODE>
             fftGraph;
         for (int i = 0; i < SSR; i++) {

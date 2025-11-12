@@ -54,64 +54,56 @@ bitonic_sort<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN, TP_CASC_
     input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_DATA>& __restrict outWindow) {
     using dataVect_t = ::aie::vector<TT_DATA, kVecSampleNum>;
 
-    dataVect_t* __restrict inPtr = (dataVect_t*)inWindow.data();
-    dataVect_t* __restrict outPtr = (dataVect_t*)outWindow.data();
+    dataVect_t* inPtr = (dataVect_t*)inWindow.data();
+    dataVect_t* outPtr = (dataVect_t*)outWindow.data();
 
     for (int frame = 0; frame < TP_NUM_FRAMES; frame++) chess_prepare_for_pipelining chess_loop_count(TP_NUM_FRAMES) {
             dataVect_t* pingPong[2] = {inPtr, outPtr};
-            dataVect_t* __restrict readPtr = inPtr;
-            dataVect_t* __restrict writePtr = outPtr;
+            dataVect_t* readPtr = inPtr;
+            dataVect_t* writePtr = outPtr;
             int ping = 1;
 
             // INITIAL STAGES WHICH ARE INTRA...
             constexpr int iEnd = MIN(kIEnd, fnLog2<kVecSampleNum>() - 1);
-            ::aie::unroll_for<int, kIStart, iEnd + 1>([&](
-                auto i) __attribute__((always_inline)) { // This is equivalent to for(int i = kIStart; i < kIEnd+1;
-                                                         // i++){...} except i is a constant
+            ::aie::unroll_for<int, kIStart, iEnd + 1>([&](auto i) __aie_inline {
+                // This is equivalent to for(int i = kIStart; i < kIEnd+1; i++){...} except i is a constant
 
                 constexpr int jStart = getJIdx<i, kIStart, kJStart, 0>();
                 constexpr int jEnd = getJIdx<i, kIEnd, kJEnd, i>();
-                ::aie::unroll_for<int, jStart, jEnd + 1>([&](auto j) __attribute__((always_inline)) {
+                ::aie::unroll_for<int, jStart, jEnd + 1>([&](auto j) __aie_inline {
 
-                    intrasort<TT_DATA, TP_DIM, TP_ASCENDING, i, j, kVecSampleNum, kUnrollMax>(readPtr, writePtr);
-                    if
-                        constexpr(getCurrStage<i, j, 0>() == kFirstStage) {
-                            chess_memory_fence();
-                        } // Required as sort of interference at low list sizes on the first stage.
+                    intrasort<TT_DATA, TP_DIM, TP_ASCENDING, i, j, kVecSampleNum>(readPtr, writePtr);
+                    chess_memory_fence();
                     swap<TT_DATA, kVecSampleNum>(readPtr, writePtr, pingPong, ping);
                 });
             });
 
             if
                 constexpr(TP_CASC_LEN == 1) {
-                    // * If one kernel run this loop which has smaller microcode.
-                    // * This is in essence what the cascade version does but the cascade code can start/end partly
+                    // If one kernel run this loop which has smaller microcode.
+                    // This is in essence what the cascade version does but the cascade code can start/end partly
                     // through the loop.
-                    // * The ability to start/stop partly through a loop significantly bloats the microcode such that a
+                    // The ability to start/stop partly through a loop significantly bloats the microcode such that a
                     // single kernel
-                    // * would run out of program memory, hence the necessity to run this loop. Cascaded kernels divide
+                    // would run out of program memory, hence the necessity to run this loop. Cascaded kernels divide
                     // the program
-                    // * memory between them, such that this is not a concern when running a cascaded design.
+                    // memory between them, such that this is not a concern when running a cascaded design.
 
                     for (int i = fnLog2<kVecSampleNum>(); i < fnLog2<TP_DIM>(); i++)
                         chess_prepare_for_pipelining chess_loop_count(fnLog2<TP_DIM / kVecSampleNum>()) {
-                            intersort_handover<TT_DATA, TP_DIM, TP_ASCENDING, kVecSampleNum, kUnrollMax>(readPtr,
-                                                                                                         writePtr, i);
+                            intersort_handover<TT_DATA, TP_DIM, TP_ASCENDING, kVecSampleNum>(readPtr, i);
+                            chess_memory_fence();
 
                             for (int j = 1; j < i + 1 - fnLog2<kVecSampleNum>(); j++) {
-                                intersort<TT_DATA, TP_DIM, TP_ASCENDING, kVecSampleNum, kUnrollMax>(readPtr, writePtr,
-                                                                                                    i, j);
+                                intersort<TT_DATA, TP_DIM, TP_ASCENDING, kVecSampleNum>(readPtr, i, j);
+                                chess_memory_fence();
                             }
 
-                            ::aie::unroll_for<int, 1, fnLog2<kVecSampleNum>() + 1>([&](
-                                auto j) __attribute__((always_inline)) {
+                            ::aie::unroll_for<int, 1, fnLog2<kVecSampleNum>() + 1>([&](auto j) __aie_inline {
 
-                                intrasort<TT_DATA, TP_DIM, TP_ASCENDING, fnLog2<kVecSampleNum>(), j, kVecSampleNum,
-                                          kUnrollMax>(readPtr, writePtr);
-                                if
-                                    constexpr(j == 1) {
-                                        chess_memory_fence();
-                                    } // Mitigates memory conflicts on first stage of intra..
+                                intrasort<TT_DATA, TP_DIM, TP_ASCENDING, fnLog2<kVecSampleNum>(), j, kVecSampleNum>(
+                                    readPtr, writePtr);
+                                chess_memory_fence();
                                 swap<TT_DATA, kVecSampleNum>(readPtr, writePtr, pingPong, ping);
                             });
                         }
@@ -133,8 +125,8 @@ bitonic_sort<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN, TP_CASC_
                         // INTERSORT HANDOVER..
                         if
                             constexpr(jFirst == 0) {
-                                intersort_handover<TT_DATA, TP_DIM, TP_ASCENDING, kVecSampleNum, kUnrollMax>(
-                                    readPtr, writePtr, i);
+                                intersort_handover<TT_DATA, TP_DIM, TP_ASCENDING, kVecSampleNum>(readPtr, i);
+                                chess_memory_fence();
                                 j++;
                             }
 
@@ -146,21 +138,18 @@ bitonic_sort<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN, TP_CASC_
 
                         for (; j < jEndInter + 1; j++) // can re-use the j I declared earlier without redeclaring.
                             chess_prepare_for_pipelining chess_loop_count(MAX(0, jEndInter - jStartInter)) {
-                                intersort<TT_DATA, TP_DIM, TP_ASCENDING, kVecSampleNum, kUnrollMax>(readPtr, writePtr,
-                                                                                                    i, j);
+                                intersort<TT_DATA, TP_DIM, TP_ASCENDING, kVecSampleNum>(readPtr, i, j);
+                                chess_memory_fence();
                             }
 
                         // INTRASORT..
                         constexpr int jStartIntra = MAX(jEndInter + 1, jFirst);
                         constexpr int jEndIntra = getJIdx<iFirst, kIEnd, kJEnd, iFirst>();
 
-                        ::aie::unroll_for<unsigned int, jStartIntra, jEndIntra + 1>([&](
-                            auto j) __attribute__((always_inline)) {
+                        ::aie::unroll_for<unsigned int, jStartIntra, jEndIntra + 1>([&](auto j) __aie_inline {
 
-                            intrasort<TT_DATA, TP_DIM, TP_ASCENDING, iFirst, j, kVecSampleNum, kUnrollMax>(readPtr,
-                                                                                                           writePtr);
-                            if
-                                constexpr(j == jStartIntra) { chess_memory_fence(); }
+                            intrasort<TT_DATA, TP_DIM, TP_ASCENDING, iFirst, j, kVecSampleNum>(readPtr, writePtr);
+                            chess_memory_fence();
                             swap<TT_DATA, kVecSampleNum>(readPtr, writePtr, pingPong, ping);
                         });
 
@@ -170,26 +159,22 @@ bitonic_sort<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN, TP_CASC_
                             constexpr(getCurrStage<iFirst, jEndIntra, 0>() < kLastStage) {
                                 for (int i = iFirst + 1; i < kIEnd; i++)
                                     chess_prepare_for_pipelining chess_loop_count(kIEnd - iFirst - 1) {
-                                        intersort_handover<TT_DATA, TP_DIM, TP_ASCENDING, kVecSampleNum, kUnrollMax>(
-                                            readPtr, writePtr, i);
+                                        intersort_handover<TT_DATA, TP_DIM, TP_ASCENDING, kVecSampleNum>(readPtr, i);
+                                        chess_memory_fence();
 
                                         for (int j = 1; j < i + 1 - fnLog2<kVecSampleNum>(); j++) {
-                                            intersort<TT_DATA, TP_DIM, TP_ASCENDING, kVecSampleNum, kUnrollMax>(
-                                                readPtr, writePtr, i, j);
+                                            intersort<TT_DATA, TP_DIM, TP_ASCENDING, kVecSampleNum>(readPtr, i, j);
+                                            chess_memory_fence();
                                         }
 
-                                        ::aie::unroll_for<int, 1, fnLog2<kVecSampleNum>() + 1>([&](
-                                            auto j) __attribute__((always_inline)) {
+                                        ::aie::unroll_for<int, 1, fnLog2<kVecSampleNum>() + 1>(
+                                            [&](auto j) __aie_inline {
 
-                                            intrasort<TT_DATA, TP_DIM, TP_ASCENDING, fnLog2<kVecSampleNum>(), j,
-                                                      kVecSampleNum, kUnrollMax>(readPtr, writePtr);
-                                            // if constexpr(j == 1){ chess_memory_fence(); } // ! I do not know why but
-                                            // this has the capability to break cascaded designs..
-                                            chess_memory_fence(); // ! The fence needs to occur at every iteration for
-                                                                  // this corruption to not occur (unlike everywhere
-                                                                  // else)
-                                            swap<TT_DATA, kVecSampleNum>(readPtr, writePtr, pingPong, ping);
-                                        });
+                                                intrasort<TT_DATA, TP_DIM, TP_ASCENDING, fnLog2<kVecSampleNum>(), j,
+                                                          kVecSampleNum>(readPtr, writePtr);
+                                                chess_memory_fence();
+                                                swap<TT_DATA, kVecSampleNum>(readPtr, writePtr, pingPong, ping);
+                                            });
                                     }
 
                                 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -197,50 +182,36 @@ bitonic_sort<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN, TP_CASC_
                                 int i = kIEnd;
 
                                 // INTERSORT HANDOVER..
-                                intersort_handover<TT_DATA, TP_DIM, TP_ASCENDING, kVecSampleNum, kUnrollMax>(
-                                    readPtr, writePtr, i);
+                                intersort_handover<TT_DATA, TP_DIM, TP_ASCENDING, kVecSampleNum>(readPtr, i);
+                                chess_memory_fence();
 
                                 // INTERSORT REGULAR..
                                 constexpr int jEndLastInter = MIN(kJEnd, kIEnd - fnLog2<kVecSampleNum>());
 
                                 for (int j = 1; j < jEndLastInter + 1; j++)
                                     chess_prepare_for_pipelining chess_loop_count(jEndLastInter) {
-                                        intersort<TT_DATA, TP_DIM, TP_ASCENDING, kVecSampleNum, kUnrollMax>(
-                                            readPtr, writePtr, i, j);
+                                        intersort<TT_DATA, TP_DIM, TP_ASCENDING, kVecSampleNum>(readPtr, i, j);
+                                        chess_memory_fence();
                                     }
 
                                 // INTRASORT..
                                 constexpr int jStartLastIntra = jEndLastInter + 1;
 
-                                ::aie::unroll_for<unsigned int, jStartLastIntra, kJEnd + 1>([&](
-                                    auto j) __attribute__((always_inline)) {
+                                ::aie::unroll_for<unsigned int, jStartLastIntra, kJEnd + 1>([&](auto j) __aie_inline {
 
-                                    intrasort<TT_DATA, TP_DIM, TP_ASCENDING, kIEnd, j, kVecSampleNum, kUnrollMax>(
-                                        readPtr, writePtr);
-                                    if
-                                        constexpr(j == jStartLastIntra) { chess_memory_fence(); }
+                                    intrasort<TT_DATA, TP_DIM, TP_ASCENDING, kIEnd, j, kVecSampleNum>(readPtr,
+                                                                                                      writePtr);
+                                    chess_memory_fence();
                                     swap<TT_DATA, kVecSampleNum>(readPtr, writePtr, pingPong, ping);
                                 });
                             }
                     }
                 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
             }
-            // workaround for for aggressive compiler optimzation that results in functional mismatches in certain
-            // cascaded designs
-            chess_separator_scheduler();
             // If the final write was to the inPtr, then this will resolve to true regardless of inter or intra.
             if (writePtr == outPtr) {
-                constexpr unsigned int kPragmaNum = MIN(kNumVecs, kUnrollMax); // How many unrolls of inner loop.
-                constexpr unsigned int kChessNum = kNumVecs / kPragmaNum;      // How many pipelines of inner loop.
-
-                int iter = 0;
-                for (int k_chess = 0; k_chess < kChessNum; k_chess++)
-                    chess_prepare_for_pipelining chess_loop_count(kChessNum) {
-#pragma unroll(kPragmaNum)
-                        for (int k_pragma = 0; k_pragma < kPragmaNum; k_pragma++) {
-                            outPtr[iter] = inPtr[iter];
-                            iter++;
-                        }
+                for (int k = 0; k < kNumVecs; k++) chess_prepare_for_pipelining chess_loop_count(kNumVecs) {
+                        outPtr[k] = inPtr[k];
                     }
             }
 

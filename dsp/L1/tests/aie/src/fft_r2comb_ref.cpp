@@ -47,6 +47,15 @@ cfloat constexpr kunitVector<cfloat>() {
     temp.imag = 0.0;
     return temp;
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+cbfloat16 constexpr kunitVector<cbfloat16>() {
+    cbfloat16 temp;
+    temp.real = 1.0;
+    temp.imag = 0.0;
+    return temp;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 namespace xf {
 namespace dsp {
@@ -165,10 +174,10 @@ void fft_r2comb_ref<TT_DATA,
     constexpr unsigned int kRadix = 2;
     int ptSize = TP_DYN_PT_SIZE == 0 ? TP_POINT_SIZE : pptSize;
     int loopSize = (ptSize >> TP_PARALLEL_POWER) >> 1; // each loop calc 2 samples
-    cfloat sam1, sam2, sam2rot;
+    TT_DATA sam1, sam2, sam2rot;
     unsigned int inIndex[kRadix];
     unsigned int outIndex[kRadix];
-    cfloat tw;
+    TT_TWIDDLE tw;
     unsigned int temp1, temp2, twIndex;
     for (int op = 0; op < loopSize;
          op++) { // Note that the order if inputs differs from UUT. Ref is Cooley-Tukey, UUT is Stockham
@@ -224,11 +233,11 @@ void fft_r2comb_ref<TT_DATA,
                 __ALIGN_BYTE_SIZE__ / (sizeof(TT_DATA)); // dynamic point size header size in samples
             constexpr unsigned int kPtSizePwr = fnGetPointSizePower<TP_POINT_SIZE>();
             constexpr unsigned int kR2Stages =
-                std::is_same<TT_DATA, cfloat>::value
+                fnIsFloat<TT_DATA>()
                     ? kPtSizePwr
                     : (kPtSizePwr % 2 == 1 ? 1 : 0); // There is one radix 2 stage if we have an odd power of 2 point
-                                                     // size, but for cfloat all stages are R2.
-            constexpr unsigned int kR4Stages = std::is_same<TT_DATA, cfloat>::value ? 0 : kPtSizePwr / 2;
+                                                     // size, but for cfloat or cbfloat16 all stages are R2.
+            constexpr unsigned int kR4Stages = fnIsFloat<TT_DATA>() ? 0 : kPtSizePwr / 2;
             constexpr unsigned int kTwShift = getTwShift<TT_TWIDDLE, TP_TWIDDLE_MODE>();
             unsigned int stageShift = 0;
 
@@ -274,7 +283,7 @@ void fft_r2comb_ref<TT_DATA,
                 for (int frameStart = 0; frameStart < TP_WINDOW_VSIZE;
                      frameStart += (TP_POINT_SIZE >> TP_PARALLEL_POWER)) {
                     if
-                        constexpr(is_cfloat<TT_DATA>()) {
+                        constexpr(fnIsFloat<TT_DATA>()) {
                             r2StageFloat(xbuff + frameStart, obuff + frameStart, &twiddles[tw_base], n, inv);
                         }
                     else {
@@ -299,7 +308,7 @@ void fft_r2comb_ref<TT_DATA,
         constexpr bool inv = TP_FFT_NIFFT == 1 ? false : true; // may be overwritten if dyn_pt_size is set
         for (int frameStart = 0; frameStart < TP_WINDOW_VSIZE; frameStart += n) {
             if
-                constexpr(is_cfloat<TT_DATA>()) {
+                constexpr(fnIsFloat<TT_DATA>()) {
                     r2StageFloat(xbuff + frameStart, obuff + frameStart, twiddles, n, inv);
                 }
             else {

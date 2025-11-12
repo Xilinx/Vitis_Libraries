@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.#
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
 # python script which takes as input a cfg file containing the list of parameters for the VSS and creates a config.json file that will then be used by the metadata checker to check the configuration.
 # requires 2 arguments : arg 1 : CUR_DIR ; arg 2 : cfg file

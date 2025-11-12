@@ -85,9 +85,13 @@
       "name": "ssr",
       "description": "Specify the number of parallel input/output data paths.",
       "default": 1,
+      "enum": [
+                "Inherit from number of input columns",
+                "<Specify SSR number>"
+            ],
       "label": "SSR:",
       "tablabel": "Main",
-      "parameterType": "edit"
+      "parameterType": "combobox"
     },
     {
       "key": "TP_SAT",

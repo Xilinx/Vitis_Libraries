@@ -99,14 +99,15 @@ all_pack:
 	@if [ -f paramset.py ]; then \
 		cp -f paramset.py $(RESULTS_DIR) ;\
 	fi
-	@if [ -f system.cfg ]; then \
-		cp -f system.cfg $(RESULTS_DIR) ;\
-	fi
 	@if [ -f sim_options.txt ]; then \
 		cp -f sim_options.txt $(RESULTS_DIR) ;\
 	fi
 	@if [ -f aie_libadf.mk ]; then \
 		cp -f aie_libadf.mk $(RESULTS_DIR) ;\
+	fi
+	@if [ -d scripts_mk ]; then \
+		mkdir -p $(RESULTS_DIR)/scripts_mk ;\
+		cp -rf scripts_mk/* $(RESULTS_DIR)/scripts_mk/ ;\
 	fi
 	@make -C $(RESULTS_DIR) cleanall $(PART_OR_PLATFORM)=$(PART_OR_PLATFORM_VAL) >  $(RESULTS_DIR)/logs/log_$(PARAMS).txt
 	@ echo "make -C $(RESULTS_DIR) run TARGET=$(TARGET) PARAMS=$(PARAMS) PARAMS_FILE=$(PARAMS_FILE) $(PART_OR_PLATFORM)=$(PART_OR_PLATFORM_VAL) 2>&1 | tee $(RESULTS_DIR)/logs/log_$(PARAMS).txt"

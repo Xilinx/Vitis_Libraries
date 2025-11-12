@@ -76,6 +76,7 @@ The Vitis AIE DSP Library includes a Fast Fourier transform (FFT), Finite Impuls
    API Reference Overview <user_guide/L2/api-reference.rst>
    Bitonic Sort <rst/group_bitonic_sort.rst>
    Convolution / Correlation <rst/group_conv_corr_graph.rst>
+   Cumsum <rst/group_cumsum_graph.rst>
    DDS Mixer <rst/group_dds_graph.rst>
    DFT <rst/group_dft_graph.rst>
    Euclidean Distance <rst/group_euclidean_distance_graph.rst>

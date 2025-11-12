@@ -1,12 +1,12 @@
 [hls]
 
-clock=3.30
+clock=3.20
 flow_target=vivado
 syn.file=test_s2mm.cpp
-syn.file_cflags=test_s2mm.cpp,-I${XF_PROJ_ROOT}/L1/include -DNSTREAM=5 -DPOINT_SIZE=4096 -DNITER=4
+syn.file_cflags=test_s2mm.cpp,-I${XF_PROJ_ROOT}/L1/include -DNSTREAM=5 -DPOINT_SIZE=4096 -DNITER=4 -DDATAWIDTH=64
 syn.top=dut
 tb.file=test_s2mm.cpp
-tb.file_cflags=test_s2mm.cpp,-I${XF_PROJ_ROOT}/L1/include -DNSTREAM=5 -DPOINT_SIZE=4096 -DNITER=4
+tb.file_cflags=test_s2mm.cpp,-I${XF_PROJ_ROOT}/L1/include -DNSTREAM=5 -DPOINT_SIZE=4096 -DNITER=4 -DDATAWIDTH=64
 
 
 

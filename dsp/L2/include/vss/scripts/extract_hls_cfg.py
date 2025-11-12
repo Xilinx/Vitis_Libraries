@@ -28,7 +28,7 @@ with open(f"{CUR_DIR}/{PARAMS_FILE}") as stream:
     )  # Workaround because configparser complains about headerless configurations
 
 no_header_params = dict(parser.items("top"))
-with open(f"{CUR_DIR}/{FNAME}", "w") as stream:
+with open(f"{FNAME}", "w") as stream:
     for key, val in no_header_params.items():
         stream.write(key + "=" + val)
         stream.write("\n")

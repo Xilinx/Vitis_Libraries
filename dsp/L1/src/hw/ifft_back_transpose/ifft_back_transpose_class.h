@@ -21,68 +21,21 @@
 #include <ap_fixed.h>
 #include <hls_stream.h>
 #include <hls_streamofblocks.h>
+#include "common.hpp"
+#include "vss_fft_ifft_1d_common.hpp"
 //#define __BACK_TRANSPOSE_DEBUG__
+using namespace xf::dsp::vss::common;
 
 namespace back_transpose {
 
-template <int NFFT, int NSTREAM, int MODE>
+template <int NFFT, int NSTREAM, int MODE = 1>
 class backTransposeCls {
    public:
-    static constexpr unsigned int modePLffts() { return 1; }
-
-    static constexpr unsigned int modeAIEffts() { return 0; }
-    template <unsigned int len, unsigned int rnd>
-    static constexpr unsigned int fnCeil() {
-        return (len + rnd - 1) / rnd * rnd;
-    }
-
-    template <unsigned int TP_POINT_SIZE, unsigned int TP_VSS_MODE, unsigned int TP_SSR>
-    static constexpr unsigned int fnPtSizeD1() {
-        if (TP_VSS_MODE == modeAIEffts()) {
-            unsigned int sqrtVal =
-                TP_POINT_SIZE == 65536
-                    ? 256
-                    : TP_POINT_SIZE == 32768
-                          ? 256
-                          : TP_POINT_SIZE == 16384
-                                ? 128
-                                : TP_POINT_SIZE == 8192
-                                      ? 128
-                                      : TP_POINT_SIZE == 4096
-                                            ? 64
-                                            : TP_POINT_SIZE == 2048
-                                                  ? 64
-                                                  : TP_POINT_SIZE == 1024
-                                                        ? 32
-                                                        : TP_POINT_SIZE == 512
-                                                              ? 32
-                                                              : TP_POINT_SIZE == 256
-                                                                    ? 16
-                                                                    : TP_POINT_SIZE == 128
-                                                                          ? 16
-                                                                          : TP_POINT_SIZE == 64
-                                                                                ? 8
-                                                                                : TP_POINT_SIZE == 32
-                                                                                      ? 8
-                                                                                      : TP_POINT_SIZE == 16 ? 4 : 0;
-            return sqrtVal;
-
-        } else {
-            return TP_POINT_SIZE / TP_SSR;
-        }
-        return 0;
-    }
-
     static constexpr unsigned SAMPLES_PER_READ = 2;
     static constexpr unsigned ptSizeCeil = fnCeil<NFFT, SSR>();
-    static constexpr unsigned vssMode = MODE == 1 ? modeAIEffts() : modePLffts();
-    static constexpr unsigned ptSizeD1 = fnPtSizeD1<NFFT, vssMode, SSR>();
+    static constexpr unsigned ptSizeD1 = fnPtSizeD1<NFFT, modeAIEffts, SSR>();
     static constexpr unsigned ptSizeD2 = NFFT / ptSizeD1;
     static constexpr unsigned ptSizeD1Ceil = fnCeil<ptSizeD1, SAMPLES_PER_READ * SSR>();
-
-    static constexpr unsigned EXTRA = 0;
-    static constexpr unsigned DEPTH = (NFFT / ptSizeD1 + EXTRA);
-    static constexpr unsigned NROW = ptSizeD1 / NSTREAM;
 
     static constexpr unsigned NBITS = 128; // Size of PLIO bus on PL side @ 312.5 MHz
 

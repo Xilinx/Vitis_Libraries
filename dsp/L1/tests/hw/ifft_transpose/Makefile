@@ -166,7 +166,7 @@ with open('$(CONFIG_FILE)', 'w') as f:
 endef
 export CONFIG_GEN_PY
 
-TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" -exec test -f '{}/bin/python3' \; -print | head -n 1)
 VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
 
 $(CONFIG_FILE): $(CONFIG_TMPL)
@@ -174,7 +174,7 @@ $(CONFIG_FILE): $(CONFIG_TMPL)
 
 data:
 	@true
-	
+
 all: check_vivado check_part data $(CONFIG_FILE)
 ifneq ($(TARGET_REL), csim)
 	v++ -c --mode hls --config $(CONFIG_FILE) --work_dir $(WORK_DIR) --part $(XPART)

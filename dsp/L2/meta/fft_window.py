@@ -364,7 +364,7 @@ def fn_validate_window_vsize(
         return validate_range(TP_WINDOW_VSIZE_range, "TP_WINDOW_VSIZE", TP_WINDOW_VSIZE)
     else:
         return isError(
-            f"Window size must be an integer multiple of point size. Got window size of {TP_WINDOW_VSIZE} and point size of {TP_POINT_SIZE}."
+            f"TP_WINDOW_VSIZE {TP_WINDOW_VSIZE} must be an integer multiple of TP_POINT_SIZE ({TP_POINT_SIZE})."
         )
 
 

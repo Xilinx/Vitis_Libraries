@@ -52,72 +52,71 @@ set coeffStimType 0 ;# FIR length
 set firLen 16 ;# FIR length
 set plioWidth 32
 set headSize 0
-if { $::argc > 2} {
-    set filename [lindex $argv 0]
-    set fileDirpath [file dirname $filename]
-    set window_vsize  [lindex $argv 1]
-    set iterations  [lindex $argv 2]
-    if {[llength $argv] > 3 } {
-        set seed [lindex $argv 3]
-    }
-    if {[llength $argv] > 4 } {
-        set dataStimType [lindex $argv 4]
-    }
-    if {[llength $argv] > 5 } {
-        set dyn_pt_size [lindex $argv 5]
-    }
-    if {[llength $argv] > 6 } {
-        set max_pt_size_pwr [lindex $argv 6]
-    }
-    if {[llength $argv] > 7 } {
-        set tt_data [lindex $argv 7]
-    }
-    if {[llength $argv] > 8 } {
-        set tp_api [lindex $argv 8]
-    }
-    if {[llength $argv] > 9 } {
-        set using_plio_class [lindex $argv 9]
-    }
-    if {[llength $argv] > 10 } {
-        set par_power [lindex $argv 10]
-    }
-    if {[llength $argv] > 11 } {
-        set coeff_reload_mode [lindex $argv 11]
-    }
-    if {[llength $argv] > 12 } {
-        set tt_coeff [lindex $argv 12]
-    }
-    if {[llength $argv] > 13 } {
-        set coeffStimType [lindex $argv 13]
-    }
-    if {[llength $argv] > 14 } {
-        set firLen [lindex $argv 14]
-    }
-    if {[llength $argv] > 15 } {
-        set plioWidth [lindex $argv 15]
-    }
-    if {[llength $argv] > 16 } {
-        set headSize [lindex $argv 16]
-    }
-    puts "filename          = $filename"
-    puts "window_vsize      = $window_vsize"
-    puts "iterations        = $iterations"
-    puts "seed              = $seed"
-    puts "dataStimType      = $dataStimType"
-    puts "dyn_pt_size       = $dyn_pt_size"
-    puts "max_pt_size_pwr   = $max_pt_size_pwr"
-    puts "tt_data           = $tt_data"
-    puts "tp_api            = $tp_api"
-    puts "using_plio_class  = $using_plio_class"
-    puts "par_power         = $par_power"
-    puts "coeff_reload_mode = $coeff_reload_mode"
-    puts "tt_coeff          = $tt_coeff"
-    puts "coeffStimType     = $coeffStimType"
-    puts "firLen            = $firLen"
-    puts "plioWidth         = $plioWidth"
-    puts "headSize          = $headSize"
-    puts "------------------------------"
+set use_pkt_switching 0
+# Improved argument parsing using a dict for defaults and a loop for assignment
+set arg_names {
+    filename
+    window_vsize
+    iterations
+    seed
+    dataStimType
+    dyn_pt_size
+    max_pt_size_pwr
+    tt_data
+    tp_api
+    using_plio_class
+    par_power
+    coeff_reload_mode
+    tt_coeff
+    coeffStimType
+    firLen
+    plioWidth
+    headSize
+    use_pkt_switching
+}
 
+# Set defaults
+set args_dict [dict create \
+    filename          $filename \
+    window_vsize      $window_vsize \
+    iterations        $iterations \
+    seed              $seed \
+    dataStimType      $dataStimType \
+    dyn_pt_size       $dyn_pt_size \
+    max_pt_size_pwr   $max_pt_size_pwr \
+    tt_data           $tt_data \
+    tp_api            $tp_api \
+    using_plio_class  $using_plio_class \
+    par_power         $par_power \
+    coeff_reload_mode $coeff_reload_mode \
+    tt_coeff          $tt_coeff \
+    coeffStimType     $coeffStimType \
+    firLen            $firLen \
+    plioWidth         $plioWidth \
+    headSize          $headSize \
+    use_pkt_switching $use_pkt_switching \
+]
+
+# Override defaults with provided arguments
+foreach idx $arg_names {
+    set i [lsearch $arg_names $idx]
+    if {$i < $::argc} {
+        dict set args_dict $idx [lindex $argv $i]
+    }
+}
+
+# Assign variables from dict
+foreach idx $arg_names {
+    set $idx [dict get $args_dict $idx]
+}
+
+# Print summary if arguments provided
+if {$::argc > 2} {
+    puts "Gen Input arguments:"
+    foreach idx $arg_names {
+        puts "$idx = [dict get $args_dict $idx]"
+    }
+    puts "------------------------------"
 }
 
 set nextSample $seed
@@ -320,7 +319,7 @@ if {$coeff_reload_mode == 2} {
 }
 
 #ADF::PLIO class expects data in 32-bits per text line, which for cint32 & cfloat is half a sample per line.
-if {$using_plio_class == 1 && ($tt_data eq "cint32" || $tt_data eq "cfloat")} {
+if {$using_plio_class == 1 && ($tt_data eq "cint32" || $tt_data eq "cfloat" || $tt_data eq "cbfloat16")} {
     set samplesPerFrame [expr ($samplesPerFrame) * 2]
 }
 set samplesPerLine 1
@@ -338,11 +337,11 @@ set plioWidthRatio [expr ($plioWidth) / 32]
 #ADF::PLIO expects data in 32-bits per text line, which for cint16 and int16 is 2 samplesPerFrame/dataPartsPerLine per line
 set dataPartsPerLine 1
 if {$using_plio_class == 0} {
-    if {$tt_data eq "cint16" || $tt_data eq "int16" || $tt_data eq "cint32" || $tt_data eq "cfloat"} {
+    if {$tt_data eq "cint16" || $tt_data eq "int16" || $tt_data eq "cint32" || $tt_data eq "cfloat" || $tt_data eq "cbfloat16"} {
         set dataPartsPerLine 2
     }
 } else { #PLIO
-    if {$tt_data eq "cint16" || $tt_data eq "int16" || $tt_data eq "uint16" || $tt_data eq "bfloat16" } {
+    if {$tt_data eq "cint16" || $tt_data eq "int16" || $tt_data eq "uint16" || $tt_data eq "bfloat16" || $tt_data eq "cbfloat16" } {
         set dataPartsPerLine 2
     }
     if {$tt_data eq "cint8" || $tt_data eq "int8" || $tt_data eq "uint8"} {
@@ -389,7 +388,7 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
         #headSize = 32 when AIE or AIE-ML, 64 for AIE-MLv2
         #headSize is in bytes, header size in samples, so convert (/8 for cint32 or cfloat, /4 for cint16)
         set header_size [expr ($headSize/8) ]
-        if {$tt_data eq "cint16"} {
+        if {$tt_data eq "cint16" || $tt_data eq "cbfloat16"} {
             set header_size [expr ($headSize/4) ]
         }
 
@@ -430,33 +429,24 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
         }
     }
 
-#    puts "finished header"
-#    puts $framesInWindow
-#    puts $window_vsize
-#    puts $headerConfigSize
-#    puts $samplesPerFrame
-#    puts $padding
-#    puts $dataPartsPerLine
-#    puts $dataStimType
-
-    puts "framesInWindow   = $framesInWindow"
-    puts "samplesPerFrame  = $samplesPerFrame"
-    puts "samplesPerLine   = $samplesPerLine"
-    puts "dataPartsPerLine = $dataPartsPerLine"
     # Process Window (single frame or multiple frames in window)
+    set samplesLines [expr ($samplesPerFrame / $samplesPerLine)]
+
     for {set winSplice 0} {$winSplice < $framesInWindow} {incr winSplice} {
-        for {set sample_idx 0} {$sample_idx < $samplesPerFrame / $samplesPerLine} {incr sample_idx} {
+        for {set sample_idx 0} {$sample_idx < $samplesLines} {incr sample_idx} {
             for {set comp 0} {$comp < $dataPartsPerLine} {incr comp} {
                 set nextSample [generateSample  $dataStimType $nextSample $sample_idx $samplesPerFrame $tt_data $comp]
+
                 if {$comp < $dataPartsPerLine-1} {
                     puts -nonewline $output_file "$nextSample "
                 } else {
+
                     puts $output_file "$nextSample "
                 }
             }
         }
         #padding is only non-zero for dynamic point size, so no need to clause with dyn_pt_size
-        for {set part_idx 0} {$part_idx < [expr ($padding) * 2]} {incr part_idx} { #each pad has two parts
+        for {set part_idx 0} {$part_idx < [expr ($padding) * 2]} {incr part_idx} {
             set padsample -1
             # check if part_idx is at end of line
             if {$part_idx % $dataPartsPerLine == $dataPartsPerLine - 1} {

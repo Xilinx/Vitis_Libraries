@@ -27,7 +27,7 @@ Coding conventions
 #include <adf.h>
 #include "device_defs.h"
 
-//#define _DSPLIB_FUNC_APPROX_HPP_DEBUG_
+// #define _DSPLIB_FUNC_APPROX_HPP_DEBUG_
 
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
 #include "aie_api/aie_adf.hpp"
@@ -52,10 +52,61 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
-NOINLINE_DECL void
-func_approx<TT_DATA, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE, TP_SHIFT, TP_RND, TP_SAT>::
-    funcApproxMain(input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_DATA>& __restrict outWindow) {
+          unsigned int TP_SAT,
+          unsigned int TP_USE_LUT_RELOAD>
+INLINE_DECL void kernelFuncApproxClass<TT_DATA,
+                                       TP_COARSE_BITS,
+                                       TP_FINE_BITS,
+                                       TP_DOMAIN_MODE,
+                                       TP_WINDOW_VSIZE,
+                                       TP_SHIFT,
+                                       TP_RND,
+                                       TP_SAT,
+                                       TP_USE_LUT_RELOAD>::funcApproxKernel(T_inputIF<TT_DATA> inInterface,
+                                                                            T_outputIF<TT_DATA> outInterface) {
+    if
+        constexpr(useLutAPI == 0) {
+            if
+                constexpr(isFloatingPoint) { funcApproxBasicFloat(inInterface, outInterface); }
+            else {
+                funcApproxBasic(inInterface, outInterface);
+            }
+        }
+    else {
+        if
+            constexpr(isFloatingPoint) { funcApproxLutAPIFloat(inInterface, outInterface); }
+        else {
+            funcApproxLutAPI(inInterface, outInterface);
+        }
+    }
+};
+
+template <typename TT_DATA,
+          unsigned int TP_COARSE_BITS,
+          unsigned int TP_FINE_BITS,
+          unsigned int TP_DOMAIN_MODE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_USE_LUT_RELOAD>
+INLINE_DECL void kernelFuncApproxClass<TT_DATA,
+                                       TP_COARSE_BITS,
+                                       TP_FINE_BITS,
+                                       TP_DOMAIN_MODE,
+                                       TP_WINDOW_VSIZE,
+                                       TP_SHIFT,
+                                       TP_RND,
+                                       TP_SAT,
+                                       TP_USE_LUT_RELOAD>::funcApproxBasic(T_inputIF<TT_DATA> inInterface,
+                                                                           T_outputIF<TT_DATA> outInterface) {
+    TT_DATA* staticLutPtr0 = m_staticLut0;
+    TT_DATA* rtpLutPtr0 = m_rtpLutPtr0;
+    TT_DATA* staticLutPtr1 = m_staticLut1;
+    TT_DATA* rtpLutPtr1 = m_rtpLutPtr1;
+    TT_DATA* __restrict lutPtr0 = (TP_USE_LUT_RELOAD == 1) ? rtpLutPtr0 : staticLutPtr0;
+    TT_DATA* __restrict lutPtr1 = (TP_USE_LUT_RELOAD == 1) ? rtpLutPtr1 : staticLutPtr1;
+
     set_rnd_mode<rnd_floor>();
     set_sat_mode<TP_SAT>();
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
@@ -67,16 +118,16 @@ func_approx<TT_DATA, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSI
     dataVect_t fineVect, slopeVect, offsetVect;
     accVect_t acc;
 
-    dataVect_t* __restrict inPtr = (dataVect_t*)inWindow.data();
-    dataVect_t* __restrict outPtr = (dataVect_t*)outWindow.data();
+    dataVect_t* __restrict inPtr = (dataVect_t*)inInterface.inWindow;
+    dataVect_t* __restrict outPtr = (dataVect_t*)outInterface.outWindow;
 
-    TT_DATA* __restrict slopePtr = &m_slopeBuff[0];
-    TT_DATA* __restrict offsetPtr = &m_offsetBuff[0];
-    dataVect_t* __restrict slopeVectPtr = (dataVect_t*)m_slopeBuff;
-    dataVect_t* __restrict offsetVectPtr = (dataVect_t*)m_offsetBuff;
+    TT_DATA* slopePtr = &m_slopeBuff[0];
+    TT_DATA* offsetPtr = &m_offsetBuff[0];
+    dataVect_t* slopeVectPtr = (dataVect_t*)m_slopeBuff;
+    dataVect_t* offsetVectPtr = (dataVect_t*)m_offsetBuff;
 
-    complex_tt_data_t<TT_DATA>* __restrict ptr1 = reinterpret_cast<complex_tt_data_t<TT_DATA>*>(&m_lut_ab[0]);
-    complex_tt_data_t<TT_DATA>* __restrict ptr2 = reinterpret_cast<complex_tt_data_t<TT_DATA>*>(&m_lut_cd[0]);
+    complex_tt_data_t<TT_DATA>* __restrict ptr1 = reinterpret_cast<complex_tt_data_t<TT_DATA>*>(lutPtr0);
+    complex_tt_data_t<TT_DATA>* __restrict ptr2 = reinterpret_cast<complex_tt_data_t<TT_DATA>*>(lutPtr1);
 
     compVect_t compVect;
 
@@ -125,39 +176,52 @@ func_approx<TT_DATA, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSI
             acc = ::aie::mac(acc, slopeVect, fineVect);
             *outPtr++ = acc.template to_vector<TT_DATA>(TP_FINE_BITS + TP_SHIFT);
         }
-};
-
-// Base specialization, used for static size window API configurations
-template <unsigned int TP_COARSE_BITS,
+}
+template <typename TT_DATA,
+          unsigned int TP_COARSE_BITS,
           unsigned int TP_FINE_BITS,
           unsigned int TP_DOMAIN_MODE,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
-NOINLINE_DECL void
-func_approx<float, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE, TP_SHIFT, TP_RND, TP_SAT>::
-    funcApproxMain(input_buffer<float>& __restrict inWindow, output_buffer<float>& __restrict outWindow) {
+          unsigned int TP_SAT,
+          unsigned int TP_USE_LUT_RELOAD>
+INLINE_DECL void kernelFuncApproxClass<TT_DATA,
+                                       TP_COARSE_BITS,
+                                       TP_FINE_BITS,
+                                       TP_DOMAIN_MODE,
+                                       TP_WINDOW_VSIZE,
+                                       TP_SHIFT,
+                                       TP_RND,
+                                       TP_SAT,
+                                       TP_USE_LUT_RELOAD>::funcApproxBasicFloat(T_inputIF<TT_DATA> inInterface,
+                                                                                T_outputIF<TT_DATA> outInterface) {
+    TT_DATA* staticLutPtr0 = m_staticLut0;
+    TT_DATA* rtpLutPtr0 = m_rtpLutPtr0;
+    TT_DATA* staticLutPtr1 = m_staticLut1;
+    TT_DATA* rtpLutPtr1 = m_rtpLutPtr1;
+    TT_DATA* __restrict lutPtr0 = (TP_USE_LUT_RELOAD == 1) ? rtpLutPtr0 : staticLutPtr0;
+    TT_DATA* __restrict lutPtr1 = (TP_USE_LUT_RELOAD == 1) ? rtpLutPtr1 : staticLutPtr1;
+
     set_rnd_mode<rnd_floor>();
     set_sat_mode<TP_SAT>();
-    typedef float TT_DATA;
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
     using accVect_t = ::aie::accum<accType_t<TT_DATA>, kSamplesInVect>;
 
     dataVect_t dataVect, offsetVect, slopeVect;
 
-    TT_DATA* __restrict slopePtr = &m_offsetBuff[0];
-    TT_DATA* __restrict offsetPtr = &m_slopeBuff[0];
-    dataVect_t* __restrict slopeVectPtr = (dataVect_t*)m_offsetBuff;
-    dataVect_t* __restrict offsetVectPtr = (dataVect_t*)m_slopeBuff;
+    TT_DATA* slopePtr = &m_offsetBuff[0];
+    TT_DATA* offsetPtr = &m_slopeBuff[0];
+    dataVect_t* slopeVectPtr = (dataVect_t*)m_offsetBuff;
+    dataVect_t* offsetVectPtr = (dataVect_t*)m_slopeBuff;
 
     ::aie::vector<int32, kSamplesInVect> idxVect, intDataVect;
     accVect_t acc;
-    dataVect_t* __restrict inPtr = (dataVect_t*)inWindow.data();
-    dataVect_t* __restrict outPtr = (dataVect_t*)outWindow.data();
+    dataVect_t* __restrict inPtr = (dataVect_t*)inInterface.inWindow;
+    dataVect_t* __restrict outPtr = (dataVect_t*)outInterface.outWindow;
 
-    cfloat* __restrict ptr1 = reinterpret_cast<cfloat*>(&m_lut_ab[0]);
-    cfloat* __restrict ptr2 = reinterpret_cast<cfloat*>(&m_lut_cd[0]);
+    cfloat* __restrict ptr1 = reinterpret_cast<cfloat*>(lutPtr0);
+    cfloat* __restrict ptr2 = reinterpret_cast<cfloat*>(lutPtr1);
 
     for (int i = 0; i < (TP_WINDOW_VSIZE / (kSamplesInVect)); i++)
         chess_prepare_for_pipelining chess_loop_range((TP_WINDOW_VSIZE / (kSamplesInVect)), ) {
@@ -180,32 +244,47 @@ func_approx<float, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE
 
     inPtr -= (TP_WINDOW_VSIZE / kSamplesInVect);
 
-    dataVect = *inPtr++;
-    offsetVect = *offsetVectPtr++;
-    slopeVect = *slopeVectPtr++;
+    // FIX: Reset slope/offset vector pointers before second phase and avoid extra prefetch causing OOB read
+    slopeVectPtr = (dataVect_t*)m_offsetBuff;
+    offsetVectPtr = (dataVect_t*)m_slopeBuff;
+
     for (int i = 0; i < (TP_WINDOW_VSIZE / (kSamplesInVect)); i++)
         chess_prepare_for_pipelining chess_loop_range((TP_WINDOW_VSIZE / (kSamplesInVect)), ) {
-            acc = ::aie::mac(::aie::from_vector<accType_t<TT_DATA> >(offsetVect), dataVect, slopeVect);
-            *outPtr++ = acc.template to_vector<TT_DATA>();
-
             dataVect = *inPtr++;
             offsetVect = *offsetVectPtr++;
             slopeVect = *slopeVectPtr++;
+            acc = ::aie::mac(::aie::from_vector<accType_t<TT_DATA> >(offsetVect), dataVect, slopeVect);
+            *outPtr++ = acc.template to_vector<TT_DATA>();
         }
-};
-#ifdef _SUPPORTS_BFLOAT16_
-// Kernel function - funcApproxLutAPI
-template <unsigned int TP_COARSE_BITS,
+}
+
+template <typename TT_DATA,
+          unsigned int TP_COARSE_BITS,
           unsigned int TP_FINE_BITS,
           unsigned int TP_DOMAIN_MODE,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
-NOINLINE_DECL void
-func_approx<int16, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE, TP_SHIFT, TP_RND, TP_SAT>::
-    funcApproxLutAPI(input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_DATA>& __restrict outWindow) {
-    typedef int16 TT_DATA;
+          unsigned int TP_SAT,
+          unsigned int TP_USE_LUT_RELOAD>
+INLINE_DECL void kernelFuncApproxClass<TT_DATA,
+                                       TP_COARSE_BITS,
+                                       TP_FINE_BITS,
+                                       TP_DOMAIN_MODE,
+                                       TP_WINDOW_VSIZE,
+                                       TP_SHIFT,
+                                       TP_RND,
+                                       TP_SAT,
+                                       TP_USE_LUT_RELOAD>::funcApproxLutAPI(T_inputIF<TT_DATA> inInterface,
+                                                                            T_outputIF<TT_DATA> outInterface) {
+    // RTP function approximation implementation
+    TT_DATA* staticLutPtr0 = m_staticLut0;
+    TT_DATA* rtpLutPtr0 = m_rtpLutPtr0;
+    TT_DATA* staticLutPtr1 = m_staticLut1;
+    TT_DATA* rtpLutPtr1 = m_rtpLutPtr1;
+    TT_DATA* __restrict lutPtr0 = (TP_USE_LUT_RELOAD == 1) ? rtpLutPtr0 : staticLutPtr0;
+    TT_DATA* __restrict lutPtr1 = (TP_USE_LUT_RELOAD == 1) ? rtpLutPtr1 : staticLutPtr1;
+
     set_rnd_mode<TP_RND>();
     set_sat_mode<TP_SAT>();
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
@@ -215,11 +294,11 @@ func_approx<int16, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE
     dataVect_t dataVect;
     dataVect_t outVect;
 
-    dataVect_t* inPtr = (dataVect_t*)inWindow.data();
-    dataVect_t* outPtr = (dataVect_t*)outWindow.data();
+    dataVect_t* __restrict inPtr = (dataVect_t*)inInterface.inWindow;
+    dataVect_t* __restrict outPtr = (dataVect_t*)outInterface.outWindow;
 
     // My lut requires Number elements in the LUT (not accounting for repetition).
-    const lut_type my_lut(kLutSize / 2, (TT_DATA*)m_lut_ab, (TT_DATA*)m_lut_cd);
+    const lut_type my_lut(kLutSize / 2, (TT_DATA*)lutPtr0, (TT_DATA*)lutPtr1);
     ::aie::linear_approx<TT_DATA, lut_type> linear_ap(my_lut, TP_FINE_BITS /*step bits*/, 0 /*bias*/,
                                                       TP_FINE_BITS /*shift offset*/);
     for (int i = 0; i < (TP_WINDOW_VSIZE / kSamplesInVect); i++) {
@@ -228,19 +307,34 @@ func_approx<int16, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE
         outVect = linear_ap.compute(dataVect).template to_vector<TT_DATA>(TP_FINE_BITS);
         *outPtr++ = outVect;
     }
-};
-// Base specialization, used for static size window API configurations
-template <unsigned int TP_COARSE_BITS,
+}
+template <typename TT_DATA,
+          unsigned int TP_COARSE_BITS,
           unsigned int TP_FINE_BITS,
           unsigned int TP_DOMAIN_MODE,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
-NOINLINE_DECL void
-func_approx<bfloat16, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE, TP_SHIFT, TP_RND, TP_SAT>::
-    funcApproxLutAPI(input_buffer<bfloat16>& __restrict inWindow, output_buffer<bfloat16>& __restrict outWindow) {
-    typedef bfloat16 TT_DATA;
+          unsigned int TP_SAT,
+          unsigned int TP_USE_LUT_RELOAD>
+INLINE_DECL void kernelFuncApproxClass<TT_DATA,
+                                       TP_COARSE_BITS,
+                                       TP_FINE_BITS,
+                                       TP_DOMAIN_MODE,
+                                       TP_WINDOW_VSIZE,
+                                       TP_SHIFT,
+                                       TP_RND,
+                                       TP_SAT,
+                                       TP_USE_LUT_RELOAD>::funcApproxLutAPIFloat(T_inputIF<TT_DATA> inInterface,
+                                                                                 T_outputIF<TT_DATA> outInterface) {
+    // RTP function approximation implementation
+    TT_LUT* staticLutPtr0 = (TP_USE_LUT_RELOAD == 1) ? nullptr : (TT_LUT*)&m_staticLut0[0];
+    TT_LUT* rtpLutPtr0 = m_rtpLutPtr0;
+    TT_LUT* staticLutPtr1 = (TP_USE_LUT_RELOAD == 1) ? nullptr : (TT_LUT*)&m_staticLut1[0];
+    TT_LUT* rtpLutPtr1 = m_rtpLutPtr1;
+    TT_LUT* __restrict lutPtr0 = (TP_USE_LUT_RELOAD == 1) ? rtpLutPtr0 : staticLutPtr0;
+    TT_LUT* __restrict lutPtr1 = (TP_USE_LUT_RELOAD == 1) ? rtpLutPtr1 : staticLutPtr1;
+
     set_rnd_mode<TP_RND>();
     set_sat_mode<TP_SAT>();
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
@@ -250,11 +344,11 @@ func_approx<bfloat16, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VS
     dataVect_t dataVect;
     dataVect_t outVect;
 
-    dataVect_t* inPtr = (dataVect_t*)inWindow.data();
-    dataVect_t* outPtr = (dataVect_t*)outWindow.data();
+    dataVect_t* __restrict inPtr = (dataVect_t*)inInterface.inWindow;
+    dataVect_t* __restrict outPtr = (dataVect_t*)outInterface.outWindow;
 
     // My lut requires Number elements in the LUT (not accounting for repetition).
-    const lut_type my_lut(kLutSize / 2, (float*)m_lut_ab, (TT_DATA*)m_lut_cd);
+    const lut_type my_lut(kLutSize / 2, (TT_LUT*)lutPtr0, (TT_DATA*)lutPtr1);
     ::aie::linear_approx<TT_DATA, lut_type> linear_ap(my_lut, -TP_COARSE_BITS + TP_DOMAIN_MODE /*step bits*/,
                                                       0 /*bias*/, TP_SHIFT /*shift offset*/);
     for (int i = 0; i < (TP_WINDOW_VSIZE / kSamplesInVect); i++) {
@@ -263,8 +357,55 @@ func_approx<bfloat16, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VS
         outVect = linear_ap.compute(dataVect).template to_vector<TT_DATA>();
         *outPtr++ = outVect;
     }
+}
+
+template <typename TT_DATA,
+          unsigned int TP_COARSE_BITS,
+          unsigned int TP_FINE_BITS,
+          unsigned int TP_DOMAIN_MODE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_USE_LUT_RELOAD>
+NOINLINE_DECL void func_approx<TT_DATA,
+                               TP_COARSE_BITS,
+                               TP_FINE_BITS,
+                               TP_DOMAIN_MODE,
+                               TP_WINDOW_VSIZE,
+                               TP_SHIFT,
+                               TP_RND,
+                               TP_SAT,
+                               TP_USE_LUT_RELOAD>::approx(input_buffer<TT_DATA>& __restrict inWindow,
+                                                          output_buffer<TT_DATA>& __restrict outWindow) {
+    T_inputIF<TT_DATA> inInterface;
+    T_outputIF<TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
+    outInterface.outWindow = outWindow.data();
+    this->funcApproxKernel(inInterface, outInterface);
 };
-#endif //_SUPPORTS_BFLOAT16_
+template <typename TT_DATA,
+          unsigned int TP_COARSE_BITS,
+          unsigned int TP_FINE_BITS,
+          unsigned int TP_DOMAIN_MODE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+NOINLINE_DECL void
+func_approx<TT_DATA, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE, TP_SHIFT, TP_RND, TP_SAT, 1>::
+    approxRtp(input_buffer<TT_DATA>& __restrict inWindow,
+              output_buffer<TT_DATA>& __restrict outWindow,
+              const TT_LUT (&lut0)[lutSize],
+              const TT_LUT (&lut1)[lutSize]) {
+    T_inputIF<TT_DATA> inInterface;
+    T_outputIF<TT_DATA> outInterface;
+    inInterface.inWindow = inWindow.data();
+    outInterface.outWindow = outWindow.data();
+    this->m_rtpLutPtr0 = (TT_LUT*)lut0;
+    this->m_rtpLutPtr1 = (TT_LUT*)lut1;
+    this->funcApproxKernel(inInterface, outInterface);
+};
 }
 }
 }

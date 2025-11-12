@@ -1,0 +1,13 @@
+
+{
+    "parameter_constraints": {
+        "AIE_VARIANT": [1],
+        "TT_DATA_A": ["int32"],
+        "TT_DATA_B": ["int32"],
+        "TP_DIM_A": 32,
+        "TP_DIM_B": 32,
+        "TP_NUM_FRAMES": 1,
+        "TP_SSR": []
+    },
+    "qor_constraints": "Throughput>500"
+}

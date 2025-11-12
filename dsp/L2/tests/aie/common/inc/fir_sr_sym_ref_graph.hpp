@@ -55,6 +55,7 @@ class fir_sr_sym_ref_graph : public graph {
     template <class dir>
     using ssr_port_array = std::array<port<dir>, TP_SSR>;
     using rtp_port = typename std::conditional_t<(TP_USE_COEFF_RELOAD == 1), port<input>, no_port>;
+    using rtp_port_array = typename std::array<rtp_port, 1>;
     using dual_ip_port = typename std::conditional_t<(TP_DUAL_IP == 1), ssr_port_array<input>, no_port>;
     using dual_op_port = typename std::conditional_t<(TP_NUM_OUTPUTS == 2), ssr_port_array<output>, no_port>;
     using widget_kernel_in = typename std::conditional<(TP_DUAL_IP == 1 && TP_API == 1), kernel, empty>::type;
@@ -64,7 +65,7 @@ class fir_sr_sym_ref_graph : public graph {
     ssr_port_array<input> in;
     ssr_port_array<output> out;
 
-    std::array<rtp_port, 1> coeff;
+    rtp_port_array coeff;
 
     dual_op_port out2;
     dual_ip_port in2;

@@ -30,6 +30,17 @@ namespace dsp {
 namespace aie {
 namespace func_approx {
 
+// Input Interfaces
+template <typename T>
+struct T_inputIF {
+    T* __restrict inWindow;
+};
+// CASC_OUT_FALSE
+template <typename T>
+struct T_outputIF {
+    T* __restrict outWindow;
+};
+
 #ifdef __SUPPORTS_ACC64__
 template <typename T_D>
 struct accType {

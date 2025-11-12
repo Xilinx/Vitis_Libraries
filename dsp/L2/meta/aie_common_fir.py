@@ -162,6 +162,61 @@ def fnNumLanes(TT_DATA, TT_COEFF, TP_API=0, AIE_VARIANT=1):
     # Undefined AIE_VARIANT
     return 0
 
+def fnMacLanes(TT_DATA, TT_COEFF, AIE_VARIANT):
+    if AIE_VARIANT == AIE_ML:
+        type_map = {
+            ('cint16', 'cint32'): 16,
+            ('cint32', 'int16'): 16,
+            ('cint32', 'int32'): 16,
+            ('cint32', 'cint16'): 16,
+            ('cint32', 'cint32'): 16,
+            ('float', 'float'): 16,
+            ('bfloat16', 'bfloat16'): 16,
+        }
+        return type_map.get((TT_DATA, TT_COEFF), 16)  # Default is 16
+
+    elif AIE_VARIANT in [AIE_2P, AIE_MLv2]:
+        type_map = {
+            ('int16', 'int16'): 32,
+            ('int16', 'int32'): 32,
+            ('int32', 'int16'): 32,
+            ('int32', 'int32'): 32,
+            ('cint16', 'int16'): 32,
+            ('cint32', 'int16'): 16,
+            ('cint32', 'int32'): 16,
+            ('bfloat16', 'bfloat16'): 16,
+        }
+
+        # Special handling for float type based on architecture
+        if (TT_DATA, TT_COEFF) == ('float', 'float'):
+            if AIE_VARIANT == AIE_2P:
+                return 32
+            elif AIE_VARIANT == AIE_MLv2:
+                return 16
+
+        return type_map.get((TT_DATA, TT_COEFF), 16)  # Default is 16
+
+    else:  # (AIE_VARIANT == 1)
+        type_map = {
+            ('int16', 'int16'): 16,
+            ('cint16', 'int16'): 8,
+            ('cint16', 'cint16'): 8,
+            ('int32', 'int16'): 8,
+            ('int32', 'int32'): 8,
+            ('cint32', 'int16'): 4,
+            ('cint32', 'cint16'): 4,
+            ('cint32', 'int32'): 4,
+            ('cint32', 'cint32'): 2,
+            ('int16', 'int32'): 8,
+            ('cint16', 'int32'): 4,
+            ('cint16', 'cint32'): 4,
+            ('float', 'float'): 8,
+            ('cfloat', 'float'): 4,
+            ('cfloat', 'cfloat'): 4,
+        }
+        return type_map.get((TT_DATA, TT_COEFF), 0)  # Default is 0 if not found
+
+
 
 # function to return the number of columns for a tall-narrow atomic intrinsic for a type combo
 def fnNumCols(TT_DATA, TT_COEFF, TP_API=0, AIE_VARIANT=1):

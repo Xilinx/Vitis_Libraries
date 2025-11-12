@@ -33,8 +33,10 @@
 #include "test_dft.hpp"
 #include "test_matvec.hpp"
 #include "test_bitonic_sort.hpp"
+#include "test_cumsum.hpp"
 
 using namespace adf;
+// The following defined values are for the number of ports in and out for each IP example.
 #define NUM_IP_FIR 1
 #define NUM_IP_DDS 1
 #define NUM_IP_FFT 4
@@ -64,6 +66,8 @@ using namespace adf;
 #define NUM_IP_FIR_TDM 1
 #define NUM_IP_BS 1
 #define NUM_OP_BS 1
+#define NUM_IP_CS 1
+#define NUM_OP_CS 1
 
 template <unsigned int elem_start, unsigned int num_ports, unsigned int NUM_IP_ALL, typename plioType>
 void createPLIOFileConnections(std::array<plioType, NUM_IP_ALL>& plioPorts,
@@ -85,11 +89,11 @@ class test_example : public graph {
     static constexpr unsigned int NUM_IP_ALL = NUM_IP_FIR + NUM_IP_DDS + NUM_IP_FFT + NUM_IP_MM + NUM_IP_WIDG_API +
                                                NUM_IP_WIDG_R2C + NUM_IP_FFTW + NUM_IP_DDS_LUT + NUM_IP_OT + NUM_IP_HAD +
                                                NUM_IP_KMP + NUM_IP_CONV + NUM_IP_CORR + NUM_IP_DFT + NUM_IP_MV +
-                                               NUM_IP_FIR_TDM + NUM_IP_BS;
+                                               NUM_IP_FIR_TDM + NUM_IP_BS + NUM_IP_CS;
     static constexpr unsigned int NUM_OP_ALL = NUM_IP_FIR + NUM_IP_DDS + NUM_IP_FFT + NUM_OP_MM + NUM_OP_WIDG_API +
                                                NUM_OP_WIDG_R2C + NUM_IP_FFTW + NUM_OP_DDS_LUT + NUM_OP_OT + NUM_OP_HAD +
                                                NUM_OP_KMP + NUM_OP_CONV + NUM_OP_CORR + NUM_OP_DFT + NUM_OP_MV +
-                                               NUM_IP_FIR_TDM + NUM_OP_BS;
+                                               NUM_IP_FIR_TDM + NUM_OP_BS + NUM_OP_CS;
 
     std::array<input_plio, NUM_IP_ALL> in;
     std::array<output_plio, NUM_OP_ALL> out;
@@ -111,6 +115,7 @@ class test_example : public graph {
     dft_example::test_dft uut_dft;
     mv_example::test_mv uut_mv;
     bitonic_sort_example::test_bitonic_sort uut_bitonic_sort;
+    cumsum_example::test_cumsum uut_cumsum;
 
     test_example() {
         // create input file connections - first template argument indicates first index of plio port for this library
@@ -132,6 +137,7 @@ class test_example : public graph {
         createPLIOFileConnections<25, NUM_IP_MV, NUM_IP_ALL>(in, "input", "mv", "in");
         createPLIOFileConnections<29, NUM_IP_FIR_TDM, NUM_IP_ALL>(in, "input", "fir_tdm", "in");
         createPLIOFileConnections<30, NUM_IP_BS, NUM_IP_ALL>(in, "input", "bitonic_sort", "in");
+        createPLIOFileConnections<31, NUM_IP_CS, NUM_IP_ALL>(in, "input", "cumsum", "in");
 
         // create output file connections
         createPLIOFileConnections<0, NUM_IP_DDS, NUM_OP_ALL>(out, "output", "dds", "out");
@@ -151,6 +157,7 @@ class test_example : public graph {
         createPLIOFileConnections<18, NUM_OP_MV, NUM_OP_ALL>(out, "output", "mv", "out");
         createPLIOFileConnections<20, NUM_IP_FIR_TDM, NUM_OP_ALL>(out, "output", "fir_tdm", "out");
         createPLIOFileConnections<21, NUM_OP_BS, NUM_OP_ALL>(out, "output", "bitonic_sort", "out");
+        createPLIOFileConnections<22, NUM_OP_CS, NUM_OP_ALL>(out, "output", "cumsum", "out");
 
         // wire up dds testbench
         connect<>(in[0].out[0], uut_dds.in);
@@ -234,6 +241,10 @@ class test_example : public graph {
         // wire up bitonic sort testbench
         connect<>(in[30].out[0], uut_bitonic_sort.in);
         connect<>(uut_bitonic_sort.out, out[21].in[0]);
+
+        // wire up cumsum testbench
+        connect<>(in[31].out[0], uut_cumsum.in);
+        connect<>(uut_cumsum.out, out[22].in[0]);
     };
 };
 };

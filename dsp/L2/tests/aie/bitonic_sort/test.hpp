@@ -25,7 +25,6 @@
 #include "utils.hpp"
 
 #include "uut_config.h"
-#include "uut_static_config.h"
 #include "test_stim.hpp"
 
 #include "device_defs.h"

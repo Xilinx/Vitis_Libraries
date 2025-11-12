@@ -121,6 +121,8 @@ proc get_param_map {libElement} {
         "LEN" "TP_LEN"
         "DIM" "TP_DIM"
         "IS_OUTPUT_SQUARED" "TP_IS_OUTPUT_SQUARED"
+        "MODE" "TP_MODE"
+        "USE_LUT_RELOAD" "TP_USE_LUT_RELOAD"
     }
     return $param_map
 }

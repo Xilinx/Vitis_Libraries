@@ -44,21 +44,50 @@ parser.add_argument(
     type=int,
     help="Set flag to 1 to return a packaged vss including the front transpose. Else set to 0.",
 )
+parser.add_argument(
+    "-d",
+    "--data_type",
+    type=str,
+    help="Data type. Set to cint16, cint32, cfloat",
+)
+parser.add_argument(
+    "-l",
+    "--aie_obj_name",
+    type=str,
+    help="Name of the AIE object. Found in the input cfg file.",
+)
+parser.add_argument(
+    "-aie_bd",
+    "--use_aie_buffer_descriptors",
+    type=int,
+    help="Specifies whether AIE buffer descriptors have the ability to do transposes internally.",
+)
 args = parser.parse_args()
 SSR = args.ssr
 fname = args.cfg_file_name
 vssName = args.vss_unit
 freqhz = args.freqhz
+dataType = args.data_type
 ipVersion = str(args.version)
+aieName = str(args.aie_obj_name)
 addFrontTpose = int(args.add_front_transpose)
 addBackTpose = int(args.add_back_transpose)
+use_aie_buffer_descriptors = int(args.use_aie_buffer_descriptors)
 
+if dataType == "cint16":
+    sample_size = 32
+else:
+    sample_size = 64
+    
+plReadWidth = 128
+ssrInt = (int)(SSR*(plReadWidth/sample_size))
 f = open(f"{fname}", "w")
 
 if addFrontTpose == 0 and addBackTpose == 0:
     common_begin_cfg = f"""
 
-freqhz={freqhz}:transpose.ap_clk
+freqhz={freqhz}:transpose.ap_clk,splitter.ap_clk,joiner.ap_clk
+#freqhz={freqhz}:transpose.ap_clk
 
 [connectivity]
 # ------------------------------------------------------------
@@ -66,10 +95,13 @@ freqhz={freqhz}:transpose.ap_clk
 # ------------------------------------------------------------
 
 # PL Transpose kernels:
-nk = ifft_transpose_wrapper:1:transpose
+nk = mid_transpose_wrapper:1:transpose
+nk = splitter_wrapper:1:splitter
+nk = joiner_wrapper:1:joiner
 
 
-vss = amd:dsplib:{vssName}:{ipVersion}:transpose,ai_engine_0
+vss = amd:dsplib:{vssName}:{ipVersion}:splitter,joiner,transpose,ai_engine_0
+#vss = amd:dsplib:{vssName}:{ipVersion}:transpose,ai_engine_0
 
 
 # ------------------------------------------------------------
@@ -135,9 +167,12 @@ freqhz={freqhz}:front_transpose.ap_clk,transpose.ap_clk,back_transpose.ap_clk
 nk = ifft_front_transpose_wrapper:1:front_transpose
 nk = ifft_back_transpose_wrapper:1:back_transpose
 nk = ifft_transpose_wrapper:1:transpose
-
+#nk = mid_transpose_wrapper:1:transpose
+#nk = splitter_wrapper:1:splitter
+#nk = joiner_wrapper:1:joiner
 
 vss = amd:dsplib:{vssName}:{ipVersion}:front_transpose,back_transpose,transpose,ai_engine_0
+#vss = amd:dsplib:{vssName}:{ipVersion}:splitter,joiner,front_transpose,back_transpose,transpose,ai_engine_0
 
 
 # ------------------------------------------------------------
@@ -156,74 +191,75 @@ if addFrontTpose == 1:
     f.write(comment)
 
     if SSR == 1:
-        text = (
-            "sc = front_transpose.sig_o" + ":ai_engine_0.fft_aie_PLIO_front_in_0" + "\n"
-        )
+        text = f'''sc = front_transpose.sig_o:ai_engine_0.{aieName}_PLIO_front_in_0\n'''
         f.write(text)
     else:
         for i in range(SSR):
-            text = (
-                "sc = front_transpose.sig_o_"
-                + str(i)
-                + ":ai_engine_0.fft_aie_PLIO_front_in_"
-                + str(i)
-                + "\n"
-            )
+            text = f'''sc = front_transpose.sig_o_{i}:ai_engine_0.{aieName}_PLIO_front_in_{i}\n'''
             f.write(text)
 
 
 comment = "# AIE TO PL TRANSPOSE1:\n"
 f.write(comment)
 
-if SSR == 1:
-    text = "sc = ai_engine_0.fft_aie_PLIO_front_out_0" + ":transpose.sig_i" + "\n"
-    f.write(text)
-else:
-    for i in range(SSR):
-        text = (
-            "sc = ai_engine_0.fft_aie_PLIO_front_out_"
-            + str(i)
-            + ":transpose.sig_i_"
-            + str(i)
-            + "\n"
-        )
+if use_aie_buffer_descriptors:
+    if SSR == 1:
+        text = f"sc = ai_engine_0.{aieName}_PLIO_front_out_0:transpose.sig_i\n"
         f.write(text)
+    else:
+        for i in range(SSR):
+            text = f'''sc = ai_engine_0.{aieName}_PLIO_front_out_{i}:splitter.sig_i_{i}\n'''
+            f.write(text)
+
+    for i in range(ssrInt):
+        text = f'''sc = splitter.sig_i_int_{i}:transpose.sig_i_{i}\n'''
+        f.write(text)
+    
+    for i in range(ssrInt):
+        text = f'''sc = transpose.sig_o_{i}:joiner.sig_o_int_{i}\n'''
+        f.write(text)
+
+else:
+    if SSR == 1:
+        text = f"sc = ai_engine_0.{aieName}_PLIO_front_out_0:transpose.sig_i\n"
+        f.write(text)
+    else:
+        for i in range(SSR):            
+            text = f'''sc = ai_engine_0.{aieName}_PLIO_front_out_{i}:transpose.sig_i_{i}\n'''
+            f.write(text)
 
 comment = "# PL TRANSPOSE1 to AIE:\n"
 f.write(comment)
 
-if SSR == 1:
-    text = "sc = transpose.sig_o" + ":ai_engine_0.fft_aie_PLIO_back_in_0" + "\n"
-    f.write(text)
-else:
-    for i in range(SSR):
-        text = (
-            "sc = transpose.sig_o_"
-            + str(i)
-            + ":ai_engine_0.fft_aie_PLIO_back_in_"
-            + str(i)
-            + "\n"
-        )
+if use_aie_buffer_descriptors:
+    if SSR == 1:
+        text = f'''sc = transpose.sig_o:ai_engine_0.{aieName}_PLIO_back_in_0\n'''
         f.write(text)
+    else:
+        for i in range(SSR):
+            text = (
+                f'''sc = joiner.sig_o_{i}:ai_engine_0.{aieName}_PLIO_back_in_{i}\n'''
+            )
+            f.write(text)
+else:
+    if SSR == 1:
+        text = f'''sc = transpose.sig_o:ai_engine_0.{aieName}_PLIO_back_in_0\n'''
+        f.write(text)
+    else:
+        for i in range(SSR):
+            text = f'''sc = transpose.sig_o_{i}:ai_engine_0.{aieName}_PLIO_back_in_{i}\n'''
+            f.write(text)
 
 if addBackTpose == 1:
     comment = "# AIE TO PL BACK TRANSPOSE:\n"
     f.write(comment)
 
     if SSR == 1:
-        text = (
-            "sc = ai_engine_0.fft_aie_PLIO_back_out_0" + ":back_transpose.sig_i" + "\n"
-        )
+        text = f'''sc = ai_engine_0.{aieName}_PLIO_back_out_0:back_transpose.sig_i\n'''
         f.write(text)
     else:
         for i in range(SSR):
-            text = (
-                "sc = ai_engine_0.fft_aie_PLIO_back_out_"
-                + str(i)
-                + ":back_transpose.sig_i_"
-                + str(i)
-                + "\n"
-            )
+            text = f'''sc = ai_engine_0.{aieName}_PLIO_back_out_{i}:back_transpose.sig_i_{i}\n'''
             f.write(text)
 
 closing_text = f"""

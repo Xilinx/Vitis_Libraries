@@ -159,6 +159,7 @@
                 "file": "conv_corr.py",
                 "function": "validate_TP_F_LEN",
                 "args": [
+                    "TT_DATA_G",
                     "TT_DATA_F",
                     "AIE_VARIANT",
                     "TP_API"
@@ -168,6 +169,7 @@
                 "file": "conv_corr.py",
                 "function": "update_TP_F_LEN",
                 "args": [
+                    "TT_DATA_G",
                     "TT_DATA_F",
                     "AIE_VARIANT",
                     "TP_API"

@@ -41,35 +41,21 @@
 // Even though most of these could be expressed in a boolean fashion, the convention is to use int
 // so that in the UUT code you can write #if __X__ == 1 || __Y__ ==2 which becomes awkward with defined(__Y__).
 
-// Error trap for unidentified arch
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10) || (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || \
-    (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
-// all ok
-#else
-//#error Unexpected __AIE_ARCH__ or __AIEARCH__ encountered //removed because compilation of gen_cfo.cpp fails here
-#endif
-
-#ifndef __AIE_ARCH__
-// AIE Graph compilation graph_preprocessor is unaware of the ARCH.
-// #define __AIE_ARCH__ 10
-#endif
-
 //----------------------------------
 // FFT R4 stage support. AIE2 supports true Radix4, but AIE1 spoofs this with 2 stages of radix2.
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __FFT_R4_IMPL__ 0
 #endif
 
-#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
-    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __FFT_R4_IMPL__ 1
 #endif
 
 //----------------------------------
 // FFT vectorization.
-#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIEARCH__ == 20) || (__AIEARCH__ == 21)
+#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21)
 #define __FFT_MIN_VECTORIZATION__ 32
-#elif (__AIE_ARCH__ == 22) || (__AIEARCH__ == 22)
+#elif (__AIE_ARCH__ == 22)
 #define __FFT_MIN_VECTORIZATION__ 64
 #else
 #define __FFT_MIN_VECTORIZATION__ 16
@@ -78,19 +64,18 @@
 //----------------------------------
 // FFT ROUNDING
 
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __FFT_NO_RND_CEIL_FLOOR__
 #endif
 
-#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
-    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __FFT_NO_RND_CEIL_FLOOR__
 #define __FFT_NO_RND_SYM_CEIL_FLOOR__
 #endif
 
 //----------------------------------
 // FFT cfloat support (native)
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __SUPPORTS_CFLOAT__ 1
 // #warning Supports cfloats
 
@@ -100,13 +85,13 @@
 #endif
 
 // FFT 32 bit twiddle support
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __SUPPORTS_32B_TW__ 1
 #else
 #define __SUPPORTS_32B_TW__ 0
 #endif
 
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __HAS_SYM_PREADD__ 1
 #else
 #define __HAS_SYM_PREADD__ 0
@@ -117,19 +102,19 @@
 // The final stage of mixed radix FFT has to be radix4 for high performance. The butterfly has 4 legs
 // each of 4 (AIE1) or 8 (AIE-ML) meaning the atom size for optimal performance is defined as follows.
 // Failing this, lower performance, but function can be achieved using radix2 in place of radix4.
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __MRFFT_ATOM__ 16
-#elif (__AIE_ARCH__ == 20) || (__AIEARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIEARCH__ == 21)
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21)
 #define __MRFFT_ATOM__ 32
-#elif (__AIE_ARCH__ == 22) || (__AIEARCH__ == 22)
+#elif (__AIE_ARCH__ == 22)
 #define __MRFFT_ATOM__ 64
 #else
 // Ideally this would NOT be an else. It is best if an unknown value of AIE_ARCH leaves MRFFT_ATOM
 // undefined, but curiously, 2 independent ifs malfunctions for AIE1.
 
 //#endif
-//#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
-//    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+//#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)   || \
+//
 #define __MRFFT_ATOM__ 64
 #endif
 
@@ -137,13 +122,12 @@
 // Accumulator widths
 // reference to accumulator widths which do not exist on a device leads to a compile time error. These definitions allow
 // such code to be claused out prior to that stage of compilation.
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __SUPPORTS_ACC48__
 #define __SUPPORTS_ACC80__
 #endif
 
-#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
-    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __SUPPORTS_ACC32__
 #define __SUPPORTS_ACC64__
 #endif
@@ -151,30 +135,29 @@
 //----------------------------------
 // Stream support
 // clauses getc_wss
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __SUPPORTS_GETC_WSS__
 #endif
 
 //----------------------------------
 // Cascade support
 // clauses put_mcd and get_scd_v8int32
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __SUPPORTS_PUT_MCD__
 #endif
 
 //__STEAMS_PER_TILE__ is not recommended for use.
 // The recommendation is to use get_input_streams_core_module() from #include <adf/arch/aie_arch_properties.hpp>
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __STREAMS_PER_TILE__ 2
-#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
-    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __STREAMS_PER_TILE__ 1
 #else
 // error trap
 #define __STREAMS_PER_TILE__ -1
 #endif
 
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define MCD_SIZE 256
 #define SCD_SIZE 256
 #else
@@ -182,70 +165,94 @@
 #define SCD_SIZE 512
 #endif
 
+// Cascade Support
+#if (__AIE_ARCH__ == 10)
+#define __CASCADES_PER_TILE__ 1
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
+#define __CASCADES_PER_TILE__ 2
+#endif
+
+#ifndef snake_raster
+//! @brief Cascade in a bidirectional pattern (boustrophedonic style)
+#define snake_raster 0
+#endif
+#ifndef grid_raster
+//! @brief Cascades rastered left to right by row, and up to down by column
+#define grid_raster 1
+#endif
+
+#if (__AIE_ARCH__ == 10)
+#define __CASCADES_STYLE__ snake_raster
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
+#define __CASCADES_STYLE__ grid_raster
+#endif
+
 //----------------------------------
 // Misc
 // not equal
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __SUPPORTS_NE32__
 #endif
 
 //----------------------------------
 // SINCOS scalar intrinsic present in hw in AIE1 but not in AIE2
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __SINCOS_IN_HW__ 1
 #endif
 
-#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
-    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __SINCOS_IN_HW__ 0
 #endif
 
 //----------------------------------
 // v8int16 supported in AIE1, not AIE2
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __SUPPORTS_V8INT16__ 1
 #define __SUPPORTS_V16INT16__ 1
 #endif
 
-#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
-    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __SUPPORTS_V8INT16__ 0
 #define __SUPPORTS_V16INT16__ 0
 #endif
 
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __MIN_REGSIZE__ 128
 #endif
-#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
-    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __MIN_REGSIZE__ 256
 #endif
 
 #define __MIN_READ_WRITE__ __MIN_REGSIZE__
 
-#if (__AIE_ARCH__ == 10) || (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIEARCH__ == 10) || \
-    (__AIEARCH__ == 20) || (__AIEARCH__ == 21)
+// vector register size on AIE-1, AIE-ML and AIE-MLv2
+#define __V_REGSIZE__ 128
+#define __W_REGSIZE__ 256
+#define __X_REGSIZE__ 512
+#define __Y_REGSIZE__ 1024
+
+// Memory access width
+#if (__AIE_ARCH__ == 10) || (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21)
 #define __MAX_READ_WRITE__ 256
-#elif (__AIE_ARCH__ == 22) || (__AIEARCH__ == 22)
+#elif (__AIE_ARCH__ == 22)
 #define __MAX_READ_WRITE__ 512
 #endif
 
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __HAS_ACCUM_PERMUTES__ 1
 #else
 #define __HAS_ACCUM_PERMUTES__ 0
 #endif
 
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10) || (__AIE_ARCH__ == 20) || (__AIEARCH__ == 20) || \
-    (__AIE_ARCH__ == 21) || (__AIEARCH__ == 21)
+#if (__AIE_ARCH__ == 10) || (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21)
 #define __ALIGN_BYTE_SIZE__ 32
-#elif (__AIE_ARCH__ == 22) || (__AIEARCH__ == 22)
+#elif (__AIE_ARCH__ == 22)
 #define __ALIGN_BYTE_SIZE__ 64
 #else
 #define __ALIGN_BYTE_SIZE__ 32
 #endif
 
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __SUPPORTS_DMA_FIFO__ 1
 #else
 #define __SUPPORTS_DMA_FIFO__ 0
@@ -253,9 +260,9 @@
 
 //----------------------------------
 // Comprehensive addressing for shuffles in AIE1 but not AIE2
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __SUPPORTS_COMPREHENSIVE_SHUFFLES__ 1
-#elif (__AIE_ARCH__ == 20) || (__AIEARCH__ == 20)
+#elif (__AIE_ARCH__ == 20)
 #define __SUPPORTS_COMPREHENSIVE_SHUFFLES__ 0
 #else
 #define __SUPPORTS_COMPREHENSIVE_SHUFFLES__ 0
@@ -263,14 +270,14 @@
 
 // TODO: Change such that it aligns with codebase (more than one underscore)
 // conv or corr support
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define _SUPPORTS_FLOAT_CFLOAT_
 #endif
-#if (__AIE_ARCH__ == 20) || (__AIEARCH__ == 20) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 22)
+#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 22)
 #define _SUPPORTS_BFLOAT16_
 #endif
 
-#if (__AIE_ARCH__ == 20) || (__AIEARCH__ == 20)
+#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 22)
 #define _SUPPORTS_CBFLOAT16_
 #else
 // not supported.
@@ -290,37 +297,58 @@
 #endif
 
 // data memory in bytes
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __DATA_MEM_BYTES__ 32768
-#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
-    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __DATA_MEM_BYTES__ 65536
 #else
 #define __DATA_MEM_BYTES__ 32768
 #endif
 
 //------------------SHIFTING--------------------------
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#if (__AIE_ARCH__ == 10)
 #define __MAX_SHIFT__ 62
 // ! Possible AIE compiler bug. If compiling aiesim AIE1, then this macro is not set if no else clause, resulting in a..
 // ! 'not defined in this scope' bug in the fnValidateShiftRange function further down this file. This means that..
 // ! right now effectively all __MAX_SHIFT__s are set to 59 to circumvent compilation fail, regardless of device.
-#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
-    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __MAX_SHIFT__ 59
 #else
 #define __MAX_SHIFT__ 62
 #endif
 
 //-------------------func_approx LUT tables----------------
-#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10) || (__AIE_ARCH__ == 20) || (__AIEARCH__ == 20) || \
-    (__AIE_ARCH__ == 21) || (__AIEARCH__ == 21)
+#if (__AIE_ARCH__ == 10) || (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21)
 #define __PARALLEL_LUT_WIDTH__ 128
-#elif (__AIE_ARCH__ == 22) || (__AIEARCH__ == 22)
+#elif (__AIE_ARCH__ == 22)
 #define __PARALLEL_LUT_WIDTH__ 256
 #else
 // deliberate error
 #define __PARALLEL_LUT_WIDTH__ -1
+#endif
+
+//-----------------Cumsum accumulator to accumulator add-------------------
+#if (__AIE_ARCH__ == 10)
+#define __SUPPORTS_ACC_ACC_ADD__ 0
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
+#define __SUPPORTS_ACC_ACC_ADD__ 1
+#else
+#define __SUPPORTS_ACC_ACC_ADD__ 0
+#endif
+
+// maximum data size in bytes that the buffer descriptor can be used for doing transposes.
+// As for 25.2 only known to affect transpose, other tiling schemes may not be affected, needs to be investigated
+// further.
+#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
+#define __MAX_BD_DSIZE__ 8 // in bytes
+#define __MAX_BD_DSIZE_TPOSE__ 8
+#define __MAX_BD_DSIZE_TILING__ 4
+#define __HAS_MEM_TILE__ 1
+#elif (__AIE_ARCH__ == 10)
+#define __MAX_BD_DSIZE__ 4 // in bytes
+#define __MAX_BD_DSIZE_TPOSE__ 4
+#define __MAX_BD_DSIZE_TILING__ 4
+#define __HAS_MEM_TILE__ 0
 #endif
 
 //----------SATURATION and ROUNDING MODES-------------------
@@ -343,8 +371,7 @@
 #define s_symmetric 3
 #endif
 
-#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
-    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 // AIE-ML variants offers 3 additional rounding modes, restricting some values for future use.
 #define __ROUNDING_MODES__ 13
 #define __SUPPORTS_ML_ROUND_MODES__
@@ -557,5 +584,21 @@ INLINE_DECL constexpr bool fnValidateSatMode() {
         return false;
     }
 };
+
+template <unsigned int powerOf2>
+INLINE_DECL constexpr unsigned int fnLog2() {
+    static_assert((powerOf2 & (powerOf2 - 1)) == 0, "Input must be a power of 2");
+    return __builtin_ctz(powerOf2); // GCC/Clang built-in, returns count of trailing zeros
+}
+
+template <unsigned int exponent>
+INLINE_DECL constexpr unsigned int fnPwr2() {
+    return 1u << exponent;
+}
+
+template <unsigned int exponent>
+INLINE_DECL constexpr uint64_t fnPwr16() {
+    return static_cast<uint64_t>(1) << (4 * exponent);
+}
 
 #endif // __DEVICE_DEFS__

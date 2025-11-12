@@ -289,6 +289,10 @@ class fir_tdm_graph : public graph {
     port_conditional_array<output, (TP_CASC_IN == CASC_IN_TRUE), TP_SSR> casc_in;
 
    public:
+    using BTT_DATA = TT_DATA;
+    using BTT_OUT_DATA = TT_OUT_DATA;
+    using BTT_COEFF = TT_COEFF;
+
     static std::vector<TT_COEFF> revert_channel_taps(const std::vector<TT_COEFF>& taps) {
         // processed output
         std::vector<TT_COEFF> revertedTaps;
@@ -354,13 +358,14 @@ class fir_tdm_graph : public graph {
      **/
     port_array<output, TP_SSR> out;
 
+    using rtp_port_array = port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), (TP_SSR * TP_CASC_LEN)>;
     /**
      * The conditional array of input async ports used to pass run-time programmable (RTP) coefficients.
      * This port_conditional_array is (generated when TP_USE_COEFF_RELOAD == 1) an array of input ports, which size is
      *defined by TP_SSR.
      * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.
      **/
-    port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), (TP_SSR * TP_CASC_LEN)> coeff;
+    rtp_port_array coeff;
 
    private:
     // Hide currently unused ports.
@@ -449,6 +454,29 @@ class fir_tdm_graph : public graph {
 
         return kernelTaps;
     };
+
+    template <typename TopGraph>
+    void update_rtp(TopGraph& top, const std::vector<TT_COEFF>& taps, rtp_port_array& portArray) {
+        int rtpPortNumber = getTotalRtpPorts();
+
+        for (unsigned int i = 0; i < rtpPortNumber; i++) {
+            std::vector<TT_COEFF> tapsForRtpPort = extractTaps(taps, i);
+            top.update(portArray[i], tapsForRtpPort.data(), tapsForRtpPort.size());
+        }
+    }
+
+    template <typename TopGraph>
+    void update_rtp(TopGraph& top, const std::vector<TT_COEFF>& taps) {
+        int rtpPortNumber = getTotalRtpPorts();
+
+        for (unsigned int i = 0; i < rtpPortNumber; i++) {
+            unsigned int rtpPosition = lastSSRKernel::getTDMRtpPosition(i);
+            // Extract the taps for the current RTP port
+            std::vector<TT_COEFF> tapsForRtpPort = extractTaps(taps, i);
+            top.update(m_firKernels[i].in[rtpPosition], tapsForRtpPort.data(),
+                       tapsForRtpPort.size()); // Requires knowledge of the RTP port mapping
+        }
+    }
 
     /**
      * @brief This is the constructor function for the FIR graph with static coefficients.

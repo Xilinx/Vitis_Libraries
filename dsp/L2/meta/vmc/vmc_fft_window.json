@@ -84,12 +84,16 @@
       "key": "TP_SSR",
       "name": "ssr",
       "description": "The number of input channels for SSR. The specified value should be of the form 2^N",
-      "default": 1,
+      "default": 1, 
+      "enum": [
+                "Inherit from number of input columns",
+                "<Specify SSR number>"
+            ],
       "type": "uint",
       "label": "SSR: ",
       "tablabel": "Main",
       "visible": "off",
-      "parameterType": "edit"
+      "parameterType": "combobox"
     },
     {
       "key": "TP_RND",

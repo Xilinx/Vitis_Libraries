@@ -21,7 +21,7 @@
 
 HELPER_CUR_DIR ?= .
 HELPER_ROOT_DIR ?= ./../../../../
-PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) COARSE_BITS $(COARSE_BITS) FINE_BITS $(FINE_BITS) DOMAIN_MODE $(DOMAIN_MODE) WINDOW_VSIZE $(WINDOW_VSIZE) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE)
+PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) COARSE_BITS $(COARSE_BITS) FINE_BITS $(FINE_BITS) DOMAIN_MODE $(DOMAIN_MODE) WINDOW_VSIZE $(WINDOW_VSIZE) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) USE_LUT_RELOAD $(USE_LUT_RELOAD)
 EXTRA_PARAM_MAP =  STIM_TYPE $(STIM_TYPE) DIFF_TOLERANCE $(DIFF_TOLERANCE) CC_TOLERANCE $(CC_TOLERANCE) NITER $(NITER) FUNC_CHOICE $(FUNC_CHOICE)
 INPUT_WINDOW_VSIZE = $(shell echo $$(($(WINDOW_VSIZE)*$(NUM_INPUTS))))
 DATA_SEED ?= 0
@@ -47,7 +47,7 @@ get_latency:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input.txt ./data/uut_output.txt $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
 
 get_stats:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output funcApprox $(NITER)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output approx $(NITER)
 
 harvest_mem:
 	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts

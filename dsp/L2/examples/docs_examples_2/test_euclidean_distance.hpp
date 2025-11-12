@@ -25,11 +25,9 @@
 
 using namespace adf;
 #define ED_DATA float
-#define ED_DATA_OUT float
 #define ED_LEN 32
 #define ED_DIM 3
 #define ED_API_IO 0
-#define ED_WINDOW_VSIZE_FA 512
 #define ED_RND 0
 #define ED_SAT 0
 #define ED_IS_OUTPUT_SQUARED 1
@@ -44,8 +42,8 @@ class test_euclidean_distance : public graph {
     port<output> out;
     // Constructor
     test_euclidean_distance() {
-        xf::dsp::aie::euclidean_distance::euclidean_distance_graph<ED_DATA, ED_DATA_OUT, ED_LEN, ED_DIM, ED_API_IO,
-                                                                   ED_RND, ED_SAT, ED_IS_OUTPUT_SQUARED>
+        xf::dsp::aie::euclidean_distance::euclidean_distance_graph<ED_DATA, ED_LEN, ED_DIM, ED_API_IO, ED_RND, ED_SAT,
+                                                                   ED_IS_OUTPUT_SQUARED>
             euclideanDistanceGraph;
 
         // Make connections

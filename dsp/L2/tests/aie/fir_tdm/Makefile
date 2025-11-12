@@ -88,7 +88,7 @@ UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 LOC_COEFF_FILE ?= ./data/coeff.txt
 LOC_INPUT_FILE ?= ./data/input.txt
-REF_INPUT_FILE ?= ./data/input_ref.txt
+REF_INPUT_FILE ?= ./data/ref_input.txt
 UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xrouter=DMAFIFOsInFreeBankOnly  --aie.stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py $(PARAMS_FILE) $(PARAMS))  --aie.Xchess=llvm.xargs="-std=c++2a" $(COMPILER_ARGS) 
 REF_TARGET_COMPILE_ARGS ?= 
 PREPROC_ARGS ?= --aie.Xpreproc=-DCOEFF_FILE=$(LOC_COEFF_FILE)
@@ -99,7 +99,7 @@ else ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
             
 COMPILER_ARGS ?= 
 AIE_VARIANT ?= 2
-FIFO_THRESHOLD ?= --aie.swfifo-threshold=120 
+FIFO_THRESHOLD ?=  
 TAG ?= UUT
 UUT_KERNEL ?= fir_tdm
 REF_KERNEL ?= fir_tdm_ref
@@ -112,7 +112,7 @@ UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 LOC_COEFF_FILE ?= ./data/coeff.txt
 LOC_INPUT_FILE ?= ./data/input.txt
-REF_INPUT_FILE ?= ./data/input_ref.txt
+REF_INPUT_FILE ?= ./data/ref_input.txt
 UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xrouter=DMAFIFOsInFreeBankOnly  --aie.stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py $(PARAMS_FILE) $(PARAMS))  --aie.Xchess=llvm.xargs="-std=c++2a" $(COMPILER_ARGS) 
 REF_TARGET_COMPILE_ARGS ?= 
 PREPROC_ARGS ?= --aie.Xpreproc=-DCOEFF_FILE=$(LOC_COEFF_FILE)
@@ -136,7 +136,7 @@ UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 LOC_COEFF_FILE ?= ./data/coeff.txt
 LOC_INPUT_FILE ?= ./data/input.txt
-REF_INPUT_FILE ?= ./data/input_ref.txt
+REF_INPUT_FILE ?= ./data/ref_input.txt
 UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xrouter=DMAFIFOsInFreeBankOnly  --aie.stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py $(PARAMS_FILE) $(PARAMS))  --aie.Xchess=llvm.xargs="-std=c++2a" $(COMPILER_ARGS) 
 REF_TARGET_COMPILE_ARGS ?= 
 PREPROC_ARGS ?= --aie.Xpreproc=-DCOEFF_FILE=$(LOC_COEFF_FILE)
@@ -147,7 +147,7 @@ else ifneq (,$(shell echo $(XPLATFORM) | awk '/xc2ve3858-ssva2112-2LP-e-S/'))
             
 COMPILER_ARGS ?= 
 AIE_VARIANT ?= 22
-FIFO_THRESHOLD ?= --aie.swfifo-threshold=120 
+FIFO_THRESHOLD ?=  
 TAG ?= UUT
 UUT_KERNEL ?= fir_tdm
 REF_KERNEL ?= fir_tdm_ref
@@ -160,7 +160,7 @@ UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 LOC_COEFF_FILE ?= ./data/coeff.txt
 LOC_INPUT_FILE ?= ./data/input.txt
-REF_INPUT_FILE ?= ./data/input_ref.txt
+REF_INPUT_FILE ?= ./data/ref_input.txt
 UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xrouter=DMAFIFOsInFreeBankOnly  --aie.stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py $(PARAMS_FILE) $(PARAMS))  --aie.Xchess=llvm.xargs="-std=c++2a" $(COMPILER_ARGS) 
 REF_TARGET_COMPILE_ARGS ?= 
 PREPROC_ARGS ?= --aie.Xpreproc=-DCOEFF_FILE=$(LOC_COEFF_FILE)
@@ -180,7 +180,7 @@ UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 LOC_COEFF_FILE ?= ./data/coeff.txt
 LOC_INPUT_FILE ?= ./data/input.txt
-REF_INPUT_FILE ?= ./data/input_ref.txt
+REF_INPUT_FILE ?= ./data/ref_input.txt
 UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xrouter=DMAFIFOsInFreeBankOnly  --aie.stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py $(PARAMS_FILE) $(PARAMS))  --aie.Xchess=llvm.xargs="-std=c++2a" $(COMPILER_ARGS) 
 REF_TARGET_COMPILE_ARGS ?= 
 PREPROC_ARGS ?= --aie.Xpreproc=-DCOEFF_FILE=$(LOC_COEFF_FILE)
@@ -286,7 +286,6 @@ pre_build:
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(XFLIB_DIR)/L2/tests/aie/common/scripts/fir_helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)")
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)"  --connector " " --var "DATA_TYPE:DATA_OUT_TYPE:COEFF_TYPE:FIR_LEN:SHIFT:ROUND_MODE:INPUT_WINDOW_VSIZE:TDM_CHANNELS:CASC_LEN:NUM_OUTPUTS:PORT_API:DUAL_IP:UUT_SSR:SAT_MODE:AIE_VARIANT:USE_COEFF_RELOAD")
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/meta/scripts/metadata_checker.py --ip $(UUT_KERNEL))
-	$(if $(filter-out REF,$(TAG)), # vitis --classic -exec ipmetadata_config_checker $(XFLIB_DIR)/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(XFLIB_DIR)/L2/tests/aie/common/scripts/fir_helper.mk gen_input HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(LOC_INPUT_FILE)")
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(XFLIB_DIR)/L2/tests/aie/common/scripts/fir_helper.mk ssr_split HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) SPLIT_ZIP_FILE=$(LOC_INPUT_FILE) TAG=$(TAG)")
 	$(if $(filter REF,$(TAG)), cp $(LOC_INPUT_FILE)  $(REF_INPUT_FILE))

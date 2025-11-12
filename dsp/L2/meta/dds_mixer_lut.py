@@ -285,7 +285,7 @@ def fn_validate_TP_INPUT_WINDOW_VSIZE(
     lanes = fn_get_dds_lanes(TT_DATA, AIE_VARIANT)
     if TP_INPUT_WINDOW_VSIZE % (lanes * lanes * TP_SSR) != 0:
         return isError(
-            f"Window size ({TP_INPUT_WINDOW_VSIZE}) must be a multiple of ({lanes*lanes*TP_SSR})"
+            f"TP_INPUT_WINDOW_VSIZE ({TP_INPUT_WINDOW_VSIZE}) must be a multiple of ({lanes*lanes*TP_SSR})"
         )
 
     legal_range_TP_INPUT_WINDOW_VSIZE = [param_dict["minimum"], param_dict["maximum"]]
@@ -541,17 +541,17 @@ def info_ports(args):
     if TP_USE_PHASE_RELOAD == 1:
         if TP_PHASE_RELOAD_API == 0:
             in3_ports = com.get_parameter_port_info(
-                "PhaseRTP", "in", "int32", TP_SSR, 1, "async"
+                "PhaseRTP", "in", "uint32", TP_SSR, 1, "async"
             )
         else:
             in3_ports = com.get_parameter_port_info(
-                "PhaseRTP", "in", "int32", TP_SSR, 1
+                "PhaseRTP", "in", "uint32", TP_SSR, 1
             )
     else:
         in3_ports = []
     if TP_USE_PHASE_INC_RELOAD == 1:
         in4_ports = com.get_parameter_port_info(
-            "PhaseIncRTP", "in", "int32", TP_SSR, 1, "async"
+            "PhaseIncRTP", "in", "uint32", TP_SSR, 1, "async"
         )
     else:
         in4_ports = []
@@ -589,7 +589,7 @@ def gen_ports_code(args):
     )
     out_ports = f"  std::array<adf::port<output>, {TP_SSR}> out;\n"
 
-    return in1_ports + in2_ports + in3_ports + out_ports  # concat strings
+    return in1_ports + in2_ports + in3_ports + in4_ports + out_ports  # concat strings
 
 
 def gen_ports_connections(args):

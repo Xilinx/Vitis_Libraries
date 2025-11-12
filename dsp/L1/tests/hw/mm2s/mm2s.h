@@ -9,9 +9,13 @@
 #include <complex>
 #include <ap_fixed.h>
 #include <hls_stream.h>
-
+#include <cstring>
+#define Q(x) #x
+#define QUOTE(x) Q(x)
 namespace mm2s {
-
+struct cint16 {};
+struct cint32 {};
+struct cfloat {};
 template <unsigned int TP_POINT_SIZE>
 static constexpr unsigned int fnPtSizeD1() {
     unsigned int sqrtVal =
@@ -50,10 +54,11 @@ static constexpr unsigned int fnCeil() {
 
 static constexpr unsigned NBITS = 128; // Size of PLIO bus on PL side @ 312.5 MHz
 typedef ap_uint<NBITS> TT_DATA;        // Equals two 'cint32' samples
-typedef ap_uint<NBITS / 2> TT_SAMPLE;  // Samples are 'cint32'
 typedef hls::stream<TT_DATA> TT_STREAM;
 static constexpr unsigned LOOP_CNT = NITER;
-static constexpr unsigned samplesPerRead = 2;
+// static constexpr int DATAWIDTH = std::is_same<DATA_TYPE, cint16>::value ? 32:64;
+static constexpr unsigned samplesPerRead = NBITS / DATAWIDTH;
+typedef ap_uint<DATAWIDTH> TT_SAMPLE; // Samples are 'cint32'
 
 static constexpr unsigned ptSizeD1 = fnPtSizeD1<POINT_SIZE>();
 static constexpr unsigned ptSizeD1Ceil = fnCeil<ptSizeD1, NSTREAM>();

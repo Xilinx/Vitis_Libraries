@@ -108,6 +108,19 @@ using namespace adf;
  *           in the range [- (2^(n-1)) : +2^(n-1) - 1].
  *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds
  *           an n-bit signed value in the range [- (2^(n-1) - 1) : +2^(n-1) - 1]. \n
+ * @tparam TP_USE_LUT_RELOAD allows the user to select if runtime lookup table
+ *         reloading should be used. When defining the parameter:
+ *         - 0 = static lookup tables, defined in graph constructor
+ *         - 1 = reloadable lookup tables, passed as argument to runtime update function via RTP ports \n
+ *         \n
+ *         Note: when used, there will be two async RTP ports (``rtpLut``). Both should be updated with the same lookup
+ *values. \n
+ *         \n
+ *         Note: AIE-ML and AIE-MLv2 devices with ``TT_DATA`` of int16 or bfloat16 support parallel access of 4
+ *         for the LUTs, requiring duplication of every 128 bits (AIE-ML) or 256 bits (AIE-MLv2). \n
+ *         \n
+ *         Note: It is recommended to use the ``update_rtp`` graph method to update LUTs at runtime,
+ *         which handles duplication automatically and both RTP ports. \n
  **/
 
 template <typename TT_DATA,
@@ -117,7 +130,8 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_USE_LUT_RELOAD = 0>
 class func_approx_graph : public graph {
    public:
     // When TT_DATA is bfloat16, values stored in the LUT should be float
@@ -145,7 +159,7 @@ class func_approx_graph : public graph {
     // static constexpr int duplicateLutEntry = useLutAPI + 1;
     static constexpr int duplicateLutEntry = useLutAPI == 1 ? 2 : 1;
     static constexpr int lutValsInLUTentry = __PARALLEL_LUT_WIDTH__ / 8 / sizeof(TT_LUT);
-
+    static constexpr int rtpPortsPerKernel = 2; // 2 per func_approx kernel
 // static asserts
 // TT_DATA - AIE1 - int16, int32, float
 #ifdef _SUPPORTS_BFLOAT16_
@@ -167,6 +181,13 @@ class func_approx_graph : public graph {
         "ERROR: The sum of values for TP_FINE_BITS and TP_COARSE_BITS exceeds the number of bits in TT_DATA.");
     // TP_DOMAIN_MODE = 0, 1, 2
     static_assert(TP_DOMAIN_MODE >= 0 && TP_DOMAIN_MODE <= 3, "ERROR: TP_DOMAIN_MODE must be set to 0, 1 or 2.");
+// TP_WINDOW_VSIZE minimum check
+#ifdef _SUPPORTS_BFLOAT16_
+    static_assert(TP_WINDOW_VSIZE >= (std::is_same<TT_DATA, bfloat16>::value ? 128 : 32),
+                  "ERROR: TP_WINDOW_VSIZE must be at least 128 for bfloat16, or at least 32 for other data types.");
+#else
+    static_assert(TP_WINDOW_VSIZE >= 32, "ERROR: TP_WINDOW_VSIZE must be at least 32.");
+#endif //_SUPPORTS_BFLOAT16_
     // TP_WINDOW_VSIZE *sizeof(TT_DATA) < DATA_MEMORY
     static_assert(sizeof(TT_DATA) * (TP_WINDOW_VSIZE) <= __DATA_MEM_BYTES__,
                   "ERROR: TP_WINDOW_VSIZE * sizeof(TT_DATA) must be less or equal to data memory size.");
@@ -187,6 +208,11 @@ class func_approx_graph : public graph {
      * The output data  of the function.
      **/
     port_array<output, 1> out;
+    using rtp_port_array = port_conditional_array<input, (TP_USE_LUT_RELOAD == 1), rtpPortsPerKernel>;
+    /**
+     * Array of two RTP ports for LUTs when TP_USE_LUT_RELOAD = 1
+     **/
+    rtp_port_array rtpLut;
     /**
      * The kernel that will be created and mapped onto an AIE tile.
      **/
@@ -200,25 +226,107 @@ class func_approx_graph : public graph {
     std::vector<TT_LUT> lut_ab, lut_cd;
 
     /**
-     * @brief This is the constructor function for the func_approx graph.
+    * @brief Access function to get total number of RTP ports.
+    **/
+    static constexpr unsigned int getTotalRtpPorts() {
+        // return the total number of RTP ports.
+        //
+        return rtpPortsPerKernel;
+    };
+
+    /**
+     * @brief Creates a duplicated LUT by replicating entries based on duplicateLutEntry.
+     *
+     * This function creates a duplicated lookup table where entries are replicated to meet
+     * the parallel access requirements of AIE-ML and AIE-MLv2 devices. For devices that support parallel
+     * access of 4 (int16 and bfloat16 on AIE-ML), every group of lutValsInLUTentry values
+     * is duplicated duplicateLutEntry times to enable efficient parallel memory access.
+     *
+     * @tparam T The data type of the LUT entries (typically TT_LUT).
+     * @param lut Pointer to the original lookup table data.
+     * @param lut_size Size of the original lookup table in number of elements.
+     * @return std::vector<T> The duplicated lookup table with replicated entries.
      **/
-    func_approx_graph(const std::array<TT_LUT, kLutValues>& lut) {
-        // 128/256 bit duplication is carried out (if necessary), and two new identical copies of the lut are created.
-        for (int i = 0; i < (kLutValues / lutValsInLUTentry); i++) {
+    template <typename T>
+    std::vector<T> create_duplicated_lut(const T* lut, size_t lut_size) const {
+        std::vector<T> duplicated_lut;
+        for (int i = 0; i < (lut_size / lutValsInLUTentry); i++) {
             for (int j = 0; j < duplicateLutEntry; j++) {
                 for (int k = 0; k < lutValsInLUTentry; k++) {
-                    lut_ab.push_back(lut[i * lutValsInLUTentry + k]);
+                    duplicated_lut.push_back(lut[i * lutValsInLUTentry + k]);
                 }
             }
         }
+        return duplicated_lut;
+    }
+
+    /**
+     * @brief Updates RTP ports with duplicated lookup table values for runtime configuration.
+     *
+     * This method is used to update the RTP ports with lookup table values
+     * when TP_USE_LUT_RELOAD = 1. The function automatically handles the duplication requirements
+     * for parallel access on AIE-ML and AIE-MLv2 devices and updates all necessary RTP ports with the same
+     * duplicated lookup table data.
+     *
+     * The method creates a duplicated version of the input lookup table to meet hardware
+     * requirements for parallel memory access, then updates both RTP ports with this
+     * duplicated data to ensure consistent behavior across the kernel's dual LUT inputs.
+     *
+     * @tparam TopGraph The type of the top-level graph containing this func_approx_graph instance.
+     * @param top Reference to the top-level graph instance used for RTP updates.
+     * @param lut The lookup table array containing the function approximation values.
+     * @param rtpPort Reference to the RTP port array that will be updated with the LUT values.
+     *
+     * @note This method should only be used when TP_USE_LUT_RELOAD = 1.
+     * @note For AIE-ML and AIE-MLv2 devices with int16 or bfloat16 data types, the LUT values are automatically
+     *       duplicated to support parallel access of 4 elements.
+     **/
+
+    template <typename TopGraph>
+    void update_rtp(TopGraph& top, const std::array<TT_LUT, kLutValues>& lut, rtp_port_array& rtpPort) {
+        // Create a new vector from lut, that has every 128/256 bit samples duplicated
+        std::vector<TT_LUT> duplicated_lut = create_duplicated_lut(lut.data(), lut.size());
+        int rtpPortNumber = getTotalRtpPorts();
+        for (int i = 0; i < rtpPortNumber; i++) {
+            top.update(rtpPort[i], duplicated_lut.data(), duplicated_lut.size());
+        }
+    }
+    /**
+     * @brief Default constructor for the func_approx graph using RTP LUTs.
+     **/
+    func_approx_graph() {
+        // Internal buffers that will be loaded with slope and offset values in the kernel
+        std::array<TT_LUT, internalBuffSize> slopeBuff = {};
+        std::array<TT_LUT, internalBuffSize> offsetBuff = {};
+
+        // Create kernel with empty LUTs (will be set via RTP)
+        m_kernel[0] =
+            kernel::create_object<func_approx<TT_DATA, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE,
+                                              TP_SHIFT, TP_RND, TP_SAT, TP_USE_LUT_RELOAD> >(slopeBuff, offsetBuff);
+        // Specify mapping constraints
+        runtime<ratio>(m_kernel[0]) = 0.9;
+        source(m_kernel[0]) = "func_approx.cpp";
+
+        connect(in[0], m_kernel[0].in[0]);
+        dimensions(m_kernel[0].in[0]) = {TP_WINDOW_VSIZE};
+        connect(m_kernel[0].out[0], out[0]);
+        dimensions(m_kernel[0].out[0]) = {TP_WINDOW_VSIZE};
+        // Connect RTP ports for LUTs
+        for (int i = 0; i < rtpPortsPerKernel; i++) {
+            connect<parameter>(rtpLut[i], async(m_kernel[0].in[i + 1]));
+        }
+    }
+    func_approx_graph(const std::array<TT_LUT, kLutValues>& lut) {
+        // 128/256 bit duplication is carried out (if necessary), and two new identical copies of the lut are created.
+        lut_ab = create_duplicated_lut(lut.data(), lut.size());
         lut_cd = lut_ab;
         // Internal buffers that will be loaded with slope and offset values in the kernel
         std::array<TT_LUT, internalBuffSize> slopeBuff = {};
         std::array<TT_LUT, internalBuffSize> offsetBuff = {};
 
-        m_kernel[0] =
-            kernel::create_object<func_approx<TT_DATA, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE,
-                                              TP_SHIFT, TP_RND, TP_SAT> >(lut_ab, lut_cd, slopeBuff, offsetBuff);
+        m_kernel[0] = kernel::create_object<func_approx<TT_DATA, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE,
+                                                        TP_WINDOW_VSIZE, TP_SHIFT, TP_RND, TP_SAT, TP_USE_LUT_RELOAD> >(
+            lut_ab, lut_cd, slopeBuff, offsetBuff);
         // Specify mapping constraints
         runtime<ratio>(m_kernel[0]) = 0.9; // Nominal figure. The real figure requires knowledge of the sample rate.
         // Source files

@@ -113,7 +113,7 @@ endif # 3
 endif
 XPLATFORM := $(firstword $(XPLATFORM))
 #Get PLATFORM_NAME by PLATFORM
-PLATFORM_NAME = $(strip $(patsubst %.xpfm, % , $(shell basename $(XPLATFORM))))
+PLATFORM_NAME := $(if $(XPLATFORM),$(strip $(patsubst %.xpfm, %, $(notdir $(XPLATFORM)))))
 
 define MSG_PLATFORM
 No platform matched pattern '$(PLATFORM)'.

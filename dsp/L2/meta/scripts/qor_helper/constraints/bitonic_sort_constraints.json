@@ -1,0 +1,13 @@
+{
+    "parameter_constraints": {
+        "AIE_VARIANT": [],
+        "TT_DATA": [],
+        "TP_DIM": [128, 64],
+        "TP_NUM_FRAMES": [1],
+        "TP_ASCENDING": 1,
+        "SINGLE_BUF": 0,
+        "TP_CASC_LEN": [],
+        "TP_SSR": [1,2,4,8,16]
+    },
+    "qor_constraints": "Throughput>300 and Latency<10000"
+}

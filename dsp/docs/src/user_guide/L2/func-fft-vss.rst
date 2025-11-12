@@ -40,7 +40,7 @@ The complete list of required parameters for the VSS FFT is shown in L2/include/
 +----------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | freqhz                           | Frequency of the internal PL components of the VSS (In Hz)                                                                                 |
 +----------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| [aie] enable_partition           | Configuration of the range of columns that you want to place the compiled AIE kernels. Please do not change the name of the aie partition. |
+| [aie] enable_partition           | Configuration of the range of columns that you want to place the compiled AIE kernels. You can update the name of the aie partition.       |
 +----------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | [APP_PARAMS] DATA_TYPE           | Used to set TT_DATA described in API Reference                                                                                             |
 +----------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
@@ -84,12 +84,10 @@ The VSS FFT can be configured for Super Sample Rate operation to achieve higher 
 
 The input data to the SSR input ports of the VSS FFT are expected to be distributed evenly in a "card-dealing" fashion. For example,
 
-Port Number 1 gets samples S_1, S_SSR+1, S_2*SSR+1, ...
-Port Number 2 gets samples S_2, S_SSR+2, S_2*SSR+2, ...
-...
-Port Number SSR gets samples S_SSR, S_SSR+SSR, S_2*SSR+SSR, ...
-
-
+* **Port Number 1** gets samples: ``S_1``, ``S_SSR+1``, ``S_2*SSR+1``, ...
+* **Port Number 2** gets samples: ``S_2``, ``S_SSR+2``, ``S_2*SSR+2``, ...
+* ...
+* **Port Number SSR** gets samples: ``S_SSR``, ``S_SSR+SSR``, ``S_2*SSR+SSR``, ...
 
 .. _SSR_POINTSIZE_CONSTRAINTS:
 
@@ -103,37 +101,69 @@ If the point size is a multiple of SSR, then the inputs can be passed as is to t
 VSS Mode 1 creates a transpose block at its input that is used to rearrange data that arrives in the natural SSR order described in :ref:`VSS_SSR_OPERATION` into an order needed by the first set of compute units within the VSS. This block uses buffers in the PL to rearrange the data. If the user wants to input data directly in the form needed by the compute units, they can save on memory resources by setting the ADD_FRONT_TRANSPOSE flag to 0.
 If the front transpose is removed, ensure that the data arriving in each port satisfies the formula:
 
-S[PORT_IDX][SAMP_IDX] = (PORT_IDX + ((SAMP_IDX % D1) * D2) + ((int)(SAMP_IDX / D1) * SSR))
+.. math::
 
-where :
-- PORT_IDX ranges from 0 to SSR - 1
-- D1 = D2 = square root of the point size when point sizes are a perfect square
-- D1 = square root of (point size * 2); D2 = square root of (point size/2) for other point sizes
+   S[PORT\_IDX][SAMP\_IDX] = PORT\_IDX + \left(\left(SAMP\_IDX \bmod D1\right) \times D2\right) + \left\lfloor \frac{SAMP\_IDX}{D1} \right\rfloor \times SSR
 
-For example, for a point size of 512 and SSR of 4
-- Stream 0 carries sample: SI_0, SI_16, SI_32, SI_48, ... SI_496, SI_4, SI_20, SI_36, ... SI_500, ...
-- Stream 1 carries sample: SI_1, SI_17, SI_33, SI_49, ... SI_497, SI_5, SI_21, SI_37, ... SI_501, ...
-- Stream 2 carries sample: SI_2, SI_18, SI_34, SI_50, ... SI_498, SI_6, SI_22, SI_38, ... SI_502, ...
-- Stream 3 carries sample: SI_3, SI_19, SI_35, SI_51, ... SI_499, SI_7, SI_23, SI_39, ... SI_503, ...
+**Where:**
 
+* ``PORT_IDX`` ranges from **0** to **SSR - 1**
+* For **perfect square** point sizes: ``D1 = D2 = √(point\_size)``
+* For **other** point sizes: 
+  
+  * ``D1 = √(point\_size × 2)`` 
+  * ``D2 = √(point\_size ÷ 2)``
+
+**Example: Point Size = 512, SSR = 4**
+
+* **Stream 0** carries samples: 
+  
+  * ``SI_0``, ``SI_16``, ``SI_32``, ``SI_48``, ..., ``SI_496``, ``SI_4``, ``SI_20``, ``SI_36``, ..., ``SI_500``, ...
+
+* **Stream 1** carries samples: 
+  
+  * ``SI_1``, ``SI_17``, ``SI_33``, ``SI_49``, ..., ``SI_497``, ``SI_5``, ``SI_21``, ``SI_37``, ..., ``SI_501``, ...
+
+* **Stream 2** carries samples: 
+  
+  * ``SI_2``, ``SI_18``, ``SI_34``, ``SI_50``, ..., ``SI_498``, ``SI_6``, ``SI_22``, ``SI_38``, ..., ``SI_502``, ...
+
+* **Stream 3** carries samples: 
+  
+  * ``SI_3``, ``SI_19``, ``SI_35``, ``SI_51``, ..., ``SI_499``, ``SI_7``, ``SI_23``, ``SI_39``, ..., ``SI_503``, ...
 
 .. _ADD_BACK_TRANSPOSE:
 
 Both VSS Mode 1 and 2 Include a transpose block after all their compute units to rearrange data in a form in the SSR form as described in section :ref:`VSS_SSR_OPERATION`. This block uses buffers in the PL to rearrange the data. If the user has downstream blocks that can directly accept the data in the form given out by the compute units, they can save on memory resources by setting the ADD_BACK_TRANSPOSE flag to 0.
 If the back transpose is removed, data arriving in each output port will be different between the 2 VSS modes for the same SSR and point size.
 
-For VSS mode 1, the samples at the output of the VSS without the back transpose would satisfy the formula
-S[PORT_IDX][SAMP_IDX] = (PORT_IDX + ((SAMP_IDX % D2) * D1) + ((int)(SAMP_IDX / D2) * SSR))
+**VSS Mode 1 Output Formula**
 
-where:
-- PORT_IDX ranges from 0 to SSR - 1
-- D1 = D2 = square root of the point size when point sizes are a perfect square
-- D1 = square root of (point size * 2); D2 = square root of (point size/2) for other point sizes
+For VSS Mode 1, the samples at the output of the VSS without the back transpose would satisfy the formula:
 
-For VSS Mode 2,
-the samples at the output of the VSS without the back transpose would satisfy the formula
-S[PORT_IDX][SAMP_IDX] = (PORT_IDX + (SAMP_IDX % SSR) * D1)
+.. math::
 
-where:
-- PORT_IDX ranges from 0 to SSR - 1
-- D1 = point size / SSR
+   S[PORT\_IDX][SAMP\_IDX] = PORT\_IDX + \left( \left( SAMP\_IDX \bmod D2 \right) \times D1 \right) + \left\lfloor \frac{SAMP\_IDX}{D2} \right\rfloor \times SSR
+
+**Where:**
+
+* ``PORT_IDX`` ranges from **0** to **SSR - 1**
+* For **perfect square** point sizes: ``D1 = D2 = √(point\_size)``
+* For **other** point sizes:
+  
+  * ``D1 = √(point\_size × 2)``
+  * ``D2 = √(point\_size ÷ 2)``
+
+**VSS Mode 2 Output Formula**
+----------------------------
+
+For VSS Mode 2, the samples at the output of the VSS without the back transpose would satisfy the formula:
+
+.. math::
+
+   S[PORT\_IDX][SAMP\_IDX] = PORT\_IDX + \left( SAMP\_IDX \bmod SSR \right) \times D1
+
+**Where:**
+
+* ``PORT_IDX`` ranges from **0** to **SSR - 1**
+* ``D1 = point\_size ÷ SSR``

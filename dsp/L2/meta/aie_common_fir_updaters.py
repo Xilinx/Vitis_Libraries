@@ -88,6 +88,17 @@ def fn_update_binary(param_name):
     param_dict = {"name": param_name, "enum": [0, 1]}
     return param_dict
 
+# fir symmetric filters 
+# When stream -> AIE-ML and AIE-Mlv2 have only 1 stream.
+# When buffer -> AIE-ML and AIE-MLv2 use asymmetric implementation (there's no symmetric MULs) and hence having 2 buffers does not add any value.
+def fn_update_dual_ip_sym(AIE_VARIANT):
+    if AIE_VARIANT in [AIE_ML, AIE_MLv2]:
+        legal_set = [0] 
+    else:
+        legal_set = [0, 1]
+    param_dict = {"name": "TP_DUAL_IP", "enum": legal_set}
+    return param_dict
+
 
 def fn_update_dual_ip_sr_asym(AIE_VARIANT, TP_API):
     legal_set = [0, 1]
@@ -131,6 +142,29 @@ def fn_update_num_outputs_sr_asym(TP_API, AIE_VARIANT, TP_SSR, TP_DUAL_IP, param
     # Constraint copied from graph. Can this be removed?
     if TP_API == API_BUFFER and TP_SSR > 1:
         legal_set = remove_from_set([2], legal_set)
+
+    param_dict.update({"enum": legal_set})
+
+    return param_dict
+
+def fn_update_num_outputs_sr_sym(TP_API, AIE_VARIANT, param_name):
+    param_dict = fn_update_num_outputs(TP_API, AIE_VARIANT, param_name)
+    legal_set = param_dict["enum"]
+    if TP_API == API_BUFFER:
+        # When buffer API, single output or 2 output clones are both valid use cases.
+        legal_set = legal_set
+    # if TP_API == API_STREAM:
+        # # When stream API, keep IO connections same,
+        # # i.e. when 1 input stream 1 output stream, when 2 inputs, allow 2 outputs.
+        # # When 2 inputs, does 1 output make sense? No.
+        # if TP_DUAL_IP == 0 and not(AIE_VARIANT in [AIE] and TP_SSR==1): #if AIE==1 and not in SSR mode, dualpip=0, num_output=2 is allowed
+        #     legal_set = remove_from_set([2], legal_set)
+        # elif TP_DUAL_IP == 1 and not(AIE_VARIANT in [AIE] and TP_SSR==1):
+        #     legal_set = remove_from_set([1], legal_set)
+
+    # # Constraint copied from graph. Can this be removed?
+    # if TP_API == API_BUFFER and TP_SSR > 1:
+    #     legal_set = remove_from_set([2], legal_set)
 
     param_dict.update({"enum": legal_set})
 

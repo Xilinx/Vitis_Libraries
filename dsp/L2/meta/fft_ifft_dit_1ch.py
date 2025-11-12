@@ -99,7 +99,9 @@ def update_TT_DATA(args):
 
 
 def fn_update_TT_DATA(AIE_VARIANT):
-    legal_set_TT_DATA = ["cint16", "cint32", "cfloat"]
+    legal_set_TT_DATA = ["cint16", "cint32", "cfloat", "cbfloat16"]
+    if AIE_VARIANT == com.AIE:
+        legal_set_TT_DATA.remove("cbfloat16")
     param_dict = {}
     param_dict.update({"name": "TT_DATA"})
     param_dict.update({"enum": legal_set_TT_DATA})
@@ -133,6 +135,8 @@ def fn_update_TT_OUT_DATA(TT_DATA):
         legal_set_TT_OUT_DATA = ["cint16", "cint32"]
     elif TT_DATA == "cfloat":
         legal_set_TT_OUT_DATA = ["cfloat"]
+    elif TT_DATA == "cbfloat16":
+        legal_set_TT_OUT_DATA = ["cbfloat16"]
 
     param_dict = {}
     param_dict.update({"name": "TT_OUT_DATA"})
@@ -170,6 +174,8 @@ def fn_update_TT_TWIDDLE(AIE_VARIANT, TT_DATA):
             legal_set_TT_TWIDDLE = ["cint16"]
     elif TT_DATA == "cfloat":
         legal_set_TT_TWIDDLE = ["cfloat"]
+    elif TT_DATA == "cbfloat16":
+        legal_set_TT_TWIDDLE = ["cbfloat16"]
 
     param_dict = {}
     param_dict.update({"name": "TT_TWIDDLE"})
@@ -290,7 +296,7 @@ def update_TP_POINT_SIZE(args):
     TP_API = args["TP_API"]
     TP_PARALLEL_POWER = args["TP_PARALLEL_POWER"]
     TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
-    if args["TP_POINT_SIZE"]:
+    if ("TP_POINT_SIZE" in args) and args["TP_POINT_SIZE"]:
         TP_POINT_SIZE = args["TP_POINT_SIZE"]
     else:
         TP_POINT_SIZE = 0
@@ -336,6 +342,12 @@ def fn_update_TP_POINT_SIZE(
         MaxPointSizePerKernel_pingpong_buf = 2048
         if TP_DYN_PT_SIZE == 1 and TP_API == 0:
             MaxPointSizePerKernel_pingpong_buf = 1024
+
+    elif TT_DATA == "cbfloat16" and TT_TWIDDLE == "cbfloat16" and TT_OUT_DATA == "cbfloat16":
+        MaxPointSizePerKernel = 4096
+        MaxPointSizePerKernel_pingpong_buf = 4096
+        if TP_DYN_PT_SIZE == 1 and TP_API == 0:
+            MaxPointSizePerKernel_pingpong_buf = 2048
 
     elif TT_DATA == "cint16" and TT_TWIDDLE == "cint16" and TT_OUT_DATA == "cint16":
         MaxPointSizePerKernel = 4096
@@ -493,7 +505,7 @@ def fn_validate_TP_POINT_SIZE(
     range_TP_POINT_SIZE = [param_dict["minimum"], param_dict["maximum"]]
 
     if not fn_is_power_of_two(TP_POINT_SIZE):
-        return isError(f"Point size ({TP_POINT_SIZE}) must be a power of 2")
+        return isError(f"TP_POINT_SIZE ({TP_POINT_SIZE}) must be a power of 2")
 
     return validate_range(range_TP_POINT_SIZE, "TP_POINT_SIZE", TP_POINT_SIZE)
 
@@ -637,20 +649,25 @@ def fn_validate_window_size(
 ########### TP_CASC_LEN Updater and Validator #########
 #######################################################
 def update_TP_CASC_LEN(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
     TP_POINT_SIZE = args["TP_POINT_SIZE"]
     TP_PARALLEL_POWER = args["TP_PARALLEL_POWER"]
-    return fn_update_TP_CASC_LEN(TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER)
+    return fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER)
 
 
-def fn_update_TP_CASC_LEN(TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER):
+def fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER):
 
     # Defines how many radix-2 ranks there are in the FFT itself (subframe or main FFT).
     log2PointSize = fn_log2(TP_POINT_SIZE >> TP_PARALLEL_POWER)
     # equation for integer ffts is complicated by the fact that odd power of 2 point sizes start with a radix 2 stage
     # Further, since integer implementation uses radix4, 2 ranks per kernel after the initial possible single radix2 is forced, so
-    NUM_STAGES = (CEIL(log2PointSize, 2) / 2) if TT_DATA != "cfloat" else log2PointSize
+    NUM_STAGES = (CEIL(log2PointSize, 2) / 2) if TT_DATA in ["cint16", "cint32"] else log2PointSize
     maxTP_CASC_LEN = min(TP_CASC_LEN_max, int(NUM_STAGES))
+
+    #In one particular scenario, cascade increases the memory requirement per kernel because the cascade data type is cint32 which increases memory use past the limit  
+    if (AIE_VARIANT==AIE) and (TP_POINT_SIZE>>TP_PARALLEL_POWER == 4096) and (TT_DATA=="cint16"):
+        maxTP_CASC_LEN = 1
 
     # maxTP_CASC_LEN=TP_CASC_LEN_max
 
@@ -663,15 +680,16 @@ def fn_update_TP_CASC_LEN(TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER):
 
 
 def validate_TP_CASC_LEN(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
     TP_POINT_SIZE = args["TP_POINT_SIZE"]
     TP_PARALLEL_POWER = args["TP_PARALLEL_POWER"]
     TP_CASC_LEN = args["TP_CASC_LEN"]
-    return fn_validate_casc_len(TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_CASC_LEN)
+    return fn_validate_casc_len(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_CASC_LEN)
 
 
-def fn_validate_casc_len(TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_CASC_LEN):
-    param_dict = fn_update_TP_CASC_LEN(TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER)
+def fn_validate_casc_len(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_CASC_LEN):
+    param_dict = fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER)
     range_TP_CASC_LEN = [param_dict["minimum"], param_dict["maximum"]]
     return validate_range(range_TP_CASC_LEN, "TP_CASC_LEN", TP_CASC_LEN)
 
@@ -715,7 +733,7 @@ def fn_update_shift_val(TT_DATA):
     param_dict = {}
     param_dict.update({"name": "TP_SHIFT"})
     param_dict.update({"minimum": TP_SHIFT_min})
-    if TT_DATA == "cfloat":
+    if TT_DATA in ["cfloat","cbfloat16"]:
         param_dict.update({"maximum": TP_SHIFT_min})
     else:
         param_dict.update({"maximum": TP_SHIFT_max})
@@ -747,13 +765,20 @@ def update_TP_RND(args):
 def fn_update_TP_RND(AIE_VARIANT):
     legal_set_TP_RND = fn_get_legalSet_roundMode(AIE_VARIANT)
     if AIE_VARIANT == AIE:
-        remove_set = [k_rnd_mode_map_aie["rnd_ceil"], k_rnd_mode_map_aie["rnd_floor"]]
-    elif AIE_VARIANT in [AIE_ML, AIE_MLv2]:
+         remove_set = [k_rnd_mode_map_aie["rnd_ceil"], k_rnd_mode_map_aie["rnd_floor"]]
+    elif AIE_VARIANT in [AIE_ML]:
         remove_set = [
             k_rnd_mode_map_aie_ml["rnd_ceil"],
             k_rnd_mode_map_aie_ml["rnd_floor"],
             k_rnd_mode_map_aie_ml["rnd_sym_floor"],
             k_rnd_mode_map_aie_ml["rnd_sym_ceil"],
+        ]
+    elif AIE_VARIANT in [AIE_MLv2]:
+        remove_set = [
+            k_rnd_mode_map_aie_mlv2["rnd_ceil"],
+            k_rnd_mode_map_aie_mlv2["rnd_floor"],
+            k_rnd_mode_map_aie_mlv2["rnd_sym_floor"],
+            k_rnd_mode_map_aie_mlv2["rnd_sym_ceil"],
         ]
 
     legal_set_TP_RND = remove_from_set(remove_set, legal_set_TP_RND.copy())
@@ -765,8 +790,8 @@ def fn_update_TP_RND(AIE_VARIANT):
 def validate_TP_RND(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TP_RND = args["TP_RND"]
-    return fn_validate_roundMode(TP_RND, AIE_VARIANT)
-
+    param_dict=fn_update_TP_RND(AIE_VARIANT)
+    return validate_rnd_mode(AIE_VARIANT, param_dict["enum"], TP_RND)
 
 ######################################################
 ########## TP_SAT Updater and Validator ##############

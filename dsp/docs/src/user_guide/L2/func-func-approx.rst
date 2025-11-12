@@ -94,11 +94,33 @@ Note, for floating-point data, all of the input is multiplied by the slope, wher
 
 .. _Configuring_the_Lookup_Table:
 
-Configuring the Lookup Table
-----------------------------
+Lookup Table Configuration
+--------------------------
 
-There will be `2^TP_COARSE_BITS` in the lookup table. Each location will contain a slope value and an offset value which represent the linear approximation of the function at the corresponding location of the domain.
-Lookup tables for integer data types require the slope/offset values to be obtained using the point-slope form, whereas lookup tables for floating-point types require the slope-intercept form.
+The lookup table contains `2^TP_COARSE_BITS` locations, where each location stores a slope and offset value representing the linear approximation for the corresponding domain segment. For integer types, there will be `2^TP_FINE_BITS` interpolation points between each entry of the lookup table. For example, if `TP_COARSE_BITS = 4` and `TP_FINE_BITS = 4`, there will be 16 locations in the lookup table, with 16 interpolation points between each location.
+
+**LUT Data Types and Scaling**:
+
+Slope and offset values use the same data type as ``TT_DATA``, except when ``TT_DATA`` is ``bfloat16``, where values are stored as ``float`` for precision. This storage type is called ``TT_LUT`` in the API reference.
+
+For integer types, values are scaled to match the bit allocation of ``TP_COARSE_BITS`` and ``TP_FINE_BITS``, with precision limited by the ``TT_LUT`` data type width. See func_approx_fns in :ref:`API_REFERENCE` for scaling and biasing for specific domain modes.
+
+**Memory Requirements**:
+
+Each LUT location stores one slope-offset pair, requiring ``2 * sizeof(TT_LUT)`` bytes. The graph creates internal duplicates for performance, with AIE-ML/AIE-MLv2 requiring additional duplication for parallel access when using ``int16`` or ``bfloat16`` data types.
+
+**LUT Generation**:
+
+Utility functions are provided to create LUTs for common functions (see :ref:`API_REFERENCE`):
+``getSqrt``, ``getInvSqrt``, ``getLog``, ``getExp``, ``getInv``. These functions handle scaling automatically and populate LUTs in the required slope-offset format.
+
+For integer data types (point-slope form):
+
+``output = offset[index] + slope[index] * input[fine_bits:0]``
+
+For floating-point data types (slope-intercept form):
+
+``output = offset[index] + slope[index] * input``
 
 For example, slope-offset values for integer types (point-slope):
 
@@ -127,8 +149,17 @@ This duplication will be done within the graph but must be accounted for when ca
 Input Domain Modes
 ------------------
 
-The template parameter `TP_DOMAIN_MODE` will control the domain of input data that is expected for the particular function's approximation.
-Provided input data that is outside the chosen `TP_DOMAIN_MODE` domain will result in undefined behavior at the output. There are three possible `TP_DOMAIN_MODES` available:
+The ``TP_DOMAIN_MODE`` parameter defines the input domain mapping for function approximation. Input data outside the specified domain produces undefined behavior.
+
+**Domain Mode Summary**:
+
+The domain modes define how input values map to the mathematical function domain:
+
+- **Mode 0**: Direct mapping - input values [0, 1) represent function domain [0, 1)
+- **Mode 1**: Biased mapping - input values [0, 1) represent function domain [1, 2), MSB of coarse bits ignored
+- **Mode 2**: Scaled mapping - input values [1, 4) represent function domain [1, 4), first quarter of LUT unused
+
+**Detailed Mapping**:
 
 +----------------+--------------------+-----------------------------------------------------------+-------------------------+----------------------------------------------------------------------------------------------------------------------------------+
 | TP_DOMAIN_MODE | Input domain       | Integer input range                                       | Floating-point input    | Notes                                                                                                                            |
@@ -144,12 +175,73 @@ Provided input data that is outside the chosen `TP_DOMAIN_MODE` domain will resu
 | 2              | 1 <= x < 4         | 2 ^ (TP_COARSE_BITS + TP_FINE_BITS - 2) <= int(x) < 2 ^   | 1 <= float(x) < 4       | Lookup tables values for the first quadrant of locations are created but are ignored. As such, the latter three quadrants of the |
 |                |                    | (TP_COARSE_BITS + TP_FINE_BITS)                           |                         | lookup tables will cover an input domain of 1 to 4.                                                                              |
 +----------------+--------------------+-----------------------------------------------------------+-------------------------+----------------------------------------------------------------------------------------------------------------------------------+
+ 
 
 Lookup Utility Functions
 ------------------------
 
 A number of utility functions are provided to create lookup tables for some common function approximations.
 The functions, as well as their recommended domain modes, are documented in :ref:`API_REFERENCE`.
+
+Runtime Lookup Table Updates
+----------------------------
+
+When ``TP_USE_LUT_RELOAD = 1``, lookup tables can be modified at runtime via RTP ports instead of being fixed at compile time.
+
+**RTP Port Configuration**:
+
+- Two RTP ports are created for parallel memory access
+- Both ports must be updated with identical lookup table data
+
+**Runtime Update Methods**:
+
+There are two methods for update of LUT values at runtime:
+
+1. Use the provided graph ``update_rtp`` function. This will perform all required duplication and broadcast.
+2. Drive data to the graph RTP ports directly. In this case, data must be duplicated depending on device as described below, and must be broadcast to both ports.
+
+
+**Graph Instantiation**:
+
+.. code-block:: cpp
+
+    // Static LUT (TP_USE_LUT_RELOAD = 0)
+    std::array<TT_LUT, kLutValues> staticLUT = { /* values */ };
+    func_approx_graph<TT_DATA, TP_COARSE_BITS, ...> graph(staticLUT);
+    
+    // Runtime LUT (TP_USE_LUT_RELOAD = 1)  
+    func_approx_graph<TT_DATA, TP_COARSE_BITS, ..., 1> graph(); // No LUT argument
+
+**Runtime Updates**:
+
+.. code-block:: cpp
+
+    std::array<TT_LUT, kLutValues> newLUT = { /* new values */ };
+    graph.update_rtp(topGraph, newLUT, graph.rtpLut);
+
+**Memory Duplication Requirements**:
+
+For AIE-ML and AIE-MLv2 devices with ``int16`` or ``bfloat16`` data types, hardware parallel access requires memory duplication:
+
+.. code-block:: cpp
+
+    // Memory layout for AIE-ML (128-bit alignment)
+    // Each group of 8 entries (slope-offset pairs) is duplicated
+    lut_data = {s0,o0, s1,o1, s2,o2, s3,o3,    // First 128-bit block
+                s0,o0, s1,o1, s2,o2, s3,o3,    // Duplicated block
+                s4,o4, s5,o5, s6,o6, s7,o7,    // Second 128-bit block  
+                s4,o4, s5,o5, s6,o6, s7,o7,    // Duplicated block
+                ...}
+    
+    // Memory layout for AIE-MLv2 (256-bit alignment)
+    // Each group of 16 entries is duplicated
+    lut_data = {s0,o0, s1,o1, ..., s7,o7,      // First 256-bit block
+                s0,o0, s1,o1, ..., s7,o7,      // Duplicated block
+                s8,o8, s9,o9, ..., s15,o15,    // Second 256-bit block
+                s8,o8, s9,o9, ..., s15,o15,    // Duplicated block
+                ...}
+
+**Automatic Duplication**: The ``update_rtp`` method handles all duplication automatically.
 
 Code Example
 ============

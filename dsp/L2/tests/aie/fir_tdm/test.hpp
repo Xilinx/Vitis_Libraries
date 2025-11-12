@@ -30,10 +30,38 @@
 #include "test_utils.hpp"
 #include "fir_common_traits.hpp"
 #include "device_defs.h"
+#include "fir_tdm_native_generated_graph/fir_tdm_generated_graph.h"
+#include "pkt_switch_graph.hpp"
 
 #ifndef UUT_GRAPH
 #define UUT_GRAPH fir_tdm_graph
 #endif
+
+#ifndef USE_PKT_SWITCHING
+#define USE_PKT_SWITCHING 0
+#endif
+
+#ifdef USING_UUT
+#if (USE_PKT_SWITCHING == 0)
+
+#define NPORT_I P_SSR
+#define NPORT_O P_SSR
+#endif
+
+#else
+// Use SSR when not doing packet switching
+#undef USE_PKT_SWITCHING
+#undef NPORT_I
+#undef NPORT_O
+
+#define USE_PKT_SWITCHING 0
+#define NPORT_I P_SSR
+#define NPORT_O P_SSR
+
+#endif
+
+#define NPLIO_I NPORT_I
+#define NPLIO_O NPORT_O
 
 #include QUOTE(UUT_GRAPH.hpp)
 
@@ -52,34 +80,45 @@ class test_graph : public graph {
 
    public:
     // When just a duplicate (windows dual ip), use only one plio per ssr port on input.
-    std::array<input_plio, P_SSR*(DUAL_INPUT_SAMPLES + 1)> in;
-    std::array<output_plio, P_SSR*(NUM_OUTPUTS)> out;
+
+    std::array<input_plio, NPLIO_I> in;
+    std::array<output_plio, NPLIO_O> out;
 
 #if (USE_COEFF_RELOAD == 1)
     // port_conditional_array<input, USE_COEFF_RELOAD == 1, P_SSR> coeff;
     port_conditional_array<input, USE_COEFF_RELOAD == 1, P_SSR * CASC_LEN> coeff;
 #endif
 
-    using uut_g = dsplib::fir::tdm::UUT_GRAPH<DATA_TYPE,
-                                              COEFF_TYPE,
-                                              FIR_LEN,
-                                              SHIFT,
-                                              ROUND_MODE,
-                                              INPUT_WINDOW_VSIZE,
-                                              TDM_CHANNELS,
-                                              NUM_OUTPUTS,
-                                              DUAL_IP,
-                                              P_SSR, // Note P_SSR forced to 1 for REF
-                                              SAT_MODE,
-                                              CASC_LEN,
-                                              DATA_OUT_TYPE,
-                                              USE_COEFF_RELOAD>;
+#ifdef USING_UUT
+    // Use Generated Graph
+    using uut = fir_tdm_native_generated_graph;
+#else
+    // Use Graph class directly for reference model
+    using uut = dsplib::fir::tdm::UUT_GRAPH<DATA_TYPE,
+                                            COEFF_TYPE,
+                                            FIR_LEN,
+                                            SHIFT,
+                                            ROUND_MODE,
+                                            INPUT_WINDOW_VSIZE,
+                                            TDM_CHANNELS,
+                                            NUM_OUTPUTS,
+                                            DUAL_IP,
+                                            P_SSR,
+                                            SAT_MODE,
+                                            CASC_LEN,
+                                            DATA_OUT_TYPE,
+                                            USE_COEFF_RELOAD>;
+#endif
 
     std::vector<COEFF_TYPE> m_taps_v =
         generateTaps<COEFF_TYPE, COEFF_STIM_TYPE, FIR_LEN * TDM_CHANNELS, COEFF_SEED>(QUOTE(COEFF_FILE));
 
-    // RTP coefficients
-    uut_g firGraph;
+#if (USE_PKT_SWITCHING == 1)
+    pkt_switch_graph<P_SSR, NPORT_I, NPORT_O, uut> firGraph;
+#else
+    uut firGraph;
+
+#endif
 
 #if (USE_COEFF_RELOAD == 1)
     // Constructor
@@ -89,54 +128,31 @@ class test_graph : public graph {
 #endif
         printConfig();
 
-// FIR sub-graph
-
-#if (USE_COEFF_RELOAD != 0) // Reloadable coefficients
-        static_assert(NITER % 2 == 0,
-                      "ERROR: Please set NITER to be a multiple of 2 when reloadable coefficients are used");
-#endif
-
         // Make plio connections
-        createPLIOFileConnections<P_SSR, DUAL_INPUT_SAMPLES>(in, QUOTE(INPUT_FILE), "in");
-        createPLIOFileConnections<P_SSR, (NUM_OUTPUTS - 1)>(out, QUOTE(OUTPUT_FILE), "out");
+        createPLIOFileConnections<NPLIO_I, DUAL_INPUT_SAMPLES>(in, QUOTE(INPUT_FILE), "in");
+        createPLIOFileConnections<NPLIO_O, (NUM_OUTPUTS - 1)>(out, QUOTE(OUTPUT_FILE), "out");
+
+#if (USE_PKT_SWITCHING == 1)
+        // Connect packet switching network.
+        // Internal connections done by Graph will
+        for (unsigned int i = 0; i < NPORT_I; ++i) {
+            connect<>(in[i].out[0], firGraph.pkt_in[i]);
+        }
+
+        for (unsigned int i = 0; i < NPORT_O; ++i) {
+            connect<>(firGraph.pkt_out[i], out[i].in[0]);
+        }
+#else
 
         for (unsigned int i = 0; i < P_SSR; ++i) {
-            unsigned int plioBaseIdx = i * (DUAL_INPUT_SAMPLES + 1);
-            connect<>(in[plioBaseIdx].out[0], firGraph.in[i]);
-#if (DUAL_IP == 1)
-            // if not using interleaved streams, just use a duplicate of in1
-            connect<>(in[plioBaseIdx + DUAL_INPUT_SAMPLES].out[0], firGraph.in2[i]);
-#endif
+            unsigned int ssrIdx = i;
+            connect<>(in[ssrIdx].out[0], firGraph.in[ssrIdx]);
 
-            connect<>(firGraph.out[i], out[plioBaseIdx].in[0]);
-#if (NUM_OUTPUTS == 2)
-            // Always feed to seperate plio
-            connect<>(firGraph.out2[i], out[plioBaseIdx + 1].in[0]);
-#endif
+            connect<>(firGraph.out[ssrIdx], out[ssrIdx].in[0]);
         }
+#endif
 
 #ifdef USING_UUT
-
-        // place location constraints
-        for (int k = 0; k < P_SSR * CASC_LEN; k++) {
-            // not_equal(location<parameter>(firGraph.m_firKernels[k].param[0]),
-            // location<parameter>(firGraph.m_firKernels[k].param[1]));
-            // location<parameter>(firGraph.m_firKernels[k].in[0]) =
-            // location<parameter>(firGraph.m_firKernels[k].param[1]);
-            // location<parameter>(firGraph.m_firKernels[k].in[0]) = location<kernel>(firGraph.m_firKernels[k]);
-            // location<parameter>(firGraph.m_firKernels[k].in[0]) = location<kernel>(firGraph.m_firKernels[k]);
-        }
-
-// // place location constraints
-// for (int k = 0; k < P_SSR * CASC_LEN; k++) {
-//     if (firGraph.isInternalBufferEnabled()) {
-//         not_equal(location<parameter>(firGraph.m_firKernels[k].param[0]),
-//         location<parameter>(firGraph.m_firKernels[k].param[1]));
-//     } else {
-//         location<parameter>(firGraph.m_firKernels[k].param[0]) =
-//         location<parameter>(firGraph.m_firKernels[k].param[1]);
-//     }
-// }
 
 #if (USE_CUSTOM_CONSTRAINT == 1)
         // place location constraints
@@ -145,7 +161,7 @@ class test_graph : public graph {
         for (int outPath = 0; outPath < P_SSR; outPath++) {
             for (int inPhase = 0; inPhase < P_SSR; inPhase++) {
                 for (int i = 1; i < CASC_LEN; i++) {
-                    location<kernel>(*firGraph.getKernels(outPath, inPhase, i)) =
+                    location<kernel>(*firGraph.filter.getKernels(outPath, inPhase, i)) =
                         tile(LOC_XBASE + inPhase * CASC_LEN + i, LOC_YBASE + 2 * outPath);
                 }
             }
@@ -156,38 +172,36 @@ class test_graph : public graph {
         for (int outPath = 0; outPath < P_SSR; outPath++) {
             for (int inPhase = 0; inPhase < P_SSR; inPhase++) {
                 for (int i = 0; i < CASC_LEN; i++) {
-                    connect<stream, stream>* net = firGraph.getInNet(outPath, inPhase, i);
+                    connect<stream, stream>* net = firGraph.filter.getInNet(outPath, inPhase, i);
                     fifo_depth(*net) = 256 + 16 * outPath + 16 * inPhase + 16 * i;
-#if (DUAL_IP == 1)
-                    connect<stream, stream>* net2 = firGraph.getIn2Net(outPath, inPhase, i);
-                    fifo_depth(*net2) = 512 + 8 + 16 * outPath + 16 * inPhase + 16 * i;
-#endif
                 }
             }
         }
 #endif
 
+#if (USE_PKT_SWITCHING == 1)
+// Single buffer constraint is disabled in the testbench because fir_tdm_generated_graph does not provide direct access
+// methods. Constraints can be applied using hierarchical members if needed.
+#else
+
         const int MAX_PING_PONG_SIZE = __DATA_MEM_BYTES__ / 2;
         const int bufferSize =
-            (PORT_API == 1 ? 0 : ((FIR_LEN * TDM_CHANNELS) + INPUT_WINDOW_VSIZE / P_SSR) * sizeof(DATA_TYPE));
+            (PORT_API == 1 ? 0
+                           : (/*(FIR_LEN * TDM_CHANNELS / P_SSR)*/ 0 + INPUT_WINDOW_VSIZE / P_SSR) * sizeof(DATA_TYPE));
         if ((bufferSize > MAX_PING_PONG_SIZE) || (SINGLE_BUF == 1 && PORT_API == 0)) {
             for (int ssr = 0; ssr < P_SSR; ssr++) {
                 for (int casc_len = 0; casc_len < CASC_LEN; casc_len++) {
-                    single_buffer(firGraph.getKernels(CASC_LEN * ssr + casc_len)->in[0]);
-                    if (DUAL_IP == 1) {
-                        single_buffer(firGraph.getKernels(CASC_LEN * ssr + casc_len)->in[1]);
-                    }
+                    single_buffer(firGraph.filter.getKernels(CASC_LEN * ssr + casc_len)->in[0]);
                     printf("INFO: Single Buffer Constraint applied to input buffers of kernel %d.\n",
                            CASC_LEN * ssr + casc_len);
                 }
-                single_buffer(firGraph.getKernels()[CASC_LEN * ssr + CASC_LEN - 1].out[0]);
-                if (NUM_OUTPUTS == 2) {
-                    single_buffer(firGraph.getKernels()[CASC_LEN * ssr + CASC_LEN - 1].out[1]);
-                }
+                single_buffer(firGraph.filter.getKernels()[CASC_LEN * ssr + CASC_LEN - 1].out[0]);
                 printf("INFO: Single Buffer Constraint applied to output buffers of kernel %d.\n",
                        CASC_LEN * ssr + CASC_LEN - 1);
             }
         }
+#endif
+
 #endif
 
 #if (USE_COEFF_RELOAD == 1)
@@ -196,22 +210,12 @@ class test_graph : public graph {
             connect<>(coeff[i], firGraph.coeff[i]);
         }
 #endif
-
-#ifdef USING_UUT
-        // Report out for AIE Synthesizer QoR harvest
-        if (&firGraph.getKernels()[0] != NULL) {
-            printf("KERNEL_ARCHS: [");
-            int arch = firGraph.getKernelArchs();
-            printf("%d", arch);
-            printf("]\n");
-        }
-#endif
         printf("========================\n");
     };
 };
-}
-}
-}
-};
+} // namespace testcase
+} // namespace aie
+} // namespace dsp
+}; // namespace xf
 
 #endif // _DSPLIB_TEST_HPP_

@@ -19,6 +19,7 @@ The DSPLib consists of the following DSP elements:
 
    Bitonic Sort <func-bitonic-sort.rst>
    Convolution / Correlation <func-conv-corr.rst>
+   Cumulative Sum <func-cumsum.rst>
    DDS / Mixer <func-dds.rst>
    DFT <func-dft.rst>
    ED <func-ed.rst>
@@ -34,6 +35,7 @@ The DSPLib consists of the following DSP elements:
    Matrix-Vector Multiply <func-matrix_vector_mul.rst>
    Mixed Radix FFT <func-mixed_radix_fft.rst>
    Outer Tensor <func-outer-tensor.rst>
+   Packet Switch Graph <func-pkt_switch.rst>
    Sample Delay <func-sample_delay.rst>
    Widget API Cast <func-widget-apicast.rst>
    Widget Real to Complex <func-widget-real2comp.rst>

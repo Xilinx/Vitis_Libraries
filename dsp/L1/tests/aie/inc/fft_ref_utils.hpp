@@ -17,6 +17,8 @@
 #ifndef _DSPLIB_FFT_REF_UTILS_HPP_
 #define _DSPLIB_FFT_REF_UTILS_HPP_
 
+#include "device_defs.h"
+
 //#include "fft_ifft_dit_twiddle_lut.h"  //for legacy cint16 tables from commslib
 #include "fft_ifft_dit_twiddle_lut_all.h" //for cint32, cint31, cint15 tables.
 //#include "fft_ifft_dit_twiddle_lut_cint32.h" //holds cint15 and cint31 tables
@@ -95,6 +97,20 @@ struct T_int_data<cfloat> {
     float real;
     float imag;
 };
+#ifdef _SUPPORTS_BFLOAT16_
+template <>
+struct T_int_data<bfloat16> {
+    bfloat16 real;
+    bfloat16 imag;
+};
+#endif // _SUPPORTS_CBFLOAT16_
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+struct T_int_data<cbfloat16> {
+    bfloat16 real;
+    bfloat16 imag;
+};
+#endif // _SUPPORTS_CBFLOAT16_
 
 template <typename T_D>
 struct T_accfftRef {};
@@ -128,6 +144,20 @@ struct T_accfftRef<cfloat> {
     float real;
     float imag;
 };
+#ifdef _SUPPORTS_BFLOAT16_
+template <>
+struct T_accfftRef<bfloat16> {
+    float real;
+    float imag;
+};
+#endif //_SUPPORTS_BFLOAT16_
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+struct T_accfftRef<cbfloat16> {
+    float real;
+    float imag;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 //---------------------------------
 // Templatized functions
@@ -160,6 +190,16 @@ template <>
 constexpr unsigned int getTwShift<cfloat, 1>() {
     return 0;
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+constexpr unsigned int getTwShift<cbfloat16, 0>() {
+    return 0;
+};
+template <>
+constexpr unsigned int getTwShift<cbfloat16, 1>() {
+    return 0;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 // Fn to perform log2 on TP_POINT_SIZE to get number of Radix2 ranks
 template <unsigned int TP_POINT_SIZE>
@@ -205,6 +245,12 @@ template <>
 inline cfloat* fnGetTwiddleMasterBase<cfloat, 0>() {
     return (cfloat*)twiddle_master_cfloat;
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+inline cbfloat16* fnGetTwiddleMasterBase<cbfloat16, 0>() {
+    return (cbfloat16*)twiddle_master_cbfloat16;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 template <>
 inline cint16* fnGetTwiddleMasterBase<cint16, 1>() {
     return (cint16*)twiddle_master_cint15;
@@ -217,8 +263,15 @@ template <>
 inline cfloat* fnGetTwiddleMasterBase<cfloat, 1>() {
     return (cfloat*)twiddle_master_cfloat;
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+inline cbfloat16* fnGetTwiddleMasterBase<cbfloat16, 1>() {
+    return (cbfloat16*)twiddle_master_cbfloat16;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 // function to query type -used to avoid template specializing the whole class.
+/*
 template <typename T_D>
 inline constexpr bool is_cfloat() {
     return false;
@@ -227,6 +280,18 @@ template <>
 inline constexpr bool is_cfloat<cfloat>() {
     return true;
 };
+*/
+template <typename T_D>
+INLINE_DECL constexpr bool fnIsFloat() {
+    bool retVal = false;
+    retVal = std::is_same<T_D, cfloat>::value
+#ifdef _SUPPORTS_CBFLOAT16_
+                     || std::is_same<T_D, cbfloat16>::value
+#endif //_SUPPORTS_CBFLOAT16_
+                 ? true
+                 : false;
+    return retVal;
+}
 
 //-----------------------------------------------------------------------------------------------------
 // Utility functions for FFT/iFFT single channel reference model
@@ -264,6 +329,17 @@ inline cfloat get_twiddle<cfloat>(int i, unsigned int TP_POINT_SIZE, unsigned in
     }
     return raw_twiddle;
 }
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+inline cbfloat16 get_twiddle<cbfloat16>(int i, unsigned int TP_POINT_SIZE, unsigned int TP_FFT_NIFFT) {
+    int step = kMaxPointSize / TP_POINT_SIZE;
+    cbfloat16 raw_twiddle = twiddle_master_cbfloat16[i * step];
+    if (TP_FFT_NIFFT == 0) {
+        raw_twiddle.imag = -raw_twiddle.imag;
+    }
+    return raw_twiddle;
+}
+#endif //_SUPPORTS_CBFLOAT16_
 
 //--------castInput
 // converts the input type to the type used for internal data processing
@@ -314,6 +390,24 @@ inline T_int_data<cfloat> castInput<cfloat>(cfloat sampleIn) {
     retVal.imag = sampleIn.imag;
     return retVal;
 }
+#ifdef _SUPPORTS_BFLOAT16_
+template <>
+inline T_int_data<bfloat16> castInput<bfloat16>(bfloat16 sampleIn) {
+    T_int_data<bfloat16> retVal;
+    retVal.real = sampleIn;
+    retVal.imag = 0;
+    return retVal;
+}
+#endif // _SUPPORTS_BFLOAT16_
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+inline T_int_data<cbfloat16> castInput<cbfloat16>(cbfloat16 sampleIn) {
+    T_int_data<cbfloat16> retVal;
+    retVal.real = sampleIn.real;
+    retVal.imag = sampleIn.imag;
+    return retVal;
+}
+#endif //_SUPPORTS_CBFLOAT16_
 
 // Derivation of base type of a complex type.
 template <typename TT_TWIDDLE = cint16>
@@ -328,7 +422,14 @@ template <>
 struct T_base_type_struct<cfloat> {
     using T_base_type = float;
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+struct T_base_type_struct<cbfloat16> {
+    using T_base_type = bfloat16;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
+/*
 // fnMaxPos Maximum positive value of a twiddle component. This is arcane because twiddle is a complex type, but the
 // return is real.
 template <typename TT_TWIDDLE = cint16>
@@ -358,6 +459,7 @@ template <>
 inline T_base_type_struct<cfloat>::T_base_type fnMaxNeg<cfloat>() {
     return -3.4028234664e+32;
 }
+*/
 
 //--------castOutput
 // converts the input type to the type used for internal data processing
@@ -411,6 +513,23 @@ inline cfloat castOutput<cfloat>(T_int_data<cfloat> sampleIn, const unsigned shi
     retVal.imag = sampleIn.imag;
     return retVal;
 }
+#ifdef _SUPPORTS_BFLOAT16_
+template <>
+inline bfloat16 castOutput<bfloat16>(T_int_data<bfloat16> sampleIn, const unsigned shift) {
+    bfloat16 retVal;
+    retVal = sampleIn.real;
+    return retVal;
+}
+#endif // _SUPPORTS_BFLOAT16_
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+inline cbfloat16 castOutput<cbfloat16>(T_int_data<cbfloat16> sampleIn, const unsigned shift) {
+    cbfloat16 retVal;
+    retVal.real = sampleIn.real;
+    retVal.imag = sampleIn.imag;
+    return retVal;
+}
+#endif //_SUPPORTS_CBFLOAT16_
 
 //----------------log2 point size
 template <unsigned int TP_POINT_SIZE>
@@ -475,7 +594,7 @@ inline unsigned int bitRev(unsigned int len, unsigned int val) {
     }
     return retVal;
 }
-
+/*
 inline void fftScale(int rndMode, int shift, T_accRef<int16>& accum) {
     // cint64_t ret;
     accum.real = rounding(rndMode, shift, accum.real);
@@ -509,6 +628,7 @@ inline void fftScale(int rndMode, int shift, T_accRef<cfloat>& accum) {
     accum.real = (accum.real + (float)(1 << (shift - 1))) / (float)(1 << (shift));
     accum.imag = (accum.imag + (float)(1 << (shift - 1))) / (float)(1 << (shift));
 };
+*/
 
 //------------------------------------------------------
 // Templatized complex multiply, returning uniform cint64.
@@ -620,6 +740,29 @@ inline void btfly<cfloat, cfloat>(T_int_data<cfloat>& q0,
     q1.imag = d0.imag - d1rot.imag;
 };
 
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+inline void btfly<cbfloat16, cbfloat16>(T_int_data<cbfloat16>& q0,
+                                        T_int_data<cbfloat16>& q1,
+                                        T_int_data<cbfloat16> d0,
+                                        T_int_data<cbfloat16> d1,
+                                        cbfloat16 tw,
+                                        bool inv,
+                                        unsigned int twShift,
+                                        unsigned int shift,
+                                        unsigned int t_rnd,
+                                        unsigned int t_sat) {
+    cbfloat16 d1up;
+    cbfloat16 d1rot;
+    d1rot.real = d0.real * tw.real - d0.imag * tw.imag;
+    d1rot.imag = d0.imag * tw.real + d0.real * tw.imag;
+    q0.real = d0.real + d1rot.real;
+    q0.imag = d0.imag + d1rot.imag;
+    q1.real = d0.real - d1rot.real;
+    q1.imag = d0.imag - d1rot.imag;
+};
+#endif // _SUPPORTS_CBFLOAT16_
+
 template <>
 inline void btfly<cint32, cint16>(T_int_data<cint32>& q0,
                                   T_int_data<cint32>& q1,
@@ -716,6 +859,7 @@ inline void btfly<cint32, cint32>(T_int_data<cint32>& q0,
 
     csum.real = ((int64)d0.real << twShift) + d1rot64.real;
     csum.imag = ((int64)d0.imag << twShift) + d1rot64.imag;
+
     roundAcc(t_rnd, shift, csum);
     saturateAcc(csum, t_sat);
     q0.real = (int32)csum.real;

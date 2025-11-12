@@ -64,6 +64,13 @@ The following table gives results for the Convolution / Correlation with a wide 
 
 :download:`conv_corr_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/conv_corr_benchmark.csv>`
 
+Cumulative Sum
+==============
+
+The following table gives the results for the Cumulative Sum with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_CUMSUM`.
+
+Placeholder for cumsum benchmark.csv
+
 DDS/Mixer
 =========
 

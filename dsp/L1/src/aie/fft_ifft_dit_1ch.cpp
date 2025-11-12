@@ -34,19 +34,15 @@ using namespace std;
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
 #include "aie_api/aie_adf.hpp"
 
+//#define _DSPLIB_FFT_IFFT_DIT_1CH_HPP_DEBUG_
+
 #include "fft_com_inc.h"
 #include "fft_ifft_dit_1ch.hpp"
 #include "kernel_api_utils.hpp"
 #include "fft_ifft_dit_1ch_utils.hpp"
 #include "fft_kernel_bufs.h"
-//#include "fft_twiddle_lut_dit.h"
-//#include "fft_twiddle_lut_dit_cfloat.h"
 #include "fft_twiddle_lut_dit_all.h"
-//#include "fft_r4_twiddles.h"
-//#include "fft_r4_twiddles_cint32.h"
 #include "fft_r4_twiddles_all.h"
-
-//#define _DSPLIB_FFT_IFFT_DIT_1CH_HPP_DEBUG_
 
 namespace xf {
 namespace dsp {
@@ -165,7 +161,9 @@ INLINE_DECL void stockhamStages<TT_DATA,
             // firstRank is explained in a large comment where firstRank is defined in stockhamStages::calc (static
             // variant)
             if
-                constexpr(std::is_same<TT_DATA, cfloat>::value) { firstRank = kPointSizePower - ptSizePwr; }
+                constexpr(std::is_same<TT_DATA, cfloat>::value || std::is_same<TT_DATA, cbfloat16>::value) {
+                    firstRank = kPointSizePower - ptSizePwr;
+                }
             else {
                 firstRank = kPointSizePowerCeiled - ptSizePwr;
             }
@@ -180,7 +178,7 @@ INLINE_DECL void stockhamStages<TT_DATA,
                     inPtr = (inHeaderVectorType*)xbuff;
                     outputPtr = (outVectorType*)obuff;
                     if
-                        constexpr(std::is_same<TT_DATA, cfloat>::value) {
+                        constexpr(std::is_same<TT_DATA, cfloat>::value || std::is_same<TT_DATA, cbfloat16>::value) {
                             for (int i = 0; i < TP_WINDOW_VSIZE / kSamplesInHeader; i++) {
                                 *outputPtr++ = *inPtr++;
                             }
@@ -356,6 +354,62 @@ INLINE_DECL void stockhamStages<TT_DATA,
             opt_cfloat_stage<11, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK>(xbuff, obuff, tmp_bufs, tw_table, pingPong,
                                                                             inv);
         }
+    else if
+        constexpr(std::is_same<TT_DATA, cbfloat16>::value) {
+            //-----------------------------------------------------------------------------
+            // cbfloat16 handling
+            TT_DATA* inptr;
+            TT_INTERNAL_DATA* outptr;
+
+            if
+                constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
+            opt_cbfloat16_stage<0, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK>(xbuff, obuff, tmp_bufs, tw_table,
+                                                                              pingPong, inv);
+            if
+                constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
+            opt_cbfloat16_stage<1, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK>(xbuff, obuff, tmp_bufs, tw_table,
+                                                                              pingPong, inv);
+            if
+                constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
+            opt_cbfloat16_stage<2, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK>(xbuff, obuff, tmp_bufs, tw_table,
+                                                                              pingPong, inv);
+            if
+                constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
+            opt_cbfloat16_stage<3, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK>(xbuff, obuff, tmp_bufs, tw_table,
+                                                                              pingPong, inv);
+            if
+                constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
+            opt_cbfloat16_stage<4, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK>(xbuff, obuff, tmp_bufs, tw_table,
+                                                                              pingPong, inv);
+            if
+                constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
+            opt_cbfloat16_stage<5, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK>(xbuff, obuff, tmp_bufs, tw_table,
+                                                                              pingPong, inv);
+            if
+                constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
+            opt_cbfloat16_stage<6, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK>(xbuff, obuff, tmp_bufs, tw_table,
+                                                                              pingPong, inv);
+            if
+                constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
+            opt_cbfloat16_stage<7, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK>(xbuff, obuff, tmp_bufs, tw_table,
+                                                                              pingPong, inv);
+            if
+                constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
+            opt_cbfloat16_stage<8, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK>(xbuff, obuff, tmp_bufs, tw_table,
+                                                                              pingPong, inv);
+            if
+                constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
+            opt_cbfloat16_stage<9, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK>(xbuff, obuff, tmp_bufs, tw_table,
+                                                                              pingPong, inv);
+            if
+                constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
+            opt_cbfloat16_stage<10, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK>(xbuff, obuff, tmp_bufs, tw_table,
+                                                                               pingPong, inv);
+            if
+                constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
+            opt_cbfloat16_stage<11, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK>(xbuff, obuff, tmp_bufs, tw_table,
+                                                                               pingPong, inv);
+        }
     else { // integer types can use radix 4 stages
 
         constexpr int firstRank = kPointSizePowerCeiled - kPointSizePower;
@@ -495,6 +549,35 @@ INLINE_DECL void stockhamStages<TT_DATA,
             opt_cfloat_dyn_stage<11, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK, kPointSizePower>(
                 xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
         }
+    else if
+        constexpr(std::is_same<TT_DATA, cbfloat16>::value) {
+            //-----------------------------------------------------------------------------
+            // cbfloat16 handling
+            opt_cbfloat16_dyn_stage<0, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK, kPointSizePower>(
+                xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+            opt_cbfloat16_dyn_stage<1, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK, kPointSizePower>(
+                xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+            opt_cbfloat16_dyn_stage<2, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK, kPointSizePower>(
+                xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+            opt_cbfloat16_dyn_stage<3, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK, kPointSizePower>(
+                xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+            opt_cbfloat16_dyn_stage<4, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK, kPointSizePower>(
+                xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+            opt_cbfloat16_dyn_stage<5, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK, kPointSizePower>(
+                xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+            opt_cbfloat16_dyn_stage<6, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK, kPointSizePower>(
+                xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+            opt_cbfloat16_dyn_stage<7, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK, kPointSizePower>(
+                xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+            opt_cbfloat16_dyn_stage<8, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK, kPointSizePower>(
+                xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+            opt_cbfloat16_dyn_stage<9, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK, kPointSizePower>(
+                xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+            opt_cbfloat16_dyn_stage<10, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK, kPointSizePower>(
+                xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+            opt_cbfloat16_dyn_stage<11, TP_POINT_SIZE, TP_START_RANK, TP_END_RANK, kPointSizePower>(
+                xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+        }
     else { // integer types can use radix 4 stages
         //------------------------------------------------------------------------------------------------
         // cint handling, dynamic variant
@@ -540,7 +623,8 @@ INLINE_DECL void stockhamStages<TT_DATA,
 
 template <typename T_TW, int T_PT, int T_TWPT, int T_TW_MODE, int TP_DYN_PT_SIZE, int TP_START_RANK, int TP_END_RANK>
 INLINE_DECL constexpr T_TW* fnGetTwPtr() {
-    constexpr int kOddPowerAdj = std::is_same<T_TW, cfloat>::value ? 0 : fnOddPower<T_PT>();
+    constexpr int kOddPowerAdj =
+        std::is_same<T_TW, cfloat>::value || std::is_same<T_TW, cbfloat16>::value ? 0 : fnOddPower<T_PT>();
     // This function would be better phrased with for loops rather than nested ifs, but since the tables are unique
     // identifiers it is not possible.
     // Also, for integers, TP_END_RANK is rounded up to Even, so point size 128 has TP_END_RANK=8, as does 256.
@@ -585,6 +669,49 @@ INLINE_DECL constexpr T_TW* fnGetTwPtr() {
             else
                 return NULL;
         }
+#ifdef _SUPPORTS_CBFLOAT16_
+    if
+        constexpr(std::is_same<T_TW, cbfloat16>::value) {
+            if
+                constexpr(T_TWPT == 1 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 0) &&
+                          TP_END_RANK > 0) return (T_TW*)fft_lut_tw1_cbfloat16;
+            else if
+                constexpr(T_TWPT == 2 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 1) &&
+                          TP_END_RANK > 1) return (T_TW*)fft_lut_tw2_cbfloat16;
+            else if
+                constexpr(T_TWPT == 4 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 2) &&
+                          TP_END_RANK > 2) return (T_TW*)fft_lut_tw4_cbfloat16;
+            else if
+                constexpr(T_TWPT == 8 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 3) &&
+                          TP_END_RANK > 3) return (T_TW*)fft_lut_tw8_cbfloat16;
+            else if
+                constexpr(T_TWPT == 16 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 4) &&
+                          TP_END_RANK > 4) return (T_TW*)fft_lut_tw16_cbfloat16;
+            else if
+                constexpr(T_TWPT == 32 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 5) &&
+                          TP_END_RANK > 5) return (T_TW*)fft_lut_tw32_cbfloat16;
+            else if
+                constexpr(T_TWPT == 64 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 6) &&
+                          TP_END_RANK > 6) return (T_TW*)fft_lut_tw64_cbfloat16;
+            else if
+                constexpr(T_TWPT == 128 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 7) &&
+                          TP_END_RANK > 7) return (T_TW*)fft_lut_tw128_cbfloat16;
+            else if
+                constexpr(T_TWPT == 256 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 8) &&
+                          TP_END_RANK > 8) return (T_TW*)fft_lut_tw256_cbfloat16;
+            else if
+                constexpr(T_TWPT == 512 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 9) &&
+                          TP_END_RANK > 9) return (T_TW*)fft_lut_tw512_cbfloat16;
+            else if
+                constexpr(T_TWPT == 1024 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 10) &&
+                          TP_END_RANK > 10) return (T_TW*)fft_lut_tw1024_cbfloat16;
+            else if
+                constexpr(T_TWPT == 2048 && T_TWPT < T_PT && (TP_DYN_PT_SIZE == 1 || TP_START_RANK <= 11) &&
+                          TP_END_RANK > 11) return (T_TW*)fft_lut_tw2048_cbfloat16; // Placeholder Not supported in AIE1
+            else
+                return NULL;
+        }
+#endif //_SUPPORTS_CBFLOAT16_
     if
         constexpr(std::is_same<T_TW, cint32>::value) {
             // Also, for integers, TP_END_RANK is rounded up to Even, so point size 128 has TP_END_RANK=8, as does 256.
@@ -878,9 +1005,10 @@ INLINE_DECL constexpr T_TW* fnGetTwPtr() {
 }
 template <typename T_TW, int T_PT, int T_TWPT, int T_TW_MODE, int TP_DYN_PT_SIZE, int TP_START_RANK, int TP_END_RANK>
 INLINE_DECL constexpr T_TW* fnGetR4TwPtr() {
-    constexpr int kOddPowerAdj = std::is_same<T_TW, cfloat>::value ? 0 : fnOddPower<T_PT>();
+    constexpr int kOddPowerAdj =
+        std::is_same<T_TW, cfloat>::value || std::is_same<T_TW, cbfloat16>::value ? 0 : fnOddPower<T_PT>();
     if
-        constexpr(std::is_same<T_TW, cfloat>::value) { return NULL; }
+        constexpr(std::is_same<T_TW, cfloat>::value || std::is_same<T_TW, cbfloat16>::value) { return NULL; }
     if
         constexpr(std::is_same<T_TW, cint32>::value) {
             if
@@ -1194,21 +1322,43 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
     T_internalDataType* tmp2_buf = NULL;
 
     // assign tmp1_buf
+    // cbfloat is half the size of cint32 or cfloat, so can use a scratchpad buffer of cint32s of half the point size
+    // hence the apparent mismatch of numbers below.
     if
-        constexpr(TP_POINT_SIZE == 4096) { tmp1_buf = (T_internalDataType*)fft_4096_tmp1; }
-    else if
-        constexpr(TP_POINT_SIZE == 2048) { tmp1_buf = (T_internalDataType*)fft_2048_tmp1; }
-    else if
-        constexpr(TP_POINT_SIZE == 1024) { tmp1_buf = (T_internalDataType*)fft_1024_tmp1; }
-    else if
-        constexpr(TP_POINT_SIZE == 512) { tmp1_buf = (T_internalDataType*)fft_512_tmp1; }
-    else if
-        constexpr(TP_POINT_SIZE == 256) { tmp1_buf = (T_internalDataType*)fft_256_tmp1; }
+        constexpr(std::is_same<TT_DATA, cbfloat16>::value) {
+            if
+                constexpr(TP_POINT_SIZE == 4096) { tmp1_buf = (T_internalDataType*)fft_2048_tmp1; }
+            else if
+                constexpr(TP_POINT_SIZE == 2048) { tmp1_buf = (T_internalDataType*)fft_1024_tmp1; }
+            else if
+                constexpr(TP_POINT_SIZE == 1024) { tmp1_buf = (T_internalDataType*)fft_512_tmp1; }
+            else if
+                constexpr(TP_POINT_SIZE == 512) { tmp1_buf = (T_internalDataType*)fft_256_tmp1; }
+            else if
+                constexpr(TP_POINT_SIZE == 256) { tmp1_buf = (T_internalDataType*)fft_128_tmp1; }
+            else {
+                tmp1_buf = (T_internalDataType*)fft_128_tmp1;
+            }
+        }
     else {
-        tmp1_buf = (T_internalDataType*)fft_128_tmp1;
+        if
+            constexpr(TP_POINT_SIZE == 4096) { tmp1_buf = (T_internalDataType*)fft_4096_tmp1; }
+        else if
+            constexpr(TP_POINT_SIZE == 2048) { tmp1_buf = (T_internalDataType*)fft_2048_tmp1; }
+        else if
+            constexpr(TP_POINT_SIZE == 1024) { tmp1_buf = (T_internalDataType*)fft_1024_tmp1; }
+        else if
+            constexpr(TP_POINT_SIZE == 512) { tmp1_buf = (T_internalDataType*)fft_512_tmp1; }
+        else if
+            constexpr(TP_POINT_SIZE == 256) { tmp1_buf = (T_internalDataType*)fft_256_tmp1; }
+        else {
+            tmp1_buf = (T_internalDataType*)fft_128_tmp1;
+        }
     }
 
     // assign tmp2_buf
+    // only cint16 is smaller than its internal data type, so it cannot reuse xbuff as scratchpad, so
+    // a second scratchpad buffer is required for cint16 only.
     if
         constexpr(std::is_same<TT_DATA, cint16>::value) {
             if
@@ -1314,6 +1464,19 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
                         (cfloat*)tmp2_buf, (cfloat*)tw4, FFT16_SIZE, 0, (cfloat*)tmp3_buf, inv);
                     stage_radix2_dit<cfloat, cfloat, cfloat, 1, 0 /*TP_TWIDDLE_MODE*/>(
                         (cfloat*)tmp3_buf, (cfloat*)tw8, FFT16_SIZE, TP_SHIFT, (cfloat*)obuff, inv); // r is not used.
+                }
+            else if
+                constexpr(std::is_same<TT_DATA, cbfloat16>::value &&
+                          (TP_END_RANK - TP_START_RANK == 4)) { // special case for uncascaded 16pt cbfloat16
+                    stage_radix2_dit<cbfloat16, cbfloat16, cbfloat16, 8, 0 /*TP_TWIDDLE_MODE*/>(
+                        (cbfloat16*)xbuff, (cbfloat16*)tw1, FFT16_SIZE, 0, (cbfloat16*)tmp1_buf, inv);
+                    stage_radix2_dit<cbfloat16, cbfloat16, cbfloat16, 4, 0 /*TP_TWIDDLE_MODE*/>(
+                        (cbfloat16*)tmp1_buf, (cbfloat16*)tw2, FFT16_SIZE, 0, (cbfloat16*)tmp2_buf, inv);
+                    stage_radix2_dit<cbfloat16, cbfloat16, cbfloat16, 2, 0 /*TP_TWIDDLE_MODE*/>(
+                        (cbfloat16*)tmp2_buf, (cbfloat16*)tw4, FFT16_SIZE, 0, (cbfloat16*)tmp3_buf, inv);
+                    stage_radix2_dit<cbfloat16, cbfloat16, cbfloat16, 1, 0 /*TP_TWIDDLE_MODE*/>(
+                        (cbfloat16*)tmp3_buf, (cbfloat16*)tw8, FFT16_SIZE, TP_SHIFT, (cbfloat16*)obuff,
+                        inv); // r is not used.
                 }
             else {
                 stages.calc(xbuff, tw_table, tmp1_buf, tmp2_buf, obuff);

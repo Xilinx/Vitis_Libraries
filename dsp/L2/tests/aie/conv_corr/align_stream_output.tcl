@@ -142,22 +142,29 @@ if {$tp_API == 1} {
         set indata [read $fd]
         close $fd
 
-        set indata [string trim $indata]
-        set elements [split $indata " "]
-
-        for {set iter_nr 1} {$iter_nr <= [expr ($num_iter)]} {incr iter_nr} {
-            set startIndex [expr ($sample_count*2)+([expr ($iter_nr - 1)]*$len_window)]
-            #set endIndex [expr {[expr ([llength $elements]-1)] - [expr (($len_of_sig +$delay_offset - [expr ($sample_count)])*2)]}]
-            set endIndex [expr {[expr (($len_window * $iter_nr)-1)] - [expr (($len_of_sig +$delay_offset - [expr ($sample_count)])*2)]}]
-
-            lappend newelements {*}[lrange $elements $startIndex $endIndex]
+        # Split into lines first, then into words to preserve structure
+        set lines [split [string trim $indata] "\n"]
+        set all_elements {}
+        foreach line $lines {
+            set line_words [regexp -all -inline {\S+} $line]
+            lappend all_elements {*}$line_words
         }
+        
+        # compute start and end index to extract the data from given input text file.
+        set startIndex [expr ($sample_count*2)]
+        set endIndex [expr {[expr (($len_window * 2)-1)] - [expr (($len_of_sig +$delay_offset - $sample_count)*2)]}]
 
-        set newindata [join $newelements " "]
+        # Extract required range and rebuild with 4 numbers per line
+        set extracted_elements [lrange $all_elements $startIndex $endIndex]
+        set newindata [regsub -all {\s+} [join $extracted_elements " "] " "]
+        set newindata [regsub -all {(\S+\s+\S+\s+\S+\s+\S+)\s+} $newindata "\\1\n"]
         set newindata [string trim $newindata]
 
+        # write extracted data into same input file.
         set fd [open $input_filename w]
         puts -nonewline $fd $newindata
+
+        # close the file.
         close $fd
     }
     puts "Align the data for REF:   "

@@ -111,31 +111,6 @@ def fn_validate_data_type_p(TT_DATA, AIE_VARIANT):
   param_dict = fn_update_data_type_p(AIE_VARIANT)
   return (com.validate_legal_set(param_dict["enum"], "TT_DATA", TT_DATA))
 
-
-#######################################################
-######### TT_DATA_OUT Updater and Validator ###########
-#######################################################
-def update_TT_DATA_OUT(args):
-  TT_DATA = args["TT_DATA"]
-  return fn_update_data_type_out(TT_DATA)
-
-def fn_update_data_type_out(TT_DATA):
-  valid_types = fn_get_valid_out_data_types(TT_DATA)
-  param_dict={
-    "name" : "TT_DATA_OUT",
-    "enum" : valid_types
-  }
-  return param_dict
-
-def validate_TT_DATA_OUT(args):
-  TT_DATA = args["TT_DATA"]
-  TT_DATA_OUT = args["TT_DATA_OUT"]
-  return fn_validate_data_type_out(TT_DATA_OUT, TT_DATA)
-
-def fn_validate_data_type_out(TT_DATA_OUT, TT_DATA):
-  param_dict = fn_update_data_type_out(TT_DATA)
-  return (com.validate_legal_set(param_dict["enum"], "TT_DATA_OUT", TT_DATA_OUT))  
-
 #######################################################
 ############# TP_API Updater and Validator ############
 #######################################################
@@ -170,6 +145,7 @@ def update_TP_LEN(args):
 def fn_update_len(TP_LEN, TT_DATA, TP_API, AIE_VARIANT):
   elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA)
   TP_LEN_max = com.k_data_memory_bytes[AIE_VARIANT] >> 2 // (com.fn_size_by_byte(TT_DATA))
+  TP_LEN_max = TP_LEN_max // TP_DIM_MAX
 
   param_dict={
     "name" : "TP_LEN",
@@ -307,13 +283,6 @@ def getNumLanes(TT_DATA, AIE_VARIANT=1):
             return 16
         else:
             return 0
-#### Valid output data types ####
-def fn_get_valid_out_data_types(TT_DATA):   # Don't feel too good with these functions but it's where we're at.
-    if (TT_DATA == "float") :     return ["float"]
-    if (TT_DATA == "bfloat16"):  return ["bfloat16"]
-    return []
-
-
 
 ########################## Ports ###########################
 def get_port_info(portname, dir, dataType, dim, apiType, vectorLength):

@@ -74,10 +74,14 @@
       "key": "TP_SSR",
       "name": "ssr",
       "description": "Specify number of data input/output in parallel",
-      "default": 2,
+      "enum": [
+                "Inherit from number of input columns",
+                "<Specify SSR number>"
+            ],
+      "default": 1,
       "label": "SSR: ",
       "tablabel": "Main",
-      "parameterType": "edit"
+      "parameterType": "combobox"
     },
     {
       "key": "TP_RND",

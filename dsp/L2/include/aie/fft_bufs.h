@@ -264,4 +264,24 @@ alignas(__ALIGN_BYTE_SIZE__) extern const cfloat fft_lut_tw512_cfloat[FFT_512];
 alignas(__ALIGN_BYTE_SIZE__) extern const cfloat fft_lut_tw1024_cfloat[FFT_1024];
 alignas(__ALIGN_BYTE_SIZE__) extern const cfloat fft_lut_tw2048_cfloat[FFT_2048];
 
+// cbfloat16 tables
+// Full (2 quadrant) float tables.
+// Float cannot use the one quadrant trick because float cannot use radix4 functions.
+// Why? The result of a butterfly for ints is an acc register, but in float it is a float reg.
+// This means that the acc registers are unavailable to store data in float and this means
+// there is not the capacity in registers required for the storage of inter-rank values in a radix 4
+// stage, hence float uses radix2.
+alignas(__ALIGN_BYTE_SIZE__) extern const cbfloat16 fft_lut_tw1_cbfloat16[FFT_1];
+alignas(__ALIGN_BYTE_SIZE__) extern const cbfloat16 fft_lut_tw2_cbfloat16[FFT_2];
+alignas(__ALIGN_BYTE_SIZE__) extern const cbfloat16 fft_lut_tw4_cbfloat16[FFT_4];
+alignas(__ALIGN_BYTE_SIZE__) extern const cbfloat16 fft_lut_tw8_cbfloat16[FFT_8];
+alignas(__ALIGN_BYTE_SIZE__) extern const cbfloat16 fft_lut_tw16_cbfloat16[FFT_16];
+alignas(__ALIGN_BYTE_SIZE__) extern const cbfloat16 fft_lut_tw32_cbfloat16[FFT_32];
+alignas(__ALIGN_BYTE_SIZE__) extern const cbfloat16 fft_lut_tw64_cbfloat16[FFT_64];
+alignas(__ALIGN_BYTE_SIZE__) extern const cbfloat16 fft_lut_tw128_cbfloat16[FFT_128];
+alignas(__ALIGN_BYTE_SIZE__) extern const cbfloat16 fft_lut_tw256_cbfloat16[FFT_256];
+alignas(__ALIGN_BYTE_SIZE__) extern const cbfloat16 fft_lut_tw512_cbfloat16[FFT_512];
+alignas(__ALIGN_BYTE_SIZE__) extern const cbfloat16 fft_lut_tw1024_cbfloat16[FFT_1024];
+alignas(__ALIGN_BYTE_SIZE__) extern const cbfloat16 fft_lut_tw2048_cbfloat16[FFT_2048];
+
 #endif /* __FFT_BUFS_H__ */

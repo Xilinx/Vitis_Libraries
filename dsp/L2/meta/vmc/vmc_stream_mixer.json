@@ -46,9 +46,13 @@
       "name": "ssr",
       "description": "Specify the number of parallel input/output data paths for a single channel.",
       "default": 1,
+        "enum": [
+                "Inherit from number of input columns",
+                "<Specify SSR number>"
+            ],
       "label": "SSR: ",
       "tablabel": "Main",
-      "parameterType": "edit"
+      "parameterType": "combobox"
     },
     {
       "key": "TP_RND",
@@ -99,11 +103,11 @@
       "parameterType": "popup"
     },
     {
-      "key": "phaseInc",
-      "name": "phase_increment",
-      "description": "Enter the phase increment value for each sample.",
+      "key": "initialPhaseOffset",
+      "name": "initial_phase_offset",
+      "description": "specifies the initial value of the phase accumulator, creating a phase offset.",
       "default": 0,
-      "label": "Phase increment:",
+      "label": "Initial phase offset:",
       "tablabel": "Main",
       "parameterType": "edit"
     },
@@ -117,13 +121,31 @@
       "parameterType": "checkbox"
     },
     {
-      "key": "initialPhaseOffset",
-      "name": "initial_phase_offset",
-      "description": "specifies the initial value of the phase accumulator, creating a phase offset.",
+      "key": "TP_PHASE_RELOAD_API",
+      "name": "PHASE_RELOAD_API",
+      "description": "specifies whether phase_offset reload, if used, is to be non-blocking (RTP) or blocking (iobuffer).",
+      "default": false,
+      "label": "Use iobuffer port for phase offset reload",
+      "tablabel": "Main",
+      "parameterType": "checkbox"
+    },
+    {
+      "key": "phaseInc",
+      "name": "phase_increment",
+      "description": "Enter the phase increment value for each sample.",
       "default": 0,
-      "label": "Initial phase offset:",
+      "label": "Phase increment:",
       "tablabel": "Main",
       "parameterType": "edit"
+    },
+    {
+      "key": "TP_USE_PHASE_INC_RELOAD",
+      "name": "phase_increment_reload",
+      "description": "specifies if phase_increment can be reloaded at runtime.",
+      "default": false,
+      "label": "Reload phase increment via input port",
+      "tablabel": "Main",
+      "parameterType": "checkbox"
     },
     {
       "key": "AIE_VARIANT",
@@ -144,24 +166,6 @@
       "tablabel": "Main",
       "visible": "off",
       "parameterType": "edit"
-    },
-    {
-      "key": "TP_PHASE_RELOAD_API",
-      "name": "PHASE_RELOAD_API",
-      "description": "specifies whether phase_offset reload, if used, is to be non-blocking (RTP) or blocking (iobuffer).",
-      "default": false,
-      "label": "phase_offset reload",
-      "tablabel": "Main",
-      "parameterType": "checkbox"
-    },
-    {
-      "key": "TP_USE_PHASE_INC_RELOAD",
-      "name": "phase_increment_reload",
-      "description": "specifies if phase_increment can be reloaded at runtime.",
-      "default": false,
-      "label": "phase_increment reload at runtime ",
-      "tablabel": "Main",
-      "parameterType": "checkbox"
     }
   ],
   "generator": {

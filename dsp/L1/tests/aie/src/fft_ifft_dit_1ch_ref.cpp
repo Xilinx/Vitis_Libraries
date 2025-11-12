@@ -19,8 +19,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+//#define _DSPLIB_FFT_IFFT_DIT_1CH_REF_DEBUG_
+
 #include "device_defs.h"
 #include "fft_ifft_dit_1ch_ref.hpp"
+#include "fft_ref_utils.hpp" //for T_int_data<T_D>
 #include "fir_ref_utils.hpp" //for rounding and saturation functions
 
 namespace xf {
@@ -53,6 +56,15 @@ constexpr cfloat unitVector<cfloat>() {
     temp.imag = 0.0;
     return temp;
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+constexpr cbfloat16 unitVector<cbfloat16>() {
+    cbfloat16 temp;
+    temp.real = 1.0;
+    temp.imag = 0.0;
+    return temp;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 template <typename T_D>
 constexpr T_D blankVector(){};
@@ -77,6 +89,15 @@ constexpr cfloat blankVector<cfloat>() {
     temp.imag = 0.0;
     return temp;
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+constexpr cbfloat16 blankVector<cbfloat16>() {
+    cbfloat16 temp;
+    temp.real = 0.0;
+    temp.imag = 0.0;
+    return temp;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 /*
   FFT/iFFT DIT single channel reference model
@@ -197,9 +218,10 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
     constexpr unsigned int kRadix = 2;
     unsigned int opLowMask = (1 << rank) - 1;
     unsigned int opHiMask = ptSize - 1 - opLowMask;
-    T_int_data<cfloat> sam1, sam2, sam2rot;
+    //    T_int_data<TT_DATA> sam1, sam2, sam2rot;
+    cfloat sam1, sam2, sam2rot;
     unsigned int inIndex[kRadix];
-    cfloat tw;
+    TT_TWIDDLE tw;
     unsigned int temp1, temp2, twIndex;
     for (int op = 0; op < (ptSize >> 1); op++) {
         for (int i = 0; i < 2; i++) {
@@ -214,12 +236,12 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
         sam1.imag = samplesA[inIndex[0]].imag;
         sam2.real = samplesA[inIndex[1]].real;
         sam2.imag = samplesA[inIndex[1]].imag;
-        // sam2rot.real = sam2.real * tw.real - sam2.imag * tw.imag;
-        // sam2rot.imag = sam2.real * tw.imag + sam2.imag * tw.real;
-        samplesB[inIndex[0]].real = +sam1.real + (-sam2.imag * tw.imag + sam2.real * tw.real); // sam2rot.real;
-        samplesB[inIndex[0]].imag = +sam1.imag + (+sam2.imag * tw.real + sam2.real * tw.imag); // sam2rot.imag;
-        samplesB[inIndex[1]].real = +sam1.real + (+sam2.imag * tw.imag - sam2.real * tw.real); // sam2rot.real;
-        samplesB[inIndex[1]].imag = +sam1.imag + (-sam2.imag * tw.real - sam2.real * tw.imag); // sam2rot.imag;
+        sam2rot.real = sam2.real * (float)tw.real - sam2.imag * (float)tw.imag;
+        sam2rot.imag = sam2.real * (float)tw.imag + sam2.imag * (float)tw.real;
+        samplesB[inIndex[0]].real = +sam1.real + sam2rot.real;
+        samplesB[inIndex[0]].imag = +sam1.imag + sam2rot.imag;
+        samplesB[inIndex[1]].real = +sam1.real - sam2rot.real;
+        samplesB[inIndex[1]].imag = +sam1.imag - sam2rot.imag;
     }
 }
 
@@ -500,11 +522,11 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
     constexpr unsigned int kSampleRanks = kRanks + 1;
 
     constexpr unsigned int kR2Stages =
-        std::is_same<TT_DATA, cfloat>::value ? kPtSizePwr : (kPtSizePwr % 2 == 1 ? 1 : 0); // There is one radix 2 stage
-                                                                                           // if we have an odd power of
-                                                                                           // 2 point size, but for
-                                                                                           // cfloat all stages are R2.
-    constexpr unsigned int kR4Stages = std::is_same<TT_DATA, cfloat>::value ? 0 : kPtSizePwr / 2;
+        fnIsFloat<TT_DATA>() ? kPtSizePwr : (kPtSizePwr % 2 == 1 ? 1 : 0); // There is one radix 2 stage
+                                                                           // if we have an odd power of
+                                                                           // 2 point size, but for
+                                                                           // cfloat or cbfloat  all stages are R2.
+    constexpr unsigned int kR4Stages = fnIsFloat<TT_DATA>() ? 0 : kPtSizePwr / 2;
     constexpr unsigned int kTwShift = getTwShift<TT_TWIDDLE, TP_TWIDDLE_MODE>();
     unsigned int stageShift = 0;
 
@@ -576,11 +598,11 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
             headerPtr = inWindow.data() + kHeaderSize;
             // override values set for constant point size with values derived from the header in a dynamic point size
             // frame
-            r2Stages = std::is_same<TT_DATA, cfloat>::value
+            r2Stages = fnIsFloat<TT_DATA>()
                            ? ptSizePwr
                            : (ptSizePwr % 2 == 1 ? 1 : 0); // There is one radix 2 stage if we have an odd power of 2
-                                                           // point size, but for cfloat all stages are R2.
-            r4Stages = std::is_same<TT_DATA, cfloat>::value ? 0 : ptSizePwr / 2;
+                                                           // point size, but for cfloat or cbfloat16 all stages are R2.
+            r4Stages = fnIsFloat<TT_DATA>() ? 0 : ptSizePwr / 2;
             ptSize = ((unsigned int)1) << ptSizePwr;
         } // end of TP_DYN_PT_SIZE==1 now for TP_DYN_PT_SIZE=0
     if ((ptSizePwr >= kMinPtSizePwr) && (ptSizePwr <= kMaxPtSizePwr)) {
@@ -609,7 +631,7 @@ for (unsigned int i = 0; i < (1 << (kMaxPtSizePwr - 1)); i++) {
 
             for (unsigned int r2StageCnt = 0; r2StageCnt < r2Stages; r2StageCnt++) {
                 if
-                    constexpr(is_cfloat<TT_DATA>()) {
+                    constexpr(fnIsFloat<TT_DATA>()) {
                         r2StageFloat(samplesA, samplesB, twiddles, r2StageCnt, ptSize, inv);
                     }
                 else {

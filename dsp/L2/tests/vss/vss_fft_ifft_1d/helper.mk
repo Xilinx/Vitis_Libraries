@@ -20,7 +20,10 @@
 ###############################################################################
 
 HELPER_CUR_DIR ?= .
-HELPER_ROOT_DIR ?= ./../../../../
+HELPER_ROOT_DIR ?= ./../../../../../
+
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" -exec test -f '{}/bin/python3' \; -print | head -n 1)
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
 
 UUT_FILE_SUFFIX = $(UUT_KERNEL)_$(DATA_TYPE)_$(TWIDDLE_TYPE)_$(POINT_SIZE)_$(FFT_NIFFT)_$(SHIFT)_$(CASC_LEN)_$(DYN_PT_SIZE)_$(WINDOW_VSIZE)_$(API_IO)_$(USE_WIDGETS)_$(ROUND_MODE)_$(SAT_MODE)
 LOG_FILE = ./logs/log_$(UUT_FILE_SUFFIX).txt
@@ -101,6 +104,14 @@ else
 	INPUTS_PER_TILE := 1
 endif
 
+
+DATAWIDTH :=
+ifeq ($(DATA_TYPE), cint16)
+DATAWIDTH := 32
+else
+DATAWIDTH := 64
+endif
+
 DYN_PT_SIZE = 0
 DYN_PT_HEADER_MODE = 0
 
@@ -111,9 +122,6 @@ HELPER:= $(HELPER_CUR_DIR)/.HELPER
 $(HELPER):  create_input sim_ref prep_x86_out
 	make cleanall
 
-PYTHON3 ?= python3
-TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -type d -name "python-3*" | head -n 1)
-VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
 create_input:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(FRONT_INPUT_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  $(TAG_PAR_PWR)
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(BACK_INPUT_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  $(TAG_PAR_PWR);
@@ -163,10 +171,24 @@ get_status: check_op_ref
 harvest_mem:
 	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts
 
+PART := $(shell $(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/include/vss/scripts/extract_param_cfg.py ./ "PART" "top" vss_fft_ifft_1d_params.cfg)
+
+AIE_VARIANT := $(shell $(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/include/vss/scripts/extract_param_cfg.py ./ "AIE_VARIANT" "top" vss_fft_ifft_1d_params.cfg)
 ifeq ($(VSS_MODE), 1)
-gen_conn_cfg:
-	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/vss/vss_fft_ifft_1d/vss_tb_cfg_gen.py --ssr $(SSR) --cfg_file_name system.cfg --vss_unit vss_fft_ifft_1d --freqhz $(FREQ)
+ifeq ($(AIE_VARIANT), 1)
+	ifeq ($(DATA_TYPE), cint16)
+		VSS_SCRIPT = vss_tb_cfg_gen_aie_if.py
+	else
+		VSS_SCRIPT = vss_tb_cfg_gen.py
+	endif
 else
-gen_conn_cfg:
-	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/vss/vss_fft_ifft_1d/vss_tb_cfg_gen_hls_fft.py --ssr $(SSR) --cfg_file_name system.cfg --vss_unit vss_fft_ifft_1d --freqhz $(FREQ)
+	VSS_SCRIPT = vss_tb_cfg_gen_aie_if.py
 endif
+else
+	VSS_SCRIPT = vss_tb_cfg_gen_hls_fft.py
+endif 
+
+aie_name := $(shell $(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/include/vss/scripts/extract_param_cfg.py ./ "enable-partition" "aie" vss_fft_ifft_1d_params.cfg)
+
+gen_conn_cfg:
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/vss/vss_fft_ifft_1d/${VSS_SCRIPT} --ssr $(SSR) --cfg_file_name system.cfg --vss_unit vss_fft_ifft_1d --freqhz $(FREQ) --aie_obj_name $(aie_name) --aie_variant $(AIE_VARIANT)

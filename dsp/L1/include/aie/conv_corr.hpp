@@ -101,7 +101,21 @@ class conv_corr {
     // load max possible elements each time based on sample size from memory that aie would operate
     static constexpr unsigned int m_kVecLoadG = (kMaxBitsLoadOnAie / (fnSampleSizeOfSigG<TT_DATA_G>()));
 
+    // zero Initiated memory buffer where F signal data filled based on p
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA_F paddedFdata[m_kPaddedLenData * TP_NUM_FRAMES] = {zeros<TT_DATA_F>()};
+
+    // Start index where data filling begins in the paddedFdata buffer
+    static constexpr unsigned int m_kFdataStartIndx =
+        getFdataStartIndx_PaddedBuffer<TT_DATA_F, TT_DATA_G, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
+
+    // End index where data filling stops in the paddedFdata buffer
+    static constexpr unsigned int m_kFdataEndIndx =
+        getFdataEndIndx_PaddedBuffer<TT_DATA_F, TT_DATA_G, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
+
+    // Member variable to hold the RTP parameter of F
     unsigned int m_vecLenF = 0;
+
+    // Member variable to hold the RTP parameter of G
     unsigned int m_vecLenG = 0;
 
    public:
@@ -179,6 +193,14 @@ class conv_corr<TT_DATA_F,
     static constexpr unsigned int m_kAccSize = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
 
     // Note, both these variables are non-static, so all kernels can update this variable
+    static constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of Lanes is 4 for MAC4_ROT()
+    static constexpr unsigned int kPoints = m_kMuls / kLanes; // Num of Points is nothing but nMuls/nPoints
+    static constexpr unsigned int kMuls = (kLanes * kPoints); // Num of Muls for MAC4_ROT()
+    static constexpr unsigned int kStreamPerCoreVar = ((kMuls * TP_PHASES) >> 1);
+    static constexpr unsigned int kStreamsPerCore = (TP_G_LEN > kStreamPerCoreVar) ? 1 : kMaxNumOfStreams;
+    static constexpr int kCascVecSizeOfCoeff = kMaxSamplesInShuffleVec / sizeof(TT_DATA_G);
+
+    TT_DATA_G chess_storage(% chess_alignof(v32cint16)) gReArrangeBuff[TP_G_LEN * kCascVecSizeOfCoeff];
     alignas(__ALIGN_BYTE_SIZE__) int delayBuff[(m_kDataBuffLen * sizeof(TT_DATA_F)) / sizeof(int)] = {0};
     alignas(__ALIGN_BYTE_SIZE__) int delayAcc[(m_kAccSize * sizeof(cacc48)) / sizeof(int)] = {0};
     int doInit = 1;
@@ -245,6 +267,14 @@ class conv_corr<TT_DATA_F,
     static constexpr unsigned int m_kAccSize = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
 
     // Note, both these variables are non-static, so all kernels can update this variable
+    static constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of Lanes is 4 for MAC4_ROT()
+    static constexpr unsigned int kPoints = m_kMuls / kLanes; // Num of Points is nothing but nMuls/nPoints
+    static constexpr unsigned int kMuls = (kLanes * kPoints); // Num of Muls for MAC4_ROT()
+    static constexpr unsigned int kStreamPerCoreVar = ((kMuls * TP_PHASES) >> 1);
+    static constexpr unsigned int kStreamsPerCore = (TP_G_LEN > kStreamPerCoreVar) ? 1 : kMaxNumOfStreams;
+    static constexpr int kCascVecSizeOfCoeff = kMaxSamplesInShuffleVec / sizeof(TT_DATA_G);
+
+    TT_DATA_G chess_storage(% chess_alignof(v32cint16)) gReArrangeBuff[TP_G_LEN * kCascVecSizeOfCoeff];
     alignas(__ALIGN_BYTE_SIZE__) int delayBuff[(m_kDataBuffLen * sizeof(TT_DATA_F)) / sizeof(int)] = {0};
     alignas(__ALIGN_BYTE_SIZE__) int delayAcc[(m_kAccSize * sizeof(cacc48)) / sizeof(int)] = {0};
     int doInit = 1;
@@ -312,6 +342,14 @@ class conv_corr<TT_DATA_F,
     static constexpr unsigned int m_kAccSize = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
 
     // Note, both these variables are non-static, so all kernels can update this variable
+    static constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of Lanes is 4 for MAC4_ROT()
+    static constexpr unsigned int kPoints = m_kMuls / kLanes; // Num of Points is nothing but nMuls/nPoints
+    static constexpr unsigned int kMuls = (kLanes * kPoints); // Num of Muls for MAC4_ROT()
+    static constexpr unsigned int kStreamPerCoreVar = ((kMuls * TP_PHASES) >> 1);
+    static constexpr unsigned int kStreamsPerCore = (TP_G_LEN > kStreamPerCoreVar) ? 1 : kMaxNumOfStreams;
+    static constexpr int kCascVecSizeOfCoeff = kMaxSamplesInShuffleVec / sizeof(TT_DATA_G);
+
+    TT_DATA_G chess_storage(% chess_alignof(v32cint16)) gReArrangeBuff[TP_G_LEN * kCascVecSizeOfCoeff];
     alignas(__ALIGN_BYTE_SIZE__) int delayBuff[(m_kDataBuffLen * sizeof(TT_DATA_F)) / sizeof(int)] = {0};
     alignas(__ALIGN_BYTE_SIZE__) int delayAcc[(m_kAccSize * sizeof(cacc48)) / sizeof(int)] = {0};
     int doInit = 1;
@@ -378,6 +416,14 @@ class conv_corr<TT_DATA_F,
     static constexpr unsigned int m_kAccSize = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
 
     // Note, both these variables are non-static, so all kernels can update this variable
+    static constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of Lanes is 4 for MAC4_ROT()
+    static constexpr unsigned int kPoints = m_kMuls / kLanes; // Num of Points is nothing but nMuls/nPoints
+    static constexpr unsigned int kMuls = (kLanes * kPoints); // Num of Muls for MAC4_ROT()
+    static constexpr unsigned int kStreamPerCoreVar = ((kMuls * TP_PHASES) >> 1);
+    static constexpr unsigned int kStreamsPerCore = (TP_G_LEN > kStreamPerCoreVar) ? 1 : kMaxNumOfStreams;
+    static constexpr int kCascVecSizeOfCoeff = kMaxSamplesInShuffleVec / sizeof(TT_DATA_G);
+
+    TT_DATA_G chess_storage(% chess_alignof(v32cint16)) gReArrangeBuff[TP_G_LEN * kCascVecSizeOfCoeff];
     alignas(__ALIGN_BYTE_SIZE__) int delayBuff[(m_kDataBuffLen * sizeof(TT_DATA_F)) / sizeof(int)] = {0};
     alignas(__ALIGN_BYTE_SIZE__) int delayAcc[(m_kAccSize * sizeof(cacc48)) / sizeof(int)] = {0};
     int doInit = 1;

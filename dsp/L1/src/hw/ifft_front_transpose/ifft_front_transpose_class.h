@@ -22,86 +22,23 @@
 #include <hls_stream.h>
 #include <hls_vector.h>
 #include <hls_streamofblocks.h>
+#include "common.hpp"
+#include "vss_fft_ifft_1d_common.hpp"
 //#define __FRONT_TRANSPOSE_DEBUG__
+using namespace xf::dsp::vss::common;
 
 namespace front_transpose {
 
 template <int NFFT, int NSTREAM>
 class frontTransposeCls {
    public:
-    template <unsigned int len, unsigned int rnd>
-    static constexpr unsigned int fnCeil() {
-        return (len + rnd - 1) / rnd * rnd;
-    }
-
-    template <unsigned int TP_POINT_SIZE>
-    static constexpr unsigned int fnPtSizeD1() {
-        unsigned int sqrtVal =
-            TP_POINT_SIZE == 65536
-                ? 256
-                : TP_POINT_SIZE == 32768
-                      ? 256
-                      : TP_POINT_SIZE == 16384
-                            ? 128
-                            : TP_POINT_SIZE == 8192
-                                  ? 128
-                                  : TP_POINT_SIZE == 4096
-                                        ? 64
-                                        : TP_POINT_SIZE == 2048
-                                              ? 64
-                                              : TP_POINT_SIZE == 1024
-                                                    ? 32
-                                                    : TP_POINT_SIZE == 512
-                                                          ? 32
-                                                          : TP_POINT_SIZE == 256
-                                                                ? 16
-                                                                : TP_POINT_SIZE == 128
-                                                                      ? 16
-                                                                      : TP_POINT_SIZE == 64
-                                                                            ? 8
-                                                                            : TP_POINT_SIZE == 32
-                                                                                  ? 8
-                                                                                  : TP_POINT_SIZE == 16 ? 4 : 0;
-        return sqrtVal;
-    }
-
-    template <unsigned int ptSizeD2, unsigned int offset, unsigned int numElems>
-    static constexpr std::array<int, numElems> fnCalcRdAddr() {
-        std::array<int, numElems> addrLoad = {0};
-        for (int i = 0; i < numElems; i++) {
-            addrLoad[i] = (offset * ptSizeD2 + i * (2 * ptSizeD2)) / numElems;
-        }
-        const std::array<int, numElems> addrLoadRet = addrLoad;
-        return addrLoad;
-    }
-
-    template <unsigned int ptSizeD2, unsigned int offset, unsigned int numElems>
-    static constexpr std::array<int, numElems> fnCalcRdBnk() {
-        std::array<int, numElems> bnkLoad = {0};
-        for (int i = 0; i < numElems; i++) {
-            bnkLoad[i] = (offset * ptSizeD2 + i * (2 * ptSizeD2)) % numElems;
-        }
-        const std::array<int, numElems> bnkLoadRet = bnkLoad;
-        return bnkLoad;
-    }
-
     static constexpr unsigned samplesPerRead = 2;
     static constexpr unsigned ptSizeCeil = fnCeil<NFFT, SSR>(); // 65
     static constexpr unsigned NPHASES = SSR;
-    static constexpr unsigned ptSizeD1 = fnPtSizeD1<NFFT>(); // 32
-    static constexpr unsigned ptSizeD2 = NFFT / ptSizeD1;    // 32
-
-    static constexpr unsigned EXTRA = 0; // # of extra zero-padded samples (to made divisible by NSTREAM)
-    static constexpr unsigned DEPTH = (NFFT / ptSizeD1 + EXTRA); // Depth of each bank // 16
-    static constexpr unsigned NROW = ptSizeD1 / NSTREAM;         // # of rows of transforms per bank // 16
+    static constexpr unsigned ptSizeD1 = fnPtSizeD1<NFFT, modeAIEffts, SSR>(); // 32
+    static constexpr unsigned ptSizeD2 = NFFT / ptSizeD1;                      // 32
 
     static constexpr unsigned NBITS = 128; // Size of PLIO bus on PL side @ 312.5 MHz
-
-    // static constexpr std::array<int, NSTREAM> rdAddrLut1 = fnCalcRdAddr<ptSizeD1, 0, NSTREAM>();
-    // static constexpr std::array<int, NSTREAM> rdAddrLut2 = fnCalcRdAddr<ptSizeD1, 1, NSTREAM>();
-    // static constexpr std::array<int, NSTREAM> rdBnkLut1 = fnCalcRdBnk<ptSizeD1, 0, NSTREAM>();
-    // static constexpr std::array<int, NSTREAM> rdBnkLut2 = fnCalcRdBnk<ptSizeD1, 1, NSTREAM>();
-
     int rdAddrLut1[NSTREAM][ptSizeD1 / samplesPerRead];
     int rdAddrLut2[NSTREAM][ptSizeD1 / samplesPerRead];
     int rdBnkLut1[NSTREAM][ptSizeD1 / samplesPerRead];

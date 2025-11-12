@@ -27,6 +27,7 @@ Reference model graph.
 #include "device_defs.h"
 #include "test_stim.hpp"
 #include "graph_utils.hpp"
+#include "plio_file_connections.hpp"
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
@@ -36,24 +37,6 @@ namespace dsp {
 namespace aie {
 namespace testcase {
 using namespace adf;
-
-template <unsigned int ssr, unsigned int dual, typename plioType, unsigned int myPlioWidth = 64>
-void createPLIOFileConnections(std::array<plioType, ssr*(dual + 1)>& plioPorts,
-                               std::string filename,
-                               std::string plioDescriptor = "in") {
-    plio_type plioAlias = (myPlioWidth == 64) ? adf::plio_64_bits : adf::plio_32_bits;
-    for (unsigned int ssrIdx = 0; ssrIdx < ssr; ++ssrIdx) {
-        for (unsigned int dualIdx = 0; dualIdx < (dual + 1); ++dualIdx) {
-            std::string filenameInternal = filename;
-            // Insert SSR index and dual stream index into filename before extension (.txt)
-            filenameInternal.insert(filenameInternal.length() - 4,
-                                    ("_" + std::to_string(ssrIdx) + "_" + std::to_string(dualIdx)));
-            plioPorts[ssrIdx * (dual + 1) + dualIdx] = plioType::create(
-                "PLIO_" + plioDescriptor + "_" + std::to_string(ssrIdx) + "_" + std::to_string(dualIdx),
-                (myPlioWidth == 64) ? adf::plio_64_bits : adf::plio_32_bits, filenameInternal);
-        }
-    }
-}
 
 template <typename coeff_type, int stim_type, size_t tapsNo, int seed>
 std::vector<coeff_type> generateTaps(std::string filename = std::string("data/input.txt")) {

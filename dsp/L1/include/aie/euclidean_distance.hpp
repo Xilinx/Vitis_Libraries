@@ -58,13 +58,11 @@ namespace euclidean_distance {
 // Single kernel specialization for io bufer
 
 template <typename TT_DATA,
-          typename TT_DATA_OUT,
           unsigned int TP_LEN,
           unsigned int TP_DIM,
           unsigned int TP_API,
           unsigned int TP_RND,
-          unsigned int TP_SAT,
-          unsigned int TP_IS_OUTPUT_SQUARED>
+          unsigned int TP_SAT>
 class euclidean_distance_squared {
    private:
     // constants derived from configuration parameters
@@ -76,7 +74,7 @@ class euclidean_distance_squared {
     static constexpr unsigned int m_kLanes = fnGetNumofLanes<TT_DATA>();
 
     // load max possible elements each time based on sample size from memory that aie would operate
-    static constexpr unsigned int m_kVecLoad = (kMaxBitsLoadOnAie / (fnSampleSize<TT_DATA>()));
+    static constexpr unsigned int m_kVecLoad = (kMaxBytesLoadOnAie / sizeof(TT_DATA));
 
    public:
     // Constructor of euclidean_distance class
@@ -86,25 +84,30 @@ class euclidean_distance_squared {
     // Euclidean_Distance
     void euclideanDistMain(input_buffer<TT_DATA>& __restrict inWindowP,
                            input_buffer<TT_DATA>& __restrict inWindowQ,
-                           output_buffer<TT_DATA_OUT>& __restrict squaredOut);
+                           output_buffer<TT_DATA>& __restrict squaredOut);
 };
 
 //-----------------------------------------------------------------------------------------------------
 // Single kernel specialization for io bufer
 
-template <typename TT_DATA, typename TT_DATA_OUT, unsigned int TP_LEN, unsigned int TP_IS_OUTPUT_SQUARED>
+template <typename TT_DATA, unsigned int TP_LEN>
 class euclidean_distance {
    private:
     // constants derived from configuration parameters
 
     // number of lanes that intrinsic would operate
-    static constexpr unsigned int m_kLanes = fnGetNumofLanes<TT_DATA_OUT>();
+    static constexpr unsigned int m_kLanes = fnGetNumofLanes<TT_DATA>();
 
     // load max possible elements each time based on sample size from memory that aie would operate
-    static constexpr unsigned int m_kVecLoad = (kMaxBitsLoadOnAie / (fnSampleSize<TT_DATA>()));
+    static constexpr unsigned int m_kVecLoad = (kMaxBytesLoadOnAie / sizeof(TT_DATA));
 
     // number of samples as per data type.
-    static constexpr unsigned int m_ksampleSize = (fnSampleSize<TT_DATA_OUT>());
+    static constexpr unsigned int m_ksampleSize = (fnSampleSize<TT_DATA>());
+#if __HAS_ACCUM_PERMUTES__ == 0
+    // zero Initiated memory buffer which stores BFLOAT16 converted data from kernel-1 when TT_DATA is float on AIE-ML.
+    // TP_LEN is max 1k (2048) on AIE-ML for float data type.
+    alignas(__ALIGN_BYTE_SIZE__) bfloat16 convertFloatToBfloat16Buff[TP_LEN] = {fir::nullElem<bfloat16>()};
+#endif
 
    public:
     // Constructor of euclidean_distance class
@@ -112,7 +115,7 @@ class euclidean_distance {
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(euclidean_distance::euclideanDistMain); }
     // Euclidean_Distance
-    void euclideanDistMain(input_buffer<TT_DATA>& __restrict squaredIn, output_buffer<TT_DATA_OUT>& __restrict sqrtOut);
+    void euclideanDistMain(input_buffer<TT_DATA>& __restrict squaredIn, output_buffer<TT_DATA>& __restrict sqrtOut);
 };
 
 } // namespace euclidean_distance

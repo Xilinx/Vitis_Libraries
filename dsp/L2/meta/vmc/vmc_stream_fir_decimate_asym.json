@@ -132,9 +132,13 @@
       "name": "ssr",
       "description": "Specify number of parallel input/output paths.",
       "default": 1,
+      "enum": [
+                "Inherit from number of input columns",
+                "<Specify SSR number>"
+            ],
       "label": "SSR: ",
       "tablabel": "Main",
-      "parameterType": "edit"
+      "parameterType": "combobox"
     },
     {
       "key": "TP_PARA_DECI_POLY",

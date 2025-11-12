@@ -9,9 +9,14 @@
 #include <complex>
 #include <ap_fixed.h>
 #include <hls_stream.h>
+#include <stdlib.h>
+#define Q(x) #x
+#define QUOTE(x) Q(x)
 
 namespace s2mm {
-
+struct cint16 {};
+struct cint32 {};
+struct cfloat {};
 template <unsigned int TP_POINT_SIZE>
 static constexpr unsigned int fnPtSizeD1() {
     unsigned int sqrtVal =
@@ -48,10 +53,12 @@ static constexpr unsigned int fnCeil() {
 }
 static constexpr unsigned NBITS = 128; // Size of PLIO bus on PL side @ 312.5 MHz
 typedef ap_uint<NBITS> TT_DATA;        // Equals two 'cint32' samples
-typedef ap_uint<NBITS / 2> TT_SAMPLE;  // Samples are 'cint32'
-typedef hls::stream<TT_DATA> TT_STREAM;
-static constexpr int samplesPerRead = 2;
+// static constexpr unsigned DATAWIDTH      =std::is_same<TT_DATA, cint16>::value ? 32 : 64; // it can be one of cint16,
+// cint32, cfloat
+static constexpr unsigned samplesPerRead = NBITS / DATAWIDTH;
 static constexpr unsigned ptSizeD1 = fnPtSizeD1<POINT_SIZE>();
+typedef ap_uint<NBITS / samplesPerRead> TT_SAMPLE; // Samples are 'cint32'
+typedef hls::stream<TT_DATA> TT_STREAM;
 static constexpr unsigned ptSizeD1Ceil = fnCeil<ptSizeD1, NSTREAM>();
 static constexpr unsigned ptSizeD2 = POINT_SIZE / ptSizeD1;
 static constexpr unsigned ptSizeD2Ceil = fnCeil<ptSizeD2, NSTREAM>();

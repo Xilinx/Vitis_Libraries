@@ -39,8 +39,8 @@
 
 using namespace adf;
 
-alignas(__ALIGN_BYTE_SIZE__) extern const int8 sqrtLUT0[1024];
-alignas(__ALIGN_BYTE_SIZE__) extern const int8 sqrtLUT1[1024];
+alignas(__ALIGN_BYTE_SIZE__) extern const int8 sqrtLUT0[LUT_SIZE];
+alignas(__ALIGN_BYTE_SIZE__) extern const int8 sqrtLUT1[LUT_SIZE];
 
 namespace xf {
 namespace dsp {
@@ -63,15 +63,11 @@ namespace euclidean_distance {
  *function. \n
  *         This is a typename and must be one of the following: \n
  *         float and bfloat16.
- * @tparam TT_DATA_OUT describes the type of individual data samples of output from the function. \n
- *         This is a typename and must be one of the following: \n
- *         float and bfloat16.
  * @tparam TP_LEN describes the number of samples of input (Points P and Q) and ouput vector. \n
  * @tparam TP_DIM describes the Dimension of plane for the point P and Q. \n
- *         This is a constant and must be nearest power of 2. the following are: \n
- *         4, 8, 16, 32, 64.....2^N;
- * @tparam TP_API describes whether to use streams (1) or windows (0).
- *         \n
+ *         This is a constant and must be one of the following: \n
+ *         1, 2, 3, 4.
+ * @tparam TP_API describes whether to use streams (1) or windows (0). \n
  *         Note: Streaming interface is currently not supported. \n
  * @tparam TP_RND describes the selection of rounding to be applied during the
  *         shift down stage of processing. \n
@@ -105,7 +101,6 @@ namespace euclidean_distance {
  **/
 // TT_DATA, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT, TP_IS_OUTPUT_SQUARED
 template <typename TT_DATA,
-          typename TT_DATA_OUT,
           unsigned int TP_LEN,
           unsigned int TP_DIM,
           unsigned int TP_API,
@@ -115,13 +110,8 @@ template <typename TT_DATA,
 
 class euclidean_distance_graph : public graph {
    public:
-#if (__HAS_ACCUM_PERMUTES__ == 0)
-    parameter edSqrtLut0;                            // LUT-0 for SQRT
-    parameter edSqrtLut1;                            // LUT-1 for SQRT
-    static constexpr unsigned int kNumOfKernels = 2; // Num of kernels becomes 2 when Arch. is AIE-ML
-#else
-    static constexpr unsigned int kNumOfKernels = 1; // Num of kernels becomes 1 when Arch. is AIE-1
-#endif
+    parameter edSqrtLut0; // LUT-0 for SQRT
+    parameter edSqrtLut1; // LUT-1 for SQRT
     /**
      * @cond NOCOMMENTS
      */
@@ -200,32 +190,18 @@ class euclidean_distance_graph : public graph {
         * @brief This is the constructor function for the euclidean_distance graph.
     **/
     euclidean_distance_graph() {
-// create the kernels
-#if (__HAS_ACCUM_PERMUTES__ == 0)
+        // create the kernels
+        // ED_squared() is default
+        m_EDKernels[0] = kernel::create_object<
+            euclidean_distance_squared<TT_DATA, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT> >(); // SQUARED
+
+        // ED() Kernel
         if
             constexpr(TP_IS_OUTPUT_SQUARED == 0) {
-                typedef typename std::conditional<((std::is_same<TT_DATA_OUT, float>::value) &&
-                                                   (TP_IS_OUTPUT_SQUARED == 0)),
-                                                  bfloat16, TT_DATA_OUT>::type TT_INTERNAL_DATA_TYPE;
-                edSqrtLut0 = parameter::array(sqrtLUT0); // LUT0 of SQRT
-                edSqrtLut1 = parameter::array(sqrtLUT1); // LUT1 of SQRT
-                m_EDKernels[0] = kernel::create_object<
-                    euclidean_distance_squared<TT_DATA, TT_INTERNAL_DATA_TYPE, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT,
-                                               TP_IS_OUTPUT_SQUARED> >(); // SQUARED
-                m_EDKernels[1] = kernel::create_object<
-                    euclidean_distance<TT_INTERNAL_DATA_TYPE, TT_DATA_OUT, TP_LEN, TP_IS_OUTPUT_SQUARED> >(); // SQRT
+                edSqrtLut0 = parameter::array(sqrtLUT0);                                        // LUT0 of SQRT
+                edSqrtLut1 = parameter::array(sqrtLUT1);                                        // LUT1 of SQRT
+                m_EDKernels[1] = kernel::create_object<euclidean_distance<TT_DATA, TP_LEN> >(); // SQRT
             }
-        else {
-            // ED_squared() is default
-            m_EDKernels[0] =
-                kernel::create_object<euclidean_distance_squared<TT_DATA, TT_DATA_OUT, TP_LEN, TP_DIM, TP_API, TP_RND,
-                                                                 TP_SAT, TP_IS_OUTPUT_SQUARED> >(); // SQUARED
-        }
-#else
-        m_EDKernels[0] =
-            kernel::create_object<euclidean_distance_squared<TT_DATA, TT_DATA_OUT, TP_LEN, TP_DIM, TP_API, TP_RND,
-                                                             TP_SAT, TP_IS_OUTPUT_SQUARED> >(); // SQUARED
-#endif
 
         if
             constexpr(TP_API == USE_WINDOW_API) {
@@ -235,19 +211,13 @@ class euclidean_distance_graph : public graph {
                 dimensions(m_EDKernels[0].in[0]) = {(TP_LEN * kDim)};
                 dimensions(m_EDKernels[0].in[1]) = {(TP_LEN * kDim)};
 
-#if (__HAS_ACCUM_PERMUTES__ == 0)
                 if
                     constexpr(TP_IS_OUTPUT_SQUARED == 0) {
                         // connect LUTs of Sqrt() to the kernel
                         connect<>(edSqrtLut0, m_EDKernels[1]);
                         connect<>(edSqrtLut1, m_EDKernels[1]);
-                    }
-#endif
 
-                // connect ED_squared() to ED()
-                if
-                    constexpr(TP_IS_OUTPUT_SQUARED == 0) {
-#if (__HAS_ACCUM_PERMUTES__ == 0)
+                        // connect ED_squared() to ED()
                         connect<>(m_EDKernels[0].out[0], m_EDKernels[1].in[0]);
                         dimensions(m_EDKernels[0].out[0]) = {TP_LEN};
                         dimensions(m_EDKernels[1].in[0]) = {TP_LEN};
@@ -255,37 +225,30 @@ class euclidean_distance_graph : public graph {
                         // connect final kernel output to output of the graph
                         connect<>(m_EDKernels[1].out[0], outWindow);
                         dimensions(m_EDKernels[1].out[0]) = {TP_LEN};
-#else
-                        // connect final kernel output to output of the graph
-                        connect<>(m_EDKernels[0].out[0], outWindow);
-                        dimensions(m_EDKernels[0].out[0]) = {(TP_LEN)};
-#endif
                     }
                 else {
                     // connect final kernel output to output of the graph
                     connect<>(m_EDKernels[0].out[0], outWindow);
                     dimensions(m_EDKernels[0].out[0]) = {TP_LEN};
                 }
-            }
 
-        // Specify mapping constraints
-        runtime<ratio>(m_EDKernels[0]) = 0.5; // Nominal figure. The real figure requires knowledge of the sample rate.
-        // Source files
-        source(m_EDKernels[0]) = "euclidean_distance.cpp";
-        headers(m_EDKernels[0]) = {"euclidean_distance.hpp"};
-
-#if (__HAS_ACCUM_PERMUTES__ == 0)
-        if
-            constexpr(TP_IS_OUTPUT_SQUARED == 0) {
                 // Specify mapping constraints
-                runtime<ratio>(m_EDKernels[1]) =
-                    0.4; // Nominal figure. The real figure requires knowledge of the sample rate.
+                runtime<ratio>(m_EDKernels[0]) =
+                    0.5; // Nominal figure. The real figure requires knowledge of the sample rate.
                 // Source files
-                source(m_EDKernels[1]) = "euclidean_distance.cpp";
-                headers(m_EDKernels[1]) = {"euclidean_distance.hpp"};
-            }
-#endif
+                source(m_EDKernels[0]) = "euclidean_distance.cpp";
+                headers(m_EDKernels[0]) = {"euclidean_distance.hpp"};
 
+                if
+                    constexpr(TP_IS_OUTPUT_SQUARED == 0) {
+                        // Specify mapping constraints
+                        runtime<ratio>(m_EDKernels[1]) =
+                            0.4; // Nominal figure. The real figure requires knowledge of the sample rate.
+                        // Source files
+                        source(m_EDKernels[1]) = "euclidean_distance.cpp";
+                        headers(m_EDKernels[1]) = {"euclidean_distance.hpp"};
+                    }
+            }
     }; // constructor
 };
 

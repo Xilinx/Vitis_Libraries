@@ -198,47 +198,42 @@ def fn_validate_TP_FIR_LEN(TT_DATA, TP_USE_COEFF_RELOAD, TP_API, TP_FIR_LEN):
 ############# TP_DUAL_IP Updater and Validator ########
 #######################################################
 def update_TP_DUAL_IP(args):
-    return comFirUpd.fn_update_binary("TP_DUAL_IP")
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return comFirUpd.fn_update_dual_ip_sym(AIE_VARIANT)
 
 
 def validate_TP_DUAL_IP(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
     TP_DUAL_IP = args["TP_DUAL_IP"]
-    return fn_validate_TP_DUAL_IP(TP_DUAL_IP)
+    return fn_validate_TP_DUAL_IP(AIE_VARIANT, TP_DUAL_IP)
 
-
-def fn_validate_TP_DUAL_IP(TP_DUAL_IP):
-    return validate_legal_set([0, 1], "TP_DUAL_IP", TP_DUAL_IP)
-
+def fn_validate_TP_DUAL_IP(AIE_VARIANT, TP_DUAL_IP):
+    param_dict = comFirUpd.fn_update_dual_ip_sym(AIE_VARIANT)
+    return validate_legal_set(param_dict["enum"], "TP_DUAL_IP", TP_DUAL_IP)
 
 #######################################################
 ############# TP_NUM_OUTPUTS Updater and Validator ####
 #######################################################
-
-
 def update_TP_NUM_OUTPUTS(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TP_API = args["TP_API"]
-    TP_DUAL_IP = args["TP_DUAL_IP"]
-    TP_SSR = args["TP_SSR"]
-    return comFirUpd.fn_update_num_outputs_sr_asym(
-        TP_API, AIE_VARIANT, TP_SSR, TP_DUAL_IP, "TP_NUM_OUTPUTS"
+    return comFirUpd.fn_update_num_outputs_sr_sym(
+        TP_API, AIE_VARIANT, "TP_NUM_OUTPUTS"
     )
 
 
 def validate_TP_NUM_OUTPUTS(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TP_API = args["TP_API"]
-    TP_DUAL_IP = args["TP_DUAL_IP"]
-    TP_SSR = args["TP_SSR"]
     TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
     return fn_validate_TP_NUM_OUTPUTS(
-        AIE_VARIANT, TP_API, TP_SSR, TP_DUAL_IP, TP_NUM_OUTPUTS
+        AIE_VARIANT, TP_API, TP_NUM_OUTPUTS
     )
 
 
-def fn_validate_TP_NUM_OUTPUTS(AIE_VARIANT, TP_API, TP_SSR, TP_DUAL_IP, TP_NUM_OUTPUTS):
-    param_dict = comFirUpd.fn_update_num_outputs_sr_asym(
-        TP_API, AIE_VARIANT, TP_SSR, TP_DUAL_IP, "TP_NUM_OUTPUTS"
+def fn_validate_TP_NUM_OUTPUTS(AIE_VARIANT, TP_API, TP_NUM_OUTPUTS):
+    param_dict = comFirUpd.fn_update_num_outputs_sr_sym(
+        TP_API, AIE_VARIANT, "TP_NUM_OUTPUTS"
     )
     return validate_legal_set(param_dict["enum"], "TP_NUM_OUTPUTS", TP_NUM_OUTPUTS)
 
@@ -253,15 +248,18 @@ def update_TP_SSR(args):
     TP_API = args["TP_API"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
+    TP_DUAL_IP = args["TP_DUAL_IP"]
+    TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
     return fn_update_TP_SSR(
-        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_DUAL_IP, TP_NUM_OUTPUTS
     )
 
 
 def fn_update_TP_SSR(
-    AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD,  TP_DUAL_IP, TP_NUM_OUTPUTS
 ):
     legal_set_TP_SSR = find_divisors(TP_FIR_LEN, TP_SSR_max)
+
     for ssr_val in legal_set_TP_SSR.copy():
         param_dict_casc_len = fn_update_TP_CASC_LEN(
             AIE_VARIANT,
@@ -275,11 +273,16 @@ def fn_update_TP_SSR(
         if ("enum" in param_dict_casc_len) and (param_dict_casc_len["enum"]) == []:
             legal_set_TP_SSR.remove(ssr_val)
 
-    if TP_API == API_BUFFER:
+
+    if TP_API == API_STREAM:
+        if TP_DUAL_IP == 0 and not(AIE_VARIANT in [AIE]) and TP_NUM_OUTPUTS==2: #if AIE!=1 and not in SSR mode, dualpip=0, num_output=2 is allowed
+            legal_set_TP_SSR =[1]
+    elif TP_API == API_BUFFER:
         legal_set_TP_SSR = [1]
 
     param_dict = {"name": "TP_SSR", "enum": legal_set_TP_SSR}
     return param_dict
+
 
 
 def validate_TP_SSR(args):
@@ -289,20 +292,21 @@ def validate_TP_SSR(args):
     TP_API = args["TP_API"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
+    TP_DUAL_IP = args["TP_DUAL_IP"]
+    TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
     TP_SSR = args["TP_SSR"]
     return fn_validate_TP_SSR(
-        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_SSR
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_SSR
     )
 
 
 def fn_validate_TP_SSR(
-    AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_SSR
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_SSR
 ):
     param_dict = fn_update_TP_SSR(
-        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_DUAL_IP, TP_NUM_OUTPUTS, 
     )
     return validate_legal_set(param_dict["enum"], "TP_SSR", TP_SSR)
-
 
 #######################################################
 ######## TP_CASC_LEN Updater and Validator ############

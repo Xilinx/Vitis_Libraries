@@ -1,0 +1,18 @@
+[hls]
+
+clock=3.20
+flow_target=vitis
+syn.file=${XF_PROJ_ROOT}/L1/src/hw/mid_transpose//mid_transpose.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/src/hw/mid_transpose//mid_transpose.cpp, -I${XF_PROJ_ROOT}/L1/src/hw/common_fns/ -I${XF_PROJ_ROOT}/L1/src/hw/mid_transpose/ -DSSR=16 -DPOINT_SIZE=4096 -DDATAWIDTH=32
+syn.top=mid_transpose_wrapper
+tb.file=test_mid_transpose.cpp
+tb.file_cflags=test_mid_transpose.cpp,-I${XF_PROJ_ROOT}/L1/src/hw/common_fns/ -I${XF_PROJ_ROOT}/L1/src/hw/mid_transpose/ -DSSR=16 -DPOINT_SIZE=4096 -DDATAWIDTH=32
+syn.debug.enable=1
+cosim.trace_level=port
+cosim.wave_debug=true
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog

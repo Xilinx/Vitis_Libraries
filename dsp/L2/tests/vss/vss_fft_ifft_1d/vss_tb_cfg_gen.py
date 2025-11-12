@@ -18,7 +18,7 @@
 import argparse
 
 parser = argparse.ArgumentParser(
-    description="Python script that produces cfg file based on the configuration parameters",
+    description="Python script that produces cfg file based on the configuration parameters. Used by VSS Mode 1 when the AI Engine does not have its own buffer descriptors, so it does needs the PL transpose kernels to manage the data movement.",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
 parser.add_argument(
@@ -27,11 +27,27 @@ parser.add_argument(
 parser.add_argument("-s", "--ssr", type=int, help="parallelisation factor")
 parser.add_argument("-u", "--vss_unit", type=str, help="name of VSS unit")
 parser.add_argument("-q", "--freqhz", type=str, help="frequency of PL kernels")
+parser.add_argument("-l", "--aie_obj_name", type=str, help="Unused for this configuration")
+parser.add_argument(
+    "-aie",
+    "--aie_variant",
+    type=int,
+    help="AIE variant",
+)
+
 args = parser.parse_args()
 SSR = args.ssr
 fname = args.cfg_file_name
 vssName = args.vss_unit
 freq = args.freqhz
+aieVariant = args.aie_variant
+
+if aieVariant == 1:
+    lpddrName = "LPDDR"
+elif aieVariant == 2:
+    lpddrName = "LPDDR2"
+elif aieVariant == 22:
+    lpddrName = "LPDDR01"
 
 f = open(f"{fname}", "w")
 
@@ -48,7 +64,7 @@ nk = mm2s_wrapper:1:mm2s
 nk = s2mm_wrapper:1:s2mm
 
 
-sp=mm2s.mem:LPDDR
+sp=mm2s.mem:{lpddrName}
 
 # ------------------------------------------------------------
 # AXI Stream Connections (PL to AIE)
@@ -102,7 +118,7 @@ else:
 
 
 closing_text = f"""
-sp=s2mm.mem:LPDDR
+sp=s2mm.mem:{lpddrName}
 
 # ------------------------------------------------------------
 # Vivado PAR

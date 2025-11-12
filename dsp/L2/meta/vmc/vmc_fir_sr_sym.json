@@ -28,7 +28,7 @@
       "key": "TP_USE_COEFF_RELOAD",
       "name": "use_coeff_reload",
       "description": "Select this option to enable coefficient reloading at runtime.",
-      "default": true,
+      "default": false,
       "label": "Specify filter coefficients via input port",
       "tablabel": "Main",
       "parameterType": "checkbox",
@@ -153,10 +153,14 @@
       "description": "Specify number of data input/output in parallel for a single channel.",
       "type": "uint",
       "default": 1,
+      "enum": [
+                "Inherit from number of input columns",
+                "<Specify SSR number>"
+            ],
       "label": "SSR:",
       "tablabel": "Main",
       "visible": "off",
-      "parameterType": "edit"
+      "parameterType": "combobox"
     }
   ],
   "generator": {

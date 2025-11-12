@@ -114,7 +114,7 @@ endif # 3
 endif
 XPLATFORM := $(firstword $(XPLATFORM))
 #Get PLATFORM_NAME by PLATFORM
-PLATFORM_NAME = $(strip $(patsubst %.xpfm, % , $(shell basename $(XPLATFORM))))
+PLATFORM_NAME := $(if $(XPLATFORM),$(strip $(patsubst %.xpfm, %, $(notdir $(XPLATFORM)))))
 
 define MSG_PLATFORM
 No platform matched pattern '$(PLATFORM)'.
@@ -138,6 +138,8 @@ else ifeq ($(HOST_ARCH_temp), cortex-a9)
 HOST_ARCH := aarch32
 else ifneq (,$(findstring cortex-a, $(HOST_ARCH_temp)))
 HOST_ARCH := aarch64
+else ifneq (,$(findstring cortexa, $(HOST_ARCH_temp)))
+    HOST_ARCH := aarch64
 endif
 
 # Special processing for tool version/platform type
@@ -151,11 +153,7 @@ IS_VERSAL := off
 endif
 # 1) for aie flow from 2022.1
 ifeq (on, $(IS_VERSAL))
-ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
 LINK_TARGET_FMT := xsa
-else
-LINK_TARGET_FMT := xclbin
-endif
 else
 LINK_TARGET_FMT := xclbin
 endif

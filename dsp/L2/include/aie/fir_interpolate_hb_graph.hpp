@@ -652,7 +652,7 @@ class fir_interpolate_hb_graph : public graph {
 
     /**
      * The conditional array of input async ports used to pass run-time programmable (RTP) coefficients.
-     * This port is (generated when TP_USE_COEFF_RELOAD == 1 and only for TP_PARA_INTERP_POLY > 1) and connects Center
+     * This port is (generated when TP_USE_COEFF_RELOAD == 1 and only for TP_PARA_INTERP_POLY == 2) and connects Center
      *Tap coefficient to dedicated Center tap kernels.
      * Each port in the array holds a duplicate of the Center Tap coefficient (single coefficient extracted out of the
      *coeff array), required to connect to each SSR input path.          *
@@ -673,14 +673,14 @@ class fir_interpolate_hb_graph : public graph {
      * This output is (generated when TP_SSR > 1) a stream API of
      * TT_DATA type
      **/
-    port_conditional_array<output, (TP_PARA_INTERP_POLY > 1), TP_SSR> out3;
+    port_conditional_array<output, (TP_PARA_INTERP_POLY == 2), TP_SSR> out3;
 
     /**
      * The output data from the function.
      * This output is (generated when TP_SSR > 1 and TP_NUM_OUTPUTS = 2) a stream API of
      * TT_DATA type
      **/
-    port_conditional_array<output, (TP_PARA_INTERP_POLY > 1 && TP_NUM_OUTPUTS == 2), TP_SSR> out4;
+    port_conditional_array<output, (TP_PARA_INTERP_POLY == 2 && TP_NUM_OUTPUTS == 2), TP_SSR> out4;
 
     /**
      * Access function to get pointer to kernel (or first kernel in a chained configuration).

@@ -38,7 +38,6 @@ namespace euclidean_distance {
 //-----------------------------------------------------------
 // EUCLIDEAN_DISTANCE reference model class
 template <typename TT_DATA,
-          typename TT_DATA_OUT,
           unsigned int TP_LEN,
           unsigned int TP_DIM,
           unsigned int TP_API,
@@ -57,7 +56,7 @@ class euclidean_distance_ref {
     // Declaration of Euclidean Distance Main Function call.
     void euclidean_distanceMain(input_buffer<TT_DATA>& inWindowP,
                                 input_buffer<TT_DATA>& inWindowQ,
-                                output_buffer<TT_DATA_OUT>& outWindow);
+                                output_buffer<TT_DATA>& outWindow);
 };
 
 } //  End of namespace euclidean_distance {

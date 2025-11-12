@@ -73,6 +73,12 @@ template <>
 INLINE_DECL constexpr int fnFFTCascVWidth<cfloat>() {
     return 4;
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+INLINE_DECL constexpr int fnFFTCascVWidth<cbfloat16>() {
+    return 8;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 template <typename T_D>
 T_D INLINE_DECL unitVector(){};
@@ -97,6 +103,15 @@ cfloat INLINE_DECL unitVector<cfloat>() {
     temp.imag = 0.0;
     return temp;
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+cbfloat16 INLINE_DECL unitVector<cbfloat16>() {
+    cbfloat16 temp = {0.0, 0.0};
+    temp.real = 1.0;
+    temp.imag = 0.0;
+    return temp;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 template <typename TT_TWIDDLE, unsigned int T_TW_MODE = 0>
 INLINE_DECL constexpr unsigned int getTwShift() {
@@ -127,6 +142,16 @@ template <>
 INLINE_DECL constexpr unsigned int getTwShift<cfloat, 1>() {
     return 0;
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+INLINE_DECL constexpr unsigned int getTwShift<cbfloat16, 0>() {
+    return 0;
+};
+template <>
+INLINE_DECL constexpr unsigned int getTwShift<cbfloat16, 1>() {
+    return 0;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 #define __24_1__
 
@@ -350,6 +375,29 @@ void INLINE_DECL r2comb_dit<cfloat, cfloat, 1>(const cfloat* x,
     stage_radix2_dit<cfloat, cfloat, cfloat, 1, 1>(x, tw, n, shift, y, inv);
 };
 
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+void INLINE_DECL r2comb_dit<cbfloat16, cbfloat16, 0>(const cbfloat16* x,
+                                                     const cbfloat16* tw,
+                                                     unsigned int n,
+                                                     unsigned int r,
+                                                     unsigned int shift,
+                                                     cbfloat16* __restrict y,
+                                                     bool inv) {
+    stage_radix2_dit<cbfloat16, cbfloat16, cbfloat16, 1, 0>(x, tw, n, shift, y, inv);
+};
+template <>
+void INLINE_DECL r2comb_dit<cbfloat16, cbfloat16, 1>(const cbfloat16* x,
+                                                     const cbfloat16* tw,
+                                                     unsigned int n,
+                                                     unsigned int r,
+                                                     unsigned int shift,
+                                                     cbfloat16* __restrict y,
+                                                     bool inv) {
+    stage_radix2_dit<cbfloat16, cbfloat16, cbfloat16, 1, 1>(x, tw, n, shift, y, inv);
+};
+#endif //_SUPPORTS_CBFLOAT16_
+
 //-------------------------------------------------------------------------------------------------
 // Unroll_for replacement functions.
 // Function to optionally call a rank if it lies within the remit of this kernel
@@ -390,6 +438,44 @@ void INLINE_DECL opt_cfloat_dyn_stage(cfloat* xbuff,
             }
         }
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <int stage, int TP_POINT_SIZE, int TP_START_RANK, int TP_END_RANK>
+void INLINE_DECL opt_cbfloat16_stage(
+    cbfloat16* xbuff, cbfloat16* obuff, cbfloat16** tmp_bufs, cbfloat16** tw_table, unsigned int& pingPong, bool& inv) {
+    if
+        constexpr(stage >= TP_START_RANK && stage < TP_END_RANK) {
+            cbfloat16* outptr = (stage == TP_END_RANK - 1) ? obuff : tmp_bufs[1 - pingPong];
+            cbfloat16* inptr = (stage == TP_START_RANK) ? xbuff : tmp_bufs[pingPong];
+            stage_radix2_dit<cbfloat16, cbfloat16, cbfloat16, (TP_POINT_SIZE >> (1 + stage)), 0 /*TP_TWIDDLE_MODE*/>(
+                (cbfloat16*)inptr, (cbfloat16*)tw_table[stage], TP_POINT_SIZE, 0, (cbfloat16*)outptr, inv);
+            pingPong = 1 - pingPong;
+        }
+};
+
+// dynamic float stage handling
+template <int stage, int TP_POINT_SIZE, int TP_START_RANK, int TP_END_RANK, int kPointSizePower>
+void INLINE_DECL opt_cbfloat16_dyn_stage(cbfloat16* xbuff,
+                                         cbfloat16* obuff,
+                                         cbfloat16** tmp_bufs,
+                                         cbfloat16** tw_table,
+                                         unsigned int& pingPong,
+                                         bool& inv,
+                                         int ptSizePwr) {
+    if
+        constexpr(stage >= TP_START_RANK && stage < TP_END_RANK) {
+            int firstRank = kPointSizePower - ptSizePwr;
+            if (stage >= firstRank) {
+                cbfloat16* outptr = (stage == TP_END_RANK - 1) ? (cbfloat16*)obuff : (cbfloat16*)tmp_bufs[1 - pingPong];
+                cbfloat16* inptr = (stage == TP_START_RANK) || (stage == firstRank) ? (cbfloat16*)xbuff
+                                                                                    : (cbfloat16*)tmp_bufs[pingPong];
+                stage_radix2_dit<cbfloat16, cbfloat16, cbfloat16, (TP_POINT_SIZE >> (1 + stage)),
+                                 0 /*TP_TWIDDLE_MODE*/>((cbfloat16*)inptr, (cbfloat16*)tw_table[stage - firstRank],
+                                                        (1 << ptSizePwr), 0, (cbfloat16*)outptr, inv);
+                pingPong = 1 - pingPong;
+            }
+        }
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 // Static int stage handling
 template <typename TT_DATA,

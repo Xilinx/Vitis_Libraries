@@ -48,6 +48,10 @@ template <>
 struct t_accType<cfloat> {
     using type = caccfloat;
 };
+template <>
+struct t_accType<cbfloat16> {
+    using type = caccfloat;
+};
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_IN_API,

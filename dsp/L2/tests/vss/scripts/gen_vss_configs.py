@@ -32,6 +32,10 @@ freqhz={FREQ}
         macro_body_str += f"""[aie]
 enable-partition=6:35:{aie_graph_name}
 """
+    elif "xc2ve3858" in PART:
+        macro_body_str += f"""[aie]
+enable-partition=6:26:{aie_graph_name}
+"""        
     else:
         macro_body_str += f"""[aie]
 enable-partition=0:38:{aie_graph_name}

@@ -14,6 +14,7 @@ For all library elements, the recommended manner to use an instance of each libr
 
 - `Bitonic Sort <../../rst/group_bitonic_sort.html>`_
 - `Convolution / Correlation <../../rst/group_conv_corr_graph.html>`_
+- `Cumulative Sum <../../rst/group_cumsum_graph.html>`_
 - `DDS Mixer <../../rst/group_dds_graph.html>`_
 - `DFT <../../rst/group_dft_graph.html>`_
 - `Euclidean Distance <../../rst/group_euclidean_distance_graph.html>`_

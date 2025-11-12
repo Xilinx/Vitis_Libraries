@@ -27,6 +27,7 @@
 using namespace adf;
 using namespace xf::dsp::aie::fft::dit_1ch;
 using namespace xf::dsp::aie::fft::twidRot;
+// using namespace xf::dsp::vss::common;
 
 namespace xf {
 namespace dsp {
@@ -91,15 +92,14 @@ class create_par_kernels_vss_decomp {
  * These are the templates to configure the single-channel decimation-in-time class.
  * @tparam TT_DATA describes the type of individual data samples input to and
  *         output from the transform function. \n
- *         This is a typename and must be cfloat for this VSS Mode. \n
+ *         This is a typename and can be cfloat, cint32 or cint16 for this VSS Mode. \n
  * @tparam TT_TWIDDLE describes the type of twiddle factors of the transform. \n
  *         It must be cfloat for this VSS Mode.
  * @tparam TP_POINT_SIZE is an unsigned integer which describes the number of samples in
  *         the transform. \n This must be 2^N where N is an integer in the range
  *         5 to 16 inclusive for AIE devices and 6 to 16 inclusive for AIE-ML devices.
- * @tparam TP_FFT_NIFFT selects whether the transform to perform is an FFT (1) or IFFT (0). Inverse FFT is not supported
- *for VSS Mode 2.
- * @tparam TP_SHIFT is not applicable for this VSS Mode.
+ * @tparam TP_FFT_NIFFT selects whether the transform to perform is an FFT (1) or IFFT (0).
+ * @tparam TP_SHIFT selects the power of 2 to scale the result by prior to output.
  * @tparam TP_API is an unsigned integer to select window (0) or stream (1) interfaces.
  *         When stream I/O is selected, one sample is taken from, or output to, a stream and the next sample
  *         from or two the next stream. Two streams minimum are used. In this example, even samples are
@@ -154,7 +154,7 @@ class vss_fft_ifft_1d_front_only : public graph {
    public:
     // FFT twiddle rotation kernels that follow the first set of FFT operations.
     kernel m_fftTwRotKernels[TP_SSR];
-    // This is a port that interfaces with a PL kernel internal to the VSS.
+    // This is a port that is exposed as the input ports of the VSS.
     port_array<input, TP_SSR> front_i;
     // This is a port that interfaces with a PL kernel internal to the VSS.
     port_array<output, TP_SSR> front_o;
@@ -165,11 +165,12 @@ class vss_fft_ifft_1d_front_only : public graph {
     static constexpr unsigned int kIntCascLen = 1;
     static constexpr unsigned int kIntUseWidg = 0;
     static constexpr unsigned int kHeaderBytes = kIntDynPtSize > 0 ? 32 : 0;
-    static constexpr unsigned int kPtSizeD1 = fnPtSizeD1<TP_POINT_SIZE, usePLffts(), TP_SSR>(); // 1024
-    static constexpr unsigned int kPtSizeD2 = TP_SSR;                                           // 4
-    static constexpr unsigned int kPtSizeD2Ceil = fnCeil<kPtSizeD2, TP_SSR>();                  // 4
-    static constexpr unsigned int kFirstFFTShift = TP_SHIFT / 2;
-    static constexpr unsigned int kSecondFFTShift = TP_SHIFT - TP_SHIFT / 2;
+    static constexpr unsigned int kPtSizeD1 = fnPtSizeD1<TP_POINT_SIZE, modePLffts, TP_SSR>();
+    static constexpr unsigned int kPtSizeD2 = TP_SSR;
+    static constexpr unsigned int kPtSizeD2Ceil = fnCeil<kPtSizeD2, TP_SSR>();
+    static constexpr unsigned int kSecondFFTShift =
+        std::is_same<TT_TWIDDLE, cfloat>() ? 0 : xf::dsp::vss::common::fnLog2<TP_SSR>();
+    static constexpr unsigned int kFirstFFTShift = TP_SHIFT - kSecondFFTShift;
     static constexpr unsigned int kWindowSizeRaw = kPtSizeD1;
     static constexpr unsigned int kWindowSizeCalc = kWindowSizeRaw * 2 * sizeof(TT_DATA) <= __DATA_MEM_BYTES__
                                                         ? kWindowSizeRaw
@@ -178,6 +179,8 @@ class vss_fft_ifft_1d_front_only : public graph {
         TP_POINT_SIZE / TP_SSR * sizeof(TT_TWIDDLE) <= __DATA_MEM_BYTES__ ? 1 : fnNumLanes<TT_TWIDDLE, TT_TWIDDLE>();
     static constexpr int kInv = TP_FFT_NIFFT == 1 ? -1 : 1;
     static_assert(TP_POINT_SIZE % TP_SSR == 0, "TP_SSR has to be a multiple of TP_POINT_SIZE");
+    static_assert(std::is_same<TT_DATA, cfloat>() || TP_SHIFT >= fnLog2<TP_SSR>(),
+                  "TP_SHIFT has to be greater than or equal to log2(TP_SSR)");
     void createTwidRotKernels() {
         std::array<std::array<TT_TWIDDLE, kRotFanSize>, kPtSizeD2> twRotTmp;
         std::array<std::array<TT_TWIDDLE, kPtSizeD2Ceil / TP_SSR * kRotFanSize>, TP_SSR> twRot;

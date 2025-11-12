@@ -348,7 +348,7 @@ template <typename TT_DATA,
           unsigned int TP_ORIG_PAR_POWER = TP_PARALLEL_POWER>
 class fft_ifft_dit_1ch_ref_graph : public graph {
    public:
-    static_assert(!(std::is_same<TT_DATA, cfloat>::value) || (TP_SHIFT == 0),
+    static_assert(!(std::is_same<TT_DATA, cfloat>::value || std::is_same<TT_DATA, cbfloat16>::value) || (TP_SHIFT == 0),
                   "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
     // static_assert(TP_API==kStreamAPI,"Error: Only Stream interface is supported for parallel FFT"); // not any more
     // as of 23.1
@@ -567,8 +567,8 @@ class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                  TP_INDEX,
                                  TP_ORIG_PAR_POWER> : public graph {
    public:
-    static_assert(!(std::is_same<TT_DATA, cfloat>::value) || (TP_SHIFT == 0),
-                  "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
+    static_assert(!(std::is_same<TT_DATA, cfloat>::value || std::is_same<TT_DATA, cbfloat16>::value) || (TP_SHIFT == 0),
+                  "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat or cbfloat, so must be set to 0");
     static constexpr int kHeaderBytes =
         TP_DYN_PT_SIZE == 1 ? kFftDynHeadBytes : 0;      // header for dynamic point size is 32 bytes
     static constexpr unsigned int TP_PARALLEL_POWER = 0; // for this specialization
@@ -644,8 +644,8 @@ class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                  TP_INDEX,
                                  TP_ORIG_PAR_POWER> : public graph {
    public:
-    static_assert(!(std::is_same<TT_DATA, cfloat>::value) || (TP_SHIFT == 0),
-                  "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
+    static_assert(!(std::is_same<TT_DATA, cfloat>::value || std::is_same<TT_DATA, cbfloat16>::value) || (TP_SHIFT == 0),
+                  "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat or cbfloat16, so must be set to 0");
 
     static constexpr unsigned int TP_PARALLEL_POWER = 0; // for this specialization
     static constexpr unsigned int kOutAPI =

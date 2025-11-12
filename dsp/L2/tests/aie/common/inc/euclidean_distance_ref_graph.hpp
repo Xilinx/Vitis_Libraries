@@ -35,9 +35,8 @@ namespace dsp {
 namespace aie {
 namespace euclidean_distance {
 
-// TT_DATA, TT_DATA_OUT, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT, TP_IS_OUTPUT_SQUARED
+// TT_DATA, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT, TP_IS_OUTPUT_SQUARED
 template <typename TT_DATA,
-          typename TT_DATA_OUT,
           unsigned int TP_LEN,
           unsigned int TP_DIM,
           unsigned int TP_API,
@@ -116,8 +115,8 @@ class euclidean_distance_ref_graph : public graph {
     **/
     euclidean_distance_ref_graph() {
         // Create EUCLIDEAN_DISTANCE class
-        m_ED_ref_kernel = kernel::create_object<euclidean_distance_ref<TT_DATA, TT_DATA_OUT, TP_LEN, TP_DIM, TP_API,
-                                                                       TP_RND, TP_SAT, TP_IS_OUTPUT_SQUARED> >();
+        m_ED_ref_kernel = kernel::create_object<
+            euclidean_distance_ref<TT_DATA, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT, TP_IS_OUTPUT_SQUARED> >();
 #ifdef _DSPLIB_EUCLIDEAN_DISTANCE_REF_DEBUG_
         printf("==========================================\n");
         printf("== EUCLIDEAN_DISTANCE REF KERNEL Graph ===\n");

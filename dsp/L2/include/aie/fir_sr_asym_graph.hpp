@@ -377,6 +377,8 @@ class fir_sr_asym_graph : public graph {
      **/
     port_conditional_array<input, (TP_DUAL_IP == 1), TP_SSR> in2;
 
+    using rtp_port_array = port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), (TP_SSR * TP_SSR * TP_CASC_LEN)>;
+
     /**
      * The conditional array of input async ports used to pass run-time programmable (RTP) coefficients.
      * This port_conditional_array is (generated when TP_USE_COEFF_RELOAD == 1) an array of input ports, which size is
@@ -449,8 +451,6 @@ class fir_sr_asym_graph : public graph {
      * Constructor has no args. To be used with TP_USE_COEFF_RELOAD=1, taps needs to be passed through RTP
      **/
     fir_sr_asym_graph() {
-        printParams<ssr_params<0> >();
-
         printf("== class fir_sr_asym_base_graph (reloadable): \n");
         lastSSRKernel::create_and_recurse(m_firKernels);
         lastSSRKernel::create_connections(m_firKernels, &in[0], in2, &out[0], out2, coeff, net, net2, casc_in);

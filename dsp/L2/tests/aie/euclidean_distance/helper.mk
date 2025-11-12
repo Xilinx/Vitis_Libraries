@@ -28,7 +28,7 @@ SEED_DATA ?= 1
 ceil = $(shell echo $$(((($1 + $2 - 1)/ $2) * $2)))
 
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
-PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA $(DATA) DATA_OUT $(DATA_OUT) LEN $(LEN)  DIM $(DIM) API_IO $(API_IO) RND $(RND) SAT $(SAT) IS_OUTPUT_SQUARED $(IS_OUTPUT_SQUARED)
+PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA $(DATA) LEN $(LEN)  DIM $(DIM) API_IO $(API_IO) RND $(RND) SAT $(SAT) IS_OUTPUT_SQUARED $(IS_OUTPUT_SQUARED)
 
 DIFF_TOLERANCE = 0.0025
 ifeq ($(DATA), float)
@@ -46,10 +46,9 @@ endif
 NITER_UUT         = $(NITER)
 NITER_REF         = $(NITER_UUT)
 
-REQUIRED_LEN_P    = $(shell echo $$((  $(LEN)*$(DIM))))
-REQUIRED_LEN_Q    = $(shell echo $$((  $(LEN)*$(DIM))))
-REARRANGED_LEN_P    = $(shell echo $$((  $(LEN)*$(FIXED_DIM))))
-REARRANGED_LEN_Q    = $(shell echo $$((  $(LEN)*$(FIXED_DIM))))
+REQUIRED_LEN_P    = $(shell echo $$((  $(LEN)*$(FIXED_DIM))))
+REQUIRED_LEN_Q    = $(shell echo $$((  $(LEN)*$(FIXED_DIM))))
+
 
 $(HELPER): create_input sim_ref prep_x86_out
 	make cleanall
@@ -66,12 +65,6 @@ create_input:
 	@echo starting generation of input
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/euclidean_distance/gen_input_ED.tcl $(LOC_INPUT_FILE_P) $(REQUIRED_LEN_P) $(NITER_UUT) $(SEED_DATA) $(STIM_TYPE) 0 0 $(DATA) $(API_IO) 1 0 0 $(DATA) 0 0 $(NUM_FRAMES) 1;\
     tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/euclidean_distance/gen_input_ED.tcl $(LOC_INPUT_FILE_Q) $(REQUIRED_LEN_Q) $(NITER_UUT) $(SEED_DATA) $(STIM_TYPE) 0 0 $(DATA) $(API_IO) 1 0 0 $(DATA) 0 0 $(NUM_FRAMES) 1;\
-	
-	@if [ $(IS_ZERO_PADDING_REQUIRED) == 1 ]; then \
-	    echo Input rearrange starts;\
-	    tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/euclidean_distance/rearrangeInData.tcl $(LOC_INPUT_FILE_P) $(DATA) $(DIM) $(FIXED_DIM) ; \
-	    tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/euclidean_distance/rearrangeInData.tcl $(LOC_INPUT_FILE_Q) $(DATA) $(DIM) $(FIXED_DIM) ; \
-	fi;\
     echo Input ready
 
 sim_ref:

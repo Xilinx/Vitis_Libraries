@@ -31,13 +31,19 @@ set aieCompileLogFile "${fileDir}AIECompiler.log"
 set aiesimLogFile "${fileDir}AIESimulator.log"
 set x86simLogFile "${fileDir}x86simulator_output/x86simulator.log"
 set diffFile "${fileDir}logs/diff.txt"
+set validationFile "${fileDir}logs/validation.txt"
+
 # Result phrases to grep
 set compPhrase "compilation complete"
 set aiesimPhrase "simulation finished"
 set x86simPhrase "ERROR SUMMARY: "
 set funcPhrase "identical"
 # Warning phrases to grep
+set assertPhrase "Assertion failure"
+set errorPhrase "Error: "
 set deadlockPhrase "Detected deadlock"
+set validationPhrase "ERROR:"
+
 # if there are valgrind warnings there will be ERROR SUMMARY: <non-zero number>
 set valgrindPhrase "ERROR SUMMARY: \[1-9\]"
 
@@ -46,10 +52,14 @@ set compilation "default"
 set simulation "default"
 set functional "default"
 set valgrind "default"
+set validation 0
+
 # warning counter. These will only be printed if warnings > 0
 set warnings 0
 set valgrind 0
 set deadlock 0
+set assertsFound 0
+set errorsFound 0
 
 # If compile file exists, search for compile phrase and remove defaults
 if {[file exist $aieCompileLogFile]} {
@@ -57,7 +67,6 @@ if {[file exist $aieCompileLogFile]} {
     set compilation [expr !$grepOut]
     set functional 0
     set simulation 0
-
 }
 # check x86sim file for completed simulation
 if {[file exist $x86simLogFile]} {
@@ -79,9 +88,26 @@ if {[file exist $diffFile]} {
         set compilation 1
     }
 }
+
+# If validation file exists, search for validation phrase
+if {[file exist $validationFile]} {
+    set grepOut [catch {exec grep -i $validationPhrase -c $validationFile}]
+    set validation [expr !$grepOut]
+    # force functional to be 0
+    if {$validation} {
+        set functional 0
+    }
+}
+
 # detect simulation warnings
 # valgrind - present when x86sim file produced ERROR SUMMARY: <not 0>
 if {[file exist $x86simLogFile]} {
+    # search for assertPhrase
+    set grepOut [catch { exec grep -E -i "$assertPhrase" $x86simLogFile  }]
+    set assertsFound [expr !$grepOut]
+    # search for errorPhrase
+    set grepOut [catch { exec grep -E -i "$errorPhrase" $x86simLogFile  }]
+    set errorsFound [expr !$grepOut]
     # search for valgrind warnings
     set grepOut [catch { exec grep -E -i "$valgrindPhrase" $x86simLogFile  }]
     set valgrind [expr !$grepOut]
@@ -89,12 +115,20 @@ if {[file exist $x86simLogFile]} {
     set grepOut [catch { exec grep -E -i "$deadlockPhrase" $x86simLogFile  }]
     set deadlock [expr !$grepOut]
 }
+
 if {[file exist $aiesimLogFile]} {
+    # search for assertPhrase
+    set grepOut [catch { exec grep -E -i "$assertPhrase" $aiesimLogFile  }]
+    set assertsFound [expr !$grepOut]
+    # search for errorPhrase
+    set grepOut [catch { exec grep -E -i "$errorPhrase" $aiesimLogFile  }]
+    set errorsFound [expr !$grepOut]
     # search for deadlocks (AIESIM)
     set grepOut [catch { exec grep -E -i "$deadlockPhrase" $aiesimLogFile  }]
     set deadlock [expr !$grepOut]
 }
-set warnings [expr $valgrind + $deadlock]
+
+set warnings [expr $valgrind + $deadlock + $assertsFound + $errorsFound]
 # -------------------------
 # --- Print to Terminal ---
 # -------------------------
@@ -106,6 +140,8 @@ if {$warnings > 0} {
     puts "Warnings:"
     puts "    VALGRIND:             $valgrind"
     puts "    DEADLOCK:             $deadlock"
+    puts "    ASSERTS:             $assertsFound"
+    puts "    ERRORS:              $errorsFound"
 }
 puts "Results:"
 puts "    COMPILE:              $compilation"

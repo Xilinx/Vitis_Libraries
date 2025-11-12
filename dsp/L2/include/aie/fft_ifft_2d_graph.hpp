@@ -49,12 +49,12 @@ namespace two_d {
  *
  *
  * These are the templates to configure the 2D FFT class.
- * @tparam TT_DATA_D1 describes the type of individual data samples input to and
- *         output from the first transform function. \n
+ * @tparam TT_DATA_D1 describes the type of individual data samples input to
+ *         the first transform function. \n
  *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
- * @tparam TT_DATA_D2 describes the type of individual data samples input to and
- *         output from the second transform function. \n
+ * @tparam TT_DATA_D2 describes the type of individual data samples input to
+ *         the second transform function. \n
  *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
  * @tparam TT_TWIDDLE describes the type of twiddle factors of the transform. \n
@@ -139,9 +139,22 @@ class fft_ifft_2d_graph : public graph {
     static constexpr unsigned int kIntDynPtSize = 0;
     static constexpr unsigned int kIntUseWidgets = 0;
     static constexpr unsigned int kIsRealDataD1 =
-        (std::is_same<TT_DATA_D1, int16>::value || std::is_same<TT_DATA_D1, bfloat16>::value) ? 1 : 0;
+        (std::is_same<TT_DATA_D1, int16>::value || std::is_same<TT_DATA_D1, bfloat16>::value) ||
+                (std::is_same<TT_DATA_D1, int32>::value || std::is_same<TT_DATA_D1, float>::value)
+            ? 1
+            : 0;
     static constexpr unsigned int kPtSizeRealSymOut = TP_POINT_SIZE_D1 / 2;
     static constexpr unsigned int kD1SizeMemTile = kIsRealDataD1 ? kPtSizeRealSymOut : TP_POINT_SIZE_D1;
+    typedef typename std::conditional_t<
+        std::is_same<TT_DATA_D1, int16>::value,
+        cint16,
+        std::conditional_t<
+            std::is_same<TT_DATA_D1, int32>::value,
+            cint32,
+            std::conditional_t<std::is_same<TT_DATA_D1, bfloat16>::value,
+                               cbfloat16,
+                               std::conditional_t<std::is_same<TT_DATA_D1, float>::value, cfloat, TT_DATA_D1> > > >
+        t_inTypeFrontGraph;
 
    public:
     /**
@@ -160,8 +173,6 @@ class fft_ifft_2d_graph : public graph {
      *TT_DATA_D1 is complex.
      * When TT_DATA_D1 is of real type, a total of (TP_POINT_SIZE_D1 * TP_POINT_SIZE_D2)/2 samples are produced at the
      *output.
-     * This is because only half the output samples of the first FFT are given as input to the second FFT. Since the
-     *output samples of a
      * real-only FFT are symmetric, this optimisation reduces the memory footprint of the design.
      **/
     port_array<output, 1> out;
@@ -170,7 +181,7 @@ class fft_ifft_2d_graph : public graph {
      * Front FFT graph that computes the first set of FFTs.
      **/
     typedef typename std::conditional_t<kIsRealDataD1,
-                                        fft_dit_2ch_real_graph<TT_DATA_D2,
+                                        fft_dit_2ch_real_graph<t_inTypeFrontGraph,
                                                                TT_TWIDDLE,
                                                                TP_POINT_SIZE_D1,
                                                                TP_FFT_NIFFT,
@@ -180,8 +191,9 @@ class fft_ifft_2d_graph : public graph {
                                                                TP_API,
                                                                TP_RND,
                                                                TP_SAT,
-                                                               TP_TWIDDLE_MODE>,
-                                        fft_ifft_dit_1ch_graph<TT_DATA_D2,
+                                                               TP_TWIDDLE_MODE,
+                                                               TT_DATA_D2>,
+                                        fft_ifft_dit_1ch_graph<t_inTypeFrontGraph,
                                                                TT_TWIDDLE,
                                                                TP_POINT_SIZE_D1,
                                                                TP_FFT_NIFFT,
@@ -194,7 +206,8 @@ class fft_ifft_2d_graph : public graph {
                                                                kIntUseWidgets,
                                                                TP_RND,
                                                                TP_SAT,
-                                                               TP_TWIDDLE_MODE> >
+                                                               TP_TWIDDLE_MODE,
+                                                               TT_DATA_D2> >
         frontGraphType;
 
     frontGraphType frontFFTGraph[1];

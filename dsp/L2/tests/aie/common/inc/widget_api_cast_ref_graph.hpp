@@ -43,6 +43,26 @@ template <typename TT_DATA,
           unsigned int TP_HEADER_BYTES = 0>
 class widget_api_cast_ref_graph : public graph {
    public:
+    // Defensive legalit checks
+    static_assert(TP_IN_API == kStreamAPI || TP_IN_API == kWindowAPI,
+                  "Error: TP_IN_API is not a supported value of 0 (window) or 1 (stream)");
+    static_assert(TP_OUT_API == kStreamAPI || TP_OUT_API == kWindowAPI,
+                  "Error: TP_OUT_API is not a supported value of 0 (window) or 1 (stream)");
+    // static_assert(!(TP_IN_API == kWindowAPI && TP_NUM_INPUTS >1), "Error: Only a single input is supported for an
+    // input API of Window");
+    // static_assert(TP_NUM_INPUTS >=1 && TP_NUM_INPUTS<=2, "Error: TP_NUM_INPUTS is out of the supported range");
+    static_assert(TP_NUM_OUTPUT_CLONES >= 1 && TP_NUM_OUTPUT_CLONES <= 4,
+                  "Error: TP_NUM_OUTPUT_CLONES is out of the supported range");
+    static_assert(TP_IN_API == 1 || TP_NUM_OUTPUT_CLONES < 4,
+                  "Error: TP_NUM_OUTPUT_CLONES may only be 4 when stream input is configured.");
+    static_assert(TP_IN_API != 1 || TP_OUT_API != 1, "Error: stream to stream connection is not supported");
+    // static_assert(TP_IN_API != 0 || TP_OUT_API != 1 || TP_NUM_INPUTS==1, "Error: Window to stream supports only a
+    // single connection in.");
+    static_assert(TP_PATTERN >= 0 && TP_PATTERN < 3, "Error: TP_PATTERN is out of range.");
+    static_assert(TP_PATTERN == 0 || (TP_IN_API == kStreamAPI && TP_NUM_INPUTS == 2) ||
+                      (TP_OUT_API == kStreamAPI && TP_NUM_OUTPUT_CLONES == 2),
+                  "Error: non-zero TP_PATTERN features require dual streams on input or output");
+
     port<input> in[TP_NUM_INPUTS];
     port<output> out[TP_NUM_OUTPUT_CLONES];
 

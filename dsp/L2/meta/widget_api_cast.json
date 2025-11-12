@@ -72,12 +72,12 @@
             "updater": {
                 "file": "widget_api_cast.py",
                 "function": "update_TP_OUT_API",
-                "args": []
+                "args": ["TP_IN_API"]
             },
             "validator": {
                 "file": "widget_api_cast.py",
                 "function": "validate_TP_OUT_API",
-                "args": []
+                "args": ["TP_IN_API"]
             }
         },
         {

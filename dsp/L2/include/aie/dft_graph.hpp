@@ -27,8 +27,13 @@ the DFT function library element.
 
 #include <adf.h>
 #include <vector>
+#include <cmath>
 #include "graph_utils.hpp"
 #include "dft.hpp"
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 using namespace adf;
 namespace xf {

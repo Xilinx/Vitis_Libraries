@@ -22,11 +22,11 @@
 using namespace std;
 using namespace back_transpose_simple;
 
-void back_transpose_simple_wrapper(backTransposeSimpleCls<POINT_SIZE, SSR>::TT_STREAM_IN sig_i[SSR],
-                                   backTransposeSimpleCls<POINT_SIZE, SSR>::TT_STREAM_OUT sig_o[SSR]) { // 2
+void back_transpose_simple_wrapper(backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::t_stream_in sig_i[SSR],
+                                   backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::t_stream_out sig_o[SSR]) { // 2
 #pragma HLS interface mode = ap_ctrl_none port = return
 #pragma HLS DATAFLOW
-    static backTransposeSimpleCls<POINT_SIZE, SSR> uut;
+    static backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH> uut;
     uut.back_transpose_simple_top(sig_i, sig_o);
 }
 

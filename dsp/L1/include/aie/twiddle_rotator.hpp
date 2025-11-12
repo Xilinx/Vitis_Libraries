@@ -21,64 +21,17 @@
 #include <vector>
 #include "fir_utils.hpp"
 #include "fft_ifft_dit_1ch_traits.hpp"
+#include "common.hpp"
+#include "vss_fft_ifft_1d_common.hpp"
 using namespace adf;
 using namespace xf::dsp::aie::fft::dit_1ch;
+// using namespace xf::dsp::vss::common;
 
 namespace xf {
 namespace dsp {
 namespace aie {
 namespace fft {
 namespace twidRot {
-
-static constexpr unsigned int usePLffts() {
-    return 1;
-}
-static constexpr unsigned int useAIEffts() {
-    return 0;
-}
-
-// Returns the point size of the first set of FFTs of the decomposed FFT.
-template <unsigned int TP_POINT_SIZE, unsigned int TP_VSS_MODE, unsigned TP_SSR>
-constexpr unsigned int fnPtSizeD1() {
-    unsigned int ptSizeD1 = -1;
-    if (TP_VSS_MODE == usePLffts()) {
-        ptSizeD1 = TP_POINT_SIZE / TP_SSR;
-    } else if (TP_VSS_MODE == useAIEffts()) {
-        // While this is simply the sqrt(point size) for perfect powers of 2 point sizes, for other point sizes like
-        // 512, it can be decomposed either as 16 x 32 or 32 x 16.
-        // Since the first set of FFT tiles will also contain the twiddle rotations, we choose the ffts with higher
-        // performance to be placed on the same kernel as the twiddle rotators to better balance the performance with
-        // the second set of FFTs
-        // This is counter-intuitively the larger of the two numbers due to lesser overheads in larger point sizes
-        // (determined based on experiments on the standalone fft).
-        ptSizeD1 = TP_POINT_SIZE == 65536
-                       ? 256
-                       : TP_POINT_SIZE == 32768
-                             ? 256
-                             : TP_POINT_SIZE == 16384
-                                   ? 128
-                                   : TP_POINT_SIZE == 8192
-                                         ? 128
-                                         : TP_POINT_SIZE == 4096
-                                               ? 64
-                                               : TP_POINT_SIZE == 2048
-                                                     ? 64
-                                                     : TP_POINT_SIZE == 1024
-                                                           ? 32
-                                                           : TP_POINT_SIZE == 512
-                                                                 ? 32
-                                                                 : TP_POINT_SIZE == 256
-                                                                       ? 16
-                                                                       : TP_POINT_SIZE == 128
-                                                                             ? 16
-                                                                             : TP_POINT_SIZE == 64
-                                                                                   ? 8
-                                                                                   : TP_POINT_SIZE == 32
-                                                                                         ? 8
-                                                                                         : TP_POINT_SIZE == 16 ? 4 : 0;
-    }
-    return ptSizeD1;
-}
 
 template <typename TT_DATA,
           typename TT_TWIDDLE,

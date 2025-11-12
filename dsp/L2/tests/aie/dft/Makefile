@@ -78,12 +78,12 @@ UUT_KERNEL ?= dft
 REF_KERNEL ?= dft_ref
 UUT_GRAPH ?= dft_graph
 REF_GRAPH ?= dft_ref_graph
-STACKSIZE_VAL ?= 900
+STACKSIZE_VAL ?= 2048
 UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 LOC_INPUT_FILE ?= ./data/input.txt
 REF_INPUT_FILE ?= ./data/input_ref.txt
-UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.pnll="off"
+UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.pnll="off" --aie.stacksize=$(STACKSIZE_VAL)
 REF_TARGET_COMPILE_ARGS ?= 
 PREPROC_ARGS ?= 
 REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(REF_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) 
@@ -99,12 +99,12 @@ UUT_KERNEL ?= dft
 REF_KERNEL ?= dft_ref
 UUT_GRAPH ?= dft_graph
 REF_GRAPH ?= dft_ref_graph
-STACKSIZE_VAL ?= 900
+STACKSIZE_VAL ?= 2048
 UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 LOC_INPUT_FILE ?= ./data/input.txt
 REF_INPUT_FILE ?= ./data/input_ref.txt
-UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.pnll="off"
+UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.pnll="off" --aie.stacksize=$(STACKSIZE_VAL)
 REF_TARGET_COMPILE_ARGS ?= 
 PREPROC_ARGS ?= 
 REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(REF_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) 
@@ -120,12 +120,12 @@ UUT_KERNEL ?= dft
 REF_KERNEL ?= dft_ref
 UUT_GRAPH ?= dft_graph
 REF_GRAPH ?= dft_ref_graph
-STACKSIZE_VAL ?= 900
+STACKSIZE_VAL ?= 2048
 UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 LOC_INPUT_FILE ?= ./data/input.txt
 REF_INPUT_FILE ?= ./data/input_ref.txt
-UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.pnll="off"
+UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.pnll="off" --aie.stacksize=$(STACKSIZE_VAL)
 REF_TARGET_COMPILE_ARGS ?= 
 PREPROC_ARGS ?= 
 REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(REF_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) 
@@ -137,12 +137,12 @@ UUT_KERNEL ?= dft
 REF_KERNEL ?= dft_ref
 UUT_GRAPH ?= dft_graph
 REF_GRAPH ?= dft_ref_graph
-STACKSIZE_VAL ?= 900
+STACKSIZE_VAL ?= 2048
 UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 LOC_INPUT_FILE ?= ./data/input.txt
 REF_INPUT_FILE ?= ./data/input_ref.txt
-UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.pnll="off"
+UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.pnll="off" --aie.stacksize=$(STACKSIZE_VAL)
 REF_TARGET_COMPILE_ARGS ?= 
 PREPROC_ARGS ?= 
 REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(REF_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) 

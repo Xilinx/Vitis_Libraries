@@ -62,7 +62,7 @@
                         "default": {
                             "COMPILER_ARGS": "",
                             "AIE_VARIANT": "2",
-                            "FIFO_THRESHOLD": "--aie.swfifo-threshold=120 "
+                            "FIFO_THRESHOLD": " "
                         }
                     }
                 }
@@ -116,7 +116,7 @@
                         "default": {
                             "COMPILER_ARGS": "",
                             "AIE_VARIANT": "22",
-                            "FIFO_THRESHOLD": "--aie.swfifo-threshold=120 "
+                            "FIFO_THRESHOLD": " "
                         }
                     }
                 }
@@ -135,9 +135,6 @@
         },
         {
             "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/meta/scripts/metadata_checker.py --ip $(UUT_KERNEL))"
-        },
-        {
-            "build_cmd": "$(if $(filter-out REF,$(TAG)), # vitis --classic -exec ipmetadata_config_checker LIB_DIR/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)"
         },
         {
             "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk gen_input HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(LOC_INPUT_FILE)\")"
@@ -223,7 +220,7 @@
                     "REF_SIM_FILE": "./data/ref_output.txt",
                     "LOC_COEFF_FILE": "./data/coeff.txt",
                     "LOC_INPUT_FILE": "./data/input.txt",
-                    "REF_INPUT_FILE": "./data/input_ref.txt",
+                    "REF_INPUT_FILE": "./data/ref_input.txt",
                     "UUT_TARGET_COMPILE_ARGS": " $(FIFO_THRESHOLD) --aie.Xrouter=DMAFIFOsInFreeBankOnly  --aie.stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py $(PARAMS_FILE) $(PARAMS))  --aie.Xchess=llvm.xargs=\"-std=c++2a\" $(COMPILER_ARGS) ",
                     "REF_TARGET_COMPILE_ARGS": "",
                     "PREPROC_ARGS": "--aie.Xpreproc=-DCOEFF_FILE=$(LOC_COEFF_FILE)",

@@ -55,9 +55,13 @@
       "name": "ssr",
       "description": "Specify the number of parallel input/output data paths for a single channel.",
       "default": 1,
+        "enum": [
+                "Inherit from number of input columns",
+                "<Specify SSR number>"
+            ],
       "label": "SSR: ",
       "tablabel": "Main",
-      "parameterType": "edit"
+      "parameterType": "combobox"
     },
     {
       "key": "TP_INPUT_WINDOW_VSIZE",
@@ -69,13 +73,13 @@
       "parameterType": "edit"
     },
     {
-      "key": "TP_PHASE_RELOAD_API",
-      "name": "PHASE_RELOAD_API",
-      "description": "specifies whether phase_offset reload, if used, is to be non-blocking (RTP) or blocking (iobuffer).",
-      "default": false,
-      "label": "phase_offset reload",
+      "key": "initialPhaseOffset",
+      "name": "initial_phase_offset",
+      "description": "Enter the initial phase offset value.",
+      "default": 0,
+      "label": "Initial phase offset:",
       "tablabel": "Main",
-      "parameterType": "checkbox"
+      "parameterType": "edit"
     },
     {
       "key": "TP_USE_PHASE_RELOAD",
@@ -83,6 +87,15 @@
       "description": "Specifies whether the initial phase should be implemented as a reloadable RTP port.",
       "default": false,
       "label": "Reload initial phase via input port",
+      "tablabel": "Main",
+      "parameterType": "checkbox"
+    },
+    {
+      "key": "TP_PHASE_RELOAD_API",
+      "name": "PHASE_RELOAD_API",
+      "description": "specifies whether phase_offset reload, if used, is to be non-blocking (RTP) or blocking (iobuffer).",
+      "default": false,
+      "label": "Use iobuffer port for phase offset reload",
       "tablabel": "Main",
       "parameterType": "checkbox"
     },
@@ -100,18 +113,9 @@
       "name": "phase_increment_reload",
       "description": "specifies if phase_increment can be reloaded at runtime.",
       "default": false,
-      "label": "phase_increment reload at runtime ",
+      "label": "Reload phase increment via input port",
       "tablabel": "Main",
       "parameterType": "checkbox"
-    },
-    {
-      "key": "initialPhaseOffset",
-      "name": "initial_phase_offset",
-      "description": "Enter the initial phase offset value.",
-      "default": 0,
-      "label": "Initial phase offset:",
-      "tablabel": "Main",
-      "parameterType": "edit"
     },
     {
       "key": "TP_RND",

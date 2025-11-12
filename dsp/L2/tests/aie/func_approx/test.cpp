@@ -20,14 +20,25 @@ reference model graph
 */
 
 #include <stdio.h>
+#include <vector>
 #include "test.hpp"
 
 xf::dsp::aie::testcase::test_graph funcApproxTestHarness;
 
 int main(void) {
     funcApproxTestHarness.init();
+#if (USE_LUT_RELOAD == 1)
+    // Use arrays directly for update_rtp function
+    funcApproxTestHarness.funcApproxGraph.update_rtp(funcApproxTestHarness, funcApproxTestHarness.m_luts_ab,
+                                                     funcApproxTestHarness.rtpLut);
+    funcApproxTestHarness.run(NITER / 2);
+    funcApproxTestHarness.wait();
+    funcApproxTestHarness.funcApproxGraph.update_rtp(funcApproxTestHarness, funcApproxTestHarness.m_luts_cd,
+                                                     funcApproxTestHarness.rtpLut);
+    funcApproxTestHarness.run(NITER / 2);
+#else
     funcApproxTestHarness.run(NITER);
+#endif
     funcApproxTestHarness.end();
-
     return 0;
 }

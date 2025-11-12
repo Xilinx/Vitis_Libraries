@@ -24,7 +24,8 @@ json_file="multi_params"
 for i in "${!args[@]}"; do
     if [[ "${args[$i]}" == '-func' ]]
     then
-        libelemName=${args[($i+1)]}
+        funcDir=${args[($i+1)]}
+        libelemName=$(basename "$funcDir")
         echo $libelemName
     fi
     if [[ "${args[$i]}" == '-params' ]]
@@ -39,7 +40,6 @@ for i in "${!args[@]}"; do
     fi
 done
 
-funcDir=$(dirname "$(dirname "$scriptDir")")/$libelemName
 echo "Start of Batch Run $funcDir/results/batch_${json_file}_${suffix}" | tee $funcDir/runmake_logs/runmake.log
 # Read keys into an array
 mapfile -t json_test_names < <(python -c "import json; print('\n'.join(json.load(open('$funcDir/$json_file.json')).keys()))")

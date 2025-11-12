@@ -119,7 +119,7 @@ template <typename TT_DATA,
           unsigned int TP_INDEX = 0>
 class bitonic_sort_graph : public graph {
    public:
-    static constexpr unsigned int kKernelSize = TP_DIM;
+    static constexpr unsigned int kLocalListSize = TP_DIM / TP_SSR;
     static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
     // Use dual streams in if available (AIE1). Else use iobuffers for merge kernels connected directly to bitonic_sort
     // kernels outputs. The next "level" of merge_sort kernels will use one stream and one cascade in
@@ -130,20 +130,26 @@ class bitonic_sort_graph : public graph {
     static constexpr unsigned int TP_OUT_API =
         (kStreamsPerTile == 2) ? kStreamAPI : (TP_INDEX / TP_SSR % 2 == 0) ? kStreamAPI : kCascAPI;
 
-    static_assert(fnLog2<kKernelSize * sizeof(TT_DATA) * TP_NUM_FRAMES>() != -1,
-                  "ERROR: TP_DIM * sizeof(TT_DATA) * TP_NUM_FRAMES must be a power of 2.");
-    // TODO: Please fix static_assert. Checks against __MAX_READ_WRITE__, but underlying vector is fixed at 256-bits).
-    // Reverting to using const.
-    static_assert(kKernelSize * sizeof(TT_DATA) * TP_NUM_FRAMES >= 2 * 256 / 8,
-                  "ERROR: TP_DIM * sizeof(TT_DATA) * TP_NUM_FRAMES must be greater than or equal to 64 bytes.");
-    static_assert(kKernelSize * sizeof(TT_DATA) * TP_NUM_FRAMES <= __DATA_MEM_BYTES__,
-                  "ERROR: TP_DIM * sizeof(TT_DATA) * TP_NUM_FRAMES must be less than or equal to I/O buffer bytes.");
+    static_assert(fnLog2<TP_DIM>(), "ERROR: TP_DIM must be a power of 2.");
+    static_assert(fnLog2<TP_SSR>(), "ERROR: TP_SSR must be a power of 2.");
+    static_assert(TP_SSR <= 8, "ERROR: TP_SSR must be less than or equal to 8.");
+    static_assert(
+        kLocalListSize * sizeof(TT_DATA) >= 2 * 256 / 8,
+        "ERROR: TP_DIM * sizeof(TT_DATA) / TP_SSR  must be greater than or equal to 2 * 256 / 8 bytes."); // TODO: Trial
+                                                                                                          // changing
+                                                                                                          // this to
+                                                                                                          // __MIN_READ_WRITE__
+    static_assert(
+        kLocalListSize * sizeof(TT_DATA) * TP_NUM_FRAMES <= __DATA_MEM_BYTES__,
+        "ERROR: TP_DIM * sizeof(TT_DATA) * TP_NUM_FRAMES / TP_SSR must be less than or equal to I/O buffer bytes.");
     static_assert(TP_ASCENDING == 0 || TP_ASCENDING == 1,
-                  "ERROR: TP_ASCENDING must be 0 (descending) or (1) ascending.");
+                  "ERROR: TP_ASCENDING must be 0 (descending) or 1 (ascending).");
     static_assert(
         TP_CASC_LEN <= getNumStages<TP_DIM>(),
         "ERROR: TP_CASC_LEN must be less or equal to the number of bitonic stages (log2(TP_DIM)+1)*log2(TP_DIM)/2.");
-    static_assert(TP_NUM_FRAMES == 1 || TP_SSR == 1, "ERROR: TP_NUM_FRAMES > 1 is only supported for TP_SSR = 1");
+    static_assert(!(TP_SSR > 1 && TP_NUM_FRAMES > 1),
+                  "ERROR: TP_SSR > 1 and TP_NUM_FRAMES > 1 are mutually exclusive.");
+    static_assert(!(TP_SSR > 1 && TP_CASC_LEN > 1), "ERROR: TP_SSR > 1 and TP_CASC_LEN > 1 are mutually exclusive.");
     /**
      * The input data to be sorted.
      **/

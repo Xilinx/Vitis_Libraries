@@ -19,7 +19,7 @@ import aie_common as com
 # import json
 # import sys
 
-k_minpoint_size = {com.AIE: 8, com.AIE_ML: 16, com.AIE_MLv2: 16}
+k_minpoint_size = {com.AIE: 8, com.AIE_ML: 16, com.AIE_MLv2: 32}
 
 TP_POINT_SIZE_max = 3300
 

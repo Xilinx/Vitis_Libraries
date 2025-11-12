@@ -52,6 +52,7 @@ TP_CASC_LEN_MAX = 32
 TP_PHASES_MIN = 1
 TP_PHASES_MAX = 16
 TP_G_LEN_iobuffer_max = 256
+TP_F_LEN_min_for_stream = 512 # The stream-based implementation requires a minimum length of 512 for TP_F_LEN to to ensure the stream implementation flushes out partial results
 
 sampleSize = {
     "int8": 8,
@@ -275,19 +276,22 @@ def update_TP_F_LEN(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TP_API = args["TP_API"]
     TT_DATA_F = args["TT_DATA_F"]
+    TT_DATA_G = args["TT_DATA_G"]
     TP_F_LEN = args["TP_F_LEN"] if ("TP_F_LEN" in args and args["TP_F_LEN"] )else 0
-    return fn_update_f_len(TP_F_LEN, TT_DATA_F, TP_API, AIE_VARIANT)
+    return fn_update_f_len(TP_F_LEN, TT_DATA_G, TT_DATA_F, TP_API, AIE_VARIANT)
 
-def fn_update_f_len(TP_F_LEN, TT_DATA_F, TP_API, AIE_VARIANT):
-    elems_per_load = (com.k_max_read_write_bytes[AIE_VARIANT]) // com.fn_size_by_byte(TT_DATA_F)
+def fn_update_f_len(TP_F_LEN, TT_DATA_G, TT_DATA_F, TP_API, AIE_VARIANT):
+    smallest_byte_size = min(com.fn_size_by_byte(TT_DATA_F), com.fn_size_by_byte(TT_DATA_G))
+    elems_per_load = (com.k_max_read_write_bytes[AIE_VARIANT] << 1 ) // smallest_byte_size
+
     TP_F_LEN_max = (com.k_data_memory_bytes[AIE_VARIANT] >> 2 )// (com.fn_size_by_byte(TT_DATA_F))
     TP_F_LEN_max_pingpong_buff= int(com.k_data_memory_bytes[AIE_VARIANT]>> 1)// (com.fn_size_by_byte(TT_DATA_F))
 
     param_dict={
         "name" : "TP_F_LEN",
-        "minimum" : elems_per_load,
+        "minimum" : elems_per_load if TP_API == com.API_BUFFER else TP_F_LEN_min_for_stream,
         "maximum" : TP_F_LEN_max if TP_API == com.API_BUFFER else 2**31,
-        "maximum_pingpong_buf" : TP_F_LEN_max_pingpong_buff 
+        "maximum_pingpong_buf" : TP_F_LEN_max_pingpong_buff
     }
     TP_F_LEN_act = TP_F_LEN + (TP_F_LEN % elems_per_load)
     if TP_F_LEN_act < param_dict["minimum"]: param_dict["actual"] = param_dict["minimum"]
@@ -299,15 +303,16 @@ def validate_TP_F_LEN(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TP_API = args["TP_API"]
     TT_DATA_F = args["TT_DATA_F"]
+    TT_DATA_G = args["TT_DATA_G"]
     TP_F_LEN = args["TP_F_LEN"]
-    return fn_validate_f_len(AIE_VARIANT, TT_DATA_F, TP_API, TP_F_LEN)
+    return fn_validate_f_len(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TP_API, TP_F_LEN)
 
 
-def fn_validate_f_len(AIE_VARIANT, TT_DATA_F, TP_API, TP_F_LEN):
-    elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(
+def fn_validate_f_len(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TP_API, TP_F_LEN):
+    elems_per_load = (com.k_max_read_write_bytes[AIE_VARIANT] << 1 ) // com.fn_size_by_byte(
         TT_DATA_F
     )
-    param_dict = fn_update_f_len(TP_F_LEN, TT_DATA_F, TP_API, AIE_VARIANT)
+    param_dict = fn_update_f_len(TP_F_LEN, TT_DATA_G, TT_DATA_F, TP_API, AIE_VARIANT)
     range_TP_F_LEN = [param_dict["minimum"], param_dict["maximum"]]
 
     if TP_F_LEN % elems_per_load != 0:
@@ -328,7 +333,9 @@ def update_TP_G_LEN(args):
     return fn_update_g_len(TP_G_LEN, TT_DATA_G, TP_F_LEN, TP_API, AIE_VARIANT)
 
 def fn_update_g_len(TP_G_LEN, TT_DATA_G, TP_F_LEN, TP_API, AIE_VARIANT):
-    elems_per_load = (com.k_max_read_write_bytes[AIE_VARIANT]) // com.fn_size_by_byte(TT_DATA_G)
+
+    if TP_API == 1: elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT]   //  com.fn_size_by_byte(TT_DATA_G)
+    else : elems_per_load = (com.k_max_read_write_bytes[AIE_VARIANT] << 1 ) //  com.fn_size_by_byte(TT_DATA_G)
 
     param_dict={
         "name" : "TT_DATA_G",
@@ -350,9 +357,10 @@ def validate_TP_G_LEN(args):
     return fn_validate_g_len(AIE_VARIANT, TP_API, TT_DATA_G, TP_F_LEN, TP_G_LEN)
 
 def fn_validate_g_len(AIE_VARIANT, TP_API, TT_DATA_G, TP_F_LEN, TP_G_LEN):
-    elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(
-        TT_DATA_G
-    )
+
+    if TP_API == 1: elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT]   //  com.fn_size_by_byte(TT_DATA_G)
+    else : elems_per_load = (com.k_max_read_write_bytes[AIE_VARIANT] << 1 ) //  com.fn_size_by_byte(TT_DATA_G)
+
     param_dict = fn_update_g_len(TP_G_LEN, TT_DATA_G, TP_F_LEN, TP_API, AIE_VARIANT)
     range_TP_G_LEN = [param_dict["minimum"], param_dict["maximum"]]
 
@@ -558,11 +566,13 @@ def update_TP_USE_RTP_VECTOR_LENGTHS(args):
 
 
 def fn_update_TP_USE_RTP_VECTOR_LENGTHS(TP_API):
-    if TP_API == 0:
-        legal_set_use_rtp_vec_lengths = [0, 1]
-    else:
-        legal_set_use_rtp_vec_lengths = [0]
+    # if TP_API == 0:
+    #     legal_set_use_rtp_vec_lengths = [0, 1]
+    # else:
+    #     legal_set_use_rtp_vec_lengths = [0]
 
+    # The use of RTP vector lengths is temporarily disabled.
+    legal_set_use_rtp_vec_lengths = [0]
     param_dict = {
         "name": "TP_USE_RTP_VECTOR_LENGTHS",
         "enum": legal_set_use_rtp_vec_lengths,
@@ -936,7 +946,7 @@ def info_ports(args):
             vectorLength=TP_PHASES,
         )
         portsRtpVecLen = (
-            com.get_parameter_port_info("rtpVecLen", "in", "int32", None, 1, "async")
+            com.get_parameter_port_info("rtpVecLen", "in", "int32", 1, 2, "async")
             if (args["TP_USE_RTP_VECTOR_LENGTHS"] == 1)
             else []
         )
@@ -972,7 +982,7 @@ def info_ports(args):
             vectorLength=TP_PHASES,
         )
         portsRtpVecLen = (
-            com.get_parameter_port_info("rtpVecLen", "in", "int32", None, 1, "async")
+            com.get_parameter_port_info("rtpVecLen", "in", "int32", 1, 2, "async")
             if (args["TP_USE_RTP_VECTOR_LENGTHS"] == 1)
             else []
         )
@@ -1004,6 +1014,17 @@ def generate_graph(graphname, args):
     TP_USE_RTP_VECTOR_LENGTHS = args["TP_USE_RTP_VECTOR_LENGTHS"]
     AIE_VARIANT = args["AIE_VARIANT"]
 
+    rtp_declare_str = (
+        f" std::array<adf::port<input>, 1> rtpVecLen;"
+        if TP_USE_RTP_VECTOR_LENGTHS == 1
+        else "//No RTP port"
+    )
+    rtp_connect_str = (
+        f"adf::connect<> net_rtpVecLen(rtpVecLen[0], conv_corr_graph.rtpVecLen[0]);"
+        if TP_USE_RTP_VECTOR_LENGTHS == 1
+        else "//No RTP port"
+    )
+
     # Use formatted multi-line string to avoid a lot of \n and \t
     code = f"""
 class {graphname} : public adf::graph {{
@@ -1011,13 +1032,14 @@ public:
   // ports
   //template <typename dir>
   static constexpr unsigned int TP_PHASES = {TP_PHASES};
+  static constexpr unsigned int TP_USE_RTP_VECTOR_LENGTHS = {TP_USE_RTP_VECTOR_LENGTHS};
   template <typename dir>
   using ssr_port_array = std::array<adf::port<dir>, TP_PHASES>;
 
   std::array<adf::port<input>, {TP_PHASES}> inF;
   std::array<adf::port<input>, 1> inG;
   std::array<adf::port<output>, {TP_PHASES}> out;
-  std::array<adf::port<input>, 1> rtpVecLen;" if TP_USE_RTP_VECTOR_LENGTHS == 1 else "//No rtpVecLen port"
+  {rtp_declare_str}
 
   xf::dsp::aie::conv_corr::conv_corr_graph<
     {TT_DATA_F}, // TT_DATA_F
@@ -1041,11 +1063,11 @@ public:
     adf::kernel *conv_corr_kernels = conv_corr_graph.getKernels();
 
     for (int phIndx = 0; phIndx < TP_PHASES; phIndx++) {{
-        adf::connect<> net_in(inF[phIndx], conv_corr_graph.inF[phIndx]);
+        adf::connect<> net_inF(inF[phIndx], conv_corr_graph.inF[phIndx]);
         adf::connect<> net_out(conv_corr_graph.out[phIndx], out[phIndx]);
     }}
-    adf::connect<> net_in(inG[0], conv_corr_graph.inG);
-    adf::connect<> net_in(rtpVecLen[0], conv_corr_graph.rtpVecLen[0]);
+    adf::connect<> net_inG(inG[0], conv_corr_graph.inG);
+    {rtp_connect_str}
   }}
 }};
 """

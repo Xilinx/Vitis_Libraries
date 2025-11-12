@@ -228,7 +228,7 @@ class conv_corr_ref_graph : public graph {
                                                 TP_CASC_LEN, TP_PHASES, TP_USE_RTP_VECTOR_LENGTHS> >();
         connect<>(inF[0], m_conv_corr_ref[0].in[0]);
         if (TP_API == USE_WINDOW_API) {
-            dimensions(m_conv_corr_ref[0].in[0]) = {kRefPaddedFsigLen * TP_NUM_FRAMES};
+            dimensions(m_conv_corr_ref[0].in[0]) = {TP_F_LEN * TP_NUM_FRAMES};
         } else {
             dimensions(m_conv_corr_ref[0].in[0]) = {TP_F_LEN};
         }

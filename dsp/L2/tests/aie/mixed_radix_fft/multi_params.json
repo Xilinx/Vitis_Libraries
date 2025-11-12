@@ -3091,27 +3091,6 @@
         "CC_TOLERANCE": "0",
         "SINGLE_BUF": "0"
     },
-    "cint16_cint16_80_0_5_8_1_80_8_4_22_1_0_0_0_1_ABS_0_0_aie22_hw_qor": {
-        "DATA_TYPE": "cint16",
-        "TWIDDLE_TYPE": "cint16",
-        "POINT_SIZE": "80",
-        "FFT_NIFFT": "0",
-        "SHIFT": "5",
-        "ROUND_MODE": "8",
-        "SAT_MODE": "1",
-        "WINDOW_VSIZE": "80",
-        "CASC_LEN": "1",
-        "API_IO": "0",
-        "NITER": "8",
-        "DIFF_TOLERANCE": "4",
-        "AIE_VARIANT": "22",
-        "DYN_PT_SIZE": "0",
-        "STIM_TYPE": "0",
-        "DATA_SEED": "1",
-        "DIFF_MODE": "ABS",
-        "CC_TOLERANCE": "0",
-        "SINGLE_BUF": "0"
-    },
     "cint16_cint16_160_0_6_8_1_160_8_4_22_1_0_0_0_1_ABS_0_0_aie22_hw_qor": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",

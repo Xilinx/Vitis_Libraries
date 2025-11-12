@@ -139,7 +139,7 @@
                     "REF_KERNEL": "fft_ifft_dit_1ch_ref",
                     "UUT_GRAPH": "fft_ifft_2d_graph",
                     "REF_GRAPH": "fft_ifft_2d_ref_graph",
-                    "STACKSIZE_VAL": "600",
+                    "STACKSIZE_VAL": "950",
                     "UUT_SIM_FILE": "./data/uut_output.txt",
                     "REF_SIM_FILE": "./data/ref_output.txt",
                     "INPUT_FILE": "./data/input.txt",

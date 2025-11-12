@@ -151,6 +151,7 @@
 #define INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE 0x01000302
 #define INT16_G_FOUR_PHASE_TWO_STREAM_LANE_SELECT_CONV 0xCCCCCCCC
 #define INT16_G_FOUR_PHASE_TWO_STREAM_LANE_SELECT_CORR 0x33333333
+#define MASK_TO_EXTRACT_N_ELEM_FROM_LANES(N) (~((1U << (N)) - 1U))
 
 #define ROUND(X, Y) (((X % Y) > ((Y + 1) / 2)) ? ((int)(X + Y - 1) / (int)Y) : ((int)X / (int)Y))
 
@@ -615,6 +616,48 @@ INLINE_DECL constexpr unsigned int fnSizeOfDataType<bfloat16>() {
 }; //
 #endif
 
+// zero Initialization
+template <typename TT_DATA>
+INLINE_DECL TT_DATA zeros() {
+    return 0;
+};
+
+// Null cint16_t element
+template <>
+INLINE_DECL cint16 zeros() {
+    cint16 retVal;
+    retVal.real = 0;
+    retVal.imag = 0;
+    return retVal;
+};
+
+// Null cint32 element
+template <>
+INLINE_DECL cint32 zeros() {
+    cint32 retVal;
+    retVal.real = 0;
+    retVal.imag = 0;
+    return retVal;
+};
+
+// Null float element
+template <>
+INLINE_DECL float zeros() {
+    return 0.0;
+};
+
+// Null cint32 element
+#if __SUPPORTS_CFLOAT__ == 1
+template <>
+INLINE_DECL cfloat zeros() {
+    cfloat retVal = {0.0, 0.0};
+
+    retVal.real = 0.0;
+    retVal.imag = 0.0;
+    return retVal;
+};
+#endif
+
 // Function returns number of columns used by MUL/MACs in Conv_Corr
 template <typename TT_DATA_F, typename TT_DATA_G>
 INLINE_DECL constexpr unsigned int getNumofMULs() {
@@ -787,6 +830,62 @@ INLINE_DECL constexpr unsigned int getLoopCount() {
     }
 
     return loopCount;
+};
+
+// Function to return the start index of F data to be filled in the padded buffer based on the given data length and
+// compute mode.
+template <typename TT_DATA_F,
+          typename TT_DATA_G,
+          unsigned int computeMode,
+          unsigned int dataLenF,
+          unsigned int dataLenG>
+INLINE_DECL constexpr unsigned int getFdataStartIndx_PaddedBuffer() {
+    unsigned int lanes = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
+    unsigned int dataLoadF = (kMaxBitsLoadOnAie / (fnSampleSizeOfSigF<TT_DATA_F>()));
+    unsigned int paddedLength = getPaddedLength<TT_DATA_F, TT_DATA_G, computeMode, dataLenF, dataLenG>();
+    unsigned int fdataStartIndx = 0;
+
+    if (computeMode == FULL_MODE) // Full
+    {
+        fdataStartIndx = ROUND((paddedLength - (dataLenF + dataLenG)), dataLoadF);
+    } else {
+        if (computeMode == SAME_MODE) // Same
+        {
+            fdataStartIndx = ROUND((paddedLength - (dataLenF + (dataLenG >> 1))), dataLoadF);
+        }
+    }
+
+    return fdataStartIndx;
+};
+
+// Function to return the end index for filling F data into the padded buffer, based on the specified data length and
+// compute mode.
+template <typename TT_DATA_F,
+          typename TT_DATA_G,
+          unsigned int computeMode,
+          unsigned int dataLenF,
+          unsigned int dataLenG>
+INLINE_DECL constexpr unsigned int getFdataEndIndx_PaddedBuffer() {
+    unsigned int lanes = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
+    unsigned int dataLoadF = (kMaxBitsLoadOnAie / (fnSampleSizeOfSigF<TT_DATA_F>()));
+    unsigned int paddedLength = getPaddedLength<TT_DATA_F, TT_DATA_G, computeMode, dataLenF, dataLenG>();
+    unsigned int paddedVecLoopCnt = ROUND(paddedLength, dataLoadF);
+    unsigned int fdataStartIndx =
+        getFdataStartIndx_PaddedBuffer<TT_DATA_F, TT_DATA_G, computeMode, dataLenF, dataLenG>();
+    unsigned int fdataEndIndx = 0;
+
+    if (computeMode == VALID_MODE) {
+        if (lanes > dataLoadF) // Valid
+        {
+            fdataEndIndx = paddedVecLoopCnt - ROUND((dataLoadF << 1), dataLoadF);
+        } else {
+            fdataEndIndx = paddedVecLoopCnt - ROUND(dataLoadF, dataLoadF);
+        }
+    } else {
+        fdataEndIndx = (paddedVecLoopCnt - fdataStartIndx);
+    }
+
+    return fdataEndIndx;
 };
 
 // 8x8 16x8 16x16 32x16 c16x16 c16x32 c16xc16 c32x16 c32xc16

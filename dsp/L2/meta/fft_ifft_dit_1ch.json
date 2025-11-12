@@ -34,7 +34,8 @@
             "enum": [
                 "cint16",
                 "cint32",
-                "cfloat"
+                "cfloat",
+                "cbfloat16"
             ],
             "updater": {
                 "file": "fft_ifft_dit_1ch.py",
@@ -58,7 +59,8 @@
             "enum": [
                 "cint16",
                 "cint32",
-                "cfloat"
+                "cfloat",
+                "cbfloat16"
             ],
             "updater": {
                 "file": "fft_ifft_dit_1ch.py",
@@ -82,7 +84,8 @@
             "enum": [
                 "cint16",
                 "cint32",
-                "cfloat"
+                "cfloat",
+                "cbfloat16"
             ],
             "updater": {
                 "file": "fft_ifft_dit_1ch.py",
@@ -250,6 +253,7 @@
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "update_TP_CASC_LEN",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA",
                     "TP_POINT_SIZE",
                     "TP_PARALLEL_POWER"
@@ -259,6 +263,7 @@
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TP_CASC_LEN",
                 "args": [
+                    "AIE_VARIANT",
                     "TT_DATA",
                     "TP_POINT_SIZE",
                     "TP_PARALLEL_POWER"

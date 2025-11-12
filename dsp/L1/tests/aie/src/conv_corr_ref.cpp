@@ -67,10 +67,12 @@ void conv_corr_ref<TT_DATA_F,
 
     unsigned int loopCount =
         (TP_API == USE_WINDOW_API) ? CEIL(m_kLoopCount, m_kLanes) : vecLenF; // loop count to iterate on each sample.
-    TT_DATA_F inDataF;                                                       // input data of F Sig.
-    TT_DATA_G inDataG, buffG[vecLenG * TP_NUM_FRAMES];                       // input data of G Sig.
-    TT_DATA_OUT outData;                                                     // output data of conv/corr.
-    T_accRef<TT_DATA_OUT> accum;                                             // declaration of accumulator
+    unsigned int paddedLoopStartVal =
+        (TP_COMPUTE_MODE == 0) ? (vecLenG - 1) : (TP_COMPUTE_MODE == 1) ? ((vecLenG >> 1) - 1) : 0;
+    TT_DATA_F inDataF;                                 // input data of F Sig.
+    TT_DATA_G inDataG, buffG[vecLenG * TP_NUM_FRAMES]; // input data of G Sig.
+    TT_DATA_OUT outData;                               // output data of conv/corr.
+    T_accRef<TT_DATA_OUT> accum;                       // declaration of accumulator
 
     // Pointers to fetch F and G data
     TT_DATA_F* inPtrF = (TT_DATA_F*)inWindowF.data();     // pointer to F data
@@ -78,10 +80,16 @@ void conv_corr_ref<TT_DATA_F,
     TT_DATA_OUT* outPtr = (TT_DATA_OUT*)outWindow.data(); // pointer to output of conv/corr.
 
     // Base pointers of F and G data
-    TT_DATA_F* baseinPtrF = (TT_DATA_F*)inWindowF.data(); // base pointer which holds starting address of F data
+    TT_DATA_F* baseinPtrF = (TT_DATA_F*)refPaddedFdata; // base pointer which holds starting address of F data
     TT_DATA_F* inPtrFperFrame = baseinPtrF;
 
     for (int frameIndx = 0; frameIndx < TP_NUM_FRAMES; frameIndx++) {
+        // copying F data to the zero initialized memory buffer to prepare padded F data as main input
+        for (unsigned int i = paddedLoopStartVal; i < (vecLenF + paddedLoopStartVal); i++) {
+            refPaddedFdata[(frameIndx * m_kPaddedDataLength) + i] =
+                *inPtrF++; // for convolution, G signal has to be reversed
+        }
+
         if (TP_FUNCT_TYPE == 1) {
             for (unsigned int i = 0; i < vecLenG; i++) {
                 buffG[(frameIndx * vecLenG) + ((vecLenG - 1) - i)] =
@@ -118,7 +126,14 @@ void conv_corr_ref<TT_DATA_F,
             roundAcc(TP_RND, TP_SHIFT, accum);     // apply rounding if any bit errors
             saturateAcc(accum, TP_SAT);            // apply saturation if any overflow of data occurs.
             outData = castAcc<TT_DATA_OUT>(accum); // writing output results to vector from accumulator
-            *outPtr++ = outData;                   // Store the results to io buffer of out.
+
+            if (TP_COMPUTE_MODE ==
+                2) // store only one sample as per Valid mode along with F and G are having same length.
+            {
+                outData = (i < m_kLoopCount) ? outData : zeros<TT_DATA_OUT>(); // Masking the output data
+            }
+
+            *outPtr++ = outData; // Store the results to io buffer of out.
 
         } // End of Loop {
     }     // End of Frames
@@ -162,10 +177,12 @@ void conv_corr_ref<TT_DATA_F,
 
     unsigned int loopCount =
         (TP_API == USE_WINDOW_API) ? CEIL(m_kLoopCount, m_kLanes) : vecLenF; // loop count to iterate on each sample.
-    TT_DATA_F inDataF;                                                       // input data of F Sig.
-    TT_DATA_G inDataG, buffG[vecLenG * TP_NUM_FRAMES];                       // input data of G Sig.
-    TT_DATA_OUT outData;                                                     // output data of conv/corr.
-    T_accRef<TT_DATA_OUT> accum;                                             // declaration of accumulator
+    unsigned int paddedLoopStartVal =
+        (TP_COMPUTE_MODE == 0) ? (vecLenG - 1) : (TP_COMPUTE_MODE == 1) ? ((vecLenG >> 1) - 1) : 0;
+    TT_DATA_F inDataF;                                 // input data of F Sig.
+    TT_DATA_G inDataG, buffG[vecLenG * TP_NUM_FRAMES]; // input data of G Sig.
+    TT_DATA_OUT outData;                               // output data of conv/corr.
+    T_accRef<TT_DATA_OUT> accum;                       // declaration of accumulator
 
     // Pointers to fetch F and G data
     TT_DATA_F* inPtrF = (TT_DATA_F*)inWindowF.data();     // pointer to F data
@@ -173,10 +190,16 @@ void conv_corr_ref<TT_DATA_F,
     TT_DATA_OUT* outPtr = (TT_DATA_OUT*)outWindow.data(); // pointer to output of conv/corr.
 
     // Base pointers of F and G data
-    TT_DATA_F* baseinPtrF = (TT_DATA_F*)inWindowF.data(); // base pointer which holds starting address of F data
+    TT_DATA_F* baseinPtrF = (TT_DATA_F*)refPaddedFdata; // base pointer which holds starting address of F data
     TT_DATA_F* inPtrFperFrame = baseinPtrF;
 
     for (int frameIndx = 0; frameIndx < TP_NUM_FRAMES; frameIndx++) {
+        // copying F data to the zero initialized memory buffer to prepare padded F data as main input
+        for (unsigned int i = paddedLoopStartVal; i < (vecLenF + paddedLoopStartVal); i++) {
+            refPaddedFdata[(frameIndx * m_kPaddedDataLength) + i] =
+                *inPtrF++; // for convolution, G signal has to be reversed
+        }
+
         if (TP_FUNCT_TYPE == 1) {
             for (unsigned int i = 0; i < vecLenG; i++) {
                 buffG[(frameIndx * vecLenG) + ((vecLenG - 1) - i)] =
@@ -213,7 +236,14 @@ void conv_corr_ref<TT_DATA_F,
             roundAcc(TP_RND, TP_SHIFT, accum);     // apply rounding if any bit errors
             saturateAcc(accum, TP_SAT);            // apply saturation if any overflow of data occurs.
             outData = castAcc<TT_DATA_OUT>(accum); // writing output results to vector from accumulator
-            *outPtr++ = outData;                   // Store the results to io buffer of out.
+
+            if (TP_COMPUTE_MODE ==
+                2) // store only one sample as per Valid mode along with F and G are having same length.
+            {
+                outData = (i < m_kLoopCount) ? outData : zeros<TT_DATA_OUT>(); // Masking the output data
+            }
+
+            *outPtr++ = outData; // Store the results to io buffer of out.
 
         } // End of Loop {
     }     // End of Frames

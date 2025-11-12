@@ -19,6 +19,91 @@
 
 // determine the acc type depending on the input type combinations
 template <typename TT_DATA_A, typename TT_DATA_B>
+#ifdef __SUPPORTS_ACC64__
+struct acc_mul_t {
+    using type = cacc64;
+};
+template <>
+struct acc_mul_t<int16, int16> {
+    using type = acc32;
+};
+template <>
+struct acc_mul_t<int16, cint16> {
+    using type = cacc32;
+};
+template <>
+struct acc_mul_t<int16, cint32> {
+    using type = cacc64;
+};
+template <>
+struct acc_mul_t<int16, int32> {
+    using type = acc64;
+};
+template <>
+struct acc_mul_t<cint16, int16> {
+    using type = cacc32;
+};
+template <>
+struct acc_mul_t<cint16, cint16> {
+    using type = cacc32;
+};
+template <>
+struct acc_mul_t<cint16, int32> {
+    using type = cacc64;
+};
+template <>
+struct acc_mul_t<cint16, cint32> {
+    using type = cacc64;
+};
+template <>
+struct acc_mul_t<int32, int16> {
+    using type = acc64;
+};
+template <>
+struct acc_mul_t<int32, cint16> {
+    using type = cacc64;
+};
+template <>
+struct acc_mul_t<int32, int32> {
+    using type = acc64;
+};
+template <>
+struct acc_mul_t<int32, cint32> {
+    using type = cacc64;
+};
+template <>
+struct acc_mul_t<cint32, int16> {
+    using type = cacc64;
+};
+template <>
+struct acc_mul_t<cint32, cint16> {
+    using type = cacc64;
+};
+template <>
+struct acc_mul_t<cint32, int32> {
+    using type = cacc64;
+};
+template <>
+struct acc_mul_t<cint32, cint32> {
+    using type = cacc64;
+};
+template <>
+struct acc_mul_t<float, float> {
+    using type = accfloat;
+};
+template <>
+struct acc_mul_t<float, cfloat> {
+    using type = caccfloat;
+};
+template <>
+struct acc_mul_t<cfloat, float> {
+    using type = caccfloat;
+};
+template <>
+struct acc_mul_t<cfloat, cfloat> {
+    using type = caccfloat;
+};
+#else //__SUPPORTS_ACC48__
 struct acc_mul_t {
     using type = acc48;
 };
@@ -56,7 +141,7 @@ struct acc_mul_t<int32, cint32> {
 };
 template <>
 struct acc_mul_t<cint32, int16> {
-    using type = cacc80;
+    using type = cacc48;
 };
 template <>
 struct acc_mul_t<cint32, cint16> {
@@ -76,7 +161,7 @@ struct acc_mul_t<int16, int32> {
 };
 template <>
 struct acc_mul_t<int16, cint32> {
-    using type = cacc80;
+    using type = cacc48;
 };
 template <>
 struct acc_mul_t<cint16, int32> {
@@ -102,6 +187,8 @@ template <>
 struct acc_mul_t<cfloat, cfloat> {
     using type = caccfloat;
 };
+
+#endif //__SUPPORTS_ACC64__
 
 template <typename T_D_A, typename T_D_B>
 using accTypeMult_t = typename acc_mul_t<T_D_A, T_D_B>::type;

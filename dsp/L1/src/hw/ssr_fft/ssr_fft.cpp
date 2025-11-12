@@ -14,13 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef SSR_FFT_CPP
+#define SSR_FFT_CPP
 
 #include "ssr_fft.h"
 // #define __SSR_FFT_DEBUG__
 
-void ssr_fft_wrapper(ssrFFTClass::TT_STREAM inData[POINT_SIZE], ssrFFTClass::TT_STREAM outData[POINT_SIZE]) {
+void ssr_fft_wrapper(ssrFFTClass<DATA_TYPE, TWIDDLE_TYPE, FFT_NIFFT>::TT_STREAM inData[POINT_SIZE],
+                     ssrFFTClass<DATA_TYPE, TWIDDLE_TYPE, FFT_NIFFT>::TT_STREAM outData[POINT_SIZE]) {
 #pragma HLS interface mode = ap_ctrl_none port = return
 #pragma HLS PIPELINE II = 1 style = flp
-    static ssrFFTClass uut;
+    static ssrFFTClass<DATA_TYPE, TWIDDLE_TYPE, FFT_NIFFT> uut;
     uut.ssr_fft(inData, outData);
 }
+#endif

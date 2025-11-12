@@ -37,7 +37,7 @@ namespace aie {
 namespace conv_corr {
 
 //-----------------------------------------------------------------------------------------------------
-// Convolution/Correlation Kernel Class
+// Convolution/Correlation Kernel Class No RTP
 template <typename TT_DATA_F,
           typename TT_DATA_G,
           typename TT_DATA_OUT,
@@ -88,6 +88,7 @@ conv_corr<TT_DATA_F,
     using T_buff_FSig = T_InOut_W_buff<TT_DATA_F>;             // W_REG_BITS buffer for reading F Data
     using T_buff_GSig = T_InOut_W_buff<TT_DATA_G>;             // W_REG_BITS buffer for reading G Data
     using dataVecOut_t = ::aie::vector<TT_DATA_OUT, m_kLanes>; // Output vector based on output data type and lanes
+    ::aie::mask<m_kLanes> dataMask;                            // Mask to extract N num of lanes elements
 
     T_buff_FSig sigF;        // Declaration of Sig F
     T_buff_GSig sigG;        // Declaration of Sig G
@@ -95,6 +96,8 @@ conv_corr<TT_DATA_F,
     T_buff_Xbuff xbuff;      // Declaration of xbuff using X(1024b) Reg.
     T_buff_Zbuff zbuff;      // Declaration of zbuff using W(256b) Reg.
     dataVecOut_t dataVecOut; // Declaration of Output Vector to store results into Out buffer.
+    dataVecOut_t dataOut =
+        ::aie::zeros<TT_DATA_OUT, m_kLanes>(); // Declaration of Output Vector to store results after masking.
 
     constexpr unsigned int DataStepX = 1;                       // Initilization of slidingmul parameter i.e. DataStepX
     constexpr unsigned int DataStepZ = 1;                       // Initilization of slidingmul parameter i.e. DataStepZ
@@ -111,16 +114,25 @@ conv_corr<TT_DATA_F,
     constexpr unsigned int kDataLoadofG = (kMaxBitsLoadOnAie / fnSampleSizeOfSigG<TT_DATA_G>());
     constexpr unsigned int kIncrOffsetGSig = ((TP_G_LEN / kDataLoadofG) - 1); // Offset to increment G Sig
     unsigned int swapCount = (ROUND(TP_G_LEN, m_kVecLoadG) >> 1); // Count of elements in G-signal to reverse them
+    constexpr unsigned int kPaddedVecLoopCnt = ROUND(m_kPaddedLenData, m_kVecLoadF); // Loop count for padded vector
+    constexpr unsigned int kDataStartIndex = m_kFdataStartIndx; // Start index for F data to be copied into buffer
+    constexpr unsigned int kDataEndIndex = m_kFdataEndIndx;     // End index to stop F data copy
+    constexpr unsigned int kXStartIdxAdj =
+        ((TP_COMPUTE_MODE == 0) || (TP_COMPUTE_MODE == 1)) ? 1 : 0; // Adjustment for X Start Index
+    unsigned int offsetMask = 0;                                    // mask for lane elements extraction
 
-    T_buff_FSig* __restrict inDataPtrF = (T_buff_FSig*)inWindowF.data(); // Input pointer for Sig_F
+    // Pointers to do Padding zeros to the F data based on compute mode
+    T_buff_FSig* __restrict inPtrF = (T_buff_FSig*)inWindowF.data(); // Alias Input pointer for Sig_F
+    T_buff_FSig* paddedFdataPtr = (T_buff_FSig*)paddedFdata;         // Pointer to padded F data
+
+    // Pointers for Input F and G. Also pointer for Output Data.
+    T_buff_FSig* inDataPtrF = (T_buff_FSig*)paddedFdata;                 // Input pointer for Sig_F
     T_buff_GSig* __restrict inDataPtrG = (T_buff_GSig*)inWindowG.data(); // Input pointer for Sig_G
     dataVecOut_t* __restrict outPtr = (dataVecOut_t*)outWindow.data();   // Output Pointer for conv/corr result
 
-    T_buff_FSig* __restrict rdInDataFPtr = (T_buff_FSig*)inWindowF.data(); // Alias Input pointer for Sig_F
+    // Alias Pointers for both F and G.
+    T_buff_FSig* rdInDataFPtr = (T_buff_FSig*)paddedFdata;                 // Alias Input pointer for Sig_F
     T_buff_GSig* __restrict rdInDataGPtr = (T_buff_GSig*)inWindowG.data(); // Alias Input pointer for Sig_G
-
-    T_buff_FSig* __restrict inFPtrPerFrame = (T_buff_FSig*)inWindowF.data(); // Alias Input pointer for Sig_F
-    T_buff_GSig* __restrict inGPtrPerFrame = (T_buff_GSig*)inWindowG.data(); // Alias Input pointer for Sig_G
 
     // Alias for sliding_mul API
     using mul_ops = ::aie::sliding_mul_ops<Lanes, Points, DataStepX, DataStepZ, DataStepY, TT_DATA_G, TT_DATA_F,
@@ -128,6 +140,15 @@ conv_corr<TT_DATA_F,
 
     for (unsigned int frameIndx = 0; frameIndx < TP_NUM_FRAMES; frameIndx++)
         chess_prepare_for_pipelining chess_loop_count(TP_NUM_FRAMES) {
+            // Padding
+            // Pointer increment to exact memory location where F data needs to be copied
+            paddedFdataPtr = (paddedFdataPtr + (frameIndx * kFrameoffsetF) + kDataStartIndex);
+
+            // copying the F data to Padded Data memory
+            for (unsigned int dataIndx = kDataStartIndex; dataIndx < kDataEndIndex; dataIndx++)
+                chess_prepare_for_pipelining chess_loop_count(kDataEndIndex) { *paddedFdataPtr++ = *inPtrF++; }
+
+            // If the function type is conv (1), then we need to reverse the G data.
             if (TP_FUNCT_TYPE == CONV) {
                 T_buff_GSig* __restrict inDataEndPtrG; // Local Pointer to fetch end address of G data
                 T_buff_Zbuff zbuffs, zbuffe;           // Registers to hold Start and End data samples of G sig.
@@ -169,7 +190,9 @@ conv_corr<TT_DATA_F,
                     acc.val = ::aie::zeros<tConvCorrAccType_t<TT_DATA_F, TT_DATA_G>,
                                            acc.val.size()>(); // null all the elements of accumulator
 
-#pragma unroll(kAccumLen)
+// Create a "nested" loop, where inner 4 iteration loop will be unrolled, wrapped in a for (kAccumLen / 4 iteration)
+// loop.
+#pragma unroll(4)
                     for (unsigned int inLoopIndx = 0; inLoopIndx < kAccumLen;
                          inLoopIndx++) // Inner Loop to do conv/corr using F and G Data.
                     {
@@ -199,21 +222,35 @@ conv_corr<TT_DATA_F,
 #pragma unroll(kInLoopLen)
                             for (unsigned int l = 0; l < kInLoopLen; l++) {
                                 // Sliding Multiplication of given signals
-                                acc.val = mul_ops::mac(acc.val, zbuff.val, (k * kInLoopLen + l) * m_kPoints, xbuff.val,
-                                                       l * m_kPoints); // Sliding MAC function Call
+                                acc.val =
+                                    mul_ops::mac(acc.val, zbuff.val, ((k * kInLoopLen + l) * m_kPoints), xbuff.val,
+                                                 ((l * m_kPoints) + kXStartIdxAdj)); // Sliding MAC function Call
 
                             } // End of kInLoopLen
                         }     // End of kGandFLoadRatio
                     }         // End of InnerLoop
 
                     dataVecOut = acc.val.template to_vector<TT_DATA_OUT>(
-                        TP_SHIFT);          // Storing accumulator results into out data vector
+                        TP_SHIFT); // Storing accumulator results into out data vector
+
+                    if (TP_COMPUTE_MODE == 2) // Valid Mode
+                    {
+                        offsetMask = (m_kLoopCount - (outIndx * m_kLanes) == 1)
+                                         ? MASK_TO_EXTRACT_N_ELEM_FROM_LANES(1)
+                                         : MASK_TO_EXTRACT_N_ELEM_FROM_LANES(m_kLanes);
+                        dataMask = ::aie::mask<m_kLanes>::from_uint32(offsetMask); // Mask to extract lane 0 element
+                        dataVecOut =
+                            ::aie::select(dataVecOut, dataOut,
+                                          dataMask); // Select the data from dataVecOut to dataOut based on the mask
+                    }
+
                     *outPtr++ = dataVecOut; // write the output results to the iobuffer
 
                 } // End of OuterLoop
         }         // End of Frames
 };                // End of conv_corrNoRTP()
 
+// Convolution/Correlation Kernel Class with RTP
 template <typename TT_DATA_F,
           typename TT_DATA_G,
           typename TT_DATA_OUT,
@@ -264,13 +301,16 @@ NOINLINE_DECL void conv_corr<TT_DATA_F,
     using T_buff_FSig = T_InOut_W_buff<TT_DATA_F>;             // W_REG_BITS buffer for reading F Data
     using T_buff_GSig = T_InOut_W_buff<TT_DATA_G>;             // W_REG_BITS buffer for reading G Data
     using dataVecOut_t = ::aie::vector<TT_DATA_OUT, m_kLanes>; // Output vector based on output data type and lanes
+    ::aie::mask<m_kLanes> dataMask;                            // Mask to extract N num of lanes elements
 
-    T_buff_FSig sigF;                                 // Declaration of Sig F
-    T_buff_GSig sigG;                                 // Declaration of Sig G
-    T_accum acc;                                      // Declaration of Accumulator
-    T_buff_Xbuff xbuff;                               // Declaration of xbuff using X(1024b) Reg.
-    T_buff_Zbuff zbuff;                               // Declaration of zbuff using W(256b) Reg.
-    dataVecOut_t dataVecOut;                          // Declaration of Output Vector to store results into Out buffer.
+    T_buff_FSig sigF;        // Declaration of Sig F
+    T_buff_GSig sigG;        // Declaration of Sig G
+    T_accum acc;             // Declaration of Accumulator
+    T_buff_Xbuff xbuff;      // Declaration of xbuff using X(1024b) Reg.
+    T_buff_Zbuff zbuff;      // Declaration of zbuff using W(256b) Reg.
+    dataVecOut_t dataVecOut; // Declaration of Output Vector to store results into Out buffer.
+    dataVecOut_t dataOut =
+        ::aie::zeros<TT_DATA_OUT, m_kLanes>();        // Declaration of Output Vector to store results after masking.
     unsigned int vecLenF = (unsigned int)inVecLen[0]; // RTP Based F_LEN
     unsigned int vecLenG = (unsigned int)inVecLen[1]; // RTP Based G_LEN
     const unsigned int* ptrVecLenF = &vecLenF;
@@ -290,17 +330,26 @@ NOINLINE_DECL void conv_corr<TT_DATA_F,
     const unsigned int kFrameoffsetG = (*ptrVecLenG / sigG.getSizeOfVec());          // Offset of F ptr
     constexpr unsigned int kDataLoadofG = (kMaxBitsLoadOnAie / fnSampleSizeOfSigG<TT_DATA_G>());
     const unsigned int kIncrOffsetGSig = ((*ptrVecLenG / kDataLoadofG) - 1); // Offset to increment G Sig
-    unsigned int swapCount = (ROUND(*ptrVecLenG, m_kVecLoadG) >> 1); // Count of elements in G-signal to reverse them
+    unsigned int swapCount = (ROUND(*ptrVecLenG, m_kVecLoadG) >> 1); // Count of elements in G-signal to reverse them.
+    constexpr unsigned int kPaddedVecLoopCnt = ROUND(m_kPaddedLenData, m_kVecLoadF); // Loop count for padded vector
+    constexpr unsigned int kDataStartIndex = m_kFdataStartIndx; // Start index for F data to be copied into buffer
+    constexpr unsigned int kDataEndIndex = m_kFdataEndIndx;     // End index to stop F data copy
+    constexpr unsigned int kXStartIdxAdj =
+        ((TP_COMPUTE_MODE == 0) || (TP_COMPUTE_MODE == 1)) ? 1 : 0; // Adjustment for X Start Index
+    unsigned int offsetMask = 0;                                    // mask for lane elements extraction
 
-    T_buff_FSig* __restrict inDataPtrF = (T_buff_FSig*)inWindowF.data(); // Input pointer for Sig_F
+    // Pointers to do Padding zeros to the F data based on compute mode
+    T_buff_FSig* __restrict inPtrF = (T_buff_FSig*)inWindowF.data(); // Alias Input pointer for Sig_F
+    T_buff_FSig* paddedFdataPtr = (T_buff_FSig*)paddedFdata;         // Pointer to padded F data
+
+    // Pointers for Input F and G. Also pointer for Output Data.
+    T_buff_FSig* inDataPtrF = (T_buff_FSig*)paddedFdata;                 // Input pointer for Sig_F
     T_buff_GSig* __restrict inDataPtrG = (T_buff_GSig*)inWindowG.data(); // Input pointer for Sig_G
     dataVecOut_t* __restrict outPtr = (dataVecOut_t*)outWindow.data();   // Output Pointer for conv/corr result
 
-    T_buff_FSig* __restrict rdInDataFPtr = (T_buff_FSig*)inWindowF.data(); // Alias Input pointer for Sig_F
+    // Alias Pointers for both F and G.
+    T_buff_FSig* rdInDataFPtr = (T_buff_FSig*)paddedFdata;                 // Alias Input pointer for Sig_F
     T_buff_GSig* __restrict rdInDataGPtr = (T_buff_GSig*)inWindowG.data(); // Alias Input pointer for Sig_G
-
-    T_buff_FSig* __restrict inFPtrPerFrame = (T_buff_FSig*)inWindowF.data(); // Alias Input pointer for Sig_F
-    T_buff_GSig* __restrict inGPtrPerFrame = (T_buff_GSig*)inWindowG.data(); // Alias Input pointer for Sig_G
 
     // Alias for sliding_mul API
     using mul_ops = ::aie::sliding_mul_ops<Lanes, Points, DataStepX, DataStepZ, DataStepY, TT_DATA_G, TT_DATA_F,
@@ -308,6 +357,15 @@ NOINLINE_DECL void conv_corr<TT_DATA_F,
 
     for (unsigned int frameIndx = 0; frameIndx < TP_NUM_FRAMES; frameIndx++)
         chess_prepare_for_pipelining chess_loop_count(TP_NUM_FRAMES) {
+            // Padding
+            // Pointer increment to exact memory location where F data needs to be copied
+            paddedFdataPtr = (paddedFdataPtr + (frameIndx * kFrameoffsetF) + kDataStartIndex);
+
+            // copying the F data to Padded Data memory
+            for (unsigned int dataIndx = kDataStartIndex; dataIndx < kDataEndIndex; dataIndx++)
+                chess_prepare_for_pipelining chess_loop_count(kDataEndIndex) { *paddedFdataPtr++ = *inPtrF++; }
+
+            // If the function type is conv (1), then we need to reverse the G data.
             if (TP_FUNCT_TYPE == CONV) {
                 T_buff_GSig* __restrict inDataEndPtrG; // Local Pointer to fetch end address of G data
                 T_buff_Zbuff zbuffs, zbuffe;           // Registers to hold Start and End data samples of G sig.
@@ -349,7 +407,9 @@ NOINLINE_DECL void conv_corr<TT_DATA_F,
                     acc.val = ::aie::zeros<tConvCorrAccType_t<TT_DATA_F, TT_DATA_G>,
                                            acc.val.size()>(); // null all the elements of accumulator
 
-                    //#pragma unroll(kAccumLen)
+// Create a "nested" loop, where inner 4 iteration loop will be unrolled, wrapped in a for (kAccumLen / 4 iteration)
+// loop.
+#pragma unroll(4)
                     for (unsigned int inLoopIndx = 0; inLoopIndx < kAccumLen;
                          inLoopIndx++) // Inner Loop to do conv/corr using F and G Data.
                     {
@@ -379,15 +439,27 @@ NOINLINE_DECL void conv_corr<TT_DATA_F,
 #pragma unroll(kInLoopLen)
                             for (unsigned int l = 0; l < kInLoopLen; l++) {
                                 // Sliding Multiplication of given signals
-                                acc.val = mul_ops::mac(acc.val, zbuff.val, (k * kInLoopLen + l) * m_kPoints, xbuff.val,
-                                                       l * m_kPoints); // Sliding MAC function Call
+                                acc.val =
+                                    mul_ops::mac(acc.val, zbuff.val, ((k * kInLoopLen + l) * m_kPoints), xbuff.val,
+                                                 ((l * m_kPoints) + kXStartIdxAdj)); // Sliding MAC function Call
 
                             } // End of kInLoopLen
                         }     // End of kGandFLoadRatio
                     }         // End of InnerLoop
 
                     dataVecOut = acc.val.template to_vector<TT_DATA_OUT>(
-                        TP_SHIFT);          // Storing accumulator results into out data vector
+                        TP_SHIFT); // Storing accumulator results into out data vector.
+
+                    if (TP_COMPUTE_MODE == 2) // Valid Mode
+                    {
+                        offsetMask = (m_kLoopCount - (outIndx * m_kLanes) == 1)
+                                         ? MASK_TO_EXTRACT_N_ELEM_FROM_LANES(1)
+                                         : MASK_TO_EXTRACT_N_ELEM_FROM_LANES(m_kLanes);
+                        dataMask = ::aie::mask<m_kLanes>::from_uint32(offsetMask); // Mask to extract lane 0 element
+                        dataVecOut =
+                            ::aie::select(dataVecOut, dataOut,
+                                          dataMask); // Select the data from dataVecOut to dataOut based on the mask
+                    }
                     *outPtr++ = dataVecOut; // write the output results to the iobuffer
 
                 } // End of OuterLoop
@@ -437,12 +509,6 @@ conv_corr<TT_DATA_F,
                                                        output_cascade<cacc48>* __restrict outcascade) {
     set_rnd_mode<TP_RND>(); //  Rounding and Saturation to avoid bit errors.
     set_sat_mode<TP_SAT>(); //  Saturation to avoid the overflow issue.
-
-    constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of Lanes is 4 for MAC4_ROT()
-    constexpr unsigned int kPoints = m_kMuls / kLanes;                   // Num of Points is nothing but nMuls/nPoints
-    constexpr unsigned int kMuls = (kLanes * kPoints);                   // Num of Muls for MAC4_ROT()
-    constexpr unsigned int kStreamPerCoreVar = ((kMuls * TP_PHASES) >> 1);
-    constexpr unsigned int kStreamsPerCore = (TP_G_LEN > kStreamPerCoreVar) ? 1 : kMaxNumOfStreams;
 
     constexpr unsigned int kCoeffShuffle = ((kPoints > kNumPoints2) && (kStreamsPerCore > 1)) ? 1 : 0;
     constexpr unsigned int kMacOffsetIncr = (kCoeffShuffle == 1) ? kPoints : kStreamsPerCore;
@@ -511,7 +577,6 @@ conv_corr<TT_DATA_F,
     T_buff_GSig_vect tempBuff;
     T_buff_GSig_vect* __restrict vInDataPtrG = (T_buff_GSig_vect*)inWindowG.data(); // Input pointer for Sig_G
     T_buff_zbuff zbuff[kMacsPerCore];
-    T_buff_GSig_vect chess_storage(% chess_alignof(v32cint16)) gReArrangeBuff[TP_G_LEN];
     T_buff_GSig_vect* tempPtr = (T_buff_GSig_vect*)gReArrangeBuff;
 
     // consuming samples from stream to adjust delay
@@ -525,7 +590,7 @@ conv_corr<TT_DATA_F,
     }
 
     // Coefficients are stored in xbuffer
-    gDataReArrange<TT_DATA_F, TT_DATA_G>(vInDataPtrG, tempPtr, kStreamsPerCore, TP_PHASES, TP_G_LEN, TP_FUNCT_TYPE);
+    gDataReArrange<TT_DATA_F, TT_DATA_G, TP_PHASES, TP_G_LEN, TP_FUNCT_TYPE, kStreamsPerCore>(vInDataPtrG, tempPtr);
 
     for (unsigned int i = 0;
          i < ((kLanes * kPoints) * (TP_CASC_LEN - TP_KERNEL_POSITION - 1) * kMacsPerCore) / kCascVecSizeOfCoeff; i++) {
@@ -671,7 +736,7 @@ conv_corr<TT_DATA_F,
         ((TP_PH_POSITION + 1) > (TP_PHASES - kStreamsPerCore * (TP_KERNEL_POSITION & (kPhaseIncr - 1)) - 1))
             ? (kCascDelay - 1)
             : kCascDelay;
-    constexpr int kCascVecSizeOfCoeff = kMaxSamplesInShuffleVec / sizeof(TT_DATA_G);
+
     constexpr unsigned int kShuffleVecSize = (kMaxSamplesInShuffleVec / fnSizeOfDataType<cint16>());
     unsigned int xstart;
     unsigned int zstart;
@@ -1032,7 +1097,6 @@ conv_corr<TT_DATA_F,
     T_buff_GSig_vect tempBuff;
     T_buff_GSig_vect* __restrict vInDataPtrG = (T_buff_GSig_vect*)inWindowG.data(); // Input pointer for Sig_G
     T_buff_zbuff zbuff[kMacsPerCore];
-    T_buff_GSig_vect chess_storage(% chess_alignof(v32cint16)) gReArrangeBuff[TP_G_LEN];
     T_buff_GSig_vect* tempPtr = (T_buff_GSig_vect*)gReArrangeBuff;
 
     dataoutVect_t dataVecOut;
@@ -1049,7 +1113,7 @@ conv_corr<TT_DATA_F,
     }
 
     // Coefficients are stored in xbuffer
-    gDataReArrange<TT_DATA_F, TT_DATA_G>(vInDataPtrG, tempPtr, kStreamsPerCore, TP_PHASES, TP_G_LEN, TP_FUNCT_TYPE);
+    gDataReArrange<TT_DATA_F, TT_DATA_G, TP_PHASES, TP_G_LEN, TP_FUNCT_TYPE, kStreamsPerCore>(vInDataPtrG, tempPtr);
 
     for (unsigned int i = 0; i < kMacsPerCore; i++) {
         for (unsigned int j = 0; j < (kLanes * kPoints) / kCascVecSizeOfCoeff; j++) {

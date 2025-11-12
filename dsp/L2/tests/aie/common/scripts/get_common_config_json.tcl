@@ -70,15 +70,27 @@ for {set i 3} { $i < [llength $argv] } { incr i 2 } {
         if { $make_param eq "COARSE_BITS" } {
             set coarseBits $make_param_value
         }
+        if { $make_param eq "DOMAIN_MODE" } {
+            set domainMode $make_param_value
+        }
+        if { $make_param eq "AIE_VARIANT" } {
+            set aieVariant $make_param_value
+        }
+        if { $make_param eq "USE_LUT_RELOAD" } {
+            set useLutReload $make_param_value
+        }
+        if { $make_param eq "DATA_TYPE" } {
+            set dataType $make_param_value
+        }
 
 
         set isComma ","
         # Don't put a comma on the last parameter if we still have dummy constructor coeffs/weights to generate
         if { [expr ($i+1)] == [expr [llength $argv]-1] } {
             # FIRs and FFT Window both need a comma
-            if { $libElement eq "fft_ifft_dit_1ch" || $libElement eq "matrix_mult" || $libElement eq "dds_mixer" || $libElement eq "dds_mixer_lut" || $libElement eq "mixed_radix_fft" || $libElement eq "dft" || $libElement eq "matrix_vector_mul" || $libElement eq "sample_delay" || $libElement eq "widget_real2complex"  || $libElement eq "widget_api_cast" || $libElement eq "hadamard" || $libElement eq "kronecker" || $libElement eq "outer_tensor" || $libElement eq "conv_corr" || $libElement eq "bitonic_sort" || $libElement eq "euclidean_distance" } {
+            if { $libElement eq "fft_ifft_dit_1ch" || $libElement eq "matrix_mult" || $libElement eq "dds_mixer" || $libElement eq "dds_mixer_lut" || $libElement eq "mixed_radix_fft" || $libElement eq "dft" || $libElement eq "matrix_vector_mul" || $libElement eq "sample_delay" || $libElement eq "widget_real2complex"  || $libElement eq "widget_api_cast" || $libElement eq "hadamard" || $libElement eq "kronecker" || $libElement eq "outer_tensor" || $libElement eq "conv_corr" || $libElement eq "bitonic_sort" || $libElement eq "euclidean_distance" || $libElement eq "cumsum" } {
                 set isComma ""
-            } elseif { $libElement eq "fir_sr_asym" || $libElement eq "fir_sr_sym" || $libElement eq "fir_interpolate_hb" || $libElement eq "fir_decimate_hb" || $libElement eq "fir_interpolate_asym" || $libElement eq "fir_decimate_asym" || $libElement eq "fir_decimate_sym" || $libElement eq "fir_resampler" || $libElement eq "fir_tdm" || $libElement eq "fft_window"	 || $libElement eq "func_approx"    } {
+            } elseif { $libElement eq "fir_sr_asym" || $libElement eq "fir_sr_sym" || $libElement eq "fir_interpolate_hb" || $libElement eq "fir_decimate_hb" || $libElement eq "fir_interpolate_asym" || $libElement eq "fir_decimate_asym" || $libElement eq "fir_decimate_sym" || $libElement eq "fir_resampler" || $libElement eq "fir_tdm" || $libElement eq "fft_window"   || $libElement eq "func_approx"    } {
                 set isComma ","
             } else {
                 puts "Error: You need to add your new library element to get_common_config_json.tcl"
@@ -111,7 +123,7 @@ if { $firLen != -1 } {
     # double taps generated if complex
     set cplx [expr $isCmplxCoeff + 1]
     for {set i 0} {$i < [expr $cplx * $firLen * $tdmChannels]} {incr i} {
-        lappend coeffs $i
+        lappend coeffs [expr $i % 32768]
     }
     set coeffVectorStr [join $coeffs ","]
     puts $outFile "    \"coeff\": \[$coeffVectorStr\]"
@@ -129,12 +141,24 @@ if { $libElement eq "fft_window" } {
 
 set approx_lookups {}
 if { $libElement eq "func_approx" } {
+    # if domainMMode == 1, then numLutSections / 2
     set numLutSections [expr 1  << $coarseBits]
+    if { $domainMode == 1 } {
+        set numLutSections [expr $numLutSections / 2]
+    }
+
+    # Check for LUT duplication - occurs with linear_approx API on AIE-ML/AIE-MLv2 with int16/bfloat16 when LUT reload is enabled
+    if { $useLutReload == 1 } {
+        if { ($aieVariant == 2 || $aieVariant == 22) && ($dataType eq "int16" || $dataType eq "bfloat16") } {
+            set numLutSections [expr $numLutSections * 2]
+        }
+    }
+
     # double taps generated if complex
     for {set i 0} {$i < [expr $numLutSections]} {incr i} {
         # two values per lutSection - slope/offset
-        lappend approx_lookups $i
-        lappend approx_lookups $i
+        lappend approx_lookups 1
+        lappend approx_lookups 1
     }
     set lutVectorStr [join $approx_lookups ","]
     puts $outFile "    \"lookup_values\": \[$lutVectorStr\]"

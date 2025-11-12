@@ -5,11 +5,12 @@
     "flow": "system",
     "platform_allowlist": [
         "vck190",
-        "vek280"
+        "vek280",
+        "vek385"
     ],
     "platform_properties": {
         "vck190": {
-            "param_set": ["*aie1*"],
+            "param_set": ["*_aie1_*"],
             "v++": {
                 "compiler": {
                     "clflags": []
@@ -27,7 +28,25 @@
             }
         },
         "vek280": {
-                "param_set": ["*aie2*"],
+                "param_set": ["*_aie2_*"],
+                "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                },
+                "package": {
+                    "clflags": [
+                        "--package.defer_aie_run"
+                    ]
+                }
+            }
+        },
+        "vek385": {
+                "param_set": ["*_aie22_*"],
                 "v++": {
                 "compiler": {
                     "clflags": []
@@ -53,7 +72,7 @@
     },
     "aiecontainers": [
         {
-            "embed_make_post": ["include ./aie_libadf.mk"]
+            "embed_make_post": ["include ./aie_libadf.mk", "include ./helper.mk"]
         }
     ],
     "containers": [
@@ -61,12 +80,12 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L1/tests/hw/mm2s/mm2s.cpp",
-                    "clflags": "-DNSTREAM=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"SSR\") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE\") -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"NITER\")",
+                    "clflags": "-DNSTREAM=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"SSR\") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE\") -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"NITER\") -DDATAWIDTH=$(DATAWIDTH)",
                     "name": "mm2s_wrapper"
                 },
                 {
                     "location": "LIB_DIR/L1/tests/hw/s2mm/s2mm.cpp",
-                    "clflags": "-DNSTREAM=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"SSR\") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE\") -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"NITER\")",
+                    "clflags": "-DNSTREAM=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"SSR\") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE\") -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"NITER\") -DDATAWIDTH=$(DATAWIDTH)",
                     "name": "s2mm_wrapper"
                 }
             ],
@@ -85,6 +104,8 @@
                 "LIB_DIR/L2/include/aie",
                 "LIB_DIR/L2/tests/aie/common/inc",
                 "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L1/include/vss/common",
+                "LIB_DIR/L1/include/vss/vss_fft_ifft_1d",
                 "LIB_DIR/L1/src/aie",
                 "LIB_DIR/L1/tests/aie/inc",
                 "LIB_DIR/L1/tests/aie/src",
@@ -130,9 +151,9 @@
                 "mkdir -p logs",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_latency HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_stats HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) \"",
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_theoretical_min HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk harvest_mem HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_stats HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_theoretical_min HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) \"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk harvest_mem HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) \"",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
             ]
         },
@@ -226,12 +247,20 @@
         "category": "canary",
         "param_set": {
             "pull_req": {
+                "*_canary_aie": [
+                    "vitis_hw_emu",
+                    "vitis_hw_build"
+                ],
                 "*_hw_checkin": [
                     "vitis_hw_emu",
                     "vitis_hw_build"
                 ]
             },
             "daily": {
+                "*_canary_aie": [
+                    "vitis_hw_emu",
+                    "vitis_hw_build"
+                ],
                 "*_hw_checkin": [
                     "vitis_hw_emu"
                 ]

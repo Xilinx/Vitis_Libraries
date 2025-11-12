@@ -65,8 +65,8 @@ template <typename TT_DATA,
 class bitonic_sort {
    private:
    public:
-    // * kFirstStage: The stage at which this kernel is sorting from. If there is a remainer, the first kernels will...
-    // * ... incorporate the remainder into an additionl stage.
+    // * kFirstStage: The stage at which this kernel is sorting from. If there is a remainder, the first kernels
+    // * will incorporate the remainder into an additional stage.
     // * kCurrCascLen: The number of stages performed by this kernel.
     // * kLastStage: The last stage this kernel is sorting from.
     // * These are then used to inform the edge cases for the i and j loops.
@@ -84,11 +84,6 @@ class bitonic_sort {
     static constexpr unsigned int kJEnd = kLastStage - getInitStageForOuterIdx<kIEnd>();
     static constexpr unsigned int kVecSampleNum = 256 / 8 / sizeof(TT_DATA);
     static constexpr unsigned int kNumVecs = TP_DIM / kVecSampleNum;
-
-    // TODO: The below could also be influenced by TP_DIM i.e. lower TP_DIMs can be unrolled more.
-    // TODO: Higher the number of cascades, lower the program memory per kernel, hence more unrolls.
-    static constexpr unsigned int kUnrollMax =
-        sizeof(TT_DATA); // //TP_CASC_LEN > 1 ? 8 / sizeof(TT_DATA) : 16 / sizeof(TT_DATA);
 
     // Constructor
     bitonic_sort() {}

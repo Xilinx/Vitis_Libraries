@@ -93,16 +93,16 @@
             }
         },
         {
-            "name": "POINT_SIZE",
-            "description": "Point size of the FFT",
+            "name": "VSS_MODE",
+            "description": "VSS_MODE offers choices of decomposing the implementatoin of the FFT. Different implementations offer different resource use and throughputs.",
             "type": "uint",
             "updater": {
                 "file": "vss_fft_ifft_1d.py",
-                "function": "update_POINT_SIZE"
+                "function": "update_VSS_MODE"
             },
             "validator": {
                 "file": "vss_fft_ifft_1d.py",
-                "function": "validate_POINT_SIZE"
+                "function": "validate_VSS_MODE"
             }
         },
         {
@@ -121,6 +121,27 @@
             }
         },
         {
+            "name": "POINT_SIZE",
+            "description": "Point size of the FFT",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_POINT_SIZE",
+                "args": [
+                    "PART",
+                    "VSS_MODE"
+                ]
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_POINT_SIZE",
+                "args": [
+                    "PART",
+                    "VSS_MODE"
+                ]
+            }
+        },
+        {
             "name": "API_IO",
             "description": "Selects whether the transform to perform is an FFT (1) or IFFT (0).",
             "type": "uint",
@@ -133,25 +154,6 @@
                 "file": "vss_fft_ifft_1d.py",
                 "function": "validate_API_IO",
                 "args": []
-            }
-        },
-        {
-            "name": "SHIFT",
-            "description": "The power of 2 shift down applied to the accumulation of fft before output",
-            "type": "uint",
-            "updater": {
-                "file": "vss_fft_ifft_1d.py",
-                "function": "update_SHIFT",
-                "args": [
-                    "DATA_TYPE"
-                ]
-            },
-            "validator": {
-                "file": "vss_fft_ifft_1d.py",
-                "function": "validate_SHIFT",
-                "args": [
-                    "DATA_TYPE"
-                ]
             }
         },
         {
@@ -205,11 +207,46 @@
             "type": "uint",
             "updater": {
                 "file": "vss_fft_ifft_1d.py",
-                "function": "update_SSR"
+                "function": "update_SSR",
+                "args": [
+                    "POINT_SIZE",
+                    "PART",
+                    "DATA_TYPE",
+                    "VSS_MODE"
+                ]
             },
             "validator": {
                 "file": "vss_fft_ifft_1d.py",
-                "function": "validate_SSR"
+                "function": "validate_SSR",
+                "args": [
+                    "POINT_SIZE",
+                    "PART",
+                    "DATA_TYPE",
+                    "VSS_MODE"
+                ]
+            }
+        },
+        {
+            "name": "SHIFT",
+            "description": "The power of 2 shift down applied to the accumulation of fft before output",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_SHIFT",
+                "args": [
+                    "DATA_TYPE",
+                    "VSS_MODE",
+                    "SSR"
+                ]
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_SHIFT",
+                "args": [
+                    "DATA_TYPE",
+                    "VSS_MODE",
+                    "SSR"
+                ]
             }
         },
         {
@@ -223,27 +260,6 @@
             "validator": {
                 "file": "vss_fft_ifft_1d.py",
                 "function": "validate_AIE_PLIO_WIDTH"
-            }
-        },
-        {
-            "name": "VSS_MODE",
-            "description": "VSS_MODE offers choices of decomposing the implementatoin of the FFT. Different implementations offer different resource use and throughputs.",
-            "type": "uint",
-            "updater": {
-                "file": "vss_fft_ifft_1d.py",
-                "function": "update_VSS_MODE",
-                "args": [
-                    "DATA_TYPE",
-                    "FFT_NIFFT"
-                ]
-            },
-            "validator": {
-                "file": "vss_fft_ifft_1d.py",
-                "function": "validate_VSS_MODE",
-                "args": [
-                    "DATA_TYPE",
-                    "FFT_NIFFT"
-                ]
             }
         }
     ],

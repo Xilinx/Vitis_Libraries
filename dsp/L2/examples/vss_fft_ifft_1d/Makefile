@@ -65,7 +65,7 @@ $(error Error: The sw_emu target is no longer supported starting from 2025.1.)
 endif
 # #################### Checking if PLATFORM in whitelist ############################
 PLATFORM_ALLOWLIST += vck190
-PLATFORM_BLOCKLIST += 
+PLATFORM_BLOCKLIST +=
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -85,15 +85,15 @@ RUN_DEPS :=
 
 # get global setting
 ifeq ($(HOST_ARCH), x86)
-CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel 
-VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
-VPP_LDFLAGS += --optimize 2 -R 2 
+CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
+VPP_LDFLAGS += --optimize 2 -R 2
 else ifeq ($(HOST_ARCH), aarch64)
-CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
-VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
-VPP_LDFLAGS += --optimize 2 -R 2 
+CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label
+LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps
+VPP_LDFLAGS += --optimize 2 -R 2
 endif
 CXXFLAGS += $(EXTRA_CXXFLAGS)
 VPP_FLAGS += $(EXTRA_VPP_FLAGS)
@@ -101,7 +101,7 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 ########################## Setting up Host Variables ##########################
 
 #Inclue Required Host Source Files
-HOST_SRCS += 
+HOST_SRCS +=
 CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/hw
 
 # workaround for opencv
@@ -109,7 +109,7 @@ ifeq (,$(findstring opencv,$(CXXFLAGS)))
 CXXFLAGS += $(XRT_CXXFLAGS)
 endif
 
-EXE_NAME := 
+EXE_NAME :=
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
@@ -191,10 +191,11 @@ sd_card: $(SD_CARD)
 endif
 
 ############################## Setting Essential Checks and Building Rules ##############################
-RUN_DEPS += host xclbin $(EMCONFIG)
-ifeq ($(SD_CARD_NEEDED), on)
-RUN_DEPS += $(SD_CARD)
-endif
+RUN_DEPS += pre_build
+#RUN_DEPS += host xclbin $(EMCONFIG)
+#ifeq ($(SD_CARD_NEEDED), on)
+#RUN_DEPS += $(SD_CARD)
+#endif
 
 .PHONY: mkflag all run
 mkflag:
@@ -212,18 +213,18 @@ ifeq ($(pcie_versal), on)
 	cp $(AIE_WORK_DIR)/reports/dma_lock_report.json ./
 	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS) 
-	
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS)
+
 else
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS)
-	
+
 endif
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
-	
+
 endif
 endif
 #hw
@@ -231,7 +232,7 @@ ifeq ($(TARGET), hw)
 ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(EXE_FILE) $(HOST_ARGS)
-	
+
 else
 	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
 endif
@@ -240,7 +241,7 @@ endif
 ############################## Setting Targets ##############################
 .PHONY: pre_build
 pre_build:
-	$(make -f example.mk all PLATFORM=$PLATFORM DSPLIB_ROOT_DIR=$(XFLIB_DIR))
+	make -f example.mk all PLATFORM=$(PLATFORM) DSPLIB_ROOT_DIR=$(XFLIB_DIR)
 
 .PHONY: clean cleanall emconfig valid_params
 emconfig: $(EMCONFIG)

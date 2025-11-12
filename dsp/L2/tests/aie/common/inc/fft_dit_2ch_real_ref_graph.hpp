@@ -94,7 +94,7 @@ class fft_dit_2ch_real_ref_graph : public graph {
                                              TT_OUT_DATA>
         fftGraph;
 
-    widget::deck_cut::widget_cut_deck_ref_graph<TT_DATA, TP_POINT_SIZE, TP_WINDOW_VSIZE * 2, 0> deckCutExitGraph;
+    widget::deck_cut::widget_cut_deck_ref_graph<TT_OUT_DATA, TP_POINT_SIZE, TP_WINDOW_VSIZE * 2, 0> deckCutExitGraph;
 
     /**
      * @brief This is the constructor function for the fft_dit_2ch_real_ref graph.

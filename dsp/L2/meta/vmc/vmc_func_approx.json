@@ -1,0 +1,163 @@
+{
+    "low_level_file": "func_approx.json",
+    "ip_name": "vmc_func_approx",
+    "block_info": {
+        "label": "Function Approximation",
+        "description": "Function Approximation block targeted for AI Engines."
+    },
+    "parameters": [
+        {
+            "key": "AIE_VARIANT",
+            "name": "AIE_VARIANT",
+            "description": "Specifies the device type: 1-AIE, 2-AIE-ML, 22-AIE-ML-V2",
+            "default": 1,
+            "label": "AIE Variant:",
+            "tablabel": "Main",
+            "visible": "off",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TT_DATA",
+            "name": "data_type",
+            "description": "describes the type of individual input output data samples of the function.",
+            "default": "int16",
+            "label": "Input/Output data type:",
+            "callback": "xmcGetFuncApproxLookUpValues(gcbh);",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "specify_lut_values",
+            "name": "specify_lut_values",
+            "type": "typename",
+            "description": "choose lut values for available functions or specify own lut values.",
+            "enum": [
+                "<Specify LUT values>",
+                "exp",
+                "inv",
+                "invSqrt",
+                "log",
+                "sqrt"
+            ],
+            "default": "<Specify LUT values>",
+            "label": "Function:",
+            "callback": "xmcGetFuncApproxLookUpValues(gcbh);",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "lookup_values",
+            "name": "lookup_values",
+            "description": "describes the LUT values.",
+            "element_type": "data_type",
+            "default": "[1:512]",
+            "label": "Specify LookUp Values:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_USE_LUT_RELOAD",
+            "name": "TP_USE_LUT_RELOAD",
+            "description": "Flag to indicate if LUT reloading is used",
+            "default": false,
+            "label": "Specify LUT Values via input port",
+            "tablabel": "Main",
+            "parameterType": "checkbox",
+            "disable": "lookup_values, specify_lut_values",
+            "enable": ""
+        },
+        {
+            "key": "TP_COARSE_BITS",
+            "name": "coarse_bits",
+            "description": "Describes the number of bits in a sample of input data that will be used to address the provided lookup table.",
+            "type": "uint",
+            "default": 8,
+            "label": "Coarse bits:",
+            "callback": "xmcGetFuncApproxLookUpValues(gcbh);",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_FINE_BITS",
+            "name": "fine_bits",
+            "description": "Describes the number of bits in an input data sample used for fine interpolation.",
+            "type": "uint",
+            "default": 7,
+            "label": "Fine bits:",
+            "callback": "xmcGetFuncApproxLookUpValues(gcbh);",            
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_DOMAIN_MODE",
+            "name": "domain_mode",
+            "description": "Specifies a mode for the input domain of the chosen function for approximation.",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "enum_str": [
+                "0 to 1",
+                "1 to 2",
+                "1 to 4"
+            ],
+            "default": 2,
+            "label": "Input domain:",
+            "callback": "xmcGetFuncApproxLookUpValues(gcbh);",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_WINDOW_VSIZE",
+            "name": "num_frames",
+            "description": "describes number of samples to be processed in each call to this function.",
+            "default": 256,
+            "label": "Input window size:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_SHIFT",
+            "name": "shift_output",
+            "description": "describes the number of bits to downshift.",
+            "default": 0,
+            "label": "Scale output down by 2^:",
+            "callback": "xmcGetFuncApproxLookUpValues(gcbh);",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_RND",
+            "name": "rnd_mode",
+            "description": "describes the selection of rounding to be applied during the shift down stage of processing.",
+            "default": "Floor",
+            "label": "Rounding mode:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_SAT",
+            "name": "sat_mode",
+            "description": "describes the selection of saturation to be applied during the shift down stage of processing.",
+            "enum": [
+                0,
+                1,
+                3
+            ],
+            "enum_str": [
+                "None",
+                "Saturate",
+                "Symmetric"
+            ],
+            "default": 1,
+            "label": "Saturation mode:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        }
+    ],
+    "generator": {
+        "file": "vmc_func_approx.py",
+        "function": "vmc_generate_graph"
+    }
+}

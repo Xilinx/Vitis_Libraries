@@ -148,6 +148,12 @@ template <>
 struct tFFTAccBaseType<cfloat> {
     using type = caccfloat;
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+struct tFFTAccBaseType<cbfloat16> {
+    using type = caccfloat;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 template <typename TT_DATA, typename TT_COEFF>
 struct tAccBaseType {
@@ -776,6 +782,18 @@ template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL constexpr unsigned int fnNumCols384() {
     return 4;
 };
+#if __AIE_ARCH__ == 22
+// Targetted specialization for AIE-MLv2, int16, int32.
+template <>
+INLINE_DECL constexpr unsigned int fnNumCols<int16, int32>() {
+    return 1;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnNumCols384<int16, int32>() {
+    return 1;
+};
+#endif
+
 #endif
 
 #if __MIN_REGSIZE__ == 128
@@ -1158,6 +1176,14 @@ INLINE_DECL cfloat nullElem() {
     retVal.real = 0.0;
     retVal.imag = 0.0;
     return retVal;
+};
+#endif
+
+#if __HAS_ACCUM_PERMUTES__ == 0
+// Null bfloat16 element
+template <>
+INLINE_DECL bfloat16 nullElem() {
+    return 0.0;
 };
 #endif
 

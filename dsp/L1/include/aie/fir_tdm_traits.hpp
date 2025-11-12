@@ -17,6 +17,8 @@
 #ifndef _DSPLIB_FIR_TDM_TRAITS_HPP_
 #define _DSPLIB_FIR_TDM_TRAITS_HPP_
 
+#include "mac_lanes_defs.hpp"
+
 /*
 TDM FIR traits.
 This file contains sets of overloaded, templatized and specialized templatized functions which
@@ -46,7 +48,6 @@ INLINE_DECL constexpr unsigned int fnFirRangeAsym() {
     // TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
     // make sure there's no runt filters ( lengths < 4)
     // make Stream architectures rounded to fnStreamFirRangeRound and only last in the chain possibly odd
-    // TODO: make Window architectures rounded to fnNumColumnsTdm
     return fnFirRange<TP_FL, TP_CL, TP_KP, (1)>();
 }
 template <unsigned int TP_FL, unsigned int TP_CL, int TP_KP, typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
@@ -66,7 +67,7 @@ INLINE_DECL constexpr unsigned int fnFirRangeOffsetAsym() {
 // function to return the number of lanes for a type combo, for a given IO API type
 template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL constexpr unsigned int fnNumLanesTdm() {
-    return fnNumLanes<TT_DATA, TT_COEFF>();
+    return fnMacLanes<TT_DATA, TT_COEFF>();
 };
 
 // function to return the number of samples in an output vector for a type combo

@@ -20,9 +20,20 @@ set fileDir             [lindex $argv 0]
 set diffFile "${fileDir}logs/diff.txt"
 set funcPassPhrase "identical"
 
-# exit 1 if functional fail, else exit 0
-if {[catch {exec grep -i $funcPassPhrase -c $diffFile}]} {
-    exit 1
+set logFolder "${fileDir}logs"
+set funcPassPhraseStatus "FUNC:                 1"
+
+# Find the single status file in the log folder
+set statusFiles [glob -nocomplain -directory $logFolder "status_*"]
+if {[llength $statusFiles] == 1} {
+    set statusFile [lindex $statusFiles 0]
+    # Search for funcPassPhraseStatus in the status file
+    if {[catch {exec grep -i $funcPassPhraseStatus -c $statusFile}] || [catch {exec grep -i $funcPassPhrase -c $diffFile}]} {
+        exit 1
+    } else {
+        exit 0
+    }
 } else {
-    exit 0
+    # No status file or multiple status files found
+    exit 1
 }

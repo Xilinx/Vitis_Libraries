@@ -21,88 +21,89 @@
 #include <ap_fixed.h>
 #include <hls_stream.h>
 #include <hls_streamofblocks.h>
+#include "common.hpp"
 //#define __BACK_TRANSPOSE_DEBUG__
 
+using namespace xf::dsp::vss::common;
 namespace back_transpose_simple {
 
-template <int NFFT, int NSTREAM_IN>
+template <int TP_NFFT, int TP_NSTREAM_EXT, int TP_SAMPLE_WIDTH>
 class backTransposeSimpleCls {
    public:
-    static constexpr unsigned int modePLffts() { return 1; }
-
-    static constexpr unsigned int modeAIEffts() { return 0; }
-    template <unsigned int len, unsigned int rnd>
-    static constexpr unsigned int fnCeil() {
-        return (len + rnd - 1) / rnd * rnd;
-    }
-
-    template <unsigned int TP_POINT_SIZE, unsigned int TP_VSS_MODE, unsigned int NUM_STREAM>
+    template <unsigned int tp_point_size, unsigned int tp_ssr>
     static constexpr unsigned int fnPtSizeD1() {
-        return TP_POINT_SIZE / NUM_STREAM;
+        return tp_point_size / tp_ssr;
     }
-    static constexpr unsigned SAMPLES_PER_READ = 2;
-    static constexpr unsigned NSTREAM_OUT = NSTREAM_IN * SAMPLES_PER_READ;
-    static constexpr unsigned ptSizeCeil = fnCeil<NFFT, NSTREAM_OUT>(); // 65
+    static constexpr unsigned kNbitsIn = 128;  // Size of PLIO bus on PL side @ 312.5 MHz
+    static constexpr unsigned kNbitsOut = 128; // Size of PLIO bus on PL side @ 312.5 MHz
 
-    static constexpr unsigned ptSizeD1 = fnPtSizeD1<NFFT, modePLffts(), SSR>(); // 32
-    static constexpr unsigned ptSizeD2 = NFFT / ptSizeD1;                       // 32
-    static constexpr unsigned ptSizeD1Ceil = fnCeil<ptSizeD1, NSTREAM_OUT>();   // 32
+    static constexpr unsigned kSamplesPerRead = kNbitsIn / TP_SAMPLE_WIDTH; // 4
+    static constexpr unsigned kNstreamInt = TP_NSTREAM_EXT * kSamplesPerRead;
 
-    static constexpr unsigned DEPTH = (NFFT / ptSizeD1);     // Depth of each bank // 16
-    static constexpr unsigned NROW = ptSizeD1 / NSTREAM_OUT; // # of rows of transforms per bank // 16
+    static constexpr unsigned kPtSizeD1 = fnPtSizeD1<TP_NFFT, TP_NSTREAM_EXT>(); // 32
+    static constexpr unsigned kPtSizeD2 = TP_NFFT / kPtSizeD1;                   // 32
+    static constexpr unsigned kPtSizeD1Ceil = fnCeil<kPtSizeD1, kNstreamInt>();  // 32
 
-    static constexpr unsigned NBITS_IN = 128;  // Size of PLIO bus on PL side @ 312.5 MHz
-    static constexpr unsigned NBITS_OUT = 128; // Size of PLIO bus on PL side @ 312.5 MHz
+    int rdAddrLut[kNstreamInt];
+    int rdBnkLut[kNstreamInt];
+    int wrBnkLut0[kNstreamInt];
 
-    int rdAddrLut[NSTREAM_OUT];
-    int rdBnkLut[NSTREAM_OUT];
-    int wrBnkLut0[NSTREAM_OUT];
+    static constexpr unsigned int kNumLoads = TP_NFFT / TP_NSTREAM_EXT;
+    static constexpr unsigned kNumStores = TP_NFFT / TP_NSTREAM_EXT; // kNumLoads;  // 7
+    typedef ap_uint<kNbitsIn> t_data;                                // Equals two 'cint32' samples
+    typedef ap_uint<kNbitsOut / kSamplesPerRead> t_sample;           // Samples are 'cint32'
+    typedef hls::stream<t_data> t_stream_in;
+    typedef hls::stream<t_data> t_stream_out;
+    typedef t_sample buff_t[kNstreamInt][TP_NFFT / kNstreamInt]; // 4 * 1024
 
-    static constexpr unsigned int numLoadsPtSize = ptSizeD1 / NSTREAM_OUT; //
-    static constexpr unsigned int numLoads = NFFT / NSTREAM_IN;            // numLoadsPtSize * ptSizeD2;   // 256*4
-    static constexpr unsigned numStores = NFFT / NSTREAM_IN;               // numLoads;  // 7
-    static constexpr unsigned numRows = fnCeil<ptSizeD2, NSTREAM_OUT>() / NSTREAM_OUT;
-    typedef ap_uint<NBITS_IN> TT_DATA;                       // Equals two 'cint32' samples
-    typedef ap_uint<NBITS_OUT / SAMPLES_PER_READ> TT_SAMPLE; // Samples are 'cint32'
-    typedef hls::stream<TT_DATA> TT_STREAM_IN;
-    typedef hls::stream<TT_DATA> TT_STREAM_OUT;
-    typedef TT_SAMPLE buff_t[NSTREAM_OUT][NFFT / NSTREAM_OUT]; // 4 * 1024
-
-    void unpack_inputs(TT_STREAM_OUT sig_int[NSTREAM_IN], hls::stream_of_blocks<buff_t>& inter_buff) {
+    void unpack_inputs(t_stream_out sig_int[TP_NSTREAM_EXT], hls::stream_of_blocks<buff_t>& inter_buff) {
 #ifdef __BACK_TRANSPOSE_DEBUG__
         FILE* fptr = fopen("/home/uvimalku/4debug_unpack_inputs.txt", "a");
 #endif //  __BACK_TRANSPOSE_DEBUG__
 
         hls::write_lock<buff_t> buff_in(inter_buff);
-        TT_SAMPLE trans_i0[NSTREAM_OUT];
+        t_sample trans_i0[kNstreamInt];
 #pragma HLS array_partition variable = trans_i0 dim = 1
         int idx = 0;
     BUFF_LOOP:
-        for (int ii = 0; ii < numStores / SAMPLES_PER_READ; ii++) {
+        for (int ii = 0; ii < kNumStores / kSamplesPerRead; ii++) {
 #pragma HLS unroll factor2
 #pragma HLS PIPELINE II = 2
         READ:
-            for (int ss = 0; ss < NSTREAM_IN; ss++) {
+            for (int ss = 0; ss < TP_NSTREAM_EXT; ss++) {
 #ifdef __BACK_TRANSPOSE_DEBUG__
-                fprintf(fptr, "write into banks %d and %d \n", wrBnkLut0[2 * ss], wrBnkLut0[2 * ss + 1]);
+                for (int samp = 0; samp < kSamplesPerRead; samp++) {
+                    printf("write into bank %d idx = %d\n", wrBnkLut0[kSamplesPerRead * ss + samp],
+                           kSamplesPerRead * ss + samp);
+                }
 #endif //  __BACK_TRANSPOSE_DEBUG__
-                (trans_i0[2 * ss + 1], trans_i0[2 * ss]) = sig_int[ss].read();
+                t_data sig_int_data = sig_int[ss].read();
+                for (int jj = 0; jj < kSamplesPerRead; jj++) {
+#pragma HLS unroll
+                    // print trans_i0
+                    // printf( "write into bank %d from idx %d to %d\n", ss*kSamplesPerRead + jj, (jj *
+                    // TP_SAMPLE_WIDTH)+ (TP_SAMPLE_WIDTH-1), (jj * TP_SAMPLE_WIDTH));
+                    (trans_i0[ss * kSamplesPerRead + jj]) =
+                        sig_int_data((jj * TP_SAMPLE_WIDTH) + (TP_SAMPLE_WIDTH - 1), (jj * TP_SAMPLE_WIDTH));
+                }
             }
 
         STORE:
-            for (int ss = 0; ss < NSTREAM_OUT; ss++) {
+            for (int ss = 0; ss < kNstreamInt; ss++) {
                 buff_in[ss][idx] = trans_i0[wrBnkLut0[ss]];
             }
         MOD:
-            for (int ss = 0; ss < NSTREAM_OUT; ss++) {
-                wrBnkLut0[ss] = (wrBnkLut0[ss] < 2) ? (wrBnkLut0[ss] + NSTREAM_OUT) - 2 : wrBnkLut0[ss] - 2;
+            for (int ss = 0; ss < kNstreamInt; ss++) {
+                wrBnkLut0[ss] = (wrBnkLut0[ss] < kSamplesPerRead) ? (wrBnkLut0[ss] + kNstreamInt) - kSamplesPerRead
+                                                                  : wrBnkLut0[ss] - kSamplesPerRead;
             }
             idx = idx + 1;
         }
 #ifdef __BACK_TRANSPOSE_DEBUG__
-        for (int ss = 0; ss < NSTREAM_OUT; ss++) {
-            for (int pp = 0; pp < numLoads; pp++) {
-                printf("[%d, %d] ", (buff_in[ss][pp] >> 32), (buff_in[ss][pp] % (1 << 31)));
+        for (int ss = 0; ss < kNstreamInt; ss++) {
+            for (int pp = 0; pp < kNumLoads; pp++) {
+                printf("[%d, %d] ", (buff_in[ss][pp] >> TP_SAMPLE_WIDTH / 2),
+                       (buff_in[ss][pp] % (1 << (TP_SAMPLE_WIDTH / 2 - 1))));
             }
             printf("\n");
         }
@@ -110,40 +111,46 @@ class backTransposeSimpleCls {
 #endif //  __BACK_TRANSPOSE_DEBUG__
     }
 
-    void ifft_load_buff(hls::stream_of_blocks<buff_t>& inter_buff, TT_STREAM_OUT sig_o[NSTREAM_IN]) {
+    void ifft_load_buff(hls::stream_of_blocks<buff_t>& inter_buff, t_stream_out sig_o[TP_NSTREAM_EXT]) {
 #ifdef __BACK_TRANSPOSE_DEBUG__
         FILE* buff_data2 = fopen("/home/uvimalku/4debug_load_buff.txt", "a");
 #endif //  __BACK_TRANSPOSE_DEBUG__
-        TT_SAMPLE trans_o0[NSTREAM_OUT];
+        t_sample trans_o0[kNstreamInt];
 #pragma HLS array_partition variable = trans_o0 dim = 1
         hls::read_lock<buff_t> buff_out(inter_buff);
         int colCtr = 0;
         int rowCtr = 0;
         int tmp = 0;
     WR_LOOP:
-        for (int cc = 0; cc < numLoads / SAMPLES_PER_READ; cc++) { // 2
-                                                                   // #pragma HLS unroll factor=2
-#pragma HLS PIPELINE II = 1
-            for (int ss = 0; ss < NSTREAM_OUT; ss++) { // 5
+        for (int cc = 0; cc < kNumLoads / kSamplesPerRead; cc++) { // 2
+#pragma HLS unroll factor = 2
+#pragma HLS PIPELINE II = 2
+            for (int ss = 0; ss < kNstreamInt; ss++) { // 5
                 trans_o0[ss] = buff_out[ss][rdAddrLut[ss]];
 #ifdef __BACK_TRANSPOSE_DEBUG__
                 fprintf(buff_data2, "rd from add = [%d][%d] \n", ss, rdAddrLut[ss]);
 #endif //  __BACK_TRANSPOSE_DEBUG__
             }
-            for (int ss = 0; ss < NSTREAM_IN; ss++) {
-                sig_o[ss].write((trans_o0[rdBnkLut[ss + NSTREAM_IN]], trans_o0[rdBnkLut[ss]]));
+            for (int ss = 0; ss < TP_NSTREAM_EXT; ss++) {
+                t_data outDat;
+                for (int samp = 0; samp < kSamplesPerRead; samp++) {
+                    outDat(samp * TP_SAMPLE_WIDTH + TP_SAMPLE_WIDTH - 1, samp * TP_SAMPLE_WIDTH) =
+                        trans_o0[rdBnkLut[ss + TP_NSTREAM_EXT * samp]];
+                }
+                sig_o[ss].write(outDat); // Write the output data
             }
-            if (colCtr + 1 == numLoads / (NSTREAM_OUT)) {
-                for (int ss = 0; ss < NSTREAM_OUT; ss++) {
-                    rdBnkLut[ss] = (rdBnkLut[ss] + 2) & (NSTREAM_OUT - 1);
-                    rdAddrLut[ss] = ((ss / 2 + NSTREAM_OUT - (1 + tmp)) & (NSTREAM_OUT / 2 - 1));
+            if (colCtr + 1 == kNumLoads / (kNstreamInt)) {
+                for (int ss = 0; ss < kNstreamInt; ss++) {
+                    rdBnkLut[ss] = (rdBnkLut[ss] + kSamplesPerRead) & (kNstreamInt - 1);
+                    rdAddrLut[ss] =
+                        ((ss / kSamplesPerRead + kNstreamInt - (1 + tmp)) & (kNstreamInt / kSamplesPerRead - 1));
                 }
                 tmp = tmp + 1;
                 rowCtr = rowCtr + 1;
                 colCtr = 0;
             } else {
-                for (int ss = 0; ss < NSTREAM_OUT; ss++) {
-                    rdAddrLut[ss] = rdAddrLut[ss] + NSTREAM_OUT / 2;
+                for (int ss = 0; ss < kNstreamInt; ss++) {
+                    rdAddrLut[ss] = rdAddrLut[ss] + kNstreamInt / kSamplesPerRead;
                 }
                 colCtr = colCtr + 1;
             }
@@ -153,7 +160,7 @@ class backTransposeSimpleCls {
 #endif //  __BACK_TRANSPOSE_DEBUG__
     }
 
-    void back_transpose_simple_top(TT_STREAM_IN sig_i[NSTREAM_IN], TT_STREAM_OUT sig_o[NSTREAM_OUT]) {
+    void back_transpose_simple_top(t_stream_in sig_i[TP_NSTREAM_EXT], t_stream_out sig_o[kNstreamInt]) {
         hls::stream_of_blocks<buff_t> inter_buff;
 #pragma HLS array_partition variable = inter_buff dim = 1 type = complete
 #pragma HLS bind_storage variable = inter_buff type = RAM_T2P impl = bram
@@ -163,15 +170,15 @@ class backTransposeSimpleCls {
     }
 
     backTransposeSimpleCls() {
-        for (int ss = 0; ss < NSTREAM_OUT; ss++) {
-            rdAddrLut[ss] = ss / 2;
+        for (int ss = 0; ss < kNstreamInt; ss++) {
+            rdAddrLut[ss] = ss / kSamplesPerRead;
             rdBnkLut[ss] = ss;
 #ifdef __BACK_TRANSPOSE_DEBUG__
             printf("1. stream= %d alculating bank: %d address : %d\n", ss, rdBnkLut[ss], rdAddrLut[ss]);
 #endif //  __BACK_TRANSPOSE_DEBUG__
         }
 
-        for (int ss = 0; ss < NSTREAM_OUT; ss++) {
+        for (int ss = 0; ss < kNstreamInt; ss++) {
             wrBnkLut0[ss] = ss;
 #ifdef __BACK_TRANSPOSE_DEBUG__
             printf("wrBnkLut0[%d] = %d\n", ss, wrBnkLut0[ss]);

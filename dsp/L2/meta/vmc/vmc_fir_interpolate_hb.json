@@ -181,10 +181,14 @@
       "description": "Specify number of data input/output in parallel for a single channel.",
       "type": "uint",
       "default": 1,
+      "enum": [
+                "Inherit from number of input columns",
+                "<Specify SSR number>"
+            ],
       "label": "SSR:",
       "tablabel": "Main",
       "visible": "off",
-      "parameterType": "edit"
+      "parameterType": "combobox"
     }
   ],
   "generator": {

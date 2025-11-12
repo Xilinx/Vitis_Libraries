@@ -44,21 +44,6 @@
             }
         },
         {
-            "name": "TT_DATA_OUT",
-            "type": "typename",
-            "description": "The type of individual data samples at output port.",
-            "validator": {
-                "file": "euclidean_distance.py",
-                "function": "validate_TT_DATA_OUT",
-                "args": ["TT_DATA"]
-            },
-            "updater": {
-                "file": "euclidean_distance.py",
-                "function": "update_TT_DATA_OUT",
-                "args": ["TT_DATA"]
-            }
-        },
-        {
             "name": "TP_API",
             "description": "The interface selection (windows/streams) of the function.",
             "type": "uint",

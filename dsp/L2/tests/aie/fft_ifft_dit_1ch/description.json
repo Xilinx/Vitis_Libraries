@@ -28,6 +28,17 @@
                         "--config PROJECT/system.cfg"
                     ]
                 }
+            },
+            "aiecompiler": {
+                "compiler": {
+                    "customized_params": {
+                        "default": {
+                            "COMPILER_ARGS": "",
+                            "AIE_VARIANT": "1",
+                            "FIFO_THRESHOLD": ""
+                        }
+                    }
+                }
             }
         },
         "vek280": {
@@ -48,6 +59,7 @@
                 "compiler": {
                     "customized_params": {
                         "default": {
+                            "AIE_VARIANT": "2",
                             "FIFO_THRESHOLD": " "
                         }
                     }

@@ -2,12 +2,14 @@
 
 clock=3.20
 flow_target=vitis
-syn.file=ssr_fft.cpp
-syn.file_cflags=ssr_fft.cpp, -I${XF_PROJ_ROOT}/L1/src/hw/ssr_fft -DPOINT_SIZE=4 -DNITER=16 -DTT_DATA=cfloat -DTT_TWIDDLE=cfloat
+syn.file=${XF_PROJ_ROOT}/L1/src/hw/ssr_fft/ssr_fft.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/src/hw/ssr_fft/ssr_fft.cpp, -I${XF_PROJ_ROOT}/L1/src/hw/ssr_fft -DPOINT_SIZE=4 -DNITER=16 -DDATA_TYPE=cint32 -DTWIDDLE_TYPE=cint16
 syn.top=ssr_fft_wrapper
-tb.file=test_ssr_fft.cpp
-tb.file_cflags=test_ssr_fft.cpp,-I${XF_PROJ_ROOT}/L1/src/hw/ssr_fft -DPOINT_SIZE=4 -DNITER=16 -DTT_DATA=cfloat -DTT_TWIDDLE=cfloat
+tb.file=${XF_PROJ_ROOT}/L1/tests/hw/ssr_fft/test_ssr_fft.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/hw/ssr_fft/test_ssr_fft.cpp,-I${XF_PROJ_ROOT}/L1/src/hw/ssr_fft -DPOINT_SIZE=4 -DNITER=16 -DDATA_TYPE=cint32 -DTWIDDLE_TYPE=cint16
 syn.debug.enable=1
+cosim.trace_level=port
+cosim.wave_debug=true
 
 
 

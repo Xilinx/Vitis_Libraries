@@ -8,7 +8,7 @@
     ],
     "pre_build": [
         {
-            "build_cmd": "$(make -f example.mk all PLATFORM=$PLATFORM DSPLIB_ROOT_DIR=LIB_DIR)"
+            "build_cmd": "make -f example.mk all PLATFORM=$(PLATFORM) DSPLIB_ROOT_DIR=LIB_DIR"
         }     
     ],
     "post_launch": [

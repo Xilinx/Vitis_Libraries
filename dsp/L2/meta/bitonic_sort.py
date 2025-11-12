@@ -47,7 +47,7 @@ from math import log2
 # and "err_message" if "is_valid" is False.
 #
 
-TP_SSR_max = 16  # sensible limit?
+TP_SSR_max = 8  # beyond this, simulations timeout for large list sizes on AIE-ML
 
 
 #######################################################
@@ -123,16 +123,16 @@ def fn_update_TP_DIM(AIE_VARIANT, TT_DATA, TP_DIM):
     # TODO - remove fixed 256b min size requirement
     max_read = 256 // 8
     data_bytes = com.fn_size_by_byte(TT_DATA)
-    TP_DIM_min = int(2 * max_read / data_bytes)
+    TP_DIM_min = 2 * max_read // data_bytes
 
     io_bytes_max = com.k_data_memory_bytes[AIE_VARIANT]
-    io_samples_max = int(TP_SSR_max * io_bytes_max / data_bytes)
+    io_samples_max = TP_SSR_max * io_bytes_max // data_bytes
 
     param_dict = {
         "name": "TP_DIM",
         "minimum": TP_DIM_min,
         "maximum": io_samples_max,
-        "maximum_pingpong_buf": int(io_samples_max / 2),
+        "maximum_pingpong_buf": io_samples_max // 2,
     }
 
     if (TP_DIM != 0) and (not fn_is_power_of_two(TP_DIM)):
@@ -176,15 +176,13 @@ def update_TP_NUM_FRAMES(args):
 def fn_update_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_DIM):
     data_bytes = com.fn_size_by_byte(TT_DATA)
     io_bytes_max = com.k_data_memory_bytes[AIE_VARIANT]
-    io_samples_max = io_bytes_max / data_bytes
-    # Currently TP_SSR>1 is not supported by TP_NUM_FRAMES>1
-    max_ssr = 1
-    TP_NUM_FRAMES_max = int(max_ssr * io_samples_max / TP_DIM)
+    io_samples_max = io_bytes_max // data_bytes
+    TP_NUM_FRAMES_max = max(1, io_samples_max // TP_DIM)    # if NUM_FRAMES>1 support added for SSR>1, refer here.
     param_dict = {
         "name": "TP_NUM_FRAMES",
         "minimum": 1,
         "maximum": TP_NUM_FRAMES_max,
-        "maximum_pingpong_buf": int(TP_NUM_FRAMES_max / 2),
+        "maximum_pingpong_buf": TP_NUM_FRAMES_max // 2,
     }
     return param_dict
 
@@ -281,7 +279,7 @@ def fn_update_casc_len(TP_DIM, TP_SSR):
     param_dict = {
         "name": "TP_CASC_LEN",
         "minimum": 1,
-        "maximum": int((log2(TP_DIM / TP_SSR) + 1) * log2(TP_DIM / TP_SSR) / 2),
+        "maximum": int((log2(TP_DIM)+1)*log2(TP_DIM)/2) if TP_SSR==1 else 1,
     }
     return param_dict
 

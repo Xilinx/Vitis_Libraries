@@ -90,15 +90,14 @@ def update_TT_OUT_DATA(args):
 def fn_update_TT_OUT_DATA(AIE_VARIANT, TT_DATA):
     legal_set_TT_OUT_DATA = comFirUpd.fn_update_tt_data(AIE_VARIANT)["enum"]
 
-    legal_set_TT_OUT_DATA = comFirUpd.fn_greater_precision_data_in_out_update(
-        TT_DATA, legal_set_TT_OUT_DATA.copy()
-    )
     legal_set_TT_OUT_DATA = fn_float_check_update(TT_DATA, legal_set_TT_OUT_DATA.copy())
     legal_set_TT_OUT_DATA = fn_complex_check_update(
         TT_DATA, legal_set_TT_OUT_DATA.copy()
     )
     legal_set_TT_OUT_DATA = fn_int_check_update(TT_DATA, legal_set_TT_OUT_DATA.copy())
-    legal_set_TT_OUT_DATA = fn_integer_check_update(TT_DATA, legal_set_TT_OUT_DATA.copy())
+    legal_set_TT_OUT_DATA = fn_integer_check_update(
+        TT_DATA, legal_set_TT_OUT_DATA.copy()
+    )
     if TT_DATA == "cfloat":
         legal_set_TT_OUT_DATA = remove_from_set(["float"], legal_set_TT_OUT_DATA)
 
@@ -128,10 +127,12 @@ def update_TT_COEFF(args):
     TT_DATA = args["TT_DATA"]
     return fn_update_tt_coeff(AIE_VARIANT, TT_DATA)
 
+
 def fn_update_tt_coeff(AIE_VARIANT, TT_DATA):
-    param_dict=comFirUpd.fn_update_tt_coeff(AIE_VARIANT, TT_DATA)
+    param_dict = comFirUpd.fn_update_tt_coeff(AIE_VARIANT, TT_DATA)
     param_dict["enum"] = fn_integer_check_update(TT_DATA, param_dict["enum"].copy())
     return param_dict
+
 
 def validate_TT_COEFF(args):
     AIE_VARIANT = args["AIE_VARIANT"]
@@ -298,7 +299,7 @@ def fn_update_TP_TDM_CHANNELS(
     MAX_COEFFS_PER_TILE = memoryGroupSize / (fn_size_by_byte(TT_COEFF))
 
     TP_TDM_CHANNELS_max_int = int(min(TP_TDM_CHANNELS_max, TP_TDM_CHANNELS_max_calc))
-    lanes = int(fnNumLanes(TT_DATA, TT_COEFF, 0, AIE_VARIANT))
+    lanes = int(fnMacLanes(TT_DATA, TT_COEFF, AIE_VARIANT))
 
     param_dict = {
         "name": "TP_TDM_CHANNELS",
@@ -332,7 +333,7 @@ def validate_TP_TDM_CHANNELS(args):
 def fn_validate_TP_TDM_CHANNELS(
     TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS
 ):
-    lanes = fnNumLanes(TT_DATA, TT_COEFF, 0, AIE_VARIANT)
+    lanes = fnMacLanes(TT_DATA, TT_COEFF, AIE_VARIANT)
     if TP_TDM_CHANNELS % lanes != 0:
         return isError(f"TP_TDM_CHANNELS must be a multiple of {lanes}!")
     else:
@@ -356,11 +357,13 @@ def update_TP_SSR(args):
 
 
 def fn_update_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_TDM_CHANNELS, TP_FIR_LEN):
-    lanes = fnNumLanes(TT_DATA, TT_COEFF, 0, AIE_VARIANT)
+    lanes = fnMacLanes(TT_DATA, TT_COEFF, AIE_VARIANT)
     legal_set_ssr = find_divisors(TP_TDM_CHANNELS / lanes, TP_SSR_max)
 
     for ssr in legal_set_ssr.copy():
-        param_dict_casc_len=fn_update_TP_CASC_LEN(TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, ssr)
+        param_dict_casc_len = fn_update_TP_CASC_LEN(
+            TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, ssr
+        )
         if "enum" in param_dict_casc_len and param_dict_casc_len["enum"] == []:
             legal_set_ssr.remove(ssr)
 
@@ -375,11 +378,17 @@ def validate_TP_SSR(args):
     TP_TDM_CHANNELS = args["TP_TDM_CHANNELS"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_SSR = args["TP_SSR"]
-    return fn_validate_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_TDM_CHANNELS, TP_FIR_LEN, TP_SSR)
+    return fn_validate_TP_SSR(
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_TDM_CHANNELS, TP_FIR_LEN, TP_SSR
+    )
 
 
-def fn_validate_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_TDM_CHANNELS, TP_FIR_LEN, TP_SSR):
-    param_dict = fn_update_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_TDM_CHANNELS, TP_FIR_LEN)
+def fn_validate_TP_SSR(
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_TDM_CHANNELS, TP_FIR_LEN, TP_SSR
+):
+    param_dict = fn_update_TP_SSR(
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_TDM_CHANNELS, TP_FIR_LEN
+    )
     return validate_legal_set(param_dict["enum"], "TP_SSR", TP_SSR)
 
 
@@ -393,31 +402,43 @@ def update_TP_CASC_LEN(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TP_TDM_CHANNELS = args["TP_TDM_CHANNELS"]
     TP_SSR = args["TP_SSR"]
-    return fn_update_TP_CASC_LEN(TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, TP_SSR)
+    return fn_update_TP_CASC_LEN(
+        TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, TP_SSR
+    )
 
 
-def fn_update_TP_CASC_LEN(TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, TP_SSR):
+def fn_update_TP_CASC_LEN(
+    TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, TP_SSR
+):
     fir_len = int(calc_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT))
     TP_CASC_LEN_max_int = min(TP_CASC_LEN_max, fir_len)
 
-    kMaxTapsPerKernel=k_data_memory_bytes[AIE_VARIANT]/com.fn_size_by_byte(TT_COEFF)
-    TP_CASC_LEN_min_taps_per_kernel=((fir_len * TP_TDM_CHANNELS) / TP_SSR) / kMaxTapsPerKernel
+    kMaxTapsPerKernel = k_data_memory_bytes[AIE_VARIANT] / com.fn_size_by_byte(TT_COEFF)
+    TP_CASC_LEN_min_taps_per_kernel = (
+        (fir_len * TP_TDM_CHANNELS) / TP_SSR
+    ) / kMaxTapsPerKernel
 
-    if TP_CASC_LEN_min_taps_per_kernel%1 == 0:
-        TP_CASC_LEN_min_taps_per_kernel=int(TP_CASC_LEN_min_taps_per_kernel)
+    if TP_CASC_LEN_min_taps_per_kernel % 1 == 0:
+        TP_CASC_LEN_min_taps_per_kernel = int(TP_CASC_LEN_min_taps_per_kernel)
     else:
-        TP_CASC_LEN_min_taps_per_kernel=int((TP_CASC_LEN_min_taps_per_kernel+1)//1) #ceiling the result
-        
+        TP_CASC_LEN_min_taps_per_kernel = int(
+            (TP_CASC_LEN_min_taps_per_kernel + 1) // 1
+        )  # ceiling the result
+
     TP_CASC_LEN_min_int = max(TP_CASC_LEN_min_taps_per_kernel, TP_CASC_LEN_min)
-    
+
     legal_set_casc_len_temp1 = list(range(TP_CASC_LEN_min_int, TP_CASC_LEN_max_int + 1))
     legal_set_casc_len_temp2 = comFirUpd.fn_eliminate_casc_len_min_fir_len_each_kernel(
         legal_set_casc_len_temp1.copy(), TP_FIR_LEN, TP_SSR=1
     )
 
     param_dict = {"name": "TP_CASC_LEN"}
-    if (legal_set_casc_len_temp1 == legal_set_casc_len_temp2) and legal_set_casc_len_temp1 != []:
-        param_dict.update({"minimum": TP_CASC_LEN_min_int, "maximum": TP_CASC_LEN_max_int})
+    if (
+        legal_set_casc_len_temp1 == legal_set_casc_len_temp2
+    ) and legal_set_casc_len_temp1 != []:
+        param_dict.update(
+            {"minimum": TP_CASC_LEN_min_int, "maximum": TP_CASC_LEN_max_int}
+        )
     else:
         param_dict.update({"enum": legal_set_casc_len_temp2})
     return param_dict
@@ -436,8 +457,12 @@ def validate_TP_CASC_LEN(args):
     )
 
 
-def fn_validate_TP_CASC_LEN(TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, TP_SSR, TP_CASC_LEN):
-    param_dict = fn_update_TP_CASC_LEN(TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, TP_SSR)
+def fn_validate_TP_CASC_LEN(
+    TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, TP_SSR, TP_CASC_LEN
+):
+    param_dict = fn_update_TP_CASC_LEN(
+        TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, TP_SSR
+    )
     if "enum" in param_dict:
         return validate_legal_set(param_dict["enum"], "TP_CASC_LEN", TP_CASC_LEN)
     else:
@@ -510,19 +535,13 @@ def fn_update_TP_INPUT_WINDOW_VSIZE(
         TP_INPUT_WINDOW_VSIZE_max_temp1, TP_INPUT_WINDOW_VSIZE_max_temp2
     )
 
-    streamRptFactor = 8
     windowSizeMultiplier = (
-        (fnNumLanes(TT_DATA, TT_COEFF, tpApiInt, AIE_VARIANT))
-        if tpApiInt == API_BUFFER
-        # Need to take unrolloing into account
-        else (
-            fnNumLanes(TT_DATA, TT_COEFF, tpApiInt, AIE_VARIANT) * streamRptFactor
-        )
+        (fnMacLanes(TT_DATA, TT_COEFF, AIE_VARIANT))
     )
 
     factor_ws = find_lcm(TP_SSR * windowSizeMultiplier, TP_TDM_CHANNELS)
 
-    TP_INPUT_WINDOW_VSIZE_min_int=CEIL(TP_INPUT_WINDOW_VSIZE_min, factor_ws)
+    TP_INPUT_WINDOW_VSIZE_min_int = CEIL(TP_INPUT_WINDOW_VSIZE_min, factor_ws)
 
     param_dict = {
         "name": "TP_INPUT_WINDOW_VSIZE",
@@ -578,13 +597,8 @@ def fn_validate_TP_INPUT_WINDOW_VSIZE(
     TP_TDM_CHANNELS,
     AIE_VARIANT,
 ):
-    tpApiInt = 0  # no stream implementation
-    streamRptFactor = 8
     windowSizeMultiplier = (
-        (fnNumLanes(TT_DATA, TT_COEFF, tpApiInt, AIE_VARIANT))
-        if tpApiInt == API_BUFFER
-        # Need to take unrolloing into account
-        else (fnNumLanes(TT_DATA, TT_COEFF, tpApiInt, AIE_VARIANT) * streamRptFactor)
+        (fnMacLanes(TT_DATA, TT_COEFF, AIE_VARIANT))
     )
 
     factor_ws = find_lcm(TP_SSR * windowSizeMultiplier, TP_TDM_CHANNELS)
@@ -597,7 +611,7 @@ def fn_validate_TP_INPUT_WINDOW_VSIZE(
             TT_COEFF,
             TP_FIR_LEN,
             TP_INPUT_WINDOW_VSIZE,
-            tpApiInt,
+            API_BUFFER,
             TP_SSR,
             TP_TDM_CHANNELS,
             AIE_VARIANT,
@@ -774,6 +788,7 @@ def info_ports(args):
     Some IP has dynamic number of ports according to parameter set,
     so port information has to be implemented as a function"""
     TT_DATA = args["TT_DATA"]
+    TT_COEFF = args["TT_COEFF"]
     TT_OUT_DATA = args["TT_OUT_DATA"]
     TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     TP_TDM_CHANNELS = args["TP_TDM_CHANNELS"]
@@ -823,6 +838,12 @@ def info_ports(args):
         if (args["TP_DUAL_IP"] == 1)
         else []
     )
+    coeff_vec_len = (TP_FIR_LEN * TP_TDM_CHANNELS)
+    coeff_ports = (
+        get_parameter_port_info("coeff", "in", TT_COEFF, TP_SSR, coeff_vec_len, "async")
+        if (args["TP_USE_COEFF_RELOAD"] == 1)
+        else []
+    )
 
     # decimate by 2 for halfband
     out_ports = get_port_info(
@@ -845,7 +866,7 @@ def info_ports(args):
         if (args["TP_NUM_OUTPUTS"] == 2)
         else []
     )
-    return in_ports + in2_ports + out_ports + out2_ports
+    return in_ports + in2_ports + coeff_ports + out_ports + out2_ports
 
 
 #### graph generator ####
@@ -898,6 +919,7 @@ def generate_graph(graphname, args):
     TP_CASC_LEN = args["TP_CASC_LEN"]
 
     taps = fn_get_taps_vector(TT_COEFF, coeff_list)
+    constr_args_str = f"taps" if TP_USE_COEFF_RELOAD == 0 else ""
     dual_ip_declare_str = (
         f"ssr_port_array<input> in2;" if TP_DUAL_IP == 1 else "// No dual input"
     )
@@ -915,7 +937,7 @@ def generate_graph(graphname, args):
         else "// No dual output"
     )
     coeff_ip_declare_str = (
-        f"ssr_port_array<input, TP_SSR * TP_CASC_LEN> coeff;"
+        f"rtp_port_array coeff;"
         if TP_USE_COEFF_RELOAD == 1
         else "//No coeff port"
     )
@@ -928,48 +950,77 @@ def generate_graph(graphname, args):
     # Use formatted multi-line string to avoid a lot of \n and \t
     code = f"""
 class {graphname} : public adf::graph {{
-public:
-  static constexpr unsigned int TP_CASC_LEN = {TP_CASC_LEN};
-  static constexpr unsigned int TP_SSR = {TP_SSR};
-  template <typename dir, unsigned int dim = TP_SSR>
-  using ssr_port_array = std::array<adf::port<dir>, dim>;
+    public:
+    // Used by pkt switching graph for type deduction
+    using BTT_COEFF = {TT_COEFF};
 
-  ssr_port_array<input> in;
-  {dual_ip_declare_str}
-  {coeff_ip_declare_str}
-  ssr_port_array<output> out;
-  {dual_op_declare_str}
+    static constexpr unsigned int TP_CASC_LEN = {TP_CASC_LEN};
+    static constexpr unsigned int TP_SSR = {TP_SSR};
+    template <typename dir, unsigned int dim = TP_SSR>
+    using ssr_port_array = std::array<adf::port<dir>, dim>;
 
-  std::vector<{TT_COEFF}> taps = {taps};
-  xf::dsp::aie::fir::tdm::fir_tdm_graph<
-    {TT_DATA}, //TT_DATA
-    {TT_COEFF}, //TT_COEFF
-    {TP_FIR_LEN}, //TP_FIR_LEN
-    {TP_SHIFT}, //TP_SHIFT
-    {TP_RND}, //TP_RND
-    {TP_INPUT_WINDOW_VSIZE}, //TP_INPUT_WINDOW_VSIZE
-    {TP_TDM_CHANNELS}, //TP_TDM_CHANNELS
-    {TP_NUM_OUTPUTS}, //TP_NUM_OUTPUTS
-    {TP_DUAL_IP}, //TP_DUAL_IP
-    // {TP_API}, //TP_API
-    {TP_SSR}, //TP_SSR
-    {TP_SAT}, //TP_SAT
-    {TP_CASC_LEN}, //TP_CASC_LEN
-    {TT_OUT_DATA} //TT_OUT_DATA
-  > filter;
+    std::vector<{TT_COEFF}> taps = {taps};
+    using firClass = xf::dsp::aie::fir::tdm::fir_tdm_graph<
+        {TT_DATA}, //TT_DATA
+        {TT_COEFF}, //TT_COEFF
+        {TP_FIR_LEN}, //TP_FIR_LEN
+        {TP_SHIFT}, //TP_SHIFT
+        {TP_RND}, //TP_RND
+        {TP_INPUT_WINDOW_VSIZE}, //TP_INPUT_WINDOW_VSIZE
+        {TP_TDM_CHANNELS}, //TP_TDM_CHANNELS
+        {TP_NUM_OUTPUTS}, //TP_NUM_OUTPUTS
+        {TP_DUAL_IP}, //TP_DUAL_IP
+        // {TP_API}, //TP_API
+        {TP_SSR}, //TP_SSR
+        {TP_SAT}, //TP_SAT
+        {TP_CASC_LEN}, //TP_CASC_LEN
+        {TT_OUT_DATA}, //TT_OUT_DATA
+        {TP_USE_COEFF_RELOAD} //TP_USE_COEFF_RELOAD
+    >;
+    firClass filter;
 
-  {graphname}() : filter({taps}) {{
-    adf::kernel *filter_kernels = filter.getKernels();
-    for (int i=0; i < TP_SSR * TP_CASC_LEN; i++) {{
-      {coeff_ip_connect_str}
-      }}
-    for (int i=0; i < TP_SSR; i++) {{
-      adf::connect<> net_in(in[i], filter.in[i]);
-      {dual_ip_connect_str}
-      adf::connect<> net_out(filter.out[i], out[i]);
-      {dual_op_connect_str}
+    static constexpr int rtpPortNumber = firClass::getTotalRtpPorts();
+    using rtp_port_array = std::array<adf::port<input>, rtpPortNumber>;
+
+    ssr_port_array<input> in;
+    {dual_ip_declare_str}
+    {coeff_ip_declare_str}
+    ssr_port_array<output> out;
+    {dual_op_declare_str}
+
+    static constexpr unsigned int getTotalRtpPorts() {{
+        return firClass::getTotalRtpPorts();
+    }};
+
+    static std::vector<{TT_COEFF}> extractTaps(const std::vector<{TT_COEFF}>& taps, unsigned int kernelNo){{
+        return firClass::extractTaps(taps, kernelNo);
+    }};
+
+    template<typename TopGraph>
+    void update_rtp(TopGraph& top, const std::vector<{TT_COEFF}>& taps, rtp_port_array coeff) {{
+        filter.update_rtp(top, taps, coeff);
+    }};
+
+    // Constructor using taps passed as an argument
+    {graphname}(const std::vector<{TT_COEFF}>& taps) : filter(taps) {{
+        create_connections();
     }}
-  }}
+    // Constructor using internal taps
+    {graphname}() : filter({constr_args_str}) {{
+        create_connections();
+    }}
+    void create_connections() {{
+        adf::kernel *filter_kernels = filter.getKernels();
+        for (int i=0; i < TP_SSR * TP_CASC_LEN; i++) {{
+        {coeff_ip_connect_str}
+        }}
+        for (int i=0; i < TP_SSR; i++) {{
+        adf::connect<> net_in(in[i], filter.in[i]);
+        {dual_ip_connect_str}
+        adf::connect<> net_out(filter.out[i], out[i]);
+        {dual_op_connect_str}
+        }}
+    }}
 
 }};
 """

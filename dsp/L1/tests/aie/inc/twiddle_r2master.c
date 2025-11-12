@@ -61,10 +61,11 @@ int main() {
     fprintf(r2fp, "#ifndef __FFT_R2COMB_TWIDDLE_LUT_ALL_H__\n#define __FFT_R2COMB_TWIDDLE_LUT_ALL_H__\n\n");
     fprintf(r2fp, "// DO NOT HAND EDIT THIS FILE. IT WAS CREATED using ../tests/inc/twiddle_r2master.c\n\n");
     fprintf(r2fp,
-            "#ifndef INLINE_DECL\n#define INLINE_DECL inline __attribute__((always_inline))\n#endif\n#ifndef "
+            "#include \"device_defs.h\"\n#ifndef INLINE_DECL\n#define INLINE_DECL inline "
+            "__attribute__((always_inline))\n#endif\n#ifndef "
             "NOINLINE_DECL\n#define NOINLINE_DECL inline __attribute__((noinline))\n#endif\n\n//The values in this "
-            "file were created using twiddle.c, then hand copied over.\n\nstatic constexpr int kR2MasterTableSize = "
-            "32768;\n//The values in this file were created using twiddle.c\n");
+            "file were created using twiddle_r2master.c.\n\nstatic constexpr int kR2MasterTableSize = "
+            "32768;\n//The values in this file were created using twiddle_r2master.c\n");
     for (i = 0; i < PT_SIZE; i++) {
         // create cint32 table
         temp = round(reals[i] * 2147483648.0);
@@ -166,6 +167,19 @@ int main() {
         }
     }
     fprintf(r2fp, "};\n\n");
+    fprintf(r2fp, "/*\n#ifdef _SUPPORTS_CBFLOAT16_\n");
+    fprintf(r2fp, "static constexpr cbfloat16 r2_twiddle_master_cbfloat16[kR2MasterTableSize] = {\n");
+    for (i = 0; i < PT_SIZE / 2; i++) {
+        fprintf(r2fp, "{%f, %f}", realf[i], imagf[i]);
+        if (i < PT_SIZE / 2 - 1) {
+            fprintf(r2fp, ", ");
+        }
+        if (i % 8 == 7) {
+            fprintf(r2fp, "\n\n");
+        }
+    }
+    fprintf(r2fp, "};\n\n");
+    fprintf(r2fp, "#endif // _SUPPORTS_CBFLOAT16_\n*/\n");
     fprintf(r2fp,
             "template<typename TT_TWIDDLE, unsigned int TP_TWIDDLE_MODE>\nINLINE_DECL constexpr TT_TWIDDLE* "
             "fnGetR2TwiddleMasterBase(){};\n");
@@ -187,6 +201,14 @@ int main() {
     fprintf(r2fp,
             "template<>\nINLINE_DECL constexpr cfloat* fnGetR2TwiddleMasterBase<cfloat,1>(){\n    return "
             "(cfloat*)r2_twiddle_master_cfloat;\n};\n");
+    fprintf(r2fp, "/*\n#ifdef _SUPPORTS_CBFLOAT16_\n");
+    fprintf(r2fp,
+            "template<>\nINLINE_DECL constexpr cbfloat16* fnGetR2TwiddleMasterBase<cbfloat16,0>(){\n    return "
+            "(cbfloat16*)r2_twiddle_master_cbfloat16;\n};\n");
+    fprintf(r2fp,
+            "template<>\nINLINE_DECL constexpr cbfloat16* fnGetR2TwiddleMasterBase<cbfloat16,1>(){\n    return "
+            "(cbfloat16*)r2_twiddle_master_cbfloat16;\n};\n");
+    fprintf(r2fp, "#endif // _SUPPORTS_CBFLOAT16_\n*/\n");
     fprintf(r2fp, "#endif //__FFT_R2COMB_TWIDDLE_LUT_ALL_H__\n");
 
     fclose(r2fp);

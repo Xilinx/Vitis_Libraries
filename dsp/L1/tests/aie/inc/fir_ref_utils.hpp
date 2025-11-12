@@ -60,17 +60,23 @@ struct T_accRef {
 // template<> struct T_accRef<int32>   {int64_t    real;};
 // template<> struct T_accRef<cint16>  {int64_t    real, imag;};
 // template<> struct T_accRef<cint32>  {int64_t    real, imag;};
-template <>
-struct T_accRef<float> {
-    float real;
-};
 #ifdef _SUPPORTS_BFLOAT16_
 template <>
 struct T_accRef<bfloat16> {
     float real;
 };
 #endif
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+struct T_accRef<cbfloat16> {
+    float real, imag;
+};
+#endif
 // #if __SUPPORTS_CFLOAT__ == 1
+template <>
+struct T_accRef<float> {
+    float real;
+};
 template <>
 struct T_accRef<cfloat> {
     float real, imag;
@@ -377,7 +383,6 @@ inline cint32_t castAcc(T_accRef<cint32_t> acc) {
     cacc32.imag = (int32)acc.imag;
     return cacc32;
 };
-
 // #if __SUPPORTS_CFLOAT__ == 1
 template <>
 inline cfloat castAcc(T_accRef<cfloat> acc) {
@@ -387,6 +392,15 @@ inline cfloat castAcc(T_accRef<cfloat> acc) {
     return caccfloat;
 };
 // #endif
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+inline cbfloat16 castAcc(T_accRef<cbfloat16> acc) {
+    cbfloat16 caccfloat;
+    caccfloat.real = (bfloat16)acc.real;
+    caccfloat.imag = (bfloat16)acc.imag;
+    return caccfloat;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 // Multiply
 template <typename T_D, typename T_C, typename T_A = T_D>
@@ -436,7 +450,25 @@ inline void multiplyAcc(T_accRef<int32_t>& accum, int32_t data, int32_t coeff) {
     accum.real += (int64_t)data * coeff;
 };
 template <>
+inline void multiplyAcc(T_accRef<int16_t>& accum, int32_t data, int16_t coeff) {
+    accum.real += (int64_t)data * coeff;
+};
+template <>
+inline void multiplyAcc(T_accRef<int16_t>& accum, int32_t data, int32_t coeff) {
+    accum.real += (int64_t)data * coeff;
+};
+template <>
 inline void multiplyAcc(T_accRef<cint16_t>& accum, cint16_t data, int32_t coeff) {
+    accum.real += (int64_t)data.real * (int64_t)coeff;
+    accum.imag += (int64_t)data.imag * (int64_t)coeff;
+};
+template <>
+inline void multiplyAcc(T_accRef<cint16_t>& accum, cint32_t data, int16_t coeff) {
+    accum.real += (int64_t)data.real * (int64_t)coeff;
+    accum.imag += (int64_t)data.imag * (int64_t)coeff;
+};
+template <>
+inline void multiplyAcc(T_accRef<cint16_t>& accum, cint32_t data, int32_t coeff) {
     accum.real += (int64_t)data.real * (int64_t)coeff;
     accum.imag += (int64_t)data.imag * (int64_t)coeff;
 };
@@ -497,6 +529,16 @@ inline void multiplyAcc(T_accRef<cint32_t>& accum, cint16_t data, cint32_t coeff
 };
 template <>
 inline void multiplyAcc(T_accRef<cint32_t>& accum, cint32_t data, cint32_t coeff) {
+    accum.real += (int64_t)coeff.real * (int64_t)data.real - (int64_t)coeff.imag * (int64_t)data.imag;
+    accum.imag += (int64_t)coeff.real * (int64_t)data.imag + (int64_t)coeff.imag * (int64_t)data.real;
+};
+template <>
+inline void multiplyAcc(T_accRef<cint16_t>& accum, cint32_t data, cint16_t coeff) {
+    accum.real += (int64_t)coeff.real * (int64_t)data.real - (int64_t)coeff.imag * (int64_t)data.imag;
+    accum.imag += (int64_t)coeff.real * (int64_t)data.imag + (int64_t)coeff.imag * (int64_t)data.real;
+};
+template <>
+inline void multiplyAcc(T_accRef<cint16_t>& accum, cint32_t data, cint32_t coeff) {
     accum.real += (int64_t)coeff.real * (int64_t)data.real - (int64_t)coeff.imag * (int64_t)data.imag;
     accum.imag += (int64_t)coeff.real * (int64_t)data.imag + (int64_t)coeff.imag * (int64_t)data.real;
 };
@@ -610,6 +652,25 @@ inline cfloat nullElem() {
     return retVal;
 };
 // #endif
+
+// Null bfloat16 element
+#ifdef _SUPPORTS_BFLOAT16_
+template <>
+inline bfloat16 nullElem() {
+    return 0.0;
+};
+#endif //_SUPPORTS_BFLOAT16_
+
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+inline cbfloat16 nullElem() {
+    cbfloat16 retVal;
+
+    retVal.real = 0.0;
+    retVal.imag = 0.0;
+    return retVal;
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 template <typename TT>
 struct realType {

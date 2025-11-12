@@ -102,10 +102,14 @@
       "name": "ssr",
       "description": "Specify the number of parallel input/output paths. The specified value should be in the form of 2^N.",
       "default": 1,
+      "enum": [
+                "Inherit from number of input columns",
+                "<Specify SSR number>" 
+            ],      
       "type": "uint",
       "label": "SSR: ",
       "tablabel": "Main",
-      "parameterType": "edit"
+      "parameterType": "combobox"
     },
     {
       "key": "TP_TWIDDLE_MODE",

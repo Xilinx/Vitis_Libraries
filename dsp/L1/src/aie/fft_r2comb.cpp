@@ -65,6 +65,12 @@ template <>
 INLINE_DECL constexpr cfloat null_tw<cfloat>() {
     return {0.0, 0.0};
 };
+#ifdef _SUPPORTS_CBFLOAT16_
+template <>
+INLINE_DECL constexpr cbfloat16 null_tw<cbfloat16>() {
+    return {0.0, 0.0};
+};
+#endif //_SUPPORTS_CBFLOAT16_
 
 // function to create offsets for multiple twiddle tables stored in one array for the Dynamic Point size case.
 template <int TP_POINT_SIZE>

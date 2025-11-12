@@ -96,8 +96,8 @@ static constexpr unsigned int kMaxIndexOf16ByteVector = 2;  // |2|1|     ===> 16
 static constexpr unsigned int kNumPoints2 = 2;              // Num of points is 2 for stream processing.
 static constexpr unsigned int kNumPoints4 = 4;              // Num of points is 4 for stream processing
 static constexpr int kXstepOfMac4Rot = -4;               // xstep is -4 for mac4_rot() intrinsic as per current design.
-static constexpr unsigned int kMinLenOfGforStream = 8;   // Min Len of G should be 8 while doing stream processing
-static constexpr unsigned int kMaxLenOfGforStream = 256; // Max Len of G should be 8 while doing stream processing
+static constexpr unsigned int kMinLenOfGforStream = 8;   // Min Len of G should be 8 while doing stream processing.
+static constexpr unsigned int kMaxLenOfGforStream = 256; // Max Len of G should be 256 while doing stream processing.
 
 template <typename TT_DATA_F, typename TT_DATA_G>
 struct t_CC_RefAccType {
@@ -706,6 +706,48 @@ INLINE_DECL bfloat16 conjugate(bfloat16& inData) {
     inData = inData;
     return inData;
 }; //
+
+// zero Initialization
+template <typename TT_DATA>
+INLINE_DECL TT_DATA zeros() {
+    return 0;
+};
+
+// Null cint16_t element
+template <>
+INLINE_DECL cint16 zeros() {
+    cint16 retVal;
+    retVal.real = 0;
+    retVal.imag = 0;
+    return retVal;
+};
+
+// Null cint32 element
+template <>
+INLINE_DECL cint32 zeros() {
+    cint32 retVal;
+    retVal.real = 0;
+    retVal.imag = 0;
+    return retVal;
+};
+
+// Null float element
+template <>
+INLINE_DECL float zeros() {
+    return 0.0;
+};
+
+// Null cint32 element
+#if __SUPPORTS_CFLOAT__ == 1
+template <>
+INLINE_DECL cfloat zeros() {
+    cfloat retVal = {0.0, 0.0};
+
+    retVal.real = 0.0;
+    retVal.imag = 0.0;
+    return retVal;
+};
+#endif
 
 // MULTIPLY_ACCUM Function
 template <typename T_F, typename T_G, typename T_OUT>

@@ -40,32 +40,35 @@
 #define NOINLINE_DECL inline __attribute__((noinline))
 #endif
 #define ROUND(X, Y) (((X % Y) > ((Y + 1) / 2)) ? ((int)(X + Y - 1) / (int)Y) : ((int)X / (int)Y))
+#define MASK_LOWEST_BITS 0x00FFu
+#define MASK_UPPER_BITS 0x7F00u
+#define EXPONENT_ADJUSTMENT_CONSTANT 0x4000u
+#define NUM_OF_PARALLEL_ACCESS_LUT 4
+
 // using namespace std;
 namespace xf {
 namespace dsp {
 namespace aie {
 namespace euclidean_distance {
 
-static constexpr unsigned int kMaxBitsRegY = 1024;                            // Max number of bits on Y Register.
-static constexpr unsigned int kMaxBitsRegX = 512;                             // Max number of bits on X Register.
-static constexpr unsigned int kMaxBitsRegW = 256;                             // Max number of bits on W Register.
-static constexpr unsigned int kMaxBitsRegV = 128;                             // Max number of bits on V Register.
-static constexpr unsigned int kMaxBitsLoadOnAie = 256;                        // Max number of bits Load on AIE
-static constexpr unsigned int kMaxBytesLoadOnAie = 32;                        // Max number of bytes (256/8) Load on AIE
+// Constants for Euclidean Distance
+static constexpr unsigned int kMaxBytesLoadOnAie = 32; // Max number of bytes (256/8) or (512/8) Load on AIE
 static constexpr unsigned int kMaxBufferLenOnAieInBytes = __DATA_MEM_BYTES__; // Max buffer Length
-static constexpr unsigned int kShiftFactor2 = 2;                              // MulFactor2
-static constexpr unsigned int kBuffSize16Byte = 16;                           // 128-bit buffer size in Bytes
-static constexpr unsigned int kBuffSize32Byte = 32;                           // 256-bit buffer size in Bytes
-static constexpr unsigned int kBuffSize64Byte = 64;                           // 512-bit buffer size in Bytes
-static constexpr unsigned int kBuffSize128Byte = 128;                         // 1024-bit buffer size in Bytes
+static constexpr unsigned int kLeftShiftFactor2 = 2;                          // MulFactor2
+static constexpr unsigned int kRightShiftFactor2 = 2;                         // DivisiableFactor2
+static constexpr unsigned int kBuffSize16Byte =
+    (__V_REGSIZE__ / 8); // 128-bit AIE-1, AIE-ML and  AIE-MLv2 buffer size in Bytes
+static constexpr unsigned int kBuffSize32Byte =
+    (__W_REGSIZE__ / 8); // 256-bit AIE-1, AIE-ML and  AIE-MLv2 buffer size in Bytes
+static constexpr unsigned int kBuffSize64Byte =
+    (__X_REGSIZE__ / 8); // 512-bit AIE-1, AIE-ML and  AIE-MLv2 buffer size in Bytes
+static constexpr unsigned int kBuffSize128Byte =
+    (__Y_REGSIZE__ / 8); // 1024-bit AIE-1, AIE-ML and  AIE-MLv2 buffer size in Bytes
 
-static constexpr unsigned int kUnrollFactor = 8;      // Unroll Factor
-static constexpr unsigned int kFixedDimOfED = 4;      // Unroll Factor
-static constexpr unsigned int kVecSize16OfBf16 = 16;  // v16bfloat16
-static constexpr unsigned int kVecSize32OfBf16 = 32;  // v32bfloat16
-static constexpr unsigned int kVecSizeOfAccum16 = 16; // v16accfloat
-static constexpr unsigned int kVecSizeOfAccum32 = 32; // v32accfloat
-static constexpr unsigned int kUpshiftFactor2 = 2;    // v32accfloat
+static constexpr unsigned int kUnrollFactor = 8;   // Unroll Factor
+static constexpr unsigned int kFixedDimOfED = 4;   // Unroll Factor
+static constexpr unsigned int kUpshiftFactor2 = 2; // v32accfloat
+static constexpr unsigned int kNumOfKernels = 2;   // Num of kernels in ED is 2
 
 // Function to return the default lanes based on choosen architecture
 template <typename TT_DATA>
@@ -156,19 +159,19 @@ INLINE_DECL constexpr unsigned int fnGetNumofPoints() {
 // Function to return Maximum supported length based on given DATA TYPE.
 template <typename TT_DATA>
 INLINE_DECL constexpr unsigned int getMaxLen() {
-    return (kMaxBufferLenOnAieInBytes >> kShiftFactor2 / sizeof(TT_DATA));
+    return (((kMaxBufferLenOnAieInBytes >> kRightShiftFactor2) /*8K*/ / kFixedDimOfED) / sizeof(TT_DATA));
 };
 
 // Function to return Minimum supported length based on given DATA TYPE.
 template <typename TT_DATA>
 INLINE_DECL constexpr unsigned int getMinLen() {
-    return (((kMaxBitsLoadOnAie << 1) / fnSampleSize<TT_DATA>()));
+    return (((kMaxBytesLoadOnAie << 1) / sizeof(TT_DATA)));
 };
 
 // Function to return true or false by checking given length is in range or not
 template <typename TT_DATA, unsigned int sigLen>
 constexpr bool isLenInRange() {
-    unsigned int minDataLoad = (kMaxBitsLoadOnAie / fnSampleSize<TT_DATA>());
+    unsigned int minDataLoad = (kMaxBytesLoadOnAie / sizeof(TT_DATA));
     bool checkLen = false;
 
     if ((sigLen >= getMinLen<TT_DATA>()) && (sigLen <= getMaxLen<TT_DATA>())) {
@@ -188,65 +191,15 @@ INLINE_DECL constexpr bool fnCheckDataTypesOfInputs() {
 };
 #if (__HAS_ACCUM_PERMUTES__ == 1)
 template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<int8>() {
-    return false;
-};
-template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<int16>() {
-    return false;
-};
-
-template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<int32>() {
-    return false;
-};
-template <>
 INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<float>() {
     return true;
-};
-template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<cint16>() {
-    return false;
-};
-template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<cint32>() {
-    return false;
-};
-template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<cfloat>() {
-    return false;
 };
 #endif
 
 #if (__HAS_ACCUM_PERMUTES__ == 0)
 template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<int8>() {
-    return false;
-};
-template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<int16>() {
-    return false;
-};
-
-template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<int32>() {
-    return false;
-};
-template <>
 INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<float>() {
     return true;
-};
-template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<cint16>() {
-    return false;
-};
-template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<cint32>() {
-    return false;
-};
-template <>
-INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<cfloat>() {
-    return false;
 };
 template <>
 INLINE_DECL constexpr bool fnCheckDataTypesOfInputs<bfloat16>() {

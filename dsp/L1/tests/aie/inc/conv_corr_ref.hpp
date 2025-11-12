@@ -60,6 +60,9 @@ class conv_corr_ref {
         getRefPaddedLength<TT_DATA_F, TT_DATA_G, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
     static constexpr unsigned int m_kLoopCount = getRefLoopCount<TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
 
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA_F refPaddedFdata[m_kPaddedDataLength * TP_NUM_FRAMES] = {
+        zeros<TT_DATA_F>()}; // Padded F data
+
    public:
     // Default Constructor
     conv_corr_ref() {}

@@ -149,7 +149,9 @@
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA",
-                    "TP_POINT_SIZE"
+                    "TP_POINT_SIZE",
+                    "TP_CASC_LEN",
+                    "TP_SSR"
                 ]
             },
             "validator": {
@@ -158,7 +160,9 @@
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA",
-                    "TP_POINT_SIZE"
+                    "TP_POINT_SIZE",
+                    "TP_CASC_LEN",
+                    "TP_SSR"
                 ]
             }
         },

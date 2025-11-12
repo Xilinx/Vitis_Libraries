@@ -1,0 +1,27 @@
+{
+    "parameter_constraints": {
+        "AIE_VARIANT": [1],
+        "TT_DATA": ["cint32"],
+        "TT_OUT_DATA": ["cint32"],
+        "TT_COEFF": ["cint32"],
+        "TP_FIR_LEN": 128,
+        "TP_INPUT_WINDOW_VSIZE": 16384,
+        "TP_DUAL_IP": 0,
+        "TP_USE_COEFF_RELOAD": 0,
+        "TP_API": [1],
+        "TP_INTERPOLATE_FACTOR": 1,
+        "TP_DECIMATE_FACTOR": 1,
+        "TP_PARA_DECI_POLY": 1,
+        "TP_PARA_INTERP_POLY": 1,
+        "TP_UPSHIFT_CT": 0,
+        "TP_TDM_CHANNELS": 1,
+        "SINGLE_BUF": 0,
+        "TP_SHIFT": 0,
+        "TP_RND": 0,
+        "TP_SAT": 0,
+        "TP_NUM_OUTPUTS": 1,
+        "TP_CASC_LEN": [],
+        "TP_SSR": []
+    },
+    "qor_constraints": "Throughput>500"
+}

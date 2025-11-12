@@ -22,13 +22,9 @@ from metadata_api import *
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 called_dir = os.getcwd()
-L2_dir = current_dir + "/../.."
-meta_dir = f"{L2_dir}/meta"
-scripts_dir = f"{L2_dir}/tests/aie/common/scripts"
-sys.path.insert(0, meta_dir)
-XILINX_VITIS = os.environ.get("XILINX_VITIS")
 
-configTranslatePath = f"{scripts_dir}/config_translation.tcl"
+lib_dir = f"{current_dir}/../../.."
+XILINX_VITIS = os.environ.get("XILINX_VITIS")
 
 
 def load_txt_file(file_path):
@@ -213,41 +209,13 @@ def check_parameters(json_data, config_params, module, error_messages):
                 )
             return False
 
-        # Check update and validate functions with the given args list
-        param_under_test = ip_parameter()
-        param_under_test.updater = param["updater"]["function"]
-        param_under_test.validator = param["validator"]["function"]
-
-        validate_args_dict = {}
-        update_args_dict = {}
-
-        for arg in updater_args:
-            update_args_dict.update({arg: config_params[arg]})
-        update_args_dict.update(
-            {param["name"]: config_params[param["name"]]}
-        )  # add the parameter itself in case needed
-        param_under_test.param_update(
-            update_args_dict, module
-        )  ##will throw a python error if there is missing args
-
-        for arg in validator_args:
-            validate_args_dict.update({arg: config_params[arg]})
-        validate_args_dict.update(
-            {param["name"]: config_params[param["name"]]}
-        )  # add the parameter itself in case needed
-        param_under_test.param_validate(
-            validate_args_dict, module, print_err="False"
-        )  ##will throw a python error if there is missing args
-
-        # Validate the configuration
-        param_under_test.param_validate(
-            config_params, module, print_err="False"
-        )  ##will throw a python error if there is missing args
-        if param_under_test.valid == "False":
-            error_messages.update(
-                {"configuration_validation_error": f"{param_under_test.err_msg}"}
-            )
-            return False
+    ip_in_use = IP(ip_name, config_params, metadata_dir)#added for xf_solver support
+    ip_in_use.update_all() ##will throw a python error if there is missing args
+    ip_in_use.validate_all(print_err=1) ##will throw a python error if there is missing args or validation fails
+    validate_return=ip_in_use.validate_all(print_err=1)
+    if validate_return["is_valid"]==False:
+        error_messages.update({"validation error": validate_return["err_msg"]})
+        return False
     print("Args lists and dependency order are consistent.")
     print("Test configuration is valid.")
 
@@ -368,11 +336,11 @@ def test_config_helper(ip_name):
     config_helper_test_result = subprocess.run(
         [
             sys.executable,
-            os.path.join(L2_dir, "meta/scripts/config_helper.py"),
+            os.path.join(L2_dir, f"{current_dir}/config_helper.py"),
             "--ip",
             ip_name,
             "--test_config_helper",
-            config_test_json_path,
+            config_test_json_path
         ]
     )
 
@@ -515,6 +483,8 @@ def get_size_byte(port_type):
         return 8
     elif port_type == "bfloat16":
         return 2
+    elif port_type == "cbfloat16":
+        return 4
     else:
         return 0
 
@@ -526,6 +496,7 @@ def isComplexType(typeStr):
         or typeStr == "cint32"
         or typeStr == "cint64"
         or typeStr == "cacc48"
+        or typeStr == "cbfloat16"
     ):
         return True
     return False
@@ -533,9 +504,21 @@ def isComplexType(typeStr):
 
 # Main function
 if __name__ == "__main__":
+    xf_solver_test = False
     for i in range(len(sys.argv)):
         if sys.argv[i] == "--ip":
             ip_name = sys.argv[i + 1]
+        if sys.argv[i] == "--lib_dir":
+            lib_dir = sys.argv[i + 1]
+        if sys.argv[i] == "--xf_solver_test":
+            xf_solver_test = True
+
+    metadata_dir = f"{lib_dir}/L2/meta"
+    L2_dir = f"{lib_dir}/L2"
+    scripts_dir = f"{L2_dir}/tests/aie/common/scripts"
+    sys.path.insert(0, metadata_dir)
+    configTranslatePath = f"{scripts_dir}/config_translation.tcl"
+
 
     schema_file_path = (
         f"{XILINX_VITIS}/data/ipmetadata/vitis_library_api_spec_schema.json"
@@ -569,9 +552,17 @@ if __name__ == "__main__":
         error_messages,
         ip_name,
     )
-    check_exit(test_config_helper(ip_name), error_messages, ip_name)
+    if not xf_solver_test:
+        check_exit(
+            test_config_helper(ip_name), error_messages, ip_name
+        )  # run config_helper.py to test the config.json file
+    else:
+        print("Skipping config_helper.py test as per user request.")
+
     print("All parameter checks passed.")
-    # gen_out_files(ip_name, config_json_data["parameters"], json_data["search_paths"])
+
+    if not xf_solver_test:
+        gen_out_files(ip_name, config_json_data["parameters"], json_data["search_paths"])
 
     # #Temporary out.json checks
     # out_new_json_path=f"./{ip_name}_new_generated_graph/out_new.json"

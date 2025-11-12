@@ -27,6 +27,8 @@ if [ $AIE_VARIANT == 1 ]; then
     PART="XCVC1902-VSVD1760-1LP-E-S"
     elif [ $AIE_VARIANT == 2 ]; then
     PART="XCVE2802-VSVH1760-1MP-E-S"
+    elif [ $AIE_VARIANT == 22 ]; then
+    PART="xc2ve3858-ssva2112-2LP-e-S"
 fi
 
 if [ -f "$VCD_DIR" ]; then #does the vcd file exist to run the power tests?
@@ -39,8 +41,13 @@ if [ -f "$VCD_DIR" ]; then #does the vcd file exist to run the power tests?
     vcdanalyze --vcd $VCD_DIR --xpe --xpe-dir $PWR_DIR
 
     #write the python file for pdm calculation
-    echo 'from librdi_pypdmtasks import *
-prj = PdmProjectMgr.new("new_proj.pdm", part="'${PART}'", process="Typ")
+    echo '
+try:
+   from libxv_pdm_pytasks import *
+except ImportError:
+    from librdi_pypdmtasks import * 
+
+prj = new_project("new_proj.pdm", part="'${PART}'", process="Typ")
 prj.import_xpe("./test.xpe")
 prj.save()
 prj.export_power_design("./test_pwr.xml")

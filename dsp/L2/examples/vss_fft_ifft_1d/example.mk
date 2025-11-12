@@ -1,4 +1,7 @@
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.#
+#
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -10,18 +13,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
 POINT_SIZE := 4096
 SSR        := 4
 DATA_TYPE  := cint32
 NITER      := 4
+DATAWIDTH   := 64
 
 vss:
 	make -f ${DSPLIB_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d.mk clean vss HELPER_CUR_DIR=./ HELPER_ROOT_DIR=${DSPLIB_ROOT_DIR} PARAMS_CFG=my_params.cfg
 
 example_xclbin:
-	v++ -c -DNSTREAM=$(SSR) -DPOINT_SIZE=$(POINT_SIZE) -DNITER=$(NITER) -t hw_emu --platform ${PLATFORM} --save-temps   -I ${DSPLIB_ROOT_DIR}//xf_dsp/L1/include/hw -k s2mm_wrapper -o s2mm_wrapper.xo ${DSPLIB_ROOT_DIR}/L1/tests/hw/s2mm/s2mm.cpp
-	v++ -c -DNSTREAM=$(SSR) -DPOINT_SIZE=$(POINT_SIZE) -DNITER=$(NITER) -t hw_emu --platform ${PLATFORM} --save-temps   -I ${DSPLIB_ROOT_DIR}//xf_dsp/L1/include/hw -k mm2s_wrapper -o mm2s_wrapper.xo ${DSPLIB_ROOT_DIR}/L1/tests/hw/mm2s/mm2s.cpp
+#	v++ -c -DNSTREAM=$(SSR) -DPOINT_SIZE=$(POINT_SIZE) -DNITER=$(NITER) -DDATAWIDTH=$(DATAWIDTH) -t hw_emu --platform ${PLATFORM} --save-temps   -I /proj/xirhdstaff1/uvimalku/icdes/dsplib/dev/xf_dsp/L1/include/hw -k mm2s_wrapper -I'/proj/xirhdstaff1/uvimalku/icdes/dsplib/dev/xf_dsp/L1/tests/hw/mm2s' --temp_dir _x_temp.hw_emu.xilinx_vck190_base_202520_1 --report_dir /proj/xirhdstaff1/uvimalku/icdes/dsplib/dev/xf_dsp/L2/tests/vss/vss_fft_ifft_1d/results/cint32_cint16_8192_1_5_5_4_1_0_rnd_sym_inf_1_1_1_0_0_0_16_312500000_128_1_1_1_aie1_hw_checkin/reports/_x.hw_emu.xilinx_vck190_base_202520_1 -o _x_temp.hw_emu.xilinx_vck190_base_202520_1/mm2s_wrapper/mm2s_wrapper.xo /proj/xirhdstaff1/uvimalku/icdes/dsplib/dev/xf_dsp/L1/tests/hw/mm2s/mm2s.cpp
+	v++ -c -DNSTREAM=$(SSR) -DPOINT_SIZE=$(POINT_SIZE) -DNITER=$(NITER) -DDATAWIDTH=$(DATAWIDTH) -t hw_emu --platform ${PLATFORM} --save-temps   -I ${DSPLIB_ROOT_DIR}//xf_dsp/L1/include/hw -k s2mm_wrapper -o s2mm_wrapper.xo ${DSPLIB_ROOT_DIR}/L1/tests/hw/s2mm/s2mm.cpp
+	v++ -c -DNSTREAM=$(SSR) -DPOINT_SIZE=$(POINT_SIZE) -DNITER=$(NITER) -DDATAWIDTH=$(DATAWIDTH) -t hw_emu --platform ${PLATFORM} --save-temps   -I ${DSPLIB_ROOT_DIR}//xf_dsp/L1/include/hw -k mm2s_wrapper -o mm2s_wrapper.xo ${DSPLIB_ROOT_DIR}/L1/tests/hw/mm2s/mm2s.cpp
 	v++ -l -g -t hw_emu --platform ${PLATFORM} --config system.cfg  -o kernel_pkg.xsa mm2s_wrapper.xo s2mm_wrapper.xo vss_fft_ifft_1d/vss_fft_ifft_1d.vss
 
 example_host:

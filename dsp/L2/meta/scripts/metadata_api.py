@@ -21,9 +21,8 @@ import importlib
 
 meta_script_directory = os.path.dirname(os.path.abspath(__file__))
 L2_dir = meta_script_directory + "/../.."
-meta_dir = f"{L2_dir}/meta"
-
-sys.path.insert(0, meta_dir)
+meta_dir_xf_dsp = f"{L2_dir}/meta"
+sys.path.insert(0, meta_dir_xf_dsp)
 from aie_common import *
 
 
@@ -121,12 +120,18 @@ def test_input_gen(ip_parameter_obj):
         print(ip_parameter_obj.enum)
 
 
-def extract_param_json(IP_name):
-    json_loc = f"{meta_dir}/{IP_name}.json"
-    with open(json_loc) as f:
-        json_load = json.load(f)
-        params_json = json_load["parameters"]
-    return params_json
+def extract_param_json(IP_name, file_loc=meta_dir_xf_dsp):   
+    json_loc = f"{file_loc}/{IP_name}.json"
+
+    try:   
+        with open(json_loc) as f:  
+            json_load = json.load(f)  
+            params_json = json_load["parameters"]  
+    except FileNotFoundError:   
+        print(f"Error: Failed to decode JSON from {json_loc}.")  
+        sys.exit(1)  
+  
+    return params_json  
 
 
 def extract_all(params_json):
@@ -193,12 +198,23 @@ def extract_param_vals_dict(params_json):
     return param_vals
 
 
-def extract_param_args_dict(params_json):
+def extract_param_args_dict_from_validator(params_json):
+    args_dict = {}
+    for pj in params_json:
+        pj["name"]
+        if "args" in pj["validator"]:
+            args_dict.update({pj["name"]: pj["validator"]["args"]})
+        else:
+            args_dict.update({pj["name"]: []})
+
+    return args_dict
+
+def extract_param_args_dict_from_updater(params_json):
     args_dict = {}
     for pj in params_json:
         pj["name"]
         if "args" in pj["updater"]:
-            args_dict.update({pj["name"]: pj["validator"]["args"]})
+            args_dict.update({pj["name"]: pj["updater"]["args"]})
         else:
             args_dict.update({pj["name"]: []})
 
@@ -227,18 +243,6 @@ def config_translate(old_config, configTranslatePath, back_translate=0, canary_t
     else:
         new_config = old_config
     return new_config
-
-
-def extract_param_args_dict(params_json):
-    args_dict = {}
-    for pj in params_json:
-        pj["name"]
-        if "args" in pj["updater"]:
-            args_dict.update({pj["name"]: pj["validator"]["args"]})
-        else:
-            args_dict.update({pj["name"]: []})
-
-    return args_dict
 
 
 def extract_args(config_L2_file_loc):
@@ -275,60 +279,110 @@ class IP:
         generate_graph: Outputs the graph. To call this function, ensure parameters are validated
     """
 
-    def __init__(self, ip_name, config_args):
+    def __init__(self, ip_name, config_args, meta_dir=meta_dir_xf_dsp):
         self.name = ip_name
         self.args = config_args
-        self.meta_json = extract_param_json(self.name)
+        self.meta_json = extract_param_json(self.name, meta_dir)
         self.params = extract_param_list_all(self.meta_json)
         self.validators = extract_validator_dict(self.meta_json)
         self.updaters = extract_updater_dict(self.meta_json)
+        self.validator_args = extract_param_args_dict_from_validator(self.meta_json)
+        self.dependency_tree={}
         self.params_valid_results_dict = {}
         self.params_valid_errors_dict = {}
         self.module = importlib.import_module(self.name)
         self.params_update_results_dict = {}
+        self.params_update_errors_dict = {}
         self.graph = {}
 
         self.param_obj_dict = {}
-        for param in self.params:
+        for param in self.params: #all IP parameters are used to generate ip_parameter class objects. Their Validtors and Updaters are assigned here.
             self.param_obj_dict.update({param: ip_parameter()})
-
-    def validate_all(self, print_err=1):
-        for param in self.params:
             self.param_obj_dict[param].name = param
             self.param_obj_dict[param].validator = self.validators[param]
-            self.param_obj_dict[param].param_validate(self.args, self.module, print_err)
-            self.params_valid_results_dict.update(
-                {param: self.param_obj_dict[param].valid}
-            )
-            self.params_valid_errors_dict.update(
-                {param: self.param_obj_dict[param].err_msg}
-            )
-            if self.param_obj_dict[param].valid == "False":
-                vmc_dict = {
-                    "is_valid": False,
-                    "err_msg": self.param_obj_dict[param].err_msg,
-                    "param_name": param,
-                }
-                return vmc_dict
-        return isValid
+            self.param_obj_dict[param].updater = self.updaters[param]
+
+    def validate_all(self, print_err=1):
+        isValidDict = {"is_valid": True, "full_validation": True} #partial validation and full_validation returns for VMC library
+        self.params_valid_results_dict={} #reset last call's results
+        self.__extract_param_dependents() #extract dependency tree
+        self.__mark_auto_params() #mark dependent parameters as auto
+
+        for param in self.params:
+            if self.args[param] =="auto": #only validate non-auto value parameters
+                isValidDict["full_validation"] = False
+            else: #only validate non-auto value parameters
+                self.param_obj_dict[param].param_validate(self.args, self.module, print_err)
+                self.params_valid_results_dict.update(
+                    {param: self.param_obj_dict[param].valid}
+                )
+                self.params_valid_errors_dict.update(
+                    {param: self.param_obj_dict[param].err_msg}
+                )
+                if self.param_obj_dict[param].valid == "False":
+                    vmc_dict = {
+                        "is_valid": False,
+                        "err_msg": self.param_obj_dict[param].err_msg,
+                        "param_name": param,
+                    }
+                    return vmc_dict
+        return isValidDict
 
     def update_all(self):
+        self.update_result={} #reset last call's results
+        self.__extract_param_dependents() #extract dependency tree
+        self.__mark_auto_params() #mark dependent parameters as auto
+
         for param in self.params:
-            self.param_obj_dict[param].name = param
-            self.param_obj_dict[param].updater = self.updaters[param]
-            self.param_obj_dict[param].param_update(self.args, self.module)
-            self.param_obj_dict[param].param_validate(
-                self.args, self.module, print_err=0
-            )
-            if self.param_obj_dict[param].valid == "False":
-                break
-            del self.param_obj_dict[param].update_result["name"]
-            self.params_update_results_dict.update(
-                {param: self.param_obj_dict[param].update_result}
+            if self.args[param] !="auto": #only validate non-auto value parameters
+                self.param_obj_dict[param].param_update(self.args, self.module)
+                self.param_obj_dict[param].param_validate(
+                    self.args, self.module, print_err=0
+                )
+                if self.param_obj_dict[param].valid == "False":
+                    self.params_update_results_dict.update(
+                    {param: self.param_obj_dict[param].err_msg})
+                    break
+                del self.param_obj_dict[param].update_result["name"]
+                self.params_update_results_dict.update(
+                    {param: self.param_obj_dict[param].update_result})
+            else:
+                self.params_update_results_dict.update(
+                    {param: "auto"}
             )
 
     def generate_graph(
         self, graph_name
     ):  # all parameters should be valid to run generate_graph
+        self.__extract_param_dependents() #extract dependency tree
+        self.__mark_auto_params() #mark dependent parameters as auto        
+        self.__default_auto_params() #assign default values to auto marked parameters        
         func_generate_graph = getattr(self.module, "generate_graph")
         self.graph = func_generate_graph(graph_name, self.args)
+
+    def __extract_param_dependents(self):
+        for param in self.params:
+            dependents_list=[]
+            for param_dependent in self.params:
+                if param in self.validator_args[param_dependent]:
+                    dependents_list.append(param_dependent)
+            self.dependency_tree.update({param:dependents_list})
+    
+    def __mark_auto_params(self):
+        for param in self.params:
+            if self.args[param]=="auto":
+                for param_dependent in self.dependency_tree[param]: 
+                    self.args.update({param_dependent : "auto"}) #mark the dependent parameters as auto
+    
+    def __default_auto_params(self):
+        for param in self.params:
+            if self.args[param] =="auto":
+                self.args[param] = 0 #for actual valued parameters' updaters
+                self.param_obj_dict[param].name = param
+                self.param_obj_dict[param].updater = self.updaters[param]
+                self.param_obj_dict[param].param_update(self.args, self.module)
+                self.args.update({param:self.param_obj_dict[param].default}) #update to default
+                self.param_obj_dict[param].param_update(self.args, self.module) #update to see if there is any actual value return
+                if "actual" in self.param_obj_dict[param].update_result: # if there is any actual value offered, take it
+                    self.args[param] = self.param_obj_dict[param].update_result["actual"] #assign the actual value
+                

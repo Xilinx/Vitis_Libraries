@@ -28,7 +28,16 @@ def hls_params(cur_dir, root_dir, kernel, params_file, tmpl_file):
     hls_config_dict = dict(parser.items("APP_PARAMS"))
     suffix = "_config.cfg"
     cfg_file = kernel + suffix
-    kernel_dict = {"ROOT_DIR": str(root_dir), "KERNEL_NAME": str(kernel)}
+    dtype = hls_config_dict["data_type"]
+    if dtype == "cint16":
+        sample_size = 32
+    else: 
+        sample_size = 64
+    print(hls_config_dict)
+    
+    if "mid_transpose" in kernel:
+        hls_config_dict["ssr"] = int(int(hls_config_dict["ssr"]) * (128/sample_size)) #128 is size of port in pl kernels
+    kernel_dict = {"ROOT_DIR": str(root_dir), "KERNEL_NAME": str(kernel), "SAMPLE_SIZE": str(sample_size)}
     full_dict = {**kernel_dict, **hls_config_dict}
     print(full_dict)
 

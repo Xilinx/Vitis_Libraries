@@ -21,53 +21,20 @@
 #include <ap_fixed.h>
 #include <hls_stream.h>
 #include <hls_streamofblocks.h>
+#include "common.hpp"
+#include "vss_fft_ifft_1d_common.hpp"
+using namespace xf::dsp::vss::common;
 //#define __MID_TRANSPOSE_DEBUG__
 namespace ifft_mid_transpose {
 template <int NFFT, int NSTREAM>
 class midTransposeCls {
    public:
-    template <unsigned int TP_POINT_SIZE>
-    static constexpr unsigned int fnPtSizeD1() {
-        unsigned int sqrtVal =
-            TP_POINT_SIZE == 65536
-                ? 256
-                : TP_POINT_SIZE == 32768
-                      ? 256
-                      : TP_POINT_SIZE == 16384
-                            ? 128
-                            : TP_POINT_SIZE == 8192
-                                  ? 128
-                                  : TP_POINT_SIZE == 4096
-                                        ? 64
-                                        : TP_POINT_SIZE == 2048
-                                              ? 64
-                                              : TP_POINT_SIZE == 1024
-                                                    ? 32
-                                                    : TP_POINT_SIZE == 512
-                                                          ? 32
-                                                          : TP_POINT_SIZE == 256
-                                                                ? 16
-                                                                : TP_POINT_SIZE == 128
-                                                                      ? 16
-                                                                      : TP_POINT_SIZE == 64
-                                                                            ? 8
-                                                                            : TP_POINT_SIZE == 32
-                                                                                  ? 8
-                                                                                  : TP_POINT_SIZE == 16 ? 4 : 0;
-        return sqrtVal;
-    }
-
-    template <unsigned int len, unsigned int rnd>
-    static constexpr unsigned int fnCeil() {
-        return (len + rnd - 1) / rnd * rnd;
-    }
-
     static constexpr unsigned NBITS = 128; // Size of PLIO bus on PL side @ 312.5 MHz
     typedef ap_uint<NBITS> TT_DATA;        // Equals two 'cint32' samples
     static constexpr unsigned SAMPLE_SIZE = 64;
     static constexpr unsigned NPHASES = NSTREAM;
     static constexpr unsigned samplesPerRead = NBITS / SAMPLE_SIZE;
-    static constexpr unsigned ptSizeD1 = fnPtSizeD1<POINT_SIZE>();
+    static constexpr unsigned ptSizeD1 = fnPtSizeD1<POINT_SIZE, modeAIEffts, NSTREAM>();
     static constexpr unsigned ptSizeD1Ceil = fnCeil<ptSizeD1, NSTREAM * samplesPerRead>(); // 70
     static constexpr unsigned ptSizeD2 = POINT_SIZE / ptSizeD1;
     static constexpr unsigned ptSizeD2Ceil = fnCeil<ptSizeD2, NSTREAM>();                    // 65
