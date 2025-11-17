@@ -77,8 +77,8 @@ STATS_INIT_LOOP:
         }
     }
 
-    int zone_width = int((roi_brx - roi_tlx + 1) / zone_col_num);  // roi_width / N
-    int zone_height = int((roi_bry - roi_tly + 1) / zone_row_num); // roi_height / M
+    int zone_width = int((roi_bry - roi_tly + 1) / zone_col_num);  // roi_width / N
+    int zone_height = int((roi_brx - roi_tlx + 1) / zone_row_num); // roi_height / M
 
     int bins = STATS_SIZE;
     const int STEP = XF_DTPIXELDEPTH(SRC_T, NPC);
@@ -226,8 +226,8 @@ STATS_INITIALIZE_LOOP:
 
     int16_t k = 0;
 
-    int zone_width = int((roi_brx - roi_tlx + 1) / zone_col_num);  // roi_width / N
-    int zone_height = int((roi_bry - roi_tly + 1) / zone_row_num); // roi_height / M
+    int zone_width = int((roi_bry - roi_tly + 1) / zone_col_num);  // roi_width / N
+    int zone_height = int((roi_brx - roi_tlx + 1) / zone_row_num); // roi_height / M
 
     int bins = STATS_SIZE;
     ap_fixed<STEP + 8, STEP + 2> min_vals = inputMin - 0.5f;
@@ -380,8 +380,8 @@ STATS_INIT:
         }
     }
 
-    int zone_width = int((roi_brx - roi_tlx + 1) / zone_col_num);  // roi_width / N
-    int zone_height = int((roi_bry - roi_tly + 1) / zone_row_num); // roi_height / M
+    int zone_width = int((roi_bry - roi_tly + 1) / zone_col_num);  // roi_width / N
+    int zone_height = int((roi_brx - roi_tlx + 1) / zone_row_num); // roi_height / M
 
     int zone_idx = 0; // = (zone_row * zone_col_num) + zone_col;
     int zone_idx_prev = 0;
