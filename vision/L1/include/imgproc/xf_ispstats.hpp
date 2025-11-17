@@ -77,8 +77,8 @@ STATS_INIT_LOOP:
         }
     }
 
-    int zone_width = int((roi_brx - roi_tlx + 1) / zone_col_num);  // roi_width / N
-    int zone_height = int((roi_bry - roi_tly + 1) / zone_row_num); // roi_height / M
+    int zone_width = int((roi_bry - roi_tly + 1) / zone_col_num);  // roi_width / N
+    int zone_height = int((roi_brx - roi_tlx + 1) / zone_row_num); // roi_height / M
 
     int bins = STATS_SIZE;
     const int STEP = XF_DTPIXELDEPTH(SRC_T, NPC);
@@ -226,8 +226,8 @@ STATS_INITIALIZE_LOOP:
 
     int16_t k = 0;
 
-    int zone_width = int((roi_brx - roi_tlx + 1) / zone_col_num);  // roi_width / N
-    int zone_height = int((roi_bry - roi_tly + 1) / zone_row_num); // roi_height / M
+    int zone_width = int((roi_bry - roi_tly + 1) / zone_col_num);  // roi_width / N
+    int zone_height = int((roi_brx - roi_tlx + 1) / zone_row_num); // roi_height / M
 
     int bins = STATS_SIZE;
     ap_fixed<STEP + 8, STEP + 2> min_vals = inputMin - 0.5f;
@@ -380,8 +380,8 @@ STATS_INIT:
         }
     }
 
-    int zone_width = int((roi_brx - roi_tlx + 1) / zone_col_num);  // roi_width / N
-    int zone_height = int((roi_bry - roi_tly + 1) / zone_row_num); // roi_height / M
+    int zone_width = int((roi_bry - roi_tly + 1) / zone_col_num);  // roi_width / N
+    int zone_height = int((roi_brx - roi_tlx + 1) / zone_row_num); // roi_height / M
 
     int zone_idx = 0; // = (zone_row * zone_col_num) + zone_col;
     int zone_idx_prev = 0;
@@ -502,11 +502,11 @@ void ispStats(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && "ROWS and COLS should be greater than input image");
-    assert(((roi_brx < _src.cols) && (roi_bry < _src.rows)) &&
+    assert(((roi_brx < _src.rows) && (roi_bry < _src.cols)) &&
            "ROI bottom-right coordinates should be less than input image");
     assert(((roi_tlx < roi_brx) && (roi_tly < roi_bry)) &&
            "ROI top-left coordinates should be less bottom-right coordinates");
-    assert((((roi_brx - roi_tlx + 1) % zone_col_num) == 0 && ((roi_bry - roi_tly + 1) % zone_row_num) == 0) &&
+    assert((((roi_brx - roi_tlx + 1) % zone_row_num) == 0 && ((roi_bry - roi_tly + 1) % zone_col_num) == 0) &&
            "ROI Sub-zones should be divisible by N(zone_row_num) x M (zone_row_num) setting");
     assert(((zone_col_num >= 0) && (zone_col_num <= 8)) &&
            "Number of sub-zones columns should be greater than or equal to 0 but less than or equal to 8");
