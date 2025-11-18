@@ -3,30 +3,12 @@
     "description": "computes the inverse of symmetric positive-de.cfgte (SPD) matrix",
     "flow": "system",
     "platform_allowlist": [
-        "u250",
-        "vck190",
-        "aws-vu9p-f1"
+        "vck190"
     ],
     "platform_blocklist": [
         "zc"
     ],
     "platform_properties": {
-        "u250": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_DDR"
-                    ]
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u250.cfg"
-                    ]
-                }
-            }
-        },
         "vck190": {
             "containers": [
                 {

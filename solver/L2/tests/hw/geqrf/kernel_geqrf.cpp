@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "xf_solver_L2.hpp"
+#include "hw/xf_solver_L2.hpp"
 #define MA 16 // Matrix Row size
 #define NA 16 // Matrix Col size
 #define NCU 4 // Number of compute units

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "xf_solver_L2.hpp"
+#include "hw/xf_solver_L2.hpp"
 #define NCU 2
 #define MAXN 4
 #define LDA 4

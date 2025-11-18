@@ -24,23 +24,23 @@
 #define _XF_SOLVER_L2_HPP_
 
 // Matrix decomposition
-#include "hw/MatrixDecomposition/potrf.hpp"
-#include "hw/MatrixDecomposition/getrf_nopivot.hpp"
-#include "hw/MatrixDecomposition/getrf.hpp"
+#include "MatrixDecomposition/potrf.hpp"
+#include "MatrixDecomposition/getrf_nopivot.hpp"
+#include "MatrixDecomposition/getrf.hpp"
 
-#include "hw/MatrixDecomposition/geqrf.hpp"
-#include "hw/MatrixDecomposition/gesvdj.hpp"
-#include "hw/MatrixDecomposition/gesvj.hpp"
+#include "MatrixDecomposition/geqrf.hpp"
+#include "MatrixDecomposition/gesvdj.hpp"
+#include "MatrixDecomposition/gesvj.hpp"
 
 // Linear solver
-#include "hw/LinearSolver/pomatrixinverse.hpp"
-#include "hw/LinearSolver/gematrixinverse.hpp"
-#include "hw/LinearSolver/trtrs.hpp"
-#include "hw/LinearSolver/polinearsolver.hpp"
-#include "hw/LinearSolver/gelinearsolver.hpp"
-#include "hw/LinearSolver/gtsv_pcr.hpp"
+#include "LinearSolver/pomatrixinverse.hpp"
+#include "LinearSolver/gematrixinverse.hpp"
+#include "LinearSolver/trtrs.hpp"
+#include "LinearSolver/polinearsolver.hpp"
+#include "LinearSolver/gelinearsolver.hpp"
+#include "LinearSolver/gtsv_pcr.hpp"
 
 // Eigen value solver
-#include "hw/EigenSolver/syevj.hpp"
+#include "EigenSolver/syevj.hpp"
 
 #endif

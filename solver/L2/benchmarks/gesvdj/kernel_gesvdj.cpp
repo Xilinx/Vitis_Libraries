@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "xf_solver_L2.hpp"
+#include "hw/xf_solver_L2.hpp"
 #define MA 16 // Symmetric Matrix Row size
 //#define MA 512// Symmetric Matrix Row size
 #define NA MA // Symmetric Matrix Col size

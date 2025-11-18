@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "xf_solver_L2.hpp"
+#include "hw/xf_solver_L2.hpp"
 
 #define MAXM 8 // Matrix Row size
 #define MAXN 8 // Matrix Col size

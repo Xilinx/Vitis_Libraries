@@ -87,7 +87,7 @@ Command to Run L1 cases
 
     cd L1/tests/hls_case_folder
     
-    make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 \
+    make run target=csim \
         PLATFORM=/path/to/<your_card_platform>
 
 Test control variables are:
