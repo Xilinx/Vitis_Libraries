@@ -3,9 +3,20 @@
 
 [Comprehensive documentation](https://docs.amd.com/r/en-US/Vitis_Libraries)
 
-* Common Vitis accelerated-libraries for Math, Statistics, Linear Algebra, and DSP offer a set of core functionality for a wide range of diverse applications.
-* Domain-specific Vitis accelerated libraries offer out-of-the-box acceleration for workloads like Vision and Image Processing, Quantitative Finance, Database, and Data Analytics, Data Compression and more.
+* Common Vitis accelerated-libraries for Math, Linear Algebra, and DSP offer a set of core functionality for a wide range of diverse applications.
+* Domain-specific Vitis accelerated libraries offer out-of-the-box acceleration for workloads like Vision and Image Processing, Security, Ultrasound, Motor Control, and more.
 * Leverage the rich growing ecosystem of partner-accelerated libraries, framework plug-ins, and accelerated applications to hit the ground running and accelerate your path to production.
+* Starting with the 2025.2 release, the following PL (Programmable Logic) Vitis Libraries will no longer be maintained:
+  * codec
+  * data_analytics
+  * data_compression
+  * graph
+  * hpc
+  * quantitative_finance
+  * sparse
+
+  > Users who still require these deprecated libraries can continue to access and use previous versions from earlier releases. AI Engine Vitis Libraries are not impacted.
+
 
 ![Comprehensive Set of Domain-Specific Accelerated Libraries](https://xilinx.github.io/Vitis_Libraries/_images/1569434411715.png)
 
