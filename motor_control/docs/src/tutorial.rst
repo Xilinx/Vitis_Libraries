@@ -150,7 +150,7 @@ CSIM verification flow
       git checkout next 
       git pull
       cd L1/tests/IP_SVPWM/
-      make run CSIM=1
+      make run TARGET=csim
 
 Execute the executable file with parameters. Follow the step below:
 
@@ -201,7 +201,7 @@ COSIM verification flow
 
    .. code-block:: shell
 
-      make run COSIM=1 XPART=xc7z020-clg400-1
+      make run TARGET=cosim XPART=xc7z020-clg400-1
 
 Waveform explanation
 
@@ -276,7 +276,7 @@ Export IP flow
       git checkout next 
       git pull
       cd L1/tests/FOC/IP_SVPWM/
-      make run VIVADO_IMPL=1  XPART=xc7z020-clg400-1
+      make run TARGET=vivado_impl XPART=xc7z020-clg400-1
 
 You can get an AXI address by using the following command.
 
@@ -297,7 +297,7 @@ CSIM verification flow
       git checkout next 
       git pull
       cd L1/tests/IP_PWM_GEN/
-      make run CSIM=1
+      make run TARGET=csim
 
 Stdout explanation
 
@@ -344,7 +344,7 @@ Export IP flow
       git checkout next 
       git pull
       cd L1/tests/IP_PWM_GEN/
-      make run VIVADO_IMPL=1  XPART=xc7z020-clg400-1
+      make run TARGET=vivado_impl XPART=xc7z020-clg400-1
 
 User can get AXI address by using the command below.
 

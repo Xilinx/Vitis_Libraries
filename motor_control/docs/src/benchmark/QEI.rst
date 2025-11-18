@@ -50,11 +50,11 @@ Run the following make command to build your IP targeting a specific device. Thi
 
 .. code-block:: bash
 
-   make run CSIM=1 CSYNTH=1 COSIM=1 XPART=xc7z010-clg400-1
+   make run TARGET=csim XPART=xc7z010-clg400-1
    
 .. code-block:: bash
 
-   make run VIVADO_SYN=1 VIVADO_IMPL=1 XPART=xc7z010-clg400-1
+   make run TARGET=vivado_syn XPART=xc7z010-clg400-1
 
 Note: Default arguments are set in run_hls.tcl
 

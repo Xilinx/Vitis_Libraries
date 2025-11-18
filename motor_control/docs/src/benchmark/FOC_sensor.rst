@@ -50,13 +50,13 @@ Run the following make command to build your IP targeting a specific device. Thi
 
 .. code-block:: bash
 
-   make run CSIM=1 CSYNTH=1 COSIM=1 XPART=xc7z010-clg400-1
+   make run TARGET=cosim XPART=xc7z010-clg400-1
 
 The command creates IP*sim.project for simulation.
 
 .. code-block:: bash
 
-   make run VIVADO_SYN=1 VIVADO_IMPL=1 XPART=xc7z010-clg400-1
+   make run TARGET=vivado_syn XPART=xc7z010-clg400-1
 
 The command creates IP.project for export IP.
 
