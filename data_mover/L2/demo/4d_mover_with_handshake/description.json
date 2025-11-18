@@ -6,8 +6,7 @@
     "gui": false,
     "flow": "system",
     "platform_allowlist": [
-        "vck190",
-        "u200"
+        "vck190"
     ],
     "runtime": [
         "OpenCL"

@@ -4,8 +4,7 @@
     "description": "Fixed kernel with pre-defined parameters",
     "flow": "system",
     "platform_allowlist": [
-        "vck190",
-        "aws-vu9p-f1"
+        "vck190"
     ],
     "platform_blocklist": [],
     "platform_properties": {},

@@ -6,7 +6,6 @@
     "gui": false,
     "flow": "system",
     "platform_allowlist": [
-        "u200",
         "vck190"
     ],
     "runtime": [
