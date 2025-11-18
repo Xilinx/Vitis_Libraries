@@ -26,22 +26,6 @@
                     ]
                 }
             }
-        },
-        "zcu102": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include",
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/lib"
-                    ]
-                }
-            }
         }
     },
     "gui": true,

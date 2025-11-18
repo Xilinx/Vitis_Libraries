@@ -13,7 +13,7 @@
         "u50"
     ],
     "platform_properties": {
-        "zcu104": {
+        "vck190": {
             "host": {
                 "compiler": {
                     "includepaths": [

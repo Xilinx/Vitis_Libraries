@@ -28,38 +28,6 @@
                 }
             }
         },
-        "aws-vu9p-f1": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ],
-                    "options": "-l opencv_objdetect"
-                }
-            }
-        },
-        "zcu104": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include",
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/lib"
-                    ],
-                    "options": "-l opencv_objdetect"
-                }
-            }
-        },
         "vck190": {
             "host": {
                 "compiler": {

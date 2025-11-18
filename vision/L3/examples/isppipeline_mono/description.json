@@ -27,45 +27,6 @@
                 }
             }
         },
-        "zcu102": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include",
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                }
-            },
-            "v++": {
-                "linker": {
-                    "ldclflags": [
-                        "--vivado.impl.strategies Performance_Explore"
-                    ]
-                }
-            }
-        },
-        "zcu104": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include",
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                }
-            }
-        },
         "vck190": {
             "host": {
                 "compiler": {

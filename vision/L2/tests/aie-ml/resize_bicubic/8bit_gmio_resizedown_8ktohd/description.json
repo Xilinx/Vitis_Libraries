@@ -162,6 +162,8 @@
             }
         ],
         "targets": [
+			"vitis_aie_sim",
+			"vitis_hw_emu",
             "vitis_hw_build", 
             "vitis_hw_run"
         ],

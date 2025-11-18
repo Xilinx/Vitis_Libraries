@@ -25,50 +25,6 @@
                     ]
                 }
             }
-        },
-        "zcu102": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include",
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                }
-            }
-        },
-        "zcu104": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include",
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                }
-            },
-            "containers": [
-                {
-                    "name": "krnl_ISPPipeline",
-                    "accelerators": [
-                        {
-                            "name": "ISPPipeline_accel",
-                            "frequency": 200.0
-                        }
-                    ],
-                    "frequency": 200.0
-                }
-            ]
         }
     },
     "gui": true,

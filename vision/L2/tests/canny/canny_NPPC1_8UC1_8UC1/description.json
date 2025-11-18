@@ -12,36 +12,6 @@
         "u250"
     ],
     "platform_properties": {
-        "aws-vu9p-f1": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
-                }
-            }
-        },
-        "zcu104": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include",
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/lib"
-                    ]
-                }
-            }
-        }
     },
     "gui": true,
     "launch": [

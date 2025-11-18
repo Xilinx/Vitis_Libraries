@@ -473,12 +473,9 @@ int main(int argc, char** argv) {
             std::cout << "Receiving data: " << dstImage.size() << "\n";
 
             //@{
-            tiler1.host2aie_nb(srcDataL.data(), srcImageL.size(),
-                               {"sbm_graph.in_sobel_left_tile[0]"});
-            auto tiles_sz = tiler2.host2aie_nb(srcDataR.data(), srcImageR.size(),
-                                               {"sbm_graph.in_sobel_right_tile[0]"});
-            stitcher.aie2host_nb(dstData.data(), dstImage.size(), tiles_sz,
-                                 {"sbm_graph.out_interp[0]"});
+            tiler1.host2aie_nb(srcDataL.data(), srcImageL.size(), {"sbm_graph.in_sobel_left_tile[0]"});
+            auto tiles_sz = tiler2.host2aie_nb(srcDataR.data(), srcImageR.size(), {"sbm_graph.in_sobel_right_tile[0]"});
+            stitcher.aie2host_nb(dstData.data(), dstImage.size(), tiles_sz, {"sbm_graph.out_interp[0]"});
             std::cout << "Graph running for " << (tiles_sz[0] * tiles_sz[1]) / NO_CORES << " iterations.\n";
 
 #if !__X86_DEVICE__

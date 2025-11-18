@@ -168,7 +168,7 @@ BINARY_CONTAINER_krnl_ispstats_OBJS += $(TEMP_DIR)/ispstats_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_ispstats_OBJS) 
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/krnl_ispstats $(VPP_LDFLAGS)  $(VPP_LDFLAGS_krnl_ispstats) $(AIE_LDFLAGS)   -o $@ $^
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/krnl_ispstats $(VPP_LDFLAGS)  $(VPP_LDFLAGS_krnl_ispstats) $(AIE_LDFLAGS) --vivado.param  ippower.enableLightWeightDeviceModel=0  -o $@ $^
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)

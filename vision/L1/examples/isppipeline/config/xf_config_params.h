@@ -169,8 +169,10 @@ typedef hls::stream<OutVideoStrmBus_t> OutVideoStrm_t;
 #define XF_GAIN_EN 1
 #define XF_AWB_EN 1
 #define XF_CCM_EN 1
-#define XF_TM_EN 1   // In this pipeline "XF_TM_EN" is fixed to '1"
-#define XF_TM_TYPE 2 // LTM = 0,gtm = 1,xf_QuatizationDithering = 2. In this pipeline only LTM and xf_QuatizationDithering are supported.
+#define XF_TM_EN 1 // In this pipeline "XF_TM_EN" is fixed to '1"
+#define XF_TM_TYPE \
+    2 // LTM = 0,gtm = 1,xf_QuatizationDithering = 2. In this pipeline only LTM and xf_QuatizationDithering are
+      // supported.
 #define XF_GAMMA_EN 1
 
 // Below flags are only informative for the host/driver to know which of the kernels in the pipeline can be bypassable

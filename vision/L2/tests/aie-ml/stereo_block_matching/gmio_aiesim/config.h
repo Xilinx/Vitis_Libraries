@@ -23,7 +23,7 @@ using DATA_TYPE = uint8_t;
 
 // To be set at compile time
 static constexpr int NO_CORES = 1;
-static constexpr int IMAGE_WIDTH = (112+10);
+static constexpr int IMAGE_WIDTH = (112 + 10);
 static constexpr int IMAGE_HEIGHT = 10;
 static constexpr int TILE_WINSIZE = 5;
 static constexpr int NO_DISPARITIES = 112;
