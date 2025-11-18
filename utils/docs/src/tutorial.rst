@@ -54,7 +54,7 @@ Command to Run cases
 
     cd L1/tests/hls_case_folder
     
-    make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 \
+    make run TARGET=csim \
         PLATFORM=/path/to/xilinx_u280_xdma_201920_3.xpfm
 
 Test control variables are:
