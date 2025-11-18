@@ -18,6 +18,7 @@
 FFT/IFFT DIT single channel kernal code.
 This file captures the body of run-time code for the kernal class.
 
+
 Coding conventions
   TT_      template type suffix
   TP_      template parameter suffix

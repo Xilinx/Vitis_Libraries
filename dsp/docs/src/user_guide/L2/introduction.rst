@@ -95,38 +95,38 @@ The following figure shows the DSPLib organization.
 
 **DSPLib Organization**
 
-.. blockdiag::
+.. graphviz::
    :caption: DSPLib Directory Organization
 
-   blockdiag {
-      dsp [shape = box, label = "dsp"];
-      docs [shape = box];
-      ext [shape = box];
-      scripts [shape = box];
+   digraph DSPLib {
+      dsp [shape=box, label="dsp"];
+      docs [shape=box];
+      ext [shape=box];
+      scripts [shape=box];
 
-      L1 [shape = box, label = "L1"];
-      L1_examples [shape = box, label = "examples"];
-      L1_include [shape = box, label = "include"];
-      L1_include_aie [shape = box, label = "aie"];
-      L1_include_hw [shape = box, label = "hw"];
-      L1_meta [shape = box, label = "meta"];
-      L1_src [shape = box, label = "src"];
-      L1_src_aie [shape = box, label = "aie"];
-      L1_src_hw [shape = box, label = "hw"];
-      L1_tests [shape = box, label = "tests"];
+      L1 [shape=box, label="L1"];
+      L1_examples [shape=box, label="examples"];
+      L1_include [shape=box, label="include"];
+      L1_include_aie [shape=box, label="aie"];
+      L1_include_hw [shape=box, label="hw"];
+      L1_meta [shape=box, label="meta"];
+      L1_src [shape=box, label="src"];
+      L1_src_aie [shape=box, label="aie"];
+      L1_src_hw [shape=box, label="hw"];
+      L1_tests [shape=box, label="tests"];
 
-      L2 [shape = box, label = "L2"];
-      L2_benchmarks [shape = box, label = "benchmarks"];
-      L2_examples [shape = box, label = "examples"];
-      L2_include [shape = box, label = "include"];
-      L2_include_aie [shape = box, label = "aie"];
-      L2_include_hw [shape = box, label = "hw"];
-      L2_include_vss [shape = box, label = "vss"];
-      L2_meta [shape = box, label = "meta"];
-      L2_tests [shape = box, label = "tests"];
-      L2_tests_aie [shape = box, label = "aie"];
-      L2_tests_hw [shape = box, label = "hw"];
-      L2_tests_vss [shape = box, label = "vss"];
+      L2 [shape=box, label="L2"];
+      L2_benchmarks [shape=box, label="benchmarks"];
+      L2_examples [shape=box, label="examples"];
+      L2_include [shape=box, label="include"];
+      L2_include_aie [shape=box, label="aie"];
+      L2_include_hw [shape=box, label="hw"];
+      L2_include_vss [shape=box, label="vss"];
+      L2_meta [shape=box, label="meta"];
+      L2_tests [shape=box, label="tests"];
+      L2_tests_aie [shape=box, label="aie"];
+      L2_tests_hw [shape=box, label="hw"];
+      L2_tests_vss [shape=box, label="vss"];
 
       dsp -> docs;
       dsp -> ext;
@@ -200,7 +200,7 @@ Use the following option in the aiecompiler command to provide the path:
     -include=$DSPLIB_ROOT/L2/include/aie/
     -include=$DSPLIB_ROOT/L1/include/aie
     -include=$DSPLIB_ROOT/L1/src/aie
-    -include=${DSPLIB_ROOT}/L1/include/vss/common 
+    -include=${DSPLIB_ROOT}/L1/include/vss/common
     -include=${DSPLIB_ROOT}/L1/include/vss/vss_fft_ifft_1d
 
 .. _KNOWN_ISSUES:

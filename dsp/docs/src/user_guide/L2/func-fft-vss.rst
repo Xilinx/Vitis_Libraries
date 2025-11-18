@@ -167,3 +167,7 @@ For VSS Mode 2, the samples at the output of the VSS without the back transpose 
 
 * ``PORT_IDX`` ranges from **0** to **SSR - 1**
 * ``D1 = point\_size ÷ SSR``
+
+**VSS Mode 2 Resource Improvement**
+
+For VSS Mode 2 implementation of cfloat data types, a more resource optimized implementation can be achieved by using the vss_fft_ifft_1d from the `Vitis IP Libraries repository <https://github.com/Xilinx/Vitis_IP_Libraries>`_.

@@ -138,7 +138,7 @@ class bitonic_sort_graph : public graph {
         "ERROR: TP_DIM * sizeof(TT_DATA) / TP_SSR  must be greater than or equal to 2 * 256 / 8 bytes."); // TODO: Trial
                                                                                                           // changing
                                                                                                           // this to
-                                                                                                          // __MIN_READ_WRITE__
+    // __MIN_READ_WRITE__
     static_assert(
         kLocalListSize * sizeof(TT_DATA) * TP_NUM_FRAMES <= __DATA_MEM_BYTES__,
         "ERROR: TP_DIM * sizeof(TT_DATA) * TP_NUM_FRAMES / TP_SSR must be less than or equal to I/O buffer bytes.");

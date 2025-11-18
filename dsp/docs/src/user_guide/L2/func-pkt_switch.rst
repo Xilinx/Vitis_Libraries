@@ -93,8 +93,10 @@ Packet Switch Graph class must be configured with ``TP_INPUT_PORTS``.
 This parameter will be used to create an array of input ports: ``std::array<port<input>, TP_INPUT_PORTS> pkt_in`` , each capable of receiving a separate set of packet streams.
 Each input port can support up to 32 different packet streams. See `UG1079 Explicit Packet Switching <https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Explicit-Packet-Switching>`_ for more details.
 
-Buffer configuration
-^^^^^^^^^^^^^^^^^^^^
+.. _PKT_SWITCH_INPUT_BUFFER_CONFIG:
+
+Input Buffer configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Packet Switch Graph class is not aware of buffer configuration the underlying design may use. Buffer size, margin, single buffer constraint are the parameters of the IP and are handled internally within the IP configuration.
 
@@ -106,7 +108,7 @@ Input Packet Split Connections
 Template parameter ``TP_INPUT_PORTS`` will also determine the number of the ``pktsplit`` graph constructs used by the ``pkt_swith_graph`` class.
 
 The ``pktsplit`` takes an input packet stream and broadcasts the stream to a number of input stream ports used by the instanced DSP IP.
-See `UG1079 Packet Split and Merge Connections<https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Packet-Split-and-Merge-Connections>`_ for more details.
+See `UG1079 Packet Split and Merge Connection <https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Packet-Split-and-Merge-Connections>`_ for more details.
 
 Number of streams each ``pktsplit`` element produces is determined by the below formula:
 
@@ -115,23 +117,24 @@ Number of streams each ``pktsplit`` element produces is determined by the below 
    N_STREAMS_SPLIT_FROM_PKT = TP_SSR / TP_INPUT_PORTS
 
 
-
-.. _PKT_SWITCH_INPUTS:
+.. _PKT_SWITCH_OUTPUTS:
 
 Output Packet Ports
-------------------
+-------------------
 
 Packet Switch Graph class must be configured with ``TP_OUTPUT_PORTS``.
 
 This parameter will be used to create an array of output ports: ``std::array<port<output>, TP_OUTPUT_PORTS> pkt_out`` , each capable of producing a separate set of packet streams.
 Each output port can produce up to 32 different packet streams. See `UG1079 Explicit Packet Switching <https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Explicit-Packet-Switching>`_ for more details.
 
-Buffer configuration
-^^^^^^^^^^^^^^^^^^^^
+.. _PKT_SWITCH_OUTPUT_BUFFER_CONFIG:
+
+Output Buffer configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Packet Switch Graph class is not aware of buffer configuration the underlying design may use. Buffer size, single buffer constraint are the parameters of the IP and are handled internally within the IP configuration.
 
-.. _PKT_SWITCH_SPLITS:
+.. _PKT_SWITCH_MERGERS:
 
 Output Packet Merge Connections
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -139,7 +142,7 @@ Output Packet Merge Connections
 Template parameter ``TP_OUTPUT_PORTS`` will also determine the number of the ``pktmerge`` graph constructs used by the ``pkt_switch_graph`` class.
 
 The ``pktmerge`` takes a number of input packet streams and merges them into a single output packet stream.
-See `UG1079 Packet Split and Merge Connections<https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Packet-Split-and-Merge-Connections>`_ for more details.
+See `UG1079 Packet Split and Merge Connections <https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Packet-Split-and-Merge-Connections>`_ for more details.
 
 Number of streams each ``pktmerge`` element merges is determined by the below formula:
 

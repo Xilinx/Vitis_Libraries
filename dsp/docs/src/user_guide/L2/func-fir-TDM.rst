@@ -170,7 +170,7 @@ For example, if ``TP_FIR_LEN = 6`` and ``TP_TDM_CHANNELS = 16``, if ``TP_SSR = 2
 FIR TDM graph class provides a helper method: ``getTapsPerRtpPort(int kernelNo)`` to get number of FIR taps per RTP port. For more details, refer to: :ref:`API_REFERENCE`.
 
 
-.. _RTP_ARRAY_SIZE_FOR_TDM_FIR:
+.. _RTP_ARRAY_CONTENTS_FOR_TDM_FIR:
 
 Reloadable Coefficients - Array Contents
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

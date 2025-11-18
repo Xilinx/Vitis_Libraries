@@ -250,13 +250,9 @@ The following table gives results for the Widget Real to Complex with a wide var
 
 :download:`widget_real2complex_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/widget_real2complex_benchmark.csv>`
 
-.. |image13| image:: ./media/image2.png
-
 Widget API Cast
 ===============
 
 The following table gives results for the Widget API Cast with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_WIDGETS`.
 
 :download:`widget_api_cast_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/widget_api_cast_benchmark.csv>`
-
-.. |image13| image:: ./media/image2.png

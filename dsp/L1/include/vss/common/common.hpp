@@ -61,10 +61,12 @@ constexpr unsigned int fnLog2() {
     }
 };
 
-template<unsigned int len, unsigned int rnd>
-static constexpr unsigned int fnCeil(){
-    return (len + rnd - 1)/rnd * rnd;
+template <unsigned int len, unsigned int rnd>
+static constexpr unsigned int fnCeil() {
+    return (len + rnd - 1) / rnd * rnd;
 }
-
-}}}}
+}
+}
+}
+}
 #endif

@@ -19,28 +19,40 @@
 
 static constexpr unsigned int modeAIEffts = 1;
 static constexpr unsigned int modePLffts = 2;
-template<unsigned int TP_POINT_SIZE, unsigned int TP_VSS_MODE, unsigned int TP_SSR>
-static constexpr unsigned int fnPtSizeD1(){
-  if(TP_VSS_MODE == modeAIEffts){
-      unsigned int sqrtVal = TP_POINT_SIZE == 65536 ? 256
-                       : TP_POINT_SIZE == 32768 ? 256
-                       : TP_POINT_SIZE == 16384 ? 128
-                       : TP_POINT_SIZE == 8192 ? 128
-                       : TP_POINT_SIZE == 4096 ? 64
-                       : TP_POINT_SIZE == 2048 ? 64
-                       : TP_POINT_SIZE == 1024 ? 32
-                       : TP_POINT_SIZE == 512 ? 32
-                       : TP_POINT_SIZE == 256 ? 16
-                       : TP_POINT_SIZE == 128 ? 16
-                       : TP_POINT_SIZE == 64 ? 8
-                       : TP_POINT_SIZE == 32 ? 8
-                       : TP_POINT_SIZE == 16 ? 4
-                       : 0;
-  return sqrtVal;
-  } else {
-    return TP_POINT_SIZE/TP_SSR;
-  }
-  return 0;
+template <unsigned int TP_POINT_SIZE, unsigned int TP_VSS_MODE, unsigned int TP_SSR>
+static constexpr unsigned int fnPtSizeD1() {
+    if (TP_VSS_MODE == modeAIEffts) {
+        unsigned int sqrtVal =
+            TP_POINT_SIZE == 65536
+                ? 256
+                : TP_POINT_SIZE == 32768
+                      ? 256
+                      : TP_POINT_SIZE == 16384
+                            ? 128
+                            : TP_POINT_SIZE == 8192
+                                  ? 128
+                                  : TP_POINT_SIZE == 4096
+                                        ? 64
+                                        : TP_POINT_SIZE == 2048
+                                              ? 64
+                                              : TP_POINT_SIZE == 1024
+                                                    ? 32
+                                                    : TP_POINT_SIZE == 512
+                                                          ? 32
+                                                          : TP_POINT_SIZE == 256
+                                                                ? 16
+                                                                : TP_POINT_SIZE == 128
+                                                                      ? 16
+                                                                      : TP_POINT_SIZE == 64
+                                                                            ? 8
+                                                                            : TP_POINT_SIZE == 32
+                                                                                  ? 8
+                                                                                  : TP_POINT_SIZE == 16 ? 4 : 0;
+        return sqrtVal;
+    } else {
+        return TP_POINT_SIZE / TP_SSR;
+    }
+    return 0;
 }
 
 #endif
