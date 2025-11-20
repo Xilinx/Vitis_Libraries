@@ -57,7 +57,7 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := zcu104
+PLATFORM := vck190
 endif
 
 # add warnning for sw_emu
@@ -65,7 +65,7 @@ ifeq ($(TARGET),sw_emu)
 $(error Error: The sw_emu target is no longer supported starting from 2025.1.)
 endif
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST += zcu104 vck190 aws-vu9p-f1
+PLATFORM_ALLOWLIST += vck190
 PLATFORM_BLOCKLIST += u280 u250
 
 include ./utils.mk

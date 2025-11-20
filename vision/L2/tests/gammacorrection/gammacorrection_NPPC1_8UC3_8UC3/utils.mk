@@ -337,5 +337,5 @@ MV = mv -f
 CP = cp -rf
 ECHO:= @echo
 PYTHON3 ?= python3
-TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" -exec test -f '{}/bin/python3' \; -print | head -n 1)
 VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3

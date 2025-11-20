@@ -39,7 +39,7 @@
                     "frequency": 150.0
                 }
             ]
-        },
+        }
     },
     "gui": true,
     "launch": [

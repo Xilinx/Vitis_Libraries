@@ -5,7 +5,7 @@
     ],
     "flow": "system",
     "platform_allowlist": [
-        "u200"
+        "vck190"
     ],
     "platform_blocklist": [
         "u280",
@@ -13,20 +13,22 @@
         "u50"
     ],
     "platform_properties": {
-        "u200": {
+        "vck190": {
             "host": {
                 "compiler": {
                     "includepaths": [
-                        "$(OPENCV_INCLUDE)"
+                        "$(SYSROOT)/usr/include",
+                        "$(SYSROOT)/usr/include/opencv4"
                     ]
                 },
                 "linker": {
                     "librarypaths": [
-                        "$(OPENCV_LIB)"
+                        "$(SYSROOT)/usr/lib",
+                        "${SYSROOT}/lib"
                     ]
                 }
             }
-        },
+        }
     },
     "gui": true,
     "launch": [

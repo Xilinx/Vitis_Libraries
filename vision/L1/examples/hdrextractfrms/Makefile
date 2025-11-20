@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -157,15 +157,6 @@ check_part:
 	@echo "Using part $(XPART)"
 endif # XPART
 
-.PHONY: check_opencv
-check_opencv:
-ifeq (,$(OPENCV_INCLUDE))
-    @echo "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable" && false
-endif
-ifeq (,$(OPENCV_LIB))
-    @echo "Cannot find Opencv lib path. Please set OPENCV_LIB variable" && false
-endif
-
 define CONFIG_GEN_PY
 import os, string
 with open('$(CONFIG_TMPL)', 'r') as fr:
@@ -175,13 +166,16 @@ with open('$(CONFIG_FILE)', 'w') as f:
 endef
 export CONFIG_GEN_PY
 
-TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" -exec test -f '{}/bin/python3' \; -print | head -n 1)
 VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
 
 $(CONFIG_FILE): $(CONFIG_TMPL)
 	@echo "$${CONFIG_GEN_PY}" | (${VITIS_PYTHON3})
+
+data:
+	@true
 	
-all: check_vivado check_part check_opencv $(CONFIG_FILE)
+all: check_vivado check_part data $(CONFIG_FILE)
 ifneq ($(TARGET_REL), csim)
 	v++ -c --mode hls --config $(CONFIG_FILE) --work_dir $(WORK_DIR) --part $(XPART)
 endif

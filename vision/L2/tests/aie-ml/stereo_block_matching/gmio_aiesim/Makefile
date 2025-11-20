@@ -18,10 +18,10 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<aiesim> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<aiesim/hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<aiesim> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<aiesim/hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
 	$(ECHO) "  NOTE: For embedded platform the following setup steps are required:"

@@ -57,7 +57,7 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := zcu104
+PLATFORM := vck190
 endif
 
 # add warnning for sw_emu
@@ -65,7 +65,7 @@ ifeq ($(TARGET),sw_emu)
 $(error Error: The sw_emu target is no longer supported starting from 2025.1.)
 endif
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST += zcu104 vck190 zcu102 u50
+PLATFORM_ALLOWLIST += vck190 u50
 PLATFORM_BLOCKLIST += u280 u250
 
 include ./utils.mk
@@ -110,22 +110,6 @@ CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/
 LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu102/'))
-HOST_SRCS += $(XFLIB_DIR)/L3/examples/isppipeline_mono/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -D __SDSVHLS__
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L3/examples/isppipeline_mono/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/opt/xilinx/xrt/lib
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu104/'))
-HOST_SRCS += $(XFLIB_DIR)/L3/examples/isppipeline_mono/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -D __SDSVHLS__
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L3/examples/isppipeline_mono/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/opt/xilinx/xrt/lib
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 HOST_SRCS += $(XFLIB_DIR)/L3/examples/isppipeline_mono/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D __SDSVHLS__
@@ -167,14 +151,7 @@ LIBRARY_PATH := $(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 endif
 
 ########################## Kernel compiler global settings ##########################
-ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu102/'))
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L3/examples/isppipeline_mono/config -I $(XFLIB_DIR)/L1/include/
-VPP_LDFLAGS +=   --vivado.impl.strategies Performance_Explore
-
-else 
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L3/examples/isppipeline_mono/config -I $(XFLIB_DIR)/L1/include/
-
-endif
 
 ######################### binary container global settings ##########################
 VPP_FLAGS_ISPPipeline_accel += --hls.clock 200000000:ISPPipeline_accel

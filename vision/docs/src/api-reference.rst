@@ -8855,6 +8855,393 @@ process a 4K (3840x2160) image.
     | (300 MHz, 8-bit image only) |                  |
     +-----------------------------+------------------+
 
+
+.. _dense-pyramidal-lk-optical:
+
+Dense Pyramidal LK Optical Flow
+===============================
+
+Optical flow is the pattern of apparent motion of image objects between
+two consecutive frames, caused by the movement of object or camera. It
+is a 2D vector field, where each vector is a displacement vector showing
+the movement of points from first frame to second.
+
+Optical Flow works on the following assumptions:
+
+-  Pixel intensities of an object do not have too many variations in
+   consecutive frames
+-  Neighboring pixels have similar motion
+
+| Consider a pixel I(x, y, t) in first frame. (Note that a new
+  dimension, time, is added here. When working with images only, there
+  is no need of time). The pixel moves by distance (dx, dy) in the next
+  frame taken after time dt. Thus, since those pixels are the same and
+  the intensity does not change, the following is true:
+| |image92|
+
+Taking the Taylor series approximation on the right-hand side, removing
+common terms, and dividing by dt gives the following equation:
+
+|image93|
+
+Where |image94|, |image95|, |image96| and |image97|.
+
+The above equation is called the Optical Flow equation, where, ``fx``
+and ``fy`` are the image gradientsand ``ft`` is the gradient along time.
+However, (u, v) is unknown. It is not possible to solve this equation
+with two unknown variables. Thus, several methods are provided to solve
+this problem. One method is Lucas-Kanade. Previously it was assumed that
+all neighboring pixels have similar motion. The Lucas-Kanade method
+takes a patch around the point, whose size can be defined through the
+‘WINDOW_SIZE’ template parameter. Thus, all the points in that patch
+have the same motion. It is possible to find (``fx``, ``fy``, ``ft`` )
+for these points. Thus, the problem now becomes solving ‘WINDOW_SIZE \*
+WINDOW_SIZE’ equations with two unknown variables,which is
+over-determined. A better solution is obtained with the “least square
+fit” method. Below is the final solution, which is a problem with two
+equations and two unknowns:
+
+|image98|
+
+This solution fails when a large motion is involved and so pyramids are
+used. Going up in the pyramid, small motions are removed and large
+motions become small motions and so by applying Lucas-Kanade, the
+optical flow along with the scale is obtained.
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+   template< int NUM_PYR_LEVELS, int NUM_LINES, int WINSIZE, int FLOW_WIDTH, int FLOW_INT, int TYPE, int ROWS, int COLS, int NPC T, bool USE_URAM=false, int XFCVDEPTH_CURR_IMG = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_NEXT_IMG = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_STREAM_IN = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_STREAM_OUT = _XFCVDEPTH_DEFAUL>
+   void densePyrOpticalFlow(
+   xf::cv::Mat<TYPE,ROWS,COLS,NPC, XFCVDEPTH_CURR_IMG> & _current_img,
+   xf::cv::Mat<TYPE,ROWS,COLS,NPC, XFCVDEPTH_NEXT_IMG> & _next_image,
+   xf::cv::Mat<XF_32UC1,ROWS,COLS,NPC, XFCVDEPTH_STREAM_IN> & _streamFlowin,
+   xf::cv::Mat<XF_32UC1,ROWS,COLS,NPC, XFCVDEPTH_STREAM_OUT> & _streamFlowout,
+   const int level, const unsigned char scale_up_flag, float scale_in, ap_uint<1> init_flag)
+
+
+.. rubric:: Parameter Descriptions
+
+
+The following table describes the template and the function parameters.
+
+.. table:: Table . densePyrOpticalFlow Function Parameter Descriptions
+
+   +-----------------------+-------------------------------------------------------+
+   | Parameter             | Description                                           |
+   +=======================+=======================================================+
+   | NUM_PYR_LEVE          | Number of Image Pyramid levels used for the optical   |
+   | LS                    | flow computation                                      |
+   +-----------------------+-------------------------------------------------------+
+   | NUM_LINES             | Number of lines to buffer for the remap algorithm –   |
+   |                       | used to find the temporal gradient                    |
+   +-----------------------+-------------------------------------------------------+
+   | WINSIZE               | Window Size over which Optical Flow is computed       |
+   +-----------------------+-------------------------------------------------------+
+   | FLOW_WIDTH,           | Data width and number of integer bits to define the   |
+   | FLOW_INT              | signed flow vector data type. Integer bit includes    |
+   |                       | the signed bit.                                       |
+   |                       |                                                       |
+   |                       | The default type is 16-bit signed word with 10        |
+   |                       | integer bits and 6 decimal bits.                      |
+   +-----------------------+-------------------------------------------------------+
+   | TYPE                  | Pixel type of the input image. XF_8UC1 is only the    |
+   |                       | supported value.                                      |
+   +-----------------------+-------------------------------------------------------+
+   | ROWS                  | Maximum height or number of rows to build the         |
+   |                       | hardware for this kernel                              |
+   +-----------------------+-------------------------------------------------------+
+   | COLS                  | Maximum width or number of columns to build the       |
+   |                       | hardware for this kernel                              |
+   +-----------------------+-------------------------------------------------------+
+   | NPC                   | Number of pixels the hardware kernel must process per |
+   |                       | clock cycle. Only XF_NPPC1, 1 pixel per cycle, is     |
+   |                       | supported.                                            |
+   +-----------------------+-------------------------------------------------------+
+   | USE_URAM              | Enable to map some storage structures to UltraRAM     |
+   +-----------------------+-------------------------------------------------------+
+   | XFCVDEPTH_CURR_IMG    | Depth of the input image.                             |
+   +-----------------------+-------------------------------------------------------+
+   | XFCVDEPTH_NEXT_IMG    | Depth of the output image.                            |
+   +-----------------------+-------------------------------------------------------+
+   | XFCVDEPTH_STREAM_IN   | Depth of the input image.                             |
+   +-----------------------+-------------------------------------------------------+
+   | XFCVDEPTH_STREAM_OUT  | Depth of the output image.                            |
+   +-----------------------+-------------------------------------------------------+
+   | \_current_img         | First input image stream                              |
+   +-----------------------+-------------------------------------------------------+
+   | \_next_img            | Second input image to which the optical flow is       |
+   |                       | computed with respect to the first image              |
+   +-----------------------+-------------------------------------------------------+
+   | \_streamFlow          | 32-bit Packed U and V flow vectors input for optical  |
+   | in                    | flow. The bits from 31-16 represent the flow vector U |
+   |                       | while the bits from 15-0 represent the flow vector V. |
+   +-----------------------+-------------------------------------------------------+
+   | \_streamFlow          | 32-bit Packed U and V flow vectors output after       |
+   | out                   | optical flow computation. The bits from 31-16         |
+   |                       | represent the flow vector U while the bits from 15-0  |
+   |                       | represent the flow vector V.                          |
+   +-----------------------+-------------------------------------------------------+
+   | level                 | Image pyramid level at which the algorithm is         |
+   |                       | currently computing the optical flow.                 |
+   +-----------------------+-------------------------------------------------------+
+   | scale_up_fla          | Flag to enable the scaling-up of the flow vectors.    |
+   | g                     | This flag is set at the host when switching from one  |
+   |                       | image pyramid level to the other.                     |
+   +-----------------------+-------------------------------------------------------+
+   | scale_in              | Floating point scale up factor for the scaling-up the |
+   |                       | flow vectors.                                         |
+   |                       | The value is (previous_rows-1)/(current_rows-1). This |
+   |                       | is not 1 when switching from one image pyramid level  |
+   |                       | to the other.                                         |
+   +-----------------------+-------------------------------------------------------+
+   | init_flag             | Flag to initialize flow vectors to 0 in the first     |
+   |                       | iteration of the highest pyramid level. This flag     |
+   |                       | must be set in the first iteration of the highest     |
+   |                       | pyramid level (smallest image in the pyramid). The    |
+   |                       | flag must be unset for all the other iterations.      |
+   +-----------------------+-------------------------------------------------------+
+
+
+
+.. rubric:: Resource Utilization
+
+
+The following table summarizes the resource utilization of
+densePyrOpticalFlow for 1 pixel per cycle implementation, with the
+optical flow computed for a window size of 11 over an image size of
+1920x1080 pixels. The results are after implementation in Vivado HLS
+2019.1 for the Xilinx xczu9eg-ffvb1156-2L-e FPGA at 300 MHz.
+
+.. table:: Table . densePyrOpticalFlow Function Resource Utilization Summary
+
+    +----------------+---------------------+----------------------+-------+------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                        |
+    |                |                     |                                             |
+    |                | (MHz)               |                                             |
+    +                +                     +----------------------+-------+------+-------+
+    |                |                     | LUTs                 | FFs   | DSPs | BRAMs |
+    +================+=====================+======================+=======+======+=======+
+    | 1 Pixel        | 300                 | 32231                | 16596 | 52   | 215   |
+    +----------------+---------------------+----------------------+-------+------+-------+
+
+.. rubric:: Resource Utilization with UltraRAM Enable
+
+
+The following table summarizes the resource utilization of
+densePyrOpticalFlow for 1 pixel per cycle implementation, with the
+optical flow computed for a window size of 11 over an image size of
+3840X2160 pixels. The results are after implementation in Vivado HLS 2019.1 for
+the Xilinx xczu7ev-ffvc1156-2 FPGA at 300 MHz with UltraRAM enabled.
+
+.. table:: Table . densePyrOpticalFlow Function Resource Utilization Summary
+
+    +----------------+---------------------+----------------------+-------+------+-------+------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                               |
+    |                |                     |                                                    |
+    |                | (MHz)               |                                                    |
+    +                +                     +----------------------+-------+------+-------+------+
+    |                |                     | LUTs                 | FFs   | DSPs | BRAMs | URAM |
+    +================+=====================+======================+=======+======+=======+======+
+    | 1 Pixel        | 300                 | 31164                | 42320 | 81   | 34    | 23   |
+    +----------------+---------------------+----------------------+-------+------+-------+------+
+
+
+.. rubric:: Performance Estimate
+
+
+The following table summarizes performance figures on hardware for the
+densePyrOpticalFlow function for 5 iterations over 5 pyramid levels
+scaled down by a factor of two at each level. This has been tested on
+the zcu102 evaluation board.
+
+.. table:: Table . densePyrOpticalFlow Function Performance Estimate Summary
+
+    +----------------+---------------------+------------+------------------+
+    | Operating Mode | Operating Frequency | Image Size | Latency Estimate |
+    |                |                     |            |                  |
+    |                | (MHz)               |            |                  |
+    +                +                     +            +------------------+
+    |                |                     |            | Max (ms)         |
+    +================+=====================+============+==================+
+    | 1 pixel        | 300                 | 1920x1080  | 49.7             |
+    +----------------+---------------------+------------+------------------+
+    | 1 pixel        | 300                 | 1280x720   | 22.9             |
+    +----------------+---------------------+------------+------------------+
+    | 1 pixel        | 300                 | 1226x370   | 12.02            |
+    +----------------+---------------------+------------+------------------+
+
+.. _dense-non-pyramidal-lk-optical:
+
+Dense Non-Pyramidal LK Optical Flow
+===================================
+
+Optical flow is the pattern of apparent motion of image objects between
+two consecutive frames, caused by the movement of object or camera. It
+is a 2D vector field, where each vector is a displacement vector showing
+the movement of points from first frame to second.
+
+Optical Flow works on the following assumptions:
+
+-  Pixel intensities of an object do not have too many variations in
+   consecutive frames
+-  Neighboring pixels have similar motion
+
+| Consider a pixel I(x, y, t) in first frame. (Note that a new
+  dimension, time, is added here. When working with images only, there
+  is no need of time). The pixel moves by distance (dx, dy) in the next
+  frame taken after time dt. Thus, since those pixels are the same and
+  the intensity does not change, the following is true:
+| |image99|
+
+Taking the Taylor series approximation on the right-hand side, removing
+common terms, and dividing by dt gives the following equation:
+
+|image100|
+
+Where |image101|, |image102|, |image103| and |image104|.
+
+The above equation is called the Optical Flow equation, where, ``fx``
+and ``fy`` are the image gradientsand ``ft`` is the gradient along time.
+However, (u, v) is unknown. It is not possible to solve this equation
+with two unknown variables. Thus, several methods are provided to solve
+this problem. One method is Lucas-Kanade. Previously it was assumed that
+all neighboring pixels have similar motion. The Lucas-Kanade method
+takes a patch around the point, whose size can be defined through the
+‘WINDOW_SIZE’ template parameter. Thus, all the points in that patch
+have the same motion. It is possible to find (``fx``, ``fy``, ``ft`` )
+for these points. Thus, the problem now becomes solving ‘WINDOW_SIZE \*
+WINDOW_SIZE’ equations with two unknown variables,which is
+over-determined. A better solution is obtained with the “least square
+fit” method. Below is the final solution, which is a problem with two
+equations and two unknowns:
+
+|image105|
+
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+   template< int WINDOW_SIZE, int TYPE, int ROWS, int COLS, int NPC, bool USE_URAM=false, int XFCVDEDPTH_IN_0 = _XFCVDEPTH_DEFAULT, int XFCVDEDPTH_IN_1 = _XFCVDEPTH_DEFAULT, int XFCVDEDPTH_IN_2 = _XFCVDEPTH_DEFAULT, int XFCVDEDPTH_IN_3 = _XFCVDEPTH_DEFAULT>
+   void DenseNonPyrLKOpticalFlow (xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_0> & frame0, xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_1> & frame1, xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_IN_2> & flowx, xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_IN_3> & flowy)
+
+
+.. rubric:: Parameter Descriptions
+
+
+The following table describes the template and the function parameters.
+
+.. table:: Table . DenseNonPyrLKOpticalFlow Function Paramete Descriptions
+
+   +-------------------+-------------------------------------------------------+
+   | Parameter         | Description                                           |
+   +===================+=======================================================+
+   | Type              | pixel type. The current supported pixel value is      |
+   |                   | XF_8UC1, unsigned 8 bit.                              |
+   +-------------------+-------------------------------------------------------+
+   | ROWS              | Maximum number of rows of the input image that the    |
+   |                   | hardware kernel must be built for.                    |
+   +-------------------+-------------------------------------------------------+
+   | COLS              | Maximum number of columns of the input image that the |
+   |                   | hardware kernel must be built for.                    |
+   +-------------------+-------------------------------------------------------+
+   | NPC               | Number of pixels to process per cycle. Supported      |
+   |                   | values are XF_NPPC1 (=1) and XF_NPPC2(=2).            |
+   +-------------------+-------------------------------------------------------+
+   | WINDOW_SIZE       | Window size over which optical flow will be computed. |
+   |                   | This can be any odd positive integer.                 |
+   +-------------------+-------------------------------------------------------+
+   | USE_URAM          | Enable to map storage structures to UltraRAM.         |
+   +-------------------+-------------------------------------------------------+
+   | XFCVDEDPTH_IN_0   | Depth of the input image.                             |
+   +-------------------+-------------------------------------------------------+
+   | XFCVDEDPTH_IN_1   | Depth of the output image.                            |
+   +-------------------+-------------------------------------------------------+
+   | XFCVDEDPTH_IN_2   | Depth of the input image.                             |
+   +-------------------+-------------------------------------------------------+
+   | XFCVDEDPTH_IN_3   | Depth of the output image.                            |
+   +-------------------+-------------------------------------------------------+
+   | frame0            | First input images.                                   |
+   +-------------------+-------------------------------------------------------+
+   | frame1            | Second input image. Optical flow is computed between  |
+   |                   | frame0 and frame1.                                    |
+   +-------------------+-------------------------------------------------------+
+   | flowx             | Horizontal component of the flow vectors. The format  |
+   |                   | of the flow vectors is XF_32FC1 or single precision.  |
+   +-------------------+-------------------------------------------------------+
+   | flowy             | Vertical component of the flow vectors. The format of |
+   |                   | the flow vectors is XF_32FC1 or single precision.     |
+   +-------------------+-------------------------------------------------------+
+
+
+.. rubric:: Resource Utilization
+
+
+The following table summarizes the resource utilization of
+DenseNonPyrLKOpticalFlow for a 4K image, as generated in the Vivado HLS
+2019.1 version tool for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA at 300
+MHz.
+
+.. table:: Table . DenseNonPyrLKOpticalFlow Function Resource Utilization Summary
+
+    +----------------+---------------------+----------------------+----------+-------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                            |
+    |                |                     |                                                 |
+    |                | (MHz)               |                                                 |
+    +                +                     +----------------------+----------+-------+-------+
+    |                |                     | BRAM_18K             | DSP_48Es | FF    | LUTs  |
+    +================+=====================+======================+==========+=======+=======+
+    | 1 pixel        | 300                 | 178                  | 42       | 11984 | 7730  |
+    +----------------+---------------------+----------------------+----------+-------+-------+
+    | 2 pixel        | 300                 | 258                  | 82       | 22747 | 15126 |
+    +----------------+---------------------+----------------------+----------+-------+-------+
+
+The following table summarizes the resource utilization of
+DenseNonPyrLKOpticalFlow for a 4K image, as generated in the Vivado HLS version
+tool for the Xilinx Xczu7eg-ffvb1156-1 FPGA at 300 MHz with UltraRAM
+enabled.
+
+.. table:: Table . DenseNonPyrLKOpticalFlow Function Resource Utilization Summary with UltraRAM Eanble
+
+    +----------------+---------------------+----------------------+------+----------+-------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                                   |
+    |                |                     |                                                        |
+    |                | (MHz)               |                                                        |
+    +                +                     +----------------------+------+----------+-------+-------+
+    |                |                     | BRAM_18K             | URAM | DSP_48Es | FF    | LUTs  |
+    +================+=====================+======================+======+==========+=======+=======+
+    | 1 pixel        | 300                 | 0                    | 12   | 42       | 11803 | 7469  |
+    +----------------+---------------------+----------------------+------+----------+-------+-------+
+    | 2 pixel        | 300                 | 0                    | 23   | 80       | 22124 | 13800 |
+    +----------------+---------------------+----------------------+------+----------+-------+-------+
+
+
+.. rubric:: Performance Estimate
+
+
+The following table summarizes performance estimates of the
+DenseNonPyrLKOpticalFlow function for a 4K image, generated using Vivado
+HLS 2019.1 version tool for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA.
+
+.. table:: Table . DenseNonPyrLKOpticalFlow Function Performance Estimate Summary
+
+    +----------------+---------------------+------------------+
+    | Operating Mode | Operating Frequency | Latency Estimate |
+    |                |                     |                  |
+    |                | (MHz)               |                  |
+    +                +                     +------------------+
+    |                |                     | Max (ms)         |
+    +================+=====================+==================+
+    | 1 pixel        | 300                 | 28.01            |
+    +----------------+---------------------+------------------+
+    | 2 pixel        | 300                 | 14.01            |
+    +----------------+---------------------+------------------+
+
+
 .. _dilate:
 
 Dilate
@@ -12029,338 +12416,6 @@ Xczu9eg-ffvb1156-1-i-es1 to process a grayscale HD (1080x1920) image for
     | THETA=1, RHO=1 | 300                       | 12.5             |
     +----------------+---------------------------+------------------+
 
-
-
-.. _preprocessing-deep-neural-networks:
-
-Preprocessing for Deep Neural Networks
-======================================
-
-The input images are typically pre-processed before being fed for inference of different deep neural networks (DNNs). The Preprocess
-function applies mean (α) and bias (β) values provided by the user to the input image.
-
-		output = (input - α) * β
-
-.. rubric:: API Syntax
-
-
-.. code:: c
-
-   template <int IN_TYPE, int OUT_TYPE, int HEIGHT, int WIDTH, int NPC, int WIDTH_A, int IBITS_A, int WIDTH_B, 
-   int IBITS_B, int WIDTH_OUT, int IBITS_OUT, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
-   void preProcess(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_IN>& in_mat,
-                xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT>& out_mat,
-                float params[2 * XF_CHANNELS(IN_TYPE, NPC)])
-
-
-The following table describes the template and the function parameters.
-
-.. table:: Table Preprocess Parameter Description
-
-    +--------------------+----------------------------------------------+
-    | Parameter          | Description                                  |
-    +====================+==============================================+
-    | IN_TYPE            | Type of the input image. Supported values are| 
-    |                    | XF_8UC3, XF_10UC3, XF_12UC3, XF_16UC3        |
-    +--------------------+----------------------------------------------+
-    | OUT_TYPE           | Type of the output image. Supported values   | 
-    |                    | are XF_8UC3, XF_10UC3, XF_12UC3, XF_16UC3    |
-    +--------------------+----------------------------------------------+
-    | HEIGHT             | Maximum rows of the input image              |
-    +--------------------+----------------------------------------------+
-    | WIDTH              | Maximum columns of the input image           |
-    +--------------------+----------------------------------------------+
-    | NPC                | Number of pixels processed per clock         |
-    +--------------------+----------------------------------------------+
-    | WIDTH_A            | alpha bit width                              |
-    +--------------------+----------------------------------------------+
-    | IBITS_A            | Number of integer bits for alpha             |
-    +--------------------+----------------------------------------------+
-    | WIDTH_B            | beta bit width                               |
-    +--------------------+----------------------------------------------+
-    | IBITS_B            | Number of integer bits for beta              |
-    +--------------------+----------------------------------------------+
-    | WIDTH_OUT          | Output bit width                             |
-    +--------------------+----------------------------------------------+
-    | IBITS_OUT          | Number of integer bits for output            |
-    +--------------------+----------------------------------------------+
-    | XFCVDEPTH_IN       | Depth of the hls::stream of input image      |
-    +--------------------+----------------------------------------------+
-    | XFCVDEPTH_OUT      | Depth of the hls::stream of output image     |
-    +--------------------+----------------------------------------------+
-    | in_mat             | Input image                                  |
-    +--------------------+----------------------------------------------+
-    | out_mat            | Output image                                 |
-    +--------------------+----------------------------------------------+
-    | params             | Array containing α, β values per channel     |
-    +--------------------+----------------------------------------------+
- 
-
-.. rubric:: Resource Utilization
-
-
-The following table summarizes the resource utilization of preProcess for NPC =8, for a maximum input image size of 1280x720 pixels. The results are after synthesis in Vitis 2019.2 for the Xilinx xcu200-fsgd2104-2-e FPGA at 300 MHz. Latency for this configuration is 0.7 ms.
-
-    +----------------+---------------------+----------------------+----------+------+-------+-------+
-    | Operating Mode | Operating Frequency | Utilization Estimate |          |      |       |       |
-    |                |                     |                      |          |      |       |       |
-    |                | (MHz)               |                      |          |      |       |       |
-    +                +                     +----------------------+----------+------+-------+-------+
-    |                |                     | BRAM_18K             | DSP_48Es | FF   | LUT   | SLICE |
-    +================+=====================+======================+==========+======+=======+=======+
-    | 8 pixel        | 300                 | 0                    | 2        | 7554 | 11127 | 2155  |
-    +----------------+---------------------+----------------------+----------+------+-------+-------+
-
-
-
-.. _pyramid-up:
-
-Pyramid Up
-==========
-
-| The ``pyrUp`` function is an image up-sampling algorithm. It first
-  inserts zero rows and zero columns after every input row and column
-  making up to the size of the output image. The output image size is
-  always |image87|. The zero padded image is then smoothened using
-  Gaussian image filter. Gaussian filter for the pyramid-up function
-  uses a fixed filter kernel as given below:
-| |image88|
-
-However, to make up for the pixel intensity that is reduced due to zero
-padding, each output pixel is multiplied by 4.
-
-
-.. rubric:: API Syntax
-
-
-.. code:: c
-
-   template<int TYPE, int ROWS, int COLS, int NPC, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT> 
-   void pyrUp (xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> & _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT> & _dst)
-
-
-.. rubric:: Parameter Descriptions
-
-
-The following table describes the template and the function parameters.
-
-.. table:: Table . pyrUp Parameter Description
-
-   +----------------+-------------------------------------------------------+
-   | Parameter      | Description                                           |
-   +================+=======================================================+
-   | TYPE           | Input and Output pixel type. Only 8-bit, unsigned, 1  |
-   |                | and 3 channels are supported (XF_8UC1 and XF_8UC3)    |
-   +----------------+-------------------------------------------------------+
-   | ROWS           | Maximum Height or number of output rows to build the  |
-   |                | hardware for this kernel                              |
-   +----------------+-------------------------------------------------------+
-   | COLS           | Maximum Width or number of output columns to build    |
-   |                | the hardware for this kernel                          |
-   +----------------+-------------------------------------------------------+
-   | NPC            | Number of pixels to process per cycle. Currently, the |
-   |                | kernel supports only 1 pixel per cycle processing     |
-   |                | (XF_NPPC1).                                           |
-   +----------------+-------------------------------------------------------+
-   | XFCVDEPTH_IN   | Depth of the input image.                             |
-   +----------------+-------------------------------------------------------+
-   | XFCVDEPTH_OUT  | Depth of the output image.                            |
-   +----------------+-------------------------------------------------------+
-   | \_src          | Input image stream                                    |
-   +----------------+-------------------------------------------------------+
-   | \_dst          | Output image stream                                   |
-   +----------------+-------------------------------------------------------+
-
-
-.. rubric:: Resource Utilization
-
-
-The following table summarizes the resource utilization of pyrUp for 1
-pixel per cycle implementation, for a maximum input image size of
-1920x1080 pixels. The results are after synthesis in Vivado HLS 2019.1
-for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA at 300 MHz.
-
-.. table:: Table . pyrUp Function Resource Utilization Summary
-
-    +----------------+---------------------+----------------------+------+------+-------+
-    | Operating Mode | Operating Frequency | Utilization Estimate                       |
-    |                |                     |                                            |
-    |                | (MHz)               |                                            |
-    +                +                     +----------------------+------+------+-------+
-    |                |                     | LUTs                 | FFs  | DSPs | BRAMs |
-    +================+=====================+======================+======+======+=======+
-    | 1 Pixel        | 300                 | 1124                 | 1199 | 0    | 10    |
-    +----------------+---------------------+----------------------+------+------+-------+
-
-
-The following table summarizes the resource utilization of pyrUp for 1
-pixel per cycle implementation, for a maximum input image size of 4K
-with BGR. The results are after synthesis in Vivado HLS 2019.1 for the
-Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA at 300 MHz.
-
-.. table:: Table . pyrUp Function Resource Utilization Summary
-
-    +----------------+---------------------+----------------------+------+------+-------+
-    | Operating Mode | Operating Frequency | Utilization Estimate                       |
-    |                |                     |                                            |
-    |                | (MHz)               |                                            |
-    +                +                     +----------------------+------+------+-------+
-    |                |                     | LUTs                 | FFs  | DSPs | BRAMs |
-    +================+=====================+======================+======+======+=======+
-    | 1 Pixel        | 300                 | 2074                 | 2176 | 0    | 59    |
-    +----------------+---------------------+----------------------+------+------+-------+
-
-
-.. rubric:: Performance Estimate
-
-
-The following table summarizes performance estimates of pyrUp function
-on Vivado HLS 2019.1 for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA.
-
-.. table:: Table . pyrUp Function Performance Estimate Summary
-
-    +----------------+---------------------+------------------+------------------+
-    | Operating Mode | Operating Frequency | Input Image Size | Latency Estimate |
-    |                |                     |                  |                  |
-    |                | (MHz)               |                  |                  |
-    +                +                     +                  +------------------+
-    |                |                     |                  | Max (ms)         |
-    +================+=====================+==================+==================+
-    | 1 pixel        | 300                 | 1920x1080        | 27.82            |
-    +----------------+---------------------+------------------+------------------+
-
-.. _pyramid-down:
-
-Pyramid Down
-============
-
-| The ``pyrDown`` function is an image down-sampling algorithm which
-  smoothens the image before down-scaling it. The image is smoothened
-  using a Gaussian filter with the following kernel:
-| |image89|
-
-Down-scaling is performed by dropping pixels in the even rows and the
-even columns. The resulting image size is |image90|.
-
-
-.. rubric:: API Syntax
-
-
-.. code:: c
-
-   template<int TYPE, int ROWS, int COLS, int NPC, bool USE_URAM=false, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT> 
-   void pyrDown (xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> & _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT> & _dst)
-
-.. rubric:: Parameter Descriptions
-
-
-The following table describes the template and the function parameters.
-
-.. table:: Table . pyrDown Parameter Description
-
-   +----------------+-------------------------------------------------------+
-   | Parameter      | Description                                           |
-   +================+=======================================================+
-   | TYPE           | Input and Output pixel type. Only 8-bit, unsigned, 1  |
-   |                | and 3 channels are supported (XF_8UC1 and XF_8UC3)    |
-   +----------------+-------------------------------------------------------+
-   | ROWS           | Maximum Height or number of input rows to build the   |
-   |                | hardware for this kernel                              |
-   +----------------+-------------------------------------------------------+
-   | COLS           | Maximum Width or number of input columns to build the |
-   |                | hardware for this kernel                              |
-   +----------------+-------------------------------------------------------+
-   | NPC            | Number of pixels to process per cycle. Currently, the |
-   |                | kernel supports only 1 pixel per cycle processing     |
-   |                | (XF_NPPC1).                                           |
-   +----------------+-------------------------------------------------------+
-   | USE_URAM       | Enable to map storage structures to UltraRAM          |
-   +----------------+-------------------------------------------------------+
-   | XFCVDEPTH_IN   | Depth of the input image.                             |
-   +----------------+-------------------------------------------------------+
-   | XFCVDEPTH_OUT  | Depth of the output image.                            |
-   +----------------+-------------------------------------------------------+
-   | \_src          | Input image stream                                    |
-   +----------------+-------------------------------------------------------+
-   | \_dst          | Output image stream                                   |
-   +----------------+-------------------------------------------------------+
-
-
-.. rubric:: Resource Utilization
-
-
-The following table summarizes the resource utilization of pyrDown for 1
-pixel per cycle implementation, for a maximum input image size of
-1920x1080 pixels. The results are after synthesis in Vivado HLS 2019.1
-for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA at 300 MHz.
-
-.. table:: Table . pyrDown Function Resource Utilization Summary
-
-    +----------------+---------------------+----------------------+------+------+-------+
-    | Operating Mode | Operating Frequency | Utilization Estimate                       |
-    |                |                     |                                            |
-    |                | (MHz)               |                                            |
-    +                +                     +----------------------+------+------+-------+
-    |                |                     | LUTs                 | FFs  | DSPs | BRAMs |
-    +================+=====================+======================+======+======+=======+
-    | 1 Pixel        | 300                 | 1171                 | 1238 | 1    | 5     |
-    +----------------+---------------------+----------------------+------+------+-------+
-
-
-The following table summarizes the resource utilization of pyrDown for 1
-pixel per cycle implementation, for a maximum input image size of 4K
-with BGR image. The results are after synthesis in Vivado HLS 2019.1 for
-the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA at 300 MHz.
-
-.. table:: Table . pyrDown Function Resource Utilization Summary
-
-    +----------------+---------------------+----------------------+------+------+-------+
-    | Operating Mode | Operating Frequency | Utilization Estimate                       |
-    |                |                     |                                            |
-    |                | (MHz)               |                                            |
-    +                +                     +----------------------+------+------+-------+
-    |                |                     | LUTs                 | FFs  | DSPs | BRAMs |
-    +================+=====================+======================+======+======+=======+
-    | 1 Pixel        | 300                 | 2158                 | 1983 | 2    | 30    |
-    +----------------+---------------------+----------------------+------+------+-------+
-
-The following table summarizes the resource utilization of pyrDown for 1
-pixel per cycle implementation, for a maximum input image size of
-3840x2160 pixels. The results are after synthesis in Vivado HLS 2019.1 for the
-Xilinx xczu7eg-ffvb1156-1 FPGA at 300 MHz with UltraRAM enabled.
-
-.. table:: Table . pyrDown Function Resource Utilization Summary with UltraRAM Enabled
-
-    +----------------+---------------------+----------------------+------+------+-------+------+
-    | Operating Mode | Operating Frequency | Utilization Estimate                              |
-    |                |                     |                                                   |
-    |                | (MHz)               |                                                   |
-    +                +                     +----------------------+------+------+-------+------+
-    |                |                     | LUTs                 | FFs  | DSPs | BRAMs | URAM |
-    +================+=====================+======================+======+======+=======+======+
-    | 1 Pixel        | 300                 | 1171                 | 1243 | 0    | 0     | 1    |
-    +----------------+---------------------+----------------------+------+------+-------+------+
-
-
-.. rubric:: Performance Estimate
-
-
-The following table summarizes performance estimates of pyrDown function
-in Vivado HLS 2019.1 for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA.
-
-.. table:: Table . pyrDown Function Performance Estimate Summary
-
-    +----------------+---------------------+------------------+------------------+
-    | Operating Mode | Operating Frequency | Input Image Size | Latency Estimate |
-    |                |                     |                  |                  |
-    |                | (MHz)               |                  |                  |
-    +                +                     +                  +------------------+
-    |                |                     |                  | Max (ms)         |
-    +================+=====================+==================+==================+
-    | 1 pixel        | 300                 | 1920x1080        | 6.99             |
-    +----------------+---------------------+------------------+------------------+
-
-
 .. _InitUndistortRectifyMapInverse:
 
 InitUndistortRectifyMapInverse
@@ -12654,391 +12709,6 @@ the Xilinx Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD
 
 .. _ispstats:
 .. include:: include/ispstats_api.rst
-
-.. _dense-pyramidal-lk-optical:
-
-Dense Pyramidal LK Optical Flow
-===============================
-
-Optical flow is the pattern of apparent motion of image objects between
-two consecutive frames, caused by the movement of object or camera. It
-is a 2D vector field, where each vector is a displacement vector showing
-the movement of points from first frame to second.
-
-Optical Flow works on the following assumptions:
-
--  Pixel intensities of an object do not have too many variations in
-   consecutive frames
--  Neighboring pixels have similar motion
-
-| Consider a pixel I(x, y, t) in first frame. (Note that a new
-  dimension, time, is added here. When working with images only, there
-  is no need of time). The pixel moves by distance (dx, dy) in the next
-  frame taken after time dt. Thus, since those pixels are the same and
-  the intensity does not change, the following is true:
-| |image92|
-
-Taking the Taylor series approximation on the right-hand side, removing
-common terms, and dividing by dt gives the following equation:
-
-|image93|
-
-Where |image94|, |image95|, |image96| and |image97|.
-
-The above equation is called the Optical Flow equation, where, ``fx``
-and ``fy`` are the image gradientsand ``ft`` is the gradient along time.
-However, (u, v) is unknown. It is not possible to solve this equation
-with two unknown variables. Thus, several methods are provided to solve
-this problem. One method is Lucas-Kanade. Previously it was assumed that
-all neighboring pixels have similar motion. The Lucas-Kanade method
-takes a patch around the point, whose size can be defined through the
-‘WINDOW_SIZE’ template parameter. Thus, all the points in that patch
-have the same motion. It is possible to find (``fx``, ``fy``, ``ft`` )
-for these points. Thus, the problem now becomes solving ‘WINDOW_SIZE \*
-WINDOW_SIZE’ equations with two unknown variables,which is
-over-determined. A better solution is obtained with the “least square
-fit” method. Below is the final solution, which is a problem with two
-equations and two unknowns:
-
-|image98|
-
-This solution fails when a large motion is involved and so pyramids are
-used. Going up in the pyramid, small motions are removed and large
-motions become small motions and so by applying Lucas-Kanade, the
-optical flow along with the scale is obtained.
-
-.. rubric:: API Syntax
-
-
-.. code:: c
-
-   template< int NUM_PYR_LEVELS, int NUM_LINES, int WINSIZE, int FLOW_WIDTH, int FLOW_INT, int TYPE, int ROWS, int COLS, int NPC T, bool USE_URAM=false, int XFCVDEPTH_CURR_IMG = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_NEXT_IMG = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_STREAM_IN = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_STREAM_OUT = _XFCVDEPTH_DEFAUL>
-   void densePyrOpticalFlow(
-   xf::cv::Mat<TYPE,ROWS,COLS,NPC, XFCVDEPTH_CURR_IMG> & _current_img,
-   xf::cv::Mat<TYPE,ROWS,COLS,NPC, XFCVDEPTH_NEXT_IMG> & _next_image,
-   xf::cv::Mat<XF_32UC1,ROWS,COLS,NPC, XFCVDEPTH_STREAM_IN> & _streamFlowin,
-   xf::cv::Mat<XF_32UC1,ROWS,COLS,NPC, XFCVDEPTH_STREAM_OUT> & _streamFlowout,
-   const int level, const unsigned char scale_up_flag, float scale_in, ap_uint<1> init_flag)
-
-
-.. rubric:: Parameter Descriptions
-
-
-The following table describes the template and the function parameters.
-
-.. table:: Table . densePyrOpticalFlow Function Parameter Descriptions
-
-   +-----------------------+-------------------------------------------------------+
-   | Parameter             | Description                                           |
-   +=======================+=======================================================+
-   | NUM_PYR_LEVE          | Number of Image Pyramid levels used for the optical   |
-   | LS                    | flow computation                                      |
-   +-----------------------+-------------------------------------------------------+
-   | NUM_LINES             | Number of lines to buffer for the remap algorithm –   |
-   |                       | used to find the temporal gradient                    |
-   +-----------------------+-------------------------------------------------------+
-   | WINSIZE               | Window Size over which Optical Flow is computed       |
-   +-----------------------+-------------------------------------------------------+
-   | FLOW_WIDTH,           | Data width and number of integer bits to define the   |
-   | FLOW_INT              | signed flow vector data type. Integer bit includes    |
-   |                       | the signed bit.                                       |
-   |                       |                                                       |
-   |                       | The default type is 16-bit signed word with 10        |
-   |                       | integer bits and 6 decimal bits.                      |
-   +-----------------------+-------------------------------------------------------+
-   | TYPE                  | Pixel type of the input image. XF_8UC1 is only the    |
-   |                       | supported value.                                      |
-   +-----------------------+-------------------------------------------------------+
-   | ROWS                  | Maximum height or number of rows to build the         |
-   |                       | hardware for this kernel                              |
-   +-----------------------+-------------------------------------------------------+
-   | COLS                  | Maximum width or number of columns to build the       |
-   |                       | hardware for this kernel                              |
-   +-----------------------+-------------------------------------------------------+
-   | NPC                   | Number of pixels the hardware kernel must process per |
-   |                       | clock cycle. Only XF_NPPC1, 1 pixel per cycle, is     |
-   |                       | supported.                                            |
-   +-----------------------+-------------------------------------------------------+
-   | USE_URAM              | Enable to map some storage structures to UltraRAM     |
-   +-----------------------+-------------------------------------------------------+
-   | XFCVDEPTH_CURR_IMG    | Depth of the input image.                             |
-   +-----------------------+-------------------------------------------------------+
-   | XFCVDEPTH_NEXT_IMG    | Depth of the output image.                            |
-   +-----------------------+-------------------------------------------------------+
-   | XFCVDEPTH_STREAM_IN   | Depth of the input image.                             |
-   +-----------------------+-------------------------------------------------------+
-   | XFCVDEPTH_STREAM_OUT  | Depth of the output image.                            |
-   +-----------------------+-------------------------------------------------------+
-   | \_current_img         | First input image stream                              |
-   +-----------------------+-------------------------------------------------------+
-   | \_next_img            | Second input image to which the optical flow is       |
-   |                       | computed with respect to the first image              |
-   +-----------------------+-------------------------------------------------------+
-   | \_streamFlow          | 32-bit Packed U and V flow vectors input for optical  |
-   | in                    | flow. The bits from 31-16 represent the flow vector U |
-   |                       | while the bits from 15-0 represent the flow vector V. |
-   +-----------------------+-------------------------------------------------------+
-   | \_streamFlow          | 32-bit Packed U and V flow vectors output after       |
-   | out                   | optical flow computation. The bits from 31-16         |
-   |                       | represent the flow vector U while the bits from 15-0  |
-   |                       | represent the flow vector V.                          |
-   +-----------------------+-------------------------------------------------------+
-   | level                 | Image pyramid level at which the algorithm is         |
-   |                       | currently computing the optical flow.                 |
-   +-----------------------+-------------------------------------------------------+
-   | scale_up_fla          | Flag to enable the scaling-up of the flow vectors.    |
-   | g                     | This flag is set at the host when switching from one  |
-   |                       | image pyramid level to the other.                     |
-   +-----------------------+-------------------------------------------------------+
-   | scale_in              | Floating point scale up factor for the scaling-up the |
-   |                       | flow vectors.                                         |
-   |                       | The value is (previous_rows-1)/(current_rows-1). This |
-   |                       | is not 1 when switching from one image pyramid level  |
-   |                       | to the other.                                         |
-   +-----------------------+-------------------------------------------------------+
-   | init_flag             | Flag to initialize flow vectors to 0 in the first     |
-   |                       | iteration of the highest pyramid level. This flag     |
-   |                       | must be set in the first iteration of the highest     |
-   |                       | pyramid level (smallest image in the pyramid). The    |
-   |                       | flag must be unset for all the other iterations.      |
-   +-----------------------+-------------------------------------------------------+
-
-
-
-.. rubric:: Resource Utilization
-
-
-The following table summarizes the resource utilization of
-densePyrOpticalFlow for 1 pixel per cycle implementation, with the
-optical flow computed for a window size of 11 over an image size of
-1920x1080 pixels. The results are after implementation in Vivado HLS
-2019.1 for the Xilinx xczu9eg-ffvb1156-2L-e FPGA at 300 MHz.
-
-.. table:: Table . densePyrOpticalFlow Function Resource Utilization Summary
-
-    +----------------+---------------------+----------------------+-------+------+-------+
-    | Operating Mode | Operating Frequency | Utilization Estimate                        |
-    |                |                     |                                             |
-    |                | (MHz)               |                                             |
-    +                +                     +----------------------+-------+------+-------+
-    |                |                     | LUTs                 | FFs   | DSPs | BRAMs |
-    +================+=====================+======================+=======+======+=======+
-    | 1 Pixel        | 300                 | 32231                | 16596 | 52   | 215   |
-    +----------------+---------------------+----------------------+-------+------+-------+
-
-.. rubric:: Resource Utilization with UltraRAM Enable
-
-
-The following table summarizes the resource utilization of
-densePyrOpticalFlow for 1 pixel per cycle implementation, with the
-optical flow computed for a window size of 11 over an image size of
-3840X2160 pixels. The results are after implementation in Vivado HLS 2019.1 for
-the Xilinx xczu7ev-ffvc1156-2 FPGA at 300 MHz with UltraRAM enabled.
-
-.. table:: Table . densePyrOpticalFlow Function Resource Utilization Summary
-
-    +----------------+---------------------+----------------------+-------+------+-------+------+
-    | Operating Mode | Operating Frequency | Utilization Estimate                               |
-    |                |                     |                                                    |
-    |                | (MHz)               |                                                    |
-    +                +                     +----------------------+-------+------+-------+------+
-    |                |                     | LUTs                 | FFs   | DSPs | BRAMs | URAM |
-    +================+=====================+======================+=======+======+=======+======+
-    | 1 Pixel        | 300                 | 31164                | 42320 | 81   | 34    | 23   |
-    +----------------+---------------------+----------------------+-------+------+-------+------+
-
-
-.. rubric:: Performance Estimate
-
-
-The following table summarizes performance figures on hardware for the
-densePyrOpticalFlow function for 5 iterations over 5 pyramid levels
-scaled down by a factor of two at each level. This has been tested on
-the zcu102 evaluation board.
-
-.. table:: Table . densePyrOpticalFlow Function Performance Estimate Summary
-
-    +----------------+---------------------+------------+------------------+
-    | Operating Mode | Operating Frequency | Image Size | Latency Estimate |
-    |                |                     |            |                  |
-    |                | (MHz)               |            |                  |
-    +                +                     +            +------------------+
-    |                |                     |            | Max (ms)         |
-    +================+=====================+============+==================+
-    | 1 pixel        | 300                 | 1920x1080  | 49.7             |
-    +----------------+---------------------+------------+------------------+
-    | 1 pixel        | 300                 | 1280x720   | 22.9             |
-    +----------------+---------------------+------------+------------------+
-    | 1 pixel        | 300                 | 1226x370   | 12.02            |
-    +----------------+---------------------+------------+------------------+
-
-.. _dense-non-pyramidal-lk-optical:
-
-Dense Non-Pyramidal LK Optical Flow
-===================================
-
-Optical flow is the pattern of apparent motion of image objects between
-two consecutive frames, caused by the movement of object or camera. It
-is a 2D vector field, where each vector is a displacement vector showing
-the movement of points from first frame to second.
-
-Optical Flow works on the following assumptions:
-
--  Pixel intensities of an object do not have too many variations in
-   consecutive frames
--  Neighboring pixels have similar motion
-
-| Consider a pixel I(x, y, t) in first frame. (Note that a new
-  dimension, time, is added here. When working with images only, there
-  is no need of time). The pixel moves by distance (dx, dy) in the next
-  frame taken after time dt. Thus, since those pixels are the same and
-  the intensity does not change, the following is true:
-| |image99|
-
-Taking the Taylor series approximation on the right-hand side, removing
-common terms, and dividing by dt gives the following equation:
-
-|image100|
-
-Where |image101|, |image102|, |image103| and |image104|.
-
-The above equation is called the Optical Flow equation, where, ``fx``
-and ``fy`` are the image gradientsand ``ft`` is the gradient along time.
-However, (u, v) is unknown. It is not possible to solve this equation
-with two unknown variables. Thus, several methods are provided to solve
-this problem. One method is Lucas-Kanade. Previously it was assumed that
-all neighboring pixels have similar motion. The Lucas-Kanade method
-takes a patch around the point, whose size can be defined through the
-‘WINDOW_SIZE’ template parameter. Thus, all the points in that patch
-have the same motion. It is possible to find (``fx``, ``fy``, ``ft`` )
-for these points. Thus, the problem now becomes solving ‘WINDOW_SIZE \*
-WINDOW_SIZE’ equations with two unknown variables,which is
-over-determined. A better solution is obtained with the “least square
-fit” method. Below is the final solution, which is a problem with two
-equations and two unknowns:
-
-|image105|
-
-
-.. rubric:: API Syntax
-
-
-.. code:: c
-
-   template< int WINDOW_SIZE, int TYPE, int ROWS, int COLS, int NPC, bool USE_URAM=false, int XFCVDEDPTH_IN_0 = _XFCVDEPTH_DEFAULT, int XFCVDEDPTH_IN_1 = _XFCVDEPTH_DEFAULT, int XFCVDEDPTH_IN_2 = _XFCVDEPTH_DEFAULT, int XFCVDEDPTH_IN_3 = _XFCVDEPTH_DEFAULT>
-   void DenseNonPyrLKOpticalFlow (xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_0> & frame0, xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_1> & frame1, xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_IN_2> & flowx, xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_IN_3> & flowy)
-
-
-.. rubric:: Parameter Descriptions
-
-
-The following table describes the template and the function parameters.
-
-.. table:: Table . DenseNonPyrLKOpticalFlow Function Paramete Descriptions
-
-   +-------------------+-------------------------------------------------------+
-   | Parameter         | Description                                           |
-   +===================+=======================================================+
-   | Type              | pixel type. The current supported pixel value is      |
-   |                   | XF_8UC1, unsigned 8 bit.                              |
-   +-------------------+-------------------------------------------------------+
-   | ROWS              | Maximum number of rows of the input image that the    |
-   |                   | hardware kernel must be built for.                    |
-   +-------------------+-------------------------------------------------------+
-   | COLS              | Maximum number of columns of the input image that the |
-   |                   | hardware kernel must be built for.                    |
-   +-------------------+-------------------------------------------------------+
-   | NPC               | Number of pixels to process per cycle. Supported      |
-   |                   | values are XF_NPPC1 (=1) and XF_NPPC2(=2).            |
-   +-------------------+-------------------------------------------------------+
-   | WINDOW_SIZE       | Window size over which optical flow will be computed. |
-   |                   | This can be any odd positive integer.                 |
-   +-------------------+-------------------------------------------------------+
-   | USE_URAM          | Enable to map storage structures to UltraRAM.         |
-   +-------------------+-------------------------------------------------------+
-   | XFCVDEDPTH_IN_0   | Depth of the input image.                             |
-   +-------------------+-------------------------------------------------------+
-   | XFCVDEDPTH_IN_1   | Depth of the output image.                            |
-   +-------------------+-------------------------------------------------------+
-   | XFCVDEDPTH_IN_2   | Depth of the input image.                             |
-   +-------------------+-------------------------------------------------------+
-   | XFCVDEDPTH_IN_3   | Depth of the output image.                            |
-   +-------------------+-------------------------------------------------------+
-   | frame0            | First input images.                                   |
-   +-------------------+-------------------------------------------------------+
-   | frame1            | Second input image. Optical flow is computed between  |
-   |                   | frame0 and frame1.                                    |
-   +-------------------+-------------------------------------------------------+
-   | flowx             | Horizontal component of the flow vectors. The format  |
-   |                   | of the flow vectors is XF_32FC1 or single precision.  |
-   +-------------------+-------------------------------------------------------+
-   | flowy             | Vertical component of the flow vectors. The format of |
-   |                   | the flow vectors is XF_32FC1 or single precision.     |
-   +-------------------+-------------------------------------------------------+
-
-
-.. rubric:: Resource Utilization
-
-
-The following table summarizes the resource utilization of
-DenseNonPyrLKOpticalFlow for a 4K image, as generated in the Vivado HLS
-2019.1 version tool for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA at 300
-MHz.
-
-.. table:: Table . DenseNonPyrLKOpticalFlow Function Resource Utilization Summary
-
-    +----------------+---------------------+----------------------+----------+-------+-------+
-    | Operating Mode | Operating Frequency | Utilization Estimate                            |
-    |                |                     |                                                 |
-    |                | (MHz)               |                                                 |
-    +                +                     +----------------------+----------+-------+-------+
-    |                |                     | BRAM_18K             | DSP_48Es | FF    | LUTs  |
-    +================+=====================+======================+==========+=======+=======+
-    | 1 pixel        | 300                 | 178                  | 42       | 11984 | 7730  |
-    +----------------+---------------------+----------------------+----------+-------+-------+
-    | 2 pixel        | 300                 | 258                  | 82       | 22747 | 15126 |
-    +----------------+---------------------+----------------------+----------+-------+-------+
-
-The following table summarizes the resource utilization of
-DenseNonPyrLKOpticalFlow for a 4K image, as generated in the Vivado HLS version
-tool for the Xilinx Xczu7eg-ffvb1156-1 FPGA at 300 MHz with UltraRAM
-enabled.
-
-.. table:: Table . DenseNonPyrLKOpticalFlow Function Resource Utilization Summary with UltraRAM Eanble
-
-    +----------------+---------------------+----------------------+------+----------+-------+-------+
-    | Operating Mode | Operating Frequency | Utilization Estimate                                   |
-    |                |                     |                                                        |
-    |                | (MHz)               |                                                        |
-    +                +                     +----------------------+------+----------+-------+-------+
-    |                |                     | BRAM_18K             | URAM | DSP_48Es | FF    | LUTs  |
-    +================+=====================+======================+======+==========+=======+=======+
-    | 1 pixel        | 300                 | 0                    | 12   | 42       | 11803 | 7469  |
-    +----------------+---------------------+----------------------+------+----------+-------+-------+
-    | 2 pixel        | 300                 | 0                    | 23   | 80       | 22124 | 13800 |
-    +----------------+---------------------+----------------------+------+----------+-------+-------+
-
-
-.. rubric:: Performance Estimate
-
-
-The following table summarizes performance estimates of the
-DenseNonPyrLKOpticalFlow function for a 4K image, generated using Vivado
-HLS 2019.1 version tool for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA.
-
-.. table:: Table . DenseNonPyrLKOpticalFlow Function Performance Estimate Summary
-
-    +----------------+---------------------+------------------+
-    | Operating Mode | Operating Frequency | Latency Estimate |
-    |                |                     |                  |
-    |                | (MHz)               |                  |
-    +                +                     +------------------+
-    |                |                     | Max (ms)         |
-    +================+=====================+==================+
-    | 1 pixel        | 300                 | 28.01            |
-    +----------------+---------------------+------------------+
-    | 2 pixel        | 300                 | 14.01            |
-    +----------------+---------------------+------------------+
 
 .. _kalman-filter:
 
@@ -15519,6 +15189,334 @@ Xczu9eg-ffvb1156-1-i-es1, to process a grayscale HD (1080x1920) image.
     +-----------------------------+------------------+
 
 
+.. _preprocessing-deep-neural-networks:
+
+Preprocessing for Deep Neural Networks
+======================================
+
+The input images are typically pre-processed before being fed for inference of different deep neural networks (DNNs). The Preprocess
+function applies mean (α) and bias (β) values provided by the user to the input image.
+
+		output = (input - α) * β
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+   template <int IN_TYPE, int OUT_TYPE, int HEIGHT, int WIDTH, int NPC, int WIDTH_A, int IBITS_A, int WIDTH_B, 
+   int IBITS_B, int WIDTH_OUT, int IBITS_OUT, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+   void preProcess(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_IN>& in_mat,
+                xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT>& out_mat,
+                float params[2 * XF_CHANNELS(IN_TYPE, NPC)])
+
+
+The following table describes the template and the function parameters.
+
+.. table:: Table Preprocess Parameter Description
+
+    +--------------------+----------------------------------------------+
+    | Parameter          | Description                                  |
+    +====================+==============================================+
+    | IN_TYPE            | Type of the input image. Supported values are| 
+    |                    | XF_8UC3, XF_10UC3, XF_12UC3, XF_16UC3        |
+    +--------------------+----------------------------------------------+
+    | OUT_TYPE           | Type of the output image. Supported values   | 
+    |                    | are XF_8UC3, XF_10UC3, XF_12UC3, XF_16UC3    |
+    +--------------------+----------------------------------------------+
+    | HEIGHT             | Maximum rows of the input image              |
+    +--------------------+----------------------------------------------+
+    | WIDTH              | Maximum columns of the input image           |
+    +--------------------+----------------------------------------------+
+    | NPC                | Number of pixels processed per clock         |
+    +--------------------+----------------------------------------------+
+    | WIDTH_A            | alpha bit width                              |
+    +--------------------+----------------------------------------------+
+    | IBITS_A            | Number of integer bits for alpha             |
+    +--------------------+----------------------------------------------+
+    | WIDTH_B            | beta bit width                               |
+    +--------------------+----------------------------------------------+
+    | IBITS_B            | Number of integer bits for beta              |
+    +--------------------+----------------------------------------------+
+    | WIDTH_OUT          | Output bit width                             |
+    +--------------------+----------------------------------------------+
+    | IBITS_OUT          | Number of integer bits for output            |
+    +--------------------+----------------------------------------------+
+    | XFCVDEPTH_IN       | Depth of the hls::stream of input image      |
+    +--------------------+----------------------------------------------+
+    | XFCVDEPTH_OUT      | Depth of the hls::stream of output image     |
+    +--------------------+----------------------------------------------+
+    | in_mat             | Input image                                  |
+    +--------------------+----------------------------------------------+
+    | out_mat            | Output image                                 |
+    +--------------------+----------------------------------------------+
+    | params             | Array containing α, β values per channel     |
+    +--------------------+----------------------------------------------+
+ 
+
+.. rubric:: Resource Utilization
+
+
+The following table summarizes the resource utilization of preProcess for NPC =8, for a maximum input image size of 1280x720 pixels. The results are after synthesis in Vitis 2019.2 for the Xilinx xcu200-fsgd2104-2-e FPGA at 300 MHz. Latency for this configuration is 0.7 ms.
+
+    +----------------+---------------------+----------------------+----------+------+-------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate |          |      |       |       |
+    |                |                     |                      |          |      |       |       |
+    |                | (MHz)               |                      |          |      |       |       |
+    +                +                     +----------------------+----------+------+-------+-------+
+    |                |                     | BRAM_18K             | DSP_48Es | FF   | LUT   | SLICE |
+    +================+=====================+======================+==========+======+=======+=======+
+    | 8 pixel        | 300                 | 0                    | 2        | 7554 | 11127 | 2155  |
+    +----------------+---------------------+----------------------+----------+------+-------+-------+
+
+
+
+.. _pyramid-up:
+
+Pyramid Up
+==========
+
+| The ``pyrUp`` function is an image up-sampling algorithm. It first
+  inserts zero rows and zero columns after every input row and column
+  making up to the size of the output image. The output image size is
+  always |image87|. The zero padded image is then smoothened using
+  Gaussian image filter. Gaussian filter for the pyramid-up function
+  uses a fixed filter kernel as given below:
+| |image88|
+
+However, to make up for the pixel intensity that is reduced due to zero
+padding, each output pixel is multiplied by 4.
+
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+   template<int TYPE, int ROWS, int COLS, int NPC, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT> 
+   void pyrUp (xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> & _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT> & _dst)
+
+
+.. rubric:: Parameter Descriptions
+
+
+The following table describes the template and the function parameters.
+
+.. table:: Table . pyrUp Parameter Description
+
+   +----------------+-------------------------------------------------------+
+   | Parameter      | Description                                           |
+   +================+=======================================================+
+   | TYPE           | Input and Output pixel type. Only 8-bit, unsigned, 1  |
+   |                | and 3 channels are supported (XF_8UC1 and XF_8UC3)    |
+   +----------------+-------------------------------------------------------+
+   | ROWS           | Maximum Height or number of output rows to build the  |
+   |                | hardware for this kernel                              |
+   +----------------+-------------------------------------------------------+
+   | COLS           | Maximum Width or number of output columns to build    |
+   |                | the hardware for this kernel                          |
+   +----------------+-------------------------------------------------------+
+   | NPC            | Number of pixels to process per cycle. Currently, the |
+   |                | kernel supports only 1 pixel per cycle processing     |
+   |                | (XF_NPPC1).                                           |
+   +----------------+-------------------------------------------------------+
+   | XFCVDEPTH_IN   | Depth of the input image.                             |
+   +----------------+-------------------------------------------------------+
+   | XFCVDEPTH_OUT  | Depth of the output image.                            |
+   +----------------+-------------------------------------------------------+
+   | \_src          | Input image stream                                    |
+   +----------------+-------------------------------------------------------+
+   | \_dst          | Output image stream                                   |
+   +----------------+-------------------------------------------------------+
+
+
+.. rubric:: Resource Utilization
+
+
+The following table summarizes the resource utilization of pyrUp for 1
+pixel per cycle implementation, for a maximum input image size of
+1920x1080 pixels. The results are after synthesis in Vivado HLS 2019.1
+for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA at 300 MHz.
+
+.. table:: Table . pyrUp Function Resource Utilization Summary
+
+    +----------------+---------------------+----------------------+------+------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                       |
+    |                |                     |                                            |
+    |                | (MHz)               |                                            |
+    +                +                     +----------------------+------+------+-------+
+    |                |                     | LUTs                 | FFs  | DSPs | BRAMs |
+    +================+=====================+======================+======+======+=======+
+    | 1 Pixel        | 300                 | 1124                 | 1199 | 0    | 10    |
+    +----------------+---------------------+----------------------+------+------+-------+
+
+
+The following table summarizes the resource utilization of pyrUp for 1
+pixel per cycle implementation, for a maximum input image size of 4K
+with BGR. The results are after synthesis in Vivado HLS 2019.1 for the
+Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA at 300 MHz.
+
+.. table:: Table . pyrUp Function Resource Utilization Summary
+
+    +----------------+---------------------+----------------------+------+------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                       |
+    |                |                     |                                            |
+    |                | (MHz)               |                                            |
+    +                +                     +----------------------+------+------+-------+
+    |                |                     | LUTs                 | FFs  | DSPs | BRAMs |
+    +================+=====================+======================+======+======+=======+
+    | 1 Pixel        | 300                 | 2074                 | 2176 | 0    | 59    |
+    +----------------+---------------------+----------------------+------+------+-------+
+
+
+.. rubric:: Performance Estimate
+
+
+The following table summarizes performance estimates of pyrUp function
+on Vivado HLS 2019.1 for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA.
+
+.. table:: Table . pyrUp Function Performance Estimate Summary
+
+    +----------------+---------------------+------------------+------------------+
+    | Operating Mode | Operating Frequency | Input Image Size | Latency Estimate |
+    |                |                     |                  |                  |
+    |                | (MHz)               |                  |                  |
+    +                +                     +                  +------------------+
+    |                |                     |                  | Max (ms)         |
+    +================+=====================+==================+==================+
+    | 1 pixel        | 300                 | 1920x1080        | 27.82            |
+    +----------------+---------------------+------------------+------------------+
+
+.. _pyramid-down:
+
+Pyramid Down
+============
+
+| The ``pyrDown`` function is an image down-sampling algorithm which
+  smoothens the image before down-scaling it. The image is smoothened
+  using a Gaussian filter with the following kernel:
+| |image89|
+
+Down-scaling is performed by dropping pixels in the even rows and the
+even columns. The resulting image size is |image90|.
+
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+   template<int TYPE, int ROWS, int COLS, int NPC, bool USE_URAM=false, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT> 
+   void pyrDown (xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> & _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT> & _dst)
+
+.. rubric:: Parameter Descriptions
+
+
+The following table describes the template and the function parameters.
+
+.. table:: Table . pyrDown Parameter Description
+
+   +----------------+-------------------------------------------------------+
+   | Parameter      | Description                                           |
+   +================+=======================================================+
+   | TYPE           | Input and Output pixel type. Only 8-bit, unsigned, 1  |
+   |                | and 3 channels are supported (XF_8UC1 and XF_8UC3)    |
+   +----------------+-------------------------------------------------------+
+   | ROWS           | Maximum Height or number of input rows to build the   |
+   |                | hardware for this kernel                              |
+   +----------------+-------------------------------------------------------+
+   | COLS           | Maximum Width or number of input columns to build the |
+   |                | hardware for this kernel                              |
+   +----------------+-------------------------------------------------------+
+   | NPC            | Number of pixels to process per cycle. Currently, the |
+   |                | kernel supports only 1 pixel per cycle processing     |
+   |                | (XF_NPPC1).                                           |
+   +----------------+-------------------------------------------------------+
+   | USE_URAM       | Enable to map storage structures to UltraRAM          |
+   +----------------+-------------------------------------------------------+
+   | XFCVDEPTH_IN   | Depth of the input image.                             |
+   +----------------+-------------------------------------------------------+
+   | XFCVDEPTH_OUT  | Depth of the output image.                            |
+   +----------------+-------------------------------------------------------+
+   | \_src          | Input image stream                                    |
+   +----------------+-------------------------------------------------------+
+   | \_dst          | Output image stream                                   |
+   +----------------+-------------------------------------------------------+
+
+
+.. rubric:: Resource Utilization
+
+
+The following table summarizes the resource utilization of pyrDown for 1
+pixel per cycle implementation, for a maximum input image size of
+1920x1080 pixels. The results are after synthesis in Vivado HLS 2019.1
+for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA at 300 MHz.
+
+.. table:: Table . pyrDown Function Resource Utilization Summary
+
+    +----------------+---------------------+----------------------+------+------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                       |
+    |                |                     |                                            |
+    |                | (MHz)               |                                            |
+    +                +                     +----------------------+------+------+-------+
+    |                |                     | LUTs                 | FFs  | DSPs | BRAMs |
+    +================+=====================+======================+======+======+=======+
+    | 1 Pixel        | 300                 | 1171                 | 1238 | 1    | 5     |
+    +----------------+---------------------+----------------------+------+------+-------+
+
+
+The following table summarizes the resource utilization of pyrDown for 1
+pixel per cycle implementation, for a maximum input image size of 4K
+with BGR image. The results are after synthesis in Vivado HLS 2019.1 for
+the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA at 300 MHz.
+
+.. table:: Table . pyrDown Function Resource Utilization Summary
+
+    +----------------+---------------------+----------------------+------+------+-------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                       |
+    |                |                     |                                            |
+    |                | (MHz)               |                                            |
+    +                +                     +----------------------+------+------+-------+
+    |                |                     | LUTs                 | FFs  | DSPs | BRAMs |
+    +================+=====================+======================+======+======+=======+
+    | 1 Pixel        | 300                 | 2158                 | 1983 | 2    | 30    |
+    +----------------+---------------------+----------------------+------+------+-------+
+
+The following table summarizes the resource utilization of pyrDown for 1
+pixel per cycle implementation, for a maximum input image size of
+3840x2160 pixels. The results are after synthesis in Vivado HLS 2019.1 for the
+Xilinx xczu7eg-ffvb1156-1 FPGA at 300 MHz with UltraRAM enabled.
+
+.. table:: Table . pyrDown Function Resource Utilization Summary with UltraRAM Enabled
+
+    +----------------+---------------------+----------------------+------+------+-------+------+
+    | Operating Mode | Operating Frequency | Utilization Estimate                              |
+    |                |                     |                                                   |
+    |                | (MHz)               |                                                   |
+    +                +                     +----------------------+------+------+-------+------+
+    |                |                     | LUTs                 | FFs  | DSPs | BRAMs | URAM |
+    +================+=====================+======================+======+======+=======+======+
+    | 1 Pixel        | 300                 | 1171                 | 1243 | 0    | 0     | 1    |
+    +----------------+---------------------+----------------------+------+------+-------+------+
+
+
+.. rubric:: Performance Estimate
+
+
+The following table summarizes performance estimates of pyrDown function
+in Vivado HLS 2019.1 for the Xilinx Xczu9eg-ffvb1156-1-i-es1 FPGA.
+
+.. table:: Table . pyrDown Function Performance Estimate Summary
+
+    +----------------+---------------------+------------------+------------------+
+    | Operating Mode | Operating Frequency | Input Image Size | Latency Estimate |
+    |                |                     |                  |                  |
+    |                | (MHz)               |                  |                  |
+    +                +                     +                  +------------------+
+    |                |                     |                  | Max (ms)         |
+    +================+=====================+==================+==================+
+    | 1 pixel        | 300                 | 1920x1080        | 6.99             |
+    +----------------+---------------------+------------------+------------------+
 
 .. _quantizationdithering:
 
@@ -17330,6 +17328,8 @@ The following table summarizes a performance estimate of the kernel in different
     | 1 pixel        | 300                 | 28.5             |
     +----------------+---------------------+------------------+
 
+.. _three_d_point:
+.. include:: include/3Dpoint_api.rst
 
 .. _thresholding:
 

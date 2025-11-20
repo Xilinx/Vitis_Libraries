@@ -5,28 +5,13 @@
     ],
     "flow": "system",
     "platform_allowlist": [
-        "vck190",
-        "u200"
+        "vck190"
     ],
     "platform_blocklist": [
         "u280",
         "u250"
     ],
     "platform_properties": {
-        "u200": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
-                }
-            }
-        },
         "vck190": {
             "host": {
                 "compiler": {
@@ -42,7 +27,7 @@
                     ]
                 }
             }
-        },
+        }
     },
     "gui": true,
     "launch": [

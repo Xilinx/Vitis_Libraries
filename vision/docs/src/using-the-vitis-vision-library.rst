@@ -221,6 +221,8 @@ folder name, which contains the library function.
    +-------------------------------------------+-----------------------------------+
    | xf::cv::remap                             | imgproc/xf_remap.hpp              |
    +-------------------------------------------+-----------------------------------+
+   | xf::cv::reprojectimageto3D                | imgproc/xf_reproject3d.hpp        |
+   +-------------------------------------------+-----------------------------------+
    | xf::cv::resize                            | imgproc/xf_resize.hpp             |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::rgbir2bayer                       | imgproc/xf_rgbir.hpp              |

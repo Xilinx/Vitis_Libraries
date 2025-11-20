@@ -57,7 +57,7 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := u200
+PLATFORM := vck190
 endif
 
 # add warnning for sw_emu
@@ -65,8 +65,8 @@ ifeq ($(TARGET),sw_emu)
 $(error Error: The sw_emu target is no longer supported starting from 2025.1.)
 endif
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST += u200 aws-vu9p-f1
-PLATFORM_BLOCKLIST += vck190 u280 u250 zcu104
+PLATFORM_ALLOWLIST += vck190
+PLATFORM_BLOCKLIST += u280 u250 zcu104
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -102,20 +102,11 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 ########################## Setting up Host Variables ##########################
 
 #Inclue Required Host Source Files
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
-HOST_SRCS += $(XFLIB_DIR)/L2/examples/ispstats/xf_ispstats_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/tests/ispstats/ispstats_NPPC1_16UC1_16UC1_ISPSTATS_BAYER -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -L $(OPENCV_LIB)
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-
-else 
 HOST_SRCS += $(XFLIB_DIR)/L2/examples/ispstats/xf_ispstats_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -I $(XFLIB_DIR)/L2/tests/ispstats/ispstats_NPPC1_16UC1_16UC1_ISPSTATS_BAYER -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-
-endif
+LDFLAGS += -L $(SYSROOT)/usr/lib -L ${SYSROOT}/lib
 # workaround for opencv
 ifeq (,$(findstring opencv,$(CXXFLAGS)))
 CXXFLAGS += $(XRT_CXXFLAGS)
@@ -168,7 +159,7 @@ BINARY_CONTAINER_krnl_ispstats_OBJS += $(TEMP_DIR)/ispstats_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_ispstats_OBJS) 
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/krnl_ispstats $(VPP_LDFLAGS)  $(VPP_LDFLAGS_krnl_ispstats) $(AIE_LDFLAGS) --vivado.param  ippower.enableLightWeightDeviceModel=0  -o $@ $^
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/krnl_ispstats $(VPP_LDFLAGS)  $(VPP_LDFLAGS_krnl_ispstats) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)

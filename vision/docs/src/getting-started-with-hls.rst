@@ -14,7 +14,7 @@ Getting Started with HLS
 
 The Vitis vision library can be used to build applications in Vitis HLS.
 This section of the document provides steps on how to run a single library component through
-the Vitis HLS 2023.1 flow which includes, C-simulation,
+the Vitis HLS 2025.2 flow which includes, C-simulation,
 C-synthesis, C/RTL co-simulation, and exporting the RTL as an IP.
 
 All the functions in the L1 folder of the Vitis Vision library can be built through Vitis HLS flow

@@ -8,7 +8,7 @@ The Vitis Vision library is designed to work with Zynq™, Zynq Ultrascale+™, 
 
 ### Prerequisites
 
-* Valid installation of [Vitis™ 2025.1](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-the-Vitis-Software-Platform) or later version and the corresponding licenses.
+* Valid installation of [Vitis™ 2025.2](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-the-Vitis-Software-Platform) or later version and the corresponding licenses.
 * Xilinx Runtime ([XRT](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Xilinx-Runtime-and-Platforms)) must be installed. XRT provides software interface to AMD FPGAs.
 * Install [OpenCV-4.4.0]((https://github.com/opencv/opencv/tree/4.4.0)) x86 libraries (with compatible ``libjpeg.so``). x86 libs have to be used for:
 
@@ -19,7 +19,7 @@ The Vitis Vision library is designed to work with Zynq™, Zynq Ultrascale+™, 
     For L2/L3 flow targeting embedded platforms (for hardware emulation and hardware build), aarch32/aarch64 version OpenCV shipped within their *sysroot* should be used.
 
 * libOpenCL.so must be [installed](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/OpenCL-Installable-Client-Driver-Loader) if not present.
-* [Install the card](https://docs.xilinx.com/r/en-US/ug1301-getting-started-guide-alveo-accelerator-cards) for which the platform is supported in Vitis 2025.1 or later versions.
+* [Install the card](https://docs.xilinx.com/r/en-US/ug1301-getting-started-guide-alveo-accelerator-cards) for which the platform is supported in Vitis 2025.2 or later versions.
 * If targeting an embedded platform, [install]((https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Embedded-Platforms?tocId=hfE7LFeS8mU4dexvgPL31Q)) it and set up the [evaluation board](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/444006775/Zynq+UltraScale+MPSoC).
 
 #### OpenCV Installation Guidance
@@ -181,13 +181,13 @@ This library is written by developers at
 
 **PL additions/enhancements:** :
 
-    • Updates:
-        • Corrected ISP pipeline parameters in documentation
+    • New additions:
+        • Added reprojectImageto3D function
 
 **AIE additions/enhancements:** :
 
-    • New Functions:
-	    • Added Bicubic Resize function
+    • Updates:
+        • Bug fixes
 
 **Known issues**
 

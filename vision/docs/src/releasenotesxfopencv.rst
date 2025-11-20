@@ -24,16 +24,13 @@ This section describes new features, changes to the existing library, and known 
 
 **PL additions/enhancements:** :
 
-	• Updates:
-    		• Corrected ISP pipeline API in documentation
+	• New Functions:
+    		• Added reprojectImageto3d function
     
 **AIE additions/enhancements:** :
 
-	• New Functions:
-		• Added Bicubic-resize function	    
-
 	• Updates:
-		• Minor bug fixes
+		• bug fixes
 
 .. _known-issues:
 

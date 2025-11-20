@@ -57,7 +57,7 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := zcu104
+PLATFORM := u50
 endif
 
 # add warnning for sw_emu
@@ -65,7 +65,7 @@ ifeq ($(TARGET),sw_emu)
 $(error Error: The sw_emu target is no longer supported starting from 2025.1.)
 endif
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST += zcu104 zcu102 u50
+PLATFORM_ALLOWLIST += u50
 PLATFORM_BLOCKLIST += u280 u250
 
 include ./utils.mk
@@ -109,20 +109,6 @@ CXXFLAGS += -O3
 LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu102/'))
-HOST_SRCS += $(XFLIB_DIR)/L3/examples/defect_detection/xf_threshold_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L3/examples/defect_detection/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3
-LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/opt/xilinx/xrt/lib
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu104/'))
-HOST_SRCS += $(XFLIB_DIR)/L3/examples/defect_detection/xf_threshold_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L3/examples/defect_detection/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3
-LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/opt/xilinx/xrt/lib
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-
 else 
 HOST_SRCS += $(XFLIB_DIR)/L3/examples/defect_detection/xf_threshold_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -I $(XFLIB_DIR)/L3/examples/defect_detection/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
@@ -158,27 +144,6 @@ endif
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L3/examples/defect_detection/config -I $(XFLIB_DIR)/L1/include/
 
 ######################### binary container global settings ##########################
-ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu102/'))
-VPP_FLAGS_gaussian_otsu_accel += --hls.clock 200000000:gaussian_otsu_accel
-VPP_FLAGS_preprocess_accel += --hls.clock 200000000:preprocess_accel
-VPP_FLAGS_cca_custom_accel += --hls.clock 200000000:cca_custom_accel
-ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_krnl_threshold += --clock.defaultFreqHz 200000000
-else
-VPP_LDFLAGS_krnl_threshold += --kernel_frequency 200
-endif
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu104/'))
-VPP_FLAGS_gaussian_otsu_accel += --hls.clock 200000000:gaussian_otsu_accel
-VPP_FLAGS_preprocess_accel += --hls.clock 200000000:preprocess_accel
-VPP_FLAGS_cca_custom_accel += --hls.clock 200000000:cca_custom_accel
-ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_krnl_threshold += --clock.defaultFreqHz 200000000
-else
-VPP_LDFLAGS_krnl_threshold += --kernel_frequency 200
-endif
-
-else 
 VPP_FLAGS_gaussian_otsu_accel += --hls.clock 300000000:gaussian_otsu_accel
 VPP_FLAGS_preprocess_accel += --hls.clock 300000000:preprocess_accel
 VPP_FLAGS_cca_custom_accel += --hls.clock 300000000:cca_custom_accel
@@ -188,7 +153,6 @@ else
 VPP_LDFLAGS_krnl_threshold += --kernel_frequency 300
 endif
 
-endif
 ifneq ($(PACKAGE_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/krnl_threshold.xclbin
 else
