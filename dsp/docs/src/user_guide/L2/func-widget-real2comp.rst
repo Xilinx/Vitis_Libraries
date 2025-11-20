@@ -10,12 +10,12 @@
 Widget Real to Complex
 ======================
 
-The DSPLib contains a Widget Real to Complex solution, which provides a utility to convert real data to complex or vice versa.
+The DSPLib contains a Widget Real to Complex solution that provides a utility to convert between real and complex data.
 
 Entry Point
 ===========
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -24,12 +24,12 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The widget real2complex supports AIE and AIE-ML devices.
+The ``widget_real2complex`` supports AIE and AIE-ML devices.
 
-Supported Types
-===============
+Supported Data Types
+====================
 
-The widget_real2complex supports int16, cint16, int32, cint32, float, and cfloat on input. The corresponding ``TT_OUT_DATA`` must be set to the real or complex partner of the input type, e.g., if ``TT_DATA`` = int16, ``TT_OUT_DATA`` must be set to cint16.
+The ``widget_real2complex`` supports ``int16``, ``cint16``, ``int32``, ``cint32``, ``float``, and ``cfloat`` on input. The corresponding ``TT_OUT_DATA`` must be set to the real or complex partner of the input type; for example, if ``TT_DATA`` is ``int16``, ``TT_OUT_DATA`` must be ``cint16``.
 
 Template Parameters
 ===================
@@ -49,7 +49,7 @@ To see details on the ports for the Widget Real to Complex, see :ref:`API_REFERE
 Design Notes
 ============
 
-The widget_real2complex library element converts real to complex or complex to real. An example of its use is that it can be used to enable real-only FFT operations despite the fact that the FFT currently supports only complex data types.
+The widget_real2complex library element converts real-to-complex or complex-to-real. For example, it enables real-only FFT operations even though the FFT currently supports only complex data types.
 
 Code Example
 ============

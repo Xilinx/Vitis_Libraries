@@ -1,8 +1,8 @@
-..
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
-   
-   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+ ..
+	Copyright (C) 2019-2022, Xilinx, Inc.
+	Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+
+	`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _CONFIGURATION:
 
@@ -10,50 +10,52 @@ Configuring the Library Elements
 --------------------------------
 
 **Prerequisites**:
-    Python bin to be used for config_helper.py:
 
-.. code-block::
+	 Python bin to be used for config_helper.py:
 
-	setenv PATH "<your-Vitis-install-path>/lin64/2025.1/Vitis/aietools/tps/lnx64/python-3.13.0/bin:$PATH"
+.. code-block:: bash
 
-DSPLIB IPs can be configured by utilizing a Python script called "config_helper.py". The "config_helper.py" is designed to assist users in establishing a valid configuration for any DSPLIB IP. This script communicates with the user through the console interface.
+	 setenv PATH "<your-Vitis-install-path>/lin64/2025.1/Vitis/aietools/tps/lnx64/python-3.13.0/bin:$PATH"
 
-The config helper will print either a legal set or a legal range for a parameter asking the user input a value. If the parameter is set to a legal value, the config helper will move to the next parameter on the parameter list of the chosen IP. If the given value is not legal, config helper will return error and ask the user to choose a legal value from the legal set/range. User can go back to the previous parameter by entering z/Z and return at any time.
+DSPLIB IPs can be configured using a Python script called ``config_helper.py``. The ``config_helper.py`` script assists users in establishing a valid configuration for any DSPLIB IP. This script communicates with the user through the console interface.
 
-Once all the parameters are set, the config helper will output a top-level file. For AI Engine IPs, a graph_*ip_name_instance_name*.txt file will be generated. This contains a top-level graph class to instantiate the IP. The user can use the PRINT_GRAPH option to print the graph on the console. For VSS IPs, a cfg_*ip_name_instance_name*.cfg file will be generated. Note that the "PART" parameter in the VSS config_helper is a representation of the device that the VSS generator supports rather than being the exact part name that is supported. Please accept the default part name for the device that you would like to support and extract the other parameters using config_helper. In the output cfg file that the config_helper creates, you can then edit the part name to any other part of the same device type before building the VSS.
-The user can use the .cfg file as the input to the top-level VSS Makefile. If the output top-level file is not needed, the user can call config_helper.py with the NO_INSTANCE argument. 
+The config helper will print either a legal set or a legal range for a parameter, asking the user to input a value. If the parameter is set to a legal value, the config helper will move to the next parameter on the parameter list of the chosen IP. If the given value is not legal, the config helper will return an error and ask the user to choose a legal value from the legal set/range. The user can go back to the previous parameter by entering ``z`` or ``Z`` and can exit at any time.
+
+Once all the parameters are set, the config helper will output a top-level file. For AI Engine IPs, a ``graph_<ip_name>_<instance_name>.txt`` file will be generated. This contains a top-level graph class to instantiate the IP. The user can use the ``PRINT_GRAPH`` option to print the graph on the console. For VSS IPs, a ``cfg_<ip_name>_<instance_name>.cfg`` file will be generated. Note that the ``PART`` parameter in the VSS config_helper is a representation of the device that the VSS generator supports rather than being the exact part name that is supported. Please accept the default part name for the device that you would like to support and extract the other parameters using config_helper. In the output cfg file that the config_helper creates, you can then edit the part name to any other part of the same device type before building the VSS.
+
+The user can use the ``.cfg`` file as the input to the top-level VSS Makefile. If the output top-level file is not needed, the user can call ``config_helper.py`` with the ``NO_INSTANCE`` argument.
 
 Running Config Helper
 ^^^^^^^^^^^^^^^^^^^^^
 
-config_helper.py is located within the `xf_dsp/L2/meta` directory. To run config_helper.py, cd into xf_dsp repository and run the following with requested options:
+``config_helper.py`` is located within the ``xf_dsp/L2/meta`` directory. To run ``config_helper.py``, change into the xf_dsp repository and run the following with the desired options:
 
-.. code-block::
+.. code-block:: bash
 
-python3 `xf_dsp/L2/meta/config_helper.py` [Options]
-	--h [helper prints]
-	--ip ip_name [providing the config helper the IP to configure]
-	--mdir metadata_directory [by default config helper will guide you to `xf_dsp/L2/meta`]
-	--outdir output_directory [by default config helper will guide you to `xf_dsp/L2/meta`]
-	LIST_PARAMS [Lists the parameters of the chosen IP to configure]
-	PRINT_GRAPH [Prints the resulting graph at the end of the configuration]
-	NO_INSTANCE [no graph instance is to be generated at the end of the configuration]
-	LIST_IPS [prints the IP list in DSPLIB]
+	 python3 xf_dsp/L2/meta/config_helper.py [Options]
+		  --h [helper prints]
+		  --ip ip_name [providing the config helper the IP to configure]
+		  --mdir metadata_directory [by default config helper will guide you to xf_dsp/L2/meta]
+		  --outdir output_directory [by default config helper will guide you to xf_dsp/L2/meta]
+		  LIST_PARAMS [Lists the parameters of the chosen IP to configure]
+		  PRINT_GRAPH [Prints the resulting graph at the end of the configuration]
+		  NO_INSTANCE [no graph instance is to be generated at the end of the configuration]
+		  LIST_IPS [prints the IP list in DSPLIB]
 
 Config Helper Example
 ^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash
 
-    python3 xf_dsp/L2/meta/config_helper.py --ip hadamard LIST_PARAMS
+	 python3 xf_dsp/L2/meta/config_helper.py --ip hadamard LIST_PARAMS
 
 .. _LEGALITY_CHECKING:
 
 Legality Checking
 ^^^^^^^^^^^^^^^^^
 
-Not all configurations of a given library unit might be supported. For instance, the range of ``TP_DECIMATE_FACTOR`` is affected by the choice of input sample data type ``TT_DATA``. Where possible, such configurations will throw a static_assert compile-time error very early in compilation, or if the library element is being generated from Vitis Model Composer, an error will be reported there prior to generation. The corresponding error messages describe the reason for the error, such as the parameters involved in the conflict, but the static_assert statement does not allow configuration-specific values to be included in the error message.
+Not all configurations of a given library unit might be supported. For instance, the range of ``TP_DECIMATE_FACTOR`` is affected by the choice of input sample data type ``TT_DATA``. Where possible, such configurations will throw a ``static_assert`` compile-time error very early in compilation, or if the library element is being generated from Vitis Model Composer, an error will be reported there prior to generation. The corresponding error messages describe the reason for the error, such as the parameters involved in the conflict, but the ``static_assert`` statement does not allow configuration-specific values to be included in the error message.
 
 However, it is not practical in general to predict when the resources required by a configuration will exceed the availability of each resource on the target device (e.g., memory use). In such cases, compile-time errors will still be generated, but they will be generated by the aiecompiler tool, at a later stage of compilation.
 
-Please refer to :ref:`CONFIGURATION`  which describes a configuration utility. This utility will help guide the user to a legal configuration before the compilation stage.
+Please refer to :ref:`CONFIGURATION`, which describes a configuration utility. This utility will help guide the user to a legal configuration before the compilation stage.

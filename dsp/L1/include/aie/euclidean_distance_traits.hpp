@@ -52,10 +52,13 @@ namespace aie {
 namespace euclidean_distance {
 
 // Constants for Euclidean Distance
+// static constexpr unsigned int kMaxBytesLoadOnAie = __MAX_READ_WRITE__ / 8; // Max number of bytes (256/8) or (512/8)
+// Load on AIE
 static constexpr unsigned int kMaxBytesLoadOnAie = 32; // Max number of bytes (256/8) or (512/8) Load on AIE
 static constexpr unsigned int kMaxBufferLenOnAieInBytes = __DATA_MEM_BYTES__; // Max buffer Length
 static constexpr unsigned int kLeftShiftFactor2 = 2;                          // MulFactor2
 static constexpr unsigned int kRightShiftFactor2 = 2;                         // DivisiableFactor2
+static constexpr unsigned int kRightShiftFactor1 = 1;                         // DivisiableFactor1
 static constexpr unsigned int kBuffSize16Byte =
     (__V_REGSIZE__ / 8); // 128-bit AIE-1, AIE-ML and  AIE-MLv2 buffer size in Bytes
 static constexpr unsigned int kBuffSize32Byte =
@@ -157,15 +160,17 @@ INLINE_DECL constexpr unsigned int fnGetNumofPoints() {
 };
 
 // Function to return Maximum supported length based on given DATA TYPE.
+// Max Length is being calculated regarding single buffer size
 template <typename TT_DATA>
 INLINE_DECL constexpr unsigned int getMaxLen() {
-    return (((kMaxBufferLenOnAieInBytes >> kRightShiftFactor2) /*8K*/ / kFixedDimOfED) / sizeof(TT_DATA));
+    return (((kMaxBufferLenOnAieInBytes) / kFixedDimOfED) / sizeof(TT_DATA));
 };
 
 // Function to return Minimum supported length based on given DATA TYPE.
 template <typename TT_DATA>
 INLINE_DECL constexpr unsigned int getMinLen() {
-    return (((kMaxBytesLoadOnAie << 1) / sizeof(TT_DATA)));
+    // return ((kMaxBytesLoadOnAie / sizeof(TT_DATA)));
+    return 32; // hardcoded min length as 32 for all data types, is to be revisited in 26.1
 };
 
 // Function to return true or false by checking given length is in range or not
@@ -221,7 +226,7 @@ INLINE_DECL constexpr bool isPowerOfTwo() {
 // Function which return true or false if Given Dimension is less than or equal to 4
 template <unsigned int TP_DIM>
 INLINE_DECL constexpr bool fnCheckforDimension() {
-    return ((TP_DIM <= kFixedDimOfED) ? true : false);
+    return ((TP_DIM > 1 && TP_DIM <= kFixedDimOfED) ? true : false);
 };
 } //  End of namespace euclidean_distance {
 } //  End of namespace aie {

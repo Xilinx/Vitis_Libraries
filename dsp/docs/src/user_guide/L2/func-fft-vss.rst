@@ -10,19 +10,19 @@
 VSS FFT/IFFT
 ============
 
-This library element implements a single-channel DIT FFT using both AI Engine tiles and programmable logic to extract higher performance for larger point sizes. The VSS offers two modes of implementing the FFT: Mode 1 and Mode 2. Mode 1 performs more computation on AIE tiles compared to Mode 2. It also allows more fine-tuning on the value of SSR. Mode 2 uses more PL compute resources compared to mode 1. It also user lesser PL memory than Mode 1. The two modes thus offer different trade-offs between performance and resource utilization.
+This library element implements a single-channel DIT FFT using both AI Engine tiles and programmable logic to extract higher performance for larger point sizes. The VSS offers two modes of implementing the FFT: Mode 1 and Mode 2. Mode 1 performs more computation on AIE tiles compared to Mode 2. It also allows finer control over the value of SSR. Mode 2 uses more PL compute resources compared to Mode 1. It also uses less PL memory than Mode 1. The two modes thus offer different trade-offs between performance and resource utilization.
 
 Entry Point
 ===========
 
-The entry points for the VSS are the ``vss_fft_ifft_pararms.cfg`` and ``vss_fft_ifft_1d.mk`` file present in the L2/include/vss/vss_fft_ifft_1d/ directory in the DSP library. The ``vss_fft_ifft_1d.mk`` takes in a user configurable file, say "vss_fft_ifft_pararms.cfg" as input and generates a .vss object as an output after performing all the intermediate steps like generating the necessary AI Engine graph and PL products and stitching them together. The user can then integrate this .vss object into their larger design. See Vitis documentation on "Vitis Subsystems" for details on how to include a .vss object into your design.
+The entry points for the VSS are the ``vss_fft_ifft_params.cfg`` and ``vss_fft_ifft_1d.mk`` files present in the L2/include/vss/vss_fft_ifft_1d/ directory in the DSP library. The ``vss_fft_ifft_1d.mk`` takes in a user-configurable file, say ``vss_fft_ifft_params.cfg`` as input and generates a .vss object as an output after performing all the intermediate steps like generating the necessary AI Engine graph and PL products and stitching them together. The user can then integrate this .vss object into their larger design. See Vitis documentation on "Vitis Subsystems" for details on how to include a .vss object into your design.
 
 Please edit the parameters in the ``cfg`` file and provide it as input to the ``vss_fft_ifft_1d.mk`` file. An example of how to create a vss and include a .vss object in your design is also provided in L2/examples/vss_fft_ifft_1d/example.mk. It creates a .vss object, links it to a larger system to create an xclbin and runs hardware emulation of the full design.
 
 Device Support
 ==============
 
-The VSS FFT can generate VSS products for AIE, AIE-ML and AIE-MLv2. The VSS is generated for the ``part`` that the user provides in the input cfg file. All features are supported on the two variants with the following differences:
+The VSS FFT can generate VSS products for AIE, AIE-ML and AIE-MLv2. The VSS is generated for the ``part`` that the user provides in the input cfg file. All features are supported on these variants with the following differences:
 
 - ``DATA_TYPE`` and ``TWIDDLE_TYPE``. AIE-ML does not support cfloat type.
 - ``TWIDDLE_TYPE``: AIE supports cint32. AIE-ML does not.
@@ -80,7 +80,7 @@ Design Notes
 Super Sample Rate
 ------------------
 
-The VSS FFT can be configured for Super Sample Rate operation to achieve higher throughput. The design generates TP_SSR number of input and output ports.
+The VSS FFT can be configured for Super Sample Rate operation to achieve higher throughput. The design generates ``TP_SSR`` number of input and output ports.
 
 The input data to the SSR input ports of the VSS FFT are expected to be distributed evenly in a "card-dealing" fashion. For example,
 
@@ -155,7 +155,7 @@ For VSS Mode 1, the samples at the output of the VSS without the back transpose 
   * ``D2 = √(point\_size ÷ 2)``
 
 **VSS Mode 2 Output Formula**
-----------------------------
+-----------------------------
 
 For VSS Mode 2, the samples at the output of the VSS without the back transpose would satisfy the formula:
 

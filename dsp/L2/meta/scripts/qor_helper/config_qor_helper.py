@@ -53,7 +53,7 @@ def generate_configs(ip_name, constraints_from_file, flavor="recursive", N_explo
         - N_legal: The number of legal configs to randomly select. Only relevant for flavor="random"
     """
     def recursive_update(config, recursive_lvl):
-        if recursive_lvl >= num_params: # base case
+        if recursive_lvl >= len(ip.params): # base case
             legal_configs.append(dict(config))
             if len(legal_configs) % 100000 == 0:
                 print(f"{len(legal_configs)} generated...")
@@ -65,12 +65,15 @@ def generate_configs(ip_name, constraints_from_file, flavor="recursive", N_explo
 
         if "enum" in ip.param_obj_dict[param].update_result:
             legal_vals = set(ip.param_obj_dict[param].update_result["enum"])
-        else:
+        elif "minimum" in ip.param_obj_dict[param].update_result:
             min_val = int(ip.param_obj_dict[param].update_result["minimum"])
             max_val = int(ip.param_obj_dict[param].update_result["maximum"])
             legal_vals = range(min_val, max_val+1)
+        elif "len" in ip.param_obj_dict[param].update_result:
+            len_ = int(ip.param_obj_dict[param].update_result["len"])
+            legal_vals = {range(len_)}
 
-        if param in do_not_iterate_set:
+        if param in no_validation_params:
             legal_vals = {next(iter(legal_vals))}   # modify legal vals to only have one value.
 
         elif constraints[param]:  # if there exists constraints for this parameter...
@@ -85,65 +88,8 @@ def generate_configs(ip_name, constraints_from_file, flavor="recursive", N_explo
             if ip.param_obj_dict[param].valid == "True":
                 config[param] = ip.args[param]
                 recursive_update(config, recursive_lvl+1)   # recursive call to next parameter
-
-
-    def random_generation():
-        param_limits = collections.defaultdict(set)
-        num_bugged_paths = 0
-
-        logging.info("Starting exploration...")
-        for n in range(N_explore):
-            try:
-                for i in range(num_params):
-                    param = ip.params[i]
-                    ip.param_obj_dict[param].param_update(ip.args, ip.module)
-
-                    if "enum" in ip.param_obj_dict[param].update_result:
-                        val = random.choice(ip.param_obj_dict[param].update_result["enum"])
-                        ip.args[param] = val
-                    else:
-                        min_val = int(ip.param_obj_dict[param].update_result["minimum"])
-                        max_val = int(ip.param_obj_dict[param].update_result["maximum"])
-                        legal_val_found = False
-                        while not legal_val_found:
-                            val = random.choice(range(min_val, max_val+1))
-                            ip.args[param] = val
-                            ip.param_obj_dict[param].param_validate(ip.args, ip.module, print_err=0)
-                            legal_val_found = True if ip.param_obj_dict[param].valid == "True" else False
-
-                    param_limits[param].add(val)
-            except:
-                num_bugged_paths += 1
-                logging.error(f"Bugged metadata config path found: {ip.args}")
-                
-        logging.info("Exploration complete.")
-        logging.info(f"param_limits: {param_limits}")
-        logging.info(f"num_bugged_paths: {num_bugged_paths}")
-
-        logging.info("Sampling from hypercube...")
-        n = 0
-        while len(legal_configs) < N_legal:
-            config = {}
-            for i in range(num_params):
-                param = ip.params[i]
-                val = random.choice(list(param_limits[param]))
-                ip.args[param] = val
-                config[param] = val
-
-            try:
-                isValidDict = ip.validate_all(print_err=0)
-                if isValidDict["is_valid"]:
-                    if config not in legal_configs:
-                        legal_configs.append(config)
-            except:
-                logging.error(f"Bugged metadata config found at validation: {ip.args}")
-            n += 1
-            if n % 1000 == 0:
-                print(f"{n} configs trialled. {len(legal_configs)} legal configs found.")
-
-
-    no_validation_set ={"weights", "coeff", "lookup_values"}
-    do_not_iterate_set = {"SINGLE_BUF", "TP_SHIFT", "TP_RND", "TP_SAT"}
+                if len(legal_configs) == 1000:  # hard limit
+                    return
     
     ip = metadata_api.IP(ip_name, {})
     for k,v in constraints_from_file.items():
@@ -155,20 +101,17 @@ def generate_configs(ip_name, constraints_from_file, flavor="recursive", N_explo
         if k in constraints:
             constraints[k] = set(v)
 
-    no_validation_params = no_validation_set & set(ip.params)
-    for param in no_validation_params:
-        ip.args[param] = "auto"
+    no_performance_impact_set = {"TP_SHIFT", "TP_RND", "TP_SAT"}
+    no_performance_impact_params = no_performance_impact_set & set(ip.params)  # adding TP_SHIFT, TP_RND, TP_SAT to iteration..
+    hidden_params = {param for param in ip.params if any(char.islower() for char in param)} # not exposed to user.
+    no_validation_params = hidden_params | no_performance_impact_params
 
-    num_params = len(ip.params) - len(no_validation_set & set(ip.params)) # ! terminate early once we get to the no_validation_params
     legal_configs = []
 
     if flavor == "recursive":
         recursive_update({}, 0) # first call to recursive function.
-    elif flavor == "random":
-        bugged_paths = random_generation()
-        print(bugged_paths)
     else:
-        raise ValueError("ERROR: flavor must be one of 'recursive' or 'random'.")
+        raise ValueError("ERROR: flavor must be one of 'recursive'.")
 
     configs_df = pd.DataFrame.from_records(legal_configs, columns=legal_configs[0].keys())
     return configs_df
@@ -194,7 +137,7 @@ if __name__ == "__main__":
     parser.add_argument("--constraints_file", default="", help="path and name of constraints json file")
     parser.add_argument("--out_csv_file", default="", help="csv file to print all valid configs")
     parser.add_argument("--out_graphs_dir", default="", help="directory to generate top graphs")
-    parser.add_argument("--model", default="polynomial", help="model type. can be one of [linear, polynomial, random_forest, svr]")
+    parser.add_argument("--model", default="linear", help="model type. can be one of [linear, polynomial, random_forest, svr]")
     parser.add_argument("--num_configs", type=int, default=10, help="# top configs to print to generate graphs for")
     parser.add_argument("--training_csv_path", default="", help="path to training data")
     args = parser.parse_args()
@@ -206,7 +149,7 @@ if __name__ == "__main__":
     out_graphs_dir = args.out_graphs_dir
 
     if constraints_file == "":
-        constraints_file = f"{DEFAULT_CONSTRAINTS_DIR}{ip_name}_constraints.json"
+        constraints_file = f"{DEFAULT_CONSTRAINTS_DIR}empty_constraints.json"
         logging.warning(f"No constraints_file defined. Will default to {constraints_file}")
 
     # Define and load the ML model.
@@ -228,7 +171,7 @@ if __name__ == "__main__":
 
     # Generate constrained configs, predict QoR and return ranked list.
     column_ordering = model.independent_cols
-    configs_df = generate_configs(ip_name, parameter_constraints)[column_ordering]
+    configs_df = generate_configs(ip_name, parameter_constraints)[column_ordering].drop_duplicates()
 
     if len(configs_df) == 0:
         logging.warning("No valid configs given the parameter constraints.")

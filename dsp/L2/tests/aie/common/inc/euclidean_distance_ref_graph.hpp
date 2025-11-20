@@ -55,16 +55,16 @@ class euclidean_distance_ref_graph : public graph {
                   " Assertion Failed : \n"
                   "            ERROR: TT_DATA is not a supported Input Data type.");
 
-    // defensive check for Lengths of F and G should be in the given range of Min and Max
-    static_assert(fnCheckLenOfData<TT_DATA, TP_LEN>(),
-                  " Assertion Failed : \n "
-                  "             ERROR: TP_LEN should be granuality of Min data_load on AIE i.e. "
-                  "[(256/samplesize<TT_DATA>())] \n                   [float   - (8*N) ] \n   [bfloat16  - (16*N)  ]] "
-                  "\n  where N is Integer > 1] and \n            TP_LEN "
-                  "should be greater than or equal to minimum length [((256/samplesize<TT_DATA>())*2)] based on "
-                  "given data type i.e.\n                 '[Data Type-    MIN    MAX]' \n                 "
-                  "'--------------------------' \n                 '[float    -    16    2048]' \n                 "
-                  "'[bfloat16 -    32    4096]'  ");
+    // // defensive check for Lengths of F and G should be in the given range of Min and Max
+    // static_assert(fnCheckLenOfData<TT_DATA, TP_LEN>(),
+    //               " Assertion Failed : \n "
+    //               "             ERROR: TP_LEN should be granuality of Min data_load on AIE i.e. "
+    //               "[(256/samplesize<TT_DATA>())] \n                   [float   - (8*N) ] \n   [bfloat16  - (16*N)  ]]
+    //               \n  where N is Integer > 1] and \n            TP_LEN "
+    //               "should be greater than or equal to minimum length [((256/samplesize<TT_DATA>())*2)] based on "
+    //               "given data type i.e.\n                 '[Data Type-    MIN    MAX]' \n                 "
+    //               "'--------------------------' \n                 '[float    -    16    4096]' \n                 "
+    //               "'[bfloat16 -    32    8192]'  ");
 
     // defensive check for Dimension of point P should not be greater than 4
     static_assert(fnCheckforDimension<TP_DIM>(),

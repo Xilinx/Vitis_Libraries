@@ -12,38 +12,38 @@ Compiling and Simulating
 
 **Prerequisites**:
 
-.. code-block::
+.. code-block:: bash
 
         source <your-Vitis-install-path>/lin64/HEAD/Vitis/settings64.csh
         setenv PLATFORM_REPO_PATHS <your-platform-repo-install-path>
         source <your-XRT-install-path>/xbb/xrt/packages/xrt-2.1.0-centos/opt/xilinx/xrt/setup.csh
 
 Library Element Unit Test
---------------------------
+-------------------------
 
-Each library element category comes supplied with a test harness. 
+Each library element category comes supplied with a test harness.
 
-For AI Engine library elements, it is located in the `L2/tests/aie/<library_element>` directory and consists of JSON, C++ files, as well as a Makefile.
-For VSS library elements, it is located in the `L2/tests/vss/<library_element>` directory and contains a host file, some helper python scripts, along with the JSON, C++ files and Makefiles. 
+For AI Engine library elements, it is located in the ``L2/tests/aie/<library_element>`` directory and consists of JSON, C++ files, as well as a Makefile.
+For VSS library elements, it is located in the ``L2/tests/vss/<library_element>`` directory and contains a host file, some helper python scripts, along with the JSON, C++ files and Makefiles.
 
-JSON description of the test harness, defined in `L2/tests/<vss/aie>/<library_element>/description.json`, has been used to generate the Makefile. In addition, the `description.json` file defines the parameters of the test harness, e.g., a list of supported platforms.
+JSON description of the test harness, defined in ``L2/tests/<vss/aie>/<library_element>/description.json``, has been used to generate the Makefile. In addition, the ``description.json`` file defines the parameters of the test harness, e.g., a list of supported platforms.
 
-Each Makefile uses a set of values for each of the library element parameters that are stored in in a JSON file in `L2/tests/aie/<library_element>/multi_params.json`. The set of parameters are combined in a form of a named test case, with default name being: `test_0_tool_canary_aie`. The set of parameters can be edited as required to configure the library element for your needs.
+Each Makefile uses a set of values for each of the library element parameters that are stored in a JSON file in ``L2/tests/aie/<library_element>/multi_params.json``. The set of parameters are combined in a form of a named test case, with default name being: ``test_0_tool_canary_aie``. The set of parameters can be edited as required to configure the library element for your needs.
 
-C++ files serve as an example of how to use the library element subgraph in the context of a super-graph. These test harnesses (graphs) can be found in the `L2/tests/aie/<library_element>/test.hpp` and `L2/tests/aie/<library_element>/test.cpp` file.
+C++ files serve as an example of how to use the library element subgraph in the context of a super-graph. These test harnesses (graphs) can be found in the ``L2/tests/aie/<library_element>/test.hpp`` and ``L2/tests/aie/<library_element>/test.cpp`` files.
 
-Although for AI Engine library elements, it is recommended that only L2 (graphs) library elements are instantiated directly in the user code, the kernels underlying the graphs can be found in the `L1/include/aie/<library_element>.hpp` and the `L1/src/aie/<library_element>.cpp` files.
+Although for AI Engine library elements, it is recommended that only L2 (graphs) library elements are instantiated directly in the user code, the kernels underlying the graphs can be found in the ``L1/include/aie/<library_element>.hpp`` and the ``L1/src/aie/<library_element>.cpp`` files.
 
-For VSS library elements, it is recommended to use the top level VSS Makefile found in `L2/include/vss/<library_element>` as the entry point. 
+For VSS library elements, it is recommended to use the top-level VSS Makefile found in ``L2/include/vss/<library_element>`` as the entry point.
 
 The test harness run consists of several steps that result in a simulated and validated design. These include:
 
-- Input files(s) generation.
-- Validate configuration with metadata (in: `L2/meta`).
-- Reference model compilation and simulation, to produce the `golden output`.
-- Uut design compilation and simulation.
-- Output post-processing (e.g., timestamps processing to produce throughput figures). The output of the reference model ( `logs/ref_output.txt` ) is verified against the output of the AI Engine graphs (`logs/uut_output.txt`).
-- Status generation. On completion of the make, the `logs/status_<config_details>.txt` file will contain the result of compilation, simulation, and an indication of whether the reference model and AI Engine model outputs match. The report will also contain resource utilization and performance metrics.
+- Input file(s) generation.
+- Validate configuration with metadata (in: ``L2/meta``).
+- Reference model compilation and simulation, to produce the golden output.
+- UUT design compilation and simulation.
+- Output post-processing (e.g., timestamps processing to produce throughput figures). The output of the reference model (``logs/ref_output.txt``) is verified against the output of the AI Engine graphs (``logs/uut_output.txt``).
+- Status generation. On completion of the make, the ``logs/status_<config_details>.txt`` file will contain the result of compilation, simulation, and an indication of whether the reference model and AI Engine model outputs match. The report will also contain resource utilization and performance metrics.
 
 Compiling Using the Makefile
 ----------------------------
@@ -53,72 +53,78 @@ Running Compilation
 
 Use the following steps to compile and simulate the reference model with the x86sim target, then to compile and simulate the library element graph as described in the above section.
 
-.. code-block::
+.. code-block:: bash
 
         make cleanall run PLATFORM=vck190
 
-.. note:: It is recommended to run a ``cleanall`` stage before the compiling design, to ensure no stale objects interfere with the compilation process.
+.. note::
+    It is recommended to run a ``cleanall`` stage before compiling the design, to ensure no stale objects interfere with the compilation process.
 
-.. note:: Platform information (e.g., PLATFORM=vck190) is a requirement of a make build process. A list of supported platforms can be found in `L2/tests/aie/<library_element>/description.json` in the "platform_allowlist" section.
+.. note::
+    Platform information (e.g., ``PLATFORM=vck190``) is a requirement of a make build process. A list of supported platforms can be found in ``L2/tests/aie/<library_element>/description.json`` in the "platform_allowlist" section.
 
 Configuring the Test Case
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To overwrite the default set of parameter, edit the `multi_params.json` file, and add a dedicated named test case or edit one of the existing ones, e.g.:
+To override the default set of parameters, edit the ``multi_params.json`` file, and add a dedicated named test case or edit one of the existing ones, e.g.:
 
-.. code-block::
+.. code-block:: json
 
-    "test_my_design":{
+    "test_my_design": {
         "DATA_TYPE": "cint32",
-        "COEFF_TYPE": "int32",
-        (...)
+         "COEFF_TYPE": "int32"
+         // ...
         }
 
 To run a test case, specify the test case name passed to the PARAMS argument, e.g.:
 
-.. code-block::
+.. code-block:: bash
 
         make cleanall run PLATFORM=vck190 PARAMS=test_my_design
 
-For list of all the configurable parameters, see the :ref:`CONFIGURATION_PARAMETERS`.
+For a list of all the configurable parameters, see the :ref:`CONFIGURATION_PARAMETERS`.
 
 Selecting TARGET
 ^^^^^^^^^^^^^^^^
 
-To perform a x86 compilation/simulation, run:
+To perform an x86 compilation/simulation, run:
 
-.. code-block::
+.. code-block:: bash
 
-    make run TARGET=x86sim.
+    make run TARGET=x86sim
 
 List of all the Makefile targets:
 
-.. code-block::
+.. code-block:: bash
 
     make all TARGET=<aiesim/x86sim/hw_emu/hw> PLATFORM=<FPGA platform>
-        Command to generate the design for specified Target and Shell.
+        # Command to generate the design for specified Target and Shell.
 
     make run TARGET=<aiesim/x86sim/hw_emu/hw> PLATFORM=<FPGA platform>
-        Command to run application in emulation.
+        # Command to run application in emulation.
 
     make clean
-        Command to remove the generated non-hardware files.
+        # Command to remove the generated non-hardware files.
 
     make cleanall
-        Command to remove all the generated files.
+        # Command to remove all the generated files.
 
 .. note::
     For embedded platforms, the following setup steps are required:
-        a. If the platform and common-image are downloaded from the Download Center (Suggested):
-            | Run the `sdk.sh` script from the `common-image` directory to install sysroot using the command: ./sdk.sh -y -d ./ -p
-            | Unzip the `rootfs` file : gunzip ./rootfs.ext4.gz
-            | export SYSROOT=< path-to-platform-sysroot >
-        b. You could also define SYSROOT, K_IMAGE, and ROOTFS by themselves:
-            .. code-block::
 
-                export SYSROOT=< path-to-platform-sysroot >
-                export K_IMAGE=< path-to-Image-files >
-                export ROOTFS=< path-to-rootfs >
+        a. If the platform and common-image are downloaded from the Download Center (Suggested):
+
+        | Run the ``sdk.sh`` script from the ``common-image`` directory to install sysroot using the command: ``./sdk.sh -y -d ./ -p``
+        | Unzip the ``rootfs`` file: ``gunzip ./rootfs.ext4.gz``
+        | ``export SYSROOT=<path-to-platform-sysroot>``
+
+        b. You could also define SYSROOT, K_IMAGE, and ROOTFS by themselves:
+
+        .. code-block:: bash
+
+            export SYSROOT=<path-to-platform-sysroot>
+            export K_IMAGE=<path-to-Image-files>
+            export ROOTFS=<path-to-rootfs>
 
 Troubleshooting Compilation
 ---------------------------
@@ -126,28 +132,28 @@ Troubleshooting Compilation
 Compilation Arguments
 ^^^^^^^^^^^^^^^^^^^^^
 
-The test harness supplied with the library allows each library unit to be compiled and simulated in isolation. When the library unit is instanced within your design, the compilation result might differ from the result obtained with the test harness. This might be because compilation of your system might need arguments not present in your system.
+The test harness supplied with the library allows each library unit to be compiled and simulated in isolation. When the library unit is instanced within your design, the compilation result might differ from the result obtained with the test harness. This may be because compiling your full system requires arguments not present in the test harness.
 
-Search the Makefile provided for UUT_TARGET_COMPILE_ARGS. For each library element, there can be compile arguments used to avoid errors or to improve performance, that is, specifying memories to be on separate banks to avoid wait states. These arguments will likely change with each release as the compile tool changes with each release.
+Search the Makefile provided for ``UUT_TARGET_COMPILE_ARGS``. For each library element, there can be compile arguments used to avoid errors or to improve performance, that is, specifying memories to be on separate banks to avoid wait states. These arguments will likely change with each release as the compile tool changes with each release.
 
 Stack Size Allocation
 ^^^^^^^^^^^^^^^^^^^^^
 
-Similarly, the test harness provided with each library unit estimates the stack size required for a variety of cases and creates a formula to assign sufficient amount of memory for stack purposes. When the library unit is instanced within your design, compilation can fail with insufficient stack allocated for a specific kernel. The error message should suggest a minimum figure that is required.
+Similarly, the test harness provided with each library unit estimates the stack size required for a variety of cases and creates a formula to allocate sufficient memory for stack purposes. When the library unit is instanced within your design, compilation can fail with insufficient stack allocated for a specific kernel. The error message should suggest a minimum figure that is required.
 
-Use the compiler argument to allocate enough stack as advised by the compiler message. Alternatively, search the Makefile provided for STACK_SIZE, and use the formula for the library unit to calculate sufficient stack size and allocate accordingly.
+Use the compiler argument to allocate enough stack as advised by the compiler message. Alternatively, search the Makefile provided for ``STACK_SIZE``, and use the formula for the library unit to calculate sufficient stack size and allocate accordingly.
 
 Invalid Throughput and/or Latency
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Throughput and latency are only reported when a stable operation has been detected. Complex designs might take several iterations to achieve stable state. When a test case is not run for enough iterations, the status report will flag such case with throughput and latency values set to -1.
+Throughput and latency are only reported when a stable operation has been detected. Complex designs might take several iterations to achieve stable state. When a test case is not run for enough iterations, the status report will flag such cases with throughput and latency values set to ``-1``.
 
 Increase the number of iterations the simulation runs for to achieve a stable state and get accurate throughput and latency measurements.
 
 Power Analysis
 --------------
 
-For DSPLIB elements, a naming convention 'VCD' can be used to harvest dynamic power consumption. Once 'VCD' string is added within the test name, VCD file of the simulation data is captured and PDM (Power Design Manager) calculates power metrics. User can find detailed power reports in `pwr_test` folder under their corresponding test result directory. Dynamic power result can also be found in the `logs/status_<config_details>.txt` file.
+For DSPLIB elements, a naming convention 'VCD' can be used to harvest dynamic power consumption. Once 'VCD' string is added within the test name, VCD file of the simulation data is captured and PDM (Power Design Manager) calculates power metrics. User can find detailed power reports in ``pwr_test`` folder under their corresponding test result directory. Dynamic power result can also be found in the ``logs/status_<config_details>.txt`` file.
 
 .. _CONFIGURATION_PARAMETERS:
 
@@ -159,7 +165,7 @@ Library Element Configuration Parameters
 Common Configuration Parameters
 -------------------------------
 
-Many library elements perform arithmetic and offer a scaling feature exposed as TP_SHIFT. During this operation, rounding and saturation can occur, configured according to parameters TP_RND and TP_SAT. The modes and values for TP_RND are  the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices, as captured in the following table.
+Many library elements perform arithmetic and offer a scaling feature exposed as TP_SHIFT. During this operation, rounding and saturation can occur, configured according to parameters TP_RND and TP_SAT. The modes and values for TP_RND are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices, as captured in the following table.
 
 .. table:: Common Configuration Parameters
 
@@ -284,12 +290,12 @@ For the Bitonic Sort library element, use the following list of configurable par
 
 .. _CONFIGURATION_PARAMETERS_CONV_CORR:
 
-Convolution / Correlation configuration parameters
+Convolution/Correlation Configuration Parameters
 --------------------------------------------------
 
-For the Convolution / Correlation library element the list of configurable parameters and default values is presented below.
+For the Convolution/Correlation library element, the list of configurable parameters and default values is presented below.
 
-.. table:: Convolution / Correlation configuration parameters
+.. table:: Convolution/Correlation Configuration Parameters
 
     +------------------------+----------------+----------------+--------------------------------------+
     |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -417,7 +423,7 @@ For the Cumulative Sum library element the list of configurable parameters and d
     | NITER                  |    unsigned    |    8           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    
+
 
 .. _CONFIGURATION_PARAMETERS_DDS_MIXER:
 
@@ -489,7 +495,7 @@ Additionally, for the DDS/Mixer library element that uses LUTs, an additional te
 +------+-----------+---------+---------------------------------------------------------------------------------------------+
 | Name |    Type   | Default |                                         Description                                         |
 +======+===========+=========+=============================================================================================+
-| SFDR | unsigned  | 90      | specifies the expected Spurious Free Dynamic Range that the useR expects from the generated |
+| SFDR | unsigned  | 90      | specifies the expected Spurious Free Dynamic Range that the user expects from the generated |
 |      |           |         | design.                                                                                     |
 +------+-----------+---------+---------------------------------------------------------------------------------------------+
 
@@ -1003,7 +1009,7 @@ For the Kronecker library element the list of configurable parameters and defaul
 Matrix Multiply Configuration Parameters
 -------------------------------------------
 
-For the Matrix Multiply (GeMM) library element, use the following list of configurable parameters and default values.
+For the Matrix Multiply (GEMM) library element, use the following list of configurable parameters and default values.
 
 .. table:: Matrix Multiply Configuration Parameters
 
@@ -1087,7 +1093,7 @@ For the Matrix Multiply (GeMM) library element, use the following list of config
 Matrix Vector Multiply Configuration Parameters
 -----------------------------------------------
 
-For the Matrix Vector Multiply (GeMV) library element, use the following list of configurable parameters and default values.
+For the Matrix Vector Multiply (GEMV) library element, use the following list of configurable parameters and default values.
 
 .. table:: Matrix Vector Multiply Configuration Parameters
 

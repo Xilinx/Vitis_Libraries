@@ -17,7 +17,7 @@ The Function Approximation can also be provided with user-created lookup tables,
 Entry Point
 ===========
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -26,12 +26,12 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The `func_approx` library element supports AIE, AIE-ML and AIE-MLv2.
+The ``func_approx`` library element supports AIE, AIE-ML, and AIE-MLv2.
 
 - Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
 
-Supported Types
-===============
+Supported Data Types
+====================
 
 The input and output data type for the Function Approximation must be real-valued and is controlled by the ``TT_DATA`` template parameter.
 For AIE devices, this parameter can be configured as `int16`, `int32`, or `float`. For AIE-ML and AIE-MLv2, this parameter can be configured as `int16`, `int32`, `float`, or `bfloat16`.
@@ -49,7 +49,7 @@ To see details on the access functions for the Function Approximation, see :ref:
 Ports
 =====
 
-The Function Approximation library element supports `iobuffers` for input and output ports.
+The Function Approximation library element supports IO-buffers for input and output ports.
 
 To see details on the ports for the Function Approximation, see :ref:`API_REFERENCE`.
 

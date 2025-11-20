@@ -10,7 +10,7 @@
 FFT/iFFT
 ========
 
-The DSPLib contains two different FFT/iFFT solutions. The first AI Engine-only implementation is recommended for point sizes less than or equal to 4096, or for configurations which do not require Super Sample Rate performance. The second AI Engine + PL implementation is recommended for larger point sizes and Super Sample Rate performance. While both support super-sample-rate, the AI Engine+PL uses resources more efficiently.
+The DSPLib contains two different FFT/iFFT solutions. The first AI Engine-only implementation is recommended for point sizes less than or equal to 4096, or for configurations which do not require Super Sample Rate performance. The second AI Engine + PL implementation is recommended for larger point sizes and Super Sample Rate performance. While both support Super Sample Rate, the AI Engine + PL implementation uses resources more efficiently.
 
 .. toctree::
    :maxdepth: 1

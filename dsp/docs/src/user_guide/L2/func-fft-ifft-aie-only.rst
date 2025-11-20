@@ -8,16 +8,16 @@
 
 
 =================================
-FFT/IFFT 1CH DIT (AI Engine only)
+FFT/IFFT 1CH DIT (AI Engine-only)
 =================================
 
-This is a single channel, decimation in time (DIT) implementation. It has a configurable point size, data type, forward/reverse direction, scaling (as a shift), cascade length, static/dynamic point size, window size, interface API (stream/window), and parallelism factor.
+This is a single-channel, decimation in time (DIT) implementation. It has a configurable point size, data type, forward/reverse direction, scaling (as a shift), cascade length, static/dynamic point size, window size, interface API (stream/window), and parallelism factor.
 
 
 Entry Point
 ===========
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -26,15 +26,15 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The fft_ifft_dit_1ch supports AIE, AIE-ML and AIE-MLv2 devices. All features are supported on these variants with the following differences:
+The fft_ifft_dit_1ch supports AIE, AIE-ML, and AIE-MLv2 devices. All features are supported on these variants with the following differences:
 
 - ``TT_DATA`` and ``TT_TWIDDLE``. AIE-ML and AIE-MLv2 devices do not support cfloat type.
 - ``TT_TWIDDLE``: AIE supports cint32. AIE-ML and AIE-MLv2 devices do not.
 - ``TP_RND``: Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
 - Number of ports: When configured for ``TP_API=1`` (stream IO), AIE will require 2 input ports (sample interleaved - even samples on the first port) and 2 output ports similarly interleaved for each lane of processing. The number of lanes is ``2^TP_PARALLEL_FACTOR``. AIE-ML and AIE-MLv2 devices accept one stream only per kernel.
 
-Supported Types
-===============
+Supported Data Types
+====================
 
 The data type to the FFT is controlled by the ``TT_DATA`` template parameter. This can take one of three choices: cint16, cint32, or cfloat. This selection applies to both input data and output data. The template parameter ``TT_TWIDDLE`` can take one of three values, cint32, cint16 or cfloat. However, ``TT_DATA`` and ``TT_TWIDDLE`` must both be integer types or must both be cfloat.
 

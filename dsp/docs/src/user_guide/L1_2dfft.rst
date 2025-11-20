@@ -14,19 +14,19 @@
 
 .. _L1_2DFFT_OVERVIEW:
 
-============================================
-2-Dimensional(Matrix) SSR FFT L1 FPGA Module
-============================================
+=============================================
+2-Dimensional (Matrix) SSR FFT L1 FPGA Module
+=============================================
 
 Overview
 ========
 
 The AMD Vitis |trade| DSP library provides a fully synthesizable 2-Dimensional fast Fourier transform (FFT) as a L1 primitive. This L1 primitive is designed to be easily transformed into an L2 kernel by adding memory adapters. The L1 primitive is designed to have an array of stream interfaces, as wide as the device double-data rate (DDR) memory widths on boards like the AMD Alveo |trade| U200, U250, and U280. Adding memory adapters requires a plugin at the SSR FFT input side which has an AXI interface for connection with the DDR memory on one side, and the other sides need to have a memory wide streaming interface to connect with the 2-D SSR FFT L1 primitive. A second memory plugin is required at the output side of the SSR FFT, which reads in an array of stream data and connects it to the output AXI interface for the DDR memory connection.
 
-Block Level Interface
+Block-Level Interface
 =====================
 
-The following figure shows the block level interface for the 2-D SSR FFT. Essentially, it is an array of stream interfaces at the input and the output.
+The following figure shows the block-level interface for the 2-D SSR FFT. Essentially, it is an array of stream interfaces at the input and the output.
 
 .. image:: /images/2-2d_fft_if.jpg
     :alt: doc tool flow
@@ -140,7 +140,7 @@ Currently, the template parameters for 2-D SSR FFT should follow the following c
 4. t_rowInstanceIDOffset and t_colInstanceIDOffset should be different and ``abs(t_rowInstanceIDOffset - t_colInstanceIDOffset) > t_numKernels``.
 
 5. The selection of the radix ``R``, ``t_numKernels``, and ``t_memWidth`` should satisfy: ``R*t_numKernels==t_memWidth``. This constraint essentially highlights the fact that number of kernels used should be enough not more nor less to exhaust the input bandwidth.
-6. ``t_memWidth`` should be multiple of sizeof(c.omplex<float>).
+6. ``t_memWidth`` should be a multiple of ``sizeof(complex<float>)``.
 
 Library Usage
 =============
@@ -160,7 +160,7 @@ To use the fixed point Vitis 2-D SSR FFT L1 module in a C++ HLS design:
 
 3. Use namespace ``xf::dsp::fft``.
 
-4. Define the parameter structures for 1-D SSR FFT processors used along rows and columns. For example, call them ``params_row`` and ``parms_column`` by extending ``ssr_fft_default_params`` like :ref:`Defining 1-D SSR FFT Parameter Structure <FIXED_FFT_PARAMS_STRUCT_LABEL>`.
+4. Define the parameter structures for 1-D SSR FFT processors used along rows and columns. For example, call them ``params_row`` and ``params_column`` by extending ``ssr_fft_default_params`` like :ref:`Defining 1-D SSR FFT Parameter Structure <FIXED_FFT_PARAMS_STRUCT_LABEL>`.
 
 5. Call the ``fft2d<8, 16, 16, 2, params_row, params_column, 0,3, std::complex<ap_fixed<...>> >(p_inStream, p_outStream);`` description for the template parameters found in :ref:`2-D SSR FFT Template Parameters<2D_FFT_TEMPLATE_PARAMS_LABEL>`.
 

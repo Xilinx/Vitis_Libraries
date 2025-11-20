@@ -41,7 +41,8 @@ import aie_common as com
 
 AIE_LOAD_SIZE = 256/8   # 32 Bytes
 AIE_LOAD_SIZE_IN_BITS = 256
-TP_DIM_MIN = 1
+# TP_DIM_MIN = 1
+TP_DIM_MIN = 2
 TP_DIM_MAX = 4
 TP_NUM_FRAMES_MIN = 1
 TP_NUM_FRAMES_MAX = 1
@@ -120,7 +121,7 @@ def update_TP_API(args):
 def fn_update_api():
   param_dict={
     "name" : "TP_API",
-    "enum" : [com.API_BUFFER, com.API_STREAM]
+    "enum" : [com.API_BUFFER]
   }
   return param_dict
 
@@ -139,24 +140,33 @@ def update_TP_LEN(args):
   AIE_VARIANT = args["AIE_VARIANT"]
   TP_API = args["TP_API"]
   TT_DATA = args["TT_DATA"]
-  TP_LEN = args["TP_LEN"] if args["TP_LEN"] else 0
+  if "TP_LEN" not in args or args["TP_LEN"] =="":
+    TP_LEN = 0 
+  else: 
+    TP_LEN = args["TP_LEN"]
   return fn_update_len(TP_LEN, TT_DATA, TP_API, AIE_VARIANT)
 
 def fn_update_len(TP_LEN, TT_DATA, TP_API, AIE_VARIANT):
-  elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA)
-  TP_LEN_max = com.k_data_memory_bytes[AIE_VARIANT] >> 2 // (com.fn_size_by_byte(TT_DATA))
+  # elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA)
+  elems_per_load = 32 // com.fn_size_by_byte(TT_DATA)
+  TP_LEN_max = com.k_data_memory_bytes[AIE_VARIANT] // (com.fn_size_by_byte(TT_DATA))
+  TP_LEN_max_pingpong = com.k_data_memory_bytes[AIE_VARIANT] >> 1 // (com.fn_size_by_byte(TT_DATA))
+  TP_LEN_max_pingpong = TP_LEN_max_pingpong // TP_DIM_MAX
   TP_LEN_max = TP_LEN_max // TP_DIM_MAX
 
   param_dict={
     "name" : "TP_LEN",
-    "minimum" : elems_per_load,
-    "maximum" : TP_LEN_max if TP_API == com.API_BUFFER else 2**31
+    # "minimum" : elems_per_load,
+    "minimum" : 32, # hardcoded minimum to 32, is to be revisited in 26.1
+    "maximum" : TP_LEN_max if TP_API == com.API_BUFFER else 2**31,
+    "maximum_pingpong_buf" : TP_LEN_max_pingpong
   }
 
-  TP_LEN_act = TP_LEN + (elems_per_load-(TP_LEN % elems_per_load))
-  if TP_LEN_act < param_dict["minimum"]: param_dict["actual"] = param_dict["minimum"]
-  elif TP_LEN_act > param_dict["maximum"]: param_dict["actual"] = param_dict["maximum"]
-  else: param_dict["actual"] = TP_LEN_act
+  if TP_LEN != 0:
+    TP_LEN_act = TP_LEN if TP_LEN % elems_per_load == 0 else TP_LEN + (elems_per_load - (TP_LEN % elems_per_load))
+    if TP_LEN_act < param_dict["minimum"]: param_dict["actual"] = param_dict["minimum"]
+    elif TP_LEN_act > param_dict["maximum"]: param_dict["actual"] = param_dict["maximum"]
+    else: param_dict["actual"] = TP_LEN_act
   return param_dict
 
 def validate_TP_LEN(args):
@@ -182,10 +192,9 @@ def fn_validate_len(AIE_VARIANT, TT_DATA, TP_API, TP_LEN):
 #######################################################
 
 def update_TP_DIM(args):
-  TP_DIM = args["TP_DIM"]
-  return fn_update_dim(TP_DIM)
+  return fn_update_dim()
 
-def fn_update_dim(TP_DIM):
+def fn_update_dim():
   param_dict ={}
   param_dict.update({"name" : "TP_DIM"})
   param_dict.update({"minimum" : TP_DIM_MIN})
@@ -194,7 +203,7 @@ def fn_update_dim(TP_DIM):
 
 def validate_TP_DIM(args):
   TP_DIM = args["TP_DIM"]
-  param_dict = fn_update_dim(TP_DIM)
+  param_dict = fn_update_dim()
   range_TP_DIM=[param_dict["minimum"], param_dict["maximum"]]
   return (com.validate_range(range_TP_DIM, "TP_DIM", TP_DIM))
 
@@ -319,7 +328,7 @@ def info_ports(args):
             dataType = TT_DATA,
             dim = inDataLen,
             apiType = "window",
-            vectorLength = TP_LEN
+            vectorLength = 1
         )
         portsInQ = get_port_info(
             portname = "inQ",
@@ -327,7 +336,7 @@ def info_ports(args):
             dataType = TT_DATA,
             dim = inDataLen,
             apiType = "window",
-            vectorLength = TP_LEN
+            vectorLength = 1
         )
         portsOut = get_port_info(
             portname = "out",
@@ -335,10 +344,8 @@ def info_ports(args):
             dataType = TT_DATA,
             dim = outDataLen,
             apiType = "window",
-            vectorLength = TP_LEN
+            vectorLength = 1
         )
-        pass
-
     return portsInP+portsInQ+portsOut
 
 #### graph generator ####

@@ -27,6 +27,8 @@ Constraints files must be in the following json format:
 }
 ```
 
+Note: Parameters which are entered at the graph must be specified in the respective format (metadata level: ```DIM_SIZE```, graph level: ```TP_DIM```). Numeric types must be entered as such. AIE_VARIANT must be one of [1, 2, 22].
+
 Parameter constraints can be one of the following:
  - fixed to a scalar value 
  - one of many values, bounded by [] 

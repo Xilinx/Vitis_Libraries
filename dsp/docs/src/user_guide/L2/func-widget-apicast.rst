@@ -10,12 +10,12 @@
 Widget API Cast
 ===============
 
-The DSPLib contains a Widget API Cast solution, which provides flexibility when connecting other kernels. This component is able to change from the stream interface to window interface and vice-versa. It may be configured to read two input stream interfaces and interleave data onto an output window interface. In addition, multiple copies of output window may be configured to allow extra flexibility when connecting to further kernels.
+The DSPLib contains a Widget API Cast solution, which provides flexibility when connecting other kernels. This component can change from a stream interface to a window interface and vice versa. It may be configured to read two input stream interfaces and interleave data onto an output window interface. In addition, multiple copies of the output window may be configured to allow extra flexibility when connecting to further kernels.
 
 Entry Point
 ===========
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -26,8 +26,8 @@ Device Support
 
 The widget API cast supports AIE and AIE-ML devices.
 
-Supported Types
-===============
+Supported Data Types
+====================
 
 The widget API cast supports int16, cint16, int32, cint32, float, and cfloat types as selected by the ``TT_DATA`` template parameter. This data type is used by both input and output ports.
 
@@ -49,7 +49,7 @@ To see details on the ports for the Widget API Cast, see :ref:`API_REFERENCE`.
 Design Notes
 ============
 
-The widget_api_cast library element serves multiple purposes. First, it can convert from window to stream or vice versa. Second, it can perform a limited broadcast of windows. Third, it can perform various patterns of interlace when there are two streams in or out.
+The widget_api_cast library element serves multiple purposes. First, it can convert from a window to a stream or vice versa. Second, it can perform a limited broadcast of windows. Third, it can perform various patterns of interleave when there are two streams in or out.
 
 Code Example
 ============

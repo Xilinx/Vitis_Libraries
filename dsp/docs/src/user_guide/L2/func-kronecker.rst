@@ -14,7 +14,7 @@ Kronecker Matrix Product
 Entry Point
 ===========
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -23,12 +23,12 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The Kronecker supports AIE and AIE-ML devices.
+The Kronecker Matrix Product supports AIE, AIE-ML, and AIE-MLv2 devices.
 
-Supported Types
-===============
+Supported Data Types
+====================
 
-Please see table :ref:`KRONECKER_output_type`: for allowed input data type combinations and corresponding output type.
+See table :ref:`KRONECKER_output_type` for allowed input data type combinations and corresponding output type.
 
 .. _KRONECKER_output_type:
 
@@ -87,7 +87,7 @@ To see details on the template parameters for the Kronecker Matrix Product, see 
 Ports
 =====
 
-To see details on the ports for the Kronecker Matrix Product, see :ref:`API_REFERENCE`. Note that the type of ports are determined by the configuration of template parameters.
+To see details on the ports for the Kronecker Matrix Product, see :ref:`API_REFERENCE`. Note that the types of ports are determined by the configuration of template parameters.
 
 Design Notes
 ============
@@ -96,9 +96,9 @@ The performance of the IP heavily depends on the chosen data types. The data typ
 Inputs
 ------
 
-It accepts input matrices in COLUMN major order. The leading dimension of the input matrices have to be an integer multiple of vector size, where:
+It accepts input matrices in column-major order. The leading dimension of the input matrices has to be an integer multiple of the vector size, where:
 
-   #. The leading dimension in a COLUMN major order is ROWS.
+   #. The leading dimension in a column-major order is rows.
    #. The vector size is data type dependent. Please see table :ref:`KRONECKER_output_type` for the vector size.
 
 Super Sample Rate (SSR)
@@ -116,7 +116,7 @@ Scaling is controlled by the ``TP_SHIFT`` parameter which describes the number o
 
 Constraints
 -----------
-The Kronecker Matrix Product does not contain any constraints. It is a single kernel design except when ``TP_SSR > 1`` in which case the port connections force placement of the kernels on separate tiles.
+The Kronecker Matrix Product does not contain any constraints. It is a single-kernel design except when ``TP_SSR > 1`` in which case the port connections force placement of the kernels on separate tiles.
 
 Code Example
 ============
@@ -128,6 +128,3 @@ Code Example
    :ltrim:
 .. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
    :ltrim:
-
-
-

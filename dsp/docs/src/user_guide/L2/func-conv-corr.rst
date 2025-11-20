@@ -33,8 +33,8 @@ Supported Input Data Types
 ==========================
 
 The data type for input ports F and G (``inF`` and ``inG``) is controlled by ``T_DATA_F`` and ``T_DATA_G``, respectively.
-Both **inputs** may take one of the following 8 choices: ``int8``, ``int16``, ``int32``, ``cint16``, ``cint32``, ``float``, ``cfloat`` and ``bfloat16``.
-The **output** may take one of the following 6 choices: ``int16``, ``int32``, ``cint16``, ``cint32``, ``float``, and ``cfloat``.
+Both **inputs** may be one of the following eight types: ``int8``, ``int16``, ``int32``, ``cint16``, ``cint32``, ``float``, ``cfloat``, and ``bfloat16``.
+The **output** may be one of the following six types: ``int16``, ``int32``, ``cint16``, ``cint32``, ``float``, and ``cfloat``.
 Please see the table below for valid input/output data type combinations.
 
 .. _CONV_CORR_combos:
@@ -106,7 +106,7 @@ See the API reference for details on the ports for Convolution/Correlation.
 
 Design Notes
 ============
-The performance of the IP depends on the chosen data type combination :ref:`CONV_CORR_combos`. The number of multiplications per clock cycle will be updated based on the data type combination.
+Performance depends on the chosen data type combination; see :ref:`CONV_CORR_combos`. The number of multiplications per clock cycle will be updated based on the data type combination.
 The Convolution/Correlation operation can be processed by both IO Buffer (``TP_API = 0``) and Stream-Based (``TP_API = 1``) interfaces, which are controlled by the parameter named ``TP_API``.
 
 Input Buffer Length
@@ -187,9 +187,9 @@ Example Config:
 
 .. code-block::
 
-   Data_F - ``int16``,
-   Data_G - ``int16``,
-   Data_Out - ``int32``,
+   Data_F - int16,
+   Data_G - int16,
+   Data_Out - int32,
    Func_Type = 1 (conv),
    compute_mode = 0 (FULL), 1 (SAME), 2 (VALID),
    F_LEN = 64,
@@ -202,19 +202,19 @@ Example Config:
       OUT_DATA_LEN = (TP_F_LEN + TP_G_LEN - 1) --> (64+32-1) --> 95
       LANES = 16 for int16xint16 data combo
       Output_Buffer_len = ceil(95,16) --> (((95+16-1)/16)*16) --> ((110/16)*16) --> (6*16)--> 96
-      So output_buffer has 95 valid output samples and 1 zero sample.
+      Therefore, the output buffer has 95 valid output samples and 1 zero sample.
 
    SAME Mode:
       OUT_DATA_LEN = TP_F_LEN --> 64
       LANES = 16 for int16xint16 data combo
       Output_Buffer_len = ceil(64,16) --> (((64+16-1)/16)*16) --> ((79/16)*16) --> (4*16)--> 64
-      So output_buffer has 64 valid output samples.
+      Therefore, the output buffer has 64 valid output samples.
 
    VALID Mode:
       OUT_DATA_LEN = (TP_F_LEN - TP_G_LEN + 1) --> (64-32+1) --> 33
       LANES = 16 for int16xint16 data combo
       Output_Buffer_len = ceil(33,16) --> (((33+16-1)/16)*16) --> ((48/16)*16) --> (3*16)--> 48
-      So output_buffer has 33 valid output samples and 15 zero samples.
+      Therefore, the output buffer has 33 valid output samples and 15 zero samples.
 
 IO Buffer Interface
 -------------------
@@ -248,7 +248,7 @@ Parallel Input/Output Paths
 
 Input/Output samples are distributed over multiple parallel computation paths, which is controlled by ``TP_PHASES`` template parameter.
 
-| Stream Processing: Num of Phases ``TP_PHASES`` can be increased only when each cascade stream has maximum data rate i.e with maximum cascade length (4)
+| Stream Processing: Number of phases ``TP_PHASES`` can be increased only when each cascade stream has maximum data rate, i.e., with maximum cascade length (4)
 |                    To achieve data rate less than 1GSPS, Cascade length parameter can be decreased in a single phase design.
 |                    To achieve data rate more than 1GSPS, NUM_PHASES parameter should be increased by keeping
 |                        the ``TP_CASC_LEN`` parameter to its maximum possible value (i.e. the value required to achieve 1GSPS when ``TP_PHASES`` is equal to 1)
@@ -259,7 +259,8 @@ Stream Output
 
    The stream output operates on instantaneous samples from the continuous input stream without data memory movements or intermediate storage.
    This approach prevents selective sample discarding while maintaining uninterrupted stream flow and continuous throughput performance.
-   :ref:`FIGURE_STREAM_IMPL_CONV_CORR` shows the transpose-form implementation of the convolution and correlation operations.
+   The figure below shows the transpose-form implementation of the convolution and correlation operations.
+
 
 .. _FIGURE_STREAM_IMPL_CONV_CORR:
 
@@ -270,8 +271,8 @@ Stream Output
 
 This discarding of M samples is necessary because the transpose-form implementation of convolution and correlation produces initial transient samples that do not represent valid results until the computation reaches steady state.
 
-Computation of **M** samples to discard from the stream output:
----------------------------------------------------------------
+Computation of M samples to discard from the stream output
+----------------------------------------------------------
 
 .. code-block:: text
 
@@ -292,7 +293,8 @@ Computation of **M** samples to discard from the stream output:
 
       where:
          * **StreamsPerCore** = 1 when **(TP_G_LEN > ((TP_PHASES * Lanes * Points) / 2))**, otherwise **StreamsPerCore** = 2.
-         * **Lanes** and **Points** are parameters related to the computation of convolution/correlation of two vectors F and G. Please refer to the table below for lanes and points for supported data type combinations. See :ref: `LANES_AND_POINTS`.
+         * **Lanes** and **Points** are parameters related to the computation of convolution/correlation of two vectors F and G. Please refer to the table below for lanes and points for supported data type combinations.
+
 
 .. _LANES_AND_POINTS:
 
@@ -307,7 +309,7 @@ Computation of **M** samples to discard from the stream output:
    | cint16 (F) x cint16 (G) | 4         |  2         |
    +-------------------------+-----------+------------+
 
-The streaming interface supports only two data type combinations. See :ref:`CONV_CORR_combos` `table:: STREAM INTERFACE`.
+The streaming interface supports only two data type combinations. See the “STREAM INTERFACE” table in :ref:`CONV_CORR_combos`.
 
 Scaling
 -------
@@ -323,7 +325,7 @@ Distortion caused by saturation is possible in Convolution/Correlation. Since th
 Run Time Parameter (RTP) for Vector Lengths
 -------------------------------------------
 
-Run Time Parameter (RTP) for Vector Lengths are not available at the moment.
+Run Time Parameter (RTP) for Vector Lengths is not available at the moment.
 
 Please configure the ``conv_corr_graph`` class with template parameter: ``TP_USE_RTP_VECTOR_LENGTHS`` set to ``0``. In this case, both ``F_LEN`` and ``G_LEN`` are static (RTP port is not present).
 

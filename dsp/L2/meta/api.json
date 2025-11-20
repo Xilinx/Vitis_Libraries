@@ -746,10 +746,90 @@
             }
         },
         {
+            "api_name": "xf::dsp::aie::cumsum::cumsum_graph",
+            "target_domain": "AIE",
+            "spec": {
+                "brief": "cumsum is utility to compute cumulative sum along specified dimension of input data.",
+                "search_paths": [
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
+                ],
+                "visible": true,
+                "target_domain": "AIE",
+                "display_name": "cumsum_graph",
+                "parameters": [
+                    {
+                        "type": "typename",
+                        "name": "TT_DATA",
+                        "description": "describes the type of individual data samples input to the function."
+                    },
+                    {
+                        "type": "typename",
+                        "name": "TT_OUT_DATA",
+                        "description": "describes the type of individual data samples output from the function."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_A",
+                        "description": "describes the number of samples in a vector or the first dimension in a 2D input."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_B",
+                        "description": "describes the second dimension size. Set to 1 for vector operation."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_NUM_FRAMES",
+                        "description": "described the number of vectors or matrices to be operated on per call to the function (an iteration)."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_MODE",
+                        "description": "described the dimension to perform cumsum along. 0 accumulates along the first dimension. 1 accumulates along the second dimension. 2 is as for 0, but without shift and limited to the range of TT_OUT_DATA."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_SHIFT",
+                        "description": "described the number of bits to downshift after the scaling by the window value."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_RND",
+                        "description": "describes the selection of rounding to be applied during the shift down stage of processing."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_SAT",
+                        "description": "describes the selection of saturation to be applied during the shift down stage of processing."
+                    }
+                ],
+                "header_file_name": [
+                    "cumsum_graph.hpp"
+                ],
+                "instance": "class",
+                "api_name": "xf::dsp::aie::cumsum::cumsum_graph",
+                "ports": [
+                    {
+                        "direction": "input",
+                        "type": "port_array<input, TP_SSR> xf::dsp::aie::cumsum::cumsum_graph< TT_DATA, TT_OUT_DATA, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_MODE, TP_SHIFT, TP_RND, TP_SAT >::in",
+                        "name": "in"
+                    },
+                    {
+                        "direction": "output",
+                        "type": "port_array<output, TP_SSR> xf::dsp::aie::cumsum::cumsum_graph< TT_DATA, TT_OUT_DATA, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_MODE, TP_SHIFT, TP_RND, TP_SAT >::out",
+                        "name": "out"
+                    }
+                ],
+                "schema": "vitis_libraries_api_list_schema-1.0"
+            }
+        },
+        {
             "api_name": "xf::dsp::aie::euclidean_distance::euclidean_distance_graph",
             "target_domain": "AIE",
             "spec": {
-                "brief": "of input vectors P and Q",
+                "brief": "euclidean_distance of input vectors P and Q",
                 "search_paths": [
                     "L1/include/aie",
                     "L1/src/aie",
@@ -763,11 +843,6 @@
                         "type": "typename",
                         "name": "TT_DATA",
                         "description": "describes the type of individual data samples of point P and Q with N Dimensions to input to the function."
-                    },
-                    {
-                        "type": "typename",
-                        "name": "TT_DATA_OUT",
-                        "description": "describes the type of individual data samples of output from the function."
                     },
                     {
                         "type": "unsigned int",
@@ -797,7 +872,7 @@
                     {
                         "type": "unsigned int",
                         "name": "TP_IS_OUTPUT_SQUARED",
-                        "description": "describes about ED's output is either SQUAED or SQRT as per user request."
+                        "description": "describes about ED's output is either SQUARED or SQRT as per user request."
                     }
                 ],
                 "header_file_name": [
@@ -808,18 +883,103 @@
                 "ports": [
                     {
                         "direction": "input",
-                        "type": "input_port xf::dsp::aie::euclidean_distance::euclidean_distance_graph< TT_DATA, TT_DATA_OUT, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT, TP_IS_OUTPUT_SQUARED >::inWindowP",
+                        "type": "input_port xf::dsp::aie::euclidean_distance::euclidean_distance_graph< TT_DATA, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT, TP_IS_OUTPUT_SQUARED >::inWindowP",
                         "name": "inWindowP"
                     },
                     {
                         "direction": "input",
-                        "type": "input_port xf::dsp::aie::euclidean_distance::euclidean_distance_graph< TT_DATA, TT_DATA_OUT, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT, TP_IS_OUTPUT_SQUARED >::inWindowQ",
+                        "type": "input_port xf::dsp::aie::euclidean_distance::euclidean_distance_graph< TT_DATA, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT, TP_IS_OUTPUT_SQUARED >::inWindowQ",
                         "name": "inWindowQ"
                     },
                     {
                         "direction": "output",
-                        "type": "output_port xf::dsp::aie::euclidean_distance::euclidean_distance_graph< TT_DATA, TT_DATA_OUT, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT, TP_IS_OUTPUT_SQUARED >::outWindow",
+                        "type": "output_port xf::dsp::aie::euclidean_distance::euclidean_distance_graph< TT_DATA, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT, TP_IS_OUTPUT_SQUARED >::outWindow",
                         "name": "outWindow"
+                    }
+                ],
+                "schema": "vitis_libraries_api_list_schema-1.0"
+            }
+        },
+        {
+            "api_name": "xf::dsp::aie::func_approx::func_approx_graph",
+            "target_domain": "AIE",
+            "spec": {
+                "brief": "func_approx is a utility that provides an approximation of f(x) for a given input data, x.",
+                "search_paths": [
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
+                ],
+                "visible": true,
+                "target_domain": "AIE",
+                "display_name": "func_approx_graph",
+                "parameters": [
+                    {
+                        "type": "typename",
+                        "name": "TT_DATA",
+                        "description": "describes the type of individual data samples input to the function."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_COARSE_BITS",
+                        "description": "describes the number of bits in a sample of input data that will be used to address the provided lookup table."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_FINE_BITS",
+                        "description": "describes the number of bits in an input data sample used for fine interpolation."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DOMAIN_MODE",
+                        "description": "specifies a mode for the input domain of the chosen function for approximation."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_WINDOW_VSIZE",
+                        "description": "describes the number of samples to be processed in each call to this function."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_SHIFT",
+                        "description": "describes the number of bits to downshift the final output approximation."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_RND",
+                        "description": "describes the selection of rounding to be applied during the shift down stage of processing."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_SAT",
+                        "description": "describes the selection of saturation to be applied during the shift down stage of processing."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_USE_LUT_RELOAD",
+                        "description": "allows the user to select if runtime lookup table reloading should be used."
+                    }
+                ],
+                "header_file_name": [
+                    "func_approx_graph.hpp"
+                ],
+                "instance": "class",
+                "api_name": "xf::dsp::aie::func_approx::func_approx_graph",
+                "ports": [
+                    {
+                        "direction": "input",
+                        "type": "port_array<input, 1> xf::dsp::aie::func_approx::func_approx_graph< TT_DATA, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE, TP_SHIFT, TP_RND, TP_SAT, TP_USE_LUT_RELOAD >::in",
+                        "name": "in"
+                    },
+                    {
+                        "direction": "output",
+                        "type": "port_array<output, 1> xf::dsp::aie::func_approx::func_approx_graph< TT_DATA, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE, TP_SHIFT, TP_RND, TP_SAT, TP_USE_LUT_RELOAD >::out",
+                        "name": "out"
+                    },
+                    {
+                        "direction": "input",
+                        "type": "port_conditional_array<input, (TP_USE_LUT_RELOAD == 1), rtpPortsPerKernel> xf::dsp::aie::func_approx::func_approx_graph< TT_DATA, TP_COARSE_BITS, TP_FINE_BITS, TP_DOMAIN_MODE, TP_WINDOW_VSIZE, TP_SHIFT, TP_RND, TP_SAT, TP_USE_LUT_RELOAD >::rtpLut",
+                        "name": "rtpLut"
                     }
                 ],
                 "schema": "vitis_libraries_api_list_schema-1.0"

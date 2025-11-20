@@ -11,7 +11,7 @@ Euclidean Distance
 ===================
 
 DSPLib contains a solution for calculating the Euclidean Distance (ED). This library element computes the Euclidean Distance (ED) operation between two input vectors, P and Q, in a vectorized manner for the specified dimension (1D, 2D, 3D, or 4D).
-This is achieved by leveraging hardware acceleration on AIE, AIE-ML, and AIE-MLv2 devices. The operation supports only the IO Buffer interface, depending on the configuration.
+This is achieved by leveraging hardware acceleration on AIE, AIE-ML, and AIE-MLv2 devices. The operation supports only the IO-buffer interface, depending on the configuration.
 The vectorized implementation ensures high performance by processing multiple data points in parallel, utilizing the hardware's capabilities.
 
 Template parameters are used to configure the top-level graph of the ``euclidean_distance_graph`` class.
@@ -30,7 +30,7 @@ Device Support
 
 The ED supports **AIE**, **AIE-ML**, and **AIE-MLv2** devices for all features.
 
-- Round modes available and the enumerated values of round modes differ between AIE and AIE-ML devices. See :ref:`COMPILING_AND_SIMULATING`.
+- The available round modes and their enumerated values differ between AIE and AIE-ML/AIE-MLv2 devices. See :ref:`COMPILING_AND_SIMULATING`.
 
 Supported Input Data Types
 ==========================
@@ -56,7 +56,7 @@ To see details on the ports for the Euclidean Distance, see :ref:`API_REFERENCE`
 Design Notes
 ============
 
-The Euclidean Distance supports the IO Buffer interface (``TP_API`` = ``0``) only.
+The Euclidean Distance supports the IO-buffer interface (``TP_API`` = ``0``) only.
 
 Input Data
 ----------
@@ -154,7 +154,7 @@ Output Data
 
 The **output data** has a length of ``TP_LEN``.
 
-- ``output vector for the above input vector P and Q is:``
+The output vector for the above input vectors P and Q is:
 
 - ``TP_IS_OUTPUT_SQUARED = 1 (SQUARED OUTPUT):``
 
@@ -183,12 +183,12 @@ IO Buffer Interface
 
 The Euclidean Distance operation can be performed via the IO Buffer interface on **AIE**, **AIE-ML**, and **AIE-MLv2** devices.
 
-| ``TP_API`` - **0** indicates **IO-BUFFER** interface
+- ``TP_API = 0`` indicates an IO-buffer interface
 
 Saturation
 ----------
 
-Distortion caused by saturation is possible for Euclidean Distance computation. Since the input values are provided at run-time, no compile-time error can be issued for this hazard, so it is for the user to ensure that saturation does not occur.
+Distortion caused by saturation is possible for Euclidean Distance computation. Since the input values are provided at runtime, no compile-time error can be issued for this hazard, so the user must ensure that saturation does not occur.
 
 ED results: output is squared or standard
 -----------------------------------------

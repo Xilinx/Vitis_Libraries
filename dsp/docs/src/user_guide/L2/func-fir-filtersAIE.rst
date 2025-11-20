@@ -56,11 +56,11 @@ Device Support
 
 The FIR filters support AIE, AIE-ML and AIE-MLv2 for all features with the following exceptions:
 
-- The ``cfloat`` data type is not supported on AIE-ML device
+- The ``cfloat`` data type is not supported on AIE-ML and AIE-MLv2 devices
 - Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
 
-Supported Types
-===============
+Supported Data Types
+====================
 
 All FIR filters can be configured for various types of data and coefficients. These types can be int16, int32, or float, and also real or complex. Certain combinations of data and coefficient type are not supported.
 
@@ -111,7 +111,7 @@ For the access functions for each FIR variant, see :ref:`API_REFERENCE`.
 Ports
 =====
 
-To see the ports for each FIR variants, see :ref:`API_REFERENCE`.
+To see the ports for each FIR variant, see :ref:`API_REFERENCE`.
 
 Design Notes
 ============
@@ -132,7 +132,7 @@ Static Coefficients - Array Size
 **Asymmetrical FIR**
 
 | Asymmetrical filters expect the port to contain the full array of coefficients, i.e., the coefficient array size is equal to the ``TP_FIR_LEN``.
-| The length of the array expected will therefore be ``(TP_FIR_LEN``, e.g., for a filter of length 7, where coefficients are ``int16``:
+| The length of the array expected will therefore be ``TP_FIR_LEN``, e.g., for a filter of length 7, where coefficients are ``int16``:
 | ``{1, 2, 3, 4, 5, 6, 7}``, the constructor expects an argument:
 | ``std::array<int16, 7> tapsIn =  {1, 2, 3, 4, 5, 6, 7}``.
 
@@ -222,7 +222,7 @@ As mentioned above, asymmetrical filters expect the port to contain the full arr
 
 | In the case of symmetrical filters, the size of each port will be dependent on the underlying kernel structure, which for SSR cases, is based on an Asymmetric FIR variant.
 | As a result, deriving the symmetric coefficients from the argument passed to graph's `update()` method is not available.
-| The length of the array expected will therefore be ``(TP_FIR_LEN)``,
+| The length of the array expected will therefore be ``TP_FIR_LEN``,
 | e.g., for a filter of length 7, where ``int16`` type coefficient's values are:
 | ``{1, 2, 3, 5, 3, 2, 1}``,
 | seven non-zero tap values, including the center tap, are expected, i.e., the `update()` method should get an argument:

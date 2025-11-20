@@ -178,14 +178,14 @@ The `L2/examples` subdirectory holds example wrapper designs to demonstrate the 
 .. _USING:
 
 =================================================
-Using Library Elements within User Defined Graphs
+Using Library Elements within User-Defined Graphs
 =================================================
 
 It is recommended that the library element to include in your graph is from the L2 directory, that is, a subgraph. For instance, to include a single rate asymmetrical FIR filter, include `fir_sr_asym_graph.hpp` from the `L2/include/aie/` folder. The test harness for each library unit can be used as a reference example of how to instantiate a parameterized graph. For example, see `L2/tests/aie/<library_element>/test.hpp` and `test.cpp`.
 
-An example `test.h` and `test.cpp`, which instantiates a parameterized graph and exposes a configured (point solution) interface, is provided in the `L2/examples/fir_129t_sym` folder.
+An example `test.hpp` and `test.cpp`, which instantiates a parameterized graph and exposes a configured (point solution) interface, is provided in the `L2/examples/fir_129t_sym` folder.
 
-Set the environment variable to DSPLIB_ROOT.
+Set the DSPLIB_ROOT environment variable.
 
 .. code-block::
 
@@ -193,7 +193,7 @@ Set the environment variable to DSPLIB_ROOT.
 
 .. note:: Use setenv for csh and export DSPLIB_ROOT=<path> for bash.
 
-Use the following option in the aiecompiler command to provide the path:
+Use the following options in the aiecompiler command to provide the include paths:
 
 .. code-block::
 
@@ -218,7 +218,7 @@ See Answer Record `75802 <https://www.xilinx.com/support/answers/75802.html>`__ 
 Vitis Tutorials
 ========================
 
-AMD provides an extensive library of purpose build tutorials. It is recommended to visit `Vitis Tutorials <https://github.com/Xilinx/Vitis-Tutorials>`__ to get familiar with the AMD Vitis |trade| in-Depth tutorials.
+AMD provides an extensive library of purpose-built tutorials. It is recommended to visit `Vitis Tutorials <https://github.com/Xilinx/Vitis-Tutorials>`__ to get familiar with the AMD Vitis |trade| in-depth tutorials.
 
 To learn how to use the Vitis core tools to develop for AMD Versal |trade|, the first Adaptive SoC, visit `AI Engine Development Tutorials <https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development>`__. There is a variety of design, methodology, and feature tutorials, where you can also find a highly recommended `DSP Library Tutorial <https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development/AIE/Feature_Tutorials/08-dsp-library>`__, which demonstrates how to use kernels provided by the DSP library for a filtering application, how to analyze the design results, and how to use filter parameters to optimize the design's performance using simulation.
 
@@ -229,5 +229,3 @@ Finally, Simulink users might be interested in the `AI Engine DSP Library and Mo
    :ltrim:
 .. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
    :ltrim:
-
-

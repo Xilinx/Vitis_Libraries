@@ -10,14 +10,14 @@
 Matrix Multiply
 ===============
 
-The DSPLib contains one Matrix Multiply/GEMM (General Matrix Multiply) solution for AIE, AIE-ML and AIE-MLv2. The GEMM has two input ports connected to two windows of data. The inputs are denoted as Matrix A (inA) and Matrix B (inB). Matrix A has a ``TP_DIM_A`` template parameter to describe the number of rows in Matrix A. The number of columns in Matrix A must be equal to the number of rows in Matrix. This is denoted with the ``TP_DIM_AB`` template parameter. The number of columns in Matrix B is denoted by ``TP_DIM_B``.
+The DSPLib contains one Matrix Multiply/GEMM (General Matrix Multiply) solution for AIE, AIE-ML, and AIE-MLv2. The GEMM has two input ports connected to two windows of data. The inputs are denoted as Matrix A (inA) and Matrix B (inB). Matrix A has a ``TP_DIM_A`` template parameter to describe the number of rows in Matrix A. The number of columns in Matrix A must be equal to the number of rows in Matrix B. This is denoted by the ``TP_DIM_AB`` template parameter. The number of columns in Matrix B is denoted by ``TP_DIM_B``.
 
 An output port connects to a window, where the data for the output matrix will be stored. The output matrix will have (``TP_DIM_A``) rows and (``TP_DIM_B``) columns. The data type of both input matrices can be configured, and the data type of the output is derived from the inputs.
 
 Entry Point
 ===========
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -26,10 +26,10 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The Matrix Multiply supports AIE, AIE-ML and AIE-MLv2 devices.
+The Matrix Multiply supports AIE, AIE-ML, and AIE-MLv2 devices.
 
-Supported Types
-===============
+Supported Data Types
+====================
 
 The Matrix Multiply supports a matrix of elements of integer type (int16, cint16, int32, or cint32) multiplied by a matrix of elements of integer type. It also supports a matrix of elements of float type (float, cfloat) multiplied by a matrix of elements of float type. However, a mix of integer types and float types are not supported.
 

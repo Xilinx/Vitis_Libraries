@@ -40,11 +40,17 @@ namespace aie {
 namespace cumsum {
 using namespace adf;
 
+/**
+ * @defgroup cumsum_graph Cumulative Sum functions
+ *
+ * Cumulative Sum
+**/
+
 //--------------------------------------------------------------------------------------------------
 // cumsum_graph template
 //--------------------------------------------------------------------------------------------------
 /**
- * @ingroup cumsum
+ * @ingroup cumsum_graph
  * @brief cumsum is utility to apply a windowing (scaling) function such as Hamming to a
  *        frame of data samples.
  *

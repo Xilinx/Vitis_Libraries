@@ -10,7 +10,7 @@
 Matrix-Vector Multiply
 ======================
 
-The DSPLib contains a Matrix-Vector Multiply/GEMV (General Matrix Vector Multiplication) solution. The GEMV has two input ports, one for each input operand. Only IO-buffer connections are supported.
+The DSPLib contains a Matrix-Vector Multiply/GEMV (General Matrix-Vector Multiplication) solution. GEMV has two input ports, one for each input operand. Only IO-buffer connections are supported.
 
 The input IO-buffer for the matrix is defined as Matrix A (inA) and is described by the ``TP_DIM_A`` and ``TP_DIM_B`` template parameters which specify the number of rows and columns in the matrix, respectively.
 
@@ -21,7 +21,7 @@ The output IO-buffer containing the result of the matrix-vector multiplication i
 Entry Point
 ===========
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -29,17 +29,17 @@ The graph entry point is the following:
 
 Device Support
 ==============
-The Matrix-Vector Multiply supports AIE, AIE-ML and AIE-MLv2 devices.
+The Matrix-Vector Multiply supports AIE, AIE-ML, and AIE-MLv2 devices.
 
-Supported Types
-===============
+Supported Data Types
+====================
 
 The Matrix-Vector Multiply supports matrices of an integer type (int16, cint16, int32, or cint32) multiplied by a vector of an integer type. Matrices containing elements with a floating-point type (float or cfloat) are supported but must be multiplied with a vector of floats. Multiplication of an integer type with a floating-point type is not supported.
 
 Template Parameters
 ===================
 
-To see details on the template parameters for the Matrix Vector Multiply, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the Matrix-Vector Multiply, see :ref:`API_REFERENCE`.
 
 Access Functions
 ================
@@ -120,9 +120,9 @@ Additionally, when ``TP_USE_MATRIX_RELOAD = 1``, the matrix data must always be 
 Maximum matrix dimensions per kernel
 ------------------------------------
 
-The maximum memory accessible by a kernel is 32 kB for AIE devices and 64kB for AIE-ML and AIE-MLv2 devices. The maximum matrix dimensions per kernel are limited by the memory requirements and how much memory is available.
+The maximum memory accessible by a kernel is 32 kB for AIE devices and 64 kB for AIE-ML and AIE-MLv2 devices. The maximum matrix dimensions per kernel are limited by the memory requirements and how much memory is available.
 
-A matrix_vector_mul design needs to allocate memory for the following:
+A ``matrix_vector_mul`` design needs to allocate memory for the following:
 
 * IO-buffer Size A: Input matrix A of size ``(TP_DIM_A / TP_SSR) x (TP_DIM_B / TP_CASC_LEN) x sizeof(TT_DATA_A)``.
 
@@ -168,12 +168,12 @@ Connections to the cascade and ssr ports can be made as follows:
 Constraints
 -----------
 
-In the entry level graph, the following names are used to identify the various kernels as follows:
+In the entry-level graph, the following names are used to identify the various kernels:
 
-'m_mat_vec_mulKernels': This is an array of kernel pointers returned by getKernels which point to the kernels in the SSR and cascade array. These are the kernels perform the matrix-vector multiply operations.
+'m_mat_vec_mulKernels': This is an array of kernel pointers returned by getKernels which point to the kernels in the SSR and cascade array. These are the kernels that perform the matrix-vector multiply operations.
 
 The index of the kernel increments along the cascade chain first.
-For example, a GEMV design with an ``TP_SSR > 1`` and ``TP_CASC_LEN > 1`` where ssrIdx specifies the rank of SSR and cascIdx specifies the position of the kernel along the cascade chain, the index of the kernel can be found by ``(ssrIdx * TP_CASC_LEN) + cascIdx``.
+For example, a GEMV design with a ``TP_SSR > 1`` and ``TP_CASC_LEN > 1`` where ssrIdx specifies the rank of SSR and cascIdx specifies the position of the kernel along the cascade chain, the index of the kernel can be found by ``(ssrIdx * TP_CASC_LEN) + cascIdx``.
 
 
 Code Example

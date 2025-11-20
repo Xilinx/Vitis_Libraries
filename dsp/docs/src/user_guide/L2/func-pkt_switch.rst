@@ -11,16 +11,16 @@ Packet Switch Graph
 
 The DSPLib contains a Packet Switch Graph.
 
-Packet Switch Graph class wraps a DSP IP and adds packet switching streaming interface to the design.
+Packet Switch Graph class wraps a DSP IP and adds a packet-switching streaming interface to the design.
 
 .. _PKT_SWITCH_ENTRY:
 
 Entry Point
 ===========
 
-Packet Switch Graph have been placed in a distinct namespace scope: ``xf::dsp::aie``.
+Packet Switch Graph has been placed in a distinct namespace scope: ``xf::dsp::aie``.
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -29,28 +29,28 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The class supports AIE, AIE-ML and AIE-MLv2.
+The class supports AIE, AIE-ML, and AIE-MLv2 devices.
 
 Supported IP
 ===============
 
-The Packet Switch Graph has been designed to support any IP that DSPLIB offer, provided the IP is configured in a way that allows addition of packet switching, see Design notes for details :ref:`PKT_SWITCH_CONFIGURATION`
+The Packet Switch Graph has been designed to support any IP that DSPLib offers, provided the IP is configured in a way that allows the addition of packet switching; see Design Notes for details in :ref:`PKT_SWITCH_CONFIGURATION`.
 
 
 Template Parameters
 ===================
 
-To see details on the template parameters for the TDM FIR, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the Packet Switch Graph, see :ref:`API_REFERENCE`.
 
 Access Functions
 ================
 
-For the access functions for each FIR variant, see :ref:`API_REFERENCE`.
+For the access functions for the Packet Switch Graph, see :ref:`API_REFERENCE`.
 
 Ports
 =====
 
-To see the ports for each FIR variants, see :ref:`API_REFERENCE`.
+To see the ports for the Packet Switch Graph, see :ref:`API_REFERENCE`.
 
 Design Notes
 ============
@@ -79,7 +79,7 @@ Super Sample Rate Configuration
 
 Packet Switch Graph class must be configured with ``TP_SSR``.
 
-This parameter will be used to create a network of connections from the array of input packet ports: ``std::array<port<input>, TP_INPUT_PORTS> pkt_in`` , to the input ports of the instanced DSP IP.
+This parameter will be used to create a network of connections from the array of input packet ports: ``std::array<port<input>, TP_INPUT_PORTS> pkt_in`` , to the input ports of the instantiated DSP IP.
 
 Template parameter ``TP_SSR`` of the ``pkt_switch_graph`` class must match with the configuration of the instanced DSP IP.
 
@@ -105,9 +105,9 @@ Packet Switch Graph class is not aware of buffer configuration the underlying de
 Input Packet Split Connections
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Template parameter ``TP_INPUT_PORTS`` will also determine the number of the ``pktsplit`` graph constructs used by the ``pkt_swith_graph`` class.
+Template parameter ``TP_INPUT_PORTS`` will also determine the number of the ``pktsplit`` graph constructs used by the ``pkt_switch_graph`` class.
 
-The ``pktsplit`` takes an input packet stream and broadcasts the stream to a number of input stream ports used by the instanced DSP IP.
+The ``pktsplit`` takes an input packet stream and broadcasts the stream to a number of input stream ports used by the instantiated DSP IP.
 See `UG1079 Packet Split and Merge Connection <https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Packet-Split-and-Merge-Connections>`_ for more details.
 
 Number of streams each ``pktsplit`` element produces is determined by the below formula:
@@ -165,13 +165,13 @@ The Packet Switch Graph class has been designed to work with any DSP IP that mee
 Constraints
 -----------
 
-The Packet Switch Graph class has been designed to create an instance of the desired DSP IPas a class member, i.e.:
+The Packet Switch Graph class has been designed to create an instance of the desired DSP IP as a class member, i.e.:
 
 .. code-block::
 
     TT_GRAPH_TYPE graph_instance;
 
-Therefore, all constraints of the DSP IP can be passed though the pkt_switch_graph class accessing the ``graph_instance`` member, or through a set of access functions, e.g.:
+Therefore, all constraints of the DSP IP can be passed through the pkt_switch_graph class by accessing the ``graph_instance`` member, or through a set of access functions, e.g.:
 
 - `getKernels()` which returns a pointer to an array of kernel pointers.
 

@@ -13,12 +13,12 @@ Outer Tensor Product
 This library element computes the Outer Tensor Product of two input vectors. If two vectors have dimensions n and m, then their outer tensor product is an n x m matrix.
 Element-wise multiplication of each element of input A by each element of input B is performed and assigned to the output.  If it is considered that input A is the column vector and input B is the row vector, then the matrix is output in a row-major fashion.
 The outer tensor product has configurable data types and vector dimensions for inputs A and B, along with a configurable number of frames, scaling, interfaces (stream/window), parallelism factors, rounding and saturation.
-Template parameters are used to configure the top level graph of the outer_tensor_graph class.
+Template parameters are used to configure the top-level graph of the ``outer_tensor_graph`` class.
 
 Entry Point
 ===========
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -29,11 +29,12 @@ Device Support
 
 The Outer Tensor Product library element supports AIE and AIE-ML devices.
 
-Supported Types
-===============
-The data type for input port A and B (inA and inB) is controlled by ``TT_DATA_A and TT_DATA_B`` respectively.
-Both inputs may take one of the 6 choices: int16, int32, cint16, cint32, float and cfloat. It must be kept in mind that depending on the input type combinations, output type will be determined by the tool.
-Please see table :ref:`OUTER_TENSOR_output_type` : for allowed input data type combinations and regarding output type.
+Supported Data Types
+====================
+
+The data type for input ports A and B (inA and inB) is controlled by ``TT_DATA_A`` and ``TT_DATA_B`` respectively.
+Both inputs may take one of six choices: ``int16``, ``int32``, ``cint16``, ``cint32``, ``float``, and ``cfloat``. Depending on the input type combination, the output type will be determined by the library element.
+See table :ref:`OUTER_TENSOR_output_type` for allowed input data type combinations and the corresponding output type.
 
 .. _OUTER_TENSOR_output_type:
 
@@ -99,7 +100,7 @@ To see details on the access functions for the Outer Tensor Product, see :ref:`A
 Ports
 =====
 
-To see details on the ports for the Outer Tensor Product, see :ref:`API_REFERENCE`. Note that the type of ports are determined by the configuration of template parameters.
+To see details on the ports for the Outer Tensor Product, see :ref:`API_REFERENCE`. Note that the types of ports are determined by the configuration of template parameters.
 
 Design Notes
 ============
@@ -121,7 +122,7 @@ Distortion caused by saturation will be possible for the Outer Tensor Product. I
 
 Constraints
 -----------
-The Outer Tensor Product inputs for ``TP_DIM_A``, ``TP_DIM_B``, ``TP_NUM_FRAMES`` and ``TP_SSR`` must be powers of 2. ``TP_DIM_X * size_of(TT_DATA_X)`` must have a minimum value of 32 bytes (size of buffer on AIE). It is a single kernel design except when ``TP_SSR>1`` in which case the port connections force placement of the tiles on separate tiles.
+The Outer Tensor Product inputs for ``TP_DIM_A``, ``TP_DIM_B``, ``TP_NUM_FRAMES``, and ``TP_SSR`` must be powers of 2. ``TP_DIM_X * sizeof(TT_DATA_X)`` must have a minimum value of 32 bytes (size of buffer on AIE). It is a single-kernel design except when ``TP_SSR > 1``, in which case the port connections force placement of the kernels on separate tiles.
 
 Code Example
 ============
@@ -133,6 +134,3 @@ Code Example
    :ltrim:
 .. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
    :ltrim:
-
-
-

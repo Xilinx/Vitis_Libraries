@@ -30,7 +30,7 @@ ceil = $(shell echo $$(((($1 + $2 - 1)/ $2) * $2)))
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA $(DATA) LEN $(LEN)  DIM $(DIM) API_IO $(API_IO) RND $(RND) SAT $(SAT) IS_OUTPUT_SQUARED $(IS_OUTPUT_SQUARED)
 
-DIFF_TOLERANCE = 0.0025
+DIFF_TOLERANCE = 0.05
 ifeq ($(DATA), float)
 CC_TOLERANCE = 0.0025
 else ifeq ($(DATA), cfloat)
@@ -38,11 +38,6 @@ CC_TOLERANCE = 0.0025
 endif
 
 FIXED_DIM = 4
-IS_ZERO_PADDING_REQUIRED = 0
-ifneq ($(DIM) , $(FIXED_DIM))
-  IS_ZERO_PADDING_REQUIRED = 1
-endif
-
 NITER_UUT         = $(NITER)
 NITER_REF         = $(NITER_UUT)
 

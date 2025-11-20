@@ -7,7 +7,7 @@
 .. _FFT_2D:
 
 ============
-FFT IFFT 2D
+FFT/IFFT 2D
 ============
 
 This library element implements a 2D FFT/IFFT function. It has configurable point sizes, data types, and
@@ -16,7 +16,7 @@ sizes separately for the two dimensions. It also has a configurable twiddle type
 Entry Point
 ===========
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -28,10 +28,10 @@ Device Support
 The 2D FFT/IFFT supports AIE-ML devices only.
 
 
-Supported Types
-===============
+Supported Data Types
+====================
 
-The input data types to the 2D FFT are controlled by the ``TT_DATA_D1`` and ``TT_DATA_D2`` template parameters, see :ref:`API_REFERENCE`.
+The input data types to the 2D FFT are controlled by the ``TT_DATA_D1`` and ``TT_DATA_D2`` template parameters; see :ref:`API_REFERENCE`.
 
 Template Parameters
 ===================

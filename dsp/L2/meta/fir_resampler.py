@@ -243,8 +243,6 @@ def fn_update_TP_INTERPOLATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_U
     else:
         legal_set_interp_factor=list(range(param_dict_int["minimum"], param_dict_int["maximum"]+1))
 
-    # legal_set_interp_factor = find_divisors(TP_FIR_LEN, param_dict_int["maximum"])
-
     for interp_fact in legal_set_interp_factor.copy():
         param_dict_dec_factor= fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, interp_fact)
         if param_dict_dec_factor["enum"] in[None, []]:
@@ -344,7 +342,6 @@ def fn_update_TP_DECIMATE_FACTOR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_
     else:
         TP_DECIMATE_FACTOR_max_int = TP_DECIMATE_FACTOR_max
 
-    # legal_set_dec_factor=find_divisors(TP_FIR_LEN, TP_DECIMATE_FACTOR_max_int)
     legal_set_dec_factor=list(range(TP_DECIMATE_FACTOR_min, TP_DECIMATE_FACTOR_max_int+1))
 
     for dec_fact in legal_set_dec_factor.copy():

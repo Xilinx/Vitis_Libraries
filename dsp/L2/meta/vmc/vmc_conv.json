@@ -131,6 +131,7 @@
             "label": "Specify G input length via input port",
             "callback": "xmcDisplayRtpPortGLengthAcceptableRangeCallback(gcbh);",
             "tablabel": "Main",
+            "visible": "off",
             "parameterType": "checkbox"
         },
         {

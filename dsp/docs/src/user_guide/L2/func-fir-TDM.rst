@@ -18,9 +18,9 @@ It is a multi-channel FIR filter with configurable application parameters, e.g. 
 Entry Point
 ===========
 
-TDM FIR have been placed in a distinct namespace scope: ``xf::dsp::aie::fir::tdm``.
+TDM FIRs have been placed in a distinct namespace scope: ``xf::dsp::aie::fir::tdm``.
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -31,11 +31,11 @@ Device Support
 
 The TDM FIR filter supports AIE, AIE-ML and AIE-MLv2 for all features with the following exceptions:
 
-- The ``cfloat`` data type is not supported on AIE-ML device
+- The ``cfloat`` data type is not supported on AIE-ML and AIE-MLv2 devices
 - Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
 
-Supported Types
-===============
+Supported Data Types
+====================
 
 TDM FIR filters can be configured for various types of data and coefficients. These types can be int16, int32, or float, and also real or complex. Certain combinations of data and coefficient type are not supported.
 
@@ -85,7 +85,7 @@ For the access functions for each FIR variant, see :ref:`API_REFERENCE`.
 Ports
 =====
 
-To see the ports for each FIR variants, see :ref:`API_REFERENCE`.
+To see the ports for each FIR variant, see :ref:`API_REFERENCE`.
 
 Design Notes
 ============
@@ -139,7 +139,7 @@ Instead, the graph's `update()` (refer to `UG1079 Run-Time Parameter Update/Read
 
 Reloadable coefficients are available for single- and multi- kernel configuration, e.g. using Cascade (``TP_CASC_LEN``) and/or Super Sample Rate (``TP_SSR``) modes of operation.
 
-TDM Channels of will be split by ``TP_SSR`` and FIR taps (for each channel) will be split by ``TP_CASC_LEN``. Each part is sent to a specific kernel via its corresponding RTP port.
+TDM channels will be split by ``TP_SSR`` and FIR taps (for each channel) will be split by ``TP_CASC_LEN``. Each part is sent to a specific kernel via its corresponding RTP port.
 
 For more details on multi-kernel modes, refer to: :ref:`FIR_TDM_CASCADE_OPERATION` and :ref:`FIR_TDM_SSR_OPERATION`.
 
@@ -224,7 +224,7 @@ Multiple Frames
 ^^^^^^^^^^^^^^^
 
 To minimize kernel switching overheads and therefore, maximize performance, TDM FIR supports batching multiple frames into a single input buffer.
-A frame can defined as a set of data samples, one data sample for each TDM channel, i.e. a frame is a set of ``TP_TDM_CHANNELS`` input samples.
+A frame can be defined as a set of data samples, one data sample for each TDM channel, i.e. a frame is a set of ``TP_TDM_CHANNELS`` input samples.
 
 Input buffer size can be set to an integer multiple of TDM Channels, e.g.:
 ``TP_INPUT_WINDOW_VSIZE = TP_TDM_CHANNELS * NUMBER_OF_FRAMES``
@@ -272,11 +272,11 @@ Input Data Samples must be stored in the Input Buffer in a form that lists set o
 .. code-block::
 
    std::vector<TT_DATA> dataVector = {
-                                 D0.0, D0.1, D0.2, D0.2, ..., D0.M-2, D0.M-1,
-                                 D1.0, D1.1, D1.2, D1.2, ..., D1.M-2, D1.M-1,
+                                 D0.0, D0.1, D0.2, D0.3, ..., D0.M-2, D0.M-1,
+                                 D1.0, D1.1, D1.2, D1.3, ..., D1.M-2, D1.M-1,
                                  ...
-                                 DF-2.0, DF-2.1, DF-2.2, DF-2.2, ..., DF-2.M-2, DF-2.M-1,
-                                 DF-1.0, DF-1.1, DF-1.2, DF-1.2, ..., DF-1.M-2, DF-1.M-1,
+                                 DF-2.0, DF-2.1, DF-2.2, DF-2.3, ..., DF-2.M-2, DF-2.M-1,
+                                 DF-1.0, DF-1.1, DF-1.2, DF-1.3, ..., DF-1.M-2, DF-1.M-1,
                                  };
 
 where:
@@ -337,9 +337,9 @@ The term Super Sample Rate strictly means the processing of more than one sample
 Super Sample Rate - Operation Mode
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-TDM FIR can be configured to operate in SSR Mode using ``TP_SSR`` template parameter.  The mode will create an array of ``TP_SSR`` kernels and create the ``TP_SSR`` amount of the **input** and **output** ports.
+TDM FIR can be configured to operate in SSR Mode using ``TP_SSR`` template parameter. The mode will create an array of ``TP_SSR`` kernels and create ``TP_SSR`` **input** and **output** ports.
 
-When SSR mode is use, i.e. when ``TP_SSR > 1``, Input Samples, and therefore, corresponding TDM Channels will be split over multiple parallel paths.
+When SSR mode is used, i.e. when ``TP_SSR > 1``, input samples, and therefore corresponding TDM channels, will be split over multiple parallel paths.
 
 As a result, each SSR path will operate on a fraction of the workload, i.e. each path will operate on ``TP_TDM_CHANNELS / TP_SSR`` number of TDM Channels.
 
@@ -355,7 +355,7 @@ The number of AI Engine tiles used by a TDM FIR will be given by the formula:
 
 .. code-block::
 
-  NUMBER_OF_AIE_TILES = TP_SSR x TP_CASC_LEN
+  NUMBER_OF_AIE_TILES = TP_SSR * TP_CASC_LEN
 
 TDM FIR graph will split the requested FIR workload among the FIR kernels equally, which can mean that each kernel is tasked with a comparatively low computational effort.
 
@@ -365,7 +365,7 @@ TDM FIR graph will split the requested FIR workload among the FIR kernels equall
 Super Sample Rate - Port Utilization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The number of input/output ports created by a FIR will be given by the formula:
+The number of input/output ports created by a TDM FIR will be given by the formula:
 
 * Number of input ports: ``NUM_INPUT_PORTS  = TP_SSR``
 

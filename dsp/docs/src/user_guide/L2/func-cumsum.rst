@@ -15,24 +15,24 @@ scaling (as a shift), rounding, and saturation modes.
 Entry Point
 ===========
 
-The graph entry point is:
+The graph entry point is as follows:
 
 .. code-block::
 
-     xf::dsp::aie::cumsum::cumsum_graph
+    xf::dsp::aie::cumsum::cumsum_graph
 
 Device Support
 ==============
 
 Cumsum supports AIE, AIE-ML, and AIE-MLv2 devices with the following exceptions:
 
-- ``TT_DATA`` and ``TT_OUT_DATA`` support ``bfloat16`` and ``cbfloat16`` on AIE-ML and AIE-MLv2, but not on AIE1.
-- ``TT_DATA`` and ``TT_OUT_DATA`` support ``float`` and ``cfloat`` on AIE1, but not on AIE-ML or AIE-MLv2.
+- ``TT_DATA`` and ``TT_OUT_DATA`` support ``bfloat16`` and ``cbfloat16`` on AIE-ML and AIE-MLv2, but not on AIE.
+- ``TT_DATA`` and ``TT_OUT_DATA`` support ``float`` and ``cfloat`` on AIE, but not on AIE-ML or AIE-MLv2.
 
 Round modes and their enumerated values are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
 
-Supported Types
-===============
+Supported Data Types
+====================
 
 The input data type to the Cumsum is controlled by the ``TT_DATA`` template parameter and must be one of: ``int16``, ``int32``, ``float``, ``bfloat16``, or complex versions of these.
 ``TT_OUT_DATA`` selects the output type, which must be the same type as ``TT_DATA`` with equal or greater precision. For example, for ``cint16`` input, valid output types are ``cint16`` and ``cint32``.
@@ -73,7 +73,7 @@ The parameter ``TP_MODE`` selects the mode of operation. The following modes are
 ``TP_MODE = 0``
 ---------------
 
-This is conventional Cumsum of element-wise accumulation along the first dimension. Note that this will operate on all samples in a row, even above ``TP_DIM_A`` up to ``CEIL(TP_DIM_A, kSamplesInMemAccess)``, as this is faster than padding with zeros using exception code.
+This is conventional cumulative sum of element-wise accumulation along the first dimension. Note that this will operate on all samples in a row, even above ``TP_DIM_A`` up to ``CEIL(TP_DIM_A, kSamplesInMemAccess)``, as this is faster than padding with zeros using exception code.
 
 ``TP_MODE = 1``
 ---------------

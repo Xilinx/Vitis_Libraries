@@ -126,13 +126,13 @@ class ct_kernels {
  * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph
  *         in a single iteration run.  \n
  *         When TP_API is set to 0, samples are buffered and stored in a ping-pong window buffer mapped onto Memory
- *Group banks. \n
+ *         Group banks. \n
  *         As a result, maximum number of samples processed by the graph is limited by the size of Memory Group. \n
  *         When TP_API is set to 1 and TP_SSR is set to 1, incoming samples are buffered in a similar manner.  \n
  *         When TP_API is set to 1 and TP_SSR > 1, samples are processed directly from the stream inputs and no
- *buffering takes place. \n
+ *         buffering takes place. \n
  *         In such case, maximum number of samples processed by the graph is limited to 32-bit value (4.294B samples per
- *iteration).  \n
+ *         iteration).  \n
  *         \n
  *         Note: For SSR configurations (TP_SSR>1), the input data must be split over multiple ports,
  *         where each successive sample is sent to a different input port in a round-robin fashion. \n
@@ -189,29 +189,29 @@ class ct_kernels {
  *         A TP_SSR of 1 means just one output leg and 1 input phase, and is the backwards compatible option. \n
  *         The number of AIEs used is given by ``TP_SSR^2 * TP_CASC_LEN``. \n
  * @tparam TP_PARA_DECI_POLY specifies the number of distinct input data phases into which the input stream will be
- *split.
+ * split.
  *         In each stream computations are performed in parallel and the outputs are combined into a single output
- *stream. \n
+ * stream. \n
  *         Currently, only TP_PARA_DECI_POLY=2 is supported for the halfband interpolators with SSR>1. SSR = 1 supports
- *TP_PARA_DECI_POLY=1 or 2.
+ * TP_PARA_DECI_POLY=1 or 2.
  *
  *         TP_PARA_DECI_POLY = 2 result in two input polyphases. Each polyphase processes half of the input data stream.
- *Processed output data from both the polyphases
+ * Processed output data from both the polyphases
  *         are combined together to produce the overall output data stream.
  *         Hence, effectively the input to the filter is de-interleaved into TP_SSR * TP_PARA_DECI_POLY distinct input
- *data phases
+ *         data phases
  *         and produces TP_SSR distinct output data phases. \n
  *
  *         Overall, the first polyphase is implemented using a single rate asymmetric filter that is configured to
- *produce and consume data in parallel in
+ * produce and consume data in parallel in
  *         TP_SSR phases, each phase can operate at maximum throughput depending on the configuration.
  *         The first polyphase uses TP_SSR^2 * TP_CASC_LEN kernels. \n
  *         The second polyphase simplifies into a single kernel that does a single tap because halfband decimators only
- *have one non-zero
+ *         have one non-zero
  *         coefficient in the second coefficient phase. The second polyphase uses SSR kernels operating at maximum
- *throughput.
+ * throughput.
  *         Currently, only TP_PARA_INTERP_POLY=2 is supported for the halfband interpolators with SSR>1. SSR = 1
- *supports TP_PARA_INTERP_POLY=1 or 2.
+ * supports TP_PARA_INTERP_POLY=1 or 2.
  *         The overall theoretical output data rate is TP_SSR * TP_NUM_OUTPUTS * 1 GSa/s.
  *         The overall theoretical input data rate is TP_SSR * TP_PARA_DECI_POLY * (TP_DUAL_IP + 1) * 1GSa/s
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
@@ -633,7 +633,7 @@ class fir_decimate_hb_graph : public graph {
     /**
      * The conditional array of input async ports used to pass run-time programmable (RTP) coefficients.
      * This port_conditional_array is (generated when TP_USE_COEFF_RELOAD == 1) an array of input ports, which size is
-     *defined by TP_SSR.
+     * defined by TP_SSR.
      * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.
      * Size of the coefficient array is dependent on the TP_SSR.
      * - When TP_SSR = 1, the taps array must be supplied in a compressed form for

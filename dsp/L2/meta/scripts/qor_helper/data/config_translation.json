@@ -106,5 +106,8 @@
     "IS_OUTPUT_SQUARED" : "TP_IS_OUTPUT_SQUARED",
     "UPPER" : "TP_UPPER",
     "MODE" : "TP_MODE",
-    "GRID_DIM" : "TP_GRID_DIM"
+    "GRID_DIM" : "TP_GRID_DIM",
+    "Throughput (MSa/s)": "Throughput",
+    "Latency (ns)": "Latency",
+    "NUM_AIE": "NUM_AIE"
 }

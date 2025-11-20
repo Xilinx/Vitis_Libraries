@@ -1,8 +1,8 @@
 ..
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
-   
-   `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+    Copyright (C) 2019-2022, Xilinx, Inc.
+    Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+
+    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _BENCHMARK:
 
@@ -10,15 +10,15 @@
 Benchmark/QoR
 =============
 
-This section provides the L2 performance benchmarks and Quality of Results (QoR) for the AI Engine digital signal processing (DSP) library elements with various configurations. The results are extracted from a hardware emulation based simulations.
+This section provides the L2 performance benchmarks and Quality of Results (QoR) for the AI Engine digital signal processing (DSP) library elements with various configurations. The results are extracted from hardware-emulation-based simulations.
 
 The devices used for benchmarking are:
 
-- AIE: xcvc1902-vsva2197-2MP-e-S,
-- AIE-ML is the xcve2802-vsvh1760-2MP-e-S.
-- AIE-MLv2 is the xc2ve3858-ssva2112-2LP-e-S.
+- AIE: xcvc1902-vsva2197-2MP-e-S
+- AIE-ML: xcve2802-vsvh1760-2MP-e-S
+- AIE-MLv2: xc2ve3858-ssva2112-2LP-e-S
 
-The benchmark results are obtained using these devices wth an AI Engine clock frequency of 1.25 GHz (AIE and AIE-ML devices) or 1.05 GHz (AIE-MLv2 device) and 64-bit PLIOs at 625 MHz.
+The benchmark results are obtained using these devices with an AI Engine clock frequency of 1.25 GHz (AIE and AIE-ML devices) or 1.05 GHz (AIE-MLv2 device) and 64-bit PLIOs at 625 MHz.
 
 The metrics reported for each case are:
 
@@ -29,18 +29,18 @@ The metrics reported for each case are:
 - **DATA_MEMORY**: Total data memory in bytes used by the design.
 - **PROGRAM_MEMORY**: Program memory in bytes used by each kernel.
 
-The AIE_VARIANT parameter refers to the type of AI Engine that is used for each particular case in the benchmark results, this may be AIE, AIE-ML or AIE-MLv2.
+The ``AIE_VARIANT`` parameter refers to the type of AI Engine used for each particular case in the benchmark results; this may be AIE, AIE-ML, or AIE-MLv2.
 
-The PROGRAM_MEMORY metrics are harvested for each kernel the design consists of. For example, a finite impulse response (FIR) configured to be implemented on two tiles (CASC_LEN=2) will have two sets of figures displayed in the following table (space delimited).
+The ``PROGRAM_MEMORY`` metrics are collected for each kernel in the design. For example, a finite impulse response (FIR) configured to be implemented on two tiles (``CASC_LEN=2``) will have two sets of figures displayed in the following table (space-delimited).
 
 Latency and Throughput
 ======================
 
-The latency and throughput values are calculated using the input and output timestamp feature of the aiesimulator. The simulator will create files for the input and output PLIO ports containing the data stream and the timestamp information. Each line of data is preceded by a line containing a timestamp of when it was read or written by the graph port. This feature can be enabled using the option:
+The latency and throughput values are calculated using the input and output timestamp feature of the ``aiesimulator``. The simulator will create files for the input and output PLIO ports containing the data stream and the timestamp information. Each line of data is preceded by a line containing a timestamp of when it was read or written by the graph port. This feature can be enabled using the option:
 
 .. code-block::
 
-    aiesimulator --graph-latency
+     aiesimulator --graph-latency
 
 The latency value for each iteration is found by calculating the difference between the first input timestamp and the first output timestamp. Throughput is calculated from the number of samples in an iteration divided by the time difference between the first input timestamp of two consecutive iterations.
 
@@ -48,7 +48,7 @@ The latency and throughput values, as reported for each library element in the f
 
 In the case where there are multiple input ports and/or multiple output ports, the timestamps from the first of these ports are used as these are the ports that contain the first timestamped sample of each iteration.
 
-Furthermore, if there are no input ports included in the design (such as DDS only mode), then the throughput will be measured using the timestamped data on the output port. In such a case, the latency figures can be marked as invalid with the value reported as ``-1``.
+Furthermore, if there are no input ports included in the design (such as DDS-only mode), then the throughput will be measured using the timestamped data on the output port. In such a case, the latency figures can be marked as invalid with the value reported as ``-1``.
 
 Bitonic Sort
 ============
@@ -60,7 +60,7 @@ The following table gives results for the Bitonic Sort with a wide variety of su
 Convolution / Correlation
 =========================
 
-The following table gives results for the Convolution / Correlation with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_CONV_CORR`.
+The following table gives results for Convolution/Correlation with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_CONV_CORR`.
 
 :download:`conv_corr_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/conv_corr_benchmark.csv>`
 
@@ -69,7 +69,7 @@ Cumulative Sum
 
 The following table gives the results for the Cumulative Sum with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_CUMSUM`.
 
-Placeholder for cumsum benchmark.csv
+:download:`cumsum_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/cumsum_benchmark.csv>`
 
 DDS/Mixer
 =========
@@ -83,7 +83,7 @@ DDS/Mixer LUT
 
 The following table gives the results for the DDS/Mixer LUT with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_DDS_MIXER`.
 
-:download:`dds_mixer_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/dds_mixer_lut_benchmark.csv>`
+:download:`dds_mixer_lut_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/dds_mixer_lut_benchmark.csv>`
 
 DFT
 ===
@@ -92,7 +92,7 @@ The following table gives results for the DFT function with a wide variety of su
 
 :download:`dft_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/dft_benchmark.csv>`
 
-The following table gives an extended dataset for DFT function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_DFT`.
+The following table gives an extended dataset for the DFT function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_DFT`.
 
 :download:`dft_database.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/dft_database.csv>`
 
@@ -185,7 +185,7 @@ FIR TDM
 
 The following table gives results for TDM FIR filter with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FILTERS`.
 
-:download:`fir_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/fir_tdm_benchmark.csv>`
+:download:`fir_tdm_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.1/dsp/docs/src/csv_data_files/L2/fir_tdm_benchmark.csv>`
 
 Function Approximation
 ======================

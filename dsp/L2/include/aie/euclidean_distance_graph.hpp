@@ -130,8 +130,8 @@ class euclidean_distance_graph : public graph {
                   "\n  where N is Integer > 1] and \n            TP_LEN "
                   "should be greater than or equal to minimum length [((256/samplesize<TT_DATA>())*2)] based on "
                   "given data type i.e.\n                 '[Data Type-    MIN    MAX]' \n                 "
-                  "'--------------------------' \n                 '[float    -    16    2048]' \n                 "
-                  "'[bfloat16 -    32    4096]'  ");
+                  "'--------------------------' \n                 '[float    -    16    4096]' \n                 "
+                  "'[bfloat16 -    32    8192]'  ");
 
     // defensive check for Dimension of point P should not be greater than 4
     static_assert(fnCheckforDimension<TP_DIM>(),

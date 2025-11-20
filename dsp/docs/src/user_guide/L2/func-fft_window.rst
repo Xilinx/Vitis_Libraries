@@ -15,7 +15,7 @@ This library element implements an FFT window function such as a Hamming Window.
 Entry Point
 ===========
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -24,14 +24,14 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The fft_window supports AIE, AIE-ML and AIE-MLv2 devices with the following exception(s):
+The fft_window supports AIE, AIE-ML, and AIE-MLv2 devices with the following exceptions:
 
 - ``TT_DATA`` supports cfloat on AIE, but not on AIE-ML.
 - ``TT_COEFF`` supports float on AIE, but not on AIE-ML.
 - Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
 
-Supported Types
-===============
+Supported Data Types
+====================
 
 The data type to the FFT window is controlled by the ``TT_DATA`` template parameter . This can take one of three choices: cint16, cint32, or cfloat (AIE only, not AIE-ML). This selection applies to both input data and output data.
 
@@ -59,7 +59,7 @@ To see details on the ports for the FFT Window, see :ref:`API_REFERENCE`. Note t
 Design Notes
 ============
 
-The FFT Window performs a sample by sample scaling of data prior to entry to a FFT. Because there is an open-ended list of window types in the literature, this unit takes the raw coefficient values as a constructor argument rather than a choice of window types from a finite supported library. For convenience, utility functions are provided for some of the common window types, i.e., Hamming, Hann, Blackman, and Kaiser. On construction, the array containing the window coefficients must be passed to the graph constructor.
+The FFT Window performs a sample-by-sample scaling of data prior to entry to an FFT. Because there is an open-ended list of window types in the literature, this unit takes the raw coefficient values as a constructor argument rather than a choice of window types from a finite supported library. For convenience, utility functions are provided for some of the common window types, i.e., Hamming, Hann, Blackman, and Kaiser. On construction, the array containing the window coefficients must be passed to the graph constructor.
 
 Dynamic Point Size
 ------------------

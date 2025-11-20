@@ -269,9 +269,9 @@ class dft_graph : public graph {
      * The input data to each of the kernels in the function.
      * This input is a window of samples of ``TT_DATA`` type.
      * The number of samples in the window to each kernel is derived by ``(TP_POINT_SIZE / TP_CASC_LEN) *
-     *TP_NUM_FRAMES``.
+     * TP_NUM_FRAMES``.
      * A data frame of size ``TP_POINT_SIZE`` may require zero-padding so that after it has been divided by TP_CASC_LEN,
-     *so that it is aligned to the vector read size
+     * so that it is aligned to the vector read size
      * (for AIE this would 4, 8, and 8 samples for cint16, cint32, and cfloat respectively, and for AIE-Ml this would be
      *8 samples for all data types).
      * Each kernel in a cascaded design will receive an equal share of the input data.

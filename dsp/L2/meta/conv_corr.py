@@ -368,7 +368,7 @@ def fn_validate_g_len(AIE_VARIANT, TP_API, TT_DATA_G, TP_F_LEN, TP_G_LEN):
         return com.isError(f"TP_G_LEN should be divisible by {elems_per_load}.")
     if TP_G_LEN > TP_F_LEN:
         return com.isError(
-            f"TP_G_LEN cannot be greater than TP_F_LEN."
+            f"TP_G_LEN cannot be greater than TP_F_LEN"
         )  # ! Assertion is unnecessary but descriptive.
 
     return com.validate_range(range_TP_G_LEN, "TP_G_LEN", TP_G_LEN)

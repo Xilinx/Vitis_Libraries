@@ -85,6 +85,15 @@ class test_graph : public graph {
         outWindow[0] = output_plio::create("PLIO_OutFile", adf::plio_64_bits, OutFile);
         connect<>(euclidean_distanceGraph.outWindow, outWindow[0].in[0]);
 
+#ifdef USING_UUT
+#if (SINGLE_BUF == 1 && API_IO == 0)
+        single_buffer(euclidean_distanceGraph.getKernels()[0].in[0]);
+        single_buffer(euclidean_distanceGraph.getKernels()[0].in[1]);
+        single_buffer(euclidean_distanceGraph.getKernels()[0].out[0]);
+        printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel.\n");
+#endif
+#endif
+
         printf("==================================\n");
         printf("======= End of sub-graph ======\n");
         printf("==================================\n");

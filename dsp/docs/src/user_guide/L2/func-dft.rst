@@ -10,12 +10,12 @@
 DFT
 ===
 
-The DSPLib contains a solution for the discrete Fourier transform (DFT). It has a configurable point size, data type, cascade length, ssr, and the ability to perform the DFT on multiple frames of data per iteration.
+The DSPLib contains a solution for the Discrete Fourier Transform (DFT). It has a configurable point size, data type, cascade length, SSR, and the ability to perform the DFT on multiple frames of data per iteration.
 
 Entry Point
 ===========
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -24,12 +24,12 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The DFT supports AIE, AIE-ML and AIE-MLv2 for all features with the following exception
+The DFT supports AIE, AIE-ML, and AIE-MLv2 devices for all features, with the following exception:
 
 - cfloat is not supported for ``TT_DATA`` on AIE-ML.
 
-Supported Types
-===============
+Supported Data Types
+====================
 
 The data type of the DFT is controlled by the ``TT_DATA`` template parameter.
 
@@ -113,7 +113,7 @@ This is also a requirement when using the cascading feature of the DFT for AIE. 
 
 When the IP is configured for SSR operation, the data provided to each port must each satisfy the above rules.
 
-For example, if ``TP_POINT_SIZE = 20`` and ``TP_CASC_LEN = 3``, this should be padded into a frame with a size that is a multiple of ``8 * TP_CASC_LEN`` for cint16, and ``4 * TP_CASC_LEN`` for cint32 and cfloats:
+For example, if ``TP_POINT_SIZE = 20`` and ``TP_CASC_LEN = 3``, this should be padded into a frame with a size that is a multiple of ``8 * TP_CASC_LEN`` for cint16, and ``4 * TP_CASC_LEN`` for ``cint32`` and ``cfloat``:
 
 20-point data for transform:
 

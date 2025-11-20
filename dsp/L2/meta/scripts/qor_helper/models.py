@@ -32,6 +32,9 @@ with open("data/column_dict.json", 'r') as file:
     COLUMN_DICT = json.load(file)
     COLUMN_DICT = {k:set(v) for k,v in COLUMN_DICT.items()}
 
+with open("data/config_translation.json", "r") as file:
+    CONFIG_TRANSLATION = json.load(file)
+
 class BaseModelPipeline(BaseEstimator, RegressorMixin):  
     def __init__(self, model=None, column_mapper:dict=None, cat_encoding:str="one_hot", scaler=StandardScaler):
         self.model = model
@@ -161,8 +164,13 @@ if __name__ == "__main__":
     training_csv_path = args.training_csv_path
 
     train_df = pd.read_csv(training_csv_path)
-    train_df.rename(columns={"Throughput (MSa/s)": "Throughput", "Latency (ns)": "Latency"}, inplace=True)  # ensure correctly labelled columns
+    train_df = train_df.rename(columns=CONFIG_TRANSLATION)  # ensure correctly labelled columns
+    col_set = {v for k,v in CONFIG_TRANSLATION.items()}
+    keep_cols = list(set(train_df.columns) & col_set)
+    train_df = train_df[keep_cols]
+    train_df.rename(columns=CONFIG_TRANSLATION, inplace=True)  # ensure correctly labelled columns
     train_df = train_df[train_df['Latency'] != -1]   # remove non-functional cases
+    train_df = train_df.dropna()
 
     col_names = set(train_df.columns)
     ip = metadata_api.IP(ip_name, {})

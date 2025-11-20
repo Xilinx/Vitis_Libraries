@@ -10,12 +10,12 @@
 Mixed Radix FFT
 ===============
 
-This library element implements an FFT or Inverse FFT of a point size which is not a power of 2 only but is a product of a power of 2, a power of 3, and a power of 5.
+This library element implements an FFT or inverse FFT for point sizes that are not solely powers of two, but products of powers of 2, 3, and 5.
 
 Entry Point
 ===========
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -23,7 +23,7 @@ The graph entry point is the following:
 
 Device Support
 ==============
-The mixed_radix_fft supports AIE, AIE-ML and AIE-MLv2 devices.
+The mixed_radix_fft supports AIE, AIE-ML, and AIE-MLv2 devices.
 
 All features are supported on these variants with minor differences as follows:
 
@@ -32,10 +32,10 @@ All features are supported on these variants with minor differences as follows:
 - Number of ports: When configured for ``TP_API=1`` (stream IO), AIE will require 2 input ports (sample interleaved - even samples on the first port) and 2 output ports similarly interleaved. AIE-ML accepts one stream only.
 - ``TP_DYN_PT_SIZE``: the dynamic (run-time) point-size feature is supported on AIE only.
 
-Supported Types
-===============
+Supported Data Types
+====================
 
-The data type to the mixed radix FFT is controlled by the ``TT_DATA`` template parameter. This can take one of two choices: cint16 or cint32. ``TT_DATA`` determined the data type of both the input data and output data.
+The data type to the mixed radix FFT is controlled by the ``TT_DATA`` template parameter. This can take one of two choices: cint16 or cint32. ``TT_DATA`` determines the data type of both the input data and output data.
 The ``TT_TWIDDLE`` template parameter is constrained by ``TT_DATA`` and so currently must be set to cint16.
 
 Template Parameters
@@ -65,7 +65,7 @@ Dynamic Point Size
 
 Dynamic point size is selected using ``TP_DYN_PT_SIZE`` = 1. When set, the library unit has two input ports and two output ports. There is a header input port
 and a data input port. Similarly there is an output header port and an output data port.
-The header for both input and output is a fixed size of 256bits considered as 8 fields each of int32 type.
+The header for both input and output is a fixed size of 256 bits, considered as 8 fields each of int32 type.
 The fields hold the following information:
 
 .. table:: Dynamic point size data header in Mixed Radix FFT
@@ -88,7 +88,7 @@ The fields hold the following information:
    +---------------+-------------------------------------------------------------------+
    |    6          |    Not used                                                       |
    +---------------+-------------------------------------------------------------------+
-   |    7          |    Error flag (set on output if the pointsize is invalid)         |
+   |    7          |    Error flag (set on output if the point size is invalid)        |
    +---------------+-------------------------------------------------------------------+
 
 
@@ -168,7 +168,7 @@ The cascade feature is not supported for dynamic point size operation.
 API Type
 --------
 
-The mixed radix FFT can be configured using ``TP_API`` to use IO buffer ports (0) or streams (1).
+The mixed radix FFT can be configured using ``TP_API`` to use IO-buffer ports (0) or streams (1).
 
 When configured for streams, additional kernels are added on the input and output to convert from streams to IO-buffers and vice versa, because internally the kernel performing the FFT itself uses IO buffers.
 
@@ -184,7 +184,7 @@ The Mixed Radix FFT does not contain any tool constraints such as location const
 Applying Design Constraints
 ---------------------------
 
-Location and other constraints might be applied in the parent graph which instances the FFT graph class. To apply a constraint, you will need to know the name of the kernel, which will include the hierarchial path to that kernel. The simplest way to derive names, including the hierarchial part, is to compile a design and open it in AMD Vitis |trade| , using the graph view. The names of all kernels and memory buffers can be obtained from there. These names may then be back-annotated to the parent graph to apply the necessary constraint.
+Location and other constraints might be applied in the parent graph which instances the FFT graph class. To apply a constraint, you will need to know the name of the kernel, which will include the hierarchical path to that kernel. The simplest way to derive names, including the hierarchical part, is to compile a design and open it in AMD Vitis |trade| , using the graph view. The names of all kernels and memory buffers can be obtained from there. These names may then be back-annotated to the parent graph to apply the necessary constraint.
 
 Code Example
 ============

@@ -23,12 +23,12 @@
 Overview
 ========
 
-The AMD Vitis |trade| DSP Library offers a fully synthesizable Super Sample data Rate (SSR) FFT with a systolic architecture to process multiple input samples every clock cycle. The number of samples
+The AMD Vitis |trade| DSP Library offers a fully synthesizable Super Sample Rate (SSR) FFT with a systolic architecture to process multiple input samples every clock cycle. The number of samples
 processed in parallel per cycle is denoted by the SSR factor. The SSR FFT is implemented as a C++ template function that synthesizes into a streaming architecture. The SSR FFT architecture used for implementation can be parameterized through template parameters, which are grouped in a C++ struct of type **ssr_fft_default_params**. A new structure can be defined by extending the default structure and redefining required member constants as follows:
 
 .. code-block:: cpp
 
-	struct ssr_fft_fix_params:ssr_fft_default_params
+	struct ssr_fft_fix_params : ssr_fft_default_params
 	{
 		static const int N = 1024;
 		static const int R = 4;
@@ -59,31 +59,31 @@ Single-instance example:
 
 .. code-block:: cpp
 
-   xf::dsp::fft::fft<fftParams><ssr_fft_fix_params>(...);
+   xf::dsp::fft::fft<ssr_fft_fix_params>(...);
 
 The current release of Vitis SSR FFT supports the use of multiple instances of 1-D SSR FFT in a single design. To enable the use of multiple instances, the fft function takes as an input a new template parameter besides the parameter structure. This parameter gets a default value if no value is provided for it. But if multiple instance support is required, all the instances used should be provided with the unique integer template parameter, like:
 
 .. code-block:: cpp
 
-   xf::dsp::fft::fft<fftParams,1><ssr_fft_fix_params>(...);
-   xf::dsp::fft::fft<fftParams,2><ssr_fft_fix_params>(...);
+   xf::dsp::fft::fft<ssr_fft_fix_params, 1>(...);
+   xf::dsp::fft::fft<ssr_fft_fix_params, 2>(...);
 
 Data Type Support for Synthesis
 ===============================
 
-Currently 1-D SSR FFT supports fixed point and floating point complex inputs for synthesis.
+Currently, 1-D SSR FFT supports fixed-point and floating-point complex inputs for synthesis.
 
 Fixed Point
 -----------
 
-The fixed point SSR FFT implementation is based on fixed point data types **std::complex<ap_fixed<>>** which are used for synthesis and implementation. It is possible to use floating point types **std::complex<float>** and **std::complex<double>** for simulation, but these floating point complex models will consume massive resources if synthesized to hardware. For the best results with the fixed point type, limit the data bit width to 27 bits (integer + fraction) as it helps to map multiplication and addition within SSR FFT butterflies directly onto a single DSP block. Larger inputs can be used but can lead to slower Fmax and more resource utilization. Finally, the complex exponential/twiddle factor storage is on 18 bits (16F+2I bits). The selection of 18-bit is made keeping in view the 18x27 multipliers available within DSP blocks on FPGAs.
+The fixed-point SSR FFT implementation is based on fixed-point data types **std::complex<ap_fixed<>>** which are used for synthesis and implementation. It is possible to use floating-point types **std::complex<float>** and **std::complex<double>** for simulation, but these floating-point complex models will consume massive resources if synthesized to hardware. For the best results with the fixed-point type, limit the data bit width to 27 bits (integer + fraction) as it helps to map multiplication and addition within SSR FFT butterflies directly onto a single DSP block. Larger inputs can be used but can lead to slower Fmax and more resource utilization. Finally, the complex exponential/twiddle factor storage is 18 bits (16F+2I bits). The selection of 18-bit is made keeping in view the 18x27 multipliers available within DSP blocks on FPGAs.
 
 .. _FLOAT_FFT_PARAMS_STRUCT_LABEL:
 
 Floating Point
 --------------
 
-1-D SSR FFT also supports synthesis for the single or double precision floating point type. For synthesizing a complex floating point type, it is required that std::complex type is not used as a complex wrapper Because this wrapper has some issues and it is required that a wrapper class provided with the AMD Vitis |trade| DSP library called **complex_wrapper<...>** is used for wrapping complex float numbers. Also while synthesizing the floating point 1-D SSR FFT the parameters in the structure which carry information such as scaling mode, twiddle factor storage bits, butterfly rounding mode. etc. which are only related to the fixed point data path, carry no meaning. Instead, the SSR FFT parameter structure can simply define relevant parameters as follows:
+1-D SSR FFT also supports synthesis for single- or double-precision floating-point types. For synthesizing a complex floating-point type, it is required that the std::complex type is not used as a complex wrapper because this wrapper has some issues; instead, use the AMD Vitis |trade| DSP library wrapper **complex_wrapper<...>** for wrapping complex floating-point numbers. Also, while synthesizing the floating-point 1-D SSR FFT, the parameters in the structure which carry information such as scaling mode, twiddle factor storage bits, butterfly rounding mode, etc., which are only related to the fixed-point data path, carry no meaning. Instead, the SSR FFT parameter structure can simply define relevant parameters as follows:
 
 .. code-block:: cpp
 
@@ -125,7 +125,7 @@ Configurations for Fixed Point Implementation (Recommended Flow)
 Start With Floating Point Model
 -------------------------------
 
-Currently, 1-D SSR FFT can be used with ap_fxied<>, ﬂloat, and double types. The following table lists the support for synthesis and simulation.
+Currently, 1-D SSR FFT can be used with ap_fixed<>, float, and double types. The following table lists the support for synthesis and simulation.
 
 +------------------------------+---------------------------+----------------------------+
 |                              |                           |                            |
@@ -378,7 +378,7 @@ If you require a streaming 1-D SSR FFT block with a first in first out (FIFO) in
     :width: 40%
     :align: center
 
-1. Declares the input and output streams explicitly with the corresponding stream depth:
+1. Declare the input and output streams explicitly with the corresponding stream depth:
 
 .. code-block:: cpp
 
@@ -387,7 +387,7 @@ If you require a streaming 1-D SSR FFT block with a first in first out (FIFO) in
     // output stream of innerFFT
     hls::stream<O_TYPE, FIFO_DEPTH> outStrm[R];
 
-2. This feeds the data to the input FIFO, or eats from the output one:
+2. Feed data to the input FIFO and read from the output FIFO:
 
 .. code-block:: cpp
 
@@ -431,14 +431,14 @@ The current version of the 1-D SSR FFT naturally supports a streaming connection
 
 1-D SSR FFT Tests
 -----------------
-Different tests are provided for the fixed point and floating point 1-D SSR FFT. These tests can be run individually using the makefile, or they can all be lauched at the same time by using a provided script. All the 1-D SSR FFT tests are in the folder, ``REPO_PATH/dsp/L1/tests/hw/1dfft``
+Different tests are provided for fixed-point and floating-point 1-D SSR FFT. These tests can be run individually using the Makefile, or they can all be launched at the same time by using a provided script. All the 1-D SSR FFT tests are in the folder, ``REPO_PATH/dsp/L1/tests/hw/1dfft``
 
 Launching an Individual Test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To launch an individual test, first it is required to set up the environment for launching the Vitis HLS Compiler which can be done as follows:
 
-Set up the environment variable **TA_PATH** to point to the installation path of your Vitis installation , and run following commands to set up the environment:
+Set up the environment variable **TA_PATH** to point to the installation path of your Vitis installation, and run the following commands to set up the environment:
 
 .. code-block:: bash
 
@@ -446,7 +446,7 @@ Set up the environment variable **TA_PATH** to point to the installation path of
    export XILINX_VIVADO=${TA_PATH}/Vivado/2021.1
    source ${XILINX_VIVADO}/settings64.sh
 
-Once the environment settings are done, an individual test can be launched by going to test folder (any folder inside sub-directory at any level of ``REPO_PATH/dsp/L1/test/hw/1dfft`` that has a Makefile is a test) and running the make command: ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1``. You can choose the part number as required, and by settting CSIM/CSYNTH/COSIM=0, choose what to build and run with make target.
+Once the environment settings are done, an individual test can be launched by going to the test folder (any folder inside a sub-directory at any level of ``REPO_PATH/dsp/L1/test/hw/1dfft`` that has a Makefile is a test) and running the make command: ``make run XPART='xcu200-fsgd2104-2-e' CSIM=1 CSYNTH=1 COSIM=1``. You can choose the part number as required, and by setting CSIM/CSYNTH/COSIM=0, choose what to build and run with the make target.
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:

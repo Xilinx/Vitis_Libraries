@@ -11,13 +11,13 @@ Hadamard Product
 ================
 
 This library element implements Hadamard Product of two input vectors. Element-wise multiplication of input ports (inA and inB) is performed. Therefore input and output vectors are required to be the same dimension.
-The Hadamard Product IP has configurable vector dimension, data type, window size, scaling (as a shift), interface api (stream/window) and parallelism factor.
-Template parameters are used to configure the top level graph of the hadamard_graph class.
+The Hadamard Product IP has configurable vector dimension, data type, window size, scaling (as a shift), interface API (stream/window), and parallelism factor.
+Template parameters are used to configure the top-level graph of the ``hadamard_graph`` class.
 
 Entry Point
 ===========
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -26,13 +26,14 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The Hadamard supports AIE and AIE-ML devices.
+The Hadamard Product supports AIE, AIE-ML, and AIE-MLv2 devices.
 
 - Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
 
 
-Supported Types
-===============
+Supported Data Types
+====================
+
 The data types of input ports A and B (inA and inB) are controlled by ``TT_DATA_A`` and ``TT_DATA_B`` respectively.
 Both inputs may take one of the 6 choices: int16, int32, cint16, cint32, float and cfloat. It must be kept in mind that depending on the input type combinations, output type will be determined by the IP.
 Please see table :ref:`HADAMARD_output_type`: for allowed input data type combinations and resultant output type. In addition, the vector size granularity is given for the data type combinations. ``TP_DIM`` should be a multiple of the listed vector size.
@@ -146,6 +147,3 @@ Code Example
    :ltrim:
 .. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
    :ltrim:
-
-
-

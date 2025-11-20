@@ -12,12 +12,12 @@ Bitonic Sort
 
 This library element bitonically sorts the input list.
 The bitonic sort has configurable data types and list sizes, along with a configurable number of frames, ascending or descending sort, and cascading support. Additionally, there is support for Super Sample Rate, which allows multiple sets of input data to be processed and sorted into a single sorted list.
-Template parameters are used to configure the top level graph of the bitonic_sort_graph class.
+Template parameters are used to configure the top-level graph of the ``bitonic_sort_graph`` class.
 
 Entry Point
 ===========
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -26,11 +26,12 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The Bitonic Sort Product library element supports AIE, AIE-ML and AIE-MLv2 devices.
+The Bitonic Sort library element supports AIE, AIE-ML, and AIE-MLv2 devices.
 
-Supported Types
-===============
-The data type is controlled by ``TT_DATA``, and can be one of 4 choices: int16, uint16 (not available on AIE), int32 or float.
+Supported Data Types
+====================
+
+The data type is controlled by ``TT_DATA`` and can be one of four types: ``int16``, ``uint16`` (not available on AIE), ``int32``, or ``float``.
 
 
 Template Parameters
@@ -47,7 +48,7 @@ To see details on the access functions for the Bitonic Sort, see :ref:`API_REFER
 Ports
 =====
 
-To see details on the ports for the Bitonic Sort, see :ref:`API_REFERENCE`. Note that the type of ports are determined by the configuration of template parameters.
+To see details on the ports for the Bitonic Sort, see :ref:`API_REFERENCE`. Note that the types of ports are determined by the configuration of template parameters.
 
 Design Notes
 ============
@@ -71,7 +72,7 @@ The bitonic sort graph configured with ``TP_SSR > 1`` will have ``TP_SSR`` input
 
 Constraints
 -----------
-The Bitonic Sort input ``TP_DIM`` must be a power of 2. ``TP_DIM * size_of(TT_DATA) / TP_SSR`` must have a minimum value of 64 bytes (size of buffer on AI Engine * 2).
+The Bitonic Sort input ``TP_DIM`` must be a power of 2. ``TP_DIM * sizeof(TT_DATA) / TP_SSR`` must be at least 64 bytes (size of buffer on AI Engine * 2).
 
 Code Example
 ============
@@ -83,6 +84,3 @@ Code Example
    :ltrim:
 .. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
    :ltrim:
-
-
-

@@ -245,7 +245,7 @@ class create_casc_kernel<1,
  *\n
  * @tparam TP_NUM_FRAMES describes the number of batches of input data that will be processed per iteration. \n
  * @tparam TP_CASC_LEN describes the number of AIE kernels the matrix-vector multiplication will be divided into in
- *series. \n
+ *         series. \n
  *         Each kernel will receive a an equal sized split (along the common dimension) of the matrix and vector,
  *         and will pass the partial computation of the output to the next kernel in the chain via the cascade stream.
  *         TP_CASC_LEN must be in the range 1 (default) to 16.
@@ -264,7 +264,7 @@ class create_casc_kernel<1,
  *         chain of cascaded kernels will be the same across all SSR ranks.
  * @tparam TP_DIM_A_LEADING describes the leading dimension of the Matrix A data.
  *         If TP_DIM_A_LEADING=1, the elements of the matrix columns are contiguous in memory. This is the only
- *supported order
+ *         supported order
  *         of Matrix A input data for computation. \n
  *         If TP_DIM_A_LEADING=0, the elements of the matrix rows are contiguous in memory and will be transposed
  *         at the input ports for each kernel using DMA Buffer Descriptors. \n
@@ -287,7 +287,7 @@ class create_casc_kernel<1,
  *         0 - iobuffer B port(s) - supported for TP_USE_MATRIX_RELOAD = 0 and TP_USE_MATRIX_RELOAD = 1 \n
  *         1 - stream B port(s) - supported only for TP_USE_MATRIX_RELOAD = 1 \n
  * @tparam TP_DUAL_IP describes whether dual inputs are used for the Vector B port(s) when TP_API = 1 and
- *TP_USE_MATRIX_RELOAD = 1. \n
+ *         TP_USE_MATRIX_RELOAD = 1. \n
  *         Supported values: \n
  *         0 - single vector input port (stream or iobuffer) for each kernel \n
  *         1 - dual vector input stream ports for each kernel. Only supported when TP_API = 1 on AIE devices.
@@ -316,9 +316,9 @@ class matrix_vector_mul_graph : public graph {
     /**
      * The kernels that will be created and mapped onto AIE tiles.
      * The size of C will determine the length of the number of kernels connected with each other in series via a
-     *cascade interface.
+     * cascade interface.
      * There will be (``TP_SSR``) number cascaded kernel chains computed in parallel. Therefore, there will be
-     *(``TP_CASC_LEN``) * (``TP_SSR``)  total kernels.
+     * (``TP_CASC_LEN``) * (``TP_SSR``)  total kernels.
      **/
     kernel m_mat_vec_mulKernels[TP_CASC_LEN * TP_SSR];
 
@@ -359,7 +359,7 @@ class matrix_vector_mul_graph : public graph {
 
     /**
      * The output data of the function. For cascaded designs, this is located at the end of the cascaded kernel chain.
-     *The number of output ports will be equal to the number of SSR ranks (``TP_SSR``). \n
+     * The number of output ports will be equal to the number of SSR ranks (``TP_SSR``). \n
      * The output type will depend on the type of the matrix and vector (TT_DATA_A and TT_DATA_B).
      * The vector result of the matrix-vector multiplication will be the size of TP_DIM_A.
      * The number of samples to the Output iobuffer will be (TP_DIM_A / TP_CASC_LEN) * TP_NUM_FRAMES.

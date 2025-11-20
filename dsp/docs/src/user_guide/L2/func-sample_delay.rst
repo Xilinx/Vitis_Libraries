@@ -10,12 +10,12 @@
 Sample Delay
 ======================
 
-Sample Delay is a circular buffer based implementation of a delay filter for introducing a delay into a time series. See the design notes for insight into the implementation.
+Sample Delay is a circular-buffer-based implementation of a delay filter for introducing a delay into a time series. See the Design Notes for insight into the implementation.
 
 Entry Point
 ===========
 
-The graph entry point is the following:
+The graph entry point is as follows:
 
 .. code-block::
 
@@ -24,12 +24,12 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The Sample Delay supports AIE, AIE-ML and AIE-MLv2.
+The Sample Delay supports AIE, AIE-ML, and AIE-MLv2.
 
-Supported Types
-===============
+Supported Data Types
+====================
 
-The sample_delay supports unit8, int8, int16, cint16, int32, cint32, float, and cfloat data types on the input.
+The sample_delay supports ``uint8``, ``int8``, ``int16``, ``cint16``, ``int32``, ``cint32``, ``float``, and ``cfloat`` data types on the input.
 
 Template Parameters
 ===================
@@ -49,9 +49,9 @@ To see details on the ports for the sample_delay, see :ref:`API_REFERENCE`.
 Design Notes
 ============
 
-Sample Delay introduces delay into the input data which is often a time series. The unit of delay is 'number of samples' which is passed on Run Time Parameter (RTP) port: sampleDelayValue. The legal range of sampleDelayValue is [0, MAX_DELAY-1].
-As far as the functionality is concerned, it is a delay filter, however, implementation employs a vectorized circular buffer. The delay passed on the sampleDelayValue RTP port is introduced by converting it into two address offsets: vector offset and element offset.
-The application of vector offset part (of the delay) is used to adjust the starting read address, whereas the application of the remainder element offset part (of the delay) is a shuffle operation carried out on each vector traversing through the processor registers.
+Sample Delay introduces delay into input data (often a time series). The unit of delay is the number of samples, provided via the runtime-programmable (RTP) port ``sampleDelayValue``. The legal range of ``sampleDelayValue`` is [0, ``MAX_DELAY`` - 1].
+As far as functionality is concerned, it is a delay filter; however, the implementation employs a vectorized circular buffer. The delay provided on the ``sampleDelayValue`` RTP port is introduced by converting it into two address offsets: a vector offset and an element offset.
+The vector-offset portion of the delay adjusts the starting read address, whereas the remaining element-offset portion is applied via a shuffle operation carried out on each vector traversing the processor registers.
 
 
 

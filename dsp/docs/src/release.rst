@@ -19,6 +19,8 @@ Release Notes
 
 The following features have been added to the library in this release:
 
+* **Bitonic Sort** - Disallowing inefficient configurations. Super Sample Rate (SSR) and use of cascades are now mutually exclusive. SSR=16 disallowed.
+
 * **Cumulative Sum** - New library element.
 
 +---------------------------------------+-----------------------------------------------------------------------------+
@@ -31,13 +33,11 @@ This element adds an implementation of the cumsum() algorithm.
 
 Supports AIE, AIE-ML and AIE-MLv2 devices.
 
-* **Function Approximation** - Added support for Run Time Programmable (RTP) configuration of the lookup tables that determine the function approximation.
-
-* **Bitonic Sort** - Disallowing inefficient configurations. Super Sample Rate (SSR) and use of cascades are now mutually exclusive. SSR=16 disallowed.
-
 * **Euclidean Distance** -
       - Removed a template parameter called ``TT_DATA_OUT`` from the ED library element, since the input and output data types must be the same by definition.
       - Added support for AIE-MLv2 device.
+
+* **Function Approximation** - Added support for Run Time Programmable (RTP) configuration of the lookup tables that determine the function approximation.
 
 * **Packet Graph Switch** - New library graph element.
 
@@ -52,6 +52,8 @@ This element adds an implementation of a packet switch graph that can route mult
 Supports AIE, AIE-ML and AIE-MLv2 devices.
 
 Supported IP: FIR TDM.
+
+* **VSS FFT/IFFT** - Adds support for cint16 data type and introduces resource optimizations.
 
 2025.1
 ======
