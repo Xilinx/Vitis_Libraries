@@ -19,6 +19,8 @@
 
 
 ![Comprehensive Set of Domain-Specific Accelerated Libraries](https://xilinx.github.io/Vitis_Libraries/_images/1569434411715.png)
+* Also starting with the 2025.2 release, some Alveo platforms will no longer be supported, including U200, U250, and U280. Users can continue using other Alveo platforms (including U50, U50LV, and U55C) to implement PL designs with similar performances. 
+
 
 # Use in Familiar Programming Languages
 Use Vitis accelerated-libraries in commonly-used programming languages that you know like C, C++, and Python. Leverage Xilinx platforms as an enabler in your applications – Work at an application level and focus your core competencies on solving challenging problems in your domain, accelerate time to insight, and innovate.
