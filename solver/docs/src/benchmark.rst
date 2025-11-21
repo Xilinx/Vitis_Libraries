@@ -10,7 +10,7 @@
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
-.. _benchmark:
+.. _benchmark_fpga:
 
 ==========
 Benchmark 

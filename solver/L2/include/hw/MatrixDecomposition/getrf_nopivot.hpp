@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 /**
- * @file potrf_nopivot.hpp
- * @brief  This files contains implementation of Cholesky decomposition
+ * @file getrf_nopivot.hpp
+ * @brief  This files contains implementation of LU decomposition without pivoting
  */
 
 #ifndef _XF_SOLVER_GETRF_NOPIVOT_

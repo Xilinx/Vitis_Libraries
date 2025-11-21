@@ -1,4 +1,3 @@
-#
 # Copyright (c) 2018-2022, Xilinx, Inc.
 # Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
@@ -13,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 xcl2_SRCS:=${COMMON_REPO}/libs/xcl2/xcl2.cpp
 xcl2_HDRS:=${COMMON_REPO}/libs/xcl2/xcl2.hpp
 

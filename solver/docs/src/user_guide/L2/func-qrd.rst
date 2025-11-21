@@ -15,8 +15,8 @@ This function computes the QR decomposition of matrix :math:`A` using the modifi
 .. math::
     A = Q R
 
-where :math:`A` is the input matrix of size :math:`m \times n`, :math:`m` is the number of rows and :math:`n` is the number of columns in the matrix. :math:`Q` is the orthonormal output matrix of size :math:`m \times n`, and :math:`R` is an upper triangular matrix of size :math:`n \times n`.
-The QR decomposition has configurable data types and matrix sizes, along with a configurable number of frames, and support for cascaded kernel implementation to allow larger matrix decomposition.
+where :math:`A` is the input matrix of size :math:`m \times n` (:math:`m` is the number of rows and :math:`n` is the number of columns). :math:`Q` is an orthonormal matrix of size :math:`m \times n` (with orthonormal columns), and :math:`R` is an upper-triangular matrix of size :math:`n \times n`.
+The QRD library element has configurable data types and matrix sizes, a configurable number of frames, and support for cascaded kernel implementation to allow larger matrix decomposition.
 
 
 Entry Point
@@ -31,12 +31,12 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The QRD library element supports AIE, AIE-ML and AIE-MLv2 devices.
+The QRD library element supports AIE, AIE-ML, and AIE-MLv2 devices.
 
 Supported Types
 ===============
 
-The data type is controlled by ``TT_DATA``, and can be one of two choices: float or cfloat.
+The data type is controlled by ``TT_DATA`` and can be one of two choices: ``float`` or ``cfloat``.
 
 
 Template Parameters
@@ -53,7 +53,7 @@ To see details on the access functions for the QRD, see :ref:`API_REFERENCE`.
 Ports
 =====
 
-To see details on the ports for the QRD, see :ref:`API_REFERENCE`. Note that the type of ports are determined by the configuration of template parameters.
+To see details on the ports for the QRD, see :ref:`API_REFERENCE`. Note that the port types are determined by the template parameter configuration.
 
 Design Notes
 ============
@@ -61,7 +61,7 @@ Design Notes
 Cascaded Implementation for Pipelining Larger Matrices
 -------------------------------------------------------
 
-QR Decomposition is accomplished using the modified Gram-Schmidt algorithm; hence a fully parallel architecture is not possible due to the sequential nature of the algorithm. However, the algorithm can be pipelined by cascading multiple kernels together, with each kernel processing a subset of the columns of the input matrix. 
+QR decomposition is accomplished using the modified Gram-Schmidt algorithm; therefore a fully parallel architecture is not possible due to its sequential nature. However, the algorithm can be pipelined by cascading multiple kernels together, with each kernel processing a subset of the input matrix columns.
 
 The input matrix is split into sub-matrices by the load-splitting algorithm. Please refer to :ref:`load-splitting` for detailed information. The idea of load-splitting is that each kernel in the cascade topology processes a different number of columns, while trying to balance projection operations across the kernels.
 
@@ -109,16 +109,16 @@ The following is an example of load-splitting for a 32x32 matrix with a cascade 
 Padding
 -------
 
-Padding is not a supported feature of the IP. ``TP_DIM_ROWS`` and ``TP_DIM_COLS`` must be set to multiples of `vecSampleNum`_ (which is 8 for float and 4 for cfloat on AIE-ML and AIE-MLv2 devices and 16 for float and 8 for cfloat on AIE2 devices). 
+Padding is not a supported feature of the library element. ``TP_DIM_ROWS`` and ``TP_DIM_COLS`` must be set to multiples of :ref:`vecSampleNum` (which is 8 for float and 4 for cfloat on AIE-ML and AIE-MLv2 devices and 16 for float and 8 for cfloat on AIE2 devices). 
 
 If a float input matrix of 5x5 is to be processed, the user must set ``TP_DIM_ROWS`` and ``TP_DIM_COLS`` to 8x8, and pad the input matrix with zeros to make it 8x8. The resulting Q and R matrices will also be of size 8x8, with the additional rows and columns being padded with zeros.
 
 Constraints
 -----------
 
-Input matrix data must be provided in column major form. The input matrix is assumed to be full rank for the QR decomposition to be valid.
+Input matrix data must be provided in column-major form. The input matrix is assumed to be full rank for the QR decomposition to be valid.
 
-float data-type supports row-major operation, but cfloat data-type only supports column-major operation. To enable row-major data reads and writes, set the ``DIM_A_LEADING``, ``DIM_Q_LEADING`` and ``DIM_R_LEADING`` template parameters to 1.
+The ``float`` data type supports row-major operation, but the ``cfloat`` data type supports only column-major operation. To enable row-major data reads and writes, set the ``DIM_A_LEADING``, ``DIM_Q_LEADING``, and ``DIM_R_LEADING`` template parameters to 1.
 
 
 Code Example

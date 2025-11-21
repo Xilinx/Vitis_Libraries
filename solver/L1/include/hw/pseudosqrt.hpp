@@ -16,8 +16,8 @@
  */
 
 /**
- * @file pagerank.hpp
- * @brief  This files contains implementation of Strongly Connected Components
+ * @file pseudosqrt.hpp
+ * @brief  This files contains implementation of pseudo square root
  */
 
 #ifndef XF_SOLVER_PSQRT_H

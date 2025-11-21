@@ -10,15 +10,15 @@
 Cholesky
 ========
 
-This function computes the Cholesky decomposition of matrix :math:`A`
+This function computes the Cholesky decomposition of matrix :math:`A`.
 
 .. math::
     A = L {L}^*
 
-where :math:`A` is a Hermitian positive-definite matrix of size :math:`n \times n`, :math:`L` is a lower triangular matrix with real and positive diagonal entries, and :math:`{L}^*` denotes the conjugate transpose of matrix of :math:`L`.
+where :math:`A` is a Hermitian positive-definite matrix of size :math:`n \times n`, :math:`L` is a lower triangular matrix with real and positive diagonal entries, and :math:`{L}^*` denotes the conjugate transpose of the matrix :math:`L`.
 Every Hermitian positive-definite matrix (and thus also every real-valued symmetric positive-definite matrix) has a unique Cholesky decomposition.
 
-The Cholesky has configurable data types and matrix sizes, along with a configurable number of frames, and support for parallelism.
+The Cholesky library element has configurable data types and matrix sizes, a configurable number of frames, and support for parallelism.
 
 Entry Point
 ===========
@@ -32,11 +32,11 @@ The graph entry point is the following:
 Device Support
 ==============
 
-The Cholesky library element supports AIE, AIE-ML and AIE-MLv2 devices.
+The Cholesky library element supports AIE, AIE-ML, and AIE-MLv2 devices.
 
 Supported Types
 ===============
-The data type is controlled by ``TT_DATA``, and can be one of 2 choices: float or cfloat.
+The data type is controlled by ``TT_DATA`` and can be one of two choices: ``float`` or ``cfloat``.
 
 
 Template Parameters
@@ -53,17 +53,17 @@ To see details on the access functions for the Cholesky, see :ref:`API_REFERENCE
 Ports
 =====
 
-To see details on the ports for the Cholesky, see :ref:`API_REFERENCE`. Note that the type of ports are determined by the configuration of template parameters.
+To see details on the ports for the Cholesky, see :ref:`API_REFERENCE`. Note that the port types are determined by the template parameter configuration.
 
 
 Parallelism (Grid Tiling)
 -------------------------
 
 Parallelism for the Cholesky is configured using the ``TP_GRID_DIM`` template parameter. This parameter scales the size of the lower-triangular grid of tiles used to split up the input matrix. Only the lower-triangular tiles are used since the upper-triangular output can be assumed to resolve to 0.
-``TP_GRID_DIM`` must be a factor of ``TP_DIM``, and the resulting sub-matrix dimension must be a multiple of ``vecSampleNum``. 
+``TP_GRID_DIM`` must be a factor of ``TP_DIM``, and the resulting sub-matrix dimension must be a multiple of :ref:`vecSampleNum`. 
 The number of AIE tiles used in the design scales according to ``TP_GRID_DIM`` * (``TP_GRID_DIM`` + 1) / 2.
 
-Following is an example of ``TP_DIM`` and ``TP_GRID_DIM`` being used:
+The following is an example of ``TP_DIM`` and ``TP_GRID_DIM`` being used:
 
 - ``vecSampleNum`` = 2
 - ``TP_DIM`` = 6
@@ -82,14 +82,14 @@ Following is an example of ``TP_DIM`` and ``TP_GRID_DIM`` being used:
         |5  11|17 19|25 31|
         +-----+-----+-----+
 
-.. note:: The numbers represent sample indices of the global matrix (must be column-major), and the drawn boundaries represent the samples which are processed by each sub-kernel. To minimise tile wastage, tiles whose samples are assumed to entirely resolve to 0 are not hooked up.
+.. note:: The numbers represent sample indices of the global matrix (must be column-major), and the drawn boundaries represent the samples processed by each sub-kernel. To minimize tile wastage, tiles whose samples are assumed to entirely resolve to 0 are not hooked up.
 
 Padding
 -------
 
-Padding is not a supported feature of the IP. For matrices whose dimensions are not multiples of `vecSampleNum`_, the input matrix must be padded such that it is a multiple of `vecSampleNum`_ (the output locations corresponding to the pads should be ignored). ``TP_DIM`` must be set to the padded dimension size.
+Padding is not a supported feature of the library element. For matrices whose dimensions are not multiples of :ref:`vecSampleNum`, the input matrix must be padded such that it is a multiple of :ref:`vecSampleNum` (the output locations corresponding to the pads should be ignored). ``TP_DIM`` must be set to the padded dimension size.
 
-Following is an example of a 6*6 matrix with a `vecSampleNum`_  of 4 (thus ``TP_DIM`` set to 8):
+The following is an example of a 6x6 matrix with :ref:`vecSampleNum` of 4 (thus ``TP_DIM`` set to 8):
 
 .. code-block::
 
@@ -106,9 +106,9 @@ Following is an example of a 6*6 matrix with a `vecSampleNum`_  of 4 (thus ``TP_
 
 Constraints
 -----------
-Input matrix data must be written in a column-major fashion, and the matrix is assumed to be Hermetian positive-definite. The cholesky operation is susceptible to catastrophic cancellation, and thus it is encouraged to ensure your matrix is well-conditioned. 
-Data is operated on in ``vecSampleNum`` * ``vecSampleNum`` chunks, and thus only chunks along and below the diagonal are operated on. Upper matrix data is assumed to be zero, thus chunks in the upper-triangular output are undefined.
-In a single-tile implementation, ``TP_DIM`` must be a multiple of ``vecSampleNum``. In multi-tile implementations, ``TP_DIM`` / ``TP_GRID_DIM`` must be a multiple of ``vecSampleNum``.
+Input matrix data must be written in a column-major fashion, and the matrix is assumed to be Hermitian positive-definite. The Cholesky operation is susceptible to catastrophic cancellation; therefore, it is recommended to ensure your matrix is well-conditioned.
+Data is operated on in :ref:`vecSampleNum` * :ref:`vecSampleNum` chunks, and thus only chunks along and below the diagonal are operated on. Upper matrix data is assumed to be zero, thus chunks in the upper-triangular output are undefined.
+In a single-tile implementation, ``TP_DIM`` must be a multiple of :ref:`vecSampleNum`. In multi-tile implementations, ``TP_DIM`` / ``TP_GRID_DIM`` must be a multiple of :ref:`vecSampleNum`.
 
 
 Code Example

@@ -22,3 +22,6 @@ Core Utility
    SVD (Singular Value Decomposition) <kernel/svd.rst>
    Cholesky_Inverse <kernel/cholesky_inverse.rst>
    Cholesky <kernel/cholesky.rst>
+   Cholesky_cfloat <kernel/cholesky_cfloat.rst>
+   MatrixBlockMultiply <kernel/matrix_block_multiply.rst>
+   MatrixVectorMultiply <kernel/matrix_vector_multiply.rst>

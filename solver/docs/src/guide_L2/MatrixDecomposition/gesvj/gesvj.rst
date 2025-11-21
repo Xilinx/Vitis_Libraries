@@ -34,25 +34,28 @@ The calculation process of one-sided Jacobi SVD method is as follows:
 2. Select two columns (i, j), i < j, of matrix A, namely :math:`A_i` and :math:`A_j`. Accumulate two columns of data by fomula
 
 .. math::
-       &b_{ii} = A_i^TA_i = ||A_i||^2 \\ 
+       &b_{ii} = A_i^TA_i = ||A_i||^2 \\
        &b_{jj} = A_j^TA_j = ||A_j||^2 \\
        &b_{ij} = A_i^TA_j
+
 A :math:`2 \times 2` matrix can be obtained and noted as:
 
 .. math::
       \begin{bmatrix}
-        b_{ii}\  b_{ij}\\ 
-        b_{ji}\  b_{jj}\\ 
+        b_{ii}\  b_{ij}\\
+        b_{ji}\  b_{jj}\\
       \end{bmatrix}
+
 where :math:`b_{ij}` equals :math:`b_{ji}`.
 
 3. Solve the :math:`2 \times 2` symmetric SVD with Jacobi rotation:
-   
+
 .. math::
       &\tau = (b_{ii} - b_{jj}) / (2 * b_{ij}))    \\
       &t = sign(\tau)/(|\tau| + \sqrt{(1 + \tau^2)})  \\
       &c = 1 / \sqrt{(1+t^2)} \\
-      &s = c * t \\ 
+      &s = c * t \\
+
 if we put s and c in a matrix as J, then J equals
 
 .. math::
@@ -75,7 +78,7 @@ if we put s and c in a matrix as J, then J equals
 .. math::
       conv = |b_{ij}| / \sqrt{(b_{ii}b_{jj})}
 
-and select the max converage of all pairs (i, j). 
+and select the max converage of all pairs (i, j).
 
 6. Repeat steps 2-4 until all pairs of (i, j) are calculated and updated.
 
@@ -101,12 +104,15 @@ It can be seen from the architecture, steps 2-5 (each pair of i and j) of the al
 Stage 1: 
   a. read two columns of data of A to BRAM and accumulate to :math:`b_{ii}`, :math:`b_{jj}` and :math:`b_{ij}`. 
   b. preload two columns of data of matrix V to BRAM.
+
 Stage 2: 
   Calculate SVD for :math:`2 \times 2` matrix
+
 Stage 3: 
   a. Update two columns of data in matrix A
   b. Update two columns of data in matrix V.
   c. Meanwhile, calculate converage for the current pair (i, j).
+
 Since operating data of matrix A and V aisre independent, two modules of stage 1 are running in parallel. Meanwhile, three modules of stage three run in parallel. The last module of stage three calculates converage using :math:`2 \times 2` matrix data. This converage computing process is in read-and-accu module of stage 1 according to the algorithm. However, it requires ~60 cycles, which is also a lot after partitioning matrix A by row. Therefore, this calculation process is extracted as a submodule in stage three.
 
 .. Note::

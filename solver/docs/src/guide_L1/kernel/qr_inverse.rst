@@ -29,7 +29,7 @@ QR_Inverse, matrix inversion with the usage of QR decomposition.  As matrix :mat
 As matrix :math:`R` is an upper triangular matrix, :math:`R^{-1}` is easy to compute. In this design, :math:`R^{-1}` is computed via Backward Substitution.
 
 Implementation
-============
+==============
 
 DataType Supported
 --------------------

@@ -42,7 +42,7 @@ Currently the AMD Vitis PL Solver library includes the following operations for 
 
 
 AI Engine Solver library
-------------
+------------------------
 
 Currently, the AMD Vitis AIE Solver Library provides the following operations on AI Engine.
 
@@ -56,7 +56,7 @@ Requirements
 Software requirements
 ~~~~~~~~~~~~~~~~~~~~~
 * This library is designed to work with AMD Vitis |trade|, and therefore inherits the system requirements of Vitis and XRT.
-* Supported operating systems are RHEL/CentOS  RHEL 8.10, RHEL 9.2, RHEL 9.3, RHEL 9.4, and RHEL 9.5, Ubuntu 22.04.2 LTS, 22.04.3 LTS, 22.04.4 LTS, and 22.04.5 LTS, Ubuntu 24.04 LTS, and 24.04.1 LTS, as well as AlmaLinux OS ver. 8.10, 9.4, and 9.5, Rocky 8.10.
+* Supported operating systems are RHEL/CentOS RHEL 9.4, RHEL 9.5, RHEL 9.6, and RHEL 10.0, Ubuntu 22.04.3 LTS, 22.04.4 LTS, and 22.04.5 LTS, Ubuntu 24.04 LTS, 24.04.1 LTS, and 24.04.2 LTS, as well as AlmaLinux OS ver. 8.10, 9.4, 9.5, 9.6, and 10.0, Rocky 8.10, 9.6, and 10.0.
 
 Hardware requirements
 ~~~~~~~~~~~~~~~~~~~~~
@@ -65,12 +65,12 @@ Hardware requirements
    * `Alveo U250 <https://www.xilinx.com/products/boards-and-kits/alveo/u250.html>`_
 * For AI Engine Solver library
    * Hardware modules and kernels are designed to work with AMD Alveo |trade| U200 and U280 cards.
+   * AI Engine graphs and kernels are designed to work with AMD |trade| Versal AI Core, Versal AI Edge, and Versal AI Edge Gen 2 devices, which are available on the VCK190, VEK280, and VEK385 boards, respectively.
 
 License
 -------
 
-    Licensed using the `Apache 2.0 license <https://www.apache.org/licenses/LICENSE-2.0>`_::
-
+Licensed using the `Apache 2.0 license <https://www.apache.org/licenses/LICENSE-2.0>`_.
 
 Trademark Notice
 ----------------

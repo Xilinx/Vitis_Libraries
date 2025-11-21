@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 /**
- * @file jacobi_svd.h
- * @brief  This files contains implementation of Jascobi SVD decoompostion
+ * @file gesvdj.hpp
+ * @brief  This files contains implementation of Jacobi SVD decomposition
  */
 #ifndef XF_SOLVER_SVDJ_H
 #define XF_SOLVER_SVDJ_H

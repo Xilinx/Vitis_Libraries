@@ -1,7 +1,7 @@
 ..
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
-   
+   
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 .. meta::
    :keywords: Matrix, Decomposition, Linear, Solver 
@@ -12,5 +12,5 @@
 APIs 
 =====
 
-.. include:: ../rst_L1/namespace_xf_solver.rst
+.. include:: ../rst/namespace_xf_solver.rst
    :start-after: FunctionSection

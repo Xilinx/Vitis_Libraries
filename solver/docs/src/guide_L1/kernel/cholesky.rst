@@ -24,7 +24,7 @@ Cholesky decomposition is useful for efficient numerical solutions.
             A = L*L^* 
 
 Implementation
-============
+==============
 
 DataType Supported
 --------------------

@@ -1,7 +1,7 @@
 ..
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
-   
+
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _API_REFERENCE:
@@ -10,7 +10,7 @@
 API Reference Overview
 ======================
 
-For all library elements, the recommended manner to use an instance of each library unit is to include an instance of the library element as a sub-graph of your graph. The graph declarations can be found in: `L2/include/aie/`. This section describes the interface to each library element, i.e., configuration parameters, constructor arguments, and ports.
+For all library elements, the recommended approach is to instantiate each library unit as a subgraph within your graph. Graph declarations are located in ``L2/include/aie/``. This section describes each library element's interface, including configuration parameters, constructor arguments, and ports.
 
 - `Cholesky <../../rst/group_cholesky.html>`_
 - `QRD <../../rst/group_qrd_graph.html>`_

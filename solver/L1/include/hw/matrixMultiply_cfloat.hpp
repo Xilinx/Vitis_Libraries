@@ -1,6 +1,7 @@
 /*
- * Copyright 2021 Xilinx, Inc.
- *
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +16,11 @@
  */
 
 /**
- * @file matrixMultiply.hpp
+ * @file matrixMultiply_cfloat.hpp
  * @brief This file contains Matrix Multiply functions
- *   - matrixMultiply           : Entry point function.
- *   - matrixMultiplyBasic      : basic matrix multiply function
- *   - matrixMultiplyTiled      : blocked matrix myultiply function
+ *   - matrixBlockMultiply        : Entry point function.
+ *   - matrixMultiplyBasic        : Basic matrix multiply function
+ *   - matrixBlockMultiply_core   : The implementation of blocked matrix multiply function
  */
 
 #ifndef _XF_SOLVER_MATRIX_MULTIPLY_CFLOAT_HPP_
@@ -114,7 +115,7 @@ matmul_tile_a_row_loop:
 }
 
 // ===================================================================================================================
-// matrixMultiplyTiled: for large matrix multiplication
+// matrixBlockMultiply_core: for large matrix multiplication
 template <int RowsA,
           int ColsA,
           int RowsB,
@@ -124,7 +125,7 @@ template <int RowsA,
           int TILE_SIZE,
           typename InputType,
           typename OutputType>
-void matrixMultiplyTiled(const InputType A[RowsA][ColsA], const InputType B[RowsB][ColsB], OutputType C[RowsC][ColsC], int startRow, int endRow) {
+void matrixBlockMultiply_core(const InputType A[RowsA][ColsA], const InputType B[RowsB][ColsB], OutputType C[RowsC][ColsC], int startRow, int endRow) {
 // AXI Interface config
 #pragma HLS INTERFACE m_axi port = A offset = slave bundle = gmem0 num_read_outstanding = 32 max_read_burst_length = 256
 #pragma HLS INTERFACE m_axi port = B offset = slave bundle = gmem1 num_read_outstanding = 32 max_read_burst_length = 256
@@ -178,7 +179,7 @@ blockA_row_loop:
 }
 
 /**
- * @brief matrixMultiply entry point function.
+ * @brief matrixBlockMultiply entry point function.
  *
  *  @tparam RowsA             Defines the matrixA rows number 
  *  @tparam ColsA             Defines the matrixA columns number 
@@ -205,7 +206,7 @@ template <int RowsA,
           int BLK,
           typename InputType,
           typename OutputType>
-void matrixMultiply(hls::stream<InputType>& matrixAStrm,
+void matrixBlockMultiply(hls::stream<InputType>& matrixAStrm,
                     hls::stream<InputType>& matrixBStrm,
                     hls::stream<OutputType>& matrixCStrm) {
     InputType A[BLK][ColsA];
@@ -225,7 +226,7 @@ void matrixMultiply(hls::stream<InputType>& matrixAStrm,
                 matrixAStrm.read(A[r][c]);
             }
         }
-        matrixMultiplyTiled<BLK, ColsA, RowsB, ColsB, BLK, ColsC, TILE_SIZE, InputType, OutputType>(A, B, C, n, n+BLK);
+        matrixBlockMultiply_core<BLK, ColsA, RowsB, ColsB, BLK, ColsC, TILE_SIZE, InputType, OutputType>(A, B, C, n, n+BLK);
         for (int r = 0; r < BLK; r++) {
 #pragma HLS PIPELINE
             for (int c = 0; c < ColsC; c++) {

@@ -501,8 +501,8 @@ public:
 
     for (int i=0; i < TP_CASC_LEN; i++) {{
       adf::connect<> net_in(inA[i], qrd.inA[i]);
-      adf::connect<> net_in(inB[i], qrd.inB[i]);
-      adf::connect<> net_out(qrd.out[i], out[i]);
+      adf::connect<> net_out(qrd.outQ[i], outQ[i]);
+      adf::connect<> net_out(qrd.outR[i], outR[i]);
     }}
   }}
 

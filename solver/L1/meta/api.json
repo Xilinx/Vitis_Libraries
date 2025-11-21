@@ -2182,6 +2182,263 @@
             "target_domain": "PL"
         },
         {
+            "api_name": "xf::solver::cholesky_cfloat",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::cholesky_cfloat",
+                "display_name": "cholesky_cfloat",
+                "brief": "cholesky_cfloat the entry point function.",
+                "target_domain": "PL",
+                "header_file_name": [
+                    "cholesky_cfloat.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "source_file_name": "L1/tests/hw/cholesky_cfloat/kernel/kernel_cholesky_cfloat_0.cpp",
+                "parameters": [
+                    {
+                        "name": "LowerTriangularL",
+                        "type": "bool",
+                        "description": "Defines the output matrix lower triangular or upper triangular",
+                        "enum": [
+                            "true",
+                            "flase"
+                        ]
+                    },
+                    {
+                        "name": "DIM",
+                        "type": "int",
+                        "description": "Defines the dimension of Hermitian/symmetric positive matrix",
+                        "minimum": "4",
+                        "maximum": "512"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename",
+                        "description": "Input data type",
+                        "enum": [
+                            "std::complex<float>"
+                        ]
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename",
+                        "description": "Output data type",
+                        "enum": [
+                            "std::complex<float>"
+                        ]
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "matrixAStrm",
+                        "direction": "input",
+                        "type": "hls::stream<InputType>&"
+                    },
+                    {
+                        "name": "matrixLStrm",
+                        "direction": "output",
+                        "type": "hls::stream<OutputType>&"
+                    }
+                ],
+                "visible": true 
+            },
+            "target_domain": "PL"
+        },
+        {
+            "api_name": "xf::solver::matrixBlockMultiply",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::matrixBlockMultiply",
+                "display_name": "matrixBlockMultiply",
+                "brief": "the entry point function.",
+                "target_domain": "PL",
+                "header_file_name": [
+                    "matrixMultiply_cfloat.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "source_file_name": "L1/tests/hw/matrixMultiply_cfloat/kernel/kernel_matrixMultiply_cfloat_0.cpp",
+                "parameters": [
+                    {
+                        "name": "RowsA",
+                        "type": "int",
+                        "description": "Defines the matrixA rows number",
+                        "minimum": "4",
+                        "maximum": "512"
+                    },
+                    {
+                        "name": "ColsA",
+                        "type": "int",
+                        "description": "Defines the matrixA columns number",
+                        "minimum": "4",
+                        "maximum": "512"
+                    },
+                    {
+                        "name": "RowsB",
+                        "type": "int",
+                        "description": "Defines the matrixB rows number",
+                        "minimum": "4",
+                        "maximum": "512"
+                    },
+                    {
+                        "name": "ColsB",
+                        "type": "int",
+                        "description": "Defines the matrixB columns number",
+                        "minimum": "4",
+                        "maximum": "512"
+                    },
+                    {
+                        "name": "RowsC",
+                        "type": "int",
+                        "description": "Defines the matrixC rows number",
+                        "minimum": "4",
+                        "maximum": "512"
+                    },
+                    {
+                        "name": "ColsC",
+                        "type": "int",
+                        "description": "Defines the matrixC columns number",
+                        "minimum": "4",
+                        "maximum": "512"
+                    },
+                    {
+                        "name": "TILE_SIZE",
+                        "type": "int",
+                        "description": "Defines the dimensition of blocks in the block matrix multiplication algorithm",
+                        "minimum": "4",
+                        "maximum": "32"
+                    },
+                    {
+                        "name": "BLK",
+                        "type": "int",
+                        "description": "Defines the number of rows when loading matrix input memory",
+                        "minimum": "4",
+                        "maximum": "512"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename",
+                        "description": "Input data type",
+                        "enum": [
+                            "std::complex<float>"
+                        ]
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename",
+                        "description": "Output data type",
+                        "enum": [
+                            "std::complex<float>"
+                        ]
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "matrixAStrm",
+                        "direction": "input",
+                        "type": "hls::stream<InputType>&"
+                    },
+                    {
+                        "name": "matrixBStrm",
+                        "direction": "input",
+                        "type": "hls::stream<InputType>&"
+                    },
+                    {
+                        "name": "matrixCStrm",
+                        "direction": "output",
+                        "type": "hls::stream<OutputType>&"
+                    }
+                ],
+                "visible": true 
+            },
+            "target_domain": "PL"
+        },
+        {
+            "api_name": "xf::solver::gemv",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::gemv",
+                "display_name": "gemv",
+                "brief": "the entry point function.",
+                "target_domain": "PL",
+                "header_file_name": [
+                    "gemv_cfloat.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "source_file_name": "L1/tests/hw/gemv_cfloat/kernel/kernel_gemv_cfloat_0.cpp",
+                "parameters": [
+                    {
+                        "name": "RowsA",
+                        "type": "int",
+                        "description": "Defines the matrixA rows number",
+                        "minimum": "4",
+                        "maximum": "512"
+                    },
+                    {
+                        "name": "ColsA",
+                        "type": "int",
+                        "description": "Defines the matrixA columns number",
+                        "minimum": "4",
+                        "maximum": "512"
+                    },
+                    {
+                        "name": "BR",
+                        "type": "int",
+                        "description": "Defines the rows number of block matrix in the block matrix vector multiplication algorithm",
+                        "minimum": "4",
+                        "maximum": "32"
+                    },
+                    {
+                        "name": "BC",
+                        "type": "int",
+                        "description": "Defines the columns number of block matrix in the block matrix vector multiplication algorithm",
+                        "minimum": "4",
+                        "maximum": "512"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename",
+                        "description": "Input data type",
+                        "enum": [
+                            "std::complex<float>"
+                        ]
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename",
+                        "description": "Output data type",
+                        "enum": [
+                            "std::complex<float>"
+                        ]
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "AStrm",
+                        "direction": "input",
+                        "type": "hls::stream<InputType>&"
+                    },
+                    {
+                        "name": "xStrm",
+                        "direction": "input",
+                        "type": "hls::stream<InputType>&"
+                    },
+                    {
+                        "name": "yStrm",
+                        "direction": "output",
+                        "type": "hls::stream<OutputType>&"
+                    }
+                ],
+                "visible": true 
+            },
+            "target_domain": "PL"
+        },
+        {
             "api_name": "xf::solver::cholesky_float",
             "spec": {
                 "schema": "vitis_libraries_api_list_schema-1.0",

@@ -16,7 +16,7 @@
  */
 
 /**
- * @file xf_solver_L1.h
+ * @file xf_solver_L1.hpp
  * @brief Top-levle header for XF Solver Libaray level-1.
  */
 

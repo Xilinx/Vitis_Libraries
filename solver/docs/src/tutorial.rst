@@ -85,7 +85,7 @@ Command to Run L1 cases
 
 .. code-block:: shell
 
-    cd L1/tests/hls_case_folder
+    cd L1/tests/hw/hls_case_folder
     
     make run target=csim \
         PLATFORM=/path/to/<your_card_platform>

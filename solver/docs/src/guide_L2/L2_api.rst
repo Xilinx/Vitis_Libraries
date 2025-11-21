@@ -14,21 +14,5 @@
 L2 PL APIs
 **********
 
-Matrix Decomposition
-====================
-
-.. include:: ../rst_L2_mat/namespace_xf_solver.rst
+.. include:: ../rst/namespace_xf_solver.rst
    :start-after: FunctionSection
-
-Linear Solver
-=============
-
-.. include:: ../rst_L2_linearsolver/namespace_xf_solver.rst
-   :start-after: FunctionSection
-
-Eigenvalue Solver
-==================
-
-.. include:: ../rst_L2_eigensolver/namespace_xf_solver.rst
-   :start-after: FunctionSection
-

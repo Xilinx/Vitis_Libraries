@@ -937,397 +937,139 @@
             "target_domain": "PL"
         },
         {
-            "api_name": "xf::solver::CholeskyGraph",
+            "api_name": "xf::solver::aie::cholesky::cholesky_graph",
+            "target_domain": "AIE",
             "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::solver::CholeskyGraph",
-                "display_name": "cholesky_float_decomposition",
-                "brief": "cholesky decomposition with float data type",
-                "target_domain": "AIE",
-                "header_file_name": [
-                    "cholesky_float_decomposition_graph.hpp"
-                ],
+                "brief": "Cholesky decomposition with float/cfloat data type.",
                 "search_paths": [
-                    "L2/include/aie",
                     "L1/include/aie",
                     "L1/src/aie",
-                    "L1/include"
-                ],
-                "instance": "class",
-                "parameters": [
-                    {
-                        "name": "NUM",
-                        "description": "number of AIE cores used",
-                        "type": "int",
-                        "minimum": 4,
-                        "maximum": 256
-                    }
-                ],
-                "ports": [
-                    {
-                        "name": "matA_data",
-                        "direction": "input",
-                        "type": "adf::input_plio",
-                        "data_type": "float"
-                    },
-                    {
-                        "name": "matL_data",
-                        "direction": "output",
-                        "type": "adf::output_plio",
-                        "data_type": "float"
-                    }
+                    "L2/include/aie"
                 ],
                 "visible": true,
-                "family": "Versal AI Core",
-                "aie_types": [
-                    "AIE1"
-                ]
-            },
-            "target_domain": "AIE"
+                "target_domain": "AIE",
+                "display_name": "cholesky",
+                "parameters": [
+                    {
+                        "type": "typename",
+                        "name": "TT_DATA",
+                        "description": "The type of individual data samples input to port."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM",
+                        "description": "The dimension size of the matrix."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_NUM_FRAMES",
+                        "description": "The number of operations per call to the kernel"
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_GRID_DIM",
+                        "description": "The dimension size of the grid of kernels used to break up a matrix."
+                    }
+                ],
+                "header_file_name": [
+                    "cholesky_graph.hpp"
+                ],
+                "instance": "class",
+                "api_name": "xf::solver::aie::cholesky::cholesky_graph",
+                "ports": [
+                    {
+                        "direction": "input",
+                        "type": "input_port xf::solver::aie::cholesky::cholesky_graph< TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_NUM_FRAMES, TP_GRID_DIM>::in",
+                        "name": "in"
+                    },
+                    {
+                        "direction": "output",
+                        "type": "output_port xf::solver::aie::cholesky::cholesky_graph< TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_NUM_FRAMES, TP_GRID_DIM>::out",
+                        "name": "out"
+                    }
+                ],
+                "schema": "vitis_libraries_api_list_schema-1.0"
+            }
         },
         {
-            "api_name": "xf::solver::CholeskyGraph",
+            "api_name": "xf::solver::aie::qrd::qrd_graph",
+            "target_domain": "AIE",
             "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::solver::CholeskyGraph",
-                "display_name": "cholesky_complex_decomposition",
-                "brief": "cholesky decomposition with complex data type",
-                "target_domain": "AIE",
-                "header_file_name": [
-                    "cholesky_complex_decomposition_graph.hpp"
-                ],
+                "brief": "QR decomposition with float/cfloat data type.",
                 "search_paths": [
-                    "L2/include/aie",
                     "L1/include/aie",
                     "L1/src/aie",
-                    "L1/include"
-                ],
-                "instance": "class",
-                "parameters": [
-                    {
-                        "name": "NUM",
-                        "description": "number of AIE cores used",
-                        "type": "int",
-                        "minimum": 4,
-                        "maximum": 256
-                    }
-                ],
-                "ports": [
-                    {
-                        "name": "matA_real_data",
-                        "direction": "input",
-                        "type": "adf::input_plio",
-                        "data_type": "float"
-                    },
-                    {
-                        "name": "matA_imag_data",
-                        "direction": "input",
-                        "type": "adf::input_plio",
-                        "data_type": "float"
-                    },
-                    {
-                        "name": "matL_real_data",
-                        "direction": "output",
-                        "type": "adf::output_plio",
-                        "data_type": "float"
-                    },
-                    {
-                        "name": "matL_imag_data",
-                        "direction": "output",
-                        "type": "adf::output_plio",
-                        "data_type": "float"
-                    }
+                    "L2/include/aie"
                 ],
                 "visible": true,
-                "family": "Versal AI Core",
-                "aie_types": [
-                    "AIE1"
-                ]
-            },
-            "target_domain": "AIE"
-        },
-        {
-            "api_name": "xf::solver::QRDComplexFloat",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::solver::QRDComplexFloat",
-                "display_name": "QRDComplexFloat",
-                "brief": "QR decomposition ",
                 "target_domain": "AIE",
+                "display_name": "qrd_graph",
+                "parameters": [
+                    {
+                        "type": "typename",
+                        "name": "TT_DATA",
+                        "description": "The type of individual data samples input to port A."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_ROWS",
+                        "description": "Row dimension of the input matrix."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_COLS",
+                        "description": "Column dimension of the input matrix."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_NUM_FRAMES",
+                        "description": "The number of operations per call to the kernel."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_CASC_LEN",
+                        "description": "The number of cascaded kernels to be used to perform the function."
+                    },     
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_A_LEADING",
+                        "description": "Describes which dimension of the Matrix A input data is contigious in memory. TP_DIM_A_LEADING=1 is row major, and TP_DIM_A_LEADING=0 is column major."
+                    },                    
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_Q_LEADING",
+                        "description": "Describes which dimension of the Matrix Q output data is contigious in memory. TP_DIM_Q_LEADING=1 is row major, and TP_DIM_Q_LEADING=0 is column major."  
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_R_LEADING",
+                        "description": "Describes which dimension of the Matrix Q output data is contigious in memory. TP_DIM_R_LEADING=1 is row major, and TP_DIM_R_LEADING=0 is column major."
+                    }
+                ],
                 "header_file_name": [
                     "qrd_graph.hpp"
                 ],
-                "search_paths": [
-                    "L2/include/aie",
-                    "L1/include/aie",
-                    "L1/src/aie"
-                ],
                 "instance": "class",
-                "parameters": [
-                    {
-                        "name": "column_num",
-                        "description": "",
-                        "type": "int",
-                        "minimum": 16,
-                        "maximum": 256
-                    },
-                    {
-                        "name": "row_num",
-                        "description": "",
-                        "type": "int",
-                        "minimum": 16,
-                        "maximum": 1024
-                    },
-                    {
-                        "name": "k_rep",
-                        "description": "",
-                        "type": "int"
-                    }
-                ],
+                "api_name": "xf::solver::aie::qrd::qrd_graph",
                 "ports": [
                     {
-                        "name": "in_0",
                         "direction": "input",
-                        "type": "adf::input_plio",
-                        "data_type": "cfloat"
+                        "type": "input_port xf::solver::aie::qrd::qrd_graph< TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES,TP_CASC_LEN>::inA",
+                        "name": "inA"
                     },
                     {
-                        "name": "in_1",
-                        "direction": "input",
-                        "type": "adf::input_plio",
-                        "data_type": "cfloat"
-                    },
-                    {
-                        "name": "out_0",
                         "direction": "output",
-                        "type": "adf::output_plio",
-                        "data_type": "cfloat"
+                        "type": "output_port xf::solver::aie::qrd::qrd_graph< TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES,TP_CASC_LEN>::outQ",
+                        "name": "outQ"
                     },
                     {
-                        "name": "out_1",
                         "direction": "output",
-                        "type": "adf::output_plio",
-                        "data_type": "cfloat"
+                        "type": "output_port xf::solver::aie::qrd::qrd_graph< TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES,TP_CASC_LEN>::outR",
+                        "name": "outR"
                     }
                 ],
-                "visible": true,
-                "family": "Versal AI Core",
-                "aie_types": [
-                    "AIE1"
-                ]
-            },
-            "target_domain": "AIE"
-        },
-        {
-            "api_name": "xf::solver::QRDComplexFloat_CASC",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::solver::QRDComplexFloat_CASC",
-                "display_name": "QRDComplexFloat_CASC",
-                "brief": "QR decomposition ",
-                "target_domain": "AIE",
-                "header_file_name": [
-                    "qrd_graph.hpp"
-                ],
-                "search_paths": [
-                    "L2/include/aie",
-                    "L1/include/aie",
-                    "L1/src/aie"
-                ],
-                "instance": "class",
-                "parameters": [
-                    {
-                        "name": "column_num",
-                        "description": "",
-                        "type": "int",
-                        "minimum": 16,
-                        "maximum": 256
-                    },
-                    {
-                        "name": "row_num",
-                        "description": "",
-                        "type": "int",
-                        "minimum": 16,
-                        "maximum": 1024
-                    },
-                    {
-                        "name": "k_rep",
-                        "description": "",
-                        "type": "int"
-                    }
-                ],
-                "ports": [
-                    {
-                        "name": "in_0",
-                        "direction": "input",
-                        "type": "adf::input_plio",
-                        "data_type": "cfloat"
-                    },
-                    {
-                        "name": "in_1",
-                        "direction": "input",
-                        "type": "adf::input_plio",
-                        "data_type": "cfloat"
-                    },
-                    {
-                        "name": "out_0",
-                        "direction": "output",
-                        "type": "adf::output_plio",
-                        "data_type": "cfloat"
-                    },
-                    {
-                        "name": "out_1",
-                        "direction": "output",
-                        "type": "adf::output_plio",
-                        "data_type": "cfloat"
-                    }
-                ],
-                "visible": true,
-                "family": "Versal AI Core",
-                "aie_types": [
-                    "AIE1"
-                ]
-            },
-            "target_domain": "AIE"
-        },
-        {
-            "api_name": "xf::solver::QRDComplexFloat",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::solver::QRDComplexFloat",
-                "display_name": "QRDComplexFloat_None_CASC",
-                "brief": "QR decomposition ",
-                "target_domain": "AIE",
-                "header_file_name": [
-                    "qrd_graph.hpp"
-                ],
-                "search_paths": [
-                    "L2/include/aie",
-                    "L1/include/aie",
-                    "L1/src/aie"
-                ],
-                "instance": "class",
-                "parameters": [
-                    {
-                        "name": "column_num",
-                        "description": "",
-                        "type": "int",
-                        "minimum": 16,
-                        "maximum": 256
-                    },
-                    {
-                        "name": "row_num",
-                        "description": "",
-                        "type": "int",
-                        "minimum": 16,
-                        "maximum": 1024
-                    },
-                    {
-                        "name": "k_rep",
-                        "description": "",
-                        "type": "int"
-                    }
-                ],
-                "ports": [
-                    {
-                        "name": "in_0",
-                        "direction": "input",
-                        "type": "adf::input_plio",
-                        "data_type": "cfloat"
-                    },
-                    {
-                        "name": "in_1",
-                        "direction": "input",
-                        "type": "adf::input_plio",
-                        "data_type": "cfloat"
-                    },
-                    {
-                        "name": "out_0",
-                        "direction": "output",
-                        "type": "adf::output_plio",
-                        "data_type": "cfloat"
-                    },
-                    {
-                        "name": "out_1",
-                        "direction": "output",
-                        "type": "adf::output_plio",
-                        "data_type": "cfloat"
-                    }
-                ],
-                "visible": true,
-                "family": "Versal AI Core",
-                "aie_types": [
-                    "AIE1"
-                ]
-            },
-            "target_domain": "AIE"
-        },
-        {
-            "api_name": "xf::solver::SVDComplexFloat",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::solver::SVDComplexFloat",
-                "display_name": "SVDComplexFloat",
-                "brief": "Singular Value Decomposition ",
-                "target_domain": "AIE",
-                "header_file_name": [
-                    "svd_graph.hpp"
-                ],
-                "search_paths": [
-                    "L2/include/aie",
-                    "L1/include/aie",
-                    "L1/src/aie"
-                ],
-                "instance": "class",
-                "parameters": [
-                    {
-                        "name": "col_num",
-                        "description": "",
-                        "type": "int",
-                        "minimum": 4,
-                        "maximum": 256
-                    },
-                    {
-                        "name": "row_num",
-                        "description": "",
-                        "type": "int",
-                        "minimum": 4,
-                        "maximum": 512
-                    }
-                ],
-                "ports": [
-                    {
-                        "name": "in_0",
-                        "direction": "input",
-                        "type": "adf::input_plio",
-                        "data_type": "cfloat"
-                    },
-                    {
-                        "name": "in_1",
-                        "direction": "input",
-                        "type": "adf::input_plio",
-                        "data_type": "cfloat"
-                    },
-                    {
-                        "name": "out_0",
-                        "direction": "output",
-                        "type": "adf::output_plio",
-                        "data_type": "cfloat"
-                    },
-                    {
-                        "name": "out_1",
-                        "direction": "output",
-                        "type": "adf::output_plio",
-                        "data_type": "cfloat"
-                    }
-                ],
-                "visible": true,
-                "family": "Versal AI Core",
-                "aie_types": [
-                    "AIE1"
-                ]
-            },
-            "target_domain": "AIE"
+                "schema": "vitis_libraries_api_list_schema-1.0"
+            }
         }
     ]
 }

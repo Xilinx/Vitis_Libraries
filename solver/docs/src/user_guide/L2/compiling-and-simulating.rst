@@ -21,7 +21,7 @@ Compiling and Simulating
 Dependencies
 ------------
 
-The solver library utilizes several compilation, metadata check and post compilation scripts from the Vitis AIE DSP library. Ensure that you have set up the DSP library environment in the same directory as the solver library. For more information on setting up the AIE DSP library environment, refer to the `Vitis DSP Library User Guide <https://docs.amd.com/r/en-US/Vitis_Libraries/L2-AIE-DSP-Library-User-Guide>`.
+The solver library utilizes several compilation, metadata checks, and post-compilation scripts from the Vitis AIE DSP library. Ensure that you have set up the DSP library environment in the same directory as the solver library. For more information on setting up the AIE DSP library environment, refer to the `Vitis DSP Library User Guide <https://docs.amd.com/r/en-US/Vitis_Libraries/L2-AIE-DSP-Library-User-Guide>`.
 
 
 Library Element Unit Test
@@ -31,22 +31,22 @@ Each library element category comes supplied with a test harness.
 
 For AI Engine library elements, it is located in the `L2/tests/aie/<library_element>` directory and consists of JSON, C++ files, as well as a Makefile.
 
-JSON description of the test harness, defined in `L2/tests/<vss/aie>/<library_element>/description.json`, has been used to generate the Makefile. In addition, the `description.json` file defines the parameters of the test harness, e.g., a list of supported platforms.
+The JSON description of the test harness, defined in ``L2/tests/aie/<library_element>/description.json``, is used to generate the Makefile. In addition, the ``description.json`` file defines the parameters of the test harness, e.g., a list of supported platforms.
 
-Each Makefile uses a set of values for each of the library element parameters that are stored in in a JSON file in `L2/tests/aie/<library_element>/multi_params.json`. The set of parameters are combined in a form of a named test case, with default name being: `test_0_tool_canary_aie`. The set of parameters can be edited as required to configure the library element for your needs.
+Each Makefile uses a set of values for each library element parameter that are stored in a JSON file at ``L2/tests/aie/<library_element>/multi_params.json``. The parameters are combined into named test cases, with the default name being ``test_0_tool_canary_aie``. You can edit these parameters as required to configure the library element for your needs.
 
-C++ files serve as an example of how to use the library element subgraph in the context of a super-graph. These test harnesses (graphs) can be found in the `L2/tests/aie/<library_element>/test.hpp` and `L2/tests/aie/<library_element>/test.cpp` file.
+C++ files serve as an example of how to use the library element subgraph in the context of a super-graph. These test harnesses (graphs) can be found in the `L2/tests/aie/<library_element>/test.hpp` and `L2/tests/aie/<library_element>/test.cpp` files.
 
 Although for AI Engine library elements, it is recommended that only L2 (graphs) library elements are instantiated directly in the user code, the kernels underlying the graphs can be found in the `L1/include/aie/<library_element>.hpp` and the `L1/src/aie/<library_element>.cpp` files. 
 
 The test harness run consists of several steps that result in a simulated and validated design. These include:
 
-- Input files(s) generation.
-- Validate configuration with metadata (in: `L2/meta`).
+- Input file(s) generation.
+- Validate configuration against metadata (in: `L2/meta`).
 - Reference model compilation and simulation, to produce the `golden output`.
-- Uut design compilation and simulation.
-- Output post-processing (e.g., timestamps processing to produce throughput figures). The output of the reference model ( `logs/ref_output.txt` ) is verified against the output of the AI Engine graphs (`logs/uut_output.txt`).
-- Output validation using linear algebra or other methods, depending on the library element. The validation report is stored in the `logs/validation.txt` file. Please note that; validation failure results in functional failure if reported as ERROR. On the other hand, if a validation failure is reported as WARNING, the functional test is considered passed. But user must ensure that the warning is acceptable for their application.
+- UUT design compilation and simulation.
+- Output post-processing (e.g., timestamp processing to produce throughput figures). The output of the reference model (``logs/ref_output.txt``) is verified against the output of the AI Engine graphs (``logs/uut_output.txt``).
+- Output validation using linear algebra or other methods, depending on the library element. The validation report is stored in ``logs/validation.txt``. Note: A validation failure reported as ERROR indicates functional failure. If reported as WARNING, the functional test is considered passed; however, you must ensure the warning is acceptable for your application.
 - Status generation. On completion of the make, the `logs/status_<config_details>.txt` file will contain the result of compilation, simulation, and an indication of whether the reference model and AI Engine model outputs match. The report will also contain resource utilization and performance metrics.
 
 
@@ -62,14 +62,14 @@ Use the following steps to compile and simulate the reference model with the x86
 
         make cleanall run PLATFORM=vck190
 
-.. note:: It is recommended to run a ``cleanall`` stage before the compiling design, to ensure no stale objects interfere with the compilation process.
+.. note:: It is recommended to run a ``cleanall`` stage before compiling the design to ensure no stale objects interfere with the compilation process.
 
 .. note:: Platform information (e.g., PLATFORM=vck190) is a requirement of a make build process. A list of supported platforms can be found in `L2/tests/aie/<library_element>/description.json` in the "platform_allowlist" section.
 
 Configuring the Test Case
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To overwrite the default set of parameter, edit the `multi_params.json` file, and add a dedicated named test case or edit one of the existing ones, e.g.:
+To overwrite the default set of parameters, edit the `multi_params.json` file, and add a dedicated named test case or edit one of the existing ones, e.g.:
 
 .. code-block::
 
@@ -85,16 +85,16 @@ To run a test case, specify the test case name passed to the PARAMS argument, e.
 
         make cleanall run PLATFORM=vck190 PARAMS=test_my_design
 
-For list of all the configurable parameters, see the :ref:`CONFIGURATION_PARAMETERS`.
+For a list of all configurable parameters, see :ref:`CONFIGURATION_PARAMETERS`.
 
 Selecting TARGET
 ^^^^^^^^^^^^^^^^
 
-To perform a x86 compilation/simulation, run:
+To perform an x86 compilation/simulation, run:
 
 .. code-block::
 
-    make run TARGET=x86sim.
+    make run TARGET=x86sim
 
 List of all the Makefile targets:
 
@@ -131,28 +131,29 @@ Troubleshooting Compilation
 Compilation Arguments
 ^^^^^^^^^^^^^^^^^^^^^
 
-The test harness supplied with the library allows each library unit to be compiled and simulated in isolation. When the library unit is instanced within your design, the compilation result might differ from the result obtained with the test harness. This might be because compilation of your system might need arguments not present in your system.
+The test harness supplied with the library allows each library unit to be compiled and simulated in isolation. When the library unit is instantiated within your design, the compilation result might differ from the result obtained with the test harness. This can occur because your system may require compiler arguments not present in the test harness.
+This can occur because your system may require compiler arguments not present in the test harness.
 
 Search the Makefile provided for UUT_TARGET_COMPILE_ARGS. For each library element, there can be compile arguments used to avoid errors or to improve performance, that is, specifying memories to be on separate banks to avoid wait states. These arguments will likely change with each release as the compile tool changes with each release.
 
 Stack Size Allocation
 ^^^^^^^^^^^^^^^^^^^^^
 
-Similarly, the test harness provided with each library unit estimates the stack size required for a variety of cases and creates a formula to assign sufficient amount of memory for stack purposes. When the library unit is instanced within your design, compilation can fail with insufficient stack allocated for a specific kernel. The error message should suggest a minimum figure that is required.
+Similarly, the test harness provided with each library unit estimates the stack size required for a variety of cases and creates a formula to assign sufficient amount of memory for stack purposes. When the library unit is instantiated within your design, compilation can fail with insufficient stack allocated for a specific kernel. The error message should suggest a minimum figure that is required.
 
 Use the compiler argument to allocate enough stack as advised by the compiler message. Alternatively, search the Makefile provided for STACK_SIZE, and use the formula for the library unit to calculate sufficient stack size and allocate accordingly.
 
 Invalid Throughput and/or Latency
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Throughput and latency are only reported when a stable operation has been detected. Complex designs might take several iterations to achieve stable state. When a test case is not run for enough iterations, the status report will flag such case with throughput and latency values set to -1.
+Throughput and latency are only reported when a stable operation has been detected. Complex designs might take several iterations to achieve a stable state. When a test case is not run for enough iterations, the status report will flag such a case with throughput and latency values set to -1.
 
 Increase the number of iterations the simulation runs for to achieve a stable state and get accurate throughput and latency measurements.
 
 Power Analysis
 --------------
 
-For SOLVERLIB elements, a naming convention 'VCD' can be used to harvest dynamic power consumption. Once 'VCD' string is added within the test name, VCD file of the simulation data is captured and PDM (Power Design Manager) calculates power metrics. User can find detailed power reports in `pwr_test` folder under their corresponding test result directory. Dynamic power result can also be found in the `logs/status_<config_details>.txt` file.
+For SOLVERLIB elements, the naming convention 'VCD' can be used to harvest dynamic power consumption. When the string 'VCD' is included in the test name, a VCD file of the simulation data is captured and PDM (Power Design Manager) calculates power metrics. You can find detailed power reports in the ``pwr_test`` folder under the corresponding test result directory. Dynamic power results can also be found in the ``logs/status_<config_details>.txt`` file.
 
 .. _CONFIGURATION_PARAMETERS:
 
@@ -164,7 +165,7 @@ Library Element Configuration Parameters
 Common Configuration Parameters
 -------------------------------
 
-Many library elements perform arithmetic and offer a scaling feature exposed as TP_SHIFT. During this operation, rounding and saturation can occur, configured according to parameters TP_RND and TP_SAT. The modes and values for TP_RND are  the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices, as captured in the following table.
+Many library elements perform arithmetic and offer a scaling feature exposed as TP_SHIFT. During this operation, rounding and saturation can occur, configured according to parameters TP_RND and TP_SAT. The modes and values for TP_RND are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices, as captured in the following table.
 
 .. table:: Common Configuration Parameters
 
@@ -281,7 +282,11 @@ For the Cholesky library element, use the following list of configurable paramet
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
+.. note:: Given parameter values are subject to checks early in compilation to ensure support.
+
+.. _CONFIGURATION_PARAMETERS_QRD:
+
+.. _CONFIGURATION_PARAMETERS_QRD:
 
 QRD configuration parameters
 --------------------------------------
@@ -324,8 +329,14 @@ For the QRD library element, use the following list of configurable parameters a
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
+.. note:: Given parameter values are subject to checks early in compilation to ensure support.
 
+.. _LEGALITY_CHECKING:
+
+Legality Checking
+-----------------
+
+During early compilation, parameter values are validated to ensure support by the metadata and build system. If a configuration is not supported, the build will report an error with details of the violation. Refer to the notes within each configuration table and to element-specific documentation for constraints.
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:

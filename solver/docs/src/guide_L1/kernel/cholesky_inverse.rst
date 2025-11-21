@@ -34,7 +34,7 @@ matrix :math:`A^{-1}` could be computed in the form of :math:`A^{-1} = (L^{-1})^
 As matrix :math:`L` is a triangular matrix, :math:`L^{-1}` is easy to compute. 
 
 Implementation
-============
+==============
 
 DataType Supported
 --------------------

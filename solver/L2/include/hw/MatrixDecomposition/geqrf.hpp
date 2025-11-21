@@ -19,7 +19,7 @@
  */
 
 /**
- * @file geqrf.h
+ * @file geqrf.hpp
  * @brief This file contains QR decomposition of dense matrix.
  *
  * This file is part of XF Solver Library.

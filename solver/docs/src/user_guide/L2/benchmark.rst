@@ -10,15 +10,15 @@
 Benchmark/QoR
 =============
 
-This section provides the L2 performance benchmarks and Quality of Results (QoR) for the AI Engine solver library elements with various configurations. The results are extracted from a hardware emulation based simulations.
+This section provides L2 performance benchmarks and Quality of Results (QoR) for the AI Engine solver library elements across various configurations. The results are extracted from hardware-emulation-based simulations.
 
 The devices used for benchmarking are:
 
-- AIE: xcvc1902-vsva2197-2MP-e-S,
-- AIE-ML is the xcve2802-vsvh1760-2MP-e-S.
-- AIE-MLv2 is the xc2ve3858-ssva2112-2LP-e-S.
+- AIE: xcvc1902-vsva2197-2MP-e-S
+- AIE-ML: xcve2802-vsvh1760-2MP-e-S
+- AIE-MLv2: xc2ve3858-ssva2112-2LP-e-S
 
-The benchmark results are obtained using these devices wth an AI Engine clock frequency of 1.25 GHz (AIE and AIE-ML devices) or 1.05 GHz (AIE-MLv2 device) and 64-bit PLIOs at 625 MHz.
+The benchmark results are obtained with an AI Engine clock frequency of 1.25 GHz (AIE and AIE-ML devices) or 1.05 GHz (AIE-MLv2), and 64-bit PLIOs at 625 MHz.
 
 The metrics reported for each case are:
 
@@ -29,9 +29,9 @@ The metrics reported for each case are:
 - **DATA_MEMORY**: Total data memory in bytes used by the design.
 - **PROGRAM_MEMORY**: Program memory in bytes used by each kernel.
 
-The AIE_VARIANT parameter refers to the type of AI Engine that is used for each particular case in the benchmark results, this may be AIE, AIE-ML or AIE-MLv2.
+The ``AIE_VARIANT`` parameter indicates the AI Engine type used for each case in the benchmark results: AIE, AIE-ML, or AIE-MLv2.
 
-The PROGRAM_MEMORY metrics are harvested for each kernel the design consists of. For example, a QR decomposition (QRD) configured to be implemented on two tiles (CASC_LEN=2) will have two sets of figures displayed in the following table (space delimited).
+The ``PROGRAM_MEMORY`` metric is collected for each kernel in the design. For example, a QR decomposition (QRD) configured to run on two tiles (``CASC_LEN=2``) will have two sets of figures displayed in the following table (space-delimited).
 
 Latency and Throughput
 ======================
@@ -53,13 +53,13 @@ Furthermore, if there are no input ports included in the design, then the throug
 Cholesky
 ============
 
-The following table gives results for the Cholesky with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_CHOLESKY`.
+The following table provides results for Cholesky across a wide range of supported parameters, defined in :ref:`CONFIGURATION_PARAMETERS_CHOLESKY`.
 
 :download:`cholesky_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.2/solver/docs/src/csv_data_files/L2/cholesky_benchmark.csv>`
 
 QRD
 ============
 
-The following table gives results for the QRD with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_QRD`.
+The following table provides results for QRD across a wide range of supported parameters, defined in :ref:`CONFIGURATION_PARAMETERS_QRD`.
 
 :download:`qrd_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.2/solver/docs/src/csv_data_files/L2/qrd_benchmark.csv>`

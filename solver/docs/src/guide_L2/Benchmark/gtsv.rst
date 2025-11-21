@@ -58,7 +58,7 @@ GTSV Input Arguments:
    Usage: test_gtsv.exe -[-xclbin -o -c -g]
           -xclbin     gtsv binary;
           -runs       number of runs; 
-          -M          size of input Matrix row/cloumn; 
+          -M          size of input Matrix row/column;
 
 .. Note:: Default arguments are set in Makefile. The default configs are: -runs 1 -M 16.
 

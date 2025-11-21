@@ -86,7 +86,7 @@ class cholesky_recur {
   */
 
 /**
- * @defgroup cholesky
+ * @defgroup cholesky Cholesky Decomposition
  *
  * Cholesky Decomposition
  *
@@ -98,7 +98,7 @@ class cholesky_recur {
 /**
  * @ingroup cholesky
  * @brief The Cholesky Decomposition is a specialization of the LU Decomposition. It decomposes a
- *        Hermetian, positive-definite matrix into the product of a lower triangular matrix and its
+ *        Hermitian, positive-definite matrix into the product of a lower triangular matrix and its
  *        conjugate transpose.
  *
  * These are the templates to configure the function.

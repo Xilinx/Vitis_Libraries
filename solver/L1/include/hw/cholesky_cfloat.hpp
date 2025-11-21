@@ -1,6 +1,7 @@
 /*
- * Copyright 2021 Xilinx, Inc.
- *
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +20,6 @@
  * @brief This file contains cholesky functions which deals with cfloat data type
  *   - cholesky_cfloat:     Entry point function
  */
-
 #ifndef _XF_SOLVER_CHOLESKY_CFLOAT_HPP_
 #define _XF_SOLVER_CHOLESKY_CFLOAT_HPP_
 
@@ -85,6 +85,7 @@ Function_cholesky_sqrt_op_complex:;
 // ===================================================================================================================
 template <int DIM, class InputType, class OutputType>
 void cholesky_cfloat_core(InputType A[DIM][DIM]) {
+outer_column_loop:
     for (int j = 0; j < DIM; j++) {
 
         // Calculate the diagonal value for this column
@@ -92,6 +93,7 @@ void cholesky_cfloat_core(InputType A[DIM][DIM]) {
         InputType ljj = {0.0, 0.0};
         float invDiag=1;
         for(int i=0; i<j; i++) {
+#pragma HLS UNROLL
             A[i][j].real(0.0);
             A[i][j].imag(0.0);
         }
@@ -141,6 +143,7 @@ template <bool LowerTriangularL, int DIM, class InputType, class OutputType>
 void cholesky_cfloat(hls::stream<InputType>& matrixAStrm, hls::stream<OutputType>& matrixLStrm) {
     InputType matA[DIM][DIM];
 
+outer_read_A:
     for (int r = 0; r < DIM; r++) {
 #pragma HLS PIPELINE
         for(int c=0; c<DIM; c++){
@@ -150,10 +153,22 @@ void cholesky_cfloat(hls::stream<InputType>& matrixAStrm, hls::stream<OutputType
 
     cholesky_cfloat_core<DIM, InputType, OutputType>(matA);
 
-    for(int c=0; c<DIM; c++){
+    if (LowerTriangularL == true){ 
+outer_write_lowerL:
+        for(int c=0; c<DIM; c++){
+            for (int r = 0; r < DIM; r++) {
 #pragma HLS PIPELINE
-        for (int r = 0; r < DIM; r++) {
-            matrixLStrm.write(matA[r][c]);
+                matrixLStrm.write(matA[r][c]);
+            }
+        }
+    }
+    else{
+outer_write_upperL:
+        for(int c=0; c<DIM; c++){
+            for (int r = 0; r < DIM; r++) {
+#pragma HLS PIPELINE
+                matrixLStrm.write(std::conj(matA[c][r]));
+            }
         }
     }
 }

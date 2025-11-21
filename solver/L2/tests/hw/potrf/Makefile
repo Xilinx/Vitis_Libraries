@@ -141,20 +141,20 @@ endif
 ######################### binary container global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 VPP_FLAGS_kernel_potrf_0 +=  -D KERNEL_NAME=kernel_potrf_0
-VPP_FLAGS_kernel_potrf_0 += --hls.clock 200000000:kernel_potrf_0
+VPP_FLAGS_kernel_potrf_0 += --hls.clock 100000000:kernel_potrf_0
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_kernel_potrf += --clock.defaultFreqHz 250000000
+VPP_LDFLAGS_kernel_potrf += --clock.defaultFreqHz 100000000
 else
-VPP_LDFLAGS_kernel_potrf += --kernel_frequency 250
+VPP_LDFLAGS_kernel_potrf += --kernel_frequency 100
 endif
 
 else 
 VPP_FLAGS_kernel_potrf_0 +=  -D KERNEL_NAME=kernel_potrf_0
-VPP_FLAGS_kernel_potrf_0 += --hls.clock 200000000:kernel_potrf_0
+VPP_FLAGS_kernel_potrf_0 += --hls.clock 100000000:kernel_potrf_0
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_kernel_potrf += --clock.defaultFreqHz 200000000
+VPP_LDFLAGS_kernel_potrf += --clock.defaultFreqHz 100000000
 else
-VPP_LDFLAGS_kernel_potrf += --kernel_frequency 200
+VPP_LDFLAGS_kernel_potrf += --kernel_frequency 100
 endif
 
 endif
