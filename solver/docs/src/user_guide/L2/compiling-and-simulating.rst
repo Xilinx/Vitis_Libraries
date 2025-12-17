@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _COMPILING_AND_SIMULATING:
+.. _SOLVER_COMPILING_AND_SIMULATING:
 
 ************************
 Compiling and Simulating
@@ -27,7 +27,7 @@ The solver library utilizes several compilation, metadata checks, and post-compi
 Library Element Unit Test
 --------------------------
 
-Each library element category comes supplied with a test harness. 
+Each library element category comes supplied with a test harness.
 
 For AI Engine library elements, it is located in the `L2/tests/aie/<library_element>` directory and consists of JSON, C++ files, as well as a Makefile.
 
@@ -37,7 +37,7 @@ Each Makefile uses a set of values for each library element parameter that are s
 
 C++ files serve as an example of how to use the library element subgraph in the context of a super-graph. These test harnesses (graphs) can be found in the `L2/tests/aie/<library_element>/test.hpp` and `L2/tests/aie/<library_element>/test.cpp` files.
 
-Although for AI Engine library elements, it is recommended that only L2 (graphs) library elements are instantiated directly in the user code, the kernels underlying the graphs can be found in the `L1/include/aie/<library_element>.hpp` and the `L1/src/aie/<library_element>.cpp` files. 
+Although for AI Engine library elements, it is recommended that only L2 (graphs) library elements are instantiated directly in the user code, the kernels underlying the graphs can be found in the `L1/include/aie/<library_element>.hpp` and the `L1/src/aie/<library_element>.cpp` files.
 
 The test harness run consists of several steps that result in a simulated and validated design. These include:
 
@@ -85,7 +85,7 @@ To run a test case, specify the test case name passed to the PARAMS argument, e.
 
         make cleanall run PLATFORM=vck190 PARAMS=test_my_design
 
-For a list of all configurable parameters, see :ref:`CONFIGURATION_PARAMETERS`.
+For a list of all configurable parameters, see :ref:`SOLVER_CONFIGURATION_PARAMETERS`.
 
 Selecting TARGET
 ^^^^^^^^^^^^^^^^
@@ -155,12 +155,12 @@ Power Analysis
 
 For SOLVERLIB elements, the naming convention 'VCD' can be used to harvest dynamic power consumption. When the string 'VCD' is included in the test name, a VCD file of the simulation data is captured and PDM (Power Design Manager) calculates power metrics. You can find detailed power reports in the ``pwr_test`` folder under the corresponding test result directory. Dynamic power results can also be found in the ``logs/status_<config_details>.txt`` file.
 
-.. _CONFIGURATION_PARAMETERS:
+.. _SOLVER_CONFIGURATION_PARAMETERS:
 
 Library Element Configuration Parameters
 ----------------------------------------
 
-.. _COMMON_CONFIG_PARAMETERS:
+.. _SOLVER_COMMON_CONFIG_PARAMETERS:
 
 Common Configuration Parameters
 -------------------------------
@@ -251,7 +251,7 @@ Many library elements perform arithmetic and offer a scaling feature exposed as 
     |                        |                |                | 22: AIE-MLv2                         |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. _CONFIGURATION_PARAMETERS_CHOLESKY:
+.. _SOLVER_CONFIGURATION_PARAMETERS_CHOLESKY:
 
 Cholesky configuration parameters
 --------------------------------------
@@ -260,33 +260,31 @@ For the Cholesky library element, use the following list of configurable paramet
 
 .. table:: Cholesky configuration parameters
 
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | DATA_TYPE              |    typename    |    float       | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_SIZE               |    unsigned    |    32          | The dimension size of the matrix.    |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NUM_FRAMES             |    unsigned    |    1           | Number of frames in a window.        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | GRID_DIM               |    unsigned    |    1           | The dimension size of the grid       |
-    |                        |                |                | of kernels used to break up a matrix.|
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
+    +------------------------+----------------+----------------+------------------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                                  |
+    +========================+================+================+================================================+
+    | DATA_TYPE              |    typename    |    float       | Data Type.                                     |
+    |                        |                |                |                                                |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | DIM_SIZE               |    unsigned    |    32          | The dimension size of the matrix.              |
+    |                        |                |                |                                                |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | NUM_FRAMES             |    unsigned    |    1           | Number of frames in a window.                  |
+    |                        |                |                |                                                |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | GRID_DIM               |    unsigned    |    1           | The dimension size of the grid                 |
+    |                        |                |                | of kernels used to break up a matrix.          |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | NITER                  |    unsigned    |    4           | See :ref:`SOLVER_COMMON_CONFIG_PARAMETERS`     |
+    |                        |                |                |                                                |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`SOLVER_COMMON_CONFIG_PARAMETERS`     |
+    |                        |                |                |                                                |
+    +------------------------+----------------+----------------+------------------------------------------------+
 
 .. note:: Given parameter values are subject to checks early in compilation to ensure support.
 
-.. _CONFIGURATION_PARAMETERS_QRD:
-
-.. _CONFIGURATION_PARAMETERS_QRD:
+.. _SOLVER_CONFIGURATION_PARAMETERS_QRD:
 
 QRD configuration parameters
 --------------------------------------
@@ -295,43 +293,43 @@ For the QRD library element, use the following list of configurable parameters a
 
 .. table:: QRD configuration parameters
 
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | DATA_TYPE              |    typename    |    float       | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_ROWS               |    unsigned    |    32          | Row dimension of the input matrix.   |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_COLS               |    unsigned    |    32          | Column dimension of the input matrix.|
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NUM_FRAMES             |    unsigned    |    1           | Number of frames in a window.        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | CASC_LEN               |    unsigned    |    1           | The number of cascaded kernels to    |
-    |                        |                |                | be used to perform the function.     |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_A_LEADING          |    unsigned    |    1           | Matrix A data memory order.          |
-    |                        |                |                | 1 is row major, 0 is column major.   |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_Q_LEADING          |    unsigned    |    1           | Matrix Q data memory order.          |
-    |                        |                |                | 1 is row major, 0 is column major.   |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_R_LEADING          |    unsigned    |    1           | Matrix R data memory order.          |
-    |                        |                |                | 1 is row major, 0 is column major.   |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
+    +------------------------+----------------+----------------+------------------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                                  |
+    +========================+================+================+================================================+
+    | DATA_TYPE              |    typename    |    float       | Data Type.                                     |
+    |                        |                |                |                                                |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | DIM_ROWS               |    unsigned    |    32          | Row dimension of the input matrix.             |
+    |                        |                |                |                                                |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | DIM_COLS               |    unsigned    |    32          | Column dimension of the input matrix.          |
+    |                        |                |                |                                                |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | NUM_FRAMES             |    unsigned    |    1           | Number of frames in a window.                  |
+    |                        |                |                |                                                |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | CASC_LEN               |    unsigned    |    1           | The number of cascaded kernels to              |
+    |                        |                |                | be used to perform the function.               |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | DIM_A_LEADING          |    unsigned    |    1           | Matrix A data memory order.                    |
+    |                        |                |                | 1 is row major, 0 is column major.             |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | DIM_Q_LEADING          |    unsigned    |    1           | Matrix Q data memory order.                    |
+    |                        |                |                | 1 is row major, 0 is column major.             |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | DIM_R_LEADING          |    unsigned    |    1           | Matrix R data memory order.                    |
+    |                        |                |                | 1 is row major, 0 is column major.             |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | NITER                  |    unsigned    |    4           | See :ref:`SOLVER_COMMON_CONFIG_PARAMETERS`     |
+    |                        |                |                |                                                |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`SOLVER_COMMON_CONFIG_PARAMETERS`     |
+    |                        |                |                |                                                |
+    +------------------------+----------------+----------------+------------------------------------------------+
 
 .. note:: Given parameter values are subject to checks early in compilation to ensure support.
 
-.. _LEGALITY_CHECKING:
+.. _SOLVER_LEGALITY_CHECKING:
 
 Legality Checking
 -----------------

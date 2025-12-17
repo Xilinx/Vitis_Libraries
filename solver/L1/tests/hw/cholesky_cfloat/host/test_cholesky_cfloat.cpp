@@ -16,9 +16,7 @@
  */
 
 //#include "matrix.hpp"
-//#include "test_cholesky_cfloat.hpp"
 #include "kernel_cholesky_cfloat.hpp"
-//#include "dut_type.hpp"
 #include "utils/x_matrix_utils.hpp"
 #include "src/utils.hpp"
 #include "src/matrix_test_utils.hpp"

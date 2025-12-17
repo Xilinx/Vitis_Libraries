@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _SOLVER_LIB_FUNC:
+.. _SOLVER_SOLVER_LIB_FUNC:
 
 ========================
 Solver Library Functions
@@ -26,7 +26,7 @@ The SolverLib consists of the following solver elements:
    :ltrim:
 
 
-.. _vecSampleNum:
+.. _SOLVER_vecSampleNum:
 
 ============
 vecSampleNum

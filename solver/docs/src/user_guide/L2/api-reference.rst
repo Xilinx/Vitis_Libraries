@@ -4,7 +4,7 @@
 
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _API_REFERENCE:
+.. _SOLVER_API_REFERENCE:
 
 ======================
 API Reference Overview

@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _INTRODUCTION:
+.. _SOLVER_INTRODUCTION:
 
 ***********************************
 Introduction to AIE Solver Library
@@ -20,36 +20,36 @@ AMD documentation is organized around a set of standard design processes to help
 
 -  **AI Engine Development:** Creating the AI Engine graph and kernels, library use, simulation debugging and profiling, and algorithm development. Also includes the integration of the programmable logic (PL) and AI Engine kernels. Topics in this document that apply to this design process include:
 
-   -  :ref:`ORGANIZATION`
+   -  :ref:`SOLVER_ORGANIZATION`
 
-   -  :ref:`USING`
+   -  :ref:`SOLVER_USING`
 
-   -  :ref:`KNOWN_ISSUES`
+   -  :ref:`SOLVER_KNOWN_ISSUES`
 
-   -  :ref:`TUTORIALS`
+   -  :ref:`SOLVER_TUTORIALS`
 
-   -  :ref:`SOLVER_LIB_FUNC`
+   -  :ref:`SOLVER_SOLVER_LIB_FUNC`
 
-   -  :ref:`COMPILING_AND_SIMULATING`
+   -  :ref:`SOLVER_COMPILING_AND_SIMULATING`
 
-   -  :ref:`API_REFERENCE`
+   -  :ref:`SOLVER_API_REFERENCE`
 
-   -  :ref:`BENCHMARK`
+   -  :ref:`SOLVER_BENCHMARK`
 
 
 -  **System and Solution Planning:** Identifying the components, performance, I/O, and data transfer requirements at a system level. Includes application mapping for the solution to the processing subsystem (PS), PL, and AI Engine. Topics in this document that apply to this design process include:
 
-   -  :ref:`CHOLESKY`
+   -  :ref:`SOLVER_CHOLESKY`
 
-   -  :ref:`QRD`
+   -  :ref:`SOLVER_QRD`
 
 -  **System Integration and Validation:** Integrating and validating the system functional performance, including timing, resource use, and power closure. Topics in this document that apply to this design process include:
 
-   -  :ref:`COMPILING_AND_SIMULATING`
+   -  :ref:`SOLVER_COMPILING_AND_SIMULATING`
 
-   -  :ref:`API_REFERENCE`
+   -  :ref:`SOLVER_API_REFERENCE`
 
-.. _ORGANIZATION:
+.. _SOLVER_ORGANIZATION:
 
 ============
 Organization
@@ -62,7 +62,6 @@ The following figure shows the SolverLib organization.
 .. graphviz::
 
    digraph solver {
-       rankdir=LR;
        node [shape=folder];
        solver -> docs;
        solver -> ext;
@@ -70,39 +69,55 @@ The following figure shows the SolverLib organization.
        solver -> L2;
        solver -> scripts;
 
-       L1 -> include;
-       L1 -> meta;
-       L1 -> src;
-       L1 -> tests;
+       L1 -> L1_include;
+       L1 -> L1_meta;
+       L1 -> L1_src;
+       L1 -> L1_tests;
 
-       include -> aie;
-       include -> hw;
+       L1_include -> L1_include_aie;
+       L1_include -> L1_include_hw;
 
-       src -> aie;
+       L1_src -> L1_src_aie;
 
-       tests -> aie;
-       tests -> src;
+       L1_tests -> L1_tests_aie;
+       L1_tests -> L1_tests_src;
 
-       L2 -> benchmarks;
-       L2 -> examples;
-       L2 -> include;
-       L2 -> meta;
-       L2 -> tests;
+       L2 -> L2_benchmarks;
+       L2 -> L2_examples;
+       L2 -> L2_include;
+       L2 -> L2_meta;
+       L2 -> L2_tests;
 
-       examples -> docs_examples;
+       L2_examples -> L2_examples_docs;
 
-       include [label="include"];
-       include -> aie [label="aie"];
-       include -> hw [label="hw"];
+       L2_include -> L2_include_aie;
+       L2_include -> L2_include_hw;
+
+       L2_tests -> L2_tests_aie;
+       L2_tests -> L2_tests_hw;
+
+       L1_include [label="include"];
+       L1_include_aie [label="aie"];
+       L1_include_hw [label="hw"];
+       L1_meta [label="meta"];
+       L1_src [label="src"];
+       L1_src_aie [label="aie"];
+       L1_tests [label="tests"];
+       L1_tests_aie [label="aie"];
+       L1_tests_src [label="src"];
 
        L2_include [label="include"];
-       L2_include -> aie [label="aie"];
-       L2_include -> hw [label="hw"];
-       L2 -> L2_include [style=invis];
-
-       tests -> aie [label="aie"];
-       tests -> hw [label="hw"];
+       L2_include_aie [label="aie"];
+       L2_include_hw [label="hw"];
+       L2_benchmarks [label="benchmarks"];
+       L2_examples [label="examples"];
+       L2_examples_docs [label="docs"];
+       L2_meta [label="meta"];
+       L2_tests [label="tests"];
+       L2_tests_aie [label="aie"];
+       L2_tests_hw [label="hw"];
    }
+
 
 
 
@@ -120,7 +135,7 @@ Reference model graph classes for each library element are contained in ``L2/tes
 
 The `L2/examples` subdirectory holds example wrapper designs to demonstrate the use of the library elements.
 
-.. _USING:
+.. _SOLVER_USING:
 
 =================================================
 Using Library Elements within User-Defined Graphs
@@ -146,7 +161,7 @@ Use the following option in the aiecompiler command to provide the path:
     -include=$SOLVERLIB_ROOT/L1/include/aie
     -include=$SOLVERLIB_ROOT/L1/src/aie
 
-.. _KNOWN_ISSUES:
+.. _SOLVER_KNOWN_ISSUES:
 
 ============
 Known Issues
@@ -155,7 +170,7 @@ Known Issues
 See Answer Record `75802 <https://www.xilinx.com/support/answers/75802.html>`__ for a list of known issues.
 
 
-.. _TUTORIALS:
+.. _SOLVER_TUTORIALS:
 
 ===============
 Vitis Tutorials

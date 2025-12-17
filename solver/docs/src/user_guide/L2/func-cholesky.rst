@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _CHOLESKY:
+.. _SOLVER_CHOLESKY:
 
 ========
 Cholesky
@@ -42,25 +42,25 @@ The data type is controlled by ``TT_DATA`` and can be one of two choices: ``floa
 Template Parameters
 ===================
 
-To see details on the template parameters for the Cholesky, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the Cholesky, see :ref:`SOLVER_API_REFERENCE`.
 
 
 Access Functions
 ================
 
-To see details on the access functions for the Cholesky, see :ref:`API_REFERENCE`.
+To see details on the access functions for the Cholesky, see :ref:`SOLVER_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the Cholesky, see :ref:`API_REFERENCE`. Note that the port types are determined by the template parameter configuration.
+To see details on the ports for the Cholesky, see :ref:`SOLVER_API_REFERENCE`. Note that the port types are determined by the template parameter configuration.
 
 
 Parallelism (Grid Tiling)
 -------------------------
 
 Parallelism for the Cholesky is configured using the ``TP_GRID_DIM`` template parameter. This parameter scales the size of the lower-triangular grid of tiles used to split up the input matrix. Only the lower-triangular tiles are used since the upper-triangular output can be assumed to resolve to 0.
-``TP_GRID_DIM`` must be a factor of ``TP_DIM``, and the resulting sub-matrix dimension must be a multiple of :ref:`vecSampleNum`. 
+``TP_GRID_DIM`` must be a factor of ``TP_DIM``, and the resulting sub-matrix dimension must be a multiple of :ref:`SOLVER_vecSampleNum`.
 The number of AIE tiles used in the design scales according to ``TP_GRID_DIM`` * (``TP_GRID_DIM`` + 1) / 2.
 
 The following is an example of ``TP_DIM`` and ``TP_GRID_DIM`` being used:
@@ -73,10 +73,10 @@ The following is an example of ``TP_DIM`` and ``TP_GRID_DIM`` being used:
 
         +-----+
         |0  6 |12 14 20 26
-        |1  7 |13 15 21 27 
+        |1  7 |13 15 21 27
         +-----+-----+
-        |2  8 |14 16|22 28 
-        |3  9 |15 17|23 29 
+        |2  8 |14 16|22 28
+        |3  9 |15 17|23 29
         +-----+-----+-----+
         |4  10|16 18|24 30|
         |5  11|17 19|25 31|
@@ -87,9 +87,9 @@ The following is an example of ``TP_DIM`` and ``TP_GRID_DIM`` being used:
 Padding
 -------
 
-Padding is not a supported feature of the library element. For matrices whose dimensions are not multiples of :ref:`vecSampleNum`, the input matrix must be padded such that it is a multiple of :ref:`vecSampleNum` (the output locations corresponding to the pads should be ignored). ``TP_DIM`` must be set to the padded dimension size.
+Padding is not a supported feature of the library element. For matrices whose dimensions are not multiples of :ref:`SOLVER_vecSampleNum`, the input matrix must be padded such that it is a multiple of :ref:`SOLVER_vecSampleNum` (the output locations corresponding to the pads should be ignored). ``TP_DIM`` must be set to the padded dimension size.
 
-The following is an example of a 6x6 matrix with :ref:`vecSampleNum` of 4 (thus ``TP_DIM`` set to 8):
+The following is an example of a 6x6 matrix with :ref:`SOLVER_vecSampleNum` of 4 (thus ``TP_DIM`` set to 8):
 
 .. code-block::
 
@@ -107,8 +107,8 @@ The following is an example of a 6x6 matrix with :ref:`vecSampleNum` of 4 (thus 
 Constraints
 -----------
 Input matrix data must be written in a column-major fashion, and the matrix is assumed to be Hermitian positive-definite. The Cholesky operation is susceptible to catastrophic cancellation; therefore, it is recommended to ensure your matrix is well-conditioned.
-Data is operated on in :ref:`vecSampleNum` * :ref:`vecSampleNum` chunks, and thus only chunks along and below the diagonal are operated on. Upper matrix data is assumed to be zero, thus chunks in the upper-triangular output are undefined.
-In a single-tile implementation, ``TP_DIM`` must be a multiple of :ref:`vecSampleNum`. In multi-tile implementations, ``TP_DIM`` / ``TP_GRID_DIM`` must be a multiple of :ref:`vecSampleNum`.
+Data is operated on in :ref:`SOLVER_vecSampleNum` * :ref:`SOLVER_vecSampleNum` chunks, and thus only chunks along and below the diagonal are operated on. Upper matrix data is assumed to be zero, thus chunks in the upper-triangular output are undefined.
+In a single-tile implementation, ``TP_DIM`` must be a multiple of :ref:`SOLVER_vecSampleNum`. In multi-tile implementations, ``TP_DIM`` / ``TP_GRID_DIM`` must be a multiple of :ref:`SOLVER_vecSampleNum`.
 
 
 Code Example
