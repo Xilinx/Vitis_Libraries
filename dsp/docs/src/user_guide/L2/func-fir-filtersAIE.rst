@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _FILTERS:
+.. _DSP_FILTERS:
 
 =======
 Filters
@@ -12,7 +12,7 @@ Filters
 
 The DSPLib contains several variants of finite impulse response (FIR) filters. These include single-rate FIRs, half-band interpolation/decimation FIRs, as well as integer and fractional interpolation/decimation FIRs.
 
-.. _FILTER_ENTRY:
+.. _DSP_FILTER_ENTRY:
 
 Entry Point
 ===========
@@ -25,7 +25,7 @@ FIR filters have been categorized into classes and placed in a distinct namespac
 
 Additionally, each FIR filter has been placed in its unique FIR type namespace. The available FIR filter classes and the corresponding graph entry point are listed as follows:
 
-.. _tab-fir-filter-classes:
+.. _DSP_tab-fir-filter-classes:
 
 .. table:: FIR Filter Classes
    :align: center
@@ -57,7 +57,7 @@ Device Support
 The FIR filters support AIE, AIE-ML and AIE-MLv2 for all features with the following exceptions:
 
 - The ``cfloat`` data type is not supported on AIE-ML and AIE-MLv2 devices
-- Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
+- Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`DSP_COMPILING_AND_SIMULATING`.
 
 Supported Data Types
 ====================
@@ -66,7 +66,7 @@ All FIR filters can be configured for various types of data and coefficients. Th
 
 The following table lists the supported combinations of data type and coefficient type with notes for those combinations not supported.
 
-.. _tab_supported_combos:
+.. _DSP_tab_supported_combos:
 
 .. table:: Supported Combinations of Data Type and Coefficient Type
    :align: center
@@ -101,22 +101,22 @@ The following table lists the supported combinations of data type and coefficien
 Template Parameters
 ===================
 
-For a list of template parameters for each FIR variant, see :ref:`API_REFERENCE`.
+For a list of template parameters for each FIR variant, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-For the access functions for each FIR variant, see :ref:`API_REFERENCE`.
+For the access functions for each FIR variant, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see the ports for each FIR variant, see :ref:`API_REFERENCE`.
+To see the ports for each FIR variant, see :ref:`DSP_API_REFERENCE`.
 
 Design Notes
 ============
 
-.. _COEFFS_FOR_FIRS:
+.. _DSP_COEFFS_FOR_FIRS:
 
 Coefficient Array for Filters
 -----------------------------
@@ -161,11 +161,11 @@ Please refer to `UG1079 Run-Time Parameter Support Summary <https://docs.amd.com
 
 .. note:: Graph's `update()` method must be called after graph has been initialized, but before kernel starts operation on data samples.
 
-.. note:: SSR configurations don't offer support for symmetry. Therefore, RTP array size should be determined using: :ref:`RTP_ARRAY_SIZE_FOR_SSR_CASES`.
+.. note:: SSR configurations don't offer support for symmetry. Therefore, RTP array size should be determined using: :ref:`DSP_RTP_ARRAY_SIZE_FOR_SSR_CASES`.
 
-.. note:: AIE-ML and AIE-MLv2 devices do not offer HW support for symmetry. Therefore, RTP array size should be determined using:  :ref:`RTP_ARRAY_SIZE_FOR_SSR_CASES`.
+.. note:: AIE-ML and AIE-MLv2 devices do not offer HW support for symmetry. Therefore, RTP array size should be determined using:  :ref:`DSP_RTP_ARRAY_SIZE_FOR_SSR_CASES`.
 
-.. _RTP_ARRAY_SIZE_FOR_NON_SSR_CASES:
+.. _DSP_RTP_ARRAY_SIZE_FOR_NON_SSR_CASES:
 
 Reloadable Coefficients - Array Size for Non-SSR Cases
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -199,12 +199,12 @@ Array size of an argument passed to the graph's `update()` method depends on the
 | three non-zero tap values, including the center tap are expected, i.e., the graph's `update()` method expects an argument:
 | ``int16 tapsIn[3] =  {1, 2, 5}``.
 
-.. _RTP_ARRAY_SIZE_FOR_SSR_CASES:
+.. _DSP_RTP_ARRAY_SIZE_FOR_SSR_CASES:
 
 Reloadable Coefficients - Array Dimensions for SSR Cases
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Reloadable coefficients are also available for Super Sample Rate (SSR) modes of operation. For more details on SSR, refer to: :ref:`SSR_OPERATION`.
+Reloadable coefficients are also available for Super Sample Rate (SSR) modes of operation. For more details on SSR, refer to: :ref:`DSP_SSR_OPERATION`.
 When the FIR is configured in an SSR mode that creates multiple parallel computation paths, i.e., ``TP_SSR`` or ``TP_PARA_INTERP_POLY`` is greater than 1, the graph will be created with an array of RTP input ports.
 
 .. note:: The size of the RTP input port array is equal to the total number of parallel computation paths, defined by: ``TP_SSR * TP_PARA_INTERP_POLY``.
@@ -242,7 +242,7 @@ As mentioned above, asymmetrical filters expect the port to contain the full arr
 
 | A helper function: ``convert_hb_taps_to_asym`` is provided in the `Graph utils <../../rst/group_graph_utils.html>`_ to ease converting the taps array to the required format.
 
-.. _WINDOW_API_FIRS:
+.. _DSP_WINDOW_API_FIRS:
 
 Window Interface for Filters
 -------------------------------
@@ -277,7 +277,7 @@ Subsequent iterations will produce output data with reduced latency, due to the 
 
 To minimize the latency, the buffer size should be set to the minimum size that meets the required throughput.
 
-.. _FIR_MULTIPLE_BUFFER_PORTS:
+.. _DSP_FIR_MULTIPLE_BUFFER_PORTS:
 
 Multiple Buffer Ports
 ^^^^^^^^^^^^^^^^^^^^^
@@ -302,7 +302,7 @@ In this scenario, two exact copies of output data will be produced in two indepe
 
 For example, a single-rate FIR with a `512` input sample buffer will produce two output buffers, where each buffer is `512` samples.
 
-.. _MAX_WINDOW_SIZE:
+.. _DSP_MAX_WINDOW_SIZE:
 
 Maximum Window Size
 ^^^^^^^^^^^^^^^^^^^
@@ -310,7 +310,7 @@ Maximum Window Size
 | Window buffer is mapped into a local memory in the area surrounding the kernel that accesses it.
 | A local memory storage is 32 kB (64 kB for AIE-ML and AIE-MLv2 devices), and the maximum size of the `ping-pong` window buffer should not exceed this limit.
 
-.. _SINGLE_BUFFER_CONSTRAINT:
+.. _DSP_SINGLE_BUFFER_CONSTRAINT:
 
 Single Buffer Constraint
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -322,7 +322,7 @@ Single Buffer Constraint
 
     single_buffer(firGraph.getKernels()[0].in[0]);
 
-.. _STREAM_API_FIRS:
+.. _DSP_STREAM_API_FIRS:
 
 Streaming Interface for Filters
 -------------------------------
@@ -362,7 +362,7 @@ When operating in a SSR mode, i.e. ``TP_SSR``, ``TP_PARA_INTERP_POLY`` or ``TP_P
 
 For example, a 32 tap, single-rate symmetric FIR implemented on AIE device with a SSR set to 2 (``TP_SSR = 2``), using ``cint16`` data with frame size of `25600` and ``int16`` coefficients achieves throughput of `1998 MSa/s` (based on 1 GHz AI Engine clock) and latency as low as tens of nanoseconds.
 
-.. _FIR_STREAM_OUTPUT:
+.. _DSP_FIR_STREAM_OUTPUT:
 
 Stream Output
 ^^^^^^^^^^^^^
@@ -401,7 +401,7 @@ Stream Input for Symmetric FIRs
 Symmetric FIRs require access to data from two distinctive areas of the data stream and therefore require memory storage.
 In symmetric FIRs, the stream input is connected to an input ping-pong window buffer through a DMA port of a Memory Module.
 
-.. _FIR_FRAME_SIZE:
+.. _DSP_FIR_FRAME_SIZE:
 
 Setting FIR Frame Size
 ----------------------
@@ -413,13 +413,13 @@ Taking into account that each vector operation might calculate four or eight out
 
 Furthermore, rate-changing FIRs require the frame size to be divisible by ``TP_DECIMATION_FACTOR`` to fully process input data samples within the optimized loop.
 
-Additionally, in SSR mode (see :ref:`SSR_OPERATION_MODES`), the user provided frame size is distributed across all input phases of the graph.
+Additionally, in SSR mode (see :ref:`DSP_SSR_OPERATION_MODES`), the user provided frame size is distributed across all input phases of the graph.
 
 Therefore, the FIR graph's frame size ``TP_INPUT_WINDOW_VSIZE`` must be divisible by ``TP_SSR * TP_DECIMATION_FACTOR * Repetition_factor``.
 
 An invalid selection will report a message in a form of Metadata error or a `static_assert()` with rule violation details and a suggestion of how to fix it.
 
-.. _FIR_LENGTH:
+.. _DSP_FIR_LENGTH:
 
 Setting FIR Length
 ------------------
@@ -430,12 +430,12 @@ Single Rate FIRs have no restriction placed on the FIR length selection.
 
 However, rate-changing FIRs require each of the individual kernels to operate on a FIR length divisible by the Decimation or Interpolation factor, imposing limits on the FIR length, e.g., ``TP_FIR_LEN % TP_DECIMATE_FACTOR == 0`` or ``TP_FIR_LEN % TP_INTERPOLATE_FACTOR == 0``.
 
-In SSR modes, see :ref:`SSR_OPERATION_MODES`; coefficients are distributed equally across all output paths. As a result, the total number of FIRs coefficients must be divisible by number of paths, i.e., ``TP_FIR_LEN % (TP_SSR) == 0``.
+In SSR modes, see :ref:`DSP_SSR_OPERATION_MODES`; coefficients are distributed equally across all output paths. As a result, the total number of FIRs coefficients must be divisible by number of paths, i.e., ``TP_FIR_LEN % (TP_SSR) == 0``.
 For rate-changing FIRs this raises additional limits on the FIR length, where FIR length can be described by e.g.: ``TP_FIR_LEN % (TP_SSR * TP_PARA_INTERP_POLY * TP_PARA_DECI_POLY) == 0``.
 
 .. note:: An invalid selection will report a message in a form of a Metadata error or a `static_assert()` with the rule violation details and a suggestion of how to fix it.
 
-.. _MAX_FIR_LENGTH:
+.. _DSP_MAX_FIR_LENGTH:
 
 Maximum FIR Length
 ------------------
@@ -448,7 +448,7 @@ Maximum Window Based FIRs Length
 
 When using a window-API for instance, the window buffer must fit into a 32 kByte memory bank, and because this includes the margin, it limits the maximum window size. Therefore, it also indirectly sets an upper limit on ``TP_FIR_LEN``.
 
-In addition, the `single_buffer()` constraint is needed to implement window buffers of > 16 kB. For more details, refer to: :ref:`SINGLE_BUFFER_CONSTRAINT`.
+In addition, the `single_buffer()` constraint is needed to implement window buffers of > 16 kB. For more details, refer to: :ref:`DSP_SINGLE_BUFFER_CONSTRAINT`.
 
 As a guide, a single rate symmetric FIR can support up to:
 
@@ -470,9 +470,9 @@ Maximum Stream based FIRs Length
 | In addition, data registers storage capacity will be affected by decimation factors, when a Decimation FIR is used.
 | As a result, the number of taps each AI Engine kernel can process, limited by the capacity of the input vector register, depends on a variety of factors, like data type, coefficient type, and decimation factor.
 
-To help find the number of FIR kernels required (or desired) to implement requested FIR length, refer to the helper functions: :ref:`MINIUM_CASC_LEN`, :ref:`OPTIMUM_CASC_LEN` described below.
+To help find the number of FIR kernels required (or desired) to implement requested FIR length, refer to the helper functions: :ref:`DSP_MINIUM_CASC_LEN`, :ref:`DSP_OPTIMUM_CASC_LEN` described below.
 
-.. _MINIUM_CASC_LEN:
+.. _DSP_MINIUM_CASC_LEN:
 
 Minimum Cascade Length
 ----------------------
@@ -497,9 +497,9 @@ where T_FIR_LEN is the tap length of the FIR; T_API refers to thee type of port 
                                                    kMinLen, USE_COEFF_RELOAD, NUM_OUTPUTS, API, SSR> firGraphWithMinLen;
 
 
-More details are provided in the :ref:`API_REFERENCE`.
+More details are provided in the :ref:`DSP_API_REFERENCE`.
 
-.. _OPTIMUM_CASC_LEN:
+.. _DSP_OPTIMUM_CASC_LEN:
 
 Optimum Cascade Length
 ----------------------
@@ -527,27 +527,27 @@ An example use of the getOptCascLen and getMinCascLen is shown below. You can fi
                                                    kOptLen, USE_COEFF_RELOAD, NUM_OUTPUTS, API, SSR> firGraphWithOptLen;
 
 
-More details are provided in the :ref:`API_REFERENCE`.
+More details are provided in the :ref:`DSP_API_REFERENCE`.
 
-.. _SSR_OPERATION:
+.. _DSP_SSR_OPERATION:
 
 Super Sample Rate
 -----------------
 
 The term Super Sample Rate strictly means the processing of more than one sample per clock cycle. Because the AI Engine is a vector processor, almost every operation is SSR by this definition, making it superfluous. Therefore, in the AI Engine context, SSR is taken to mean an implementation using multiple computation paths to improve performance at the expense of additional resource use.
 
-.. _SSR_OPERATION_MODES:
+.. _DSP_SSR_OPERATION_MODES:
 
 Super Sample Rate - Operation Modes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In the FIR, SSR operation can be achieved using one of the following modes:
 
-- :ref:`SSR_OPERATION_COEFF_DATA_DISTRO`: Driven by the ``TP_SSR`` template parameter. The mode will create an array of ``TP_SSR^2`` kernels and create the ``TP_SSR`` amount of the **input** and **output** ports.
-- :ref:`SSR_OPERATION_PARA_DECI_POLY`: Driven by the ``TP_PARA_DECI_POLY`` template parameter. The mode will create a vector of ``TP_PARA_DECI_POLY`` kernels and create the ``TP_PARA_DECI_POLY`` amount of the **input** ports.
-- :ref:`SSR_OPERATION_PARA_INTERP_POLY`: Driven by the ``TP_PARA_INTERP_POLY`` template parameter. The mode will create a vector of ``TP_PARA_INTERP_POLY`` kernels and create data a ``TP_PARA_INTERP_POLY`` amount of the **output** ports.
+- :ref:`DSP_SSR_OPERATION_COEFF_DATA_DISTRO`: Driven by the ``TP_SSR`` template parameter. The mode will create an array of ``TP_SSR^2`` kernels and create the ``TP_SSR`` amount of the **input** and **output** ports.
+- :ref:`DSP_SSR_OPERATION_PARA_DECI_POLY`: Driven by the ``TP_PARA_DECI_POLY`` template parameter. The mode will create a vector of ``TP_PARA_DECI_POLY`` kernels and create the ``TP_PARA_DECI_POLY`` amount of the **input** ports.
+- :ref:`DSP_SSR_OPERATION_PARA_INTERP_POLY`: Driven by the ``TP_PARA_INTERP_POLY`` template parameter. The mode will create a vector of ``TP_PARA_INTERP_POLY`` kernels and create data a ``TP_PARA_INTERP_POLY`` amount of the **output** ports.
 
-.. _SSR_OPERATION_RESOURCE_UTILIZATION:
+.. _DSP_SSR_OPERATION_RESOURCE_UTILIZATION:
 
 Super Sample Rate - Resource Utilization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -561,7 +561,7 @@ The number of AI Engine tiles used by a FIR will be given by the formula:
 Examples of this formula are given in the following table.
 
 
-.. _SSR_OPERATION_RESOURCE_TABLE:
+.. _DSP_SSR_OPERATION_RESOURCE_TABLE:
 
 .. table:: FIR SSR Resource Usage Examples
    :align: center
@@ -598,7 +598,7 @@ Examples of this formula are given in the following table.
    |    4    |            2           |           1             |      3       |        96         |
    +---------+------------------------+-------------------------+--------------+-------------------+
 
-.. _SSR_OPERATION_PORT_UTILIZATION:
+.. _DSP_SSR_OPERATION_PORT_UTILIZATION:
 
 Super Sample Rate - Port Utilization and Throughput
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -641,7 +641,7 @@ However, a similarly configured FIR, a 32 tap Single Rate FIR operating on ``cin
 | Hence, if the output runs at maximum bandwidth, the input would need to run at 1/3rd its maximum bandwidth, and you are forced to underutilize the input stream of the filter at only 33 percent efficiency.
 | However, if you are able to split the operation of the interpolator over three kernels, broadcast the input stream to their inputs, and operate the kernels at maximum performance, it will be possible to use both the input and output bandwidths at their maximum bandwidths.
 
-.. _SSR_OPERATION_COEFF_DATA_DISTRO:
+.. _DSP_SSR_OPERATION_COEFF_DATA_DISTRO:
 
 Super Sample Rate - Coefficient and Data Distribution
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -652,7 +652,7 @@ The ``TP_SSR`` parameter allows a trade of performance for resource use in the f
 When used, a number of ``TP_SSR`` input phases and a number of ``TP_SSR`` output paths will be created.
 An array of ``TP_SSR^2`` FIR sub-graphs will be created to connect the input phases and output paths.
 
-Input data samples are distributed across the input phases in a round-robin, sample-by-sample mechanism where each input phase processes a fraction of the input samples, i.e. ``TP_INPUT_WINDOW_VSIZE / TP_SSR``. More details in: :ref:`SSR_PORT_MAPPING`.
+Input data samples are distributed across the input phases in a round-robin, sample-by-sample mechanism where each input phase processes a fraction of the input samples, i.e. ``TP_INPUT_WINDOW_VSIZE / TP_SSR``. More details in: :ref:`DSP_SSR_PORT_MAPPING`.
 
 Coefficients are distributed in such way that each output path consists of all the FIRs coefficients, but each FIR sub-graph in any given output path is only configured to operate on a fraction of the FIR length, i.e., operates on ``TP_FIR_LEN / TP_SSR`` number of coefficients.
 
@@ -660,9 +660,9 @@ As a result, each FIR sub-graph operates on a fraction of coefficients and a fra
 
 In addition, each FIR sub-graph can be further split into multiple FIR kernels with the use of a cascade interface, which is driven by the ``TP_CASC_LEN`` template parameter.
 
-For example, a FIR with ``TP_SSR = 4`` and ``TP_CASC_LEN = 2`` will create a kernel structure presented as follows, in :ref:`FIGURE_FIR_SSR`.
+For example, a FIR with ``TP_SSR = 4`` and ``TP_CASC_LEN = 2`` will create a kernel structure presented as follows, in :ref:`DSP_FIGURE_FIR_SSR`.
 
-.. _FIGURE_FIR_SSR:
+.. _DSP_FIGURE_FIR_SSR:
 
 .. figure:: ./media/SSR_FIR_6_5in.png
 
@@ -676,7 +676,7 @@ The resampling process requires input data samples to be "reused" in a computati
 
 Therefore, Resampling only supports ``TP_SSR`` mode when ``TP_PARA_INTERP_POLY = TP_INTERPOLATION_FACTOR`` and ``TP_PARA_DECI_POLY = TP_DECIMATION_FACTOR``.
 
-.. _SSR_PORT_MAPPING:
+.. _DSP_SSR_PORT_MAPPING:
 
 Super Sample Rate - Sample to Port Mapping
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -702,12 +702,12 @@ For example, if you have a data stream like :code:`int32 x = 0, 1, 2, 3, 4, 5, 6
 The output data will be produced in a similar method.
 Samples will be sent to each port in a round-robin fashion, in addition being organized in 128-bit interleaved patterns when two output ports are in use, i.e., when ``TP_NUM_OUTPUTS`` is set to 2.
 
-.. _SSR_OPERATION_PARA_INTERP_POLY:
+.. _DSP_SSR_OPERATION_PARA_INTERP_POLY:
 
 Super Sample Rate - Interpolation Polyphases
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In addition to the method described above, :ref:`SSR_OPERATION`, FIR can decompose the interpolation process into multiple parallel polyphases using the ``TP_PARA_INTERP_POLY`` template parameter.
+In addition to the method described above, :ref:`DSP_SSR_OPERATION`, FIR can decompose the interpolation process into multiple parallel polyphases using the ``TP_PARA_INTERP_POLY`` template parameter.
 
 When used, a ``TP_PARA_INTERP_POLY`` number of output paths will be created.
 
@@ -760,7 +760,7 @@ The output stream would produce data in this form:
 
 You see that you can think of ``TP_SSR x TP_PARA_INTERP_POLY`` as an effective ``OUT_SSR`` which gives you the maximum output sample rate of the filter.
 
-.. _SSR_OPERATION_PARA_DECI_POLY:
+.. _DSP_SSR_OPERATION_PARA_DECI_POLY:
 
 Super Sample Rate - Decimation Polyphases
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -816,14 +816,14 @@ the output stream would look like:
    out[0] = o0, o2, o4, o6, o8, o10, ...
    out[1] = o1, o3, o5, o7, o9, o11, ...
 
-For more details about how to configure the various parameters to meet various performance metrics, refer to :ref:`FIR_CONFIGURATION_NOTES`
+For more details about how to configure the various parameters to meet various performance metrics, refer to :ref:`DSP_FIR_CONFIGURATION_NOTES`
 
-.. _FIR_CONSTRAINTS:
+.. _DSP_FIR_CONSTRAINTS:
 
 Constraints
 -----------
 
-Should it be necessary to apply constraints within the FIR instance to achieve successful mapping of the design, you need to know the internal instance names for graph and kernel names. See :ref:`FIGURE_FIR_SSR`.
+Should it be necessary to apply constraints within the FIR instance to achieve successful mapping of the design, you need to know the internal instance names for graph and kernel names. See :ref:`DSP_FIGURE_FIR_SSR`.
 
 Each FIR variant has a variety of access methods to help assign a constraint on a kernel and/or a net, e.g.:
 
@@ -831,9 +831,9 @@ Each FIR variant has a variety of access methods to help assign a constraint on 
 
 - `getInNet()` which returns a pointer to a net indexed by method's argument(s).
 
-More details are provided in the :ref:`API_REFERENCE`.
+More details are provided in the :ref:`DSP_API_REFERENCE`.
 
-An example of how to use this is given in the section :ref:`FIR_CODE_EXAMPLE`.
+An example of how to use this is given in the section :ref:`DSP_FIR_CODE_EXAMPLE`.
 When configured for a SSR operation, the FIR has a two-dimensional array (paths x phases) of units which are themselves FIRs, though each atomic FIR in this structure can itself be a series of kernels as described by ``TP_CASC_LEN``. The `getKernels()` access function returns a pointer to the array of kernels within the SSR FIR. This array will have ``TP_SSR * TP_SSR * TP_CASC_LEN`` members. The index in the array is determined by its path number, phase number and cascade position as shown in the following equation.
 
 .. code-block::
@@ -844,7 +844,7 @@ For example, in a design with ``TP_CASC_LEN = 2`` and ``TP_SSR = 3``, the first 
 
 The nets returned by the `getInNet()` function can be assigned custom fifo_depths values to override the defaults.
 
-.. _FIR_CODE_EXAMPLE:
+.. _DSP_FIR_CODE_EXAMPLE:
 
 Code Example
 ============
@@ -856,7 +856,7 @@ The following code example shows how a FIR graph class might be used within a us
     :lines: 17-
 
 
-.. _FIR_CONFIGURATION_NOTES:
+.. _DSP_FIR_CONFIGURATION_NOTES:
 
 Configuration Notes
 ===================
@@ -874,7 +874,7 @@ The least resource-expensive method to obtain higher performance is to use the d
 | ``TP_SSR`` is the parameter that enables finer control over the throughput and AI Engine tiles use.
 | The number of tiles used will be ``TP_CASC_LEN * TP_SSR * TP_SSR``, i.e., SSR is a 2-dimensional expansion. Both methods can work in addition to the ``TP_CASC_LEN`` parameter which also increases the number of tiles. ``TP_SSR`` can take any positive integer value and its maximum is only limited by the number of AI Engine tiles available. This can be used to prevent overutilization of kernels if the throughput requirement is not as high as the one offered by ``TP_PARA_X_POLY``.
 
-``TP_CASC_LEN`` indicates the number of kernels to be cascaded together to distribute the calculation of the ``TP_FIR_LEN`` parameter. It works in addition to ``TP_SSR`` and ``TP_PARA_X_POLY`` to overcome any bottlenecks posed by the vector processor. The library provides access functions to determine the value of ``TP_CASC_LEN`` that gives you the optimum performance, i.e., the minimum number of kernels that can provide the maximum performance. More details can be found in :ref:`API_REFERENCE`.
+``TP_CASC_LEN`` indicates the number of kernels to be cascaded together to distribute the calculation of the ``TP_FIR_LEN`` parameter. It works in addition to ``TP_SSR`` and ``TP_PARA_X_POLY`` to overcome any bottlenecks posed by the vector processor. The library provides access functions to determine the value of ``TP_CASC_LEN`` that gives you the optimum performance, i.e., the minimum number of kernels that can provide the maximum performance. More details can be found in :ref:`DSP_API_REFERENCE`.
 
 If there is no constraint on the number of AI Engine tiles, the easiest way to get the required performance is to set the ``TP_PARA_X_POLY`` to the closest factor of the interpolation/decimation rate that is higher than the throughput needed. If, however, the goal is to obtain a performance using the least number of tiles, ``TP_SSR`` might need to be used as a finer tuning parameter to get the throughput you want.
 
@@ -888,7 +888,7 @@ If there is no constraint on the number of AI Engine tiles, the easiest way to g
 
 | For a 32 tap interpolate by 2 filter that needs 4 GSa/s at output:
 | ``TP_PARA_INTERP_POLY`` can be set to 2. This would create two output paths and so, at least two AI Engine tiles. Say that the optimum cascade length for the data_type/coeff_type combination is 2. Set ``TP_CASC_LEN = 2``.
-| The optimum cascade lengths for the various parameters can be obtained using the helper functions in :ref:`API_REFERENCE`. With these two output paths, it is possible to obtain the required sample rate of 4 GSa/s.
+| The optimum cascade lengths for the various parameters can be obtained using the helper functions in :ref:`DSP_API_REFERENCE`. With these two output paths, it is possible to obtain the required sample rate of 4 GSa/s.
 
 **SCENARIO 3:**
 

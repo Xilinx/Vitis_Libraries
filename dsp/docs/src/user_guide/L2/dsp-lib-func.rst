@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _DSP_LIB_FUNC:
+.. _DSP_DSP_LIB_FUNC:
 
 =====================
 DSP Library Functions

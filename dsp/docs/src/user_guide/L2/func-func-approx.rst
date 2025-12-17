@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _Function_Approximation:
+.. _DSP_Function_Approximation:
 
 ======================
 Function Approximation
@@ -12,7 +12,7 @@ Function Approximation
 
 The Function Approximation library element provides a vectorized linear approximation of a function, f(x), for a given input data, x, using a configured lookup table of slope and offset values that describe the function.
 Utility functions which create the approximation lookup tables are provided for a number of frequently used functions such as sqrt(), invsqrt(), log(), exp() and inv().
-The Function Approximation can also be provided with user-created lookup tables, provided they meet the requirements specified in the section below, :ref:`Configuring the Lookup Table <Configuring_the_Lookup_Table>`.
+The Function Approximation can also be provided with user-created lookup tables, provided they meet the requirements specified in the section below, :ref:`Configuring the Lookup Table <DSP_Configuring_the_Lookup_Table>`.
 
 Entry Point
 ===========
@@ -28,7 +28,7 @@ Device Support
 
 The ``func_approx`` library element supports AIE, AIE-ML, and AIE-MLv2.
 
-- Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
+- Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`DSP_COMPILING_AND_SIMULATING`.
 
 Supported Data Types
 ====================
@@ -39,19 +39,19 @@ For AIE devices, this parameter can be configured as `int16`, `int32`, or `float
 Template Parameters
 ===================
 
-For further information on the template parameters for the Function Approximation, see :ref:`API_REFERENCE`.
+For further information on the template parameters for the Function Approximation, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-To see details on the access functions for the Function Approximation, see :ref:`API_REFERENCE`.
+To see details on the access functions for the Function Approximation, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
 The Function Approximation library element supports IO-buffers for input and output ports.
 
-To see details on the ports for the Function Approximation, see :ref:`API_REFERENCE`.
+To see details on the ports for the Function Approximation, see :ref:`DSP_API_REFERENCE`.
 
 Design Notes
 ============
@@ -92,7 +92,7 @@ For floating-point types, the slope-offset values are in slope-intercept form. T
 
 Note, for floating-point data, all of the input is multiplied by the slope, whereas for integer data, only the lower `TP_FINE_BITS` is multiplied with the slope. This means that slope-offset values for the interpolated function lines are point-slope for integers and slope-intercept for floats. Further information can be found in the following section about configuring the lookup tables.
 
-.. _Configuring_the_Lookup_Table:
+.. _DSP_Configuring_the_Lookup_Table:
 
 Lookup Table Configuration
 --------------------------
@@ -103,7 +103,7 @@ The lookup table contains `2^TP_COARSE_BITS` locations, where each location stor
 
 Slope and offset values use the same data type as ``TT_DATA``, except when ``TT_DATA`` is ``bfloat16``, where values are stored as ``float`` for precision. This storage type is called ``TT_LUT`` in the API reference.
 
-For integer types, values are scaled to match the bit allocation of ``TP_COARSE_BITS`` and ``TP_FINE_BITS``, with precision limited by the ``TT_LUT`` data type width. See func_approx_fns in :ref:`API_REFERENCE` for scaling and biasing for specific domain modes.
+For integer types, values are scaled to match the bit allocation of ``TP_COARSE_BITS`` and ``TP_FINE_BITS``, with precision limited by the ``TT_LUT`` data type width. See func_approx_fns in :ref:`DSP_API_REFERENCE` for scaling and biasing for specific domain modes.
 
 **Memory Requirements**:
 
@@ -111,7 +111,7 @@ Each LUT location stores one slope-offset pair, requiring ``2 * sizeof(TT_LUT)``
 
 **LUT Generation**:
 
-Utility functions are provided to create LUTs for common functions (see :ref:`API_REFERENCE`):
+Utility functions are provided to create LUTs for common functions (see :ref:`DSP_API_REFERENCE`):
 ``getSqrt``, ``getInvSqrt``, ``getLog``, ``getExp``, ``getInv``. These functions handle scaling automatically and populate LUTs in the required slope-offset format.
 
 For integer data types (point-slope form):
@@ -175,13 +175,13 @@ The domain modes define how input values map to the mathematical function domain
 | 2              | 1 <= x < 4         | 2 ^ (TP_COARSE_BITS + TP_FINE_BITS - 2) <= int(x) < 2 ^   | 1 <= float(x) < 4       | Lookup tables values for the first quadrant of locations are created but are ignored. As such, the latter three quadrants of the |
 |                |                    | (TP_COARSE_BITS + TP_FINE_BITS)                           |                         | lookup tables will cover an input domain of 1 to 4.                                                                              |
 +----------------+--------------------+-----------------------------------------------------------+-------------------------+----------------------------------------------------------------------------------------------------------------------------------+
- 
+
 
 Lookup Utility Functions
 ------------------------
 
 A number of utility functions are provided to create lookup tables for some common function approximations.
-The functions, as well as their recommended domain modes, are documented in :ref:`API_REFERENCE`.
+The functions, as well as their recommended domain modes, are documented in :ref:`DSP_API_REFERENCE`.
 
 Runtime Lookup Table Updates
 ----------------------------
@@ -208,8 +208,8 @@ There are two methods for update of LUT values at runtime:
     // Static LUT (TP_USE_LUT_RELOAD = 0)
     std::array<TT_LUT, kLutValues> staticLUT = { /* values */ };
     func_approx_graph<TT_DATA, TP_COARSE_BITS, ...> graph(staticLUT);
-    
-    // Runtime LUT (TP_USE_LUT_RELOAD = 1)  
+
+    // Runtime LUT (TP_USE_LUT_RELOAD = 1)
     func_approx_graph<TT_DATA, TP_COARSE_BITS, ..., 1> graph(); // No LUT argument
 
 **Runtime Updates**:
@@ -229,10 +229,10 @@ For AIE-ML and AIE-MLv2 devices with ``int16`` or ``bfloat16`` data types, hardw
     // Each group of 8 entries (slope-offset pairs) is duplicated
     lut_data = {s0,o0, s1,o1, s2,o2, s3,o3,    // First 128-bit block
                 s0,o0, s1,o1, s2,o2, s3,o3,    // Duplicated block
-                s4,o4, s5,o5, s6,o6, s7,o7,    // Second 128-bit block  
+                s4,o4, s5,o5, s6,o6, s7,o7,    // Second 128-bit block
                 s4,o4, s5,o5, s6,o6, s7,o7,    // Duplicated block
                 ...}
-    
+
     // Memory layout for AIE-MLv2 (256-bit alignment)
     // Each group of 16 entries is duplicated
     lut_data = {s0,o0, s1,o1, ..., s7,o7,      // First 256-bit block

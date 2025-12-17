@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _OUTER_TENSOR_PRODUCT:
+.. _DSP_OUTER_TENSOR_PRODUCT:
 
 ====================
 Outer Tensor Product
@@ -34,9 +34,9 @@ Supported Data Types
 
 The data type for input ports A and B (inA and inB) is controlled by ``TT_DATA_A`` and ``TT_DATA_B`` respectively.
 Both inputs may take one of six choices: ``int16``, ``int32``, ``cint16``, ``cint32``, ``float``, and ``cfloat``. Depending on the input type combination, the output type will be determined by the library element.
-See table :ref:`OUTER_TENSOR_output_type` for allowed input data type combinations and the corresponding output type.
+See table :ref:`DSP_OUTER_TENSOR_output_type` for allowed input data type combinations and the corresponding output type.
 
-.. _OUTER_TENSOR_output_type:
+.. _DSP_OUTER_TENSOR_output_type:
 
 .. table:: Supported Combinations of Input/Output data types
    :align: center
@@ -89,18 +89,18 @@ See table :ref:`OUTER_TENSOR_output_type` for allowed input data type combinatio
 Template Parameters
 ===================
 
-To see details on the template parameters for the Outer Tensor Product, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the Outer Tensor Product, see :ref:`DSP_API_REFERENCE`.
 
 
 Access Functions
 ================
 
-To see details on the access functions for the Outer Tensor Product, see :ref:`API_REFERENCE`.
+To see details on the access functions for the Outer Tensor Product, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the Outer Tensor Product, see :ref:`API_REFERENCE`. Note that the types of ports are determined by the configuration of template parameters.
+To see details on the ports for the Outer Tensor Product, see :ref:`DSP_API_REFERENCE`. Note that the types of ports are determined by the configuration of template parameters.
 
 Design Notes
 ============

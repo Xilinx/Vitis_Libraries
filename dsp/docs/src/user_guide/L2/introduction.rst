@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _INTRODUCTION:
+.. _DSP_INTRODUCTION:
 
 ********************************
 Introduction for AIE DSP library
@@ -20,72 +20,72 @@ AMD documentation is organized around a set of standard design processes to help
 
 -  **AI Engine Development:** Creating the AI Engine graph and kernels, library use, simulation debugging and profiling, and algorithm development. Also includes the integration of the programmable logic (PL) and AI Engine kernels. Topics in this document that apply to this design process include:
 
-   -  :ref:`ORGANIZATION`
+   -  :ref:`DSP_ORGANIZATION`
 
-   -  :ref:`USING`
+   -  :ref:`DSP_USING`
 
-   -  :ref:`KNOWN_ISSUES`
+   -  :ref:`DSP_KNOWN_ISSUES`
 
-   -  :ref:`TUTORIALS`
+   -  :ref:`DSP_TUTORIALS`
 
-   -  :ref:`DSP_LIB_FUNC`
+   -  :ref:`DSP_DSP_LIB_FUNC`
 
-   -  :ref:`COMPILING_AND_SIMULATING`
+   -  :ref:`DSP_COMPILING_AND_SIMULATING`
 
-   -  :ref:`API_REFERENCE`
+   -  :ref:`DSP_API_REFERENCE`
 
-   -  :ref:`BENCHMARK`
+   -  :ref:`DSP_BENCHMARK`
 
 
 -  **System and Solution Planning:** Identifying the components, performance, I/O, and data transfer requirements at a system level. Includes application mapping for the solution to the processing subsystem (PS), PL, and AI Engine. Topics in this document that apply to this design process include:
 
-   -  :ref:`BITONIC_SORT`
+   -  :ref:`DSP_BITONIC_SORT`
 
-   -  :ref:`CONVOLUTION_CORRELATION`
+   -  :ref:`DSP_CONVOLUTION_CORRELATION`
 
-   -  :ref:`DDS_MIXER`
+   -  :ref:`DSP_DDS_MIXER`
 
-   -  :ref:`DFT`
+   -  :ref:`DSP_DFT`
 
-   -  :ref:`EUCLIDEAN_DISTANCE`
+   -  :ref:`DSP_EUCLIDEAN_DISTANCE`
 
-   -  :ref:`FFT_IFFT`
+   -  :ref:`DSP_FFT_IFFT`
 
-   -  :ref:`FFT_2D`
+   -  :ref:`DSP_FFT_2D`
 
-   -  :ref:`FFT_WINDOW`
+   -  :ref:`DSP_FFT_WINDOW`
 
-   -  :ref:`FILTERS`
+   -  :ref:`DSP_FILTERS`
 
-   -  :ref:`FIR_TDM`
+   -  :ref:`DSP_FIR_TDM`
 
-   -  :ref:`FUNCTION_APPROXIMATION`
+   -  :ref:`DSP_FUNCTION_APPROXIMATION`
 
-   -  :ref:`HADAMARD_PRODUCT`
+   -  :ref:`DSP_HADAMARD_PRODUCT`
 
-   -  :ref:`KRONECKER_MATRIX_PRODUCT`
+   -  :ref:`DSP_KRONECKER_MATRIX_PRODUCT`
 
-   -  :ref:`MATRIX_MULTIPLY`
+   -  :ref:`DSP_MATRIX_MULTIPLY`
 
-   -  :ref:`MATRIX_VECTOR_MULTIPLY`
+   -  :ref:`DSP_MATRIX_VECTOR_MULTIPLY`
 
-   -  :ref:`MIXED_RADIX_FFT`
+   -  :ref:`DSP_MIXED_RADIX_FFT`
 
-   -  :ref:`OUTER_TENSOR_PRODUCT`
+   -  :ref:`DSP_OUTER_TENSOR_PRODUCT`
 
-   -  :ref:`SAMPLE_DELAY`
+   -  :ref:`DSP_SAMPLE_DELAY`
 
-   -  :ref:`WIDGET_API_CAST`
+   -  :ref:`DSP_WIDGET_API_CAST`
 
-   -  :ref:`WIDGET_REAL2COMPLEX`
+   -  :ref:`DSP_WIDGET_REAL2COMPLEX`
 
 -  **System Integration and Validation:** Integrating and validating the system functional performance, including timing, resource use, and power closure. Topics in this document that apply to this design process include:
 
-   -  :ref:`COMPILING_AND_SIMULATING`
+   -  :ref:`DSP_COMPILING_AND_SIMULATING`
 
-   -  :ref:`API_REFERENCE`
+   -  :ref:`DSP_API_REFERENCE`
 
-.. _ORGANIZATION:
+.. _DSP_ORGANIZATION:
 
 ============
 Organization
@@ -175,7 +175,7 @@ Reference models graph class for each library element are contained in `L2/tests
 
 The `L2/examples` subdirectory holds example wrapper designs to demonstrate the use of the library elements.
 
-.. _USING:
+.. _DSP_USING:
 
 =================================================
 Using Library Elements within User-Defined Graphs
@@ -203,7 +203,7 @@ Use the following options in the aiecompiler command to provide the include path
     -include=${DSPLIB_ROOT}/L1/include/vss/common
     -include=${DSPLIB_ROOT}/L1/include/vss/vss_fft_ifft_1d
 
-.. _KNOWN_ISSUES:
+.. _DSP_KNOWN_ISSUES:
 
 ============
 Known Issues
@@ -212,7 +212,7 @@ Known Issues
 See Answer Record `75802 <https://www.xilinx.com/support/answers/75802.html>`__ for a list of known issues.
 
 
-.. _TUTORIALS:
+.. _DSP_TUTORIALS:
 
 ========================
 Vitis Tutorials

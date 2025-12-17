@@ -54,13 +54,13 @@ bitonic_sort<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN, TP_CASC_
     input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_DATA>& __restrict outWindow) {
     using dataVect_t = ::aie::vector<TT_DATA, kVecSampleNum>;
 
-    dataVect_t* inPtr = (dataVect_t*)inWindow.data();
-    dataVect_t* outPtr = (dataVect_t*)outWindow.data();
+    dataVect_t* __restrict inPtr = (dataVect_t*)inWindow.data();
+    dataVect_t* __restrict outPtr = (dataVect_t*)outWindow.data();
 
     for (int frame = 0; frame < TP_NUM_FRAMES; frame++) chess_prepare_for_pipelining chess_loop_count(TP_NUM_FRAMES) {
             dataVect_t* pingPong[2] = {inPtr, outPtr};
-            dataVect_t* readPtr = inPtr;
-            dataVect_t* writePtr = outPtr;
+            dataVect_t* __restrict readPtr = inPtr;
+            dataVect_t* __restrict writePtr = outPtr;
             int ping = 1;
 
             // INITIAL STAGES WHICH ARE INTRA...

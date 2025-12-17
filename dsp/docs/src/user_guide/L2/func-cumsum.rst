@@ -3,7 +3,7 @@
 
     `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _Cumsum:
+.. _DSP_Cumsum:
 
 ======
 Cumsum
@@ -29,7 +29,7 @@ Cumsum supports AIE, AIE-ML, and AIE-MLv2 devices with the following exceptions:
 - ``TT_DATA`` and ``TT_OUT_DATA`` support ``bfloat16`` and ``cbfloat16`` on AIE-ML and AIE-MLv2, but not on AIE.
 - ``TT_DATA`` and ``TT_OUT_DATA`` support ``float`` and ``cfloat`` on AIE, but not on AIE-ML or AIE-MLv2.
 
-Round modes and their enumerated values are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
+Round modes and their enumerated values are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`DSP_COMPILING_AND_SIMULATING`.
 
 Supported Data Types
 ====================
@@ -40,17 +40,17 @@ The input data type to the Cumsum is controlled by the ``TT_DATA`` template para
 Template Parameters
 ===================
 
-For details on the template parameters for Cumsum, see :ref:`API_REFERENCE`.
+For details on the template parameters for Cumsum, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-For details on the access functions for Cumsum, see :ref:`API_REFERENCE`.
+For details on the access functions for Cumsum, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-For details on the ports for Cumsum, see :ref:`API_REFERENCE`.
+For details on the ports for Cumsum, see :ref:`DSP_API_REFERENCE`.
 
 Note that the number and type of ports are determined by the configuration of template parameters.
 The size of the input and output window is a product of the size of each element as defined by ``TT_DATA`` and ``TT_OUT_DATA``, the second dimension ``TP_DIM_B``, the number of frames ``TP_NUM_FRAMES``, and the ceiling function of the first dimension ``TP_DIM_A`` rounded up to an integer number of data memory accesses. Memory access is 256 bits wide on AIE and AIE-ML, but 512 bits on AIE-MLv2.
@@ -102,7 +102,7 @@ The user must ensure that the cumsum does not overflow ``TT_OUT_DATA`` when usin
 Scaling
 -------
 
-Scaling in Cumsum is controlled by the ``TP_SHIFT`` parameter, which describes how many binary places to shift the result to the right (i.e., only power-of-2 scaling values are supported). 
+Scaling in Cumsum is controlled by the ``TP_SHIFT`` parameter, which describes how many binary places to shift the result to the right (i.e., only power-of-2 scaling values are supported).
 No scaling is applied when the data type is a floating point type. Setting ``TP_SHIFT`` to any value other than 0 when ``TT_DATA`` is a floating-point type will result in an error.
 
 Rounding and Saturation

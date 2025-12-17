@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _HADAMARD_PRODUCT:
+.. _DSP_HADAMARD_PRODUCT:
 
 ================
 Hadamard Product
@@ -28,7 +28,7 @@ Device Support
 
 The Hadamard Product supports AIE, AIE-ML, and AIE-MLv2 devices.
 
-- Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
+- Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`DSP_COMPILING_AND_SIMULATING`.
 
 
 Supported Data Types
@@ -36,9 +36,9 @@ Supported Data Types
 
 The data types of input ports A and B (inA and inB) are controlled by ``TT_DATA_A`` and ``TT_DATA_B`` respectively.
 Both inputs may take one of the 6 choices: int16, int32, cint16, cint32, float and cfloat. It must be kept in mind that depending on the input type combinations, output type will be determined by the IP.
-Please see table :ref:`HADAMARD_output_type`: for allowed input data type combinations and resultant output type. In addition, the vector size granularity is given for the data type combinations. ``TP_DIM`` should be a multiple of the listed vector size.
+Please see table :ref:`DSP_HADAMARD_output_type`: for allowed input data type combinations and resultant output type. In addition, the vector size granularity is given for the data type combinations. ``TP_DIM`` should be a multiple of the listed vector size.
 
-.. _HADAMARD_output_type:
+.. _DSP_HADAMARD_output_type:
 
 .. table:: Hadamard Supported Combinations of Input/Output data types
    :align: center
@@ -92,24 +92,24 @@ Please see table :ref:`HADAMARD_output_type`: for allowed input data type combin
 Template Parameters
 ===================
 
-To see details on the template parameters for the Hadamard Product, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the Hadamard Product, see :ref:`DSP_API_REFERENCE`.
 
 
 Access Functions
 ================
 
-To see details on the access functions for the Hadamard Product, see :ref:`API_REFERENCE`.
+To see details on the access functions for the Hadamard Product, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the Hadamard Product, see :ref:`API_REFERENCE`.
+To see details on the ports for the Hadamard Product, see :ref:`DSP_API_REFERENCE`.
 
 Design Notes
 ============
 The performance of the IP heavily depends on the chosen data types. The data type combination determines the number of multiplications per clock cycle.
 
-The IP performs a ceiling operation on the ``TP_DIM`` value to the nearest multiple of the vector size listed in :ref:`HADAMARD_output_type`:.
+The IP performs a ceiling operation on the ``TP_DIM`` value to the nearest multiple of the vector size listed in :ref:`DSP_HADAMARD_output_type`:.
 
 
 Super Sample Rate Operation

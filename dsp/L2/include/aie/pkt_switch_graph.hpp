@@ -37,11 +37,21 @@ using namespace adf;
 // ------------------------------------------------------------
 
 /**
+ * @defgroup pkt_switch_graph Packet Switch Graphs
+ *
+ * Packet Switch Graphs Group contains graph classes for adding packet switching streaming in AIE DSP IP.
+ *
+ */
+
+/**
  * @brief Graph class for adding packet switching streaming in AIE DSP IP.
+ *
  *
  * This class implements a graph that splits incoming packet streams into multiple streams,
  * processes them using a wrapped graph instance, and then merges the processed streams back
  * into packet outputs.
+ *
+ * @ingroup pkt_switch_graph
  *
  * @tparam TP_SSR Number of super sample rate streams the wrapped graph instance uses.
  * @tparam TP_INPUT_PORTS Number of input packet ports.

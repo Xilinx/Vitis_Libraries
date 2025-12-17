@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _KRONECKER_MATRIX_PRODUCT:
+.. _DSP_KRONECKER_MATRIX_PRODUCT:
 
 ========================
 Kronecker Matrix Product
@@ -28,9 +28,9 @@ The Kronecker Matrix Product supports AIE, AIE-ML, and AIE-MLv2 devices.
 Supported Data Types
 ====================
 
-See table :ref:`KRONECKER_output_type` for allowed input data type combinations and corresponding output type.
+See table :ref:`DSP_KRONECKER_output_type` for allowed input data type combinations and corresponding output type.
 
-.. _KRONECKER_output_type:
+.. _DSP_KRONECKER_output_type:
 
 .. table:: Supported Combinations of Input/Output data types
    :align: center
@@ -82,12 +82,12 @@ See table :ref:`KRONECKER_output_type` for allowed input data type combinations 
 Template Parameters
 ===================
 
-To see details on the template parameters for the Kronecker Matrix Product, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the Kronecker Matrix Product, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the Kronecker Matrix Product, see :ref:`API_REFERENCE`. Note that the types of ports are determined by the configuration of template parameters.
+To see details on the ports for the Kronecker Matrix Product, see :ref:`DSP_API_REFERENCE`. Note that the types of ports are determined by the configuration of template parameters.
 
 Design Notes
 ============
@@ -99,7 +99,7 @@ Inputs
 It accepts input matrices in column-major order. The leading dimension of the input matrices has to be an integer multiple of the vector size, where:
 
    #. The leading dimension in a column-major order is rows.
-   #. The vector size is data type dependent. Please see table :ref:`KRONECKER_output_type` for the vector size.
+   #. The vector size is data type dependent. Please see table :ref:`DSP_KRONECKER_output_type` for the vector size.
 
 Super Sample Rate (SSR)
 -----------------------

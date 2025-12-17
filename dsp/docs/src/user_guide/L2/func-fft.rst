@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _FFT_IFFT:
+.. _DSP_FFT_IFFT:
 
 ========
 FFT/iFFT

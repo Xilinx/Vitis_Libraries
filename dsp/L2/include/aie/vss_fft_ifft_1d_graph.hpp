@@ -175,6 +175,13 @@ class vss_fft_ifft_1d_graph : public graph {
     // This is a port that interfaces with a PL kernel internal to the VSS.
     port_array<output, TP_SSR> front_o;
 
+#if __HAS_MEM_TILE__ == 1
+    adf::shared_buffer<TT_DATA> memTileFrontIn[TP_SSR];
+    adf::shared_buffer<TT_DATA> memTileFrontOut[TP_SSR];
+    adf::shared_buffer<TT_DATA> memTileBackIn[TP_SSR];
+    adf::shared_buffer<TT_DATA> memTileBackOut[TP_SSR];
+#endif
+
    private:
     static constexpr unsigned int kIntDynPtSize = 0;
     static constexpr unsigned int kIntParPow = 0;
@@ -207,12 +214,6 @@ class vss_fft_ifft_1d_graph : public graph {
         __HAS_MEM_TILE__ == 1 && (kWindowSizeRaw2 * 2 * sizeof(TT_DATA) > __DATA_MEM_BYTES__) ? true : false;
     static constexpr bool kUseBDTiling = sizeof(TT_DATA) <= __MAX_BD_DSIZE_TILING__ ? true : false;
     static constexpr bool kUseMemTileTiling = __HAS_MEM_TILE__ == 1 ? true : false;
-#if __HAS_MEM_TILE__ == 1
-    adf::shared_buffer<TT_DATA> memTileFrontIn[TP_SSR];
-    adf::shared_buffer<TT_DATA> memTileFrontOut[TP_SSR];
-    adf::shared_buffer<TT_DATA> memTileBackIn[TP_SSR];
-    adf::shared_buffer<TT_DATA> memTileBackOut[TP_SSR];
-#endif
 
     // This static assert may trigger only for point sizes that are not perfect square numbers.
     // The window size for the front and back FFTs need to be equal and they also need to be a divisible by the front

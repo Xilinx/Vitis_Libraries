@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _WIDGET_REAL2COMPLEX:
+.. _DSP_WIDGET_REAL2COMPLEX:
 
 ======================
 Widget Real to Complex
@@ -34,17 +34,17 @@ The ``widget_real2complex`` supports ``int16``, ``cint16``, ``int32``, ``cint32`
 Template Parameters
 ===================
 
-To see details on the template parameters for the Widget Real to Complex, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the Widget Real to Complex, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-To see details on the access functions for the Widget Real to Complex, see :ref:`API_REFERENCE`.
+To see details on the access functions for the Widget Real to Complex, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the Widget Real to Complex, see :ref:`API_REFERENCE`.
+To see details on the ports for the Widget Real to Complex, see :ref:`DSP_API_REFERENCE`.
 
 Design Notes
 ============

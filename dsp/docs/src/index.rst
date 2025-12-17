@@ -12,11 +12,11 @@ The AMD Vitis |trade| digital signal processing library (DSPLib) provides an imp
 
 The DSPLib contains:
 
-- :ref:`INTRODUCTION_PL`.
+- :ref:`DSP_INTRODUCTION_PL`.
 
-- :ref:`INTRODUCTION_AIE`.
+- :ref:`DSP_INTRODUCTION_AIE`.
 
-.. _INTRODUCTION_PL:
+.. _DSP_INTRODUCTION_PL:
 
 PL DSP Library
 ==============
@@ -27,7 +27,7 @@ The L1 PL primitives can be leveraged by developers working on hardware design i
 
 The Vitis PL DSP Library provides a fully synthesizable PL based Super Sample data Rate (SSR) FFT, as well as a 2-Dimensional FFT version. For detailed documentation, refer to :ref:`L1_1DFFT_OVERVIEW` and  :ref:`L1_2DFFT_OVERVIEW`.
 
-.. _INTRODUCTION_AIE:
+.. _DSP_INTRODUCTION_AIE:
 
 AI Engine DSP Library
 =====================
@@ -42,9 +42,9 @@ The library is organized into three parts:
 
 Currently, there are no L3 software APIs. The recommended entry point for all library elements is an L2 graph for designs that include only AI Engines and a vss Makefile for designs including both AI Engine and PL components.
 
-For more information, refer to :ref:`INTRODUCTION`.
+For more information, refer to :ref:`DSP_INTRODUCTION`.
 
-The Vitis AIE DSP Library includes a Fast Fourier transform (FFT), Finite Impulse Response (FIR) filters, Direct Digital Synthesis (DDS), General Matrix Multiply (GeMM) implementation, as well as many others. For a full list of available DSP functions, refer to :ref:`DSP_LIB_FUNC`.
+The Vitis AIE DSP Library includes a Fast Fourier transform (FFT), Finite Impulse Response (FIR) filters, Direct Digital Synthesis (DDS), General Matrix Multiply (GeMM) implementation, as well as many others. For a full list of available DSP functions, refer to :ref:`DSP_DSP_LIB_FUNC`.
 
 .. toctree::
    :caption: Introduction
@@ -90,6 +90,7 @@ The Vitis AIE DSP Library includes a Fast Fourier transform (FFT), Finite Impuls
    Graph utils <rst/group_graph_utils.rst>
    Hadamard Product <rst/group_hadamard_graph.rst>
    Kronecker <rst/group_kronecker_graph.rst>
+   Packet Switch <rst/group_pkt_switch_graph.rst>
    Outer Tensor <rst/group_outer_tensor_graph.rst>
    Sample Delay <rst/group_sample_delay_graph.rst>
    Widgets <rst/group_widget_graph.rst>

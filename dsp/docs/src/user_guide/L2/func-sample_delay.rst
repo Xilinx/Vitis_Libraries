@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _SAMPLE_DELAY:
+.. _DSP_SAMPLE_DELAY:
 
 ======================
 Sample Delay
@@ -34,17 +34,17 @@ The sample_delay supports ``uint8``, ``int8``, ``int16``, ``cint16``, ``int32``,
 Template Parameters
 ===================
 
-To see details on the template parameters for the sample_delay, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the sample_delay, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-To see details on the access functions for the sample_delay, see :ref:`API_REFERENCE`.
+To see details on the access functions for the sample_delay, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the sample_delay, see :ref:`API_REFERENCE`.
+To see details on the ports for the sample_delay, see :ref:`DSP_API_REFERENCE`.
 
 Design Notes
 ============

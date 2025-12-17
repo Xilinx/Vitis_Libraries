@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _DFT:
+.. _DSP_DFT:
 
 ===
 DFT
@@ -40,17 +40,17 @@ The data type of the DFT coefficients is specified by the template parameter ``T
 Template Parameters
 ===================
 
-To see details on the template parameters for the DFT, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the DFT, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-To see details on the access functions for the DFT, see :ref:`API_REFERENCE`.
+To see details on the access functions for the DFT, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the DFT, see :ref:`API_REFERENCE`.
+To see details on the ports for the DFT, see :ref:`DSP_API_REFERENCE`.
 
 Design Notes
 ============
@@ -77,9 +77,9 @@ SSR
 
 The DFT supports an SSR, using the ``TP_SSR`` template parameter, which allows for multiple cascaded kernel paths to operate in parallel. Kernels in one SSR rank should receive same input data as all other SSR ranks, however, each rank of SSR will produce an equal split of the DFT output. The outputs for each SSR should be interleaved back together to produce the final output of the DFT.
 
-:ref:`FIGURE_DFT_SSR_CASC` shows the input and output graph port connects for a cascaded SSR DFT.
+:ref:`DSP_FIGURE_DFT_SSR_CASC` shows the input and output graph port connects for a cascaded SSR DFT.
 
-.. _FIGURE_DFT_SSR_CASC:
+.. _DSP_FIGURE_DFT_SSR_CASC:
 .. figure:: ./media/dft_ssr_3_2.png
 
     **DFT Kernel Connections with TP_SSR=2 and TP_CASC_LEN=3**

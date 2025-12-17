@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _MATRIX_VECTOR_MULTIPLY:
+.. _DSP_MATRIX_VECTOR_MULTIPLY:
 
 ======================
 Matrix-Vector Multiply
@@ -39,17 +39,17 @@ The Matrix-Vector Multiply supports matrices of an integer type (int16, cint16, 
 Template Parameters
 ===================
 
-To see details on the template parameters for the Matrix-Vector Multiply, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the Matrix-Vector Multiply, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-To see details on the access functions for the Matrix-Vector Multiply, see :ref:`API_REFERENCE`.
+To see details on the access functions for the Matrix-Vector Multiply, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the Matrix-Vector Multiply, see :ref:`API_REFERENCE`.
+To see details on the ports for the Matrix-Vector Multiply, see :ref:`DSP_API_REFERENCE`.
 
 Design Notes
 ============
@@ -151,7 +151,7 @@ The number of columns and size of the input vector (``TP_DIM_B``) must be a mult
 
 Matrix and vector input data can be zero-padded to meet these requirements.
 
-You can find a full list of descriptions and parameters in :ref:`API_REFERENCE`.
+You can find a full list of descriptions and parameters in :ref:`DSP_API_REFERENCE`.
 
 Connections to the cascade and ssr ports can be made as follows:
 

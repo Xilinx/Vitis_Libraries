@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _MIXED_RADIX_FFT:
+.. _DSP_MIXED_RADIX_FFT:
 
 ===============
 Mixed Radix FFT
@@ -41,17 +41,17 @@ The ``TT_TWIDDLE`` template parameter is constrained by ``TT_DATA`` and so curre
 Template Parameters
 ===================
 
-To see details on the template parameters for the Mixed Radix FFT, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the Mixed Radix FFT, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-To see details on the access functions for the Mixed Radix FFT, see :ref:`API_REFERENCE`.
+To see details on the access functions for the Mixed Radix FFT, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the Mixed Radix FFT, see :ref:`API_REFERENCE`.
+To see details on the ports for the Mixed Radix FFT, see :ref:`DSP_API_REFERENCE`.
 
 .. note:: The number and type of ports are determined by the configuration of template parameters.
 
@@ -110,7 +110,7 @@ Rounding and Saturation
 
 In the final stage, the final values are converted to ``TT_DATA`` using ``TP_SHIFT``, ``TP_RND``, and ``TP_SAT``. ``TP_SHIFT`` performs the scaling as described previously. ``TP_RND`` and ``TP_SAT`` determine the form of rounding and saturation applied on the downshifted value. The following tables describe the form of rounding and of saturation performed.
 
-.. _mixed_radix_fft_rnd_and_sat:
+.. _DSP_mixed_radix_fft_rnd_and_sat:
 
 .. table:: Rounding and Saturation in Mixed Radix FFT
    :align: center

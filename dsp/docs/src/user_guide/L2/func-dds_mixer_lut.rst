@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _DDS_MIXER_LUT:
+.. _DSP_DDS_MIXER_LUT:
 
 ======================
 DDS / Mixer Using LUTs
@@ -24,7 +24,7 @@ Device Support
 
 The DDS/Mixer LUT library element supports AIE, AIE-ML, and AIE-MLv2 with the following differences:
 
-- Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
+- Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`DSP_COMPILING_AND_SIMULATING`.
 
 
 
@@ -40,17 +40,17 @@ The ``cfloat`` data type is not supported on AIE-ML devices.
 Template Parameters
 ===================
 
-To see details on the template parameters for the DDS/Mixer, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the DDS/Mixer, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-To see details on the access functions for the DDS/Mixer, see :ref:`API_REFERENCE`.
+To see details on the access functions for the DDS/Mixer, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the DDS/Mixer, see :ref:`API_REFERENCE`. On AIE-ML devices, outputs of the streaming and windowed modes are not bitwise identical due to some implementation choices made for higher performance.
+To see details on the ports for the DDS/Mixer, see :ref:`DSP_API_REFERENCE`. On AIE-ML devices, outputs of the streaming and windowed modes are not bitwise identical due to some implementation choices made for higher performance.
 
 Design Notes
 ============
@@ -68,7 +68,7 @@ Spurious Free Dynamic Range is a parameter used to characterize signal generator
 Super Sample Rate Operation
 ---------------------------
 
-See :ref:`DDS_SSR`.
+See :ref:`DSP_DDS_SSR`.
 
 In this implementation of the DDS, the output data for various values of ``TP_SSR`` are not bitwise identical. The SFDR values might also be slightly different for different values of ``TP_SSR``.
 

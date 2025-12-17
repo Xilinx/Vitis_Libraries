@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _BITONIC_SORT:
+.. _DSP_BITONIC_SORT:
 
 ============
 Bitonic Sort
@@ -37,18 +37,18 @@ The data type is controlled by ``TT_DATA`` and can be one of four types: ``int16
 Template Parameters
 ===================
 
-To see details on the template parameters for the Bitonic Sort, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the Bitonic Sort, see :ref:`DSP_API_REFERENCE`.
 
 
 Access Functions
 ================
 
-To see details on the access functions for the Bitonic Sort, see :ref:`API_REFERENCE`.
+To see details on the access functions for the Bitonic Sort, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the Bitonic Sort, see :ref:`API_REFERENCE`. Note that the types of ports are determined by the configuration of template parameters.
+To see details on the ports for the Bitonic Sort, see :ref:`DSP_API_REFERENCE`. Note that the types of ports are determined by the configuration of template parameters.
 
 Design Notes
 ============

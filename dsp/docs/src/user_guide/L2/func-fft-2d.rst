@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _FFT_2D:
+.. _DSP_FFT_2D:
 
 ============
 FFT/IFFT 2D
@@ -31,21 +31,21 @@ The 2D FFT/IFFT supports AIE-ML devices only.
 Supported Data Types
 ====================
 
-The input data types to the 2D FFT are controlled by the ``TT_DATA_D1`` and ``TT_DATA_D2`` template parameters; see :ref:`API_REFERENCE`.
+The input data types to the 2D FFT are controlled by the ``TT_DATA_D1`` and ``TT_DATA_D2`` template parameters; see :ref:`DSP_API_REFERENCE`.
 
 Template Parameters
 ===================
 
-To see details on the template parameters for the 2D FFT/IFFT, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the 2D FFT/IFFT, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-To see details on the access functions for the 2D FFT/IFFT, see :ref:`API_REFERENCE`.
+To see details on the access functions for the 2D FFT/IFFT, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
-To see details on the ports for the 2D FFT/IFFT, see :ref:`API_REFERENCE`.
+To see details on the ports for the 2D FFT/IFFT, see :ref:`DSP_API_REFERENCE`.
 
 
 Code Example

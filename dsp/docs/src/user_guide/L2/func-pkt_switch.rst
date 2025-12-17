@@ -3,7 +3,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _PKT_SWITCH:
+.. _DSP_PKT_SWITCH:
 
 ===================
 Packet Switch Graph
@@ -13,7 +13,7 @@ The DSPLib contains a Packet Switch Graph.
 
 Packet Switch Graph class wraps a DSP IP and adds a packet-switching streaming interface to the design.
 
-.. _PKT_SWITCH_ENTRY:
+.. _DSP_PKT_SWITCH_ENTRY:
 
 Entry Point
 ===========
@@ -34,28 +34,28 @@ The class supports AIE, AIE-ML, and AIE-MLv2 devices.
 Supported IP
 ===============
 
-The Packet Switch Graph has been designed to support any IP that DSPLib offers, provided the IP is configured in a way that allows the addition of packet switching; see Design Notes for details in :ref:`PKT_SWITCH_CONFIGURATION`.
+The Packet Switch Graph has been designed to support any IP that DSPLib offers, provided the IP is configured in a way that allows the addition of packet switching; see Design Notes for details in :ref:`DSP_PKT_SWITCH_CONFIGURATION`.
 
 
 Template Parameters
 ===================
 
-To see details on the template parameters for the Packet Switch Graph, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the Packet Switch Graph, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-For the access functions for the Packet Switch Graph, see :ref:`API_REFERENCE`.
+For the access functions for the Packet Switch Graph, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see the ports for the Packet Switch Graph, see :ref:`API_REFERENCE`.
+To see the ports for the Packet Switch Graph, see :ref:`DSP_API_REFERENCE`.
 
 Design Notes
 ============
 
-.. _PKT_SWITCH_CONFIGURATION:
+.. _DSP_PKT_SWITCH_CONFIGURATION:
 
 Packet Switch Graph configuration
 ----------------------------------
@@ -72,7 +72,7 @@ Class requires the following parameters:
 - Type of the wrapped graph instance, ``TT_GRAPH_TYPE``.
 
 
-.. _PKT_SWITCH_SSR:
+.. _DSP_PKT_SWITCH_SSR:
 
 Super Sample Rate Configuration
 -------------------------------
@@ -83,7 +83,7 @@ This parameter will be used to create a network of connections from the array of
 
 Template parameter ``TP_SSR`` of the ``pkt_switch_graph`` class must match with the configuration of the instanced DSP IP.
 
-.. _PKT_SWITCH_INPUTS:
+.. _DSP_PKT_SWITCH_INPUTS:
 
 Input Packet Ports
 ------------------
@@ -93,14 +93,14 @@ Packet Switch Graph class must be configured with ``TP_INPUT_PORTS``.
 This parameter will be used to create an array of input ports: ``std::array<port<input>, TP_INPUT_PORTS> pkt_in`` , each capable of receiving a separate set of packet streams.
 Each input port can support up to 32 different packet streams. See `UG1079 Explicit Packet Switching <https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Explicit-Packet-Switching>`_ for more details.
 
-.. _PKT_SWITCH_INPUT_BUFFER_CONFIG:
+.. _DSP_PKT_SWITCH_INPUT_BUFFER_CONFIG:
 
 Input Buffer configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Packet Switch Graph class is not aware of buffer configuration the underlying design may use. Buffer size, margin, single buffer constraint are the parameters of the IP and are handled internally within the IP configuration.
 
-.. _PKT_SWITCH_SPLITS:
+.. _DSP_PKT_SWITCH_SPLITS:
 
 Input Packet Split Connections
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -117,7 +117,7 @@ Number of streams each ``pktsplit`` element produces is determined by the below 
    N_STREAMS_SPLIT_FROM_PKT = TP_SSR / TP_INPUT_PORTS
 
 
-.. _PKT_SWITCH_OUTPUTS:
+.. _DSP_PKT_SWITCH_OUTPUTS:
 
 Output Packet Ports
 -------------------
@@ -127,14 +127,14 @@ Packet Switch Graph class must be configured with ``TP_OUTPUT_PORTS``.
 This parameter will be used to create an array of output ports: ``std::array<port<output>, TP_OUTPUT_PORTS> pkt_out`` , each capable of producing a separate set of packet streams.
 Each output port can produce up to 32 different packet streams. See `UG1079 Explicit Packet Switching <https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Explicit-Packet-Switching>`_ for more details.
 
-.. _PKT_SWITCH_OUTPUT_BUFFER_CONFIG:
+.. _DSP_PKT_SWITCH_OUTPUT_BUFFER_CONFIG:
 
 Output Buffer configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Packet Switch Graph class is not aware of buffer configuration the underlying design may use. Buffer size, single buffer constraint are the parameters of the IP and are handled internally within the IP configuration.
 
-.. _PKT_SWITCH_MERGERS:
+.. _DSP_PKT_SWITCH_MERGERS:
 
 Output Packet Merge Connections
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -151,7 +151,7 @@ Number of streams each ``pktmerge`` element merges is determined by the below fo
    N_STREAMS_MERGES_TO_PKT = TP_SSR / TP_OUTPUT_PORTS
 
 
-.. _PKT_SWITCH_LIMITS:
+.. _DSP_PKT_SWITCH_LIMITS:
 
 Limitations
 -----------
@@ -175,7 +175,7 @@ Therefore, all constraints of the DSP IP can be passed through the pkt_switch_gr
 
 - `getKernels()` which returns a pointer to an array of kernel pointers.
 
-More details are provided in the :ref:`API_REFERENCE`.
+More details are provided in the :ref:`DSP_API_REFERENCE`.
 
 
 

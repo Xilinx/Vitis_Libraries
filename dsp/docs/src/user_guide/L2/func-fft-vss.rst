@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _VSS_FFT:
+.. _DSP_VSS_FFT:
 
 ============
 VSS FFT/IFFT
@@ -75,7 +75,7 @@ The complete list of required parameters for the VSS FFT is shown in L2/include/
 Design Notes
 ============
 
-.. _VSS_SSR_OPERATION:
+.. _DSP_VSS_SSR_OPERATION:
 
 Super Sample Rate
 ------------------
@@ -89,16 +89,16 @@ The input data to the SSR input ports of the VSS FFT are expected to be distribu
 * ...
 * **Port Number SSR** gets samples: ``S_SSR``, ``S_SSR+SSR``, ``S_2*SSR+SSR``, ...
 
-.. _SSR_POINTSIZE_CONSTRAINTS:
+.. _DSP_SSR_POINTSIZE_CONSTRAINTS:
 
 Padding Input Data based on Super Sample Rate and Point Size
 ------------------------------------------------------------
 
 If the point size is a multiple of SSR, then the inputs can be passed as is to the FFT. Otherwise, every point size number of samples needs to be padded with zeros to the closest multiple of SSR before giving as input to the FFT. The output data also contains Point size number of valid data samples padded to the closest multiple of SSR.
 
-.. _ADD_FRONT_TRANSPOSE:
+.. _DSP_ADD_FRONT_TRANSPOSE:
 
-VSS Mode 1 creates a transpose block at its input that is used to rearrange data that arrives in the natural SSR order described in :ref:`VSS_SSR_OPERATION` into an order needed by the first set of compute units within the VSS. This block uses buffers in the PL to rearrange the data. If the user wants to input data directly in the form needed by the compute units, they can save on memory resources by setting the ADD_FRONT_TRANSPOSE flag to 0.
+VSS Mode 1 creates a transpose block at its input that is used to rearrange data that arrives in the natural SSR order described in :ref:`DSP_VSS_SSR_OPERATION` into an order needed by the first set of compute units within the VSS. This block uses buffers in the PL to rearrange the data. If the user wants to input data directly in the form needed by the compute units, they can save on memory resources by setting the ADD_FRONT_TRANSPOSE flag to 0.
 If the front transpose is removed, ensure that the data arriving in each port satisfies the formula:
 
 .. math::
@@ -109,32 +109,32 @@ If the front transpose is removed, ensure that the data arriving in each port sa
 
 * ``PORT_IDX`` ranges from **0** to **SSR - 1**
 * For **perfect square** point sizes: ``D1 = D2 = √(point\_size)``
-* For **other** point sizes: 
-  
-  * ``D1 = √(point\_size × 2)`` 
+* For **other** point sizes:
+
+  * ``D1 = √(point\_size × 2)``
   * ``D2 = √(point\_size ÷ 2)``
 
 **Example: Point Size = 512, SSR = 4**
 
-* **Stream 0** carries samples: 
-  
+* **Stream 0** carries samples:
+
   * ``SI_0``, ``SI_16``, ``SI_32``, ``SI_48``, ..., ``SI_496``, ``SI_4``, ``SI_20``, ``SI_36``, ..., ``SI_500``, ...
 
-* **Stream 1** carries samples: 
-  
+* **Stream 1** carries samples:
+
   * ``SI_1``, ``SI_17``, ``SI_33``, ``SI_49``, ..., ``SI_497``, ``SI_5``, ``SI_21``, ``SI_37``, ..., ``SI_501``, ...
 
-* **Stream 2** carries samples: 
-  
+* **Stream 2** carries samples:
+
   * ``SI_2``, ``SI_18``, ``SI_34``, ``SI_50``, ..., ``SI_498``, ``SI_6``, ``SI_22``, ``SI_38``, ..., ``SI_502``, ...
 
-* **Stream 3** carries samples: 
-  
+* **Stream 3** carries samples:
+
   * ``SI_3``, ``SI_19``, ``SI_35``, ``SI_51``, ..., ``SI_499``, ``SI_7``, ``SI_23``, ``SI_39``, ..., ``SI_503``, ...
 
-.. _ADD_BACK_TRANSPOSE:
+.. _DSP_ADD_BACK_TRANSPOSE:
 
-Both VSS Mode 1 and 2 Include a transpose block after all their compute units to rearrange data in a form in the SSR form as described in section :ref:`VSS_SSR_OPERATION`. This block uses buffers in the PL to rearrange the data. If the user has downstream blocks that can directly accept the data in the form given out by the compute units, they can save on memory resources by setting the ADD_BACK_TRANSPOSE flag to 0.
+Both VSS Mode 1 and 2 Include a transpose block after all their compute units to rearrange data in a form in the SSR form as described in section :ref:`DSP_VSS_SSR_OPERATION`. This block uses buffers in the PL to rearrange the data. If the user has downstream blocks that can directly accept the data in the form given out by the compute units, they can save on memory resources by setting the ADD_BACK_TRANSPOSE flag to 0.
 If the back transpose is removed, data arriving in each output port will be different between the 2 VSS modes for the same SSR and point size.
 
 **VSS Mode 1 Output Formula**
@@ -150,7 +150,7 @@ For VSS Mode 1, the samples at the output of the VSS without the back transpose 
 * ``PORT_IDX`` ranges from **0** to **SSR - 1**
 * For **perfect square** point sizes: ``D1 = D2 = √(point\_size)``
 * For **other** point sizes:
-  
+
   * ``D1 = √(point\_size × 2)``
   * ``D2 = √(point\_size ÷ 2)``
 

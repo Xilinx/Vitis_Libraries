@@ -57,14 +57,16 @@ namespace two_d {
  *         the second transform function. \n
  *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
+ *         Note that choice of TT_DATA_D2 will impact the output data type of the first set of FFTs.
+ *         Hence, not all combinations of TT_DATA_D1 and TT_DATA_D2 are supported.
  * @tparam TT_TWIDDLE describes the type of twiddle factors of the transform. \n
- *         It must be one of the following: cint16, cint32, cfloat
+ *         It must be one of the following: cint16, cfloat
  * @tparam TP_POINT_SIZE_D1 is an unsigned integer which describes the number of samples in
  *         the first transform. \n This must be 2^N where N is an integer in the range
- *         4 to 16 inclusive.
+ *         5 to 16 inclusive.
  * @tparam TP_POINT_SIZE_D2 is an unsigned integer which describes the number of samples in
  *         the second transform. \n This must be 2^N where N is an integer in the range
- *         4 to 16 inclusive.
+ *         5 to 16 inclusive.
  * @tparam TP_FFT_NIFFT selects whether the transform to perform is an FFT (1) or IFFT (0).
  * @tparam TP_SHIFT selects the power of 2 to scale the result by prior to output.
  * @tparam TP_CASC_LEN selects the number of kernels the FFT will be divided over in series
