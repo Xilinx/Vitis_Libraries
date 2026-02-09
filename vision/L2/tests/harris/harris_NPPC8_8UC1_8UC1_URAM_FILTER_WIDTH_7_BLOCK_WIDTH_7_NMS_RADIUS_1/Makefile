@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -102,14 +102,7 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 ########################## Setting up Host Variables ##########################
 
 #Inclue Required Host Source Files
-ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu104/'))
-HOST_SRCS += $(XFLIB_DIR)/L2/examples/harris/xf_harris_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L2/tests/harris/harris_NPPC8_8UC1_8UC1_URAM_FILTER_WIDTH_7_BLOCK_WIDTH_7_NMS_RADIUS_1 -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/lib
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
+ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 HOST_SRCS += $(XFLIB_DIR)/L2/examples/harris/xf_harris_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L2/tests/harris/harris_NPPC8_8UC1_8UC1_URAM_FILTER_WIDTH_7_BLOCK_WIDTH_7_NMS_RADIUS_1 -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
@@ -151,15 +144,6 @@ endif
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/tests/harris/harris_NPPC8_8UC1_8UC1_URAM_FILTER_WIDTH_7_BLOCK_WIDTH_7_NMS_RADIUS_1 -I $(XFLIB_DIR)/L1/include/
 
 ######################### binary container global settings ##########################
-ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu104/'))
-VPP_FLAGS_cornerHarris_accel += --hls.clock 150000000:cornerHarris_accel
-ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_krnl_harris += --clock.defaultFreqHz 150000000
-else
-VPP_LDFLAGS_krnl_harris += --kernel_frequency 150
-endif
-
-else 
 VPP_FLAGS_cornerHarris_accel += --hls.clock 300000000:cornerHarris_accel
 ifneq ($(HOST_ARCH_temp), x86)
 VPP_LDFLAGS_krnl_harris += --clock.defaultFreqHz 300000000
@@ -167,7 +151,6 @@ else
 VPP_LDFLAGS_krnl_harris += --kernel_frequency 300
 endif
 
-endif
 ifneq ($(PACKAGE_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/krnl_harris.xclbin
 else

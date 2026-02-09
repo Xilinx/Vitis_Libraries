@@ -24,19 +24,39 @@ This section describes new features, changes to the existing library, and known 
 
 **PL additions/enhancements:** :
 
-	• New Functions:
-    		• Added reprojectImageto3d function
-    
+	• New additions:
+		• 3D depth
+		• 3D point cloud
+		• New L3 pipeline examples
+
 **AIE additions/enhancements:** :
 
+	• New additions:
+		• hls2rgb
+		• hsv2rgba
+		• mean_rgb888
+		• mean_yuv400
+		• nv12-resize
+		• polyphase resize
+		• bicubic resize
+		• resize-yuv420
+		• resize-yuv422
+		• resize-yuv444
+		• rgb2hls
+		• rgb2ycrcb
+		• rgba2hsv
+		• rgba2rgb
+		• stdev-rgb888
+		• stddev-yuv400
+		• ycrcb2rgb
 	• Updates:
-		• bug fixes
+		• Bug fixes
 
 .. _known-issues:
 
 Known issues
 ==============
  
-	• AMD Vitis™ GUI projects on RHEL83 and CEntOS82 may fail because of a lib conflict in the LD_LIBRARY_PATH setting. You need to remove ${env_var:LD_LIBRARY_PATH} from the project environment settings for the function to build successfully.
-	• rgbir2bayer, isppipeline_rgbir PL functions are not supplied with input images.
-	• lkdensepyroptflow fails to meet timing when URAM is enabled.
+	• Few AIE-ML testcases take a long time to finish hardware emulation because of large input size.
+	• ``rgbir2bayer`` and ``isppipeline_rgbir`` PL functions are not supplied with input images.
+	• ``lkdensepyroptflow`` fails to meet timing when URAM is enabled.

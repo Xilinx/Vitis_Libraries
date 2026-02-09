@@ -22,20 +22,15 @@ hardware accelerated xf::cv::colordetect on FPGA  : 133 images(full-hd)/sec
 ### Commands to run:
 
     source < path-to-Vitis-installation-directory >/settings64.sh
-
     export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
 
 **For PCIe devices:**
 
     source < path-to-XRT-installation-directory >/setup.sh
-
-	export OPENCV_INCLUDE=< path-to-opencv-include-folder >
-
-	export OPENCV_LIB=< path-to-opencv-lib-folder >
-	
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
-	
-    make host xclbin TARGET=< sw_emu|hw_emu|hw >
+    export OPENCV_INCLUDE=< path-to-opencv-include-folder >
+    export OPENCV_LIB=< path-to-opencv-lib-folder >
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >	
+    make host xclbin TARGET=< hw_emu|hw >
 
 
 **For embedded devices:**
@@ -46,21 +41,15 @@ hardware accelerated xf::cv::colordetect on FPGA  : 133 images(full-hd)/sec
 
     export SYSROOT=< path-to-platform-sysroot >
 	
-	export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >
+    make host xclbin TARGET=< hw_emu|hw > 
 
-	export PERL=<path-to-perl-installation-location> #For example, "export PERL=/usr/bin/perl". Please make sure that Expect.pm package is available in your Perl installation.
-
-    make host xclbin TARGET=< sw_emu|hw_emu|hw > 
-
-    make run TARGET=< sw_emu|hw_emu|hw > #This command will generate only the sd_card folder in case of hardware build.
+    make run TARGET=< hw_emu|hw > #This command will generate only the sd_card folder in case of hardware build.
 
 
-**Note1**. For non-DFX platforms, BOOT.BIN has to be manually copied from < build-directory >/< xclbin-folder >/sd\_card / to the top level sd_card folder.
-
-**Note2**. For hw run on embedded devices, copy the generated sd_card folder content to an SDCARD and either run the "init.sh" or run the following commands on the board:
+**Note**. For hw run on embedded devices, copy the generated sd_card folder content to an SDCARD and run the following commands on the board:
 
     cd /mnt
 	   
     export XCL_BINDIR=< xclbin-folder-present-in-the-sd_card > #For example, "export XCL_BINDIR=xclbin_zcu102_base_hw"
 	   
-    ./< executable > < arguments >
+    ./run_script.sh

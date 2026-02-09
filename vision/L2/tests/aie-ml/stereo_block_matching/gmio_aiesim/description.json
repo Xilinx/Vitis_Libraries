@@ -119,7 +119,7 @@
             ],
             "clflags": [ 
                 "--aie.stacksize=2048",
-                "--aie.heapsize=1000"
+                "--aie.heapsize=38000"
             ]              
         }
     },
@@ -131,7 +131,7 @@
                     "pl-freq": 300,
                     "workdir": "./Work",
                     "name": "libadf.a",
-                    "aie_kernel_files": [
+                    "files": [
                         "xf_sobel.cc",
                         "xf_sbm.cc"
                     ]
@@ -164,9 +164,6 @@
         ],
         "targets": [
             "vitis_aie_sim",
-			"vitis_hw_emu",
-			"vitis_hw_build",
-			"vitis_hw_run"
         ],
         "category": "canary"
     },

@@ -1,0 +1,6 @@
+13:37:13 INFO  : updated workspace path: 
+13:37:13 INFO  : bash, -c, source /proj/xbuilds/SWIP/2024.2_1113_1001/installs/lin64/Vitis/2024.2/tps/lnx64/lopper-1.1.0/env/bin/activate && python /proj/xbuilds/SWIP/2024.2_1113_1001/installs/lin64/Vitis/2024.2/data/embeddedsw/scripts/pyesw//repo.py -st  /proj/xbuilds/SWIP/2024.2_1113_1001/installs/lin64/Vitis/2024.2/data/embeddedsw && deactivate
+13:37:49 INFO  : Successfully created repository data at /tmp/rigel_lopper_sushmita4940327830974772531
+13:37:49 INFO  : bash, -c, source /proj/xbuilds/SWIP/2024.2_1113_1001/installs/lin64/Vitis/2024.2/tps/lnx64/lopper-1.1.0/env/bin/activate && python /proj/xbuilds/SWIP/2024.2_1113_1001/installs/lin64/Vitis/2024.2/data/embeddedsw/scripts/pyesw//get_template_data.py -d /tmp/rigel_lopper_sushmita3201655026511551519 -r /tmp/rigel_lopper_sushmita4940327830974772531/.repo.yaml && deactivate
+13:37:50 INFO  : Embedded Template List generated successfully
+13:38:41 INFO  : Terminating Vitis C++ Server

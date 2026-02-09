@@ -39,7 +39,7 @@ void xFStddevkernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat1,
 // clang-format off
     #pragma HLS inline
     // clang-format on
-    ap_uint<4> j;
+    ap_uint<10> j;
     ap_uint<45> tmp_var_vals[(1 << XF_BITSHIFT(NPC)) * PLANES]; //={0};
     ap_uint<64> var[PLANES];                                    //={0};
     uint32_t tmp_sum_vals[(1 << XF_BITSHIFT(NPC)) * PLANES];    //={0};

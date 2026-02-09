@@ -1,0 +1,87 @@
+/*
+ * Copyright 2021 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef ADF_GRAPH_H
+#define ADF_GRAPH_H
+
+#include <adf.h>
+#include "kernels.h"
+#include "config.h"
+
+using namespace adf;
+
+class HSV2RGBAGraph : public adf::graph {
+   private:
+    kernel k[NO_CORES_PER_COL];
+
+   public:
+    input_plio in1;
+    output_plio out1;
+    shared_buffer<uint8_t> mtx_out, mtx_in;
+
+    HSV2RGBAGraph(int tile_col, int tile_row, int CORE_IDX) {
+        int mt_col = tile_col;
+
+        std::stringstream ssi, ssi_data;
+        ssi << "DataIn" << (0 + CORE_IDX);
+        ssi_data << "data/input" << (0 + CORE_IDX) << ".txt";
+        in1 = input_plio::create(ssi.str().c_str(), adf::plio_128_bits, ssi_data.str().c_str());
+
+        std::stringstream sso, sso_data;
+        sso << "DataOut" << (0 + CORE_IDX);
+        sso_data << "data/output" << (0 + CORE_IDX) << ".txt";
+        out1 = output_plio::create(sso.str().c_str(), adf::plio_128_bits, sso_data.str().c_str());
+
+        mtx_in = shared_buffer<uint8_t>::create({TILE_WINDOW_SIZE * NO_CORES_PER_COL}, 1, NO_CORES_PER_COL);
+        num_buffers(mtx_in) = 2;
+        location<buffer>(mtx_in) = {address(mt_col, 0, 0),
+                                    address(mt_col, 0, (TILE_WINDOW_SIZE * NO_CORES_PER_COL))};
+
+        mtx_out = shared_buffer<uint8_t>::create({TILE_WINDOW_SIZE * NO_CORES_PER_COL}, NO_CORES_PER_COL, 1);
+        num_buffers(mtx_out) = 2;
+        location<buffer>(mtx_out) = {address(mt_col, 1, 0),
+                                     address(mt_col, 1, (TILE_WINDOW_SIZE * NO_CORES_PER_COL))};
+
+        connect<>(in1.out[0], mtx_in.in[0]);
+        write_access(mtx_in.in[0]) = buffer_descriptor((TILE_WINDOW_SIZE * NO_CORES_PER_COL) / 4, 0, {1}, {});
+
+        // create kernels
+        for (int i = 0; i < NO_CORES_PER_COL; i++) {
+            k[i] = kernel::create(hsv2rgba);
+
+            
+            connect<>(mtx_in.out[i], k[i].in[0]);
+            adf::dimensions(k[i].in[0]) = {TILE_WINDOW_SIZE};
+            read_access(mtx_in.out[i]) =
+                buffer_descriptor((TILE_WINDOW_SIZE) / 4, (i * (TILE_WINDOW_SIZE / 4)), {1}, {});
+
+            connect<>(k[i].out[0], mtx_out.in[i]);
+            adf::dimensions(k[i].out[0]) = {TILE_WINDOW_SIZE};
+            write_access(mtx_out.in[i]) =
+                buffer_descriptor((TILE_WINDOW_SIZE) / 4, (i * TILE_WINDOW_SIZE / 4), {1}, {});
+
+            // specify kernel sources
+            source(k[i]) = "xf_hsv2rgba.cc";
+
+            // specify kernel run times
+            location<kernel>(k[i]) = tile(tile_col, i);
+            runtime<ratio>(k[i]) = 1.0;
+        }
+        connect<stream>(mtx_out.out[0], out1.in[0]);
+        read_access(mtx_out.out[0]) = buffer_descriptor((NO_CORES_PER_COL * TILE_WINDOW_SIZE) / 4, 0, {1}, {});
+    }
+};
+#endif

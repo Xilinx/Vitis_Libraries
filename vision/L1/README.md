@@ -6,7 +6,7 @@ The API description and design details of these modules can be found in [Vitis V
 
 The 'examples' folder contains the testbench and accel C++ files that demonstrate the call of Vitis Vision functions in HLS flow.
 
-The 'build' folder inside 'examples' folder has the configuration file that would help modify the default configuration of the function.
+The 'config' folder inside 'examples' folder has the configuration file that would help modify the default configuration of the function.
 
 The 'include' folder contains the definitions of all the functions in various hpp files.
 

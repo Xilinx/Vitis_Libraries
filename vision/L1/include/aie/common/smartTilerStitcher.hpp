@@ -54,7 +54,7 @@ void smartTileTilerGenerateMetaDataWithSpecifiedTileSize(std::vector<uint16_t> s
                                                          int tileAlignment = 1,
                                                          bool YorUV = false,
                                                          bool enableInvalidRegions = true,
-                                                         bool resize_bicubic = false); // namespace xF
+                                                         int resize_type=0); // namespace xF
 }
 
 #endif //_SMARTTILERSTITCHER_HPP_

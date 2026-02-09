@@ -658,7 +658,7 @@ Vitis Vision Library Functions
 ###############################
 
 The Vitis Vision library is a set of select OpenCV functions optimized for
-Zynq-7000, Zynq UltraScale+ MPSoC, Versal VCK190, Alveo U200, and U50 devices. The maximum resolution supported for all the functions is 4K, except
+Zynq-7000, Zynq UltraScale+ MPSoC, Versal VEK280, Alveo U200, and U50 devices. The maximum resolution supported for all the functions is 4K, except
 Houghlines and HOG (RB mode).
 
 .. Important::
@@ -17117,9 +17117,9 @@ image.
     +                             +------------------+
     |                             | Max Latency (ms) |
     +=============================+==================+
-    | 1 pixel operation (300 MHz) |                  |
+    | 1 pixel operation (300 MHz) |       7          |
     +-----------------------------+------------------+
-    | 8 pixel operation (150 MHz) |                  |
+    | 8 pixel operation (150 MHz) |       2          |
     +-----------------------------+------------------+
 
      
@@ -17236,6 +17236,8 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
     | 300                       | 204              | 204          |
     +---------------------------+------------------+--------------+
 
+.. _three_d_depth:
+.. include:: include/3Ddepth_api.rst
 
 .. _threedlut:
 

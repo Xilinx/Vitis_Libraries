@@ -11,7 +11,7 @@
             "v++": {
                 "compiler": {
                     "clflags": [
-                        ""
+                        "-std=c++17"
                     ]
                 },
                 "linker": {
@@ -32,7 +32,7 @@
                         "$(SYSROOT)/usr/include/",
                         "$(SYSROOT)/usr/include/opencv4"
                     ],
-                    "options": "",
+                    "options": "-std=c++17",
                     "symbols": [
                         "__PS_ENABLE_AIE__"
                     ]
@@ -95,7 +95,7 @@
         "host_exe": "host.elf",
         "compiler": {
             "sources": [
-                "LIB_DIR/L2/tests/aie/absdiff/16bit_aie_gmio/host.cpp",
+                "LIB_DIR/L2/tests/aie-ml/nms/16bit_aie_gmio/host.cpp",
                 "./Work/ps/c_rts/aie_control_xrt.cpp"
             ],
             "includepaths": [
@@ -130,12 +130,12 @@
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/tests/aie/absdiff/16bit_aie_gmio/graph.cpp",
+                    "location": "LIB_DIR/L2/tests/aie-ml/nms/16bit_aie_gmio/graph.cpp",
                     "pl-freq": 300,
                     "workdir": "./Work",
                     "name": "libadf.a",
                     "files": [
-                        "xf_absdiff.cc"
+                        "xf_nms.cc"
                     ]
                 }
             ]

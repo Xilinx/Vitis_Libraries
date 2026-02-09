@@ -21,6 +21,7 @@
 #include <aie_api/aie.hpp>
 #include <aie_api/utils.hpp>
 #include <common/xf_aie_hw_utils.hpp>
+#include <common/xf_aie_device_traits.hpp>
 #include <type_traits>
 #include <utility>
 
@@ -29,6 +30,13 @@ namespace cv {
 namespace aie {
 
 class ResizeNorm {
+   private:
+#if __AIE_ARCH__ == 22 || __AIE_ARCH__ == 21 // AIE2P/S
+    static constexpr int N = 64;             // Vectorization factor
+#else
+    static constexpr int N = 32; // Vectorization factor
+#endif
+
    public:
     int last_blk_repeat(int tile_width_out) {
         int last_blk = ((((tile_width_out + 32 - 1) / 32) * 32) - tile_width_out);
@@ -197,37 +205,51 @@ __attribute__((noinline)) void ResizeNorm::xf_normalize(
     uint32_t alpha_i = *((uint32_t*)(alpha));
     int32_t beta_i = *((int32_t*)(beta));
 
-    auto a_reg = ::aie::broadcast<uint32_t, 8>(alpha_i).template cast_to<uint8_t>();
-    auto b_tmp = ::aie::broadcast<int32_t, 8>(beta_i).template cast_to<int8_t>();
-    ::aie::vector<int8_t, 64> b_reg = ::aie::concat(b_tmp, ::aie::neg(b_tmp));
+    auto a_reg = ::aie::broadcast<uint32_t, N / 4>(alpha_i).template cast_to<uint8_t>();
+    auto b_tmp = ::aie::broadcast<int32_t, N / 4>(beta_i).template cast_to<int8_t>();
+    ::aie::vector<int8_t, N* 2> b_reg = ::aie::concat(b_tmp, ::aie::neg(b_tmp));
 
-    ::aie::vector<uint8_t, 64> data_vec;
-    ::aie::accum<acc32, 32> acc;
-    data_vec.insert(0, ::aie::load_v<32>(input));
+    ::aie::vector<uint8_t, N * 2> data_vec;
+    ::aie::accum<acc32, N> acc;
+    data_vec.insert(0, ::aie::load_v<N>(input));
     data_vec.insert(1, a_reg);
-    uint8_t* restrict img_in_ptr = (uint8_t*)input + 32;
+    uint8_t* restrict img_in_ptr = (uint8_t*)input + N;
     int8_t* restrict img_out_ptr = (int8_t*)output;
     int nFBits = FBits[0] + FBits[1] - FBits[2];
     int pixel_width = tile_width_out * nChannels;
-    for (int i = 0; i < pixel_width / 32; i += 1) chess_prepare_for_pipelining chess_loop_range(14, ) {
+    for (int i = 0; i < pixel_width / N; i += 1) chess_prepare_for_pipelining chess_loop_range(14, ) {
+#ifdef __SUPPORT_MUL64__ // AIE2P
+            acc = mul_elem_64_2(data_vec, b_reg);
+#else
             acc = mul_elem_32_2(data_vec, b_reg);
+#endif
             ::aie::store_v(img_out_ptr, acc.template to_vector<int8_t>(nFBits));
-            data_vec.insert(0, ::aie::load_v<32>(img_in_ptr));
-            img_in_ptr += 32;
-            img_out_ptr += 32;
+            data_vec.insert(0, ::aie::load_v<N>(img_in_ptr));
+            img_in_ptr += N;
+            img_out_ptr += N;
         }
 
-    if ((pixel_width % 32) != 0) {
+    if ((pixel_width % N) != 0) {
         int LAST_BLK_REPEAT = last_blk_repeat(pixel_width);
-        img_in_ptr -= (32 + LAST_BLK_REPEAT);
+        img_in_ptr -= (N + LAST_BLK_REPEAT);
         img_out_ptr -= LAST_BLK_REPEAT;
-        data_vec.insert(0, ::aie::load_unaligned_v<32>(img_in_ptr));
+        data_vec.insert(0, ::aie::load_unaligned_v<N>(img_in_ptr));
+#ifdef __SUPPORT_MUL64__ // AIE2P
+        acc = mul_elem_64_2(data_vec, b_reg);
+#else
         acc = mul_elem_32_2(data_vec, b_reg);
+#endif
 
         auto last_vec = acc.template to_vector<int8_t>(nFBits);
+#ifdef __MASK_WITH64__
         ::aie::store_unaligned_v(img_out_ptr,
-                                 ::aie::select(::aie::load_unaligned_v<32>(img_out_ptr), last_vec,
-                                               ::aie::mask<32>::from_uint32((0xFFFFFFFF << LAST_BLK_REPEAT))));
+                                 ::aie::select(::aie::load_unaligned_v<N>(img_out_ptr), last_vec,
+                                               ::aie::mask<N>::from_uint64((0xFFFFFFFF << LAST_BLK_REPEAT))));
+#else
+        ::aie::store_unaligned_v(img_out_ptr,
+                                 ::aie::select(::aie::load_unaligned_v<N>(img_out_ptr), last_vec,
+                                               ::aie::mask<N>::from_uint32((0xFFFFFFFF << LAST_BLK_REPEAT))));
+#endif
     }
 }
 
@@ -235,26 +257,26 @@ __attribute__((noinline)) void ResizeNorm::xf_clamp(
     int8_t* input, uint8_t* output, int tile_width_out, int nChannels, const int16_t* coeff) {
     uint8_t lower_bound = (uint8_t)coeff[0];
     uint8_t upper_bound = (uint8_t)coeff[1];
-    ::aie::vector<int8_t, 64> vec;
-    ::aie::vector<int8_t, 64> vec_out1;
-    ::aie::vector<int8_t, 64> vec_out2;
-    ::aie::vector<int8_t, 64> vec_max;
-    ::aie::vector<int8_t, 64> vec_min;
+    ::aie::vector<int8_t, N> vec;
+    ::aie::vector<int8_t, N> vec_out1;
+    ::aie::vector<int8_t, N> vec_out2;
+    ::aie::vector<int8_t, N> vec_max;
+    ::aie::vector<int8_t, N> vec_min;
 
-    vec_max = ::aie::broadcast<int8_t, 64>(upper_bound);
-    vec_min = ::aie::broadcast<int8_t, 64>(lower_bound);
+    vec_max = ::aie::broadcast<int8_t, N>(upper_bound);
+    vec_min = ::aie::broadcast<int8_t, N>(lower_bound);
 
     int8_t* restrict in_ptr = (int8_t*)input;
     int8_t* restrict out_ptr = (int8_t*)output;
     int pixel_width = tile_width_out * nChannels;
 
-    for (int i = 0; i < pixel_width; i += 64) // 64x samples per loop
+    for (int i = 0; i < pixel_width; i += N) // 64x samples per loop
         chess_prepare_for_pipelining chess_loop_range(16, ) {
-            vec = ::aie::load_v<64>(in_ptr + i);
+            vec = ::aie::load_v<N>(in_ptr + i);
             vec_out1 = ::aie::max(vec_min, vec);
             vec_out2 = ::aie::min(vec_max, vec_out1);
             ::aie::store_v(out_ptr, vec_out2);
-            out_ptr += 64;
+            out_ptr += N;
         }
 }
 
@@ -272,54 +294,58 @@ __attribute__((noinline)) void ResizeNorm::xf_denormalize(int8_t* input1,
     uint32_t alpha_i = *((uint32_t*)(alpha));
     int32_t beta_i = *((int32_t*)(beta));
 
-    auto a_reg = ::aie::broadcast<uint32_t, 8>(alpha_i).template cast_to<uint8_t>();
-    auto b_reg = ::aie::broadcast<int32_t, 8>(beta_i).template cast_to<int8_t>();
+    auto a_reg = ::aie::broadcast<uint32_t, N / 4>(alpha_i).template cast_to<uint8_t>();
+    auto b_reg = ::aie::broadcast<int32_t, N / 4>(beta_i).template cast_to<int8_t>();
 
-    ::aie::accum<acc32, 32> acc_init;
+    ::aie::accum<acc32, N> acc_init;
     uint8_t nFBits = FBits[0] + FBits[2];
     uint8_t mFBits = nFBits - FBits[1];
     uint8_t nFBits_x256 = nFBits - 8;
     uint8_t a_scale = (1 << mFBits);
     acc_init = ::aie::mul(a_reg, a_scale);
 
-    ::aie::vector<int8_t, 32> data_vec1 = ::aie::load_v<32>(input1);
-    ::aie::vector<int8_t, 32> data_vec2 = ::aie::load_v<32>(input2);
-    int8_t* restrict img_in_ptr1 = (int8_t*)input1 + 32;
-    int8_t* restrict img_in_ptr2 = (int8_t*)input2 + 32;
+    ::aie::vector<int8_t, N> data_vec1 = ::aie::load_v<N>(input1);
+    ::aie::vector<int8_t, N> data_vec2 = ::aie::load_v<N>(input2);
+    int8_t* restrict img_in_ptr1 = (int8_t*)input1 + N;
+    int8_t* restrict img_in_ptr2 = (int8_t*)input2 + N;
     uint8_t* restrict img_out_ptr1 = (uint8_t*)output1;
     uint8_t* restrict img_out_ptr2 = (uint8_t*)output2;
     set_rnd(rnd_floor);
     int pixel_width = tile_width_in * nChannels;
-    for (int i = 0; i < pixel_width / 32; i += 1) chess_prepare_for_pipelining chess_loop_range(14, ) {
-            ::aie::accum<acc32, 32> acc1 = ::aie::mac(acc_init, data_vec1, b_reg);
-            ::aie::accum<acc32, 32> acc2 = ::aie::mac(acc_init, data_vec2, b_reg);
+    for (int i = 0; i < pixel_width / N; i += 1) chess_prepare_for_pipelining chess_loop_range(14, ) {
+            ::aie::accum<acc32, N> acc1 = ::aie::mac(acc_init, data_vec1, b_reg);
+            ::aie::accum<acc32, N> acc2 = ::aie::mac(acc_init, data_vec2, b_reg);
             ::aie::store_v(img_out_ptr1, acc1.template to_vector<uint8_t>(nFBits_x256));
             ::aie::store_v(img_out_ptr2, acc2.template to_vector<uint8_t>(nFBits_x256));
-            data_vec1 = ::aie::load_v<32>(img_in_ptr1);
-            data_vec2 = ::aie::load_v<32>(img_in_ptr2);
-            img_in_ptr1 += 32;
-            img_out_ptr1 += 32;
-            img_in_ptr2 += 32;
-            img_out_ptr2 += 32;
+            data_vec1 = ::aie::load_v<N>(img_in_ptr1);
+            data_vec2 = ::aie::load_v<N>(img_in_ptr2);
+            img_in_ptr1 += N;
+            img_out_ptr1 += N;
+            img_in_ptr2 += N;
+            img_out_ptr2 += N;
         }
 
-    if ((pixel_width % 32) != 0) {
+    if ((pixel_width % N) != 0) {
         int LAST_BLK_REPEAT = last_blk_repeat(pixel_width);
-        img_in_ptr1 -= (32 + LAST_BLK_REPEAT);
-        img_in_ptr2 -= (32 + LAST_BLK_REPEAT);
+        img_in_ptr1 -= (N + LAST_BLK_REPEAT);
+        img_in_ptr2 -= (N + LAST_BLK_REPEAT);
         img_out_ptr1 -= LAST_BLK_REPEAT;
         img_out_ptr2 -= LAST_BLK_REPEAT;
 
-        data_vec1 = ::aie::load_unaligned_v<32>(img_in_ptr1);
-        data_vec2 = ::aie::load_unaligned_v<32>(img_in_ptr2);
-        ::aie::accum<acc32, 32> acc1 = ::aie::mac(acc_init, data_vec1, b_reg);
-        ::aie::accum<acc32, 32> acc2 = ::aie::mac(acc_init, data_vec2, b_reg);
+        data_vec1 = ::aie::load_unaligned_v<N>(img_in_ptr1);
+        data_vec2 = ::aie::load_unaligned_v<N>(img_in_ptr2);
+        ::aie::accum<acc32, N> acc1 = ::aie::mac(acc_init, data_vec1, b_reg);
+        ::aie::accum<acc32, N> acc2 = ::aie::mac(acc_init, data_vec2, b_reg);
 
         auto last_vec1 = acc1.template to_vector<uint8_t>(nFBits_x256);
         auto last_vec2 = acc2.template to_vector<uint8_t>(nFBits_x256);
-        auto m = ::aie::mask<32>::from_uint32((0xFFFFFFFF << LAST_BLK_REPEAT));
-        ::aie::store_unaligned_v(img_out_ptr1, ::aie::select(::aie::load_unaligned_v<32>(img_out_ptr1), last_vec1, m));
-        ::aie::store_unaligned_v(img_out_ptr2, ::aie::select(::aie::load_unaligned_v<32>(img_out_ptr2), last_vec2, m));
+#ifdef __MASK_WITH64__
+        auto m = ::aie::mask<N>::from_uint64((0xFFFFFFFF << LAST_BLK_REPEAT));
+#else
+        auto m = ::aie::mask<N>::from_uint32((0xFFFFFFFF << LAST_BLK_REPEAT));
+#endif
+        ::aie::store_unaligned_v(img_out_ptr1, ::aie::select(::aie::load_unaligned_v<N>(img_out_ptr1), last_vec1, m));
+        ::aie::store_unaligned_v(img_out_ptr2, ::aie::select(::aie::load_unaligned_v<N>(img_out_ptr2), last_vec2, m));
     }
     set_rnd(rnd_conv_even);
 }
@@ -334,43 +360,57 @@ __attribute__((noinline)) void ResizeNorm::xf_resize1DV(uint8_t* input1,
                                                         int nChannels) {
     auto r = compute_wtsy(row, scale_y, img_height_in);
     const uint8_t weight = r.second;
-    ::aie::vector<uint8_t, 64> wy =
-        ::aie::concat(::aie::broadcast<uint8_t, 32>(255 - weight), ::aie::broadcast<uint8_t, 32>(weight));
+    ::aie::vector<uint8_t, N* 2> wy =
+        ::aie::concat(::aie::broadcast<uint8_t, N>(255 - weight), ::aie::broadcast<uint8_t, N>(weight));
 
-    ::aie::vector<uint8_t, 64> data_vec;
-    ::aie::accum<acc32, 32> acc;
-    data_vec.insert(0, ::aie::load_v<32>(input1));
-    data_vec.insert(1, ::aie::load_v<32>(input2));
-    uint8_t* restrict img_in_ptr1 = (uint8_t*)input1 + 32;
-    uint8_t* restrict img_in_ptr2 = (uint8_t*)input2 + 32;
+    ::aie::vector<uint8_t, N * 2> data_vec;
+    ::aie::accum<acc32, N> acc;
+    data_vec.insert(0, ::aie::load_v<N>(input1));
+    data_vec.insert(1, ::aie::load_v<N>(input2));
+    uint8_t* restrict img_in_ptr1 = (uint8_t*)input1 + N;
+    uint8_t* restrict img_in_ptr2 = (uint8_t*)input2 + N;
     uint8_t* restrict img_out_ptr = (uint8_t*)output;
     int pixel_width = tile_width_out * nChannels;
-    for (int i = 0; i < pixel_width / 32; i += 1) chess_prepare_for_pipelining chess_loop_range(14, ) {
+    for (int i = 0; i < pixel_width / N; i += 1) chess_prepare_for_pipelining chess_loop_range(14, ) {
+#ifdef __SUPPORT_MUL64__
+            acc = mul_elem_64_2(data_vec, wy);
+#else
             acc = mul_elem_32_2(data_vec, wy);
-            acc = ::aie::add(acc, data_vec.template extract<32>(0));
+#endif
+            acc = ::aie::add(acc, data_vec.template extract<N>(0));
             ::aie::store_v(img_out_ptr, acc.template to_vector<uint8_t>(8));
-            data_vec.insert(0, ::aie::load_v<32>(img_in_ptr1));
-            data_vec.insert(1, ::aie::load_v<32>(img_in_ptr2));
-            img_in_ptr1 += 32;
-            img_in_ptr2 += 32;
-            img_out_ptr += 32;
+            data_vec.insert(0, ::aie::load_v<N>(img_in_ptr1));
+            data_vec.insert(1, ::aie::load_v<N>(img_in_ptr2));
+            img_in_ptr1 += N;
+            img_in_ptr2 += N;
+            img_out_ptr += N;
         }
 
-    if ((pixel_width % 32) != 0) {
+    if ((pixel_width % N) != 0) {
         int LAST_BLK_REPEAT = last_blk_repeat(pixel_width);
-        img_in_ptr1 -= (32 + LAST_BLK_REPEAT);
-        img_in_ptr2 -= (32 + LAST_BLK_REPEAT);
+        img_in_ptr1 -= (N + LAST_BLK_REPEAT);
+        img_in_ptr2 -= (N + LAST_BLK_REPEAT);
         img_out_ptr -= LAST_BLK_REPEAT;
 
-        data_vec.insert(0, ::aie::load_unaligned_v<32>(img_in_ptr1));
-        data_vec.insert(1, ::aie::load_unaligned_v<32>(img_in_ptr2));
+        data_vec.insert(0, ::aie::load_unaligned_v<N>(img_in_ptr1));
+        data_vec.insert(1, ::aie::load_unaligned_v<N>(img_in_ptr2));
+#ifdef __SUPPORT_MUL64__
+        acc = mul_elem_64_2(data_vec, wy);
+#else
         acc = mul_elem_32_2(data_vec, wy);
-        acc = ::aie::add(acc, data_vec.template extract<32>(0));
+#endif
+        acc = ::aie::add(acc, data_vec.template extract<N>(0));
 
         auto last_vec = acc.template to_vector<uint8_t>(8);
+#ifdef __MASK_WITH64__
         ::aie::store_unaligned_v(img_out_ptr,
-                                 ::aie::select(::aie::load_unaligned_v<32>(img_out_ptr), last_vec,
-                                               ::aie::mask<32>::from_uint32((0xFFFFFFFF << LAST_BLK_REPEAT))));
+                                 ::aie::select(::aie::load_unaligned_v<N>(img_out_ptr), last_vec,
+                                               ::aie::mask<N>::from_uint64((0xFFFFFFFF << LAST_BLK_REPEAT))));
+#else
+        ::aie::store_unaligned_v(img_out_ptr,
+                                 ::aie::select(::aie::load_unaligned_v<N>(img_out_ptr), last_vec,
+                                               ::aie::mask<N>::from_uint32((0xFFFFFFFF << LAST_BLK_REPEAT))));
+#endif
     }
 }
 
@@ -401,8 +441,16 @@ __attribute__((noinline)) void ResizeNorm::xf_resize1DH(
 
             auto data_vec = input_vector.template cast_to<uint8_t>();
 
+#ifdef __SUPPORT_ACC64__
+            ::aie::vector<uint16_t, 64> data_vec_16 = ::aie::unpack(data_vec);
+            ::aie::vector<uint16_t, 32> wx_inv_16 = ::aie::unpack(wx_inv);
+            ::aie::vector<uint16_t, 32> wtxs_16 = ::aie::unpack(wtxs);
+            ::aie::accum<acc64, 32> acc = mul_elem_32_2(data_vec_16, ::aie::concat(wx_inv_16, wtxs_16));
+            acc = ::aie::add(acc, data_vec_16.template extract<32>(0));
+#else
             ::aie::accum<acc32, 32> acc = mul_elem_32_2(data_vec, ::aie::concat(wx_inv, wtxs));
             acc = ::aie::add(acc, data_vec.template extract<32>(0));
+#endif
 
             ::aie::store_v(img_out_ptr, acc.template to_vector<uint8_t>(8));
             img_out_ptr += 32;
@@ -435,8 +483,16 @@ __attribute__((noinline)) void ResizeNorm::xf_resize1DH(
 
         auto data_vec = input_vector.template cast_to<uint8_t>();
 
+#ifdef __SUPPORT_ACC64__
+        ::aie::vector<uint16_t, 64> data_vec_16 = ::aie::unpack(data_vec);
+        ::aie::vector<uint16_t, 32> wx_inv_16 = ::aie::unpack(wx_inv);
+        ::aie::vector<uint16_t, 32> wtxs_16 = ::aie::unpack(wtxs);
+        ::aie::accum<acc64, 32> acc = mul_elem_32_2(data_vec_16, ::aie::concat(wx_inv_16, wtxs_16));
+        acc = ::aie::add(acc, data_vec_16.template extract<32>(0));
+#else
         ::aie::accum<acc32, 32> acc = mul_elem_32_2(data_vec, ::aie::concat(wx_inv, wtxs));
         acc = ::aie::add(acc, data_vec.template extract<32>(0));
+#endif
 
         ::aie::store_unaligned_v(img_out_ptr, acc.template to_vector<uint8_t>(8));
     }
@@ -479,9 +535,19 @@ __attribute__((noinline)) void ResizeNorm::xf_resize1DH1CH(
             auto data_vec_h = data_vec_hf.template extract<32>(1);
             auto data_vec_l = data_vec_lf.template extract<32>(1);
 
+#ifdef __SUPPORT_ACC64__
+            ::aie::vector<uint16_t, 32> data_vec_h_16 = ::aie::unpack(data_vec_h);
+            ::aie::vector<uint16_t, 32> data_vec_l_16 = ::aie::unpack(data_vec_l);
+            ::aie::vector<uint16_t, 32> wx_inv_16 = ::aie::unpack(wx_inv);
+            ::aie::vector<uint16_t, 32> wtxs_16 = ::aie::unpack(wtxs);
+            ::aie::accum<acc64, 32> acc =
+                mul_elem_32_2(::aie::concat(data_vec_h_16, data_vec_l_16), ::aie::concat(wx_inv_16, wtxs_16));
+            acc = ::aie::add(acc, data_vec_h_16);
+#else
             ::aie::accum<acc32, 32> acc =
                 mul_elem_32_2(::aie::concat(data_vec_h, data_vec_l), ::aie::concat(wx_inv, wtxs));
             acc = ::aie::add(acc, data_vec_h);
+#endif
 
             ::aie::store_v(img_out_ptr, acc.template to_vector<uint8_t>(8));
             img_out_ptr += 32;
@@ -519,8 +585,18 @@ __attribute__((noinline)) void ResizeNorm::xf_resize1DH1CH(
         auto data_vec_h = data_vec_hf.template extract<32>(1);
         auto data_vec_l = data_vec_lf.template extract<32>(1);
 
+#ifdef __SUPPORT_ACC64__
+        ::aie::vector<uint16_t, 32> data_vec_h_16 = ::aie::unpack(data_vec_h);
+        ::aie::vector<uint16_t, 32> data_vec_l_16 = ::aie::unpack(data_vec_l);
+        ::aie::vector<uint16_t, 32> wx_inv_16 = ::aie::unpack(wx_inv);
+        ::aie::vector<uint16_t, 32> wtxs_16 = ::aie::unpack(wtxs);
+        ::aie::accum<acc64, 32> acc =
+            mul_elem_32_2(::aie::concat(data_vec_h_16, data_vec_l_16), ::aie::concat(wx_inv_16, wtxs_16));
+        acc = ::aie::add(acc, data_vec_h_16);
+#else
         ::aie::accum<acc32, 32> acc = mul_elem_32_2(::aie::concat(data_vec_h, data_vec_l), ::aie::concat(wx_inv, wtxs));
         acc = ::aie::add(acc, data_vec_h);
+#endif
 
         ::aie::store_unaligned_v(img_out_ptr, acc.template to_vector<uint8_t>(8));
     }
@@ -538,7 +614,13 @@ __attribute__((noinline)) void ResizeNorm::xf_resize1DUpscaleGenericTile(uint8_t
                                                                          int tile_width_out) {
     set_rnd(rnd_conv_even);
     ::aie::vector<uint8_t, 64> data_vec;
+    //::aie::accum<acc32, 32> acc;
+#ifdef __SUPPORT_16BIT_VEC__
+    ::aie::accum<acc64, 32> acc;
+#else
     ::aie::accum<acc32, 32> acc;
+#endif
+
     // Tile width should always be multiple of 32
     for (int j = 0; j < tile_width_out; j += 32) {
         uint8_t* restrict img_out_ptr = (uint8_t*)(output + j);
@@ -552,8 +634,15 @@ __attribute__((noinline)) void ResizeNorm::xf_resize1DUpscaleGenericTile(uint8_t
 
                 data_vec.insert(0, ::aie::load_v<32>(img_in_ptr1));
                 data_vec.insert(1, ::aie::load_v<32>(img_in_ptr2));
+#ifdef __SUPPORT_16BIT_VEC__
+                ::aie::vector<uint16_t, 64> data_vec_16 = ::aie::unpack(data_vec);
+                ::aie::vector<uint16_t, 64> wy_16 = ::aie::unpack(wy);
+                acc = mul_elem_32_2(data_vec_16, wy_16);
+                acc = ::aie::add(acc, data_vec_16.template extract<32>(0));
+#else
                 acc = mul_elem_32_2(data_vec, wy);
                 acc = ::aie::add(acc, data_vec.template extract<32>(0));
+#endif
                 ::aie::store_v(img_out_ptr, acc.template to_vector<uint8_t>(8));
                 img_out_ptr += tile_width_out;
             }

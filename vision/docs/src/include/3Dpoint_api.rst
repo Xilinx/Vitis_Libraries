@@ -13,6 +13,7 @@
 
 The function transforms a single-channel disparity map to a 3-channel image representing a 3D surface. 
 That is, for each pixel (x,y) and the corresponding disparity d=disparity(x,y) , it computes
+
 .. figure:: ./images/3dpoint.png
    :alt: 
    :figclass: image
@@ -54,9 +55,9 @@ The following table describes the template and the function parameters.
     | NPC                  | Number of Pixels to be processed per cycle. NPPC1           |
     |                      | is supported.                                               |
     +----------------------+-------------------------------------------------------------+
-    | XFCVDEPTH_IN         | Depth of Input image                                        |
+    | XFCVDEPTH_IN         | Depth of hls:stream of input xf::cv::Mat                    |
     +----------------------+-------------------------------------------------------------+
-    | XFCVDEPTH_OUT        | Depth of Output image                                       |
+    | XFCVDEPTH_OUT        | Depth of hls:stream of output xf::cv::Mat                   |
     +----------------------+-------------------------------------------------------------+
     | _disp_mat            | Input Image,  If the disparity is 16-bit signed format,     | 
     |                      | as computed by StereoBM or StereoSGBM and maybe             | 
@@ -71,9 +72,9 @@ The following table describes the template and the function parameters.
     +----------------------+-------------------------------------------------------------+
     | min_disp             | minimum value in a input disparity map                      |
     +----------------------+-------------------------------------------------------------+
-    | handle_missval       | if it is true then pixels with the minimal disparity that   | 
+    | handle_missval       | If set to true then pixels with the minimal disparity that   | 
     |                      | corresponds to the outliers are transformed to 3D  points   |
-    |                      | with a very large Z value. currently set to 10000           |
+    |                      | with a very large Z value. Currently set to 10000           |
     +----------------------+-------------------------------------------------------------+
 
 .. rubric:: Resource Utilization
@@ -89,7 +90,7 @@ The following table summarizes the resource utilization in different configurati
     +                +                     +------------------+----------+-------+-------+------+
     |                |                     | BRAM_18K         | DSP      | FF    | LUT   | URAM |
     +================+=====================+==================+==========+=======+=======+======+
-    | 1 Pixel        |  300                | 0                | 36       | 40432  | 26476| 0    |
+    | 1 Pixel        |         300         |        0         |    36    | 40432 | 26476 |   0  |
     +----------------+---------------------+------------------+----------+-------+-------+------+
 
 .. rubric:: Performance Estimate
@@ -106,7 +107,7 @@ The following table summarizes the performance estimates in different configurat
     +                +                     +------------------+
     |                |                     | Max (ms)         |
     +================+=====================+==================+
-    | 1 pixel        | 300                 | 3.4              |
+    | 1 pixel        |        300          |        3.4       |
     +----------------+---------------------+------------------+
 
 .. rubric:: Deviations from OpenCV
@@ -114,12 +115,13 @@ The following table summarizes the performance estimates in different configurat
 
 Listed below are the deviations from the OpenCV:
 
-    #. Output handling
+#. Output handling
 
-   The output type of the OpenCV can be passed as argument. In the HLS
+   The output type of the OpenCV can be passed as argument. In Vitis Vision 
    implementation, output type will be always float type.
 
-   #. min disparity value
-   The min disparity value is computed inside the opencv kernel.In the HLS
-   implementation, min disparity value will be computed in testbench and send as argument to kernel.
+#. Minimum disparity value
+
+   The min disparity value is computed inside the opencv kernel. In the HLS
+   implementation, min disparity value will be computed in testbench and sent as argument to kernel.
    

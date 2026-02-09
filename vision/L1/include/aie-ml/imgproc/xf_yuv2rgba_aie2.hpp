@@ -21,6 +21,7 @@
 #include <aie_api/aie.hpp>
 #include <aie_api/utils.hpp>
 #include <common/xf_aie_hw_utils.hpp>
+#include <common/xf_aie_device_traits.hpp>
 
 namespace xf {
 namespace cv {
@@ -33,7 +34,12 @@ const T toFixed(const float f) {
 
 class Yuv2Rgba {
    private:
+#if __AIE_ARCH__ == 22 || __AIE_ARCH__ == 21
+
+    static constexpr int N = 64; // Vectorization factor
+#else
     static constexpr int N = 32; // Vectorization factor
+#endif
 
    public:
     void runImpl(uint8* img_in1, uint8* img_in2, uint8* img_out, uint16_t tile_width, uint16_t tile_height);
@@ -70,29 +76,50 @@ __attribute__((noinline)) void Yuv2Rgba::xf_yuv2rgba(const uint8_t* restrict ptr
                 auto acc_Y = ::aie::mul(y, toFixed<uint8_t, 7>(1.164));
                 ::aie::accum<acc32, N> acc;
 
-                // R Channel {
+// R Channel {
+#ifdef __SUPPORT_ADDMAC64__ // AIE2P
+                acc = ::addmac_elem_64_2(vv.template grow<128>(),
+                                         ::aie::concat(::aie::broadcast<uint8_t, N>(toFixed<uint8_t, 7>(1.596)),
+                                                       ::aie::broadcast<uint8_t, N>((uint8_t)0)),
+                                         acc_Y, acc_const);
+#else
                 acc = ::addmac_elem_32_2(vv.template grow<64>(),
                                          ::aie::concat(::aie::broadcast<uint8_t, N>(toFixed<uint8_t, 7>(1.596)),
                                                        ::aie::broadcast<uint8_t, N>((uint8_t)0)),
                                          acc_Y, acc_const);
+#endif
                 auto r = acc.template to_vector<uint8_t>(7);
-                //}
+//}
 
-                // G channel {
+// G channel {
+#ifdef __SUPPORT_ADDMAC64__ // AIE2P
+                acc = ::addmsc_elem_64_2(::aie::concat(vv, uu),
+                                         ::aie::concat(::aie::broadcast<uint8_t, N>(toFixed<uint8_t, 7>(0.813)),
+                                                       ::aie::broadcast<uint8_t, N>(toFixed<uint8_t, 7>(0.391))),
+                                         acc_Y, acc_const);
+#else
                 acc = ::addmsc_elem_32_2(::aie::concat(vv, uu),
                                          ::aie::concat(::aie::broadcast<uint8_t, N>(toFixed<uint8_t, 7>(0.813)),
                                                        ::aie::broadcast<uint8_t, N>(toFixed<uint8_t, 7>(0.391))),
                                          acc_Y, acc_const);
+#endif
                 auto g = acc.template to_vector<uint8_t>(7);
                 //}
 
                 std::tie(r, g) = ::aie::interleave_zip(r, g, 1);
 
-                // B channel {
+// B channel {
+#ifdef __SUPPORT_ADDMAC64__ // AIE2P
+                acc = ::addmac_elem_64_2(::aie::concat(uu, uu),
+                                         ::aie::concat(::aie::broadcast<uint8_t, N>(toFixed<uint8_t, 7>(1.018)),
+                                                       ::aie::broadcast<uint8_t, N>(toFixed<uint8_t, 7>(1.0))),
+                                         acc_Y, acc_const);
+#else
                 acc = ::addmac_elem_32_2(::aie::concat(uu, uu),
                                          ::aie::concat(::aie::broadcast<uint8_t, N>(toFixed<uint8_t, 7>(1.018)),
                                                        ::aie::broadcast<uint8_t, N>(toFixed<uint8_t, 7>(1.0))),
                                          acc_Y, acc_const);
+#endif
                 auto b = acc.template to_vector<uint8_t>(7);
                 //}
 
@@ -124,6 +151,7 @@ void Yuv2Rgba::runImpl(
 
     uint8_t index = (((y_row == 1) && (uv_row == 0)) ? 1 : (((y_row == 0) && (uv_row == 0)) ? 0 : (y_row % uv_row)));
     xf_yuv2rgba(ptr1, ptr2, ptr_out, tile_width, tile_height, index);
+ 
 }
 } // aie
 } // cv

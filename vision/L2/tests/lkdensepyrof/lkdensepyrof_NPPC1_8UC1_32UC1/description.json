@@ -12,38 +12,6 @@
         "u250"
     ],
     "platform_properties": {
-        "zcu104": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include",
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/lib"
-                    ]
-                }
-            },
-            "containers": [
-                {
-                    "name": "krnl_pyr_dense_optical_flow",
-                    "accelerators": [
-                        {
-                            "name": "pyr_dense_optical_flow_accel",
-                            "frequency": 150.0
-                        },
-                        {
-                            "name": "pyr_down_accel",
-                            "frequency": 150.0
-                        }
-                    ],
-                    "frequency": 150.0
-                }
-            ]
-        },
         "vck190": {
             "host": {
                 "compiler": {

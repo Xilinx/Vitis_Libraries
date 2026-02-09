@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -102,14 +102,7 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 ########################## Setting up Host Variables ##########################
 
 #Inclue Required Host Source Files
-ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu104/'))
-HOST_SRCS += $(XFLIB_DIR)/L2/examples/stereolbm/xf_stereolbm_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L2/tests/stereolbm/stereolbm_NPPC1_8UC1_16UC1_URAM_15_128_32 -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/lib
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
+ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 HOST_SRCS += $(XFLIB_DIR)/L2/examples/stereolbm/xf_stereolbm_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L2/tests/stereolbm/stereolbm_NPPC1_8UC1_16UC1_URAM_15_128_32 -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
@@ -151,15 +144,7 @@ endif
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/tests/stereolbm/stereolbm_NPPC1_8UC1_16UC1_URAM_15_128_32 -I $(XFLIB_DIR)/L1/include/
 
 ######################### binary container global settings ##########################
-ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu104/'))
-VPP_FLAGS_stereolbm_accel += --hls.clock 150000000:stereolbm_accel
-ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_krnl_stereolbm += --clock.defaultFreqHz 150000000
-else
-VPP_LDFLAGS_krnl_stereolbm += --kernel_frequency 150
-endif
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
+ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 VPP_FLAGS_stereolbm_accel += --hls.clock 150000000:stereolbm_accel
 ifneq ($(HOST_ARCH_temp), x86)
 VPP_LDFLAGS_krnl_stereolbm += --clock.defaultFreqHz 150000000
