@@ -57,7 +57,7 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := vck190
+PLATFORM := vek280
 endif
 
 # add warnning for sw_emu
@@ -65,7 +65,7 @@ ifeq ($(TARGET),sw_emu)
 $(error Error: The sw_emu target is no longer supported starting from 2025.1.)
 endif
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST += vck190
+PLATFORM_ALLOWLIST += vek280
 PLATFORM_BLOCKLIST += u280 u250
 
 include ./utils.mk
@@ -102,7 +102,7 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 ########################## Setting up Host Variables ##########################
 
 #Inclue Required Host Source Files
-ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
+ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
 HOST_SRCS += $(XFLIB_DIR)/L3/benchmarks/blobfromimage/xf_blobfromimage_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D __SDSVHLS__
 CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
@@ -335,22 +335,12 @@ ifeq (,$(OPENCV_INCLUDE))
 	$(error "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable")
 endif
 endif
-ifneq (,$(shell echo $(XPLATFORM) | awk '/aws-vu9p-f1/'))
-ifeq (,$(OPENCV_INCLUDE))
-	$(error "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable")
-endif
-endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 ifeq (,$(OPENCV_LIB))
 	$(error "Cannot find Opencv lib path. Please set OPENCV_LIB variable")
 endif
 endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
-ifeq (,$(OPENCV_LIB))
-	$(error "Cannot find Opencv lib path. Please set OPENCV_LIB variable")
-endif
-endif
-ifneq (,$(shell echo $(XPLATFORM) | awk '/aws-vu9p-f1/'))
 ifeq (,$(OPENCV_LIB))
 	$(error "Cannot find Opencv lib path. Please set OPENCV_LIB variable")
 endif

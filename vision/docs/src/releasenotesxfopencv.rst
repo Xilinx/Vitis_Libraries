@@ -28,6 +28,10 @@ This section describes new features, changes to the existing library, and known 
 		• 3D depth
 		• 3D point cloud
 		• New L3 pipeline examples
+		
+	• Updates:
+    		• Fixed isp stats bug of x and y index swap.
+    		• Minor bug fixes
 
 **AIE additions/enhancements:** :
 
@@ -55,8 +59,9 @@ This section describes new features, changes to the existing library, and known 
 .. _known-issues:
 
 Known issues
-==============
+===============
  
 	• Few AIE-ML testcases take a long time to finish hardware emulation because of large input size.
 	• ``rgbir2bayer`` and ``isppipeline_rgbir`` PL functions are not supplied with input images.
 	• ``lkdensepyroptflow`` fails to meet timing when URAM is enabled.
+	• AWB-npc8, customconv-npc8, lkdensepyrof_uram, tonemapping, meanstddev-pipeline, hls2rgb, rgb2hls, cases fail hw_emu because of a known tool issue. Other targets work fine.

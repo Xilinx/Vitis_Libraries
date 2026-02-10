@@ -43,7 +43,7 @@
     "launch": [
         {
             "target": "hw_emu",
-            "cmd_args": "LIB_DIR/data/4k.jpg ",
+            "cmd_args": "LIB_DIR/data/128x128.png ",
             "name": "hw_emu",
             "ld_library_path": [
                 "$(OPENCV_LIB)",
@@ -63,7 +63,8 @@
         }
     ],
     "data": [
-        "LIB_DIR/data/4k.jpg"
+        "LIB_DIR/data/4k.jpg",
+        "LIB_DIR/data/128x128.png"
     ],
     "host": {
         "host_exe": "resize_pipeline",
@@ -75,9 +76,8 @@
             "includepaths": [
                 "LIB_DIR/L3/examples/resize_pipeline/config"
             ],
-            "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include",
+            "options": "-O3 -I$(XILINX_HLS)/include",
             "symbols": [
-                "__SDSVHLS__"
             ]
         }
     },
@@ -108,8 +108,7 @@
             "env": "OPENCV_INCLUDE",
             "platform": [
                 "u200",
-                "u50",
-                "aws-vu9p-f1"
+                "u50"
             ],
             "echo": "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable"
         },
@@ -117,8 +116,7 @@
             "env": "OPENCV_LIB",
             "platform": [
                 "u200",
-                "u50",
-                "aws-vu9p-f1"
+                "u50"
             ],
             "echo": "Cannot find Opencv lib path. Please set OPENCV_LIB variable"
         }

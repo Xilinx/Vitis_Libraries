@@ -186,7 +186,7 @@
                     "location": "LIB_DIR/L2/tests/aie-ml/rgba2hsv/8bit_aie_8bit_pl/graph.cpp", 
                     "pl-freq": 500, 
                     "workdir": "./Work", 
-                    "options": "--aie.stacksize=2048", 
+                    "options": "", 
                     "name": "libadf.a", 
                     "files": [
                         "xf_rgba2hsv.cc"

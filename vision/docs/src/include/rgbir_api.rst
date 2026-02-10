@@ -81,7 +81,7 @@ The following table describes the template and the function parameters.
    +-------------------+--------------------------------------------------+
    | BORDER_T          | Border handling type. Fixed to XF_BORDER_CONSTANT|
    +-------------------+--------------------------------------------------+
-   | USE_URAM          | Enable URAM storage structure                     |
+   | USE_URAM          | Enable URAM storage structure                    |
    +-------------------+--------------------------------------------------+
    | \_src_mat         | Input image                                      |
    +-------------------+--------------------------------------------------+

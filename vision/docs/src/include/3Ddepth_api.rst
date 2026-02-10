@@ -19,15 +19,15 @@ that encodes how far each part of the scene is in 3D space.
 					𝑍 = (𝑓⋅𝐵)/𝑑
 					
 	𝑍 : depth (distance from the camera to the object)
-	𝑓 : focal length of the camera (in pixels)	
-	𝐵 : baseline, i.e., distance between the two cameras	
+	
+	𝑓 : focal length of the camera (in pixels)
+	
+	𝐵 : baseline, i.e., distance between the two cameras
+	
 	𝑑 : disparity (pixel shift between left and right images)
+	
 
 .. rubric:: API Syntax
-
-.. figure:: ../images/3ddepthmap.png
-   :alt: 
-   :figclass: image
 
 .. code:: c
 
@@ -50,7 +50,7 @@ The following table describes the template and the function parameters.
     +----------------------+-------------------------------------------------------------+
     | Parameter            | Description                                                 |
     +======================+=============================================================+
-    | SRC_T                | Input Pixel type. The current supported pixel value are      |
+    | SRC_T                | Input Pixel type. The current supported pixel value are     |
     |                      | XF_16UC3, XF_16SC3                                          |
     +----------------------+-------------------------------------------------------------+
     | DST_T                | Output co-ordinate type. The current supported value is     |

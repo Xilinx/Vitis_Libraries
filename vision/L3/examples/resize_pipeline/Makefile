@@ -18,10 +18,10 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
 	$(ECHO) "  NOTE: For embedded platform the following setup steps are required:"
@@ -49,7 +49,7 @@ CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
 # setting default value
-TARGET ?= sw_emu
+TARGET ?= hw_emu
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
@@ -103,17 +103,15 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 #Inclue Required Host Source Files
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
 HOST_SRCS += $(XFLIB_DIR)/L3/examples/resize_pipeline/xf_resize_pipeline_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -D __SDSVHLS__
 CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L3/examples/resize_pipeline/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
+CXXFLAGS += -O3 -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/lib
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 
 else 
 HOST_SRCS += $(XFLIB_DIR)/L3/examples/resize_pipeline/xf_resize_pipeline_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -D __SDSVHLS__
 CXXFLAGS +=  -I $(XFLIB_DIR)/L3/examples/resize_pipeline/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
+CXXFLAGS += -O3 -I$(XILINX_HLS)/include
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 
 endif
@@ -126,15 +124,8 @@ EXE_NAME := resize_pipeline
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
-ifeq ($(TARGET),$(filter $(TARGET),sw_emu))
-HOST_ARGS := $(XFLIB_DIR)/data/4k.jpg 
-ifneq ($(HOST_ARCH), x86)
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
-endif
-LIBRARY_PATH := $(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
-endif
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
-HOST_ARGS := $(XFLIB_DIR)/data/4k.jpg 
+HOST_ARGS := $(XFLIB_DIR)/data/128x128.png 
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
@@ -216,7 +207,7 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(XFLIB_DIR)/data/4k.jpg $(custom_data_file)
+DATA_FILE := $(XFLIB_DIR)/data/128x128.png $(XFLIB_DIR)/data/4k.jpg $(custom_data_file)
 DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
@@ -341,22 +332,12 @@ ifeq (,$(OPENCV_INCLUDE))
 	$(error "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable")
 endif
 endif
-ifneq (,$(shell echo $(XPLATFORM) | awk '/aws-vu9p-f1/'))
-ifeq (,$(OPENCV_INCLUDE))
-	$(error "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable")
-endif
-endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 ifeq (,$(OPENCV_LIB))
 	$(error "Cannot find Opencv lib path. Please set OPENCV_LIB variable")
 endif
 endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
-ifeq (,$(OPENCV_LIB))
-	$(error "Cannot find Opencv lib path. Please set OPENCV_LIB variable")
-endif
-endif
-ifneq (,$(shell echo $(XPLATFORM) | awk '/aws-vu9p-f1/'))
 ifeq (,$(OPENCV_LIB))
 	$(error "Cannot find Opencv lib path. Please set OPENCV_LIB variable")
 endif

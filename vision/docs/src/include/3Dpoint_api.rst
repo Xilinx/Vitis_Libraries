@@ -72,7 +72,7 @@ The following table describes the template and the function parameters.
     +----------------------+-------------------------------------------------------------+
     | min_disp             | minimum value in a input disparity map                      |
     +----------------------+-------------------------------------------------------------+
-    | handle_missval       | If set to true then pixels with the minimal disparity that   | 
+    | handle_missval       | If set to true then pixels with the minimal disparity that  | 
     |                      | corresponds to the outliers are transformed to 3D  points   |
     |                      | with a very large Z value. Currently set to 10000           |
     +----------------------+-------------------------------------------------------------+
