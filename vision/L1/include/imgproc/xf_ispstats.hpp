@@ -125,8 +125,8 @@ STATS_ROW_LOOP:
 
             // Check if part of zone
             if ((col >= roi_tlx) && (col <= (roi_brx)) && (row >= roi_tly) && (row <= (roi_bry))) {
-                int zone_col = int((col - roi_tlx) / zone_width);
-                int zone_row = int((row - roi_tly) / zone_height);
+                int zone_col = int((col - roi_tly) / zone_width);
+                int zone_row = int((row - roi_tlx) / zone_height);
                 zone_idx = (zone_row * zone_col_num) + zone_col;
 
             EXTRACT_UPDATE:
@@ -292,8 +292,8 @@ STATS_ROW_LOOP:
 
             // Check if part of zone
             if ((col >= roi_tlx) && (col <= (roi_brx)) && (row >= roi_tly) && (row <= (roi_bry))) {
-                int zone_col = int((col - roi_tlx) / zone_width);
-                int zone_row = int((row - roi_tly) / zone_height);
+                int zone_col = int((col - roi_tly) / zone_width);
+                int zone_row = int((row - roi_tlx) / zone_height);
                 zone_idx = (zone_row * zone_col_num) + zone_col;
 
                 col_idx = col * NPC + 0 + col_incr;
@@ -428,8 +428,8 @@ ROW_LOOP:
 
             // Check if part of zone
             if ((col >= roi_tlx) && (col <= (roi_brx)) && (row >= roi_tly) && (row <= (roi_bry))) {
-                int zone_col = int((col - roi_tlx) / zone_width);
-                int zone_row = int((row - roi_tly) / zone_height);
+                int zone_col = int((col - roi_tly) / zone_width);
+                int zone_row = int((row - roi_tlx) / zone_height);
                 zone_idx = (zone_row * zone_col_num) + zone_col;
 
             EXTRACT_UPDATE:
