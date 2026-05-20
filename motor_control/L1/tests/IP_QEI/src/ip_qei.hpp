@@ -1,5 +1,4 @@
 /*
-Copyright (C) 2022-2022, Xilinx, Inc.
 Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 SPDX-License-Identifier: X11
 
@@ -31,27 +30,22 @@ from Advanced Micro Devices, Inc.
 #define _IP_QEI_HPP_
 
 #include "ap_int.h"
-#include "ap_fixed.h"
-#include "hls_stream.h"
+#include <hls_stream.h>
 #include "qei.hpp"
+#define TESTNUMBER (10000000)
+typedef ap_uint<1> t_bin_qei;
+typedef ap_uint<2> t_err_qei;
 
-typedef ap_uint<1> bit;
-
-// Top function
-void hls_qei(hls::stream<bit>& strm_qei_A,
-             hls::stream<bit>& strm_qei_B,
-             hls::stream<bit>& strm_qei_I,
-             hls::stream<ap_uint<32> >& strm_qei_RPM_THETA_m,
-             hls::stream<ap_uint<256> >& logger,
+void hls_qei(hls::stream<t_bin_qei>& qei_A,
+             hls::stream<t_bin_qei>& qei_B,
+             hls::stream<t_bin_qei>& qei_I,
+             hls::stream<ap_uint<32> >& qei_RPM_THETA_m,
+             hls::stream<t_bin_qei>& qei_dir,
+             hls::stream<t_err_qei>& qei_err,
              volatile int& qei_args_cpr,
              volatile int& qei_args_ctrl,
              volatile int& qei_stts_RPM_THETA_m,
              volatile int& qei_stts_dir,
-             volatile int& qei_stts_err,
-             volatile int& qei_args_flt_size,
-             volatile int& qei_args_cnt_trip,
-             volatile int& qei_debug_rpm,
-             volatile int& qei_count_mode,
-             volatile int& qei_args_flt_size_i);
+             volatile int& qei_stts_err);
 
 #endif // _IP_QEI_HPP_

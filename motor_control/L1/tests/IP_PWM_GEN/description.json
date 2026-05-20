@@ -3,11 +3,11 @@
     "description": "Test PWM GEN",
     "flow": "hls",
     "platform_allowlist": [
-        "u200"
+        "xck26-sfvc784-2LV-c"
     ],
     "platform_blocklist": [],
     "part_allowlist": [
-        "xc7z010-clg400-1"
+        "xck26-sfvc784-2LV-c"
     ],
     "part_blocklist": [],
     "project": "test_svpwm_duty",

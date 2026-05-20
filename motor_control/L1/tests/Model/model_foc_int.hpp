@@ -1,5 +1,4 @@
 /*
-Copyright (C) 2022-2022, Xilinx, Inc.
 Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 SPDX-License-Identifier: X11
 

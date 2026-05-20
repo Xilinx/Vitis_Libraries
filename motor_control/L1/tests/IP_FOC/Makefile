@@ -1,17 +1,29 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
+# 
+# X11 License
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Except as contained in this notice, the name of Advanced Micro Devices 
+# shall not be used in advertising or otherwise to promote the sale,
+# use or other dealings in this Software without prior written authorization 
+# from Advanced Micro Devices, Inc.
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -47,7 +59,8 @@ export CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 export XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L1/*}')
 
 # setting default value
-PLATFORM ?= xilinx_u200_gen3x16_xdma_2_202110_1 
+PLATFORM ?= xilinx_vck190_base_202610_1
+
 export PATH := $(XILINX_VIVADO)/bin:$(PATH)
 WORK_DIR ?= hls
 TARGET ?= csim
@@ -57,6 +70,7 @@ CONFIG_TMPL ?= $(CUR_DIR)/hls_config_sim.tmpl
 else
 CONFIG_TMPL ?= $(CUR_DIR)/hls_config.tmpl
 endif
+
 ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
 export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
 endif
@@ -168,10 +182,16 @@ with open('$(CONFIG_FILE)', 'w') as f:
 endef
 export CONFIG_GEN_PY
 
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" -exec test -f '{}/bin/python3' \; -print | head -n 1)
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
+
 $(CONFIG_FILE): $(CONFIG_TMPL)
-	@echo "$${CONFIG_GEN_PY}" | python3
+	@echo "$${CONFIG_GEN_PY}" | (${VITIS_PYTHON3})
+
+data:
+	@true
 	
-all: check_vivado check_part $(CONFIG_FILE)
+all: check_vivado check_part data $(CONFIG_FILE)
 ifneq ($(TARGET_REL), csim)
 	v++ -c --mode hls --config $(CONFIG_FILE) --work_dir $(WORK_DIR) --part $(XPART)
 endif

@@ -1,0 +1,20 @@
+[hls]
+
+clock=10
+set_clock_uncertainty=1.25
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/tests/tests_fp32/svpwm_apfixed_tb/src/svpwm_apfixed_top.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/tests_fp32/svpwm_apfixed_tb/src/svpwm_apfixed_top.cpp,-DSIM_FINITE -I${XF_PROJ_ROOT}/L1/include
+syn.top=SVPWM_ratios_apfixed_top
+tb.file=${XF_PROJ_ROOT}/L1/tests/tests_fp32/svpwm_apfixed_tb/tb/test_svpwm_apfixed.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/tests_fp32/svpwm_apfixed_tb/tb/test_svpwm_apfixed.cpp,-I${XF_PROJ_ROOT}/L1/include -I${XF_PROJ_ROOT}/L1/include/models_fp -I${XF_PROJ_ROOT}/L1/tests/tests_fp32/precision_common
+tb.file=${XF_PROJ_ROOT}/L1/tests/tests_fp32/precision_common/precision_analyzer.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/tests_fp32/precision_common/precision_analyzer.cpp,-I${XF_PROJ_ROOT}/L1/include/models_fp -I${XF_PROJ_ROOT}/L1/tests/tests_fp32/precision_common
+
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+

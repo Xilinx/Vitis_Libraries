@@ -1,5 +1,4 @@
 /*
-Copyright (C) 2022-2022, Xilinx, Inc.
 Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 SPDX-License-Identifier: X11
 
@@ -27,44 +26,39 @@ use or other dealings in this Software without prior written authorization
 from Advanced Micro Devices, Inc.
 */
 
-#include "qei.hpp"
 #include "ip_qei.hpp"
 
-typedef ap_uint<1> bit;
-
-void hls_qei(hls::stream<bit>& strm_qei_A,
-             hls::stream<bit>& strm_qei_B,
-             hls::stream<bit>& strm_qei_I,
-             hls::stream<ap_uint<32> >& strm_qei_RPM_THETA_m,
-             hls::stream<ap_uint<256> >& logger,
+void hls_qei(hls::stream<t_bin_qei>& qei_A,
+             hls::stream<t_bin_qei>& qei_B,
+             hls::stream<t_bin_qei>& qei_I,
+             hls::stream<ap_uint<32> >& qei_RPM_THETA_m,
+             hls::stream<t_bin_qei>& qei_dir,
+             hls::stream<t_err_qei>& qei_err,
              volatile int& qei_args_cpr,
              volatile int& qei_args_ctrl,
              volatile int& qei_stts_RPM_THETA_m,
              volatile int& qei_stts_dir,
-             volatile int& qei_stts_err,
-             volatile int& qei_args_flt_size,
-             volatile int& qei_args_cnt_trip,
-             volatile int& qei_debug_rpm,
-             volatile int& qei_count_mode,
-             volatile int& qei_args_flt_size_i) {
-#pragma HLS INTERFACE ap_fifo port = strm_qei_A
-#pragma HLS INTERFACE ap_fifo port = strm_qei_B
-#pragma HLS INTERFACE ap_fifo port = strm_qei_I
-#pragma HLS INTERFACE ap_fifo port = logger
-#pragma HLS INTERFACE axis port = strm_qei_RPM_THETA_m
-#pragma HLS INTERFACE s_axilite port = qei_args_cpr offset = 0x10 bundle = qei_args
-#pragma HLS INTERFACE s_axilite port = qei_args_ctrl offset = 0x20 bundle = qei_args
-#pragma HLS INTERFACE s_axilite port = qei_stts_RPM_THETA_m offset = 0x28 bundle = qei_args
-#pragma HLS INTERFACE s_axilite port = qei_stts_dir offset = 0x38 bundle = qei_args
-#pragma HLS INTERFACE s_axilite port = qei_stts_err offset = 0x48 bundle = qei_args
-#pragma HLS interface s_axilite port = qei_args_flt_size bundle = qei_args
-#pragma HLS interface s_axilite port = qei_args_cnt_trip bundle = qei_args
-#pragma HLS interface s_axilite port = qei_debug_rpm bundle = qei_args
-#pragma HLS interface s_axilite port = qei_args_flt_size_i bundle = qei_args
-#pragma HLS interface s_axilite port = qei_count_mode bundle = qei_args
+             volatile int& qei_stts_err) {
+#pragma HLS INTERFACE ap_fifo port = qei_A
+#pragma HLS INTERFACE ap_fifo port = qei_B
+#pragma HLS INTERFACE ap_fifo port = qei_I
+#pragma HLS INTERFACE axis port = qei_RPM_THETA_m
+#pragma HLS INTERFACE axis port = qei_dir
+#pragma HLS INTERFACE axis port = qei_err
+#pragma HLS INTERFACE s_axilite port = qei_args_cpr bundle = qei_args
+#pragma HLS INTERFACE s_axilite port = qei_args_ctrl bundle = qei_args
+#pragma HLS INTERFACE s_axilite port = qei_stts_RPM_THETA_m bundle = qei_args
+#pragma HLS INTERFACE s_axilite port = qei_stts_dir bundle = qei_args
+#pragma HLS INTERFACE s_axilite port = qei_stts_err bundle = qei_args
+#pragma HLS stable variable = qei_args_cpr
+#pragma HLS stable variable = qei_args_ctrl
 #pragma HLS interface s_axilite port = return bundle = qei_args
-    xf::motorcontrol::hls_qei_axi<bit>(strm_qei_A, strm_qei_B, strm_qei_I, strm_qei_RPM_THETA_m, logger, qei_args_cpr,
-                                       qei_args_ctrl, qei_stts_RPM_THETA_m, qei_stts_dir, qei_stts_err,
-                                       qei_args_flt_size, qei_args_cnt_trip, qei_debug_rpm, qei_count_mode,
-                                       qei_args_flt_size_i);
+
+    long qei_args_cnt_trip = 0x7fffffffffffffffL;
+#ifdef SIM_FINITE
+    qei_args_cnt_trip = TESTNUMBER;
+#endif
+    xf::motorcontrol::hls_qei_axi<t_bin_qei, t_err_qei>(qei_A, qei_B, qei_I, qei_RPM_THETA_m, qei_dir, qei_err,
+                                                        qei_args_cpr, qei_args_ctrl, qei_stts_RPM_THETA_m, qei_stts_dir,
+                                                        qei_stts_err, qei_args_cnt_trip);
 }

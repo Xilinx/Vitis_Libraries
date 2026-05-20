@@ -1,14 +1,14 @@
 # Vitis Motor Control Library
 
-Motor Control Library is an open-sourced library written in C/C++ for accelerating developments of motor control applications. It has covered 4 algorithm-level L1 APIs including FOC, SVPWM__DUTY, PWM_GEN and QEI. These four APIs have AXI configuration interfaces, that can be directly integrated into the system by using IPI flow.
+Motor Control Library is an open-sourced library written in C/C++ for accelerating developments of motor control applications. It covers four algorithm-level L1 APIs including FOC, SVPWM_DUTY, PWM_GEN and QEI. These APIs provide AXI configuration interfaces and can be integrated into systems by using the IPI flow.
 
-From 24.1 release 12 new fine-grained function-level APIs are provided for supporting traditional IP integration flow. These APIs are based on integer types and can simplify computational logic in suitable scenarios.
+For the 2026.1 release, the non-FP32 Motor Control HLS source implementation is restored to the 2024.1 source-based implementation for KD240 application integration readiness. The recent FP32 model and precision-test infrastructure remains available under `L1/include/models_fp` and `L1/tests/tests_fp32`.
 
 ## Overview
 
 The 4 algorithm-level algorithms APIs implemented by Vitis Motor Control Library include:
 
-- FOC: the API is for sensor based field-orientated control (FOC).From 2024.2 release, the L1/test/IP_FOC functionally becomes a register container module which can be composed by the 12 new-added fine-grained function-level APIs.
+- FOC: the API is for sensor based field-orientated control (FOC), including speed and torque control modes and field-weakening control.
 - SVPWM_DUTY: the API is the front-end for Space Vector Pulse Width Modulation (SVPWM) to calculate ratios.
 - PWM_GEN: the API is the back-end for Space Vector Pulse Width Modulation (SVPWM) to generate output signals based on ratios.
 - QEI: the API is for quadrature encoder interface(QEI).

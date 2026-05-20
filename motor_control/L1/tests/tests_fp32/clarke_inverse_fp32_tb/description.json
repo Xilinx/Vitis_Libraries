@@ -1,0 +1,55 @@
+{
+    "name": "Clarke Inverse FP32 HLS Test",
+    "description": "Float32 synthesizable motor-control kernel; targets Xilinx VCK190 (Versal xcvc1902).",
+    "flow": "hls",
+    "platform_allowlist": [
+        "vck190"
+    ],
+    "platform_blocklist": [],
+    "part_allowlist": [
+        "xcvc1902-vsva2197-2MP-e-S"
+    ],
+    "part_blocklist": [],
+    "project": "clarke_inverse_fp32",
+    "solution": "sol1",
+    "clock": "5",
+    "clock_uncertainty": 1.25,
+    "topfunction": "Clarke_Inverse_2p_fp32_top",
+    "top": {
+        "source": [
+            "${XF_PROJ_ROOT}/L1/tests/tests_fp32/clarke_inverse_fp32_tb/src/clarke_inverse_fp32_top.cpp",
+            "${XF_PROJ_ROOT}/L1/tests/tests_fp32/clarke_inverse_fp32_tb/src/clarke_inverse_fp32.hpp"
+        ],
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/models_fp -I${XF_PROJ_ROOT}/L1/tests/tests_fp32/clarke_inverse_fp32_tb/src"
+    },
+    "testbench": {
+        "source": [
+            "${XF_PROJ_ROOT}/L1/tests/tests_fp32/clarke_inverse_fp32_tb/tb/test_clarke_inverse_fp32.cpp"
+        ],
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/models_fp -I${XF_PROJ_ROOT}/L1/tests/tests_fp32/clarke_inverse_fp32_tb/src -I${XF_PROJ_ROOT}/L1/tests/tests_fp32/precision_common"
+    },
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": {
+                    "hls_csim": 20480,
+                    "hls_csynth": 10240
+                },
+                "max_time_min": {
+                    "hls_csim": 300,
+                    "hls_csynth": 60
+                }
+            }
+        ],
+        "targets": [
+            "hls_csim",
+            "hls_csynth"
+        ],
+        "category": "canary"
+    }
+}

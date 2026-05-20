@@ -3,14 +3,11 @@
     "description": "Test Design to validate IP Quadrature Encoder Interface kernel",
     "flow": "hls",
     "platform_allowlist": [
-        "u200",
-        "vck190",
-        "aws-vu9p-f1",
-        "xilinx_zcu104_base_202220_1"
+        "xck26-sfvc784-2LV-c"
     ],
     "platform_blocklist": [],
     "part_allowlist": [
-        "xc7z020-clg400-1"
+        "xck26-sfvc784-2LV-c"
     ],
     "part_blocklist": [],
     "project": "hls_qei",
