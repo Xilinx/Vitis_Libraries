@@ -3,9 +3,7 @@
     "description": "Check handshakes of Bi-DM in multiple cases",
     "flow": "hls",
     "platform_allowlist": [
-        "u200",
-        "vck190",
-        "aws-vu9p-f1"
+        "vck190"
     ],
     "project": "dut",
     "solution": "solution1",

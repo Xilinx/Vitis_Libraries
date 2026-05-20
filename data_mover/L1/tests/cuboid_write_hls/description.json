@@ -3,7 +3,6 @@
     "description": "Test 4D data_mover's correctness under certain descriptor",
     "flow": "hls",
     "platform_allowlist": [
-        "u200",
         "vck190"
     ],
     "platform_blocklist": [],
