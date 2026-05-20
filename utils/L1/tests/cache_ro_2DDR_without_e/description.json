@@ -3,8 +3,7 @@
     "description": "Xilinx Cache Ro 2ports Without E HLS Test",
     "flow": "hls",
     "platform_allowlist": [
-        "vck190",
-        "aws-vu9p-f1"
+        "vck190"
     ],
     "platform_blocklist": [],
     "part_allowlist": [],
