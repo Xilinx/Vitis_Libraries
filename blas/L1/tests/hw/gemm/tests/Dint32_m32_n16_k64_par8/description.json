@@ -7,8 +7,6 @@
     "part_allowlist": [],
     "platform_blocklist": [],
     "platform_allowlist": [
-        "u250",
-        "aws-vu9p-f1",
         "vck190"
     ],
     "project": "gemm_test_Dint32_m32_n16_k64_par8",

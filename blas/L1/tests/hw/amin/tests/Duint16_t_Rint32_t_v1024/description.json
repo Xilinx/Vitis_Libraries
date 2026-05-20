@@ -7,8 +7,6 @@
     "part_allowlist": [],
     "platform_blocklist": [],
     "platform_allowlist": [
-        "u200",
-        "aws-vu9p-f1",
         "vck190"
     ],
     "project": "amin_Duint16_t_Rint32_t_v1024_test",

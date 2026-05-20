@@ -7,8 +7,6 @@
     "part_allowlist": [],
     "platform_blocklist": [],
     "platform_allowlist": [
-        "u200",
-        "aws-vu9p-f1",
         "vck190"
     ],
     "project": "tbmv_Ddouble_m4096_k4_lower_test",

@@ -7,9 +7,6 @@
     "part_allowlist": [],
     "platform_blocklist": [],
     "platform_allowlist": [
-        "u250",
-        "u200",
-        "aws-vu9p-f1",
         "vck190"
     ],
     "project": "gemm_Dint16_t_m64_n64_k64_par4_test",
