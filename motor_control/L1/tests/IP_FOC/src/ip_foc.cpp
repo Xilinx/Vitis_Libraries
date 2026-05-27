@@ -130,6 +130,7 @@ void hls_foc_periodic_ap_fixed(
     #pragma HLS interface s_axilite port = Ihomopolar_stts bundle = foc_args
     #pragma HLS interface s_axilite port = fixed_angle_args bundle = foc_args
 
+    #pragma HLS interface ap_ctrl_hs port=return
     #pragma HLS interface s_axilite port = return bundle = foc_args
     long trip_cnt = 0x7fffffffffffffffL;
 #ifdef SIM_FINITE

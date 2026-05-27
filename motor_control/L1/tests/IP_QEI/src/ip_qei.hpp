@@ -31,6 +31,7 @@ from Advanced Micro Devices, Inc.
 
 #include "ap_int.h"
 #include <hls_stream.h>
+#include "hls_directio.h"
 #include "qei.hpp"
 #define TESTNUMBER (10000000)
 typedef ap_uint<1> t_bin_qei;
@@ -44,8 +45,8 @@ void hls_qei(hls::stream<t_bin_qei>& qei_A,
              hls::stream<t_err_qei>& qei_err,
              volatile int& qei_args_cpr,
              volatile int& qei_args_ctrl,
-             volatile int& qei_stts_RPM_THETA_m,
-             volatile int& qei_stts_dir,
-             volatile int& qei_stts_err);
+             hls::ap_none<int>& qei_stts_RPM_THETA_m,
+             hls::ap_none<int>& qei_stts_dir,
+             hls::ap_none<int>& qei_stts_err);
 
 #endif // _IP_QEI_HPP_

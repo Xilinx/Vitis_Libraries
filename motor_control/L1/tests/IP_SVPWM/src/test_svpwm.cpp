@@ -58,6 +58,15 @@ struct AxiParameters_PWM {
     t_glb_q15q16 pwm_stt_duty_ratio_c;
 };
 
+template <typename T>
+static void read_last_directio(hls::ap_none<int>& status, T& value) {
+    int latest = 0;
+    while (status.size() > 0) {
+        latest = status.read();
+    }
+    value = (T)latest;
+}
+
 // test wrapper
 void SVPWM_wrapper(hls::stream<t_svpwm_cmd>& strm_Va_cmd,
                    hls::stream<t_svpwm_cmd>& strm_Vb_cmd,
@@ -72,22 +81,22 @@ void SVPWM_wrapper(hls::stream<t_svpwm_cmd>& strm_Va_cmd,
                    hls::stream<ap_uint<1> >& strm_pwm_sync_a,
                    hls::stream<ap_uint<1> >& strm_pwm_sync_b,
                    hls::stream<ap_uint<1> >& strm_pwm_sync_c,
-                   volatile int& pwm_stt_pwm_cycle,
+                   hls::ap_none<int>& pwm_stt_pwm_cycle,
                    volatile int& pwm_args_pwm_freq,
                    volatile int& pwm_args_dead_cycles,
                    volatile int& pwm_args_phase_shift,
                    volatile int& pwm_args_dc_link_ref,
-                   volatile int& pwm_stt_cnt_iter,
+                   hls::ap_none<int>& pwm_stt_cnt_iter,
                    volatile int& pwm_stt_cnt_read_foc,
                    volatile int& pwm_stt_cnt_read_dc,
                    volatile int& pwm_args_dc_src_mode,
                    volatile int& pwm_args_sample_ii,
-                   volatile int& pwm_stt_Va_cmd,
-                   volatile int& pwm_stt_Vb_cmd,
-                   volatile int& pwm_stt_Vc_cmd,
-                   volatile int& pwm_stt_duty_ratio_a,
-                   volatile int& pwm_stt_duty_ratio_b,
-                   volatile int& pwm_stt_duty_ratio_c) {
+                   hls::ap_none<int>& pwm_stt_Va_cmd,
+                   hls::ap_none<int>& pwm_stt_Vb_cmd,
+                   hls::ap_none<int>& pwm_stt_Vc_cmd,
+                   hls::ap_none<int>& pwm_stt_duty_ratio_a,
+                   hls::ap_none<int>& pwm_stt_duty_ratio_b,
+                   hls::ap_none<int>& pwm_stt_duty_ratio_c) {
     // hls::stream<pwmPassedArgs > strm_args;// fixme : refine no useful config will save resouce
     // #pragma HLS STREAM depth = 4 variable = strm_args
 
@@ -103,7 +112,7 @@ void SVPWM_wrapper(hls::stream<t_svpwm_cmd>& strm_Va_cmd,
                    strm_duty_cycle_c, /*strm_args,*/
                    pwm_args_dc_link_ref, pwm_stt_cnt_iter, pwm_args_dc_src_mode, pwm_args_sample_ii, pwm_stt_Va_cmd,
                    pwm_stt_Vb_cmd, pwm_stt_Vc_cmd);
-    pwm_stt_cnt_read_foc = pwm_stt_cnt_read_dc = pwm_stt_cnt_iter;
+    pwm_stt_cnt_read_foc = pwm_stt_cnt_read_dc = 0;
 
     hls_pwm_gen(strm_duty_cycle_a, strm_duty_cycle_b, strm_duty_cycle_c, /*strm_args,*/
                 strm_pwm_h_a, strm_pwm_h_b, strm_pwm_h_c, strm_pwm_l_a, strm_pwm_l_b, strm_pwm_l_c, strm_pwm_sync_a,
@@ -168,6 +177,14 @@ int main(int argc, char** argv) {
     double allowed_res_ratio = 0.05;
 
     AxiParameters_PWM<t_glb_q15q16> axi_para;
+    hls::ap_none<int> pwm_stt_pwm_cycle_io("pwm_stt_pwm_cycle");
+    hls::ap_none<int> pwm_stt_cnt_iter_io("pwm_stt_cnt_iter");
+    hls::ap_none<int> pwm_stt_Va_cmd_io("pwm_stt_Va_cmd");
+    hls::ap_none<int> pwm_stt_Vb_cmd_io("pwm_stt_Vb_cmd");
+    hls::ap_none<int> pwm_stt_Vc_cmd_io("pwm_stt_Vc_cmd");
+    hls::ap_none<int> pwm_stt_duty_ratio_a_io("pwm_stt_duty_ratio_a");
+    hls::ap_none<int> pwm_stt_duty_ratio_b_io("pwm_stt_duty_ratio_b");
+    hls::ap_none<int> pwm_stt_duty_ratio_c_io("pwm_stt_duty_ratio_c");
     int clk_fq = COMM_CLOCK_FREQ;
     axi_para.args_pwm_freq = 20000;
     axi_para.args_dead_cycles = 10;
@@ -266,18 +283,25 @@ int main(int argc, char** argv) {
 
     // hls_svpwm(
     SVPWM_wrapper(inputVa, inputVb, inputVc, dc_link, pwm_h_a, pwm_h_b, pwm_h_c, pwm_l_a, pwm_l_b, pwm_l_c, pwm_sync_a,
-                  pwm_sync_b, pwm_sync_c, (volatile int&)axi_para.stt_pwm_cycle, (volatile int&)axi_para.args_pwm_freq,
+                  pwm_sync_b, pwm_sync_c, pwm_stt_pwm_cycle_io, (volatile int&)axi_para.args_pwm_freq,
                   (volatile int&)axi_para.args_dead_cycles, (volatile int&)axi_para.args_phase_shift,
-                  (volatile int&)axi_para.args_dc_link_ref, (volatile int&)axi_para.stt_cnt_iter,
+                  (volatile int&)axi_para.args_dc_link_ref, pwm_stt_cnt_iter_io,
                   (volatile int&)axi_para.stt_cnt_read_foc, (volatile int&)axi_para.stt_cnt_read_dc,
                   (volatile int&)axi_para.args_dc_src_mode, (volatile int&)axi_para.args_sample_ii,
-                  (volatile int&)axi_para.pwm_stt_Va_cmd, (volatile int&)axi_para.pwm_stt_Vb_cmd,
-                  (volatile int&)axi_para.pwm_stt_Vc_cmd, (volatile int&)axi_para.pwm_stt_duty_ratio_a,
-                  (volatile int&)axi_para.pwm_stt_duty_ratio_b, (volatile int&)axi_para.pwm_stt_duty_ratio_c);
+                  pwm_stt_Va_cmd_io, pwm_stt_Vb_cmd_io, pwm_stt_Vc_cmd_io, pwm_stt_duty_ratio_a_io,
+                  pwm_stt_duty_ratio_b_io, pwm_stt_duty_ratio_c_io);
     //(volatile long&)axi_para.args_cnt_trip);
     //        volatile t_svpwm_cmd& pwm_stt_Va_cmd,
     //    volatile t_svpwm_cmd& pwm_stt_Vb_cmd,
     //    volatile t_svpwm_cmd& pwm_stt_Vc_cmd
+    read_last_directio(pwm_stt_pwm_cycle_io, axi_para.stt_pwm_cycle);
+    read_last_directio(pwm_stt_cnt_iter_io, axi_para.stt_cnt_iter);
+    read_last_directio(pwm_stt_Va_cmd_io, axi_para.pwm_stt_Va_cmd);
+    read_last_directio(pwm_stt_Vb_cmd_io, axi_para.pwm_stt_Vb_cmd);
+    read_last_directio(pwm_stt_Vc_cmd_io, axi_para.pwm_stt_Vc_cmd);
+    read_last_directio(pwm_stt_duty_ratio_a_io, axi_para.pwm_stt_duty_ratio_a);
+    read_last_directio(pwm_stt_duty_ratio_b_io, axi_para.pwm_stt_duty_ratio_b);
+    read_last_directio(pwm_stt_duty_ratio_c_io, axi_para.pwm_stt_duty_ratio_c);
 
     char fname2[64];
     sprintf(fname2, "wave_all%d", TESTNUMBER);

@@ -36,9 +36,9 @@ void hls_qei(hls::stream<t_bin_qei>& qei_A,
              hls::stream<t_err_qei>& qei_err,
              volatile int& qei_args_cpr,
              volatile int& qei_args_ctrl,
-             volatile int& qei_stts_RPM_THETA_m,
-             volatile int& qei_stts_dir,
-             volatile int& qei_stts_err) {
+             hls::ap_none<int>& qei_stts_RPM_THETA_m,
+             hls::ap_none<int>& qei_stts_dir,
+             hls::ap_none<int>& qei_stts_err) {
 #pragma HLS INTERFACE ap_fifo port = qei_A
 #pragma HLS INTERFACE ap_fifo port = qei_B
 #pragma HLS INTERFACE ap_fifo port = qei_I

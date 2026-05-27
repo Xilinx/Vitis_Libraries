@@ -32,6 +32,7 @@ from Advanced Micro Devices, Inc.
 #include "ap_int.h"
 #include <iostream>
 #include <hls_stream.h>
+#include "hls_directio.h"
 #include "common.hpp"
 
 //--------------------------------------------------------------------------
@@ -315,12 +316,12 @@ void calcCounter(hls::stream<QEI_EdgeInfo>& strm_cntEdge,
                  volatile int& axi_qei_cpr,
                  // volatile int& axi_qei_freq,COMM_CLOCK_FREQ
                  volatile int& axi_qei_ctrl,
-                 volatile int& axi_qei_rpm_theta_m,
-                 volatile int& axi_qei_dir,
-                 volatile int& axi_qei_err) {
-    axi_qei_rpm_theta_m = 0;
-    axi_qei_dir = 0;
-    axi_qei_err = 0;
+                 hls::ap_none<int>& axi_qei_rpm_theta_m,
+                 hls::ap_none<int>& axi_qei_dir,
+                 hls::ap_none<int>& axi_qei_err) {
+    axi_qei_rpm_theta_m.write(0);
+    axi_qei_dir.write(0);
+    axi_qei_err.write(0);
 
     const int i_a = 0;
     const int i_b = 1;
@@ -437,13 +438,13 @@ LOOP_QEI_COUNTEDGE:
                     ap_uint<32> tmp;
                     tmp.range(15, 0) = speed_rpm;
                     tmp.range(31, 16) = counter >> 2; // 4X mode : using any type of edges of A or B
-                    axi_qei_rpm_theta_m = (int)tmp;
+                    axi_qei_rpm_theta_m.write((int)tmp);
                     // outputing
                     if (!out_speed_angle.full()) out_speed_angle.write((int)tmp);
                     if (!out_dirstr.full()) out_dirstr.write((T_bin)dir);
                     if (!out_errstr.full()) out_errstr.write((T_err)0);
-                    axi_qei_dir = dir;
-                    axi_qei_err = 0;
+                    axi_qei_dir.write(dir);
+                    axi_qei_err.write(0);
                 }
                 isPreValid = true;
 #ifndef __SYNTHESIS__
@@ -464,12 +465,12 @@ LOOP_QEI_COUNTEDGE:
             isNoEdge = true;
             if (cnt_noEdge == timeOut_noEdge - 1) {
                 // debug tobe refine
-                axi_qei_dir = counter >> 2; /// 4X mode : using any type of edges of A or B
+                axi_qei_dir.write(counter >> 2); /// 4X mode : using any type of edges of A or B
                 ap_uint<32> tmp_err;
                 tmp_err.range(3, 0) = (ap_uint<4>)3;
                 tmp_err.range(31, 4) = (ap_uint<28>)cnt_noEdge;
 
-                axi_qei_err = tmp_err;
+                axi_qei_err.write(tmp_err);
                 // reseting
                 counter = 0;
                 cnt_noEdge = 0;
@@ -543,9 +544,9 @@ void hls_qei_axi(hls::stream<T_bin>& strm_qei_A,
                  hls::stream<T_err>& strm_qei_err,
                  volatile int& qei_args_cpr,
                  volatile int& qei_args_ctrl,
-                 volatile int& qei_stts_RPM_THETA_m,
-                 volatile int& qei_stts_dir,
-                 volatile int& qei_stts_err,
+                 hls::ap_none<int>& qei_stts_RPM_THETA_m,
+                 hls::ap_none<int>& qei_stts_dir,
+                 hls::ap_none<int>& qei_stts_err,
                  volatile long& qei_args_cnt_trip) {
 #pragma HLS DATAFLOW
 

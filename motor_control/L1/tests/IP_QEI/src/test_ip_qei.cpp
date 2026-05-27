@@ -29,6 +29,12 @@ from Advanced Micro Devices, Inc.
 #include <iostream>
 #include "ip_qei.hpp"
 
+static void read_last_directio(hls::ap_none<int>& status, int& value) {
+    while (status.size() > 0) {
+        value = status.read();
+    }
+}
+
 unsigned int qei_inverse_new(hls::stream<ap_uint<1> >& A,
                              hls::stream<ap_uint<1> >& B,
                              hls::stream<ap_uint<1> >& I,
@@ -214,6 +220,9 @@ int testBench() {
 
     // int qei_args[QEI_ARGS_SIZE];
     AxiParameters_QEI qei_args;
+    hls::ap_none<int> qei_stts_RPM_THETA_m_io("qei_stts_RPM_THETA_m");
+    hls::ap_none<int> qei_stts_dir_io("qei_stts_dir");
+    hls::ap_none<int> qei_stts_err_io("qei_stts_err");
 
     printf(
         "SIM_QEI: *****************************  Generating Input "
@@ -222,10 +231,12 @@ int testBench() {
     Setting_3(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, qei_args, golden_rpms);
 
     hls_qei(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, strm_out_qei_RPM_THETA_m, strm_out_qei_dir, strm_out_qei_err,
-            (volatile int&)qei_args.qei_args_cpr, (volatile int&)qei_args.qei_args_ctrl,
-            (volatile int&)qei_args.qei_stts_RPM_THETA_m, (volatile int&)qei_args.qei_stts_dir,
-            (volatile int&)qei_args.qei_stts_err); //,
+            (volatile int&)qei_args.qei_args_cpr, (volatile int&)qei_args.qei_args_ctrl, qei_stts_RPM_THETA_m_io,
+            qei_stts_dir_io, qei_stts_err_io); //,
     //(volatile long&)qei_args.qei_args_cnt_trip);
+    read_last_directio(qei_stts_RPM_THETA_m_io, qei_args.qei_stts_RPM_THETA_m);
+    read_last_directio(qei_stts_dir_io, qei_args.qei_stts_dir);
+    read_last_directio(qei_stts_err_io, qei_args.qei_stts_err);
 
     ap_uint<32> qei_stts_RPM_THETA_m = (ap_uint<32>)qei_args.qei_stts_RPM_THETA_m;
 

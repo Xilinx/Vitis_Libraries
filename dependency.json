@@ -1,48 +1,48 @@
 [
     {
-        "lib": "blas",
+        "lib": "blas", 
         "dependsOn": []
-    },
+    }, 
     {
-        "lib": "data_mover",
+        "lib": "data_mover", 
         "dependsOn": [
             "utils"
         ]
-    },
+    }, 
     {
-        "lib": "dsp",
+        "lib": "dsp", 
         "dependsOn": [
-            "utils",
+            "utils", 
             "data_mover"
         ]
-    },
+    }, 
     {
-        "lib": "motor_control",
+        "lib": "motor_control", 
         "dependsOn": []
-    },
+    }, 
     {
-        "lib": "security",
+        "lib": "security", 
         "dependsOn": [
             "utils"
         ]
-    },
+    }, 
     {
-        "lib": "solver",
+        "lib": "solver", 
         "dependsOn": [
-            "utils",
+            "utils", 
             "dsp"
         ]
-    },
+    }, 
     {
-        "lib": "ultrasound",
+        "lib": "ultrasound", 
         "dependsOn": []
-    },
+    }, 
     {
-        "lib": "utils",
+        "lib": "utils", 
         "dependsOn": []
-    },
+    }, 
     {
-        "lib": "vision",
+        "lib": "vision", 
         "dependsOn": []
     }
 ]

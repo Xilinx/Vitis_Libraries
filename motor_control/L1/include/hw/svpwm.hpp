@@ -30,6 +30,7 @@ from Advanced Micro Devices, Inc.
 #define SVPWM_HPP
 
 #include <hls_stream.h>
+#include "hls_directio.h"
 #include <ap_axi_sdata.h>
 #include <ap_int.h>
 #include <stdint.h>
@@ -172,10 +173,10 @@ void calculate_ratios(hls::stream<pwmStrmIO<T_FOC_COM> >& strm_pwm_bundle_in,
                       hls::stream<T_RATIO_16b>& strm_duty_ratio_c,
                       volatile int& args_dc_link_ref,
                       volatile int& args_dc_src_mode,
-                      volatile int& stt_cnt_iter,
-                      volatile int& pwm_stt_Va_cmd,
-                      volatile int& pwm_stt_Vb_cmd,
-                      volatile int& pwm_stt_Vc_cmd) {
+                      hls::ap_none<int>& stt_cnt_iter,
+                      hls::ap_none<int>& pwm_stt_Va_cmd,
+                      hls::ap_none<int>& pwm_stt_Vb_cmd,
+                      hls::ap_none<int>& pwm_stt_Vc_cmd) {
     int iter = 0;
     bool isEnd_cond = true;
     T_FOC_COM Vcmd[3];
@@ -198,12 +199,12 @@ LOOP_SVPWM_RATIO:
         t_glb_q15q16 pwm_Vb_stt_temp = Vcmd[1];
         t_glb_q15q16 pwm_Vc_stt_temp = Vcmd[2];
 
-        pwm_stt_Va_cmd = pwm_Va_stt_temp.range(31, 0);
-        pwm_stt_Vb_cmd = pwm_Vb_stt_temp.range(31, 0);
-        pwm_stt_Vc_cmd = pwm_Vc_stt_temp.range(31, 0);
+        pwm_stt_Va_cmd.write(pwm_Va_stt_temp.range(31, 0));
+        pwm_stt_Vb_cmd.write(pwm_Vb_stt_temp.range(31, 0));
+        pwm_stt_Vc_cmd.write(pwm_Vc_stt_temp.range(31, 0));
 
         calculate_ratios_core<T_FOC_COM>(duty_ratio, Vcmd, dcLink_adc, args_dc_link_ref, args_dc_src_mode);
-        stt_cnt_iter = iter++;
+        stt_cnt_iter.write(iter++);
 
         ap_ufixed<16, 0> r0 = (ap_ufixed<16, 0>)duty_ratio[0];
         ap_ufixed<16, 0> r1 = (ap_ufixed<16, 0>)duty_ratio[1];
@@ -485,10 +486,10 @@ void PWM_gen_wave(
     hls::stream<ap_uint<1> >& strm_sync_a,
     hls::stream<ap_uint<1> >& strm_sync_b,
     hls::stream<ap_uint<1> >& strm_sync_c,
-    volatile int& pwm_stt_pwm_cycle,
-    volatile int& pwm_stt_duty_ratio_a,
-    volatile int& pwm_stt_duty_ratio_b,
-    volatile int& pwm_stt_duty_ratio_c) {
+    hls::ap_none<int>& pwm_stt_pwm_cycle,
+    hls::ap_none<int>& pwm_stt_duty_ratio_a,
+    hls::ap_none<int>& pwm_stt_duty_ratio_b,
+    hls::ap_none<int>& pwm_stt_duty_ratio_c) {
     T_RATIO_16b local_duty_ratio_a_next;
     T_RATIO_16b local_duty_ratio_b_next;
     T_RATIO_16b local_duty_ratio_c_next;
@@ -504,9 +505,9 @@ void PWM_gen_wave(
     t_glb_q15q16 pwm_duty_ratio_b_temp = local_duty_ratio_b_inuse;
     t_glb_q15q16 pwm_duty_ratio_c_temp = local_duty_ratio_c_inuse;
 
-    pwm_stt_duty_ratio_a = pwm_duty_ratio_a_temp.range(31, 0);
-    pwm_stt_duty_ratio_b = pwm_duty_ratio_b_temp.range(31, 0);
-    pwm_stt_duty_ratio_c = pwm_duty_ratio_c_temp.range(31, 0);
+    pwm_stt_duty_ratio_a.write(pwm_duty_ratio_a_temp.range(31, 0));
+    pwm_stt_duty_ratio_b.write(pwm_duty_ratio_b_temp.range(31, 0));
+    pwm_stt_duty_ratio_c.write(pwm_duty_ratio_c_temp.range(31, 0));
 
     int ii_sample = pwm_args_ii_sample <= 0 ? 1 : pwm_args_ii_sample;
     int pwm_freq_inuse = pwm_args_pwm_freq;
@@ -555,15 +556,15 @@ LOOP_GEN_WAVE:
     do {
 #pragma HLS pipeline II = 1
 
-        pwm_stt_pwm_cycle = pwm_cycle;
+        pwm_stt_pwm_cycle.write(pwm_cycle);
 
         pwm_duty_ratio_a_temp = (t_glb_q15q16)local_duty_ratio_a_inuse;
         pwm_duty_ratio_b_temp = (t_glb_q15q16)local_duty_ratio_b_inuse;
         pwm_duty_ratio_c_temp = (t_glb_q15q16)local_duty_ratio_c_inuse;
 
-        pwm_stt_duty_ratio_a = pwm_duty_ratio_a_temp.range(31, 0);
-        pwm_stt_duty_ratio_b = pwm_duty_ratio_b_temp.range(31, 0);
-        pwm_stt_duty_ratio_c = pwm_duty_ratio_c_temp.range(31, 0);
+        pwm_stt_duty_ratio_a.write(pwm_duty_ratio_a_temp.range(31, 0));
+        pwm_stt_duty_ratio_b.write(pwm_duty_ratio_b_temp.range(31, 0));
+        pwm_stt_duty_ratio_c.write(pwm_duty_ratio_c_temp.range(31, 0));
 
         generate_output_chnl<ap_uint<18> >(pwm_cycle, pwm_cnt, dead_cycles_inuse, shift[0], len[0],
                                            local_duty_ratio_a_inuse, strm_h_a, strm_l_a, strm_sync_a);
@@ -656,13 +657,13 @@ void hls_svpwm_duty_axi(hls::stream<T_FOC_COM>& strm_Va_cmd,
                         hls::stream<T_RATIO_16b>& strm_duty_ratio_b,
                         hls::stream<T_RATIO_16b>& strm_duty_ratio_c,
                         volatile int& pwm_args_dc_link_ref,
-                        volatile int& pwm_stt_cnt_iter,
+                        hls::ap_none<int>& pwm_stt_cnt_iter,
                         volatile int& pwm_args_dc_src_mode,
                         volatile int& pwm_args_sample_ii,
                         volatile long& pwm_args_cnt_trip,
-                        volatile int& pwm_stt_Va_cmd,
-                        volatile int& pwm_stt_Vb_cmd,
-                        volatile int& pwm_stt_Vc_cmd) {
+                        hls::ap_none<int>& pwm_stt_Va_cmd,
+                        hls::ap_none<int>& pwm_stt_Vb_cmd,
+                        hls::ap_none<int>& pwm_stt_Vc_cmd) {
     hls::stream<details::pwmStrmIO<T_FOC_COM> > strm_pwm_io_bundle;
 #pragma HLS STREAM depth = 2 variable = strm_pwm_io_bundle
 
@@ -717,12 +718,12 @@ void hls_pwm_gen_axi(hls::stream<T_RATIO_16b>& strm_duty_ratio_a,
                      volatile int& pwm_args_pwm_freq,
                      volatile int& pwm_args_dead_cycles,
                      volatile int& pwm_args_phase_shift,
-                     volatile int& pwm_stt_pwm_cycle,
+                     hls::ap_none<int>& pwm_stt_pwm_cycle,
                      volatile long& pwm_args_cnt_trip,
                      volatile int& pwm_args_sample_ii,
-                     volatile int& pwm_stt_duty_ratio_a,
-                     volatile int& pwm_stt_duty_ratio_b,
-                     volatile int& pwm_stt_duty_ratio_c) {
+                     hls::ap_none<int>& pwm_stt_duty_ratio_a,
+                     hls::ap_none<int>& pwm_stt_duty_ratio_b,
+                     hls::ap_none<int>& pwm_stt_duty_ratio_c) {
     details::PWM_gen_wave<T_RATIO_16b>(
         strm_duty_ratio_a, strm_duty_ratio_b, strm_duty_ratio_c,
 

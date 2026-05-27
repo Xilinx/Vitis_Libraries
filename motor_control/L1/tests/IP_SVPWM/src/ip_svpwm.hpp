@@ -29,6 +29,7 @@ from Advanced Micro Devices, Inc.
 #define _IP_SVPWM_HPP_
 #include "ap_int.h"
 #include <hls_stream.h>
+#include "hls_directio.h"
 #include "svpwm.hpp"
 using namespace hls;
 #define TESTNUMBER (10)
@@ -71,12 +72,12 @@ void hls_svpwm_duty(hls::stream<t_svpwm_cmd>& strm_Va_cmd,
                     hls::stream<t_svpwm_ratio>& strm_duty_ratio_b,
                     hls::stream<t_svpwm_ratio>& strm_duty_ratio_c,
                     volatile int& pwm_args_dc_link_ref,
-                    volatile int& pwm_stt_cnt_iter,
+                    hls::ap_none<int>& pwm_stt_cnt_iter,
                     volatile int& pwm_args_dc_src_mode,
                     volatile int& pwm_args_sample_ii,
-                    volatile int& pwm_stt_Va_cmd,
-                    volatile int& pwm_stt_Vb_cmd,
-                    volatile int& pwm_stt_Vc_cmd);
+                    hls::ap_none<int>& pwm_stt_Va_cmd,
+                    hls::ap_none<int>& pwm_stt_Vb_cmd,
+                    hls::ap_none<int>& pwm_stt_Vc_cmd);
 
 void hls_pwm_gen(hls::stream<t_svpwm_ratio>& strm_duty_ratio_a,
                  hls::stream<t_svpwm_ratio>& strm_duty_ratio_b,
@@ -93,10 +94,10 @@ void hls_pwm_gen(hls::stream<t_svpwm_ratio>& strm_duty_ratio_a,
                  volatile int& pwm_args_pwm_freq,
                  volatile int& pwm_args_dead_cycles,
                  volatile int& pwm_args_phase_shift,
-                 volatile int& pwm_stt_pwm_cycle,
+                 hls::ap_none<int>& pwm_stt_pwm_cycle,
                  volatile int& pwm_args_sample_ii,
-                 volatile int& pwm_stt_duty_ratio_a,
-                 volatile int& pwm_stt_duty_ratio_b,
-                 volatile int& pwm_stt_duty_ratio_c);
+                 hls::ap_none<int>& pwm_stt_duty_ratio_a,
+                 hls::ap_none<int>& pwm_stt_duty_ratio_b,
+                 hls::ap_none<int>& pwm_stt_duty_ratio_c);
 
 #endif
