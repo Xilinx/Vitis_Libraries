@@ -16,7 +16,7 @@
 
 /**
  * @file sm234.hpp
- * @brief header file for SM2 / SM3 / SM4 algorithm related functions.
+ * @brief header file for SM3 / SM4 algorithm related functions.
  * This file is part of Vitis Security Library.
  */
 
@@ -24,7 +24,7 @@
 #define _XF_SECURITY_SM234_HPP_
 
 #include <ap_int.h>
-#include "xf_security/ecc.hpp"
+#include <hls_stream.h>
 #include "xf_security/types.hpp"
 
 namespace xf {
@@ -272,132 +272,6 @@ uint32_t sm4LSH(uint32_t x) {
 }
 
 } // namespace internal
-
-/**
- * @brief SM2 algorithm related function.
- * This class provide signing and verifying functions.
- *
- * @tparam W Bit width of SM2 curve's parameters.
- */
-template <int W>
-class sm2 : public xf::security::ecc<W> {
-   public:
-    /// X coordinate of generation point
-    ap_uint<W> Gx;
-    /// Y coordinate of generation point
-    ap_uint<W> Gy;
-    /// Order of generation point
-    ap_uint<W> n;
-
-    sm2() {
-#pragma HLS inline
-    }
-
-    /**
-     * @brief Setup parameters for curve y^2 = x^3 + ax + b in GF(p)
-     *
-     * @param inputA Parameter a for y^2 = x^3 + ax + b in GF(p)
-     * @param inputB Parameter b for y^2 = x^3 + ax + b in GF(p)
-     * @param inputP Parameter p for y^2 = x^3 + ax + b in GF(p)
-     * @param inputGx X coordinate of generation point G.
-     * @param inputGy Y coordinate of generation point G.
-     * @param inputN Order of generation point.
-     */
-    void init(ap_uint<W> inputA,
-              ap_uint<W> inputB,
-              ap_uint<W> inputP,
-              ap_uint<W> inputGx,
-              ap_uint<W> inputGy,
-              ap_uint<W> inputN) {
-        this->a = inputA;
-        this->b = inputB;
-        this->p = inputP;
-        Gx = inputGx;
-        Gy = inputGy;
-        n = inputN;
-    };
-
-    /**
-     * @brief signing function.
-     * It will return true if input parameters are legal, otherwise return false.
-     *
-     * @param hashZaM Digest value of message to be signed.
-     * @param k A random key to sign the message, should kept different each time to be used.
-     * @param privateKey Private Key to sign the message
-     * @param r part of signing pair {r, s}
-     * @param s part of signing pair {r, s}
-     */
-    bool sign(ap_uint<W> hashZaM, ap_uint<W> k, ap_uint<W> privateKey, ap_uint<W>& r, ap_uint<256>& s) {
-        bool valid = true;
-        ap_uint<W> x, y;
-        this->dotProduct(Gx, Gy, k, x, y);
-
-        if (x >= n) {
-            x -= n;
-        }
-
-        if (hashZaM >= n) {
-            hashZaM -= n;
-        }
-
-        ap_uint<W> tmpr, tmps;
-        tmpr = xf::security::internal::addMod<W>(hashZaM, x, n);
-        if (tmpr == 0 || xf::security::internal::addMod<W>(tmpr, k, n) == 0) {
-            valid = false;
-        } else {
-            ap_uint<W> da1 = xf::security::internal::addMod<W>(privateKey, 1, n);
-            ap_uint<W> da1Inv = xf::security::internal::modularInv<W>(da1, n);
-            ap_uint<W> rda = xf::security::internal::productMod<W>(privateKey, tmpr, n);
-            ap_uint<W> krda = xf::security::internal::subMod<W>(k, rda, n);
-            tmps = xf::security::internal::productMod<W>(da1Inv, krda, n);
-            if (tmps == 0) {
-                valid = false;
-            }
-        }
-
-        r = tmpr;
-        s = tmps;
-        return valid;
-    }
-
-    /**
-     * @brief verifying function.
-     * It will return true if verified, otherwise false.
-     *
-     * @param r part of signing pair {r, s}
-     * @param s part of signing pair {r, s}
-     * @param hashZaM Digest value of message to be signed.
-     * @param Px X coordinate of public key point P.
-     * @param Py Y coordinate of public key point P.
-     */
-    bool verify(ap_uint<W> r, ap_uint<W> s, ap_uint<W> hashZaM, ap_uint<W> Px, ap_uint<W> Py) {
-        bool valid = true;
-        if (r == 0 || r >= n || s == 0 || s >= n) {
-            valid = false;
-        }
-
-        ap_uint<W> t = xf::security::internal::addMod<W>(r, s, n);
-        if (t == 0) {
-            valid = false;
-        }
-
-        ap_uint<W> tmpX, tmpY, x, y;
-        this->dotProduct(Px, Py, t, tmpX, tmpY);
-        this->dotProduct(Gx, Gy, s, x, y);
-        this->add(x, y, tmpX, tmpY, x, y);
-
-        if (hashZaM >= n) {
-            hashZaM -= n;
-        }
-        ap_uint<W> res = xf::security::internal::addMod<W>(hashZaM, x, n);
-
-        if (res != r) {
-            valid = false;
-        }
-
-        return valid;
-    }
-};
 
 /**
  * @brief SM3 function to genrate digest value for input messages.

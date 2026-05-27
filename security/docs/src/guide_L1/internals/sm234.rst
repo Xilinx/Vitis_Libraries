@@ -4,20 +4,11 @@
 `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
-   :keywords: Vitis, Security, Library, SM2, SM3, SM4, encryption, algorithms
-   :description: SM2/3/4 are crypto standard issued by Office of Security Commercial Code Administration(OSCCA) of China.
+   :keywords: Vitis, Security, Library, SM3, SM4, encryption, algorithms
+   :description: SM3/4 are crypto standard issued by Office of Security Commercial Code Administration(OSCCA) of China.
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
-
-****
-SM2
-****
-
-.. toctree::
-   :maxdepth: 1
-
-SM2 is an Elliptic Curve Diffie-Hellman key agreement and signature using a specified 256-bit elliptic curve. In this release, support for signature generation and verification is provided.
 
 ****
 SM3

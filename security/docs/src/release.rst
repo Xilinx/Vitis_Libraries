@@ -28,7 +28,6 @@ Known Issue
 In this release, support for the following functions is added:
 
 * Poseidon Hash function
-* ECDSA NIST-P384
 
 2021.2
 ------
@@ -45,7 +44,6 @@ The 2021.2 release provides support for:
 The 2021.1 release provides support for:
 
 * RIPEMD160
-* Initial support for BLS (not complete)
 
 2020.2
 ------
@@ -53,8 +51,6 @@ The 2021.1 release provides support for:
 The 2020.2 release provides support for signatures algorithms and VDF functions.
 
 * DSA
-* ECC
-* ECDSA
 * EDDSA
 * VDF
 

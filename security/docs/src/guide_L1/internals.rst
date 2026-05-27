@@ -29,10 +29,6 @@ Design Internals
    DES and 3DES Algorithms <internals/des.rst>
    Digital Signature Algorithm <internals/dsa.rst>
    ECB Mode <internals/ecb.rst>
-   Elliptic-curve Cryptography <internals/ecc.rst>
-   ECDSA nistp256 <internals/ecdsa_nistp256.rst>
-   ECDSA secp256k1 <internals/ecdsa_secp256k1.rst>
-   ECDSA nistp384 <internals/ecdsa_nistp384.rst>
    GCM Mode <internals/gcm.rst>
    GMAC <internals/gmac.rst>
    HMAC Algorithms <internals/hmac.rst>
@@ -46,7 +42,7 @@ Design Internals
    SHA-1 Algorithm <internals/sha1.rst>
    SHA-2 Algorithms <internals/sha2.rst>
    SHA-3 Algorithms <internals/sha3.rst>
-   SM2 <internals/sm234.rst>
+   SM3 and SM4 <internals/sm234.rst>
    Verifiable Delay Function <internals/vdf.rst>
    XTS mode <internals/xts.rst>
    Poseidon Hash Algorithm <internals/poseidon.rst>
