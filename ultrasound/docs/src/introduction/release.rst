@@ -14,7 +14,7 @@ Release Note
 
 .. note:: Known Issue
 
-    * L3/tests/scanline_AllinAIE interrupted issue with hw_emu target. This will get fixed in the next release.
+    * Synthetic_Aperture_Test and Scanline_Test have a known hardware build issue on xilinx_vck190_base_202610_1 and later VCK190 platforms because the designs require more interrupt resources than the platform provides. As a workaround, use xilinx_vck190_base_202520_1 for Synthetic_Aperture_Test, and use the scanline_AllinAIE design instead of Scanline_Test.
 
 AMD Vitis |trade| Ultrasound library provides not only toolbox-style implementation of different L1/L2/L3 APIs for ultrasound image processing, but also an all-in-AIE implementation of scanline imaging algorithm. You can directly use the function combinations based on toolbox APIs to customize algorithms, and can also start from or refer to the all-in-AIE scanline implementation to obtain the final design.
 

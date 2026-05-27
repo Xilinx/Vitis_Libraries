@@ -13,7 +13,8 @@
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L1/include/",
-                "LIB_DIR/L1/include/tileV"
+                "LIB_DIR/L1/include/tileV",
+                "./"
             ]
         }
     },

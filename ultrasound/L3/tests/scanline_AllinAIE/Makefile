@@ -129,7 +129,7 @@ AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
-AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/ -I $(XFLIB_DIR)/L2/include/
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/ -I $(XFLIB_DIR)/L2/include/ -I $(XILINX_HLS)/include -I $(XFLIB_DIR)/L3/models/include/
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
@@ -140,9 +140,9 @@ AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 ########################## Setting up Host Variables ##########################
 
 #Inclue Required Host Source Files
-HOST_SRCS += $(XFLIB_DIR)/L3/tests/scanline_AllinAIE/PS_host/host.cpp $(XFLIB_DIR)/L3/models/src/scanline.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L3/tests/scanline_AllinAIE/PS_host/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L3/tests/scanline_AllinAIE/aie_graph -I $(XFLIB_DIR)/L2/tests/graph_scanline/aie_graph -I $(XFLIB_DIR)/L3/tests/scanline_AllinAIE -I $(XFLIB_DIR)/L3/models/include -I $(XFLIB_DIR)/L3/models/src/
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/tests/scanline_AllinAIE/aie_graph -I $(XFLIB_DIR)/L2/tests/graph_scanline/aie_graph -I $(XFLIB_DIR)/L3/tests/scanline_AllinAIE -I $(XFLIB_DIR)/L3/models/include
 CXXFLAGS += -include $(XFLIB_DIR)/L2/include/graph_scanline.hpp -include $(XFLIB_DIR)/L1/include/kernels.hpp -include $(XFLIB_DIR)/L1/include/kernel_imagepoints.hpp -include $(XFLIB_DIR)/L1/include/kernel_focusing.hpp -include $(XFLIB_DIR)/L1/include/kernel_delay.hpp -include $(XFLIB_DIR)/L1/include/kernel_sample.hpp -include $(XFLIB_DIR)/L1/include/kernel_interpolation.hpp -include $(XFLIB_DIR)/L1/include/kernel_apodization.hpp -include $(XFLIB_DIR)/L1/include/kernel_mult.hpp
 
 # workaround for opencv
