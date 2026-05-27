@@ -5,7 +5,7 @@
     ],
     "flow": "system",
     "platform_allowlist": [
-	"vck190"
+	"vek280"
     ],
     "platform_blocklist": [
         "u280",
@@ -13,7 +13,7 @@
         "zcu104"
     ],
     "platform_properties": {
-        "vck190": {
+        "vek280": {
             "host": {
                 "compiler": {
                     "includepaths": [
@@ -91,7 +91,7 @@
                     "frequency": 150.0
                 }
             ],
-            "frequency": 150.0
+            "frequency": 100.0
         }
     ],
     "check_env": [

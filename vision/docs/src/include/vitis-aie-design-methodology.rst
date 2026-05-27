@@ -293,7 +293,7 @@ For x86Simulation, the AIE simulation and top level application had simple ADF A
 
    5. Sync output device buffer objects to host memory.
 
-   dst_hndl.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
+   dst_hndl.sync(XCL_BO_SYNC_BO_FROM_PLATFORM);
 
    //6. post-processing on host memory - "host_out
 

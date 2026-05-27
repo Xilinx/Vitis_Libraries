@@ -129,7 +129,7 @@
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/tests/aie-ml/rgba2yuv/8bit_aie_8bit_gmio/host.cpp",
+                    "location": "LIB_DIR/L2/tests/aie-ml/rgba2yuv/8bit_aie_8bit_gmio/graph.cpp",
                     "pl-freq": 400,
                     "workdir": "./Work",
                     "name": "libadf.a",

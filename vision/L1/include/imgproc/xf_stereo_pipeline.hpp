@@ -123,8 +123,8 @@ void xFComputeUndistortCoordinates(
         y = (FRAMET)(_y * winv);
     }
 
-    typename hls::x_traits<FRAMET, FRAMET>::MULT_T x2t = x * x, y2t = y * y; // Full precision result here.
-    FRAME2T _2xy = 2 * x * y;
+    float x2t = x * x, y2t = y * y; // Full precision result here.
+    FRAME2T _2xy = x * y * 2;
     FRAME2T r2 = x2t + y2t;
     FRAME2T x2 = x2t, y2 = y2t;
 
@@ -168,6 +168,9 @@ void xFInitUndistortRectifyMapInverseKernel(CM_T* cameraMatrix,
     #pragma HLS ARRAY_PARTITION variable=iRnewCameraMatrixHLS complete dim=0
     // clang-format on
 
+    ap_int<XF_DTPIXELDEPTH(MAP_T, NPC) * NPC> mx_int;
+    ap_int<XF_DTPIXELDEPTH(MAP_T, NPC) * NPC> my_int;
+
     for (int i = 0; i < CM_SIZE; i++) {
 // clang-format off
         #pragma HLS PIPELINE II=1
@@ -199,28 +202,37 @@ loop_height:
     loop_width:
         for (int j = 0; j < cols; j++) {
 // clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS/NPC
             #pragma HLS PIPELINE II=1
             // clang-format on
-            typedef ap_uint<BitWidth<ROWS>::Value> ROWT;
-            typedef ap_uint<BitWidth<COLS>::Value> COLT;
-            ROWT ifixed = i;
-            COLT jfixed = j;
 
-            ap_fixed<1 + BitWidth<COLS>::Value + _XF_INTER_BITS_, 1 + BitWidth<COLS>::Value, AP_RND, AP_SAT> u;
-            ap_fixed<1 + BitWidth<ROWS>::Value + _XF_INTER_BITS_, 1 + BitWidth<ROWS>::Value, AP_RND, AP_SAT> v;
-            xFComputeUndistortCoordinates<
-                typename xfInitUndistortRectifyMap_traits<CM_T>::FRAMET,
-                typename xfInitUndistortRectifyMap_traits<CM_T>::FRAME2T, ROWT, COLT,
-                ap_fixed<1 + BitWidth<COLS>::Value + _XF_INTER_BITS_, 1 + BitWidth<COLS>::Value, AP_RND, AP_SAT>,
-                ap_fixed<1 + BitWidth<ROWS>::Value + _XF_INTER_BITS_, 1 + BitWidth<ROWS>::Value, AP_RND, AP_SAT>, CM_T,
-                CM_SIZE, N>(cameraMatrixHLS, distCoeffsHLS, iRnewCameraMatrixHLS, noRotation, ifixed, jfixed, u, v);
+            for (int n = 0; n < NPC; n++) {
+// clang-format off
+                #pragma HLS UNROLL
+                // clang-format on
+                typedef ap_uint<BitWidth<ROWS>::Value> ROWT;
+                typedef ap_uint<BitWidth<COLS>::Value> COLT;
+                ROWT ifixed = i;
+                COLT jfixed = j * NPC + n;
 
-            float mx = (float)u;
-            float my = (float)v;
+                float u;
+                float v;
+                xFComputeUndistortCoordinates<
+                    float,
+                    float, ROWT, COLT,
+                    float,
+                    float, CM_T,
+                    CM_SIZE, N>(cameraMatrixHLS, distCoeffsHLS, iRnewCameraMatrixHLS, noRotation, ifixed, jfixed, u, v);
 
-            int32_t mx_int = (uint32_t)(mx * 256);
-            int32_t my_int = (uint32_t)(my * 256);
+                float mx = (float)u;
+                float my = (float)v;
+
+                uint32_t mx_scaled = (uint32_t)(mx * 256.0f);
+                uint32_t my_scaled = (uint32_t)(my * 256.0f);
+
+                mx_int.range(32 * (n + 1) - 1, 32 * n) = mx_scaled;
+                my_int.range(32 * (n + 1) - 1, 32 * n) = my_scaled;
+            }
 
             map1.write(idx, mx_int);
             map2.write(idx++, my_int);
@@ -236,9 +248,9 @@ template <int CM_SIZE,
           int NPC,
           int XFCVDEPTH_mapx = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_mapy = _XFCVDEPTH_DEFAULT>
-void InitUndistortRectifyMapInverse(ap_fixed<32, 12>* cameraMatrix,
-                                    ap_fixed<32, 12>* distCoeffs,
-                                    ap_fixed<32, 12>* ir,
+void InitUndistortRectifyMapInverse(float* cameraMatrix,
+                                    float* distCoeffs,
+                                    float* ir,
                                     xf::cv::Mat<MAP_T, ROWS, COLS, NPC, XFCVDEPTH_mapx>& _mapx_mat,
                                     xf::cv::Mat<MAP_T, ROWS, COLS, NPC, XFCVDEPTH_mapy>& _mapy_mat,
                                     int _cm_size,
@@ -247,9 +259,12 @@ void InitUndistortRectifyMapInverse(ap_fixed<32, 12>* cameraMatrix,
     #pragma HLS INLINE OFF
     // clang-format on
 
-    xFInitUndistortRectifyMapInverseKernel<ROWS, COLS, CM_SIZE, ap_fixed<32, 12>, DC_SIZE, MAP_T, NPC, XFCVDEPTH_mapx,
+    uint16_t rows = _mapx_mat.rows;
+    uint16_t cols = _mapx_mat.cols >> XF_BITSHIFT(NPC);
+
+    xFInitUndistortRectifyMapInverseKernel<ROWS, COLS, CM_SIZE, float, DC_SIZE, MAP_T, NPC, XFCVDEPTH_mapx,
                                            XFCVDEPTH_mapy, XF_TNAME(MAP_T, NPC)>(
-        cameraMatrix, distCoeffs, ir, _mapx_mat, _mapy_mat, _mapx_mat.rows, _mapx_mat.cols);
+        cameraMatrix, distCoeffs, ir, _mapx_mat, _mapy_mat, rows, cols);
 }
 } // namespace cv
 } // namespace xf

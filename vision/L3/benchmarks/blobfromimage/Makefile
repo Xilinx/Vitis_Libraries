@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := vck190
+PLATFORM := vek280
 endif
 
 # add warnning for sw_emu
@@ -65,7 +65,7 @@ ifeq ($(TARGET),sw_emu)
 $(error Error: The sw_emu target is no longer supported starting from 2025.1.)
 endif
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST += vck190
+PLATFORM_ALLOWLIST += vek280
 PLATFORM_BLOCKLIST += u280 u250
 
 include ./utils.mk
@@ -102,15 +102,7 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 ########################## Setting up Host Variables ##########################
 
 #Inclue Required Host Source Files
-ifneq (,$(shell echo $(XPLATFORM) | awk '/aws-vu9p-f1/'))
-HOST_SRCS += $(XFLIB_DIR)/L3/benchmarks/blobfromimage/xf_blobfromimage_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -D __SDSVHLS__
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3  -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -L $(OPENCV_LIB)
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
+ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
 HOST_SRCS += $(XFLIB_DIR)/L3/benchmarks/blobfromimage/xf_blobfromimage_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D __SDSVHLS__
 CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
@@ -243,7 +235,7 @@ endif
 # 2. General Embeded flow
 ifeq ($(dfx_hw), off)
 ifeq ($(pcie_versal), off)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.generate_sdcard --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
 endif
@@ -343,22 +335,12 @@ ifeq (,$(OPENCV_INCLUDE))
 	$(error "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable")
 endif
 endif
-ifneq (,$(shell echo $(XPLATFORM) | awk '/aws-vu9p-f1/'))
-ifeq (,$(OPENCV_INCLUDE))
-	$(error "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable")
-endif
-endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 ifeq (,$(OPENCV_LIB))
 	$(error "Cannot find Opencv lib path. Please set OPENCV_LIB variable")
 endif
 endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
-ifeq (,$(OPENCV_LIB))
-	$(error "Cannot find Opencv lib path. Please set OPENCV_LIB variable")
-endif
-endif
-ifneq (,$(shell echo $(XPLATFORM) | awk '/aws-vu9p-f1/'))
 ifeq (,$(OPENCV_LIB))
 	$(error "Cannot find Opencv lib path. Please set OPENCV_LIB variable")
 endif

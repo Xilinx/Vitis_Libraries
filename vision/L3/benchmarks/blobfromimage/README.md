@@ -43,23 +43,13 @@ Table below shows the speed up achieved compared to various CPU implementations.
     source < path-to-Vitis-installation-directory >/settings64.sh
     source < path-to-XRT-installation-directory >/setup.sh
     export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
-	export OPENCV_INCLUDE=< path-to-opencv-include-folder >
-	export OPENCV_LIB=< path-to-opencv-lib-folder >
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
-    make host xclbin TARGET=< sw_emu|hw_emu|hw >
-    make run TARGET=< sw_emu|hw_emu|hw >
+    export OPENCV_INCLUDE=< path-to-opencv-include-folder >
+    export OPENCV_LIB=< path-to-opencv-lib-folder >
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
+    make host xclbin TARGET=< hw_emu|hw >
+    make run TARGET=< hw_emu|hw >
 
 **For Embedded Devices:**
-
-Software Emulation:
-
-    source < path-to-Vitis-installation-directory >/settings64.sh
-    source < path-to-XRT-installation-directory >/setup.sh
-    export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
-	export OPENCV_INCLUDE=< path-to-opencv-include-folder >
-	export OPENCV_LIB=< path-to-opencv-lib-folder >
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
-    make run TARGET=sw_emu
 
 Hardware Emulation and Hardware Build:
 

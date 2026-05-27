@@ -1,0 +1,125 @@
+/*
+ * Copyright 2020 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <ap_int.h>
+#include "common/xf_common.hpp"
+#include "common/xf_utility.hpp"
+#include <hls_stream.h>
+
+#include "dnn/xf_preprocess.hpp"
+#include "imgproc/xf_crop.hpp"
+#include "imgproc/xf_cvt_color.hpp"
+#include "imgproc/xf_cvt_color_1.hpp"
+#include "imgproc/xf_duplicateimage.hpp"
+#include "imgproc/xf_resize.hpp"
+
+#define _XF_SYNTHESIS_ 1
+
+// Enable or disable channel Swap
+#define BGR2RGB 0
+// Enable or disable crop
+#define CROP 0
+
+// Max image resoultion
+static constexpr int WIDTH = 1920;
+static constexpr int HEIGHT = 1080;
+
+// Pixels processed per cycle
+static constexpr int NPC = XF_NPPC4;
+
+// preprocess kernel params out = (in - a) * b
+// a, b and out are fixed point values and below params are used to configure
+// the width and integer bits
+static constexpr int WIDTH_A = 8;
+static constexpr int IBITS_A = 8;
+static constexpr int WIDTH_B = 8;
+static constexpr int IBITS_B = 4; // so B is 8-bit wide and 4-bits are integer bits
+static constexpr int WIDTH_OUT = 8;
+static constexpr int IBITS_OUT = 8;
+
+// Resize configuration parameters
+static constexpr int NEWWIDTH = 600; // Maximum output image width
+static constexpr int NEWHEIGHT = 600;
+
+static constexpr int MAXDOWNSCALE = 9;
+
+static constexpr int INTERPOLATION = 1;
+
+#define XF_USE_URAM 1
+
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_CH_SWAP 2
+#define XF_CV_DEPTH_RESIZE_OUT 2
+#define XF_CV_DEPTH_CROP 2
+#define XF_CV_DEPTH_OUT 2
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT 2
+#define XF_CV_DEPTH_IN_0 2
+#define XF_CV_DEPTH_OUT_0 2
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_OUT_1 2
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_OUT_2 2
+
+/*  set the optimisation type  */
+#define SPC 0
+// Single Pixel per Clock operation
+#define MPC 1
+// Multiple Pixels per Clock operation
+
+// input types supported
+#define YUV_420 0
+#define YUV_422 0
+#define YUV_400 0
+#define YUV_444 0
+#define RGB 1
+
+#if YUV_420
+#if SPC
+static constexpr int NPC1 = XF_NPPC1;
+static constexpr int NPC2 = XF_NPPC1;
+#endif
+#if MPC
+static constexpr int NPC1 = XF_NPPC4;
+static constexpr int NPC2 = XF_NPPC2;
+#endif
+#else
+#if SPC
+static constexpr int NPC1 = XF_NPPC1;
+static constexpr int NPC2 = XF_NPPC1;
+#endif
+#if MPC
+static constexpr int NPC1 = XF_NPPC4;
+static constexpr int NPC2 = XF_NPPC4;
+#endif
+#endif
+
+#define NPPCX XF_NPPC4
+
+// Set the input and output pixel depth:
+#if YUV_400
+#define IN_TYPE XF_8UC1
+#define OUT_TYPE XF_8UC1
+
+#define INPUT_PTR_WIDTH 64
+#define OUTPUT_PTR_WIDTH 64
+#else
+#define IN_TYPE XF_8UC3
+#define OUT_TYPE XF_8UC3
+
+#define INPUT_PTR_WIDTH 128
+#define OUTPUT_PTR_WIDTH 128
+#endif

@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
             cv::Vec3w bgr = in_img.at<cv::Vec3w>(row, col);
 #endif
             // Count if inside ROI
-            if ((row >= roi_tlx) && (row <= (roi_brx)) && (col >= roi_tly) && (col <= (roi_bry))) {
+            if ((col >= roi_tlx) && (col <= (roi_brx)) && (row >= roi_tly) && (row <= (roi_bry))) {
                 int zone_col = int((col - roi_tlx) / zone_width);
                 int zone_row = int((row - roi_tly) / zone_height);
                 int zone_idx = (zone_row * N) + zone_col;
@@ -172,7 +172,7 @@ STATS_ROW_LOOP:
             // Read BGR, 8-bit per channel at once
 
             // Check if part of zone
-            if ((row >= roi_tlx) && (row <= (roi_brx)) && (col >= roi_tly) && (col <= (roi_bry))) {
+            if ((col >= roi_tlx) && (col <= (roi_brx)) && (row >= roi_tly) && (row <= (roi_bry))) {
                 int zone_col = int((col - roi_tlx) / zone_width);
                 int zone_row = int((row - roi_tly) / zone_height);
                 zone_idx = (zone_row * N) + zone_col;
@@ -243,7 +243,7 @@ STATS_ROW_LOOP:
 #endif
             currentBin_aec = int((val - minValue) * internal_inv);
             // Count if inside ROI
-            if ((row >= roi_tlx) && (row <= (roi_brx)) && (col >= roi_tly) && (col <= (roi_bry))) {
+            if ((col >= roi_tlx) && (col <= (roi_brx)) && (row >= roi_tly) && (row <= (roi_bry))) {
                 int zone_col = int((col - roi_tlx) / zone_width);
                 int zone_row = int((row - roi_tly) / zone_height);
                 int zone_idx = (zone_row * N) + zone_col;

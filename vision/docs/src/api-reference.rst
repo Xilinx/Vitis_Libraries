@@ -658,7 +658,7 @@ Vitis Vision Library Functions
 ###############################
 
 The Vitis Vision library is a set of select OpenCV functions optimized for
-Zynq-7000, Zynq UltraScale+ MPSoC, Versal VCK190, Alveo U200, and U50 devices. The maximum resolution supported for all the functions is 4K, except
+Zynq-7000, Zynq UltraScale+ MPSoC, Versal VEK280, Alveo U200, and U50 devices. The maximum resolution supported for all the functions is 4K, except
 Houghlines and HOG (RB mode).
 
 .. Important::
@@ -15772,7 +15772,8 @@ The following table describes the template parameters.
    +---------------------+-------------------------------------------------------+
    | INTERPOLATIO        | Type of interpolation, either XF_INTERPOLATION_NN     |
    | N_TYPE              | (nearest neighbor) or XF_INTERPOLATION_BILINEAR       |
-   |                     | (linear interpolation)                                |
+   |                     | (linear interpolation) or XF_INTERPOLATION_BICUBIC    |
+   |                     | (bicubic interpolation)                               |
    +---------------------+-------------------------------------------------------+
    | SRC_T               | Input image pixel type. Only 8-bit, unsigned, 1       |
    |                     | and 3 channels are supported (XF_8UC1 and XF_8UC3)    |
@@ -15827,23 +15828,27 @@ The following table describes the function parameters.
 The following table summarizes the resource utilization of remap, for 4k
 (2160x3840) with different configurations images generated in the Vivado 
 HLS 2024.2 version tool for the Xilinx xcvc1902-vsva2197-2MP-e-S FPGA at 
-300 MHz, with WIN_ROWS as 74.
+300 MHz.
 
 Note: Resources are dependent on WIN_ROWS value.
 
 .. table:: Table . remap Function Resource Utilization Summary
 
-   +---------------------------+----------+----------------+----------------+-------+---------+---------+----------+---------+---------+
-   | Function                  | channels | Height x Width | Frequency(MHZ) | NPC   | LUT     | FF      | DSP      | BRAM    | URAM    |
-   +===========================+==========+================+================+=======+=========+=========+==========+=========+=========+
-   | Remap_Bilinear_URAM       | 3        | 2160 x 3840    | 300            | 2     | 1721    | 1449    | 33       | 0       | 24      |
-   +---------------------------+----------+----------------+----------------+-------+---------+---------+----------+---------+---------+
-   | Remap_Bilinear_BRAM       | 3        | 2160 x 3840    | 300            | 2     | 25800   | 12720   | 24       | 444     | 0       |
-   +---------------------------+----------+----------------+----------------+-------+---------+---------+----------+---------+---------+
-   | Remap_NN_URAM             | 3        | 2160 x 3840    | 300            | 2     | 7838    | 10632   | 4        | 0       | 20      |
-   +---------------------------+----------+----------------+----------------+-------+---------+---------+----------+---------+---------+
-   | Remap_NN_BRAM             | 3        | 2160 x 3840    | 300            | 2     | 30593   | 18946   | 4        | 444     | 0       |
-   +---------------------------+----------+----------------+----------------+-------+---------+---------+----------+---------+---------+
+   +---------------------------+----------+----------------+---------+----------------+-------+---------+---------+----------+---------+---------+
+   | Function                  | channels | Height x Width | WIN_ROWS| Frequency(MHZ) | NPC   | LUT     | FF      | DSP      | BRAM    | URAM    |
+   +===========================+==========+================+=========+================+=======+=========+=========+==========+=========+=========+
+   | Remap_Bilinear_URAM       | 3        | 2160 x 3840    | 74      | 300            | 2     | 1721    | 1449    | 33       | 0       | 24      |
+   +---------------------------+----------+----------------+---------+----------------+-------+---------+---------+----------+---------+---------+
+   | Remap_Bilinear_BRAM       | 3        | 2160 x 3840    | 74      | 300            | 2     | 25800   | 12720   | 24       | 444     | 0       |
+   +---------------------------+----------+----------------+---------+----------------+-------+---------+---------+----------+---------+---------+
+   | Remap_NN_URAM             | 3        | 2160 x 3840    | 74      | 300            | 2     | 7838    | 10632   | 4        | 0       | 20      |
+   +---------------------------+----------+----------------+---------+----------------+-------+---------+---------+----------+---------+---------+
+   | Remap_NN_BRAM             | 3        | 2160 x 3840    | 74      | 300            | 2     | 30593   | 18946   | 4        | 444     | 0       |
+   +---------------------------+----------+----------------+---------+----------------+-------+---------+---------+----------+---------+---------+
+   | Remap_Bicubic_BRAM        | 3        | 2160 x 3840    | 74      | 300            | 2     | 49201   | 43507   | 123      | 576     | 0       |
+   +---------------------------+----------+----------------+---------+----------------+-------+---------+---------+----------+---------+---------+
+   | Remap_Bicubic_URAM        | 3        | 2160 x 3840    | 500     | 300            | 2     | 51966   | 43164   | 123      | 0       | 192     |
+   +---------------------------+----------+----------------+---------+----------------+-------+---------+---------+----------+---------+---------+
 
 .. rubric:: Performance Estimate
 
@@ -17117,9 +17122,9 @@ image.
     +                             +------------------+
     |                             | Max Latency (ms) |
     +=============================+==================+
-    | 1 pixel operation (300 MHz) |                  |
+    | 1 pixel operation (300 MHz) |       7          |
     +-----------------------------+------------------+
-    | 8 pixel operation (150 MHz) |                  |
+    | 8 pixel operation (150 MHz) |       2          |
     +-----------------------------+------------------+
 
      
@@ -17236,6 +17241,8 @@ Xczu9eg-ffvb1156-1-i-es1 FPGA.
     | 300                       | 204              | 204          |
     +---------------------------+------------------+--------------+
 
+.. _three_d_depth:
+.. include:: include/3Ddepth_api.rst
 
 .. _threedlut:
 

@@ -30,6 +30,460 @@
 #define XF_RESIZE_INTER_TAB_SIZE 32
 #define XF_RESIZE_INTER_BITS 5
 
+#define XF_INTERPOLATION_BICUBIC 2
+
+template <int SRC_T,
+          int DST_T,
+          int PLANES,
+          int MAP_T,
+          int WIN_ROW,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Remapped = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_MAPX = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_MAPY = _XFCVDEPTH_DEFAULT,
+          bool USE_URAM>
+void xFRemapCI(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+               xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_Remapped>& dst,
+               xf::cv::Mat<MAP_T, ROWS, COLS, NPC, XFCVDEPTH_MAPX>& mapx,
+               xf::cv::Mat<MAP_T, ROWS, COLS, NPC, XFCVDEPTH_MAPY>& mapy,
+               uint16_t rows,
+               uint16_t cols) {
+#pragma HLS DATAFLOW
+    ap_uint<48> line_buffer[WIN_ROW >> 2][4][COLS >> 1];
+
+    // Select storage for line_buffer based on USE_URAM.
+    // URAM: larger capacity, good for wide images, single-cycle latency configured.
+    // BRAM: default on-chip memory, also set to two-port with same latency.
+    if (USE_URAM) {
+        #pragma HLS bind_storage variable = line_buffer type = RAM_T2P impl = URAM latency = 1
+        // Partition the 2nd dimension (kernel row within the 4-row block)
+        // to enable parallel access to each of the 4 rows.
+        #pragma HLS array_partition complete variable = line_buffer dim = 2
+    } else { 
+        #pragma HLS bind_storage variable = line_buffer type = RAM_T2P impl = BRAM latency = 1
+        // Same partitioning when using BRAM to keep identical access semantics.
+        #pragma HLS array_partition complete variable = line_buffer dim = 2
+    }
+
+    XF_TNAME(SRC_T, NPC) s;
+    ap_uint<48> temp_buf_uram_npc1 = 0;
+    ap_uint<48> temp_buf_uram_npc2 = 0;
+
+    float one = 1.0f;
+    float two = 2.0f;
+    float one_point_five = 1.5f;
+    float two_point_five = 2.5f;
+    float four = 4.0f;
+    float zero = 0.0f;
+    
+    XF_TNAME(DST_T, NPC) output_pixel = 0;
+
+
+    float fraction_x[NPC];
+    float fraction_y[NPC];
+
+    ap_ufixed<32, 24> x_int[NPC], y_int[NPC];
+
+    ap_uint<7> f1_msb[NPC];
+    ap_uint<7> f1_lsb[NPC];
+
+    ap_ufixed<32, 24> x_fl[NPC];
+    ap_ufixed<32, 24> y_fl[NPC];
+    int wbase[NPC];
+
+    ap_int<XF_DTPIXELDEPTH(MAP_T, NPC) * NPC> mapped_x, mapped_y;
+
+    int bit_depth = XF_PIXELDEPTH(SRC_T);
+
+     int x_fix[NPC];
+    int y_fix[NPC];
+
+    int x[NPC];
+    int y[NPC];
+    int x_frac[NPC];
+    int y_frac[NPC];
+    int read_pointer_src = 0, read_pointer_map = 0, write_pointer = 0;
+
+    float weights_x[NPC][4], weights_y[NPC][4];
+    float accumulated_sum[NPC][PLANES];
+    ap_uint<16> win_row_by_four = WIN_ROW >> 2;
+
+    // local storage: for each of 4 kernel rows preload 3 words (each 48-bit)
+    ap_uint<48> line_buffer_words[4][2][NPC];
+#pragma HLS ARRAY_PARTITION variable = line_buffer_words complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = line_buffer_words complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = line_buffer_words complete dim = 3
+
+loop_height:
+    for (int i = 0; i < rows + WIN_ROW / 2; ++i) {
+#pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS + WIN_ROW - 1
+
+    loop_width:
+        for (int j = 0; j < cols; ++j) {
+#pragma HLS LOOP_TRIPCOUNT min=1 max=COLS / NPC
+#pragma HLS PIPELINE II=1
+#pragma HLS LOOP_FLATTEN OFF
+
+#pragma HLS dependence variable = line_buffer inter RAW false
+#pragma HLS dependence variable = line_buffer intra false
+
+            // Read input pixel if within source image, else zero
+            if (i < rows && j < cols) {
+                s = src.read(read_pointer_src++);
+            } else {
+                s = 0;
+            }
+
+            // Pack two pixels into a 48-bit word and write to URAM line buffer
+            if (i < rows) {
+                if (NPC > 1) {
+                    line_buffer[(i >> 2) % win_row_by_four][i & 3][j] = s;
+                } else{
+
+                    if ((j & 1) == 0) {
+                        temp_buf_uram_npc1 = s;
+                    } else {
+                        temp_buf_uram_npc2 = s;
+                        ap_uint<48> packed = ((temp_buf_uram_npc2 << bit_depth) | temp_buf_uram_npc1);
+                        line_buffer[(i >> 2) % win_row_by_four][i & 3][j >> 1] = packed;
+                    }
+                }
+            }
+
+            // Output when enough rows have been buffered
+            if (i >= WIN_ROW / 2) {
+                int current_row = i - (WIN_ROW / 2);
+
+                bool is_in_bounds = (current_row >= 0 && current_row < rows && j >= 0 && j < cols);
+     
+                if (is_in_bounds) {
+                    // NOTE: keep same fixed-point scale you used previously
+                    mapped_x = mapx.read(read_pointer_map);
+                    mapped_y = mapy.read(read_pointer_map++);
+                }
+
+
+                for (int n = 0; n < NPC; n++) {
+
+                    f1_msb[n] = ((n + 1) << 5) - 1;
+                    f1_lsb[n] = (n << 5);
+
+                    x_int[n] = mapped_x.range(f1_msb[n], f1_lsb[n]);
+                    y_int[n] = mapped_y.range(f1_msb[n], f1_lsb[n]);
+
+                    x_fl[n] = (x_int[n] >> 8);
+                    y_fl[n] = (y_int[n] >> 8);
+
+                    x_fix[n] = (x_fl[n] << XF_RESIZE_INTER_BITS); // mapx data in
+                                                                  // A16.XF_RESIZE_INTER_TAB_SIZE
+                                                                  // format
+                    y_fix[n] = (y_fl[n] << XF_RESIZE_INTER_BITS); // mapy data in
+                                                                  // A16.XF_RESIZE_INTER_TAB_SIZE
+                                                                  // format
+
+                    x[n] = x_fix[n] >> XF_RESIZE_INTER_BITS;
+                    y[n] = y_fix[n] >> XF_RESIZE_INTER_BITS;
+                    x_frac[n] = x_fix[n] & (XF_RESIZE_INTER_TAB_SIZE - 1);
+                    y_frac[n] = y_fix[n] & (XF_RESIZE_INTER_TAB_SIZE - 1);
+                    
+                    // compute base word index that will allow loading three consecutive words safely
+                    int first_needed_col = x[n];
+                    if (first_needed_col < 0) first_needed_col = 0;
+                    int first_word = first_needed_col >> 1;
+                    
+                    int max_word_index = (cols) - 1;
+                    if (first_word > max_word_index - 2) {
+                        first_word = (max_word_index - 2 > 0) ? (max_word_index - 2) : 0;
+                    }
+                    wbase[n] = first_word;
+                }
+
+                //preload three words for each of the 4 kernel rows
+                if (y[0] <= 0){
+
+                    line_buffer_words[0][0][0] = line_buffer[0][0][wbase[0]];
+                    line_buffer_words[0][1][0] = line_buffer[0][0][wbase[0]+1];
+                } else {
+                    line_buffer_words[0][0][0] = line_buffer[((y[0] - 1) >> 2) % win_row_by_four][((y[0] - 1) & 3)][wbase[0]];
+                    line_buffer_words[0][1][0] = line_buffer[((y[0] - 1) >> 2) % win_row_by_four][((y[0] - 1) & 3)][wbase[0]+1];
+                }
+                line_buffer_words[1][0][0] = line_buffer[(y[0] >> 2) % win_row_by_four][(y[0] & 3)][wbase[0]];
+                line_buffer_words[2][0][0] = line_buffer[((y[0] + 1) >> 2) % win_row_by_four][((y[0] + 1) & 3)][wbase[0]];
+                line_buffer_words[3][0][0] = line_buffer[((y[0] + 2) >> 2) % win_row_by_four][((y[0] + 2) & 3)][wbase[0]];
+                line_buffer_words[1][1][0] = line_buffer[(y[0] >> 2) % win_row_by_four][(y[0] & 3)][wbase[0]+1];
+                line_buffer_words[2][1][0] = line_buffer[((y[0] + 1) >> 2) % win_row_by_four][((y[0] + 1) & 3)][wbase[0]+1];
+                line_buffer_words[3][1][0] = line_buffer[((y[0] + 2) >> 2) % win_row_by_four][((y[0] + 2) & 3)][wbase[0]+1];
+                if (NPC > 1) {
+                    if (y[1] > y[0]) {
+                        if (wbase[1] > wbase[0]) {
+                            
+                            line_buffer_words[0][0][1] = line_buffer[(((y[0] + 1) - 1) >> 2) % win_row_by_four][(((y[0] + 1) - 1) & 3)][(wbase[0] + 1)];
+                            line_buffer_words[1][0][1] = line_buffer[((y[0] + 1) >> 2) % win_row_by_four][((y[0] + 1) & 3)][(wbase[0] + 1)];
+                            line_buffer_words[2][0][1] = line_buffer[(((y[0] + 1) + 1) >> 2) % win_row_by_four][(((y[0] + 1) + 1) & 3)][(wbase[0] + 1)];
+                            line_buffer_words[3][0][1] = line_buffer[(((y[0] + 1) + 2) >> 2) % win_row_by_four][(((y[0] + 1) + 2) & 3)][(wbase[0] + 1)];
+                            line_buffer_words[0][1][1] = line_buffer[(((y[0] + 1) - 1) >> 2) % win_row_by_four][(((y[0] + 1) - 1) & 3)][(wbase[0] + 1)+1];
+                            line_buffer_words[1][1][1] = line_buffer[((y[0] + 1) >> 2) % win_row_by_four][((y[0] + 1) & 3)][(wbase[0] + 1)+1];
+                            line_buffer_words[2][1][1] = line_buffer[(((y[0] + 1) + 1) >> 2) % win_row_by_four][(((y[0] + 1) + 1) & 3)][(wbase[0] + 1)+1];
+                            line_buffer_words[3][1][1] = line_buffer[(((y[0] + 1) + 2) >> 2) % win_row_by_four][(((y[0] + 1) + 2) & 3)][(wbase[0] + 1)+1];
+                        } else if (wbase[1] == wbase[0]){
+                            line_buffer_words[0][0][1] = line_buffer[(((y[0] + 1) - 1) >> 2) % win_row_by_four][(((y[0] + 1) - 1) & 3)][wbase[0]];
+                            line_buffer_words[1][0][1] = line_buffer[((y[0] + 1) >> 2) % win_row_by_four][((y[0] + 1) & 3)][wbase[0]];
+                            line_buffer_words[2][0][1] = line_buffer[(((y[0] + 1) + 1) >> 2) % win_row_by_four][(((y[0] + 1) + 1) & 3)][wbase[0]];
+                            line_buffer_words[3][0][1] = line_buffer[(((y[0] + 1) + 2) >> 2) % win_row_by_four][(((y[0] + 1) + 2) & 3)][wbase[0]];
+                            line_buffer_words[0][1][1] = line_buffer[(((y[0] + 1) - 1) >> 2) % win_row_by_four][(((y[0] + 1) - 1) & 3)][wbase[0]+1];
+                            line_buffer_words[1][1][1] = line_buffer[((y[0] + 1) >> 2) % win_row_by_four][((y[0] + 1) & 3)][wbase[0]+1];
+                            line_buffer_words[2][1][1] = line_buffer[(((y[0] + 1) + 1) >> 2) % win_row_by_four][(((y[0] + 1) + 1) & 3)][wbase[0]+1];
+                            line_buffer_words[3][1][1] = line_buffer[(((y[0] + 1) + 2) >> 2) % win_row_by_four][(((y[0] + 1) + 2) & 3)][wbase[0]+1];
+                        } else if (wbase[1] < wbase[0]){
+                            line_buffer_words[0][0][1] = line_buffer[(((y[0] + 1) - 1) >> 2) % win_row_by_four][(((y[0] + 1) - 1) & 3)][(wbase[0] - 1)];
+                            line_buffer_words[1][0][1] = line_buffer[((y[0] + 1) >> 2) % win_row_by_four][((y[0] + 1) & 3)][(wbase[0] - 1)];
+                            line_buffer_words[2][0][1] = line_buffer[(((y[0] + 1) + 1) >> 2) % win_row_by_four][(((y[0] + 1) + 1) & 3)][(wbase[0] - 1)];
+                            line_buffer_words[3][0][1] = line_buffer[(((y[0] + 1) + 2) >> 2) % win_row_by_four][(((y[0] + 1) + 2) & 3)][(wbase[0] - 1)];
+                            line_buffer_words[0][1][1] = line_buffer[(((y[0] + 1) - 1) >> 2) % win_row_by_four][(((y[0] + 1) - 1) & 3)][(wbase[0] - 1)+1];
+                            line_buffer_words[1][1][1] = line_buffer[((y[0] + 1) >> 2) % win_row_by_four][((y[0] + 1) & 3)][(wbase[0] - 1)+1];
+                            line_buffer_words[2][1][1] = line_buffer[(((y[0] + 1) + 1) >> 2) % win_row_by_four][(((y[0] + 1) + 1) & 3)][(wbase[0] - 1)+1];
+                            line_buffer_words[3][1][1] = line_buffer[(((y[0] + 1) + 2) >> 2) % win_row_by_four][(((y[0] + 1) + 2) & 3)][(wbase[0] - 1)+1];
+
+                        }
+                    } else if (y[1] < y[0]) {
+                        if (wbase[1] > wbase[0]) {
+                            if (y[1] <= 0){
+
+                                line_buffer_words[0][0][1] = line_buffer[0][0][(wbase[0] + 1)];
+                                line_buffer_words[1][0][1] = line_buffer[0][0][(wbase[0] + 1)];
+                                line_buffer_words[2][0][1] = line_buffer[0][1][(wbase[0] + 1)];
+                                line_buffer_words[3][0][1] = line_buffer[0][2][(wbase[0] + 1)];
+                                line_buffer_words[0][1][1] = line_buffer[0][0][(wbase[0] + 1)+1];
+                                line_buffer_words[1][1][1] = line_buffer[0][0][(wbase[0] + 1)+1];
+                                line_buffer_words[2][1][1] = line_buffer[0][1][(wbase[0] + 1)+1];
+                                line_buffer_words[3][1][1] = line_buffer[0][2][(wbase[0] + 1)+1];
+                            } else {
+                                line_buffer_words[0][0][1] = line_buffer[(((y[0] - 1) - 1) >> 2) % win_row_by_four][(((y[0] - 1) - 1) & 3)][(wbase[0] + 1)];
+                                line_buffer_words[1][0][1] = line_buffer[((y[0] - 1) >> 2) % win_row_by_four][((y[0] - 1) & 3)][(wbase[0] + 1)];
+                                line_buffer_words[2][0][1] = line_buffer[(((y[0] - 1) + 1) >> 2) % win_row_by_four][(((y[0] - 1) + 1) & 3)][(wbase[0] + 1)];
+                                line_buffer_words[3][0][1] = line_buffer[(((y[0] - 1) + 2) >> 2) % win_row_by_four][(((y[0] - 1) + 2) & 3)][(wbase[0] + 1)];
+                                line_buffer_words[0][1][1] = line_buffer[(((y[0] - 1) - 1) >> 2) % win_row_by_four][(((y[0] - 1) - 1) & 3)][(wbase[0] + 1)+1];
+                                line_buffer_words[1][1][1] = line_buffer[((y[0] - 1) >> 2) % win_row_by_four][((y[0] - 1) & 3)][(wbase[0] + 1)+1];
+                                line_buffer_words[2][1][1] = line_buffer[(((y[0] - 1) + 1) >> 2) % win_row_by_four][(((y[0] - 1) + 1) & 3)][(wbase[0] + 1)+1];
+                                line_buffer_words[3][1][1] = line_buffer[(((y[0] - 1) + 2) >> 2) % win_row_by_four][(((y[0] - 1) + 2) & 3)][(wbase[0] + 1)+1];
+                                
+                            }
+                            
+                        } else if (wbase[1] < wbase[0]) {
+                            if (y[1] <= 0){
+
+                                line_buffer_words[0][0][1] = line_buffer[0][0][(wbase[0] - 1)];
+                                line_buffer_words[1][0][1] = line_buffer[0][0][(wbase[0] - 1)];
+                                line_buffer_words[2][0][1] = line_buffer[0][1][(wbase[0] - 1)];
+                                line_buffer_words[3][0][1] = line_buffer[0][2][(wbase[0] - 1)];
+                                line_buffer_words[0][1][1] = line_buffer[0][0][(wbase[0] - 1)+1];
+                                line_buffer_words[1][1][1] = line_buffer[0][0][(wbase[0] - 1)+1];
+                                line_buffer_words[2][1][1] = line_buffer[0][1][(wbase[0] - 1)+1];
+                                line_buffer_words[3][1][1] = line_buffer[0][2][(wbase[0] - 1)+1];
+                            } else {
+                                line_buffer_words[0][0][1] = line_buffer[(((y[0] - 1) - 1) >> 2) % win_row_by_four][(((y[0] - 1) - 1) & 3)][(wbase[0] - 1)];
+                                line_buffer_words[1][0][1] = line_buffer[((y[0] - 1) >> 2) % win_row_by_four][((y[0] - 1) & 3)][(wbase[0] - 1)];
+                                line_buffer_words[2][0][1] = line_buffer[(((y[0] - 1) + 1) >> 2) % win_row_by_four][(((y[0] - 1) + 1) & 3)][(wbase[0] - 1)];
+                                line_buffer_words[3][0][1] = line_buffer[(((y[0] - 1) + 2) >> 2) % win_row_by_four][(((y[0] - 1) + 2) & 3)][(wbase[0] - 1)];
+                                line_buffer_words[0][1][1] = line_buffer[(((y[0] - 1) - 1) >> 2) % win_row_by_four][(((y[0] - 1) - 1) & 3)][(wbase[0] - 1)+1];
+                                line_buffer_words[1][1][1] = line_buffer[((y[0] - 1) >> 2) % win_row_by_four][((y[0] - 1) & 3)][(wbase[0] - 1)+1];
+                                line_buffer_words[2][1][1] = line_buffer[(((y[0] - 1) + 1) >> 2) % win_row_by_four][(((y[0] - 1) + 1) & 3)][(wbase[0] - 1)+1];
+                                line_buffer_words[3][1][1] = line_buffer[(((y[0] - 1) + 2) >> 2) % win_row_by_four][(((y[0] - 1) + 2) & 3)][(wbase[0] - 1)+1];
+                                
+                            }
+                            
+                        } else {
+
+                            
+                            if (y[1] <= 0){
+
+                                line_buffer_words[0][0][1] = line_buffer[0][0][wbase[0]];
+                                line_buffer_words[1][0][1] = line_buffer[0][0][wbase[0]];
+                                line_buffer_words[2][0][1] = line_buffer[0][1][wbase[0]];
+                                line_buffer_words[3][0][1] = line_buffer[0][2][wbase[0]];
+                                line_buffer_words[0][1][1] = line_buffer[0][0][wbase[0]+1];
+                                line_buffer_words[1][1][1] = line_buffer[0][0][wbase[0]+1];
+                                line_buffer_words[2][1][1] = line_buffer[0][1][wbase[0]+1];
+                                line_buffer_words[3][1][1] = line_buffer[0][2][wbase[0]+1];
+
+                            } else {
+                                line_buffer_words[0][0][1] = line_buffer[(((y[0] - 1) - 1) >> 2) % win_row_by_four][(((y[0] - 1) - 1) & 3)][wbase[0]];
+                                line_buffer_words[1][0][1] = line_buffer[((y[0] - 1) >> 2) % win_row_by_four][((y[0] - 1) & 3)][wbase[0]];
+                                line_buffer_words[2][0][1] = line_buffer[(((y[0] - 1) + 1) >> 2) % win_row_by_four][(((y[0] - 1) + 1) & 3)][wbase[0]];
+                                line_buffer_words[3][0][1] = line_buffer[(((y[0] - 1) + 2) >> 2) % win_row_by_four][(((y[0] - 1) + 2) & 3)][wbase[0]];
+                                line_buffer_words[0][1][1] = line_buffer[(((y[0] - 1) - 1) >> 2) % win_row_by_four][(((y[0] - 1) - 1) & 3)][wbase[0]+1];
+                                line_buffer_words[1][1][1] = line_buffer[((y[0] - 1) >> 2) % win_row_by_four][((y[0] - 1) & 3)][wbase[0]+1];
+                                line_buffer_words[2][1][1] = line_buffer[(((y[0] - 1) + 1) >> 2) % win_row_by_four][(((y[0] - 1) + 1) & 3)][wbase[0]+1];
+                                line_buffer_words[3][1][1] = line_buffer[(((y[0] - 1) + 2) >> 2) % win_row_by_four][(((y[0] - 1) + 2) & 3)][wbase[0]+1];
+                                
+                            }
+                        }
+                    } 
+                    else if (y[0] == y[1]) {
+                        if (wbase[1] > wbase[0]) {
+                            if (y[0] <= 0) {
+
+                                line_buffer_words[0][0][1] = line_buffer[0][0][(wbase[0] + 1)];
+                                line_buffer_words[0][1][1] = line_buffer[0][0][(wbase[0] + 1)+1];
+
+                            } else {
+                                line_buffer_words[0][0][1] = line_buffer[(((y[0]) - 1) >> 2) % win_row_by_four][(((y[0]) - 1) & 3)][(wbase[0] + 1)];
+                                line_buffer_words[0][1][1] = line_buffer[(((y[0]) - 1) >> 2) % win_row_by_four][(((y[0]) - 1) & 3)][(wbase[0] + 1)+1];
+                            }
+
+                            line_buffer_words[1][0][1] = line_buffer[(y[0] >> 2) % win_row_by_four][(y[0] & 3)][(wbase[0] + 1)];
+                            line_buffer_words[2][0][1] = line_buffer[((y[0] + 1) >> 2) % win_row_by_four][((y[0] + 1) & 3)][(wbase[0] + 1)];
+                            line_buffer_words[3][0][1] = line_buffer[((y[0] + 2) >> 2) % win_row_by_four][((y[0] + 2) & 3)][(wbase[0] + 1)];
+                            line_buffer_words[1][1][1] = line_buffer[(y[0] >> 2) % win_row_by_four][(y[0] & 3)][(wbase[0] + 1)+1];
+                            line_buffer_words[2][1][1] = line_buffer[((y[0] + 1) >> 2) % win_row_by_four][((y[0] + 1) & 3)][(wbase[0] + 1)+1];
+                            line_buffer_words[3][1][1] = line_buffer[((y[0] + 2) >> 2) % win_row_by_four][((y[0] + 2) & 3)][(wbase[0] + 1)+1];
+                            
+                        } else if (wbase[1] < wbase[0]) {
+                            if (y[0] <= 0) {
+
+                                line_buffer_words[0][0][1] = line_buffer[0][0][(wbase[0] - 1)];
+                                line_buffer_words[0][1][1] = line_buffer[0][0][(wbase[0] - 1)+1];
+
+                            } else {
+                                line_buffer_words[0][0][1] = line_buffer[(((y[0]) - 1) >> 2) % win_row_by_four][(((y[0]) - 1) & 3)][(wbase[0] - 1)];
+                                line_buffer_words[0][1][1] = line_buffer[(((y[0]) - 1) >> 2) % win_row_by_four][(((y[0]) - 1) & 3)][(wbase[0] - 1)+1];
+                            }
+
+                            line_buffer_words[1][0][1] = line_buffer[(y[0] >> 2) % win_row_by_four][(y[0] & 3)][(wbase[0] - 1)];
+                            line_buffer_words[2][0][1] = line_buffer[((y[0] + 1) >> 2) % win_row_by_four][((y[0] + 1) & 3)][(wbase[0] - 1)];
+                            line_buffer_words[3][0][1] = line_buffer[((y[0] + 2) >> 2) % win_row_by_four][((y[0] + 2) & 3)][(wbase[0] - 1)];
+                            line_buffer_words[1][1][1] = line_buffer[(y[0] >> 2) % win_row_by_four][(y[0] & 3)][(wbase[0] - 1)+1];
+                            line_buffer_words[2][1][1] = line_buffer[((y[0] + 1) >> 2) % win_row_by_four][((y[0] + 1) & 3)][(wbase[0] - 1)+1];
+                            line_buffer_words[3][1][1] = line_buffer[((y[0] + 2) >> 2) % win_row_by_four][((y[0] + 2) & 3)][(wbase[0] - 1)+1];
+                            
+                        } else {
+
+                            if (y[0] <= 0) {
+
+                                line_buffer_words[0][0][1] = line_buffer[0][0][wbase[0]];
+                                line_buffer_words[0][1][1] = line_buffer[0][0][wbase[0]+1];
+                            } else {
+                                line_buffer_words[0][0][1] = line_buffer[(((y[0]) - 1) >> 2) % win_row_by_four][(((y[0]) - 1) & 3)][wbase[0]];
+                                line_buffer_words[0][1][1] = line_buffer[(((y[0]) - 1) >> 2) % win_row_by_four][(((y[0]) - 1) & 3)][wbase[0]+1];
+                            }
+
+                            line_buffer_words[1][0][1] = line_buffer[(y[0] >> 2) % win_row_by_four][(y[0] & 3)][wbase[0]];
+                            line_buffer_words[2][0][1] = line_buffer[((y[0] + 1) >> 2) % win_row_by_four][((y[0] + 1) & 3)][wbase[0]];
+                            line_buffer_words[3][0][1] = line_buffer[((y[0] + 2) >> 2) % win_row_by_four][((y[0] + 2) & 3)][wbase[0]];
+                            line_buffer_words[1][1][1] = line_buffer[(y[0] >> 2) % win_row_by_four][(y[0] & 3)][wbase[0]+1];
+                            line_buffer_words[2][1][1] = line_buffer[((y[0] + 1) >> 2) % win_row_by_four][((y[0] + 1) & 3)][wbase[0]+1];
+                            line_buffer_words[3][1][1] = line_buffer[((y[0] + 2) >> 2) % win_row_by_four][((y[0] + 2) & 3)][wbase[0]+1];
+                            
+                        }
+                    }
+                }
+
+                for (int n = 0; n < NPC; n++) {
+
+                    
+                    bool is_valid = (x[n] >= 0 && x[n] <= (COLS - 1) && y[n] >= 0 && y[n] <= (ROWS - 1));
+                    
+                    if (is_in_bounds && is_valid) {
+                        fraction_x[n] = (float)(x_fl[n] - x[n]);
+                        fraction_y[n] = (float)(y_fl[n] - y[n]);
+                        
+                        // compute cubic weights (Catmull-Rom, a = -0.5)
+                        loop_weights:
+                        for (int k = 0; k < 4; ++k) {
+                            #pragma HLS UNROLL
+                            float x = k - 1 - fraction_x[n];
+                            float y = k - 1 - fraction_y[n];
+                            
+                            x = (x < (0)) ? (-x) : x;
+                            y = (y < (0)) ? (-y) : y;
+                            
+                            
+                            if (x <= one)
+                            weights_x[n][k] = ((one_point_five) * x - (two_point_five)) * x * x + (one);
+                            else if (x < two)
+                            weights_x[n][k] = (((-0.5f) * x + (two_point_five)) * x - (four)) * x + (two);
+                            else
+                            weights_x[n][k] = zero;
+                            
+                            if (y <= one)
+                            weights_y[n][k] = ((one_point_five) * y - (two_point_five)) * y * y + (one);
+                            else if (y < two)
+                            weights_y[n][k] = (((-0.5f) * y + (two_point_five)) * y - (four)) * y + (two);
+                            else
+                            weights_y[n][k] = zero;
+                        }
+                        
+                        loop_reset_accumulated_sum:
+                        for (int ch = 0; ch < PLANES; ++ch) {
+                            #pragma HLS UNROLL
+                            accumulated_sum[n][ch] = 0;
+                        }
+                          
+                        for (int kr = 0; kr < 4; ++kr) {
+    #pragma HLS UNROLL
+                            int source_y = y[n] + kr - 1;
+                            // clamp source_y
+                            if (source_y < 0) source_y = 0;
+                            else if (source_y >= ROWS) source_y = ROWS - 1;
+
+                            for (int kc = 0; kc < 4; ++kc) {
+    #pragma HLS UNROLL
+                                int source_x = x[n] + kc - 1;
+                                // clamp source_x
+                                if (source_x < 0) source_x = 0;
+                                else if (source_x >= (cols * NPC)) source_x = (cols * NPC) - 1;
+
+                                int word_index = (source_x >> 1) - wbase[n];
+                                if (word_index < 0) word_index = 0;
+                                if (word_index > 2) word_index = 2;
+
+                                int pixel_offset = (source_x & 1) * bit_depth; // 0 or 24
+                                ap_uint<48> source_word = line_buffer_words[kr][word_index][n];
+
+                                ap_uint<24> pix24 = source_word.range(pixel_offset + bit_depth - 1, pixel_offset);
+
+                                float combined_weight = weights_x[n][kc] * weights_y[n][kr];
+
+                                // accumulate per channel
+                            loop_accumulate:
+                                for (int channel = 0; channel < PLANES; ++channel) {
+    #pragma HLS UNROLL
+                                    float pixel_value = (pix24 >> (channel << 3)) & 0xFF;
+                                    accumulated_sum[n][channel] += pixel_value * combined_weight;
+                                }
+                            }
+                        }
+
+
+                        // Write final interpolated pixel
+                    loop_write_pixel:
+                        for (int channel = 0; channel < PLANES; ++channel) {
+    #pragma HLS UNROLL
+                            
+                            if (accumulated_sum[n][channel] < 0) accumulated_sum[n][channel] = 0;
+                            if (accumulated_sum[n][channel] > 255) accumulated_sum[n][channel] = 255;
+                            uint8_t final_value = (uint8_t)(accumulated_sum[n][channel] + (0.5f));
+                            if (final_value < 0) final_value = 0;
+                            if (final_value > 255) final_value = 255;
+                            output_pixel.range(((n * PLANES + channel + 1) * 8) - 1, (n * PLANES + channel) * 8) = final_value;
+                        }
+                    } else {
+                        // Out of bounds -> write black/zero
+                        output_pixel = 0;
+                    }
+                }
+
+                dst.write(write_pointer++, output_pixel);
+            }
+        }
+    }
+}
+
+
+
 namespace xf {
 namespace cv {
 
@@ -550,11 +1004,17 @@ void remap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
         xFRemapLI<SRC_T, DST_T, XF_CHANNELS(SRC_T, NPC), MAP_T, WIN_ROWS, ROWS, COLS, NPC, XFCVDEPTH_IN,
                   XFCVDEPTH_Remapped, XFCVDEPTH_MAPX, XFCVDEPTH_MAPY, USE_URAM>(_src_mat, _remapped_mat, _mapx_mat,
                                                                                 _mapy_mat, rows, cols);
-    } else {
+    } 
+    else if (INTERPOLATION_TYPE == XF_INTERPOLATION_BICUBIC) {
+        xFRemapCI<SRC_T, DST_T, XF_CHANNELS(SRC_T, NPC), MAP_T, WIN_ROWS, ROWS, COLS, NPC, XFCVDEPTH_IN,
+                  XFCVDEPTH_Remapped, XFCVDEPTH_MAPX, XFCVDEPTH_MAPY, USE_URAM>(_src_mat, _remapped_mat, _mapx_mat,
+                                                                                _mapy_mat, rows, cols);
+    }  
+    else {
 #ifndef __SYNTHESIS__
-        assert(((INTERPOLATION_TYPE == XF_INTERPOLATION_NN) || (INTERPOLATION_TYPE == XF_INTERPOLATION_BILINEAR)) &&
+        assert(((INTERPOLATION_TYPE == XF_INTERPOLATION_NN) || (INTERPOLATION_TYPE == XF_INTERPOLATION_BILINEAR) || (INTERPOLATION_TYPE == XF_INTERPOLATION_BICUBIC)) &&
                "The INTERPOLATION_TYPE must be either XF_INTERPOLATION_NN or "
-               "XF_INTERPOLATION_BILINEAR");
+               "XF_INTERPOLATION_BILINEAR or XF_INTERPOLATION_BICUBIC");
 #endif
     }
 }

@@ -404,6 +404,7 @@ void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC, XFCVDEPTH_I
     for (int i = 0; i < loop_row_count; i++) {
 // clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=1 max=LOOPCOUNTROW
+	#pragma HLS LOOP_FLATTEN OFF
         // clang-format on
 
         scaleCompute<INDEX_INT, COMP_INDEX_WIDTH, COMP_INDEX_INT, SCALE_WIDTH, SCALE_INT, INTERPOLATION_TYPE>(

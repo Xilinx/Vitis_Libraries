@@ -994,9 +994,9 @@ rowloop:
             xfExtractPixels<NPC, WORDWIDTH_UV, XF_8UP>(UVbuf, UVPacked, 0);
             for (int k = 0; k<(1 << XF_BITSHIFT(NPC))>> 1; k++) {
 // clang-format off
-#pragma HLS LOOP_FLATTEN off
+//#pragma HLS LOOP_FLATTEN off
 #pragma HLS LOOP_TRIPCOUNT min=iTC max=iTC
-#pragma HLS unroll
+//#pragma HLS unroll
                 // clang-format on
                 // Y00 = (Ybuf[k<<1] > 16) ? (Ybuf[k<<1]-16) : 0;
                 // Y01 = (Ybuf[(k<<1)+1] > 16) ? (Ybuf[(k<<1)+1] - 16) : 0;
@@ -9219,6 +9219,97 @@ void yuyv2uyvy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& yuyv,
 }
 //////////////////////////////////////////////////////end of
 /// YUYV2UYVY//////////////////////////////////////////////////////////////
+
+// yuv444 to rgb
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST,
+          int TC>
+void xfyuv4442rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+                  xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
+                  unsigned short int height,
+                  unsigned short int width) {
+    XF_CTUNAME(SRC_T, NPC) YUV[3 * XF_NPIXPERCYCLE(NPC)];
+// clang-format off
+#pragma HLS ARRAY_PARTITION variable=YUV complete
+    // clang-format on
+    XF_DTUNAME(DST_T, NPC) RGB[XF_NPIXPERCYCLE(NPC)];
+    XF_TNAME(SRC_T, NPC) YUV_packed = 0;
+
+    XF_TNAME(DST_T, NPC) RGB_packed = 0;
+    XF_TNAME(DST_T, NPC) R, G, B;
+    int32_t V2Rtemp, U2Gtemp, V2Gtemp, U2Btemp;
+rowloop:
+    for (ap_uint<13> i = 0; i < height; i++) {
+// clang-format off
+#pragma HLS LOOP_FLATTEN off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+    // clang-format on
+    columnloop:
+        for (ap_uint<13> j = 0; j<width>> XF_BITSHIFT(NPC); j++) {
+// clang-format off
+#pragma HLS pipeline
+#pragma HLS LOOP_TRIPCOUNT min=COLS max=COLS
+            // clang-format on
+
+            YUV_packed = src.read((i * width >> XF_BITSHIFT(NPC)) + j);
+            ExtractUYVYPixels<WORDWIDTH_SRC>(YUV_packed, YUV);
+            for (int k = 0, offset = 0; k < XF_NPIXPERCYCLE(NPC); k++, offset += 3) {
+                V2Rtemp = (YUV[offset + 2] - 128) * (short int)V2R;
+                U2Gtemp = (short int)U2G * (YUV[offset + 1] - 128);
+                V2Gtemp = (short int)V2G * (YUV[offset + 2] - 128);
+                U2Btemp = (YUV[offset + 1] - 128) * (short int)U2B;
+
+                // R = 1.164*Y + 1.596*V = Y + 0.164*Y + V + 0.596*V
+                // G = 1.164*Y - 0.813*V - 0.391*U = Y + 0.164*Y - 0.813*V - 0.391*U
+                // B = 1.164*Y + 2.018*U = Y + 0.164 + 2*U + 0.018*U
+                R = CalculateR(YUV[offset], V2Rtemp, (YUV[offset + 2] - 128)); // R
+                G = CalculateG(YUV[offset], U2Gtemp, V2Gtemp);                 // G
+                B = CalculateB(YUV[offset], U2Btemp, (YUV[offset + 1] - 128)); // B
+
+                if (i == 0 && j == 0 && k == 0) {
+                }
+                RGB[k].range((XF_DTPIXELDEPTH(DST_T, NPC) - 1), 0) = R;
+                RGB[k].range((XF_DTPIXELDEPTH(DST_T, NPC) * 2) - 1, XF_DTPIXELDEPTH(DST_T, NPC)) = G;
+                RGB[k].range((XF_DTPIXELDEPTH(DST_T, NPC) * 3) - 1, XF_DTPIXELDEPTH(DST_T, NPC) * 2) = B;
+                RGB_packed.range(k * XF_PIXELWIDTH(DST_T, NPC) + (XF_PIXELWIDTH(DST_T, NPC) - 1),
+                                 k * XF_PIXELWIDTH(DST_T, NPC)) = RGB[k];
+            }
+
+            dst.write((i * width >> XF_BITSHIFT(NPC)) + j, RGB_packed);
+        }
+    }
+}
+
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void yuv4442rgb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
+                xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst) {
+// clang-format off
+#pragma HLS INLINE OFF
+// clang-format on
+#ifndef __SYNTHESIS__
+    assert((SRC_T == XF_8UC3) && " RGB image Type must be XF_8UC3");
+    assert((DST_T == XF_8UC3) && " YCrCb image Type must be XF_8UC3");
+    assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " RGB image rows and cols should be less than ROWS, COLS");
+    assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "RGB and YCrCb plane dimensions mismatch");
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8) || (NPC == XF_NPPC4)) && " 1,4,8 pixel parallelism is supported  ");
+#endif
+    xfyuv4442rgb<SRC_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, XF_WORDWIDTH(SRC_T, NPC),
+                 XF_WORDWIDTH(DST_T, NPC), (ROWS * (COLS >> (XF_NPIXPERCYCLE(NPC))))>(_src, _dst, _src.rows, _src.cols);
+}
+
 } // namespace cv
 } // namespace xf
 #endif

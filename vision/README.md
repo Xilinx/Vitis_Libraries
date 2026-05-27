@@ -8,8 +8,8 @@ The Vitis Vision library is designed to work with Zynq™, Zynq Ultrascale+™, 
 
 ### Prerequisites
 
-* Valid installation of [Vitis™ 2025.2](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-the-Vitis-Software-Platform) or later version and the corresponding licenses.
-* Xilinx Runtime ([XRT](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Xilinx-Runtime-and-Platforms)) must be installed. XRT provides software interface to AMD FPGAs.
+* Valid installation of [Vitis™ 2025.2](https://docs.amd.com/r/en-US/ug1742-vitis-release-notes/Installing-the-Vitis-Software-Platform) or later version and the corresponding licenses.
+* Xilinx Runtime ([XRT](https://docs.amd.com/r/en-US/ug1701-vitis-accelerated-embedded/Installing-Xilinx-Runtime-and-Platforms)) must be installed. XRT provides software interface to AMD FPGAs.
 * Install [OpenCV-4.4.0]((https://github.com/opencv/opencv/tree/4.4.0)) x86 libraries (with compatible ``libjpeg.so``). x86 libs have to be used for:
 
    a. L1 flow irrespective of target FPGA device being PCIe or embedded.
@@ -18,9 +18,9 @@ The Vitis Vision library is designed to work with Zynq™, Zynq Ultrascale+™, 
 
     For L2/L3 flow targeting embedded platforms (for hardware emulation and hardware build), aarch32/aarch64 version OpenCV shipped within their *sysroot* should be used.
 
-* libOpenCL.so must be [installed](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/OpenCL-Installable-Client-Driver-Loader) if not present.
+* libOpenCL.so must be [installed](https://docs.amd.com/r/en-US/ug1700-vitis-accelerated-data-center/OpenCL-Installable-Client-Driver-Loader) if not present.
 * [Install the card](https://docs.xilinx.com/r/en-US/ug1301-getting-started-guide-alveo-accelerator-cards) for which the platform is supported in Vitis 2025.2 or later versions.
-* If targeting an embedded platform, [install]((https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Embedded-Platforms?tocId=hfE7LFeS8mU4dexvgPL31Q)) it and set up the [evaluation board](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/444006775/Zynq+UltraScale+MPSoC).
+* If targeting an embedded platform, [install](https://docs.amd.com/r/en-US/ug1701-vitis-accelerated-embedded/Installing-Embedded-Platforms) it and set up the [evaluation board](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/2712338433/Versal+AI+Edge+Series+VEK280+Evaluation+Kit).
 
 #### OpenCV Installation Guidance
 
@@ -52,7 +52,7 @@ The OpenCV includes and libs will be in the ``install`` directory
 
 ## Source Files Organization
 
-The Vitis development environment supports a variety of build flows (based on the target engine (either AI Engine or Programmable Logic) and source type):
+The Vitis development environment supports a variety of build flows (based on the target (either AI Engine or Programmable Logic) and source type):
 
 * **PL [HLS/RTL]**: Kernels targeting FPGA (PL), coded in C/C++/HDL for Vitis HLS.
 * **AIE**: Kernels targeting AI Engine programmed in C/C++ in accordance to AI Engine coding methodology.
@@ -140,7 +140,7 @@ For AI Engine development ``L1/include/aie-ml`` , ``L2/tests/aie-ml`` has source
 
 * Refer to [L2/L3 readme](https://github.com/Xilinx/Vitis_Libraries/blob/master/vision/L2/README.md) for details on how to setup the environment and run the L2/L3 functions.
 	
-* All limitations and constraints of Vitis ([OS support, compatibility](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installation-Requirements) etc.) are also applicable to Vitis Vision library.
+* All limitations and constraints of Vitis ([OS support, compatibility](https://docs.amd.com/r/en-US/ug1742-vitis-release-notes/Installation-Requirements) etc.) are also applicable to Vitis Vision library.
 
 
 
@@ -182,17 +182,42 @@ This library is written by developers at
 **PL additions/enhancements:** :
 
     • New additions:
-        • Added reprojectImageto3D function
-
+        • 3D depth
+        • 3D point cloud
+        • New L3 pipeline examples
+	
+    • Updates:
+        • Fixed isp stats bug of x and y index swap.
+        • Minor bug fixes
+	
 **AIE additions/enhancements:** :
 
+    • New additions:
+        • hls2rgb
+        • hsv2rgba
+        • mean_rgb888
+        • mean_yuv400
+        • nv12-resize
+        • polyphase resize
+        • bicubic resize
+        • resize-yuv420
+        • resize-yuv422
+        • resize-yuv444
+        • rgb2hls
+        • rgb2ycrcb
+        • rgba2hsv
+        • rgba2rgb
+        • stdev-rgb888
+        • stddev-yuv400
+        • ycrcb2rgb
+	
     • Updates:
         • Bug fixes
 
 **Known issues**
 
-  * Vitis GUI projects on RHEL83 and CEntOS82 may fail because of a lib conflict in the
-     ``LD_LIBRARY_PATH`` setting. You need to remove ``${env_var:LD_LIBRARY_PATH}`` from the project
-      environment settings for the function to build successfully.
+  * Few AIE-ML testcases take a long time to finish hardware emulation because of large input size.
   * ``rgbir2bayer`` and ``isppipeline_rgbir`` PL functions are not supplied with input images.
   * ``lkdensepyroptflow`` fails to meet timing when URAM is enabled.
+  * AWB-npc8, customconv-npc8, lkdensepyrof_uram, tonemapping, meanstddev-pipeline, hls2rgb, rgb2hls,
+  cases fail hw_emu because of a known tool issue. Other targets work fine.

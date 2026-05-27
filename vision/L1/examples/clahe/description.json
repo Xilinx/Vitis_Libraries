@@ -3,7 +3,7 @@
     "description": "HLS case",
     "flow": "hls",
     "platform_allowlist": [
-        "u200"
+        "vck190"
     ],
     "platform_blocklist": [],
     "part_allowlist": [],

@@ -12,34 +12,6 @@
         "u250"
     ],
     "platform_properties": {
-        "zcu104": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include",
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/lib"
-                    ]
-                }
-            },
-            "containers": [
-                {
-                    "name": "krnl_histogram",
-                    "accelerators": [
-                        {
-                            "name": "histogram_accel",
-                            "frequency": 200.0
-                        }
-                    ],
-                    "frequency": 200.0
-                }
-            ]
-        },
         "vck190": {
             "host": {
                 "compiler": {

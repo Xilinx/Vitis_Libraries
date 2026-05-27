@@ -373,7 +373,7 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
                           bool YorUV = false,
                           const int OUT_TILE_WIDTH_MAX = TILE_WIDTH_MAX,
                           const int OUT_TILE_HEIGHT_MAX = TILE_HEIGHT_MAX,
-                          bool resize_bicubic = false,
+                          int resize_type = 0,
                           bool sbm = false);
 
     // These functions will start the data transfer protocol {
@@ -632,7 +632,7 @@ void xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTOR
                      bool YorUV,
                      const int OUT_TILE_WIDTH_MAX,
                      const int OUT_TILE_HEIGHT_MAX,
-                     bool resize_bicubic,
+                     int resize_type,
                      bool sbm) {
     mMetaDataList.clear();
 
@@ -654,11 +654,11 @@ void xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTOR
                                                             AIE_VECTORIZATION_FACTOR, true, false);
         mIsOutputResize = false;
         mOutSize = cv::Size(inputImgSize.height, inputImgSize.width);
-    } else if (resize_bicubic == true) {
+    } else if ((resize_type == 0) || (resize_type == 1)|| (resize_type == 2)) {
         smartTileTilerGenerateMetaDataWithSpecifiedTileSize(
             {inputImgSize.height, inputImgSize.width}, {outputImgSize.height, outputImgSize.width}, mMetaDataList,
             {TILE_HEIGHT_MAX, TILE_WIDTH_MAX}, {OUT_TILE_HEIGHT_MAX, OUT_TILE_WIDTH_MAX}, mTileRows, mTileCols,
-            AIE_VECTORIZATION_FACTOR, YorUV, true, true);
+            AIE_VECTORIZATION_FACTOR, YorUV, true, resize_type);
         isDynamicOutputResize = true;
         mIsOutputResize = true;
         mOutSize = cv::Size(OUT_TILE_WIDTH_MAX, OUT_TILE_HEIGHT_MAX);

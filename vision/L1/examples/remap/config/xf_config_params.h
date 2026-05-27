@@ -36,12 +36,14 @@
 // The type of interpolation, define INTERPOLATION as 0 for Nearest Neighbour
 // or 1 for Bilinear
 #define INTERPOLATION 1
-
+#define XF_INTERPOLATION_BICUBIC 2
 // Resolve interpolation type:
 #if (INTERPOLATION == 0)
 #define XF_REMAP_INTERPOLATION_TYPE XF_INTERPOLATION_NN
-#else
+#elif (INTERPOLATION == 1)
 #define XF_REMAP_INTERPOLATION_TYPE XF_INTERPOLATION_BILINEAR
+#elif (INTERPOLATION == 2)
+#define XF_REMAP_INTERPOLATION_TYPE XF_INTERPOLATION_BICUBIC
 #endif
 
 // Mat types

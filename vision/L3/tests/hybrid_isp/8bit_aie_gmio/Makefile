@@ -18,10 +18,10 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<aiesim/x86sim/hw_emu/hw> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<aiesim/hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<aiesim/x86sim/hw_emu/hw> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<aiesim/hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
 	$(ECHO) "  NOTE: For embedded platform the following setup steps are required:"
@@ -130,7 +130,7 @@ AIE_PKG_DIR = $(AIE_WORK_DIR)
 
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/aie-ml/
 
-AIE_CXXFLAGS +=  --aie.stacksize=32000
+AIE_CXXFLAGS +=  --aie.stacksize=32000  --aie.Xpreproc=-DAIE_API_DISABLE_ALIGNMENT_ASSERTIONS
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
@@ -188,6 +188,7 @@ VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   --package.defer_aie_run
 
 else 
+VPP_FLAGS +=   --aie.Xpreproc=-DAIE_API_DISABLE_ALIGNMENT_ASSERTIONS
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/ -I $(CUR_DIR)
 
 endif
@@ -296,7 +297,7 @@ endif
 # 2. General Embeded flow
 ifeq ($(dfx_hw), off)
 ifeq ($(pcie_versal), off)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.generate_sdcard --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
 endif

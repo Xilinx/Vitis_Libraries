@@ -41,6 +41,7 @@ examples are described in this section:
 -  `Image Sensor Processing all-in-one-adas pipeline <#isp-aio-adas>`_
 -  `Image Sensor Processing all-in-one pipeline <#isp-aio>`_
 -  `24 bits-per-channel Image Sensor Processing pipeline <#isp-24bit>`_
+-  `Image Sensor Processing pipeline with auto-gain <#isp-autogain>`_
 
 .. Important::All functions in the library are implemented in streaming model except 7. Crop, EdgeTracing, MeanShiftTracking, and Rotate are memory mapped implementations. These functions need to have the flag ``__SDA_MEM_MAP__`` set to compile correctly.
 
@@ -2787,7 +2788,7 @@ The input to the accel is a 12bit non-linearized full-HD (1920x1080) image.
 .. _isp-24bit:
 .. include:: include/isp_24bit_api.rst
 
-.. isp_autogain:
+.. _isp-autogain:
 .. include:: include/isp_autogain_api.rst
 
 .. |pp_image1| image:: ./images/letterbox.PNG

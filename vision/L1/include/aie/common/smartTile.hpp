@@ -25,6 +25,12 @@
 
 namespace xF {
 
+enum resize_type {
+    bicubic,
+    polyphase,
+    dynamic_2D_bilinear
+};
+
 // smartTile metaData class declaration
 
 class smartTileMetaData {

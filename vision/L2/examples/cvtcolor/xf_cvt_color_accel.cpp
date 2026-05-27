@@ -3058,8 +3058,8 @@ void cvtcolor_rgb2hsv(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS DATAFLOW
     // clang-format on
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
-    xf::cv::rgb2hsv<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_bgr);
+    xf::cv::rgb2hsv<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_hsv);
 }
 
 #endif

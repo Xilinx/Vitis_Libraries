@@ -5,28 +5,14 @@
     ],
     "flow": "system",
     "platform_allowlist": [
-        "vck190"
+        "vek280"
     ],
     "platform_blocklist": [
         "u280",
         "u250"
     ],
     "platform_properties": {
-        "aws-vu9p-f1": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
-                }
-            }
-        },
-        "vck190": {
+        "vek280": {
             "host": {
                 "compiler": {
                     "includepaths": [
@@ -106,8 +92,7 @@
             "env": "OPENCV_INCLUDE",
             "platform": [
                 "u200",
-                "u50",
-                "aws-vu9p-f1"
+                "u50"
             ],
             "echo": "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable"
         },
@@ -115,8 +100,7 @@
             "env": "OPENCV_LIB",
             "platform": [
                 "u200",
-                "u50",
-                "aws-vu9p-f1"
+                "u50"
             ],
             "echo": "Cannot find Opencv lib path. Please set OPENCV_LIB variable"
         }

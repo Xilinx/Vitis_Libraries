@@ -69,8 +69,15 @@ extern const unsigned char icvSaturate8u_cv1[];
 #define CV_CALC_MIN_8U(a, b) (a) -= CV_FAST_CAST_8U((a) - (b))
 #define CV_CALC_MAX_8U(a, b) (a) += CV_FAST_CAST_8U((b) - (a))
 
-template <int SRC_T, int ROWS, int COLS, int NPC>
-void rgb2hsv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat) {
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void rgb2hsv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+             xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat) {
 // clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
