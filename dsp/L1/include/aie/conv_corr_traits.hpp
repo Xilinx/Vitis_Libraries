@@ -20,7 +20,7 @@
 /*
     Convolution and Correlation traits.
     This file contains sets of overloaded, templatized and specialized templatized functions which
-    encapsulate properties of the intrinsics used by the main kernal class. Specifically,
+    encapsulate properties of the intrinsics used by the main kernel class. Specifically,
     this file does not contain any vector types or intrinsics since it is required for construction
     and therefore must be suitable for the aie compiler graph-level compilation.
 */
@@ -174,6 +174,12 @@ static constexpr unsigned int kBuffSize64Byte = 64;                           //
 static constexpr unsigned int kBuffSize128Byte = 128;                         // 1024-bit buffer size in Bytes
 static constexpr unsigned int kBuffIndx1 = 1;                                 // updW index to update the vector
 static constexpr unsigned int kBuffIndx2 = 2;                                 // updW index to update the vector
+static constexpr unsigned int kBuffIndx3 = 3;                                 // updW index for 4th vector load
+static constexpr unsigned int kLanesGtDataLoad = 2;     // Tail padding vectors for VALID mode when lanes > dataLoad
+static constexpr unsigned int kLanesLeDataLoad = 1;     // Tail padding vectors for VALID mode when lanes <= dataLoad
+static constexpr unsigned int kSameModeRoundFactor = 2; // Rounding factor for SAME mode kernel half-length calculation
+static constexpr unsigned int kLoadOffsetMargin =
+    2; // Safety margin accounting for pointer state and load offset during third load
 
 //**************************************************************************************/
 //****   STREAM Related traits which were used when TP_API=1 and AIE_VARIANT=1      ****/
@@ -194,12 +200,14 @@ static constexpr unsigned int kMaxIndexOf16ByteVector = 2;  // |2|1|     ===> 16
 static constexpr unsigned int kNumPoints2 = 2;              // Num of points is 2 for stream processing.
 static constexpr unsigned int kNumPoints4 = 4;              // Num of points is 4 for stream processing
 static constexpr int kXstepOfMac4Rot = -4;               // xstep is -4 for mac4_rot() intrinsic as per current design.
-static constexpr unsigned int kMinLenOfGforStream = 8;   // Min Len of G should be 8 while doing stream processing
-static constexpr unsigned int kMaxLenOfGforStream = 256; // Max Len of G should be 8 while doing stream processing
+static constexpr unsigned int kMaxLenOfGforStream = 256; // Max supported G Len is 256 while doing stream processing
 
 // Function to check Len of G is in valid range or not while doing stream processing
-template <unsigned int gLen>
+template <typename TT_DATA_G, unsigned int gLen>
 INLINE_DECL constexpr bool fnCheckLenOfStreamforSigG() {
+    unsigned int kMinLenOfGforStream =
+        kMaxBytesLoadOnAie / sizeof(TT_DATA_G); // Min Len of G should be at least one vector load on AIE based on data
+                                                // type of G Signal while doing stream processing
     return ((gLen >= kMinLenOfGforStream) && (gLen <= kMaxLenOfGforStream));
 };
 
@@ -207,7 +215,7 @@ INLINE_DECL constexpr bool fnCheckLenOfStreamforSigG() {
 template <typename TT_DATA_F>
 INLINE_DECL constexpr unsigned int fnNumOfLanesForMac4Rot() {
     return 4;
-}; // defualt Lanes are 4
+}; // default Lanes are 4
 
 template <>
 INLINE_DECL constexpr unsigned int fnNumOfLanesForMac4Rot<cint16>() {
@@ -218,7 +226,7 @@ INLINE_DECL constexpr unsigned int fnNumOfLanesForMac4Rot<cint16>() {
 template <typename TT_DATA_F>
 INLINE_DECL constexpr unsigned int fnNumOfPointsForMac4Rot() {
     return 2;
-}; // defualt Points are 2
+}; // default Points are 2
 
 template <>
 INLINE_DECL constexpr unsigned int fnNumOfPointsForMac4Rot<cint16>() {
@@ -232,37 +240,25 @@ INLINE_DECL constexpr unsigned int fnNumOfPointsForMac4Rot<cint16>() {
 // Function to return the default lanes based on choosen architecture
 template <typename TT_DATA_F, typename TT_DATA_G>
 INLINE_DECL constexpr unsigned int fnNumOfLanes() {
-    return 32; // defualt return for AIE2
+    return 32; // default return for AIE2
 };
 
 // Function to return the default MULS/MACS based on choosen architecture
 template <typename TT_DATA_F, typename TT_DATA_G>
 INLINE_DECL constexpr unsigned int fnNumOfMuls() {
-    return 256; // defualt return for AIE2
-};
-
-// Function to return the default sample size of F Sig
-template <typename TT_DATA_F>
-INLINE_DECL constexpr unsigned int fnSampleSizeOfSigF() {
-    return 8; // defualt sample size is 8
+    return 256; // default return for AIE2
 };
 
 // Function to return the default sample size of G Sig
 template <typename TT_DATA_G>
 INLINE_DECL constexpr unsigned int fnSampleSizeOfSigG() {
-    return 8; // defualt sample size is 8
-};
-
-// Function to return the max sample size of G Signal
-template <typename TT_DATA_G>
-INLINE_DECL constexpr unsigned int fnSizeOfSample() {
-    return 32; // defualt multiple factor is 32 for both AIE-1 and AIE-2
+    return 8; // default sample size is 8
 };
 
 // Function to return the max sample size of G Signal
 template <typename TT_DATA_G>
 INLINE_DECL constexpr unsigned int fnSizeOfDataType() {
-    return 2; // defualt multiple factor is 32 for both AIE-1 and AIE-2
+    return 2; // default byte size of the data type
 };
 
 // for io buffer cases
@@ -472,42 +468,6 @@ INLINE_DECL constexpr unsigned int fnNumOfMuls<cint32, cint16>() {
 
 #endif
 
-// function to return number of samples for given data type of F Sig
-template <>
-INLINE_DECL constexpr unsigned int fnSampleSizeOfSigF<int8>() {
-    return 8;
-}; //
-template <>
-INLINE_DECL constexpr unsigned int fnSampleSizeOfSigF<int16>() {
-    return 16;
-}; //
-template <>
-INLINE_DECL constexpr unsigned int fnSampleSizeOfSigF<int32>() {
-    return 32;
-}; //
-template <>
-INLINE_DECL constexpr unsigned int fnSampleSizeOfSigF<float>() {
-    return 32;
-}; //
-template <>
-INLINE_DECL constexpr unsigned int fnSampleSizeOfSigF<cint16>() {
-    return 32;
-}; //
-template <>
-INLINE_DECL constexpr unsigned int fnSampleSizeOfSigF<cint32>() {
-    return 64;
-}; //
-template <>
-INLINE_DECL constexpr unsigned int fnSampleSizeOfSigF<cfloat>() {
-    return 64;
-}; //
-#if (__HAS_ACCUM_PERMUTES__ == 0)
-template <>
-INLINE_DECL constexpr unsigned int fnSampleSizeOfSigF<bfloat16>() {
-    return 16;
-}; //
-#endif
-
 // function to return number of samples for given data type of G Sig
 template <>
 INLINE_DECL constexpr unsigned int fnSampleSizeOfSigG<int8>() {
@@ -540,42 +500,6 @@ INLINE_DECL constexpr unsigned int fnSampleSizeOfSigG<cfloat>() {
 #if (__HAS_ACCUM_PERMUTES__ == 0)
 template <>
 INLINE_DECL constexpr unsigned int fnSampleSizeOfSigG<bfloat16>() {
-    return 16;
-}; //
-#endif
-
-// function to return number of samples for given data type
-template <>
-INLINE_DECL constexpr unsigned int fnSizeOfSample<int8>() {
-    return 8;
-}; //
-template <>
-INLINE_DECL constexpr unsigned int fnSizeOfSample<int16>() {
-    return 16;
-}; //
-template <>
-INLINE_DECL constexpr unsigned int fnSizeOfSample<int32>() {
-    return 32;
-}; //
-template <>
-INLINE_DECL constexpr unsigned int fnSizeOfSample<float>() {
-    return 32;
-}; //
-template <>
-INLINE_DECL constexpr unsigned int fnSizeOfSample<cint16>() {
-    return 32;
-}; //
-template <>
-INLINE_DECL constexpr unsigned int fnSizeOfSample<cint32>() {
-    return 64;
-}; //
-template <>
-INLINE_DECL constexpr unsigned int fnSizeOfSample<cfloat>() {
-    return 64;
-}; //
-#if (__HAS_ACCUM_PERMUTES__ == 0)
-template <>
-INLINE_DECL constexpr unsigned int fnSizeOfSample<bfloat16>() {
     return 16;
 }; //
 #endif
@@ -646,7 +570,7 @@ INLINE_DECL float zeros() {
     return 0.0;
 };
 
-// Null cint32 element
+// Null cfloat element
 #if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL cfloat zeros() {
@@ -676,22 +600,16 @@ INLINE_DECL constexpr unsigned int getNumofPoints() {
     return (fnNumOfMuls<TT_DATA_F, TT_DATA_G>() / fnNumOfLanes<TT_DATA_F, TT_DATA_G>());
 };
 
-// Function to return the number of points based on given data types
-template <typename TT_DATA_F>
-INLINE_DECL constexpr unsigned int getNumSamplesFsig() {
-    return fnSampleSizeOfSigF<TT_DATA_F>();
-};
-
-// Function to return the number of G Sig. samples to read based on given data types
-template <typename TT_DATA_G>
-INLINE_DECL constexpr unsigned int getNumSamplesGsig() {
-    return fnSampleSizeOfSigG<TT_DATA_G>();
-};
-
 // Function to return the resultant value of Log base 2
 template <unsigned int inLength>
 INLINE_DECL constexpr unsigned int getLog2() {
     switch (inLength) {
+        case 1:
+            return 0;
+            break;
+        case 2:
+            return 1;
+            break;
         case 4:
             return 2;
             break;
@@ -747,26 +665,26 @@ INLINE_DECL constexpr unsigned int getLog2() {
 // Function to return the offset to move G Sig Pointer.
 template <typename TT_DATA_G, unsigned int dataLenG>
 INLINE_DECL constexpr unsigned int getOffsetGsig() {
-    unsigned int gLoad = (kMaxBitsLoadOnAie / fnSampleSizeOfSigG<TT_DATA_G>());
+    unsigned int gLoad = (kMaxBytesLoadOnAie / sizeof(TT_DATA_G));
     return ((dataLenG / gLoad) - 1);
 };
 
 // Function to return Maximum supported length based on given DATA TYPE.
 template <typename TT_DATA>
 INLINE_DECL constexpr unsigned int getMaxLen() {
-    return (kMaxBufferLenOnAieInBytes >> kShiftFactor2 / sizeof(TT_DATA));
+    return (kMaxBufferLenOnAieInBytes / sizeof(TT_DATA));
 };
 
 // Function to return Minimum supported length based on given DATA TYPE.
 template <typename TT_DATA>
 INLINE_DECL constexpr unsigned int getMinLen() {
-    return (((kMaxBitsLoadOnAie << 1) / fnSizeOfSample<TT_DATA>()));
+    return ((kMaxBytesLoadOnAie << 1) / sizeof(TT_DATA));
 };
 
 // Function to return true or false by checking given length is in range or not
 template <typename TT_DATA, unsigned int sigLen, unsigned int TP_API>
 constexpr bool isLenInRange() {
-    unsigned int minDataLoad = (kMaxBitsLoadOnAie / fnSizeOfSample<TT_DATA>());
+    unsigned int minDataLoad = (kMaxBytesLoadOnAie / sizeof(TT_DATA));
     bool checkLen = false;
 
     if ((sigLen >= getMinLen<TT_DATA>()) && (sigLen <= getMaxLen<TT_DATA>())) {
@@ -784,25 +702,35 @@ template <typename TT_DATA_F,
 INLINE_DECL constexpr unsigned int getPaddedLength() {
     unsigned int paddedLength = 0;
     unsigned int lanes = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
-    unsigned int dataSamples = fnSampleSizeOfSigF<TT_DATA_F>();
-    unsigned int dataLoad = kMaxBitsLoadOnAie / dataSamples;
+    unsigned int dataLoad = (kMaxBytesLoadOnAie / sizeof(TT_DATA_F));
 
     if (computeMode == FULL_MODE) // Full
     {
-        paddedLength = ((dataLenG - 1) + dataLenF + (dataLenG - 1));
-        paddedLength = CEIL(paddedLength, dataLoad);
-    } else if (computeMode == SAME_MODE) // Same
-    {
-        paddedLength = (((dataLenG >> 1) - 1) + dataLenF + ((dataLenG >> 1) - 1));
-        paddedLength = CEIL(paddedLength, dataLoad);
+        // Subtract 1 because two sequences of length F_LEN and G_LEN produce F_LEN+G_LEN-1 output samples.
+        // This counts from the first overlap (1 element) through the last overlap (1 element).
+        unsigned int fullModeLength = ((dataLenG - 1) + dataLenF + (dataLenG - 1));
+        paddedLength = CEIL(fullModeLength, dataLoad);
+    } else if (computeMode == SAME_MODE) {
+        // SAME mode: F must start at a vector-aligned offset (F-copy loop writes
+        // whole vectors), so the left-pad is CEIL(G/2, dataLoad), not G/2-1.
+        // When G is an odd multiple of dataLoad (e.g. G=3*dl), using G/2-1 reduces
+        // kPaddedVecLoopCnt by one, causing the strict guard
+        // (baseOffset < kThirdVecLoadOffset) to fail at the final outer iteration.
+        // This suppresses a required F-vector load, leaving stale data in xbuff
+        // and producing incorrect MAC output.
+        // kXStartIdxAdj (= CEIL(G/2,dl) - (G/2-1)) offsets the sliding_mul xbuff
+        // start accordingly to keep output sample alignment correct.
+        unsigned int samePadding = CEIL((dataLenG >> 1), dataLoad);
+        unsigned int sameModeLength = (samePadding + dataLenF + samePadding);
+        paddedLength = CEIL(sameModeLength, dataLoad);
     } else if (computeMode == VALID_MODE) {
         if (lanes > dataLoad) // Valid
         {
-            paddedLength = (dataLenF + (dataLoad << 1));
-            paddedLength = CEIL(paddedLength, dataLoad);
+            unsigned int validModeLength = (dataLenF + (dataLoad << 1));
+            paddedLength = CEIL(validModeLength, dataLoad);
         } else {
-            paddedLength = (dataLenF + dataLoad);
-            paddedLength = CEIL(paddedLength, dataLoad);
+            unsigned int validModeLength = (dataLenF + dataLoad);
+            paddedLength = CEIL(validModeLength, dataLoad);
         }
     } else {
         // do nothing
@@ -815,15 +743,11 @@ INLINE_DECL constexpr unsigned int getPaddedLength() {
 template <unsigned int computeMode, unsigned int dataLenF, unsigned int dataLenG>
 INLINE_DECL constexpr unsigned int getLoopCount() {
     unsigned int loopCount = 0;
-    if (computeMode == FULL_MODE) // Full
-    {
+    if (computeMode == FULL_MODE) {
         loopCount = ((dataLenF + dataLenG) - 1);
-    } else if (computeMode == SAME_MODE) // Same
-    {
+    } else if (computeMode == SAME_MODE) {
         loopCount = dataLenF;
-
-    } else if (computeMode == VALID_MODE) // Valid
-    {
+    } else if (computeMode == VALID_MODE) {
         loopCount = ((dataLenF - dataLenG) + 1);
     } else {
         loopCount = ((dataLenF + dataLenG) - 1); // default Full mode
@@ -839,19 +763,17 @@ template <typename TT_DATA_F,
           unsigned int computeMode,
           unsigned int dataLenF,
           unsigned int dataLenG>
-INLINE_DECL constexpr unsigned int getFdataStartIndx_PaddedBuffer() {
+INLINE_DECL constexpr unsigned int getFdataStartIndexOfPaddedBuffer() {
     unsigned int lanes = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
-    unsigned int dataLoadF = (kMaxBitsLoadOnAie / (fnSampleSizeOfSigF<TT_DATA_F>()));
+    unsigned int dataLoadF = (kMaxBytesLoadOnAie / sizeof(TT_DATA_F));
     unsigned int paddedLength = getPaddedLength<TT_DATA_F, TT_DATA_G, computeMode, dataLenF, dataLenG>();
     unsigned int fdataStartIndx = 0;
 
-    if (computeMode == FULL_MODE) // Full
-    {
-        fdataStartIndx = ROUND((paddedLength - (dataLenF + dataLenG)), dataLoadF);
+    if (computeMode == FULL_MODE) {
+        fdataStartIndx = CEIL((dataLenG - 1), dataLoadF) / dataLoadF; // Return vector index
     } else {
-        if (computeMode == SAME_MODE) // Same
-        {
-            fdataStartIndx = ROUND((paddedLength - (dataLenF + (dataLenG >> 1))), dataLoadF);
+        if (computeMode == SAME_MODE) {
+            fdataStartIndx = CEIL(((dataLenG >> 1)), dataLoadF) / dataLoadF; // Return vector index
         }
     }
 
@@ -865,26 +787,123 @@ template <typename TT_DATA_F,
           unsigned int computeMode,
           unsigned int dataLenF,
           unsigned int dataLenG>
-INLINE_DECL constexpr unsigned int getFdataEndIndx_PaddedBuffer() {
+INLINE_DECL constexpr unsigned int getFdataEndIndexOfPaddedBuffer() {
     unsigned int lanes = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
-    unsigned int dataLoadF = (kMaxBitsLoadOnAie / (fnSampleSizeOfSigF<TT_DATA_F>()));
+    unsigned int dataLoadF = (kMaxBytesLoadOnAie / sizeof(TT_DATA_F));
     unsigned int paddedLength = getPaddedLength<TT_DATA_F, TT_DATA_G, computeMode, dataLenF, dataLenG>();
     unsigned int paddedVecLoopCnt = ROUND(paddedLength, dataLoadF);
     unsigned int fdataStartIndx =
-        getFdataStartIndx_PaddedBuffer<TT_DATA_F, TT_DATA_G, computeMode, dataLenF, dataLenG>();
+        getFdataStartIndexOfPaddedBuffer<TT_DATA_F, TT_DATA_G, computeMode, dataLenF, dataLenG>();
     unsigned int fdataEndIndx = 0;
 
     if (computeMode == VALID_MODE) {
-        if (lanes > dataLoadF) // Valid
-        {
-            fdataEndIndx = paddedVecLoopCnt - ROUND((dataLoadF << 1), dataLoadF);
+        if (lanes > dataLoadF) {
+            fdataEndIndx = paddedVecLoopCnt - kLanesGtDataLoad;
         } else {
-            fdataEndIndx = paddedVecLoopCnt - ROUND(dataLoadF, dataLoadF);
+            fdataEndIndx = paddedVecLoopCnt - kLanesLeDataLoad;
         }
+    } else if ((computeMode == FULL_MODE) || (computeMode == SAME_MODE)) {
+        fdataEndIndx = fdataStartIndx + (CEIL(dataLenF, dataLoadF) / dataLoadF); // Return vector index
     } else {
-        fdataEndIndx = (paddedVecLoopCnt - fdataStartIndx);
+        // do nothing
     }
 
+    return fdataEndIndx;
+};
+
+//----------------------------------------------------------------------
+// Runtime helper functions for RTP-based computations
+//----------------------------------------------------------------------
+
+// Function to return the paddedLength based on given data length and compute mode
+template <typename TT_DATA_F, typename TT_DATA_G, unsigned int computeMode>
+INLINE_DECL unsigned int getRuntimePaddedLength(unsigned int dataLenF, unsigned int dataLenG) {
+    unsigned int paddedLength = 0;
+    unsigned int lanes = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
+    unsigned int dataLoad = (kMaxBytesLoadOnAie / sizeof(TT_DATA_F));
+
+    if (computeMode == FULL_MODE) {
+        // Subtract 1 because two sequences of length F_LEN and G_LEN produce F_LEN+G_LEN-1 output samples.
+        // This counts from the first overlap (1 element) through the last overlap (1 element).
+        unsigned int fullModeLength = ((dataLenG - 1) + dataLenF + (dataLenG - 1));
+        paddedLength = CEIL(fullModeLength, dataLoad);
+
+    } else if (computeMode == SAME_MODE) {
+        // Mirrors getPaddedLength exactly -- see that function for the full rationale.
+        // Summary: (G/2-1) padding is insufficient when G is an odd
+        // multiple of dataLoad; CEIL(G/2, dataLoad) is required so that the
+        // kThirdVecLoadOffset strict-less-than guard passes at the final outer
+        // iteration and all F-vector loads needed by the inner MAC loop proceed.
+        // kXStartIdxAdj compensates so that output sample alignment is unaffected.
+        unsigned int samePadding = CEIL((dataLenG >> 1), dataLoad);
+        unsigned int sameModeLength = samePadding + dataLenF + samePadding;
+        paddedLength = CEIL(sameModeLength, dataLoad);
+
+    } else if (computeMode == VALID_MODE) {
+        if (lanes > dataLoad) {
+            unsigned int validModeLength = (dataLenF + (dataLoad << 1));
+            paddedLength = CEIL(validModeLength, dataLoad);
+        } else {
+            unsigned int validModeLength = (dataLenF + dataLoad);
+            paddedLength = CEIL(validModeLength, dataLoad);
+        }
+    } else {
+        // do nothing
+    }
+
+    return paddedLength;
+};
+
+// Function to return the LoopCount based on given data length and compute mode
+template <unsigned int computeMode>
+INLINE_DECL unsigned int getRuntimeLoopCount(unsigned int dataLenF, unsigned int dataLenG) {
+    unsigned int loopCount = 0;
+    if (computeMode == FULL_MODE) {
+        loopCount = ((dataLenF + dataLenG) - 1);
+    } else if (computeMode == SAME_MODE) {
+        loopCount = dataLenF;
+    } else if (computeMode == VALID_MODE) {
+        loopCount = ((dataLenF - dataLenG) + 1);
+    } else {
+        loopCount = ((dataLenF + dataLenG) - 1); // default Full mode
+    }
+
+    return loopCount;
+};
+
+// Returns the start index into the padded F buffer where F data begins;
+// called by conv_corrRTP with pre-computed paddedLength to avoid a redundant getRuntimePaddedLength call.
+template <typename TT_DATA_F, typename TT_DATA_G, unsigned int computeMode>
+INLINE_DECL unsigned int getRuntimeFdataStartIndex(unsigned int dataLenF,
+                                                   unsigned int dataLenG,
+                                                   unsigned int paddedLength) {
+    unsigned int dataLoadF = (kMaxBytesLoadOnAie / sizeof(TT_DATA_F));
+    unsigned int fdataStartIndx = 0;
+    if (computeMode == FULL_MODE) {
+        fdataStartIndx = ROUND((paddedLength - (dataLenF + dataLenG)), dataLoadF);
+    } else if (computeMode == SAME_MODE) {
+        fdataStartIndx = ROUND((paddedLength - (dataLenF + (dataLenG >> 1))), dataLoadF);
+    }
+    return fdataStartIndx;
+};
+
+// Returns the end index into the padded F buffer up to which F data is filled;
+// called by conv_corrRTP with pre-computed paddedLength and fdataStartIndx to avoid redundant getRuntimePaddedLength
+// and getRuntimeFdataStartIndex calls.
+template <typename TT_DATA_F, typename TT_DATA_G, unsigned int computeMode>
+INLINE_DECL unsigned int getRuntimeFdataEndIndex(unsigned int dataLenF,
+                                                 unsigned int dataLenG,
+                                                 unsigned int paddedLength,
+                                                 unsigned int fdataStartIndx) {
+    unsigned int lanes = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
+    unsigned int dataLoadF = (kMaxBytesLoadOnAie / sizeof(TT_DATA_F));
+    unsigned int paddedVecLoopCnt = ROUND(paddedLength, dataLoadF);
+    unsigned int fdataEndIndx = 0;
+    if (computeMode == VALID_MODE) {
+        fdataEndIndx = paddedVecLoopCnt - (lanes > dataLoadF ? kLanesGtDataLoad : kLanesLeDataLoad);
+    } else {
+        fdataEndIndx = paddedVecLoopCnt - fdataStartIndx;
+    }
     return fdataEndIndx;
 };
 
@@ -1193,10 +1212,84 @@ INLINE_DECL constexpr bool fnCheckDataTypeOfOutput() {
     return (fnCheckDataOutType<TT_DATA_F, TT_DATA_G, TT_DATA_OUT>() ? true : false);
 }
 
-// Configuration Defensive check function to check Length of F Signal and G Signal
-template <typename TT_DATA, unsigned int sigLen, unsigned int TP_API>
-INLINE_DECL constexpr bool fnCheckLenOfData() {
-    return (isLenInRange<TT_DATA, sigLen, TP_API>() ? true : false);
+// Configuration Defensive check function to validate TP_F_LEN: alignment, min (2*baseLoad), and mode-dependent max from
+// output buffer constraints. Output constraint skipped when output exceeds ping-pong threshold (single_buffer takes
+// over).
+// MAX_F = min(dataMaxF, FULL: maxOut-minG+1, SAME: maxOut, VALID: maxOut+minG-1)
+template <typename TT_DATA_F,
+          typename TT_DATA_G,
+          typename TT_DATA_OUT,
+          unsigned int TP_F_LEN,
+          unsigned int TP_API,
+          unsigned int TP_COMPUTE_MODE>
+INLINE_DECL constexpr bool fnCheckInBuffofFLen() {
+    if
+        constexpr(TP_API == USE_STREAM_API) { return true; }                   // Stream API bypasses buffer validation
+    constexpr unsigned int baseLoadF = kMaxBytesLoadOnAie / sizeof(TT_DATA_F); // Vector load size in F elements
+    constexpr unsigned int minFLen = baseLoadF << 1;                           // Minimum F length = 2 vector loads
+    constexpr unsigned int dataMaxF = kMaxBufferLenOnAieInBytes / sizeof(TT_DATA_F); // Max F from data memory limit
+    constexpr unsigned int maxOutElems = kMaxBufferLenOnAieInBytes / sizeof(TT_DATA_OUT); // Max output elements
+    constexpr unsigned int pingpongThresholdElems =
+        (kMaxBufferLenOnAieInBytes >> 1) / sizeof(TT_DATA_OUT);                  // Half memory in output elements
+    constexpr unsigned int minG = (kMaxBytesLoadOnAie << 1) / sizeof(TT_DATA_G); // Minimum G length = 2 vector loads
+
+    // Calculate worst-case output size for max F to check if single_buffer will be triggered
+    constexpr unsigned int maxOutForMaxF =
+        (TP_COMPUTE_MODE == FULL_MODE)
+            ? (dataMaxF + minG - 1)
+            : (TP_COMPUTE_MODE == SAME_MODE) ? dataMaxF : (dataMaxF - minG + 1); // VALID mode
+
+    // Derive max F from output constraint: FULL(out=F+G-1), SAME(out=F), VALID(out=F-G+1)
+    // Only apply output constraint if the output won't trigger single_buffer
+    constexpr unsigned int maxFLenOut =
+        (maxOutForMaxF > pingpongThresholdElems) ? dataMaxF : // Output will use single_buffer, no constraint
+            ((TP_COMPUTE_MODE == FULL_MODE)
+                 ? (maxOutElems - minG + 1)
+                 : (TP_COMPUTE_MODE == SAME_MODE) ? maxOutElems : (maxOutElems + minG - 1)); // VALID mode
+
+    constexpr unsigned int maximumFLen =
+        (dataMaxF < maxFLenOut) ? dataMaxF : maxFLenOut; // min(data_limit, output_limit_if_applicable)
+    return (TP_F_LEN >= minFLen) && (TP_F_LEN <= maximumFLen) &&
+           ((TP_F_LEN % baseLoadF) == 0); // Range and alignment check
+}
+
+// Configuration Defensive check function to validate TP_G_LEN: alignment, min (2*baseLoad), and mode-dependent max from
+// F, data memory, and output constraints. Output constraint skipped when output exceeds ping-pong threshold
+// (single_buffer takes over).
+// MAX_G = min(F, dataMaxG, FULL: maxOut-F+1, SAME/VALID: dataMaxG)
+template <typename TT_DATA_F,
+          typename TT_DATA_G,
+          typename TT_DATA_OUT,
+          unsigned int TP_F_LEN,
+          unsigned int TP_G_LEN,
+          unsigned int TP_API,
+          unsigned int TP_COMPUTE_MODE>
+INLINE_DECL constexpr bool fnCheckInBuffofGLen() {
+    if
+        constexpr(TP_API == USE_STREAM_API) { return true; }                   // Stream API bypasses buffer validation
+    constexpr unsigned int baseLoadG = kMaxBytesLoadOnAie / sizeof(TT_DATA_G); // Vector load size in G elements
+    constexpr unsigned int minG = baseLoadG << 1;                              // Minimum G length = 2 vector loads
+    constexpr unsigned int dataMaxG = kMaxBufferLenOnAieInBytes / sizeof(TT_DATA_G); // Max G from data memory limit
+    constexpr unsigned int maxOutElems = kMaxBufferLenOnAieInBytes / sizeof(TT_DATA_OUT); // Max output elements
+    constexpr unsigned int pingpongThresholdBytes = kMaxBufferLenOnAieInBytes >> 1;       // Half memory in bytes
+
+    // Calculate worst-case output size with current TP_F_LEN and max G to check if single_buffer triggers
+    constexpr unsigned int maxOutWithMaxG =
+        (TP_COMPUTE_MODE == FULL_MODE)
+            ? (TP_F_LEN + dataMaxG - 1)
+            : (TP_COMPUTE_MODE == SAME_MODE) ? TP_F_LEN : dataMaxG; // VALID mode: no constraint
+    constexpr unsigned int maxOutBytes = maxOutWithMaxG * sizeof(TT_DATA_OUT);
+
+    // Derive max G from output constraint: FULL(out=F+G-1 → maxG=maxOut-F+1), SAME/VALID(no output constraint on G)
+    // Only apply output constraint if output won't trigger single_buffer
+    constexpr unsigned int maxGOut =
+        (maxOutBytes > pingpongThresholdBytes) ? dataMaxG : // Output uses single_buffer, no constraint
+            ((TP_COMPUTE_MODE == FULL_MODE) ? (maxOutElems - TP_F_LEN + 1) : dataMaxG);
+
+    constexpr unsigned int maxGRaw = (TP_F_LEN < dataMaxG) ? TP_F_LEN : dataMaxG; // G constrained by min(F, dataMaxG)
+    constexpr unsigned int maxG =
+        (maxGRaw < maxGOut) ? maxGRaw : maxGOut; // Apply tightest constraint: min(F_limit, output_limit_if_applicable)
+    return (TP_G_LEN >= minG) && (TP_G_LEN <= maxG) && ((TP_G_LEN % baseLoadG) == 0); // Range and alignment check
 }
 
 // Configuration Defensive check function to check whether strem process supported by AIE-1 or AIE-2
@@ -1261,29 +1354,34 @@ INLINE_DECL constexpr bool fnCheckIsComputeModeValid() {
 
 // Configuration Defensive check function to check Length of G Signal should be multiple
 // of ((phases*lanes)*(Points/streamsPerCore)) when stream processing happening
-template <typename TT_DATA_F, unsigned int fLen, unsigned int gLen, unsigned int numPhases, unsigned int TP_API>
+template <typename TT_DATA_F,
+          typename TT_DATA_G,
+          unsigned int fLen,
+          unsigned int gLen,
+          unsigned int numPhases,
+          unsigned int TP_API>
 INLINE_DECL constexpr bool fnCheckGLen() {
     bool isLenOfGvalid = true;
     bool isGlenGreaterThanFlen = (gLen > fLen) ? true : false;
+    constexpr unsigned int kMuls = fnNumOfMuls<TT_DATA_F, TT_DATA_G>();
+    constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>();
+    constexpr unsigned int kPoints = kMuls / kLanes;
+    constexpr unsigned int kStreamPerCoreVar = (kMuls * numPhases) >> 1;
+    constexpr unsigned int kStreamsPerCore = (gLen > kStreamPerCoreVar) ? 1 : kMaxNumOfStreams;
+    constexpr unsigned int kMinGLen = (numPhases * kLanes) * (kPoints / kStreamsPerCore);
 
     if (TP_API == USE_STREAM_API) {
-        if ((isGlenGreaterThanFlen) && (!(fnCheckLenOfStreamforSigG<gLen>()))) {
+        if (isGlenGreaterThanFlen) {
             isLenOfGvalid = false;
-
-        } else {
-            if ((isGlenGreaterThanFlen) && (gLen < (numPhases << kShiftFactor2))) {
-                isLenOfGvalid = false;
-
-            } else if (gLen > (numPhases << kShiftFactor2)) {
-                if ((isGlenGreaterThanFlen) && (gLen % (numPhases << (kShiftFactor2 + 1)) != 0)) {
-                    isLenOfGvalid = false;
-                }
-            }
+        } else if (!(fnCheckLenOfStreamforSigG<TT_DATA_G, gLen>())) {
+            isLenOfGvalid = false;
+        } else if (gLen < kMinGLen) {
+            isLenOfGvalid = false;
+        } else if (gLen % kMinGLen != 0) {
+            isLenOfGvalid = false;
         }
-    } else // Check for gLen when TP_API = USE_WINDOW_API (I/O BUFFER)
-    {
-        if (isGlenGreaterThanFlen) // gLen <= fLen
-        {
+    } else { // USE_WINDOW_API
+        if (isGlenGreaterThanFlen) {
             isLenOfGvalid = false;
         }
     }

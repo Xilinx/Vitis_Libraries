@@ -25,7 +25,8 @@
 
 using namespace back_transpose_simple;
 
-void back_transpose_simple_wrapper(backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::t_stream_in sig_i[SSR],
-                                   backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::t_stream_out sig_o[SSR]);
+void back_transpose_simple_wrapper(
+    backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH, POINT_SIZE_D1>::t_stream_in sig_i[SSR],
+    backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH, POINT_SIZE_D1>::t_stream_out sig_o[SSR]);
 
 #endif

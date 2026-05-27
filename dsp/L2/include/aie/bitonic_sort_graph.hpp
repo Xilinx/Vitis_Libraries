@@ -168,13 +168,19 @@ class bitonic_sort_graph : public graph {
     **/
     kernel* getKernels() { return m_kernels; };
 
-    kernel merge_sorter;
     /**
-     * @brief This is the constructor function for the bitonic_sort graph.
+     * Merge sorter kernel used when TP_SSR > 1 to combine sorted sub-lists.
      **/
+    kernel merge_sorter;
 
+    /**
+     * Bitonic sort subgraph for first half of input data (when TP_SSR > 1).
+     **/
     bitonic_sort_graph<TT_DATA, TP_DIM / 2, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN, TP_SSR / 2, TP_INDEX>
         bitonic_merge_subframe0;
+    /**
+     * Bitonic sort subgraph for second half of input data (when TP_SSR > 1).
+     **/
     bitonic_sort_graph<TT_DATA,
                        TP_DIM / 2,
                        TP_NUM_FRAMES,
@@ -185,6 +191,10 @@ class bitonic_sort_graph : public graph {
         bitonic_merge_subframe1;
 
     using mergerClass = merge_sort<TT_DATA, TP_IN_API, TP_OUT_API, TP_DIM, TP_ASCENDING>;
+
+    /**
+     * @brief This is the constructor function for the bitonic_sort graph (TP_SSR > 1 specialization).
+     **/
     bitonic_sort_graph() {
         merge_sorter = kernel::create_object<mergerClass>();
         // connect inputs - first half to subframe0, second half to subframe1
@@ -247,6 +257,9 @@ class bitonic_sort_graph<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_L
     **/
     kernel* getKernels() { return m_kernels; };
 
+    /**
+     * @brief This is the constructor function for the bitonic_sort graph (TP_SSR == 1 specialization).
+     **/
     bitonic_sort_graph() {
         bitonic_sort_recur<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_LEN, 0>::create(m_kernels);
 

@@ -25,7 +25,6 @@
 #include "utils.hpp"
 
 #include "uut_config.h"
-#include "uut_static_config.h"
 #include "test_stim.hpp"
 
 #include "device_defs.h"
@@ -87,7 +86,6 @@ class test_graph : public graph {
             std::string filenameInA = QUOTE(INPUT_FILE_A);
             std::string filenameInB = QUOTE(INPUT_FILE_B);
             filenameInA.insert(filenameInA.length() - 4, ("_" + std::to_string(i) + "_0"));
-            // filenameInB.insert(filenameInB.length()-4, ("_"+std::to_string(i)+"_0"));
             inA[i] = input_plio::create("PLIO_inA_" + std::to_string(i), adf::plio_64_bits, filenameInA);
             inB[i] = input_plio::create("PLIO_inB_" + std::to_string(i), adf::plio_64_bits, filenameInB);
             connect<>(inA[i].out[0], outer_tensorGraph.inA[i]);
@@ -107,10 +105,10 @@ class test_graph : public graph {
 #endif
 #endif
         }
-#else
+#else // USING_REF
         // Outer Tensor sub-graph
-        dsplib::outer_tensor::UUT_GRAPH<T_DATA_A, T_DATA_B, DIM_SIZE_A, DIM_SIZE_B, NUM_FRAMES, SHIFT, API_IO, 1,
-                                        ROUND_MODE, SAT_MODE>
+        dsplib::outer_tensor::UUT_GRAPH<T_DATA_A, T_DATA_B, DIM_SIZE_A, DIM_SIZE_B, NUM_FRAMES, SHIFT, ROUND_MODE,
+                                        SAT_MODE>
             outer_tensorGraph;
 
         std::string filenameInA = QUOTE(INPUT_FILE_A);
@@ -118,12 +116,12 @@ class test_graph : public graph {
 
         inA[0] = input_plio::create("PLIO_inA_" + std::to_string(0), adf::plio_64_bits, filenameInA);
         inB[0] = input_plio::create("PLIO_inB_" + std::to_string(0), adf::plio_64_bits, filenameInB);
-        connect<>(inA[0].out[0], outer_tensorGraph.inA[0]);
-        connect<>(inB[0].out[0], outer_tensorGraph.inB[0]);
+        connect<>(inA[0].out[0], outer_tensorGraph.inA);
+        connect<>(inB[0].out[0], outer_tensorGraph.inB);
 
         std::string filenameOut = QUOTE(OUTPUT_FILE);
         out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_64_bits, filenameOut);
-        connect<>(outer_tensorGraph.out[0], out[0].in[0]);
+        connect<>(outer_tensorGraph.out, out[0].in[0]);
 #endif
     };
 };

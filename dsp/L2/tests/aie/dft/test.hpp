@@ -27,11 +27,16 @@ dft graph class.
 #include "utils.hpp"
 
 #include "uut_config.h"
-#include "test_stim.hpp"
+#include "uut_static_config.h"
+#include "test_utils.hpp"
+#include "pkt_switch_graph.hpp"
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
 
+#ifdef USING_UUT
+#include "dft_native_generated_graph/dft_generated_graph.h"
+#endif
 #ifndef UUT_GRAPH
 #define UUT_GRAPH dft_graph
 #endif
@@ -52,11 +57,58 @@ namespace testcase {
 class test_graph : public graph {
    private:
    public:
-    std::array<input_plio, (UUT_SSR * CASC_LEN)> in;
-    std::array<output_plio, (UUT_SSR)> out;
+    // NPORT used directly when packet switching is used or gets defined in uut_static_config.h
+    static constexpr unsigned numInPlio = NPORT_I;
+    static constexpr unsigned numOutPlio = NPORT_O;
+
+    static constexpr int plioBitWidth = PLIO_WIDTH;
+#if (USE_PKT_SWITCHING != 0)
+    std::array<input_plio, numInPlio> in =
+        createPLIOFileConnections<numInPlio, 0, input_plio, plioBitWidth>(PKT_INPUT_FILE, "in");
+    std::array<output_plio, numOutPlio> out =
+        createPLIOFileConnections<numOutPlio, 0, output_plio, plioBitWidth>(PKT_OUTPUT_FILE, "out");
+#else
+    std::array<input_plio, numInPlio> in =
+        createPLIOFileConnections<numInPlio, 0, input_plio, plioBitWidth>(QUOTE(INPUT_FILE), "in");
+    std::array<output_plio, numOutPlio> out =
+        createPLIOFileConnections<numOutPlio, 0, output_plio, plioBitWidth>(QUOTE(OUTPUT_FILE), "out");
+#endif
+
+#ifdef USING_UUT
+    // Use Generated Graph
+    using uut = dft_native_generated_graph;
+#else
+    // Use Graph class directly for reference model
+    using uut = xf::dsp::aie::fft::dft::UUT_GRAPH<DATA_TYPE,
+                                                  TWIDDLE_TYPE,
+                                                  POINT_SIZE,
+                                                  FFT_NIFFT,
+                                                  SHIFT,
+                                                  CASC_LEN,
+                                                  NUM_FRAMES,
+                                                  ROUND_MODE,
+                                                  SAT_MODE,
+                                                  UUT_SSR>;
+#endif
+
+#if (USE_PKT_SWITCHING == 1)
+// The pkt_switch_graph class in unsuitable for the DFT, due to the varied inputs and outputs per "SSR" configuration.
+// Use the pkt_switch_input and pkt_switch_output classes instead.
+// pkt_switch_graph<UUT_SSR, NPORT_I, NPORT_O, uut> dftGraph;
+#elif (USE_PKT_SWITCHING == 2)
+    uut dftGraph;
+    pkt_switch_input<CASC_LEN, NPORT_I> dftGraphIn;
+    pkt_switch_output<UUT_SSR, NPORT_O> dftGraphOut;
+#else
+    uut dftGraph;
+#endif
 
     // Constructor
-    test_graph() {
+    test_graph()
+#if (USE_PKT_SWITCHING == 2)
+        : dftGraphOut(dftGraph.out, out)
+#endif
+    {
         printf("========================\n");
         printf("== UUT Graph Class: ");
         printf(QUOTE(UUT_GRAPH));
@@ -92,49 +144,43 @@ class test_graph : public graph {
                                std::conditional_t<std::is_same<DATA_TYPE, float>::value, cfloat, DATA_TYPE> > >
             T_outDataType;
 
-        // constexpr unsigned int kWindowSize = xf::dsp::aie::fft::dft::getWindowSize<T_outDataType,POINT_SIZE,
-        // NUM_FRAMES>();
-
-        xf::dsp::aie::fft::dft::UUT_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, CASC_LEN, NUM_FRAMES,
-                                          ROUND_MODE, SAT_MODE, UUT_SSR>
-            dftGraph;
-
 #ifdef USING_UUT
+#if (USE_PKT_SWITCHING == 0)
         for (int ssr = 0; ssr < UUT_SSR; ssr++) {
             for (int casc = 0; casc < CASC_LEN; casc++) {
-                std::string filenameIn = QUOTE(INPUT_FILE);
-                // Each rank of ssr receives same input data
-                filenameIn.insert(filenameIn.length() - 4, ("_" + std::to_string(ssr) + "_" + std::to_string(casc)));
-                // Make connections
-                in[casc + ssr * CASC_LEN] = input_plio::create("PLIO_in_" + std::to_string(casc + ssr * CASC_LEN),
-                                                               adf::plio_64_bits, filenameIn);
-                connect<>(in[casc + ssr * CASC_LEN].out[0], dftGraph.in[casc + ssr * CASC_LEN]);
+                // Broadcast connections from PLIO to SSR paths.
+                connect<>(in[casc].out[0], dftGraph.in[casc + ssr * CASC_LEN]);
 #if (SINGLE_BUF == 1)
-                single_buffer(dftGraph.getKernels()[casc + ssr * CASC_LEN].in[0]);
+                single_buffer(dftGraph.dft_graph.getKernels()[casc + ssr * CASC_LEN].in[0]);
                 printf("INFO: Single Buffer Constraint applied to input buffer of kernel %d.\n", casc + ssr * CASC_LEN);
 #endif // single buffer enabled
             }
         }
         for (int ssrOut = 0; ssrOut < UUT_SSR; ssrOut++) {
-            std::string filenameOut = QUOTE(OUTPUT_FILE);
-            filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(ssrOut) + "_0"));
-            out[ssrOut] = output_plio::create("PLIO_out_" + std::to_string(ssrOut), adf::plio_64_bits, filenameOut);
             connect<>(dftGraph.out[ssrOut], out[ssrOut].in[0]);
 #if (SINGLE_BUF == 1)
-            single_buffer(dftGraph.getKernels()[(ssrOut * CASC_LEN + CASC_LEN) - 1].out[0]);
+            single_buffer(dftGraph.dft_graph.getKernels()[(ssrOut * CASC_LEN + CASC_LEN) - 1].out[0]);
             printf("INFO: Single Buffer Constraint applied to output buffer of kernel %d.\n",
                    ssrOut * CASC_LEN + CASC_LEN);
 #endif // single buffer enabled
         }
-#else // using ref
-        std::string filenameIn = QUOTE(INPUT_FILE);
-        // Make connections
-        in[0] = input_plio::create("PLIO_in_" + std::to_string(0), adf::plio_32_bits, filenameIn);
+#elif (USE_PKT_SWITCHING == 2)
+        // Use pkt_switch_input class
+        for (int i = 0; i < NPORT_I; i++) {
+            // Connect PLIOs to pkt_switch_input.
+            connect<>(in[i].out[0], dftGraphIn.pkt_in[i]);
+        }
+        for (int ssr = 0; ssr < UUT_SSR; ssr++) {
+            for (int casc = 0; casc < CASC_LEN; casc++) {
+                // Connect and broadcast connections from pkt_switch_input to dftGraph casc and SSR paths.
+                connect<>(dftGraphIn.pkt_ssr_out[casc], dftGraph.in[casc + ssr * CASC_LEN]);
+            }
+        }
+// Use pkt_switch_output class
+// No need to connect here, done in pkt_switch_output constructor
+#endif // USE_PKT_SWITCHING == 0
+#else  // using ref
         connect<>(in[0].out[0], dftGraph.in[0]);
-
-        std::string filenameOut = QUOTE(OUTPUT_FILE);
-        // filenameOut.insert(filenameOut.length() - 4, ("_0_0"));
-        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_64_bits, filenameOut);
         connect<>(dftGraph.out[0], out[0].in[0]);
 #endif
     };

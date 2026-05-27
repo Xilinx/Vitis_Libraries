@@ -27,9 +27,9 @@ int ceil(int x, int y) {
 
 void dut() {
     static constexpr unsigned kVssMode = 1;
-    using TT_STREAM = backTransposeCls<POINT_SIZE, SSR, kVssMode>::TT_STREAM;
-    using TT_SAMPLE = backTransposeCls<POINT_SIZE, SSR, kVssMode>::TT_SAMPLE;
-    constexpr int SAMPLES_PER_READ = backTransposeCls<POINT_SIZE, SSR, kVssMode>::SAMPLES_PER_READ;
+    using TT_STREAM = backTransposeCls<POINT_SIZE, SSR, kVssMode, POINT_SIZE_D1>::TT_STREAM;
+    using TT_SAMPLE = backTransposeCls<POINT_SIZE, SSR, kVssMode, POINT_SIZE_D1>::TT_SAMPLE;
+    constexpr int SAMPLES_PER_READ = backTransposeCls<POINT_SIZE, SSR, kVssMode, POINT_SIZE_D1>::SAMPLES_PER_READ;
     constexpr int NSTREAM = SSR;
     TT_STREAM sig_i[NSTREAM], sig_o[NSTREAM];
     typedef ap_uint<32> real_32; // Equals two 'cint32' samples
@@ -40,9 +40,9 @@ void dut() {
     TT_SAMPLE rdData2 = 0;
 
     // Load stream stimulus:
-    int ptSizeCeil = ceil(POINT_SIZE, NSTREAM);                                  // 65
-    unsigned numStores = backTransposeCls<POINT_SIZE, SSR, kVssMode>::numStores; // 7
-    int ptSizeD1 = backTransposeCls<POINT_SIZE, SSR, kVssMode>::ptSizeD1;
+    int ptSizeCeil = ceil(POINT_SIZE, NSTREAM);                                                 // 65
+    unsigned numStores = backTransposeCls<POINT_SIZE, SSR, kVssMode, POINT_SIZE_D1>::numStores; // 7
+    int ptSizeD1 = backTransposeCls<POINT_SIZE, SSR, kVssMode, POINT_SIZE_D1>::ptSizeD1;
     int ptSizeD2 = POINT_SIZE / ptSizeD1;
     int totRows = ceil(ptSizeD2, NSTREAM);
     int memSize = ptSizeD1 * totRows;
@@ -51,7 +51,7 @@ void dut() {
     TT_SAMPLE mem2d[ptSizeD2][ptSizeD1];
     TT_SAMPLE memOutProc[memSize];
     TT_SAMPLE mem2dTmp[totRows][ptSizeD1];
-    int numReads = backTransposeCls<POINT_SIZE, SSR, kVssMode>::numRows * ptSizeD1; // 8 * 2
+    int numReads = backTransposeCls<POINT_SIZE, SSR, kVssMode, POINT_SIZE_D1>::numRows * ptSizeD1; // 8 * 2
     TT_SAMPLE memOut[memSize];
     int NITER = 4;
     int ddTmp = 1;

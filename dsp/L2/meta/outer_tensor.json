@@ -80,33 +80,37 @@
             }
         },
         {
-            "name": "TP_API",
-            "description": "The interface selection (windows/streams) of the function.",
-            "type": "uint",
-            "updater": {
-                "file": "outer_tensor.py",
-                "function": "update_TP_API",
-                "args": []
-            },
-            "validator": {
-                "file": "outer_tensor.py",
-                "function": "validate_TP_API",
-                "args": []
-            }
-        },
-        {
             "name": "TP_SSR",
             "description": "The number of kernels to be used in parallel to perform the function.",
             "type": "uint",
             "updater": {
                 "file": "outer_tensor.py",
                 "function": "update_TP_SSR",
-                "args": []
+                "args": [
+                ]
             },
             "validator": {
                 "file": "outer_tensor.py",
                 "function": "validate_TP_SSR",
-                "args": []
+                "args": [
+                ]
+            }
+        },
+        {
+            "name": "TP_NUM_FRAMES",
+            "description": "The number of operations per call to the kernel",
+            "type": "uint",
+            "updater": {
+                "file": "outer_tensor.py",
+                "function": "update_TP_NUM_FRAMES",
+                "args": [
+                ]
+            },
+            "validator": {
+                "file": "outer_tensor.py",
+                "function": "validate_TP_NUM_FRAMES",
+                "args": [
+                ]
             }
         },
         {
@@ -120,8 +124,8 @@
                     "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
-                    "TP_API",
-                    "TP_SSR"
+                    "TP_SSR",
+                    "TP_NUM_FRAMES"
                 ]
             },
             "validator": {
@@ -130,9 +134,8 @@
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA_A",
-                    "TT_DATA_B",
-                    "TP_API",
-                    "TP_SSR"
+                    "TP_SSR",
+                    "TP_NUM_FRAMES"
                 ]
             }
         },
@@ -147,9 +150,7 @@
                     "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
-                    "TP_API",
-                    "TP_SSR",
-                    "TP_DIM_A"
+                    "TP_NUM_FRAMES"
                 ]
             },
             "validator": {
@@ -157,42 +158,37 @@
                 "function": "validate_TP_DIM_B",
                 "args": [
                     "AIE_VARIANT",
-                    "TT_DATA_A",
                     "TT_DATA_B",
-                    "TP_API",
-                    "TP_SSR",
-                    "TP_DIM_A"
+                    "TP_NUM_FRAMES"
                 ]
             }
         },
         {
-            "name": "TP_NUM_FRAMES",
-            "description": "The number of operations per call to the kernel",
+            "name": "TP_API",
+            "description": "The interface selection (windows/streams) of the function.",
             "type": "uint",
             "updater": {
                 "file": "outer_tensor.py",
-                "function": "update_TP_NUM_FRAMES",
+                "function": "update_TP_API",
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
-                    "TP_API",
-                    "TP_SSR",
                     "TP_DIM_A",
-                    "TP_DIM_B"
+                    "TP_DIM_B",
+                    "TP_NUM_FRAMES"
                 ]
             },
             "validator": {
                 "file": "outer_tensor.py",
-                "function": "validate_TP_NUM_FRAMES",
+                "function": "validate_TP_API",
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA_A",
                     "TT_DATA_B",
-                    "TP_API",
-                    "TP_SSR",
                     "TP_DIM_A",
-                    "TP_DIM_B"
+                    "TP_DIM_B",
+                    "TP_NUM_FRAMES"
                 ]
             }
         },

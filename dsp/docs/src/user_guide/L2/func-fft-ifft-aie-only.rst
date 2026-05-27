@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _FFT_IFFT_AIE_ONLY:
+.. _DSP_FFT_IFFT_AIE_ONLY:
 
 
 =================================
@@ -28,36 +28,37 @@ Device Support
 
 The fft_ifft_dit_1ch supports AIE, AIE-ML, and AIE-MLv2 devices. All features are supported on these variants with the following differences:
 
-- ``TT_DATA`` and ``TT_TWIDDLE``. AIE-ML and AIE-MLv2 devices do not support cfloat type.
+- ``TT_DATA`` and ``TT_TWIDDLE``. Cbfloat16 is only supported on AIE-ML and AIE-MLv2 devices.
 - ``TT_TWIDDLE``: AIE supports cint32. AIE-ML and AIE-MLv2 devices do not.
-- ``TP_RND``: Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
+- ``TP_RND``: Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`DSP_COMPILING_AND_SIMULATING`.
 - Number of ports: When configured for ``TP_API=1`` (stream IO), AIE will require 2 input ports (sample interleaved - even samples on the first port) and 2 output ports similarly interleaved for each lane of processing. The number of lanes is ``2^TP_PARALLEL_FACTOR``. AIE-ML and AIE-MLv2 devices accept one stream only per kernel.
 
 Supported Data Types
 ====================
 
-The data type to the FFT is controlled by the ``TT_DATA`` template parameter. This can take one of three choices: cint16, cint32, or cfloat. This selection applies to both input data and output data. The template parameter ``TT_TWIDDLE`` can take one of three values, cint32, cint16 or cfloat. However, ``TT_DATA`` and ``TT_TWIDDLE`` must both be integer types or must both be cfloat.
+The data type to the FFT is controlled by the ``TT_DATA`` template parameter. This can take one of the following choices: cint16, cint32, cfloat or cbfloat16 (ML devices). This selection applies to both input data and output data. The template parameter ``TT_TWIDDLE`` can take one of the same set of types. ``TT_TWIDDLE`` must match ``TT_DATA`` except for integer types which can mix.
+Please note that cbfloat16 has only 7 bits of mantissa, which means that rounding errors and catastrophic cancellation in each rank of processing quickly erode accuracy. cbfloat16 as a data type is therefore only recommended for small point sizes.
 
 Template Parameters
 ===================
 
-To see details on the template parameters for the FFT, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the FFT, see :ref:`DSP_API_REFERENCE`.
 
-For guidance on configuration with some example scenarios, see :ref:`FFT_CONFIGURATION_NOTES`
+For guidance on configuration with some example scenarios, see :ref:`DSP_FFT_CONFIGURATION_NOTES`
 
-See also :ref:`PARAMETER_LEGALITY_NOTES` regarding legality checking of parameters.
+See also :ref:`DSP_PARAMETER_LEGALITY_NOTES` regarding legality checking of parameters.
 
 .. note::  Window interfaces are now referred to as IO-buffers. IO-buffers are conceptually the same as windows. Graph connections between windows and IO-buffers are supported. More details on IO-buffers can be found in  `UG1079 Input and Output Buffers <https://docs.amd.com/r/en-US/ug1079-ai-engine-kernel-coding/Input-and-Output-Buffers>`_. For backwards compatibility, template parameters which refer to windows, e.g., ``TP_WINDOW_VSIZE``, remain unchanged.
 
 Access Functions
 ================
 
-To see details on the access functions for the FFT, see :ref:`API_REFERENCE`.
+To see details on the access functions for the FFT, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the FFT, see :ref:`API_REFERENCE`. Note that the number and type of ports are determined by the configuration of template parameters.
+To see details on the ports for the FFT, see :ref:`DSP_API_REFERENCE`. Note that the number and type of ports are determined by the configuration of template parameters.
 
 Design Notes
 ============
@@ -67,8 +68,10 @@ Dynamic Point Size
 
 The FFT supports dynamic (runtime controlled) point sizes. This feature is available when the ``TP_DYN_PT_SIZE`` template parameter is set. When set to 0 (static point size), all data will be expected in frames of ``TP_POINT_SIZE`` data samples, though multiple frames can be input together using ``TP_WINDOW_VSIZE``. When set to 1 (dynamic point size), each window must be preceded by a 256-bit header (512 bit in AIE-MLv2) to describe the runtime parameters of that window. Note that ``TP_WINDOW_VSIZE`` described the number of samples in a window so does not include this header. The format of the header is described in Table 5. When ``TP_DYN_PT_SIZE`` =1, ``TP_POINT_SIZE`` describes the maximum point size which may be input.
 The size of the header is 256 bits in AIE and AIE-ML, but 512 bits in AIE-MLv2 as these are the smallest header sizes possible where the following data samples are aligned to memory accesses for the AI Engine variant.
+The performance of dynamic operation is naturally lower than for static operation because certain decisions become run-time rather than compile-time. Also, no performance metrics are given for dynamic mode because the metrics are so dependent on the run-time point size.
+Dynamic mode is not supported for cbfloat16 data type.
 
-.. _FFT_IFFT_HEADER_FORMAT:
+.. _DSP_FFT_IFFT_HEADER_FORMAT:
 
 .. table:: Header Format
    :align: center
@@ -101,9 +104,10 @@ Note that for ``TT_DATA=cfloat``, the values in the header are expected as cfloa
 Super Sample Rate Operation
 ---------------------------
 
-While the term Super Sample Rate strictly means the processing of more than one sample per clock cycle, in the AI Engine context, it is taken to mean an implementation using parallel kernels to improve performance at the expense of additional resource use. In the FFT, SSR operation is controlled by the ``TP_PARALLEL_POWER`` template parameter. This parameter is intended to improve performance and also allow support of point sizes beyond the limitations of a single tile. Diagram :ref:`FIGURE_FFT_CONSTRAINTS` shows an example graph with ``TP_PARALLEL_POWER`` set to 2. This results in four subframe processors in parallel each performing an FFT of ``N/2^TP_PARALLEL_POWER`` point size. These subframe outputs are then combined by ``TP_PARALLEL_POWER`` stages of radix2 to create the final result. The order of samples is described in the note for ``TP_API`` above.
+While the term Super Sample Rate strictly means the processing of more than one sample per clock cycle, in the AI Engine context, it is taken to mean an implementation using parallel kernels to improve performance at the expense of additional resource use. In the FFT, SSR operation is controlled by the ``TP_PARALLEL_POWER`` template parameter. This parameter is intended to improve performance and also allow support of point sizes beyond the limitations of a single tile. Diagram :ref:`DSP_FIGURE_FFT_CONSTRAINTS` shows an example graph with ``TP_PARALLEL_POWER`` set to 2. This results in four subframe processors in parallel each performing an FFT of ``N/2^TP_PARALLEL_POWER`` point size. These subframe outputs are then combined by ``TP_PARALLEL_POWER`` stages of radix2 to create the final result. The order of samples is described in the note for ``TP_API`` above.
 
 The ``TP_PARALLEL_POWER`` parameter  allows a trade of performance for resource use in the form of tiles used. ``TP_CASC_LEN`` determines the number of kernels in series for each parallel lane of processing and allows another trade of performance for resource use. The following table shows the tile utilization versus ``TP_PARALLEL_POWER`` and  ``TP_CASC_LEN`` assuming that all widgets co-habit with FFT processing kernels.
+Super Sample Rate operation is not supported for cbfloat16 data type.
 
 .. table:: FFT Resource Usage
    :align: center
@@ -165,14 +169,14 @@ Super Sample Rate operation (``TP_PARALLEL_POWER``>0) supports both  IO-buffer I
 Scaling
 -------
 
-Scaling in the FFT is controlled by the ``TP_SHIFT`` parameter which describes how many binary places by which to shift the result to the right, i.e., only power-of-2 scaling values are supported. The FFT implementation does not implement the 1/N scaling of an IFFT directly, but this can be configured via ``TP_SHIFT``. Internal to the FFT, for cint16 and cint32 data, a data type of cint32 is used for temporary value. After each rank, the values are scaled by only enough to normalize the bit growth caused by the twiddle multiplication (i.e., 15 bits), but there is no compensation for the bit growth of the adder in the butterfly operation. No scaling is applied at any point when the data type is cfloat. Setting ``TP_SHIFT`` to any value other than 0 when ``TT_DATA`` is cfloat will result in an error. In the case of ``TP_PARALLEL_POWER > 0`` for cint16, the streams carrying data between subframe processors, and the combiner stages carry cint16 data so as to allow for high performance. In this case, the scaling value applied to each subframe processor is (``TP_SHIFT-TP_PARALLEL_POWER``) (if positive and 0 if not). Each combiner stage will have a shift of 1 is applied, to compensate for the bit growth of 1 in the stage's butterfly, if there is adequate ``TP_SHIFT`` to allow for this, or 0 if there is not. For example, with an FFT configured to be ``POINT_SIZE=1024``, ``DATA_TYPE=cint16``, ``PARALLEL_POWER=2`` and ``TP_SHIFT=10``, there will be four subframe processors and two further ranks of four combiners. The four subframe processors will all have a local ``TP_SHIFT`` of 10-2 = 8 applied, and each of the combiners will have a local ``TP_SHIFT`` of 1 applied. This scheme is designed to preserve as much accuracy as possible without compromising performance. If better accuracy or noise performance is required, this can be achieved at the expense of throughput by using ``TT_DATA=cint32``.
+Scaling in the FFT is controlled by the ``TP_SHIFT`` parameter which describes how many binary places by which to shift the result to the right, i.e., only power-of-2 scaling values are supported. The FFT implementation does not implement the 1/N scaling of an IFFT directly, but this can be configured via ``TP_SHIFT``. Internal to the FFT, for cint16 and cint32 data, a data type of cint32 is used for temporary value. After each rank, the values are scaled by only enough to normalize the bit growth caused by the twiddle multiplication (i.e., 15 bits), but there is no compensation for the bit growth of the adder in the butterfly operation. No scaling is applied at any point when the data type is cfloat or cbfloat16. Setting ``TP_SHIFT`` to any value other than 0 when ``TT_DATA`` is cfloat or cbfloat16 will result in an error. In the case of ``TP_PARALLEL_POWER > 0`` for cint16, the streams carrying data between subframe processors, and the combiner stages carry cint16 data so as to allow for high performance. In this case, the scaling value applied to each subframe processor is (``TP_SHIFT-TP_PARALLEL_POWER``) (if positive and 0 if not). Each combiner stage will have a shift of 1 is applied, to compensate for the bit growth of 1 in the stage's butterfly, if there is adequate ``TP_SHIFT`` to allow for this, or 0 if there is not. For example, with an FFT configured to be ``POINT_SIZE=1024``, ``DATA_TYPE=cint16``, ``PARALLEL_POWER=2`` and ``TP_SHIFT=10``, there will be four subframe processors and two further ranks of four combiners. The four subframe processors will all have a local ``TP_SHIFT`` of 10-2 = 8 applied, and each of the combiners will have a local ``TP_SHIFT`` of 1 applied. This scheme is designed to preserve as much accuracy as possible without compromising performance. If better accuracy or noise performance is required, this can be achieved at the expense of throughput by using ``TT_DATA=cint32``.
 
 Rounding and Saturation
 -----------------------
 
 In the final stage, the final values are converted to ``TT_DATA`` using ``TP_SHIFT``, ``TP_RND``, and ``TP_SAT``. ``TP_SHIFT`` performs the scaling as described elsewhere. ``TP_RND`` and ``TP_SAT`` determine the form of rounding and saturation applied on the downshifted value. The following tables describe the form of rounding and of saturation performed.
 
-.. _fft_rnd_and_sat:
+.. _DSP_fft_rnd_and_sat:
 
 .. table:: Rounding and Saturation in FFT
    :align: center
@@ -235,7 +239,7 @@ In the final stage, the final values are converted to ``TT_DATA`` using ``TP_SHI
    |                        |                |                 |                                  |
    +------------------------+----------------+-----------------+----------------------------------+
 
-Distortion caused by saturation will be possible for certain configurations of the FFT. For instance, with ``TT_DATA=cint32``, it is possible for the sample values within the FFT to grow beyond the range of int32 values due to bit growth in the FFT algorithm. Saturation is applied at each stage (rank). In the final stage when ``TP_SHIFT`` is applied, saturation is also applied according to ``TP_SAT``. Similarly, if the FFT is configured for ``TT_DATA=cint16``, but insufficient scaling (TP_SHIFT) is applied, then sample values can exceed the range of int16 and so these too will be saturated in the final stage. For ``TT_DATA=cfloat``, the FFT performs no scaling, nor saturation. Any saturation effects will be due to the atomic float operations returning positive infinity, negative infinity, or NaN.
+Distortion caused by saturation will be possible for certain configurations of the FFT. For instance, with ``TT_DATA=cint32``, it is possible for the sample values within the FFT to grow beyond the range of int32 values due to bit growth in the FFT algorithm. Saturation is applied at each stage (rank). In the final stage when ``TP_SHIFT`` is applied, saturation is also applied according to ``TP_SAT``. Similarly, if the FFT is configured for ``TT_DATA=cint16``, but insufficient scaling (TP_SHIFT) is applied, then sample values can exceed the range of int16 and so these too will be saturated in the final stage. For ``TT_DATA=cfloat`` or ``TT_DATA=cbfloat16``, the FFT performs no scaling, nor saturation. Any saturation effects will be due to the atomic float operations returning positive infinity, negative infinity, or NaN.
 
 Cascade Feature
 ---------------
@@ -250,9 +254,9 @@ For integer types of ``TT_TWIDDLE``, the twiddle values are stored internally in
 Constraints
 -----------
 
-The FFT design has large memory requirements for data buffering and twiddle storage. Constraints might be necessary to fit a design or to achieve high performance, such as ensuring FFT kernels do not share tiles with other FFT kernels or user kernels. To apply constraints, you must know the instance names of the internal graph hierarchy of the FFT. See :ref:`FIGURE_FFT_CONSTRAINTS`.
+The FFT design has large memory requirements for data buffering and twiddle storage. Constraints might be necessary to fit a design or to achieve high performance, such as ensuring FFT kernels do not share tiles with other FFT kernels or user kernels. To apply constraints, you must know the instance names of the internal graph hierarchy of the FFT. See :ref:`DSP_FIGURE_FFT_CONSTRAINTS`.
 
-.. _FIGURE_FFT_CONSTRAINTS:
+.. _DSP_FIGURE_FFT_CONSTRAINTS:
 
 .. figure:: ./media/X25897.png
 
@@ -260,7 +264,7 @@ The FFT design has large memory requirements for data buffering and twiddle stor
 
 Location and other constraints can be applied in the parent graph which instances the FFT graph class. To apply a constraint, you will need to know the name of the kernel, which will include the hierarchial path to that kernel. The simplest way to derive names, including the hierarchial part, is to compile a design and open it in AMD Vitis |trade| , using the graph view. The names of all kernels and memory buffers can be obtained from there. These names can then be back-annotated to the parent graph to apply the necessary constraint.
 
-The FFT graph class is implemented as a recursion of the top level to implement the parallelism. The instance names of each pair of subgraphs in the recursion are FFTsubframe(0) and FFTsubframe(1). In the final level of recursion, the FFT graph will contain an instance of either FFTwinproc (for ``TP_API = 0`` ) or FFTstrproc (when ``TP_API=1`` ). Within this level there is an array of kernels called m_fftKernels which will have ``TP_CASC_LEN`` members. In the above diagram, widgets are shown in green and red. The widgets either receive two streams and interlace these streams to form an IO-buffer of data on which the FFT operates, or take the IO-buffer output from the FFT and deinterlace this into two streams. The widgets might be expressed as separate kernels (``TP_USE_WIDGETS`` = 1), and hence then placed on separate tiles, or might be expressed as functions internal to the FFT kernel (or combiner kernel) (``TP_USE_WIDGETS`` = 0) for improved performance compared to one tile hosting both the FFT kernel and associated widgets. See also :ref:`FFT_CONFIGURATION_NOTES`.
+The FFT graph class is implemented as a recursion of the top level to implement the parallelism. The instance names of each pair of subgraphs in the recursion are FFTsubframe(0) and FFTsubframe(1). In the final level of recursion, the FFT graph will contain an instance of either FFTwinproc (for ``TP_API = 0`` ) or FFTstrproc (when ``TP_API=1`` ). Within this level there is an array of kernels called m_fftKernels which will have ``TP_CASC_LEN`` members. In the above diagram, widgets are shown in green and red. The widgets either receive two streams and interlace these streams to form an IO-buffer of data on which the FFT operates, or take the IO-buffer output from the FFT and deinterlace this into two streams. The widgets might be expressed as separate kernels (``TP_USE_WIDGETS`` = 1), and hence then placed on separate tiles, or might be expressed as functions internal to the FFT kernel (or combiner kernel) (``TP_USE_WIDGETS`` = 0) for improved performance compared to one tile hosting both the FFT kernel and associated widgets. See also :ref:`DSP_FFT_CONFIGURATION_NOTES`.
 
 In release 2023.1, widget kernels which converted from dual streams to IO-buffers and vice versa were blended with the parent FFT or combiner kernels they supported. This eliminated kernel-switch overheads and so improved performance versus the case where widgets were co-located with their parent FFT or combiner. However, this prevented you from splitting each trio of kernels over multiple tiles for even higher performance albeit at a trebling of the resource cost. In 2023.2, the choice of whether to express the widgets as standalone kernels, or to blend them with the FFT or combiner they serve, has been added as ``TP_USE_WIDGETS``. The following description applies to the configuration with widget kernels, but the principles of the recursive decomposition and the names of the FFT and FFT combiner kernels remain and apply in either case.
 The stream to window conversion kernels on input and output to the FFT subframes are at the same level as m_fftKernels and are called m_inWidgetKernel and m_outWidgetKernel respectively. Each level of recursion will also contain an array of radix2 combiner kernels and associated stream to window conversion kernels. These are seen as a column of kernels in the above figure. Their instance names are m_r2Comb[] for the radix2 combiners and m_combInKernel[] and m_combOutKernel[] for the input and output widget kernels respectively.
@@ -301,7 +305,7 @@ The following code block shows example code of how to include an instance of the
     :language: cpp
     :lines: 17-
 
-.. _FFT_CONFIGURATION_NOTES:
+.. _DSP_FFT_CONFIGURATION_NOTES:
 
 Configuration Notes
 ===================
@@ -341,7 +345,7 @@ Memory Placement
 ----------------
 The FFT uses many memories for input, output, internal scratchpad, twiddles and sysmem (heap and stack). Should any two of these be placed on the same bank, then memory collisions can occur, causing wait states and a loss of performance. If performance is not meeting your needs, consider the placement of memories. This may be improved using the BufferOptLevel argument to aiecompiler, or an improvement may be possible by applying location constraints to buffers.
 
-.. _PARAMETER_LEGALITY_NOTES:
+.. _DSP_PARAMETER_LEGALITY_NOTES:
 
 Parameter Legality Notes
 ========================
@@ -363,6 +367,8 @@ The largest point size which can be supported in a single kernel is limited by d
    |    cint32         |       2048              |        4096           |
    +-------------------+-------------------------+-----------------------+
    |    cfloat         |       2048              |        2048           |
+   +-------------------+-------------------------+-----------------------+
+   |    cbfloat16      |       4096              |        4096           |
    +-------------------+-------------------------+-----------------------+
 
 The maximum point size supported per kernel puts a practical limit on the maximum point size supported when using ``TP_PARALLEL_POWER>1``. This is because the largest devices available currently support a maximum ``TP_PARALLEL_POWER`` of 4. The largest possible FFT can be found by multiplying the values in the table by 2^4. For example, the largest practical FFT with stream IO and ``cint16`` data is 4096 << 4 = 65536. However, the extensive use of neighboring tile RAM makes placement a challenge the the mapper, so 32768 may be a practical upper limit for ``cint32``.

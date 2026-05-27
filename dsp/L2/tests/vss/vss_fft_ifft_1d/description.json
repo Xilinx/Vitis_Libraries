@@ -80,12 +80,12 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L1/tests/hw/mm2s/mm2s.cpp",
-                    "clflags": "-DNSTREAM=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"SSR\") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE\") -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"NITER\") -DDATAWIDTH=$(DATAWIDTH)",
+                    "clflags": "-DNSTREAM=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"SSR\") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE\") -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"NITER\") -DDATAWIDTH=$(DATA_WIDTH) -DPOINT_SIZE_D1=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE_D1\") -DAPI_IO=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"API_IO\")",
                     "name": "mm2s_wrapper"
                 },
                 {
                     "location": "LIB_DIR/L1/tests/hw/s2mm/s2mm.cpp",
-                    "clflags": "-DNSTREAM=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"SSR\") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE\") -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"NITER\") -DDATAWIDTH=$(DATAWIDTH)",
+                    "clflags": "-DNSTREAM=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"SSR\") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE\") -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"NITER\") -DDATAWIDTH=$(DATA_WIDTH) -DPOINT_SIZE_D1=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE_D1\") -DAPI_IO=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"API_IO\")",
                     "name": "s2mm_wrapper"
                 }
             ],
@@ -111,7 +111,7 @@
                 "LIB_DIR/L1/tests/aie/src",
                 "PROJECT"
             ],
-            "options": "--sysroot=$(SYSROOT) -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE\")  -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"NITER\")   -DSSR=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"SSR\") -DTT_DATA=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"DATA_TYPE\")",
+            "options": "--sysroot=$(SYSROOT) -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE\")  -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"NITER\")   -DSSR=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"SSR\") -DTT_DATA=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"DATA_TYPE\") -DPOINT_SIZE_D1=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"POINT_SIZE_D1\") -DAPI_IO=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) \"API_IO\")",
             "symbols": [
                 "__PS_ENABLE_AIE__",
                 "USING_UUT=1"
@@ -125,6 +125,9 @@
         }
     },
     "pre_build": [
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), echo \"I have read and accepted the terms and conditions in the disclaimer.txt file\" >> $(CUR_DIR)/agreement.txt)"
+        },
         {
             "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/vss/scripts/gen_vss_configs.py LIB_DIR $(CUR_DIR) $(PARAMS) vss_fft_ifft_1d_params.cfg fft_aie)"
         },

@@ -54,19 +54,6 @@ std::vector<coeff_type> generateTaps(std::string filename = std::string("data/in
     }
     return taps_v;
 }
-// Unused parameters get a default here.
-#ifndef INTERPOLATE_FACTOR
-#define INTERPOLATE_FACTOR 1
-#endif
-#ifndef DECIMATE_FACTOR
-#define DECIMATE_FACTOR 1
-#endif
-#ifndef P_PARA_INTERP_POLY
-#define P_PARA_INTERP_POLY 1
-#endif
-#ifndef P_PARA_DECI_POLY
-#define P_PARA_DECI_POLY 1
-#endif
 
 void printConfig() {
     // Prints UUT configuration, reading info from macros.
@@ -81,24 +68,58 @@ void printConfig() {
     printf("Coeff type              = ");
     printf(QUOTE(COEFF_TYPE));
     printf("\n");
+#ifdef INPUT_SAMPLES
     printf("Input samples           = %d \n", INPUT_SAMPLES);
+#endif
+#ifdef INPUT_MARGIN
     printf("Input window [B]        = %lu \n", INPUT_SAMPLES * sizeof(DATA_TYPE));
     printf("Input margin            = %lu \n", INPUT_MARGIN(FIR_LEN, DATA_TYPE));
+#endif
+#ifdef OUTPUT_SAMPLES
     printf("Output samples          = %d \n", OUTPUT_SAMPLES);
+#endif
+#ifdef FIR_LEN
     printf("FIR Length              = %d \n", FIR_LEN);
+#endif
+#ifdef INTERPOLATE_FACTOR
     printf("INTERPOLATE_FACTOR      = %d \n", INTERPOLATE_FACTOR);
+#endif
+#ifdef DECIMATE_FACTOR
     printf("DECIMATE_FACTOR         = %d \n", DECIMATE_FACTOR);
+#endif
+#ifdef SHIFT
     printf("Shift                   = %d \n", SHIFT);
+#endif
+#ifdef ROUND_MODE
     printf("ROUND_MODE              = %d \n", ROUND_MODE);
+#endif
+#ifdef CASC_LEN
     printf("CASC_LEN                = %d \n", CASC_LEN);
+#endif
+#ifdef NUM_OUTPUTS
     printf("NUM_OUTPUTS             = %d \n", NUM_OUTPUTS);
+#endif
+#ifdef USE_COEFF_RELOAD
     printf("USE_COEFF_RELOAD        = %d \n", USE_COEFF_RELOAD);
+#endif
+#ifdef PORT_API
     printf("PORT_API                = %d \n", PORT_API);
+#endif
+#ifdef DUAL_IP
     printf("DUAL_IP                 = %d \n", DUAL_IP);
+#endif
+#ifdef P_SSR
     printf("SSR                     = %d \n", P_SSR);
+#endif
+#ifdef P_PARA_INTERP_POLY
     printf("PARA_INTERP_POLY        = %d \n", P_PARA_INTERP_POLY);
+#endif
+#ifdef P_PARA_DECI_POLY
     printf("PARA_DECI_POLY          = %d \n", P_PARA_DECI_POLY);
+#endif
+#ifdef NITER
     printf("Number of iterations    = %d \n", NITER);
+#endif
 }
 }
 }

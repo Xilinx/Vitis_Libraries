@@ -49,20 +49,11 @@ class test_example : public graph {
 
     test_example() {
         // create input file connections - first template argument indicates first index of plio port for this library
-        // createPLIOFileConnections<0, NUM_IP_FA, NUM_IP_ALL>(in, "input", "func_approx", "in");
-
-        // create output file connections
-        // createPLIOFileConnections<0, NUM_IP_FA, NUM_OP_ALL>(out, "output", "func_approx", "out");
-
-        // create input file connections - first template argument indicates first index of plio port for this library
         createPLIOFileConnections<0, NUM_IP_FFT2D, NUM_IP_ALL>(in, "input", "fft_2d", "in");
 
         // create output file connections
         createPLIOFileConnections<0, NUM_OP_FFT2D, NUM_OP_ALL>(out, "output", "fft_2d", "out");
 
-        // wire up func_approx
-        // connect<>(in[0].out[0], uut_fa.in);
-        // connect<>(uut_fa.out, out[0].in[0]);
         connect<>(in[0].out[0], uut_fft2d.in);
         connect<>(uut_fft2d.out, out[0].in[0]);
     }

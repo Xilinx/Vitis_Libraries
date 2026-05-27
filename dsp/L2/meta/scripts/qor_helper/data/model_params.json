@@ -1,0 +1,185 @@
+{
+    "bitonic_sort": {
+        "categorical": [
+            "AIE_VARIANT",
+            "TT_DATA"
+        ],
+        "ordinal": [
+            "TP_DIM",
+            "TP_NUM_FRAMES",
+            "TP_SSR",
+            "TP_CASC_LEN"
+        ],
+        "dependent": [
+            "THROUGHPUT",
+            "LATENCY",
+            "NUM_AIE",
+            "NUM_BANKS"
+        ]
+    },
+
+    "fft_ifft_dit_1ch": {
+        "categorical": [
+            "AIE_VARIANT",
+            "TT_DATA",
+            "TT_TWIDDLE",
+            "TT_OUT_DATA",
+            "TP_API",
+            "TP_USE_WIDGETS"
+        ],
+        "ordinal": [
+            "TP_POINT_SIZE",
+            "TP_WINDOW_VSIZE",
+            "TP_CASC_LEN",
+            "TP_PARALLEL_POWER"
+        ],
+        "dependent": [
+            "THROUGHPUT",
+            "LATENCY",
+            "NUM_AIE",
+            "NUM_BANKS"
+        ],
+        "restricted": {
+            "TP_DYN_PT_SIZE": [0]
+        }
+    },
+
+    "matrix_mult": {
+        "categorical": [
+            "AIE_VARIANT",
+            "TT_DATA_A",
+            "TT_DATA_B",
+            "TT_OUT_DATA"
+        ],
+        "ordinal": [
+            "TP_DIM_A",
+            "TP_DIM_AB",
+            "TP_DIM_B",
+            "TP_CASC_LEN",
+            "TP_SSR"
+        ],
+        "dependent": [
+            "THROUGHPUT",
+            "LATENCY",
+            "NUM_AIE",
+            "NUM_BANKS"
+        ],
+        "restricted": {
+            "TP_ADD_TILING_A": [0],
+            "TP_ADD_TILING_B": [0],
+            "TP_ADD_DETILING_OUT": [0]
+        }
+    },
+
+    "matrix_vector_mul": {
+        "categorical": [
+            "AIE_VARIANT",
+            "TT_DATA_A",
+            "TT_DATA_B",
+            "TP_USE_MATRIX_RELOAD",
+            "TP_API",
+            "TP_DUAL_IP"
+        ],
+        "ordinal": [
+            "TP_DIM_A",
+            "TP_DIM_B",
+            "TP_NUM_FRAMES",
+            "TP_CASC_LEN",
+            "TP_SSR",
+            "TP_NUM_OUTPUTS"
+        ],
+        "dependent": [
+            "THROUGHPUT",
+            "LATENCY",
+            "NUM_AIE",
+            "NUM_BANKS"
+        ]
+    },
+
+    "fir_sr_asym": {
+        "categorical": [
+            "AIE_VARIANT",
+            "TT_DATA",
+            "TT_COEFF",
+            "TP_API",
+            "TP_DUAL_IP",
+            "TP_USE_COEFF_RELOAD"
+        ],
+        "ordinal": [
+            "TP_FIR_LEN",
+            "TP_INPUT_WINDOW_VSIZE",
+            "TP_CASC_LEN",
+            "TP_SSR",
+            "TP_NUM_OUTPUTS"
+        ],
+        "dependent": [
+            "THROUGHPUT",
+            "LATENCY",
+            "NUM_AIE",
+            "NUM_BANKS"
+        ],
+        "restricted": {
+            "TP_USE_RTP_VECTOR_LENGTHS": [0]
+        }
+    },
+
+    "cholesky": {
+        "categorical": [
+            "AIE_VARIANT",
+            "TT_DATA",
+            "TP_DIAG_INV"
+        ],
+        "ordinal": [
+            "TP_DIM",
+            "TP_NUM_FRAMES",
+            "TP_GRID_DIM",
+            "TP_CASC_LEN"
+        ],
+        "dependent": [
+            "THROUGHPUT",
+            "LATENCY",
+            "NUM_AIE",
+            "NUM_BANKS"
+        ]
+    },
+
+    "substitution": {
+        "categorical": [
+            "AIE_VARIANT",
+            "TT_DATA",
+            "TP_DIAG_INV"
+        ],
+        "ordinal": [
+            "TP_DIM",
+            "TP_NUM_FRAMES",
+            "TP_GRID_DIM"
+        ],
+        "dependent": [
+            "THROUGHPUT",
+            "LATENCY",
+            "NUM_AIE",
+            "NUM_BANKS"
+        ]
+    },
+
+    "qrd": {
+        "categorical": [
+            "AIE_VARIANT",
+            "TT_DATA"
+        ],
+        "ordinal": [
+            "TP_DIM_ROWS",
+            "TP_DIM_COLS",
+            "TP_NUM_FRAMES",
+            "TP_CASC_LEN"
+        ],
+        "dependent": [
+            "THROUGHPUT",
+            "LATENCY",
+            "NUM_AIE",
+            "NUM_BANKS"
+        ]
+    },
+
+    "no_iterate_params": ["TP_SHIFT", "TP_RND", "TP_SAT"]
+}

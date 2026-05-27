@@ -32,7 +32,15 @@ decomposed fft .
 #define QUOTE(x) Q(x)
 #define NITER 2
 #define AIE_GRAPH vss_fft_ifft_1d_front_only
-
+#ifndef CASC_LEN
+#define CASC_LEN 1
+#endif
+#ifndef USE_WIDGETS
+#define USE_WIDGETS 0
+#endif
+#ifndef API_IO
+#define API_IO 0
+#endif
 #include QUOTE(AIE_GRAPH.hpp)
 
 using namespace adf;
@@ -47,9 +55,9 @@ class tl_graph : public graph {
    public:
     static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
     static constexpr int kWindowAPI = 0;
-    static constexpr int kPortsPerTile = kWindowAPI == 0 ? 1 : kStreamsPerTile;
-    std::array<input_plio, SSR> front_i;
-    std::array<output_plio, SSR> front_o;
+    static constexpr int kPortsPerTile = API_IO == 0 ? 1 : kStreamsPerTile;
+    std::array<input_plio, SSR * kPortsPerTile> front_i;
+    std::array<output_plio, SSR * kPortsPerTile> front_o;
 
     // Constructor
     tl_graph() {
@@ -64,6 +72,7 @@ class tl_graph : public graph {
         printf("API_IO               = %d \n", API_IO);
         printf("Round mode           = %d \n", ROUND_MODE);
         printf("Saturation mode      = %d \n", SAT_MODE);
+        printf("VSS mode      = %d \n", VSS_MODE);
         printf("Data type            = ");
         printf(QUOTE(DATA_TYPE));
         printf("\n");
@@ -73,10 +82,11 @@ class tl_graph : public graph {
         printf("========================\n");
         adf::plio_type aiePlioWidth = AIE_PLIO_WIDTH == 64 ? adf::plio_64_bits : adf::plio_128_bits;
         // FIR sub-graph
-        xf::dsp::aie::fft::vss_1d::AIE_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, kWindowAPI, SSR,
-                                             ROUND_MODE, SAT_MODE, TWIDDLE_MODE>
+        xf::dsp::aie::fft::vss_1d::AIE_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, API_IO, SSR,
+                                             ROUND_MODE, SAT_MODE, TWIDDLE_MODE, POINT_SIZE_D1, CASC_LEN, USE_WIDGETS>
             fftGraph;
-        for (int i = 0; i < SSR; i++) {
+        for (int i = 0; i < SSR * kPortsPerTile; i++) {
+            printf("Creating PLIO for port %d \n", i);
             std::string filenameInFront = QUOTE(FRONT_INPUT_FILE);
 
             // Insert SSR index into filename before extension (.txt), e.g. input_X_Y.txt

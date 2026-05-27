@@ -14,274 +14,282 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+"""
+VSS FFT/IFFT 1D Configuration Generator
+
+This script generates connectivity configuration files for VSS FFT/IFFT 1D implementations
+based on specified parameters including SSR, data type, and transpose options.
+"""
+
 import argparse
 
 parser = argparse.ArgumentParser(
-    description="Python script that produces cfg file based on the configuration parameters",
+    description="Generate connectivity cfg file based on configuration parameters",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
 parser.add_argument(
-    "-f", "--cfg_file_name", type=str, help="name of the connectivity cfg file"
+    "-f", "--cfg_file_name", type=str, help="Name of the connectivity cfg file"
 )
-parser.add_argument("-s", "--ssr", type=int, help="parallelisation factor")
+parser.add_argument("-s", "--ssr", type=int, help="Parallelization factor")
 parser.add_argument(
     "-hz",
     "--freqhz",
     type=int,
-    help="frequency of PL components. Set this to be 1/4th of the core frequency of the AIE device",
+    help="Frequency of PL components (set to 1/4th of AIE core frequency)",
 )
-parser.add_argument("-u", "--vss_unit", type=str, help="name of vss unit")
+parser.add_argument("-u", "--vss_unit", type=str, help="Name of VSS unit")
 parser.add_argument("-v", "--version", type=int, help="Version of IP")
 parser.add_argument(
     "-nf",
     "--add_front_transpose",
     type=int,
-    help="Set flag to 1 to return a packaged vss including the back transpose. Else set to 0.",
+    help="Set to 1 to include front transpose, 0 otherwise",
 )
 parser.add_argument(
     "-nb",
     "--add_back_transpose",
     type=int,
-    help="Set flag to 1 to return a packaged vss including the front transpose. Else set to 0.",
+    help="Set to 1 to include back transpose, 0 otherwise",
 )
 parser.add_argument(
     "-d",
     "--data_type",
     type=str,
-    help="Data type. Set to cint16, cint32, cfloat",
+    help="Data type (cint16, cint32, or cfloat)",
 )
 parser.add_argument(
     "-l",
     "--aie_obj_name",
     type=str,
-    help="Name of the AIE object. Found in the input cfg file.",
+    help="Name of the AIE object (found in input cfg file)",
 )
 parser.add_argument(
     "-aie_bd",
     "--use_aie_buffer_descriptors",
     type=int,
-    help="Specifies whether AIE buffer descriptors have the ability to do transposes internally.",
+    help="Set to 1 if AIE buffer descriptors can do internal transposes",
 )
+parser.add_argument(
+    "-m",
+    "--vss_mode",
+    type=int,
+    help="VSS mode specification",
+)
+# optional argument dual_streams
+parser.add_argument(
+    "-ds",
+    "--dual_streams",
+    type=int,
+    help="Set to 1 to generate config for dual stream AIE implementation (only applicable for AIE variant 1 with port API), 0 otherwise",
+)
+# Parse arguments
 args = parser.parse_args()
 SSR = args.ssr
 fname = args.cfg_file_name
-vssName = args.vss_unit
+vss_name = args.vss_unit
 freqhz = args.freqhz
-dataType = args.data_type
-ipVersion = str(args.version)
-aieName = str(args.aie_obj_name)
-addFrontTpose = int(args.add_front_transpose)
-addBackTpose = int(args.add_back_transpose)
+data_type = args.data_type
+ip_version = str(args.version)
+aie_name = str(args.aie_obj_name)
+add_front_transpose = int(args.add_front_transpose)
+add_back_transpose = int(args.add_back_transpose)
 use_aie_buffer_descriptors = int(args.use_aie_buffer_descriptors)
+vss_mode = int(args.vss_mode)
 
-if dataType == "cint16":
+# Determine sample size based on data type
+if data_type == "cint16":
     sample_size = 32
 else:
     sample_size = 64
-    
-plReadWidth = 128
-ssrInt = (int)(SSR*(plReadWidth/sample_size))
-f = open(f"{fname}", "w")
 
-if addFrontTpose == 0 and addBackTpose == 0:
-    common_begin_cfg = f"""
+# Calculate datawidth to match PLIO bandwidth with PL kernel bandwidth
+# PL kernels run at 1/4th max PLIO frequency, so PL port width = 4x PLIO width
+# Max PLIO frequency allows 32-bit datawidth, hence PL read ports are 128 bits
+PL_READ_WIDTH = 128
+samples_per_read = PL_READ_WIDTH // sample_size
+ssr_int = int(SSR * samples_per_read)
 
-freqhz={freqhz}:transpose.ap_clk,splitter.ap_clk,joiner.ap_clk
-#freqhz={freqhz}:transpose.ap_clk
+f = open(fname, "w")
 
-[connectivity]
-# ------------------------------------------------------------
-# HLS PL Kernels:
-# ------------------------------------------------------------
+# Determine kernel configuration based on transpose settings
+hls_kernels = []
+rtl_kernels = []
+# Build frequency, kernel list, and VSS component strings
+freqhz_str = f"freqhz={freqhz}:"
+kernel_list_str = ""
+vss_comp_list = f"vss = amd:dsplib:{vss_name}:{ip_version}:ai_engine_0,"
+rtl_kernel_instances = []
 
-# PL Transpose kernels:
-nk = mid_transpose_wrapper:1:transpose
-nk = splitter_wrapper:1:splitter
-nk = joiner_wrapper:1:joiner
-
-
-vss = amd:dsplib:{vssName}:{ipVersion}:splitter,joiner,transpose,ai_engine_0
-#vss = amd:dsplib:{vssName}:{ipVersion}:transpose,ai_engine_0
-
-
-# ------------------------------------------------------------
-# AXI Stream Connections (PL to AIE)
-# ------------------------------------------------------------
-
-"""
-elif addBackTpose == 1 and addFrontTpose == 0:
-    common_begin_cfg = f"""
-
-freqhz={freqhz}:transpose.ap_clk,back_transpose.ap_clk
-
-[connectivity]
-# ------------------------------------------------------------
-# HLS PL Kernels:
-# ------------------------------------------------------------
-
-# PL Transpose kernels:
-nk = ifft_transpose_wrapper:1:transpose
-nk = ifft_back_transpose_wrapper:1:back_transpose
-
-vss = amd:dsplib:{vssName}:{ipVersion}:back_transpose,transpose,ai_engine_0
-
-
-# ------------------------------------------------------------
-# AXI Stream Connections (PL to AIE)
-# ------------------------------------------------------------
-
-"""
-elif addFrontTpose == 1 and addBackTpose == 0:
-    common_begin_cfg = f"""
-
-freqhz={freqhz}:front_transpose.ap_clk,transpose.ap_clk
-
-[connectivity]
-# ------------------------------------------------------------
-# HLS PL Kernels:
-# ------------------------------------------------------------
-
-# PL Transpose kernels:
-nk = ifft_front_transpose_wrapper:1:front_transpose
-nk = ifft_transpose_wrapper:1:transpose
-
-vss = amd:dsplib:{vssName}:{ipVersion}:front_transpose,transpose,ai_engine_0
-
-
-# ------------------------------------------------------------
-# AXI Stream Connections (PL to AIE)
-# ------------------------------------------------------------
-
-"""
+rtl_kernel_instances
+if add_front_transpose == 0 and add_back_transpose == 0:
+    hls_kernels.extend([
+        "mid_transpose_wrapper",
+        "splitter_wrapper",
+        "joiner_wrapper"
+    ])
+    for kernel in hls_kernels:
+        # Remove 'ifft_' prefix and '_wrapper' suffix for readability
+        k_inst_name = kernel[:-8]
+        freqhz_str += f"{k_inst_name}.ap_clk,"
+        kernel_list_str += f"nk = {kernel}:1:{k_inst_name}\n"
+        vss_comp_list += f"{k_inst_name},"
 else:
-    common_begin_cfg = f"""
+    hls_kernels.extend([
+        "ifft_front_transpose_wrapper",
+        "ifft_transpose_wrapper",
+        "ifft_back_transpose_wrapper"
+    ])
+    for kernel in hls_kernels:
+        # Remove 'ifft_' prefix and '_wrapper' suffix for readability
+        k_inst_name = kernel[5:-8]
+        freqhz_str += f"{k_inst_name}.ap_clk,"
+        kernel_list_str += f"nk = {kernel}:1:{k_inst_name}\n"
+        vss_comp_list += f"{k_inst_name},"
 
-freqhz={freqhz}:front_transpose.ap_clk,transpose.ap_clk,back_transpose.ap_clk
+if vss_mode == 2:
+    rtl_kernels.append("xfft_bd")
 
+
+
+
+
+freqhz_str = freqhz_str[:-1]
+
+for kernel in rtl_kernels:
+    # Create multiple instances for RTL kernels (e.g., xfft_bd_0, xfft_bd_1)
+    for inst in range(SSR):
+        inst_name = f"{kernel}_{inst}"
+        rtl_kernel_instances.append(inst_name)
+        vss_comp_list += f"{inst_name},"
+        freqhz_str += f",{inst_name}.aclk_0"
+
+    kernel_list_str += f"nk = {kernel}:{SSR}:"
+    kernel_list_str += ",".join(rtl_kernel_instances)
+    kernel_list_str += "\n"
+
+vss_comp_list = vss_comp_list[:-1] + "\n"
+freqhz_str += "\n"
+
+# Write configuration file header
+common_begin_cfg = f"""{freqhz_str}
+# ------------------------------------------------------------
+# PL Kernels:
+# ------------------------------------------------------------
 [connectivity]
+{kernel_list_str}
 # ------------------------------------------------------------
-# HLS PL Kernels:
+# VSS Definition:
 # ------------------------------------------------------------
-
-# PL Transpose kernels:
-nk = ifft_front_transpose_wrapper:1:front_transpose
-nk = ifft_back_transpose_wrapper:1:back_transpose
-nk = ifft_transpose_wrapper:1:transpose
-#nk = mid_transpose_wrapper:1:transpose
-#nk = splitter_wrapper:1:splitter
-#nk = joiner_wrapper:1:joiner
-
-vss = amd:dsplib:{vssName}:{ipVersion}:front_transpose,back_transpose,transpose,ai_engine_0
-#vss = amd:dsplib:{vssName}:{ipVersion}:splitter,joiner,front_transpose,back_transpose,transpose,ai_engine_0
-
-
+{vss_comp_list}
 # ------------------------------------------------------------
-# AXI Stream Connections (PL to AIE)
+# Connections:
 # ------------------------------------------------------------
-
-
-
 """
 
 f.write(common_begin_cfg)
 
-
-if addFrontTpose == 1:
-    comment = "# FRONT TRANSPOSE TO AIE:\n"
-    f.write(comment)
-
+# Front transpose connections
+if add_front_transpose == 1:
+    f.write("# FRONT TRANSPOSE TO AIE:\n")
     if SSR == 1:
-        text = f'''sc = front_transpose.sig_o:ai_engine_0.{aieName}_PLIO_front_in_0\n'''
-        f.write(text)
+        f.write(f"sc = front_transpose.sig_o:ai_engine_0.{aie_name}_PLIO_front_in_0\n")
     else:
         for i in range(SSR):
-            text = f'''sc = front_transpose.sig_o_{i}:ai_engine_0.{aieName}_PLIO_front_in_{i}\n'''
-            f.write(text)
+            f.write(f"sc = front_transpose.sig_o_{i}:ai_engine_0.{aie_name}_PLIO_front_in_{i}\n")
 
-
-comment = "# AIE TO PL TRANSPOSE1:\n"
-f.write(comment)
+# AIE to PL transpose connections
+f.write("# AIE TO PL TRANSPOSE1:\n")
 
 if use_aie_buffer_descriptors:
     if SSR == 1:
-        text = f"sc = ai_engine_0.{aieName}_PLIO_front_out_0:transpose.sig_i\n"
-        f.write(text)
+        f.write(f"sc = ai_engine_0.{aie_name}_PLIO_front_out_0:mid_transpose.sig_i\n")
     else:
         for i in range(SSR):
-            text = f'''sc = ai_engine_0.{aieName}_PLIO_front_out_{i}:splitter.sig_i_{i}\n'''
-            f.write(text)
+            f.write(f"sc = ai_engine_0.{aie_name}_PLIO_front_out_{i}:splitter.sig_i_{i}\n")
 
-    for i in range(ssrInt):
-        text = f'''sc = splitter.sig_i_int_{i}:transpose.sig_i_{i}\n'''
-        f.write(text)
-    
-    for i in range(ssrInt):
-        text = f'''sc = transpose.sig_o_{i}:joiner.sig_o_int_{i}\n'''
-        f.write(text)
+    for i in range(ssr_int):
+        f.write(f"sc = splitter.sig_i_int_{i}:mid_transpose.sig_i_{i}\n")
 
+    for i in range(ssr_int):
+        f.write(f"sc = mid_transpose.sig_o_{i}:joiner.sig_o_int_{i}\n")
 else:
     if SSR == 1:
-        text = f"sc = ai_engine_0.{aieName}_PLIO_front_out_0:transpose.sig_i\n"
-        f.write(text)
-    else:
-        for i in range(SSR):            
-            text = f'''sc = ai_engine_0.{aieName}_PLIO_front_out_{i}:transpose.sig_i_{i}\n'''
-            f.write(text)
-
-comment = "# PL TRANSPOSE1 to AIE:\n"
-f.write(comment)
-
-if use_aie_buffer_descriptors:
-    if SSR == 1:
-        text = f'''sc = transpose.sig_o:ai_engine_0.{aieName}_PLIO_back_in_0\n'''
-        f.write(text)
+        f.write(f"sc = ai_engine_0.{aie_name}_PLIO_front_out_0:transpose.sig_i\n")
     else:
         for i in range(SSR):
-            text = (
-                f'''sc = joiner.sig_o_{i}:ai_engine_0.{aieName}_PLIO_back_in_{i}\n'''
-            )
-            f.write(text)
-else:
-    if SSR == 1:
-        text = f'''sc = transpose.sig_o:ai_engine_0.{aieName}_PLIO_back_in_0\n'''
-        f.write(text)
+            f.write(f"sc = ai_engine_0.{aie_name}_PLIO_front_out_{i}:transpose.sig_i_{i}\n")
+
+# PL transpose to AIE connections
+f.write("# PL TRANSPOSE1 to AIE:\n")
+
+if vss_mode == 1:
+    if use_aie_buffer_descriptors:
+        if SSR == 1:
+            f.write(f"sc = mid_transpose.sig_o:ai_engine_0.{aie_name}_PLIO_back_in_0\n")
+        else:
+            for i in range(SSR):
+                f.write(f"sc = joiner.sig_o_{i}:ai_engine_0.{aie_name}_PLIO_back_in_{i}\n")
     else:
-        for i in range(SSR):
-            text = f'''sc = transpose.sig_o_{i}:ai_engine_0.{aieName}_PLIO_back_in_{i}\n'''
-            f.write(text)
-
-if addBackTpose == 1:
-    comment = "# AIE TO PL BACK TRANSPOSE:\n"
-    f.write(comment)
-
-    if SSR == 1:
-        text = f'''sc = ai_engine_0.{aieName}_PLIO_back_out_0:back_transpose.sig_i\n'''
-        f.write(text)
+        if SSR == 1:
+            f.write(f"sc = transpose.sig_o:ai_engine_0.{aie_name}_PLIO_back_in_0\n")
+        else:
+            for i in range(SSR):
+                f.write(f"sc = transpose.sig_o_{i}:ai_engine_0.{aie_name}_PLIO_back_in_{i}\n")
+elif vss_mode == 2:
+    if use_aie_buffer_descriptors:
+        if SSR == 1:
+            f.write("sc = mid_transpose.sig_o:xfft_bd_0.S_AXIS_DATA_0\n")
+        else:
+            for i in range(SSR):
+                f.write(f"sc = joiner.sig_o_{i}:xfft_bd_{i}.S_AXIS_DATA_0\n")
     else:
-        for i in range(SSR):
-            text = f'''sc = ai_engine_0.{aieName}_PLIO_back_out_{i}:back_transpose.sig_i_{i}\n'''
-            f.write(text)
+        if SSR == 1:
+            f.write("sc = transpose.sig_o:xfft_bd_0.S_AXIS_DATA_0\n")
+        else:
+            for i in range(SSR):
+                f.write(f"sc = transpose.sig_o_{i}:xfft_bd_{i}.S_AXIS_DATA_0\n")
 
-closing_text = f"""
+# Back transpose connections
+if add_back_transpose == 1:
+    f.write("# AIE TO PL BACK TRANSPOSE:\n")
+    if vss_mode == 1:
+        if SSR == 1:
+            f.write(f"sc = ai_engine_0.{aie_name}_PLIO_back_out_0:back_transpose.sig_i\n")
+        else:
+            for i in range(SSR):
+                f.write(f"sc = ai_engine_0.{aie_name}_PLIO_back_out_{i}:back_transpose.sig_i_{i}\n")
+    elif vss_mode == 2:
+        if SSR == 1:
+            f.write("sc = xfft_bd_0.M_AXIS_DATA_0:back_transpose.sig_i\n")
+        else:
+            for i in range(SSR):
+                f.write(f"sc = xfft_bd_{i}.M_AXIS_DATA_0:back_transpose.sig_i_{i}\n")
 
+# Write Vivado configuration
+closing_text = """
 # ------------------------------------------------------------
 # Vivado PAR
 # ------------------------------------------------------------
 
 [vivado]
+# Implementation strategies (commented out by default)
 #impl.strategies=Performance_Explore,Performance_ExplorePostRoutePhysOpt,Performance_ExtraTimingOpt
 #impl.strategies=Congestion_SpreadLogic_high
 #impl.jobs=8
+
+# Enable physical optimization steps
 prop=run.impl_1.steps.phys_opt_design.is_enabled=1
 prop=run.impl_1.steps.post_route_phys_opt_design.is_enabled=1
 
+# Optimization directives (commented out by default)
 #prop=run.impl_1.steps.opt_design.args.directive=SpreadLogic_high
 #prop=run.impl_1.steps.place_design.args.directive=SpreadLogic_high
 #prop=run.impl_1.steps.phys_opt_design.args.directive=SpreadLogic_high
 #prop=run.impl_1.steps.route_design.args.directive=SpreadLogic_high
 
-# This enabled unified AIE flow to show AIE resource in Vivado:
-param=project.enableUnifiedAIEFlow=true"""
+# Enable unified AIE flow to show AIE resources in Vivado
+param=project.enableUnifiedAIEFlow=true
+"""
 
 f.write(closing_text)
 f.close()

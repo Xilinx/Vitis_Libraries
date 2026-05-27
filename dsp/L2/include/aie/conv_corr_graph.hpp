@@ -347,7 +347,8 @@ class create_casc_kernel<2,
  *rtpVecLen;```
  *         will be added to the graph. \n
  *         \n
- *         Note: Conv/corr graph only support G vector. \n
+ *         Note: The single RTP port carries both F and G vector lengths as a 2-element array:
+ *         ``inVecLen[0]`` = runtime F_LEN, ``inVecLen[1]`` = runtime G_LEN. \n
  *
  **/
 
@@ -374,6 +375,8 @@ class conv_corr_graph : public graph {
     /**
      * @cond NOCOMMENTS
      */
+
+    static constexpr int rtpPortsPerKernel = 1; // Only one RTP port which holds both F and G.
     // Parameter value defensive and legality checks
 
     // defensive check for Input data types
@@ -402,14 +405,14 @@ class conv_corr_graph : public graph {
 
     // defensive check for G sig length should be always less than or equal to F Sig Length
     // defensive check for TP_G_LEN which should be multiples of (phases*4)) when Stream only Processing happening
-    static_assert(fnCheckGLen<TT_DATA_F, TP_F_LEN, TP_G_LEN, TP_PHASES, TP_API>(),
+    static_assert(fnCheckGLen<TT_DATA_F, TT_DATA_G, TP_F_LEN, TP_G_LEN, TP_PHASES, TP_API>(),
                   " Assertion Failed : \n            ERROR: 'TP_G_LEN' should be always less than or equal to TP_F_LEN "
                   "as per con_corr requirement \n"
-                  "                   For API-1[STREAM] [COND-1] : TP_G_LEN must be in the range <8,256> when stream "
+                  "                   For API-1[STREAM] [COND-1] : TP_G_LEN must be in the range "
+                  "<(256/8/sizeof(TT_DATA_G)), 256> when stream "
                   "only processing AND \n  "
-                  "                                    ([COND-2] : TP_G_LEN must be equal to (TP_PHASES*4) OR \n "
-                  "                                     [COND-3] : TP_G_LEN must be multiples of (TP_PHASES*8) when "
-                  "TP_G_LEN is greater than (TP_PHASES*4)).  \n");
+                  "                                    [COND-2] : TP_G_LEN must be a multiple of (TP_PHASES * kLanes * "
+                  "(kPoints / kStreamsPerCore)).  \n");
 
     // defensive check for num of frames i.e., TP_NUM_FRAMES restricted to 1 to maintain the better performance for time
     // being.
@@ -419,29 +422,26 @@ class conv_corr_graph : public graph {
                   "maintain the same performance of conv/corr.");
 
     // defensive check for Lengths of F and G should be in the given range of Min and Max
-    static_assert(fnCheckLenOfData<TT_DATA_F, TP_F_LEN, TP_API>(),
+    static_assert(fnCheckInBuffofFLen<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_F_LEN, TP_API, TP_COMPUTE_MODE>(),
                   " Assertion Failed : \n "
-                  "             ERROR: TP_F_LEN should be granuality of Min data_load on AIE i.e. "
-                  "[(256/samplesize<TT_DATA_F>())] \n                   [int8   - (32*N) ] \n                   [int16 "
-                  " - (16*N) ] \n                   [int32  - (8*N)  ] \n                   [cint16 - (8*N)  ] \n      "
-                  "             [cint32 - (4*N)  ] \n            where N is Integer > 1] and \n            TP_F_LEN "
-                  "should be greater than or equal to minimum length [((256/samplesize<TT_DATA_F>())*2)] based on "
-                  "given data type i.e.\n                 '[Data Type-    MIN    MAX]' \n                 "
-                  "'--------------------------' \n                 '[int8     -    64    8192]' \n                 "
-                  "'[int16    -    32    4096]' \n                 '[int32    -    16    2048]' \n                 "
-                  "'[cint16   -    16    2048]' \n                 '[cint32   -    8     1024]' ");
+                  "             ERROR: TP_F_LEN must be a multiple of data_load = 256/samplesize(TT_DATA_F) : \n"
+                  "                   [int8 - (32*N)] [int16/bfloat16 - (16*N)] [int32/cint16/float - (8*N)] \n"
+                  "                   [cint32/cfloat - (4*N)]  where N >= 2 \n"
+                  "             TP_F_LEN in [2*data_load, MAX_F] where \n"
+                  "             MAX_F = min(__DATA_MEM_BYTES__/sizeof(TT_DATA_F), \n"
+                  "                         FULL:  __DATA_MEM_BYTES__/sizeof(TT_DATA_OUT) - G_min + 1, \n"
+                  "                         SAME:  __DATA_MEM_BYTES__/sizeof(TT_DATA_OUT), \n"
+                  "                         VALID: __DATA_MEM_BYTES__/sizeof(TT_DATA_OUT) + G_min - 1).");
 
-    static_assert(fnCheckLenOfData<TT_DATA_G, TP_G_LEN, TP_API>(),
+    static_assert(fnCheckInBuffofGLen<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_F_LEN, TP_G_LEN, TP_API, TP_COMPUTE_MODE>(),
                   " Assertion Failed : \n "
-                  "             ERROR: TP_G_LEN should be granuality of Min data_load on AIE i.e. "
-                  "[(256/samplesize<TT_DATA_G>())] \n                   [int8   - (32*N) ] \n                   [int16 "
-                  " - (16*N) ] \n                   [int32  - (8*N)  ] \n                   [cint16 - (8*N)  ] \n      "
-                  "             [cint32 - (4*N)  ] \n            where N is Integer > 1] and \n            TP_G_LEN "
-                  "should be greater than or equal to minimum length [((256/samplesize<TT_DATA_G>())*2)] based on "
-                  "given data type i.e.\n                 '[Data Type-    MIN    MAX]' \n                 "
-                  "'--------------------------' \n                 '[int8     -    64    8192]' \n                 "
-                  "'[int16    -    32    4096]' \n                 '[int32    -    16    2048]' \n                 "
-                  "'[cint16   -    16    2048]' \n                 '[cint32   -    8     1024]' ");
+                  "             ERROR: TP_G_LEN must be a multiple of data_load = 256/samplesize(TT_DATA_G) : \n"
+                  "                   [int8 - (32*N)] [int16/bfloat16 - (16*N)] [int32/cint16/float - (8*N)] \n"
+                  "                   [cint32/cfloat - (4*N)]  where N >= 2 \n"
+                  "             TP_G_LEN in [2*data_load, MAX_G] where \n"
+                  "             MAX_G = min(TP_F_LEN, __DATA_MEM_BYTES__/sizeof(TT_DATA_G), \n"
+                  "                         FULL:  __DATA_MEM_BYTES__/sizeof(TT_DATA_OUT) - TP_F_LEN + 1, \n"
+                  "                         SAME/VALID: __DATA_MEM_BYTES__/sizeof(TT_DATA_G)).");
 
     // defensive check for scaling factor should be in the range.
     static_assert(fnValidateShiftFloat<TP_SHIFT, TT_DATA_F>(), "ERROR: TP_SHIFT must be 0 for float types.");
@@ -492,9 +492,15 @@ class conv_corr_graph : public graph {
     port_array<output, TP_PHASES> out;
 
     /**
-      * The conditional array of input async ports used to pass run-time programmable (RTP) vector lengths.
+        * The conditional array of input async ports used to pass run-time programmable (RTP) vector lengths.
      **/
-    port_conditional_array<input, (TP_USE_RTP_VECTOR_LENGTHS == 1), 1> rtpVecLen;
+    using rtp_port_array = port_conditional_array<input, (TP_USE_RTP_VECTOR_LENGTHS == 1), 1>;
+
+    /**
+     * When TP_USE_RTP_VECTOR_LENGTHS = 1, this port array is used to pass runtime vector lengths for F and G to the
+     * kernel(s).
+     */
+    rtp_port_array rtpVecLen;
 
     /**
         * The array of kernels that will be created and mapped onto AIE tiles.
@@ -502,10 +508,46 @@ class conv_corr_graph : public graph {
     kernel m_conv_corr[TP_PHASES][TP_CASC_LEN];
 
     /**
+        * Stream output alignment kernels (one per phase, stream API only).
+     **/
+    kernel m_conv_corr_align[TP_PHASES];
+
+    /**
      * Access function to get pointer to kernel (or first kernel in a chained and/or PHASE configurations).
      * No arguments required.
      **/
     kernel* getKernels() { return m_conv_corr[0]; };
+
+    /**
+    * @brief Access function to get total number of RTP ports.
+    **/
+    static constexpr unsigned int getTotalRtpPorts() {
+        // return the total number of RTP ports.
+        //
+        return rtpPortsPerKernel;
+    };
+
+   public:
+    /**
+     * @brief Updates the RTP port with runtime F and G vector lengths.
+     *
+     * When TP_USE_RTP_VECTOR_LENGTHS = 1, call this method before each kernel invocation
+     * to pass the runtime F and G lengths down to the kernel via the RTP port.
+     *
+     * @tparam TopGraph The type of the top-level graph containing this conv_corr_graph instance.
+     * @param top      Reference to the top-level graph used to call update().
+     * @param rtpPort  Reference to the top-level graph's RTP port array to update.
+     * @param rtpFLen  Runtime F vector length.
+     * @param rtpGLen  Runtime G vector length.
+     **/
+    template <typename TopGraph>
+    void update_rtp(TopGraph& top, rtp_port_array& rtpPort, unsigned int rtpFLen, unsigned int rtpGLen) {
+        if
+            constexpr(TP_USE_RTP_VECTOR_LENGTHS == 1) {
+                const std::array<int32_t, 2> vecLens = {static_cast<int32_t>(rtpFLen), static_cast<int32_t>(rtpGLen)};
+                top.update(rtpPort[0], vecLens.data(), 2);
+            }
+    }
 
     /**
         * @brief This is the constructor function for the conv_corr graph.
@@ -520,11 +562,44 @@ class conv_corr_graph : public graph {
 
                 // Loop Count
                 static constexpr int kLanes = getNumofLanes<TT_DATA_F, TT_DATA_G>();
-                static constexpr int kLoopCount = getLoopCount<TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
+                static constexpr int kMinGLenWin = ((TP_USE_RTP_VECTOR_LENGTHS == 1) && (TP_COMPUTE_MODE == VALID_MODE))
+                                                       ? getMinLen<TT_DATA_G>()
+                                                       : TP_G_LEN;
+                static constexpr int kLoopCount = getLoopCount<TP_COMPUTE_MODE, TP_F_LEN, kMinGLenWin>();
                 static constexpr int kAieLoopCount = (CEIL(kLoopCount, kLanes) / kLanes);
                 static constexpr int kOutLen = (kAieLoopCount * kLanes);
-                static constexpr int kpaddedFsigLen =
-                    getPaddedLength<TT_DATA_F, TT_DATA_G, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
+
+                static constexpr bool useSingleBufferF =
+                    (TP_F_LEN * sizeof(TT_DATA_F) * TP_NUM_FRAMES) > (__DATA_MEM_BYTES__ / 2) ? true : false;
+                static constexpr bool useSingleBufferG =
+                    (TP_G_LEN * sizeof(TT_DATA_G) * TP_NUM_FRAMES) > (__DATA_MEM_BYTES__ / 2) ? true : false;
+                static constexpr bool useSingleBufferOut =
+                    (kOutLen * sizeof(TT_DATA_OUT) * TP_NUM_FRAMES) > (__DATA_MEM_BYTES__ / 2) ? true : false;
+
+                // Stack size of the kernel, which is required to be defined explicitly when window API is used.
+                stack_size(m_conv_corr[0][0]) = 4096;
+
+                // connect RTP port of F and G Lengths to the Kernel
+                if
+                    constexpr(TP_USE_RTP_VECTOR_LENGTHS == 1) {
+                        connect<parameter>(rtpVecLen[0], async(m_conv_corr[0][0].in[2])); // RTP for F_LEN and G_LEN
+                    }
+
+                if
+                    constexpr(useSingleBufferF) {
+                        // Handle single buffer case for F input when F is too large.
+                        single_buffer(m_conv_corr[0][0].in[0]);
+                    }
+                if
+                    constexpr(useSingleBufferG) {
+                        // Handle single buffer case for G input when G is too large.
+                        single_buffer(m_conv_corr[0][0].in[1]);
+                    }
+                if
+                    constexpr(useSingleBufferOut) {
+                        // Handle single buffer case for output when output is too large.
+                        single_buffer(m_conv_corr[0][0].out[0]);
+                    }
 
                 // make connections
                 connect<>(inF[0], m_conv_corr[0][0].in[0]);
@@ -535,12 +610,6 @@ class conv_corr_graph : public graph {
                 // connect final kernel output to output of the graph
                 connect<>(m_conv_corr[0][0].out[0], out[0]);
                 dimensions(m_conv_corr[0][0].out[0]) = {kOutLen * TP_NUM_FRAMES};
-
-                // connect RTP port of F and G Lengths to the Kernel
-                if
-                    constexpr(TP_USE_RTP_VECTOR_LENGTHS == 1) {
-                        connect<parameter>(rtpVecLen[0], async(m_conv_corr[0][0].in[2])); // RTP for F_LEN and G_LEN
-                    }
 
                 // Specify mapping constraints
                 runtime<ratio>(m_conv_corr[0][0]) =
@@ -568,6 +637,9 @@ class conv_corr_graph : public graph {
                 // Make Connections
                 // Inner loop that iterates for cascade length
                 for (unsigned int j = 0; j < TP_CASC_LEN; j++) {
+                    // Stack size of the kernel, which is required to be defined explicitly when stream API is used.
+                    stack_size(m_conv_corr[i][j]) = 4096;
+
                     // connect cascaded kernels
                     if (TP_CASC_LEN > 1 && j > 0) {
                         connect<cascade>(m_conv_corr[i][j - 1].out[0], m_conv_corr[i][j].in[2]);
@@ -590,16 +662,42 @@ class conv_corr_graph : public graph {
                     headers(m_conv_corr[i][j]) = {"conv_corr.hpp"};
                 }
 
+                // Stack size of the kernel, which is required to be defined explicitly when stream API is used.
+                stack_size(m_conv_corr[i][0]) = 4096;
+
                 connect(inG, m_conv_corr[i][0].in[2]);
                 dimensions(m_conv_corr[i][0].in[2]) = {TP_G_LEN};
-                // connect final kernel output to output of the graph
-                connect<stream>(m_conv_corr[i][TP_CASC_LEN - 1].out[0], out[i]);
 
                 // connect RTP port of F and G Lengths to the Kernel
                 if
                     constexpr(TP_USE_RTP_VECTOR_LENGTHS == 1) {
                         connect<parameter>(rtpVecLen[0], async(m_conv_corr[i][0].in[3])); // RTP for F_LEN and G_LEN
                     }
+
+#if (__HAS_ACCUM_PERMUTES__ == 1)
+                // Stream output alignment kernel creation for each phase, used to discard the MAC4_ROT pipeline
+                // startup-transient samples and
+                // forward only the valid, aligned output samples.
+                m_conv_corr_align[i] =
+                    kernel::create_object<conv_corr_stream_align<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_F_LEN, TP_G_LEN,
+                                                                 TP_PHASES, TP_CASC_LEN> >();
+
+                // Stack size of the kernel, which is required to be defined explicitly when stream API is used.
+                stack_size(m_conv_corr_align[i]) = 4096;
+
+                // Route conv_corr output as input to the alignment kernel
+                connect<stream>(m_conv_corr[i][TP_CASC_LEN - 1].out[0], m_conv_corr_align[i].in[0]);
+
+                // Route alignment kernel output to the final output
+                connect<stream>(m_conv_corr_align[i].out[0], out[i]);
+
+                runtime<ratio>(m_conv_corr_align[i]) = 0.9;
+                source(m_conv_corr_align[i]) = "conv_corr_stream_align.cpp";
+                headers(m_conv_corr_align[i]) = {"conv_corr_stream_align.hpp"};
+#else
+                // Direct connection when alignment kernel is not available
+                connect<stream>(m_conv_corr[i][TP_CASC_LEN - 1].out[0], out[i]);
+#endif
             }
         }
     }; // constructor

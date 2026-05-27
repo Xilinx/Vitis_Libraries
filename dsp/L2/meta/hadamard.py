@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# from socket import TIPC_SUB_SERVICE
 import aie_common as com
 from aie_common import *
 
@@ -563,11 +562,6 @@ def generate_graph(graphname, args):
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
 
-    if TP_API == API_STREAM:
-        ssr = TP_SSR // 2
-    else:
-        ssr = TP_SSR
-
     # Use formatted multi-line string to avoid a lot of \n and \t
     code = f"""
 class {graphname} : public adf::graph {{
@@ -587,15 +581,15 @@ public:
     {TP_NUM_FRAMES}, //TP_NUM_FRAMES
     {TP_SHIFT}, //TP_SHIFT
     {TP_API}, //TP_API
-    {ssr}, //TP_SSR
+    {TP_SSR} //TP_SSR
   > hadamard;
 
   {graphname}() : hadamard() {{
     adf::kernel *hadamard_kernels = hadamard.getKernels();
 
     for (int i=0; i < TP_SSR; i++) {{
-      adf::connect<> net_in(inA[i], hadamard.inA[i]);
-      adf::connect<> net_in(inB[i], hadamard.inB[i]);
+      adf::connect<> net_inA(inA[i], hadamard.inA[i]);
+      adf::connect<> net_inB(inB[i], hadamard.inB[i]);
       adf::connect<> net_out(hadamard.out[i], out[i]);
     }}
   }}

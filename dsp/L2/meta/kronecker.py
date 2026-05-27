@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# from ctypes import sizeof
-# from socket import TIPC_SUB_SERVICE
 import aie_common as com
 from aie_common import *
 
@@ -351,7 +349,7 @@ def fn_validate_dim_cols_a(
 
     if TP_DIM_A_COLS % TP_SSR != 0:
         return isError(
-            f"TP_DIM_A_COLS should be an integer multiple of ssr. Got TP_DIM__ROWS = {TP_DIM_A_COLS}, TP_SSR = {TP_SSR}"
+            f"TP_DIM_A_COLS should be an integer multiple of ssr. Got TP_DIM_A_COLS = {TP_DIM_A_COLS}, TP_SSR = {TP_SSR}"
         )
     else:
         range_TP_DIM_A_COLS = [param_dict["minimum"], param_dict["maximum"]]
@@ -476,7 +474,7 @@ def fn_validate_dim_b_rows(
 
     if TP_DIM_B_ROWS % VEC_SIZE:
         return isError(
-            f"TP_DIM_B_ROWS should be an integer multiple of vector size. Vector size for the data type {TT_DATA_B} is {VEC_SIZE}. Got TP_DIM__ROWS = {TP_DIM_B_ROWS}"
+            f"TP_DIM_B_ROWS should be an integer multiple of vector size. Vector size for the data type {TT_DATA_B} is {VEC_SIZE}. Got TP_DIM_B_ROWS = {TP_DIM_B_ROWS}"
         )
     else:
         range_TP_DIM_B_ROWS = [param_dict["minimum"], param_dict["maximum"]]
@@ -827,6 +825,7 @@ def fn_det_out_type(TT_DATA_A, TT_DATA_B):
 
 #### port ####
 def get_port_info(portname, dir, dataType, dim, numFrames, apiType, vectorLength):
+    windowSize = dim * fn_size_by_byte(dataType)
     return [
         {
             "name": f"{portname}[{idx}]",
@@ -834,7 +833,7 @@ def get_port_info(portname, dir, dataType, dim, numFrames, apiType, vectorLength
             "direction": f"{dir}",
             "data_type": dataType,
             "fn_is_complex": fn_is_complex(dataType),
-            "window_size": dim
+            "window_size": windowSize
             * numFrames,  # com.fn_input_window_size(windowVsize, dataType),
             "margin_size": 0,
         }
@@ -861,7 +860,7 @@ def info_ports(args):
             portname="inA",
             dir="in",
             dataType=TT_DATA_A,
-            dim=TP_DIM_A_ROWS * TP_DIM_A_COLS,
+            dim=TP_DIM_A_ROWS * TP_DIM_A_COLS / TP_SSR,
             numFrames=TP_NUM_FRAMES,
             apiType="window",
             vectorLength=TP_SSR,
@@ -879,7 +878,7 @@ def info_ports(args):
             portname="out",
             dir="out",
             dataType=fn_det_out_type(TT_DATA_A, TT_DATA_B),
-            dim=TP_DIM_A_ROWS * TP_DIM_B_ROWS * TP_DIM_A_COLS * TP_DIM_B_COLS,
+            dim=TP_DIM_A_ROWS * TP_DIM_B_ROWS * TP_DIM_A_COLS * TP_DIM_B_COLS / TP_SSR,
             numFrames=TP_NUM_FRAMES,
             apiType="window",
             vectorLength=TP_SSR,
@@ -889,7 +888,7 @@ def info_ports(args):
             portname="inA",
             dir="in",
             dataType=TT_DATA_A,
-            dim=TP_DIM_A_ROWS * TP_DIM_A_COLS,
+            dim=TP_DIM_A_ROWS * TP_DIM_A_COLS / TP_SSR,
             numFrames=TP_NUM_FRAMES,
             apiType="stream",
             vectorLength=TP_SSR,
@@ -907,7 +906,7 @@ def info_ports(args):
             portname="out",
             dir="out",
             dataType=fn_det_out_type(TT_DATA_A, TT_DATA_B),
-            dim=TP_DIM_A_ROWS * TP_DIM_B_ROWS * TP_DIM_A_COLS * TP_DIM_B_COLS,
+            dim=TP_DIM_A_ROWS * TP_DIM_B_ROWS * TP_DIM_A_COLS * TP_DIM_B_COLS / TP_SSR,
             numFrames=TP_NUM_FRAMES,
             apiType="stream",
             vectorLength=TP_SSR,
@@ -926,16 +925,11 @@ def generate_graph(graphname, args):
     TP_DIM_A_ROWS = args["TP_DIM_A_ROWS"]
     TP_DIM_A_COLS = args["TP_DIM_A_COLS"]
     TP_DIM_B_ROWS = args["TP_DIM_B_ROWS"]
-    TP_DIM_B_ROWS = args["TP_DIM_B_COLS"]
+    TP_DIM_B_COLS = args["TP_DIM_B_COLS"]
     TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
     TP_SHIFT = args["TP_SHIFT"]
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
-
-    # if TP_API == API_STREAM:
-    #   ssr = TP_SSR//2
-    # else:
-    #   ssr = TP_SSR
 
     # Use formatted multi-line string to avoid a lot of \n and \t
     code = f"""
@@ -955,19 +949,19 @@ public:
     {TP_DIM_A_ROWS}, //TP_DIM_A_ROWS
     {TP_DIM_A_COLS}, //TP_DIM_A_COLS
     {TP_DIM_B_ROWS}, //TP_DIM_B_ROWS
-    {TP_DIM_A_COLS}, //TP_DIM_B_COLS
+    {TP_DIM_B_COLS}, //TP_DIM_B_COLS
     {TP_NUM_FRAMES}, //TP_NUM_FRAMES
     {TP_API}, //TP_API
     {TP_SHIFT}, //TP_SHIFT
-    {TP_SSR}, //TP_SSR
+    {TP_SSR} //TP_SSR
   > kronecker;
 
   {graphname}() : kronecker() {{
     adf::kernel *kronecker_kernels = kronecker.getKernels();
 
     for (int i=0; i < TP_SSR; i++) {{
-      adf::connect<> net_in(inA[i], kronecker.inA[i]);
-      adf::connect<> net_in(inB[i], kronecker.inB[i]);
+      adf::connect<> net_inA(inA[i], kronecker.inA[i]);
+      adf::connect<> net_inB(inB[i], kronecker.inB[i]);
       adf::connect<> net_out(kronecker.out[i], out[i]);
     }}
   }}

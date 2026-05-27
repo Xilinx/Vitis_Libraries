@@ -75,12 +75,6 @@ inline int read_array(int size, char* filename, int offset, int16_t* read_data) 
         fscanf(pFile, "%d \n", &real);
         read_data[i + offset] = real;
     }
-    printf("Read Array:\n");
-    for (int i = 0; i < (size + offset); i++) {
-        if ((i % 16) == 0) printf("[%5d]", i);
-        printf("%6d, ", read_data[i]);
-        if ((i % 16) == 15) printf("\n");
-    }
     fclose(pFile);
     pFile = NULL;
     return RETURN_SUCCESS;

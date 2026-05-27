@@ -23,20 +23,12 @@ TP_SSR_max = 16
 TP_CASC_min = 1
 TP_CASC_max = 16
 
-# aie1_pp_buffer=16384
-# aie2_pp_buffer=32768
-
 
 #######################################################
 ########### AIE_VARIANT Updater and Validator #########
 #######################################################
 def update_AIE_VARIANT(args):
-    return fn_update_AIE_VARIANT()
-
-
-def fn_update_AIE_VARIANT():
     legal_set_AIE_VARIANT = [com.AIE, com.AIE_ML, com.AIE_MLv2]
-
     param_dict = {}
     param_dict.update({"name": "AIE_VARIANT"})
     param_dict.update({"enum": legal_set_AIE_VARIANT})
@@ -45,13 +37,11 @@ def fn_update_AIE_VARIANT():
 
 def validate_AIE_VARIANT(args):
     AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_validate_AIE_VARIANT(AIE_VARIANT)
-
-
-def fn_validate_AIE_VARIANT(AIE_VARIANT):
-    param_dict = fn_update_AIE_VARIANT()
-    legal_set_AIE_VARIANT = param_dict["enum"]
-    return validate_legal_set(legal_set_AIE_VARIANT, "AIE_VARIANT", AIE_VARIANT)
+    
+    # Get legal set from updater
+    legal_set = update_AIE_VARIANT(args)["enum"]
+    
+    return validate_legal_set(legal_set, "AIE_VARIANT", AIE_VARIANT)
 
 
 #######################################################
@@ -59,28 +49,25 @@ def fn_validate_AIE_VARIANT(AIE_VARIANT):
 #######################################################
 def update_TT_DATA_A(args):
     AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_update_TT_DATA_A(AIE_VARIANT)
-
-
-def fn_update_TT_DATA_A(AIE_VARIANT):
     legal_set_TT_DATA_A = ["int16", "cint16", "int32", "cint32", "float", "cfloat"]
-    float_set = ["float", "cfloat"]
-    if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2:  # ? cfloat only?
-        legal_set_TT_DATA_A = remove_from_set(float_set, legal_set_TT_DATA_A)
-
-    param_dict = {"name": "TT_DATA_A", "enum": legal_set_TT_DATA_A}
+    
+    # Float types not supported on AIE-ML/MLv2
+    if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2:
+        legal_set_TT_DATA_A = [t for t in legal_set_TT_DATA_A if t not in ["float", "cfloat"]]
+    
+    param_dict = {}
+    param_dict.update({"name": "TT_DATA_A"})
+    param_dict.update({"enum": legal_set_TT_DATA_A})
     return param_dict
 
 
 def validate_TT_DATA_A(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA_A = args["TT_DATA_A"]
-    return fn_validate_TT_DATA_A(AIE_VARIANT, TT_DATA_A)
-
-
-def fn_validate_TT_DATA_A(AIE_VARIANT, TT_DATA_A):
-    param_dict = fn_update_TT_DATA_A(AIE_VARIANT)
-    return validate_legal_set(param_dict["enum"], "TT_DATA_A", TT_DATA_A)
+    
+    # Get legal set from updater
+    legal_set = update_TT_DATA_A(args)["enum"]
+    return validate_legal_set(legal_set, "TT_DATA_A", TT_DATA_A)
 
 
 #######################################################
@@ -89,39 +76,32 @@ def fn_validate_TT_DATA_A(AIE_VARIANT, TT_DATA_A):
 def update_TT_DATA_B(args):
     TT_DATA_A = args["TT_DATA_A"]
     AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_update_TT_DATA_B(TT_DATA_A, AIE_VARIANT)
-
-
-def fn_update_TT_DATA_B(TT_DATA_A, AIE_VARIANT):
     legal_set_TT_DATA_B = ["int16", "cint16", "int32", "cint32", "float", "cfloat"]
     int_set = ["int16", "cint16", "int32", "cint32"]
     float_set = ["float", "cfloat"]
 
+    # Type compatibility: int with int, float with float
     if TT_DATA_A in int_set:
-        legal_set_TT_DATA_B = remove_from_set(float_set, legal_set_TT_DATA_B)
+        legal_set_TT_DATA_B = [t for t in legal_set_TT_DATA_B if t not in float_set]
     elif TT_DATA_A in float_set:
-        legal_set_TT_DATA_B = remove_from_set(int_set, legal_set_TT_DATA_B)
+        legal_set_TT_DATA_B = [t for t in legal_set_TT_DATA_B if t not in int_set]
 
-    # check which TT_DATA_B types have supported tiling scheme with TT_DATA_A
-    for typeB in legal_set_TT_DATA_B.copy():
-        if getTilingScheme(TT_DATA_A, typeB, AIE_VARIANT) == (0, 0, 0):
-            legal_set_TT_DATA_B = remove_from_set([typeB], legal_set_TT_DATA_B)
+    # Check which TT_DATA_B types have supported tiling scheme with TT_DATA_A
+    legal_set_TT_DATA_B = [t for t in legal_set_TT_DATA_B if getTilingScheme(TT_DATA_A, t, AIE_VARIANT) != (0, 0, 0)]
 
-    param_dict = {"name": "TT_DATA_A", "enum": legal_set_TT_DATA_B}
+    param_dict = {}
+    param_dict.update({"name": "TT_DATA_B"})
+    param_dict.update({"enum": legal_set_TT_DATA_B})
     return param_dict
 
 
 def validate_TT_DATA_B(args):
-    TT_DATA_A = args["TT_DATA_A"]
     TT_DATA_B = args["TT_DATA_B"]
-    AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_validate_TT_DATA_B(TT_DATA_A, TT_DATA_B, AIE_VARIANT)
-
-
-def fn_validate_TT_DATA_B(TT_DATA_A, TT_DATA_B, AIE_VARIANT):
-    param_dict = fn_update_TT_DATA_B(TT_DATA_A, AIE_VARIANT)
-    return validate_legal_set(param_dict["enum"], "TT_DATA_B", TT_DATA_B)
-
+    
+    # Get legal set from updater
+    legal_set = update_TT_DATA_B(args)["enum"]
+    return validate_legal_set(legal_set, "TT_DATA_B", TT_DATA_B)
+    
 
 #######################################################
 ########### TT_OUT_DATA Updater and Validator ###########
@@ -129,50 +109,38 @@ def fn_validate_TT_DATA_B(TT_DATA_A, TT_DATA_B, AIE_VARIANT):
 def update_TT_OUT_DATA(args):
     TT_DATA_A = args["TT_DATA_A"]
     TT_DATA_B = args["TT_DATA_B"]
-    return fn_update_TT_OUT_DATA(TT_DATA_A, TT_DATA_B)
-
-
-def fn_update_TT_OUT_DATA(TT_DATA_A, TT_DATA_B):
     legal_set_TT_OUT_DATA = ["int16", "cint16", "int32", "cint32", "float", "cfloat"]
 
-    # if A or B complex, out must be complex, else out is real
+    # If A or B complex, out must be complex, else out is real
     if fn_is_complex(TT_DATA_A) or fn_is_complex(TT_DATA_B):
-        legal_set_TT_OUT_DATA = remove_from_set(
-            k_non_complex_types, legal_set_TT_OUT_DATA
-        )
+        legal_set_TT_OUT_DATA = [t for t in legal_set_TT_OUT_DATA if fn_is_complex(t)]
     else:
-        legal_set_TT_OUT_DATA = remove_from_set(k_complex_types, legal_set_TT_OUT_DATA)
-    # if A or B float,out must be float, else integer
+        legal_set_TT_OUT_DATA = [t for t in legal_set_TT_OUT_DATA if not fn_is_complex(t)]
+    
+    # If A or B float, out must be float, else integer
     if fn_is_floating_point(TT_DATA_A) or fn_is_floating_point(TT_DATA_B):
-        legal_set_TT_OUT_DATA = remove_from_set(k_integral_types, legal_set_TT_OUT_DATA)
+        legal_set_TT_OUT_DATA = [t for t in legal_set_TT_OUT_DATA if fn_is_floating_point(t)]
     else:
-        legal_set_TT_OUT_DATA = remove_from_set(
-            k_floating_point_types, legal_set_TT_OUT_DATA
-        )
+        legal_set_TT_OUT_DATA = [t for t in legal_set_TT_OUT_DATA if not fn_is_floating_point(t)]
 
-    # remove out types with less precision than the larger input data
-    maxBaseType = max(
-        fn_size_by_byte(fn_base_type(TT_DATA_A)),
-        fn_size_by_byte(fn_base_type(TT_DATA_B)),
-    )
-    for dataOut in legal_set_TT_OUT_DATA:
-        if fn_size_by_byte(fn_base_type(dataOut)) < maxBaseType:
-            legal_set_TT_OUT_DATA = remove_from_set([dataOut], legal_set_TT_OUT_DATA)
+    # Remove out types with less precision than the larger input data
+    maxBaseType = max(fn_size_by_byte(fn_base_type(TT_DATA_A)), fn_size_by_byte(fn_base_type(TT_DATA_B)))
+    legal_set_TT_OUT_DATA = [t for t in legal_set_TT_OUT_DATA if fn_size_by_byte(fn_base_type(t)) >= maxBaseType]
 
-    param_dict = {"name": "TT_OUT_DATA", "enum": legal_set_TT_OUT_DATA}
+    param_dict = {}
+    param_dict.update({"name": "TT_OUT_DATA"})
+    param_dict.update({"enum": legal_set_TT_OUT_DATA})
     return param_dict
 
 
 def validate_TT_OUT_DATA(args):
     TT_OUT_DATA = args["TT_OUT_DATA"]
-    TT_DATA_A = args["TT_DATA_A"]
-    TT_DATA_B = args["TT_DATA_B"]
-    return fn_validate_TT_OUT_DATA(TT_OUT_DATA, TT_DATA_A, TT_DATA_B)
+    
+    # Get legal set from updater
+    legal_set = update_TT_OUT_DATA(args)["enum"]
+    
+    return validate_legal_set(legal_set, "TT_OUT_DATA", TT_OUT_DATA)
 
-
-def fn_validate_TT_OUT_DATA(TT_OUT_DATA, TT_DATA_A, TT_DATA_B):
-    param_dict = fn_update_TT_OUT_DATA(TT_DATA_A, TT_DATA_B)
-    return validate_legal_set(param_dict["enum"], "TT_OUT_DATA", TT_OUT_DATA)
 
 
 #######################################################
@@ -183,48 +151,31 @@ def update_TP_DIM_A(args):
     TT_DATA_A = args["TT_DATA_A"]
     TT_DATA_B = args["TT_DATA_B"]
     TT_OUT_DATA = args["TT_OUT_DATA"]
+    TP_DIM_A_input = int(args.get("TP_DIM_A", 0)) if args.get("TP_DIM_A") else 0
 
-    if "TP_DIM_A" in args and args["TP_DIM_A"]:
-        TP_DIM_A = args["TP_DIM_A"]
-    else:
-        TP_DIM_A = 0
-
-    return fn_update_TP_DIM_A(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A)
-
-
-def fn_update_TP_DIM_A(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A):
     (tileA, tileAB, tileB) = getTilingScheme(TT_DATA_A, TT_DATA_B, AIE_VARIANT)
-
     buffer_size = k_data_memory_bytes[AIE_VARIANT]
-    max_buffer_sample_in = buffer_size / fn_size_by_byte(TT_DATA_A)
-    max_buffer_sample_out = buffer_size / fn_size_by_byte(TT_OUT_DATA)
+    max_buffer_sample_in = buffer_size // fn_size_by_byte(TT_DATA_A)
+    max_buffer_sample_out = buffer_size // fn_size_by_byte(TT_OUT_DATA)
 
     TP_SSR = 16
     TP_CASC = 16
     TP_DIM_B = tileB
     TP_DIM_AB = tileAB
 
-    TP_DIM_A_max_buffer_in = (max_buffer_sample_in * TP_SSR * TP_CASC) / (TP_DIM_AB)
-    TP_DIM_A_max_buffer_out = (max_buffer_sample_out * TP_SSR) / (TP_DIM_B)
-    TP_DIM_A_max = min(TP_DIM_A_max_buffer_in, TP_DIM_A_max_buffer_out)
+    TP_DIM_A_max_buffer_in = (max_buffer_sample_in * TP_SSR * TP_CASC) // TP_DIM_AB
+    TP_DIM_A_max_buffer_out = (max_buffer_sample_out * TP_SSR) // TP_DIM_B
+    TP_DIM_A_max = int(FLOOR(min(TP_DIM_A_max_buffer_in, TP_DIM_A_max_buffer_out), tileA))
 
     param_dict = {
         "name": "TP_DIM_A",
         "minimum": tileA,
-        "maximum": int(FLOOR(TP_DIM_A_max, tileA)),
-        "maximum_pingpong_buf": int(FLOOR(TP_DIM_A_max / 2, tileA)),
+        "maximum": TP_DIM_A_max,
     }
 
-    if TP_DIM_A != 0 and (TP_DIM_A % tileA != 0):
-        TP_DIM_A_act = round(TP_DIM_A / tileA) * tileA
-
-        if TP_DIM_A_act < param_dict["minimum"]:
-            TP_DIM_A_act = param_dict["minimum"]
-
-        if TP_DIM_A_act > param_dict["maximum"]:
-            TP_DIM_A_act = param_dict["maximum"]
-
-        param_dict.update({"actual": int(TP_DIM_A_act)})
+    TP_DIM_A_act = com.CLIP(TP_DIM_A_input, param_dict["minimum"], param_dict["maximum"])
+    TP_DIM_A_act = com.ROUND_TO_NEAREST_MULTIPLE(TP_DIM_A_act, tileA)
+    param_dict.update({"actual": int(TP_DIM_A_act)})
 
     return param_dict
 
@@ -235,23 +186,33 @@ def validate_TP_DIM_A(args):
     TT_DATA_B = args["TT_DATA_B"]
     TT_OUT_DATA = args["TT_OUT_DATA"]
     TP_DIM_A = args["TP_DIM_A"]
-    return fn_validate_TP_DIM_A(
-        AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A
-    )
-
-
-def fn_validate_TP_DIM_A(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A):
-
+    
     (tileA, tileAB, tileB) = getTilingScheme(TT_DATA_A, TT_DATA_B, AIE_VARIANT)
-
+    
+    # Check tiling alignment
     if TP_DIM_A % tileA != 0:
-        return isError(f"TP_DIM_A should be a multiple of {tileA}!")
-    else:
-        param_dict = fn_update_TP_DIM_A(
-            AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A
-        )
-        range_TP_DIM_A = [param_dict["minimum"], param_dict["maximum"]]
-        return validate_range(range_TP_DIM_A, "TP_DIM_A", TP_DIM_A)
+        return isError(f"TP_DIM_A ({TP_DIM_A}) must be a multiple of tileA ({tileA})!")
+    
+    # Check buffer size constraints
+    buffer_size = k_data_memory_bytes[AIE_VARIANT]
+    max_buffer_sample_in = buffer_size // fn_size_by_byte(TT_DATA_A)
+    max_buffer_sample_out = buffer_size // fn_size_by_byte(TT_OUT_DATA)
+    
+    TP_SSR_max_val = 16
+    TP_CASC_max_val = 16
+    TP_DIM_B_min = tileB
+    TP_DIM_AB_min = tileAB
+    
+    TP_DIM_A_max_buffer_in = (max_buffer_sample_in * TP_SSR_max_val * TP_CASC_max_val) // TP_DIM_AB_min
+    TP_DIM_A_max_buffer_out = (max_buffer_sample_out * TP_SSR_max_val) // TP_DIM_B_min
+    TP_DIM_A_max = min(TP_DIM_A_max_buffer_in, TP_DIM_A_max_buffer_out)
+    
+    if TP_DIM_A < tileA:
+        return isError(f"TP_DIM_A ({TP_DIM_A}) must be at least {tileA}!")
+    if TP_DIM_A > TP_DIM_A_max:
+        return isError(f"TP_DIM_A ({TP_DIM_A}) exceeds maximum ({int(TP_DIM_A_max)}) based on buffer size constraints!")
+    
+    return isValid
 
 
 #######################################################
@@ -261,52 +222,31 @@ def update_TP_DIM_B(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA_A = args["TT_DATA_A"]
     TT_DATA_B = args["TT_DATA_B"]
-    TP_DIM_A = args["TP_DIM_A"]
+    TP_DIM_A = int(args["TP_DIM_A"])
     TT_OUT_DATA = args["TT_OUT_DATA"]
+    TP_DIM_B_input = int(args.get("TP_DIM_B", 0)) if args.get("TP_DIM_B") else 0
 
-    if "TP_DIM_B" in args and args["TP_DIM_B"]:
-        TP_DIM_B = args["TP_DIM_B"]
-    else:
-        TP_DIM_B = 0
-
-    return fn_update_TP_DIM_B(
-        AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_B
-    )
-
-
-def fn_update_TP_DIM_B(
-    AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_B
-):
     (tileA, tileAB, tileB) = getTilingScheme(TT_DATA_A, TT_DATA_B, AIE_VARIANT)
-
     buffer_size = k_data_memory_bytes[AIE_VARIANT]
-    max_buffer_sample_in = buffer_size / fn_size_by_byte(TT_DATA_B)
-    max_buffer_sample_out = buffer_size / fn_size_by_byte(TT_OUT_DATA)
+    max_buffer_sample_in = buffer_size // fn_size_by_byte(TT_DATA_B)
+    max_buffer_sample_out = buffer_size // fn_size_by_byte(TT_OUT_DATA)
 
     TP_CASC = 16
-    TP_SSR = 16
+    TP_SSR = min(TP_SSR_max, TP_DIM_A // tileA)
     TP_DIM_AB = tileAB
-    TP_DIM_B_max_in = max_buffer_sample_in * TP_CASC / (TP_DIM_AB)
-    TP_DIM_B_max_out = max_buffer_sample_out * TP_SSR / TP_DIM_A
-    TP_DIM_B_max = min(TP_DIM_B_max_in, TP_DIM_B_max_out)
+    TP_DIM_B_max_in = (max_buffer_sample_in * TP_CASC) // TP_DIM_AB
+    TP_DIM_B_max_out = (max_buffer_sample_out * TP_SSR) // TP_DIM_A
+    TP_DIM_B_max = int(FLOOR(min(TP_DIM_B_max_in, TP_DIM_B_max_out), tileB))
 
     param_dict = {
         "name": "TP_DIM_B",
         "minimum": tileB,
-        "maximum": int(TP_DIM_B_max),
-        "maximum_pingpong_buf": int(TP_DIM_B_max / 2),
+        "maximum": TP_DIM_B_max,
     }
 
-    if TP_DIM_B != 0 and (TP_DIM_B % tileB != 0):
-        TP_DIM_B_act = round(TP_DIM_B / tileB) * tileB
-
-        if TP_DIM_B_act < param_dict["minimum"]:
-            TP_DIM_B_act = param_dict["minimum"]
-
-        if TP_DIM_B_act > param_dict["maximum"]:
-            TP_DIM_B_act = param_dict["maximum"]
-
-        param_dict.update({"actual": int(TP_DIM_B_act)})
+    TP_DIM_B_act = com.CLIP(TP_DIM_B_input, param_dict["minimum"], param_dict["maximum"])
+    TP_DIM_B_act = com.ROUND_TO_NEAREST_MULTIPLE(TP_DIM_B_act, tileB)
+    param_dict.update({"actual": int(TP_DIM_B_act)})
 
     return param_dict
 
@@ -318,24 +258,32 @@ def validate_TP_DIM_B(args):
     TT_OUT_DATA = args["TT_OUT_DATA"]
     TP_DIM_A = args["TP_DIM_A"]
     TP_DIM_B = args["TP_DIM_B"]
-    return fn_validate_TP_DIM_B(
-        AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_B
-    )
-
-
-def fn_validate_TP_DIM_B(
-    AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_B
-):
+    
     (tileA, tileAB, tileB) = getTilingScheme(TT_DATA_A, TT_DATA_B, AIE_VARIANT)
-
+    
+    # Check tiling alignment
     if TP_DIM_B % tileB != 0:
-        return isError(f"TP_DIM_B should be a multiple of {tileB}!")
-    else:
-        param_dict = fn_update_TP_DIM_B(
-            AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_B
-        )
-        range_TP_DIM_B = [param_dict["minimum"], param_dict["maximum"]]
-        return validate_range(range_TP_DIM_B, "TP_DIM_B", TP_DIM_B)
+        return isError(f"TP_DIM_B ({TP_DIM_B}) must be a multiple of tileB ({tileB})!")
+    
+    # Check buffer size constraints
+    buffer_size = k_data_memory_bytes[AIE_VARIANT]
+    max_buffer_sample_in = buffer_size // fn_size_by_byte(TT_DATA_B)
+    max_buffer_sample_out = buffer_size // fn_size_by_byte(TT_OUT_DATA)
+    
+    TP_CASC_max_val = 16
+    TP_SSR_max_val = min(TP_SSR_max, TP_DIM_A // tileA)
+    TP_DIM_AB_min = tileAB
+
+    TP_DIM_B_max_in = (max_buffer_sample_in * TP_CASC_max_val) // TP_DIM_AB_min
+    TP_DIM_B_max_out = (max_buffer_sample_out * TP_SSR_max_val) // TP_DIM_A
+    TP_DIM_B_max = FLOOR(min(TP_DIM_B_max_in, TP_DIM_B_max_out), tileB)
+    
+    if TP_DIM_B < tileB:
+        return isError(f"TP_DIM_B ({TP_DIM_B}) must be at least {tileB}!")
+    if TP_DIM_B > TP_DIM_B_max:
+        return isError(f"TP_DIM_B ({TP_DIM_B}) exceeds maximum ({int(TP_DIM_B_max)}) based on buffer size constraints!")
+    
+    return isValid
 
 
 #######################################################
@@ -345,49 +293,30 @@ def update_TP_DIM_AB(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA_A = args["TT_DATA_A"]
     TT_DATA_B = args["TT_DATA_B"]
-    TP_DIM_A = args["TP_DIM_A"]
-    TP_DIM_B = args["TP_DIM_B"]
+    TP_DIM_A = int(args["TP_DIM_A"])
+    TP_DIM_B = int(args["TP_DIM_B"])
+    TP_DIM_AB_input = int(args.get("TP_DIM_AB", 0)) if args.get("TP_DIM_AB") else 0
 
-    if "TP_DIM_AB" in args and args["TP_DIM_AB"]:
-        TP_DIM_AB = args["TP_DIM_AB"]
-    else:
-        TP_DIM_AB = 0
-    return fn_update_TP_DIM_AB(
-        AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_DIM_AB
-    )
-
-
-def fn_update_TP_DIM_AB(
-    AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_DIM_AB
-):
     (tileA, tileAB, tileB) = getTilingScheme(TT_DATA_A, TT_DATA_B, AIE_VARIANT)
     buffer_size = k_data_memory_bytes[AIE_VARIANT]
-    max_buffer_sample_a = buffer_size / fn_size_by_byte(TT_DATA_A)
-    max_buffer_sample_b = buffer_size / fn_size_by_byte(TT_DATA_B)
+    max_buffer_sample_a = buffer_size // fn_size_by_byte(TT_DATA_A)
+    max_buffer_sample_b = buffer_size // fn_size_by_byte(TT_DATA_B)
 
     TP_SSR = 16
     TP_CASC = 16
-    TP_DIM_AB_max1 = (max_buffer_sample_a * TP_SSR * TP_CASC) / TP_DIM_A
-    TP_DIM_AB_max2 = (max_buffer_sample_b * TP_CASC) / TP_DIM_B
-    TP_DIM_AB_max = min(TP_DIM_AB_max1, TP_DIM_AB_max2)
+    TP_DIM_AB_max1 = (max_buffer_sample_a * TP_SSR * TP_CASC) // TP_DIM_A
+    TP_DIM_AB_max2 = (max_buffer_sample_b * TP_CASC) // TP_DIM_B
+    TP_DIM_AB_max = int(FLOOR(min(TP_DIM_AB_max1, TP_DIM_AB_max2), tileAB))
 
     param_dict = {
         "name": "TP_DIM_AB",
         "minimum": tileAB,
-        "maximum": int(TP_DIM_AB_max),
-        "maximum_pingpong_buf": int(TP_DIM_AB_max / 2),
+        "maximum": TP_DIM_AB_max,
     }
 
-    if TP_DIM_AB != 0 and (TP_DIM_AB % tileAB != 0):
-        TP_DIM_AB_act = round(TP_DIM_AB / tileAB) * tileAB
-
-        if TP_DIM_AB_act < param_dict["minimum"]:
-            TP_DIM_AB_act = param_dict["minimum"]
-
-        if TP_DIM_AB_act > param_dict["maximum"]:
-            TP_DIM_AB_act = param_dict["maximum"]
-
-        param_dict.update({"actual": int(TP_DIM_AB_act)})
+    TP_DIM_AB_act = com.CLIP(TP_DIM_AB_input, param_dict["minimum"], param_dict["maximum"])
+    TP_DIM_AB_act = com.ROUND_TO_NEAREST_MULTIPLE(TP_DIM_AB_act, tileAB)
+    param_dict.update({"actual": int(TP_DIM_AB_act)})
 
     return param_dict
 
@@ -399,24 +328,31 @@ def validate_TP_DIM_AB(args):
     TP_DIM_A = args["TP_DIM_A"]
     TP_DIM_B = args["TP_DIM_B"]
     TP_DIM_AB = args["TP_DIM_AB"]
-    return fn_validate_TP_DIM_AB(
-        AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_DIM_AB
-    )
-
-
-def fn_validate_TP_DIM_AB(
-    AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_DIM_AB
-):
+    
     (tileA, tileAB, tileB) = getTilingScheme(TT_DATA_A, TT_DATA_B, AIE_VARIANT)
-
+    
+    # Check tiling alignment
     if TP_DIM_AB % tileAB != 0:
-        return isError(f"TP_DIM_AB should be a mulriple of {tileAB}!")
-    else:
-        param_dict = fn_update_TP_DIM_AB(
-            AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_DIM_AB
-        )
-        range_TP_DIM_AB = [param_dict["minimum"], param_dict["maximum"]]
-        return validate_range(range_TP_DIM_AB, "TP_DIM_AB", TP_DIM_AB)
+        return isError(f"TP_DIM_AB ({TP_DIM_AB}) must be a multiple of tileAB ({tileAB})!")
+    
+    # Check buffer size constraints
+    buffer_size = k_data_memory_bytes[AIE_VARIANT]
+    max_buffer_sample_a = buffer_size // fn_size_by_byte(TT_DATA_A)
+    max_buffer_sample_b = buffer_size // fn_size_by_byte(TT_DATA_B)
+    
+    TP_SSR_max_val = 16
+    TP_CASC_max_val = 16
+    
+    TP_DIM_AB_max1 = (max_buffer_sample_a * TP_SSR_max_val * TP_CASC_max_val) // TP_DIM_A
+    TP_DIM_AB_max2 = (max_buffer_sample_b * TP_CASC_max_val) // TP_DIM_B
+    TP_DIM_AB_max = FLOOR(min(TP_DIM_AB_max1, TP_DIM_AB_max2), tileAB)
+    
+    if TP_DIM_AB < tileAB:
+        return isError(f"TP_DIM_AB ({TP_DIM_AB}) must be at least {tileAB}!")
+    if TP_DIM_AB > TP_DIM_AB_max:
+        return isError(f"TP_DIM_AB ({TP_DIM_AB}) exceeds maximum ({int(TP_DIM_AB_max)}) based on buffer size constraints!")
+    
+    return isValid
 
 
 #######################################################
@@ -430,95 +366,44 @@ def update_TP_SSR(args):
     TP_DIM_A = args["TP_DIM_A"]
     TP_DIM_AB = args["TP_DIM_AB"]
     TP_DIM_B = args["TP_DIM_B"]
-    return fn_update_ssr(
-        AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_AB, TP_DIM_B
-    )
-
-
-def fn_update_ssr(
-    AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_AB, TP_DIM_B
-):
-    buffer_size = k_data_memory_bytes[AIE_VARIANT]
-    ssrMinForA = max(
-        1,
-        fn_size_by_byte(TT_DATA_A) * TP_DIM_A * TP_DIM_AB / (TP_CASC_max * buffer_size),
-    )
-    ssrMinForOut = max(
-        1, fn_size_by_byte(TT_OUT_DATA) * TP_DIM_A * TP_DIM_B / (buffer_size)
-    )
-
-    ssrMinForA_pingpong = max(
-        1,
-        fn_size_by_byte(TT_DATA_A)
-        * TP_DIM_A
-        * TP_DIM_AB
-        / (TP_CASC_max * buffer_size / 2),
-    )
-    ssrMinForOut_pingpong = max(
-        1, fn_size_by_byte(TT_OUT_DATA) * TP_DIM_A * TP_DIM_B / (buffer_size / 2)
-    )
-    minSsr_pingpong = max(ssrMinForA_pingpong, ssrMinForOut_pingpong)
+    TP_SSR = args["TP_SSR"] if "TP_SSR" in args and args["TP_SSR"] else 0
 
     (tileA, tileAB, tileB) = getTilingScheme(TT_DATA_A, TT_DATA_B, AIE_VARIANT)
+    buffer_size = k_data_memory_bytes[AIE_VARIANT]
+    
+    # Calculate max possible cascade length based on actual TP_DIM_AB
+    max_casc_for_dim_ab = min(TP_CASC_max, TP_DIM_AB // tileAB)
+    
+    # Calculate buffer constraints - use max_casc_for_dim_ab since more splits allow larger dimensions
+    ssrMinForA = max(1, (fn_size_by_byte(TT_DATA_A) * TP_DIM_A * TP_DIM_AB + (max_casc_for_dim_ab * buffer_size) - 1) // (max_casc_for_dim_ab * buffer_size))
+    ssrMinForOut = max(1, (fn_size_by_byte(TT_OUT_DATA) * TP_DIM_A * TP_DIM_B + buffer_size - 1) // buffer_size)
     minSsr = max(ssrMinForA, ssrMinForOut)
-    maxSsr = min(TP_SSR_max, TP_DIM_A / tileA)
+    maxSsr = min(TP_SSR_max, TP_DIM_A // tileA)
 
-    legal_set_TP_SSR = find_divisors(TP_DIM_A, int(CEIL(maxSsr, 1)))
-    legal_set_TP_SSR_pingpong = legal_set_TP_SSR.copy()
+    # Build legal set using find_divisors
+    legal_set_TP_SSR = find_divisors(TP_DIM_A, maxSsr)
+    
+    # Filter based on constraints
+    legal_set_TP_SSR = [k for k in legal_set_TP_SSR 
+                        if k >= minSsr and k <= maxSsr 
+                        and (TP_DIM_A // k) % tileA == 0]
+    
+    if not legal_set_TP_SSR:
+        return False    # failure state
 
-    for k in legal_set_TP_SSR.copy():
-        if (k > maxSsr) or (k < minSsr):
-            legal_set_TP_SSR.remove(k)
-        if (k > maxSsr) or (k < minSsr_pingpong):
-            legal_set_TP_SSR_pingpong.remove(k)
-    param_dict = {
-        "name": "TP_SSR",
-        "enum": legal_set_TP_SSR,
-        "enum_pingpong_buf": legal_set_TP_SSR_pingpong,
-    }
+    param_dict = {"name": "TP_SSR", "enum": legal_set_TP_SSR, "actual": com.GET_CLOSEST(TP_SSR, legal_set_TP_SSR)}
     return param_dict
 
 
 def validate_TP_SSR(args):
-    AIE_VARIANT = args["AIE_VARIANT"]
-    TT_DATA_A = args["TT_DATA_A"]
-    TT_DATA_B = args["TT_DATA_B"]
-    TT_OUT_DATA = args["TT_OUT_DATA"]
-    TP_DIM_A = args["TP_DIM_A"]
-    TP_DIM_AB = args["TP_DIM_AB"]
-    TP_DIM_B = args["TP_DIM_B"]
     TP_SSR = args["TP_SSR"]
-    return fn_validate_ssr(
-        AIE_VARIANT,
-        TT_DATA_A,
-        TT_DATA_B,
-        TT_OUT_DATA,
-        TP_DIM_A,
-        TP_DIM_AB,
-        TP_DIM_B,
-        TP_SSR,
-    )
-
-
-def fn_validate_ssr(
-    AIE_VARIANT,
-    TT_DATA_A,
-    TT_DATA_B,
-    TT_OUT_DATA,
-    TP_DIM_A,
-    TP_DIM_AB,
-    TP_DIM_B,
-    TP_SSR,
-):
-    param_dict = fn_update_ssr(
-        AIE_VARIANT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_AB, TP_DIM_B
-    )
-    legal_set_TP_SSR = param_dict["enum"]
-    return validate_legal_set(legal_set_TP_SSR, "TP_SSR", TP_SSR)
+    result = update_TP_SSR(args)
+    legal_set = result.get("enum", []) if result else []
+    return validate_legal_set(legal_set, "TP_SSR", TP_SSR)
 
 
 #######################################################
-############ TP_CASC Updater and Validator ############
+############ TP_CASC_LEN Updater and Validator ########
 #######################################################
 def update_TP_CASC_LEN(args):
     AIE_VARIANT = args["AIE_VARIANT"]
@@ -528,88 +413,39 @@ def update_TP_CASC_LEN(args):
     TP_DIM_AB = args["TP_DIM_AB"]
     TP_DIM_B = args["TP_DIM_B"]
     TP_SSR = args["TP_SSR"]
-    return fn_update_TP_CASC(
-        AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_DIM_AB, TP_SSR
-    )
-
-
-def fn_update_TP_CASC(
-    AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_DIM_AB, TP_SSR
-):
-    buffer_size = k_data_memory_bytes[AIE_VARIANT]
-
-    cascMinForA = max(
-        1, fn_size_by_byte(TT_DATA_A) * TP_DIM_A * TP_DIM_AB / (TP_SSR * buffer_size)
-    )
-    cascMinForB = max(
-        1, fn_size_by_byte(TT_DATA_B) * TP_DIM_B * TP_DIM_AB / (buffer_size)
-    )
-
-    cascMinForA_pingpong = max(
-        1,
-        fn_size_by_byte(TT_DATA_A) * TP_DIM_A * TP_DIM_AB / (TP_SSR * buffer_size / 2),
-    )
-    cascMinForB_pingpong = max(
-        1, fn_size_by_byte(TT_DATA_B) * TP_DIM_B * TP_DIM_AB / (buffer_size / 2)
-    )
-    minCasc_pingpong = max(cascMinForA_pingpong, cascMinForB_pingpong)
+    TP_CASC_LEN = args["TP_CASC_LEN"] if "TP_CASC_LEN" in args and args["TP_CASC_LEN"] else 0
 
     (tileA, tileAB, tileB) = getTilingScheme(TT_DATA_A, TT_DATA_B, AIE_VARIANT)
+    buffer_size = k_data_memory_bytes[AIE_VARIANT]
+    
+    # Calculate buffer constraints
+    cascMinForA = max(1, (fn_size_by_byte(TT_DATA_A) * TP_DIM_A * TP_DIM_AB + (TP_SSR * buffer_size) - 1) // (TP_SSR * buffer_size))
+    cascMinForB = max(1, (fn_size_by_byte(TT_DATA_B) * TP_DIM_B * TP_DIM_AB + buffer_size - 1) // buffer_size)
     minCasc = max(cascMinForA, cascMinForB)
-    maxCasc = min(TP_SSR_max, TP_DIM_AB / tileAB)
+    
+    # maxCasc is limited by TP_DIM_AB / tileAB (can't split more than this)
+    maxCasc = min(TP_CASC_max, TP_DIM_AB // tileAB)
 
-    legal_set_TP_CASC = find_divisors(TP_DIM_AB, int(CEIL(maxCasc, 1)))
-    legal_set_TP_CASC_pingpong = legal_set_TP_CASC.copy()
-
-    for k in legal_set_TP_CASC.copy():
-        if (k > maxCasc) or (k < minCasc):
-            legal_set_TP_CASC.remove(k)
-        if (k > maxCasc) or (k < minCasc_pingpong):
-            legal_set_TP_CASC_pingpong.remove(k)
-
-    param_dict = {
-        "name": "TP_CASC_LEN",
-        "enum": legal_set_TP_CASC,
-        "enum_pingpong_buf": legal_set_TP_CASC_pingpong,
-    }
+    # Build legal set using find_divisors - use maxCasc based on actual TP_DIM_AB
+    legal_set_TP_CASC = find_divisors(TP_DIM_AB, maxCasc)
+    
+    # Filter based on constraints
+    legal_set_TP_CASC = [k for k in legal_set_TP_CASC 
+                         if k >= minCasc and k <= maxCasc 
+                         and (TP_DIM_AB // k) % tileAB == 0]
+    
+    if not legal_set_TP_CASC:
+        return False    # failure state
+    
+    param_dict = {"name": "TP_CASC_LEN", "enum": legal_set_TP_CASC, "actual": com.GET_CLOSEST(TP_CASC_LEN, legal_set_TP_CASC)}
     return param_dict
 
 
 def validate_TP_CASC_LEN(args):
-    AIE_VARIANT = args["AIE_VARIANT"]
-    TT_DATA_A = args["TT_DATA_A"]
-    TT_DATA_B = args["TT_DATA_B"]
-    TP_DIM_A = args["TP_DIM_A"]
-    TP_DIM_B = args["TP_DIM_B"]
-    TP_DIM_AB = args["TP_DIM_AB"]
-    TP_SSR = args["TP_SSR"]
     TP_CASC_LEN = args["TP_CASC_LEN"]
-    return fn_validate_TP_CASC(
-        AIE_VARIANT,
-        TT_DATA_A,
-        TT_DATA_B,
-        TP_DIM_A,
-        TP_DIM_B,
-        TP_DIM_AB,
-        TP_SSR,
-        TP_CASC_LEN,
-    )
-
-
-def fn_validate_TP_CASC(
-    AIE_VARIANT,
-    TT_DATA_A,
-    TT_DATA_B,
-    TP_DIM_A,
-    TP_DIM_B,
-    TP_DIM_AB,
-    TP_SSR,
-    TP_CASC_LEN,
-):
-    param_dict = fn_update_TP_CASC(
-        AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_DIM_AB, TP_SSR
-    )
-    return validate_legal_set(param_dict["enum"], "TP_CASC_LEN", TP_CASC_LEN)
+    result = update_TP_CASC_LEN(args)
+    legal_set = result.get("enum", []) if result else []
+    return validate_legal_set(legal_set, "TP_CASC_LEN", TP_CASC_LEN)
 
 
 #######################################################
@@ -618,18 +454,12 @@ def fn_validate_TP_CASC(
 def update_TP_INPUT_WINDOW_VSIZE_A(args):
     TP_DIM_A = args["TP_DIM_A"]
     TP_DIM_AB = args["TP_DIM_AB"]
-    return fn_update_TP_INPUT_WINDOW_VSIZE_A(TP_DIM_A, TP_DIM_AB)
-
-
-def fn_update_TP_INPUT_WINDOW_VSIZE_A(TP_DIM_A, TP_DIM_AB):
-
     TP_INPUT_WINDOW_VSIZE_A_min = int(TP_DIM_A * TP_DIM_AB)
     param_dict = {
         "name": "TP_INPUT_WINDOW_VSIZE_A",
         "minimum": TP_INPUT_WINDOW_VSIZE_A_min,
         "maximum": TP_INPUT_WINDOW_VSIZE_A_min,
     }
-
     return param_dict
 
 
@@ -638,42 +468,30 @@ def validate_TP_INPUT_WINDOW_VSIZE_A(args):
     TP_DIM_AB = args["TP_DIM_AB"]
     TP_INPUT_WINDOW_VSIZE_A = args["TP_INPUT_WINDOW_VSIZE_A"]
 
-    return fn_validate_TP_INPUT_WINDOW_VSIZE_A(
-        TP_DIM_A, TP_DIM_AB, TP_INPUT_WINDOW_VSIZE_A
-    )
+    # Check that window size is an integer multiple of matrix size
+    matrix_size = TP_DIM_A * TP_DIM_AB
+    if TP_INPUT_WINDOW_VSIZE_A % matrix_size != 0:
+        return isError(f"TP_INPUT_WINDOW_VSIZE_A ({TP_INPUT_WINDOW_VSIZE_A}) must be an integer multiple of TP_DIM_A*TP_DIM_AB ({matrix_size})!")
+    
+    # For single matrix per window, must be exactly equal
+    if TP_INPUT_WINDOW_VSIZE_A != matrix_size:
+        return isError(f"TP_INPUT_WINDOW_VSIZE_A ({TP_INPUT_WINDOW_VSIZE_A}) must equal TP_DIM_A*TP_DIM_AB ({matrix_size}) for single matrix per window!")
 
-
-def fn_validate_TP_INPUT_WINDOW_VSIZE_A(TP_DIM_A, TP_DIM_AB, TP_INPUT_WINDOW_VSIZE_A):
-    param_dict = fn_update_TP_INPUT_WINDOW_VSIZE_A(TP_DIM_A, TP_DIM_AB)
-    range_TP_INPUT_WINDOW_VSIZE_A = [param_dict["minimum"], param_dict["maximum"]]
-    return validate_range(
-        range_TP_INPUT_WINDOW_VSIZE_A,
-        "TP_INPUT_WINDOW_VSIZE_A",
-        TP_INPUT_WINDOW_VSIZE_A,
-    )
+    return isValid
 
 
 #######################################################
 ### TP_INPUT_WINDOW_VSIZE_B Updater and Validator #####
 #######################################################
-
-
 def update_TP_INPUT_WINDOW_VSIZE_B(args):
     TP_DIM_B = args["TP_DIM_B"]
     TP_DIM_AB = args["TP_DIM_AB"]
-    return fn_update_TP_INPUT_WINDOW_VSIZE_B(TP_DIM_B, TP_DIM_AB)
-
-
-def fn_update_TP_INPUT_WINDOW_VSIZE_B(TP_DIM_B, TP_DIM_AB):
-
     TP_INPUT_WINDOW_VSIZE_B_min = int(TP_DIM_B * TP_DIM_AB)
-
     param_dict = {
         "name": "TP_INPUT_WINDOW_VSIZE_B",
         "minimum": TP_INPUT_WINDOW_VSIZE_B_min,
         "maximum": TP_INPUT_WINDOW_VSIZE_B_min,
     }
-
     return param_dict
 
 
@@ -681,95 +499,75 @@ def validate_TP_INPUT_WINDOW_VSIZE_B(args):
     TP_INPUT_WINDOW_VSIZE_B = args["TP_INPUT_WINDOW_VSIZE_B"]
     TP_DIM_AB = args["TP_DIM_AB"]
     TP_DIM_B = args["TP_DIM_B"]
-    return fn_validate_TP_INPUT_WINDOW_VSIZE_B(
-        TP_DIM_B, TP_DIM_AB, TP_INPUT_WINDOW_VSIZE_B
-    )
 
+    # Check that window size is an integer multiple of matrix size
+    matrix_size = TP_DIM_B * TP_DIM_AB
+    if TP_INPUT_WINDOW_VSIZE_B % matrix_size != 0:
+        return isError(f"TP_INPUT_WINDOW_VSIZE_B ({TP_INPUT_WINDOW_VSIZE_B}) must be an integer multiple of TP_DIM_B*TP_DIM_AB ({matrix_size})!")
+    
+    # For single matrix per window, must be exactly equal
+    if TP_INPUT_WINDOW_VSIZE_B != matrix_size:
+        return isError(f"TP_INPUT_WINDOW_VSIZE_B ({TP_INPUT_WINDOW_VSIZE_B}) must equal TP_DIM_B*TP_DIM_AB ({matrix_size}) for single matrix per window!")
 
-def fn_validate_TP_INPUT_WINDOW_VSIZE_B(TP_DIM_B, TP_DIM_AB, TP_INPUT_WINDOW_VSIZE_B):
-    param_dict = fn_update_TP_INPUT_WINDOW_VSIZE_B(TP_DIM_B, TP_DIM_AB)
-    range_TP_INPUT_WINDOW_VSIZE_B = [param_dict["minimum"], param_dict["maximum"]]
-    return validate_range(
-        range_TP_INPUT_WINDOW_VSIZE_B,
-        "TP_INPUT_WINDOW_VSIZE_B",
-        TP_INPUT_WINDOW_VSIZE_B,
-    )
+    return isValid
 
 
 #######################################################
 ######### TP_DIM_A_LEADING Updater and Validator ######
 #######################################################
 def update_TP_DIM_A_LEADING(args):
-    return fn_update_TP_DIM_A_LEADING()
-
-
-def fn_update_TP_DIM_A_LEADING():
     legal_set_TP_DIM_A_LEADING = [0, 1]
-
-    param_dict = {"name": "TP_DIM_A_LEADING", "enum": legal_set_TP_DIM_A_LEADING}
-
+    param_dict = {}
+    param_dict.update({"name": "TP_DIM_A_LEADING"})
+    param_dict.update({"enum": legal_set_TP_DIM_A_LEADING})
     return param_dict
 
 
 def validate_TP_DIM_A_LEADING(args):
     TP_DIM_A_LEADING = args["TP_DIM_A_LEADING"]
-    return fn_validate_TP_DIM_A_LEADING(TP_DIM_A_LEADING)
-
-
-def fn_validate_TP_DIM_A_LEADING(TP_DIM_A_LEADING):
-    param_dict = fn_update_TP_DIM_A_LEADING()
-    return validate_legal_set(param_dict["enum"], "TP_DIM_A_LEADING", TP_DIM_A_LEADING)
+    
+    # Get legal set from updater
+    legal_set = update_TP_DIM_A_LEADING(args)["enum"]
+    return validate_legal_set(legal_set, "TP_DIM_A_LEADING", TP_DIM_A_LEADING)
 
 
 #######################################################
 ######### TP_DIM_B_LEADING Updater and Validator ######
 #######################################################
 def update_TP_DIM_B_LEADING(args):
-    return fn_update_TP_DIM_B_LEADING()
-
-
-def fn_update_TP_DIM_B_LEADING():
-
-    legal_set = [0, 1]
-
-    param_dict = {"name": "TP_DIM_B_LEADING", "enum": legal_set}
+    legal_set_TP_DIM_B_LEADING = [0, 1]
+    param_dict = {}
+    param_dict.update({"name": "TP_DIM_B_LEADING"})
+    param_dict.update({"enum": legal_set_TP_DIM_B_LEADING})
     return param_dict
 
 
 def validate_TP_DIM_B_LEADING(args):
     TP_DIM_B_LEADING = args["TP_DIM_B_LEADING"]
-    return fn_validate_TP_DIM_B_LEADING(TP_DIM_B_LEADING)
+    # Get legal set from updater
+    legal_set = update_TP_DIM_B_LEADING(args)["enum"]
+    return validate_legal_set(legal_set, "TP_DIM_B_LEADING", TP_DIM_B_LEADING)
 
-
-def fn_validate_TP_DIM_B_LEADING(TP_DIM_B_LEADING):
-    param_dict = fn_update_TP_DIM_B_LEADING()
-    return validate_legal_set(param_dict["enum"], "TP_DIM_B_LEADING", TP_DIM_B_LEADING)
 
 
 #######################################################
 ######### TP_DIM_OUT_LEADING Updater and Validator ####
 #######################################################
 def update_TP_DIM_OUT_LEADING(args):
-    return fn_update_TP_DIM_OUT_LEADING()
-
-
-def fn_update_TP_DIM_OUT_LEADING():
-    legal_set = [0, 1]
-
-    param_dict = {"name": "TP_DIM_OUT_LEADING", "enum": legal_set}
+    legal_set_TP_DIM_OUT_LEADING = [0, 1]
+    param_dict = {}
+    param_dict.update({"name": "TP_DIM_OUT_LEADING"})
+    param_dict.update({"enum": legal_set_TP_DIM_OUT_LEADING})
     return param_dict
 
 
 def validate_TP_DIM_OUT_LEADING(args):
     TP_DIM_OUT_LEADING = args["TP_DIM_OUT_LEADING"]
-    return fn_validate_TP_DIM_OUT_LEADING(TP_DIM_OUT_LEADING)
-
-
-def fn_validate_TP_DIM_OUT_LEADING(TP_DIM_OUT_LEADING):
-    param_dict = fn_update_TP_DIM_OUT_LEADING()
-    return validate_legal_set(
-        param_dict["enum"], "TP_DIM_OUT_LEADING", TP_DIM_OUT_LEADING
-    )
+    
+    # Get legal set from updater
+    legal_set = update_TP_DIM_OUT_LEADING(args)["enum"]
+    
+    return validate_legal_set(legal_set, "TP_DIM_OUT_LEADING", TP_DIM_OUT_LEADING)
 
 
 #######################################################
@@ -783,77 +581,34 @@ def update_TP_ADD_TILING_A(args):
     TP_SSR = args["TP_SSR"]
     TP_CASC_LEN = args["TP_CASC_LEN"]
     TP_DIM_A_LEADING = args["TP_DIM_A_LEADING"]
-    return fn_update_TP_ADD_TILING_A(
-        AIE_VARIANT,
-        TT_DATA_A,
-        TP_DIM_A,
-        TP_DIM_AB,
-        TP_SSR,
-        TP_CASC_LEN,
-        TP_DIM_A_LEADING,
-    )
-
-
-def fn_update_TP_ADD_TILING_A(
-    AIE_VARIANT, TT_DATA_A, TP_DIM_A, TP_DIM_AB, TP_SSR, TP_CASC_LEN, TP_DIM_A_LEADING
-):
-
-    majorDim = TP_DIM_A // TP_SSR
-    commonDim = TP_DIM_AB // TP_CASC_LEN
-    matrixSize = fn_size_by_byte(TT_DATA_A) * majorDim * (commonDim)
-
     legal_set_TP_ADD_TILING_A = [0, 1]
-    if ((TP_DIM_A_LEADING == 1) and (TT_DATA_A == "int16")) or (matrixSize < 512 // 8):
-        legal_set_TP_ADD_TILING_A = [0]
+    
+    # Tiling not supported on AIE-MLv2
     if AIE_VARIANT == com.AIE_MLv2:
-        # Tiling not on AIE-MLv2 in this configuration
         legal_set_TP_ADD_TILING_A = [0]
+    else:
+        # Check matrix size constraints
+        majorDim = TP_DIM_A // TP_SSR
+        commonDim = TP_DIM_AB // TP_CASC_LEN
+        matrixSize = fn_size_by_byte(TT_DATA_A) * majorDim * commonDim
+        
+        # Tiling not needed for small matrices or specific configurations
+        if ((TP_DIM_A_LEADING == 1) and (TT_DATA_A == "int16")) or (matrixSize < 512 // 8):
+            legal_set_TP_ADD_TILING_A = [0]
 
-    param_dict = {"name": "TP_ADD_TILING_A", "enum": legal_set_TP_ADD_TILING_A}
+    param_dict = {}
+    param_dict.update({"name": "TP_ADD_TILING_A"})
+    param_dict.update({"enum": legal_set_TP_ADD_TILING_A})
     return param_dict
 
 
 def validate_TP_ADD_TILING_A(args):
-    AIE_VARIANT = args["AIE_VARIANT"]
-    TT_DATA_A = args["TT_DATA_A"]
-    TP_DIM_A = args["TP_DIM_A"]
-    TP_DIM_AB = args["TP_DIM_AB"]
-    TP_SSR = args["TP_SSR"]
-    TP_CASC_LEN = args["TP_CASC_LEN"]
-    TP_DIM_A_LEADING = args["TP_DIM_A_LEADING"]
     TP_ADD_TILING_A = args["TP_ADD_TILING_A"]
-    return fn_validate_TP_ADD_TILING_A(
-        AIE_VARIANT,
-        TT_DATA_A,
-        TP_DIM_A,
-        TP_DIM_AB,
-        TP_SSR,
-        TP_CASC_LEN,
-        TP_DIM_A_LEADING,
-        TP_ADD_TILING_A,
-    )
+    
+    # Get legal set from updater
+    legal_set = update_TP_ADD_TILING_A(args)["enum"]
+    return validate_legal_set(legal_set, "TP_ADD_TILING_A", TP_ADD_TILING_A)
 
-
-def fn_validate_TP_ADD_TILING_A(
-    AIE_VARIANT,
-    TT_DATA_A,
-    TP_DIM_A,
-    TP_DIM_AB,
-    TP_SSR,
-    TP_CASC_LEN,
-    TP_DIM_A_LEADING,
-    TP_ADD_TILING_A,
-):
-    param_dict = fn_update_TP_ADD_TILING_A(
-        AIE_VARIANT,
-        TT_DATA_A,
-        TP_DIM_A,
-        TP_DIM_AB,
-        TP_SSR,
-        TP_CASC_LEN,
-        TP_DIM_A_LEADING,
-    )
-    return validate_legal_set(param_dict["enum"], "TP_ADD_TILING_A", TP_ADD_TILING_A)
 
 
 #######################################################
@@ -866,62 +621,33 @@ def update_TP_ADD_TILING_B(args):
     TP_DIM_AB = args["TP_DIM_AB"]
     TP_CASC_LEN = args["TP_CASC_LEN"]
     TP_DIM_B_LEADING = args["TP_DIM_B_LEADING"]
-    return fn_update_TP_ADD_TILING_B(
-        AIE_VARIANT, TT_DATA_B, TP_DIM_B, TP_DIM_AB, TP_CASC_LEN, TP_DIM_B_LEADING
-    )
-
-
-def fn_update_TP_ADD_TILING_B(
-    AIE_VARIANT, TT_DATA_B, TP_DIM_B, TP_DIM_AB, TP_CASC_LEN, TP_DIM_B_LEADING
-):
-    majorDim = TP_DIM_B
-    commonDim = TP_DIM_AB // TP_CASC_LEN
-    matrixSize = fn_size_by_byte(TT_DATA_B) * majorDim * (commonDim)
-
     legal_set_TP_ADD_TILING_B = [0, 1]
-    if ((TP_DIM_B_LEADING == 1) and (TT_DATA_B == "int16")) or (matrixSize < 512 // 8):
-        legal_set_TP_ADD_TILING_B = [0]
+    
+    # Tiling not supported on AIE-MLv2
     if AIE_VARIANT == com.AIE_MLv2:
-        # Tiling not on AIE-MLv2 in this configuration
         legal_set_TP_ADD_TILING_B = [0]
+    else:
+        # Check matrix size constraints
+        majorDim = TP_DIM_B
+        commonDim = TP_DIM_AB // TP_CASC_LEN
+        matrixSize = fn_size_by_byte(TT_DATA_B) * majorDim * commonDim
+        
+        # Tiling not needed for small matrices or specific configurations
+        if ((TP_DIM_B_LEADING == 1) and (TT_DATA_B == "int16")) or (matrixSize < 512 // 8):
+            legal_set_TP_ADD_TILING_B = [0]
 
-    param_dict = {"name": "TP_ADD_TILING_B", "enum": legal_set_TP_ADD_TILING_B}
-
+    param_dict = {}
+    param_dict.update({"name": "TP_ADD_TILING_B"})
+    param_dict.update({"enum": legal_set_TP_ADD_TILING_B})
     return param_dict
 
 
 def validate_TP_ADD_TILING_B(args):
-    AIE_VARIANT = args["AIE_VARIANT"]
-    TT_DATA_B = args["TT_DATA_B"]
-    TP_DIM_B = args["TP_DIM_B"]
-    TP_DIM_AB = args["TP_DIM_AB"]
-    TP_CASC_LEN = args["TP_CASC_LEN"]
-    TP_DIM_B_LEADING = args["TP_DIM_B_LEADING"]
     TP_ADD_TILING_B = args["TP_ADD_TILING_B"]
-    return fn_validate_TP_ADD_TILING_B(
-        AIE_VARIANT,
-        TT_DATA_B,
-        TP_DIM_B,
-        TP_DIM_AB,
-        TP_CASC_LEN,
-        TP_DIM_B_LEADING,
-        TP_ADD_TILING_B,
-    )
-
-
-def fn_validate_TP_ADD_TILING_B(
-    AIE_VARIANT,
-    TT_DATA_B,
-    TP_DIM_B,
-    TP_DIM_AB,
-    TP_CASC_LEN,
-    TP_DIM_B_LEADING,
-    TP_ADD_TILING_B,
-):
-    param_dict = fn_update_TP_ADD_TILING_B(
-        AIE_VARIANT, TT_DATA_B, TP_DIM_B, TP_DIM_AB, TP_CASC_LEN, TP_DIM_B_LEADING
-    )
-    return validate_legal_set(param_dict["enum"], "TP_ADD_TILING_B", TP_ADD_TILING_B)
+    
+    # Get legal set from updater
+    legal_set = update_TP_ADD_TILING_B(args)["enum"]    
+    return validate_legal_set(legal_set, "TP_ADD_TILING_B", TP_ADD_TILING_B)
 
 
 #######################################################
@@ -936,94 +662,33 @@ def update_TP_ADD_DETILING_OUT(args):
     TP_DIM_B = args["TP_DIM_B"]
     TP_SSR = args["TP_SSR"]
     TP_DIM_OUT_LEADING = args["TP_DIM_OUT_LEADING"]
-    return fn_update_TP_ADD_DETILING_OUT(
-        AIE_VARIANT,
-        TT_DATA_A,
-        TT_DATA_B,
-        TT_OUT_DATA,
-        TP_DIM_A,
-        TP_DIM_B,
-        TP_SSR,
-        TP_DIM_OUT_LEADING,
-    )
-
-
-def fn_update_TP_ADD_DETILING_OUT(
-    AIE_VARIANT,
-    TT_DATA_A,
-    TT_DATA_B,
-    TT_OUT_DATA,
-    TP_DIM_A,
-    TP_DIM_B,
-    TP_SSR,
-    TP_DIM_OUT_LEADING,
-):
-    majorDim = TP_DIM_A // TP_SSR
-    commonDim = TP_DIM_B
-    matrixSize = fn_size_by_byte(TT_OUT_DATA) * majorDim * (commonDim)
-
     legal_set_TP_ADD_DETILING_OUT = [0, 1]
-    if ((TP_DIM_OUT_LEADING == 1) and (TT_OUT_DATA == "int16")) or (
-        matrixSize < 512 // 8
-    ):
-        legal_set_TP_ADD_DETILING_OUT = [0]
-
+    
+    # Detiling not supported on AIE-MLv2
     if AIE_VARIANT == com.AIE_MLv2:
         legal_set_TP_ADD_DETILING_OUT = [0]
+    else:
+        # Check matrix size constraints
+        majorDim = TP_DIM_A // TP_SSR
+        commonDim = TP_DIM_B
+        matrixSize = fn_size_by_byte(TT_OUT_DATA) * majorDim * commonDim
+        
+        # Detiling not needed for small matrices or specific configurations
+        if ((TP_DIM_OUT_LEADING == 1) and (TT_OUT_DATA == "int16")) or (matrixSize < 512 // 8):
+            legal_set_TP_ADD_DETILING_OUT = [0]
 
-    param_dict = {"name": "TP_ADD_DETILING_OUT", "enum": legal_set_TP_ADD_DETILING_OUT}
-
+    param_dict = {}
+    param_dict.update({"name": "TP_ADD_DETILING_OUT"})
+    param_dict.update({"enum": legal_set_TP_ADD_DETILING_OUT})
     return param_dict
 
 
 def validate_TP_ADD_DETILING_OUT(args):
-    AIE_VARIANT = args["AIE_VARIANT"]
-    TT_DATA_A = args["TT_DATA_A"]
-    TT_DATA_B = args["TT_DATA_B"]
-    TT_OUT_DATA = args["TT_OUT_DATA"]
-    TP_DIM_A = args["TP_DIM_A"]
-    TP_DIM_B = args["TP_DIM_B"]
-    TP_SSR = args["TP_SSR"]
-    TP_DIM_OUT_LEADING = args["TP_DIM_OUT_LEADING"]
     TP_ADD_DETILING_OUT = args["TP_ADD_DETILING_OUT"]
-    return fn_validate_TP_ADD_DETILING_OUT(
-        AIE_VARIANT,
-        TT_DATA_A,
-        TT_DATA_B,
-        TT_OUT_DATA,
-        TP_DIM_A,
-        TP_DIM_B,
-        TP_SSR,
-        TP_DIM_OUT_LEADING,
-        TP_ADD_DETILING_OUT,
-    )
-
-
-def fn_validate_TP_ADD_DETILING_OUT(
-    AIE_VARIANT,
-    TT_DATA_A,
-    TT_DATA_B,
-    TT_OUT_DATA,
-    TP_DIM_A,
-    TP_DIM_B,
-    TP_SSR,
-    TP_DIM_OUT_LEADING,
-    TP_ADD_DETILING_OUT,
-):
-    param_dict = fn_update_TP_ADD_DETILING_OUT(
-        AIE_VARIANT,
-        TT_DATA_A,
-        TT_DATA_B,
-        TT_OUT_DATA,
-        TP_DIM_A,
-        TP_DIM_B,
-        TP_SSR,
-        TP_DIM_OUT_LEADING,
-    )
-    return validate_legal_set(
-        param_dict["enum"], "TP_ADD_DETILING_OUT", TP_ADD_DETILING_OUT
-    )
-
+    
+    # Get legal set from updater
+    legal_set = update_TP_ADD_DETILING_OUT(args)["enum"]  
+    return validate_legal_set(legal_set, "TP_ADD_DETILING_OUT", TP_ADD_DETILING_OUT)
 
 #######################################################
 ############## TP_SHIFT Updater and Validator #########
@@ -1031,12 +696,7 @@ def fn_validate_TP_ADD_DETILING_OUT(
 def update_TP_SHIFT(args):
     TT_DATA = args["TT_DATA_A"]
     AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_update_TP_SHIFT(AIE_VARIANT, TT_DATA)
-
-
-def fn_update_TP_SHIFT(AIE_VARIANT, TT_DATA):
     range_TP_SHIFT = com.fn_update_range_TP_SHIFT(AIE_VARIANT, TT_DATA)
-
     param_dict = {
         "name": "TP_SHIFT",
         "minimum": range_TP_SHIFT[0],
@@ -1047,15 +707,19 @@ def fn_update_TP_SHIFT(AIE_VARIANT, TT_DATA):
 
 def validate_TP_SHIFT(args):
     TT_DATA = args["TT_DATA_A"]
-    TP_SHIFT = args["TP_SHIFT"]
     AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_validate_TP_SHIFT(AIE_VARIANT, TT_DATA, TP_SHIFT)
-
-
-def fn_validate_TP_SHIFT(AIE_VARIANT, TT_DATA, TP_SHIFT):
-    param_dict = fn_update_TP_SHIFT(AIE_VARIANT, TT_DATA)
-    range_TP_SHIFT = [param_dict["minimum"], param_dict["maximum"]]
+    if "TP_SHIFT" not in args:
+        return isValid
+    TP_SHIFT = args["TP_SHIFT"]
+    
+    # Check that TP_SHIFT is 0 for float types
+    if fn_is_floating_point(TT_DATA) and TP_SHIFT != 0:
+        return isError(f"TP_SHIFT must be 0 for floating point types (TT_DATA_A={TT_DATA}), but got TP_SHIFT={TP_SHIFT}!")
+    
+    # Get range based on AIE variant and data type
+    range_TP_SHIFT = com.fn_update_range_TP_SHIFT(AIE_VARIANT, TT_DATA)
     return validate_range(range_TP_SHIFT, "TP_SHIFT", TP_SHIFT)
+
 
 
 #######################################################
@@ -1063,12 +727,10 @@ def fn_validate_TP_SHIFT(AIE_VARIANT, TT_DATA, TP_SHIFT):
 #######################################################
 def update_TP_RND(args):
     AIE_VARIANT = args["AIE_VARIANT"]
-    return fn_update_TP_RND(AIE_VARIANT)
-
-
-def fn_update_TP_RND(AIE_VARIANT):
     legal_set_TP_RND = fn_get_legalSet_roundMode(AIE_VARIANT)
-    param_dict = {"name": "TP_RND", "enum": legal_set_TP_RND}
+    param_dict = {}
+    param_dict.update({"name": "TP_RND"})
+    param_dict.update({"enum": legal_set_TP_RND})
     return param_dict
 
 
@@ -1083,7 +745,9 @@ def validate_TP_RND(args):
 #######################################################
 def update_TP_SAT(args):
     legal_set_sat = fn_legal_set_sat()
-    param_dict = {"name": "TP_SAT", "enum": legal_set_sat}
+    param_dict = {}
+    param_dict.update({"name": "TP_SAT"})
+    param_dict.update({"enum": legal_set_sat})
     return param_dict
 
 
@@ -1092,6 +756,9 @@ def validate_TP_SAT(args):
     return fn_validate_satMode(TP_SAT)
 
 
+#######################################################
+################## Helper Functions ###################
+#######################################################
 def getTilingScheme(typeA, typeB, AIE_VARIANT):
     # needs to be compatible with c++14 -> so just use plain ifs
     # 16b x 16b
@@ -1119,10 +786,10 @@ def getTilingScheme(typeA, typeB, AIE_VARIANT):
             return (2, 4, 2)
         # 16b x 64b
         if typeA == "int16" and typeB == "cint32":
-            return (2, 4, 2)  # 4, 4, 2 is also ok
+            return (2, 4, 2)
         # 64b x 32b
         if typeA == "cint32" and (typeB == "cint16" or typeB == "int32"):
-            return (2, 2, 2)  # 2, 4, 2 is also ok
+            return (2, 2, 2)
         # 32b x 64b
         if (typeA == "cint16" or typeA == "int32") and typeB == "cint32":
             return (2, 2, 2)
@@ -1130,17 +797,13 @@ def getTilingScheme(typeA, typeB, AIE_VARIANT):
         if typeA == "cint32" and typeB == "cint32":
             return (2, 2, 2)
         # Mixed Floats
-        if (typeA == "cfloat" and typeB == "float") or (
-            typeA == "float" and typeB == "cfloat"
-        ):
-            return (2, 4, 2)  # 2, 2, 2 is also ok
+        if (typeA == "cfloat" and typeB == "float") or (typeA == "float" and typeB == "cfloat"):
+            return (2, 4, 2)
         # cfloats
         if typeA == "cfloat" and typeB == "cfloat":
             return (4, 2, 2)
     if AIE_VARIANT == AIE_ML:
-        if (typeA == "int16" or typeA == "int32") and (
-            typeB == "int16" or typeB == "int32"
-        ):
+        if (typeA == "int16" or typeA == "int32") and (typeB == "int16" or typeB == "int32"):
             return (4, 4, 4)
         if typeA == "cint16" and typeB == "int16":
             return (4, 4, 4)
@@ -1178,22 +841,15 @@ def getTilingScheme(typeA, typeB, AIE_VARIANT):
     return (0, 0, 0)
 
 
-def getOutputType(typeA, typeB):
-    if fn_size_by_byte(typeA) > fn_size_by_byte(typeB):
-        return typeA
-    else:
-        return typeB
-
-
+#######################################################
+################## Port Info ##########################
+#######################################################
 def info_ports(args):
-
     portsA = com.get_port_info(
         portname="inA",
         dir="in",
         TT_DATA=args["TT_DATA_A"],
-        windowVSize=(
-            args["TP_INPUT_WINDOW_VSIZE_A"] // (args["TP_SSR"] * args["TP_CASC_LEN"])
-        ),
+        windowVSize=(args["TP_INPUT_WINDOW_VSIZE_A"] // (args["TP_SSR"] * args["TP_CASC_LEN"])),
         vectorLength=(args["TP_CASC_LEN"] * args["TP_SSR"]),
     )
 
@@ -1202,20 +858,24 @@ def info_ports(args):
         dir="in",
         TT_DATA=args["TT_DATA_B"],
         windowVSize=(args["TP_INPUT_WINDOW_VSIZE_B"] // args["TP_CASC_LEN"]),
-        vectorLength=args["TP_CASC_LEN"],
+        vectorLength=(args["TP_CASC_LEN"] * args["TP_SSR"]),
     )
+    
     TP_OUTPUT_WINDOW_VSIZE = (args["TP_DIM_A"] // args["TP_SSR"]) * args["TP_DIM_B"]
     portsOut = com.get_port_info(
         portname="out",
         dir="out",
         TT_DATA=args["TT_OUT_DATA"],
-        windowVSize=(TP_OUTPUT_WINDOW_VSIZE),
+        windowVSize=TP_OUTPUT_WINDOW_VSIZE,
         vectorLength=args["TP_SSR"],
     )
-    # join lists of ports together and return
+    
     return portsA + portsB + portsOut
 
 
+#######################################################
+################## Graph Generator ####################
+#######################################################
 def generate_graph(graphname, args):
     if graphname == "":
         graphname = "default_graphname"
@@ -1240,14 +900,12 @@ def generate_graph(graphname, args):
     TP_SSR = args["TP_SSR"]
     TT_OUT_DATA = args["TT_OUT_DATA"]
 
-    # Use formatted multi-line string to avoid a lot of \n and \t
     code = f"""
 class {graphname} : public adf::graph {{
 public:
-  constexpr unsigned TP_CASC_LEN = {TP_CASC_LEN};
-  std::array<adf::port<input>,TP_CASC_LEN> inA;
-  std::array<adf::port<input>,TP_CASC_LEN> inB;
-  adf::port<output> out;
+  std::array<adf::port<input>,{TP_CASC_LEN} * {TP_SSR}> inA;
+  std::array<adf::port<input>,{TP_CASC_LEN} * {TP_SSR}> inB;
+  std::array<adf::port<output>, {TP_SSR}> out;
   xf::dsp::aie::blas::matrix_mult::matrix_mult_graph<
     {TT_DATA_A}, // TT_DATA_A
     {TT_DATA_B}, // TT_DATA_B
@@ -1263,21 +921,22 @@ public:
     {TP_ADD_TILING_B}, // TP_ADD_TILING_B
     {TP_ADD_DETILING_OUT}, // TP_ADD_DETILING_OUT
     {TP_INPUT_WINDOW_VSIZE_A}, // TP_INPUT_WINDOW_VSIZE_A
-    {TP_INPUT_WINDOW_VSIZE_B} // TP_INPUT_WINDOW_VSIZE_B
-    {TP_CASC_LEN} // TP_CASC_LEN
-    {TP_SAT} // TP_SAT
-    {TP_SSR} // TP_SSR
+    {TP_INPUT_WINDOW_VSIZE_B}, // TP_INPUT_WINDOW_VSIZE_B
+    {TP_CASC_LEN}, // TP_CASC_LEN
+    {TP_SAT}, // TP_SAT
+    {TP_SSR}, // TP_SSR
     {TT_OUT_DATA} // TT_OUT_DATA
   > mmult;
 
   {graphname}() : mmult() {{
     adf::kernel *mmult_kernels = mmult.getKernels();
-
-    for (int i=0; i < TP_CASC_LEN; i++) {{
-      adf::connect<> net_inA(inA[i], mmult.inA[i]);
-      adf::connect<> net_inB(inB[i], mmult.inB[i]);
+    for (int ssrIdx = 0; ssrIdx < {TP_SSR}; ssrIdx++) {{ 
+        for (int cascIdx =0; cascIdx < {TP_CASC_LEN}; cascIdx++) {{
+            adf::connect<> net_inA(inA[cascIdx + ssrIdx * {TP_CASC_LEN}], mmult.inA[cascIdx + ssrIdx * {TP_CASC_LEN}]);
+            adf::connect<> net_inB(inB[cascIdx + ssrIdx * {TP_CASC_LEN}], mmult.inB[cascIdx + ssrIdx * {TP_CASC_LEN}]);
+        }}
+        adf::connect<> net_out(mmult.out[ssrIdx], out[ssrIdx]);
     }}
-    adf::connect<> net_out(mmult.out[0], out);
   }}
 
 }};
@@ -1287,5 +946,4 @@ public:
     out["port_info"] = info_ports(args)
     out["headerfile"] = "matrix_mult_graph.hpp"
     out["searchpaths"] = ["L1/include/aie", "L2/include/aie", "L1/src/aie"]
-
     return out

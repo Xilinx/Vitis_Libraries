@@ -1,0 +1,11 @@
+{
+    "parameter_constraints": {
+        "AIE_VARIANT": 1,
+        "TP_FIR_LEN": 128,
+        "TT_DATA": "cint16",
+        "TT_COEFF": "int16",
+        "TP_SSR": [1,2,4,8]
+    },
+    "qor_constraints": "throughput>1000",
+    "confidence": 1
+}

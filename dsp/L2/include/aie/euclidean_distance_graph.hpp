@@ -122,16 +122,21 @@ class euclidean_distance_graph : public graph {
                   " Assertion Failed : \n"
                   "            ERROR: TT_DATA is not a supported Input Data type.");
 
-    // defensive check for Lengths of F and G should be in the given range of Min and Max
-    static_assert(fnCheckLenOfData<TT_DATA, TP_LEN>(),
+    // defensive check for Lengths of F and G should be in the given range of Min and Max.
+    // On AIE-ML/AIE-MLv2 with IS_OUTPUT_SQUARED=0, TP_LEN must also be a multiple of 32
+    // (LUT sqrt processes 32 bfloat16 per iteration).
+    static_assert(fnCheckLenOfData<TT_DATA, TP_LEN, TP_IS_OUTPUT_SQUARED>(),
                   " Assertion Failed : \n "
-                  "             ERROR: TP_LEN should be granuality of Min data_load on AIE i.e. "
-                  "[(256/samplesize<TT_DATA>())] \n                   [float   - (8*N) ] \n   [bfloat16  - (16*N)  ]] "
-                  "\n  where N is Integer > 1] and \n            TP_LEN "
-                  "should be greater than or equal to minimum length [((256/samplesize<TT_DATA>())*2)] based on "
-                  "given data type i.e.\n                 '[Data Type-    MIN    MAX]' \n                 "
-                  "'--------------------------' \n                 '[float    -    16    4096]' \n                 "
-                  "'[bfloat16 -    32    8192]'  ");
+                  "             ERROR: TP_LEN should be a multiple of the native load size for the chosen architecture "
+                  "and data type:\n"
+                  "               [AIE-1   float    IS_OUTPUT_SQUARED=0/1] : multiple of  8, minimum  8\n"
+                  "               [AIE-ML  float    IS_OUTPUT_SQUARED=1  ] : multiple of  8, minimum  8\n"
+                  "               [AIE-ML  float    IS_OUTPUT_SQUARED=0  ] : multiple of 32, minimum 32\n"
+                  "               [AIE-ML  bfloat16 IS_OUTPUT_SQUARED=1  ] : multiple of 16, minimum 16\n"
+                  "               [AIE-ML  bfloat16 IS_OUTPUT_SQUARED=0  ] : multiple of 32, minimum 32\n"
+                  "               [AIE-MLv2 float   IS_OUTPUT_SQUARED=1  ] : multiple of 16, minimum 16\n"
+                  "               [AIE-MLv2 float   IS_OUTPUT_SQUARED=0  ] : multiple of 32, minimum 32\n"
+                  "               [AIE-MLv2 bfloat16 IS_OUTPUT_SQUARED=0/1] : multiple of 32, minimum 32");
 
     // defensive check for Dimension of point P should not be greater than 4
     static_assert(fnCheckforDimension<TP_DIM>(),
@@ -195,12 +200,18 @@ class euclidean_distance_graph : public graph {
         m_EDKernels[0] = kernel::create_object<
             euclidean_distance_squared<TT_DATA, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT> >(); // SQUARED
 
+        // Stack size of the kernel-1 which computes the squared result of ED
+        stack_size(m_EDKernels[0]) = 2048;
+
         // ED() Kernel
         if
             constexpr(TP_IS_OUTPUT_SQUARED == 0) {
                 edSqrtLut0 = parameter::array(sqrtLUT0);                                        // LUT0 of SQRT
                 edSqrtLut1 = parameter::array(sqrtLUT1);                                        // LUT1 of SQRT
                 m_EDKernels[1] = kernel::create_object<euclidean_distance<TT_DATA, TP_LEN> >(); // SQRT
+
+                // Stack size of the kernel-2 which computes the final ED result
+                stack_size(m_EDKernels[1]) = 2048;
             }
 
         if

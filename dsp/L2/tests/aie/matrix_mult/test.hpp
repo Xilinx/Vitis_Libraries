@@ -26,6 +26,7 @@
 #include "uut_config.h"
 #include "uut_static_config.h"
 #include "test_stim.hpp"
+#include "matrix_mult_native_generated_graph/matrix_mult_generated_graph.h"
 
 // The following macro allows this test harness to be used
 // to stimulate the UUT (kernel code for this library element)
@@ -46,6 +47,8 @@ namespace dsp {
 namespace aie {
 namespace testcase {
 
+namespace dsplib = xf::dsp::aie;
+
 class test_graph : public graph {
    private:
    public:
@@ -59,6 +62,30 @@ class test_graph : public graph {
 // std::array<output_plio, 1> out;
 #endif
     std::array<output_plio, UUT_SSR> out;
+#if defined(USING_UUT) && !defined(USING_PL_MOVER)
+    using uut = matrix_mult_native_generated_graph;
+#else
+    using uut = dsplib::blas::matrix_mult::UUT_GRAPH<T_DATA_A,
+                                                     T_DATA_B,
+                                                     P_DIM_A,
+                                                     P_DIM_AB,
+                                                     P_DIM_B,
+                                                     P_SHIFT,
+                                                     P_ROUND_MODE,
+                                                     P_DIM_A_LEADING,
+                                                     P_DIM_B_LEADING,
+                                                     P_DIM_OUT_LEADING,
+                                                     P_ADD_TILING_A,
+                                                     P_ADD_TILING_B,
+                                                     P_ADD_DETILING_OUT,
+                                                     P_INPUT_WINDOW_VSIZE_A,
+                                                     P_INPUT_WINDOW_VSIZE_B,
+                                                     P_CASC_LEN,
+                                                     P_SAT_MODE,
+                                                     UUT_SSR,
+                                                     DATA_OUT_TYPE>;
+#endif
+    uut mmultGraph;
     // Constructor
     test_graph() {
         printf("========================\n");
@@ -79,17 +106,12 @@ class test_graph : public graph {
         printf(QUOTE(T_DATA_A) QUOTE(T_DATA_B));
         printf("\n");
         printf("\n");
-        namespace dsplib = xf::dsp::aie;
-
-        dsplib::blas::matrix_mult::UUT_GRAPH<T_DATA_A, T_DATA_B, P_DIM_A, P_DIM_AB, P_DIM_B, P_SHIFT, P_ROUND_MODE,
-                                             P_DIM_A_LEADING, P_DIM_B_LEADING, P_DIM_OUT_LEADING, P_ADD_TILING_A,
-                                             P_ADD_TILING_B, P_ADD_DETILING_OUT, P_INPUT_WINDOW_VSIZE_A,
-                                             P_INPUT_WINDOW_VSIZE_B, P_CASC_LEN, P_SAT_MODE, UUT_SSR, DATA_OUT_TYPE>
-            mmultGraph;
-
-// Make connections
-// Size of window in Bytes.
-// broadcast
+        // Make connections
+        // Size of window in Bytes.
+        // broadcast
+        unsigned int plioBitWidth = 128;
+        plio_type plioAlias =
+            (plioBitWidth == 128) ? adf::plio_128_bits : (plioBitWidth == 64) ? adf::plio_64_bits : adf::plio_32_bits;
 
 #ifdef USING_PL_MOVER
         connect<>(inA[0], mmultGraph.inA[0]);
@@ -107,27 +129,27 @@ class test_graph : public graph {
                                  ("_" + std::to_string(ssrRank) + "_" + std::to_string(cascRank)));
 
                 inA[(ssrRank * P_CASC_LEN) + cascRank] = input_plio::create(
-                    "PLIO_in_A" + std::to_string((ssrRank * P_CASC_LEN) + cascRank), adf::plio_64_bits, filenameA);
+                    "PLIO_in_A" + std::to_string((ssrRank * P_CASC_LEN) + cascRank), plioAlias, filenameA);
                 inB[(ssrRank * P_CASC_LEN) + cascRank] = input_plio::create(
-                    "PLIO_in_B" + std::to_string((ssrRank * P_CASC_LEN) + cascRank), adf::plio_64_bits, filenameB);
+                    "PLIO_in_B" + std::to_string((ssrRank * P_CASC_LEN) + cascRank), plioAlias, filenameB);
 
                 connect<>(inA[(ssrRank * P_CASC_LEN) + cascRank].out[0],
                           mmultGraph.inA[(ssrRank * P_CASC_LEN) + cascRank]);
                 connect<>(inB[(ssrRank * P_CASC_LEN) + cascRank].out[0],
                           mmultGraph.inB[(ssrRank * P_CASC_LEN) + cascRank]);
 #if (SINGLE_BUF == 1)
-                single_buffer(mmultGraph.getKernels()[(ssrRank * P_CASC_LEN) + cascRank].in[0]);
-                single_buffer(mmultGraph.getKernels()[(ssrRank * P_CASC_LEN) + cascRank].in[1]);
+                single_buffer(mmultGraph.mmult.getKernels()[(ssrRank * P_CASC_LEN) + cascRank].in[0]);
+                single_buffer(mmultGraph.mmult.getKernels()[(ssrRank * P_CASC_LEN) + cascRank].in[1]);
                 printf("INFO: Single Buffer Constraint applied to input buffers of kernel %d.\n",
                        ((ssrRank * P_CASC_LEN) + cascRank));
 #endif
             }
             std::string filenameOut = QUOTE(OUTPUT_FILE);
             filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(ssrRank) + "_0"));
-            out[ssrRank] = output_plio::create("PLIO_out_" + std::to_string(ssrRank), adf::plio_64_bits, filenameOut);
+            out[ssrRank] = output_plio::create("PLIO_out_" + std::to_string(ssrRank), plioAlias, filenameOut);
             connect<>(mmultGraph.out[ssrRank], out[ssrRank].in[0]);
 #if (SINGLE_BUF == 1)
-            single_buffer(mmultGraph.getKernels()[(ssrRank * P_CASC_LEN) + (P_CASC_LEN - 1)].out[0]);
+            single_buffer(mmultGraph.mmult.getKernels()[(ssrRank * P_CASC_LEN) + (P_CASC_LEN - 1)].out[0]);
             printf("INFO: Single Buffer Constraint applied the output buffer of kernel %d.\n",
                    (ssrRank * P_CASC_LEN) + (P_CASC_LEN - 1));
 #endif
@@ -139,23 +161,23 @@ class test_graph : public graph {
         // filenameA.insert(filenameA.length()-4, ("_0"));
         // filenameB.insert(filenameB.length()-4, ("_0"));
         // Make connections
-        inA[0] = input_plio::create("PLIO_in_A" + std::to_string(0), adf::plio_64_bits, filenameA);
-        inB[0] = input_plio::create("PLIO_in_B" + std::to_string(0), adf::plio_64_bits, filenameB);
+        inA[0] = input_plio::create("PLIO_in_A" + std::to_string(0), plioAlias, filenameA);
+        inB[0] = input_plio::create("PLIO_in_B" + std::to_string(0), plioAlias, filenameB);
         connect<>(inA[0].out[0], mmultGraph.inA[0]);
         connect<>(inB[0].out[0], mmultGraph.inB[0]);
 
         std::string filenameOut = QUOTE(OUTPUT_FILE);
         // filenameOut.insert(filenameOut.length()-4, ("_0_0"));
-        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_64_bits, filenameOut);
+        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), plioAlias, filenameOut);
         connect<>(mmultGraph.out[0], out[0].in[0]);
 #endif
 #endif
 
         printf("========================\n");
-    };
+    }
 };
-}
-}
-}
-};
+} // namespace testcase
+} // namespace aie
+} // namespace dsp
+} // namespace xf
 #endif // _DSPLIB_TEST_HPP_

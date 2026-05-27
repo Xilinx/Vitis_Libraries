@@ -32,6 +32,22 @@ namespace dsp {
 namespace aie {
 namespace fft {
 namespace twidRot {
+template <typename T_D>
+struct T_inputIF {
+    input_buffer<T_D>* inWindow;
+};
+template <typename T_D, unsigned int T_API>
+struct T_outputIF {};
+
+template <typename T_D>
+struct T_outputIF<T_D, 0> {
+    output_buffer<T_D>* outWindow;
+};
+template <typename T_D>
+struct T_outputIF<T_D, 1> {
+    output_stream<T_D>* outStream0;
+    output_stream<T_D>* outStream1;
+};
 
 template <typename TT_DATA,
           typename TT_TWIDDLE,
@@ -40,7 +56,8 @@ template <typename TT_DATA,
           unsigned int TP_PT_SIZE_D2,
           unsigned int TP_SSR,
           unsigned int TP_FFT_NIFFT,
-          unsigned int TP_PHASE>
+          unsigned int TP_PHASE,
+          unsigned int TP_API = 0>
 class twiddleRotator {
     static constexpr unsigned int m_kSampleRatioPLAIE = 2;
     static constexpr unsigned int m_kNumDataLanes = fnNumLanes<TT_DATA, TT_TWIDDLE>();
@@ -68,13 +85,25 @@ class twiddleRotator {
 
     // Register Kernel Class
     static void registerKernelClass() {
-        REGISTER_PARAMETER(m_kTwRot);
-        REGISTER_PARAMETER(m_kTwMain);
-        REGISTER_FUNCTION(twiddleRotator::twiddleRotation);
+        if
+            constexpr(TP_API == 0) {
+                REGISTER_PARAMETER(m_kTwRot);
+                REGISTER_PARAMETER(m_kTwMain);
+                REGISTER_FUNCTION(twiddleRotator::twiddleRotation);
+            }
+        else {
+            REGISTER_PARAMETER(m_kTwRot);
+            REGISTER_PARAMETER(m_kTwMain);
+            REGISTER_FUNCTION(twiddleRotator::twiddleRotationStream);
+        }
     }
 
     // Main function
+    void twiddleRotationMain(T_inputIF<TT_DATA> inInterface, T_outputIF<TT_DATA, TP_API> outInterface);
     void twiddleRotation(input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_DATA>& __restrict outWindow);
+    void twiddleRotationStream(input_buffer<TT_DATA>& __restrict inWindow,
+                               output_stream<TT_DATA>* outStream0,
+                               output_stream<TT_DATA>* outStream1);
 };
 }
 }

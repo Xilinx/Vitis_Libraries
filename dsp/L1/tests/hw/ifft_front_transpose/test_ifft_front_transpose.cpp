@@ -25,9 +25,9 @@ int ceil(int x, int y) {
     return (((x + y - 1) / y) * y);
 }
 void dut() {
-    using TT_STREAM = frontTransposeCls<POINT_SIZE, SSR>::TT_STREAM;
-    using TT_SAMPLE = frontTransposeCls<POINT_SIZE, SSR>::TT_SAMPLE;
-    constexpr int samplesPerRead = frontTransposeCls<POINT_SIZE, SSR>::samplesPerRead;
+    using TT_STREAM = frontTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::TT_STREAM;
+    using TT_SAMPLE = frontTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::TT_SAMPLE;
+    constexpr int samplesPerRead = frontTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::samplesPerRead;
     constexpr int NSTREAM = SSR;
     TT_STREAM sig_i[NSTREAM], sig_o[NSTREAM];
     typedef ap_uint<32> real_32; // Equals two 'cint32' samples
@@ -40,11 +40,11 @@ void dut() {
     // Load stream stimulus:
     int data[NSTREAM] = {0};
     int new_data = 0;
-    int ptSizeCeil = ceil(POINT_SIZE, NSTREAM);                         // 65
-    unsigned numStores = frontTransposeCls<POINT_SIZE, SSR>::numStores; // 7
-    int ptSizeD1 = frontTransposeCls<POINT_SIZE, SSR>::ptSizeD1;
-    int ptSizeD2 = frontTransposeCls<POINT_SIZE, SSR>::ptSizeD2;
-    int ptSizeD2Ceil = frontTransposeCls<POINT_SIZE, SSR>::ptSizeD2Ceil;
+    int ptSizeCeil = ceil(POINT_SIZE, NSTREAM);                                        // 65
+    unsigned numStores = frontTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::numStores; // 7
+    int ptSizeD1 = frontTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::ptSizeD1;
+    int ptSizeD2 = frontTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::ptSizeD2;
+    int ptSizeD2Ceil = frontTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::ptSizeD2Ceil;
     int numRows = POINT_SIZE / ptSizeD1;
     int memSize = ptSizeD1 * ptSizeD2Ceil;
 
@@ -52,7 +52,7 @@ void dut() {
     TT_SAMPLE mem2d[ptSizeD2][ptSizeD1];
     TT_SAMPLE mem_ref[memSize];
     TT_SAMPLE mem2d_ref[ptSizeD2Ceil][ptSizeD1];
-    int numReads = frontTransposeCls<POINT_SIZE, SSR>::numLoadsPtSize * ptSizeD1; // 8 * 2
+    int numReads = frontTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::numLoadsPtSize * ptSizeD1; // 8 * 2
     TT_SAMPLE mem_out[memSize];
     for (int ss = 0; ss < SSR; ss++) {
         data[ss] = 0;

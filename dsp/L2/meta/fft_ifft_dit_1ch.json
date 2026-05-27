@@ -139,12 +139,16 @@
             "updater": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "update_TP_DYN_PT_SIZE",
-                "args": []
+                "args": [
+                    "TT_DATA"
+                ]
             },
             "validator": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TP_DYN_PT_SIZE",
-                "args": []
+                "args": [
+                    "TT_DATA"
+                ]
             }
         },
         {
@@ -170,14 +174,14 @@
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "update_TP_PARALLEL_POWER",
                 "args": [
-                    "TP_API"
+                    "TT_DATA"
                 ]
             },
             "validator": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TP_PARALLEL_POWER",
                 "args": [
-                    "TP_API"
+                    "TT_DATA"
                 ]
             }
         },

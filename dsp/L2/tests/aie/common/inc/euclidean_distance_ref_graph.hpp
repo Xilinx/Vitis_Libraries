@@ -48,42 +48,6 @@ class euclidean_distance_ref_graph : public graph {
     /**
      * @cond NOCOMMENTS
      */
-    // Defensive configuration legality checks
-
-    // defensive check for Input data types
-    static_assert(fnCheckDataTypesOfInputs<TT_DATA>(),
-                  " Assertion Failed : \n"
-                  "            ERROR: TT_DATA is not a supported Input Data type.");
-
-    // // defensive check for Lengths of F and G should be in the given range of Min and Max
-    // static_assert(fnCheckLenOfData<TT_DATA, TP_LEN>(),
-    //               " Assertion Failed : \n "
-    //               "             ERROR: TP_LEN should be granuality of Min data_load on AIE i.e. "
-    //               "[(256/samplesize<TT_DATA>())] \n                   [float   - (8*N) ] \n   [bfloat16  - (16*N)  ]]
-    //               \n  where N is Integer > 1] and \n            TP_LEN "
-    //               "should be greater than or equal to minimum length [((256/samplesize<TT_DATA>())*2)] based on "
-    //               "given data type i.e.\n                 '[Data Type-    MIN    MAX]' \n                 "
-    //               "'--------------------------' \n                 '[float    -    16    4096]' \n                 "
-    //               "'[bfloat16 -    32    8192]'  ");
-
-    // defensive check for Dimension of point P should not be greater than 4
-    static_assert(fnCheckforDimension<TP_DIM>(),
-                  " Assertion Failed : \n"
-                  "               ERROR: Dimension of point P should be less than or equal to 4 as per kernel design.");
-
-    // defensive check for API Port is whether iobuffer or stream.
-    static_assert(TP_API == 0,
-                  " Assertion Failed : \n"
-                  "            ERROR: TP_API must be 0 for 'iobuffer'. ");
-
-    // defensive check for SATURATION Mode which should be in the range i.e. SAT_MODE_MIN <TP_SAT< SAT_MODE_MAX
-    static_assert(TP_SAT >= kMinSaturationMode && TP_SAT <= kMaxSaturationMode,
-                  " Assertion Failed : \n"
-                  "             ERROR: TP_SAT is out of supported range");
-    static_assert(TP_SAT != kUnSuppportedSaturationMode,
-                  " Assertion Failed : \n"
-                  "              ERROR: TP_SAT is invalid. Valid values of TP_SAT are 0, 1, and 3");
-
     /**
     * @endcond
         */
@@ -98,7 +62,7 @@ class euclidean_distance_ref_graph : public graph {
     input_port inWindowQ;
 
     /**
-        * Output port to write the data out
+        * Output port to write the data out.
     **/
     output_port outWindow;
 
@@ -121,13 +85,15 @@ class euclidean_distance_ref_graph : public graph {
         printf("==========================================\n");
         printf("== EUCLIDEAN_DISTANCE REF KERNEL Graph ===\n");
         printf("==========================================\n");
-        printf("LEN                 = %d \n", LEN);
-        printf("DIM                 = %d \n", DIM);
-        printf("API                   = %d \n", API_IO);
-        printf("RND                   = %d \n", RND);
-        printf("SAT                   = %d \n", SAT);
-        printf("IS_OUTPUT_SQUARED     = %d \n", IS_OUTPUT_SQUARED);
-
+        printf("LEN               = %d \n", TP_LEN);
+        printf("DIM               = %d \n", TP_DIM);
+        printf("API               = %d \n", TP_API);
+        printf("RND               = %d \n", TP_RND);
+        printf("SAT               = %d \n", TP_SAT);
+        printf("IS_OUTPUT_SQUARED = %d \n", TP_IS_OUTPUT_SQUARED);
+        printf("===================================================\n");
+        printf("== END of EUCLIDEAN_DISTANCE REF KERNEL Graph =====\n");
+        printf("===================================================\n");
 #endif
         // make connections
         connect<>(inWindowP, m_ED_ref_kernel.in[0]);
@@ -143,10 +109,6 @@ class euclidean_distance_ref_graph : public graph {
         // Source files
         source(m_ED_ref_kernel) = "euclidean_distance_ref.cpp";
         headers(m_ED_ref_kernel) = {"euclidean_distance_ref.hpp"};
-
-        printf("===================================================\n");
-        printf("== END of EUCLIDEAN_DISTANCE REF KERNEL Graph =====\n");
-        printf("===================================================\n");
     };
 };
 } //  End of namespace euclidean_distance {

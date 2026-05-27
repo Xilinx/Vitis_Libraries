@@ -60,8 +60,18 @@ class conv_corr_ref {
         getRefPaddedLength<TT_DATA_F, TT_DATA_G, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
     static constexpr unsigned int m_kLoopCount = getRefLoopCount<TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
 
-    alignas(__ALIGN_BYTE_SIZE__) TT_DATA_F refPaddedFdata[m_kPaddedDataLength * TP_NUM_FRAMES] = {
-        zeros<TT_DATA_F>()}; // Padded F data
+    // G length used for output buffer sizing: for VALID+RTP use smallest G (= largest output); else compile-time max.
+    static constexpr unsigned int m_kMinGLenForBuf =
+        ((TP_USE_RTP_VECTOR_LENGTHS == 1) && (TP_COMPUTE_MODE == VALID_MODE)) ? getMinLen<TT_DATA_G>() : TP_G_LEN;
+    // Maximum loop count the output buffer must accommodate (matches graph buffer dimension).
+    static constexpr unsigned int m_kMaxRefLoopCount = getRefLoopCount<TP_COMPUTE_MODE, TP_F_LEN, m_kMinGLenForBuf>();
+    // Maximum output sample count the output buffer can hold.
+    static constexpr unsigned int m_kMaxOutLen = CEIL(m_kMaxRefLoopCount, m_kLanes);
+
+    // zero Initiated memory buffer where F signal data filled based on paddedLength
+    // Using chess_storage to allocate in data memory instead of stack to avoid stack overflow
+    TT_DATA_F chess_storage(% chess_alignof(v32int8)) refPaddedFdata[m_kPaddedDataLength * TP_NUM_FRAMES] = {
+        zeros<TT_DATA_F>()};
 
    public:
     // Default Constructor

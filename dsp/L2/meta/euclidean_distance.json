@@ -95,7 +95,7 @@
             "validator": {
                 "file": "euclidean_distance.py",
                 "function": "validate_TP_IS_OUTPUT_SQUARED",
-                "args": []
+                "args": ["AIE_VARIANT", "TP_LEN"]
             },
             "updater": {
                 "file": "euclidean_distance.py",

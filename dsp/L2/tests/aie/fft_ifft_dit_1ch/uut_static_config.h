@@ -24,3 +24,19 @@
 #define INPUT_WINDOW_VSIZE ((4 * DYN_PT_SIZE) + POINT_SIZE)
 #endif
 #endif
+
+#if defined(USING_UUT)
+#if (USE_PKT_SWITCHING != 0)
+#define PKT_INPUT_FILE "./data/input_pkts.csv"
+#define PKT_OUTPUT_FILE "./data/output_pkts.txt"
+#endif
+#endif
+
+#define PLIO_WIDTH 128
+// Force PLIO bit width to 64-bit when packet switching
+#if defined(USING_UUT)
+#if (USE_PKT_SWITCHING != 0)
+#undef PLIO_WIDTH
+#define PLIO_WIDTH 64
+#endif
+#endif

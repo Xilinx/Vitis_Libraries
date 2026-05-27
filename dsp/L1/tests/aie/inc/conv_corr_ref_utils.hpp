@@ -40,6 +40,10 @@ using namespace std;
 #define NOINLINE_DECL inline __attribute__((noinline))
 #endif
 
+#ifndef MIN
+#define MIN(x, y) ((x) > (y) ? (y) : (x))
+#endif
+
 #define SHIFT_MAX 62
 #define SHIFT_MIN 0
 #define SAT_MODE_MAX 3
@@ -96,8 +100,7 @@ static constexpr unsigned int kMaxIndexOf16ByteVector = 2;  // |2|1|     ===> 16
 static constexpr unsigned int kNumPoints2 = 2;              // Num of points is 2 for stream processing.
 static constexpr unsigned int kNumPoints4 = 4;              // Num of points is 4 for stream processing
 static constexpr int kXstepOfMac4Rot = -4;               // xstep is -4 for mac4_rot() intrinsic as per current design.
-static constexpr unsigned int kMinLenOfGforStream = 8;   // Min Len of G should be 8 while doing stream processing.
-static constexpr unsigned int kMaxLenOfGforStream = 256; // Max Len of G should be 256 while doing stream processing.
+static constexpr unsigned int kMaxLenOfGforStream = 256; // Max supported G Len is 256 while doing stream processing
 
 template <typename TT_DATA_F, typename TT_DATA_G>
 struct t_CC_RefAccType {
@@ -707,6 +710,14 @@ INLINE_DECL bfloat16 conjugate(bfloat16& inData) {
     return inData;
 }; //
 
+// cfloat
+template <>
+INLINE_DECL cfloat conjugate(cfloat& inData) {
+    inData.real = inData.real;
+    inData.imag = (-1) * inData.imag;
+    return inData;
+}; //
+
 // zero Initialization
 template <typename TT_DATA>
 INLINE_DECL TT_DATA zeros() {
@@ -857,19 +868,19 @@ INLINE_DECL void multiplyAccum(T_accRef<cfloat>& accum, cfloat& inDataF, cfloat&
 // Function to return Maximum supported length based on given DATA TYPE.
 template <typename TT_DATA>
 INLINE_DECL constexpr unsigned int getMaxLen() {
-    return (((kMaxBufferLenOnAieInBytes >> kShiftFactor2) / sizeof(TT_DATA)));
+    return ((kMaxBufferLenOnAieInBytes / sizeof(TT_DATA)));
 };
 
 // Function to return Minimum supported length based on given DATA TYPE.
 template <typename TT_DATA>
 INLINE_DECL constexpr unsigned int getMinLen() {
-    return (((kMaxBitsLoadOnAie << 1) / fnRefNumOfSamples<TT_DATA>()));
+    return ((kMaxBytesLoadOnAie << 1) / sizeof(TT_DATA));
 };
 
 // Function to return true or false by checking given length is in range or not
 template <typename TT_DATA, unsigned int sigLen, unsigned int TP_API>
 constexpr bool isLenInRange() {
-    unsigned int minDataLoad = (kMaxBitsLoadOnAie / fnRefNumOfSamples<TT_DATA>());
+    unsigned int minDataLoad = (kMaxBytesLoadOnAie / sizeof(TT_DATA));
     bool checkLen = false;
 
     if ((sigLen >= getMinLen<TT_DATA>()) && (sigLen <= getMaxLen<TT_DATA>())) {
@@ -882,15 +893,12 @@ constexpr bool isLenInRange() {
 template <unsigned int computeMode, unsigned int dataLenF, unsigned int dataLenG>
 INLINE_DECL constexpr unsigned int getRefLoopCount() {
     unsigned int loopCount = 0;
-    if (computeMode == FULL_MODE) // Full
-    {
+    if (computeMode == FULL_MODE) {
         loopCount = ((dataLenF + dataLenG) - 1);
-    } else if (computeMode == SAME_MODE) // Same
-    {
+    } else if (computeMode == SAME_MODE) {
         loopCount = dataLenF;
 
-    } else if (computeMode == VALID_MODE) // Valid
-    {
+    } else if (computeMode == VALID_MODE) {
         loopCount = ((dataLenF - dataLenG) + 1);
     } else {
         loopCount = ((dataLenF + dataLenG) - 1); // default Full mode
@@ -908,20 +916,72 @@ template <typename TT_DATA_F,
 INLINE_DECL constexpr unsigned int getRefPaddedLength() {
     unsigned int refPaddedLength = 0;
     unsigned int refLanes = fnRefNumLanes<TT_DATA_F, TT_DATA_G>();
-    unsigned int refDataSamples = fnRefNumOfSamplesizeF<TT_DATA_F>();
-    unsigned int refDataLoad = kMaxBitsLoadOnAie / refDataSamples;
+    unsigned int refDataLoad = kMaxBytesLoadOnAie / sizeof(TT_DATA_F);
 
-    if (computeMode == FULL_MODE) // Full
-    {
+    if (computeMode == FULL_MODE) {
+        // Subtract 1 because two sequences of length F_LEN and G_LEN produce F_LEN+G_LEN-1 output samples.
+        // This counts from the first overlap (1 element) through the last overlap (1 element).
         refPaddedLength = ((dataLenG - 1) + dataLenF + (dataLenG - 1));
         refPaddedLength = CEIL(refPaddedLength, refDataLoad);
-    } else if (computeMode == SAME_MODE) // Same
-    {
+    } else if (computeMode == SAME_MODE) {
+        // The reference uses (G/2-1) padding -- the straightforward scalar formula.
+        // The UUT uses CEIL(G/2, dataLoad) instead to satisfy vector-alignment constraints,
+        // and compensates via kXStartIdxAdj to keep output sample alignment correct.
         refPaddedLength = (((dataLenG >> 1) - 1) + dataLenF + ((dataLenG >> 1) - 1));
         refPaddedLength = CEIL(refPaddedLength, refDataLoad);
     } else if (computeMode == VALID_MODE) {
-        if (refLanes > refDataLoad) // Valid
-        {
+        if (refLanes > refDataLoad) {
+            refPaddedLength = (dataLenF + (refDataLoad << 1));
+            refPaddedLength = CEIL(refPaddedLength, refDataLoad);
+        } else {
+            refPaddedLength = (dataLenF + refDataLoad);
+            refPaddedLength = CEIL(refPaddedLength, refDataLoad);
+        }
+    } else {
+        // do nothing
+    }
+
+    return refPaddedLength;
+};
+
+// Function to return the LoopCount based on given data length and compute mode
+template <unsigned int computeMode>
+INLINE_DECL unsigned int getRefRunTimeLoopCount(unsigned int dataLenF, unsigned int dataLenG) {
+    unsigned int loopCount = 0;
+    if (computeMode == FULL_MODE) {
+        loopCount = ((dataLenF + dataLenG) - 1);
+    } else if (computeMode == SAME_MODE) {
+        loopCount = dataLenF;
+
+    } else if (computeMode == VALID_MODE) {
+        loopCount = ((dataLenF - dataLenG) + 1);
+    } else {
+        loopCount = ((dataLenF + dataLenG) - 1); // default Full mode
+    }
+
+    return loopCount;
+};
+
+// Function to return the refPaddedLength based on given data length and compute mode
+template <typename TT_DATA_F, typename TT_DATA_G, unsigned int computeMode>
+INLINE_DECL unsigned int getRefRunTimePaddedLength(unsigned int dataLenF, unsigned int dataLenG) {
+    unsigned int refPaddedLength = 0;
+    unsigned int refLanes = fnRefNumLanes<TT_DATA_F, TT_DATA_G>();
+    unsigned int refDataLoad = kMaxBytesLoadOnAie / sizeof(TT_DATA_F);
+
+    if (computeMode == FULL_MODE) {
+        // Subtract 1 because two sequences of length F_LEN and G_LEN produce F_LEN+G_LEN-1 output samples.
+        // This counts from the first overlap (1 element) through the last overlap (1 element).
+        refPaddedLength = ((dataLenG - 1) + dataLenF + (dataLenG - 1));
+        refPaddedLength = CEIL(refPaddedLength, refDataLoad);
+    } else if (computeMode == SAME_MODE) {
+        // The reference uses (G/2-1) padding -- the straightforward scalar formula.
+        // The UUT uses CEIL(G/2, dataLoad) instead to satisfy vector-alignment constraints,
+        // and compensates via kXStartIdxAdj to keep output sample alignment correct.
+        refPaddedLength = (((dataLenG >> 1) - 1) + dataLenF + ((dataLenG >> 1) - 1));
+        refPaddedLength = CEIL(refPaddedLength, refDataLoad);
+    } else if (computeMode == VALID_MODE) {
+        if (refLanes > refDataLoad) {
             refPaddedLength = (dataLenF + (refDataLoad << 1));
             refPaddedLength = CEIL(refPaddedLength, refDataLoad);
         } else {
@@ -1241,15 +1301,92 @@ INLINE_DECL constexpr bool fnCheckDataTypeOfOutput() {
 }
 
 // Function to check Len of G is in valid range or not while doing stream processing
-template <unsigned int gLen>
+template <typename TT_DATA_G, unsigned int gLen>
 INLINE_DECL constexpr bool fnCheckLenOfStreamforSigG() {
+    unsigned int kMinLenOfGforStream =
+        kMaxBytesLoadOnAie / sizeof(TT_DATA_G); // Min Len of G should be at least one vector load on AIE based on data
+                                                // type of G Signal while doing stream processing
     return ((gLen >= kMinLenOfGforStream) && (gLen <= kMaxLenOfGforStream));
 };
 
-// Configuration Defensive check function to check Length of F Signal and G Signal
-template <typename TT_DATA, unsigned int sigLen, unsigned int TP_API>
-INLINE_DECL constexpr bool fnCheckLenOfData() {
-    return (isLenInRange<TT_DATA, sigLen, TP_API>() ? true : false);
+// Configuration Defensive check function to validate TP_F_LEN: alignment, min (2*baseLoad), and mode-dependent max from
+// output buffer constraints. Output constraint skipped when output exceeds ping-pong threshold (single_buffer takes
+// over).
+// MAX_F = min(dataMaxF, FULL: maxOut-minG+1, SAME: maxOut, VALID: maxOut+minG-1)
+template <typename TT_DATA_F,
+          typename TT_DATA_G,
+          typename TT_DATA_OUT,
+          unsigned int TP_F_LEN,
+          unsigned int TP_API,
+          unsigned int TP_COMPUTE_MODE>
+INLINE_DECL constexpr bool fnCheckInBuffofFLen() {
+    if
+        constexpr(TP_API == USE_STREAM_API) { return true; } // Stream API bypasses buffer validation
+    constexpr unsigned int baseLoadFsig = kMaxBytesLoadOnAie / sizeof(TT_DATA_F); // Vector load size in F elements
+    constexpr unsigned int minFLen = baseLoadFsig << 1;                           // Minimum F length = 2 vector loads
+    constexpr unsigned int dataMaxF = kMaxBufferLenOnAieInBytes / sizeof(TT_DATA_F); // Max F from data memory limit
+    constexpr unsigned int maxOutElems = kMaxBufferLenOnAieInBytes / sizeof(TT_DATA_OUT); // Max output elements
+    constexpr unsigned int pingpongThresholdElems =
+        (kMaxBufferLenOnAieInBytes >> 1) / sizeof(TT_DATA_OUT);                  // Half memory in output elements
+    constexpr unsigned int minG = (kMaxBytesLoadOnAie << 1) / sizeof(TT_DATA_G); // Minimum G length = 2 vector loads
+
+    // Calculate worst-case output size for max F to check if single_buffer will be triggered
+    constexpr unsigned int maxOutForMaxF =
+        (TP_COMPUTE_MODE == FULL_MODE)
+            ? (dataMaxF + minG - 1)
+            : (TP_COMPUTE_MODE == SAME_MODE) ? dataMaxF : (dataMaxF - minG + 1); // VALID mode
+
+    // Derive max F from output constraint: FULL(out=F+G-1), SAME(out=F), VALID(out=F-G+1)
+    // Only apply output constraint if the output won't trigger single_buffer
+    constexpr unsigned int maxFLenOut =
+        (maxOutForMaxF > pingpongThresholdElems) ? dataMaxF : // Output will use single_buffer, no constraint
+            ((TP_COMPUTE_MODE == FULL_MODE)
+                 ? (maxOutElems - minG + 1)
+                 : (TP_COMPUTE_MODE == SAME_MODE) ? maxOutElems : (maxOutElems + minG - 1)); // VALID mode
+
+    constexpr unsigned int maximumFLen =
+        (dataMaxF < maxFLenOut) ? dataMaxF : maxFLenOut; // min(data_limit, output_limit)
+    return (TP_F_LEN >= minFLen) && (TP_F_LEN <= maximumFLen) &&
+           ((TP_F_LEN % baseLoadFsig) == 0); // Range and alignment check
+}
+
+// Configuration Defensive check function to validate TP_G_LEN: alignment, min (2*baseLoad), and mode-dependent max from
+// F, data memory, and output constraints. Output constraint skipped when output exceeds ping-pong threshold
+// (single_buffer takes over).
+// MAX_G = min(F, dataMaxG, FULL: maxOut-F+1, SAME/VALID: dataMaxG)
+template <typename TT_DATA_F,
+          typename TT_DATA_G,
+          typename TT_DATA_OUT,
+          unsigned int TP_F_LEN,
+          unsigned int TP_G_LEN,
+          unsigned int TP_API,
+          unsigned int TP_COMPUTE_MODE>
+INLINE_DECL constexpr bool fnCheckInBuffofGLen() {
+    if
+        constexpr(TP_API == USE_STREAM_API) { return true; }                   // Stream API bypasses buffer validation
+    constexpr unsigned int baseLoadG = kMaxBytesLoadOnAie / sizeof(TT_DATA_G); // Vector load size in G elements
+    constexpr unsigned int minG = baseLoadG << 1;                              // Minimum G length = 2 vector loads
+    constexpr unsigned int dataMaxG = kMaxBufferLenOnAieInBytes / sizeof(TT_DATA_G); // Max G from data memory limit
+    constexpr unsigned int maxOutElems = kMaxBufferLenOnAieInBytes / sizeof(TT_DATA_OUT); // Max output elements
+    constexpr unsigned int pingpongThresholdBytes = kMaxBufferLenOnAieInBytes >> 1;       // Half memory in bytes
+
+    // Calculate worst-case output size with current TP_F_LEN and max G to check if single_buffer triggers
+    constexpr unsigned int maxOutWithMaxG =
+        (TP_COMPUTE_MODE == FULL_MODE)
+            ? (TP_F_LEN + dataMaxG - 1)
+            : (TP_COMPUTE_MODE == SAME_MODE) ? TP_F_LEN : dataMaxG; // VALID mode: no constraint
+    constexpr unsigned int maxOutBytes = maxOutWithMaxG * sizeof(TT_DATA_OUT);
+
+    // Derive max G from output constraint: FULL(out=F+G-1 → maxG=maxOut-F+1), SAME/VALID(no output constraint on G)
+    // Only apply output constraint if output won't trigger single_buffer
+    constexpr unsigned int maxGOut =
+        (maxOutBytes > pingpongThresholdBytes) ? dataMaxG : // Output uses single_buffer, no constraint
+            ((TP_COMPUTE_MODE == FULL_MODE) ? (maxOutElems - TP_F_LEN + 1) : dataMaxG);
+
+    constexpr unsigned int maxGRaw = (TP_F_LEN < dataMaxG) ? TP_F_LEN : dataMaxG; // G constrained by min(F, dataMaxG)
+    constexpr unsigned int maxG =
+        (maxGRaw < maxGOut) ? maxGRaw : maxGOut; // Apply tightest constraint: min(F_limit, output_limit)
+    return (TP_G_LEN >= minG) && (TP_G_LEN <= maxG) && ((TP_G_LEN % baseLoadG) == 0); // Range and alignment check
 }
 
 // Configuration Defensive check function to check whether strem process supported by AIE-1 or AIE-2
@@ -1284,6 +1421,18 @@ INLINE_DECL constexpr bool fnCheckPhases() {
     unsigned int muls = fnRefNumMuls<TT_DATA_F, TT_DATA_G>();
     unsigned int numOfCores4 =
         (gLen / muls); // muls are 8 Complex MACS for eg: 32(G_Len)/8(CMACS) = 4 is the Max CascLen (4 cores)
+
+    // --------------------------------------------
+    // IO-Buffer : Always Num of Phases must be 1.
+    // --------------------------------------------
+    // Stream Processing: Num of Phases can be increased only when each cascade stream has maximum data rate i.e with
+    // maximum cascade length (4)
+    //                    To achieve data rate less than 1GSPS, Cascade length parameter can be decreased in a single
+    //                    phase design
+    //                    To achieve data rate more than 1GSPS, NUM_PHASES parameter should be increased by keeping
+    //                        the CASC_LEN parameter to its maximum possible value (i.e. the value required to achieve
+    //                        1GSPS when NUM_PHASES=1)
+    //---------------------------------------------
     if (TP_API == USE_STREAM_API && numPhases <= kMaxNumOfPhases && isPowerOfTwo<numPhases>()) {
         isphasesValid = ((cascLen == numOfCores4) && (numPhases > 1)) ? true : ((numPhases == 1) ? true : false);
     } else {
@@ -1302,29 +1451,34 @@ INLINE_DECL constexpr bool fnCheckIsComputeModeValid() {
 
 // Configuration Defensive check function to check Length of G Signal should be multiple
 // of ((phases*lanes)*(Points/streamsPerCore)) when stream processing happening
-template <typename TT_DATA_F, unsigned int fLen, unsigned int gLen, unsigned int numPhases, unsigned int TP_API>
+template <typename TT_DATA_F,
+          typename TT_DATA_G,
+          unsigned int fLen,
+          unsigned int gLen,
+          unsigned int numPhases,
+          unsigned int TP_API>
 INLINE_DECL constexpr bool fnCheckGLen() {
     bool isLenOfGvalid = true;
     bool isGlenGreaterThanFlen = (gLen > fLen) ? true : false;
+    constexpr unsigned int kMuls = fnRefNumMuls<TT_DATA_F, TT_DATA_G>();
+    constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>();
+    constexpr unsigned int kPoints = kMuls / kLanes;
+    constexpr unsigned int kStreamPerCoreVar = (kMuls * numPhases) >> 1;
+    constexpr unsigned int kStreamsPerCore = (gLen > kStreamPerCoreVar) ? 1 : kMaxNumOfStreams;
+    constexpr unsigned int kMinGLen = (numPhases * kLanes) * (kPoints / kStreamsPerCore);
 
     if (TP_API == USE_STREAM_API) {
-        if ((isGlenGreaterThanFlen) && (!(fnCheckLenOfStreamforSigG<gLen>()))) {
+        if (isGlenGreaterThanFlen) {
             isLenOfGvalid = false;
-
-        } else {
-            if ((isGlenGreaterThanFlen) && (gLen < (numPhases << kShiftFactor2))) {
-                isLenOfGvalid = false;
-
-            } else if (gLen > (numPhases << kShiftFactor2)) {
-                if ((isGlenGreaterThanFlen) && (gLen % (numPhases << (kShiftFactor2 + 1)) != 0)) {
-                    isLenOfGvalid = false;
-                }
-            }
+        } else if (!(fnCheckLenOfStreamforSigG<TT_DATA_G, gLen>())) {
+            isLenOfGvalid = false;
+        } else if (gLen < kMinGLen) {
+            isLenOfGvalid = false;
+        } else if (gLen % kMinGLen != 0) {
+            isLenOfGvalid = false;
         }
-    } else // Check for gLen when TP_API = USE_WINDOW_API (I/O BUFFER)
-    {
-        if (isGlenGreaterThanFlen) // gLen <= fLen
-        {
+    } else { // USE_WINDOW_API
+        if (isGlenGreaterThanFlen) {
             isLenOfGvalid = false;
         }
     }

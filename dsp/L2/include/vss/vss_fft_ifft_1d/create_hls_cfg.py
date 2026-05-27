@@ -21,7 +21,7 @@ import string
 
 def hls_params(cur_dir, root_dir, kernel, params_file, tmpl_file):
     parser = configparser.ConfigParser()
-    with open(f"{cur_dir}/{params_file}") as stream:
+    with open(f"{params_file}") as stream:
         parser.read_string(
             "[top]\n" + stream.read()
         )  # python's configparser complains about headerless configurations in cfg files. This is a trick to get around the issue
@@ -37,6 +37,12 @@ def hls_params(cur_dir, root_dir, kernel, params_file, tmpl_file):
     
     if "mid_transpose" in kernel:
         hls_config_dict["ssr"] = int(int(hls_config_dict["ssr"]) * (128/sample_size)) #128 is size of port in pl kernels
+    if "2" in hls_config_dict["vss_mode"] and "1" in hls_config_dict["api_io"]:
+        if "back_transpose" in kernel:
+            hls_config_dict["point_size"] = int(int(hls_config_dict["point_size"]) // 2)
+        #print("Dual stream configuration selected, doubling SSR for AIE variant 1 with port API and widget use")
+        #hls_config_dict["ssr"] = int(int(hls_config_dict["ssr"]) * 2) #128 is size of port in pl kernels
+    print(hls_config_dict["ssr"])
     kernel_dict = {"ROOT_DIR": str(root_dir), "KERNEL_NAME": str(kernel), "SAMPLE_SIZE": str(sample_size)}
     full_dict = {**kernel_dict, **hls_config_dict}
     print(full_dict)

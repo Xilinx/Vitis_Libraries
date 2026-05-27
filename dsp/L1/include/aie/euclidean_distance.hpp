@@ -64,20 +64,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_SAT>
 class euclidean_distance_squared {
-   private:
-    // constants derived from configuration parameters
-
-    // number of multiplications per lane for main intrinsic
-    static constexpr unsigned int m_kMuls = fnGetNumofMULs<TT_DATA>();
-
-    // number of lanes that intrinsic would operate
-    static constexpr unsigned int m_kLanes = fnGetNumofLanes<TT_DATA>();
-
-    // load max possible elements each time based on sample size from memory that aie would operate
-    static constexpr unsigned int m_kVecLoad = (kMaxBytesLoadOnAie / sizeof(TT_DATA));
-
    public:
-    // Constructor of euclidean_distance class
+    // Constructor of euclidean_distance_squared class
     euclidean_distance_squared() {}
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(euclidean_distance_squared::euclideanDistMain); }
@@ -88,25 +76,21 @@ class euclidean_distance_squared {
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Single kernel specialization for io bufer
+// Single kernel specialization for io buffer
 
 template <typename TT_DATA, unsigned int TP_LEN>
 class euclidean_distance {
    private:
-    // constants derived from configuration parameters
+    // Native load/store vector element count = kMaxBytesLoadOnAie / sizeof(TT_DATA):
+    //   float  AIE-1/AIE-ML: 8    bfloat16 AIE-ML:    16
+    //   float  AIE-MLv2:     16   bfloat16 AIE-MLv2:  32
+    static constexpr unsigned int m_ksampleSize = kMaxBytesLoadOnAie / sizeof(TT_DATA);
 
-    // number of lanes that intrinsic would operate
-    static constexpr unsigned int m_kLanes = fnGetNumofLanes<TT_DATA>();
-
-    // load max possible elements each time based on sample size from memory that aie would operate
-    static constexpr unsigned int m_kVecLoad = (kMaxBytesLoadOnAie / sizeof(TT_DATA));
-
-    // number of samples as per data type.
-    static constexpr unsigned int m_ksampleSize = (fnSampleSize<TT_DATA>());
 #if __HAS_ACCUM_PERMUTES__ == 0
-    // zero Initiated memory buffer which stores BFLOAT16 converted data from kernel-1 when TT_DATA is float on AIE-ML.
-    // TP_LEN is max 1k (2048) on AIE-ML for float data type.
-    alignas(__ALIGN_BYTE_SIZE__) bfloat16 convertFloatToBfloat16Buff[TP_LEN] = {fir::nullElem<bfloat16>()};
+    // Intermediate buffer for float→bfloat16 conversion on AIE-ML/AIE-MLv2.
+    // Required when TT_DATA=float: squared float results are converted to bfloat16
+    // before being fed into the LUT-based sqrt. Size is TP_LEN bfloat16 elements.
+    alignas(__ALIGN_BYTE_SIZE__) bfloat16 convertFloatToBfloat16Buff[TP_LEN];
 #endif
 
    public:

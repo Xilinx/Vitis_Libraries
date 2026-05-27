@@ -194,7 +194,7 @@ class ct_kernels {
  * stream. \n
  *         Currently, only TP_PARA_DECI_POLY=2 is supported for the halfband interpolators with SSR>1. SSR = 1 supports
  * TP_PARA_DECI_POLY=1 or 2.
- *
+ *         \n
  *         TP_PARA_DECI_POLY = 2 result in two input polyphases. Each polyphase processes half of the input data stream.
  * Processed output data from both the polyphases
  *         are combined together to produce the overall output data stream.

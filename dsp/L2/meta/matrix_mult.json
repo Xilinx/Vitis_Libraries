@@ -192,6 +192,7 @@
             "name": "TP_SSR",
             "type": "uint",
             "description": "describes the number of parallel kernel chains to split the GEMM into. Split occurs along TP_DIM_A of Matrix A.",
+            "test_max": 8,
             "minimum": 1,
             "updater": {
                 "file": "matrix_mult.py",
@@ -224,6 +225,7 @@
             "name": "TP_CASC_LEN",
             "type": "uint",
             "description": "describes the number of AIE Tiles to split the GEMM operation into.",
+            "test_max": 8,
             "minimum": 1,
             "updater": {
                 "file": "matrix_mult.py",
@@ -332,11 +334,7 @@
             },
             "validator": {
                 "file": "matrix_mult.py",
-                "function": "validate_TP_DIM_OUT_LEADING",
-                "args": [
-                    "TP_DIM_A_LEADING",
-                    "TP_DIM_B_LEADING"
-                ]
+                "function": "validate_TP_DIM_OUT_LEADING"
             }
         },
         {

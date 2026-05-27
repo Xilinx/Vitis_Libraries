@@ -26,5 +26,9 @@ if not f:
     print(parameter_file + " open failed")
     exit(1)
 parameters = json.load(f)
-PARAM_VAL = parameters[parameter_set][parameter_name]
+try:
+    PARAM_VAL = parameters[parameter_set][parameter_name]
+# if key doesn't exist, just print 1.
+except:
+    PARAM_VAL=1
 print(PARAM_VAL)

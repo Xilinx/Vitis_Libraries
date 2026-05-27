@@ -1,3 +1,5 @@
+#
+# Copyright (C) 2019-2022, Xilinx, Inc.
 # Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,12 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.10
 #
-#+-------------------------------------------------------------------------------
-# The following parameters are assigned with default values. These parameters can
-# be overridden through the make command line
-#+-------------------------------------------------------------------------------
 
 REPORT := no
 PROFILE := no

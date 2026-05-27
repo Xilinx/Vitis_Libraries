@@ -41,13 +41,14 @@ import aie_common as com
 
 AIE_LOAD_SIZE = 256/8   # 32 Bytes
 AIE_LOAD_SIZE_IN_BITS = 256
-# TP_DIM_MIN = 1
-TP_DIM_MIN = 2
+AIE_X_REG_BYTES = 512 // 8  # X-register is always 512 bits on all AIE variants
+TP_DIM_MIN = 1
 TP_DIM_MAX = 4
 TP_NUM_FRAMES_MIN = 1
 TP_NUM_FRAMES_MAX = 1
 SQRT_OUTPUT = 0
 SQUARED_OUTPUT = 1
+FIXED_DIM = 4
 
 
 sampleSize = {
@@ -147,8 +148,7 @@ def update_TP_LEN(args):
   return fn_update_len(TP_LEN, TT_DATA, TP_API, AIE_VARIANT)
 
 def fn_update_len(TP_LEN, TT_DATA, TP_API, AIE_VARIANT):
-  # elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA)
-  elems_per_load = 32 // com.fn_size_by_byte(TT_DATA)
+  elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA)
   TP_LEN_max = com.k_data_memory_bytes[AIE_VARIANT] // (com.fn_size_by_byte(TT_DATA))
   TP_LEN_max_pingpong = com.k_data_memory_bytes[AIE_VARIANT] >> 1 // (com.fn_size_by_byte(TT_DATA))
   TP_LEN_max_pingpong = TP_LEN_max_pingpong // TP_DIM_MAX
@@ -156,8 +156,7 @@ def fn_update_len(TP_LEN, TT_DATA, TP_API, AIE_VARIANT):
 
   param_dict={
     "name" : "TP_LEN",
-    # "minimum" : elems_per_load,
-    "minimum" : 32, # hardcoded minimum to 32, is to be revisited in 26.1
+    "minimum" : elems_per_load,
     "maximum" : TP_LEN_max if TP_API == com.API_BUFFER else 2**31,
     "maximum_pingpong_buf" : TP_LEN_max_pingpong
   }
@@ -222,11 +221,29 @@ def fn_update_is_output_squared():
 
 def validate_TP_IS_OUTPUT_SQUARED(args):
   TP_IS_OUTPUT_SQUARED = args["TP_IS_OUTPUT_SQUARED"]
-  return fn_validate_is_output_squared(TP_IS_OUTPUT_SQUARED)
+  AIE_VARIANT = args["AIE_VARIANT"]
+  TP_LEN = args["TP_LEN"]
+  return fn_validate_is_output_squared(TP_IS_OUTPUT_SQUARED, AIE_VARIANT, TP_LEN)
 
-def fn_validate_is_output_squared(TP_IS_OUTPUT_SQUARED):
+def fn_validate_is_output_squared(TP_IS_OUTPUT_SQUARED, AIE_VARIANT, TP_LEN):
   param_dict = fn_update_is_output_squared()
-  return(com.validate_legal_set(param_dict["enum"], "TP_IS_OUTPUT_SQUARED", TP_IS_OUTPUT_SQUARED))
+  legal_set_check = com.validate_legal_set(param_dict["enum"], "TP_IS_OUTPUT_SQUARED", TP_IS_OUTPUT_SQUARED)
+  if not legal_set_check["is_valid"]:
+    return legal_set_check
+
+  # For sqrt output on AIE-ML/AIE-MLv2, TP_LEN must be a multiple of one X-register
+  # worth of bfloat16 elements: AIE_X_REG_BYTES / sizeof(bfloat16).
+  # A non-compliant TP_LEN produces zero output samples.
+  lut_granularity = AIE_X_REG_BYTES // com.fn_size_by_byte("bfloat16")
+  if TP_IS_OUTPUT_SQUARED == SQRT_OUTPUT and AIE_VARIANT in [com.AIE_ML, com.AIE_MLv2]:
+    if TP_LEN % lut_granularity != 0:
+      return com.isError(
+        f"For IS_OUTPUT_SQUARED=0 (sqrt output) on AIE-ML/AIE-MLv2, TP_LEN must be a multiple of {lut_granularity} "
+        f"(AIE_X_REG_BYTES({AIE_X_REG_BYTES}) / sizeof(bfloat16)({com.fn_size_by_byte('bfloat16')}) = {lut_granularity}). "
+        f"TP_LEN={TP_LEN} is not valid. Minimum TP_LEN = {lut_granularity}."
+      )
+
+  return com.isValid
 
 #######################################################
 ############# TP_RND Updater and Validator ############
@@ -318,7 +335,7 @@ def info_ports(args):
     TP_IS_OUTPUT_SQUARED = args["TP_IS_OUTPUT_SQUARED"]
     AIE_VARIANT = args["AIE_VARIANT"]
 
-    inDataLen =  (TP_LEN*TP_DIM)
+    inDataLen =  (TP_LEN*FIXED_DIM)  # Input is always TP_LEN * FixedDimOfED (4), regardless of TP_DIM
     outDataLen = (TP_LEN)
 
     if (TP_API == com.API_BUFFER) :

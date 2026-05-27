@@ -40,22 +40,17 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_SHIFT,
-          unsigned int TP_API,
-          unsigned int TP_SSR,
           unsigned int TP_RND,
           unsigned int TP_SAT>
 class outer_tensor_ref_graph : public graph {
    public:
-    static constexpr int kDimA = TP_DIM_A / TP_SSR;
-    static constexpr int kDimB = TP_DIM_B;
-    static constexpr int kvecSampleNumOut = 256 / 8 / vectByte<TT_DATA_A, TT_DATA_B>().val_byteOut;
-    static constexpr int kWindowVsize = TP_DIM_A * CEIL(TP_DIM_B, kvecSampleNumOut) / TP_SSR;
+    static constexpr int kWindowVsize = TP_DIM_A * TP_DIM_B;
 
-    port<input> inA[TP_SSR];
-    port<input> inB[TP_SSR];
-    port<output> out[TP_SSR];
+    port<input> inA;
+    port<input> inB;
+    port<output> out;
 
-    kernel m_kernels[TP_SSR];
+    kernel m_kernel;
 
     // Constructor
     outer_tensor_ref_graph() {
@@ -66,29 +61,25 @@ class outer_tensor_ref_graph : public graph {
         printf("TP_DIM_B                = %d\n", TP_DIM_B);
         printf("TP_NUM_FRAMES           = %d\n", TP_NUM_FRAMES);
         printf("TP_SHIFT                = %d\n", TP_SHIFT);
-        printf("TP_API                  = %d\n", TP_API);
-        printf("TP_SSR                  = %d\n", TP_SSR);
         printf("TP_RND                  = %d\n", TP_RND);
         printf("TP_SAT                  = %d\n", TP_SAT);
 
-        for (int i = 0; i < TP_SSR; i++) {
-            m_kernels[i] = kernel::create_object<outer_tensor_ref<TT_DATA_A, TT_DATA_B, kDimA, kDimB, TP_NUM_FRAMES,
-                                                                  TP_SHIFT, TP_API, TP_SSR, TP_RND, TP_SAT> >();
+        m_kernel = kernel::create_object<
+            outer_tensor_ref<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SHIFT, TP_RND, TP_SAT> >();
 
-            // Specify mapping constraints
-            runtime<ratio>(m_kernels[i]) = 0.9; // Nominal figure. The real figure requires knowledge of the sample
-                                                // rate.
-            // Source files
-            source(m_kernels[i]) = "outer_tensor_ref.cpp";
+        // Specify mapping constraints
+        runtime<ratio>(m_kernel) = 0.9; // Nominal figure. The real figure requires knowledge of the sample rate.
 
-            // make connections
-            connect(inA[i], m_kernels[i].in[0]);
-            connect(inB[i], m_kernels[i].in[1]);
-            dimensions(m_kernels[i].in[0]) = {kDimA * TP_NUM_FRAMES};
-            dimensions(m_kernels[i].in[1]) = {kDimB * TP_NUM_FRAMES};
-            connect(m_kernels[i].out[0], out[i]);
-            dimensions(m_kernels[i].out[0]) = {kWindowVsize * TP_NUM_FRAMES};
-        }
+        // Source files
+        source(m_kernel) = "outer_tensor_ref.cpp";
+
+        // make connections
+        connect(inA, m_kernel.in[0]);
+        connect(inB, m_kernel.in[1]);
+        dimensions(m_kernel.in[0]) = {TP_DIM_A * TP_NUM_FRAMES};
+        dimensions(m_kernel.in[1]) = {TP_DIM_B * TP_NUM_FRAMES};
+        connect(m_kernel.out[0], out);
+        dimensions(m_kernel.out[0]) = {kWindowVsize * TP_NUM_FRAMES};
     };
 };
 }

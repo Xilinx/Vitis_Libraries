@@ -28,7 +28,7 @@ if [ $AIE_VARIANT == 1 ]; then
     elif [ $AIE_VARIANT == 2 ]; then
     PART="XCVE2802-VSVH1760-1MP-E-S"
     elif [ $AIE_VARIANT == 22 ]; then
-    PART="xc2ve3858-ssva2112-2LP-e-S"
+    PART="xc2ve3858-ssva2112-2MP-e-S"
 fi
 
 if [ -f "$VCD_DIR" ]; then #does the vcd file exist to run the power tests?
@@ -45,7 +45,7 @@ if [ -f "$VCD_DIR" ]; then #does the vcd file exist to run the power tests?
 try:
    from libxv_pdm_pytasks import *
 except ImportError:
-    from librdi_pypdmtasks import * 
+    from librdi_pypdmtasks import *
 
 prj = new_project("new_proj.pdm", part="'${PART}'", process="Typ")
 prj.import_xpe("./test.xpe")

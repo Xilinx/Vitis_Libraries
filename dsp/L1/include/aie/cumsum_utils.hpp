@@ -185,7 +185,10 @@ INLINE_DECL bfloat16 nullElem() {
 template <>
 INLINE_DECL cbfloat16 nullElem() {
     cbfloat16 retVal;
-    retVal = {0.0, 0.0};
+
+    // retVal = {1.0, 0.0}; CR1267629
+    retVal.real = (bfloat16)0.0;
+    retVal.imag = (bfloat16)0.0;
 
     return retVal;
 };
@@ -235,7 +238,10 @@ INLINE_DECL bfloat16 cumsumUnity() {
 template <>
 INLINE_DECL cbfloat16 cumsumUnity() {
     cbfloat16 retVal;
-    retVal = {1.0, 0.0};
+    // retVal = {1.0, 0.0}; CR1267629
+    retVal.real = (bfloat16)0.0;
+    retVal.imag = (bfloat16)0.0;
+
     return retVal;
 };
 #endif //_SUPPORTS_BFLOAT16_

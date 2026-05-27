@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# this generates the VSS config file based on paramters
 import argparse
 
 parser = argparse.ArgumentParser(
@@ -40,6 +39,13 @@ parser.add_argument(
     type=int,
     help="AIE variant",
 )
+parser.add_argument(
+    "-ds",
+    "--dual_streams",
+    type=int,
+    help="Set to 1 to generate config for dual stream AIE implementation",
+    default=0,
+)
 args = parser.parse_args()
 SSR = args.ssr
 fname = args.cfg_file_name
@@ -48,6 +54,7 @@ freq = args.freqhz
 dataType = args.data_type
 aieName = args.aie_obj_name
 aieVariant = args.aie_variant
+dualStreams = args.dual_streams
 
 if aieVariant == 1:
     lpddrName = "LPDDR"
@@ -59,13 +66,21 @@ elif aieVariant == 22:
 f = open(f"{fname}", "w")
 
 
-if dataType == "cint16":
+if dualStreams == 1 and dataType != "cint16":
+    common_begin_cfg = f"""
+freqhz={freq}:{vssName}_back_transpose_1.ap_clk,{vssName}_back_transpose_2.ap_clk,{vssName}_ssr_fft_wrapper_1.ap_clk,{vssName}_ssr_fft_wrapper_2.ap_clk,{vssName}_ssr_fft_wrapper_3.ap_clk,{vssName}_ssr_fft_wrapper_4.ap_clk,mm2s.ap_clk,s2mm.ap_clk,{vssName}_joiner_1.ap_clk,{vssName}_splitter_1.ap_clk,{vssName}_joiner_2.ap_clk,{vssName}_splitter_2.ap_clk
+"""
+elif dualStreams == 0 and dataType != "cint16":
+    common_begin_cfg = f"""
+freqhz={freq}:{vssName}_back_transpose.ap_clk,{vssName}_ssr_fft_wrapper_1.ap_clk,{vssName}_ssr_fft_wrapper_2.ap_clk,mm2s.ap_clk,s2mm.ap_clk,{vssName}_joiner.ap_clk,{vssName}_splitter.ap_clk
+"""
+elif dataType == "cint16" and dualStreams == 0:
     common_begin_cfg = f"""
 freqhz={freq}:{vssName}_back_transpose.ap_clk,{vssName}_ssr_fft_wrapper_1.ap_clk,{vssName}_ssr_fft_wrapper_2.ap_clk,{vssName}_ssr_fft_wrapper_3.ap_clk,{vssName}_ssr_fft_wrapper_4.ap_clk,mm2s.ap_clk,s2mm.ap_clk,{vssName}_joiner.ap_clk,{vssName}_splitter.ap_clk
 """
 else:
     common_begin_cfg = f"""
-freqhz={freq}:{vssName}_back_transpose.ap_clk,{vssName}_ssr_fft_wrapper_1.ap_clk,{vssName}_ssr_fft_wrapper_2.ap_clk,mm2s.ap_clk,s2mm.ap_clk,{vssName}_joiner.ap_clk,{vssName}_splitter.ap_clk
+freqhz={freq}:{vssName}_back_transpose_1.ap_clk,{vssName}_back_transpose_2.ap_clk,{vssName}_ssr_fft_wrapper_1.ap_clk,{vssName}_ssr_fft_wrapper_2.ap_clk,{vssName}_ssr_fft_wrapper_3.ap_clk,{vssName}_ssr_fft_wrapper_4.ap_clk,{vssName}_ssr_fft_wrapper_5.ap_clk,{vssName}_ssr_fft_wrapper_6.ap_clk,{vssName}_ssr_fft_wrapper_7.ap_clk,{vssName}_ssr_fft_wrapper_8.ap_clk,mm2s.ap_clk,s2mm.ap_clk,{vssName}_joiner_1.ap_clk,{vssName}_splitter_1.ap_clk,{vssName}_joiner_2.ap_clk,{vssName}_splitter_2.ap_clk
 """
 common_begin_cfg += f"""
 [connectivity]
@@ -93,7 +108,11 @@ f.write(common_begin_cfg)
 
 comment = "# connect mm2s\n"
 f.write(comment)
-if SSR == 1:
+if dualStreams == 1:
+    for i in range(SSR):
+        text = f"sc = mm2s.sig_o_{i}:ai_engine_0.{aieName}_PLIO_front_in_{i}\n"
+        f.write(text)
+elif SSR == 1:
     text = f"sc = mm2s.sig_o:ai_engine_0.{aieName}_PLIO_front_in_0\n"
     f.write(text)
 else:
@@ -107,7 +126,16 @@ else:
 comment = "# connect s2mm\n"
 f.write(comment)
 
-if SSR == 1:
+if dualStreams == 1:
+    for i in range(int(SSR / 2)):
+        s2mm_idx_1 = (i // 2) * 4 + (i % 2)
+        text = f"sc = {vssName}_back_transpose_1.sig_o_{i}:s2mm.sig_i_{s2mm_idx_1}\n"
+        f.write(text)
+    for i in range(int(SSR / 2)):
+        s2mm_idx_2 = (i // 2) * 4 + 2 + (i % 2)
+        text = f"sc = {vssName}_back_transpose_2.sig_o_{i}:s2mm.sig_i_{s2mm_idx_2}\n"
+        f.write(text)
+elif SSR == 1:
     text = f"sc = {vssName}_back_transpose.sig_o:s2mm.sig_i\n"
     f.write(text)
 else:

@@ -58,7 +58,7 @@ for test_name in "${json_test_names[@]}"; do
             part_or_platform="PLATFORM"
     fi
     if [[ "$test_name" == *_aie22_* ]]; then
-            platform="xc2ve3858-ssva2112-2LP-e-S"
+            platform="xc2ve3858-ssva2112-2MP-e-S"
             part_or_platform="XPART"
     fi
 

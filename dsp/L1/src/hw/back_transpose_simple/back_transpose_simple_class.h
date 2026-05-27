@@ -22,12 +22,18 @@
 #include <hls_stream.h>
 #include <hls_streamofblocks.h>
 #include "common.hpp"
+#include "vss_fft_ifft_1d_common.hpp"
 //#define __BACK_TRANSPOSE_DEBUG__
 
 using namespace xf::dsp::vss::common;
+
+#ifndef POINT_SIZE_D1
+#define POINT_SIZE_D1 1
+#endif
+
 namespace back_transpose_simple {
 
-template <int TP_NFFT, int TP_NSTREAM_EXT, int TP_SAMPLE_WIDTH>
+template <int TP_NFFT, int TP_NSTREAM_EXT, int TP_SAMPLE_WIDTH, int TP_POINT_SIZE_D1 = 1>
 class backTransposeSimpleCls {
    public:
     template <unsigned int tp_point_size, unsigned int tp_ssr>
@@ -40,9 +46,10 @@ class backTransposeSimpleCls {
     static constexpr unsigned kSamplesPerRead = kNbitsIn / TP_SAMPLE_WIDTH; // 4
     static constexpr unsigned kNstreamInt = TP_NSTREAM_EXT * kSamplesPerRead;
 
-    static constexpr unsigned kPtSizeD1 = fnPtSizeD1<TP_NFFT, TP_NSTREAM_EXT>(); // 32
-    static constexpr unsigned kPtSizeD2 = TP_NFFT / kPtSizeD1;                   // 32
-    static constexpr unsigned kPtSizeD1Ceil = fnCeil<kPtSizeD1, kNstreamInt>();  // 32
+    static constexpr unsigned kPtSizeD1 =
+        (TP_POINT_SIZE_D1 == 1) ? fnPtSizeD1<TP_NFFT, modePLffts, TP_NSTREAM_EXT>() : TP_POINT_SIZE_D1; // 32
+    static constexpr unsigned kPtSizeD2 = TP_NFFT / kPtSizeD1;                                          // 32
+    static constexpr unsigned kPtSizeD1Ceil = fnCeil<kPtSizeD1, kNstreamInt>();                         // 32
 
     int rdAddrLut[kNstreamInt];
     int rdBnkLut[kNstreamInt];

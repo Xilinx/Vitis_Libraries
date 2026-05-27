@@ -23,6 +23,7 @@
 #include <adf.h>
 #include <vector>
 #include <array>
+#include <cstdlib>
 #include "utils.hpp"
 
 #include "uut_config.h"
@@ -36,9 +37,59 @@
 #define UUT_GRAPH conv_corr_graph
 #endif
 
+#ifndef SEED_RTP
+#define SEED_RTP 1
+#endif
+
 #include QUOTE(UUT_GRAPH.hpp)
 
 using namespace adf;
+using xf::dsp::aie::conv_corr::getMinLen;
+using xf::dsp::aie::conv_corr::getMaxLen;
+
+// Returns a non-power-of-2 F length that is a valid multiple of vecSize,
+// spread across [3*vecSize, TP_F_LEN] using a half-range stride between successive calls.
+template <typename TT_DATA_F, unsigned int TP_F_LEN>
+unsigned int getRtpFLen() {
+    constexpr unsigned int minFLen = getMinLen<TT_DATA_F>();
+    constexpr unsigned int maxFLen = MIN(TP_F_LEN, getMaxLen<TT_DATA_F>());
+    constexpr unsigned int vecSize = minFLen >> 1;            // elements per single vector load
+    constexpr unsigned int lenStep = minFLen;                 // 2*vecSize: step over even multiples of vecSize
+    constexpr unsigned int minNonPow2Len = minFLen + vecSize; // 3*vecSize: first odd multiple of vecSize >= minFLen
+    constexpr unsigned int numLens = (maxFLen >= minNonPow2Len) ? (maxFLen - minNonPow2Len) / lenStep + 1u : 0u;
+    if
+        constexpr(numLens == 0u) {
+            return getMinLen<TT_DATA_F>(); // TP_F_LEN < 3*vecSize: no non-power-of-2 length exists
+        }
+    else {
+        constexpr unsigned int stride = numLens / 2u + 1u; // half-range jump alternates halves
+        static unsigned int startIdx = rand() % numLens;   // random start, set once
+        static unsigned int callIdx = 0;
+        return minNonPow2Len + lenStep * ((startIdx + callIdx++ * stride) % numLens);
+    }
+}
+
+// Returns a non-power-of-2 G length that is a valid multiple of vecSize,
+// spread across [3*vecSize, TP_G_LEN] using a half-range stride between successive calls.
+template <typename TT_DATA_G, unsigned int TP_G_LEN>
+unsigned int getRtpGLen() {
+    constexpr unsigned int minGLen = getMinLen<TT_DATA_G>();
+    constexpr unsigned int maxGLen = MIN(TP_G_LEN, getMaxLen<TT_DATA_G>());
+    constexpr unsigned int vecSize = minGLen >> 1;            // elements per single vector load
+    constexpr unsigned int lenStep = minGLen;                 // 2*vecSize: step over even multiples of vecSize
+    constexpr unsigned int minNonPow2Len = minGLen + vecSize; // 3*vecSize: first odd multiple of vecSize >= minGLen
+    constexpr unsigned int numLens = (maxGLen >= minNonPow2Len) ? (maxGLen - minNonPow2Len) / lenStep + 1u : 0u;
+    if
+        constexpr(numLens == 0u) {
+            return getMinLen<TT_DATA_G>(); // TP_G_LEN < 3*vecSize: no non-power-of-2 length exists
+        }
+    else {
+        constexpr unsigned int stride = numLens / 2u + 1u; // half-range jump alternates halves
+        static unsigned int startIdx = rand() % numLens;   // random start, set once
+        static unsigned int callIdx = 0;
+        return minNonPow2Len + lenStep * ((startIdx + callIdx++ * stride) % numLens);
+    }
+}
 
 namespace xf {
 namespace dsp {
@@ -52,10 +103,28 @@ class test_graph : public graph {
     std::array<input_plio, 1> inWindowG;
     std::array<output_plio, PHASES> outWindow;
 
+    // Conv_Corr sub-graph instance (class member so update_rtp() and connections can access it)
+    dsplib::conv_corr::UUT_GRAPH<DATA_F,
+                                 DATA_G,
+                                 DATA_OUT,
+                                 FUNCT_TYPE,
+                                 COMPUTE_MODE,
+                                 REF_F_LEN,
+                                 G_LEN,
+                                 SHIFT,
+                                 API_IO,
+                                 RND,
+                                 SAT,
+                                 NUM_FRAMES,
+                                 CASC_LEN,
+                                 PHASES,
+                                 USE_RTP_VECTOR_LENGTHS>
+        conv_corrGraph;
+
 #if (USE_RTP_VECTOR_LENGTHS == 1)
     port_conditional_array<input, (USE_RTP_VECTOR_LENGTHS == 1), 1> rtpVecLen;
 #endif
-    int32 m_inVecLen[2];
+
     // Constructor
     test_graph() {
         printf("=============================================================\n");
@@ -84,11 +153,6 @@ class test_graph : public graph {
         printf("CASC_LEN       = %d \n", CASC_LEN);
         printf("PHASES         = %d \n", PHASES);
         printf("USE_RTP_VECTOR_LENGTHS = %d \n", USE_RTP_VECTOR_LENGTHS);
-
-        // Conv_Corr sub-graph
-        dsplib::conv_corr::UUT_GRAPH<DATA_F, DATA_G, DATA_OUT, FUNCT_TYPE, COMPUTE_MODE, REF_F_LEN, G_LEN, SHIFT,
-                                     API_IO, RND, SAT, NUM_FRAMES, CASC_LEN, PHASES, USE_RTP_VECTOR_LENGTHS>
-            conv_corrGraph;
 
 // Make connections:
 #ifdef USING_UUT
@@ -143,7 +207,7 @@ class test_graph : public graph {
     };
 };
 
-} // namespace conv_corr
+} // namespace testcase
 } // namespace aie
 } // namespace dsp
 } // namespace xf

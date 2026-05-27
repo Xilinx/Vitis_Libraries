@@ -827,7 +827,9 @@ sub zip_files {
     print("OUT file is $outFile\n");
     my @ssrOutFiles = (0...(( $ssrJoin - 1)));
 
-    my $num_lines = $linesPerSample*($inRow*$inCol/$ssrJoin)/$samplesPerLine;
+    my $num_lines = $colMajor
+        ? $linesPerSample*($inRow/$ssrJoin)/$samplesPerLine
+        : $linesPerSample*($inRow*$inCol/$ssrJoin)/$samplesPerLine;
 
     my @files = map { "./data/uut_output_$_\_0.txt"} (0...$ssrJoin-1);
     print join(", ", @files);

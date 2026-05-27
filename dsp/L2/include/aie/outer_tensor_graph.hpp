@@ -107,41 +107,33 @@ class outer_tensor_graph : public graph {
     /**
      * @cond NOCOMMENTS
      */
-    static constexpr int bufferSizeBytes = 32;
-    static constexpr int kMaxSSR = 16;
-    static constexpr int dimSizeMinA = bufferSizeBytes / sizeof(TT_DATA_A);
-    static constexpr int dimSizeMinB = bufferSizeBytes / sizeof(TT_DATA_B);
+    using outer_tensor_template =
+        outer_tensor<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SHIFT, TP_API, TP_SSR, TP_RND, TP_SAT>;
+    using out_t = typename outer_tensor_template::out_t;
+
+    static constexpr unsigned int kKernelDimA = TP_DIM_A / TP_SSR;
+    static constexpr unsigned int kKernelDimB = TP_DIM_B;
+    static constexpr unsigned int kKernelMatrixSize = kKernelDimA * kKernelDimB;
 
     // Defensive configuration legality checks
-    static_assert(TP_NUM_FRAMES* TP_DIM_A* TP_DIM_B* vectByte<TT_DATA_A, TT_DATA_B>().val_byteOut <=
-                          __DATA_MEM_BYTES__ ||
-                      TP_API == 1,
+    static_assert(kKernelMatrixSize* TP_NUM_FRAMES * sizeof(out_t) <= __DATA_MEM_BYTES__ || TP_API == 1,
                   "ERROR: Output cannot exceed 32kB for AIE-1 and 64kB for AIE-ML with windowed interface.");
-    static_assert(TP_DIM_A / TP_SSR >= dimSizeMinA,
-                  "ERROR: TP_DIM_A * sizeof(TT_DATA_A) / TP_SSR must be >= 32 bytes.");
-    static_assert(TP_DIM_B >= dimSizeMinB, "ERROR: TP_DIM_B * sizeof(TT_DATA_B) must be >= 32 bytes.");
-    static_assert(TP_DIM_A * sizeof(TT_DATA_A) * TP_NUM_FRAMES <= __DATA_MEM_BYTES__,
-                  "ERROR: Input at port A must be less than 32kB for AIE-1 and 64kB for AIE-ML.");
+    static_assert(TP_DIM_A % TP_SSR == 0, "ERROR: TP_DIM_A must be a multiple of TP_SSR");
+    static_assert(kKernelDimA % outer_tensor_template::kVecSampleNumA == 0,
+                  "ERROR: TP_DIM_A / TP_SSR must be a multiple of kVecSampleNumA.");
+    static_assert(TP_DIM_B % outer_tensor_template::kVecSampleNumB == 0,
+                  "ERROR: TP_DIM_B must be a multiple of kVecSampleNumB.");
+    static_assert(kKernelDimA * sizeof(TT_DATA_A) * TP_NUM_FRAMES <= __DATA_MEM_BYTES__,
+                  "ERROR: Input at port A must be less or equal to than 32kB for AIE-1 or 64kB for AIE-ML.");
     static_assert(TP_DIM_B * sizeof(TT_DATA_B) * TP_NUM_FRAMES <= __DATA_MEM_BYTES__,
-                  "ERROR: Input at port B must be less than 32kB for AIE-1 and 64kB for AIE-ML.");
+                  "ERROR: Input at port B must be less or equal to than 32kB for AIE-1 or 64kB for AIE-ML.");
     static_assert(TP_NUM_FRAMES > 0, "ERROR: TP_NUM_FRAMES must be > 0.");
     static_assert(fnValidateShiftFloat<TP_SHIFT, TT_DATA_A>(), "ERROR: TP_SHIFT must be 0 for float types.");
     static_assert(fnValidateShiftRange<TP_SHIFT>(), "ERROR: TP_SHIFT is out of the supported range.");
     static_assert(TP_API == 0 || TP_API == 1, "ERROR: TP_API is not a supported value (0 or 1)");
-    static_assert(TP_SSR > 0 && TP_SSR <= kMaxSSR, "ERROR: TP_SSR is not in the supported range of 1 to 16");
-    static_assert((TP_DIM_A & (TP_DIM_A - 1)) == 0, "ERROR: TP_DIM_A is not a power of 2.");
-    static_assert((TP_DIM_B & (TP_DIM_B - 1)) == 0, "ERROR: TP_DIM_B is not a power of 2.");
-    static_assert((TP_NUM_FRAMES & (TP_NUM_FRAMES - 1)) == 0, "ERROR: TP_NUM_FRAMES is not a power of 2.");
-    static_assert((TP_SSR & (TP_SSR - 1)) == 0, "ERROR: TP_SSR is not a power of 2.");
     static_assert(fnValidateRoundMode<TP_RND>(), "ERROR: Illegal round mode.");
     static_assert(fnValidateSatMode<TP_SAT>(), "ERROR: Illegal saturation mode.");
 
-    using outer_tensor_template =
-        outer_tensor<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SHIFT, TP_API, TP_SSR, TP_RND, TP_SAT>;
-    static constexpr unsigned int kKernelASize = CEIL(TP_DIM_A, outer_tensor_template::vecSampleNumA) / TP_SSR;
-    static constexpr unsigned int kKernelBSize = CEIL(TP_DIM_B, outer_tensor_template::vecSampleNumB);
-    static constexpr unsigned int kKernelOutSize =
-        TP_DIM_A * CEIL(TP_DIM_B, outer_tensor_template::vecSampleNumOut) / TP_SSR;
     /**
     * @endcond
     */
@@ -172,26 +164,28 @@ class outer_tensor_graph : public graph {
     outer_tensor_graph() {
         for (int i = 0; i < TP_SSR; i++) {
             m_kernels[i] =
-                kernel::create_object<outer_tensor<TT_DATA_A, TT_DATA_B, kKernelASize, kKernelBSize, TP_NUM_FRAMES,
+                kernel::create_object<outer_tensor<TT_DATA_A, TT_DATA_B, kKernelDimA, kKernelDimB, TP_NUM_FRAMES,
                                                    TP_SHIFT, TP_API, TP_SSR, TP_RND, TP_SAT> >();
+
             // Specify mapping constraints
-            runtime<ratio>(m_kernels[i]) = 0.9; // Nominal figure. The real figure requires knowledge of the sample
-                                                // rate.
+            runtime<ratio>(m_kernels[i]) =
+                0.9; // Nominal figure. The real figure requires knowledge of the sample rate.
+
             // Source files
             source(m_kernels[i]) = "outer_tensor.cpp";
-            if (TP_API == 0) {
-                stack_size(m_kernels[i]) =
-                    outer_tensor_template::vecSampleNumA * outer_tensor_template::vecNumB * 64 / TP_SSR + 1024;
-            }
+            stack_size(m_kernels[i]) = 4096;
 
             // make connections
             connect(inA[i], m_kernels[i].in[0]);
             connect(inB[i], m_kernels[i].in[1]);
-            dimensions(m_kernels[i].in[0]) = {kKernelASize * TP_NUM_FRAMES};
-            dimensions(m_kernels[i].in[1]) = {kKernelBSize * TP_NUM_FRAMES};
+            dimensions(m_kernels[i].in[0]) = {kKernelDimA * TP_NUM_FRAMES};
+            dimensions(m_kernels[i].in[1]) = {kKernelDimB * TP_NUM_FRAMES};
             if (TP_API == 0) {
+                if (kKernelMatrixSize * TP_NUM_FRAMES * sizeof(out_t) > __DATA_MEM_BYTES__ / 2) {
+                    single_buffer(m_kernels[i].out[0]);
+                }
                 connect(m_kernels[i].out[0], out[i]);
-                dimensions(m_kernels[i].out[0]) = {kKernelOutSize * TP_NUM_FRAMES};
+                dimensions(m_kernels[i].out[0]) = {kKernelMatrixSize * TP_NUM_FRAMES};
             } else {
                 connect<stream>(m_kernels[i].out[0], out[i]);
             }

@@ -1,14 +1,11 @@
 {
     "parameter_constraints": {
         "AIE_VARIANT": [1],
-        "TT_DATA_A": ["cint32"],
-        "TT_DATA_B": ["cint16"],
         "TT_OUT_DATA": ["cint32"],
-        "TP_DIM_A": 32,
-        "TP_DIM_AB": 64,
-        "TP_DIM_B": 32,
-        "TP_INPUT_WINDOW_VSIZE_A": 2048,
-        "TP_INPUT_WINDOW_VSIZE_B": [2048],
+        "TP_DIM_A": 128,
+        "TP_DIM_B": 128,
+        "TP_INPUT_WINDOW_VSIZE_A": [],
+        "TP_INPUT_WINDOW_VSIZE_B": [],
         "TP_SSR": [],
         "TP_CASC_LEN": [],
         "TP_ADD_TILING_A": 0,
@@ -22,5 +19,6 @@
         "TP_RND": 0,
         "TP_SAT": 0
     },
-    "qor_constraints": "Throughput>500"
+    "qor_constraints": "throughput>1400",
+    "confidence": 2
 }

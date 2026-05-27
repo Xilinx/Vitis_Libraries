@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _CONVOLUTION_CORRELATION:
+.. _DSP_CONVOLUTION_CORRELATION:
 
 =======================
 Convolution/Correlation
@@ -27,7 +27,7 @@ Device Support
 
 The Convolution/Correlation library element supports AIE, AIE-ML and AIE-MLv2 devices for all features, with the following differences:
 
-- The available round modes and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
+- The available round modes and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`DSP_COMPILING_AND_SIMULATING`.
 
 Supported Input Data Types
 ==========================
@@ -37,7 +37,7 @@ Both **inputs** may be one of the following eight types: ``int8``, ``int16``, ``
 The **output** may be one of the following six types: ``int16``, ``int32``, ``cint16``, ``cint32``, ``float``, and ``cfloat``.
 Please see the table below for valid input/output data type combinations.
 
-.. _CONV_CORR_combos:
+.. _DSP_CONV_CORR_combos:
 
 .. table:: IO-BUFFER INTERFACE: Supported Combinations of Input/Output Data Types
    :align: center
@@ -106,7 +106,7 @@ See the API reference for details on the ports for Convolution/Correlation.
 
 Design Notes
 ============
-Performance depends on the chosen data type combination; see :ref:`CONV_CORR_combos`. The number of multiplications per clock cycle will be updated based on the data type combination.
+Performance depends on the chosen data type combination; see :ref:`DSP_CONV_CORR_combos`. The number of multiplications per clock cycle will be updated based on the data type combination.
 The Convolution/Correlation operation can be processed by both IO Buffer (``TP_API = 0``) and Stream-Based (``TP_API = 1``) interfaces, which are controlled by the parameter named ``TP_API``.
 
 Input Buffer Length
@@ -125,7 +125,7 @@ Formula for **ceil**:
 
     ceil(a,b) ==> (((a+b-1)/b) * b)
 
-.. _Out_Buffer_Len_and_Lanes_info:
+.. _DSP_Out_Buffer_Len_and_Lanes_info:
 
 .. table:: OUT_BUFFER_LEN
    :align: center
@@ -144,9 +144,9 @@ Where:
 
 * ``TP_F_LEN`` is the length of input F vector.
 * ``TP_G_LEN`` is the length of input G vector.
-* ``LANES`` is the number of parallel data lanes available in the AIE hardware, which depends on the data type combination used. See :ref:`LANES`
+* ``LANES`` is the number of parallel data lanes available in the AIE hardware, which depends on the data type combination used. See :ref:`DSP_LANES`
 
-.. _LANES:
+.. _DSP_LANES:
 
 .. table:: LANES
    :align: center
@@ -241,7 +241,7 @@ Cascaded Kernels
 ----------------
 
 Number of kernels to be cascaded together to distribute the computation of convolution or correlation is controlled by ``TP_CASC_LEN`` template parameter.
-      The library provides access functions to determine the value of ``TP_CASC_LEN`` that gives you the optimum performance, i.e., the minimum number of kernels that can provide the maximum performance. More details can be found in :ref:`API_REFERENCE`.
+      The library provides access functions to determine the value of ``TP_CASC_LEN`` that gives you the optimum performance, i.e., the minimum number of kernels that can provide the maximum performance. More details can be found in :ref:`DSP_API_REFERENCE`.
 
 Parallel Input/Output Paths
 ---------------------------
@@ -262,7 +262,7 @@ Stream Output
    The figure below shows the transpose-form implementation of the convolution and correlation operations.
 
 
-.. _FIGURE_STREAM_IMPL_CONV_CORR:
+.. _DSP_FIGURE_STREAM_IMPL_CONV_CORR:
 
 .. figure:: ./media/transpose_form_of_filter_implementation.png
 
@@ -296,7 +296,7 @@ Computation of M samples to discard from the stream output
          * **Lanes** and **Points** are parameters related to the computation of convolution/correlation of two vectors F and G. Please refer to the table below for lanes and points for supported data type combinations.
 
 
-.. _LANES_AND_POINTS:
+.. _DSP_LANES_AND_POINTS:
 
 .. table:: LANES and POINTS: Used by the stream-based conv_corr kernel
    :align: center
@@ -309,7 +309,7 @@ Computation of M samples to discard from the stream output
    | cint16 (F) x cint16 (G) | 4         |  2         |
    +-------------------------+-----------+------------+
 
-The streaming interface supports only two data type combinations. See the “STREAM INTERFACE” table in :ref:`CONV_CORR_combos`.
+The streaming interface supports only two data type combinations. See the “STREAM INTERFACE” table in :ref:`DSP_CONV_CORR_combos`.
 
 Scaling
 -------

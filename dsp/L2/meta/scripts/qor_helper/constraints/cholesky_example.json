@@ -1,0 +1,12 @@
+
+{
+    "parameter_constraints": {
+        "TT_DATA": ["float"],
+        "TP_DIM": 128,
+        "TP_DIAG_INV": 0
+    },
+    "qor_constraints": "throughput>350",
+    "sort_by": ["num_aie", "throughput", "latency"],
+    "ascending": [true, false, true],
+    "confidence": 1
+}

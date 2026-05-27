@@ -30,6 +30,10 @@ STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 
 PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_F $(DATA_F) DATA_G $(DATA_G) DATA_OUT $(DATA_OUT) FUNCT_TYPE $(FUNCT_TYPE) COMPUTE_MODE $(COMPUTE_MODE) F_LEN $(F_LEN) G_LEN $(G_LEN) SHIFT $(SHIFT) API_IO $(API_IO) RND $(RND) SAT $(SAT) NUM_FRAMES $(NUM_FRAMES) CASC_LEN $(CASC_LEN) PHASES $(PHASES) USE_RTP_VECTOR_LENGTHS $(USE_RTP_VECTOR_LENGTHS)
 
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
+
+
 ifeq ($(DATA_F), int8)
 	ifeq ($(DATA_G), int8)
 	    ifeq ($(AIE_VARIANT), 1)
@@ -220,6 +224,8 @@ ifeq ($(DATA_F), float)
 CC_TOLERANCE = 0.0025
 else ifeq ($(DATA_F), cfloat)
 CC_TOLERANCE = 0.0025
+else ifeq ($(DATA_F), bfloat16)
+CC_TOLERANCE = 0.1 
 else
 CC_TOLERANCE = 0
 endif
@@ -273,22 +279,21 @@ prep_aie_out:
 
 get_diff:
 	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_OUT) --ssr $(PHASES) --zip --dual 0 -k 0 -w $(OUT_DATA_LEN) --plioWidth 64 ;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_OUT) --ssr 1 --zip --dual 0 -k 0 -w $(OUT_DATA_LEN) --plioWidth 64 ;\
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/align_stream_output.tcl $(REF_SIM_FILE) $(UUT_SIM_FILE) $(PHASES) $(CASC_LEN) $(REF_F_LEN) $(G_LEN) 1 $(API_IO) $(DATA_G) ;\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_OUT) --ssr 1 --zip --dual 0 -k 0 -w $(OUT_DATA_LEN) --plioWidth 64
+	@if [ $(API_IO) == 1 ]; then \
+		tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/align_ref_stream_output.tcl $(REF_SIM_FILE) $(UUT_SIM_FILE) $(PHASES) $(CASC_LEN) $(REF_F_LEN) $(G_LEN) $(DATA_G) ; \
+	fi
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl $(UUT_SIM_FILE) $(REF_SIM_FILE) ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) PERCENT
 
 get_latency:
 	@sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT);\
+
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_inData_F_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(F_LEN) $(NITER_UUT)
 
-get_stats:
-	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(F_LEN) 1 $(STATUS_FILE) ./aiesimulator_output "conv_corr" $(NITER_UUT)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file T_inData_F_0.txt -t_out_file uut_output_0_0.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(F_LEN) -niter $(NITER_UUT) -casc_len $(CASC_LEN) -aiesim_out_dir ./aiesimulator_output -ip conv_corr 
 
 get_status:
 	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) SINGLE_BUF $(SINGLE_BUF)
-
-harvest_mem:
-	@$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts
 
 cleanup:
 	make cleanall

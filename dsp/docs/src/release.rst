@@ -14,6 +14,13 @@ Release Notes
    :hidden:
    :maxdepth: 1
 
+2026.1
+======
+
+The follow features have been added to the library this release:
+
+* **Outer Tensor** - TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES and TP_SSR no longer constrained to being powers to 2.
+
 2025.2
 ======
 

@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _DDS_MIXER_INTRINSIC:
+.. _DSP_DDS_MIXER_INTRINSIC:
 
 ==========
 DDS/Mixer
@@ -32,17 +32,17 @@ The DDS/Mixer supports input types of cint16, cint32, and cfloat as selected by 
 Template Parameters
 ===================
 
-To see details on the template parameters for the DDS/Mixer, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the DDS/Mixer, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-To see details on the access functions for the DDS/Mixer, see :ref:`API_REFERENCE`.
+To see details on the access functions for the DDS/Mixer, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the DDS/Mixer, see :ref:`API_REFERENCE`.
+To see details on the ports for the DDS/Mixer, see :ref:`DSP_API_REFERENCE`.
 
 Design Notes
 ============
@@ -52,7 +52,7 @@ Scaling
 
 When configured as a DDS (``TP_MIXER_MODE=0``), the output of the DDS is intended to be the components of a unit vector. For ``TT_DATA = cfloat``, this means that the outputs will be in the range -1.0 to +1.0. For ``TT_DATA = cint16``, the output is scaled by 2 to the power 15 such that the binary point follows the most significant bit of the output. Therefore, if the DDS output is used to multiply/mix, you must account for this 15 bit shift.
 
-.. _DDS_SSR:
+.. _DSP_DDS_SSR:
 
 Super Sample Rate Operation
 ---------------------------
@@ -83,9 +83,9 @@ The precomputation occurs at construction time. The vector of offset values is c
 
 It should be noted that the cartesian values for lookup in hardware are scaled to use the full range of int16, so -1 becomes -32768, but +1 is saturated to +32767. Also, following the runtime multiplication of the looked-up cartesian value for a cycle by the precomputed vector, scaling down and rounding will lead to slightly different values than if the lookup had been used directly for each output value. In other words, the DDS output is not bit-accurate to the sin/cos lookup intrinsic.
 
-:ref:`FIGURE_DDS_IMPL` shows the construction-time creation of a vector of offsets, then the runtime use of this vector to create multiple outputs from a single sin/cos lookup each cycle.
+:ref:`DSP_FIGURE_DDS_IMPL` shows the construction-time creation of a vector of offsets, then the runtime use of this vector to create multiple outputs from a single sin/cos lookup each cycle.
 
-.. _FIGURE_DDS_IMPL:
+.. _DSP_FIGURE_DDS_IMPL:
 .. figure:: ./media/DDS\ implementation.png
 
     **DDS Implementation**

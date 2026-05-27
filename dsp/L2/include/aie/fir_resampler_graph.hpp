@@ -42,7 +42,7 @@ using namespace adf;
 
 /**
  * @brief fir_resampler is a generic asymmetric FIR filter that can do fractional and integer interpolation and
- *decimation.
+ * decimation.
  *
  * @ingroup fir_graphs
  *

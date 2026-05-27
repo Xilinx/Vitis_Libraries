@@ -23,10 +23,13 @@ HELPER_CUR_DIR ?= .
 HELPER_ROOT_DIR ?= ./../../../../
 SEED ?= 0
 
-WINDOW_VSIZE = $$(( $(DIM_SIZE) * $(NUM_FRAMES) ))
+WINDOW_VSIZE = $(shell expr $(DIM_SIZE) \* $(NUM_FRAMES))
 
 PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) DIM_SIZE $(DIM_SIZE) NUM_FRAMES $(NUM_FRAMES) ASCENDING $(ASCENDING) CASC_LEN $(CASC_LEN) UUT_SSR $(UUT_SSR)
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
+
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
 
 HELPER:= $(HELPER_CUR_DIR)/.HELPER
 
@@ -73,10 +76,7 @@ get_diff:
 
 get_latency:
 	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(VCD_FILE_DIR) $(STATUS_FILE) $(AIE_PART);\
+
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input_0_0.txt ./data/uut_output.txt $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
-
-get_stats:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(DIM_SIZE) 1 $(STATUS_FILE) ./aiesimulator_output "bitonic" $(NITER)
-
-harvest_mem:
-	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts
+	
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file T_input_0_0.txt -t_out_file uut_output.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(WINDOW_VSIZE) -niter $(NITER) -casc_len 1 -aiesim_out_dir ./aiesimulator_output -ip bitonic

@@ -23,14 +23,14 @@ using namespace s2mm;
 // Stream Capture
 // ------------------------------------------------------------
 
-void capture_streams(TT_SAMPLE (&buff)[NITER][NSTREAM][(memSizeAct * samplesPerRead) / NSTREAM],
-                     TT_STREAM sig_i[NSTREAM]) {
+void capture_streams(TT_SAMPLE (&buff)[NITER][NSTREAM_INT][(memSizeAct * samplesPerRead) / NSTREAM_INT],
+                     TT_STREAM sig_i[NSTREAM_INT]) {
 // Incoming samples arriving down columns:
 CAPTURE:
     for (int ll = 0; ll < NITER; ll++) {
-        for (int cc = 0, addr = 0; cc < (memSizeAct) / NSTREAM; cc++) {
+        for (int cc = 0, addr = 0; cc < (memSizeAct) / NSTREAM_INT; cc++) {
 #pragma HLS pipeline II = 1
-            for (int ss = 0; ss < NSTREAM; ss++) {
+            for (int ss = 0; ss < NSTREAM_INT; ss++) {
                 TT_SAMPLE val3, val2, val1, val0;
                 if (samplesPerRead == 2) {
                     (val1, val0) = sig_i[ss].read();
@@ -62,26 +62,26 @@ CAPTURE:
 // ------------------------------------------------------------
 
 void read_buffer(TT_DATA mem[NITER][memSizeAct],
-                 TT_SAMPLE (&buff)[NITER][NSTREAM][(memSizeAct * samplesPerRead) / NSTREAM]) {
+                 TT_SAMPLE (&buff)[NITER][NSTREAM_INT][(memSizeAct * samplesPerRead) / NSTREAM_INT]) {
     for (int nn = 0; nn < NITER; nn++) {
         for (int rr = 0, mm = 0, ss0 = 0, addr0 = 0; rr < memSizeAct; rr++) {
 #pragma HLS PIPELINE II = 1
             if (samplesPerRead == 2) {
-                int ss1 = (ss0 == NSTREAM - 1) ? 0 : ss0 + 1;
-                int addr1 = (ss0 == NSTREAM - 1) ? addr0 + 1 : addr0;
+                int ss1 = (ss0 == NSTREAM_INT - 1) ? 0 : ss0 + 1;
+                int addr1 = (ss0 == NSTREAM_INT - 1) ? addr0 + 1 : addr0;
                 TT_SAMPLE val0 = buff[nn][ss0][addr0];
                 TT_SAMPLE val1 = buff[nn][ss1][addr1];
-                if (ss0 == NSTREAM - 1 || ss1 == NSTREAM - 1) {
+                if (ss0 == NSTREAM_INT - 1 || ss1 == NSTREAM_INT - 1) {
                     addr0 += 1;
                 }
                 mem[nn][mm++] = (val1, val0);
             } else {
-                int ss1 = (ss0 == NSTREAM - 1) ? 0 : ss0 + 1;
-                int ss2 = (ss0 >= NSTREAM - 2) ? ss0 + 2 - NSTREAM : ss0 + 2;
-                int ss3 = (ss0 >= NSTREAM - 3) ? ss0 + 3 - NSTREAM : ss0 + 3;
-                int addr1 = (ss0 == NSTREAM - 1) ? addr0 + 1 : addr0;
-                int addr2 = (ss0 >= NSTREAM - 2) ? addr0 + 1 : addr0;
-                int addr3 = (ss0 >= NSTREAM - 3) ? addr0 + 1 : addr0;
+                int ss1 = (ss0 == NSTREAM_INT - 1) ? 0 : ss0 + 1;
+                int ss2 = (ss0 >= NSTREAM_INT - 2) ? ss0 + 2 - NSTREAM_INT : ss0 + 2;
+                int ss3 = (ss0 >= NSTREAM_INT - 3) ? ss0 + 3 - NSTREAM_INT : ss0 + 3;
+                int addr1 = (ss0 == NSTREAM_INT - 1) ? addr0 + 1 : addr0;
+                int addr2 = (ss0 >= NSTREAM_INT - 2) ? addr0 + 1 : addr0;
+                int addr3 = (ss0 >= NSTREAM_INT - 3) ? addr0 + 1 : addr0;
                 TT_SAMPLE val0 = buff[nn][ss0][addr0];
                 TT_SAMPLE val1 = buff[nn][ss1][addr1];
                 TT_SAMPLE val2 = buff[nn][ss2][addr2];
@@ -90,12 +90,13 @@ void read_buffer(TT_DATA mem[NITER][memSizeAct],
                 // printf("reading [%d,%d] from %d %d %d\n", val1>>16, val1 % (1<<15), nn, ss1, addr1);
                 // printf("reading [%d,%d] from %d %d %d\n", val2>>16, val2 % (1<<15), nn, ss2, addr2);
                 // printf("reading [%d,%d] from %d %d %d\n", val3>>16, val3 % (1<<15), nn, ss3, addr3);
-                if (ss0 == NSTREAM - 1 || ss1 == NSTREAM - 1 || ss2 == NSTREAM - 1 || ss3 == NSTREAM - 1) {
+                if (ss0 == NSTREAM_INT - 1 || ss1 == NSTREAM_INT - 1 || ss2 == NSTREAM_INT - 1 ||
+                    ss3 == NSTREAM_INT - 1) {
                     addr0 += 1;
                 }
                 mem[nn][mm++] = (val3, val2, val1, val0);
             }
-            ss0 = (ss0 + samplesPerRead > NSTREAM - 1) ? ss0 + samplesPerRead - NSTREAM : ss0 + samplesPerRead;
+            ss0 = (ss0 + samplesPerRead > NSTREAM_INT - 1) ? ss0 + samplesPerRead - NSTREAM_INT : ss0 + samplesPerRead;
         }
     }
 }
@@ -104,7 +105,7 @@ void read_buffer(TT_DATA mem[NITER][memSizeAct],
 // Used for streams=1
 // ------------------------------------------------------------
 
-void s2mm_str1(TT_DATA mem[NITER][memSizeAct], TT_STREAM sig_i[NSTREAM]) {
+void s2mm_str1(TT_DATA mem[NITER][memSizeAct], TT_STREAM sig_i[NSTREAM_INT]) {
     for (int nn = 0; nn < NITER; nn++) {
         for (int rr = 0, mm = 0; rr < memSizeAct; rr++) {
 #pragma HLS PIPELINE II = 1
@@ -116,7 +117,7 @@ void s2mm_str1(TT_DATA mem[NITER][memSizeAct], TT_STREAM sig_i[NSTREAM]) {
 // Wrapper
 // ------------------------------------------------------------
 
-void s2mm_wrapper(s2mm::TT_DATA mem[NITER][memSizeAct], s2mm::TT_STREAM sig_i[NSTREAM])
+void s2mm_wrapper(s2mm::TT_DATA mem[NITER][memSizeAct], s2mm::TT_STREAM sig_i[NSTREAM_INT])
 
 {
 #pragma HLS interface m_axi port = mem bundle = gmem offset = slave depth = NITER * memSizeAct
@@ -125,14 +126,14 @@ void s2mm_wrapper(s2mm::TT_DATA mem[NITER][memSizeAct], s2mm::TT_STREAM sig_i[NS
 #pragma HLS interface s_axilite port = return bundle = control
 #pragma HLS DATAFLOW
 
-    TT_SAMPLE buff[NITER][NSTREAM][(memSizeAct * samplesPerRead) / NSTREAM];
+    TT_SAMPLE buff[NITER][NSTREAM_INT][(memSizeAct * samplesPerRead) / NSTREAM_INT];
 
 #pragma HLS array_partition variable = buff dim = 1
 #pragma HLS array_partition variable = buff dim = 2
 #pragma HLS bind_storage variable = buff type = RAM_T2P impl = bram
 #pragma HLS dependence variable = buff type = intra false
 
-    if (NSTREAM != 1) {
+    if (NSTREAM_INT != 1) {
         // Front end load from DDR4 to PL BRAM:
         capture_streams(buff, sig_i);
 

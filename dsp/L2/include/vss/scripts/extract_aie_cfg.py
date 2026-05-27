@@ -21,7 +21,7 @@ parser = configparser.ConfigParser()
 
 CUR_DIR = sys.argv[1]
 PARAMS_FILE = sys.argv[2]
-with open(f"{CUR_DIR}/{PARAMS_FILE}") as stream:
+with open(f"{PARAMS_FILE}") as stream:
     parser.read_string(
         "[top]\n" + stream.read()
     )  # Workaround because configparser complains about headerless configurations

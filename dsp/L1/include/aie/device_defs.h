@@ -41,6 +41,10 @@
 // Even though most of these could be expressed in a boolean fashion, the convention is to use int
 // so that in the UUT code you can write #if __X__ == 1 || __Y__ ==2 which becomes awkward with defined(__Y__).
 
+#ifndef __AIE_ARCH__
+#define __AIE_ARCH__ 10
+#endif
+
 //----------------------------------
 // FFT R4 stage support. AIE2 supports true Radix4, but AIE1 spoofs this with 2 stages of radix2.
 #if (__AIE_ARCH__ == 10)
@@ -244,12 +248,18 @@
 #define __HAS_ACCUM_PERMUTES__ 0
 #endif
 
+#if (__AIE_ARCH__ == 10) || (__AIE_ARCH__ == 20)
+#define __AXI4_STREAM_INTERCONNECT_WIDTH__ 32
+#elif (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
+#define __AXI4_STREAM_INTERCONNECT_WIDTH__ 64
+#else
+#define __AXI4_STREAM_INTERCONNECT_WIDTH__ 32
+#endif
+
 #if (__AIE_ARCH__ == 10) || (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21)
 #define __ALIGN_BYTE_SIZE__ 32
 #elif (__AIE_ARCH__ == 22)
 #define __ALIGN_BYTE_SIZE__ 64
-#else
-#define __ALIGN_BYTE_SIZE__ 32
 #endif
 
 #if (__AIE_ARCH__ == 10)
@@ -262,9 +272,7 @@
 // Comprehensive addressing for shuffles in AIE1 but not AIE2
 #if (__AIE_ARCH__ == 10)
 #define __SUPPORTS_COMPREHENSIVE_SHUFFLES__ 1
-#elif (__AIE_ARCH__ == 20)
-#define __SUPPORTS_COMPREHENSIVE_SHUFFLES__ 0
-#else
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __SUPPORTS_COMPREHENSIVE_SHUFFLES__ 0
 #endif
 
@@ -284,6 +292,13 @@
 // #define _SUPPORTS_CBFLOAT16_
 #endif
 
+// define whether or not the device has native sqrt and invsqrt scalar hw
+#if (__AIE_ARCH__ == 20)
+#define __USES_NATIVE_SQRT_FUNC__ 0
+#else
+#define __USES_NATIVE_SQRT_FUNC__ 1
+#endif
+
 #if (__AIE_ARCH__ == 10)
 #define __SHUFFLE_CASCADE__ 0
 #elif (__AIE_ARCH__ == 20)
@@ -301,8 +316,6 @@
 #define __DATA_MEM_BYTES__ 32768
 #elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __DATA_MEM_BYTES__ 65536
-#else
-#define __DATA_MEM_BYTES__ 32768
 #endif
 
 //------------------SHIFTING--------------------------
@@ -313,8 +326,6 @@
 // ! right now effectively all __MAX_SHIFT__s are set to 59 to circumvent compilation fail, regardless of device.
 #elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __MAX_SHIFT__ 59
-#else
-#define __MAX_SHIFT__ 62
 #endif
 
 //-------------------func_approx LUT tables----------------
@@ -591,6 +602,17 @@ INLINE_DECL constexpr unsigned int fnLog2() {
     return __builtin_ctz(powerOf2); // GCC/Clang built-in, returns count of trailing zeros
 }
 
+template <unsigned int n>
+INLINE_DECL constexpr unsigned int fnLog2RoundDown(unsigned int ans = 0) {
+    // Compile time function which handles non powers of 2.
+    return (n <= 1) ? ans : fnLog2RoundDown<n / 2>(ans + 1);
+}
+
+template <unsigned int n>
+INLINE_DECL constexpr unsigned int fnCheckIfPwr2() {
+    return (n > 0) && ((n & (n - 1)) == 0);
+}
+
 template <unsigned int exponent>
 INLINE_DECL constexpr unsigned int fnPwr2() {
     return 1u << exponent;
@@ -600,5 +622,23 @@ template <unsigned int exponent>
 INLINE_DECL constexpr uint64_t fnPwr16() {
     return static_cast<uint64_t>(1) << (4 * exponent);
 }
+
+template <typename TT>
+INLINE_DECL constexpr unsigned int fnVecSampleNumMax() {
+    return __MAX_READ_WRITE__ / 8 / sizeof(TT);
+}
+
+template <typename TT>
+INLINE_DECL constexpr unsigned int fnVecSampleNumMin() {
+    return __MIN_READ_WRITE__ / 8 / sizeof(TT);
+}
+
+//--------------------------------------------
+//_SUPPORTS_HW_INVERSE_
+#if (__AIE_ARCH__ == 10)
+#define _SUPPORTS_HW_INVERSE_
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
+// AIE2 does not have hardware inverse support
+#endif //_SUPPORTS_HW_INVERSE_
 
 #endif // __DEVICE_DEFS__

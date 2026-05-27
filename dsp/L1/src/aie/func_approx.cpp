@@ -141,8 +141,9 @@ INLINE_DECL void kernelFuncApproxClass<TT_DATA,
                 constexpr(sizeof(TT_DATA) == 2) {
 #pragma unroll(kSamplesInVect)
                     for (int j = 0; j < kSamplesInVect; j++) {
-                        compVect[j] = ptr1[idxVect[j]];
-                        // compVect[j + 1] = ptr2[idxVect[j + 1]];
+                        // Mask index to LUT bounds: prevents OOB access on out-of-range input.
+                        // Functional correctness still requires valid input per documentation.
+                        compVect[j] = ptr1[(unsigned int)idxVect[j] & (kLutSize / 2 - 1)];
                     }
                     *slopeVectPtr++ = ::aie::real(compVect);
                     *offsetVectPtr++ = ::aie::imag(compVect);
@@ -150,8 +151,11 @@ INLINE_DECL void kernelFuncApproxClass<TT_DATA,
             else {
 #pragma unroll(kSamplesInVect)
                 for (int j = 0; j < kSamplesInVect; j++) {
-                    *slopePtr++ = ptr1[idxVect[j]].real;
-                    *offsetPtr++ = ptr2[idxVect[j]].imag;
+                    // Mask index to LUT bounds: prevents OOB access on out-of-range input.
+                    // Functional correctness still requires valid input per documentation.
+                    unsigned int clampedIdx = (unsigned int)idxVect[j] & (kLutSize / 2 - 1);
+                    *slopePtr++ = ptr1[clampedIdx].real;
+                    *offsetPtr++ = ptr2[clampedIdx].imag;
                 }
             }
         }
@@ -196,10 +200,10 @@ INLINE_DECL void kernelFuncApproxClass<TT_DATA,
                                        TP_SAT,
                                        TP_USE_LUT_RELOAD>::funcApproxBasicFloat(T_inputIF<TT_DATA> inInterface,
                                                                                 T_outputIF<TT_DATA> outInterface) {
-    TT_DATA* staticLutPtr0 = m_staticLut0;
-    TT_DATA* rtpLutPtr0 = m_rtpLutPtr0;
-    TT_DATA* staticLutPtr1 = m_staticLut1;
-    TT_DATA* rtpLutPtr1 = m_rtpLutPtr1;
+    TT_DATA* staticLutPtr0 = (TT_DATA*)m_staticLut0;
+    TT_DATA* rtpLutPtr0 = (TT_DATA*)m_rtpLutPtr0;
+    TT_DATA* staticLutPtr1 = (TT_DATA*)m_staticLut1;
+    TT_DATA* rtpLutPtr1 = (TT_DATA*)m_rtpLutPtr1;
     TT_DATA* __restrict lutPtr0 = (TP_USE_LUT_RELOAD == 1) ? rtpLutPtr0 : staticLutPtr0;
     TT_DATA* __restrict lutPtr1 = (TP_USE_LUT_RELOAD == 1) ? rtpLutPtr1 : staticLutPtr1;
 
@@ -210,8 +214,8 @@ INLINE_DECL void kernelFuncApproxClass<TT_DATA,
 
     dataVect_t dataVect, offsetVect, slopeVect;
 
-    TT_DATA* slopePtr = &m_offsetBuff[0];
-    TT_DATA* offsetPtr = &m_slopeBuff[0];
+    TT_DATA* slopePtr = (TT_DATA*)&m_offsetBuff[0];
+    TT_DATA* offsetPtr = (TT_DATA*)&m_slopeBuff[0];
     dataVect_t* slopeVectPtr = (dataVect_t*)m_offsetBuff;
     dataVect_t* offsetVectPtr = (dataVect_t*)m_slopeBuff;
 
@@ -235,8 +239,11 @@ INLINE_DECL void kernelFuncApproxClass<TT_DATA,
 
 #pragma unroll(kSamplesInVect)
             for (int j = 0; j < kSamplesInVect; j++) {
-                *slopePtr++ = ptr1[idxVect[j]].real;
-                *offsetPtr++ = ptr2[idxVect[j]].imag;
+                // Mask index to LUT bounds: prevents OOB access on out-of-range input.
+                // Functional correctness still requires valid input per documentation.
+                unsigned int clampedIdx = (unsigned int)idxVect[j] & (kLutSize / 2 - 1);
+                *slopePtr++ = ptr1[clampedIdx].real;
+                *offsetPtr++ = ptr2[clampedIdx].imag;
             }
         }
     chess_separator();

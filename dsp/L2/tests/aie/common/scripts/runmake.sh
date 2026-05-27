@@ -30,12 +30,14 @@ run_tests=1
 ignore_fails=""
 no_test_verify=""
 static_default=""
+random_count=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         -h)
             cat <<EOF
 Usage: runmake.sh -run_type <suite|jenkins|qor|checkin|/path/to/suite.txt> [options]
+       runmake.sh -random <N> [options]
 
 run_type options:
   checkin    : Run the checkin suite (test_suites/checkin.txt) and run tests
@@ -46,6 +48,7 @@ run_type options:
 
 Options:
   -ip_path <path>         Set IP path
+  -random <N>             Generate N random configurations using generate_database.py
   -no_test_run            Only validate, do not run tests
   -ignore_fails           Ignore invalid tests, continue with valid ones
   -no_test_verify         Disable test verification
@@ -57,6 +60,8 @@ EOF
             pathToLibElem=$2; shift 2;;
         -run_type)
             run_type=$2; shift 2;;
+        -random)
+            random_count=$2; shift 2;;
         -no_test_run)
             run_tests=0; shift;;
         -ignore_fails)
@@ -76,20 +81,47 @@ if [[ $run_type == "jenkins" ]]; then
 fi
 
 echo "Running runmake located at $script_path" | tee "$logfile"
-echo "Input args: -run_type $run_type $ignore_fails $no_test_verify $static_default" | tee -a "$logfile"
 
-# Run create_params.py
-output=$(python3 "$runmake_dir/create_params.py" "$run_type" $ignore_fails $no_test_verify $static_default 2>&1)
-exit_status=$?
-echo "$output" | tee /dev/tty
-json_file=$(echo "$output" | tail -n 1)
-
-if [ $exit_status -ne 0 ]; then
-    echo "create_params.py failed (exit $exit_status). Fix validation or use -ignore_fails/-no_test_verify." | tee -a "$logfile"
-    exit 1
+# Check if using random mode
+if [[ -n "$random_count" ]]; then
+    # Extract base name from pathToLibElem
+    func=$(basename "$pathToLibElem")
+    json_file="multi_params_random.json"
+    
+    echo "Input args: -random $random_count" | tee -a "$logfile"
+    echo "Generating $random_count random configurations for $func" | tee -a "$logfile"
+    
+    # Run generate_database.py (must run from its directory due to relative imports)
+    qor_helper_dir="$runmake_dir/../../../../meta/scripts/qor_helper"
+    current_dir=$(pwd)
+    cd "$qor_helper_dir"
+    output=$(python generate_database.py -ip "$func" --num_generated_configs "$random_count" --runmake 1 2>&1)
+    exit_status=$?
+    cd "$current_dir"
+    echo "$output" | tee /dev/tty
+    
+    if [ $exit_status -ne 0 ]; then
+        echo "generate_database.py failed (exit $exit_status)." | tee -a "$logfile"
+        exit 1
+    fi
+    
+    echo "Generated JSON file: $json_file" | tee -a "$logfile"
+else
+    echo "Input args: -run_type $run_type $ignore_fails $no_test_verify $static_default" | tee -a "$logfile"
+    
+    # Run create_params.py
+    output=$(python3 "$runmake_dir/create_params.py" "$run_type" $ignore_fails $no_test_verify $static_default 2>&1)
+    exit_status=$?
+    echo "$output" | tee /dev/tty
+    json_file=$(echo "$output" | tail -n 1)
+    
+    if [ $exit_status -ne 0 ]; then
+        echo "create_params.py failed (exit $exit_status). Fix validation or use -ignore_fails/-no_test_verify." | tee -a "$logfile"
+        exit 1
+    fi
+    
+    echo "Generated JSON file: $json_file" | tee -a "$logfile"
 fi
-
-echo "Generated JSON file: $json_file" | tee -a "$logfile"
 
 if [[ $run_tests == 1 ]]; then
     timestamp=$(date +"%y%m%d_%H%M")

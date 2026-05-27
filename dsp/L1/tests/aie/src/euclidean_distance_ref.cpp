@@ -40,34 +40,34 @@ void euclidean_distance_ref<TT_DATA, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT, TP_
     euclidean_distanceMain(input_buffer<TT_DATA>& inWindowP,
                            input_buffer<TT_DATA>& inWindowQ,
                            output_buffer<TT_DATA>& outWindow) {
-    unsigned int loopCount = TP_LEN;   // Number of iterations
-    unsigned int nDim = kFixedDimOfED; // Number of dimensions
+    constexpr unsigned int kDim = kFixedDimOfED; // Fixed spatial dimension (4 coords per point)
 
-    TT_DATA inDataP;         // input data of P Sig.
-    TT_DATA inDataQ;         // input data of Q Sig.
-    TT_DATA outData;         // output data of eucliean distance.
-    TT_DATA resOfSub[nDim];  // array to store res of subtraction of P and Q
-    T_accRef<TT_DATA> accum; // declaration of accumulator
+    TT_DATA outData;         // output euclidean distance result
+    TT_DATA resOfSub[kDim];  // per-dimension (Q - P) differences
+    T_accRef<TT_DATA> accum; // accumulator for summing squared differences
 
     // Pointers to fetch P and Q data
-    TT_DATA* inPtrP = (TT_DATA*)inWindowP.data(); // pointer to P data
-    TT_DATA* inPtrQ = (TT_DATA*)inWindowQ.data(); // pointer to Q data
-    TT_DATA* outPtr = (TT_DATA*)outWindow.data(); // pointer to output of eucliean distance.
+    TT_DATA* inPtrP = (TT_DATA*)inWindowP.data(); // pointer to P input data
+    TT_DATA* inPtrQ = (TT_DATA*)inWindowQ.data(); // pointer to Q input data
+    TT_DATA* outPtr = (TT_DATA*)outWindow.data(); // pointer to euclidean distance output
 
     // Computation of Euclidean Distance between P and Q
-    for (unsigned int i = 0; i < loopCount; i++) {
+    for (unsigned int i = 0; i < TP_LEN; i++) {
         accum = null_accRef<TT_DATA>(); // Initialize accumulator
-        for (unsigned int dimIndx = 0; dimIndx < nDim; dimIndx++) {
-            inDataP = *inPtrP++; // Fetch P sample
-            inDataQ = *inPtrQ++; // Fetch Q Sample
-            resOfSub[dimIndx] = (inDataQ - inDataP);
-        } // Compute the difference between P and Q samples
 
-        for (unsigned int dataIndx = 0; dataIndx < TP_DIM; dataIndx++) {
-            accum.real += (float)(resOfSub[dataIndx] * resOfSub[dataIndx]); // Accumulate the squared difference
+        // Compute (Q - P) for each of the kDim spatial dimensions
+        for (unsigned int dimIndx = 0; dimIndx < kDim; dimIndx++) {
+            TT_DATA inDataP = *inPtrP++; // Fetch P sample
+            TT_DATA inDataQ = *inPtrQ++; // Fetch Q sample
+            resOfSub[dimIndx] = (inDataQ - inDataP);
         }
 
-        // writing output results to vector from accumulator
+        // Accumulate squared differences over TP_DIM active dimensions
+        for (unsigned int dataIndx = 0; dataIndx < TP_DIM; dataIndx++) {
+            accum.real += (float)(resOfSub[dataIndx] * resOfSub[dataIndx]);
+        }
+
+        // Cast accumulator result to output type
         outData = castAcc<TT_DATA>(accum);
 
         // If output is not squared, take the square root of the accumulated value.
@@ -75,11 +75,11 @@ void euclidean_distance_ref<TT_DATA, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT, TP_
             outData = sqrtf(outData);
         }
 
-        // Store the results to io buffer of out.
+        // Store the result to the output io buffer
         *outPtr++ = outData;
 
-    } // End of Loop {
-};    // End of euclidean_distance_ref() {
+    } // End of Loop
+};    // End of euclidean_distanceMain()
 
 } //  End of namespace euclidean_distance {
 } //  End of namespace aie {

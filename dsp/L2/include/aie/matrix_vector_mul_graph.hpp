@@ -376,6 +376,13 @@ class matrix_vector_mul_graph : public graph {
         return TP_SSR * TP_CASC_LEN;
     };
 
+    static constexpr bool useSingleBufferA = (TP_NUM_FRAMES * (TP_DIM_A / TP_SSR) * (TP_DIM_B / TP_CASC_LEN) *
+                                              sizeof(TT_DATA_A)) > (__DATA_MEM_BYTES__ / 2);
+    static constexpr bool useSingleBufferB = (TP_NUM_FRAMES * (TP_DIM_B / TP_CASC_LEN) * sizeof(TT_DATA_B)) >
+                                             (__DATA_MEM_BYTES__ / 2);
+    static constexpr bool useSingleBufferOut = (TP_NUM_FRAMES * (TP_DIM_A / TP_SSR) *
+                                                sizeof(outType_t<TT_DATA_A, TT_DATA_B>)) > (__DATA_MEM_BYTES__ / 2);
+
     /**
      * @brief This is the constructor function for the Matrix Vector Multiply graph.
      * Constructor has no arguments.
@@ -432,6 +439,10 @@ class matrix_vector_mul_graph : public graph {
                                          .tile_traversal = {{.dimension = 0, .stride = 1, .wrap = dimAPerKernel},
                                                             {.dimension = 1, .stride = dimBPerKernel, .wrap = 1}}});
                             }
+                        if
+                            constexpr(useSingleBufferA) {
+                                single_buffer(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[0]);
+                            }
                     }
                 else {
                     connect<parameter>(matrixA[cascNum + (ssrRank * TP_CASC_LEN)],
@@ -442,6 +453,10 @@ class matrix_vector_mul_graph : public graph {
                         connect(inB[cascNum + (ssrRank * TP_CASC_LEN)],
                                 m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[1]);
                         dimensions(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[1]) = {windowSizeB};
+                        if
+                            constexpr(useSingleBufferB) {
+                                single_buffer(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[1]);
+                            }
                     }
                 else {
                     for (int dualIdx = 0; dualIdx < (TP_DUAL_IP + 1); dualIdx++) {
@@ -462,6 +477,10 @@ class matrix_vector_mul_graph : public graph {
                     connect(m_mat_vec_mulKernels[(TP_CASC_LEN - 1) + (ssrRank * TP_CASC_LEN)].out[0], out[ssrRank]);
                     dimensions(m_mat_vec_mulKernels[(TP_CASC_LEN - 1) + (ssrRank * TP_CASC_LEN)].out[0]) = {
                         windowSizeOut};
+                    if
+                        constexpr(useSingleBufferOut) {
+                            single_buffer(m_mat_vec_mulKernels[(TP_CASC_LEN - 1) + (ssrRank * TP_CASC_LEN)].out[0]);
+                        }
                 }
             else {
                 for (int outIdx = 0; outIdx < (TP_NUM_OUTPUTS); outIdx++) {

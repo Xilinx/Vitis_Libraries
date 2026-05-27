@@ -179,6 +179,13 @@ void createLut<bfloat16, float>(float* lut_values,
  */
 template <typename T_D, typename T_L>
 void getSqrt(T_L* lut_values, const int coarseBits, const int fineBits, const int domainMode, const int shift) {
+    // domainMode 1 consumes one coarse bit for domain bias, so minimum is 2; otherwise minimum is 1.
+    int minCoarseBits = (domainMode == 1) ? 2 : 1;
+    if (coarseBits < minCoarseBits) {
+        printf("ERROR: getSqrt: coarseBits (%d) is invalid for domainMode %d. Minimum is %d. LUT not populated.\n",
+               coarseBits, domainMode, minCoarseBits);
+        return;
+    }
     // When TP_DOMAIN_MODE = 1, x_points are biased to be in domain 1 to 2
     unsigned int biasDomain = (domainMode == 1) ? 1 : 0;
     // When TP_DOMAIN_MODE = 2, x_points are scaled to be in domain 0 to 4.
@@ -241,6 +248,13 @@ void getSqrt(T_L* lut_values, const int coarseBits, const int fineBits, const in
  */
 template <typename T_D, typename T_L>
 void getInvSqrt(T_L* lut_values, const int coarseBits, const int fineBits, const int domainMode, const int shift) {
+    // domainMode 1 consumes one coarse bit for domain bias, so minimum is 2; otherwise minimum is 1.
+    int minCoarseBits = (domainMode == 1) ? 2 : 1;
+    if (coarseBits < minCoarseBits) {
+        printf("ERROR: getInvSqrt: coarseBits (%d) is invalid for domainMode %d. Minimum is %d. LUT not populated.\n",
+               coarseBits, domainMode, minCoarseBits);
+        return;
+    }
     // When TP_DOMAIN_MODE = 1, x_points are biased to be in domain 1 to 2
     unsigned int biasDomain = (domainMode == 1) ? 1 : 0;
     // When TP_DOMAIN_MODE = 2, x_points are scaled to be in domain 0 to 4.
@@ -310,6 +324,13 @@ void getInvSqrt(T_L* lut_values, const int coarseBits, const int fineBits, const
  */
 template <typename T_D, typename T_L>
 void getLog(T_L* lut_values, const int coarseBits, const int fineBits, const int domainMode, const int shift) {
+    // domainMode 1 consumes one coarse bit for domain bias, so minimum is 2; otherwise minimum is 1.
+    int minCoarseBits = (domainMode == 1) ? 2 : 1;
+    if (coarseBits < minCoarseBits) {
+        printf("ERROR: getLog: coarseBits (%d) is invalid for domainMode %d. Minimum is %d. LUT not populated.\n",
+               coarseBits, domainMode, minCoarseBits);
+        return;
+    }
     // When TP_DOMAIN_MODE = 1, x_points are biased to be in domain 1 to 2
     unsigned int biasDomain = (domainMode == 1) ? 1 : 0;
     // When TP_DOMAIN_MODE = 2, x_points are scaled to be in domain 0 to 4.
@@ -372,6 +393,13 @@ void getLog(T_L* lut_values, const int coarseBits, const int fineBits, const int
  */
 template <typename T_D, typename T_L>
 void getExp(T_L* lut_values, const int coarseBits, const int fineBits, const int domainMode, const int shift) {
+    // domainMode 1 consumes one coarse bit for domain bias, so minimum is 2; otherwise minimum is 1.
+    int minCoarseBits = (domainMode == 1) ? 2 : 1;
+    if (coarseBits < minCoarseBits) {
+        printf("ERROR: getExp: coarseBits (%d) is invalid for domainMode %d. Minimum is %d. LUT not populated.\n",
+               coarseBits, domainMode, minCoarseBits);
+        return;
+    }
     // When TP_DOMAIN_MODE = 1, x_points are biased to be in domain 1 to 2
     unsigned int biasDomain = (domainMode == 1) ? 1 : 0;
     // When TP_DOMAIN_MODE = 2, x_points are scaled to be in domain 0 to 4.
@@ -434,6 +462,13 @@ void getExp(T_L* lut_values, const int coarseBits, const int fineBits, const int
  */
 template <typename T_D, typename T_L>
 void getInv(T_L* lut_values, const int coarseBits, const int fineBits, const int domainMode, const int shift) {
+    // domainMode 1 consumes one coarse bit for domain bias, so minimum is 2; otherwise minimum is 1.
+    int minCoarseBits = (domainMode == 1) ? 2 : 1;
+    if (coarseBits < minCoarseBits) {
+        printf("ERROR: getInv: coarseBits (%d) is invalid for domainMode %d. Minimum is %d. LUT not populated.\n",
+               coarseBits, domainMode, minCoarseBits);
+        return;
+    }
     // When TP_DOMAIN_MODE = 1, x_points are biased to be in domain 1 to 2
     unsigned int biasDomain = (domainMode == 1) ? 1 : 0;
     // When TP_DOMAIN_MODE = 2, x_points are scaled to be in domain 0 to 4.

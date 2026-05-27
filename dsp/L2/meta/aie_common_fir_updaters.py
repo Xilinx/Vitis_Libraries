@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Common utility variables and functions used accross FIR elements.
 
 import aie_common as com
 from aie_common import *
@@ -63,9 +62,28 @@ def fn_type_aieml_support_update(AIE_VARIANT, TT_DATA, legal_set):
     return legal_set_int
 
 
+def fn_max_taps_per_each_kernel(TT_DATA, TP_USE_COEFF_RELOAD, TP_API=0, symFactor=1):
+    # Coeff array needs storage on heap and unrolled MAC operation inflate Program Memory.
+    firLengthMaxCoeffArray = 256 * symFactor
+    # Data samples must fit into 1024-bit (128 Byte) vector register
+    firLengthMaxDataReg = 128 * symFactor / fn_size_by_byte(TT_DATA)
+    # Fir length per kernel in a cascaded design that may also be decomposed into multiple SSR paths.
+    if TP_API == API_BUFFER:
+        if TP_USE_COEFF_RELOAD == 1:
+            # When buffer IO, check that the coeff array fits into heap
+            return firLengthMaxCoeffArray
+        else:
+            # No restrictions
+            return TP_FIR_LEN_max
+    else:
+        # When stream IO, check that the data fits into a 1024-bit reg. Coeff Array condition always met.
+        return firLengthMaxDataReg
+
+
 def fn_max_fir_len_each_kernel_update(
     TT_DATA, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_SSR=1, TP_API=0, symFactor=1
 ):
+
     # Coeff array needs storage on heap and unrolled MAC operation inflate Program Memory.
     firLengthMaxCoeffArray = 256 * symFactor
     # Data samples must fit into 1024-bit (128 Byte) vector register
@@ -75,25 +93,30 @@ def fn_max_fir_len_each_kernel_update(
         # When buffer IO, check that the coeff array fits into heap
         if TP_USE_COEFF_RELOAD == 1:
             # Coeff array gets divided up in SSR mode, where each SSR phase gets a fraction of the array.
-            TP_FIR_LEN_max = int(firLengthMaxCoeffArray * TP_SSR)
+            max_fir_len = firLengthMaxCoeffArray * TP_SSR
         else:
-            TP_FIR_LEN_max = int(firLengthMaxCoeffArray * (TP_CASC_LEN * TP_SSR))
+            max_fir_len = TP_FIR_LEN_max
     else:
         # When stream IO, check that the data fits into a 1024-bit reg. Coeff Array condition always met.
-        TP_FIR_LEN_max = int(firLengthMaxDataReg * (TP_CASC_LEN * TP_SSR))
-    return TP_FIR_LEN_max
+        if TP_USE_COEFF_RELOAD == 1:
+            # Coeff array gets divided up in SSR mode, where each SSR phase gets a fraction of the array.
+            max_fir_len = firLengthMaxDataReg * TP_SSR
+        else:
+            max_fir_len = firLengthMaxDataReg * TP_CASC_LEN * TP_SSR
+    return max_fir_len
 
 
 def fn_update_binary(param_name):
     param_dict = {"name": param_name, "enum": [0, 1]}
     return param_dict
 
-# fir symmetric filters 
+
+# fir symmetric filters
 # When stream -> AIE-ML and AIE-Mlv2 have only 1 stream.
 # When buffer -> AIE-ML and AIE-MLv2 use asymmetric implementation (there's no symmetric MULs) and hence having 2 buffers does not add any value.
 def fn_update_dual_ip_sym(AIE_VARIANT):
     if AIE_VARIANT in [AIE_ML, AIE_MLv2]:
-        legal_set = [0] 
+        legal_set = [0]
     else:
         legal_set = [0, 1]
     param_dict = {"name": "TP_DUAL_IP", "enum": legal_set}
@@ -106,9 +129,10 @@ def fn_update_dual_ip_sr_asym(AIE_VARIANT, TP_API):
     if TP_API == API_STREAM:
         if (
             AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2
-        ):  # Under this condition 2 outputs will not be supported, hence TP_DUAL_IP should also be 0.
+        ):  # Device only has 1 stream per tile.
             legal_set = [0]
     else:
+        # Asymmetric buffer implementation does not benefit from 2 buffers.
         legal_set = [0]
     param_dict = {"name": "TP_DUAL_IP", "enum": legal_set}
     return param_dict
@@ -139,13 +163,20 @@ def fn_update_num_outputs_sr_asym(TP_API, AIE_VARIANT, TP_SSR, TP_DUAL_IP, param
         else:
             legal_set = remove_from_set([1], legal_set)
 
-    # Constraint copied from graph. Can this be removed?
+    # Constraint copied from graph:
+    # static_assert(not(TP_API == USE_WINDOW_API && TP_SSR > 1 && TP_NUM_OUTPUTS == 2),
+    #           "ERROR: Dual output ports is not supported when port API is a window and SSR > 1. ");
+    # Can this be removed?
+    # Constraint could be removed alongside statis_assert, as the scenario is possible to achieve.
+    # However, there's litttle to no use case for this, as tools now support buffer broadcast.
+    # So, no need to support 2 output clones when in SSR mode.
     if TP_API == API_BUFFER and TP_SSR > 1:
         legal_set = remove_from_set([2], legal_set)
 
     param_dict.update({"enum": legal_set})
 
     return param_dict
+
 
 def fn_update_num_outputs_sr_sym(TP_API, AIE_VARIANT, param_name):
     param_dict = fn_update_num_outputs(TP_API, AIE_VARIANT, param_name)
@@ -154,13 +185,13 @@ def fn_update_num_outputs_sr_sym(TP_API, AIE_VARIANT, param_name):
         # When buffer API, single output or 2 output clones are both valid use cases.
         legal_set = legal_set
     # if TP_API == API_STREAM:
-        # # When stream API, keep IO connections same,
-        # # i.e. when 1 input stream 1 output stream, when 2 inputs, allow 2 outputs.
-        # # When 2 inputs, does 1 output make sense? No.
-        # if TP_DUAL_IP == 0 and not(AIE_VARIANT in [AIE] and TP_SSR==1): #if AIE==1 and not in SSR mode, dualpip=0, num_output=2 is allowed
-        #     legal_set = remove_from_set([2], legal_set)
-        # elif TP_DUAL_IP == 1 and not(AIE_VARIANT in [AIE] and TP_SSR==1):
-        #     legal_set = remove_from_set([1], legal_set)
+    # # When stream API, keep IO connections same,
+    # # i.e. when 1 input stream 1 output stream, when 2 inputs, allow 2 outputs.
+    # # When 2 inputs, does 1 output make sense? No.
+    # if TP_DUAL_IP == 0 and not(AIE_VARIANT in [AIE] and TP_SSR==1): #if AIE==1 and not in SSR mode, dualpip=0, num_output=2 is allowed
+    #     legal_set = remove_from_set([2], legal_set)
+    # elif TP_DUAL_IP == 1 and not(AIE_VARIANT in [AIE] and TP_SSR==1):
+    #     legal_set = remove_from_set([1], legal_set)
 
     # # Constraint copied from graph. Can this be removed?
     # if TP_API == API_BUFFER and TP_SSR > 1:
@@ -255,6 +286,24 @@ def fn_eliminate_casc_len_max_fir_len_each_kernel(
             legal_set_casc_int = remove_from_set([casc_len], legal_set_casc_int)
 
     return legal_set_casc_int
+
+
+def fn_max_fir_len_for_buffer_update(
+    TT_DATA,
+    TP_SSR=1,
+    TP_INTERPOLATE_FACTOR=1,
+    TP_DECIMATE_FACTOR=1,
+    AIE_VARIANT=1,
+):
+    kMemoryModuleSize = k_data_memory_bytes[AIE_VARIANT]
+    min_sample_buffer_size = k_max_read_write_bytes[AIE_VARIANT] // sizeof(
+        TT_DATA
+    )  # alignment / sample size
+    max_margin_size = (
+        kMemoryModuleSize / fn_size_by_byte(TT_DATA)
+    ) - min_sample_buffer_size
+    TP_FIR_LEN_max = max_margin_size + 1
+    return int(TP_FIR_LEN_max)
 
 
 def fn_max_windowsize_for_buffer_update(

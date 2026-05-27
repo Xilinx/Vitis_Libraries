@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 from aie_common import *
+from get_aievar_from_part import get_aie_arch_from_part_name
 import sys
 
 TP_POINT_SIZE_min_aie = 16
@@ -171,29 +172,34 @@ def fn_validate_twiddle_type(PART, TWIDDLE_TYPE, DATA_TYPE):
 ########### TP_DYN_PT_SIZE Updater and Validator ######
 #######################################################
 def update_POINT_SIZE(args):
-    VSS_MODE = args["VSS_MODE"]
+    VSS_MODE = int(args["VSS_MODE"])
     PART = args["PART"]
-    return fn_update_POINT_SIZE(VSS_MODE, PART)
+    DATA_TYPE = args["DATA_TYPE"]
+    return fn_update_POINT_SIZE(VSS_MODE, PART, DATA_TYPE)
 
 
-def fn_update_POINT_SIZE(VSS_MODE, PART):
+def fn_update_POINT_SIZE(VSS_MODE, PART, DATA_TYPE):
     legal_set_POINT_SIZE = [64]
     min_point_size_pwr_aie1 = 4
     min_point_size_pwr_aie2 = 5
+    AIE_VARIANT = get_aie_arch_from_part_name(PART)
+    max_point_size_power = 16
+    if VSS_MODE == 1 and "cint16" in DATA_TYPE and AIE_VARIANT == 1:
+        max_point_size_power = 15
     # add code that updates legalset with powers of two from 4 to 65536 in a for loop
     if VSS_MODE == 1:
-        if PART == "xcvc1902-vsva2197-2MP-e-S":
-            for i in range(2*min_point_size_pwr_aie1, 17): # factor of 2 appears because the overall point size of vss in mode 1 is square of point size of aie kernel
+        if AIE_VARIANT  == 1:
+            for i in range(2*min_point_size_pwr_aie1, max_point_size_power+1): # factor of 2 appears because the overall point size of vss in mode 1 is square of point size of aie kernel
                 legal_set_POINT_SIZE.append(2 ** i)
         else:
-            for i in range(2*min_point_size_pwr_aie2, 17):
+            for i in range(2*min_point_size_pwr_aie2, max_point_size_power+1):
                 legal_set_POINT_SIZE.append(2 ** i)
     elif VSS_MODE == 2:
-        if PART == "xcvc1902-vsva2197-2MP-e-S":
-            for i in range(min_point_size_pwr_aie1+1, 17): # adding 1 because overall point size of vss in mode 2 is ssr*(point size of aie kernel). Minimum ssr in this mode is 2.
+        if AIE_VARIANT  == 1:
+            for i in range(min_point_size_pwr_aie1+1, max_point_size_power+1): # adding 1 to min size because overall point size of vss in mode 2 is ssr*(point size of aie kernel). Minimum ssr in this mode is 2.
                 legal_set_POINT_SIZE.append(2 ** i)
         else:
-            for i in range(min_point_size_pwr_aie2+1, 17):
+            for i in range(min_point_size_pwr_aie2+1, max_point_size_power+1):
                 legal_set_POINT_SIZE.append(2 ** i)
     param_dict = {}
     param_dict.update({"name": "POINT_SIZE"})
@@ -203,13 +209,14 @@ def fn_update_POINT_SIZE(VSS_MODE, PART):
 
 def validate_POINT_SIZE(args):
     POINT_SIZE = args["POINT_SIZE"]
-    VSS_MODE = args["VSS_MODE"]
+    VSS_MODE = int(args["VSS_MODE"])
     PART = args["PART"]
-    return fn_validate_POINT_SIZE(POINT_SIZE, VSS_MODE, PART)
+    DATA_TYPE = args["DATA_TYPE"]
+    return fn_validate_POINT_SIZE(POINT_SIZE, VSS_MODE, PART, DATA_TYPE)
 
 
-def fn_validate_POINT_SIZE(POINT_SIZE, VSS_MODE, PART):
-    param_dict = fn_update_POINT_SIZE(VSS_MODE, PART)
+def fn_validate_POINT_SIZE(POINT_SIZE, VSS_MODE, PART, DATA_TYPE):
+    param_dict = fn_update_POINT_SIZE(VSS_MODE, PART, DATA_TYPE)
     legal_set_POINT_SIZE = param_dict["enum"]
     return validate_legal_set(legal_set_POINT_SIZE, "POINT_SIZE", int(POINT_SIZE))
 
@@ -248,7 +255,7 @@ def fn_validate_FFT_NIFFT(FFT_NIFFT):
 def update_SHIFT(args):
     DATA_TYPE = args["DATA_TYPE"]
     VSS_MODE = args["VSS_MODE"]
-    SSR = args["SSR"]
+    SSR = int(args["SSR"])
     return fn_update_shift_val(DATA_TYPE, VSS_MODE, SSR)
 
 
@@ -270,7 +277,7 @@ def validate_SHIFT(args):
     SHIFT = args["SHIFT"]
     DATA_TYPE = args["DATA_TYPE"]
     VSS_MODE = args["VSS_MODE"]
-    SSR = args["SSR"]
+    SSR = int(args["SSR"])
     return fn_validate_shift_val(DATA_TYPE, SHIFT, VSS_MODE, SSR)
 
 
@@ -284,26 +291,31 @@ def fn_validate_shift_val(DATA_TYPE, SHIFT, VSS_MODE, SSR):
 ########### API_IO Updater and Validator ##############
 #######################################################
 def update_API_IO(args):
-    return fn_update_API_IO()
+    VSS_MODE = args["VSS_MODE"]
+    PART = args["PART"]
+    return fn_update_API_IO(VSS_MODE, PART)
 
-
-def fn_update_API_IO():
-    legal_set_API_IO = [0, 1]
-
+def fn_update_API_IO(VSS_MODE, PART):
+    AIE_VARIANT = get_aie_arch_from_part_name(PART)
+    if AIE_VARIANT == 1 and str(VSS_MODE) == "2":
+        legal_set_API_IO = [0, 1]
+    else:
+        legal_set_API_IO = [0]
     param_dict = {}
     param_dict.update({"name": "API_IO"})
     param_dict.update({"enum": legal_set_API_IO})
-
     return param_dict
 
 
 def validate_API_IO(args):
     API_IO = args["API_IO"]
-    return fn_validate_API_IO(API_IO)
+    VSS_MODE = args["VSS_MODE"]
+    PART = args["PART"]
+    return fn_validate_API_IO(API_IO, VSS_MODE, PART)
 
 
-def fn_validate_API_IO(API_IO):
-    param_dict = fn_update_API_IO()
+def fn_validate_API_IO(API_IO, VSS_MODE, PART):
+    param_dict = fn_update_API_IO(VSS_MODE, PART)
     legal_set_API_IO = param_dict["enum"]
     return validate_legal_set(legal_set_API_IO, "API_IO", int(API_IO))
 
@@ -432,12 +444,12 @@ def fn_pt_size_d1(POINT_SIZE):
         return 0
 
 
-def legal_ssr_point_size(POINT_SIZE, SSR, PART, DATA_TYPE):
-    point_size_d1 = fn_pt_size_d1(POINT_SIZE)
-    point_size_d2 = POINT_SIZE / point_size_d1
-    ceil_d1_ssr = CEIL(point_size_d1, SSR)
+def legal_ssr_point_size(POINT_SIZE, SSR, PART, DATA_TYPE, POINT_SIZE_D1):
+    point_size_d1_act = fn_pt_size_d1(POINT_SIZE) if POINT_SIZE_D1 == 1 else POINT_SIZE_D1
+    point_size_d2 = POINT_SIZE / point_size_d1_act
+    ceil_d1_ssr = CEIL(point_size_d1_act, SSR)
     ceil_d2_ssr = CEIL(point_size_d2, SSR)
-    window_size_d1 = ceil_d2_ssr / SSR * point_size_d1 * fn_size_by_byte(DATA_TYPE)
+    window_size_d1 = ceil_d2_ssr / SSR * point_size_d1_act * fn_size_by_byte(DATA_TYPE)
     window_size_d2 = ceil_d1_ssr / SSR * point_size_d2 * fn_size_by_byte(DATA_TYPE)
     if fn_is_power_of_two(SSR):
         return True
@@ -451,13 +463,14 @@ def legal_ssr_point_size(POINT_SIZE, SSR, PART, DATA_TYPE):
 
 
 def update_SSR(args):
-    POINT_SIZE = args["POINT_SIZE"]
+    POINT_SIZE = int(args["POINT_SIZE"])
     PART = args["PART"]
     DATA_TYPE = args["DATA_TYPE"]
     VSS_MODE = args["VSS_MODE"]
-    return fn_update_ssr(POINT_SIZE, PART, DATA_TYPE, VSS_MODE)
+    POINT_SIZE_D1 = int(args["POINT_SIZE_D1"])
+    return fn_update_ssr(POINT_SIZE, PART, DATA_TYPE, VSS_MODE, POINT_SIZE_D1)
 
-def fn_update_ssr(POINT_SIZE, PART, DATA_TYPE, VSS_MODE):
+def fn_update_ssr(POINT_SIZE, PART, DATA_TYPE, VSS_MODE, POINT_SIZE_D1):
     range_SSR = [2, 64]
     param_dict = {}
     param_dict.update({"name": "SSR"})
@@ -470,7 +483,7 @@ def fn_update_ssr(POINT_SIZE, PART, DATA_TYPE, VSS_MODE):
         remove_list = []
         for cur_ssr in legal_set_TP_SSR:
             if (
-                legal_ssr_point_size(POINT_SIZE, cur_ssr, PART, DATA_TYPE) == False
+                legal_ssr_point_size(POINT_SIZE, cur_ssr, PART, DATA_TYPE, POINT_SIZE_D1) == False
             ):  # Second condition is to make sure that the downstream parameter does not lead to an empty configuration if the SSR value is chosen.
                 remove_list.append(cur_ssr)
         legal_set_TP_SSR_eliminated = remove_from_set(remove_list, legal_set_TP_SSR.copy())
@@ -482,16 +495,17 @@ def fn_update_ssr(POINT_SIZE, PART, DATA_TYPE, VSS_MODE):
     return param_dict
 
 def validate_SSR(args):
-    SSR = args["SSR"]
-    POINT_SIZE = args["POINT_SIZE"]
+    SSR = int(args["SSR"])
+    POINT_SIZE = int(args["POINT_SIZE"])
     PART = args["PART"]
     DATA_TYPE = args["DATA_TYPE"]
-    VSS_MODE = args["VSS_MODE"]
-    return fn_validate_ssr(SSR, POINT_SIZE, PART, DATA_TYPE, VSS_MODE)
+    VSS_MODE = int(args["VSS_MODE"])
+    POINT_SIZE_D1 = int(args["POINT_SIZE_D1"])
+    return fn_validate_ssr(SSR, POINT_SIZE, PART, DATA_TYPE, VSS_MODE, POINT_SIZE_D1)
 
 
-def fn_validate_ssr(SSR, POINT_SIZE, PART, DATA_TYPE, VSS_MODE):
-    param_dict = fn_update_ssr(POINT_SIZE, PART, DATA_TYPE, VSS_MODE)
+def fn_validate_ssr(SSR, POINT_SIZE, PART, DATA_TYPE, VSS_MODE, POINT_SIZE_D1):
+    param_dict = fn_update_ssr(POINT_SIZE, PART, DATA_TYPE, VSS_MODE, POINT_SIZE_D1)
     if "enum" in param_dict:
         return validate_legal_set(param_dict["enum"], "SSR", int(SSR))
     else:
@@ -556,6 +570,195 @@ def fn_validate_VSS_MODE(VSS_MODE):
     legal_set_VSS_MODE = param_dict["enum"]
     return validate_legal_set(legal_set_VSS_MODE, "VSS_MODE", int(VSS_MODE))
 
+#######################################################
+########### TP_CASC_LEN Updater and Validator #########
+#######################################################
+def update_TP_CASC_LEN(args):
+    PART = args["PART"]
+    DATA_TYPE = args["DATA_TYPE"]
+    POINT_SIZE = int(args["POINT_SIZE"])
+    POINT_SIZE_D1 = int(args.get("POINT_SIZE_D1", 1))
+    VSS_MODE = int(args["VSS_MODE"])
+    return fn_update_TP_CASC_LEN(PART, DATA_TYPE, POINT_SIZE, POINT_SIZE_D1, VSS_MODE)
+
+
+def fn_update_TP_CASC_LEN(PART, DATA_TYPE, POINT_SIZE, POINT_SIZE_D1, VSS_MODE):
+    point_size_d1_act = fn_pt_size_d1(POINT_SIZE) if POINT_SIZE_D1 == 1 else POINT_SIZE_D1
+    point_size_d2 = POINT_SIZE / point_size_d1_act
+    aie_point_size = max(point_size_d1_act, point_size_d2) if VSS_MODE == 1 else point_size_d1_act
+    log2PointSize = fn_log2(int(aie_point_size))
+    AIE_VARIANT = get_aie_arch_from_part_name(PART)
+    # equation for integer ffts is complicated by the fact that odd power of 2 point sizes start with a radix 2 stage
+    # Further, since integer implementation uses radix4, 2 ranks per kernel after the initial possible single radix2 is forced, so
+    NUM_STAGES = (CEIL(log2PointSize, 2) / 2) if DATA_TYPE in ["cint16", "cint32"] else log2PointSize
+    maxTP_CASC_LEN = min(TP_CASC_LEN_max, int(NUM_STAGES))
+
+    #In one particular scenario, cascade increases the memory requirement per kernel because the cascade data type is cint32 which increases memory use past the limit  
+    if (AIE_VARIANT==AIE) and (aie_point_size == 4096) and (DATA_TYPE in ["cint16", "cint32"]):
+        maxTP_CASC_LEN = 1
+
+    param_dict = {}
+    param_dict.update({"name": "TP_CASC_LEN"})
+    param_dict.update({"minimum": TP_CASC_LEN_min})
+    param_dict.update({"maximum": maxTP_CASC_LEN})
+
+    return param_dict
+
+
+def validate_TP_CASC_LEN(args):
+    PART = args["PART"]
+    DATA_TYPE = args["DATA_TYPE"]
+    POINT_SIZE = int(args["POINT_SIZE"])
+    TP_CASC_LEN = int(args["CASC_LEN"])
+    POINT_SIZE_D1 = int(args["POINT_SIZE_D1"])
+    VSS_MODE = int(args["VSS_MODE"])
+    return fn_validate_casc_len(PART, DATA_TYPE, POINT_SIZE, TP_CASC_LEN, POINT_SIZE_D1, VSS_MODE)
+
+
+def fn_validate_casc_len(PART, DATA_TYPE, POINT_SIZE, TP_CASC_LEN, POINT_SIZE_D1, VSS_MODE):
+    param_dict = fn_update_TP_CASC_LEN(PART, DATA_TYPE, POINT_SIZE, POINT_SIZE_D1, VSS_MODE)
+    range_TP_CASC_LEN = [param_dict["minimum"], param_dict["maximum"]]
+    return validate_range(range_TP_CASC_LEN, "TP_CASC_LEN", TP_CASC_LEN)
+
+
+#######################################################
+########### USE_WIDGETS Updater and Validator ##############
+#######################################################
+def update_USE_WIDGETS(args):
+    VSS_MODE = int(args["VSS_MODE"])
+    PART = args["PART"]
+    API_IO = int(args["API_IO"])
+    return fn_update_USE_WIDGETS(VSS_MODE, PART, API_IO)
+
+def fn_update_USE_WIDGETS(VSS_MODE, PART, API_IO):
+    AIE_VARIANT = get_aie_arch_from_part_name(PART)
+    if AIE_VARIANT == 1 and API_IO == 1 and VSS_MODE == 2:
+        legal_set_USE_WIDGETS = [0, 1]
+    else:
+        legal_set_USE_WIDGETS = [0]
+    
+    param_dict = {}
+    param_dict.update({"name": "USE_WIDGETS"})
+    param_dict.update({"enum": legal_set_USE_WIDGETS})
+
+    return param_dict
+
+
+def validate_USE_WIDGETS(args):
+    USE_WIDGETS = args["USE_WIDGETS"]
+    VSS_MODE = args["VSS_MODE"]
+    PART = args["PART"]
+    API_IO = args["API_IO"]
+    return fn_validate_USE_WIDGETS(USE_WIDGETS, VSS_MODE, PART, API_IO)
+
+
+def fn_validate_USE_WIDGETS(USE_WIDGETS, VSS_MODE, PART, API_IO):
+    param_dict = fn_update_USE_WIDGETS(VSS_MODE, PART, API_IO)
+    legal_set_USE_WIDGETS = param_dict["enum"]
+    return validate_legal_set(legal_set_USE_WIDGETS, "USE_WIDGETS", int(USE_WIDGETS))
+
+
+#######################################################
+########### POINT_SIZE_D1 Updater and Validator #######
+#######################################################
+def update_POINT_SIZE_D1(args):
+    POINT_SIZE = int(args["POINT_SIZE"])
+    VSS_MODE = int(args["VSS_MODE"])
+    DATA_TYPE = args["DATA_TYPE"]
+    PART = args["PART"]
+    return fn_update_POINT_SIZE_D1(POINT_SIZE, VSS_MODE, DATA_TYPE, PART)
+
+
+def fn_update_POINT_SIZE_D1(POINT_SIZE, VSS_MODE, DATA_TYPE, PART):
+    param_dict = {}
+    param_dict.update({"name": "POINT_SIZE_D1"})
+    param_dict.update({"minimum": 1})
+    AIE_VARIANT = get_aie_arch_from_part_name(PART)
+    if VSS_MODE == 1 and AIE_VARIANT == 1 and "cint16" in DATA_TYPE:
+        param_dict.update({"maximum": 255})
+    elif VSS_MODE == 2 and AIE_VARIANT == 1 and "cint16" in DATA_TYPE and POINT_SIZE_D1 != 1: # point_size_d1 = 1 means default simplified configuration, means that AIE BDs don't need to be used so only check for other cases
+        param_dict.update({"maximum": 255})
+    else:
+        param_dict.update({"maximum": int(POINT_SIZE) // 2})
+    return param_dict
+
+
+def validate_POINT_SIZE_D1(args):
+    POINT_SIZE_D1 = int(args["POINT_SIZE_D1"])
+    POINT_SIZE = int(args["POINT_SIZE"])
+    VSS_MODE = int(args["VSS_MODE"])
+    DATA_TYPE = args["DATA_TYPE"]
+    PART = args["PART"]
+    return fn_validate_POINT_SIZE_D1(POINT_SIZE_D1, POINT_SIZE, VSS_MODE, DATA_TYPE, PART)
+
+
+def fn_validate_POINT_SIZE_D1(POINT_SIZE_D1, POINT_SIZE, VSS_MODE, DATA_TYPE, PART):
+    param_dict = fn_update_POINT_SIZE_D1(POINT_SIZE, VSS_MODE, DATA_TYPE, PART)
+    range_POINT_SIZE_D1 = [param_dict["minimum"], param_dict["maximum"]]
+    
+    # Check range first
+    range_check = validate_range(range_POINT_SIZE_D1, "POINT_SIZE_D1", POINT_SIZE_D1)
+    if range_check["is_valid"] == False:
+        return range_check
+    
+    # Check divisibility: POINT_SIZE % POINT_SIZE_D1 == 0
+    if POINT_SIZE % POINT_SIZE_D1 != 0:
+        return isError(f"POINT_SIZE_D1 ({POINT_SIZE_D1}) must evenly divide POINT_SIZE ({POINT_SIZE})")
+    
+    return range_check
+
+
+#######################################################
+########### ADD_FRONT_TRANSPOSE Updater and Validator #
+#######################################################
+def update_ADD_FRONT_TRANSPOSE(args):
+    return fn_update_ADD_FRONT_TRANSPOSE()
+
+
+def fn_update_ADD_FRONT_TRANSPOSE():
+    legal_set = [1]
+    param_dict = {}
+    param_dict.update({"name": "ADD_FRONT_TRANSPOSE"})
+    param_dict.update({"enum": legal_set})
+    return param_dict
+
+
+def validate_ADD_FRONT_TRANSPOSE(args):
+    ADD_FRONT_TRANSPOSE = args["ADD_FRONT_TRANSPOSE"]
+    return fn_validate_ADD_FRONT_TRANSPOSE(ADD_FRONT_TRANSPOSE)
+
+
+def fn_validate_ADD_FRONT_TRANSPOSE(ADD_FRONT_TRANSPOSE):
+    param_dict = fn_update_ADD_FRONT_TRANSPOSE()
+    legal_set = param_dict["enum"]
+    return validate_legal_set(legal_set, "ADD_FRONT_TRANSPOSE", int(ADD_FRONT_TRANSPOSE))
+
+
+#######################################################
+########### ADD_BACK_TRANSPOSE Updater and Validator ##
+#######################################################
+def update_ADD_BACK_TRANSPOSE(args):
+    return fn_update_ADD_BACK_TRANSPOSE()
+
+
+def fn_update_ADD_BACK_TRANSPOSE():
+    legal_set = [1]
+    param_dict = {}
+    param_dict.update({"name": "ADD_BACK_TRANSPOSE"})
+    param_dict.update({"enum": legal_set})
+    return param_dict
+
+
+def validate_ADD_BACK_TRANSPOSE(args):
+    ADD_BACK_TRANSPOSE = args["ADD_BACK_TRANSPOSE"]
+    return fn_validate_ADD_BACK_TRANSPOSE(ADD_BACK_TRANSPOSE)
+
+
+def fn_validate_ADD_BACK_TRANSPOSE(ADD_BACK_TRANSPOSE):
+    param_dict = fn_update_ADD_BACK_TRANSPOSE()
+    legal_set = param_dict["enum"]
+    return validate_legal_set(legal_set, "ADD_BACK_TRANSPOSE", int(ADD_BACK_TRANSPOSE))
+
 
 def info_ports():
     return 0
@@ -603,3 +806,6 @@ enable-partition=5:26:fft_aie
 """
     out["cfg"] = macro_body_str_init + macro_body_str
     return out
+
+def generate_graph(aie_graph_name, args):
+    return {}

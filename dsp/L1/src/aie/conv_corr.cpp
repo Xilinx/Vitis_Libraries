@@ -16,8 +16,8 @@
  */
 
 /*
-CONV_CORR kernal code.
-This file captures the body of run-time code for the kernal class.
+CONV_CORR kernel code.
+This file captures the body of run-time code for the kernel class.
 Coding conventions
 TT_      template type suffix
 TP_      template parameter suffix
@@ -88,10 +88,11 @@ conv_corr<TT_DATA_F,
     using T_buff_FSig = T_InOut_W_buff<TT_DATA_F>;             // W_REG_BITS buffer for reading F Data
     using T_buff_GSig = T_InOut_W_buff<TT_DATA_G>;             // W_REG_BITS buffer for reading G Data
     using dataVecOut_t = ::aie::vector<TT_DATA_OUT, m_kLanes>; // Output vector based on output data type and lanes
-    ::aie::mask<m_kLanes> dataMask;                            // Mask to extract N num of lanes elements
+    using T_vecF = ::aie::vector<TT_DATA_F, m_kVecLoadF>;      // Vector type for F data load
+    T_vecF zeroVec =
+        ::aie::zeros<TT_DATA_F,
+                     m_kVecLoadF>(); // Zero Vector of F data type and F load size to use for padding of zeros.
 
-    T_buff_FSig sigF;        // Declaration of Sig F
-    T_buff_GSig sigG;        // Declaration of Sig G
     T_accum acc;             // Declaration of Accumulator
     T_buff_Xbuff xbuff;      // Declaration of xbuff using X(1024b) Reg.
     T_buff_Zbuff zbuff;      // Declaration of zbuff using W(256b) Reg.
@@ -105,25 +106,28 @@ conv_corr<TT_DATA_F,
     constexpr unsigned int Lanes = m_kLanes;                    // Num of Lanes
     constexpr unsigned int Points = m_kPoints;                  // Num of Points
     constexpr unsigned int kFLoadbits = getLog2<m_kVecLoadF>(); // No of bits for FLoad
-    constexpr unsigned int kAccumLen = ROUND(TP_G_LEN, m_kVecLoadG);                 // Len. of Accumulator
-    constexpr unsigned int kInLoopLen = ROUND(m_kVecLoadF, m_kPoints);               // In loop Length
-    constexpr unsigned int kGandFLoadRatio = FLOOR(m_kVecLoadG, m_kVecLoadF);        // Ratio of G load to F Load
-    constexpr unsigned int kLoopCount = (CEIL(m_kLoopCount, m_kLanes) / m_kLanes);   // Loopcount
-    constexpr unsigned int kFrameoffsetF = (m_kPaddedLenData / sigF.getSizeOfVec()); // Offset of F ptr
-    constexpr unsigned int kFrameoffsetG = (TP_G_LEN / sigG.getSizeOfVec());         // Offset of F ptr
-    constexpr unsigned int kDataLoadofG = (kMaxBitsLoadOnAie / fnSampleSizeOfSigG<TT_DATA_G>());
-    constexpr unsigned int kIncrOffsetGSig = ((TP_G_LEN / kDataLoadofG) - 1); // Offset to increment G Sig
-    unsigned int swapCount = (ROUND(TP_G_LEN, m_kVecLoadG) >> 1); // Count of elements in G-signal to reverse them
+    constexpr unsigned int kAccumLen = ROUND(TP_G_LEN, m_kVecLoadG);               // Len. of Accumulator
+    constexpr unsigned int kInLoopLen = ROUND(m_kVecLoadF, m_kPoints);             // In loop Length
+    constexpr unsigned int kGandFLoadRatio = FLOOR(m_kVecLoadG, m_kVecLoadF);      // Ratio of G load to F Load
+    constexpr unsigned int kLoopCount = (CEIL(m_kLoopCount, m_kLanes) / m_kLanes); // Loopcount
+    constexpr unsigned int kDataLoadofF = (kMaxBytesLoadOnAie / sizeof(TT_DATA_F));
+    constexpr unsigned int kDataLoadofG = (kMaxBytesLoadOnAie / sizeof(TT_DATA_G));
+    constexpr unsigned int kFrameoffsetF = (m_kPaddedLenData / kDataLoadofF);        // Offset of F ptr
+    constexpr unsigned int kFrameoffsetG = (TP_G_LEN / kDataLoadofG);                // Offset of F ptr
+    constexpr unsigned int kIncrOffsetGSig = ((TP_G_LEN / kDataLoadofG) - 1);        // Offset to increment G Sig
     constexpr unsigned int kPaddedVecLoopCnt = ROUND(m_kPaddedLenData, m_kVecLoadF); // Loop count for padded vector
-    constexpr unsigned int kDataStartIndex = m_kFdataStartIndx; // Start index for F data to be copied into buffer
-    constexpr unsigned int kDataEndIndex = m_kFdataEndIndx;     // End index to stop F data copy
+    constexpr unsigned int kDataStartIndex =
+        m_kFdataStartIndx; // Start index (in vectors) for F data to be copied into buffer
+    constexpr unsigned int kDataEndIndex = m_kFdataEndIndx; // End index (in vectors) to stop F data copy
     constexpr unsigned int kXStartIdxAdj =
-        ((TP_COMPUTE_MODE == 0) || (TP_COMPUTE_MODE == 1)) ? 1 : 0; // Adjustment for X Start Index
-    unsigned int offsetMask = 0;                                    // mask for lane elements extraction
+        (TP_COMPUTE_MODE == SAME_MODE)
+            ? ((m_kFdataStartIndx * m_kVecLoadF) - (CEIL((TP_G_LEN >> 1), kSameModeRoundFactor) - 1))
+            : (TP_COMPUTE_MODE == VALID_MODE) ? 0 : ((m_kFdataStartIndx * m_kVecLoadF) -
+                                                     (TP_G_LEN - 1)); // Offset accounting for vector-aligned padding
 
     // Pointers to do Padding zeros to the F data based on compute mode
     T_buff_FSig* __restrict inPtrF = (T_buff_FSig*)inWindowF.data(); // Alias Input pointer for Sig_F
-    T_buff_FSig* paddedFdataPtr = (T_buff_FSig*)paddedFdata;         // Pointer to padded F data
+    T_buff_FSig* paddedFdataPtr = (T_buff_FSig*)paddedFdata;         // Vector pointer to padded F data
 
     // Pointers for Input F and G. Also pointer for Output Data.
     T_buff_FSig* inDataPtrF = (T_buff_FSig*)paddedFdata;                 // Input pointer for Sig_F
@@ -140,41 +144,77 @@ conv_corr<TT_DATA_F,
 
     for (unsigned int frameIndx = 0; frameIndx < TP_NUM_FRAMES; frameIndx++)
         chess_prepare_for_pipelining chess_loop_count(TP_NUM_FRAMES) {
-            // Padding
-            // Pointer increment to exact memory location where F data needs to be copied
-            paddedFdataPtr = (paddedFdataPtr + (frameIndx * kFrameoffsetF) + kDataStartIndex);
+            // Initialize pointer to start of current frame
+            T_buff_FSig* paddedFdataPtr = (T_buff_FSig*)paddedFdata + (frameIndx * kFrameoffsetF);
 
-            // copying the F data to Padded Data memory
+            // ========== Zero padding before F data(0 to kDataStartIndex) ==========
+            for (unsigned int dataIndx = 0; dataIndx < kDataStartIndex; dataIndx++)
+                chess_prepare_for_pipelining chess_loop_count(kDataStartIndex) {
+                    *paddedFdataPtr++ = (T_buff_FSig)zeroVec; // Write zeroVec, increment paddedFdataPtr
+                }
+
+            // ========== Copy F data (kDataStartIndex to kDataEndIndex) ==========
             for (unsigned int dataIndx = kDataStartIndex; dataIndx < kDataEndIndex; dataIndx++)
-                chess_prepare_for_pipelining chess_loop_count(kDataEndIndex) { *paddedFdataPtr++ = *inPtrF++; }
+                chess_prepare_for_pipelining chess_loop_count(kDataEndIndex - kDataStartIndex) {
+                    *paddedFdataPtr++ = *inPtrF++; // Copy F data, increment both pointers
+                }
+
+            // ========== Zero padding after F data (kDataEndIndex to end) ==========
+            constexpr unsigned int totalVecs = m_kPaddedLenData / m_kVecLoadF;
+            constexpr unsigned int suffixCount = totalVecs - kDataEndIndex;
+
+            for (unsigned int dataIndx = kDataEndIndex; dataIndx < totalVecs; dataIndx++)
+                chess_prepare_for_pipelining chess_loop_count(suffixCount) {
+                    *paddedFdataPtr++ = (T_buff_FSig)zeroVec; // Write zeroVec, increment paddedFdataPtr
+                }
 
             // If the function type is conv (1), then we need to reverse the G data.
             if (TP_FUNCT_TYPE == CONV) {
                 T_buff_GSig* __restrict inDataEndPtrG; // Local Pointer to fetch end address of G data
-                T_buff_Zbuff zbuffs, zbuffe;           // Registers to hold Start and End data samples of G sig.
-                constexpr int kVsize = kMaxBytesLoadOnAie /
-                                       sizeof(TT_DATA_G); // Size of vector (256/8/sizeof(DATA) as per given data type.
+                constexpr int kVsize =
+                    (kMaxBytesLoadOnAie /
+                     sizeof(TT_DATA_G)); // Size of vector (256/8/sizeof(DATA) as per given data type.
                 using t_vect = ::aie::vector<TT_DATA_G, kVsize>; // definition using the vec size.
+                t_vect zbuffs, zbuffe; // Registers to hold Start and End data samples of G sig.
 
                 inDataPtrG = (rdInDataGPtr + (frameIndx * kFrameoffsetG));
                 inDataEndPtrG = (inDataPtrG + kIncrOffsetGSig); // Move the pointer to End address of G sig.
+
+                // Vector pointers for efficient in-place data reversal
+                t_vect* startPtr = (t_vect*)inDataPtrG;  // Points to beginning of G buffer
+                t_vect* endPtr = (t_vect*)inDataEndPtrG; // Points to end of G buffer
 
                 t_vect* outStartPtrG = (t_vect*)
                     inDataPtrG; // Output pointer pointing to Start of G buffer, used to write the swapped data of G sig
                 t_vect* outEndPtrG = (t_vect*)inDataEndPtrG; // Output pointer pointing to End of G buffer, used to
                                                              // write the swapped data of G sig
 
-                // reverse the G elements using inplace memory for Conv.
-                for (unsigned int i = 0; i < swapCount; i++) chess_prepare_for_pipelining chess_loop_count(kVsize) {
-                        upd_W_buff(zbuffs.val, 0, inDataPtrG++);    // Load from starting postion and increment
-                        upd_W_buff(zbuffe.val, 0, inDataEndPtrG--); // Load from End position and decrement
+                // Calculate number of full vector swaps and remaining elements
+                constexpr unsigned int kFullVecSwaps = (TP_G_LEN / kVsize) >> 1;
+                constexpr unsigned int kRemElements = TP_G_LEN % kVsize;
+                constexpr bool kPartialVec = (kRemElements > 0);
+
+                // reverse the G elements using inplace memory for Conv - full vectors
+                for (unsigned int i = 0; i < kFullVecSwaps; i++)
+                    chess_prepare_for_pipelining chess_loop_count(kFullVecSwaps) {
+                        zbuffs = *startPtr++; // Load from starting position and increment
+                        zbuffe = *endPtr--;   // Load from end position and decrement
 
                         // Reverse the data fetched and store in respective locations
-                        zbuffs.val = (::aie::reverse(zbuffs.val));
-                        zbuffe.val = (::aie::reverse(zbuffe.val));
+                        zbuffs = (::aie::reverse(zbuffs));
+                        zbuffe = (::aie::reverse(zbuffe));
 
-                        *outStartPtrG++ = zbuffe.val; // Storing the data after swap to same G sig buffer.
-                        *outEndPtrG-- = zbuffs.val;   // Storing the data after swap to same G sig buffer.
+                        *outStartPtrG++ = zbuffe; // Storing the data after swap to same G sig buffer.
+                        *outEndPtrG-- = zbuffs;   // Storing the data after swap to same G sig buffer.
+                    }
+
+                // Handle the center vector if TP_G_LEN/kVsize is odd
+                if
+                    constexpr(kPartialVec || ((TP_G_LEN / kVsize) & 1)) {
+                        zbuffs = *startPtr;
+
+                        zbuffs = (::aie::reverse(zbuffs));
+                        *outStartPtrG = zbuffs; // Storing the data after swap to same G sig buffer.
                     }
             }
 
@@ -182,9 +222,24 @@ conv_corr<TT_DATA_F,
             for (unsigned int outIndx = 0; outIndx < kLoopCount; outIndx++)
                 chess_prepare_for_pipelining chess_loop_count(kLoopCount) {
                     // Updation of F and G pointer to fetch respective data from both signal
-                    inDataPtrF = (rdInDataFPtr + (outIndx * (m_kLanes >> kFLoadbits)) +
-                                  (frameIndx * kFrameoffsetF));                // Reset F Sig Pointer.
+                    inDataPtrF =
+                        (rdInDataFPtr + (outIndx * (m_kLanes >> kFLoadbits)) +
+                         (frameIndx * kPaddedVecLoopCnt)); // Reset F Sig Pointer - load from start including padding
                     inDataPtrG = (rdInDataGPtr + (frameIndx * kFrameoffsetG)); // Reset G Sig Pointer.
+
+                    // Conservative bounds check - done ONCE per outer loop before any inner loops
+                    // kInnerLoopFptrIncr: max F-ptr offset at the moment of 3rd vector load in the inner loop (4th load
+                    // goes one further, but that one is also conditionally loaded)
+                    constexpr unsigned int kInnerLoopFptrIncr = kAccumLen * kGandFLoadRatio + 1;
+                    constexpr unsigned int kThirdVecLoadOffset =
+                        (kInnerLoopFptrIncr < kPaddedVecLoopCnt) ? (kPaddedVecLoopCnt - kInnerLoopFptrIncr) : 0;
+                    // The additional pre-increment advances one extra vector, so the threshold is reduced by one.
+                    constexpr unsigned int kFourthVecLoadOffset =
+                        (kInnerLoopFptrIncr + 1 < kPaddedVecLoopCnt) ? (kPaddedVecLoopCnt - kInnerLoopFptrIncr - 1) : 0;
+
+                    unsigned int baseOffset = (outIndx * (m_kLanes >> kFLoadbits));
+                    bool load3rdVec = (baseOffset < kThirdVecLoadOffset);
+                    bool load4thVec = (baseOffset < kFourthVecLoadOffset);
 
                     // Initialization of Accumulator with Zeros to flush the previous data.
                     acc.val = ::aie::zeros<tConvCorrAccType_t<TT_DATA_F, TT_DATA_G>,
@@ -206,25 +261,36 @@ conv_corr<TT_DATA_F,
 // Load Data of F Signal
 #pragma unroll(kGandFLoadRatio)
                         for (unsigned int k = 0; k < kGandFLoadRatio; k++) {
-                            // Pointer Manipulation to read No of "FLoad" elements into Y_REG_BITS buffer outIndx.e.
-                            // xbuff
+                            // Pointer Manipulation to read No of "FLoad" elements into Y_REG_BITS buffer
+                            // Always load first two vectors
                             upd_W_buff(xbuff.val, 0,
                                        inDataPtrF++); // update xbuff with F sig data based on vector load.
                             upd_W_buff(xbuff.val, kBuffIndx1,
-                                       inDataPtrF);     // update xbuff with F sig data based on vector load.
-                            if (m_kLanes > m_kVecLoadF) // m_kVecLoad_Len_F is nothing but FLoad
-                            {
-                                inDataPtrF++;
+                                       inDataPtrF); // update xbuff with F sig data based on vector load.
+
+                            // Load 3rd and 4th vectors only when the precomputed bounds condition is true (evaluated
+                            // once per outer loop); otherwise this unrolled path is a no-op and the pointer is not
+                            // advanced.
+                            if (load3rdVec) {
+                                inDataPtrF++; // increment pointer to next vector boundary if 3rd vector load is valid
                                 upd_W_buff(xbuff.val, kBuffIndx2,
-                                           inDataPtrF--); // Fetch the data when kLanes greater than F Vector load
+                                           inDataPtrF); // update xbuff with F sig data based on 3rd vector load.
+
+                                if (load4thVec) {
+                                    inDataPtrF++; // increment pointer to next vector boundary if 4th vector load is
+                                                  // valid
+                                    upd_W_buff(xbuff.val, kBuffIndx3, inDataPtrF--); // update xbuff with F sig data
+                                                                                     // based on 4th vector load, then
+                                                                                     // decrement pointer
+                                }
+                                inDataPtrF--; // restore pointer to next iteration's first vector
                             }
 
 #pragma unroll(kInLoopLen)
                             for (unsigned int l = 0; l < kInLoopLen; l++) {
                                 // Sliding Multiplication of given signals
-                                acc.val =
-                                    mul_ops::mac(acc.val, zbuff.val, ((k * kInLoopLen + l) * m_kPoints), xbuff.val,
-                                                 ((l * m_kPoints) + kXStartIdxAdj)); // Sliding MAC function Call
+                                acc.val = mul_ops::mac(acc.val, zbuff.val, ((k * kInLoopLen + l) * m_kPoints),
+                                                       xbuff.val, ((l * m_kPoints) + kXStartIdxAdj));
 
                             } // End of kInLoopLen
                         }     // End of kGandFLoadRatio
@@ -233,16 +299,17 @@ conv_corr<TT_DATA_F,
                     dataVecOut = acc.val.template to_vector<TT_DATA_OUT>(
                         TP_SHIFT); // Storing accumulator results into out data vector
 
-                    if (TP_COMPUTE_MODE == 2) // Valid Mode
-                    {
-                        offsetMask = (m_kLoopCount - (outIndx * m_kLanes) == 1)
-                                         ? MASK_TO_EXTRACT_N_ELEM_FROM_LANES(1)
-                                         : MASK_TO_EXTRACT_N_ELEM_FROM_LANES(m_kLanes);
-                        dataMask = ::aie::mask<m_kLanes>::from_uint32(offsetMask); // Mask to extract lane 0 element
-                        dataVecOut =
-                            ::aie::select(dataVecOut, dataOut,
-                                          dataMask); // Select the data from dataVecOut to dataOut based on the mask
-                    }
+                    // Handle partial output vector in last iteration for ALL compute modes
+                    if
+                        constexpr((m_kLoopCount % m_kLanes) != 0) {
+                            constexpr unsigned int kValidSamplesLast = m_kLoopCount % m_kLanes;
+                            constexpr uint32_t kLastVecMask = ~((1U << kValidSamplesLast) - 1U);
+
+                            if (outIndx == (kLoopCount - 1)) {
+                                dataVecOut = ::aie::select(dataVecOut, dataOut,
+                                                           ::aie::mask<m_kLanes>::from_uint32(kLastVecMask));
+                            }
+                        }
 
                     *outPtr++ = dataVecOut; // write the output results to the iobuffer
 
@@ -292,64 +359,72 @@ NOINLINE_DECL void conv_corr<TT_DATA_F,
                                                                       input_buffer<TT_DATA_G>& __restrict inWindowG,
                                                                       output_buffer<TT_DATA_OUT>& __restrict outWindow,
                                                                       const int32 (&inVecLen)[2]) {
-    set_rnd_mode<TP_RND>(); //  Rounding and Saturation to avoid bit errors.
-    set_sat_mode<TP_SAT>(); //  Saturation to avoid the overflow issue.
+    set_rnd_mode<TP_RND>(); // Set rounding mode
+    set_sat_mode<TP_SAT>(); // Set saturation mode
 
     using T_accum = T_acc_ConCor<TT_DATA_F, TT_DATA_G>;
-    using T_buff_Xbuff = T_InOut_Y_buff<TT_DATA_F>;            // Y_REG_BITS buffer for X Reg.
-    using T_buff_Zbuff = T_InOut_W_buff<TT_DATA_G>;            // W_REG_BITS buffer for W Reg
-    using T_buff_FSig = T_InOut_W_buff<TT_DATA_F>;             // W_REG_BITS buffer for reading F Data
-    using T_buff_GSig = T_InOut_W_buff<TT_DATA_G>;             // W_REG_BITS buffer for reading G Data
-    using dataVecOut_t = ::aie::vector<TT_DATA_OUT, m_kLanes>; // Output vector based on output data type and lanes
-    ::aie::mask<m_kLanes> dataMask;                            // Mask to extract N num of lanes elements
+    using T_buff_Xbuff = T_InOut_Y_buff<TT_DATA_F>;            // 1024-bit X register buffer for F data
+    using T_buff_Zbuff = T_InOut_W_buff<TT_DATA_G>;            // 256-bit W register buffer for G data
+    using T_buff_FSig = T_InOut_W_buff<TT_DATA_F>;             // 256-bit W register buffer for F data
+    using T_buff_GSig = T_InOut_W_buff<TT_DATA_G>;             // 256-bit W register buffer for G data
+    using dataVecOut_t = ::aie::vector<TT_DATA_OUT, m_kLanes>; // Output vector type
+    using T_vecF = ::aie::vector<TT_DATA_F, m_kVecLoadF>;      // F data load vector type
+    T_vecF zeroVec = ::aie::zeros<TT_DATA_F, m_kVecLoadF>();   // Zero vector for F buffer padding
 
-    T_buff_FSig sigF;        // Declaration of Sig F
-    T_buff_GSig sigG;        // Declaration of Sig G
-    T_accum acc;             // Declaration of Accumulator
-    T_buff_Xbuff xbuff;      // Declaration of xbuff using X(1024b) Reg.
-    T_buff_Zbuff zbuff;      // Declaration of zbuff using W(256b) Reg.
-    dataVecOut_t dataVecOut; // Declaration of Output Vector to store results into Out buffer.
-    dataVecOut_t dataOut =
-        ::aie::zeros<TT_DATA_OUT, m_kLanes>();        // Declaration of Output Vector to store results after masking.
-    unsigned int vecLenF = (unsigned int)inVecLen[0]; // RTP Based F_LEN
-    unsigned int vecLenG = (unsigned int)inVecLen[1]; // RTP Based G_LEN
-    const unsigned int* ptrVecLenF = &vecLenF;
-    const unsigned int* ptrVecLenG = &vecLenG;
+    T_accum acc;                                                  // Accumulator register
+    T_buff_Xbuff xbuff;                                           // X(1024b) register buffer
+    T_buff_Zbuff zbuff;                                           // W(256b) register buffer
+    dataVecOut_t dataVecOut;                                      // Output vector
+    dataVecOut_t dataOut = ::aie::zeros<TT_DATA_OUT, m_kLanes>(); // Zero vector for output lane masking
+    unsigned int vecLenF = (unsigned int)inVecLen[0];             // RTP Based F_LEN
+    unsigned int vecLenG = (unsigned int)inVecLen[1];             // RTP Based G_LEN
 
-    constexpr unsigned int DataStepX = 1;                       // Initilization of slidingmul parameter i.e. DataStepX
-    constexpr unsigned int DataStepZ = 1;                       // Initilization of slidingmul parameter i.e. DataStepZ
-    constexpr unsigned int DataStepY = 1;                       // Initilization of slidingmul parameter i.e. DataStepY
-    constexpr unsigned int Lanes = m_kLanes;                    // Num of Lanes
-    constexpr unsigned int Points = m_kPoints;                  // Num of Points
-    constexpr unsigned int kFLoadbits = getLog2<m_kVecLoadF>(); // No of bits for FLoad
-    constexpr unsigned int kInLoopLen = ROUND(m_kVecLoadF, m_kPoints);               // In loop Length
-    constexpr unsigned int kGandFLoadRatio = FLOOR(m_kVecLoadG, m_kVecLoadF);        // Ratio of G load to F Load
-    constexpr unsigned int kLoopCount = (CEIL(m_kLoopCount, m_kLanes) / m_kLanes);   // Loopcount
-    constexpr unsigned int kFrameoffsetF = (m_kPaddedLenData / sigF.getSizeOfVec()); // Offset of F ptr
-    const unsigned int kAccumLen = ROUND(*ptrVecLenG, m_kVecLoadG);                  // Len. of Accumulator
-    const unsigned int kFrameoffsetG = (*ptrVecLenG / sigG.getSizeOfVec());          // Offset of F ptr
-    constexpr unsigned int kDataLoadofG = (kMaxBitsLoadOnAie / fnSampleSizeOfSigG<TT_DATA_G>());
-    const unsigned int kIncrOffsetGSig = ((*ptrVecLenG / kDataLoadofG) - 1); // Offset to increment G Sig
-    unsigned int swapCount = (ROUND(*ptrVecLenG, m_kVecLoadG) >> 1); // Count of elements in G-signal to reverse them.
-    constexpr unsigned int kPaddedVecLoopCnt = ROUND(m_kPaddedLenData, m_kVecLoadF); // Loop count for padded vector
-    constexpr unsigned int kDataStartIndex = m_kFdataStartIndx; // Start index for F data to be copied into buffer
-    constexpr unsigned int kDataEndIndex = m_kFdataEndIndx;     // End index to stop F data copy
-    constexpr unsigned int kXStartIdxAdj =
-        ((TP_COMPUTE_MODE == 0) || (TP_COMPUTE_MODE == 1)) ? 1 : 0; // Adjustment for X Start Index
-    unsigned int offsetMask = 0;                                    // mask for lane elements extraction
+    constexpr unsigned int DataStepX = 1; // sliding_mul DataStepX
+    constexpr unsigned int DataStepZ = 1; // sliding_mul DataStepZ
+    constexpr unsigned int DataStepY = 1; // sliding_mul DataStepY
 
-    // Pointers to do Padding zeros to the F data based on compute mode
-    T_buff_FSig* __restrict inPtrF = (T_buff_FSig*)inWindowF.data(); // Alias Input pointer for Sig_F
-    T_buff_FSig* paddedFdataPtr = (T_buff_FSig*)paddedFdata;         // Pointer to padded F data
+    // Runtime values derived from RTP vector lengths — computed in dependency order
+    // so that getRuntimePaddedLength is called only once (start/end index reuse it).
+    unsigned int kPaddedLenData = getRuntimePaddedLength<TT_DATA_F, TT_DATA_G, TP_COMPUTE_MODE>(vecLenF, vecLenG);
+    unsigned int kDataStartIndex =
+        getRuntimeFdataStartIndex<TT_DATA_F, TT_DATA_G, TP_COMPUTE_MODE>(vecLenF, vecLenG, kPaddedLenData);
+    unsigned int kDataEndIndex = getRuntimeFdataEndIndex<TT_DATA_F, TT_DATA_G, TP_COMPUTE_MODE>(
+        vecLenF, vecLenG, kPaddedLenData, kDataStartIndex);
+    unsigned int kRuntimeLoopCount = getRuntimeLoopCount<TP_COMPUTE_MODE>(vecLenF, vecLenG);
 
-    // Pointers for Input F and G. Also pointer for Output Data.
-    T_buff_FSig* inDataPtrF = (T_buff_FSig*)paddedFdata;                 // Input pointer for Sig_F
-    T_buff_GSig* __restrict inDataPtrG = (T_buff_GSig*)inWindowG.data(); // Input pointer for Sig_G
-    dataVecOut_t* __restrict outPtr = (dataVecOut_t*)outWindow.data();   // Output Pointer for conv/corr result
+    constexpr unsigned int Lanes = m_kLanes;
+    constexpr unsigned int Points = m_kPoints;
+    constexpr unsigned int kFLoadbits = getLog2<m_kVecLoadF>();               // Log2 of F vector load size
+    constexpr unsigned int kInLoopLen = ROUND(m_kVecLoadF, m_kPoints);        // Inner loop unroll length
+    constexpr unsigned int kGandFLoadRatio = FLOOR(m_kVecLoadG, m_kVecLoadF); // G-to-F load ratio
+    const unsigned int kLoopCountDynamic =
+        (CEIL(kRuntimeLoopCount, m_kLanes) / m_kLanes);           // Runtime output vector count
+    constexpr unsigned int kLoopCountStatic = m_kMaxLoopCountVec; // Compile-time output vector count
+    constexpr unsigned int kDataLoadofF = (kMaxBytesLoadOnAie / sizeof(TT_DATA_F));
+    constexpr unsigned int kDataLoadofG = (kMaxBytesLoadOnAie / sizeof(TT_DATA_G));
+    const unsigned int kFrameoffsetF = (kPaddedLenData / kDataLoadofF);        // Runtime F frame stride
+    const unsigned int kAccumLen = ROUND(vecLenG, m_kVecLoadG);                // G accumulation length in vectors
+    const unsigned int kFrameoffsetG = (vecLenG / kDataLoadofG);               // Runtime G frame stride
+    const unsigned int kIncrOffsetGSig = ((vecLenG / kDataLoadofG) - 1);       // Index of last G vector
+    const unsigned int kPaddedVecLoopCnt = ROUND(kPaddedLenData, m_kVecLoadF); // Padded F data length in vectors
+    // MAC xbuff start offset accounting for runtime zero-padding
+    const unsigned int kXStartIdxAdj =
+        (TP_COMPUTE_MODE == SAME_MODE)
+            ? ((kDataStartIndex * m_kVecLoadF) - (CEIL((vecLenG >> 1), kSameModeRoundFactor) - 1))
+            : (TP_COMPUTE_MODE == VALID_MODE) ? 0u : ((kDataStartIndex * m_kVecLoadF) - (vecLenG - 1));
+    // Output mask: precomputed once per call using runtime loop count
+    const unsigned int kValidSamplesLast = kRuntimeLoopCount % m_kLanes;
+    const uint32_t kLastVecMask = (kValidSamplesLast != 0) ? (~((1U << kValidSamplesLast) - 1U)) : 0U;
 
-    // Alias Pointers for both F and G.
-    T_buff_FSig* rdInDataFPtr = (T_buff_FSig*)paddedFdata;                 // Alias Input pointer for Sig_F
-    T_buff_GSig* __restrict rdInDataGPtr = (T_buff_GSig*)inWindowG.data(); // Alias Input pointer for Sig_G
+    // Signal I/O pointers
+    T_buff_FSig* __restrict inPtrF = (T_buff_FSig*)inWindowF.data();     // F input read pointer
+    T_buff_FSig* inDataPtrF = (T_buff_FSig*)paddedFdata;                 // Padded F data pointer
+    T_buff_GSig* __restrict inDataPtrG = (T_buff_GSig*)inWindowG.data(); // G input read pointer
+    dataVecOut_t* __restrict outPtr = (dataVecOut_t*)outWindow.data();   // Output write pointer
+
+    // Base pointers for per-frame pointer resets
+    T_buff_FSig* rdInDataFPtr = (T_buff_FSig*)paddedFdata;
+    T_buff_GSig* __restrict rdInDataGPtr = (T_buff_GSig*)inWindowG.data();
 
     // Alias for sliding_mul API
     using mul_ops = ::aie::sliding_mul_ops<Lanes, Points, DataStepX, DataStepZ, DataStepY, TT_DATA_G, TT_DATA_F,
@@ -357,114 +432,139 @@ NOINLINE_DECL void conv_corr<TT_DATA_F,
 
     for (unsigned int frameIndx = 0; frameIndx < TP_NUM_FRAMES; frameIndx++)
         chess_prepare_for_pipelining chess_loop_count(TP_NUM_FRAMES) {
-            // Padding
-            // Pointer increment to exact memory location where F data needs to be copied
-            paddedFdataPtr = (paddedFdataPtr + (frameIndx * kFrameoffsetF) + kDataStartIndex);
+            // Initialize pointer to start of current frame
+            T_buff_FSig* paddedFdataPtr = (T_buff_FSig*)paddedFdata + (frameIndx * kFrameoffsetF);
 
-            // copying the F data to Padded Data memory
+            // ========== Zero padding before F data(0 to kDataStartIndex) ==========
+            for (unsigned int dataIndx = 0; dataIndx < kDataStartIndex; dataIndx++) chess_prepare_for_pipelining {
+                    *paddedFdataPtr++ = (T_buff_FSig)zeroVec; // Write zeroVec, increment paddedFdataPtr
+                }
+
+            // ========== Copy F data (kDataStartIndex to kDataEndIndex) ==========
             for (unsigned int dataIndx = kDataStartIndex; dataIndx < kDataEndIndex; dataIndx++)
-                chess_prepare_for_pipelining chess_loop_count(kDataEndIndex) { *paddedFdataPtr++ = *inPtrF++; }
+                chess_prepare_for_pipelining {
+                    *paddedFdataPtr++ = *inPtrF++; // Copy F data, increment both pointers
+                }
 
-            // If the function type is conv (1), then we need to reverse the G data.
+            // ========== Zero padding after F data (kDataEndIndex to end) ==========
+            for (unsigned int dataIndx = kDataEndIndex; dataIndx < kPaddedVecLoopCnt; dataIndx++)
+                chess_prepare_for_pipelining {
+                    *paddedFdataPtr++ = (T_buff_FSig)zeroVec; // Write zeroVec, increment paddedFdataPtr
+                }
+
+            // Reverse G data in-place for convolution
             if (TP_FUNCT_TYPE == CONV) {
-                T_buff_GSig* __restrict inDataEndPtrG; // Local Pointer to fetch end address of G data
-                T_buff_Zbuff zbuffs, zbuffe;           // Registers to hold Start and End data samples of G sig.
-                constexpr int kVsize = kMaxBytesLoadOnAie /
-                                       sizeof(TT_DATA_G); // Size of vector (256/8/sizeof(DATA) as per given data type.
-                using t_vect = ::aie::vector<TT_DATA_G, kVsize>; // definition using the vec size.
+                T_buff_GSig* __restrict inDataEndPtrG;                           // Pointer to last G vector
+                constexpr int kVsize = (kMaxBytesLoadOnAie / sizeof(TT_DATA_G)); // Elements per vector
+                using t_vect = ::aie::vector<TT_DATA_G, kVsize>;
+                t_vect zbuffs, zbuffe; // Start and end vector registers for G reversal
 
                 inDataPtrG = (rdInDataGPtr + (frameIndx * kFrameoffsetG));
-                inDataEndPtrG = (inDataPtrG + kIncrOffsetGSig); // Move the pointer to End address of G sig.
+                inDataEndPtrG = (inDataPtrG + kIncrOffsetGSig); // Point to last G vector
 
-                t_vect* outStartPtrG = (t_vect*)
-                    inDataPtrG; // Output pointer pointing to Start of G buffer, used to write the swapped data of G sig
-                t_vect* outEndPtrG = (t_vect*)inDataEndPtrG; // Output pointer pointing to End of G buffer, used to
-                                                             // write the swapped data of G sig
+                t_vect* startPtr = (t_vect*)inDataPtrG;      // Read pointer at G start
+                t_vect* endPtr = (t_vect*)inDataEndPtrG;     // Read pointer at G end
+                t_vect* outStartPtrG = (t_vect*)inDataPtrG;  // Write pointer at G start
+                t_vect* outEndPtrG = (t_vect*)inDataEndPtrG; // Write pointer at G end
 
-                // reverse the G elements using inplace memory for Conv.
-                for (unsigned int i = 0; i < swapCount; i++) chess_prepare_for_pipelining chess_loop_count(kVsize) {
-                        upd_W_buff(zbuffs.val, 0, inDataPtrG++);    // Load from starting postion and increment
-                        upd_W_buff(zbuffe.val, 0, inDataEndPtrG--); // Load from End position and decrement
+                // Number of full vector swaps and partial vector flag
+                const unsigned int kFullVecSwaps = (vecLenG / kVsize) >> 1;
+                const unsigned int kRemElements = vecLenG % kVsize;
+                const bool kPartialVec = (kRemElements > 0);
 
-                        // Reverse the data fetched and store in respective locations
-                        zbuffs.val = (::aie::reverse(zbuffs.val));
-                        zbuffe.val = (::aie::reverse(zbuffe.val));
-
-                        *outStartPtrG++ = zbuffe.val; // Storing the data after swap to same G sig buffer.
-                        *outEndPtrG-- = zbuffs.val;   // Storing the data after swap to same G sig buffer.
+                // Swap and reverse full vector pairs from both ends toward center
+                for (unsigned int i = 0; i < kFullVecSwaps; i++) chess_prepare_for_pipelining {
+                        zbuffs = *startPtr++;
+                        zbuffe = *endPtr--;
+                        *outStartPtrG++ = ::aie::reverse(zbuffe);
+                        *outEndPtrG-- = ::aie::reverse(zbuffs);
                     }
+
+                // Handle center or partial vector (odd vector count or non-multiple vecLenG)
+                if (kPartialVec || ((vecLenG / kVsize) & 1)) {
+                    *outStartPtrG = ::aie::reverse(*startPtr);
+                }
             }
 
-            // Outer Loop to do Convolution/Correlation
-            for (unsigned int outIndx = 0; outIndx < kLoopCount; outIndx++)
-                chess_prepare_for_pipelining chess_loop_count(kLoopCount) {
-                    // Updation of F and G pointer to fetch respective data from both signal
-                    inDataPtrF = (rdInDataFPtr + (outIndx * (m_kLanes >> kFLoadbits)) +
-                                  (frameIndx * kFrameoffsetF));                // Reset F Sig Pointer.
-                    inDataPtrG = (rdInDataGPtr + (frameIndx * kFrameoffsetG)); // Reset G Sig Pointer.
+            // Outer loop: one iteration per output vector
+            for (unsigned int outIndx = 0; outIndx < kLoopCountDynamic; outIndx++) chess_prepare_for_pipelining {
+                    // Reset F and G pointers for this output index
+                    inDataPtrF =
+                        (rdInDataFPtr + (outIndx * (m_kLanes >> kFLoadbits)) + (frameIndx * kPaddedVecLoopCnt));
+                    inDataPtrG = (rdInDataGPtr + (frameIndx * kFrameoffsetG));
 
-                    // Initialization of Accumulator with Zeros to flush the previous data.
-                    acc.val = ::aie::zeros<tConvCorrAccType_t<TT_DATA_F, TT_DATA_G>,
-                                           acc.val.size()>(); // null all the elements of accumulator
+                    // Bounds check for 3rd/4th F vector loads, evaluated once per output vector
+                    const unsigned int kInnerLoopFptrIncr = kAccumLen * kGandFLoadRatio + 1;
+                    const unsigned int kThirdVecLoadOffset =
+                        (kInnerLoopFptrIncr < kPaddedVecLoopCnt) ? (kPaddedVecLoopCnt - kInnerLoopFptrIncr) : 0;
+                    // 4th-vector threshold is one less because the pre-increment advances one extra vector.
+                    const unsigned int kFourthVecLoadOffset =
+                        (kInnerLoopFptrIncr + 1 < kPaddedVecLoopCnt) ? (kPaddedVecLoopCnt - kInnerLoopFptrIncr - 1) : 0;
 
-// Create a "nested" loop, where inner 4 iteration loop will be unrolled, wrapped in a for (kAccumLen / 4 iteration)
-// loop.
-#pragma unroll(4)
-                    for (unsigned int inLoopIndx = 0; inLoopIndx < kAccumLen;
-                         inLoopIndx++) // Inner Loop to do conv/corr using F and G Data.
-                    {
-                        // Load Data of G Signal
-                        upd_W_buff(zbuff.val, 0, inDataPtrG++); // Fetch the G data to Registrer zbuff.
+                    unsigned int baseOffset = (outIndx * (m_kLanes >> kFLoadbits));
+                    bool load3rdVec = (baseOffset < kThirdVecLoadOffset);
+                    bool load4thVec = (baseOffset < kFourthVecLoadOffset);
+
+                    // Clear accumulator
+                    acc.val = ::aie::zeros<tConvCorrAccType_t<TT_DATA_F, TT_DATA_G>, acc.val.size()>();
+
+                    // kAccumLen is runtime-determined; unrolling here causes modulo-unroll bloat in Chess
+                    for (unsigned int inLoopIndx = 0; inLoopIndx < kAccumLen; inLoopIndx++) {
+                        // Load G vector
+                        upd_W_buff(zbuff.val, 0, inDataPtrG++);
                         if
                             constexpr((TP_FUNCT_TYPE == CORR) && (isComplex<TT_DATA_G>())) {
-                                zbuff.val = ::aie::conj(
-                                    zbuff.val); // zbuff data should be conjugate when function type is correlation
+                                zbuff.val = ::aie::conj(zbuff.val); // Conjugate G for correlation
                             }
-// Load Data of F Signal
+// Load F vectors
 #pragma unroll(kGandFLoadRatio)
                         for (unsigned int k = 0; k < kGandFLoadRatio; k++) {
-                            // Pointer Manipulation to read No of "FLoad" elements into Y_REG_BITS buffer outIndx.e.
-                            // xbuff
-                            upd_W_buff(xbuff.val, 0,
-                                       inDataPtrF++); // update xbuff with F sig data based on vector load.
-                            upd_W_buff(xbuff.val, kBuffIndx1,
-                                       inDataPtrF);     // update xbuff with F sig data based on vector load.
-                            if (m_kLanes > m_kVecLoadF) // m_kVecLoad_Len_F is nothing but FLoad
-                            {
+                            // Load first two F vectors
+                            upd_W_buff(xbuff.val, 0, inDataPtrF++);
+                            upd_W_buff(xbuff.val, kBuffIndx1, inDataPtrF);
+
+                            // Conditionally load 3rd and 4th F vectors based on precomputed bounds
+                            if (load3rdVec) {
                                 inDataPtrF++;
-                                upd_W_buff(xbuff.val, kBuffIndx2,
-                                           inDataPtrF--); // Fetch the data when kLanes greater than F Vector load
+                                upd_W_buff(xbuff.val, kBuffIndx2, inDataPtrF);
+
+                                if (load4thVec) {
+                                    inDataPtrF++;
+                                    upd_W_buff(xbuff.val, kBuffIndx3, inDataPtrF--);
+                                }
+                                inDataPtrF--; // Restore pointer for next iteration
                             }
 
 #pragma unroll(kInLoopLen)
                             for (unsigned int l = 0; l < kInLoopLen; l++) {
-                                // Sliding Multiplication of given signals
-                                acc.val =
-                                    mul_ops::mac(acc.val, zbuff.val, ((k * kInLoopLen + l) * m_kPoints), xbuff.val,
-                                                 ((l * m_kPoints) + kXStartIdxAdj)); // Sliding MAC function Call
-
+                                acc.val = mul_ops::mac(acc.val, zbuff.val, ((k * kInLoopLen + l) * m_kPoints),
+                                                       xbuff.val, ((l * m_kPoints) + kXStartIdxAdj));
                             } // End of kInLoopLen
                         }     // End of kGandFLoadRatio
-                    }         // End of InnerLoop
+                    }         // End of inner loop
 
-                    dataVecOut = acc.val.template to_vector<TT_DATA_OUT>(
-                        TP_SHIFT); // Storing accumulator results into out data vector.
+                    dataVecOut = acc.val.template to_vector<TT_DATA_OUT>(TP_SHIFT);
 
-                    if (TP_COMPUTE_MODE == 2) // Valid Mode
-                    {
-                        offsetMask = (m_kLoopCount - (outIndx * m_kLanes) == 1)
-                                         ? MASK_TO_EXTRACT_N_ELEM_FROM_LANES(1)
-                                         : MASK_TO_EXTRACT_N_ELEM_FROM_LANES(m_kLanes);
-                        dataMask = ::aie::mask<m_kLanes>::from_uint32(offsetMask); // Mask to extract lane 0 element
-                        dataVecOut =
-                            ::aie::select(dataVecOut, dataOut,
-                                          dataMask); // Select the data from dataVecOut to dataOut based on the mask
+                    // Mask partial lanes in the last output vector
+                    if (kValidSamplesLast != 0) {
+                        if (outIndx == (kLoopCountDynamic - 1)) {
+                            dataVecOut =
+                                ::aie::select(dataVecOut, dataOut, ::aie::mask<m_kLanes>::from_uint32(kLastVecMask));
+                        }
                     }
-                    *outPtr++ = dataVecOut; // write the output results to the iobuffer
 
-                } // End of OuterLoop
-        }         // End of Frames
-};                // End of conv_corrRTP()
+                    *outPtr++ = dataVecOut;
+
+                } // End of outer loop
+
+            // Zero output vectors beyond the computed results to prevent stale data from previous iterations.
+            for (unsigned int outIndx = kLoopCountDynamic; outIndx < kLoopCountStatic; outIndx++)
+                chess_prepare_for_pipelining {
+                    dataVecOut_t zeroOutVec = ::aie::zeros<TT_DATA_OUT, m_kLanes>();
+                    *outPtr++ = zeroOutVec;
+                }
+        } // End of Frames
+};        // End of conv_corrRTP()
 
 #if (__HAS_ACCUM_PERMUTES__ == 1)
 // Conv-Corr - stream specialization
@@ -1160,6 +1260,7 @@ conv_corr<TT_DATA_F,
     *vPtrDelayLineAcc = acc;
     *vPtrDelayLine = xbuff;
 } // End of conv_corrMain() - Single Kernel of cascade for stream
+
 #endif
 
 } //  End of namespace conv_corr {

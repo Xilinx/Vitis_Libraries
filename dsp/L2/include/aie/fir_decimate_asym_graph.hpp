@@ -159,9 +159,9 @@ using namespace adf;
  *         operating as independent single rate filters connected by cascades.
  *         TP_PARA_DECI_POLY < TP_DECIMATE_FACTOR will result in the polyphase branches operating as
  *         independent decimators connected by cascades.
- *
+ *         \n
  *         The number of AIEs used is given by TP_PARA_DECI_POLY * TP_SSR^2 * TP_CASC_LEN. \n
- *
+ *         \n
  * @tparam TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths,
  *         giving an overall higher throughput.   \n
  *         A TP_SSR of 1 means just one output leg and 1 input phase, and is the backwards compatible option. \n
@@ -345,10 +345,11 @@ class fir_decimate_asym_graph : public graph {
         return optTaps;
     };
 
-    /**
-     * The conditional input array data to the function.
-     * This input is (generated when TP_CASC_IN == CASC_IN_TRUE) either a cascade input.
-     **/
+    static constexpr unsigned int lastSSRDim = (TP_SSR * TP_SSR) - 1;
+
+    // src file might not be interpolate_asym - use decomposer utility to get sourcefile.
+    static constexpr const char* srcFileName = decomposer::getSourceFile<ssr_params<0> >();
+
     port_conditional_array<output, (TP_CASC_IN == CASC_IN_TRUE), TP_SSR> casc_in;
 
    public:
@@ -494,11 +495,6 @@ class fir_decimate_asym_graph : public graph {
         //                          (TP_INPUT_WINDOW_VSIZE / TP_SSR), false, true, firRangeSSR, 0, TP_CASC_LEN,
         //                          TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API, 0>::get_m_kArch();
     };
-
-    static constexpr unsigned int lastSSRDim = (TP_SSR * TP_SSR) - 1;
-
-    // src file might not be interpolate_asym - use decomposer utility to get sourcefile.
-    static constexpr const char* srcFileName = decomposer::getSourceFile<ssr_params<0> >();
     /**
      * @brief This is the constructor function for the FIR graph with static coefficients.
      * @param[in] taps   a reference to the std::vector array of taps values of type TT_COEFF.

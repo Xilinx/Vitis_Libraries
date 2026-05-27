@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ PARAMS ?= test_0_tool_canary_aie
 PARAMS_FILE ?= multi_params.json 
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST += vck190 vek280 xcvr1602-vsva2488-2LP-e-S-es1 xc2ve3858-ssva2112-2LP-e-S
+PLATFORM_ALLOWLIST += vck190 vek280 xcvr1602-vsva2488-2LP-e-S-es1 xc2ve3858-ssva2112-2MP-e-S
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk
@@ -80,7 +80,6 @@ UUT_KERNEL ?= euclidean_distance
 REF_KERNEL ?= euclidean_distance_ref
 UUT_GRAPH ?= euclidean_distance_graph
 REF_GRAPH ?= euclidean_distance_ref_graph
-STACKSIZE_VAL ?= 2048
 UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 LOC_INPUT_FILE_P ?= ./data/inData_P.txt
@@ -91,7 +90,7 @@ UUT_FILE_SUFFIX ?= $(UUT_KERNEL)_$(PARAMS)
 LOG_FILE ?= ./logs/log_$(UUT_FILE_SUFFIX).txt
 STATUS_LOG_FILE ?= ./logs/status_$(UUT_FILE_SUFFIX).txt
 STATUS_FILE ?= $(STATUS_LOG_FILE)
-UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=main:backend.mist2.xargs=-k120 --aie.xlopt=1 --aie.Xrouter=DMAFIFOsInFreeBankOnly --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off" --aie.stacksize=$(STACKSIZE_VAL)
+UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=main:backend.mist2.xargs=-k120 --aie.xlopt=1 --aie.Xrouter=DMAFIFOsInFreeBankOnly --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off"
 REF_TARGET_COMPILE_ARGS ?= 
 UUT_WORK_DIR ?= ./Work
 REF_WORK_DIR ?= ./Work
@@ -109,7 +108,6 @@ UUT_KERNEL ?= euclidean_distance
 REF_KERNEL ?= euclidean_distance_ref
 UUT_GRAPH ?= euclidean_distance_graph
 REF_GRAPH ?= euclidean_distance_ref_graph
-STACKSIZE_VAL ?= 2048
 UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 LOC_INPUT_FILE_P ?= ./data/inData_P.txt
@@ -120,7 +118,7 @@ UUT_FILE_SUFFIX ?= $(UUT_KERNEL)_$(PARAMS)
 LOG_FILE ?= ./logs/log_$(UUT_FILE_SUFFIX).txt
 STATUS_LOG_FILE ?= ./logs/status_$(UUT_FILE_SUFFIX).txt
 STATUS_FILE ?= $(STATUS_LOG_FILE)
-UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=main:backend.mist2.xargs=-k120 --aie.xlopt=1 --aie.Xrouter=DMAFIFOsInFreeBankOnly --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off" --aie.stacksize=$(STACKSIZE_VAL)
+UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=main:backend.mist2.xargs=-k120 --aie.xlopt=1 --aie.Xrouter=DMAFIFOsInFreeBankOnly --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off"
 REF_TARGET_COMPILE_ARGS ?= 
 UUT_WORK_DIR ?= ./Work
 REF_WORK_DIR ?= ./Work
@@ -138,7 +136,6 @@ UUT_KERNEL ?= euclidean_distance
 REF_KERNEL ?= euclidean_distance_ref
 UUT_GRAPH ?= euclidean_distance_graph
 REF_GRAPH ?= euclidean_distance_ref_graph
-STACKSIZE_VAL ?= 2048
 UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 LOC_INPUT_FILE_P ?= ./data/inData_P.txt
@@ -149,7 +146,7 @@ UUT_FILE_SUFFIX ?= $(UUT_KERNEL)_$(PARAMS)
 LOG_FILE ?= ./logs/log_$(UUT_FILE_SUFFIX).txt
 STATUS_LOG_FILE ?= ./logs/status_$(UUT_FILE_SUFFIX).txt
 STATUS_FILE ?= $(STATUS_LOG_FILE)
-UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=main:backend.mist2.xargs=-k120 --aie.xlopt=1 --aie.Xrouter=DMAFIFOsInFreeBankOnly --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off" --aie.stacksize=$(STACKSIZE_VAL)
+UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=main:backend.mist2.xargs=-k120 --aie.xlopt=1 --aie.Xrouter=DMAFIFOsInFreeBankOnly --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off"
 REF_TARGET_COMPILE_ARGS ?= 
 UUT_WORK_DIR ?= ./Work
 REF_WORK_DIR ?= ./Work
@@ -157,7 +154,7 @@ PREPROC_ARGS ?= --aie.Xpreproc=-DINPUT_FILE_P=$(LOC_INPUT_FILE_P) --aie.Xpreproc
 REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)
 UUT_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1
 
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/xc2ve3858-ssva2112-2LP-e-S/'))
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/xc2ve3858-ssva2112-2MP-e-S/'))
             
 COMPILER_ARGS ?=  --aie.Xpreproc=-D_AIE_API_WORKAROUND_CR_1223259_=1
 AIE_VARIANT ?= 22
@@ -167,7 +164,6 @@ UUT_KERNEL ?= euclidean_distance
 REF_KERNEL ?= euclidean_distance_ref
 UUT_GRAPH ?= euclidean_distance_graph
 REF_GRAPH ?= euclidean_distance_ref_graph
-STACKSIZE_VAL ?= 2048
 UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 LOC_INPUT_FILE_P ?= ./data/inData_P.txt
@@ -178,7 +174,7 @@ UUT_FILE_SUFFIX ?= $(UUT_KERNEL)_$(PARAMS)
 LOG_FILE ?= ./logs/log_$(UUT_FILE_SUFFIX).txt
 STATUS_LOG_FILE ?= ./logs/status_$(UUT_FILE_SUFFIX).txt
 STATUS_FILE ?= $(STATUS_LOG_FILE)
-UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=main:backend.mist2.xargs=-k120 --aie.xlopt=1 --aie.Xrouter=DMAFIFOsInFreeBankOnly --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off" --aie.stacksize=$(STACKSIZE_VAL)
+UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=main:backend.mist2.xargs=-k120 --aie.xlopt=1 --aie.Xrouter=DMAFIFOsInFreeBankOnly --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off"
 REF_TARGET_COMPILE_ARGS ?= 
 UUT_WORK_DIR ?= ./Work
 REF_WORK_DIR ?= ./Work
@@ -192,7 +188,6 @@ UUT_KERNEL ?= euclidean_distance
 REF_KERNEL ?= euclidean_distance_ref
 UUT_GRAPH ?= euclidean_distance_graph
 REF_GRAPH ?= euclidean_distance_ref_graph
-STACKSIZE_VAL ?= 2048
 UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 LOC_INPUT_FILE_P ?= ./data/inData_P.txt
@@ -203,7 +198,7 @@ UUT_FILE_SUFFIX ?= $(UUT_KERNEL)_$(PARAMS)
 LOG_FILE ?= ./logs/log_$(UUT_FILE_SUFFIX).txt
 STATUS_LOG_FILE ?= ./logs/status_$(UUT_FILE_SUFFIX).txt
 STATUS_FILE ?= $(STATUS_LOG_FILE)
-UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=main:backend.mist2.xargs=-k120 --aie.xlopt=1 --aie.Xrouter=DMAFIFOsInFreeBankOnly --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off" --aie.stacksize=$(STACKSIZE_VAL)
+UUT_TARGET_COMPILE_ARGS ?=  $(FIFO_THRESHOLD) --aie.Xchess=main:backend.mist2.xargs=-k120 --aie.xlopt=1 --aie.Xrouter=DMAFIFOsInFreeBankOnly --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off"
 REF_TARGET_COMPILE_ARGS ?= 
 UUT_WORK_DIR ?= ./Work
 REF_WORK_DIR ?= ./Work
@@ -246,7 +241,7 @@ else ifneq (,$(shell echo $(XPLATFORM) | awk '/xcvr1602-vsva2488-2LP-e-S-es1/'))
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
 AIE_CXXFLAGS += --aie.verbose $($(TAG)_TARGET_COMPILE_ARGS) $($(TAG)_PREPROC_ARGS)
 
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/xc2ve3858-ssva2112-2LP-e-S/'))
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/xc2ve3858-ssva2112-2MP-e-S/'))
         
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
 AIE_CXXFLAGS += --aie.verbose $($(TAG)_TARGET_COMPILE_ARGS) $($(TAG)_PREPROC_ARGS)

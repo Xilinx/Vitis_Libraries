@@ -28,6 +28,9 @@ DATA_SEED ?= 0
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 SPLIT_ZIP_FILE ?=
 
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
+
 sim_ref:
 	make run TARGET=x86sim TAG=REF ;\
 	make cleanall
@@ -44,10 +47,7 @@ get_status:
 
 get_latency:
 	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
+	
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input.txt ./data/uut_output.txt $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
-
-get_stats:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output approx $(NITER)
-
-harvest_mem:
-	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts
+	
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file T_input.txt -t_out_file uut_output.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(WINDOW_VSIZE) -niter $(NITER) -casc_len 1 -aiesim_out_dir ./aiesimulator_output -ip approx 

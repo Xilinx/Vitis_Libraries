@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _DSPLIB_FFT_IFFT_1D_GRAPH_HPP_
-#define _DSPLIB_FFT_IFFT_1D_GRAPH_HPP_
+#ifndef _DSPLIB_VSS_FFT_IFFT_1D_FRONT_ONLY_HPP_
+#define _DSPLIB_VSS_FFT_IFFT_1D_FRONT_ONLY_HPP_
 
 #include <adf.h>
 #include <vector>
@@ -23,11 +23,11 @@
 #include "graph_utils.hpp"
 #include "fft_ifft_dit_1ch_graph.hpp"
 #include "twiddle_rotator.hpp"
+#include "common.hpp"
 
 using namespace adf;
 using namespace xf::dsp::aie::fft::dit_1ch;
 using namespace xf::dsp::aie::fft::twidRot;
-// using namespace xf::dsp::vss::common;
 
 namespace xf {
 namespace dsp {
@@ -47,7 +47,9 @@ template <typename TT_DATA,
           unsigned int TP_RND = 0,
           unsigned int TP_SAT = 1,
           unsigned int TP_PT_SIZE_D2_CEIL = TP_PT_SIZE_D2,
-          unsigned int TP_ROT_FAN_SIZE = 8>
+          unsigned int TP_ROT_FAN_SIZE = 8,
+          unsigned int TP_API = 0,
+          unsigned int TP_USE_WIDGETS = 0>
 class create_par_kernels_vss_decomp {
    public:
     static void create(kernel (&m_fftTwRotKernels)[TP_SSR],
@@ -61,8 +63,12 @@ class create_par_kernels_vss_decomp {
                TP_PT_SIZE_D2_CEIL / TP_SSR * TP_PT_SIZE_D1 / TP_ROT_FAN_SIZE * sizeof(TT_TWIDDLE));
         m_fftTwRotKernels[TP_DIM] =
             kernel::create_object<twiddleRotator<TT_DATA, TT_TWIDDLE, TP_WINDOW_SIZE_CALC, TP_PT_SIZE_D1, TP_PT_SIZE_D2,
-                                                 TP_SSR, TP_FFT_NIFFT, TP_DIM> >(twRotKernel, twMainKernel);
-        runtime<ratio>(m_fftTwRotKernels[TP_DIM]) = 0.2;
+                                                 TP_SSR, TP_FFT_NIFFT, TP_DIM, TP_API> >(twRotKernel, twMainKernel);
+        if
+            constexpr(TP_USE_WIDGETS == 1 && TP_API == 1) { runtime<ratio>(m_fftTwRotKernels[TP_DIM]) = 0.8; }
+        else {
+            runtime<ratio>(m_fftTwRotKernels[TP_DIM]) = 0.2; // fft kernels are set to 0.7
+        }
         // Source files
         source(m_fftTwRotKernels[TP_DIM]) = "twiddle_rotator.cpp";
         headers(m_fftTwRotKernels[TP_DIM]) = {"twiddle_rotator.hpp"};
@@ -70,8 +76,8 @@ class create_par_kernels_vss_decomp {
             constexpr(TP_DIM != 0) {
                 create_par_kernels_vss_decomp<TT_DATA, TT_TWIDDLE, TP_WINDOW_SIZE_CALC, TP_DIM - 1, TP_SSR,
                                               TP_PT_SIZE_D1, TP_PT_SIZE_D2, TP_FFT_NIFFT, TP_DYN_PT_SIZE, TP_RND,
-                                              TP_SAT, TP_PT_SIZE_D2_CEIL, TP_ROT_FAN_SIZE>::create(m_fftTwRotKernels,
-                                                                                                   twRot, twMain);
+                                              TP_SAT, TP_PT_SIZE_D2_CEIL, TP_ROT_FAN_SIZE, TP_API,
+                                              TP_USE_WIDGETS>::create(m_fftTwRotKernels, twRot, twMain);
             }
     }
 };
@@ -138,6 +144,16 @@ class create_par_kernels_vss_decomp {
  *introduce errors
  *         - 1: 0.5 amplitude. Twiddle values are 1/2 that of mode 0 so as to avoid twiddle saturation. However,
  *twiddles are one bit less precise versus mode 0.
+ * @tparam TP_POINT_SIZE_D1 specifies how an expert user wants the FFT to be decomposed. It specifies the size of first
+ *dimension of the decomposed FFT.
+ * @tparam TP_CASC_LEN selects the number of kernels the first dimension of the FFT will be divided over in series
+ *         to improve throughput
+ * @tparam TP_USE_WIDGETS is an unsigned integer to control the use of widgets for configurations which use
+ *         TP_API=1.  \n
+ *         The default is not to use widgets but to have the stream to window conversion performed as part of the FFT
+ *kernel.
+ *         Using widget kernels allows this conversion to be placed in a separate tile and so boost performance
+ *         at the expense of more tiles being used.
  *
   **/
 template <typename TT_DATA,
@@ -149,37 +165,42 @@ template <typename TT_DATA,
           unsigned int TP_SSR = 0,
           unsigned int TP_RND = 4,
           unsigned int TP_SAT = 1,
-          unsigned int TP_TWIDDLE_MODE = 0>
+          unsigned int TP_TWIDDLE_MODE = 0,
+          unsigned int TP_POINT_SIZE_D1 = 1,
+          unsigned int TP_CASC_LEN = 1,
+          unsigned int TP_USE_WIDGETS = 0>
 class vss_fft_ifft_1d_front_only : public graph {
    public:
     // FFT twiddle rotation kernels that follow the first set of FFT operations.
     kernel m_fftTwRotKernels[TP_SSR];
-    // This is a port that is exposed as the input ports of the VSS.
-    port_array<input, TP_SSR> front_i;
-    // This is a port that interfaces with a PL kernel internal to the VSS.
-    port_array<output, TP_SSR> front_o;
+    /**
+       Widget kernels are used to reorder data as per FFT algorithm requirements.
+     **/
+    kernel m_combInKernel[TP_SSR];
 
    private:
     static constexpr unsigned int kIntDynPtSize = 0;
     static constexpr unsigned int kIntParPow = 0;
-    static constexpr unsigned int kIntCascLen = 1;
-    static constexpr unsigned int kIntUseWidg = 0;
+    static constexpr unsigned int kIntUseWidgets = 0;
     static constexpr unsigned int kHeaderBytes = kIntDynPtSize > 0 ? 32 : 0;
-    static constexpr unsigned int kPtSizeD1 = fnPtSizeD1<TP_POINT_SIZE, modePLffts, TP_SSR>();
-    static constexpr unsigned int kPtSizeD2 = TP_SSR;
-    static constexpr unsigned int kPtSizeD2Ceil = fnCeil<kPtSizeD2, TP_SSR>();
+    static constexpr unsigned int kPtSizeD1 =
+        TP_POINT_SIZE_D1 == 1 ? fnPtSizeD1<TP_POINT_SIZE, modePLffts, TP_SSR>() : TP_POINT_SIZE_D1;
+    static constexpr unsigned int kPtSizeD2 = TP_POINT_SIZE / kPtSizeD1;
+    static constexpr unsigned int kPtSizeD2Ceil = xf::dsp::vss::common::fnCeil<kPtSizeD2, TP_SSR>();
     static constexpr unsigned int kSecondFFTShift =
         std::is_same<TT_TWIDDLE, cfloat>() ? 0 : xf::dsp::vss::common::fnLog2<TP_SSR>();
     static constexpr unsigned int kFirstFFTShift = TP_SHIFT - kSecondFFTShift;
     static constexpr unsigned int kWindowSizeRaw = kPtSizeD1;
+    static constexpr unsigned int kIntHeaderBytes = 0;
     static constexpr unsigned int kWindowSizeCalc = kWindowSizeRaw * 2 * sizeof(TT_DATA) <= __DATA_MEM_BYTES__
                                                         ? kWindowSizeRaw
                                                         : __DATA_MEM_BYTES__ / (2 * sizeof(TT_DATA));
     static constexpr unsigned int kRotFanSize =
         TP_POINT_SIZE / TP_SSR * sizeof(TT_TWIDDLE) <= __DATA_MEM_BYTES__ ? 1 : fnNumLanes<TT_TWIDDLE, TT_TWIDDLE>();
+    static constexpr unsigned int kPortsPerFFT = TP_API == 1 ? get_input_streams_core_module() : 1;
     static constexpr int kInv = TP_FFT_NIFFT == 1 ? -1 : 1;
     static_assert(TP_POINT_SIZE % TP_SSR == 0, "TP_SSR has to be a multiple of TP_POINT_SIZE");
-    static_assert(std::is_same<TT_DATA, cfloat>() || TP_SHIFT >= fnLog2<TP_SSR>(),
+    static_assert(std::is_same<TT_DATA, cfloat>() || TP_SHIFT >= xf::dsp::vss::common::fnLog2<TP_SSR>(),
                   "TP_SHIFT has to be greater than or equal to log2(TP_SSR)");
     void createTwidRotKernels() {
         std::array<std::array<TT_TWIDDLE, kRotFanSize>, kPtSizeD2> twRotTmp;
@@ -210,23 +231,28 @@ class vss_fft_ifft_1d_front_only : public graph {
                    kPtSizeD1 / kRotFanSize * sizeof(TT_TWIDDLE));
         }
         create_par_kernels_vss_decomp<TT_DATA, TT_TWIDDLE, kWindowSizeCalc, TP_SSR - 1, TP_SSR, kPtSizeD1, kPtSizeD2,
-                                      TP_FFT_NIFFT, kIntDynPtSize, TP_RND, TP_SAT, kPtSizeD2Ceil,
-                                      kRotFanSize>::create(m_fftTwRotKernels, twRot, twMain);
+                                      TP_FFT_NIFFT, kIntDynPtSize, TP_RND, TP_SAT, kPtSizeD2Ceil, kRotFanSize, TP_API,
+                                      TP_USE_WIDGETS>::create(m_fftTwRotKernels, twRot, twMain);
     }
 
    public:
+    // This is a port that is exposed as the input ports of the VSS.
+    port_array<input, TP_SSR * kPortsPerFFT> front_i;
+    // This is a port that interfaces with a PL kernel internal to the VSS.
+    port_array<output, TP_SSR * kPortsPerFFT> front_o;
+
     // FFT graph that performs the initial set of FFT calculations
     fft_ifft_dit_1ch_graph<TT_DATA,
                            TT_TWIDDLE,
                            kPtSizeD1,
                            TP_FFT_NIFFT,
                            kFirstFFTShift,
-                           kIntCascLen,
+                           TP_CASC_LEN,
                            kIntDynPtSize,
                            kWindowSizeCalc,
-                           TP_API,
+                           xf::dsp::aie::fft::dit_1ch::kWindowAPI,
                            kIntParPow,
-                           kIntUseWidg,
+                           kIntUseWidgets,
                            TP_RND,
                            TP_SAT,
                            TP_TWIDDLE_MODE>
@@ -237,13 +263,39 @@ class vss_fft_ifft_1d_front_only : public graph {
      **/
     vss_fft_ifft_1d_front_only() {
         createTwidRotKernels();
-        for (int i = 0; i < TP_SSR; i++) {
-            connect<>(front_i[i], frontFFTGraph[i].in[0]);
-            connect<>(frontFFTGraph[i].out[0], m_fftTwRotKernels[i].in[0]);
-            dimensions(m_fftTwRotKernels[i].in[0]) = {kWindowSizeCalc + kHeaderBytes / sizeof(TT_DATA)};
+        if
+            constexpr(kPortsPerFFT == 2) {
+                for (int ss = 0; ss < TP_SSR; ss++) {
+                    m_combInKernel[ss] =
+                        kernel::create_object<widget_api_cast<TT_DATA, xf::dsp::aie::fft::dit_1ch::kStreamAPI,
+                                                              xf::dsp::aie::fft::dit_1ch::kWindowAPI, 2,
+                                                              kWindowSizeCalc, 1, kSampleIntlv, kIntHeaderBytes> >();
+                    runtime<ratio>(m_combInKernel[ss]) = 0.2;
+                    // Source files
+                    source(m_combInKernel[ss]) = "widget_api_cast.cpp";
+                    headers(m_combInKernel[ss]) = {"widget_api_cast.hpp"};
+                    for (int ii = 0; ii < kPortsPerFFT; ii++) {
+                        printf("Connecting front_i[%d] to m_combInKernel[%d].in[%d] \n", ss + ii * TP_SSR, ss, ii);
+                        connect<>(front_i[ss + ii * TP_SSR], m_combInKernel[ss].in[ii]);
+                    }
+                    connect<>(m_combInKernel[ss].out[0], frontFFTGraph[ss].in[0]);
+                    dimensions(m_combInKernel[ss].out[0]) = {kWindowSizeCalc + kHeaderBytes / sizeof(TT_DATA)};
+                    connect<>(frontFFTGraph[ss].out[0], m_fftTwRotKernels[ss].in[0]);
+                    dimensions(m_fftTwRotKernels[ss].in[0]) = {kWindowSizeCalc + kHeaderBytes / sizeof(TT_DATA)};
+                    for (int ii = 0; ii < kPortsPerFFT; ii++) {
+                        connect<>(m_fftTwRotKernels[ss].out[ii], front_o[ss + ii * TP_SSR]);
+                    }
+                }
+            }
+        else {
+            for (int ss = 0; ss < TP_SSR; ss++) {
+                connect<>(front_i[ss], frontFFTGraph[ss].in[0]);
+                connect<>(frontFFTGraph[ss].out[0], m_fftTwRotKernels[ss].in[0]);
+                dimensions(m_fftTwRotKernels[ss].in[0]) = {kWindowSizeCalc + kHeaderBytes / sizeof(TT_DATA)};
 
-            connect<>(m_fftTwRotKernels[i].out[0], front_o[i]);
-            dimensions(m_fftTwRotKernels[i].out[0]) = {kWindowSizeCalc + kHeaderBytes / sizeof(TT_DATA)};
+                connect<>(m_fftTwRotKernels[ss].out[0], front_o[ss]);
+                dimensions(m_fftTwRotKernels[ss].out[0]) = {kWindowSizeCalc + kHeaderBytes / sizeof(TT_DATA)};
+            }
         }
     };
 };
@@ -254,4 +306,4 @@ class vss_fft_ifft_1d_front_only : public graph {
 } // namespace dsp
 } // namespace xf
 
-#endif // _DSPLIB_FFT_IFFT_1D_GRAPH_HPP_
+#endif // _DSPLIB_VSS_FFT_IFFT_1D_FRONT_ONLY_HPP_

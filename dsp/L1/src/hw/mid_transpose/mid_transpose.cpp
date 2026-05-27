@@ -17,11 +17,11 @@
 
 #include "mid_transpose.h"
 
-void mid_transpose_wrapper(midTransposeCls<POINT_SIZE, SSR, DATAWIDTH>::TT_STREAM sig_i[SSR],
-                           midTransposeCls<POINT_SIZE, SSR, DATAWIDTH>::TT_STREAM sig_o[SSR]) {
+void mid_transpose_wrapper(midTransposeCls<POINT_SIZE, SSR, DATAWIDTH, POINT_SIZE_D1>::TT_STREAM sig_i[SSR],
+                           midTransposeCls<POINT_SIZE, SSR, DATAWIDTH, POINT_SIZE_D1>::TT_STREAM sig_o[SSR]) {
 #pragma HLS interface mode = ap_ctrl_none port = return
 #pragma HLS DATAFLOW
     //#pragma HLS PIPELINE
-    static midTransposeCls<POINT_SIZE, SSR, DATAWIDTH> uut;
+    static midTransposeCls<POINT_SIZE, SSR, DATAWIDTH, POINT_SIZE_D1> uut;
     uut.mid_transpose_top(sig_i, sig_o);
 }

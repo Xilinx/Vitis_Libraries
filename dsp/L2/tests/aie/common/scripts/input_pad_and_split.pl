@@ -47,6 +47,7 @@ options:
     [--ssr=i]
     [--numFrames=i]                                    => frames of data to be operated on within a window
     [-d | --dual]                                     => If using dual input/output streams, casc phases are split into io1 and io2 with a granularity determined by the data type.
+    [-pkt | --pkt_switch]                                     => Use packet switch data arrangement, where data is split into multiple streams on major index.
     [-h|--help]                                      => Optional. prints this usage
 ";
 
@@ -60,6 +61,7 @@ my $numFrames = 1;
 my $variant = 1;
 my $dual = 0;
 my $help = 0;
+my $pkt_switch = 0;
 my $plioWidth = 64;
 
 
@@ -75,6 +77,7 @@ GetOptions (
     "variant=i"    => \$variant,
     "d|dual=i" => \$dual,
     "plio|plioWidth=i" => \$plioWidth,
+    "pkt|pkt_switch=i" => \$pkt_switch,
     "h|help" => \$help)
 or die("Error in command line arguments\n");
 
@@ -236,7 +239,12 @@ for (my $i = 0; $i < @paddedDataParts; $i++) {
 # Assuming @subArrays is an array of array references
 for my $cascIdx (@cascRange) {
     my $fileIdx = $cascIdx;
-    $subFiles[$fileIdx] = "${newFileDir}${newFileName}_0_$cascIdx${newFileExt}";
+
+    if ($pkt_switch == 1) {
+        $subFiles[$fileIdx] = "${newFileDir}${newFileName}_${cascIdx}_0${newFileExt}";
+    } else {
+        $subFiles[$fileIdx] = "${newFileDir}${newFileName}_0_$cascIdx${newFileExt}";
+    }
     print "Writing to $subFiles[$fileIdx]\n";
 
     open(my $subFileH, ">", $subFiles[$fileIdx]) or die "Cannot open $subFiles[$fileIdx]: $!";
@@ -260,7 +268,12 @@ if ($ssr > 1) {
             # print "ssr is $i\n";
             my $cloneFile = $subFile;
             $cloneFile =~ s/_0_/_${i}_/; # replace "_0." with "_$i."
-            system("cp $subFile $cloneFile"); # clone the file
+
+            if ($pkt_switch == 1) {
+                # Do nothing, cloned file are not required.
+            } else {
+                system("cp $subFile $cloneFile"); # clone the file
+            }
         }
     }
 }

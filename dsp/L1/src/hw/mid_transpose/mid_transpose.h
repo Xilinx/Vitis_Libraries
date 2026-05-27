@@ -21,5 +21,5 @@
 //#include <hls_streamofblocks.h>
 #include "mid_transpose_class.h"
 
-void mid_transpose_wrapper(midTransposeCls<POINT_SIZE, SSR, DATAWIDTH>::TT_STREAM sig_i[SSR],
-                           midTransposeCls<POINT_SIZE, SSR, DATAWIDTH>::TT_STREAM sig_o[SSR]);
+void mid_transpose_wrapper(midTransposeCls<POINT_SIZE, SSR, DATAWIDTH, POINT_SIZE_D1>::TT_STREAM sig_i[SSR],
+                           midTransposeCls<POINT_SIZE, SSR, DATAWIDTH, POINT_SIZE_D1>::TT_STREAM sig_o[SSR]);

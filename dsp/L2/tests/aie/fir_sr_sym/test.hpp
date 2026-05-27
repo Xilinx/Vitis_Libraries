@@ -138,8 +138,9 @@ class test_graph : public graph {
 #endif
 
         // Make connections
-        createPLIOFileConnections<P_SSR, DUAL_INPUT_SAMPLES>(in, QUOTE(INPUT_FILE), "in");
-        createPLIOFileConnections<P_SSR, (NUM_OUTPUTS - 1)>(out, QUOTE(OUTPUT_FILE), "out");
+        static constexpr int plioBitWidth = 128;
+        createPLIOFileConnections<P_SSR, DUAL_INPUT_SAMPLES, input_plio, plioBitWidth>(in, QUOTE(INPUT_FILE), "in");
+        createPLIOFileConnections<P_SSR, (NUM_OUTPUTS - 1), output_plio, plioBitWidth>(out, QUOTE(OUTPUT_FILE), "out");
 
         for (unsigned int i = 0; i < P_SSR; ++i) {
             unsigned int plioIpBaseIdx = i * (DUAL_INPUT_SAMPLES + 1);

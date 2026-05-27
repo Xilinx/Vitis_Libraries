@@ -201,12 +201,14 @@ def fn_validate_twiddle_type(AIE_VARIANT, TT_DATA, TT_TWIDDLE):
 ########### TP_DYN_PT_SIZE Updater and Validator ######
 #######################################################
 def update_TP_DYN_PT_SIZE(args):
-    return fn_update_TP_DYN_PT_SIZE()
+    TT_DATA = args["TT_DATA"]
+    return fn_update_TP_DYN_PT_SIZE(TT_DATA)
 
 
-def fn_update_TP_DYN_PT_SIZE():
+def fn_update_TP_DYN_PT_SIZE(TT_DATA):
     legal_set_TP_DYN_PT_SIZE = [0, 1]
-
+    if TT_DATA in ["cbfloat16"]:
+        legal_set_TP_DYN_PT_SIZE   = [0]
     param_dict = {}
     param_dict.update({"name": "TP_DYN_PT_SIZE"})
     param_dict.update({"enum": legal_set_TP_DYN_PT_SIZE})
@@ -216,11 +218,12 @@ def fn_update_TP_DYN_PT_SIZE():
 
 def validate_TP_DYN_PT_SIZE(args):
     TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
-    return fn_validate_TP_DYN_PT_SIZE(TP_DYN_PT_SIZE)
+    TT_DATA = args["TT_DATA"]
+    return fn_validate_TP_DYN_PT_SIZE(TP_DYN_PT_SIZE, TT_DATA)
 
 
-def fn_validate_TP_DYN_PT_SIZE(TP_DYN_PT_SIZE):
-    param_dict = fn_update_TP_DYN_PT_SIZE()
+def fn_validate_TP_DYN_PT_SIZE(TP_DYN_PT_SIZE, TT_DATA):
+    param_dict = fn_update_TP_DYN_PT_SIZE(TT_DATA)
     legal_set_TP_DYN_PT_SIZE = param_dict["enum"]
     return validate_legal_set(
         legal_set_TP_DYN_PT_SIZE, "TP_DYN_PT_SIZE", TP_DYN_PT_SIZE
@@ -259,11 +262,15 @@ def fn_validate_TP_API(TP_API):
 ########### TP_PARALLEL_POWER Updater and Validator ###
 #######################################################
 def update_TP_PARALLEL_POWER(args):
-    return fn_update_parallel_power()
+    TT_DATA = args["TT_DATA"]
+    return fn_update_parallel_power(TT_DATA)
 
 
-def fn_update_parallel_power():
+def fn_update_parallel_power(TT_DATA):
     range_TP_PARALLEL_POWER = [0, 4]
+    #cbfloat initialization of r2comb twiddles fails due to internal limit so disable parallel power for cbfloat16
+    if TT_DATA in ["cbfloat16"]:
+        range_TP_PARALLEL_POWER = [0, 0]
     param_dict = {}
     param_dict.update({"name": "TP_PARALLEL_POWER"})
     param_dict.update({"minimum": range_TP_PARALLEL_POWER[0]})
@@ -273,12 +280,13 @@ def fn_update_parallel_power():
 
 
 def validate_TP_PARALLEL_POWER(args):
+    TT_DATA = args["TT_DATA"]
     TP_PARALLEL_POWER = args["TP_PARALLEL_POWER"]
-    return fn_validate_parallel_power(TP_PARALLEL_POWER)
+    return fn_validate_parallel_power(TP_PARALLEL_POWER, TT_DATA)
 
 
-def fn_validate_parallel_power(TP_PARALLEL_POWER):
-    param_dict = fn_update_parallel_power()
+def fn_validate_parallel_power(TP_PARALLEL_POWER, TT_DATA):
+    param_dict = fn_update_parallel_power(TT_DATA)
     range_TP_PARALLEL_POWER = [param_dict["minimum"], param_dict["maximum"]]
     return validate_range(
         range_TP_PARALLEL_POWER, "TP_PARALLEL_POWER", TP_PARALLEL_POWER
@@ -665,9 +673,11 @@ def fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER
     NUM_STAGES = (CEIL(log2PointSize, 2) / 2) if TT_DATA in ["cint16", "cint32"] else log2PointSize
     maxTP_CASC_LEN = min(TP_CASC_LEN_max, int(NUM_STAGES))
 
-    #In one particular scenario, cascade increases the memory requirement per kernel because the cascade data type is cint32 which increases memory use past the limit  
-    if (AIE_VARIANT==AIE) and (TP_POINT_SIZE>>TP_PARALLEL_POWER == 4096) and (TT_DATA=="cint16"):
-        maxTP_CASC_LEN = 1
+    #In one particular scenario, cascade increases the memory requirement per kernel because the cascade data type is cint32 which increases memory use past the limit
+    #However, in this very particular scenario of CASC_LEN=2, 4k works out as 6 ranks of radix4 which divide into 3 per kernel. This allows the output buffer of the
+    #first kernel to be re-used as one of the internal temp buffers and for the input buffer of the second kernel to be used in a similar fashion, so this just fits.
+    if (AIE_VARIANT==AIE) and (TP_POINT_SIZE>>TP_PARALLEL_POWER == 4096) and (TT_DATA in ["cint16"]):
+        maxTP_CASC_LEN = 2
 
     # maxTP_CASC_LEN=TP_CASC_LEN_max
 

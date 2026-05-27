@@ -27,6 +27,10 @@ STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 DIFF_MODE          = ABS
 DIFF_TOLERANCE     = 2
 CC_TOLERANCE       = 0
+
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
+
 PARAM_MAP = DATA_TYPE $(DATA_TYPE) \
 			MIXER_MODE $(MIXER_MODE) \
 			USE_PHASE_RELOAD $(USE_PHASE_RELOAD) \
@@ -99,12 +103,7 @@ get_status:
 
 get_latency:
 	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
+
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input_0_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) USE_OUTPUTS_IF_NO_INPUTS
 
-get_stats:
-	@echo helper.mk stage:  get_stats
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(INPUT_WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output dds $(NITER)
-
-harvest_mem:
-	@echo helper.mk stage:  harvest_mem
-	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file T_input_0_0.txt -t_out_file uut_output_0_0.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(INPUT_WINDOW_VSIZE) -niter $(NITER) -use_outputs_if_no_inputs True -casc_len 1 -aiesim_out_dir ./aiesimulator_output -ip dds 

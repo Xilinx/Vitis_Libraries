@@ -26,7 +26,7 @@
 
 using namespace ifft_mid_transpose;
 
-void ifft_transpose_wrapper(midTransposeCls<POINT_SIZE, SSR>::TT_STREAM sig_i[SSR],
-                            midTransposeCls<POINT_SIZE, SSR>::TT_STREAM sig_o[SSR]);
+void ifft_transpose_wrapper(midTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::TT_STREAM sig_i[SSR],
+                            midTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::TT_STREAM sig_o[SSR]);
 
 #endif

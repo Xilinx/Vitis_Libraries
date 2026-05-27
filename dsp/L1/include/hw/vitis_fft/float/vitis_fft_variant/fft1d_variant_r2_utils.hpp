@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2025-2025, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,5 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define INPUT_SAMPLES DIM_A* NUM_FRAMES* NUM_ITER
-#define OUTPUT_SAMPLES DIM_A* NUM_FRAMES* NUM_ITER
+
+#ifndef FFT1D_VARIANT_R2_UTILS_HPP
+#define FFT1D_VARIANT_R2_UTILS_HPP
+
+#include "fft_1d_variant_types.hpp"
+
+namespace xf {
+namespace dsp {
+namespace fft {
+
+template <typename T>
+inline void calculate_radix2(const T& in0, const T& in1, const T& twiddle, T& out0, T& out1) {
+#pragma HLS INLINE
+    T tw_mult = twiddle * in1;
+    out0 = in0 + tw_mult;
+    out1 = in0 - tw_mult;
+}
+
+} // namespace fft
+} // namespace dsp
+} // namespace xf
+
+#endif // FFT1D_VARIANT_R2_UTILS_HPP

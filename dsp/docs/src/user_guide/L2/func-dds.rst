@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _DDS_MIXER:
+.. _DSP_DDS_MIXER:
 
 =========
 DDS/Mixer

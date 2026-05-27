@@ -1,10 +1,10 @@
-.. 
+..
    Copyright © 2019–2022 Xilinx Inc.
    Copyright © 2022–2025 Advanced Micro Devices, Inc.
 
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _EUCLIDEAN_DISTANCE:
+.. _DSP_EUCLIDEAN_DISTANCE:
 
 ===================
 Euclidean Distance
@@ -30,7 +30,7 @@ Device Support
 
 The ED supports **AIE**, **AIE-ML**, and **AIE-MLv2** devices for all features.
 
-- The available round modes and their enumerated values differ between AIE and AIE-ML/AIE-MLv2 devices. See :ref:`COMPILING_AND_SIMULATING`.
+- The available round modes and their enumerated values differ between AIE and AIE-ML/AIE-MLv2 devices. See :ref:`DSP_COMPILING_AND_SIMULATING`.
 
 Supported Input Data Types
 ==========================
@@ -41,17 +41,17 @@ Supported data types are: ``float`` (on **AIE**, **AIE-ML**, and **AIE-MLv2**) a
 Template Parameters
 ===================
 
-To see details on the template parameters for the Euclidean Distance, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the Euclidean Distance, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-To see details on the access functions for the Euclidean Distance, see :ref:`API_REFERENCE`.
+To see details on the access functions for the Euclidean Distance, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the Euclidean Distance, see :ref:`API_REFERENCE`.
+To see details on the ports for the Euclidean Distance, see :ref:`DSP_API_REFERENCE`.
 
 Design Notes
 ============
@@ -68,7 +68,7 @@ Input data must have length ``TP_LEN × 4`` samples for each vector (P and Q), r
 .. code-block::
 
    TP_LEN = 8, TP_DIM = 3, TP_IS_OUTPUT_SQUARED = 1
-   
+
    in_P[32] = [1,2,3,4, 5,6,7,8, 9,10,11,12, ..., 29,30,31,32]
    in_Q[32] = [32,31,30,29, 28,27,26,25, 24,23,22,21, ..., 4,3,2,1]
 
@@ -79,7 +79,7 @@ Input data must have length ``TP_LEN × 4`` samples for each vector (P and Q), r
     4-Element Groups (TP_LEN=8):
     P0:{1,2,3,4}   P1:{5,6,7,8}   P2:{9,10,11,12}   ...   P7:{29,30,31,32}
     Q0:{32,31,30,29} Q1:{28,27,26,25} Q2:{24,23,22,21} ... Q7:{4,3,2,1}
-    
+
     When TP_DIM=3, only first 3 elements are used:
     P0→{1,2,3} Q0→{32,31,30} (4th element ignored)
 
@@ -92,15 +92,15 @@ The algorithm processes data in chunks of 4 elements (FIXED_DIM = 4) from each i
 ::
 
     Memory Layout (FIXED_DIM = 4):
-    
+
     Vector P Memory:
-    [1][2][3][4]   [5][6][7][8]   [9][10][11][12]   ...   [29][30][31][32]      
+    [1][2][3][4]   [5][6][7][8]   [9][10][11][12]   ...   [29][30][31][32]
         P0             P1              P2                        P7
-    
+
     Vector Q Memory:
     [32][31][30][29]   [28][27][26][25]   [24][23][22][21]   ...   [4][3][2][1]
            Q0                 Q1                 Q2                      Q7
-    
+
     Processing Flow:
     Iteration 1: P0{1,2,3,4} <--> Q0{32,31,30,29}
     Iteration 2: P1{5,6,7,8} <--> Q1{28,27,26,25}
@@ -116,10 +116,10 @@ For each iteration, only the first ``TP_DIM`` elements from each 4-element group
 ::
 
     For each iteration i (0 to 7):
-    
+
     1. Extract TP_DIM elements:     Pi[0:2] and Qi[0:2]
     2. Compute differences:         Diff = Qi - Pi  (element-wise)
-    3. Square differences:          Squared = Diff²  (element-wise) 
+    3. Square differences:          Squared = Diff²  (element-wise)
     4. Sum squared differences:     Sum = Σ(Squared)
     5. Apply square root:           Distance = √Sum  (if TP_IS_OUTPUT_SQUARED = 0)
 
@@ -141,9 +141,9 @@ For each iteration, only the first ``TP_DIM`` elements from each 4-element group
 
 .. important::
    **Critical Memory Requirement:** ED expects input data of **P** and **Q** to have **TP_LEN × 4** samples, regardless of the user's dimension (i.e., ``TP_DIM``).
-   
+
    This means:
-   
+
    * Always allocate memory for 4 elements per vector group
    * Even if TP_DIM = 1, 2, or 3, you still need 4 elements per group
    * Total memory required: **TP_LEN × 4** samples for each input vector

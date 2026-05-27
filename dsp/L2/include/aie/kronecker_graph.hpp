@@ -203,6 +203,9 @@ class kronecker_graph : public graph {
             dimensions(m_kernels[i].in[0]) = {kWindowVsizeA};
             dimensions(m_kernels[i].in[1]) = {kWindowVsizeB};
             if (TP_API == 0) {
+                if (kWindowVsizeOut * sizeof(out_t) > __DATA_MEM_BYTES__ / 2) {
+                    single_buffer(m_kernels[i].out[0]);
+                }
                 connect(m_kernels[i].out[0], out[i]);
                 dimensions(m_kernels[i].out[0]) = {kWindowVsizeOut};
             } else {

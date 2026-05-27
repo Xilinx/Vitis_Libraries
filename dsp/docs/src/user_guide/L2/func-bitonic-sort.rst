@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _BITONIC_SORT:
+.. _DSP_BITONIC_SORT:
 
 ============
 Bitonic Sort
@@ -37,18 +37,18 @@ The data type is controlled by ``TT_DATA`` and can be one of four types: ``int16
 Template Parameters
 ===================
 
-To see details on the template parameters for the Bitonic Sort, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the Bitonic Sort, see :ref:`DSP_API_REFERENCE`.
 
 
 Access Functions
 ================
 
-To see details on the access functions for the Bitonic Sort, see :ref:`API_REFERENCE`.
+To see details on the access functions for the Bitonic Sort, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the Bitonic Sort, see :ref:`API_REFERENCE`. Note that the types of ports are determined by the configuration of template parameters.
+To see details on the ports for the Bitonic Sort, see :ref:`DSP_API_REFERENCE`. Note that the types of ports are determined by the configuration of template parameters.
 
 Design Notes
 ============
@@ -73,6 +73,12 @@ The bitonic sort graph configured with ``TP_SSR > 1`` will have ``TP_SSR`` input
 Constraints
 -----------
 The Bitonic Sort input ``TP_DIM`` must be a power of 2. ``TP_DIM * sizeof(TT_DATA) / TP_SSR`` must be at least 64 bytes (size of buffer on AI Engine * 2).
+
+
+Notes
+-----
+
+If an input is sufficiently large, hang detection may trigger a false positive. If this occurs on AIESimulator then ``--hang-detect-time`` should be increased. If this occurs on x86simulator then ``--disable-stop-on-deadlock`` should be set to disable deadlock detection. 
 
 Code Example
 ============

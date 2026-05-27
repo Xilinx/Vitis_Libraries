@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _FIR_TDM:
+.. _DSP_FIR_TDM:
 
 =======
 FIR TDM
@@ -13,7 +13,7 @@ FIR TDM
 The DSPLib contains a Time-Division Multiplexing (TDM) variant of finite impulse response (FIR) filter.
 It is a multi-channel FIR filter with configurable application parameters, e.g. number of channels, FIR length, as well as implementation parameters, e.g. IO buffer size or super sample rate (SSR) operation mode.
 
-.. _FIR_TDM_ENTRY:
+.. _DSP_FIR_TDM_ENTRY:
 
 Entry Point
 ===========
@@ -32,7 +32,7 @@ Device Support
 The TDM FIR filter supports AIE, AIE-ML and AIE-MLv2 for all features with the following exceptions:
 
 - The ``cfloat`` data type is not supported on AIE-ML and AIE-MLv2 devices
-- Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
+- Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`DSP_COMPILING_AND_SIMULATING`.
 
 Supported Data Types
 ====================
@@ -41,7 +41,7 @@ TDM FIR filters can be configured for various types of data and coefficients. Th
 
 The following table lists the supported combinations of data type and coefficient type with notes for those combinations not supported.
 
-.. _tdm_supported_combos:
+.. _DSP_tdm_supported_combos:
 
 .. table:: Supported Combinations of Data Type and Coefficient Type
    :align: center
@@ -75,22 +75,22 @@ The following table lists the supported combinations of data type and coefficien
 Template Parameters
 ===================
 
-To see details on the template parameters for the TDM FIR, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the TDM FIR, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-For the access functions for each FIR variant, see :ref:`API_REFERENCE`.
+For the access functions for each FIR variant, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see the ports for each FIR variant, see :ref:`API_REFERENCE`.
+To see the ports for each FIR variant, see :ref:`DSP_API_REFERENCE`.
 
 Design Notes
 ============
 
-.. _COEFFS_FOR_FIR_TDM:
+.. _DSP_COEFFS_FOR_FIR_TDM:
 
 Coefficient Array for Filters
 -----------------------------
@@ -104,7 +104,7 @@ TDM FIR Coefficient array size is equal to the length of the FIR multiplied by n
 
 ``Coeff_Array_Size = TP_FIR_LEN * TP_TDM_CHANNELS``
 
-.. _FIR_TDM_COEFF_ORGANIZATION:
+.. _DSP_FIR_TDM_COEFF_ORGANIZATION:
 
 Coefficients - Array Organization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -141,9 +141,9 @@ Reloadable coefficients are available for single- and multi- kernel configuratio
 
 TDM channels will be split by ``TP_SSR`` and FIR taps (for each channel) will be split by ``TP_CASC_LEN``. Each part is sent to a specific kernel via its corresponding RTP port.
 
-For more details on multi-kernel modes, refer to: :ref:`FIR_TDM_CASCADE_OPERATION` and :ref:`FIR_TDM_SSR_OPERATION`.
+For more details on multi-kernel modes, refer to: :ref:`DSP_FIR_TDM_CASCADE_OPERATION` and :ref:`DSP_FIR_TDM_SSR_OPERATION`.
 
-.. _RTP_PORTS_FOR_TDM_FIR:
+.. _DSP_RTP_PORTS_FOR_TDM_FIR:
 
 Reloadable Coefficients - Number of ports
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -154,9 +154,9 @@ The total number of RTP ports created by a TDM FIR will be given by the formula:
 
 For example, if ``TP_SSR = 2`` and ``TP_CASC_LEN = 3``, the coefficient array will be divided into ``2 * 3 = 6`` parts.
 
-FIR TDM graph class provides a helper method: ``getTotalRtpPorts()`` to get number of RTP ports. For more details, refer to: :ref:`API_REFERENCE`.
+FIR TDM graph class provides a helper method: ``getTotalRtpPorts()`` to get number of RTP ports. For more details, refer to: :ref:`DSP_API_REFERENCE`.
 
-.. _RTP_ARRAY_SIZE_FOR_TDM_FIR:
+.. _DSP_RTP_ARRAY_SIZE_FOR_TDM_FIR:
 
 Reloadable Coefficients - Array Size
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -167,19 +167,19 @@ The array size is equal to the length of the FIR multiplied by number of channel
 
 For example, if ``TP_FIR_LEN = 6`` and ``TP_TDM_CHANNELS = 16``, if ``TP_SSR = 2`` and ``TP_CASC_LEN = 3``, the coefficient array will be divided into ``2 * 3 = 6`` parts.
 
-FIR TDM graph class provides a helper method: ``getTapsPerRtpPort(int kernelNo)`` to get number of FIR taps per RTP port. For more details, refer to: :ref:`API_REFERENCE`.
+FIR TDM graph class provides a helper method: ``getTapsPerRtpPort(int kernelNo)`` to get number of FIR taps per RTP port. For more details, refer to: :ref:`DSP_API_REFERENCE`.
 
 
-.. _RTP_ARRAY_CONTENTS_FOR_TDM_FIR:
+.. _DSP_RTP_ARRAY_CONTENTS_FOR_TDM_FIR:
 
 Reloadable Coefficients - Array Contents
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 TDM Channels of will be split by ``TP_SSR`` and FIR taps (for each channel) will be split by ``TP_CASC_LEN``. Each part is sent to a specific kernel via its corresponding RTP port.
 
-FIR TDM graph class provides a helper method: ``extractTaps(const std::vector<TT_COEFF>& taps, unsigned int kernelNo)`` to get coefficients for a given kernel. For more details, refer to: :ref:`API_REFERENCE`.
+FIR TDM graph class provides a helper method: ``extractTaps(const std::vector<TT_COEFF>& taps, unsigned int kernelNo)`` to get coefficients for a given kernel. For more details, refer to: :ref:`DSP_API_REFERENCE`.
 
-.. _BUFFER_API_FIRS:
+.. _DSP_BUFFER_API_FIRS:
 
 IO Buffer Interface for Filters
 -------------------------------
@@ -238,7 +238,7 @@ Latency of a buffer-based TDM FIR is predominantly due to the buffering in the i
 
 To minimize the latency, the buffer size should be set to the minimum size that meets the required throughput.
 
-.. _FIR_TDM_MAX_WINDOW_SIZE:
+.. _DSP_FIR_TDM_MAX_WINDOW_SIZE:
 
 Maximum Window Size
 ^^^^^^^^^^^^^^^^^^^
@@ -250,7 +250,7 @@ A local memory storage is 32 kB (64 kB for AIE-ML and AIE-MLv2 devices), and the
 .. note:: Input buffers may be extended by margin data, which can significantly reduce the maximum window size.
 
 
-.. _FIR_TDM_SINGLE_BUFFER_CONSTRAINT:
+.. _DSP_FIR_TDM_SINGLE_BUFFER_CONSTRAINT:
 
 Single Buffer Constraint
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -262,7 +262,7 @@ Single Buffer Constraint
 
     single_buffer(firGraph.getKernels()[0].in[0]);
 
-.. _FIR_TDM_INPUT_ORGANIZATION:
+.. _DSP_FIR_TDM_INPUT_ORGANIZATION:
 
 Input Data Samples - Array Organization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -291,7 +291,7 @@ Streaming Interface for Filters
 Streaming interfaces are not supported by TDM FIR.
 
 
-.. _FIR_TDM_CASCADE_OPERATION:
+.. _DSP_FIR_TDM_CASCADE_OPERATION:
 
 Cascaded kernels
 ----------------
@@ -325,14 +325,14 @@ Output type
 TDM FIR graph class allows to specify 32-bit output type when input type is 16-bit using template parameter ``TT_OUT_DATA``.
 
 
-.. _FIR_TDM_SSR_OPERATION:
+.. _DSP_FIR_TDM_SSR_OPERATION:
 
 Super Sample Rate
 -----------------
 
 The term Super Sample Rate strictly means the processing of more than one sample per clock cycle. Because the AI Engine is a vector processor, almost every operation is SSR by this definition, making it superfluous. Therefore, in the AI Engine context, SSR is taken to mean an implementation using multiple computation paths to improve performance at the expense of additional resource use.
 
-.. _FIR_TDM_SSR_OPERATION_MODE:
+.. _DSP_FIR_TDM_SSR_OPERATION_MODE:
 
 Super Sample Rate - Operation Mode
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -343,10 +343,10 @@ When SSR mode is used, i.e. when ``TP_SSR > 1``, input samples, and therefore co
 
 As a result, each SSR path will operate on a fraction of the workload, i.e. each path will operate on ``TP_TDM_CHANNELS / TP_SSR`` number of TDM Channels.
 
-Input data samples are distributed across the input paths in a round-robin, sample-by-sample mechanism where each input path processes a fraction of the input samples, i.e. ``TP_INPUT_WINDOW_VSIZE / TP_SSR``. More details in: :ref:`FIR_TDM_SSR_PORT_MAPPING`.
+Input data samples are distributed across the input paths in a round-robin, sample-by-sample mechanism where each input path processes a fraction of the input samples, i.e. ``TP_INPUT_WINDOW_VSIZE / TP_SSR``. More details in: :ref:`DSP_FIR_TDM_SSR_PORT_MAPPING`.
 
 
-.. _FIR_TDM_SSR_OPERATION_RESOURCE_UTILIZATION:
+.. _DSP_FIR_TDM_SSR_OPERATION_RESOURCE_UTILIZATION:
 
 Super Sample Rate - Resource Utilization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -360,7 +360,7 @@ The number of AI Engine tiles used by a TDM FIR will be given by the formula:
 TDM FIR graph will split the requested FIR workload among the FIR kernels equally, which can mean that each kernel is tasked with a comparatively low computational effort.
 
 
-.. _FIR_TDM_SSR_OPERATION_PORT_UTILIZATION:
+.. _DSP_FIR_TDM_SSR_OPERATION_PORT_UTILIZATION:
 
 Super Sample Rate - Port Utilization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -371,7 +371,7 @@ The number of input/output ports created by a TDM FIR will be given by the formu
 
 * Number of output ports: ``NUM_OUTPUT_PORTS  = TP_SSR``
 
-.. _FIR_TDM_SSR_PORT_MAPPING:
+.. _DSP_FIR_TDM_SSR_PORT_MAPPING:
 
 Super Sample Rate - Sample to Port Mapping
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -390,7 +390,7 @@ For example, for a data stream that looks like:  :code:`int32 x = 0, 1, 2, 3, 4,
 
 The output data will be produced in a similar method.
 
-.. _FIR_TDM_CONSTRAINTS:
+.. _DSP_FIR_TDM_CONSTRAINTS:
 
 Constraints
 -----------
@@ -399,11 +399,11 @@ TDM FIR variant has a variety of access methods to help assign a constraint on a
 
 - `getKernels()` which returns a pointer to an array of kernel pointers, or
 
-More details are provided in the :ref:`API_REFERENCE`.
+More details are provided in the :ref:`DSP_API_REFERENCE`.
 
-An example of how to use this is given in the section :ref:`FIR_TDM_CODE_EXAMPLE`.
+An example of how to use this is given in the section :ref:`DSP_FIR_TDM_CODE_EXAMPLE`.
 
-.. _FIR_TDM_CODE_EXAMPLE:
+.. _DSP_FIR_TDM_CODE_EXAMPLE:
 
 Code Example
 ============

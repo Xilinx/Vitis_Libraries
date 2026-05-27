@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _FFT_Window:
+.. _DSP_FFT_Window:
 
 ==========
 FFT Window
@@ -28,7 +28,7 @@ The fft_window supports AIE, AIE-ML, and AIE-MLv2 devices with the following exc
 
 - ``TT_DATA`` supports cfloat on AIE, but not on AIE-ML.
 - ``TT_COEFF`` supports float on AIE, but not on AIE-ML.
-- Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`COMPILING_AND_SIMULATING`.
+- Round modes available and the enumerated values of round modes are the same for AIE-ML and AIE-MLv2 devices, but differ from those for AIE devices. See :ref:`DSP_COMPILING_AND_SIMULATING`.
 
 Supported Data Types
 ====================
@@ -44,17 +44,17 @@ The ``TT_COEFF`` template parameter  can take one of three values, int16, int32,
 Template Parameters
 ===================
 
-To see details on the template parameters for the FFT Window, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the FFT Window, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-To see details on the access functions for the FFT Window, see :ref:`API_REFERENCE`.
+To see details on the access functions for the FFT Window, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the FFT Window, see :ref:`API_REFERENCE`. Note that the number and type of ports are determined by the configuration of template parameters.
+To see details on the ports for the FFT Window, see :ref:`DSP_API_REFERENCE`. Note that the number and type of ports are determined by the configuration of template parameters.
 
 Design Notes
 ============
@@ -72,7 +72,7 @@ When set to 1 (dynamic point size), each _window_ must be preceded by a header t
 
 The format of the header is described in the following table. When ``TP_DYN_PT_SIZE = 1``, ``TP_POINT_SIZE`` describes the maximum point size which can be input.
 
-.. _FFT_Window_HEADER_FORMAT:
+.. _DSP_FFT_Window_HEADER_FORMAT:
 
 .. table:: Header Format
    :align: center

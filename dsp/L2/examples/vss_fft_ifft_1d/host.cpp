@@ -115,8 +115,8 @@ int main(int argc, char* argv[]) {
     auto xclbin_uuid = my_device.load_xclbin(xclbinFilename);
     std::cout << STR_PASSED << "auto xclbin_uuid = my_device.load_xclbin(" << xclbinFilename << ")" << std::endl;
 
-    auto my_graph = xrt::graph(my_device, xclbin_uuid, "fft_tb");
-    std::cout << STR_PASSED << "auto my_graph  = xrt::graph(my_device, xclbin_uuid, \"fft_tb\")" << std::endl;
+    auto my_graph = xrt::graph(my_device, xclbin_uuid, "fft_aie_fft_tb");
+    std::cout << STR_PASSED << "auto my_graph  = xrt::graph(my_device, xclbin_uuid, \"fft_aie_fft_tb\")" << std::endl;
 
     my_graph.reset();
     std::cout << STR_PASSED << "my_graph.reset()" << std::endl;
@@ -201,6 +201,9 @@ int main(int argc, char* argv[]) {
 
     s2mm_run.wait();
     std::cout << STR_PASSED << "s2mm_run.wait()" << std::endl;
+
+    mm2s_run.wait();
+    std::cout << STR_PASSED << "mm2s_run.wait()" << std::endl;
 
     // ------------------------------------------------------------
     // Retrieve Results

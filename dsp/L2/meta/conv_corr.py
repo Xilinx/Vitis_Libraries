@@ -53,6 +53,7 @@ TP_PHASES_MIN = 1
 TP_PHASES_MAX = 16
 TP_G_LEN_iobuffer_max = 256
 TP_F_LEN_min_for_stream = 512 # The stream-based implementation requires a minimum length of 512 for TP_F_LEN to to ensure the stream implementation flushes out partial results
+MAX_NUM_OF_STREAMS = 2 # maximum number of streams per core, used in phases validation
 
 sampleSize = {
     "int8": 8,
@@ -277,25 +278,73 @@ def update_TP_F_LEN(args):
     TP_API = args["TP_API"]
     TT_DATA_F = args["TT_DATA_F"]
     TT_DATA_G = args["TT_DATA_G"]
+    TT_DATA_OUT = args["TT_DATA_OUT"]
+    TP_COMPUTE_MODE = args["TP_COMPUTE_MODE"]
     TP_F_LEN = args["TP_F_LEN"] if ("TP_F_LEN" in args and args["TP_F_LEN"] )else 0
-    return fn_update_f_len(TP_F_LEN, TT_DATA_G, TT_DATA_F, TP_API, AIE_VARIANT)
+    return fn_update_f_len(TP_F_LEN, TT_DATA_G, TT_DATA_F, TT_DATA_OUT, TP_COMPUTE_MODE, TP_API, AIE_VARIANT)
 
-def fn_update_f_len(TP_F_LEN, TT_DATA_G, TT_DATA_F, TP_API, AIE_VARIANT):
-    smallest_byte_size = min(com.fn_size_by_byte(TT_DATA_F), com.fn_size_by_byte(TT_DATA_G))
-    elems_per_load = (com.k_max_read_write_bytes[AIE_VARIANT] << 1 ) // smallest_byte_size
+def fn_update_f_len(TP_F_LEN, TT_DATA_G, TT_DATA_F, TT_DATA_OUT, TP_COMPUTE_MODE, TP_API, AIE_VARIANT):
+    # Alignment granularity is base load size (256 bits / 8 / sizeof)
+    base_load_f = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA_F)
 
-    TP_F_LEN_max = (com.k_data_memory_bytes[AIE_VARIANT] >> 2 )// (com.fn_size_by_byte(TT_DATA_F))
-    TP_F_LEN_max_pingpong_buff= int(com.k_data_memory_bytes[AIE_VARIANT]>> 1)// (com.fn_size_by_byte(TT_DATA_F))
+    # Minimum is 2x base load for buffer mode, stream has different minimum
+    if TP_API == com.API_BUFFER:
+        min_elems_f = (com.k_max_read_write_bytes[AIE_VARIANT] << 1) // com.fn_size_by_byte(TT_DATA_F)
+    else:
+        min_elems_f = TP_F_LEN_min_for_stream
+    
+    # Calculate elems_per_load for TT_DATA_G to ensure TP_F_LEN can accommodate TP_G_LEN minimum
+    if TP_API == com.API_STREAM:
+        elems_per_load_g = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA_G)
+    else:
+        elems_per_load_g = (com.k_max_read_write_bytes[AIE_VARIANT] << 1) // com.fn_size_by_byte(TT_DATA_G)
 
+    TP_F_LEN_max = (com.k_data_memory_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA_F)) # Assume always SINGLE_BUFF is ON.
+    TP_F_LEN_max_pingpong_buff= int(com.k_data_memory_bytes[AIE_VARIANT] >> 1)// (com.fn_size_by_byte(TT_DATA_F))
+
+    # Output-aware F_max: output port (single copy) must fit within one MG
+    # NOTE: The graph auto-enables single_buffer for F and Out independently when they exceed half memory
+    # Only apply output constraint when the output buffer won't trigger single_buffer on its own
+    if TP_API == com.API_BUFFER:
+        sizeof_out = com.fn_size_by_byte(TT_DATA_OUT)
+        max_out_elems = com.k_data_memory_bytes[AIE_VARIANT] // sizeof_out
+        pingpong_threshold_elems = (com.k_data_memory_bytes[AIE_VARIANT] >> 1) // sizeof_out
+        G_min = (com.k_max_read_write_bytes[AIE_VARIANT] << 1) // com.fn_size_by_byte(TT_DATA_G)
+
+        # Calculate the maximum output size based on compute mode
+        # This represents the worst-case output buffer requirement
+        if TP_COMPUTE_MODE == COMPUTE_FULL:
+            TP_F_LEN_max_out = max_out_elems - G_min + 1
+            max_out_elems_at_max_f = TP_F_LEN_max + G_min - 1  # out = F + G - 1 at max F with min G
+        elif TP_COMPUTE_MODE == COMPUTE_SAME:
+            TP_F_LEN_max_out = max_out_elems
+            max_out_elems_at_max_f = TP_F_LEN_max                # out = F at max F
+        else:  # VALID
+            TP_F_LEN_max_out = max_out_elems + G_min - 1
+            max_out_elems_at_max_f = TP_F_LEN_max - G_min + 1  # out = F - G + 1 at max F with min G
+        
+        # Only apply output constraint if the output won't trigger single_buffer
+        # If max_out_elems_at_max_f > threshold, output will use single_buffer, no memory collision
+        if max_out_elems_at_max_f <= pingpong_threshold_elems:
+            TP_F_LEN_max = min(TP_F_LEN_max, TP_F_LEN_max_out)
+        # else: output will use single_buffer, F can use full memory without collision
+
+    # Floor max to base_load_f alignment so the reported maximum is always a valid value
+    TP_F_LEN_max = com.FLOOR(TP_F_LEN_max, base_load_f)
+
+    # Minimum must be at least elems_per_load_g to satisfy TP_G_LEN <= TP_F_LEN constraint
+    minimum = max(min_elems_f, elems_per_load_g)
+    
     param_dict={
         "name" : "TP_F_LEN",
-        "minimum" : elems_per_load if TP_API == com.API_BUFFER else TP_F_LEN_min_for_stream,
+        "minimum" : minimum,
         "maximum" : TP_F_LEN_max if TP_API == com.API_BUFFER else 2**31,
         "maximum_pingpong_buf" : TP_F_LEN_max_pingpong_buff
     }
-    TP_F_LEN_act = TP_F_LEN + (TP_F_LEN % elems_per_load)
+    # Round up to nearest multiple of base_load_f (alignment granularity)
+    TP_F_LEN_act = com.CEIL(TP_F_LEN, base_load_f) if TP_F_LEN > 0 else base_load_f
     if TP_F_LEN_act < param_dict["minimum"]: param_dict["actual"] = param_dict["minimum"]
-    elif TP_F_LEN_act > param_dict["maximum"]: param_dict["actual"] = param_dict["maximum"]
+    elif TP_F_LEN_act > param_dict["maximum"]: param_dict["actual"] = com.FLOOR(param_dict["maximum"], base_load_f)
     else: param_dict["actual"] = TP_F_LEN_act
     return param_dict
 
@@ -304,19 +353,36 @@ def validate_TP_F_LEN(args):
     TP_API = args["TP_API"]
     TT_DATA_F = args["TT_DATA_F"]
     TT_DATA_G = args["TT_DATA_G"]
+    TT_DATA_OUT = args["TT_DATA_OUT"]
+    TP_COMPUTE_MODE = args["TP_COMPUTE_MODE"]
     TP_F_LEN = args["TP_F_LEN"]
-    return fn_validate_f_len(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TP_API, TP_F_LEN)
+    return fn_validate_f_len(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE, TP_API, TP_F_LEN)
 
 
-def fn_validate_f_len(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TP_API, TP_F_LEN):
-    elems_per_load = (com.k_max_read_write_bytes[AIE_VARIANT] << 1 ) // com.fn_size_by_byte(
-        TT_DATA_F
-    )
-    param_dict = fn_update_f_len(TP_F_LEN, TT_DATA_G, TT_DATA_F, TP_API, AIE_VARIANT)
-    range_TP_F_LEN = [param_dict["minimum"], param_dict["maximum"]]
+def fn_validate_f_len(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE, TP_API, TP_F_LEN):
+    # Alignment granularity is base load size (256 bits / 8 / sizeof)
+    base_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA_F)
 
-    if TP_F_LEN % elems_per_load != 0:
-        return com.isError(f"TP_F_LEN should be divisible by {elems_per_load}.")
+    param_dict = fn_update_f_len(TP_F_LEN, TT_DATA_G, TT_DATA_F, TT_DATA_OUT, TP_COMPUTE_MODE, TP_API, AIE_VARIANT)
+    
+    # Check if single_buffer will be auto-enabled due to F buffer size exceeding ping-pong threshold
+    # When this happens, use full memory constraint instead of ping-pong constraint
+    f_buf_bytes = TP_F_LEN * com.fn_size_by_byte(TT_DATA_F)
+    pingpong_threshold_bytes = com.k_data_memory_bytes[AIE_VARIANT] >> 1
+
+    if TP_API == com.API_BUFFER and f_buf_bytes <= pingpong_threshold_bytes:
+        # Buffer mode, ping-pong territory → F must fit in half memory
+        max_allowed = param_dict["maximum_pingpong_buf"]
+    else:
+        # Buffer mode with single_buffer auto-enabled, or stream → use full maximum
+        max_allowed = param_dict["maximum"]
+    
+    range_TP_F_LEN = [param_dict["minimum"], max_allowed]
+
+    # Enforce base_load alignment (not doubled) - allows multiples of base_load that are >= minimum
+    # For int16 buffer mode: minimum=32, but alignment=16, so 48, 64, 80, 96 are all valid
+    if TP_F_LEN % base_load != 0:
+        return com.isError(f"TP_F_LEN ({TP_F_LEN}) should be multiples of \"{base_load}\" (base alignment for TT_DATA_F \"{TT_DATA_F}\").")
 
     return com.validate_range(range_TP_F_LEN, "TP_F_LEN", TP_F_LEN)
 
@@ -327,50 +393,109 @@ def fn_validate_f_len(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TP_API, TP_F_LEN):
 def update_TP_G_LEN(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TP_API = args["TP_API"]
+    TT_DATA_F = args["TT_DATA_F"]
     TT_DATA_G = args["TT_DATA_G"]
+    TT_DATA_OUT = args["TT_DATA_OUT"]
+    TP_COMPUTE_MODE = args["TP_COMPUTE_MODE"]
     TP_F_LEN = args["TP_F_LEN"]
     TP_G_LEN = args["TP_G_LEN"] if ("TP_G_LEN" in args and args["TP_G_LEN"]) else 0
-    return fn_update_g_len(TP_G_LEN, TT_DATA_G, TP_F_LEN, TP_API, AIE_VARIANT)
+    return fn_update_g_len(TP_G_LEN, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE, TP_F_LEN, TP_API, AIE_VARIANT)
 
-def fn_update_g_len(TP_G_LEN, TT_DATA_G, TP_F_LEN, TP_API, AIE_VARIANT):
+def fn_update_g_len(TP_G_LEN, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE, TP_F_LEN, TP_API, AIE_VARIANT):
 
-    if TP_API == 1: elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT]   //  com.fn_size_by_byte(TT_DATA_G)
-    else : elems_per_load = (com.k_max_read_write_bytes[AIE_VARIANT] << 1 ) //  com.fn_size_by_byte(TT_DATA_G)
+    # Alignment granularity is base load size (256 bits / 8 / sizeof(TT_DATA_G))
+    # TP_G_LEN must be a multiple of base_load for both stream and buffer.
+    base_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA_G)
+    
+    # Minimum is 2x base load for buffer mode, 1x for stream mode
+    if TP_API == com.API_STREAM:
+        min_elems = base_load
+    else:
+        min_elems = (com.k_max_read_write_bytes[AIE_VARIANT] << 1) // com.fn_size_by_byte(TT_DATA_G)
 
+    # G port MG limit (single copy must fit in one MG)
+    G_max_port = com.k_data_memory_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA_G)
+
+    # Output-aware G_max: output port (single copy) must fit within one MG
+    # NOTE: Similar to F buffer, check if output will trigger single_buffer before applying constraint
+    if TP_API == com.API_BUFFER:
+        sizeof_out = com.fn_size_by_byte(TT_DATA_OUT)
+        max_out_elems = com.k_data_memory_bytes[AIE_VARIANT] // sizeof_out
+        pingpong_threshold_bytes = com.k_data_memory_bytes[AIE_VARIANT] >> 1
+
+        # Calculate worst-case output size for current TP_F_LEN
+        if TP_COMPUTE_MODE == COMPUTE_FULL:
+            # out = F + G - 1, with current F and max G
+            max_out_with_max_g = TP_F_LEN + G_max_port - 1
+            out_buffer_bytes = max_out_with_max_g * sizeof_out
+
+            # Only apply output constraint if output won't trigger single_buffer
+            if out_buffer_bytes <= pingpong_threshold_bytes:
+                G_max_out = max_out_elems - TP_F_LEN + 1
+            else:
+                G_max_out = G_max_port  # output uses single_buffer, no constraint
+        elif TP_COMPUTE_MODE == COMPUTE_SAME:
+            # out = F, independent of G — no output-based restriction on G
+            G_max_out = G_max_port
+        else:  # VALID
+            # out = F - G + 1, larger G shrinks output, no restriction from output
+            G_max_out = G_max_port
+
+        maximum = min(TP_F_LEN, G_max_port, G_max_out)
+    else:
+        maximum = min(TP_G_LEN_iobuffer_max, TP_F_LEN)
+
+    # Floor max to base_load alignment so the reported maximum is always a valid value
+    maximum = com.FLOOR(maximum, base_load)
+
+    # Minimum is min_elems but capped at maximum to avoid invalid ranges
+    minimum = min(min_elems, maximum)
+    
     param_dict={
-        "name" : "TT_DATA_G",
-        "minimum" : elems_per_load,
-        "maximum" : min(TP_G_LEN_iobuffer_max, TP_F_LEN) if TP_API == com.API_STREAM else TP_F_LEN
+        "name" : "TP_G_LEN",
+        "minimum" : minimum,
+        "maximum" : maximum
     }
-    TP_G_LEN_act = TP_G_LEN + (TP_G_LEN % elems_per_load)
+    # Round up to nearest multiple of base_load (alignment granularity)
+    TP_G_LEN_act = com.CEIL(TP_G_LEN, base_load) if TP_G_LEN > 0 else base_load
     if TP_G_LEN_act < param_dict["minimum"]: param_dict["actual"] = param_dict["minimum"]
-    elif TP_G_LEN_act > param_dict["maximum"]: param_dict["actual"] = param_dict["maximum"]
+    elif TP_G_LEN_act > param_dict["maximum"]: param_dict["actual"] = com.FLOOR(param_dict["maximum"], base_load)
     else: param_dict["actual"] = TP_G_LEN_act
     return param_dict
 
 def validate_TP_G_LEN(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TP_API = args["TP_API"]
+    TT_DATA_F = args["TT_DATA_F"]
     TT_DATA_G = args["TT_DATA_G"]
+    TT_DATA_OUT = args["TT_DATA_OUT"]
+    TP_COMPUTE_MODE = args["TP_COMPUTE_MODE"]
     TP_F_LEN = args["TP_F_LEN"]
     TP_G_LEN = args["TP_G_LEN"] if args["TP_G_LEN"] else 0
-    return fn_validate_g_len(AIE_VARIANT, TP_API, TT_DATA_G, TP_F_LEN, TP_G_LEN)
+    return fn_validate_g_len(AIE_VARIANT, TP_API, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN)
 
-def fn_validate_g_len(AIE_VARIANT, TP_API, TT_DATA_G, TP_F_LEN, TP_G_LEN):
+def fn_validate_g_len(AIE_VARIANT, TP_API, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN):
+    # Alignment granularity is base load size (256 bits / 8 / sizeof)
+    base_load = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA_G)
 
-    if TP_API == 1: elems_per_load = com.k_max_read_write_bytes[AIE_VARIANT]   //  com.fn_size_by_byte(TT_DATA_G)
-    else : elems_per_load = (com.k_max_read_write_bytes[AIE_VARIANT] << 1 ) //  com.fn_size_by_byte(TT_DATA_G)
-
-    param_dict = fn_update_g_len(TP_G_LEN, TT_DATA_G, TP_F_LEN, TP_API, AIE_VARIANT)
+    param_dict = fn_update_g_len(TP_G_LEN, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE, TP_F_LEN, TP_API, AIE_VARIANT)
     range_TP_G_LEN = [param_dict["minimum"], param_dict["maximum"]]
 
-    if TP_G_LEN % elems_per_load != 0:
-        return com.isError(f"TP_G_LEN should be divisible by {elems_per_load}.")
-    if TP_G_LEN > TP_F_LEN:
+    # Enforce base_load alignment (not doubled) - allows multiples of base_load that are >= minimum
+    # For int16 buffer mode: minimum=32, but alignment=16, so 80 is valid (80 >= 32 and 80 % 16 == 0)
+    if TP_G_LEN % base_load != 0:
         return com.isError(
-            f"TP_G_LEN cannot be greater than TP_F_LEN"
-        )  # ! Assertion is unnecessary but descriptive.
+            f"TP_G_LEN ({TP_G_LEN}) must be a multiple of {base_load} "
+            f"(= kMaxBytesLoadOnAie / sizeof(TT_DATA_G=\"{TT_DATA_G}\"))."
+        )
 
+    # Check 2: TP_G_LEN must be <= TP_F_LEN and within [minimum, maximum].
+    if TP_G_LEN > TP_F_LEN:
+        return com.isError(f"TP_G_LEN cannot be greater than TP_F_LEN")
+
+    # Check 3 (stream only): TP_G_LEN % kMinGLen == 0,
+    #   kMinGLen = TP_PHASES * kLanes * (kPoints / kStreamsPerCore).
+    #   Enforced in fn_validate_phases where TP_PHASES is available.
     return com.validate_range(range_TP_G_LEN, "TP_G_LEN", TP_G_LEN)
 
 
@@ -405,35 +530,45 @@ def fn_validate_num_frames(TP_NUM_FRAMES):
 ########## TP_CASC_LEN Updater and Validator ##########
 #######################################################
 def update_TP_CASC_LEN(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TT_DATA_F = args["TT_DATA_F"]
+    TT_DATA_G = args["TT_DATA_G"]
     TP_G_LEN = args["TP_G_LEN"]
     TP_API = args["TP_API"]
-    return fn_update_casc_len(TP_G_LEN, TP_API)
+    return fn_update_casc_len(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TP_G_LEN, TP_API)
 
 
-def fn_update_casc_len(TP_G_LEN, TP_API):
+def fn_update_casc_len(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TP_G_LEN, TP_API):
     legal_set = []
 
     if TP_API == com.API_STREAM:
-        legal_set = [TP_G_LEN // 32, TP_G_LEN // 16, TP_G_LEN // 8]  # ? 1 not legal?
+        muls = getNumMuls(TT_DATA_F, TT_DATA_G, AIE_VARIANT)
+        # Valid cascade lengths: gLen/muls (max throughput), gLen/(muls*2), gLen/(muls*4)
+        # Matches fnCheckCascLen in conv_corr_traits.hpp
+        legal_set = [TP_G_LEN // (muls << 2), TP_G_LEN // (muls << 1), TP_G_LEN // muls]
     elif TP_API == com.API_BUFFER:
         legal_set = [1]
 
     legal_set = [val for val in legal_set.copy() if val >= TP_CASC_LEN_MIN]
     legal_set = [val for val in legal_set.copy() if val <= TP_CASC_LEN_MAX]
+    legal_set = list(dict.fromkeys(legal_set))  # remove duplicates, preserve order
 
     param_dict = {"name": "TP_CASC_LEN", "enum": legal_set}
     return param_dict
 
 
 def validate_TP_CASC_LEN(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TT_DATA_F = args["TT_DATA_F"]
+    TT_DATA_G = args["TT_DATA_G"]
     TP_CASC_LEN = args["TP_CASC_LEN"]
     TP_G_LEN = args["TP_G_LEN"]
     TP_API = args["TP_API"]
-    return fn_validate_casc_len(TP_CASC_LEN, TP_G_LEN, TP_API)
+    return fn_validate_casc_len(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TP_CASC_LEN, TP_G_LEN, TP_API)
 
 
-def fn_validate_casc_len(TP_CASC_LEN, TP_G_LEN, TP_API):
-    param_dict = fn_update_casc_len(TP_G_LEN, TP_API)
+def fn_validate_casc_len(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TP_CASC_LEN, TP_G_LEN, TP_API):
+    param_dict = fn_update_casc_len(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TP_G_LEN, TP_API)
 
     legal_set_casc_len = param_dict["enum"]
     return com.validate_legal_set(legal_set_casc_len, "TP_CASC_LEN", TP_CASC_LEN)
@@ -458,8 +593,24 @@ def fn_update_phases(AIE_VARIANT, TT_DATA_F,TT_DATA_G,TP_G_LEN, TP_API, TP_CASC_
     legal_set = [i for i in range(TP_PHASES_MIN, TP_PHASES_MAX+1)]
     legal_set = [i for i in legal_set.copy() if com.fn_is_power_of_two(i)]
 
-    if (TP_API == com.API_STREAM) and (TP_CASC_LEN != TP_G_LEN // muls):
-        legal_set = [1]
+    if TP_API == com.API_STREAM:
+        if TP_CASC_LEN != TP_G_LEN // muls:
+            # Phases > 1 require cascLen == G_LEN / muls (maximum cascade = 1GSPS per phase)
+            legal_set = [1]
+        else:
+            # Filter to phases where G_LEN satisfies kMinGLen constraint.
+            # kMinGLen depends on phases and on G_LEN itself (through kStreamsPerCore),
+            # so evaluate per-phase. MAC4_ROT always uses kLanes=4 for AIE1 stream.
+            kLanes = 4
+            kPoints = muls // kLanes
+            def g_len_compatible(p):
+                kStreamPerCoreVar = (muls * p) >> 1
+                kStreamsPerCore = 1 if TP_G_LEN > kStreamPerCoreVar else MAX_NUM_OF_STREAMS
+                kMinGLen = p * kLanes * (kPoints // kStreamsPerCore)
+                return TP_G_LEN >= kMinGLen and TP_G_LEN % kMinGLen == 0
+            legal_set = [p for p in legal_set if g_len_compatible(p)]
+            if not legal_set:
+                legal_set = [1]
     elif TP_API == com.API_BUFFER:
         legal_set = [1]
 
@@ -485,8 +636,30 @@ def fn_validate_phases(
     param_dict = fn_update_phases(
         AIE_VARIANT, TT_DATA_F, TT_DATA_G, TP_G_LEN, TP_API, TP_CASC_LEN
     )
-
     legal_set_phases = param_dict["enum"]
+
+    if TP_API == com.API_STREAM:
+        muls = getNumMuls(TT_DATA_F, TT_DATA_G, AIE_VARIANT)
+        if TP_CASC_LEN == TP_G_LEN // muls:
+            # Check 3 (stream only): TP_G_LEN must be a multiple of kMinGLen and >= kMinGLen.
+            #   kMinGLen = TP_PHASES * kLanes * (kPoints / kStreamsPerCore)
+            #   kStreamsPerCore = 1 (ONE_STREAM) if TP_G_LEN > (muls * TP_PHASES) >> 1, else 2 (TWO_STREAMS).
+            # Note: This check is done directly here rather than via legal_set membership,
+            # because fn_update_phases falls back to [1] when no phase is compatible,
+            # which would allow invalid (TP_G_LEN, TP_PHASES) pairs to pass silently.
+            kLanes = 4
+            kPoints = muls // kLanes
+            kStreamPerCoreVar = (muls * TP_PHASES) >> 1
+            kStreamsPerCore = 1 if TP_G_LEN > kStreamPerCoreVar else 2
+            kMinGLen = TP_PHASES * kLanes * (kPoints // kStreamsPerCore)
+            if TP_G_LEN < kMinGLen or TP_G_LEN % kMinGLen != 0:
+                return com.isError(
+                    f"TP_PHASES={TP_PHASES} is not supported for TP_G_LEN={TP_G_LEN}: "
+                    f"kMinGLen = TP_PHASES({TP_PHASES}) * kLanes({kLanes}) * (kPoints({kPoints}) / kStreamsPerCore({kStreamsPerCore})) = {kMinGLen}, "
+                    f"but TP_G_LEN={TP_G_LEN} is not a multiple of kMinGLen. "
+                    f"Adjust TP_PHASES to a value where TP_G_LEN is a valid multiple of kMinGLen."
+                )
+
     return com.validate_legal_set(legal_set_phases, "TP_PHASES", TP_PHASES)
 
 
@@ -561,18 +734,28 @@ def validate_TP_SAT(args):
 ###### TP_USE_RTP_VECTOR_LENGTHS Updater and Validator ######
 #############################################################
 def update_TP_USE_RTP_VECTOR_LENGTHS(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
     TP_API = args["TP_API"]
-    return fn_update_TP_USE_RTP_VECTOR_LENGTHS(TP_API)
+    TP_F_LEN = args["TP_F_LEN"]
+    TP_G_LEN = args["TP_G_LEN"]
+    TT_DATA_F = args["TT_DATA_F"]
+    TT_DATA_G = args["TT_DATA_G"]
+    TT_DATA_OUT = args["TT_DATA_OUT"]
+    TP_COMPUTE_MODE = args["TP_COMPUTE_MODE"]
+    return fn_update_TP_USE_RTP_VECTOR_LENGTHS(AIE_VARIANT, TP_API, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN)
 
 
-def fn_update_TP_USE_RTP_VECTOR_LENGTHS(TP_API):
-    # if TP_API == 0:
-    #     legal_set_use_rtp_vec_lengths = [0, 1]
-    # else:
-    #     legal_set_use_rtp_vec_lengths = [0]
+def fn_update_TP_USE_RTP_VECTOR_LENGTHS(AIE_VARIANT, TP_API, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN):
+    param_dict_flen = fn_update_f_len(TP_F_LEN, TT_DATA_G, TT_DATA_F, TT_DATA_OUT, TP_COMPUTE_MODE, TP_API, AIE_VARIANT)
+    param_dict_glen = fn_update_g_len(TP_G_LEN, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE, TP_F_LEN, TP_API, AIE_VARIANT)
 
-    # The use of RTP vector lengths is temporarily disabled.
-    legal_set_use_rtp_vec_lengths = [0]
+    if (TP_API == 1) or (TP_API == 0 and TP_F_LEN == param_dict_flen["minimum"] and TP_G_LEN == param_dict_glen["minimum"]):
+        legal_set_use_rtp_vec_lengths = [0]
+    elif TP_API == 0 and (TP_F_LEN > param_dict_flen["minimum"] or TP_G_LEN > param_dict_glen["minimum"]):
+        legal_set_use_rtp_vec_lengths = [0, 1]
+    else:
+        legal_set_use_rtp_vec_lengths = [0]
+
     param_dict = {
         "name": "TP_USE_RTP_VECTOR_LENGTHS",
         "enum": legal_set_use_rtp_vec_lengths,
@@ -581,13 +764,21 @@ def fn_update_TP_USE_RTP_VECTOR_LENGTHS(TP_API):
 
 
 def validate_TP_USE_RTP_VECTOR_LENGTHS(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
     TP_API = args["TP_API"]
     TP_USE_RTP_VECTOR_LENGTHS = args["TP_USE_RTP_VECTOR_LENGTHS"]
-    return fn_validate_TP_USE_RTP_VECTOR_LENGTHS(TP_API, TP_USE_RTP_VECTOR_LENGTHS)
+    TT_DATA_F = args["TT_DATA_F"]
+    TT_DATA_G = args["TT_DATA_G"]
+    TT_DATA_OUT = args["TT_DATA_OUT"]
+    TP_COMPUTE_MODE = args["TP_COMPUTE_MODE"]
+    TP_F_LEN = args["TP_F_LEN"]
+    TP_G_LEN = args["TP_G_LEN"]
+    info_ports(args)
+    return fn_validate_TP_USE_RTP_VECTOR_LENGTHS(AIE_VARIANT, TP_API, TP_USE_RTP_VECTOR_LENGTHS, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN)
 
 
-def fn_validate_TP_USE_RTP_VECTOR_LENGTHS(TP_API, TP_USE_RTP_VECTOR_LENGTHS):
-    param_dict = fn_update_TP_USE_RTP_VECTOR_LENGTHS(TP_API)
+def fn_validate_TP_USE_RTP_VECTOR_LENGTHS(AIE_VARIANT,TP_API, TP_USE_RTP_VECTOR_LENGTHS, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN):
+    param_dict = fn_update_TP_USE_RTP_VECTOR_LENGTHS(AIE_VARIANT, TP_API, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN)
     return com.validate_legal_set(
         param_dict["enum"], "TP_USE_RTP_VECTOR_LENGTHS", TP_USE_RTP_VECTOR_LENGTHS
     )
@@ -841,7 +1032,12 @@ def fn_get_input_paddedLength(
     PaddedLength = 0
     lanes = getNumLanes(TT_DATA_F, TT_DATA_G)
     dataSamples = sampleSize[TT_DATA_F]
-    dataLoad = AIE_LOAD_SIZE_IN_BITS / dataSamples
+    
+    # Float types need 512-bit (64-byte) alignment for padding, integer types use 256-bit (32-byte) alignment
+    if TT_DATA_F in ["float", "cfloat", "bfloat16"]:
+        dataLoad = (AIE_LOAD_SIZE_IN_BITS * 2) / dataSamples
+    else:
+        dataLoad = AIE_LOAD_SIZE_IN_BITS / dataSamples
 
     if TP_COMPUTE_MODE == COMPUTE_FULL:
         PaddedLength = (TP_G_LEN - 1) + TP_F_LEN + (TP_G_LEN - 1)
@@ -908,10 +1104,12 @@ def info_ports(args):
     AIE_VARIANT = args["AIE_VARIANT"]
 
     lanes = getNumLanes(TT_DATA_F, TT_DATA_G, AIE_VARIANT)
-    loopcount = fn_compute_output_dimension(TP_F_LEN, TP_G_LEN, TP_COMPUTE_MODE)
-    inDataLen = fn_get_input_paddedLength(
-        TT_DATA_F, TT_DATA_G, TP_F_LEN, TP_G_LEN, TP_COMPUTE_MODE
-    )
+    param_dict_glen = fn_update_g_len(TP_G_LEN, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE, TP_F_LEN, TP_API, AIE_VARIANT)
+    # For VALID mode with RTP, use minimum G_LEN to compute the worst-case (maximum) output size,
+    # since smaller G_LEN produces a larger output (F - G + 1). TP_G_LEN is kept as the
+    # compile-time maximum for inG port sizing — runtime G_LEN is always <= TP_G_LEN.
+    TP_G_LEN_for_output = param_dict_glen["minimum"] if (TP_USE_RTP_VECTOR_LENGTHS == 1 and TP_COMPUTE_MODE == COMPUTE_VALID) else TP_G_LEN
+    loopcount = fn_compute_output_dimension(TP_F_LEN, TP_G_LEN_for_output, TP_COMPUTE_MODE)
     outDataLen = (((com.CEIL(loopcount, lanes)) / lanes)) * lanes
 
     if TP_API == com.API_BUFFER:
@@ -919,7 +1117,7 @@ def info_ports(args):
             portname="inF",
             dir="in",
             dataType=TT_DATA_F,
-            dim=inDataLen,
+            dim=TP_F_LEN,
             numFrames=TP_NUM_FRAMES,
             numPhases=TP_PHASES,
             apiType="window",
@@ -967,9 +1165,9 @@ def info_ports(args):
             dataType=TT_DATA_G,
             dim=TP_G_LEN,
             numFrames=TP_NUM_FRAMES,
-            numPhases=TP_PHASES,
-            apiType="stream",
-            vectorLength=TP_PHASES,
+            numPhases=TP_PHASES_MIN,
+            apiType="window",
+            vectorLength=TP_PHASES_MIN,
         )
         portsOut = get_port_info(
             portname="out",

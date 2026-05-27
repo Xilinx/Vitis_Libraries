@@ -300,11 +300,11 @@ INLINE_DECL void kernelMatVecMulClass<TT_DATA_A,
         for (int bdx = 0; bdx < ((TP_DIM_B / TP_CASC_LEN) / (streamLoadSize * (TP_DUAL_IP + 1))); bdx++) {
             // printf("bdx = %d\n", bdx);
             inVecStream = readincr_v<streamLoadSize, aie_stream_resource_in::a>(inInterface.inStreamB);
-            vBuff.template insert((TP_DUAL_IP + 1) * bdx, inVecStream);
+            vBuff.insert((TP_DUAL_IP + 1) * bdx, inVecStream);
             if
                 constexpr(TP_DUAL_IP) {
                     inVecStream2 = readincr_v<streamLoadSize, aie_stream_resource_in::b>(inInterface.inStreamB2);
-                    vBuff.template insert((TP_DUAL_IP + 1) * bdx + 1, inVecStream2);
+                    vBuff.insert((TP_DUAL_IP + 1) * bdx + 1, inVecStream2);
                 }
         }
 

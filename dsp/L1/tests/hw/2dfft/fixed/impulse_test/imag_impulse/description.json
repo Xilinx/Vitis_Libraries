@@ -3,8 +3,6 @@
     "description": "HLS case",
     "flow": "hls",
     "platform_allowlist": [
-        "u200",
-        "aws-vu9p-f1",
         "vck190"
     ],
     "platform_blocklist": [],

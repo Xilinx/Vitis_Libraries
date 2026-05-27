@@ -117,20 +117,27 @@
       "name": "TP_FIR_LEN",
       "description": "The number of taps in the filter",
       "type": "uint",
+      "test_max": 2048,
       "updater": {
         "file": "fir_sr_asym.py",
         "function": "update_TP_FIR_LEN",
         "args": [
+          "AIE_VARIANT",
           "TT_DATA",
-          "TP_USE_COEFF_RELOAD"
+          "TT_COEFF",
+          "TP_USE_COEFF_RELOAD",
+          "TP_API"
         ]
       },
       "validator": {
         "file": "fir_sr_asym.py",
         "function": "validate_TP_FIR_LEN",
         "args": [
+          "AIE_VARIANT",
           "TT_DATA",
-          "TP_USE_COEFF_RELOAD"
+          "TT_COEFF",
+          "TP_USE_COEFF_RELOAD",
+          "TP_API"
         ]
       }
     },
@@ -138,6 +145,7 @@
       "name": "TP_SSR",
       "description": "TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput.",
       "type": "uint",
+      "test_max": 8,
       "updater": {
         "file": "fir_sr_asym.py",
         "function": "update_TP_SSR",
@@ -167,6 +175,7 @@
       "name": "TP_CASC_LEN",
       "description": "The length of the cascade chain.",
       "type": "uint",
+      "test_max": 10,
       "updater": {
         "file": "fir_sr_asym.py",
         "function": "update_TP_CASC_LEN",
@@ -244,10 +253,12 @@
       "name": "TP_INPUT_WINDOW_VSIZE",
       "description": "The number of samples in the window PAI used for input to the filter function. The number of values in the output window will be TP_INPUT_WINDOW_VSIZE also by virtue the single rate nature of this function.",
       "type": "uint",
+      "test_max": 65536,
       "updater": {
         "file": "fir_sr_asym.py",
         "function": "update_TP_INPUT_WINDOW_VSIZE",
         "args": [
+          "AIE_VARIANT",
           "TT_DATA",
           "TT_COEFF",
           "TP_FIR_LEN",
@@ -259,6 +270,7 @@
         "file": "fir_sr_asym.py",
         "function": "validate_TP_INPUT_WINDOW_VSIZE",
         "args": [
+          "AIE_VARIANT",
           "TT_DATA",
           "TT_COEFF",
           "TP_FIR_LEN",

@@ -274,7 +274,7 @@ if {$OUTPUTS_ONLY == 0} {
     puts  "Files not found for latency calculation"
 }
 
-puts $statusFile "    Latency:              $stableLatency ns\n    Throughput:           $stableThroughout MSa/s"
+puts $statusFile "    Latency_last (ns):              $stableLatency \n    Throughput_last (MSa/s):        $stableThroughout"
 file delete -force "$fileOutTemp"
 close $statusFile
 close $logFile

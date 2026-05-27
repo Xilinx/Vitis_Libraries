@@ -1,0 +1,11 @@
+{
+    "parameter_constraints": {
+        "AIE_VARIANT": 1,
+        "TT_DATA_A": "float",
+        "TP_DIM_A": 128,
+        "TP_DIM_B": 128,
+        "TP_NUM_OUTPUTS": 1
+    },
+    "qor_constraints": "throughput>1400",
+    "confidence": 2
+}

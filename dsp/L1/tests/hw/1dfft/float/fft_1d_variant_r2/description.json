@@ -1,0 +1,64 @@
+{
+    "name": "Vitis FFT Radix-2 Stockham DIT Rate2_Length16384",
+    "description": "HLS case",
+    "flow": "hls",
+    "platform_allowlist": [
+        "vck190"
+    ],
+    "platform_blocklist": [],
+    "part_allowlist": [],
+    "part_blocklist": [],
+    "project": "prj_ssr_fft_reg_test_r2_l16384",
+    "solution": "solution1",
+    "clock": "2.0",
+    "topfunction": "fft1d_variant_r2_stages_top",
+    "top": {
+        "source": [
+            "${XF_PROJ_ROOT}/L1/tests/hw/1dfft/float/fft_1d_variant_r2/fft1d_variant_r2_top.cpp"
+        ],
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw/vitis_fft/float/vitis_fft_variant -I${XF_PROJ_ROOT}/L1/tests/hw/1dfft/float/fft_1d_variant_r2 -DNUM_FFT=16384"
+    },
+    "testbench": {
+        "source": [
+            "${XF_PROJ_ROOT}/L1/tests/hw/1dfft/float/fft_1d_variant_r2/test_fft1d_variant_r2_tb.cpp"
+        ],
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw/vitis_fft/float/vitis_fft_variant -I${XF_PROJ_ROOT}/L1/tests/hw/1dfft/float/fft_1d_variant_r2 -DNUM_FFT=16384",
+        "ldflags": "",
+        "argv": {},
+        "stdmath": false
+    },
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": {
+                    "vivado_syn": 32768,
+                    "hls_csim": 10240,
+                    "hls_cosim": 16384,
+                    "vivado_impl": 16384,
+                    "hls_csynth": 10240
+                },
+                "max_time_min": {
+                    "vivado_syn": 470,
+                    "hls_csim": 60,
+                    "hls_cosim": 470,
+                    "vivado_impl": 470,
+                    "hls_csynth": 60
+                }
+            }
+        ],
+        "targets": [
+            "hls_csim",
+            "hls_csynth",
+            "hls_cosim",
+            "vivado_syn",
+            "vivado_impl"
+        ],
+        "category": "canary"
+    },
+    "gui": false
+}

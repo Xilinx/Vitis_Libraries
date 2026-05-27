@@ -41,6 +41,9 @@ namespace aie {
 namespace fir {
 namespace interpolate_hb {
 
+/**
+  * @cond NOCOMMENTS
+  */
 template <int dim, int FIR_LENGTH_ACT, typename ct_kernel_params = fir_params_defaults>
 class ct_kernels {
    private:
@@ -77,6 +80,9 @@ class ct_kernels {
             constexpr(dim != 0) { recurseClass::create_and_recurse(firKernels); }
     }
 };
+/**
+  * @endcond
+  */
 
 //--------------------------------------------------------------------------------------------------
 // fir_interpolate_hb_graph template

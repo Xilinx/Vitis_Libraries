@@ -129,7 +129,8 @@
                 "function": "update_POINT_SIZE",
                 "args": [
                     "PART",
-                    "VSS_MODE"
+                    "VSS_MODE",
+                    "DATA_TYPE"
                 ]
             },
             "validator": {
@@ -137,7 +138,8 @@
                 "function": "validate_POINT_SIZE",
                 "args": [
                     "PART",
-                    "VSS_MODE"
+                    "VSS_MODE",
+                    "DATA_TYPE"
                 ]
             }
         },
@@ -148,12 +150,18 @@
             "updater": {
                 "file": "vss_fft_ifft_1d.py",
                 "function": "update_API_IO",
-                "args": []
+                "args": [
+                    "VSS_MODE",
+                    "PART"
+                ]
             },
             "validator": {
                 "file": "vss_fft_ifft_1d.py",
                 "function": "validate_API_IO",
-                "args": []
+                "args": [
+                    "VSS_MODE",
+                    "PART"
+                ]
             }
         },
         {
@@ -202,6 +210,29 @@
             }
         },
         {
+            "name": "POINT_SIZE_D1",
+            "description": "Point size for the first dimension. Must be between 1 and POINT_SIZE/2, and POINT_SIZE must be divisible by POINT_SIZE_D1.",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_POINT_SIZE_D1",
+                "args": [
+                    "POINT_SIZE",
+                    "DATA_TYPE",
+                    "PART"
+                ]
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_POINT_SIZE_D1",
+                "args": [
+                    "POINT_SIZE",
+                    "DATA_TYPE",
+                    "PART"
+                ]
+            }
+        },
+        {
             "name": "SSR",
             "description": "TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput.",
             "type": "uint",
@@ -212,7 +243,8 @@
                     "POINT_SIZE",
                     "PART",
                     "DATA_TYPE",
-                    "VSS_MODE"
+                    "VSS_MODE",
+                    "POINT_SIZE_D1"
                 ]
             },
             "validator": {
@@ -222,7 +254,8 @@
                     "POINT_SIZE",
                     "PART",
                     "DATA_TYPE",
-                    "VSS_MODE"
+                    "VSS_MODE",
+                    "POINT_SIZE_D1"
                 ]
             }
         },
@@ -260,6 +293,82 @@
             "validator": {
                 "file": "vss_fft_ifft_1d.py",
                 "function": "validate_AIE_PLIO_WIDTH"
+            }
+        },
+        {
+            "name": "USE_WIDGETS",
+            "description": "Flag to enable or disable the use of widgets to improve performance of the AIE portion of the FFT",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_USE_WIDGETS",
+                "args": [
+                    "VSS_MODE",
+                    "PART",
+                    "API_IO"
+                ]
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_USE_WIDGETS",
+                "args": [
+                    "VSS_MODE",
+                    "PART",
+                    "API_IO"
+                ]
+            }
+        },
+        {
+            "name": "CASC_LEN",
+            "description": "CASC_LEN specifies the length of the cascade at the AIE-PL interface",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_TP_CASC_LEN",
+                "args": [
+                    "PART",
+                    "DATA_TYPE",
+                    "POINT_SIZE",
+                    "POINT_SIZE_D1",
+                    "VSS_MODE"
+                ]
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_TP_CASC_LEN",
+                "args": [
+                    "PART",
+                    "DATA_TYPE",
+                    "POINT_SIZE",
+                    "POINT_SIZE_D1",
+                    "VSS_MODE"
+                ]
+            }
+        },
+        {
+            "name": "ADD_FRONT_TRANSPOSE",
+            "description": "Flag to add front transpose operation",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_ADD_FRONT_TRANSPOSE"
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_ADD_FRONT_TRANSPOSE"
+            }
+        },
+        {
+            "name": "ADD_BACK_TRANSPOSE",
+            "description": "Flag to add back transpose operation",
+            "type": "uint",
+            "updater": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "update_ADD_BACK_TRANSPOSE"
+            },
+            "validator": {
+                "file": "vss_fft_ifft_1d.py",
+                "function": "validate_ADD_BACK_TRANSPOSE"
             }
         }
     ],

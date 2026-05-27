@@ -20,117 +20,69 @@ import importlib
 import sys
 import os
 
-dsplib_aie_ip_list = [
-    "conv_corr",
-    "dds_mixer",
-    "dds_mixer_lut",
-    "dft",
-    "euclidean_distance",
-    "fft_ifft_dit_1ch",
-    "fft_window",
-    "fir_decimate_asym",
-    "fir_decimate_hb",
-    "fir_decimate_sym",
-    "fir_interpolate_asym",
-    "fir_interpolate_hb",
-    "fir_resampler",
-    "fir_sr_asym",
-    "fir_sr_sym",
-    "fir_tdm",
-    "func_approx",
-    "hadamard",
-    "kronecker",
-    "matrix_mult",
-    "matrix_vector_mul",
-    "mixed_radix",
-    "outer_tensor",
-    "sample_delay",
-    "widget_api_cast",
-    "widget_real2complex",
-]
-dsplib_vss_ip_list = ["vss_fft_ifft_1d"]
+# Functions and Classes
+def extract_aie_ip_names(json_file_path):
+    """
+    Extracts IP names from api.json file for AIE domain.
+    
+    Args:
+        json_file_path: Path to the api.json file
+        
+    Returns:
+        list: List of unique IP names (last part of api_name before ::) for AIE domain
+    """
+    # Read the JSON file
+    with open(json_file_path, 'r') as f:
+        data = json.load(f)
+    
+    # Set to store unique IP names
+    ip_names = set()
+    
+    # Iterate through api_list
+    if 'api_list' in data:
+        for api_entry in data['api_list']:
+            # Check if target_domain is AIE
+            if api_entry.get('target_domain') == 'AIE':
+                # Check if 'spec' and 'instance' exist and instance == 'class'
+                spec = api_entry.get('spec', {})
+                if spec.get('instance') == 'class':
+                    api_name = api_entry.get('api_name', '')
+                    # Extract the last part after the last ::
+                    if '::' in api_name:
+                        ip_name = api_name.split('::')[-1]
+                        if ip_name.endswith('_graph'):
+                            ip_name = ip_name[:-6]
+                        ip_names.add(ip_name)
+    
+    # Return sorted list of IP names
+    return sorted(list(ip_names))
 
 
-# Arguments
-test_config_helper = False
-for i in range(len(sys.argv)):
-    if sys.argv[i] == "--ip":
-        IP_in_use = sys.argv[i + 1]
-    if sys.argv[i] == "--mdir":
-        meta_dir = sys.argv[i + 1]
-    if sys.argv[i] == "--outdir":
-        out_dir = sys.argv[i + 1]
-    if sys.argv[i] == "--test_config_helper":
-        test_config_helper = True
-        config_test_path = sys.argv[i + 1]
-        with open(config_test_path) as f:
-            config_test_load = json.load(f)
-        config_test = config_test_load["parameters"]
-
-if "--h" in sys.argv:
-    help_msg = (
-        "\nConfig Helper Options:"
-        + "\n--h [prints the helper message]"
-        + "\n--ip ip_name [providing the config helper the IP to configure]"
-        + "\n--mdir metadata_directory [by default config helper will guide you to xf_dsp\\L2\\meta]"
-        + "\n--outdir output_directory [by default config helper will guide you to xf_dsp\\L2\\meta]"
-        + "\n--test_config_helper [tests config_helper with the canary test of the IP]"
-        + "\nLIST_PARAMS [lists the parameters of the chosen IP to configure]"
-        + "\nPRINT_GRAPH [prints the resulting graph at the end of the configuration]"
-        + "\nNO_INSTANCE [no graph instance is to be generated at the end of the configuration]"
-        + "\nLIST_IPS [prints the IP list in DSPLIB]"
-    )
-    print(help_msg)
-    sys.exit()
-
-if "LIST_PARAMS" in sys.argv:
-    LIST_PARAMS = True
-else:
-    LIST_PARAMS = False
-
-if "PRINT_GRAPH" in sys.argv:
-    PRINT_GRAPH = True
-else:
-    PRINT_GRAPH = False
-
-if "NO_INSTANCE" in sys.argv:
-    NO_INSTANCE = True
-else:
-    NO_INSTANCE = False
-
-if "LIST_IPS" in sys.argv:
-    LIST_IPS = True
-else:
-    LIST_IPS = False
-
-
-# add meta data and output directory defaults if they are not provided in arguments
-scripts_directory = os.path.dirname(os.path.abspath(__file__))
-metadata_directory = f"{scripts_directory}/.."
-sys.path.insert(0, metadata_directory)
-
-
-def print_IPs(LIST_IPS):
-    if LIST_IPS:
-        print("\nAvailable DSPLIB IPs:")
-        sorted_list_ip = sorted(dsplib_aie_ip_list + dsplib_vss_ip_list)
-        for dsplibip in sorted_list_ip:
-            print(dsplibip)
+def print_IPs(LIST_IPS, default_lib_meta_dirs):
+    
+    for key in default_lib_meta_dirs:
+        api_json_loc = f"{default_lib_meta_dirs[key]}/api.json"
+        
+        if os.path.exists(api_json_loc):            
+            ip_names = extract_aie_ip_names(api_json_loc)
+            if LIST_IPS:
+                print(f"\nAvailable {key.upper()} IPs:")
+                print("---------------------")
+                for dsplibip in ip_names:
+                    print(dsplibip)
 
 
 def print_with_condition(message, condition):
     if condition is False:
         print(message)
 
-
-# Functions and Classes
 def map_power(num):
     superscript_mapping = str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹")
     formatted_num = str(num).translate(superscript_mapping)
     return formatted_num
 
 
-def validName(string):
+def valid_name(string):
     english_letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     allowed_chars = english_letters + "1234567890" + "_"
     if string == "":
@@ -157,19 +109,37 @@ def fn_helper_IPname_in():
     return IP_in_use
 
 
-def fn_helper_metadir_in():
-    if test_config_helper:
-        meta_dir = metadata_directory
+def fn_helper_metadir_in(IP_in_use, meta_dir, called_root, default_lib_meta_dirs):
+    # Search for {IP_in_use}.json in default_lib_meta_dirs
+    json_loc = None
+    lib_in_use = None
+    metadata_dir = None
+
+    if meta_dir is not None:  # override metadata directory if provided
+        json_loc = f"{meta_dir}/{IP_in_use}.json"
+        metadata_dir = meta_dir
+        metadata_root = metadata_dir[:metadata_dir.rfind('/L2')]
+        lib_in_use = os.path.basename(metadata_root)  # get the library name
     else:
-        meta_dir = input(
-            f"\nPlease provide the metadata directory. To accept the default {metadata_directory} return: "
-        )
-        if meta_dir == "":
-            meta_dir = metadata_directory
-    return meta_dir
+        # Check in the called directory first
+        candidate = f"{called_root}/L2/meta/{IP_in_use}.json"
+        if os.path.exists(candidate):
+            json_loc = candidate
+            lib_in_use = os.path.basename(called_root)  # get the library name
+            metadata_dir = called_root + "/L2/meta"
+        else:
+            for key in default_lib_meta_dirs:    
+                candidate = f"{default_lib_meta_dirs[key]}/{IP_in_use}.json"
+                if os.path.exists(candidate):
+                    json_loc = candidate
+                    lib_in_use = os.path.basename(os.path.dirname(os.path.dirname(default_lib_meta_dirs[key])))  # get the library name
+                    metadata_dir = default_lib_meta_dirs[key]
+                    break
+
+    return json_loc, metadata_dir, lib_in_use
 
 
-def fn_helper_outdir_in():
+def fn_helper_outdir_in(metadata_directory, test_config_helper):
     if test_config_helper:
         out_dir = metadata_directory
     else:
@@ -252,6 +222,10 @@ class ip_parameter:
     def param_update(self, param_vals):
         func_update = getattr(module, self.updater)
         update_return = func_update(param_vals)
+        if not update_return:   # if there are no legal downstream configs...
+            self.helper_msg = "No legal downstream configs. You must go back."
+            return
+
         if "enum" in update_return:
             default_val = update_return["enum"][0]
             enum_list = update_return["enum"]
@@ -292,40 +266,143 @@ class ip_parameter:
 
 
 ##CONFIG HELPER ALGORITHM
+
+# Arguments
+IP_in_use=None
+meta_dir=None
+out_dir=None
+test_config_helper=False
+
+for i in range(len(sys.argv)):
+    if sys.argv[i] == "--ip":
+        IP_in_use = sys.argv[i + 1]
+    if sys.argv[i] == "--mdir":
+        meta_dir = sys.argv[i + 1]
+    if sys.argv[i] == "--outdir":
+        out_dir = sys.argv[i + 1]
+    if sys.argv[i] == "--test_config_helper":
+        test_config_helper = True
+        config_test_path = sys.argv[i + 1]
+        with open(config_test_path) as f:
+            config_test_load = json.load(f)
+        config_test = config_test_load["parameters"]
+
+if "--h" in sys.argv:
+    help_msg = (
+        "\nConfig Helper Options:"
+        + "\n--h [prints the helper message]"
+        + "\n--ip ip_name [providing the config helper the IP to configure]"
+        + "\n--mdir metadata_directory [by default config helper will guide you to xf_dsp\\L2\\meta]"
+        + "\n--outdir output_directory [by default config helper will guide you to xf_dsp\\L2\\meta]"
+        + "\n--test_config_helper [tests config_helper with the canary test of the IP]"
+        + "\nLIST_PARAMS [lists the parameters of the chosen IP to configure]"
+        + "\nPRINT_GRAPH [prints the resulting graph at the end of the configuration]"
+        + "\nNO_INSTANCE [no graph instance is to be generated at the end of the configuration]"
+        + "\nLIST_IPS [prints the IP list in DSPLIB]"
+    )
+    print(help_msg)
+    sys.exit()
+
+if "LIST_PARAMS" in sys.argv:
+    LIST_PARAMS = True
+else:
+    LIST_PARAMS = False
+
+if "PRINT_GRAPH" in sys.argv:
+    PRINT_GRAPH = True
+else:
+    PRINT_GRAPH = False
+
+if "NO_INSTANCE" in sys.argv:
+    NO_INSTANCE = True
+else:
+    NO_INSTANCE = False
+
+if "LIST_IPS" in sys.argv:
+    LIST_IPS = True
+else:
+    LIST_IPS = False
+
+
+scripts_directory = os.path.dirname(os.path.abspath(__file__))
+dsp_root = scripts_directory[:scripts_directory.rfind('/L2')]
+
+# script can be called from library root, L1 or L2 directories and sub directories.
+called_path = os.getcwd()
+
+if '/L1' in called_path:
+    called_root = called_path[:called_path.rfind('/L1')]
+    default_root = called_root
+if '/L2' in called_path:
+    called_root = called_path[:called_path.rfind('/L2')]
+    default_root = called_root
+elif os.path.isdir(os.path.join(called_path, "L2")):
+    # If "L2" is a subdirectory of the current working directory
+    called_root = called_path
+    default_root = called_root
+else:
+    called_root = dsp_root #if called root cannot be inserted, not to cause a bug assign dsp_root for a first scan of the IP
+    default_root = dsp_root  # Fallback to dsp_root if /L2 not in path and no L2 subdir
+
+libraries = ["dsp", "dsp_ip", "solver"]
+default_lib_meta_dirs = {}
+parent_dir = os.path.dirname(dsp_root)
+
+for lib in libraries:
+    lib_meta_dir = None
+    # Search for a directory containing {lib} in its name in parent_dir
+    for entry in os.listdir(parent_dir):
+        entry_path = os.path.join(parent_dir, entry)
+        if os.path.isdir(entry_path) and lib in entry:
+            lib_meta_dir = os.path.join(entry_path, "L2", "meta")
+            break
+    if lib_meta_dir is None:
+        lib_meta_dir = f"{dsp_root}/L2/meta"
+    default_lib_meta_dirs[lib] = lib_meta_dir
+
 # import the IP
 print_with_condition("\nHello this is CONFIG HELPER!", test_config_helper)
+print_IPs(LIST_IPS, default_lib_meta_dirs)
 
-if "IP_in_use" not in locals():
-    print_IPs(LIST_IPS)
+if IP_in_use is None: # try to find IP in libraries
     IP_in_use = fn_helper_IPname_in()
 
-if "meta_dir" not in locals():
-    meta_dir = fn_helper_metadir_in()
-
-if "out_dir" not in locals():
-    out_dir = fn_helper_outdir_in()
-
-
-json_loc = f"{meta_dir}/{IP_in_use}.json"
-while not (os.path.exists(json_loc)):
+json_loc, metadata_dir, lib_in_use = fn_helper_metadir_in(IP_in_use, meta_dir, called_root, default_lib_meta_dirs)
+while json_loc is None or not(os.path.exists(json_loc)):
     help_request = input(
-        f"\nERROR: {IP_in_use} cannot be found in the metadata directory: {meta_dir}."
+        f"\nERROR: {IP_in_use} cannot be found in {', '.join(libraries)} libraries."
         + "\nWould you like to retry? (y/n) "
     )
     if help_request == "y" or help_request == "":
-        print_IPs(LIST_IPS)
+        print_IPs(True, default_lib_meta_dirs)
         IP_in_use = fn_helper_IPname_in()
-        meta_dir = fn_helper_metadir_in()
-        out_dir = fn_helper_outdir_in()
-        json_loc = json_loc = f"{meta_dir}/{IP_in_use}.json"
+        json_loc, metadata_dir, lib_in_use = fn_helper_metadir_in(IP_in_use, meta_dir, called_root, default_lib_meta_dirs)
     if help_request == "n":
         print_with_condition("\nExiting config_helper...", test_config_helper)
         sys.exit()
 
+sys.path.insert(0, default_lib_meta_dirs["dsp"]) #always insert xf_dsp path for common library imports
+if metadata_dir and metadata_dir not in sys.path:
+    sys.path.insert(1, metadata_dir) #insert the metadata directory of the chosen IP for its specific imports
+
+print_with_condition(
+    f"\n{IP_in_use} IP found in the {lib_in_use}!",
+    test_config_helper,
+)
+
+if out_dir is None:
+    out_dir = fn_helper_outdir_in(metadata_dir, test_config_helper)
+
+print_with_condition(
+    f"\nNow, let me help you validate {IP_in_use} parameters.",
+    test_config_helper,
+)
 module_name = IP_in_use
 is_vss_object = False
-if module_name in dsplib_vss_ip_list:
+
+if "vss_" in module_name:
     is_vss_object = True
+    
 module = importlib.import_module(module_name)
 if is_vss_object:
     out_inst = "cfg"
@@ -361,10 +438,6 @@ with open(json_loc) as f:
         param_vals.update(
             {pj["name"]: ""}
         )  # construct the parameter library where all the necessary values will be written
-print_with_condition(
-    f"\n{IP_in_use} IP found in the DSPLIB! Now, let me help you validate {IP_in_use} parameters.",
-    test_config_helper,
-)
 
 if LIST_PARAMS:
     print_with_condition("", test_config_helper)
@@ -441,7 +514,7 @@ if not (NO_INSTANCE) and not (test_config_helper):
     valid_instance_name = False
     while not valid_instance_name:
         instanceName = input("\nPlease enter a name for your instance: ")
-        valid_instance_name = validName(instanceName)
+        valid_instance_name = valid_name(instanceName)
 
     print_with_condition(instanceName + " is accepted\n", test_config_helper)
     instance_out = generate_out(instanceName, param_vals)
@@ -461,9 +534,9 @@ if not (NO_INSTANCE) and not (test_config_helper):
             "\nPlease note that the makefile might also require other build parameters. The help target in the vss generator will contain details about any other parameters. \n",
             test_config_helper,
         )
- 
+
         
     if PRINT_GRAPH:
         print_with_condition("\nHere is your configured instance:", test_config_helper)
         print_with_condition(instance_out[out_inst])
-    
+

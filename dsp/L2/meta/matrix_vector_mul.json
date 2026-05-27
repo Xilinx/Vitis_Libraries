@@ -81,7 +81,7 @@
             "name": "TP_USE_MATRIX_RELOAD",
             "type": "uint",
             "description": "describes if matrix A is reloadable at runtime via RTP port",
-            "minimum": 1,
+            "minimum": 0,
             "updater": {
                 "file": "matrix_vector_mul.py",
                 "function": "update_TP_USE_MATRIX_RELOAD",
@@ -97,7 +97,7 @@
             "name": "TP_API",
             "type": "uint",
             "description": "describes if matrix A is reloadable at runtime via RTP port",
-            "minimum": 1,
+            "minimum": 0,
             "updater": {
                 "file": "matrix_vector_mul.py",
                 "function": "update_TP_API",
@@ -167,6 +167,7 @@
             "name": "TP_NUM_FRAMES",
             "type": "uint",
             "description": "describes the number matrix-vector multiplications occuring per window of matrix/vector input data",
+            "test_max": 128,
             "minimum": 1,
             "updater": {
                 "file": "matrix_vector_mul.py",
@@ -197,7 +198,8 @@
             "name": "TP_SSR",
             "type": "uint",
             "description": "The number of kernels to be used in parallel to perform the function.",
-            "minimum": 0,
+            "test_max": 8,
+            "minimum": 1,
             "updater": {
                 "file": "matrix_vector_mul.py",
                 "function": "update_TP_SSR",
@@ -227,6 +229,7 @@
             "name": "TP_CASC_LEN",
             "type": "uint",
             "description": "describes the number of AIE Tiles to split the GEMV operation into.",
+            "test_max": 8,
             "minimum": 1,
             "updater": {
                 "file": "matrix_vector_mul.py",
@@ -250,7 +253,6 @@
                     "TT_DATA_A",
                     "TT_DATA_B",
                     "TP_DIM_A",
-                    "TP_DIM_B",
                     "TP_DIM_B",
                     "TP_NUM_FRAMES",
                     "TP_SSR",

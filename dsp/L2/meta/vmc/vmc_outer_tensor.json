@@ -1,0 +1,126 @@
+{
+    "low_level_file": "outer_tensor.json",
+    "ip_name": "vmc_outer_tensor",
+    "block_info": {
+        "label": "Outer Tensor",
+        "description": "Outer Tensor block targeted for AI Engines."
+    },
+    "parameters": [
+        {
+            "key": "AIE_VARIANT",
+            "name": "AIE_VARIANT",
+            "description": "Specifies the device type: 1-AIE, 2-AIE-ML, 22-AIE-ML-V2",
+            "default": 1,
+            "label": "AIE Variant:",
+            "tablabel": "Main",
+            "visible": "off",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_API",
+            "name": "TP_API",
+            "description": "The form of IO: 0 for windows, 1 for streams",
+            "type": "uint",
+            "default": 0,
+            "label": "API:",
+            "tablabel": "Main",
+            "visible": "off",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TT_DATA_A",
+            "name": "data_type_A",
+            "description": "describes the type of individual data samples input to the function.",
+            "default": "int16",
+            "label": "A input data type:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TT_DATA_B",
+            "name": "data_type_B",
+            "description": "describes the type of individual data samples input to the function.",
+            "default": "int16",
+            "label": "B input data type:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_DIM_A",
+            "name": "dim_a",
+            "description": "describes the number of samples in the vector A.",
+            "default": 16,
+            "label": "A input length:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_DIM_B",
+            "name": "dim_b",
+            "description": "describes the number of samples in the vector B.",
+            "default": 16,
+            "label": "B input length:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_NUM_FRAMES",
+            "name": "num_frames",
+            "description": "describes the number of outer tensor product operations to perform per call to the kernel.",
+            "default": 1,
+            "label": "Number of frames:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_SHIFT",
+            "name": "shift_output",
+            "description": "describes the number of bits to downshift.",
+            "default": 0,
+            "label": "Scale output down by 2^:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+              "key": "TP_SSR",
+              "name": "ssr",
+              "description": "describes the number of kernels to use in parallel to perform the windowing function.",
+              "default": 1,
+              "label": "SSR: ",
+              "tablabel": "Main",
+              "parameterType": "edit"
+        },
+        {
+            "key": "TP_RND",
+            "name": "rnd_mode",
+            "description": "describes the selection of rounding to be applied during the shift down stage of processing.",
+            "default": "Floor",
+            "label": "Rounding mode:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_SAT",
+            "name": "sat_mode",
+            "description": "describes the selection of saturation to be applied during the shift down stage of processing.",
+            "enum": [
+                0,
+                1,
+                3
+            ],
+            "enum_str": [
+                "None",
+                "Saturate",
+                "Symmetric"
+            ],
+            "default": 0,
+            "label": "Saturation mode:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        }
+    ],
+    "generator": {
+        "file": "vmc_outer_tensor.py",
+        "function": "vmc_generate_graph"
+    }
+}

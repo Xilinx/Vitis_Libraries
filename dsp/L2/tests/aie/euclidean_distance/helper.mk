@@ -24,11 +24,13 @@ HELPER_ROOT_DIR ?= ./../../../../
 HELPER:= $(HELPER_CUR_DIR)/.helper
 SEED_DATA ?= 1
 
-
 ceil = $(shell echo $$(((($1 + $2 - 1)/ $2) * $2)))
 
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA $(DATA) LEN $(LEN)  DIM $(DIM) API_IO $(API_IO) RND $(RND) SAT $(SAT) IS_OUTPUT_SQUARED $(IS_OUTPUT_SQUARED)
+
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
 
 DIFF_TOLERANCE = 0.05
 ifeq ($(DATA), float)
@@ -58,8 +60,8 @@ validate_config:
 
 create_input:
 	@echo starting generation of input
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/euclidean_distance/gen_input_ED.tcl $(LOC_INPUT_FILE_P) $(REQUIRED_LEN_P) $(NITER_UUT) $(SEED_DATA) $(STIM_TYPE) 0 0 $(DATA) $(API_IO) 1 0 0 $(DATA) 0 0 $(NUM_FRAMES) 1;\
-    tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/euclidean_distance/gen_input_ED.tcl $(LOC_INPUT_FILE_Q) $(REQUIRED_LEN_Q) $(NITER_UUT) $(SEED_DATA) $(STIM_TYPE) 0 0 $(DATA) $(API_IO) 1 0 0 $(DATA) 0 0 $(NUM_FRAMES) 1;\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/euclidean_distance/gen_input_ED.tcl $(LOC_INPUT_FILE_P) $(REQUIRED_LEN_P) $(NITER_UUT) $(SEED_DATA) $(STIM_TYPE_P) 0 0 $(DATA) $(API_IO) 1 0 0 $(DATA) 0 0 $(NUM_FRAMES) 1;\
+    tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/euclidean_distance/gen_input_ED.tcl $(LOC_INPUT_FILE_Q) $(REQUIRED_LEN_Q) $(NITER_UUT) $(SEED_DATA) $(STIM_TYPE_Q) 0 0 $(DATA) $(API_IO) 1 0 0 $(DATA) 0 0 $(NUM_FRAMES) 1;\
     echo Input ready
 
 sim_ref:
@@ -86,16 +88,13 @@ get_diff:
 
 get_latency:
 	@sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT);\
+	
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_inData_P.txt ./data/uut_output.txt $(STATUS_FILE) $(LEN) $(NITER_UUT)
 
-get_stats:
-	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(LEN) 1 $(STATUS_FILE) ./aiesimulator_output "euclideanDistMain" $(NITER_UUT)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file T_inData_P.txt -t_out_file uut_output.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(LEN) -niter $(NITER_UUT) -casc_len 1 -aiesim_out_dir ./aiesimulator_output -ip euclideanDistMain 
 
 get_status:
 	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
-
-harvest_mem:
-	@$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts
 
 cleanup:
 	make cleanall

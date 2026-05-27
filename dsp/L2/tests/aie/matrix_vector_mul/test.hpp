@@ -28,6 +28,7 @@ matrix_vector_mul graph class.
 #include "uut_static_config.h"
 #include "uut_config.h"
 #include "test_stim.hpp"
+#include "matrix_vector_mul_native_generated_graph/matrix_vector_mul_generated_graph.h"
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
@@ -45,6 +46,8 @@ namespace dsp {
 namespace aie {
 namespace testcase {
 
+namespace dsplib = xf::dsp::aie;
+
 class test_graph : public graph {
    private:
     static constexpr int matrixSizePerKernel = DIM_A * DIM_B * NUM_FRAMES / (CASC_LEN * UUT_SSR);
@@ -53,7 +56,26 @@ class test_graph : public graph {
    public:
 #ifdef USING_UUT
     port_conditional_array<input, (USE_MATRIX_RELOAD == 1), UUT_SSR * CASC_LEN> matrixRtp;
+    using uut = matrix_vector_mul_native_generated_graph;
+#else
+    using uut = dsplib::blas::matrix_vector_mul::UUT_GRAPH<DATA_A,
+                                                           DATA_B,
+                                                           DIM_A,
+                                                           DIM_B,
+                                                           SHIFT,
+                                                           ROUND_MODE,
+                                                           NUM_FRAMES,
+                                                           CASC_LEN,
+                                                           SAT_MODE,
+                                                           UUT_SSR,
+                                                           DIM_A_LEADING,
+                                                           USE_MATRIX_RELOAD,
+                                                           API_IO,
+                                                           DUAL_IP,
+                                                           NUM_OUTPUTS>;
 #endif
+    uut matrix_vector_mulGraph;
+
     std::array<input_plio, CASC_LEN * UUT_SSR> inA;
     std::array<input_plio, CASC_LEN * UUT_SSR*(DUAL_IP + 1)> inB;
     std::array<output_plio, UUT_SSR * NUM_OUTPUTS> out;
@@ -89,27 +111,12 @@ class test_graph : public graph {
         printf("\n");
         printf("==========================\n");
 
-        namespace dsplib = xf::dsp::aie;
-        dsplib::blas::matrix_vector_mul::UUT_GRAPH<DATA_A, DATA_B, DIM_A, DIM_B, SHIFT, ROUND_MODE, NUM_FRAMES,
-                                                   CASC_LEN, SAT_MODE, UUT_SSR, DIM_A_LEADING, USE_MATRIX_RELOAD,
-                                                   API_IO, DUAL_IP, NUM_OUTPUTS>
-            matrix_vector_mulGraph;
-
 #ifdef USING_UUT
         for (int ssr = 0; ssr < UUT_SSR; ssr++) {
             for (int casc = 0; casc < CASC_LEN; casc++) {
-                //////////////////////////////////////////////// UUT A
-                ///////////////////////////////////////////////////////////////////
                 std::string filenameInMatrix = QUOTE(INPUT_FILE_A);
                 filenameInMatrix.insert(filenameInMatrix.length() - 4,
                                         ("_" + std::to_string(ssr) + "_" + std::to_string(casc)));
-
-#if (SINGLE_BUF == 1)
-                single_buffer(matrix_vector_mulGraph.getKernels()[(ssr * CASC_LEN) + casc].in[0]);
-                single_buffer(matrix_vector_mulGraph.getKernels()[(ssr * CASC_LEN) + casc].in[1]);
-                printf("INFO: Single Buffer Constraint applied to input buffers of kernel %d.\n",
-                       ((ssr * CASC_LEN) + casc));
-#endif
 
 // iobuffer A
 #if (USE_MATRIX_RELOAD == 0)
@@ -122,7 +129,6 @@ class test_graph : public graph {
                 test_stim<DATA_A, matrixSizePerKernel * NITER, 0> taps_gen(filenameInMatrix);
                 taps_gen.gen(1, matrixA);
 
-                printf("ssr = %d casc = %d matrixSize = %d\n", ssr, casc, matrixSizePerKernel);
                 for (int i = 0; i < matrixSizePerKernel; i++) {
                     m_matrixA[casc + ssr * CASC_LEN][0][i] = matrixA[i];
                 }
@@ -131,13 +137,10 @@ class test_graph : public graph {
                 }
                 connect<>(matrixRtp[casc + ssr * CASC_LEN], matrix_vector_mulGraph.matrixA[casc + ssr * CASC_LEN]);
 #endif
-                //////////////////////////////////////////////// UUT b
-                ////////////////////////////////////////////////////////////////////
                 // Streams B (single or dual)
                 for (int dualIdx = 0; dualIdx < (DUAL_IP + 1); dualIdx++) {
                     int bPortIdx = (DUAL_IP + 1) * (casc + ssr * CASC_LEN) + dualIdx;
                     std::string filenameInVector = QUOTE(INPUT_FILE_B);
-                    printf("Connecting B port %d to kernel %d  ", dualIdx, bPortIdx);
                     filenameInVector.insert(
                         filenameInVector.length() - 4,
                         ("_" + std::to_string(ssr)) + "_" + std::to_string(casc) + "_" + std::to_string(dualIdx));
@@ -146,14 +149,7 @@ class test_graph : public graph {
                     connect<>(inB[bPortIdx].out[0], matrix_vector_mulGraph.inB[bPortIdx]);
                 }
             }
-#if (SINGLE_BUF == 1)
-            single_buffer(matrix_vector_mulGraph.getKernels()[(ssr * CASC_LEN) + (CASC_LEN - 1)].out[0]);
-            printf("INFO: Single Buffer Constraint applied the output buffer of kernel %d.\n",
-                   (ssr * CASC_LEN) + (CASC_LEN - 1));
-#endif
         }
-        //////////////////////////////////////////////// UUT out////////////////////////////////////////////////////////
-
         // Streams out (single or dual)
         for (int ssrOut = 0; ssrOut < UUT_SSR; ssrOut++) {
             for (int outIdx = 0; outIdx < NUM_OUTPUTS; outIdx++) {
@@ -168,7 +164,6 @@ class test_graph : public graph {
                 connect<>(matrix_vector_mulGraph.out[outPortIdx], out[outPortIdx].in[0]);
             }
         }
-//////////////////////////////////////////////// Ref ////////////////////////////////////////////////////////////////
 
 // using ref
 #else

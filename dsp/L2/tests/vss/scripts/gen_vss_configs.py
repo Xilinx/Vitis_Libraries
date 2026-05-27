@@ -64,6 +64,9 @@ def uut_params(cur_dir, test, fname):
                 "VSS_MODE",
                 "ADD_FRONT_TRANSPOSE",
                 "ADD_BACK_TRANSPOSE",
+                "POINT_SIZE_D1",
+                "USE_WIDGETS",
+                "CASC_LEN",
             ]:
                 macro_body.append(
                     f"""

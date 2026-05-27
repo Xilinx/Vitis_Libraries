@@ -1,0 +1,240 @@
+{
+    "low_level_file": "matrix_mult.json",
+    "ip_name": "vmc_matrix_mult",
+    "block_info": {
+        "label": "GEMM",
+        "description": "Matrix Multiplication block targeted for AI Engines."
+    },
+    "parameters": [
+        {
+            "key": "AIE_VARIANT",
+            "name": "AIE_VARIANT",
+            "description": "Specifies the device type: 1-AIE, 2-AIE-ML, 22-AIE-ML-V2",
+            "default": 1,
+            "label": "AIE Variant:",
+            "tablabel": "Main",
+            "visible": "off",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TT_DATA_A",
+            "name": "data_type_A",
+            "description": "describes the data type of samples in input matrix A",
+            "default": "int16",
+            "label": "A input data type:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TT_DATA_B",
+            "name": "data_type_B",
+            "description": "describes the data type of samples in input matrix B",
+            "default": "int16",
+            "label": "B input data type:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TT_OUT_DATA",
+            "name": "data_type_out",
+            "type": "typename",
+            "description": "describes the type of data samples in the output matrix.",
+            "enum": [
+                "int8",
+                "int16",
+                "int32",
+                "cint16",
+                "cint32",
+                "float",
+                "cfloat",
+                "bfloat16"
+            ],
+            "default": "int32",
+            "label": "Output data type:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_DIM_A",
+            "name": "Dim_A",
+            "description": "is an unsigned integer which describes the number of elements along the unique dimension (rows) of Matrix A.",
+            "default": 4,
+            "label": "Rows in input A:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_DIM_B",
+            "name": "Dim_B",
+            "description": "is an unsigned integer which describes the number of elements along the unique dimension (columns) of Matrix B.",
+            "default": 4,
+            "label": "Columns in input B:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_DIM_AB",
+            "name": "Dim_AB",
+            "description": "is an unsigned integer which describes the number of elements along the unique dimension (A'columns & B'rows) of Matrix B.",
+            "default": 4,
+            "label": "Columns in input A, Rows in input B:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+              "key": "TP_SSR",
+              "name": "ssr",
+              "description": "describes the number of kernels (or cascaded kernel chains) that will compute the matrix multiplication in parallel.",
+              "default": 1,
+              "label": "SSR: ",
+              "tablabel": "Main",
+              "parameterType": "edit"
+        },
+        {
+            "key": "TP_CASC_LEN",
+            "name": "casc_length",
+            "description": "describes the number of AIE kernels the matrix multiplication will be divided into in series.",
+            "default": 1,
+            "label": "Number of cascade stages:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_INPUT_WINDOW_VSIZE_A",
+            "name": "InputWindowSizeA",
+            "description": "describes the number of samples in the window API used for input to Matrix A.",
+            "default": 16,
+            "label": "Number of samples in input A:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_INPUT_WINDOW_VSIZE_B",
+            "name": "InputWindowSizeB",
+            "description": "describes the number of samples in the window API used for input to Matrix B.",
+            "default": 16,
+            "label": "Number of samples in input B:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_DIM_A_LEADING",
+            "name": "A_Leading_data",
+            "description": "describes whether input matrix A is row-major or column-major",
+            "enum": [
+                0,
+                1
+            ],
+            "enum_str": [
+                "Row-major(0)",
+                "Column-major(1)"
+            ],
+            "default": 0,
+            "label": "A input leading dimension:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_DIM_B_LEADING",
+            "name": "B_Leading_data",
+            "description": "describes whether input matrix B is row-major or column-major",
+            "enum": [
+                0,
+                1
+            ],
+            "enum_str": [
+                "Row-major(0)",
+                "Column-major(1)"
+            ],
+            "default": 0,
+            "label": "B input leading dimension:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_DIM_OUT_LEADING",
+            "name": "Output_Leading_data",
+            "description": "describes whether output matrix is row-major or column-major",
+            "enum": [
+                0,
+                1
+            ],
+            "enum_str": [
+                "Row-major(0)",
+                "Column-major(1)"
+            ],
+            "default": 0,
+            "label": "Output leading dimension:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_ADD_TILING_A",
+            "name": "A_Tiling_data",
+            "description": "describes whether or not to add an additional kernel to rearrange the matrix samples into their required position.",
+            "default": false,
+            "label": "Add tiling to input A",
+            "tablabel": "Main",
+            "parameterType": "checkbox"
+        },
+        {
+            "key": "TP_ADD_TILING_B",
+            "name": "B_Tiling_data",
+            "description": "describes wether or not to add an additional kernel to rearrange the matrix samples into their required position.",
+            "default": false,
+            "label": "Add tiling to input B",
+            "tablabel": "Main",
+            "parameterType": "checkbox"
+        },
+        {
+            "key": "TP_ADD_DETILING_OUT",
+            "name": "Output_Detiling_data",
+            "description": "describes wether or not to add an additional kernel to rearrange the matrix samples into their required position.",
+            "default": false,
+            "label": "Add detiling to output",
+            "tablabel": "Main",
+            "parameterType": "checkbox"
+        },
+        {
+            "key": "TP_SHIFT",
+            "name": "shift_output",
+            "description": "describes power of 2 shift down applied to the accumulation of product terms before each output.",
+            "default": 0,
+            "label": "Scale output down by 2^:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_RND",
+            "name": "rnd_mode",
+            "description": "describes the selection of rounding to be applied during the shift down stage of processing.",
+            "default": "Floor",
+            "label": "Rounding mode:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_SAT",
+            "name": "sat_mode",
+            "description": "describes the selection of saturation to be applied during the shift down stage of processing.",
+            "enum": [
+                0,
+                1,
+                3
+            ],
+            "enum_str": [
+                "None",
+                "Saturate",
+                "Symmetric"
+            ],
+            "default": 0,
+            "label": "Saturation mode:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        }
+    ],
+    "generator": {
+        "file": "vmc_matrix_mult.py",
+        "function": "vmc_generate_graph"
+    }
+}

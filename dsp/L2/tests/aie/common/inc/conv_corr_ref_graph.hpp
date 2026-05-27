@@ -36,9 +36,6 @@ namespace dsp {
 namespace aie {
 namespace conv_corr {
 
-class empty {};
-struct no_port {};
-
 // TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN, TP_SHIFT, TP_API, TP_RND,
 // TP_SAT, TP_CASC_LEN, TP_PHASES
 template <typename TT_DATA_F,
@@ -57,10 +54,9 @@ template <typename TT_DATA_F,
           unsigned int TP_PHASES,
           unsigned int TP_USE_RTP_VECTOR_LENGTHS>
 class conv_corr_ref_graph : public graph {
-   private:
-    using rtp_port = typename std::conditional_t<(TP_USE_RTP_VECTOR_LENGTHS == 1), port<input>, no_port>;
-
    public:
+    using rtp_port_array = port_conditional_array<input, (TP_USE_RTP_VECTOR_LENGTHS == 1), 1>;
+
     // Defensive configuration legality checks
 
     // defensive check for Input data types
@@ -83,20 +79,20 @@ class conv_corr_ref_graph : public graph {
     // defensive check for CONV/CORR compute mode i.e. full/same/valid
     static_assert(fnCheckIsComputeModeValid<TP_COMPUTE_MODE, TP_API>(),
                   " Assertion Failed : \n"
-                  "              ERROR: [TP_API = 1 'STRAEM']  'TP_COMPUTE_MODE' always 2-VALID_MODE only \n"
+                  "              ERROR: [TP_API = 1 'STREAM']  'TP_COMPUTE_MODE' always 2-VALID_MODE only \n"
                   "                     [TP_API = 0 'IOBuffer'] \n "
                   "                    'TP_COMPUTE_MODE' must be 0-FULL_MODE  or 1-SAME_MODE or 2-VALID_MODE \n ");
 
     // defensive check for G sig length should be always less than or equal to F Sig Length
     // defensive check for TP_G_LEN which should be multiples of (phases*4)) when Stream only Processing happening
-    static_assert(fnCheckGLen<TT_DATA_F, TP_F_LEN, TP_G_LEN, TP_PHASES, TP_API>(),
+    static_assert(fnCheckGLen<TT_DATA_F, TT_DATA_G, TP_F_LEN, TP_G_LEN, TP_PHASES, TP_API>(),
                   " Assertion Failed : \n            ERROR: 'TP_G_LEN' should be always less than or equal to TP_F_LEN "
                   "as per con_corr requirement \n"
-                  "                   For API-2 [COND-1] : TP_G_LEN should be in the range <8,256> when Strem only "
-                  "processing and \n  "
-                  "                           [COND-2] : TP_G_LEN should be greater than ((TP_PHASES*4)) and \n "
-                  "                            [COND-3] : TP_G_LEN must be greater than ((TP_PHASES*4)) and multiples "
-                  "of ((TP_PHASES*8))  \n");
+                  "                   For API-1[STREAM] [COND-1] : TP_G_LEN must be in the range "
+                  "<(256/8/sizeof(TT_DATA_G)), 256> when stream "
+                  "only processing AND \n  "
+                  "                                    [COND-2] : TP_G_LEN must be a multiple of (TP_PHASES * kLanes * "
+                  "(kPoints / kStreamsPerCore)).  \n");
 
     // defensive check for num of frames i.e., TP_NUM_FRAMES restricted to 1 to maintain the better performance for time
     // being.
@@ -106,29 +102,26 @@ class conv_corr_ref_graph : public graph {
                   "maintain the same performance of conv/corr.");
 
     // defensive check for Lengths of F and G should be in the given range of Min and Max
-    static_assert(fnCheckLenOfData<TT_DATA_F, TP_F_LEN, TP_API>(),
+    static_assert(fnCheckInBuffofFLen<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_F_LEN, TP_API, TP_COMPUTE_MODE>(),
                   " Assertion Failed : \n "
-                  "             ERROR: TP_F_LEN should be granuality of Min data_load on AIE i.e. "
-                  "[(256/samplesize<TT_DATA_F>())] \n                   [int8   - (32*N) ] \n                   [int16 "
-                  " - (16*N) ] \n                   [int32  - (8*N)  ] \n                   [cint16 - (8*N)  ] \n      "
-                  "             [cint32 - (4*N)  ] \n            where N is Integer > 1] and \n            TP_F_LEN "
-                  "should be greater than or equal to minimum length [((256/samplesize<TT_DATA_F>())*2)] based on "
-                  "given data type i.e.\n                 '[Data Type-    MIN    MAX]' \n                 "
-                  "'--------------------------' \n                 '[int8     -    64    8192]' \n                 "
-                  "'[int16    -    32    4096]' \n                 '[int32    -    16    2048]' \n                 "
-                  "'[cint16   -    16    2048]' \n                 '[cint32   -    8     1024]' ");
+                  "             ERROR: TP_F_LEN must be a multiple of data_load = 256/samplesize(TT_DATA_F) : \n"
+                  "                   [int8 - (32*N)] [int16/bfloat16 - (16*N)] [int32/cint16/float - (8*N)] \n"
+                  "                   [cint32/cfloat - (4*N)]  where N >= 2 \n"
+                  "             TP_F_LEN in [2*data_load, MAX_F] where \n"
+                  "             MAX_F = min(__DATA_MEM_BYTES__/sizeof(TT_DATA_F), \n"
+                  "                         FULL:  __DATA_MEM_BYTES__/sizeof(TT_DATA_OUT) - G_min + 1, \n"
+                  "                         SAME:  __DATA_MEM_BYTES__/sizeof(TT_DATA_OUT), \n"
+                  "                         VALID: __DATA_MEM_BYTES__/sizeof(TT_DATA_OUT) + G_min - 1).");
 
-    static_assert(fnCheckLenOfData<TT_DATA_G, TP_G_LEN, TP_API>(),
+    static_assert(fnCheckInBuffofGLen<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_F_LEN, TP_G_LEN, TP_API, TP_COMPUTE_MODE>(),
                   " Assertion Failed : \n "
-                  "             ERROR: TP_G_LEN should be granuality of Min data_load on AIE i.e. "
-                  "[(256/samplesize<TT_DATA_G>())] \n                   [int8   - (32*N) ] \n                   [int16 "
-                  " - (16*N) ] \n                   [int32  - (8*N)  ] \n                   [cint16 - (8*N)  ] \n      "
-                  "             [cint32 - (4*N)  ] \n            where N is Integer > 1] and \n            TP_G_LEN "
-                  "should be greater than or equal to minimum length [((256/samplesize<TT_DATA_G>())*2)] based on "
-                  "given data type i.e.\n                 '[Data Type-    MIN    MAX]' \n                 "
-                  "'--------------------------' \n                 '[int8     -    64    8192]' \n                 "
-                  "'[int16    -    32    4096]' \n                 '[int32    -    16    2048]' \n                 "
-                  "'[cint16   -    16    2048]' \n                 '[cint32   -    8     1024]' ");
+                  "             ERROR: TP_G_LEN must be a multiple of data_load = 256/samplesize(TT_DATA_G) : \n"
+                  "                   [int8 - (32*N)] [int16/bfloat16 - (16*N)] [int32/cint16/float - (8*N)] \n"
+                  "                   [cint32/cfloat - (4*N)]  where N >= 2 \n"
+                  "             TP_G_LEN in [2*data_load, MAX_G] where \n"
+                  "             MAX_G = min(TP_F_LEN, __DATA_MEM_BYTES__/sizeof(TT_DATA_G), \n"
+                  "                         FULL:  __DATA_MEM_BYTES__/sizeof(TT_DATA_OUT) - TP_F_LEN + 1, \n"
+                  "                         SAME/VALID: __DATA_MEM_BYTES__/sizeof(TT_DATA_G)).");
     // defensive check for scaling factor should be in the range i.e. 0 < SHIFT < 61
     static_assert(TP_SHIFT >= SHIFT_MIN && TP_SHIFT <= SHIFT_MAX,
                   " Assertion Failed : \n "
@@ -176,25 +169,48 @@ class conv_corr_ref_graph : public graph {
     port_array<output, TP_PHASES> out;
 
     /**
-     *  RTP Parameter for F and G Lengths
+     * Conditional RTP port array for runtime F and G vector lengths.
+     * Active (1 port) when TP_USE_RTP_VECTOR_LENGTHS = 1, empty otherwise.
      */
-    std::array<rtp_port, 1> rtpVecLen;
+    rtp_port_array rtpVecLen;
 
     /**
         * The array of kernels that will be created and mapped onto AIE tiles.
     **/
     kernel m_conv_corr_ref[TP_PHASES];
 
+   public:
+    /**
+     * @brief Updates the RTP port with runtime F and G vector lengths.
+     *
+     * When TP_USE_RTP_VECTOR_LENGTHS = 1, call this method before each kernel invocation
+     * to pass the runtime F and G lengths down to the kernel via the RTP port.
+     *
+     * @tparam TopGraph    The type of the top-level graph containing this conv_corr_ref_graph instance.
+     * @tparam T_RtpArray  The type of the RTP port array (deduced from the argument).
+     * @param top      Reference to the top-level graph used to call update().
+     * @param rtpPort  Reference to the top-level graph's RTP port array to update.
+     * @param rtpFLen     Runtime F vector length.
+     * @param rtpGLen     Runtime G vector length.
+     **/
+    template <typename TopGraph, typename T_RtpArray>
+    void update_rtp(TopGraph& top, T_RtpArray& rtpPort, unsigned int rtpFLen, unsigned int rtpGLen) {
+        if
+            constexpr(TP_USE_RTP_VECTOR_LENGTHS == 1) {
+                const std::array<int32_t, 2> vecLens = {static_cast<int32_t>(rtpFLen), static_cast<int32_t>(rtpGLen)};
+                top.update(rtpPort[0], vecLens.data(), 2);
+            }
+    }
+
     // Constructor
     conv_corr_ref_graph() {
         // Create CONV_CORR class
         static constexpr unsigned int kLanes = fnRefNumLanes<TT_DATA_F, TT_DATA_G>();
-        static constexpr unsigned int kLoopCount = getRefLoopCount<TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
+        static constexpr int kMinGLenWin =
+            ((TP_USE_RTP_VECTOR_LENGTHS == 1) && (TP_COMPUTE_MODE == VALID_MODE)) ? getMinLen<TT_DATA_G>() : TP_G_LEN;
+        static constexpr int kLoopCount = getRefLoopCount<TP_COMPUTE_MODE, TP_F_LEN, kMinGLenWin>();
         static constexpr unsigned int kRefLoopCount = (CEIL(kLoopCount, kLanes) / kLanes);
         static constexpr unsigned int kRefOutLen = (kRefLoopCount * kLanes);
-        static constexpr unsigned int kRefPaddedFsigLen =
-            getRefPaddedLength<TT_DATA_F, TT_DATA_G, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
-        TT_DATA_F data_In;
 
 #ifdef _DSPLIB_CONV_CORR_REF_DEBUG_
         printf("=================================\n");
@@ -246,6 +262,22 @@ class conv_corr_ref_graph : public graph {
         } else {
             dimensions(m_conv_corr_ref[0].out[0]) = {TP_F_LEN};
         }
+
+        if
+            constexpr(TP_API == USE_WINDOW_API) {
+                static constexpr bool useSingleBufferF =
+                    (TP_F_LEN * sizeof(TT_DATA_F) * TP_NUM_FRAMES) > (__DATA_MEM_BYTES__ / 2) ? true : false;
+                static constexpr bool useSingleBufferG =
+                    (TP_G_LEN * sizeof(TT_DATA_G) * TP_NUM_FRAMES) > (__DATA_MEM_BYTES__ / 2) ? true : false;
+                static constexpr bool useSingleBufferOut =
+                    (kRefOutLen * sizeof(TT_DATA_OUT) * TP_NUM_FRAMES) > (__DATA_MEM_BYTES__ / 2) ? true : false;
+                if
+                    constexpr(useSingleBufferF) { single_buffer(m_conv_corr_ref[0].in[0]); }
+                if
+                    constexpr(useSingleBufferG) { single_buffer(m_conv_corr_ref[0].in[1]); }
+                if
+                    constexpr(useSingleBufferOut) { single_buffer(m_conv_corr_ref[0].out[0]); }
+            }
 
         runtime<ratio>(m_conv_corr_ref[0]) = 0.8;
 

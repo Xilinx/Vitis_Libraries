@@ -32,70 +32,70 @@ REF_INPUT_FILE = ./data/input_ref.txt
 REF_SIM_FILE = ./data/ref_output.txt
 STATUS_FILE = $(STATUS_LOG_FILE)
 DIFF_MODE = PERCENT
-ifeq ($(AIE_VARIANT), 2)
+ifeq ($(filter 2,$(AIE_VARIANT)), 2)
 DIFF_MODE          = ABS
 endif
 
 INPUT_WINDOW_VSIZE = $(POINT_SIZE)
 REF_INPUT_FILE = ./data/input_ref.txt
 
-ifeq ($(POINT_SIZE), 16)
+ifeq ($(filter 16,$(POINT_SIZE)), 16)
 	PT_SIZE_PWR       := 4
 	TAG_PAR_PWR       := 0
 	REF_SSR           := 1
 # there is some duplication here, tag_ssr needs to be 1<<TAG_PAR_PWR
-else ifeq ($(POINT_SIZE), 32)
+else ifeq ($(filter 32,$(POINT_SIZE)), 32)
 	PT_SIZE_PWR       := 5
 	TAG_PAR_PWR       := 0
 	REF_SSR           := 1
-else ifeq ($(POINT_SIZE), 64)
+else ifeq ($(filter 64,$(POINT_SIZE)), 64)
 	PT_SIZE_PWR       := 6
 	TAG_PAR_PWR       := 0
 	REF_SSR           := 1
-else ifeq ($(POINT_SIZE), 128)
+else ifeq ($(filter 128,$(POINT_SIZE)), 128)
 	PT_SIZE_PWR       := 7
 	TAG_PAR_PWR       := 0
 	REF_SSR           := 1
-else ifeq ($(POINT_SIZE), 256)
+else ifeq ($(filter 256,$(POINT_SIZE)), 256)
 	PT_SIZE_PWR       := 8
 	TAG_PAR_PWR       := 0
 	REF_SSR           := 1
-else ifeq ($(POINT_SIZE), 512)
+else ifeq ($(filter 512,$(POINT_SIZE)), 512)
 	PT_SIZE_PWR       := 9
 	TAG_PAR_PWR       := 0
 	REF_SSR           := 1
-else ifeq ($(POINT_SIZE), 1024)
+else ifeq ($(filter 1024,$(POINT_SIZE)), 1024)
 	PT_SIZE_PWR       := 10
 	TAG_PAR_PWR       := 0
 	REF_SSR           := 1
-else ifeq ($(POINT_SIZE), 2048)
+else ifeq ($(filter 2048,$(POINT_SIZE)), 2048)
 	PT_SIZE_PWR       := 11
 	TAG_PAR_PWR       := 0
 	REF_SSR           := 1
-else ifeq ($(POINT_SIZE), 4096)
+else ifeq ($(filter 4096,$(POINT_SIZE)), 4096)
 	PT_SIZE_PWR       := 12
 	TAG_PAR_PWR       := 1
 	REF_SSR           := 2
-else ifeq ($(POINT_SIZE), 8192)
+else ifeq ($(filter 8192,$(POINT_SIZE)), 8192)
 	PT_SIZE_PWR       := 13
 	TAG_PAR_PWR       := 2
 	REF_SSR           := 4
-else ifeq ($(POINT_SIZE), 16384)
+else ifeq ($(filter 16384,$(POINT_SIZE)), 16384)
 	PT_SIZE_PWR       := 14
 	TAG_PAR_PWR       := 3
 	REF_SSR           := 8
-else ifeq ($(POINT_SIZE), 32768)
+else ifeq ($(filter 32768,$(POINT_SIZE)), 32768)
 	PT_SIZE_PWR       := 15
 	TAG_PAR_PWR       := 4
 	REF_SSR           := 16
-else ifeq ($(POINT_SIZE), 65536)
+else ifeq ($(filter 65536,$(POINT_SIZE)), 65536)
 	PT_SIZE_PWR       := 16
 	TAG_PAR_PWR       := 5
 	REF_SSR           := 32
 endif
 
-ifeq ($(AIE_VARIANT), 1)
-	ifeq ($(API_IO),0)
+ifeq ($(strip $(AIE_VARIANT)), 1)
+	ifeq ($(strip $(API_IO)),0)
 		INPUTS_PER_TILE := 1
 	else
 		INPUTS_PER_TILE := 2
@@ -103,15 +103,22 @@ ifeq ($(AIE_VARIANT), 1)
 else
 	INPUTS_PER_TILE := 1
 endif
+NUM_INPUTS:=$$(($(SSR)*$(INPUTS_PER_TILE)))
 
 
-DATAWIDTH :=
+DATA_WIDTH :=
 ifeq ($(DATA_TYPE), cint16)
-DATAWIDTH := 32
+DATA_WIDTH := 32
 else
-DATAWIDTH := 64
+DATA_WIDTH := 64
 endif
 
+DUAL_STREAMS := 0
+ifeq ($(filter 1,$(API_IO)), 1)
+	DUAL_STREAMS := 1
+else
+	DUAL_STREAMS := 0
+endif
 DYN_PT_SIZE = 0
 DYN_PT_HEADER_MODE = 0
 
@@ -126,8 +133,8 @@ create_input:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(FRONT_INPUT_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  $(TAG_PAR_PWR)
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(BACK_INPUT_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  $(TAG_PAR_PWR);
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(REF_INPUT_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  $(TAG_PAR_PWR);
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(FRONT_INPUT_FILE) --type $(DATA_TYPE) --ssr ${SSR} --split --dual 0 -k $(DYN_PT_HEADER_MODE) -w ${INPUT_WINDOW_VSIZE};\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(BACK_INPUT_FILE) --type $(DATA_TYPE) --ssr ${SSR} --split --dual 0 -k $(DYN_PT_HEADER_MODE) -w ${INPUT_WINDOW_VSIZE};
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(FRONT_INPUT_FILE) --type $(DATA_TYPE) --ssr ${NUM_INPUTS} --split --dual 0 -k $(DYN_PT_HEADER_MODE) -w ${INPUT_WINDOW_VSIZE};\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(BACK_INPUT_FILE) --type $(DATA_TYPE) --ssr ${NUM_INPUTS} --split --dual 0 -k $(DYN_PT_HEADER_MODE) -w ${INPUT_WINDOW_VSIZE};
 	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_INPUT_FILE) --type $(DATA_TYPE) --ssr $(REF_SSR) --split --dual 0 -k $(DYN_PT_HEADER_MODE) -w ${INPUT_WINDOW_VSIZE}
 	echo Input ready
 
@@ -173,22 +180,59 @@ harvest_mem:
 
 PART := $(shell $(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/include/vss/scripts/extract_param_cfg.py ./ "PART" "top" vss_fft_ifft_1d_params.cfg)
 
-AIE_VARIANT := $(shell $(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/include/vss/scripts/extract_param_cfg.py ./ "AIE_VARIANT" "top" vss_fft_ifft_1d_params.cfg)
-ifeq ($(VSS_MODE), 1)
-ifeq ($(AIE_VARIANT), 1)
-	ifeq ($(DATA_TYPE), cint16)
-		VSS_SCRIPT = vss_tb_cfg_gen_aie_if.py
-	else
-		VSS_SCRIPT = vss_tb_cfg_gen.py
-	endif
+AIE_VARIANT := $(shell $(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/meta/vss/scripts/get_aievar_from_part.py ${PART})
+
+# set default values for parameters non-necessary parameters to maintain backwards compatibility
+ifeq ($(filter -1,$(VSS_MODE)), -1)
+override VSS_MODE := 1
+endif
+
+# Calculate POINT_SIZE_D1 and POINT_SIZE_D2 based on VSS_MODE if user provides default of 1 or leaves it empty (-1).
+# All HLS kernels, AIE graphs have internal calculations that use default values of point_size_d1 and point_size_d2 based on the sqrt function when the user leaves POINT_SIZE_D1 to be the default of 1.
+# The connectivity generator for VSS_MODE=2 needs to change if it needs to generate simple connections when POINT_SIZE_D2=SSR.
+# whereas the connectivity generator for VSS_MODE=1 changes  based on whether it can use internal buffer descriptors. 
+# TODO VSS_MODE=2 can also have different connections if it can use buffer descriptors but that is not implemented yet.
+ifneq (,$(filter -1 1,$(POINT_SIZE_D1)))
+  ifeq ($(VSS_MODE), 2)
+    POINT_SIZE_D2 := $(SSR)
+  else
+    POINT_SIZE_D2 := $(POINT_SIZE)
+  endif
+  override POINT_SIZE_D1 := $(shell expr $(POINT_SIZE) / $(POINT_SIZE_D2))
+endif
+POINT_SIZE_D2 := $(shell expr $(POINT_SIZE) / $(POINT_SIZE_D1))
+
+
+HAS_BD_TRANSPOSE := $(shell $(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/include/vss/vss_fft_ifft_1d/check_aie_bd_use.py --vss_mode $(VSS_MODE) --aie_variant $(AIE_VARIANT) --ssr $(SSR) --data_width $(DATA_WIDTH) --point_size_d1 $(POINT_SIZE_D1) --point_size_d2 $(POINT_SIZE_D2))
+ifeq ($(filter 1,$(HAS_BD_TRANSPOSE)), 1)
+    ADD_FRONT_TRANSPOSE := 0
+    ADD_BACK_TRANSPOSE := 0
 else
+    ADD_FRONT_TRANSPOSE := 1
+    ADD_BACK_TRANSPOSE := 1
+endif
+
+ifeq ($(filter 1,$(VSS_MODE)), 1)
+ifeq ($(filter 1,$(HAS_BD_TRANSPOSE)), 1)
 	VSS_SCRIPT = vss_tb_cfg_gen_aie_if.py
+else
+	VSS_SCRIPT = vss_tb_cfg_gen.py
 endif
 else
+ifeq ($(filter $(SSR),$(POINT_SIZE_D2)), $(SSR))
 	VSS_SCRIPT = vss_tb_cfg_gen_hls_fft.py
+else
+	VSS_SCRIPT = vss_tb_cfg_gen.py
 endif 
+endif
 
 aie_name := $(shell $(VITIS_PYTHON3) ${HELPER_ROOT_DIR}/L2/include/vss/scripts/extract_param_cfg.py ./ "enable-partition" "aie" vss_fft_ifft_1d_params.cfg)
 
 gen_conn_cfg:
-	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/vss/vss_fft_ifft_1d/${VSS_SCRIPT} --ssr $(SSR) --cfg_file_name system.cfg --vss_unit vss_fft_ifft_1d --freqhz $(FREQ) --aie_obj_name $(aie_name) --aie_variant $(AIE_VARIANT)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/vss/vss_fft_ifft_1d/${VSS_SCRIPT} --ssr $(NUM_INPUTS) --cfg_file_name system.cfg --vss_unit vss_fft_ifft_1d --freqhz $(FREQ) --aie_obj_name $(aie_name) --aie_variant $(AIE_VARIANT) --dual_streams $(DUAL_STREAMS)
+
+get_perf:
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/vss/scripts/throughput_extract.py $(HELPER_CUR_DIR)/package_hw_emu/ $(SSR) $(POINT_SIZE) $(DATA_WIDTH) $(NITER) $(STATUS_FILE)
+
+get_resources:
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/vss/scripts/resource_extract.py $(HELPER_CUR_DIR) >> $(STATUS_FILE)

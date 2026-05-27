@@ -28,13 +28,24 @@ fft_ifft_dit_1ch graph class.
 
 #include "uut_config.h"
 #include "uut_static_config.h"
-#include "test_stim.hpp"
+#include "test_utils.hpp"
+#include "pkt_switch_graph.hpp"
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
 
 #ifndef UUT_GRAPH
 #define UUT_GRAPH fft_ifft_dit_1ch_graph
+#endif
+
+#ifndef USE_PKT_SWITCHING
+#define USE_PKT_SWITCHING 0
+#endif
+
+#ifndef USING_UUT
+// For Ref Model not to use packet switching
+#undef USE_PKT_SWITCHING
+#define USE_PKT_SWITCHING 0
 #endif
 
 // location constraints for POINT_SIZE=65536
@@ -51,15 +62,86 @@ namespace aie {
 namespace testcase {
 
 class test_graph : public graph {
-   private:
    public:
     static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
     static constexpr int kPortsPerTile = API_IO == 0 ? 1 : kStreamsPerTile;
-    std::array<input_plio, (kPortsPerTile << PARALLEL_POWER)> in;
-    std::array<output_plio, (kPortsPerTile << PARALLEL_POWER)> out;
+
+    static constexpr int fftSsr = (kPortsPerTile << PARALLEL_POWER);
+#if (USE_PKT_SWITCHING == 0)
+    static constexpr int numInputPlios = fftSsr;
+    static constexpr int numOutputPlios = fftSsr;
+#else
+    static constexpr int numInputPlios = NPORT_I;
+    static constexpr int numOutputPlios = NPORT_O;
+#endif
+
+    static constexpr int plioBitWidth = PLIO_WIDTH;
+#if (USE_PKT_SWITCHING != 0)
+    std::array<input_plio, numInputPlios> in =
+        createPLIOFileConnections<numInputPlios, 0, input_plio, plioBitWidth>(PKT_INPUT_FILE, "in");
+    std::array<output_plio, numOutputPlios> out =
+        createPLIOFileConnections<numOutputPlios, 0, output_plio, plioBitWidth>(PKT_OUTPUT_FILE, "out");
+#else
+    std::array<input_plio, numInputPlios> in =
+        createPLIOFileConnections<numInputPlios, 0, input_plio, plioBitWidth>(QUOTE(INPUT_FILE), "in");
+    std::array<output_plio, numOutputPlios> out =
+        createPLIOFileConnections<numOutputPlios, 0, output_plio, plioBitWidth>(QUOTE(OUTPUT_FILE), "out");
+#endif
+
+#if (USE_PKT_SWITCHING != 1)
+    // FFT sub-graph
+    xf::dsp::aie::fft::dit_1ch::UUT_GRAPH<DATA_TYPE,
+                                          TWIDDLE_TYPE,
+                                          POINT_SIZE,
+                                          FFT_NIFFT,
+                                          SHIFT,
+                                          CASC_LEN,
+                                          DYN_PT_SIZE,
+                                          WINDOW_VSIZE,
+                                          API_IO,
+                                          PARALLEL_POWER,
+                                          USE_WIDGETS,
+                                          ROUND_MODE,
+                                          SAT_MODE,
+                                          TWIDDLE_MODE,
+                                          DATA_OUT_TYPE>
+        fftGraph;
+#endif
+
+#if (USE_PKT_SWITCHING == 1)
+    pkt_switch_graph<fftSsr,
+                     NPORT_I,
+                     NPORT_O,
+                     xf::dsp::aie::fft::dit_1ch::UUT_GRAPH<DATA_TYPE,
+                                                           TWIDDLE_TYPE,
+                                                           POINT_SIZE,
+                                                           FFT_NIFFT,
+                                                           SHIFT,
+                                                           CASC_LEN,
+                                                           DYN_PT_SIZE,
+                                                           WINDOW_VSIZE,
+                                                           API_IO,
+                                                           PARALLEL_POWER,
+                                                           USE_WIDGETS,
+                                                           ROUND_MODE,
+                                                           SAT_MODE,
+                                                           TWIDDLE_MODE,
+                                                           DATA_OUT_TYPE> >
+        fftGraphPkt;
+#endif
+
+#if (USE_PKT_SWITCHING == 2)
+    pkt_switch_input<fftSsr, NPORT_I> fftGraphIn;
+    pkt_switch_output<fftSsr, NPORT_O> fftGraphOut;
+#endif
 
     // Constructor
-    test_graph() {
+    test_graph()
+#if (USE_PKT_SWITCHING == 2)
+        : fftGraphIn(in, fftGraph.in),
+          fftGraphOut(fftGraph.out, out)
+#endif
+    {
         printf("========================\n");
         printf("== UUT Graph Class: ");
         printf(QUOTE(UUT_GRAPH));
@@ -95,28 +177,31 @@ class test_graph : public graph {
 
         printf("========================\n");
 
-        // FIR sub-graph
-        xf::dsp::aie::fft::dit_1ch::UUT_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, CASC_LEN,
-                                              DYN_PT_SIZE, WINDOW_VSIZE, API_IO, PARALLEL_POWER, USE_WIDGETS,
-                                              ROUND_MODE, SAT_MODE, TWIDDLE_MODE, DATA_OUT_TYPE>
-            fftGraph;
-        for (int i = 0; i < (kPortsPerTile << PARALLEL_POWER); i++) {
-            std::string filenameOut = QUOTE(OUTPUT_FILE);
-            std::string filenameIn = QUOTE(INPUT_FILE);
+#if (USE_PKT_SWITCHING == 1)
+        // Connect packet switching network.
+        // Internal connections done by Graph will
+        for (unsigned int i = 0; i < NPORT_I; ++i) {
+            connect<>(in[i].out[0], fftGraphPkt.pkt_in[i]);
+        }
 
-            // Insert SSR index into filename before extension (.txt), e.g. input_X_Y.txt
-            // where X is ssr index (used even when there is only one port) and Y is for dual stream format (not used in
-            // FFT)
-            filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(i) + "_0"));
-            filenameIn.insert(filenameIn.length() - 4, ("_" + std::to_string(i) + "_0"));
+        for (unsigned int i = 0; i < NPORT_O; ++i) {
+            connect<>(fftGraphPkt.pkt_out[i], out[i].in[0]);
+        }
+#elif (USE_PKT_SWITCHING == 2)
+// All connections done in pkt_switch_input and pkt_switch_output constructors.
+// No action needed here.
 
-            // Make connections
-            in[i] = input_plio::create("PLIO_in_" + std::to_string(i), adf::plio_64_bits, filenameIn);
-            connect<>(in[i].out[0], fftGraph.in[i]);
+#else
 
-            out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_64_bits, filenameOut);
-            connect<>(fftGraph.out[i], out[i].in[0]);
+        for (unsigned int i = 0; i < fftSsr; ++i) {
+            unsigned int ssrIdx = i;
+            connect<>(in[ssrIdx].out[0], fftGraph.in[ssrIdx]);
 
+            connect<>(fftGraph.out[ssrIdx], out[ssrIdx].in[0]);
+        }
+#endif
+
+        for (int i = 0; i < fftSsr; i++) {
 #ifdef USING_UUT
 #if (SINGLE_BUF == 1 && API_IO == 0)
 #if (PARALLEL_POWER == 0)

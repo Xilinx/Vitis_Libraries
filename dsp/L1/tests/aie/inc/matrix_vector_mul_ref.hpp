@@ -27,6 +27,7 @@ MATRIX_VECTOR_MUL single channel reference model
 
 #include <adf.h>
 #include <limits>
+#include "matrix_vector_mul_traits.hpp"
 
 using namespace adf;
 
@@ -42,93 +43,6 @@ namespace matrix_vector_mul {
 #ifndef COL_MAJOR
 #define COL_MAJOR 1
 #endif // COL_MAJOR
-
-template <typename T_A, typename T_B>
-struct outType {
-    using type = cint16;
-};
-template <>
-struct outType<int16, int16> {
-    using type = int16;
-};
-template <>
-struct outType<int16, cint16> {
-    using type = cint16;
-};
-template <>
-struct outType<int16, cint32> {
-    using type = cint32;
-};
-template <>
-struct outType<int16, int32> {
-    using type = int32;
-};
-template <>
-struct outType<cint16, int16> {
-    using type = cint16;
-};
-template <>
-struct outType<cint16, cint16> {
-    using type = cint16;
-};
-template <>
-struct outType<cint16, int32> {
-    using type = cint32;
-};
-template <>
-struct outType<cint16, cint32> {
-    using type = cint32;
-};
-template <>
-struct outType<int32, int16> {
-    using type = int32;
-};
-template <>
-struct outType<int32, cint16> {
-    using type = cint32;
-};
-template <>
-struct outType<int32, int32> {
-    using type = int32;
-};
-template <>
-struct outType<int32, cint32> {
-    using type = cint32;
-};
-template <>
-struct outType<cint32, int16> {
-    using type = cint32;
-};
-template <>
-struct outType<cint32, cint16> {
-    using type = cint32;
-};
-template <>
-struct outType<cint32, int32> {
-    using type = cint32;
-};
-template <>
-struct outType<cint32, cint32> {
-    using type = cint32;
-};
-template <>
-struct outType<float, float> {
-    using type = float;
-};
-template <>
-struct outType<cfloat, float> {
-    using type = cfloat;
-};
-template <>
-struct outType<float, cfloat> {
-    using type = cfloat;
-};
-template <>
-struct outType<cfloat, cfloat> {
-    using type = cfloat;
-};
-template <typename T_D_A, typename T_D_B>
-using outType_t = typename outType<T_D_A, T_D_B>::type;
 
 //-----------------------------------------------------------------------------------------------------
 // MATRIX_VECTOR_MUL single channel reference model class

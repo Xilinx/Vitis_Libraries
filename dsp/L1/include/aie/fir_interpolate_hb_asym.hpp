@@ -177,7 +177,7 @@ class kernelFilterClass {
     // Lower polyphase taps internal storage. Initialised to zeros.
     alignas(__ALIGN_BYTE_SIZE__) TT_COEFF
         m_internalTaps[CEIL(m_kNumTaps, m_kCoeffRegVsize)]; // Filter taps/coefficients
-    alignas(__ALIGN_BYTE_SIZE__) TT_COEFF m_phaseTwoTap[kMaxColumns] = {
+    alignas(m_kZbuffSize) TT_COEFF m_phaseTwoTap[kMaxColumns] = {
         nullElem<TT_COEFF>()}; // note, the array is initializeed, causing extra instructions during initialiation.
 
     alignas(__ALIGN_BYTE_SIZE__) TT_COEFF
@@ -2670,10 +2670,10 @@ class fir_interpolate_hb_asym_tl : public fir_interpolate_hb_asym<typename fp::B
                                                  fp::BTP_API,
                                                  fp::BTP_SAT>;
 };
-}
-}
-}
-}
-}
+} // namespace interpolate_hb_asym
+} // namespace fir
+} // namespace aie
+} // namespace dsp
+} // namespace xf
 
 #endif // _DSPLIB_fir_interpolate_hb_asym_HPP_

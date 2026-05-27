@@ -45,7 +45,6 @@ template <typename TT_DATA,
           unsigned int TP_SAT,
           unsigned int TP_IS_OUTPUT_SQUARED>
 class euclidean_distance_ref {
-   private:
    public:
     // Default Constructor
     euclidean_distance_ref() {}

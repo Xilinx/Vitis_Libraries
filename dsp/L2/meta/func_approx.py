@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# from ctypes import sizeof
 import aie_common as com
 from aie_common import *
 import math
@@ -118,8 +117,19 @@ def fn_update_tp_coarse_bits(AIE_VARIANT, TT_DATA):
 
 def validate_TP_COARSE_BITS(args):
     TP_COARSE_BITS = args["TP_COARSE_BITS"]
+    TP_DOMAIN_MODE = args["TP_DOMAIN_MODE"]
+    return fn_validate_tp_coarse_bits(args, TP_COARSE_BITS, TP_DOMAIN_MODE)
+
+
+def fn_validate_tp_coarse_bits(args, TP_COARSE_BITS, TP_DOMAIN_MODE):
     param_dict = update_TP_COARSE_BITS(args)
     range_TP_COARSE_BITS = [param_dict["minimum"], param_dict["maximum"]]
+    # Cross-constraint: domainMode 1 consumes one coarse bit for domain bias, requiring at least 2.
+    if TP_DOMAIN_MODE == 1 and TP_COARSE_BITS < 2:
+        return isError(
+            f"TP_COARSE_BITS ({TP_COARSE_BITS}) must be at least 2 when TP_DOMAIN_MODE = 1 "
+            "(one coarse bit is consumed by the domain bias)."
+        )
     return validate_range(range_TP_COARSE_BITS, "TP_COARSE_BITS", TP_COARSE_BITS)
 
 

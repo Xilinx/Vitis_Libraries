@@ -49,7 +49,7 @@ using namespace adf;
 
 /**
  * @brief matrix_mult performs a General Matrix Multiply (GEMM), taking two input matrices of configurable dimensions
- *and data type.
+ * and data type.
  *
  * These are the templates to configure the Matrix Multiply graph class.
  *
@@ -220,10 +220,10 @@ class matrix_mult_graph : public graph {
 
     kernel* getKernels() { return m_MatmultKernels; };
 
-    // Empty type for a fallback to avoid redundant instantiations from the compiler in x86
     /**
      * @cond NOCOMMENTS
      */
+    // Empty type for a fallback to avoid redundant instantiations from the compiler in x86
     struct no_kernel {};
 
     // Flag request for Tiler/Untiler with COL_MAJOR
@@ -298,6 +298,19 @@ class matrix_mult_graph : public graph {
     static constexpr bool isRedundantTilerOut =
         ((dimBPerKernel <= tilingScheme.Btile) && (TP_DIM_OUT_LEADING == ROW_MAJOR));
 
+    static constexpr int windowSizePerKernelA = (TP_INPUT_WINDOW_VSIZE_A / (TP_SSR * TP_CASC_LEN));
+    static constexpr int windowSizePerKernelB = (TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN);
+    static constexpr int windowSizePerKernelOut = ((TP_DIM_A / TP_SSR) * TP_DIM_B);
+    static constexpr bool useSingleBufferA = (windowSizePerKernelA * sizeof(TT_DATA_A)) > (__DATA_MEM_BYTES__ / 2)
+                                                 ? true
+                                                 : false;
+    static constexpr bool useSingleBufferB = (windowSizePerKernelB * sizeof(TT_DATA_B)) > (__DATA_MEM_BYTES__ / 2)
+                                                 ? true
+                                                 : false;
+    static constexpr bool useSingleBufferOut = (windowSizePerKernelOut * sizeof(TT_OUT_DATA)) > (__DATA_MEM_BYTES__ / 2)
+                                                   ? true
+                                                   : false;
+
     /**
      * @endcond
      */
@@ -345,35 +358,50 @@ class matrix_mult_graph : public graph {
                     constexpr(!isRedundantTilerA && TP_ADD_TILING_A) {
                         tilerA[kernelNum] = kernel::create_object<TilerClassA>();
                         connect<>(inA[kernelNum], tilerA[kernelNum].in[0]);
-                        dimensions(tilerA[kernelNum].in[0]) = {TP_INPUT_WINDOW_VSIZE_A / (TP_SSR * TP_CASC_LEN)};
+                        dimensions(tilerA[kernelNum].in[0]) = {windowSizePerKernelA};
 
                         connect<>(tilerA[kernelNum].out[0], m_MatmultKernels[kernelNum].in[0]);
-                        dimensions(tilerA[kernelNum].out[0]) = {TP_INPUT_WINDOW_VSIZE_A / (TP_SSR * TP_CASC_LEN)};
-                        dimensions(m_MatmultKernels[kernelNum].in[0]) = {TP_INPUT_WINDOW_VSIZE_A /
-                                                                         (TP_SSR * TP_CASC_LEN)};
+                        dimensions(tilerA[kernelNum].out[0]) = {windowSizePerKernelA};
+                        dimensions(m_MatmultKernels[kernelNum].in[0]) = {windowSizePerKernelA};
+                        if
+                            constexpr(useSingleBufferA) {
+                                single_buffer(tilerA[kernelNum].in[0]);
+                                single_buffer(tilerA[kernelNum].out[0]);
+                                single_buffer(m_MatmultKernels[kernelNum].in[0]);
+                            }
                     }
                 else {
                     connect<>(inA[kernelNum], m_MatmultKernels[kernelNum].in[0]);
-                    dimensions(m_MatmultKernels[kernelNum].in[0]) = {TP_INPUT_WINDOW_VSIZE_A / (TP_SSR * TP_CASC_LEN)};
+                    dimensions(m_MatmultKernels[kernelNum].in[0]) = {windowSizePerKernelA};
+                    if
+                        constexpr(useSingleBufferA) { single_buffer(m_MatmultKernels[kernelNum].in[0]); }
                 }
 
                 if
                     constexpr(!isRedundantTilerB && TP_ADD_TILING_B) {
                         tilerB[kernelNum] = kernel::create_object<TilerClassB>();
                         connect<>(inB[kernelNum], tilerB[kernelNum].in[0]);
-                        dimensions(tilerB[kernelNum].in[0]) = {TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN};
+                        dimensions(tilerB[kernelNum].in[0]) = {windowSizePerKernelB};
                         connect<>(tilerB[kernelNum].out[0], m_MatmultKernels[kernelNum].in[1]);
-                        dimensions(tilerB[kernelNum].out[0]) = {TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN};
-                        dimensions(m_MatmultKernels[kernelNum].in[1]) = {TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN};
+                        dimensions(tilerB[kernelNum].out[0]) = {windowSizePerKernelB};
+                        dimensions(m_MatmultKernels[kernelNum].in[1]) = {windowSizePerKernelB};
+                        if
+                            constexpr(useSingleBufferB) {
+                                single_buffer(tilerB[kernelNum].in[0]);
+                                single_buffer(tilerB[kernelNum].out[0]);
+                                single_buffer(m_MatmultKernels[kernelNum].in[1]);
+                            }
                     }
                 else {
                     connect<>(inB[kernelNum], m_MatmultKernels[kernelNum].in[1]);
-                    dimensions(m_MatmultKernels[kernelNum].in[1]) = {TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN};
+                    dimensions(m_MatmultKernels[kernelNum].in[1]) = {windowSizePerKernelB};
+                    if
+                        constexpr(useSingleBufferB) { single_buffer(m_MatmultKernels[kernelNum].in[1]); }
                 }
                 // Specify mapping constraints - Can be overriden in parent graph.
                 runtime<ratio>(m_MatmultKernels[kernelNum]) = 0.8;
-                runtime<ratio>(tilerA[kernelNum]) = 0.4;
-                runtime<ratio>(tilerB[kernelNum]) = 0.4;
+                runtime<ratio>(tilerA[kernelNum]) = 0.8;
+                runtime<ratio>(tilerB[kernelNum]) = 0.8;
                 // Source files
                 source(m_MatmultKernels[kernelNum]) = "matrix_mult.cpp";
                 source(tilerA[kernelNum]) = "matrix_mult_tiler.cpp";
@@ -384,16 +412,24 @@ class matrix_mult_graph : public graph {
                 constexpr(!isRedundantTilerOut && TP_ADD_DETILING_OUT) {
                     untiler[ssrRank] = kernel::create_object<DetilerClassOut>();
                     connect<>(m_MatmultKernels[kernelOutNum].out[0], untiler[ssrRank].in[0]);
-                    dimensions(m_MatmultKernels[kernelOutNum].out[0]) = {(dimAPerKernel / TP_SSR) * dimBPerKernel};
-                    dimensions(untiler[ssrRank].in[0]) = {(dimAPerKernel / TP_SSR) * dimBPerKernel};
+                    dimensions(m_MatmultKernels[kernelOutNum].out[0]) = {windowSizePerKernelOut};
+                    dimensions(untiler[ssrRank].in[0]) = {windowSizePerKernelOut};
+                    if
+                        constexpr(useSingleBufferOut) {
+                            single_buffer(m_MatmultKernels[kernelOutNum].out[0]);
+                            single_buffer(untiler[ssrRank].in[0]);
+                            single_buffer(untiler[ssrRank].out[0]);
+                        }
                     connect<>(untiler[ssrRank].out[0], out[ssrRank]);
-                    dimensions(untiler[ssrRank].out[0]) = {(dimAPerKernel / TP_SSR) * dimBPerKernel};
+                    dimensions(untiler[ssrRank].out[0]) = {windowSizePerKernelOut};
                 }
             else {
                 connect<>(m_MatmultKernels[kernelOutNum].out[0], out[ssrRank]);
-                dimensions(m_MatmultKernels[kernelOutNum].out[0]) = {(dimAPerKernel / TP_SSR) * dimBPerKernel};
+                dimensions(m_MatmultKernels[kernelOutNum].out[0]) = {windowSizePerKernelOut};
+                if
+                    constexpr(useSingleBufferOut) { single_buffer(m_MatmultKernels[kernelOutNum].out[0]); }
             }
-            runtime<ratio>(untiler[ssrRank]) = 0.4;
+            runtime<ratio>(untiler[ssrRank]) = 0.8;
             source(untiler[ssrRank]) = "matrix_mult_untiler.cpp";
         }
     }

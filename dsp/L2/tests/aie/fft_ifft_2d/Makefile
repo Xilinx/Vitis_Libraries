@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ help::
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
 
-
 ############################## Setting up Project Variables ##############################
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
@@ -46,7 +45,7 @@ PARAMS ?= test_0_tool_canary_aie
 PARAMS_FILE ?= multi_params.json 
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST += vek280 xc2ve3858-ssva2112-2LP-e-S
+PLATFORM_ALLOWLIST += vek280 xc2ve3858-ssva2112-2MP-e-S
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk
@@ -60,7 +59,6 @@ BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(PLATFORM_NAME)
 
 include $(XFLIB_DIR)/L2/tests/aie/common/scripts/params.mk
 
-
 RUN_DEPS :=
 
 # aie template
@@ -71,7 +69,6 @@ AIE_WORK_DIR ?= Work
 AIE_PKG_DIR ?= Work
 
 # Setting customized_params in aiecompiler
-
 
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
             
@@ -91,7 +88,7 @@ PREPROC_ARGS ?= --aie.Xpreproc=-DINPUT_FILE=$(INPUT_FILE)
 REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) 
 UUT_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1
 
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/xc2ve3858-ssva2112-2LP-e-S/'))
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/xc2ve3858-ssva2112-2MP-e-S/'))
             
 COMPILER_ARGS ?= 
 AIE_VARIANT ?= 22
@@ -101,7 +98,7 @@ UUT_KERNEL ?= fft_ifft_dit_1ch
 REF_KERNEL ?= fft_ifft_dit_1ch_ref
 UUT_GRAPH ?= fft_ifft_2d_graph
 REF_GRAPH ?= fft_ifft_2d_ref_graph
-STACKSIZE_VAL ?= 600
+STACKSIZE_VAL ?= 950
 UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 INPUT_FILE ?= ./data/input.txt
@@ -117,7 +114,7 @@ UUT_KERNEL ?= fft_ifft_dit_1ch
 REF_KERNEL ?= fft_ifft_dit_1ch_ref
 UUT_GRAPH ?= fft_ifft_2d_graph
 REF_GRAPH ?= fft_ifft_2d_ref_graph
-STACKSIZE_VAL ?= 600
+STACKSIZE_VAL ?= 950
 UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 INPUT_FILE ?= ./data/input.txt
@@ -135,8 +132,6 @@ else
 AIETARGET := x86sim
 endif
 
-
-
 ifeq (,$(PLATFORM)) 
 AIE_CXXFLAGS += --part=$(XPLATFORM)
 else
@@ -149,14 +144,12 @@ AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
-
-
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
         
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
 AIE_CXXFLAGS += --aie.verbose  $($(TAG)_TARGET_COMPILE_ARGS)  $($(TAG)_PREPROC_ARGS)
 
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/xc2ve3858-ssva2112-2LP-e-S/'))
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/xc2ve3858-ssva2112-2MP-e-S/'))
         
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
 AIE_CXXFLAGS += --aie.verbose  $($(TAG)_TARGET_COMPILE_ARGS)  $($(TAG)_PREPROC_ARGS)
@@ -169,15 +162,11 @@ endif
 
 AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 
-
-
 ############################## Setting Rules for AIE (Building Kernels) ##################
 $(AIE_CONTAINER): pre_build test.cpp uut_config.h $(XFLIB_DIR)/L1/src/aie/fft_r2comb.cpp $(XFLIB_DIR)/L1/src/aie/fft_ifft_dit_1ch.cpp 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
-
-
 
 ############################## Setting Essential Checks and Building Rules ##############################
 ifneq (,$(filter x86sim aiesim, $(TARGET)))
@@ -212,7 +201,6 @@ ifeq ($(TARGET), aiesim)
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./
 endif
 
-
 ############################## Setting Targets ##############################
 .PHONY: pre_build
 pre_build:
@@ -236,7 +224,6 @@ uut_config.h: $(XFLIB_DIR)/L2/tests/aie/common/scripts/tb_gen.py
 valid_params:
 
 gen_instances: $(GENERATED_FILES)
-
 
 ############################## Cleaning Rules ##############################
 clean:

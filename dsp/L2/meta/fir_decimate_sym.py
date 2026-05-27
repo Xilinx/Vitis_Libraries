@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# from ctypes import sizeof
-# from socket import TIPC_SUB_SERVICE
 import aie_common as com
 from aie_common import *
 from aie_common_fir import *

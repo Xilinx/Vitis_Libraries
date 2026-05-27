@@ -32,44 +32,16 @@ namespace dsp {
 namespace aie {
 namespace outer_tensor {
 
-template <typename TT_A, typename TT_B>
-struct vectByte {
-    unsigned val_byteA = sizeof(outTypeMult_t<TT_A, TT_B>);
-    unsigned val_byteB = sizeof(outTypeMult_t<TT_A, TT_B>);
-    unsigned val_byteAcc = sizeof(outTypeMult_t<TT_A, TT_B>);
-    unsigned val_byteOut = sizeof(outTypeMult_t<TT_A, TT_B>);
-};
+template <typename outType>
+INLINE_DECL constexpr unsigned int getUnrollBudget() {
+    return 4;
+}
+#if (__SUPPORTS_CFLOAT__ == 0) // not enough program memory for 16 unrolls.
 template <>
-struct vectByte<int16, cint32> {
-    unsigned val_byteA = 2;
-    unsigned val_byteB = 8;
-    unsigned val_byteAcc = 8;
-    unsigned val_byteOut = 8;
-};
-template <>
-struct vectByte<cint32, int16> {
-    unsigned val_byteA = 8;
-    unsigned val_byteB = 4;
-    unsigned val_byteAcc = 4;
-    unsigned val_byteOut = 8;
-};
-
-template <typename T_A, typename T_B>
-struct vecSampleNum {
-    unsigned int A = 256 / 8 / vectByte<T_A, T_B>().val_byteA;
-    unsigned int B = 256 / 8 / vectByte<T_A, T_B>().val_byteB;
-    unsigned int Acc = 256 / 8 / vectByte<T_A, T_B>().val_byteAcc;
-    unsigned int TempOut = 256 / 8 / vectByte<T_A, T_B>().val_byteOut;
-    unsigned int Out = 256 / 8 / vectByte<T_A, T_B>().val_byteOut;
-};
-template <>
-struct vecSampleNum<cint32, int16> {
-    unsigned int A = 256 / 8 / vectByte<cint32, int16>().val_byteA;
-    unsigned int B = 256 / 8 / vectByte<cint32, int16>().val_byteB;
-    unsigned int Acc = 256 / 8 / vectByte<cint32, int16>().val_byteAcc;
-    unsigned int TempOut = 2 * 256 / 8 / vectByte<cint32, int16>().val_byteOut; // 2 loops to push data out.
-    unsigned int Out = 256 / 8 / vectByte<cint32, int16>().val_byteOut;
-};
+INLINE_DECL constexpr unsigned int getUnrollBudget<cfloat>() {
+    return 4;
+}
+#endif // __SUPPORTS_CFLOAT__ == 1
 }
 }
 }

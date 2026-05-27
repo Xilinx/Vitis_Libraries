@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# from ctypes import sizeof
-# from socket import TIPC_SUB_SERVICE
 import aie_common as com
 from aie_common import *
 from aie_common_fir import *
@@ -178,91 +176,140 @@ def fn_validate_TP_USE_COEFF_RELOAD(TP_USE_COEFF_RELOAD):
 ########## TP_FIR_LEN Updater and Validator ###########
 #######################################################
 def update_TP_FIR_LEN(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
+    TT_COEFF = args["TT_COEFF"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
-    return fn_update_TP_FIR_LEN(TT_DATA, TP_USE_COEFF_RELOAD)
+    TP_API = args["TP_API"]
+    if "TP_FIR_LEN" in args and args["TP_FIR_LEN"]:
+        TP_FIR_LEN = args["TP_FIR_LEN"]
+    else:
+        TP_FIR_LEN = 0
+    return fn_update_TP_FIR_LEN(
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_USE_COEFF_RELOAD, TP_API, TP_FIR_LEN
+    )
 
 
-def fn_update_TP_FIR_LEN(TT_DATA, TP_USE_COEFF_RELOAD):
+def fn_update_TP_FIR_LEN(
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_USE_COEFF_RELOAD, TP_API, TP_FIR_LEN=0
+):
     TP_FIR_LEN_max_int1 = comFirUpd.fn_max_fir_len_each_kernel_update(
         TT_DATA,
         TP_CASC_LEN=TP_CASC_LEN_max,
         TP_USE_COEFF_RELOAD=TP_USE_COEFF_RELOAD,
         TP_SSR=TP_SSR_max,
-        TP_API=0,
+        TP_API=TP_API,
         symFactor=1,
     )
-    TP_FIR_LEN_max_int2 = min(TP_FIR_LEN_max_int1, TP_FIR_LEN_max)
+
+    # Get the maximum FIR length that doesn't exceed buffer size
+    TP_FIR_LEN_buffer_max = comFirUpd.fn_max_fir_len_for_buffer_update(
+        TT_DATA, AIE_VARIANT=AIE_VARIANT
+    )
+    TP_FIR_LEN_max_int2 = min(
+        TP_FIR_LEN_max_int1, TP_FIR_LEN_max, TP_FIR_LEN_buffer_max
+    )
     param_dict = {
         "name": "TP_FIR_LEN",
         "minimum": TP_FIR_LEN_min,
         "maximum": TP_FIR_LEN_max_int2,
     }
+
+    # If TP_FIR_LEN is provided, check if it needs adjustment and calculate actual value
+    if TP_FIR_LEN != 0:
+
+
+        # Check if TP_FIR_LEN has valid divisors within the TP_SSR range
+        all_divisors_TP_FIR_LEN = find_divisors(TP_FIR_LEN, TP_SSR_max)
+        valid_divisors = all_divisors_TP_FIR_LEN.copy()
+        for potential_ssr_val in all_divisors_TP_FIR_LEN:
+            param_dict_pot_ssr = fn_update_TP_SSR(
+                AIE_VARIANT,
+                TT_DATA,
+                TT_COEFF,
+                TP_API,
+                TP_FIR_LEN,
+                TP_USE_COEFF_RELOAD,
+                potential_ssr_val,
+            )
+            if param_dict_pot_ssr == False or (
+                ("enum" in param_dict_pot_ssr) and (param_dict_pot_ssr["enum"]) == []
+            ):
+                valid_divisors.remove(potential_ssr_val)
+
+        # If no valid divisors, find the nearest TP_FIR_LEN that has valid SSR divisors
+        if not valid_divisors:
+            # Search for the closest valid TP_FIR_LEN by checking nearby values
+            best_fir_len = None
+            search_range = 200
+
+            for candidate in range(TP_FIR_LEN, TP_FIR_LEN + search_range):
+                # Skip if outside valid range
+                if candidate > param_dict["maximum"]:
+                    break
+
+                # Check if this candidate has valid SSR divisors
+                candidate_divisors = find_divisors(candidate, TP_SSR_max)
+                candidate_valid_divisors = candidate_divisors
+
+                for potential_ssr_val in candidate_divisors:
+                    param_dict_pot_ssr = fn_update_TP_SSR(
+                        AIE_VARIANT,
+                        TT_DATA,
+                        TT_COEFF,
+                        TP_API,
+                        candidate,
+                        TP_USE_COEFF_RELOAD,
+                        potential_ssr_val,
+                    )
+                    if param_dict_pot_ssr == False or (
+                        ("enum" in param_dict_pot_ssr)
+                        and (param_dict_pot_ssr["enum"]) == []
+                    ):
+                        candidate_valid_divisors.remove(potential_ssr_val)
+                    else:
+                        # Valid SSR for candidate FIR length found, stop searching.
+                        best_fir_len = candidate
+                        break
+
+                # If we found a valid value, stop searching other candidates
+                if best_fir_len is not None:
+                    break
+
+
+            if best_fir_len is not None:
+                # print(best_fir_len)
+                param_dict.update({"actual": int(best_fir_len)})
+
     return param_dict
 
 
 def validate_TP_FIR_LEN(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
+    TT_COEFF = args["TT_COEFF"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
+    TP_API = args["TP_API"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
-    return fn_validate_TP_FIR_LEN(TT_DATA, TP_USE_COEFF_RELOAD, TP_FIR_LEN)
+    return fn_validate_TP_FIR_LEN(
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_USE_COEFF_RELOAD, TP_API, TP_FIR_LEN
+    )
 
 
-def fn_validate_TP_FIR_LEN(TT_DATA, TP_USE_COEFF_RELOAD, TP_FIR_LEN):
-    param_dict = fn_update_TP_FIR_LEN(TT_DATA, TP_USE_COEFF_RELOAD)
+def fn_validate_TP_FIR_LEN(
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_USE_COEFF_RELOAD, TP_API, TP_FIR_LEN
+):
+    param_dict = fn_update_TP_FIR_LEN(
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_USE_COEFF_RELOAD, TP_API, TP_FIR_LEN
+    )
     range_TP_FIR_LEN = [param_dict["minimum"], param_dict["maximum"]]
+
+    if param_dict.get("actual") is not None and param_dict.get("actual") != TP_FIR_LEN:
+        return isError(
+            f"TP_FIR_LEN ({TP_FIR_LEN}) is not valid. Use {param_dict.get('actual')} instead. "
+        )
+
     return validate_range(range_TP_FIR_LEN, "TP_FIR_LEN", TP_FIR_LEN)
-
-
-#######################################################
-############# TP_DUAL_IP Updater and Validator ########
-#######################################################
-def update_TP_DUAL_IP(args):
-    AIE_VARIANT = args["AIE_VARIANT"]
-    return comFirUpd.fn_update_dual_ip_sr_asym(AIE_VARIANT, "TP_DUAL_IP")
-
-
-def validate_TP_DUAL_IP(args):
-    AIE_VARIANT = args["AIE_VARIANT"]
-    TP_API = args["TP_API"]
-    TP_DUAL_IP = args["TP_DUAL_IP"]
-    return fn_validate_TP_DUAL_IP(AIE_VARIANT, TP_API, TP_DUAL_IP)
-
-
-def fn_validate_TP_DUAL_IP(AIE_VARIANT, TP_API, TP_DUAL_IP):
-    param_dict = comFirUpd.fn_update_dual_ip_sr_asym(AIE_VARIANT, TP_API)
-    return validate_legal_set(param_dict["enum"], "TP_DUAL_IP", TP_DUAL_IP)
-
-
-#######################################################
-############# TP_NUM_OUTPUTS Updater and Validator ####
-#######################################################
-def update_TP_NUM_OUTPUTS(args):
-    AIE_VARIANT = args["AIE_VARIANT"]
-    TP_API = args["TP_API"]
-    TP_DUAL_IP = args["TP_DUAL_IP"]
-    TP_SSR = args["TP_SSR"]
-    return comFirUpd.fn_update_num_outputs_sr_asym(
-        TP_API, AIE_VARIANT, TP_SSR, TP_DUAL_IP, "TP_NUM_OUTPUTS"
-    )
-
-
-def validate_TP_NUM_OUTPUTS(args):
-    AIE_VARIANT = args["AIE_VARIANT"]
-    TP_API = args["TP_API"]
-    TP_DUAL_IP = args["TP_DUAL_IP"]
-    TP_SSR = args["TP_SSR"]
-    TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
-    return fn_validate_TP_NUM_OUTPUTS(
-        AIE_VARIANT, TP_API, TP_SSR, TP_DUAL_IP, TP_NUM_OUTPUTS
-    )
-
-
-def fn_validate_TP_NUM_OUTPUTS(AIE_VARIANT, TP_API, TP_SSR, TP_DUAL_IP, TP_NUM_OUTPUTS):
-    param_dict = comFirUpd.fn_update_num_outputs_sr_asym(
-        TP_API, AIE_VARIANT, TP_SSR, TP_DUAL_IP, "TP_NUM_OUTPUTS"
-    )
-    return validate_legal_set(param_dict["enum"], "TP_NUM_OUTPUTS", TP_NUM_OUTPUTS)
 
 
 #######################################################
@@ -275,16 +322,17 @@ def update_TP_SSR(args):
     TP_API = args["TP_API"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
+    TP_SSR = args["TP_SSR"] if "TP_SSR" in args and args["TP_SSR"] else 0
     return fn_update_TP_SSR(
-        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_SSR
     )
 
 
 def fn_update_TP_SSR(
-    AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_SSR=0
 ):
     legal_set_TP_SSR = find_divisors(TP_FIR_LEN, TP_SSR_max)
-
+    # print(legal_set_TP_SSR)
     for ssr_val in legal_set_TP_SSR.copy():
         # Call to fn_update_TP_CASC_LEN is done to utilize eliminate_casc_length functions for all ssr-casclen combinations
         # This is to prevent an empy casc_len list
@@ -300,7 +348,23 @@ def fn_update_TP_SSR(
         if ("enum" in param_dict_casc_len) and (param_dict_casc_len["enum"]) == []:
             legal_set_TP_SSR.remove(ssr_val)
 
-    param_dict = {"name": "TP_SSR", "enum": legal_set_TP_SSR}
+        # print(
+        #     AIE_VARIANT,
+        #     TT_DATA,
+        #     TT_COEFF,
+        #     TP_API,
+        #     TP_FIR_LEN,
+        #     ssr_val,
+        #     TP_USE_COEFF_RELOAD,
+        # )
+    if not legal_set_TP_SSR:
+        return False  # If no legal TP_SSR values are found, return False, so that the caller can handle this case and we're not looking for a closest value in an empty list.
+
+    param_dict = {
+        "name": "TP_SSR",
+        "enum": legal_set_TP_SSR,
+        "actual": com.GET_CLOSEST(TP_SSR, legal_set_TP_SSR),
+    }
     return param_dict
 
 
@@ -321,8 +385,11 @@ def fn_validate_TP_SSR(
     AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_SSR
 ):
     param_dict = fn_update_TP_SSR(
-        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD
+        AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_USE_COEFF_RELOAD, TP_SSR
     )
+
+    if param_dict is False:
+        return isError("No valid TP_SSR values found for the given parameters")
     return validate_legal_set(param_dict["enum"], "TP_SSR", TP_SSR)
 
 
@@ -345,7 +412,7 @@ def update_TP_CASC_LEN(args):
 def fn_update_TP_CASC_LEN(
     AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_SSR, TP_USE_COEFF_RELOAD
 ):
-    legal_set_casc1 = list(range(TP_CASC_LEN_min, TP_CASC_LEN_max + 1))
+    legal_set_casc1 = list(range(TP_CASC_LEN_min, TP_CASC_LEN_max))
     legal_set_casc2 = fn_eliminate_casc_len_FirRangeRemAsym(
         TP_FIR_LEN,
         TT_DATA,
@@ -374,6 +441,7 @@ def fn_update_TP_CASC_LEN(
         legal_set_casc=legal_set_casc3.copy(),
     )
     param_dict = {"name": "TP_CASC_LEN"}
+    # print(legal_set_casc1, legal_set_casc2, legal_set_casc3, legal_set_casc4)
 
     if legal_set_casc1 == legal_set_casc4:
         param_dict.update({"minimum": TP_CASC_LEN_min})
@@ -492,6 +560,7 @@ def fn_validate_TP_CASC_LEN(
 ##### TP_INPUT_WINDOW_VSIZE Updater and Validator #####
 #######################################################
 def update_TP_INPUT_WINDOW_VSIZE(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
     TT_COEFF = args["TT_COEFF"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
@@ -502,12 +571,18 @@ def update_TP_INPUT_WINDOW_VSIZE(args):
     else:
         TP_INPUT_WINDOW_VSIZE = 0
     return fn_update_input_window_size(
-        TT_DATA, TT_COEFF, TP_FIR_LEN, TP_API, TP_SSR, TP_INPUT_WINDOW_VSIZE
+        AIE_VARIANT,
+        TT_DATA,
+        TT_COEFF,
+        TP_FIR_LEN,
+        TP_API,
+        TP_SSR,
+        TP_INPUT_WINDOW_VSIZE,
     )
 
 
 def fn_update_input_window_size(
-    TT_DATA, TT_COEFF, TP_FIR_LEN, TP_API, TP_SSR, TP_INPUT_WINDOW_VSIZE
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_API, TP_SSR, TP_INPUT_WINDOW_VSIZE
 ):
 
     # CAUTION: this constant overlaps many factors. The main need is a "strobe" concept that means we unroll until xbuff is back to starting conditions.
@@ -528,12 +603,10 @@ def fn_update_input_window_size(
             TP_SSR,
             TP_INTERPOLATE_FACTOR=1,
             TP_DECIMATE_FACTOR=1,
-            AIE_VARIANT=1,
+            AIE_VARIANT=AIE_VARIANT,
         )
-        # Buffer size per SSR path, hence max input can be a multiple of TP_SSR.
-        TP_INPUT_WINDOW_VSIZE_max = (
-            int(FLOOR(TP_INPUT_WINDOW_VSIZE_max, lcm_ws)) * TP_SSR
-        )
+        # Buffer size per SSR path; lcm_ws already includes TP_SSR factor, so no extra multiply.
+        TP_INPUT_WINDOW_VSIZE_max = int(FLOOR(TP_INPUT_WINDOW_VSIZE_max, lcm_ws))
     else:
         TP_INPUT_WINDOW_VSIZE_max = com.TP_INPUT_WINDOW_VSIZE_max_streams
 
@@ -558,6 +631,7 @@ def fn_update_input_window_size(
 
 
 def validate_TP_INPUT_WINDOW_VSIZE(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
     TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     TT_DATA = args["TT_DATA"]
     TT_COEFF = args["TT_COEFF"]
@@ -565,12 +639,18 @@ def validate_TP_INPUT_WINDOW_VSIZE(args):
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
     return fn_validate_input_window_size(
-        TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR
+        AIE_VARIANT,
+        TT_DATA,
+        TT_COEFF,
+        TP_FIR_LEN,
+        TP_INPUT_WINDOW_VSIZE,
+        TP_API,
+        TP_SSR,
     )
 
 
 def fn_validate_input_window_size(
-    TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR
 ):
     streamRptFactor = 8
     windowSizeMultiplier = (
@@ -583,12 +663,70 @@ def fn_validate_input_window_size(
         return isError(f"TP_INPUT_WINDOW_VSIZE should be a multiple of {lcm_ws}!")
     else:
         param_dict = fn_update_input_window_size(
-            TT_DATA, TT_COEFF, TP_FIR_LEN, TP_API, TP_SSR, TP_INPUT_WINDOW_VSIZE
+            AIE_VARIANT,
+            TT_DATA,
+            TT_COEFF,
+            TP_FIR_LEN,
+            TP_API,
+            TP_SSR,
+            TP_INPUT_WINDOW_VSIZE,
         )
         range_TP_INPUT_WINDOW_VSIZE = [param_dict["minimum"], param_dict["maximum"]]
         return validate_range(
             range_TP_INPUT_WINDOW_VSIZE, "TP_INPUT_WINDOW_VSIZE", TP_INPUT_WINDOW_VSIZE
         )
+
+
+#######################################################
+############# TP_DUAL_IP Updater and Validator ########
+#######################################################
+def update_TP_DUAL_IP(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TP_API = args["TP_API"]
+    return comFirUpd.fn_update_dual_ip_sr_asym(AIE_VARIANT, TP_API)
+
+
+def validate_TP_DUAL_IP(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TP_API = args["TP_API"]
+    TP_DUAL_IP = args["TP_DUAL_IP"]
+    return fn_validate_TP_DUAL_IP(AIE_VARIANT, TP_API, TP_DUAL_IP)
+
+
+def fn_validate_TP_DUAL_IP(AIE_VARIANT, TP_API, TP_DUAL_IP):
+    param_dict = comFirUpd.fn_update_dual_ip_sr_asym(AIE_VARIANT, TP_API)
+    return validate_legal_set(param_dict["enum"], "TP_DUAL_IP", TP_DUAL_IP)
+
+
+#######################################################
+############# TP_NUM_OUTPUTS Updater and Validator ####
+#######################################################
+def update_TP_NUM_OUTPUTS(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TP_API = args["TP_API"]
+    TP_DUAL_IP = args["TP_DUAL_IP"]
+    TP_SSR = args["TP_SSR"]
+    return comFirUpd.fn_update_num_outputs_sr_asym(
+        TP_API, AIE_VARIANT, TP_SSR, TP_DUAL_IP, "TP_NUM_OUTPUTS"
+    )
+
+
+def validate_TP_NUM_OUTPUTS(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TP_API = args["TP_API"]
+    TP_DUAL_IP = args["TP_DUAL_IP"]
+    TP_SSR = args["TP_SSR"]
+    TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
+    return fn_validate_TP_NUM_OUTPUTS(
+        AIE_VARIANT, TP_API, TP_SSR, TP_DUAL_IP, TP_NUM_OUTPUTS
+    )
+
+
+def fn_validate_TP_NUM_OUTPUTS(AIE_VARIANT, TP_API, TP_SSR, TP_DUAL_IP, TP_NUM_OUTPUTS):
+    param_dict = comFirUpd.fn_update_num_outputs_sr_asym(
+        TP_API, AIE_VARIANT, TP_SSR, TP_DUAL_IP, "TP_NUM_OUTPUTS"
+    )
+    return validate_legal_set(param_dict["enum"], "TP_NUM_OUTPUTS", TP_NUM_OUTPUTS)
 
 
 #######################################################
@@ -727,14 +865,38 @@ def fn_validate_coeff(TT_COEFF, TP_FIR_LEN, coeff_list, TP_USE_COEFF_RELOAD):
 #####functions
 
 
-def fnNumLanesStream(*args):
-    return fnNumLanes(*args, TP_API=1)
+def fnNumLanesStream(TT_DATA, TT_COEFF, AIE_VARIANT):
+    # This function corresponds to fnNumLanesStream in C++ traits
+    # Default is fnNumLanes384b, with exceptions using fnNumLanes for specific type combinations
+
+    if AIE_VARIANT == AIE_ML or AIE_VARIANT == AIE_MLv2:
+        # For AIE-ML/MLv2, always use regular fnNumLanes with stream API
+        return fnNumLanes(TT_DATA, TT_COEFF, TP_API=1, AIE_VARIANT=AIE_VARIANT)
+    elif AIE_VARIANT == AIE:
+        # For AIE (__MIN_REGSIZE__ == 128): Default is fnNumLanes384b, with exceptions using fnNumLanes
+        # Exceptions: int32/int16, cint32/int16, cint32/int32, cint32/cint16, float/float, cfloat/float, cfloat/cfloat
+        if (
+            (TT_DATA == "int32" and TT_COEFF == "int16")
+            or (TT_DATA == "cint32" and TT_COEFF == "int16")
+            or (TT_DATA == "cint32" and TT_COEFF == "int32")
+            or (TT_DATA == "cint32" and TT_COEFF == "cint16")
+            or (TT_DATA == "float" and TT_COEFF == "float")
+            or (TT_DATA == "cfloat" and TT_COEFF == "float")
+            or (TT_DATA == "cfloat" and TT_COEFF == "cfloat")
+        ):
+            return fnNumLanes(TT_DATA, TT_COEFF, TP_API=1, AIE_VARIANT=AIE_VARIANT)
+        else:
+            # Default case for AIE
+            return fnNumLanes384b(TT_DATA, TT_COEFF, AIE_VARIANT)
+    else:
+        # Fallback for unknown AIE_VARIANT
+        return fnNumLanes(TT_DATA, TT_COEFF, TP_API=1, AIE_VARIANT=AIE_VARIANT)
 
 
 def fnNumColsStream(T_D, T_C, AIE_VARIANT):
 
     if AIE_VARIANT == AIE_MLv2:
-        # AIE_ML API always calls for 4 columns
+        # AIE_MLv2 API always calls for 4 columns
         return 4
 
     if AIE_VARIANT == AIE_ML:
@@ -742,19 +904,21 @@ def fnNumColsStream(T_D, T_C, AIE_VARIANT):
         return 4
 
     if AIE_VARIANT == AIE:
-
-        # Slight rephrasing (vs traits) to avoid templates and enable runtime check.
-        if T_D == "cint16" or T_D == "int16" or (T_D == "int32" and T_C == "int32"):
-            return fnNumCols384(T_D, T_C)
-        else:
-            # int32,  int16
-            # cint32,  int16
-            # cint32,  int32
-            # cint32, cint16
-            # float,  float
-            # cfloat,  float
-            # cfloat, cfloat
+        # Default is fnNumCols384, with exceptions using fnNumCols
+        # Exceptions: int32/int16, cint32/int16, cint32/int32, cint32/cint16, float/float, cfloat/float, cfloat/cfloat
+        if (
+            (T_D == "int32" and T_C == "int16")
+            or (T_D == "cint32" and T_C == "int16")
+            or (T_D == "cint32" and T_C == "int32")
+            or (T_D == "cint32" and T_C == "cint16")
+            or (T_D == "float" and T_C == "float")
+            or (T_D == "cfloat" and T_C == "float")
+            or (T_D == "cfloat" and T_C == "cfloat")
+        ):
             return fnNumCols(T_D, T_C)
+        else:
+            # Default case: cint16/int16, cint16/cint16, int16/int16, int16/int32, int32/int32, cint16/int32, cint16/cint32, cint32/cint32
+            return fnNumCols384(T_D, T_C)
 
 
 # align to num cols coeffs for FIR cascade splitting for optimal mac efficiency
@@ -766,14 +930,11 @@ def fnStreamFirRangeRound(T_D, T_C, AIE_VARIANT):
 def fnFirRangeOffset(TP_FL, TP_CL, TP_KP, TP_Rnd=1, TP_Sym=1):
 
     # TP_FL - FIR Length, TP_CL - Cascade Length, TP_KP - Kernel Position
-    return (
-        TP_KP * (fnTrunc(TP_FL, TP_Rnd * TP_CL) // TP_CL)
-        + (
-            TP_Rnd * TP_KP
-            if (TP_FL - fnTrunc(TP_FL, TP_Rnd * TP_CL)) >= TP_Rnd * TP_KP
-            else (fnTrunc(TP_FL, TP_Rnd) - fnTrunc(TP_FL, TP_Rnd * TP_CL))
-        )
-    ) // TP_Sym
+    return TP_KP * (fnTrunc(TP_FL, TP_Rnd * TP_CL) // TP_CL) + (
+        TP_Rnd * TP_KP
+        if (TP_FL - fnTrunc(TP_FL, TP_Rnd * TP_CL)) >= TP_Rnd * TP_KP
+        else (fnTrunc(TP_FL, TP_Rnd) - fnTrunc(TP_FL, TP_Rnd * TP_CL))
+    )
 
 
 def fnFirRangeRemAsym(TP_FL, TP_CL, TP_KP, TT_DATA, TT_COEFF, TP_API, AIE_VARIANT):
@@ -832,20 +993,28 @@ def fnFirMargin(TP_FIR_LEN, TT_DATA):
 
 
 def fnStreamReadWidth(T_D, T_C, AIE_VARIANT=1):
-    if AIE_VARIANT == com.AIE and (
-        T_D == "cint16" or T_D == "int16" or (T_D == "int32" and T_C == "int32")
-    ):
-        return 128
+    # This function corresponds to fnStreamReadWidth in C++ traits
+    if AIE_VARIANT == com.AIE_ML or AIE_VARIANT == com.AIE_MLv2:
+        # For AIE-ML and AIE-MLv2 (__MIN_REGSIZE__ == 256): Always return 256
+        return 256
+    elif AIE_VARIANT == com.AIE:
+        # For AIE (__MIN_REGSIZE__ == 128): Default is 128, with exceptions returning 256
+        # Exceptions: int32/int16, cint32/int16, cint32/int32, cint32/cint16, float/float, cfloat/float, cfloat/cfloat
+        if (
+            (T_D == "int32" and T_C == "int16")
+            or (T_D == "cint32" and T_C == "int16")
+            or (T_D == "cint32" and T_C == "int32")
+            or (T_D == "cint32" and T_C == "cint16")
+            or (T_D == "float" and T_C == "float")
+            or (T_D == "cfloat" and T_C == "float")
+            or (T_D == "cfloat" and T_C == "cfloat")
+        ):
+            return 256
+        else:
+            # Default case for AIE: cint16/int16, cint16/cint16, int16/int16, int16/int32, int32/int32, cint16/int32, cint16/cint32, cint32/cint32
+            return 128
     else:
-        # AIE-ML, AIE-MLv2
-        # or
-        # int32,  int16
-        # cint32,  int16
-        # cint32,  int32
-        # cint32, cint16
-        # float,  float
-        # cfloat,  float
-        # cfloat, cfloat
+        # Fallback for unknown AIE_VARIANT
         return 256
 
 

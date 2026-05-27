@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _COMPILING_AND_SIMULATING:
+.. _DSP_COMPILING_AND_SIMULATING:
 
 ************************
 Compiling and Simulating
@@ -82,7 +82,7 @@ To run a test case, specify the test case name passed to the PARAMS argument, e.
 
         make cleanall run PLATFORM=vck190 PARAMS=test_my_design
 
-For a list of all the configurable parameters, see the :ref:`CONFIGURATION_PARAMETERS`.
+For a list of all the configurable parameters, see the :ref:`DSP_CONFIGURATION_PARAMETERS`.
 
 Selecting TARGET
 ^^^^^^^^^^^^^^^^
@@ -155,12 +155,12 @@ Power Analysis
 
 For DSPLIB elements, a naming convention 'VCD' can be used to harvest dynamic power consumption. Once 'VCD' string is added within the test name, VCD file of the simulation data is captured and PDM (Power Design Manager) calculates power metrics. User can find detailed power reports in ``pwr_test`` folder under their corresponding test result directory. Dynamic power result can also be found in the ``logs/status_<config_details>.txt`` file.
 
-.. _CONFIGURATION_PARAMETERS:
+.. _DSP_CONFIGURATION_PARAMETERS:
 
 Library Element Configuration Parameters
 ----------------------------------------
 
-.. _COMMON_CONFIG_PARAMETERS:
+.. _DSP_COMMON_CONFIG_PARAMETERS:
 
 Common Configuration Parameters
 -------------------------------
@@ -175,33 +175,9 @@ Many library elements perform arithmetic and offer a scaling feature exposed as 
     | SHIFT                  |    unsigned    |    8           | Acc results shift down value.        |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
+    | ROUND_MODE             |    unsigned    |    0           | Rounding mode. See table below.      |
     |                        |                |                |                                      |
-    |                        |                |                +------------------+-------------------+
-    |                        |                |                |     AIE          | AIE-ML or AIE-MLv2|
-    |                        |                |                +------------------+-------------------+
-    |                        |                |                |                  |                   |
-    |                        |                |                | 0 - rnd_floor*   | 0 - rnd_floor*    |
-    |                        |                |                |                  |                   |
-    |                        |                |                | 1 - rnd_ceil*    | 1 - rnd_ceil*     |
-    |                        |                |                |                  |                   |
-    |                        |                |                | 2 - rnd_pos_inf  | 2 - rnd_sym_floor*|
-    |                        |                |                |                  |                   |
-    |                        |                |                | 3 - rnd_neg_inf  | 3 - rnd_sym_ceil* |
-    |                        |                |                |                  |                   |
-    |                        |                |                | 4 - rnd_sym_inf  | 8 - rnd_neg_inf   |
-    |                        |                |                |                  |                   |
-    |                        |                |                | 5 - rnd_sym_zero | 9 - rnd_pos_inf   |
-    |                        |                |                |                  |                   |
-    |                        |                |                | 6 - rnd_conv_even| 10 - rnd_sym_zero |
-    |                        |                |                |                  |                   |
-    |                        |                |                | 7 - rnd_conv_odd | 11 - rnd_sym_inf  |
-    |                        |                |                |                  |                   |
-    |                        |                |                |                  | 12 - rnd_conv_even|
-    |                        |                |                |                  |                   |
-    |                        |                |                |                  | 13 - rnd_conv_odd |
-    |                        |                |                |                  |                   |
-    +------------------------+----------------+----------------+------------------+-------------------+
+    +------------------------+----------------+----------------+--------------------------------------+
     | SAT_MODE               |    unsigned    |    1           | Saturation mode.                     |
     |                        |                |                |                                      |
     |                        |                |                | 0 - none                             |
@@ -251,7 +227,41 @@ Many library elements perform arithmetic and offer a scaling feature exposed as 
     |                        |                |                | 22: AIE-MLv2                         |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. _CONFIGURATION_PARAMETERS_BITONIC_SORT:
+.. table:: ROUND_MODE values by device
+
++------+-------------------------+---------------------------+
+| Code | AIE                     | AIE-ML / AIE-MLv2         |
++======+=========================+===========================+
+| 0    | rnd_floor*              | rnd_floor*                |
++------+-------------------------+---------------------------+
+| 1    | rnd_ceil*               | rnd_ceil*                 |
++------+-------------------------+---------------------------+
+| 2    | rnd_pos_inf             | rnd_sym_floor*            |
++------+-------------------------+---------------------------+
+| 3    | rnd_neg_inf             | rnd_sym_ceil*             |
++------+-------------------------+---------------------------+
+| 4    | rnd_sym_inf             | n/a                       |
++------+-------------------------+---------------------------+
+| 5    | rnd_sym_zero            | n/a                       |
++------+-------------------------+---------------------------+
+| 6    | rnd_conv_even           | n/a                       |
++------+-------------------------+---------------------------+
+| 7    | rnd_conv_odd            | n/a                       |
++------+-------------------------+---------------------------+
+| 8    | n/a                     | rnd_neg_inf               |
++------+-------------------------+---------------------------+
+| 9    | n/a                     | rnd_pos_inf               |
++------+-------------------------+---------------------------+
+| 10   | n/a                     | rnd_sym_zero              |
++------+-------------------------+---------------------------+
+| 11   | n/a                     | rnd_sym_inf               |
++------+-------------------------+---------------------------+
+| 12   | n/a                     | rnd_conv_even             |
++------+-------------------------+---------------------------+
+| 13   | n/a                     | rnd_conv_odd              |
++------+-------------------------+---------------------------+
+
+.. _DSP_CONFIGURATION_PARAMETERS_BITONIC_SORT:
 
 Bitonic Sort configuration parameters
 --------------------------------------
@@ -279,16 +289,16 @@ For the Bitonic Sort library element, use the following list of configurable par
     |                        |                |                | bitonic stages.                      |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    4           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`DSP_LEGALITY_CHECKING`
 
-.. _CONFIGURATION_PARAMETERS_CONV_CORR:
+.. _DSP_CONFIGURATION_PARAMETERS_CONV_CORR:
 
 Convolution/Correlation Configuration Parameters
 --------------------------------------------------
@@ -331,7 +341,7 @@ For the Convolution/Correlation library element, the list of configurable parame
     | G_LEN                  |    unsigned    |    32          | Dimension size of vector G.          |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SHIFT                  |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
@@ -341,13 +351,13 @@ For the Convolution/Correlation library element, the list of configurable parame
     |                        |                |                | 1 - stream                           |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    8           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    8           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | NUM_FRAMES             |    unsigned    |    1           | Number of frames in a window.        |
@@ -368,13 +378,13 @@ For the Convolution/Correlation library element, the list of configurable parame
     |                        |                |                |  **F_LEN** is static in both cases   |
     +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE_F            |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
-    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    |                        |                |                | :ref:`DSP_COMMON_CONFIG_PARAMETERS`      |
     +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE_G            |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
-    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    |                        |                |                | :ref:`DSP_COMMON_CONFIG_PARAMETERS`      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. _CONFIGURATION_PARAMETERS_CUMSUM:
+.. _DSP_CONFIGURATION_PARAMETERS_CUMSUM:
 
 Cumulative Sum configuration parameters
 --------------------------------------------------
@@ -408,24 +418,24 @@ For the Cumulative Sum library element the list of configurable parameters and d
     |                        |                |                | (reduced range, higher performance)  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SHIFT                  |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE              |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
-    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    |                        |                |                | :ref:`DSP_COMMON_CONFIG_PARAMETERS`      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    8           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    8           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
 
-.. _CONFIGURATION_PARAMETERS_DDS_MIXER:
+.. _DSP_CONFIGURATION_PARAMETERS_DDS_MIXER:
 
 DDS/Mixer Configuration Parameters
 ----------------------------------
@@ -464,10 +474,10 @@ For the DDS/Mixer library element, use the following list of configurable parame
     |                        |                |                | Defaults to 1.                       |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    16          | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | INITIAL_DDS_OFFSET     |    unsigned    |    0           | Initial DDS offset.                  |
@@ -477,12 +487,12 @@ For the DDS/Mixer library element, use the following list of configurable parame
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | DATA_STIM_TYPE         |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
-    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    |                        |                |                | :ref:`DSP_COMMON_CONFIG_PARAMETERS`      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | USE_PHASE_RELOAD       |    unsigned    | static         | 0: 'static phase'                    |
@@ -499,7 +509,7 @@ Additionally, for the DDS/Mixer library element that uses LUTs, an additional te
 |      |           |         | design.                                                                                     |
 +------+-----------+---------+---------------------------------------------------------------------------------------------+
 
-.. _CONFIGURATION_PARAMETERS_DFT:
+.. _DSP_CONFIGURATION_PARAMETERS_DFT:
 
 DFT Configuration Parameters
 -------------------------------
@@ -520,7 +530,7 @@ For the DFT library element, use the following list of configurable parameters a
     | POINT_SIZE             |    unsigned    |    16          | DFT point size.                      |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    8           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SHIFT                  |    unsigned    |    8           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | FFT_NIFFT              |    unsigned    |    0           | Forward (1) or reverse (0) transform.|
@@ -543,25 +553,25 @@ For the DFT library element, use the following list of configurable parameters a
     |                        |                |                | Defaults to 1.                       |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    8           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    8           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`DSP_LEGALITY_CHECKING`
 
-.. _CONFIGURATION_PARAMETERS_EUCLIDEAN_DISTANCE:
+.. _DSP_CONFIGURATION_PARAMETERS_EUCLIDEAN_DISTANCE:
 
 Euclidean Distance Configuration Parameters
 -------------------------------------------
@@ -587,10 +597,10 @@ For the Euclidean Distance library element, use the following list of configurab
     |                        |                |                | 0: window                            |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | RND                    |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | RND                    |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT                    |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SAT                    |    unsigned    |    1           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | IS_OUTPUT_SQUARED      |    unsigned    |    0           | Compute output as:                   |
@@ -601,9 +611,9 @@ For the Euclidean Distance library element, use the following list of configurab
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`DSP_LEGALITY_CHECKING`
 
-.. _CONFIGURATION_PARAMETERS_FFT:
+.. _DSP_CONFIGURATION_PARAMETERS_FFT:
 
 FFT Configuration Parameters
 -------------------------------
@@ -624,7 +634,7 @@ For the FFT/iFFT library element, use the following list of configurable paramet
     | POINT_SIZE             |    unsigned    |    1024        | FFT point size.                      |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    17          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SHIFT                  |    unsigned    |    17          | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | FFT_NIFFT              |    unsigned    |    0           | Forward (1) or reverse (0) transform.|
@@ -651,25 +661,25 @@ For the FFT/iFFT library element, use the following list of configurable paramet
     |                        |                |                | Super Sample Rate operation.         |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    4           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`DSP_LEGALITY_CHECKING`
 
-.. _CONFIGURATION_PARAMETERS_FFT_WINDOW:
+.. _DSP_CONFIGURATION_PARAMETERS_FFT_WINDOW:
 
 FFT Window Configuration Parameters
 --------------------------------------
@@ -690,7 +700,7 @@ For the FFT Window library element, use the following list of configurable param
     | POINT_SIZE             |    unsigned    |    1024        | FFT point size.                      |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    17          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SHIFT                  |    unsigned    |    17          | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | WINDOW_VSIZE           |    unsigned    |    1024        | Input/Output window size.            |
@@ -718,25 +728,25 @@ For the FFT Window library element, use the following list of configurable param
     |                        |                |                | 3: Kaiser                            |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    4           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`DSP_LEGALITY_CHECKING`
 
-.. _CONFIGURATION_PARAMETERS_FILTERS:
+.. _DSP_CONFIGURATION_PARAMETERS_FILTERS:
 
 FIR Configuration Parameters
 -------------------------------
@@ -757,7 +767,7 @@ The following list consists of configurable parameters for FIR library elements 
     | FIR_LEN                |    unsigned    |    81          | FIR length.                          |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SHIFT                  |    unsigned    |    16          | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | INPUT_WINDOW_VSIZE     |    unsigned    |    512         | Input window size.                   |
@@ -779,7 +789,7 @@ The following list consists of configurable parameters for FIR library elements 
     | DUAL_IP                |    unsigned    |    0           | Dual inputs used in FIRs,            |
     |                        |                |                | see note below.                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NUM_OUTPUTS            |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NUM_OUTPUTS            |    unsigned    |    1           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | USE_COEFF_RELOAD       |    unsigned    |    0           | Use two sets of reloadable           |
@@ -799,17 +809,17 @@ The following list consists of configurable parameters for FIR library elements 
     |                        |                |                | see note below                       |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    16          | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | DATA_STIM_TYPE         |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
-    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    |                        |                |                | :ref:`DSP_COMMON_CONFIG_PARAMETERS`      |
     +------------------------+----------------+----------------+--------------------------------------+
     | COEFF_STIM_TYPE        |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
-    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    |                        |                |                | :ref:`DSP_COMMON_CONFIG_PARAMETERS`      |
     +------------------------+----------------+----------------+--------------------------------------+
     | USE_CUSTOM_CONSTRAINT  |    unsigned    |    0           | Overwrite default or non-existent.   |
     |                        |                |                |                                      |
@@ -818,21 +828,21 @@ The following list consists of configurable parameters for FIR library elements 
     |                        |                |                | 1: use the Graph's access functions  |
     |                        |                |                | to set a location and                |
     |                        |                |                | overwrite a fifo_depth constraint.   |
-    |                        |                |                | see also :ref:`FIR_CONSTRAINTS`      |
+    |                        |                |                | see also :ref:`DSP_FIR_CONSTRAINTS`      |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`DSP_LEGALITY_CHECKING`
 
 .. note:: Not all dsplib elements support all of the above configurable parameters. Unsupported parameters which are not used have no impact on execution, e.g., the `INTERPOLATE_FACTOR` parameter is only supported by interpolation filters and will be ignored by other library elements.
 
-.. _CONFIGURATION_PARAMETERS_FUNC_APPROX:
+.. _DSP_CONFIGURATION_PARAMETERS_FUNC_APPROX:
 
 Function Approximation configuration parameters
 -----------------------------------------------
@@ -870,15 +880,15 @@ For the Function Approximation library element, use the list of configurable par
     |                        |                |                | 3 - EXP_FUNC                         |
     |                        |                |                | 4 - INV_FUNC                         |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  | unsigned       | 0              | See :ref:`COMMON_CONFIG_PARAMETERS`. |
+    | SHIFT                  | unsigned       | 0              | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`. |
     +------------------------+----------------+----------------+--------------------------------------+
-    | WINDOW_VSIZE           | unsigned       | 6              | See :ref:`COMMON_CONFIG_PARAMETERS`. |
+    | WINDOW_VSIZE           | unsigned       | 6              | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`. |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             | unsigned       | 0              | See :ref:`COMMON_CONFIG_PARAMETERS`. |
+    | ROUND_MODE             | unsigned       | 0              | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`. |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               | unsigned       | 1              | See :ref:`COMMON_CONFIG_PARAMETERS`. |
+    | SAT_MODE               | unsigned       | 1              | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`. |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  | unsigned       | 4              | See :ref:`COMMON_CONFIG_PARAMETERS`. |
+    | NITER                  | unsigned       | 4              | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`. |
     +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE              | unsigned       | 0              | This parameter drives the input data |
     |                        |                |                | stimulus differently from other      |
@@ -891,7 +901,7 @@ For the Function Approximation library element, use the list of configurable par
     |                        |                |                | the selected DOMAIN_MODE.            |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. _CONFIGURATION_PARAMETERS_HADAMARD:
+.. _DSP_CONFIGURATION_PARAMETERS_HADAMARD:
 
 Hadamard Product configuration parameters
 -----------------------------------------
@@ -915,7 +925,7 @@ For the Hadamard Product library element, use the list of configurable parameter
     | NUM_FRAMES             |    unsigned    |    1           | Number of vectors to be processed.   |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    6           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SHIFT                  |    unsigned    |    6           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
@@ -925,25 +935,25 @@ For the Hadamard Product library element, use the list of configurable parameter
     |                        |                |                | 1 - stream                           |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    4           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`DSP_LEGALITY_CHECKING`
 
-.. _CONFIGURATION_PARAMETERS_KRONECKER:
+.. _DSP_CONFIGURATION_PARAMETERS_KRONECKER:
 
 Kronecker configuration parameters
 --------------------------------------
@@ -983,28 +993,28 @@ For the Kronecker library element the list of configurable parameters and defaul
     |                        |                |                | 1 - in window / out stream           |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SHIFT                  |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | UUT_SSR                |    unsigned    |    1           | Super Sample Rate.                   |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    4           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`DSP_LEGALITY_CHECKING`
 
-.. _CONFIGURATION_PARAMETERS_GEMM:
+.. _DSP_CONFIGURATION_PARAMETERS_GEMM:
 
 Matrix Multiply Configuration Parameters
 -------------------------------------------
@@ -1034,10 +1044,10 @@ For the Matrix Multiply (GEMM) library element, use the following list of config
     | P_DIM_B                |    unsigned    |    16          | Input B Dimension.                   |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    20          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SHIFT                  |    unsigned    |    20          | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | P_CASC_LEN             |    unsigned    |    1           | Cascade length.                      |
@@ -1070,25 +1080,25 @@ For the Matrix Multiply (GEMM) library element, use the following list of config
     |                        |                |                |                                      |
     |                        |                |                | add additional detiling kernel = 1   |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    16          | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE_A            |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
-    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    |                        |                |                | :ref:`DSP_COMMON_CONFIG_PARAMETERS`      |
     +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE_B            |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
-    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    |                        |                |                | :ref:`DSP_COMMON_CONFIG_PARAMETERS`      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`DSP_LEGALITY_CHECKING`
 
-.. _CONFIGURATION_PARAMETERS_GEMV:
+.. _DSP_CONFIGURATION_PARAMETERS_GEMV:
 
 Matrix Vector Multiply Configuration Parameters
 -----------------------------------------------
@@ -1112,10 +1122,10 @@ For the Matrix Vector Multiply (GEMV) library element, use the following list of
     | DIM_B                  |    unsigned    |    16          | Input Vector B Dimension             |
     |                        |                |                | (number of matrix columns).          |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SHIFT                  |    unsigned    |    16          | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | UUT_SSR                |    unsigned    |    1           |  Super Sample Rate.                  |
@@ -1144,25 +1154,25 @@ For the Matrix Vector Multiply (GEMV) library element, use the following list of
     |                        |                |                | 2 - dual outputs per SSR rank,       |
     |                        |                |                | stream only                          |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    16          | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE_A            |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
-    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    |                        |                |                | :ref:`DSP_COMMON_CONFIG_PARAMETERS`      |
     +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE_B            |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
-    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    |                        |                |                | :ref:`DSP_COMMON_CONFIG_PARAMETERS`      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`DSP_LEGALITY_CHECKING`
 
-.. _CONFIGURATION_PARAMETERS_MRFFT:
+.. _DSP_CONFIGURATION_PARAMETERS_MRFFT:
 
 Mixed Radix FFT Configuration Parameters
 ----------------------------------------
@@ -1183,7 +1193,7 @@ For the Mixed Radix library element, use the following list of configurable para
     | POINT_SIZE             |    unsigned    |    48          | FFT point size.                      |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    6           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SHIFT                  |    unsigned    |    6           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | FFT_NIFFT              |    unsigned    |    0           | Forward (1) or reverse (0) transform.|
@@ -1203,26 +1213,26 @@ For the Mixed Radix library element, use the following list of configurable para
     |                        |                |                | 1: stream                            |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    4           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`DSP_LEGALITY_CHECKING`
 
 
-.. _CONFIGURATION_PARAMETERS_OUTER_TENSOR:
+.. _DSP_CONFIGURATION_PARAMETERS_OUTER_TENSOR:
 
 Outer Tensor configuration parameters
 --------------------------------------
@@ -1249,7 +1259,7 @@ For the Outer Tensor library element, use the following list of configurable par
     | NUM_FRAMES             |    unsigned    |    1           | Number of frames in a window.        |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SHIFT                  |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
@@ -1263,22 +1273,22 @@ For the Outer Tensor library element, use the following list of configurable par
     |                        |                |                | Defaults to 1.                       |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    4           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | ROUND_MODE             |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | ROUND_MODE             |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               |    unsigned    |    1           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | SAT_MODE               |    unsigned    |    1           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE              |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`DSP_LEGALITY_CHECKING`
 
-.. _CONFIGURATION_PARAMETERS_SAMPLE_DELAY:
+.. _DSP_CONFIGURATION_PARAMETERS_SAMPLE_DELAY:
 
 Sample Delay Configuration Parameters
 -------------------------------------
@@ -1300,7 +1310,7 @@ For the Sample Delay library elements, use the following list of configurable pa
     |                        |                |                |                                      |
     |                        |                |                | 1 = stream                           |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    16          | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | DELAY_INI_VALUE        |    unsigned    |    10          | The delay to the input data.         |
@@ -1310,11 +1320,11 @@ For the Sample Delay library elements, use the following list of configurable pa
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | DATA_STIM_TYPE         |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
-    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    |                        |                |                | :ref:`DSP_COMMON_CONFIG_PARAMETERS`      |
     +------------------------+----------------+----------------+--------------------------------------+
 
 
-.. _CONFIGURATION_PARAMETERS_WIDGETS:
+.. _DSP_CONFIGURATION_PARAMETERS_WIDGETS:
 
 Widgets Configuration Parameters
 -----------------------------------
@@ -1353,14 +1363,14 @@ For the Widgets library elements, use the following list of configurable paramet
     |                        |                |                | or from the input window             |
     |                        |                |                | to dual output streams.              |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    16          | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | DATA_STIM_TYPE         |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
-    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    |                        |                |                | :ref:`DSP_COMMON_CONFIG_PARAMETERS`      |
     +------------------------+----------------+----------------+--------------------------------------+
 
 
@@ -1377,17 +1387,17 @@ For the Widgets library elements, use the following list of configurable paramet
     +------------------------+----------------+----------------+--------------------------------------+
     | WINDOW_VSIZE           |    unsigned    |    256         | Input/Output window size.            |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    16          | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | NITER                  |    unsigned    |    16          | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`COMMON_CONFIG_PARAMETERS`  |
+    | DIFF_TOLERANCE         |    unsigned    |    0           | See :ref:`DSP_COMMON_CONFIG_PARAMETERS`  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | DATA_STIM_TYPE         |    unsigned    |    0           | See ``STIM_TYPE`` in                 |
-    |                        |                |                | :ref:`COMMON_CONFIG_PARAMETERS`      |
+    |                        |                |                | :ref:`DSP_COMMON_CONFIG_PARAMETERS`      |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`LEGALITY_CHECKING`
+.. note:: Given parameter values are subject to checks early in compilation to ensure support. See :ref:`DSP_LEGALITY_CHECKING`
 
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN

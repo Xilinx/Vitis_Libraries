@@ -50,7 +50,13 @@ parser.add_argument(
     type=str,
     help="Name of the AIE object. Found in the input cfg file.",
 )
-
+# optional argument dual_streams
+parser.add_argument(
+    "-ds",
+    "--dual_streams",
+    type=int,
+    help="Set to 1 to generate config for dual stream AIE implementation (only applicable for AIE variant 1 with port API), 0 otherwise",
+)
 args = parser.parse_args()
 SSR = args.ssr
 fname = args.cfg_file_name
@@ -60,6 +66,9 @@ ipVersion = str(args.version)
 addBackTranspose = int(args.add_back_transpose)
 aieName = str(args.aie_obj_name)
 dataType = str(args.data_type)
+dualStreams = int(args.dual_streams)
+kStreamsPerPort = 2 if dualStreams == 1 else 1
+kEffSSR = SSR * kStreamsPerPort
 
 if dataType == "cint16":
     aie_buff_descriptors_works = True
@@ -70,6 +79,7 @@ else:
 plReadWidth = 128
 samplesPerRead = (int)(plReadWidth / sample_size)
 ssrInt = (int)(SSR*(plReadWidth/sample_size))
+kNumFFTKernels = samplesPerRead*kStreamsPerPort
 
 f = open(f"{fname}", "w")
 
@@ -84,7 +94,7 @@ freqhz={freqhz}:ssr_fft.ap_clk
 # ------------------------------------------------------------
 
 # PL Transpose kernels:
-nk = parallel_fft:1:ssr_fft
+nk = ssr_fft_wrapper:1:ssr_fft
 
 
 vss = amd:dsplib:{vssName}:{ipVersion}:ssr_fft,ai_engine_0
@@ -96,34 +106,59 @@ vss = amd:dsplib:{vssName}:{ipVersion}:ssr_fft,ai_engine_0
 
 """
 else:
-    if dataType == "cint16":
+    if dataType == "cint16" and dualStreams == 0:
         common_begin_cfg = f"""
 freqhz={freqhz}:ssr_fft_wrapper_1.ap_clk,ssr_fft_wrapper_2.ap_clk,ssr_fft_wrapper_3.ap_clk,ssr_fft_wrapper_4.ap_clk,back_transpose.ap_clk,splitter.ap_clk,joiner.ap_clk"""
-    else:
+    elif dataType == "cint16" and dualStreams == 1:
+        common_begin_cfg = f"""
+freqhz={freqhz}:ssr_fft_wrapper_1.ap_clk,ssr_fft_wrapper_2.ap_clk,ssr_fft_wrapper_3.ap_clk,ssr_fft_wrapper_4.ap_clk,ssr_fft_wrapper_5.ap_clk,ssr_fft_wrapper_6.ap_clk,ssr_fft_wrapper_7.ap_clk,ssr_fft_wrapper_8.ap_clk,back_transpose_1.ap_clk,back_transpose_2.ap_clk,splitter_1.ap_clk,joiner_1.ap_clk,splitter_2.ap_clk,joiner_2.ap_clk"""
+    elif dataType != "cint16" and dualStreams == 0:
         common_begin_cfg = f"""
 freqhz={freqhz}:ssr_fft_wrapper_1.ap_clk,ssr_fft_wrapper_2.ap_clk,back_transpose.ap_clk,splitter.ap_clk,joiner.ap_clk"""
+    else:
+        common_begin_cfg = f"""
+freqhz={freqhz}:ssr_fft_wrapper_1.ap_clk,ssr_fft_wrapper_2.ap_clk,ssr_fft_wrapper_3.ap_clk,ssr_fft_wrapper_4.ap_clk,back_transpose_1.ap_clk,back_transpose_2.ap_clk,splitter_1.ap_clk,joiner_1.ap_clk,splitter_2.ap_clk,joiner_2.ap_clk"""
 
-    common_begin_cfg += f"""
+    if dualStreams == 0:
+        common_begin_cfg += f"""
 [connectivity]
 # ------------------------------------------------------------
 # HLS PL Kernels:
 # ------------------------------------------------------------
 
 # PL Transpose kernels:
-nk= back_transpose_simple_wrapper:1:back_transpose
-nk = joiner_wrapper:1:joiner
-nk = splitter_wrapper:1:splitter
-nk = ssr_fft_wrapper:{samplesPerRead}
-"""
-
-    if dataType == "cint16":
-        common_begin_cfg += f"""
-vss = amd:dsplib:{vssName}:{ipVersion}:back_transpose,ssr_fft_wrapper_1,ssr_fft_wrapper_2,ssr_fft_wrapper_3,ssr_fft_wrapper_4,ai_engine_0,splitter,joiner
+nk= back_transpose_simple_wrapper:{kStreamsPerPort}:back_transpose
+nk = joiner_wrapper:{kStreamsPerPort}:joiner
+nk = splitter_wrapper:{kStreamsPerPort}:splitter
+nk = ssr_fft_wrapper:{kNumFFTKernels}
 """
     else:
         common_begin_cfg += f"""
+[connectivity]
+# ------------------------------------------------------------
+# HLS PL Kernels:
+# ------------------------------------------------------------
+
+# PL Transpose kernels:
+nk= back_transpose_simple_wrapper:{kStreamsPerPort}:back_transpose_1,back_transpose_2
+nk = joiner_wrapper:{kStreamsPerPort}:joiner_1,joiner_2
+nk = splitter_wrapper:{kStreamsPerPort}:splitter_1,splitter_2
+nk = ssr_fft_wrapper:{kNumFFTKernels}
+"""
+    if dataType == "cint16" and dualStreams == 0:
+        common_begin_cfg += f"""
+vss = amd:dsplib:{vssName}:{ipVersion}:back_transpose,ssr_fft_wrapper_1,ssr_fft_wrapper_2,ssr_fft_wrapper_3,ssr_fft_wrapper_4,ai_engine_0,splitter,joiner
+"""
+    elif dataType == "cint16" and dualStreams == 1:
+        common_begin_cfg += f"""
+vss = amd:dsplib:{vssName}:{ipVersion}:back_transpose_1,back_transpose_2,ssr_fft_wrapper_1,ssr_fft_wrapper_2,ssr_fft_wrapper_3,ssr_fft_wrapper_4,ssr_fft_wrapper_5,ssr_fft_wrapper_6,ssr_fft_wrapper_7,ssr_fft_wrapper_8,ai_engine_0,splitter_1,joiner_1,splitter_2,joiner_2"""
+    elif dataType != "cint16" and dualStreams == 0:
+        common_begin_cfg += f"""
 vss = amd:dsplib:{vssName}:{ipVersion}:back_transpose,ssr_fft_wrapper_1,ssr_fft_wrapper_2,ai_engine_0,splitter,joiner
 """
+    else:
+        common_begin_cfg += f"""
+vss = amd:dsplib:{vssName}:{ipVersion}:back_transpose_1,back_transpose_2,ssr_fft_wrapper_1,ssr_fft_wrapper_2,ssr_fft_wrapper_3,ssr_fft_wrapper_4,ai_engine_0,splitter_1,joiner_1,splitter_2,joiner_2"""
 
 common_begin_cfg += f"""
 # ------------------------------------------------------------
@@ -140,23 +175,45 @@ f.write(common_begin_cfg)
 comment = "# AIE FFT TO PL FFT:\n"
 f.write(comment)
 
-if SSR == 1:
-    text = "sc = ai_engine_0.{aieName}_PLIO_front_out_0" + ":ssr_fft.inData" + "\n"
-    f.write(text)
-else:
-    for i in range(SSR):
-        text = f'''sc = ai_engine_0.{aieName}_PLIO_front_out_{i}:splitter.sig_i_{i}\n'''
+if dualStreams == 0:
+    if kEffSSR == 1:
+        text = f"sc = ai_engine_0.{aieName}_PLIO_front_out_0" + ":ssr_fft.inData" + "\n"
         f.write(text)
-    for i in range(SSR):
-        for samp in range(samplesPerRead):
-            curStream = samp*SSR+i
-            text = f'''sc = splitter.sig_i_int_{curStream}:ssr_fft_wrapper_{samp+1}.inData_{i}\n'''
-            f.write(text)
-    for i in range(SSR):
-        for samp in range(samplesPerRead):
-            curStream = samp*SSR+i
-            text = f'''sc = ssr_fft_wrapper_{samp+1}.outData_{i}:joiner.sig_o_int_{curStream}\n'''
-            f.write(text)
+    else:
+        for i in range(kEffSSR):
+                text = f'''sc = ai_engine_0.{aieName}_PLIO_front_out_{i}:splitter.sig_i_{i}\n'''
+                f.write(text)
+        for i in range(kEffSSR):
+            for samp in range(samplesPerRead):
+                curStream = samp*kEffSSR+i
+                text = f'''sc = splitter.sig_i_int_{curStream}:ssr_fft_wrapper_{samp+1}.inData_{i}\n'''
+                f.write(text)
+        for i in range(kEffSSR):
+            for samp in range(samplesPerRead):
+                curStream = samp*kEffSSR+i
+                text = f'''sc = ssr_fft_wrapper_{samp+1}.outData_{i}:joiner.sig_o_int_{curStream}\n'''
+                f.write(text)
+else:
+    for i in range(kEffSSR):
+        split_idx = i // SSR
+        port_idx = i % SSR
+        text = f'''sc = ai_engine_0.{aieName}_PLIO_front_out_{i}:splitter_{split_idx+1}.sig_i_{port_idx}\n'''
+        f.write(text)
+    for split_idx in range(kStreamsPerPort):
+        for i in range(SSR):
+            for samp in range(samplesPerRead):
+                wrapper_idx = samp * kStreamsPerPort + split_idx + 1
+                curStream = samp * SSR + i
+                text = f'''sc = splitter_{split_idx+1}.sig_i_int_{curStream}:ssr_fft_wrapper_{wrapper_idx}.inData_{i}\n'''
+                f.write(text)
+    for samp in range(samplesPerRead):
+        joiner_idx = samp + 1
+        for i in range(SSR):
+            for split_idx in range(kStreamsPerPort):
+                wrapper_idx = samp * kStreamsPerPort + split_idx + 1
+                offset = split_idx * SSR
+                text = f'''sc = ssr_fft_wrapper_{wrapper_idx}.outData_{i}:joiner_{joiner_idx}.sig_o_int_{offset+i}\n'''
+                f.write(text)
 
 
 
@@ -164,13 +221,19 @@ if addBackTranspose == 1:
     comment = "# PL FFT TO PL TRANSPOSE:\n"
     f.write(comment)
 
-    if SSR == 1:
-        text = "sc = ssr_fft.outData" + ":back_transpose.sig_i" + "\n"
-        f.write(text)
-    else:
-        for i in range(SSR):
-            text = f'''sc = joiner.sig_o_{i}:back_transpose.sig_i_{i}\n'''
+    if dualStreams == 0:
+        if kEffSSR == 1:
+            text = "sc = ssr_fft.outData" + ":back_transpose.sig_i" + "\n"
             f.write(text)
+        else:
+            for i in range(kEffSSR):
+                text = f'''sc = joiner.sig_o_{i}:back_transpose.sig_i_{i}\n'''
+                f.write(text)
+    else:
+        for j_idx in range(kStreamsPerPort):
+            for i in range(SSR):
+                text = f'''sc = joiner_{j_idx+1}.sig_o_{i}:back_transpose_{j_idx+1}.sig_i_{i}\n'''
+                f.write(text)
 
 
 closing_text = f"""

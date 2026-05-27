@@ -48,6 +48,8 @@
     "DIM_A_LEADING" : "TP_DIM_A_LEADING",
     "P_DIM_B_LEADING" : "TP_DIM_B_LEADING",
     "P_DIM_OUT_LEADING" : "TP_DIM_OUT_LEADING",
+    "DIM_Q_LEADING": "TP_DIM_Q_LEADING",
+    "DIM_R_LEADING": "TP_DIM_R_LEADING",
     "P_ADD_TILING_A" : "TP_ADD_TILING_A",
     "P_ADD_TILING_B" : "TP_ADD_TILING_B",
     "P_ADD_DETILING_OUT" : "TP_ADD_DETILING_OUT",
@@ -107,7 +109,15 @@
     "UPPER" : "TP_UPPER",
     "MODE" : "TP_MODE",
     "GRID_DIM" : "TP_GRID_DIM",
-    "Throughput (MSa/s)": "Throughput",
-    "Latency (ns)": "Latency",
-    "NUM_AIE": "NUM_AIE"
+    "DIAG_INV" : "TP_DIAG_INV",
+    "USE_LUT_RELOAD" : "TP_USE_LUT_RELOAD",
+    "L_LEADING": "TP_L_LEADING",
+    "SUBST_TYPE": "TP_SUBST_TYPE",
+
+    "THROUGHPUT (MSA/S)": "THROUGHPUT",
+    "LATENCY (NS)": "LATENCY",
+    "NUM_AIE": "NUM_AIE",
+    "FIR_TYPE": "FIR_TYPE",
+    "CYCLECOUNTAVG": "CYCLES",
+    "NUM_BANKS": "NUM_BANKS"
 }

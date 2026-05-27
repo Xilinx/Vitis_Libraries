@@ -56,6 +56,7 @@
             "name": "TP_DIM",
             "description": "The number of inputs in port.",
             "type": "uint",
+            "test_max": 8192,
             "updater": {
                 "file": "bitonic_sort.py",
                 "function": "update_TP_DIM",
@@ -77,6 +78,7 @@
             "name": "TP_NUM_FRAMES",
             "description": "The number of operations per call to the kernel",
             "type": "uint",
+            "test_max": 32,
             "updater": {
                 "file": "bitonic_sort.py",
                 "function": "update_TP_NUM_FRAMES",

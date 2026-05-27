@@ -14,11 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# usage -> in the test directory of a specific function do:
-# 			make -f ../common/scripts/run_pack.mk all_pack PARAMS=<test from multi_params> TARGET=<x86sim or aiesim> PLATFORM=<vck190 or vek280> PARAMS_FILE=<name of multi_params file>
-#
-# 			If no TARGET or PLATFORM are specified, the script will gather these parameters from the PARAMS name if it contains x86sim / hw and vck190 / vek280 respectively
-#
 
 PARAMS ?=test_0_tool_canary_aie
 PARAMS_FILE ?=multi_params.json
@@ -32,7 +27,7 @@ ifndef XPART
 	else ifeq ($(findstring _aie2_,$(PARAMS)),_aie2_)
 		PLATFORM=vek280
 	else ifeq ($(findstring _aie22_,$(PARAMS)),_aie22_)
-		XPART=xc2ve3858-ssva2112-2LP-e-S
+		XPART=xc2ve3858-ssva2112-2MP-e-S
 	else
 		PLATFORM=vck190
 	endif
@@ -48,7 +43,7 @@ ifdef XPART
 PART_OR_PLATFORM=XPART
 # Alias
 ifeq ($(XPART), aie_mlv2)
-PART_OR_PLATFORM_VAL=xc2ve3858-ssva2112-2LP-e-S
+PART_OR_PLATFORM_VAL=xc2ve3858-ssva2112-2MP-e-S
 else
 PART_OR_PLATFORM_VAL=$(XPART)
 endif

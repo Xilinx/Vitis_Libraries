@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _WIDGET_API_CAST:
+.. _DSP_WIDGET_API_CAST:
 
 ===============
 Widget API Cast
@@ -34,17 +34,17 @@ The widget API cast supports int16, cint16, int32, cint32, float, and cfloat typ
 Template Parameters
 ===================
 
-To see details on the template parameters for the Widget API Cast, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the Widget API Cast, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-To see details on the access functions for the Widget API Cast, see :ref:`API_REFERENCE`.
+To see details on the access functions for the Widget API Cast, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the Widget API Cast, see :ref:`API_REFERENCE`.
+To see details on the ports for the Widget API Cast, see :ref:`DSP_API_REFERENCE`.
 
 Design Notes
 ============

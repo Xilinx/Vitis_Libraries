@@ -22,6 +22,8 @@
 HELPER_CUR_DIR ?= .
 HELPER_ROOT_DIR ?= ./../../../../
 
+include ./utils.mk
+
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 CC_TOLERANCE ?= 0
 DIFF_MODE ?= PERCENT
@@ -113,11 +115,24 @@ ifeq ($(DYN_PT_SIZE), 1)
 	endif
 endif
 
-PLIO_WIDTH  = 64
+# PLIO_WIDTH  = 64
+PLIO_WIDTH  = 128
 
 NUM_OUTPUTS = $(NUM_INPUTS)
 
-PARAM_MAP = DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) CASC_LEN $(CASC_LEN) DYN_PT_SIZE $(DYN_PT_SIZE) WINDOW_VSIZE $(WINDOW_VSIZE) PARALLEL_POWER $(PARALLEL_POWER) API_IO $(API_IO) USE_WIDGETS $(USE_WIDGETS) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) TWIDDLE_MODE $(TWIDDLE_MODE) DATA_OUT_TYPE $(DATA_OUT_TYPE) AIE_VARIANT $(AIE_VARIANT)
+USE_PKT_SWITCHING ?= 0
+POLYPHASE_ORDER ?= 0
+NPORT_I ?= 1
+NPORT_O ?= 1
+
+PKT_SPLITTERS = $(shell echo $$(( $(NUM_INPUTS) / $(NPORT_I) )))
+PKT_SIZE = $(shell echo $$(( $(INPUT_WINDOW_VSIZE) / $(NUM_INPUTS) )))
+PKT_MERGERS = $(shell echo $$(( $(NUM_OUTPUTS) / $(NPORT_O) )))
+INPUT_FILE_PATTERN = "data/input_[0-9]*_0.txt"
+OUTPUT_FILE_PATTERN = "*simulator_output/data/output_pkts_[0-9]*_0.txt"
+
+META_PARAM_MAP = DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) CASC_LEN $(CASC_LEN) DYN_PT_SIZE $(DYN_PT_SIZE) WINDOW_VSIZE $(WINDOW_VSIZE) PARALLEL_POWER $(PARALLEL_POWER) API_IO $(API_IO) USE_WIDGETS $(USE_WIDGETS) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) TWIDDLE_MODE $(TWIDDLE_MODE) DATA_OUT_TYPE $(DATA_OUT_TYPE) AIE_VARIANT $(AIE_VARIANT)
+PARAM_MAP = $(META_PARAM_MAP) USE_PKT_SWITCHING $(USE_PKT_SWITCHING) POLYPHASE_ORDER $(POLYPHASE_ORDER) NPORT_I $(NPORT_I) NPORT_O $(NPORT_O) SINGLE_BUF $(SINGLE_BUF)
 
 HELPER:= $(HELPER_CUR_DIR)/.HELPER
 
@@ -126,15 +141,13 @@ $(HELPER): create_input sim_ref prep_x86_out
 
 create_config:
 	@echo creating configuration
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP);
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(META_PARAM_MAP);
 
 create_input:
 	@echo starting create_input
-	@echo NUM_INPUTS $(NUM_INPUTS)
-	@echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  ${PARALLEL_POWER} 0 0 0 0 ${PLIO_WIDTH} ${HEADER_SIZE};
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  ${PARALLEL_POWER} 0 0 0 0 ${PLIO_WIDTH} ${HEADER_SIZE};
-	@echo perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k $(HEADER_SIZE) -w ${WINDOW_VSIZE} -plioWidth ${PLIO_WIDTH} ;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k $(HEADER_SIZE) -w ${WINDOW_VSIZE} -plioWidth ${PLIO_WIDTH};\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k $(HEADER_SIZE) -w ${INPUT_WINDOW_VSIZE} -plioWidth ${PLIO_WIDTH};\
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_recombine.py --combine 1 --input_pattern $(INPUT_FILE_PATTERN) --group_size $(PKT_SPLITTERS) --windowVsize ${PKT_SIZE}  --data_type $(DATA_TYPE) --output_file data/input_pkts
 	echo Input ready
 
 sim_ref:
@@ -156,21 +169,16 @@ prep_aie_out:
 	done
 
 get_diff:
-	@echo starting get_diff
-	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_OUT_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 -k $(HEADER_SIZE) -w ${WINDOW_VSIZE} -plioWidth ${PLIO_WIDTH};\
+	echo starting get_diff
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_recombine.py --output_pattern $(OUTPUT_FILE_PATTERN) --windowVsize ${WINDOW_VSIZE} --data_type $(DATA_OUT_TYPE) --output_file $(UUT_SIM_FILE) --combine 0 --group_size $(PKT_MERGERS)
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_OUT_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 -k $(HEADER_SIZE) -w ${WINDOW_VSIZE} -plioWidth ${PLIO_WIDTH}
 	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_OUT_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 -k $(HEADER_SIZE) -w ${WINDOW_VSIZE} -plioWidth ${PLIO_WIDTH}
-	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) $(DIFF_MODE);\
-    tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) $(DIFF_MODE)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) $(DIFF_MODE)
 
 get_latency:
 	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input_0_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(INPUT_WINDOW_VSIZE) $(NITER)
-
-get_stats:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(INPUT_WINDOW_VSIZE) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output fftMain $(NITER)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file T_input_0_0.txt -t_out_file uut_output_0_0.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(INPUT_WINDOW_VSIZE) -niter $(NITER) -casc_len $(CASC_LEN) -aiesim_out_dir ./aiesimulator_output -ip fftMain
 
 get_status:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) SINGLE_BUF $(SINGLE_BUF)
-
-harvest_mem:
-	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)

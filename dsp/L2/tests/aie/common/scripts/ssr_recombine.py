@@ -1,3 +1,4 @@
+#
 # Copyright (C) 2019-2022, Xilinx, Inc.
 # Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
@@ -31,6 +32,7 @@ def parse_args():
     parser.add_argument('--windowVsize', type=int, required=True, help='Number of samples per SSR file per packet')
     parser.add_argument('--data_type', required=True, help='Sample precision in bits (16 or 32)')
     parser.add_argument('--output_file', required=True, help='Output file name')
+    parser.add_argument('--polyphase_order', type=int, default=0, help='Polyphase order: 0 - sequential (default), 1 - polyphase')
     parser.add_argument('--verbose', action='store_true', help='Verbose output')
     return parser.parse_args()
 
@@ -110,8 +112,10 @@ def format_64bit_csv(samples, sample_bits):
         rows.append(row)
     return rows
 
-def combine_files(input_ssr_files, windowVsize, data_type, output_file, verbose):
+def combine_files(input_ssr_files, totalWindowVsize, data_type, output_file, verbose):
     ssr_data = read_samples(input_ssr_files)
+    windowVsize = totalWindowVsize // len(input_ssr_files)
+    # windowVsize = 128
     # Reconstruct 32-bit samples for int16/cint16 types
     if data_type in ['cint16', 'int16']:
         ssr_32bit_data = []
@@ -170,24 +174,29 @@ def combine_files(input_ssr_files, windowVsize, data_type, output_file, verbose)
         'cfloat': 32,
         'cint32': 32,
         'cint16': 32,
+        'cbfloat16' : 32,
         'float': 32,
         'int32': 32,
         'int16': 32,
+        'bfloat16' : 32,
         'int8': 32
     }[data_type]
     samples_per_line = {
         'cfloat': 2,
         'cint32': 2,
         'cint16': 2,
+        'cbfloat16' : 2,
         'float': 2,
         'int32': 2,
         'int16': 2,
+        'bfloat16': 2,
         'int8': 2
     }[data_type]
     csv_header = get_samples_csv_header(samples_per_line)
 
     if verbose:
         print(f"num_ssr: {num_ssr}")
+        print(f"windowVsize: {windowVsize}")
         print(f"max_len: {max_len}")
         print(f"num_packets: {num_packets}")
 
@@ -200,17 +209,11 @@ def combine_files(input_ssr_files, windowVsize, data_type, output_file, verbose)
                 # Write 32-bit packet index
                 packet_samples = add_header(ssr_idx, sample_bits)
 
-                if verbose:
-                    print(f"packet_samples: {packet_samples}")
                 start = pkt_idx * windowVsize
                 end = min(start + windowVsize, len(ssr_data[ssr_idx]))
                 # Write packet data
                 packet_samples.extend(ssr_data[ssr_idx][start:end])
-                if verbose:
-                    print(f"packet_samples with ssr_data: {packet_samples}")
                 words = format_64bit(packet_samples, sample_bits)
-                if verbose:
-                    print(f"words: {words}")
                 for word in words:
                     out.write(word + '\n')
             if verbose:
@@ -228,6 +231,12 @@ def combine_files(input_ssr_files, windowVsize, data_type, output_file, verbose)
                 start = pkt_idx * windowVsize
                 end = min(start + windowVsize, len(ssr_data[ssr_idx]))
                 packet_samples.extend(ssr_data[ssr_idx][start:end])
+                if verbose:
+                    # print(f"packet_samples: {packet_samples}")
+                    print(f"start: {start}")
+                    print(f"end: {end}")
+                    print(f"start + windowVsize: {start + windowVsize}")
+                    print(f"len(ssr_data[ssr_idx]): {len(ssr_data[ssr_idx])}")
                 rows = format_64bit_csv(packet_samples, sample_bits)
                 writer.writerows(rows)
 
@@ -242,7 +251,7 @@ def get_samples_csv_header(samples_per_line):
         csv_header = ['CMD', 'D', 'TKEEP', 'TLAST']
     return csv_header
 
-def unpack_64bit_txt(input_txt, data_type, output_prefix, output_idx, pkt_streams_per_file, verbose=False):
+def unpack_64bit_txt(input_txt, data_type, output_prefix, output_idx, output_idx_offset, polyphase_order, verbose=False):
     sample_bits = {
         'cfloat': 32,
         'cint32': 32,
@@ -283,7 +292,10 @@ def unpack_64bit_txt(input_txt, data_type, output_prefix, output_idx, pkt_stream
         samples = line.split()
         # First sample(s) are header (packet index)
         packet_hdr_idx = int(samples[header_idx]) & 0xFF
-        packet_index = packet_hdr_idx + (output_idx * pkt_streams_per_file)
+        if polyphase_order == 1:
+            output_index = packet_hdr_idx * (output_idx_offset) + output_idx
+        else:
+            output_index = packet_hdr_idx + (output_idx * output_idx_offset)
         data_samples = samples[header_idx+1:]  # skip header
         if verbose:
             print(f"header_idx {header_idx}")
@@ -291,7 +303,7 @@ def unpack_64bit_txt(input_txt, data_type, output_prefix, output_idx, pkt_stream
             print(f"samples {samples}")
             print(f"data_samples {data_samples}")
             print(f"packet_hdr_idx {packet_hdr_idx}")
-            print(f"packet_index {packet_index}")
+            print(f"output_index {output_index}")
         collected = []
         # Add the first data sample sent alongside packet header
         collected.extend(data_samples)
@@ -316,8 +328,6 @@ def unpack_64bit_txt(input_txt, data_type, output_prefix, output_idx, pkt_stream
                     break
             elif line.startswith('T ') and len(line.split()) == 3 and line.split()[2].endswith('s'):
                 # Discard timestamp lines like "T [number] [p]s"
-                if verbose:
-                    print(f"Discarding timestamp line: {line}")
                 idx += 1
             else:
                 samples = line.split()
@@ -361,7 +371,7 @@ def unpack_64bit_txt(input_txt, data_type, output_prefix, output_idx, pkt_stream
                 reconstructed.extend([low])
             collected = reconstructed
         # Write to output file
-        out_file = f"{output_prefix}_{packet_index}_0.txt"
+        out_file = f"{output_prefix}_{output_index}_0.txt"
         os.makedirs(os.path.dirname(out_file), exist_ok=True)
         with open(out_file, 'a') as out:
             words = []
@@ -384,14 +394,26 @@ def main():
     if args.combine == 1:
         # Expand pattern to actual file list
         input_ssr_files = sorted(glob.glob(args.input_pattern))
+        group_size = args.group_size
         total_files = len(input_ssr_files)
-
+        files_per_group = total_files // group_size
         if total_files == 0:
             print(f"No files matched pattern: {args.input_pattern}")
             return
 
         # Group input files
-        file_groups = [input_ssr_files[i:i+args.group_size] for i in range(0, total_files, args.group_size)]
+        if args.polyphase_order == 1:
+            # Polyphase grouping
+            file_groups = []
+            for i in range(group_size):
+                group_files = [input_ssr_files[j] for j in range(i, total_files, files_per_group)]
+                file_groups.append(group_files)
+                if verbose:
+                    print(f"Group idx: {i}")
+                    print(f"group_files: {group_files}")
+        else:
+            # Sequential grouping
+            file_groups = [input_ssr_files[i:i+group_size] for i in range(0, total_files, group_size)]
 
         for group_idx, file_group in enumerate(file_groups):
             output_pkt_file = f"{args.output_file}_{group_idx}_0"
@@ -405,7 +427,13 @@ def main():
         # Expand pattern to actual file list
         input_pkt_files = sorted(glob.glob(args.output_pattern))
         total_files = len(input_pkt_files)
-        pkt_streams_per_file = args.group_size
+        # Set Output file Index offset
+        if args.polyphase_order == 0:
+            # Sequential Order
+            output_idx_offset = args.group_size
+        else:
+            # Polyphase Order
+            output_idx_offset = total_files
 
         if total_files == 0:
             print(f"No files matched pattern: {args.output_pattern}")
@@ -415,9 +443,10 @@ def main():
             if verbose:
                 print(f"Processing file idx: {file_idx}")
                 print(f"input_pkt_file: {input_pkt_file}")
+                print(f"output_idx_offset: {output_idx_offset}")
             # Unpack TXT and CSV formats
             output_prefix = os.path.splitext(args.output_file)[0]
-            unpack_64bit_txt(input_pkt_file, args.data_type, output_prefix, file_idx, pkt_streams_per_file, args.verbose)
+            unpack_64bit_txt(input_pkt_file, args.data_type, output_prefix, file_idx, output_idx_offset, args.polyphase_order, args.verbose)
 
 if __name__ == "__main__":
     main()

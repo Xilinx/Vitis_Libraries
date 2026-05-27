@@ -27,33 +27,49 @@ xf::dsp::aie::testcase::test_graph conv_corr_TestHarness;
 int main(void) {
     conv_corr_TestHarness.init();
 
-#if (USE_RTP_VECTOR_LENGTHS == 1)
-    conv_corr_TestHarness.m_inVecLen[0] = (int32)(REF_F_LEN);
-    conv_corr_TestHarness.m_inVecLen[1] = (int32)(G_LEN);
+#if (USE_RTP_VECTOR_LENGTHS == 1) // RTP
 
-#ifdef USING_UUT
-    conv_corr_TestHarness.update(conv_corr_TestHarness.rtpVecLen[0], conv_corr_TestHarness.m_inVecLen, 2);
+    // Fix rand() seed so UUT and reference generate identical RTP length sequences.
+    // Without this, any divergence in rand() state between the two executables causes
+    // getRtpFLen/getRtpGLen to produce different lengths, making the diff comparison invalid.
+    srand(SEED_RTP);
+
+    // First half: iter 0 uses minimum lengths; subsequent iters use varied non-power-of-2 lengths
+    for (unsigned int iter = 0; iter < (NITER / 2); iter++) {
+        unsigned int rtpFLen, rtpGLen;
+        if (iter == 0) {
+            rtpFLen = getMinLen<DATA_F>(); // min valid F: 2 vector loads
+            rtpGLen = getMinLen<DATA_G>(); // min valid G: 2 vector loads
+            if (rtpFLen < rtpGLen) {
+                rtpFLen = rtpGLen; // mixed types: set F to meet F >= G
+            }
+        } else {
+            constexpr unsigned int minFLen = getMinLen<DATA_F>();
+            rtpFLen = getRtpFLen<DATA_F, REF_F_LEN>();
+            rtpGLen = getRtpGLen<DATA_G, G_LEN>();
+            if (rtpFLen < rtpGLen) {
+                // set F to the smallest valid multiple of minFLen that satisfies F >= G.
+                // Avoids collapsing to compile-time maxima on every mixed-type iteration.
+                rtpFLen = ((rtpGLen + minFLen - 1u) / minFLen) * minFLen; // smallest valid F >= G
+                if (rtpFLen > REF_F_LEN) {
+                    rtpFLen = REF_F_LEN;
+                    rtpGLen = G_LEN;
+                } // G exceeds max F: use compile-time max
+            }
+        }
+
+        conv_corr_TestHarness.conv_corrGraph.update_rtp(conv_corr_TestHarness, conv_corr_TestHarness.rtpVecLen, rtpFLen,
+                                                        rtpGLen);
+        conv_corr_TestHarness.run(1);
+        conv_corr_TestHarness.wait();
+    }
+
+    conv_corr_TestHarness.conv_corrGraph.update_rtp(conv_corr_TestHarness, conv_corr_TestHarness.rtpVecLen, REF_F_LEN,
+                                                    G_LEN);
     conv_corr_TestHarness.run(NITER / 2);
-    conv_corr_TestHarness
-        .wait(); // Async : the kernel execution waits for the first update to happen for parameter initialization
-    conv_corr_TestHarness.update(conv_corr_TestHarness.rtpVecLen[0], conv_corr_TestHarness.m_inVecLen, 2);
-    conv_corr_TestHarness.run(NITER / 2);
-#else
-#if (API_IO == 1)
-    conv_corr_TestHarness.update(conv_corr_TestHarness.rtpVecLen[0], conv_corr_TestHarness.m_inVecLen, 2);
-    conv_corr_TestHarness.run(1);
-    conv_corr_TestHarness
-        .wait(); // Async : the kernel execution waits for the first update to happen for parameter initialization
-#else
-    conv_corr_TestHarness.update(conv_corr_TestHarness.rtpVecLen[0], conv_corr_TestHarness.m_inVecLen, 2);
-    conv_corr_TestHarness.run(NITER / 2);
-    conv_corr_TestHarness
-        .wait(); // Async : the kernel execution waits for the first update to happen for parameter initialization
-    conv_corr_TestHarness.update(conv_corr_TestHarness.rtpVecLen[0], conv_corr_TestHarness.m_inVecLen, 2);
-    conv_corr_TestHarness.run(NITER / 2);
-#endif
-#endif
-#else
+    conv_corr_TestHarness.wait();
+
+#else // NON RTP
 #ifdef USING_UUT
     conv_corr_TestHarness.run(NITER);
 #else
@@ -63,7 +79,7 @@ int main(void) {
     conv_corr_TestHarness.run(NITER);
 #endif
 #endif
-#endif
+#endif // END of NON RTP
 
     conv_corr_TestHarness.end();
 

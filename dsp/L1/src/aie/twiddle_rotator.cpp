@@ -33,6 +33,29 @@ namespace dsp {
 namespace aie {
 namespace fft {
 namespace twidRot {
+
+// Helper function template to handle output writes
+// Each specialization declares its own output types
+template <unsigned int TP_API, typename TT_DATA_TYPE, unsigned int NUM_DATA_LANES>
+inline void writeOutputData(T_outputIF<TT_DATA_TYPE, TP_API>& outInterface,
+                            const ::aie::vector<TT_DATA_TYPE, NUM_DATA_LANES>& outVect,
+                            ::aie::vector<TT_DATA_TYPE, NUM_DATA_LANES>*& outPtr) {
+    if
+        constexpr(TP_API == 0) {
+            // Memory/Window output mode - use passed pointer (initialized per kernel invocation)
+            *outPtr++ = outVect;
+        }
+    else {
+        // Stream output mode - use interface directly (no static caching)
+        ::aie::vector<TT_DATA_TYPE, NUM_DATA_LANES / 2> out128a =
+            ::aie::filter_even< ::aie::vector<TT_DATA_TYPE, NUM_DATA_LANES> >(outVect);
+        ::aie::vector<TT_DATA_TYPE, NUM_DATA_LANES / 2> out128b =
+            ::aie::filter_odd< ::aie::vector<TT_DATA_TYPE, NUM_DATA_LANES> >(outVect);
+        writeincr<aie_stream_resource_out::a, TT_DATA_TYPE, NUM_DATA_LANES / 2>(outInterface.outStream0, out128a);
+        writeincr<aie_stream_resource_out::b, TT_DATA_TYPE, NUM_DATA_LANES / 2>(outInterface.outStream1, out128b);
+    }
+}
+
 template <typename TT_DATA,
           typename TT_TWIDDLE,
           unsigned int TP_WINDOW_SIZE,
@@ -40,16 +63,29 @@ template <typename TT_DATA,
           unsigned int TP_PT_SIZE_D2,
           unsigned int TP_SSR,
           unsigned int TP_FFT_NIFFT,
-          unsigned int TP_PHASE>
-NOINLINE_DECL void
-twiddleRotator<TT_DATA, TT_TWIDDLE, TP_WINDOW_SIZE, TP_PT_SIZE_D1, TP_PT_SIZE_D2, TP_SSR, TP_FFT_NIFFT, TP_PHASE>::
-    twiddleRotation(input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_DATA>& __restrict outWindow) {
+          unsigned int TP_PHASE,
+          unsigned int TP_API>
+NOINLINE_DECL void twiddleRotator<TT_DATA,
+                                  TT_TWIDDLE,
+                                  TP_WINDOW_SIZE,
+                                  TP_PT_SIZE_D1,
+                                  TP_PT_SIZE_D2,
+                                  TP_SSR,
+                                  TP_FFT_NIFFT,
+                                  TP_PHASE,
+                                  TP_API>::twiddleRotationMain(T_inputIF<TT_DATA> inInterface,
+                                                               T_outputIF<TT_DATA, TP_API> outInterface) {
     using dataVect_t = ::aie::vector<TT_DATA, m_kNumDataLanes>;
     using twidVect_t = ::aie::vector<TT_TWIDDLE, m_kNumTwLanes>;
     using accVect_t = ::aie::accum<typename tAccBaseTypeMul<TT_DATA, TT_TWIDDLE>::type, m_kNumDataLanes>;
 
-    dataVect_t* inPtr = (dataVect_t*)inWindow.data();
-    dataVect_t* outPtr = (dataVect_t*)outWindow.data();
+    dataVect_t* inPtr = (dataVect_t*)inInterface.inWindow->data();
+
+    // Initialize output pointer at start of each kernel invocation (not static)
+    dataVect_t* outPtr = nullptr;
+    if
+        constexpr(TP_API == 0) { outPtr = (dataVect_t*)outInterface.outWindow->data(); }
+
     dataVect_t inData, outVect;
     dataVect_t inData2, outVect2;
     accVect_t acc;
@@ -106,7 +142,7 @@ twiddleRotator<TT_DATA, TT_TWIDDLE, TP_WINDOW_SIZE, TP_PT_SIZE_D1, TP_PT_SIZE_D2
                             else {
                                 outVect = acc.template to_vector<TT_DATA>();
                             }
-                            *outPtr++ = outVect;
+                            writeOutputData<TP_API, TT_DATA, m_kNumDataLanes>(outInterface, outVect, outPtr);
                         }
                     }
             }
@@ -131,11 +167,11 @@ twiddleRotator<TT_DATA, TT_TWIDDLE, TP_WINDOW_SIZE, TP_PT_SIZE_D1, TP_PT_SIZE_D2
                         inData = *inPtr++;
                         acc = ::aie::mul(twidAct.template extract<m_kNumDataLanes>(0), inData);
                         outVect = acc.template to_vector<TT_DATA>(m_kShift);
-                        *outPtr++ = outVect;
+                        writeOutputData<TP_API, TT_DATA, m_kNumDataLanes>(outInterface, outVect, outPtr);
                         inData2 = *inPtr++;
                         acc2 = ::aie::mul(twidAct.template extract<m_kNumDataLanes>(1), inData2);
                         outVect2 = acc2.template to_vector<TT_DATA>(m_kShift);
-                        *outPtr++ = outVect2;
+                        writeOutputData<TP_API, TT_DATA, m_kNumDataLanes>(outInterface, outVect2, outPtr);
                     }
                 }
         }
@@ -158,6 +194,60 @@ twiddleRotator<TT_DATA, TT_TWIDDLE, TP_WINDOW_SIZE, TP_PT_SIZE_D1, TP_PT_SIZE_D2
             }
     }
 };
+
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_WINDOW_SIZE,
+          unsigned int TP_PT_SIZE_D1,
+          unsigned int TP_PT_SIZE_D2,
+          unsigned int TP_SSR,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_PHASE,
+          unsigned int TP_API>
+NOINLINE_DECL void twiddleRotator<TT_DATA,
+                                  TT_TWIDDLE,
+                                  TP_WINDOW_SIZE,
+                                  TP_PT_SIZE_D1,
+                                  TP_PT_SIZE_D2,
+                                  TP_SSR,
+                                  TP_FFT_NIFFT,
+                                  TP_PHASE,
+                                  TP_API>::twiddleRotation(input_buffer<TT_DATA>& __restrict inWindow,
+                                                           output_buffer<TT_DATA>& __restrict outWindow) {
+    T_inputIF<TT_DATA> inInterface;
+    T_outputIF<TT_DATA, TP_API> outInterface;
+    inInterface.inWindow = &inWindow;
+    outInterface.outWindow = &outWindow;
+    this->twiddleRotationMain(inInterface, outInterface);
+}
+
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_WINDOW_SIZE,
+          unsigned int TP_PT_SIZE_D1,
+          unsigned int TP_PT_SIZE_D2,
+          unsigned int TP_SSR,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_PHASE,
+          unsigned int TP_API>
+NOINLINE_DECL void twiddleRotator<TT_DATA,
+                                  TT_TWIDDLE,
+                                  TP_WINDOW_SIZE,
+                                  TP_PT_SIZE_D1,
+                                  TP_PT_SIZE_D2,
+                                  TP_SSR,
+                                  TP_FFT_NIFFT,
+                                  TP_PHASE,
+                                  TP_API>::twiddleRotationStream(input_buffer<TT_DATA>& __restrict inWindow,
+                                                                 output_stream<TT_DATA>* outStream0,
+                                                                 output_stream<TT_DATA>* outStream1) {
+    T_inputIF<TT_DATA> inInterface;
+    T_outputIF<TT_DATA, TP_API> outInterface;
+    inInterface.inWindow = &inWindow;
+    outInterface.outStream0 = outStream0;
+    outInterface.outStream1 = outStream1;
+    this->twiddleRotationMain(inInterface, outInterface);
+}
 }
 }
 }

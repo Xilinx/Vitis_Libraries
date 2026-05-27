@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# this generates the VSS config file based on paramters
 import argparse
 
 parser = argparse.ArgumentParser(
@@ -34,7 +33,13 @@ parser.add_argument(
     type=int,
     help="AIE variant",
 )
-
+parser.add_argument(
+    "-ds",
+    "--dual_streams",
+    type=int,
+    help="Set to 1 to generate config for dual stream AIE implementation",
+    default=0,
+)
 args = parser.parse_args()
 SSR = args.ssr
 fname = args.cfg_file_name

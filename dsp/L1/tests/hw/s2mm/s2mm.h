@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 //
 // Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 // SPDX-License-Identifier: MIT
@@ -17,6 +33,11 @@ namespace s2mm {
 struct cint16 {};
 struct cint32 {};
 struct cfloat {};
+
+#ifndef POINT_SIZE_D1
+#define POINT_SIZE_D1 1
+#endif
+
 template <unsigned int TP_POINT_SIZE>
 static constexpr unsigned int fnPtSizeD1() {
     unsigned int sqrtVal =
@@ -51,19 +72,25 @@ template <unsigned int len, unsigned int rnd>
 static constexpr unsigned int fnCeil() {
     return (len + rnd - 1) / rnd * rnd;
 }
+#ifndef API_IO
+static constexpr unsigned API_IO = 0;
+#endif
+// API_IO will only be allowed for AIE1, so dual streams is inferred.
+static constexpr unsigned NSTREAM_INT = (API_IO == 1) ? (NSTREAM * 2) : NSTREAM;
+
 static constexpr unsigned NBITS = 128; // Size of PLIO bus on PL side @ 312.5 MHz
 typedef ap_uint<NBITS> TT_DATA;        // Equals two 'cint32' samples
 // static constexpr unsigned DATAWIDTH      =std::is_same<TT_DATA, cint16>::value ? 32 : 64; // it can be one of cint16,
 // cint32, cfloat
 static constexpr unsigned samplesPerRead = NBITS / DATAWIDTH;
-static constexpr unsigned ptSizeD1 = fnPtSizeD1<POINT_SIZE>();
+static constexpr unsigned ptSizeD1 = (POINT_SIZE_D1 == 1) ? fnPtSizeD1<POINT_SIZE>() : POINT_SIZE_D1;
 typedef ap_uint<NBITS / samplesPerRead> TT_SAMPLE; // Samples are 'cint32'
 typedef hls::stream<TT_DATA> TT_STREAM;
-static constexpr unsigned ptSizeD1Ceil = fnCeil<ptSizeD1, NSTREAM>();
+static constexpr unsigned ptSizeD1Ceil = fnCeil<ptSizeD1, NSTREAM_INT>();
 static constexpr unsigned ptSizeD2 = POINT_SIZE / ptSizeD1;
-static constexpr unsigned ptSizeD2Ceil = fnCeil<ptSizeD2, NSTREAM>();
+static constexpr unsigned ptSizeD2Ceil = fnCeil<ptSizeD2, NSTREAM_INT>();
 static constexpr unsigned memSizeAct = (ptSizeD2Ceil * ptSizeD1) / samplesPerRead;
 };
 
 // Run:
-void s2mm_wrapper(s2mm::TT_DATA mem[NITER][s2mm::memSizeAct], s2mm::TT_STREAM sig_i[NSTREAM]);
+void s2mm_wrapper(s2mm::TT_DATA mem[NITER][s2mm::memSizeAct], s2mm::TT_STREAM sig_i[s2mm::NSTREAM_INT]);

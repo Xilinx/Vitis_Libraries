@@ -43,7 +43,6 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_SHIFT,
-          unsigned int TP_API,
           unsigned int TP_RND,
           unsigned int TP_SAT>
 
@@ -62,19 +61,10 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_SHIFT,
-          unsigned int TP_API,
-          unsigned int TP_SSR,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-class outer_tensor_ref : public outer_tensor_ref_base<TT_DATA_A,
-                                                      TT_DATA_B,
-                                                      TP_DIM_A,
-                                                      TP_DIM_B,
-                                                      TP_NUM_FRAMES,
-                                                      TP_SHIFT,
-                                                      TP_API,
-                                                      TP_RND,
-                                                      TP_SAT> {
+class outer_tensor_ref
+    : public outer_tensor_ref_base<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SHIFT, TP_RND, TP_SAT> {
    private:
    public:
     using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;

@@ -150,6 +150,10 @@ class create_par_kernels_vss_decomp {
  *introduce errors
  *         - 1: 0.5 amplitude. Twiddle values are 1/2 that of mode 0 so as to avoid twiddle saturation. However,
  *twiddles are one bit less precise versus mode 0.
+ * @tparam TP_POINT_SIZE_D1 specifies how an expert user wants the FFT to be decomposed. It specifies the size of first
+ *dimension of the decomposed FFT.
+ * @tparam TP_CASC_LEN selects the number of kernels the first dimension of the FFT will be divided over in series
+ *         to improve throughput
  *
   **/
 template <typename TT_DATA,
@@ -161,7 +165,12 @@ template <typename TT_DATA,
           unsigned int TP_SSR = 0,
           unsigned int TP_RND = 4,
           unsigned int TP_SAT = 1,
-          unsigned int TP_TWIDDLE_MODE = 0>
+          unsigned int TP_TWIDDLE_MODE = 0,
+          unsigned int TP_POINT_SIZE_D1 = 1, // Setting default to 1 to indicate thet the user has not set a
+                                             // decomposition value. If value is left to default then the best choice
+                                             // will be calculated internally.
+          unsigned int TP_CASC_LEN = 1,
+          unsigned int TP_USE_WIDGETS = 0>
 class vss_fft_ifft_1d_graph : public graph {
    public:
     // FFT twiddle rotation kernels that follow the first set of FFT operations.
@@ -175,13 +184,21 @@ class vss_fft_ifft_1d_graph : public graph {
     // This is a port that interfaces with a PL kernel internal to the VSS.
     port_array<output, TP_SSR> front_o;
 
+#if __HAS_MEM_TILE__ == 1
+    adf::shared_buffer<TT_DATA> memTileFrontIn[TP_SSR];
+    adf::shared_buffer<TT_DATA> memTileFrontOut[TP_SSR];
+    adf::shared_buffer<TT_DATA> memTileBackIn[TP_SSR];
+    adf::shared_buffer<TT_DATA> memTileBackOut[TP_SSR];
+#endif
+
    private:
     static constexpr unsigned int kIntDynPtSize = 0;
     static constexpr unsigned int kIntParPow = 0;
     static constexpr unsigned int kIntCascLen = 1;
     static constexpr unsigned int kIntUseWidg = 0;
     static constexpr unsigned int kHeaderBytes = kIntDynPtSize > 0 ? 32 : 0;
-    static constexpr unsigned int kPtSizeD1 = fnPtSizeD1<TP_POINT_SIZE, modeAIEffts, TP_SSR>();
+    static constexpr unsigned int kPtSizeD1 =
+        (TP_POINT_SIZE_D1 == 1) ? fnPtSizeD1<TP_POINT_SIZE, modeAIEffts, TP_SSR>() : TP_POINT_SIZE_D1;
     static constexpr unsigned int kPtSizeD2 = TP_POINT_SIZE / kPtSizeD1;
     static constexpr unsigned int kPtSizeD2Ceil = fnCeil<kPtSizeD2, TP_SSR>();
     static constexpr unsigned int kFirstFFTShift = TP_SHIFT / 2;
@@ -199,20 +216,20 @@ class vss_fft_ifft_1d_graph : public graph {
     static constexpr int kInv = TP_FFT_NIFFT == 1 ? -1 : 1;
     static constexpr unsigned int kSamplesPerRead =
         128 / (sizeof(TT_DATA) * 8); // 128 is the width of data read by subsequent PL kernels
-    static constexpr bool kUseBDTranspose =
-        (sizeof(TT_DATA) <= __MAX_BD_DSIZE_TPOSE__) && (kWindowSizeRaw1 * 2 * sizeof(TT_DATA) <= __DATA_MEM_BYTES__)
-            ? true
-            : false;
+    static constexpr bool kUseBDTranspose = (!fnCheckIfPwr2<kWindowSizeCalc1>())
+                                                ? false
+                                                : ((sizeof(TT_DATA) <= __MAX_BD_DSIZE_TPOSE__) &&
+                                                           (kWindowSizeRaw1 * 2 * sizeof(TT_DATA) <= __DATA_MEM_BYTES__)
+                                                       ? true
+                                                       : false);
     static constexpr bool kUseMemTileTranspose =
-        __HAS_MEM_TILE__ == 1 && (kWindowSizeRaw2 * 2 * sizeof(TT_DATA) > __DATA_MEM_BYTES__) ? true : false;
-    static constexpr bool kUseBDTiling = sizeof(TT_DATA) <= __MAX_BD_DSIZE_TILING__ ? true : false;
-    static constexpr bool kUseMemTileTiling = __HAS_MEM_TILE__ == 1 ? true : false;
-#if __HAS_MEM_TILE__ == 1
-    adf::shared_buffer<TT_DATA> memTileFrontIn[TP_SSR];
-    adf::shared_buffer<TT_DATA> memTileFrontOut[TP_SSR];
-    adf::shared_buffer<TT_DATA> memTileBackIn[TP_SSR];
-    adf::shared_buffer<TT_DATA> memTileBackOut[TP_SSR];
-#endif
+        (!fnCheckIfPwr2<kWindowSizeCalc1>())
+            ? false
+            : (__HAS_MEM_TILE__ == 1 && (kWindowSizeRaw2 * 2 * sizeof(TT_DATA) > __DATA_MEM_BYTES__) ? true : false);
+    static constexpr bool kUseBDTiling =
+        (!fnCheckIfPwr2<kWindowSizeCalc1>()) ? false : (sizeof(TT_DATA) <= __MAX_BD_DSIZE_TILING__ ? true : false);
+    static constexpr bool kUseMemTileTiling =
+        (!fnCheckIfPwr2<kWindowSizeCalc1>()) ? false : (__HAS_MEM_TILE__ == 1 ? true : false);
 
     // This static assert may trigger only for point sizes that are not perfect square numbers.
     // The window size for the front and back FFTs need to be equal and they also need to be a divisible by the front
@@ -269,12 +286,12 @@ class vss_fft_ifft_1d_graph : public graph {
                            kPtSizeD1,
                            TP_FFT_NIFFT,
                            kFirstFFTShift,
-                           kIntCascLen,
+                           TP_CASC_LEN,
                            kIntDynPtSize,
                            kWindowSizeCalc1,
                            TP_API,
                            kIntParPow,
-                           kIntUseWidg,
+                           TP_USE_WIDGETS,
                            TP_RND,
                            TP_SAT,
                            TP_TWIDDLE_MODE>
@@ -286,12 +303,12 @@ class vss_fft_ifft_1d_graph : public graph {
                            kPtSizeD2,
                            TP_FFT_NIFFT,
                            kSecondFFTShift,
-                           kIntCascLen,
+                           TP_CASC_LEN,
                            kIntDynPtSize,
                            kWindowSizeCalc2,
                            TP_API,
                            kIntParPow,
-                           kIntUseWidg,
+                           TP_USE_WIDGETS,
                            TP_RND,
                            TP_SAT,
                            TP_TWIDDLE_MODE>
@@ -413,7 +430,6 @@ class vss_fft_ifft_1d_graph : public graph {
                                           .stride = kSamplesPerRead,
                                           .wrap = ((kPtSizeD2 / TP_SSR / kSamplesPerRead))},
                                      }});
-
                     // Middle transpose to back BDs
                     memTileBackIn[ss] = adf::shared_buffer<TT_DATA>::create({(kPtSizeD2), (kPtSizeD1 / TP_SSR)}, 1, 1);
                     num_buffers(memTileBackIn[ss]) = 2;

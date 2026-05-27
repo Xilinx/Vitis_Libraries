@@ -26,11 +26,11 @@ int ceil(int x, int y) {
 }
 
 void dut() {
-    using TT_STREAM_IN = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::t_stream_in;
-    using TT_STREAM_OUT = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::t_stream_out;
-    using TT_SAMPLE = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::t_sample;
-    using TT_DATA = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::t_data;
-    constexpr int SAMPLES_PER_READ = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::kSamplesPerRead;
+    using TT_STREAM_IN = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH, POINT_SIZE_D1>::t_stream_in;
+    using TT_STREAM_OUT = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH, POINT_SIZE_D1>::t_stream_out;
+    using TT_SAMPLE = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH, POINT_SIZE_D1>::t_sample;
+    using TT_DATA = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH, POINT_SIZE_D1>::t_data;
+    constexpr int SAMPLES_PER_READ = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH, POINT_SIZE_D1>::kSamplesPerRead;
     constexpr int NSTREAM_IN = SSR;
     constexpr int NSTREAM_OUT = NSTREAM_IN * SAMPLES_PER_READ;
     TT_STREAM_IN sig_i[NSTREAM_IN];
@@ -43,8 +43,8 @@ void dut() {
     TT_SAMPLE rdData2 = 0;
 
     // Load stream stimulus:
-    unsigned numStores = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::kNumStores; // 7
-    int ptSizeD1 = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH>::kPtSizeD1;
+    unsigned numStores = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH, POINT_SIZE_D1>::kNumStores; // 7
+    int ptSizeD1 = backTransposeSimpleCls<POINT_SIZE, SSR, DATAWIDTH, POINT_SIZE_D1>::kPtSizeD1;
     int ptSizeD2 = POINT_SIZE / ptSizeD1;
     int memSize = POINT_SIZE;
 

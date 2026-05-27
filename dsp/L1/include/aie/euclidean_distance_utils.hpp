@@ -46,7 +46,7 @@ struct tEDAccType {
     using type = accfloat;
 };
 
-// Retun type of accumulator and output data type for AIE-1
+// Return type of accumulator for AIE-1
 #if (__HAS_ACCUM_PERMUTES__ == 1)
 // float
 template <>
@@ -54,9 +54,9 @@ struct tEDAccType<float> {
     using type = accfloat;
 };
 
-#endif // __HAS_ACCUM_PERMUTES__ == 1 for AIE
+#endif // __HAS_ACCUM_PERMUTES__ == 1 for AIE-1
 
-// Retun type of accumulator and output data type for AIE-2
+// Return type of accumulator for AIE-ML and AIE-MLv2
 #if (__HAS_ACCUM_PERMUTES__ == 0)
 // float
 template <>
@@ -70,19 +70,10 @@ struct tEDAccType<bfloat16> {
     using type = accfloat;
 };
 
-#endif // __HAS_ACCUM_PERMUTES__ == 0 for AIE-ML
+#endif // __HAS_ACCUM_PERMUTES__ == 0 for AIE-ML and AIE-MLv2
 
 template <typename T_D>
 using tEDAccType_t = typename tEDAccType<T_D>::type;
-
-// T_acc struct with ::aie::accum
-template <typename TT_DATA>
-struct T_acc_ED {
-    using v_type = ::aie::accum<tEDAccType_t<TT_DATA>, fnEDNumLanes<TT_DATA>()>;
-    v_type val, uval;
-    static constexpr unsigned getLanes() { return (fnEDNumLanes<TT_DATA>()); };
-    static constexpr unsigned getSize() { return getAccSize<TT_DATA>(); };
-};
 
 } // namespace euclidean_distance {
 } // namespace aie {

@@ -544,11 +544,11 @@ def info_ports(args):
                 "PhaseRTP", "in", "uint32", TP_SSR, 1, "async"
             )
         else:
-            in3_ports = com.get_parameter_port_info(
-                "PhaseRTP", "in", "uint32", TP_SSR, 1
+            in3_ports = com.get_port_info(
+            "PhaseIO", "in", TT_DATA, (TP_INPUT_WINDOW_VSIZE / TP_SSR), TP_SSR, 0, TP_API
             )
-    else:
-        in3_ports = []
+    else: in3_ports = []
+
     if TP_USE_PHASE_INC_RELOAD == 1:
         in4_ports = com.get_parameter_port_info(
             "PhaseIncRTP", "in", "uint32", TP_SSR, 1, "async"
@@ -566,7 +566,9 @@ def gen_ports_code(args):
     TP_SSR = args["TP_SSR"]
     TP_MIXER_MODE = args["TP_MIXER_MODE"]
     TP_USE_PHASE_RELOAD = args["TP_USE_PHASE_RELOAD"]
+    TP_PHASE_RELOAD_API = args["TP_PHASE_RELOAD_API"]
     TP_USE_PHASE_INC_RELOAD = args["TP_USE_PHASE_INC_RELOAD"]
+
     in1_ports = (
         (f"  std::array<adf::port<input>, {TP_SSR}> in1;\n")
         if (TP_MIXER_MODE in [1, 2])
@@ -577,11 +579,13 @@ def gen_ports_code(args):
         if (TP_MIXER_MODE == 2)
         else ""
     )
-    in3_ports = (
-        (f"  std::array<adf::port<input>, {TP_SSR}> PhaseRTP;\n")
-        if (TP_USE_PHASE_RELOAD == 1)
-        else ""
-    )
+    
+    if (TP_USE_PHASE_RELOAD == 1 and TP_PHASE_RELOAD_API == 0):
+        in3_ports =f"  std::array<adf::port<input>, {TP_SSR}> PhaseRTP;\n"
+    elif(TP_USE_PHASE_RELOAD == 1 and TP_PHASE_RELOAD_API == 1):
+        in3_ports =f"  std::array<adf::port<input>, {TP_SSR}> PhaseIO;\n"
+    else: in3_ports = ""
+
     in4_ports = (
         (f"  std::array<adf::port<input>, {TP_SSR}> PhaseIncRTP;\n")
         if (TP_USE_PHASE_INC_RELOAD == 1)
@@ -597,6 +601,7 @@ def gen_ports_connections(args):
     TP_MIXER_MODE = args["TP_MIXER_MODE"]
     TP_USE_PHASE_RELOAD = args["TP_USE_PHASE_RELOAD"]
     TP_USE_PHASE_INC_RELOAD = args["TP_USE_PHASE_INC_RELOAD"]
+    TP_PHASE_RELOAD_API = args["TP_PHASE_RELOAD_API"]
     in1_ports = (
         (f"     adf::connect<>(in1[ssrIdx],mixer_graph.in1[ssrIdx]);\n")
         if (TP_MIXER_MODE in [1, 2])
@@ -607,11 +612,14 @@ def gen_ports_connections(args):
         if (TP_MIXER_MODE == 2)
         else ""
     )
-    in3_ports = (
-        (f"     adf::connect<>(PhaseRTP[ssrIdx],mixer_graph.PhaseRTP[ssrIdx]);\n")
-        if (TP_USE_PHASE_RELOAD == 1)
-        else ""
-    )
+
+    if (TP_USE_PHASE_RELOAD == 1 and TP_PHASE_RELOAD_API == 0):
+        in3_ports = (f"      adf::connect<parameter>(PhaseRTP[ssrIdx],mixer_graph.PhaseRTP[ssrIdx]);\n")
+    elif (TP_USE_PHASE_RELOAD == 1 and TP_PHASE_RELOAD_API == 1):
+        in3_ports = (f"      adf::connect<>(PhaseIO[ssrIdx],mixer_graph.PhaseRTP[ssrIdx]);\n")
+    else:
+        in3_ports = ""
+
     in4_ports = (
         (
             f"      adf::connect<>(PhaseIncRTP[ssrIdx],mixer_graph.PhaseIncRTP[ssrIdx]);\n"

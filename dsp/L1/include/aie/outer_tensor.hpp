@@ -69,17 +69,37 @@ template <typename TT_DATA_A,
 class outer_tensor {
    private:
    public:
-    static constexpr unsigned int vecSampleNumA = vecSampleNum<TT_DATA_A, TT_DATA_B>().A;
-    static constexpr unsigned int vecSampleNumB = vecSampleNum<TT_DATA_A, TT_DATA_B>().B;
-    static constexpr unsigned int vecSampleNumAcc = vecSampleNum<TT_DATA_A, TT_DATA_B>().Acc;
-    static constexpr unsigned int vecSampleNumTempOut = vecSampleNum<TT_DATA_A, TT_DATA_B>().TempOut;
-    static constexpr unsigned int vecSampleNumOut = vecSampleNum<TT_DATA_A, TT_DATA_B>().Out;
-    static constexpr unsigned int vecNumA = TP_DIM_A / vecSampleNumA;
-    static constexpr unsigned int vecNumB = CEIL(TP_DIM_B, vecSampleNumB) / vecSampleNumB;
-    static constexpr unsigned int outDim = TP_DIM_A * TP_DIM_B;
-    static constexpr unsigned int vecNumOut = outDim / vecSampleNumOut;
-    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
     using acc_t = accTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+
+    static constexpr unsigned int kVecSampleNumA = fnVecSampleNumMax<TT_DATA_A>();
+    static constexpr unsigned int kVecSampleNumB = fnVecSampleNumMax<TT_DATA_B>();
+    static constexpr unsigned int kVecSampleNumOut =
+        fnVecSampleNumMax<out_t>(); // only achievable if this number of elements in vector B is >= __MIN_REGSIZE__ / 8.
+    static constexpr unsigned int kVecSampleNumBSubMin =
+        __MIN_REGSIZE__ / 8 / sizeof(TT_DATA_B); // we cannot extract a sub-vector smaller than __MIN_REGSIZE__.
+    static constexpr unsigned int kVecSampleNumBSub = MAX(kVecSampleNumBSubMin, kVecSampleNumOut);
+    static constexpr unsigned int kNumExtractions =
+        kVecSampleNumB / kVecSampleNumBSub; // this is how many sub-vectors we will need to extract from vector B.
+    static constexpr unsigned int kVecNumA = TP_DIM_A / kVecSampleNumA;
+    static constexpr unsigned int kVecNumB = TP_DIM_B / kVecSampleNumB;
+
+    static constexpr unsigned int pwrsOf2 =
+        fnCheckIfPwr2<TP_DIM_A>() & fnCheckIfPwr2<TP_DIM_B>(); // only exploit budget if nice-round-numbers.
+
+    // TODO: consider if this can be optimized by factorizing into 2 primes?
+    static constexpr unsigned int kUnrollBudget =
+        pwrsOf2 ? getUnrollBudget<out_t>()
+                : 0; // This denotes how many unrolls we can delegate between the i, j, k loops.
+    static constexpr unsigned int kUnrollsK = MIN(kVecNumB, fnPwr2<kUnrollBudget>());
+    static constexpr unsigned int kUnrollBudgetAfterK = kUnrollBudget - fnLog2<kUnrollsK>();
+    static constexpr unsigned int kUnrollsJ = MIN(kVecSampleNumA, fnPwr2<kUnrollBudgetAfterK>());
+    static constexpr unsigned int kUnrollBudgetAfterJ = kUnrollBudgetAfterK - fnLog2<kUnrollsJ>();
+    static constexpr unsigned int kUnrollsI = MIN(kVecNumA, fnPwr2<kUnrollBudgetAfterK>());
+
+    static constexpr unsigned int kChessNumI = kVecNumA / kUnrollsI;
+    static constexpr unsigned int kChessNumJ = kVecSampleNumA / kUnrollsJ;
+    static constexpr unsigned int kChessNumK = kVecNumB / kUnrollsK;
 
     // Constructor
     outer_tensor(){};
@@ -108,17 +128,37 @@ template <typename TT_DATA_A,
 class outer_tensor<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SHIFT, 1, TP_SSR, TP_RND, TP_SAT> {
    private:
    public:
-    static constexpr unsigned int vecSampleNumA = vecSampleNum<TT_DATA_A, TT_DATA_B>().A;
-    static constexpr unsigned int vecSampleNumB = vecSampleNum<TT_DATA_A, TT_DATA_B>().B;
-    static constexpr unsigned int vecSampleNumAcc = vecSampleNum<TT_DATA_A, TT_DATA_B>().Acc;
-    static constexpr unsigned int vecSampleNumTempOut = vecSampleNum<TT_DATA_A, TT_DATA_B>().TempOut;
-    static constexpr unsigned int vecSampleNumOut = vecSampleNum<TT_DATA_A, TT_DATA_B>().Out;
-    static constexpr unsigned int vecNumA = TP_DIM_A / vecSampleNumA;
-    static constexpr unsigned int vecNumB = CEIL(TP_DIM_B, vecSampleNumB) / vecSampleNumB;
-    static constexpr unsigned int outDim = TP_DIM_A * TP_DIM_B;
-    static constexpr unsigned int vecNumOut = outDim / vecSampleNumOut;
-    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
     using acc_t = accTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+
+    static constexpr unsigned int kVecSampleNumA = fnVecSampleNumMax<TT_DATA_A>();
+    static constexpr unsigned int kVecSampleNumB = fnVecSampleNumMax<TT_DATA_B>();
+    static constexpr unsigned int kVecSampleNumOut =
+        fnVecSampleNumMax<out_t>(); // only achievable if this number of elements in vector B is >= __MIN_REGSIZE__ / 8.
+    static constexpr unsigned int kVecSampleNumBSubMin =
+        __MIN_REGSIZE__ / 8 / sizeof(TT_DATA_B); // we cannot extract a sub-vector smaller than __MIN_REGSIZE__.
+    static constexpr unsigned int kVecSampleNumBSub = MAX(kVecSampleNumBSubMin, kVecSampleNumOut);
+    static constexpr unsigned int kNumExtractions =
+        kVecSampleNumB / kVecSampleNumBSub; // this is how many sub-vectors we will need to extract from vector B.
+    static constexpr unsigned int kVecNumA = TP_DIM_A / kVecSampleNumA;
+    static constexpr unsigned int kVecNumB = TP_DIM_B / kVecSampleNumB;
+
+    static constexpr unsigned int pwrsOf2 =
+        fnCheckIfPwr2<TP_DIM_A>() & fnCheckIfPwr2<TP_DIM_B>(); // only exploit budget if nice-round-numbers.
+
+    // TODO: consider if this can be optimized by factorizing into primes?
+    static constexpr unsigned int kUnrollBudget =
+        pwrsOf2 ? getUnrollBudget<out_t>()
+                : 0; // This denotes how many unrolls we can delegate between the i, j, k loops.
+    static constexpr unsigned int kUnrollsK = MIN(kVecNumB, fnPwr2<kUnrollBudget>());
+    static constexpr unsigned int kUnrollBudgetAfterK = kUnrollBudget - fnLog2<kUnrollsK>();
+    static constexpr unsigned int kUnrollsJ = MIN(kVecSampleNumA, fnPwr2<kUnrollBudgetAfterK>());
+    static constexpr unsigned int kUnrollBudgetAfterJ = kUnrollBudgetAfterK - fnLog2<kUnrollsJ>();
+    static constexpr unsigned int kUnrollsI = MIN(kVecNumA, fnPwr2<kUnrollBudgetAfterK>());
+
+    static constexpr unsigned int kChessNumI = kVecNumA / kUnrollsI;
+    static constexpr unsigned int kChessNumJ = kVecSampleNumA / kUnrollsJ;
+    static constexpr unsigned int kChessNumK = kVecNumB / kUnrollsK;
 
     // Constructor
     outer_tensor(){};

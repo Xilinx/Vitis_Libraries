@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# this generates the VSS config file based on paramters
-# Python script that produces cfg file based on the configuration parameters. Used by VSS Mode 1 when the AI Engine has its own buffer descriptors, so it doesn't need the PL kernels to manage the data movement
 
 import argparse
 
@@ -41,6 +39,13 @@ parser.add_argument(
     type=int,
     help="AIE variant",
 )
+parser.add_argument(
+    "-ds",
+    "--dual_streams",
+    type=int,
+    help="Set to 1 to generate config for dual stream AIE implementation",
+    default=0,
+)
 args = parser.parse_args()
 SSR = args.ssr
 fname = args.cfg_file_name
@@ -59,7 +64,7 @@ elif aieVariant == 22:
 f = open(f"{fname}", "w")
 
 common_begin_cfg = f"""
-freqhz={freq}:{vssName}_transpose.ap_clk,mm2s.ap_clk,s2mm.ap_clk
+freqhz={freq}:{vssName}_mid_transpose.ap_clk,mm2s.ap_clk,s2mm.ap_clk,{vssName}_splitter.ap_clk,{vssName}_joiner.ap_clk
 
 [connectivity]
 # ------------------------------------------------------------

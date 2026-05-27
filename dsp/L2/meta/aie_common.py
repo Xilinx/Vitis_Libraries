@@ -80,12 +80,6 @@ def fn_validate_minmax_value(ValueStr, Value, MinValue, MaxValue):
     return isValid
 
 
-def fn_validate_min_value(ValueStr, Value, MinValue):
-    if Value < MinValue:
-        return isError(f"Minimum value for {ValueStr} is {MinValue}, but got {Value}. ")
-    return isValid
-
-
 def fn_validate_max_value(ValueStr, Value, MaxValue):
     if Value > MaxValue:
         return isError(f"Maximum value for {ValueStr} is {MaxValue}, but got {Value}. ")
@@ -119,6 +113,34 @@ def CEIL(m, n):
 def FLOOR(m, n):
     return (m // n) * n
 
+def CLIP(value, lower_bound, upper_bound):
+    """
+    Clips a value to be within bounds.
+    """
+    if value < lower_bound:
+        return lower_bound
+    elif value > upper_bound:
+        return upper_bound
+    else:
+        return value
+    
+def GET_CLOSEST(value, value_set):
+    """
+    Returns the closest number from value_set to value.
+    """
+    return min(value_set, key=lambda x:abs(x-value))
+
+def ROUND_TO_NEAREST_MULTIPLE(value, multiple):
+    """
+    Rounds a value to the nearest multiple.
+    """
+    return multiple * round(value / multiple)
+
+def fnVecSampleNumMin(AIE_VARIANT, TT_DATA):
+    return k_min_read_write_bytes[AIE_VARIANT] // sizeof(TT_DATA)
+
+def fnVecSampleNumMax(AIE_VARIANT, TT_DATA):
+    return k_max_read_write_bytes[AIE_VARIANT] // sizeof(TT_DATA)
 
 def fnTrunc(x, y):
     a = int(x)
@@ -218,6 +240,8 @@ def fn_size_by_byte(type):
         2 if fn_is_complex(type) else 1
     )
 
+def sizeof(type):
+    return fn_size_by_byte(type)
 
 def fn_is_32b_type(type):
     # It is a 32 type when base type is 4 Bytes.
@@ -483,15 +507,6 @@ def validate_LUT_len_range(lut_list, len_lut_min, len_lut_max):
     else:
         return isError(
             f"The lookup list array must contain values between {len_lut_min} and {len_lut_max}. However, the provided list contains {len(lut_list)} values."
-        )
-
-
-def validate_min(min_val, param_name, param_value):
-    if param_value >= min_val:
-        return isValid
-    else:
-        return isError(
-            f"{param_name} is smaller than {min_val}. It should be equal to or greater than {min_val}."
         )
 
 

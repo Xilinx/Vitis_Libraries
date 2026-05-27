@@ -130,7 +130,6 @@ def update_TT_COEFF(args):
 
 def fn_update_tt_coeff(AIE_VARIANT, TT_DATA):
     param_dict = comFirUpd.fn_update_tt_coeff(AIE_VARIANT, TT_DATA)
-    param_dict["enum"] = fn_integer_check_update(TT_DATA, param_dict["enum"].copy())
     return param_dict
 
 
@@ -142,7 +141,7 @@ def validate_TT_COEFF(args):
 
 
 def fn_validate_TT_COEFF(AIE_VARIANT, TT_DATA, TT_COEFF):
-    param_dict = comFirUpd.fn_update_tt_coeff(AIE_VARIANT, TT_DATA)
+    param_dict = fn_update_tt_coeff(AIE_VARIANT, TT_DATA)
     legal_set_TT_COEFF = param_dict["enum"]
     return validate_legal_set(legal_set_TT_COEFF, "TT_COEFF", TT_COEFF)
 
@@ -189,9 +188,10 @@ def fn_update_TP_FIR_LEN(TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN):
     TP_USE_COEFF_RELOAD = 0
     TP_CASC_LEN = 1
     symmetryFactor = 1
+    tpSsrInt = 1 # TDM FIR does not split FIR taps across SSR paths.
 
     TP_FIR_LEN_max_int = comFirUpd.fn_max_fir_len_each_kernel_update(
-        TT_DATA, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_SSR_max, tpApiInt, symmetryFactor
+        TT_DATA, TP_CASC_LEN, TP_USE_COEFF_RELOAD, tpSsrInt, tpApiInt, symmetryFactor
     )
 
     param_dict = {
@@ -359,7 +359,6 @@ def update_TP_SSR(args):
 def fn_update_TP_SSR(AIE_VARIANT, TT_DATA, TT_COEFF, TP_TDM_CHANNELS, TP_FIR_LEN):
     lanes = fnMacLanes(TT_DATA, TT_COEFF, AIE_VARIANT)
     legal_set_ssr = find_divisors(TP_TDM_CHANNELS / lanes, TP_SSR_max)
-
     for ssr in legal_set_ssr.copy():
         param_dict_casc_len = fn_update_TP_CASC_LEN(
             TT_DATA, TT_COEFF, TP_FIR_LEN, AIE_VARIANT, TP_TDM_CHANNELS, ssr
@@ -970,7 +969,6 @@ class {graphname} : public adf::graph {{
         {TP_TDM_CHANNELS}, //TP_TDM_CHANNELS
         {TP_NUM_OUTPUTS}, //TP_NUM_OUTPUTS
         {TP_DUAL_IP}, //TP_DUAL_IP
-        // {TP_API}, //TP_API
         {TP_SSR}, //TP_SSR
         {TP_SAT}, //TP_SAT
         {TP_CASC_LEN}, //TP_CASC_LEN

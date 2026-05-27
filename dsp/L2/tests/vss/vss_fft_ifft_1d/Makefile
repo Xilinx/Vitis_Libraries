@@ -1,3 +1,5 @@
+#
+# Copyright (C) 2019-2022, Xilinx, Inc.
 # Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.10
+#
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -174,7 +176,7 @@ AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 HOST_SRCS += host.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__ -D USING_UUT=1
 CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/vss/common -I $(XFLIB_DIR)/L1/include/vss/vss_fft_ifft_1d -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I PROJECT -I $(XFLIB_DIR)/L1/include/hw
-CXXFLAGS += --sysroot=$(SYSROOT) -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE")  -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "NITER")   -DSSR=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "SSR") -DTT_DATA=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "DATA_TYPE")
+CXXFLAGS += --sysroot=$(SYSROOT) -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE")  -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "NITER")   -DSSR=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "SSR") -DTT_DATA=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "DATA_TYPE") -DPOINT_SIZE_D1=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE_D1") -DAPI_IO=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "API_IO")
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/
 LDFLAGS += --sysroot=$(SYSROOT)
 
@@ -209,8 +211,8 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw
 endif
 
 ######################### binary container global settings ##########################
-VPP_FLAGS_mm2s_wrapper += -DNSTREAM=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "SSR") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE") -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "NITER") -DDATAWIDTH=$(DATAWIDTH)
-VPP_FLAGS_s2mm_wrapper += -DNSTREAM=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "SSR") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE") -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "NITER") -DDATAWIDTH=$(DATAWIDTH)
+VPP_FLAGS_mm2s_wrapper += -DNSTREAM=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "SSR") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE") -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "NITER") -DDATAWIDTH=$(DATA_WIDTH) -DPOINT_SIZE_D1=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE_D1") -DAPI_IO=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "API_IO")
+VPP_FLAGS_s2mm_wrapper += -DNSTREAM=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "SSR") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE") -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "NITER") -DDATAWIDTH=$(DATA_WIDTH) -DPOINT_SIZE_D1=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE_D1") -DAPI_IO=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "API_IO")
 
 ifneq ($(PACKAGE_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/kernel.xclbin
@@ -326,6 +328,7 @@ PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 PACKAGE_DIR := $(CUR_DIR)/package_$(TARGET)
 PACKAGE_DIR_HW := $(CUR_DIR)/package.$(TARGET)
+SD_CARD := $(CUR_DIR)/package_$(TARGET)
 $(PACKAGE_DIR): host xclbin $(RUN_SCRIPT) $(EMCONFIG) #check_kimage check_rootfs
 	@echo "Generating sd_card folder...."
 	mkdir -p $(PACKAGE_DIR)
@@ -354,7 +357,7 @@ ifeq (${TARGET},hw)
 	@ln -sfn $(PACKAGE_DIR) $(PACKAGE_DIR_HW)
 endif	
 else
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(PACKAGE_DIR) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(PACKAGE_DIR) --package.rootfs $(ROOTFS) --package.generate_sdcard --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 endif
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
@@ -477,6 +480,7 @@ endif
 ############################## Setting Targets ##############################
 .PHONY: pre_build
 pre_build:
+	$(if $(filter-out REF,$(TAG)), echo "I have read and accepted the terms and conditions in the disclaimer.txt file" >> $(CUR_DIR)/agreement.txt)
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/vss/scripts/gen_vss_configs.py $(XFLIB_DIR) $(CUR_DIR) $(PARAMS) vss_fft_ifft_1d_params.cfg fft_aie)
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL) TAG=$(TAG) FRONT_INPUT_FILE=$(FRONT_INPUT_FILE) BACK_INPUT_FILE=$(BACK_INPUT_FILE) REF_INPUT_FILE=$(REF_INPUT_FILE) REF_SIM_FILE=$(REF_SIM_FILE)")
 	$(if $(filter hw_emu,$(TARGET)), make -f $(XFLIB_DIR)/L2/include/vss/vss_fft_ifft_1d/vss_fft_ifft_1d.mk vss HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) AIETARGET=hw)

@@ -32,14 +32,14 @@
             "type": "typename",
             "description": "choose lut values for available functions or specify own lut values.",
             "enum": [
-                "<Specify LUT values>",
+                "<Custom Function>",
                 "exp",
                 "inv",
                 "invSqrt",
                 "log",
                 "sqrt"
             ],
-            "default": "<Specify LUT values>",
+            "default": "<Custom Function>",
             "label": "Function:",
             "callback": "xmcGetFuncApproxLookUpValues(gcbh);",
             "tablabel": "Main",
@@ -51,7 +51,7 @@
             "description": "describes the LUT values.",
             "element_type": "data_type",
             "default": "[1:512]",
-            "label": "Specify LookUp Values:",
+            "label": "Custom LookUp Values:",
             "tablabel": "Main",
             "parameterType": "edit"
         },

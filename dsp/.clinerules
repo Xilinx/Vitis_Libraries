@@ -1,0 +1,102 @@
+# xf_dsp Project-Specific Rules and Conventions
+
+## Notes
+
+- This is an AMD/Xilinx DSP library for AIE (AI Engine) architecture
+- Created for internal development, for use within xf_dsp repository
+- Focus on performance and hardware efficiency
+- Consider memory alignment and vectorization
+- Be mindful of compile-time vs runtime constraints
+
+## Code Style
+
+- Use 4 spaces for indentation (no tabs)
+- Maximum line length is 120 characters for C++/C code
+- Use snake_case for Python variables and functions
+- Use camelCase for C++ member variables
+- Add comprehensive docstrings to all public functions and classes
+
+## File Organization
+
+### Directory Structure
+- **L1/**: Level 1 - Low-level kernels and implementations
+  - `L1/include/aie/`: AIE kernel class headers
+  - `L1/src/aie/`: AIE kernel class method implementations
+  - `L1/tests/`: Unit tests for L1 components
+  - `L1/meta/`: Metadata and configuration scripts
+- **L2/**: Level 2 - Graph-level implementations
+  - `L2/include/aie/`: Graph headers
+  - `L2/tests/aie/`: AIE graph tests
+  - `L2/meta/`: Python metadata scripts for parameter validation
+- **docs/**: Documentation source files
+- **scripts/**: Build and utility scripts
+
+### Naming Conventions
+- Header files: `<component>_graph.hpp` for graphs, `<component>.hpp` for kernels
+- Test files: `test.hpp` or `test.cpp` in component-specific test directories
+- Metadata scripts: `<component>.py` in L2/meta/
+- Use descriptive names: `fir_sr_asym` (FIR Single Rate Asymmetric)
+
+## DSP Library Specific Patterns
+
+### IP Implementation
+- Kernel implementations go in L1/include/aie/ and L1/src/aie/
+- Graph wrappers go in L2/include/aie/
+- Traits classes define compile-time properties (e.g., `fir_sr_asym_traits.hpp`)
+- Keep kernel and graph implementations separate
+- Follow the pattern: kernel class → graph class → metadata script
+
+### Parameter Validation
+- Use metadata scripts in L2/meta/ for parameter validation
+- Import common updaters from `aie_common*.py`
+- Validate parameters like: TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, etc.
+- Check for hardware constraints (e.g., memory limits, data alignment)
+
+## Testing
+
+### Test Structure
+- Each AIE graph component should have tests in corresponding L2/testsaie/<component> directory
+- Use `test.hpp` for test logic
+
+### Running Tests
+- To run a test or set of tests, use `runmake.sh` from `L2/tests/aie/common/scripts/`.
+- Create a test suite under test_suites in a <test_suite_name>.txt.
+- Then, prepare env with: `source ~/dsplib_env.csh` and
+- Run the test suite with: `L2/tests/aie/common/scripts/runmake.sh -run_type <test_suite_name>`
+- This will trigger LSF to run a batch of jobs in `results/batch_multi_params_<test_suite_name_<date>_<time>` subdirectory.
+
+### Test Results
+- Each test will have a subdirectory in a batch results directory, which corresponds to testcase parameters
+- The `logs` directory has a status_<params>.txt file with a Configuration and Results sections.
+- Results section has COMPILE, SIM and FUNC that correspond to compilation, simulation and functional verification.
+- Each of these indicates 1 for a success, 0 for a fail and default for early termination
+- Next, there are design Qor and resource utilization information
+
+## Documentation
+
+- Main documentation in docs/src/
+- Use reStructuredText (.rst) format
+- Update index.rst when adding new components
+- Include code examples in documentation
+
+## Python Metadata Scripts
+
+### Common Patterns
+- Import from `aie_common_fir_updaters` for validation functions
+- Use dictionaries to define parameter relationships
+- Validate legal combinations of data/coefficient types
+- Check for hardware resource constraints
+- Return error messages for invalid configurations
+
+### Validation Functions
+- `fn_validate_fir_len()`: Check filter length constraints
+- `fn_validate_shift()`: Validate shift parameter
+- `fn_max_casc_len()`: Calculate maximum cascade length
+- Check memory requirements and alignment
+
+## Version Control
+
+- Main repository: FaaSApps/xf_dsp (upstream)
+- Follow git flow for feature branches
+- Keep commits atomic and well-described
+- Review .gitignore for build artifacts

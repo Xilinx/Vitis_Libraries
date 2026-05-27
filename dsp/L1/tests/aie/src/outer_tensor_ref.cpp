@@ -124,22 +124,12 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_SHIFT,
-          unsigned int TP_API,
-          unsigned int TP_SSR,
           unsigned int TP_RND,
           unsigned int TP_SAT>
-void outer_tensor_ref<TT_DATA_A,
-                      TT_DATA_B,
-                      TP_DIM_A,
-                      TP_DIM_B,
-                      TP_NUM_FRAMES,
-                      TP_SHIFT,
-                      TP_API,
-                      TP_SSR,
-                      TP_RND,
-                      TP_SAT>::outer_tensor_main(input_buffer<TT_DATA_A>& inWindowA,
-                                                 input_buffer<TT_DATA_B>& inWindowB,
-                                                 output_buffer<outTypeMult_t<TT_DATA_A, TT_DATA_B> >& outWindow0) {
+void outer_tensor_ref<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SHIFT, TP_RND, TP_SAT>::
+    outer_tensor_main(input_buffer<TT_DATA_A>& inWindowA,
+                      input_buffer<TT_DATA_B>& inWindowB,
+                      output_buffer<outTypeMult_t<TT_DATA_A, TT_DATA_B> >& outWindow0) {
     using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
     TT_DATA_A dA_in;
     TT_DATA_B dB_in;

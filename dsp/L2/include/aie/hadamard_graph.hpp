@@ -141,7 +141,9 @@ class hadamard_graph : public graph {
     static constexpr int paddedDataSize = CEIL(DataSizePerSSR, kSamplesInVectOutData);
     static constexpr int kKernelPtSize = paddedDataSize;
     static constexpr int kKernelWindowVsize = (TP_NUM_FRAMES * kKernelPtSize);
-
+    static constexpr unsigned int kBufferSize = (kKernelWindowVsize * vectByte<TT_DATA_A, TT_DATA_B>().val_byteOut);
+    static_assert(kBufferSize <= __DATA_MEM_BYTES__,
+                  "ERROR: TP_NUM_FRAMES*(TP_DIM/TP_SSR)*sizeof(TT_DATA) must be at no more than data memory size.");
     static_assert(kKernelPtSize >= 16, "ERROR: TP_DIM/TP_SSR must be at least 16");
     //     static_assert(kKernelWindowVsize * sizeof(outTypeMult_t<TT_DATA_A, TT_DATA_B>) <= __DATA_MEM_BYTES__,
     //                   "ERROR: TP_NUM_FRAMES*(TP_DIM/TP_SSR) must be at no more than data memory size.");
@@ -176,26 +178,36 @@ class hadamard_graph : public graph {
     /**
      * @brief This is the constructor function for the hadamard graph.
      **/
+
     hadamard_graph() {
         for (int i = 0; i < TP_SSR; i++) {
             m_kernels[i] = kernel::create_object<hadamard<TT_DATA_A, TT_DATA_B, kKernelPtSize, TP_NUM_FRAMES, TP_SHIFT,
                                                           TP_API, TP_SSR, TP_RND, TP_SAT> >();
             // Specify mapping constraints
-            runtime<ratio>(m_kernels[i]) = 0.1; // Nominal figure. The real figure requires knowledge of the sample
+            runtime<ratio>(m_kernels[i]) = 0.9; // Nominal figure. The real figure requires knowledge of the sample
                                                 // rate.
             // Source files
             source(m_kernels[i]) = "hadamard.cpp";
 
             // make connections
-            if (TP_API == 0) {
-                connect(inA[i], m_kernels[i].in[0]);
-                connect(inB[i], m_kernels[i].in[1]);
-                dimensions(m_kernels[i].in[0]) = {kKernelWindowVsize};
-                dimensions(m_kernels[i].in[1]) = {kKernelWindowVsize};
-                connect(m_kernels[i].out[0], out[i]);
-                dimensions(m_kernels[i].out[0]) = {kKernelWindowVsize};
+            if
+                constexpr(TP_API == 0) {
+                    connect(inA[i], m_kernels[i].in[0]);
+                    connect(inB[i], m_kernels[i].in[1]);
+                    dimensions(m_kernels[i].in[0]) = {kKernelWindowVsize};
+                    dimensions(m_kernels[i].in[1]) = {kKernelWindowVsize};
+                    connect(m_kernels[i].out[0], out[i]);
+                    dimensions(m_kernels[i].out[0]) = {kKernelWindowVsize};
 
-            } else {
+                    if
+                        constexpr(kBufferSize > __DATA_MEM_BYTES__ / 2) { // if not fitting in pinpong, use single
+                                                                          // buffer
+                            single_buffer(m_kernels[i].in[0]);
+                            single_buffer(m_kernels[i].in[1]);
+                            single_buffer(m_kernels[i].out[0]);
+                        }
+                }
+            else {
                 connect<stream>(inA[i], m_kernels[i].in[0]);
                 connect<stream>(inB[i], m_kernels[i].in[1]);
                 connect<stream>(m_kernels[i].out[0], out[i]);

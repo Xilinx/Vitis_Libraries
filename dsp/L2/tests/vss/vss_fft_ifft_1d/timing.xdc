@@ -1,0 +1,1 @@
+create_clock -period 3.2 -name pl_300mhz_aclk [get_ports pl_300mhz_aclk]

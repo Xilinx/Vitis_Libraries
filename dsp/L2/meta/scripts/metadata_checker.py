@@ -1,5 +1,6 @@
 #
-# Copyright (C) 2024-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -360,20 +361,13 @@ def check_exit(check_result, error_messages, ip_name):
 
 
 def gen_out_files(ip_name, config_json_params, search_paths):
-    ip_in_use = IP(ip_name, config_json_params)
+    ip_in_use = IP(ip_name, config_json_params, metadata_dir)
     ip_in_use.generate_graph(f"{ip_name}_native_generated_graph")
 
     graph_string_if = f'#ifndef {ip_name}_generated_graph_GRAPH_H_\n#define {ip_name}_generated_graph_GRAPH_H_\n\n#include <adf.h>\n#include "{ip_name}_graph.hpp"\n\n'
     graph_string_endif = f"\n\n#endif // {ip_name}_generated_graph_GRAPH_H_"
     graph_content = graph_string_if + ip_in_use.graph["graph"] + graph_string_endif
 
-    # out_dict={}
-    # out_dict.update({"graphName":f"{ip_name}_generated_graph"})
-    # out_dict.update({"graphHeaderFile":f"{ip_name}_generated_graph.h"})
-    # out_dict.update({"graphSearchPath":search_paths})
-    # out_dict.update({"graphPreProcOptions":[]})
-    # out_dict.update({"ports":port_info_map(ip_in_use.graph["port_info"])})
-    # out_dict.update({"graphSourceFileUpdated":True})
     out_dict = ip_in_use.graph["port_info"]
 
     folder_path = f"./{ip_name}_native_generated_graph"
@@ -381,9 +375,9 @@ def gen_out_files(ip_name, config_json_params, search_paths):
     graph_h_path = folder_path + f"/{ip_name}_generated_graph.h"
     create_graph_folder(folder_path)
     with open(graph_h_path, "w") as graph_file:
-        graph_file.write(graph_content)  # indent for pretty printing
+        graph_file.write(graph_content)  
     with open(out_json_path, "w") as json_file:
-        json.dump(out_dict, json_file, indent=4)  # indent for pretty printing
+        json.dump(out_dict, json_file, indent=4)  
 
 
 def gen_out_json_error(ip_name, error_messages):
@@ -393,7 +387,7 @@ def gen_out_json_error(ip_name, error_messages):
     with open(out_json_path, "w") as out_json_error:
         json.dump(
             error_messages, out_json_error, indent=4
-        )  # indent for pretty printing
+        ) 
 
 
 def create_graph_folder(folder_path):
@@ -561,13 +555,6 @@ if __name__ == "__main__":
 
     print("All parameter checks passed.")
 
-    if not xf_solver_test:
+    if not "vss" in ip_name:  # skip out.json generation vss IPs
         gen_out_files(ip_name, config_json_data["parameters"], json_data["search_paths"])
-
-    # #Temporary out.json checks
-    # out_new_json_path=f"./{ip_name}_new_generated_graph/out_new.json"
-    # out_old_json_path=f"./{ip_name}_generated_graph/out.json"
-    # compare_return=subprocess.run([sys.executable, os.path.join(L2_dir, "meta/scripts/compare_out_json.py"), out_new_json_path, out_old_json_path])
-    # if compare_return.returncode != 0:
-    #     print("Error: out.json comparison failed!")
-    #     sys.exit(1)
+        print("Native graph folder is generated.")

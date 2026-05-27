@@ -31,7 +31,15 @@ decomposed fft .
 #define QUOTE(x) Q(x)
 #define NITER 1
 #define AIE_GRAPH vss_fft_ifft_1d_graph
-
+#ifndef CASC_LEN
+#define CASC_LEN 1
+#endif
+#ifndef USE_WIDGETS
+#define USE_WIDGETS 0
+#endif
+#ifndef API_IO
+#define API_IO 0
+#endif
 #include QUOTE(AIE_GRAPH.hpp)
 
 using namespace adf;
@@ -73,8 +81,8 @@ class tl_graph : public graph {
         printf("\n");
         printf("========================\n");
         adf::plio_type aiePlioWidth = AIE_PLIO_WIDTH == 64 ? adf::plio_64_bits : adf::plio_128_bits;
-        xf::dsp::aie::fft::vss_1d::AIE_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, kWindowAPI, SSR,
-                                             ROUND_MODE, SAT_MODE, TWIDDLE_MODE>
+        xf::dsp::aie::fft::vss_1d::AIE_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, API_IO, SSR,
+                                             ROUND_MODE, SAT_MODE, TWIDDLE_MODE, POINT_SIZE_D1, CASC_LEN, USE_WIDGETS>
             fftGraph;
         for (int i = 0; i < SSR; i++) {
             std::string filenameInFront = QUOTE(FRONT_INPUT_FILE);

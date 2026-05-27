@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _MATRIX_MULTIPLY:
+.. _DSP_MATRIX_MULTIPLY:
 
 ===============
 Matrix Multiply
@@ -38,17 +38,17 @@ The Matrix Multiply for AIE-ML and AIE-MLv2 devices supports integer types (int1
 Template Parameters
 ===================
 
-To see details on the template parameters for the Matrix Multiply, see :ref:`API_REFERENCE`.
+To see details on the template parameters for the Matrix Multiply, see :ref:`DSP_API_REFERENCE`.
 
 Access Functions
 ================
 
-To see details on the access functions for the Matrix Multiply, see :ref:`API_REFERENCE`.
+To see details on the access functions for the Matrix Multiply, see :ref:`DSP_API_REFERENCE`.
 
 Ports
 =====
 
-To see details on the ports for the Matrix Multiply, see :ref:`API_REFERENCE`.
+To see details on the ports for the Matrix Multiply, see :ref:`DSP_API_REFERENCE`.
 
 Design Notes
 ============
@@ -180,7 +180,7 @@ Tiling Schemes and Data Type Combinations
 
 The following table specifies the tiling scheme used for a given data type combination and the corresponding default output data type for AI Engine devices:
 
-.. _table-tile-pattern-AIE:
+.. _DSP_table-tile-pattern-AIE:
 .. table:: Matrix Multiply Tiling Pattern Combination for AIE
    :align: center
 
@@ -233,7 +233,7 @@ The following table specifies the tiling scheme used for a given data type combi
 
 The following table specifies the tiling scheme used for a given data type combination and the corresponding output data type for AIE-ML devices:
 
-.. _table-tile-pattern-AIE-ML:
+.. _DSP_table-tile-pattern-AIE-ML:
 .. table:: Matrix Multiply Tiling Pattern Combination for AIE-ML
    :align: center
 
@@ -261,7 +261,7 @@ The following table specifies the tiling scheme used for a given data type combi
 
 The following table specifies the tiling scheme used for a given data type combination and the corresponding output data type for AIE-ML devices:
 
-.. _table-tile-pattern-AIE-MLv2:
+.. _DSP_table-tile-pattern-AIE-MLv2:
 .. table:: Matrix Multiply Tiling Pattern Combination for AIE-MLv2
    :align: center
 
@@ -295,7 +295,7 @@ When used with ``TP_DIM_A_LEADING``, ``TP_DIM_B_LEADING``, or ``TP_DIM_OUT_LEADI
 
 If the additional kernels are not selected, then the matrix multiply kernels assume incoming data is in the correct format, as specified above.
 
-The tiling imposes a restriction that the matrix dimensions need to be multiples of the tile dimensions. If you require dimensions that do not satisfy these requirements, pad the matrices up to the closet multiple of the tile dimensions in table :ref:`table-tile-pattern-AIE`, :ref:`table-tile-pattern-AIE-ML`  or :ref:`table-tile-pattern-AIE-MLv2` with zeroes for AIE, AIE-ML or AIE-MLv2 devices respectively.
+The tiling imposes a restriction that the matrix dimensions need to be multiples of the tile dimensions. If you require dimensions that do not satisfy these requirements, pad the matrices up to the closet multiple of the tile dimensions in table :ref:`DSP_table-tile-pattern-AIE`, :ref:`DSP_table-tile-pattern-AIE-ML`  or :ref:`DSP_table-tile-pattern-AIE-MLv2` with zeroes for AIE, AIE-ML or AIE-MLv2 devices respectively.
 
 Maximum matrix dimensions per kernel
 ------------------------------------
@@ -307,7 +307,7 @@ A matrix_mult design needs to allocate memory for the following:
 
 * Window Size B: Input matrix B of size ``TP_DIM_B x (TP_DIM_AB / TP_CASC_LEN) x sizeof(TT_DATA_B)``.
 
-* Window Size Out: Output matrix of size ``(TP_DIM_A / TP_SSR) x TP_DIM_B x sizeof(TT_DATA_OUT)``.
+* Window Size Out: Output matrix of size ``(TP_DIM_A / TP_SSR) x TP_DIM_B x sizeof(TT_OUT_DATA)``.
 
 Optionally, depending on whether you use the tiling/detiling feature of the element, you need:
 
@@ -408,7 +408,7 @@ Each AI Engine kernel in the array is given a sub-matrix, so the interface to th
    |            |            |  240  |  241  |  242  |  243  |  244  |  245  |  246  |  247  |  248  |  249  |  250  |  251  |  252  |  253  |  254  |  255  |
    +------------+------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
 
-You can find a full list of the descriptions and parameters in the :ref:`API_REFERENCE`.
+You can find a full list of the descriptions and parameters in the :ref:`DSP_API_REFERENCE`.
 
 Connections to the cascade ports can be made as follows:
 
@@ -548,7 +548,7 @@ When using the ``TP_SSR`` parameter, this will determine the number of parallel 
    |            |            |  240  |  241  |  242  |  243  |  244  |  245  |  246  |  247  |  248  |  249  |  250  |  251  |  252  |  253  |  254  |  255  |
    +------------+------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
 
-You can find a full list of the descriptions and parameters in the :ref:`API_REFERENCE`.
+You can find a full list of the descriptions and parameters in the :ref:`DSP_API_REFERENCE`.
 
 Connections to the cascade ports can be made as follows:
 
@@ -573,6 +573,7 @@ The tiling kernels' function is to convert between the arrangement of matrix ele
 - 'untiler' - This is an array of ``TP_SSR`` kernels on the output of the each Matrix Multiply SSR path. It performs the transformation from a tiled format to the true output format.
 - 'tilerA' - This is an array of ``TP_CASC_LEN * TP_SSR`` kernels which connect 1:1 with the A input port of the matrix multiply kernels.
 - 'tilerB' - This is an array of ``TP_CASC_LEN * TP_SSR`` kernels which connect 1:1 with the B input port of the matrix multiply kernels.
+- Matrix transposition is not supported for int16 data types; meaning ``TP_DIM_A_LEADING``, ``TP_DIM_B_LEADING``, or ``TP_DIM_OUT_LEADING`` can only be set to 0 when the respective data type is int16.
 
 .. note:: Some combinations of the template parameters are not supported. A possible workaround is to pad up the matrices with zeroes so that their dimensions become the closest multiple of 8 for cint32 data types, 16 for cint16/int16 data types, and 32 for int16 data types.
 

@@ -57,14 +57,16 @@ namespace two_d {
  *         the second transform function. \n
  *         This is a typename and must be one of the following: \n
  *         int16, cint16, int32, cint32, float, cfloat.
+ *         Note that choice of TT_DATA_D2 will impact the output data type of the first set of FFTs.
+ *         Hence, not all combinations of TT_DATA_D1 and TT_DATA_D2 are supported.
  * @tparam TT_TWIDDLE describes the type of twiddle factors of the transform. \n
- *         It must be one of the following: cint16, cint32, cfloat
+ *         It must be one of the following: cint16, cfloat
  * @tparam TP_POINT_SIZE_D1 is an unsigned integer which describes the number of samples in
  *         the first transform. \n This must be 2^N where N is an integer in the range
- *         4 to 16 inclusive.
+ *         5 to 16 inclusive.
  * @tparam TP_POINT_SIZE_D2 is an unsigned integer which describes the number of samples in
  *         the second transform. \n This must be 2^N where N is an integer in the range
- *         4 to 16 inclusive.
+ *         5 to 16 inclusive.
  * @tparam TP_FFT_NIFFT selects whether the transform to perform is an FFT (1) or IFFT (0).
  * @tparam TP_SHIFT selects the power of 2 to scale the result by prior to output.
  * @tparam TP_CASC_LEN selects the number of kernels the FFT will be divided over in series
@@ -102,7 +104,7 @@ namespace two_d {
  *         No rounding is performed on ceil or floor mode variants. \n
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
- *
+ *         \n
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML and AIE-MLv2 device.
  *\n
  * @tparam TP_SAT describes the selection of saturation to be applied during the shift down stage of processing. \n
@@ -178,8 +180,8 @@ class fft_ifft_2d_graph : public graph {
     port_array<output, 1> out;
 
     /**
-     * Front FFT graph that computes the first set of FFTs.
-     **/
+     * @cond NOCOMMENTS
+     */
     typedef typename std::conditional_t<kIsRealDataD1,
                                         fft_dit_2ch_real_graph<t_inTypeFrontGraph,
                                                                TT_TWIDDLE,
@@ -209,7 +211,13 @@ class fft_ifft_2d_graph : public graph {
                                                                TP_TWIDDLE_MODE,
                                                                TT_DATA_D2> >
         frontGraphType;
+    /**
+     * @endcond
+     */
 
+    /**
+     * Front FFT graph that computes the first set of FFTs.
+     **/
     frontGraphType frontFFTGraph[1];
 
     /**
@@ -231,9 +239,7 @@ class fft_ifft_2d_graph : public graph {
                            TP_SAT,
                            TP_TWIDDLE_MODE>
         backFFTGraph[1];
-    /**
-    * @endcond
-    */
+
     /**
      * Memtile object that performs the transpose between the first set of FFTs and the second set of FFTs.
      **/

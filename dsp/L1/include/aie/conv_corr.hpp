@@ -44,6 +44,10 @@ TP_      template parameter suffix
 #include "aie_api/aie_adf.hpp"
 #include "conv_corr_traits.hpp"
 
+#if (__HAS_ACCUM_PERMUTES__ == 1)
+#include "conv_corr_stream_align.hpp"
+#endif // (__HAS_ACCUM_PERMUTES__ == 1)
+
 using namespace adf;
 
 #ifndef _DSPLIB_CONV_CORR_HPP_DEBUG_
@@ -55,7 +59,7 @@ namespace dsp {
 namespace aie {
 namespace conv_corr {
 //-----------------------------------------------------------------------------------------------------
-// Single kernel specialization for io bufer
+// Single kernel specialization for io buffer
 
 template <typename TT_DATA_F,
           typename TT_DATA_G,
@@ -88,30 +92,38 @@ class conv_corr {
     // number of points that intrinsic would operate
     static constexpr unsigned int m_kPoints = getNumofPoints<TT_DATA_F, TT_DATA_G>();
 
-    // Loop count that aie would operate
+    // Padded data length including zero-padding based on compute mode
     static constexpr unsigned int m_kPaddedLenData =
         getPaddedLength<TT_DATA_F, TT_DATA_G, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
 
-    // length of F vector that aie would operate
+    // Number of iterations (loop count) for the main computation loop
     static constexpr unsigned int m_kLoopCount = getLoopCount<TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
 
-    // load max possible elements each time based on sample size from memory that aie would operate
-    static constexpr unsigned int m_kVecLoadF = (kMaxBitsLoadOnAie / (fnSampleSizeOfSigF<TT_DATA_F>()));
+    // G length used for output buffer sizing: for VALID+RTP use smallest G (= largest output); else compile-time max.
+    static constexpr unsigned int m_kMinGLenForBuf =
+        ((TP_USE_RTP_VECTOR_LENGTHS == 1) && (TP_COMPUTE_MODE == VALID_MODE)) ? getMinLen<TT_DATA_G>() : TP_G_LEN;
+    // Maximum loop count the output buffer must accommodate (matches graph buffer dimension).
+    static constexpr unsigned int m_kMaxLoopCount = getLoopCount<TP_COMPUTE_MODE, TP_F_LEN, m_kMinGLenForBuf>();
+    // Maximum number of output vectors the output buffer can hold.
+    static constexpr unsigned int m_kMaxLoopCountVec = CEIL(m_kMaxLoopCount, m_kLanes) / m_kLanes;
 
     // load max possible elements each time based on sample size from memory that aie would operate
-    static constexpr unsigned int m_kVecLoadG = (kMaxBitsLoadOnAie / (fnSampleSizeOfSigG<TT_DATA_G>()));
+    static constexpr unsigned int m_kVecLoadF = (kMaxBytesLoadOnAie / sizeof(TT_DATA_F));
 
-    // zero Initiated memory buffer where F signal data filled based on p
-    alignas(__ALIGN_BYTE_SIZE__) TT_DATA_F paddedFdata[m_kPaddedLenData * TP_NUM_FRAMES] = {zeros<TT_DATA_F>()};
+    // load max possible elements each time based on sample size from memory that aie would operate
+    static constexpr unsigned int m_kVecLoadG = (kMaxBytesLoadOnAie / sizeof(TT_DATA_G));
+
+    // Zero initialized memory buffer where F signal data is filled based on paddedLength
+    alignas(__ALIGN_BYTE_SIZE__) TT_DATA_F
+        chess_storage(% chess_alignof(v32int8)) paddedFdata[m_kPaddedLenData * TP_NUM_FRAMES];
 
     // Start index where data filling begins in the paddedFdata buffer
     static constexpr unsigned int m_kFdataStartIndx =
-        getFdataStartIndx_PaddedBuffer<TT_DATA_F, TT_DATA_G, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
+        getFdataStartIndexOfPaddedBuffer<TT_DATA_F, TT_DATA_G, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
 
     // End index where data filling stops in the paddedFdata buffer
     static constexpr unsigned int m_kFdataEndIndx =
-        getFdataEndIndx_PaddedBuffer<TT_DATA_F, TT_DATA_G, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
-
+        getFdataEndIndexOfPaddedBuffer<TT_DATA_F, TT_DATA_G, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN>();
     // Member variable to hold the RTP parameter of F
     unsigned int m_vecLenF = 0;
 
@@ -119,7 +131,7 @@ class conv_corr {
     unsigned int m_vecLenG = 0;
 
    public:
-    // Constructor of con_corr class
+    // Constructor of conv_corr class
     conv_corr() {}
     // Register Kernel Class
     static void registerKernelClass() {
@@ -192,9 +204,9 @@ class conv_corr<TT_DATA_F,
             : ((m_kMacsPerCore * m_kPoints) << kShiftFactor2); // Len of Data Buffer
     static constexpr unsigned int m_kAccSize = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
 
-    // Note, both these variables are non-static, so all kernels can update this variable
+    // Local convenience aliases for MAC4_ROT parameters (static constexpr)
     static constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of Lanes is 4 for MAC4_ROT()
-    static constexpr unsigned int kPoints = m_kMuls / kLanes; // Num of Points is nothing but nMuls/nPoints
+    static constexpr unsigned int kPoints = m_kMuls / kLanes; // Num of Points is nothing but nMuls/nLanes
     static constexpr unsigned int kMuls = (kLanes * kPoints); // Num of Muls for MAC4_ROT()
     static constexpr unsigned int kStreamPerCoreVar = ((kMuls * TP_PHASES) >> 1);
     static constexpr unsigned int kStreamsPerCore = (TP_G_LEN > kStreamPerCoreVar) ? 1 : kMaxNumOfStreams;
@@ -206,7 +218,7 @@ class conv_corr<TT_DATA_F,
     int doInit = 1;
 
    public:
-    // Constructor of con_corr class
+    // Constructor of conv_corr class
     conv_corr() {}
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(conv_corr::conv_corrMain); }
@@ -266,9 +278,9 @@ class conv_corr<TT_DATA_F,
             : ((m_kMacsPerCore * m_kPoints) << kShiftFactor2); // Len of Data Buffer
     static constexpr unsigned int m_kAccSize = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
 
-    // Note, both these variables are non-static, so all kernels can update this variable
+    // Local convenience aliases for MAC4_ROT parameters (static constexpr)
     static constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of Lanes is 4 for MAC4_ROT()
-    static constexpr unsigned int kPoints = m_kMuls / kLanes; // Num of Points is nothing but nMuls/nPoints
+    static constexpr unsigned int kPoints = m_kMuls / kLanes; // Num of Points is nothing but nMuls/nLanes
     static constexpr unsigned int kMuls = (kLanes * kPoints); // Num of Muls for MAC4_ROT()
     static constexpr unsigned int kStreamPerCoreVar = ((kMuls * TP_PHASES) >> 1);
     static constexpr unsigned int kStreamsPerCore = (TP_G_LEN > kStreamPerCoreVar) ? 1 : kMaxNumOfStreams;
@@ -280,7 +292,7 @@ class conv_corr<TT_DATA_F,
     int doInit = 1;
 
    public:
-    // Constructor of con_corr class
+    // Constructor of conv_corr class
     conv_corr() {}
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(conv_corr::conv_corrMain); }
@@ -341,9 +353,9 @@ class conv_corr<TT_DATA_F,
             : ((m_kMacsPerCore * m_kPoints) << kShiftFactor2); // Len of Data Buffer
     static constexpr unsigned int m_kAccSize = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
 
-    // Note, both these variables are non-static, so all kernels can update this variable
+    // Local convenience aliases for MAC4_ROT parameters (static constexpr)
     static constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of Lanes is 4 for MAC4_ROT()
-    static constexpr unsigned int kPoints = m_kMuls / kLanes; // Num of Points is nothing but nMuls/nPoints
+    static constexpr unsigned int kPoints = m_kMuls / kLanes; // Num of Points is nothing but nMuls/nLanes
     static constexpr unsigned int kMuls = (kLanes * kPoints); // Num of Muls for MAC4_ROT()
     static constexpr unsigned int kStreamPerCoreVar = ((kMuls * TP_PHASES) >> 1);
     static constexpr unsigned int kStreamsPerCore = (TP_G_LEN > kStreamPerCoreVar) ? 1 : kMaxNumOfStreams;
@@ -355,7 +367,7 @@ class conv_corr<TT_DATA_F,
     int doInit = 1;
 
    public:
-    // Constructor of con_corr class
+    // Constructor of conv_corr class
     conv_corr() {}
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(conv_corr::conv_corrMain); }
@@ -401,7 +413,7 @@ class conv_corr<TT_DATA_F,
                 CASC_OUT_FALSE,
                 USE_RTP_VECTOR_LENGTHS_FALSE /*No RTP Lengths */> {
    private:
-    // number of Lanes that intrinsic would operate
+    // number of multiplications that intrinsic would operate
     static constexpr unsigned int m_kMuls = getNumofMULs<TT_DATA_F, TT_DATA_G>();
     static constexpr unsigned int m_kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of Lanes
     static constexpr unsigned int m_kPoints = m_kMuls / m_kLanes;                 // Num of Points
@@ -415,9 +427,9 @@ class conv_corr<TT_DATA_F,
             : ((m_kMacsPerCore * m_kPoints) << kShiftFactor2); // Len of Data Buffer
     static constexpr unsigned int m_kAccSize = fnNumOfLanes<TT_DATA_F, TT_DATA_G>();
 
-    // Note, both these variables are non-static, so all kernels can update this variable
+    // Local convenience aliases for MAC4_ROT parameters (static constexpr)
     static constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of Lanes is 4 for MAC4_ROT()
-    static constexpr unsigned int kPoints = m_kMuls / kLanes; // Num of Points is nothing but nMuls/nPoints
+    static constexpr unsigned int kPoints = m_kMuls / kLanes; // Num of Points is nothing but nMuls/nLanes
     static constexpr unsigned int kMuls = (kLanes * kPoints); // Num of Muls for MAC4_ROT()
     static constexpr unsigned int kStreamPerCoreVar = ((kMuls * TP_PHASES) >> 1);
     static constexpr unsigned int kStreamsPerCore = (TP_G_LEN > kStreamPerCoreVar) ? 1 : kMaxNumOfStreams;
@@ -429,7 +441,7 @@ class conv_corr<TT_DATA_F,
     int doInit = 1;
 
    public:
-    // Constructor of con_corr class
+    // Constructor of conv_corr class
     conv_corr() {}
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(conv_corr::conv_corrMain); }

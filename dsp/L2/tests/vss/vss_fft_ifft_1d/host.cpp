@@ -36,6 +36,10 @@
 #define Q(x) #x
 #define QUOTE(x) Q(x)
 
+#ifndef API_IO
+#define API_IO 0
+#endif
+
 static const char* STR_ERROR = "ERROR:   ";
 static const char* STR_PASSED = "PASSED:  ";
 static const char* STR_USAGE = "USAGE:   ";
@@ -50,12 +54,14 @@ using namespace xf::dsp::vss::common;
 static constexpr int32_t NUM_ITER = -1; // Let the graph run and have s2mm terminate things
 static constexpr int32_t LOOP_CNT = NITER;
 static constexpr int32_t LOOP_SEL = 0; // ID of loop to capture by DDR SNK PL HLS block
-static constexpr unsigned NSTREAM = SSR;
+static constexpr unsigned kNumPorts = API_IO ? 2 : 1;
+static constexpr unsigned NSTREAM = SSR * kNumPorts;
 static constexpr unsigned DATAWIDTH = 128;
 static constexpr unsigned sizeOfData = QUOTE(TT_DATA) == "cint16" ? 4 : 8; // size in bytes
 static constexpr unsigned samplesPerRead = 128 / (sizeOfData * 8);
 
-static constexpr unsigned ptSizeD1 = fnPtSizeD1<POINT_SIZE, modeAIEffts, NSTREAM>();
+static constexpr unsigned ptSizeD1 =
+    (POINT_SIZE_D1 == 1) ? fnPtSizeD1<POINT_SIZE, modeAIEffts, NSTREAM>() : POINT_SIZE_D1;
 static constexpr unsigned ptSizeD1Ceil = fnCeil<ptSizeD1, NSTREAM>();
 static constexpr unsigned ptSizeD2 = POINT_SIZE / ptSizeD1;
 static constexpr unsigned ptSizeD2Ceil = fnCeil<ptSizeD2, NSTREAM>();
@@ -95,8 +101,8 @@ int main(int argc, char* argv[]) {
     auto xclbin_uuid = my_device.load_xclbin(xclbinFilename);
     std::cout << STR_PASSED << "auto xclbin_uuid = my_device.load_xclbin(" << xclbinFilename << ")" << std::endl;
 
-    auto my_graph = xrt::graph(my_device, xclbin_uuid, "fft_tb");
-    std::cout << STR_PASSED << "auto my_graph  = xrt::graph(my_device, xclbin_uuid, \"fft_tb\")" << std::endl;
+    auto my_graph = xrt::graph(my_device, xclbin_uuid, "fft_aie_fft_tb");
+    std::cout << STR_PASSED << "auto my_graph  = xrt::graph(my_device, xclbin_uuid, \"fft_aie_fft_tb\")" << std::endl;
 
     my_graph.reset();
     std::cout << STR_PASSED << "my_graph.reset()" << std::endl;
@@ -180,6 +186,9 @@ int main(int argc, char* argv[]) {
 
     s2mm_run.wait();
     std::cout << STR_PASSED << "s2mm_run.wait()" << std::endl;
+
+    mm2s_run.wait();
+    std::cout << STR_PASSED << "mm2s_run.wait()" << std::endl;
 
     // ------------------------------------------------------------
     // Retrieve Results

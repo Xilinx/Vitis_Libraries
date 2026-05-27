@@ -181,6 +181,11 @@ class func_approx_graph : public graph {
         "ERROR: The sum of values for TP_FINE_BITS and TP_COARSE_BITS exceeds the number of bits in TT_DATA.");
     // TP_DOMAIN_MODE = 0, 1, 2
     static_assert(TP_DOMAIN_MODE >= 0 && TP_DOMAIN_MODE <= 3, "ERROR: TP_DOMAIN_MODE must be set to 0, 1 or 2.");
+    // TP_COARSE_BITS minimum
+    static_assert(TP_COARSE_BITS >= 1, "ERROR: TP_COARSE_BITS must be at least 1.");
+    // TP_DOMAIN_MODE 1 consumes one coarse bit for domain bias, so at least 2 coarse bits are required.
+    static_assert(!(TP_DOMAIN_MODE == 1 && TP_COARSE_BITS < 2),
+                  "ERROR: TP_COARSE_BITS must be at least 2 when TP_DOMAIN_MODE = 1.");
 // TP_WINDOW_VSIZE minimum check
 #ifdef _SUPPORTS_BFLOAT16_
     static_assert(TP_WINDOW_VSIZE >= (std::is_same<TT_DATA, bfloat16>::value ? 128 : 32),

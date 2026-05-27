@@ -120,7 +120,7 @@ if { $::argc > 2} {
 
 }
 
-set nextSample $seed
+set nextSample [expr {$seed - 1}]
 
 proc srand {seed} {
     set nextSample $seed
@@ -412,7 +412,7 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
     # Process Window (single frame or multiple frames in window)
     for {set winSplice 0} {$winSplice < $framesInWindow} {incr winSplice} {
         if {$seed_reset == 1} {
-            set nextSample $seed
+            set nextSample [expr {$seed - 1}]
         }
         for {set sample_idx 0} {$sample_idx < $samplesPerFrame / $samplesPerLine} {incr sample_idx} {
             for {set comp 0} {$comp < $dataPartsPerLine} {incr comp} {

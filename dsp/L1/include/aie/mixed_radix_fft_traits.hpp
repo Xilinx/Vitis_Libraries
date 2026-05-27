@@ -147,7 +147,7 @@ constexpr int fnGetTwiddleTableSize() {
     // The overall twiddle table size is TP_POINT_SIZE, but due to alignment/padding, earlier ranks require a few more
     // entries, hence the additional factor which is a
     // roughly calculated worst case for point sizes up to ~4000
-    return TP_POINT_SIZE + 128;
+    return TP_POINT_SIZE + 4 * __ALIGN_BYTE_SIZE__;
 }
 }
 }

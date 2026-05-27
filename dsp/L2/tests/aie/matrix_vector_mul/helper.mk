@@ -30,6 +30,9 @@ WINDOW_VSIZE_OUT    = $(shell echo $$(( $(DIM_A) * $(NUM_FRAMES))))
 PARAM_MAP = DATA_A $(DATA_A) DATA_B $(DATA_B) DIM_A $(DIM_A) DIM_B $(DIM_B) DIM_A_LEADING $(DIM_A_LEADING) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) NUM_FRAMES $(NUM_FRAMES) CASC_LEN $(CASC_LEN) UUT_SSR $(UUT_SSR) USE_MATRIX_RELOAD $(USE_MATRIX_RELOAD) API_IO $(API_IO) DUAL_IP $(DUAL_IP) NUM_OUTPUTS $(NUM_OUTPUTS) AIE_VARIANT $(AIE_VARIANT)
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
+
 NITER_A_DATA = $(NITER)
 ifeq ($(USE_MATRIX_RELOAD), 1)
 NITER_A_DATA          = 2
@@ -57,10 +60,10 @@ $(HELPER):
 
 get_latency:
 	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
+	
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(TS_INPUT) $(TS_OUTPUT) $(STATUS_FILE) $(WINDOW_VSIZE_A) $(NITER)
 
-get_stats:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE_A) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output matVecMul $(NITER)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file $(TS_INPUT) -t_out_file uut_output_0_0.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(WINDOW_VSIZE_A) -niter $(NITER) -casc_len $(CASC_LEN) -aiesim_out_dir ./aiesimulator_output -ip matVecMul
 
 get_status:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) SINGLE_BUF $(SINGLE_BUF)
@@ -88,6 +91,3 @@ create_config:
 	echo $(STATUS_FILE)
 	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP)
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP)
-
-harvest_mem:
-	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts

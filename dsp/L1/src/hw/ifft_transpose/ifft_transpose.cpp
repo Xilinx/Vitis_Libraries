@@ -25,11 +25,11 @@ using namespace ifft_mid_transpose;
 // Wrapper
 // ------------------------------------------------------------
 
-void ifft_transpose_wrapper(midTransposeCls<POINT_SIZE, SSR>::TT_STREAM sig_i[SSR],
-                            midTransposeCls<POINT_SIZE, SSR>::TT_STREAM sig_o[SSR]) {
+void ifft_transpose_wrapper(midTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::TT_STREAM sig_i[SSR],
+                            midTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::TT_STREAM sig_o[SSR]) {
 #pragma HLS interface mode = ap_ctrl_none port = return
 #pragma HLS DATAFLOW
-    static midTransposeCls<POINT_SIZE, SSR> uut;
+    static midTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1> uut;
     uut.ifft_transpose_top(sig_i, sig_o);
 }
 

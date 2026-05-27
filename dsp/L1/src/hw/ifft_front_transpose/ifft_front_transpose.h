@@ -26,7 +26,7 @@
 
 using namespace front_transpose;
 
-void ifft_front_transpose_wrapper(frontTransposeCls<POINT_SIZE, SSR>::TT_STREAM sig_i[SSR],
-                                  frontTransposeCls<POINT_SIZE, SSR>::TT_STREAM sig_o[SSR]);
+void ifft_front_transpose_wrapper(frontTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::TT_STREAM sig_i[SSR],
+                                  frontTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::TT_STREAM sig_o[SSR]);
 
 #endif

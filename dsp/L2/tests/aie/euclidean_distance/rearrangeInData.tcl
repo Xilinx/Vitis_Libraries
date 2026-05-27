@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-#
 set usage "
 For generating single file by deinterleave the data from the different input files based on Num_of_Phases.
 tclsh streams_to_window.tcl <filename> <numSamples> <iterations> \[<seed>\] \[<dataStimType>\]

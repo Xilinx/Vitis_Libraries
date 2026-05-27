@@ -24,8 +24,8 @@
 
 void dut() {
     typedef ap_uint<32> real_32; // Equals two 'cint32' samples
-    using TT_STREAM = midTransposeCls<POINT_SIZE, SSR>::TT_STREAM;
-    using TT_SAMPLE = midTransposeCls<POINT_SIZE, SSR>::TT_SAMPLE;
+    using TT_STREAM = midTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::TT_STREAM;
+    using TT_SAMPLE = midTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::TT_SAMPLE;
     TT_STREAM sig_i[SSR], sig_o[SSR];
     TT_SAMPLE rd_data1, rd_data2;
     // Configure the same as 'host.cpp' for top level application:
@@ -41,11 +41,11 @@ void dut() {
     }
     int cur_data1, cur_data2, cur_data3, cur_data4;
     // Load stream stimulus:
-    int ptSizeD1 = midTransposeCls<POINT_SIZE, SSR>::ptSizeD1;
-    int ptSizeD2 = midTransposeCls<POINT_SIZE, SSR>::ptSizeD2;
-    int ptSizeD1Ceil = midTransposeCls<POINT_SIZE, SSR>::ptSizeD1Ceil;
-    int ptSizeD1CeilRd = midTransposeCls<POINT_SIZE, SSR>::ptSizeD1CeilRd;
-    int ptSizeD2Ceil = midTransposeCls<POINT_SIZE, SSR>::ptSizeD2Ceil;
+    int ptSizeD1 = midTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::ptSizeD1;
+    int ptSizeD2 = midTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::ptSizeD2;
+    int ptSizeD1Ceil = midTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::ptSizeD1Ceil;
+    int ptSizeD1CeilRd = midTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::ptSizeD1CeilRd;
+    int ptSizeD2Ceil = midTransposeCls<POINT_SIZE, SSR, POINT_SIZE_D1>::ptSizeD2Ceil;
 
     TT_SAMPLE memIn[NITER][ptSizeD2Ceil][ptSizeD1];
     TT_SAMPLE memRef[NITER][ptSizeD1Ceil][ptSizeD2Ceil];

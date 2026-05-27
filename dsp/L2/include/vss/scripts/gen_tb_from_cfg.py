@@ -37,7 +37,7 @@ def run_function(path, method, *args):
 
 
 parser = configparser.ConfigParser()
-with open(f"{CUR_DIR}/{PARAMS_FILE}") as stream:
+with open(f"{PARAMS_FILE}") as stream:
     parser.read_string(
         "[top]\n" + stream.read()
     )  # Workaround because configparser complains about headerless configurations

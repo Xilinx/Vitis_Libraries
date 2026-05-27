@@ -65,6 +65,12 @@ void conv_corr_ref<TT_DATA_F,
     unsigned int vecLenF = TP_F_LEN; // F_LEN via Template
     unsigned int vecLenG = TP_G_LEN; // G_LEN via Template
 
+    // Initialize paddedFdata buffer with zeros to avoid garbage values in padded F data which is used as main input for
+    // convolution/correlation
+    for (unsigned int i = 0; i < (m_kPaddedDataLength * TP_NUM_FRAMES); i++) {
+        refPaddedFdata[i] = zeros<TT_DATA_F>();
+    }
+
     unsigned int loopCount =
         (TP_API == USE_WINDOW_API) ? CEIL(m_kLoopCount, m_kLanes) : vecLenF; // loop count to iterate on each sample.
     unsigned int paddedLoopStartVal =
@@ -87,7 +93,7 @@ void conv_corr_ref<TT_DATA_F,
         // copying F data to the zero initialized memory buffer to prepare padded F data as main input
         for (unsigned int i = paddedLoopStartVal; i < (vecLenF + paddedLoopStartVal); i++) {
             refPaddedFdata[(frameIndx * m_kPaddedDataLength) + i] =
-                *inPtrF++; // for convolution, G signal has to be reversed
+                *inPtrF++; // copy F data into padded buffer at offset paddedLoopStartVal
         }
 
         if (TP_FUNCT_TYPE == 1) {
@@ -111,7 +117,7 @@ void conv_corr_ref<TT_DATA_F,
         for (unsigned int i = 0; i < loopCount; i++) {
             accum = null_accRef<TT_DATA_OUT>(); // reset accumulator at the start of new multiply accumulation of each
                                                 // output
-            inPtrF = baseinPtrF++;              // update pointer of F data
+            inPtrF = (baseinPtrF + i);          // update pointer of F data to slide through padded buffer
             inPtrG = &buffG[(frame * vecLenG)]; // update pointer of G data
 
             // Inner Loop to do multiply and accum
@@ -127,11 +133,8 @@ void conv_corr_ref<TT_DATA_F,
             saturateAcc(accum, TP_SAT);            // apply saturation if any overflow of data occurs.
             outData = castAcc<TT_DATA_OUT>(accum); // writing output results to vector from accumulator
 
-            if (TP_COMPUTE_MODE ==
-                2) // store only one sample as per Valid mode along with F and G are having same length.
-            {
-                outData = (i < m_kLoopCount) ? outData : zeros<TT_DATA_OUT>(); // Masking the output data
-            }
+            // ALWAYS mask padded samples beyond valid output count
+            outData = (i < m_kLoopCount) ? outData : zeros<TT_DATA_OUT>(); // Masking the output data
 
             *outPtr++ = outData; // Store the results to io buffer of out.
 
@@ -174,15 +177,27 @@ void conv_corr_ref<TT_DATA_F,
                                                             const int32 (&inVecLen)[2]) {
     unsigned int vecLenF = inVecLen[0]; // F_LEN via RTP
     unsigned int vecLenG = inVecLen[1]; // G_LEN via RTP
+    const unsigned int* ptrVecLenF = &vecLenF;
+    const unsigned int* ptrVecLenG = &vecLenG;
 
-    unsigned int loopCount =
-        (TP_API == USE_WINDOW_API) ? CEIL(m_kLoopCount, m_kLanes) : vecLenF; // loop count to iterate on each sample.
-    unsigned int paddedLoopStartVal =
-        (TP_COMPUTE_MODE == 0) ? (vecLenG - 1) : (TP_COMPUTE_MODE == 1) ? ((vecLenG >> 1) - 1) : 0;
-    TT_DATA_F inDataF;                                 // input data of F Sig.
-    TT_DATA_G inDataG, buffG[vecLenG * TP_NUM_FRAMES]; // input data of G Sig.
-    TT_DATA_OUT outData;                               // output data of conv/corr.
-    T_accRef<TT_DATA_OUT> accum;                       // declaration of accumulator
+    // Initialize paddedFdata buffer with zeros to avoid garbage values in padded F data which is used as main input for
+    // convolution/correlation
+    for (unsigned int i = 0; i < (m_kPaddedDataLength * TP_NUM_FRAMES); i++) {
+        refPaddedFdata[i] = zeros<TT_DATA_F>();
+    }
+
+    unsigned int kRuntimeLoopCount = getRefRunTimeLoopCount<TP_COMPUTE_MODE>(*ptrVecLenF, *ptrVecLenG);
+    unsigned int loopCountDynamic = (TP_API == USE_WINDOW_API) ? CEIL(kRuntimeLoopCount, m_kLanes)
+                                                               : *ptrVecLenF; // loop count to iterate on each sample.
+    unsigned int paddedLoopStartVal = (TP_COMPUTE_MODE == FULL_MODE)
+                                          ? (*ptrVecLenG - 1)
+                                          : (TP_COMPUTE_MODE == SAME_MODE) ? ((*ptrVecLenG >> 1) - 1) : 0;
+    unsigned int kPaddedDataLength =
+        getRefRunTimePaddedLength<TT_DATA_F, TT_DATA_G, TP_COMPUTE_MODE>(*ptrVecLenF, *ptrVecLenG);
+    TT_DATA_F inDataF;                                     // input data of F Sig.
+    TT_DATA_G inDataG, buffG[*ptrVecLenG * TP_NUM_FRAMES]; // input data of G Sig.
+    TT_DATA_OUT outData;                                   // output data of conv/corr.
+    T_accRef<TT_DATA_OUT> accum;                           // declaration of accumulator
 
     // Pointers to fetch F and G data
     TT_DATA_F* inPtrF = (TT_DATA_F*)inWindowF.data();     // pointer to F data
@@ -195,20 +210,20 @@ void conv_corr_ref<TT_DATA_F,
 
     for (int frameIndx = 0; frameIndx < TP_NUM_FRAMES; frameIndx++) {
         // copying F data to the zero initialized memory buffer to prepare padded F data as main input
-        for (unsigned int i = paddedLoopStartVal; i < (vecLenF + paddedLoopStartVal); i++) {
-            refPaddedFdata[(frameIndx * m_kPaddedDataLength) + i] =
-                *inPtrF++; // for convolution, G signal has to be reversed
+        for (unsigned int i = paddedLoopStartVal; i < (*ptrVecLenF + paddedLoopStartVal); i++) {
+            refPaddedFdata[(frameIndx * kPaddedDataLength) + i] =
+                *inPtrF++; // copy F data into padded buffer at offset paddedLoopStartVal
         }
 
         if (TP_FUNCT_TYPE == 1) {
-            for (unsigned int i = 0; i < vecLenG; i++) {
-                buffG[(frameIndx * vecLenG) + ((vecLenG - 1) - i)] =
+            for (unsigned int i = 0; i < *ptrVecLenG; i++) {
+                buffG[(frameIndx * *ptrVecLenG) + ((*ptrVecLenG - 1) - i)] =
                     *inPtrG++; // for convolution, G signal has to be reversed
             }
         } else {
-            for (unsigned int i = 0; i < vecLenG; i++) {
+            for (unsigned int i = 0; i < *ptrVecLenG; i++) {
                 inDataG = *inPtrG++;
-                buffG[((frameIndx * vecLenG) + i)] =
+                buffG[((frameIndx * *ptrVecLenG) + i)] =
                     conjugate<TT_DATA_G>(inDataG); // for correlation , G signal has to be conjugate
             }
         }
@@ -216,13 +231,13 @@ void conv_corr_ref<TT_DATA_F,
 
     // Convolution/correlation computation
     for (int frame = 0; frame < TP_NUM_FRAMES; frame++) {
-        baseinPtrF = (inPtrFperFrame + (frame * m_kPaddedDataLength));
+        baseinPtrF = (inPtrFperFrame + (frame * kPaddedDataLength));
 
-        for (unsigned int i = 0; i < loopCount; i++) {
+        for (unsigned int outIndex = 0; outIndex < loopCountDynamic; outIndex++) {
             accum = null_accRef<TT_DATA_OUT>(); // reset accumulator at the start of new multiply accumulation of each
                                                 // output
-            inPtrF = baseinPtrF++;              // update pointer of F data
-            inPtrG = &buffG[(frame * vecLenG)]; // update pointer of G data
+            inPtrF = (baseinPtrF + outIndex);   // update pointer of F data to slide through padded buffer
+            inPtrG = &buffG[(frame * *ptrVecLenG)]; // update pointer of G data
 
             // Inner Loop to do multiply and accum
             for (unsigned int j = 0; j < vecLenG; j++) {
@@ -237,17 +252,18 @@ void conv_corr_ref<TT_DATA_F,
             saturateAcc(accum, TP_SAT);            // apply saturation if any overflow of data occurs.
             outData = castAcc<TT_DATA_OUT>(accum); // writing output results to vector from accumulator
 
-            if (TP_COMPUTE_MODE ==
-                2) // store only one sample as per Valid mode along with F and G are having same length.
-            {
-                outData = (i < m_kLoopCount) ? outData : zeros<TT_DATA_OUT>(); // Masking the output data
-            }
-
+            // Mask padded samples beyond the runtime valid output count (loop count rounded up to lane boundary)
+            outData = (outIndex < kRuntimeLoopCount) ? outData : zeros<TT_DATA_OUT>();
             *outPtr++ = outData; // Store the results to io buffer of out.
 
         } // End of Loop {
-    }     // End of Frames
-};        // End of conv_corr_ref() {
+
+        // Zero remaining output positions up to the full output buffer size to match UUT masking behaviour.
+        for (unsigned int outIndex = loopCountDynamic; outIndex < m_kMaxOutLen; outIndex++) {
+            *outPtr++ = zeros<TT_DATA_OUT>();
+        }
+    } // End of Frames
+};    // End of conv_corr_ref() {
 
 } //  End of namespace conv_corr {
 } //  End of namespace aie {

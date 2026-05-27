@@ -29,7 +29,6 @@
 #include "uut_static_config.h"
 #include "test_utils.hpp"
 #include "fir_common_traits.hpp"
-#include "device_defs.h"
 #include "fir_tdm_native_generated_graph/fir_tdm_generated_graph.h"
 #include "pkt_switch_graph.hpp"
 
@@ -81,8 +80,18 @@ class test_graph : public graph {
    public:
     // When just a duplicate (windows dual ip), use only one plio per ssr port on input.
 
-    std::array<input_plio, NPLIO_I> in;
-    std::array<output_plio, NPLIO_O> out;
+    static constexpr int plioBitWidth = PLIO_WIDTH;
+#if (USE_PKT_SWITCHING != 0)
+    std::array<input_plio, NPLIO_I> in =
+        createPLIOFileConnections<NPLIO_I, DUAL_INPUT_SAMPLES, input_plio, plioBitWidth>(PKT_INPUT_FILE, "in");
+    std::array<output_plio, NPLIO_O> out =
+        createPLIOFileConnections<NPLIO_O, (NUM_OUTPUTS - 1), output_plio, plioBitWidth>(PKT_OUTPUT_FILE, "out");
+#else
+    std::array<input_plio, NPLIO_I> in =
+        createPLIOFileConnections<NPLIO_I, DUAL_INPUT_SAMPLES, input_plio, plioBitWidth>(QUOTE(INPUT_FILE), "in");
+    std::array<output_plio, NPLIO_O> out =
+        createPLIOFileConnections<NPLIO_O, (NUM_OUTPUTS - 1), output_plio, plioBitWidth>(QUOTE(OUTPUT_FILE), "out");
+#endif
 
 #if (USE_COEFF_RELOAD == 1)
     // port_conditional_array<input, USE_COEFF_RELOAD == 1, P_SSR> coeff;
@@ -114,7 +123,11 @@ class test_graph : public graph {
         generateTaps<COEFF_TYPE, COEFF_STIM_TYPE, FIR_LEN * TDM_CHANNELS, COEFF_SEED>(QUOTE(COEFF_FILE));
 
 #if (USE_PKT_SWITCHING == 1)
-    pkt_switch_graph<P_SSR, NPORT_I, NPORT_O, uut> firGraph;
+    pkt_switch_graph<P_SSR, NPORT_I, NPORT_O, uut, POLYPHASE_ORDER> firGraph;
+#elif (USE_PKT_SWITCHING == 2)
+    uut firGraph;
+    pkt_switch_input<P_SSR, NPORT_I, POLYPHASE_ORDER> firGraphIn;
+    pkt_switch_output<P_SSR, NPORT_O, POLYPHASE_ORDER> firGraphOut;
 #else
     uut firGraph;
 
@@ -124,13 +137,16 @@ class test_graph : public graph {
     // Constructor
     test_graph() {
 #else
-    test_graph() : firGraph(m_taps_v) {
+    test_graph()
+        : firGraph(m_taps_v)
+#if (USE_PKT_SWITCHING == 2)
+          ,
+          firGraphIn(in, firGraph.in),
+          firGraphOut(firGraph.out, out)
+#endif
+    {
 #endif
         printConfig();
-
-        // Make plio connections
-        createPLIOFileConnections<NPLIO_I, DUAL_INPUT_SAMPLES>(in, QUOTE(INPUT_FILE), "in");
-        createPLIOFileConnections<NPLIO_O, (NUM_OUTPUTS - 1)>(out, QUOTE(OUTPUT_FILE), "out");
 
 #if (USE_PKT_SWITCHING == 1)
         // Connect packet switching network.
@@ -142,14 +158,18 @@ class test_graph : public graph {
         for (unsigned int i = 0; i < NPORT_O; ++i) {
             connect<>(firGraph.pkt_out[i], out[i].in[0]);
         }
+#elif (USE_PKT_SWITCHING == 2)
+// All connections done in pkt_switch_input and pkt_switch_output constructors.
+// No action needed here.
+
 #else
 
-        for (unsigned int i = 0; i < P_SSR; ++i) {
-            unsigned int ssrIdx = i;
-            connect<>(in[ssrIdx].out[0], firGraph.in[ssrIdx]);
+    for (unsigned int i = 0; i < P_SSR; ++i) {
+        unsigned int ssrIdx = i;
+        connect<>(in[ssrIdx].out[0], firGraph.in[ssrIdx]);
 
-            connect<>(firGraph.out[ssrIdx], out[ssrIdx].in[0]);
-        }
+        connect<>(firGraph.out[ssrIdx], out[ssrIdx].in[0]);
+    }
 #endif
 
 #ifdef USING_UUT
@@ -179,15 +199,13 @@ class test_graph : public graph {
         }
 #endif
 
-#if (USE_PKT_SWITCHING == 1)
-// Single buffer constraint is disabled in the testbench because fir_tdm_generated_graph does not provide direct access
-// methods. Constraints can be applied using hierarchical members if needed.
-#else
+#if (USE_PKT_SWITCHING == 0)
+        // Single buffer constraint is disabled in the testbench because packet switch graph class does not provide
+        // direct access methods. Constraints can be applied using hierarchical members if needed.
 
         const int MAX_PING_PONG_SIZE = __DATA_MEM_BYTES__ / 2;
         const int bufferSize =
-            (PORT_API == 1 ? 0
-                           : (/*(FIR_LEN * TDM_CHANNELS / P_SSR)*/ 0 + INPUT_WINDOW_VSIZE / P_SSR) * sizeof(DATA_TYPE));
+            (PORT_API == 1 ? 0 : ((FIR_LEN * TDM_CHANNELS / P_SSR) + INPUT_WINDOW_VSIZE / P_SSR) * sizeof(DATA_TYPE));
         if ((bufferSize > MAX_PING_PONG_SIZE) || (SINGLE_BUF == 1 && PORT_API == 0)) {
             for (int ssr = 0; ssr < P_SSR; ssr++) {
                 for (int casc_len = 0; casc_len < CASC_LEN; casc_len++) {

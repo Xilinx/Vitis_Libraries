@@ -9,10 +9,10 @@
     ],
     "part_allowlist": [
         "xcvr1602-vsva2488-2LP-e-S-es1",
-        "xc2ve3858-ssva2112-2LP-e-S"
+        "xc2ve3858-ssva2112-2MP-e-S"
     ],
     "part_alias": {
-        "xc2ve3858-ssva2112-2LP-e-S": "aie_mlv2"
+        "xc2ve3858-ssva2112-2MP-e-S": "aie_mlv2"
 
     },
     "platform_properties": {

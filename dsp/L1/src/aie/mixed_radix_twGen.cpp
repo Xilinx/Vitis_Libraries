@@ -99,7 +99,7 @@ kernel_MRFFTTwiddleGenerationClass<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_RND, T
     nR2 = (nR2raw & 1);
     nR4 = nR2raw >> 1;
     int totalLegsInAllStages = nR3 * 2 + nR5 * 4 + nR4 * 3 + nR2;
-#endif // __FFT_R4_IMPL__
+#endif                     // __FFT_R4_IMPL__
     int totalStages = nR2 + nR4 + nR3 + nR5;
     int count = 0;
     int prev = 1;

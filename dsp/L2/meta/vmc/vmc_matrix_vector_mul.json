@@ -1,0 +1,182 @@
+{
+    "low_level_file": "matrix_vector_mul.json",
+    "ip_name": "vmc_matrix_vector_mul",
+    "block_info": {
+        "label": "GEMV",
+        "description": "Matrix and Vector Multiplication block targeted for AI Engines."
+    },
+    "parameters": [
+        {
+            "key": "AIE_VARIANT",
+            "name": "AIE_VARIANT",
+            "description": "Specifies the device type: 1-AIE, 2-AIE-ML, 22-AIE-ML-V2",
+            "default": 1,
+            "label": "AIE Variant:",
+            "tablabel": "Main",
+            "visible": "off",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TT_DATA_A",
+            "name": "data_type_A",
+            "description": "describes the data type of samples in input matrix A",
+            "default": "int16",
+            "label": "A input data type:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TT_DATA_B",
+            "name": "data_type_B",
+            "description": "describes the data type of samples in input matrix B",
+            "default": "int16",
+            "label": "B input data type:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+          "key": "TP_USE_MATRIX_RELOAD",
+          "name": "Matrix_reload",
+          "description": "When enabled, the input port for matrix A is an asynchronous RTP. Otherwise, the input port for matrix A is a buffer. ",
+          "default": false,
+          "label": "Provide matrix A via RTP",
+          "tablabel": "Main",
+          "parameterType": "checkbox"
+        },
+        {
+            "key": "TP_API",
+            "name": "api",
+            "description": "IO interface: 0 for windows, 1 for streams",
+            "default": 0,
+            "label": "api:",
+            "tablabel": "Main",
+            "visible": "off",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_DIM_A",
+            "name": "Dim_A",
+            "description": "is an unsigned integer which describes the number of elements along the unique dimension (rows) of Matrix A.",
+            "default": 16,
+            "label": "Rows in input A:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_DIM_B",
+            "name": "Dim_B",
+            "description": "is an unsigned integer which describes the number of elements in Vector B and the number of columns in Matrix A.",
+            "default": 16,
+            "label": "Columns in input A, Length of vector B:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_NUM_FRAMES",
+            "name": "num_frames",
+            "description": "describes the number matrix-vector multiplications occuring per window of matrix/vector input data",
+            "default": 1,
+            "label": "Number of frames:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+              "key": "TP_SSR",
+              "name": "ssr",
+              "description": "describes the number of kernels (or cascaded kernel chains) that will compute the matrix-vector multiplication in parallel.",
+              "default": 1,
+              "label": "SSR",
+              "tablabel": "Main",
+              "parameterType": "edit"
+        },
+        {
+            "key": "TP_CASC_LEN",
+            "name": "casc_length",
+            "description": "describes the number of AIE kernels the matrix-vector multiplication will be divided into in series.",
+            "default": 1,
+            "label": "Number of cascade stages:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_DUAL_IP",
+            "name": "dual_ip",
+            "description": "Enable a second set of stream input ports. Interleave the input data between the 2 inputs.",
+            "type": "uint",
+            "default": false,
+            "visible": "off",
+            "label": "Provide second set of input ports",
+            "tablabel": "Main",
+            "parameterType": "checkbox"
+        },
+        {
+            "key": "TP_NUM_OUTPUTS",
+            "name": "num_outputs",
+            "description": "Enable a second set of stream output ports. The result is interleaved between the 2 ouputs.",
+            "default": false,
+            "label": "Provide second set of output ports",
+            "tablabel": "Main",
+            "visible": "off",         
+            "parameterType": "checkbox"
+        },
+        {
+            "key": "TP_DIM_A_LEADING",
+            "name": "A_Leading_data",
+            "description": "describes whether input matrix A is row-major or column-major",
+            "enum": [
+                0,
+                1
+            ],
+            "enum_str": [
+                "Row-major(0)",
+                "Column-major(1)"
+            ],
+            "default": 1,
+            "label": "A input leading dimension:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_SHIFT",
+            "name": "shift_output",
+            "description": "describes power of 2 shift down applied to the accumulation of product terms before each output.",
+            "default": 0,
+            "label": "Scale output down by 2^:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_RND",
+            "name": "rnd_mode",
+            "description": "describes the selection of rounding to be applied during the shift down stage of processing.",
+            "default": "Floor",
+            "label": "Rounding mode:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_SAT",
+            "name": "sat_mode",
+            "description": "describes the selection of saturation to be applied during the shift down stage of processing.",
+            "enum": [
+                0,
+                1,
+                3
+            ],
+            "enum_str": [
+                "None",
+                "Saturate",
+                "Symmetric"
+            ],
+            "default": 0,
+            "label": "Saturation mode:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        }
+    ],
+    "generator": {
+        "file": "vmc_matrix_vector_mult.py",
+        "function": "vmc_generate_graph"
+    }
+    
+}

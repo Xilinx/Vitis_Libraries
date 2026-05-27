@@ -23,6 +23,9 @@ PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) DIM_SIZE $(DIM_SIZ
 
 DIM_SIZE ?= WINDOW_VSIZE
 
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
+
 HELPER:= $(HELPER_CUR_DIR)/.HELPER
 
 $(HELPER): create_input sim_ref prep_x86_out
@@ -63,11 +66,8 @@ get_status: check_op_ref
 get_latency:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input.txt ./data/uut_output_0.txt $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
 
-# get_power:
-# 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(STATUS_FILE) $(DIM_OUT) $(NITER)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file T_input.txt -t_out_file uut_output_0.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(WINDOW_VSIZE) -niter $(NITER) -casc_len 1 -aiesim_out_dir ./aiesimulator_output -ip widget_2ch_real_fft_main
 
+# get_power:
 # 	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(VCD_FILE_DIR) $(STATUS_FILE) $(AIE_PART);\
 
-
-get_stats:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(DIM_SIZE) 1 $(STATUS_FILE) ./aiesimulator_output "widget_2ch_real_fft_main" $(NITER)
