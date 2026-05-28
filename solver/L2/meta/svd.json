@@ -1,0 +1,126 @@
+{
+    "schema": "vitis_library_api_spec_schema-1.0",
+    "api_name": "xf::solver::aie::svd::svd_graph",
+    "display_name": "svd_graph",
+    "header_file_name": "svd_graph.hpp",
+    "search_paths": [
+        "L1/include/aie",
+        "L1/src/aie",
+        "L1/tests/aie/inc",
+        "L1/tests/aie/src",
+        "L2/include/aie",
+        "L2/tests/aie/common/inc"
+    ],
+    "parameters": [
+        {
+            "name": "AIE_VARIANT",
+            "description": "specifies the device type",
+            "type": "uint",
+            "updater": {
+                "file": "svd.py",
+                "function": "update_AIE_VARIANT",
+                "args": []
+            },
+            "validator": {
+                "file": "svd.py",
+                "function": "validate_AIE_VARIANT",
+                "args": []
+            }
+        },
+        {
+            "name": "TT_DATA",
+            "description": "The type of individual data samples input to port A.",
+            "type": "typename",
+            "enum": [
+                "cfloat",
+                "float"
+            ],
+            "updater": {
+                "file": "svd.py",
+                "function": "update_TT_DATA",
+                "args": []
+            },
+            "validator": {
+                "file": "svd.py",
+                "function": "validate_TT_DATA",
+                "args": []
+            }
+        },
+        {
+            "name": "TP_DIM_COLS",
+            "description": "Column dimension of the input matrix.",
+            "type": "uint",
+            "updater": {
+                "file": "svd.py",
+                "function": "update_TP_DIM_COLS",
+                "args": []
+            },
+            "validator": {
+                "file": "svd.py",
+                "function": "validate_TP_DIM_COLS",
+                "args": []
+            }
+        },
+        {
+            "name": "TP_DIM_ROWS",
+            "description": "Row dimension of the input matrix.",
+            "type": "uint",
+            "updater": {
+                "file": "svd.py",
+                "function": "update_TP_DIM_ROWS",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_DIM_COLS"
+                ]
+            },
+            "validator": {
+                "file": "svd.py",
+                "function": "validate_TP_DIM_ROWS",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_DIM_COLS"
+                ]
+            }
+        },
+        {
+            "name": "TP_CASC_LEN",
+            "description": "The number of cascaded kernels to be used to perform the function.",
+            "type": "uint",
+            "validator": {
+                "file": "svd.py",
+                "function": "validate_TP_CASC_LEN",
+                "args": []
+            },
+            "updater": {
+                "file": "svd.py",
+                "function": "update_TP_CASC_LEN",
+                "args": []
+            }
+        },
+        {
+            "name": "TP_PASSES",
+            "description": "The number of operations per call to the kernel.",
+            "type": "uint",
+            "updater": {
+                "file": "svd.py",
+                "function": "update_TP_PASSES",
+                "args": []
+            },
+            "validator": {
+                "file": "svd.py",
+                "function": "validate_TP_PASSES",
+                "args": []
+            }
+        }  
+    ],
+    "ports": {
+        "file": "svd.py",
+        "function": "info_ports"
+    },
+    "generator": {
+        "file": "svd.py",
+        "function": "generate_graph"
+    }
+}

@@ -1,0 +1,57 @@
+# Functional-focused SVD checkin suite
+# Goal: cover all major features with a compact set of tests that are suitable
+# for routine checkin use.
+#
+# Coverage:
+# - DATA_TYPE: float, cfloat
+# - SORT: 1
+# - Column shapes: even/aligned, odd, even/non-aligned
+# - CASC_LEN: 1, 2, 4
+# - AIE variants: 1, 2, 22
+#
+# Notes:
+# - AIE_VARIANT=[1,2,22] is used on single-kernel cases to cover architecture
+#   differences with the lowest functional risk.
+# - A small number of cascaded ML/MLv2 cases are included to ensure cascade
+#   feature coverage exists on all supported architectures without making the
+#   suite excessively large.
+
+# Single-kernel baseline: sorted output, aligned columns
+make all  DATA_TYPE=float  DIM_ROWS=64 DIM_COLS=8  PASSES=3 SORT=1 CASC_LEN=1 AIE_VARIANT=[1,2,22]
+make all  DATA_TYPE=cfloat DIM_ROWS=64 DIM_COLS=8  PASSES=3 SORT=1 CASC_LEN=1 AIE_VARIANT=[1,2,22]
+
+# Single-kernel odd-column schedule padding path
+make all  DATA_TYPE=float  DIM_ROWS=72 DIM_COLS=11 PASSES=3 SORT=1 CASC_LEN=1 AIE_VARIANT=[1,2,22]
+make all  DATA_TYPE=cfloat DIM_ROWS=72 DIM_COLS=11 PASSES=3 SORT=1 CASC_LEN=1 AIE_VARIANT=[1,2,22]
+
+# Single-kernel even but non-trivially padded storage path
+make all  DATA_TYPE=float  DIM_ROWS=80 DIM_COLS=10 PASSES=3 SORT=1 CASC_LEN=1 AIE_VARIANT=[1,2,22]
+make all  DATA_TYPE=cfloat DIM_ROWS=80 DIM_COLS=10 PASSES=3 SORT=1 CASC_LEN=1 AIE_VARIANT=[1,2,22]
+
+# Single-kernel wider aligned case
+make all  DATA_TYPE=float  DIM_ROWS=56 DIM_COLS=16 PASSES=3 SORT=1 CASC_LEN=1 AIE_VARIANT=1
+make all  DATA_TYPE=cfloat DIM_ROWS=56 DIM_COLS=16 PASSES=3 SORT=1 CASC_LEN=1 AIE_VARIANT=1
+
+# Cascaded baseline: aligned columns
+make all  DATA_TYPE=float  DIM_ROWS=144 DIM_COLS=8 PASSES=3 SORT=1 CASC_LEN=2 AIE_VARIANT=1
+make all  DATA_TYPE=cfloat DIM_ROWS=144 DIM_COLS=8 PASSES=3 SORT=1 CASC_LEN=2 AIE_VARIANT=1
+make all  DATA_TYPE=float  DIM_ROWS=256 DIM_COLS=8 PASSES=3 SORT=1 CASC_LEN=4 AIE_VARIANT=1
+make all  DATA_TYPE=cfloat DIM_ROWS=256 DIM_COLS=8 PASSES=3 SORT=1 CASC_LEN=4 AIE_VARIANT=1
+
+# Cascaded baseline on ML / MLv2
+make all  DATA_TYPE=float  DIM_ROWS=128 DIM_COLS=8 PASSES=3 SORT=1 CASC_LEN=2 AIE_VARIANT=[2,22]
+make all  DATA_TYPE=cfloat DIM_ROWS=128 DIM_COLS=8 PASSES=3 SORT=1 CASC_LEN=2 AIE_VARIANT=[2,22]
+make all  DATA_TYPE=float  DIM_ROWS=128 DIM_COLS=8 PASSES=3 SORT=1 CASC_LEN=4 AIE_VARIANT=[2,22]
+make all  DATA_TYPE=cfloat DIM_ROWS=128 DIM_COLS=8 PASSES=3 SORT=1 CASC_LEN=4 AIE_VARIANT=[2,22]
+
+# Cascaded odd/even-nonaligned feature coverage
+make all  DATA_TYPE=float  DIM_ROWS=144 DIM_COLS=13 PASSES=3 SORT=1 CASC_LEN=2 AIE_VARIANT=1
+make all  DATA_TYPE=cfloat DIM_ROWS=144 DIM_COLS=13 PASSES=3 SORT=1 CASC_LEN=2 AIE_VARIANT=1
+make all  DATA_TYPE=float  DIM_ROWS=160 DIM_COLS=10 PASSES=3 SORT=1 CASC_LEN=2 AIE_VARIANT=1
+make all  DATA_TYPE=cfloat DIM_ROWS=160 DIM_COLS=10 PASSES=3 SORT=1 CASC_LEN=2 AIE_VARIANT=1
+
+# Cascaded odd/even-nonaligned coverage on ML / MLv2
+make all  DATA_TYPE=float  DIM_ROWS=128 DIM_COLS=13 PASSES=3 SORT=1 CASC_LEN=2 AIE_VARIANT=[2,22]
+make all  DATA_TYPE=cfloat DIM_ROWS=128 DIM_COLS=13 PASSES=3 SORT=1 CASC_LEN=2 AIE_VARIANT=[2,22]
+make all  DATA_TYPE=float  DIM_ROWS=128 DIM_COLS=13 PASSES=3 SORT=1 CASC_LEN=4 AIE_VARIANT=[2,22]
+make all  DATA_TYPE=cfloat DIM_ROWS=128 DIM_COLS=13 PASSES=3 SORT=1 CASC_LEN=4 AIE_VARIANT=[2,22]

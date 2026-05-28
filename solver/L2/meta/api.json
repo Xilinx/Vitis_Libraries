@@ -1070,6 +1070,87 @@
                 ],
                 "schema": "vitis_libraries_api_list_schema-1.0"
             }
+        },
+        {
+            "api_name": "xf::solver::aie::qrd_hh::qrd_hh_graph",
+            "target_domain": "AIE",
+            "spec": {
+                "brief": "QR decomposition with float/cfloat data type.",
+                "search_paths": [
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
+                ],
+                "visible": true,
+                "target_domain": "AIE",
+                "display_name": "qrd_hh_graph",
+                "parameters": [
+                    {
+                        "type": "typename",
+                        "name": "TT_DATA",
+                        "description": "The type of individual data samples input to port A."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_ROWS",
+                        "description": "Row dimension of the input matrix."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_COLS",
+                        "description": "Column dimension of the input matrix."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_NUM_FRAMES",
+                        "description": "The number of operations per call to the kernel."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_CASC_LEN",
+                        "description": "The number of cascaded kernels to be used to perform the function."
+                    },     
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_A_LEADING",
+                        "description": "Describes which dimension of the Matrix A input data is contigious in memory. TP_DIM_A_LEADING=1 is row major, and TP_DIM_A_LEADING=0 is column major."
+                    },                    
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_Q_LEADING",
+                        "description": "Describes which dimension of the Matrix Q output data is contigious in memory. TP_DIM_Q_LEADING=1 is row major, and TP_DIM_Q_LEADING=0 is column major."  
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_R_LEADING",
+                        "description": "Describes which dimension of the Matrix Q output data is contigious in memory. TP_DIM_R_LEADING=1 is row major, and TP_DIM_R_LEADING=0 is column major."
+                    }
+                ],
+                "header_file_name": [
+                    "qrd_hh_graph.hpp"
+                ],
+                "instance": "class",
+                "api_name": "xf::solver::aie::qrd_hh::qrd_hh_graph",
+                "ports": [
+                    {
+                        "direction": "input",
+                        "type": "input_port xf::solver::aie::qrd_hh::qrd_hh_graph< TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES,TP_CASC_LEN>::inA",
+                        "name": "inA"
+                    },
+                    {
+                        "direction": "output",
+                        "type": "output_port xf::solver::aie::qrd_hh::qrd_hh_graph< TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES,TP_CASC_LEN>::outQ",
+                        "name": "outQ"
+                    },
+                    {
+                        "direction": "output",
+                        "type": "output_port xf::solver::aie::qrd_hh::qrd_hh_graph< TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES,TP_CASC_LEN>::outR",
+                        "name": "outR"
+                    }
+                ],
+                "schema": "vitis_libraries_api_list_schema-1.0"
+            }
         }
+
     ]
 }

@@ -3,10 +3,10 @@
 clock=300MHz
 flow_target=vivado
 syn.file=${XF_PROJ_ROOT}/L1/tests/hw/matrixMultiply_cfloat/kernel/kernel_matrixMultiply_cfloat_0.cpp
-syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/hw/matrixMultiply_cfloat/kernel/kernel_matrixMultiply_cfloat_0.cpp, -D_ROWA=128 -D_COLA=64 -D_COLB=32 -D_DATA_PATH=${XF_PROJ_ROOT}/L1/tests/hw/matrixMultiply_cfloat/datas/ -I./ -I./host/ -I./kernel/ -I../ -I${XF_PROJ_ROOT}/L1/tests/ -I${XF_PROJ_ROOT}/L1/include/ -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/../utils/L1/include/
+syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/hw/matrixMultiply_cfloat/kernel/kernel_matrixMultiply_cfloat_0.cpp, -D_ROWA=128 -D_COLA=64 -D_COLB=32 -D_DATA_PATH=${XF_PROJ_ROOT}/L1/tests/hw/matrixMultiply_cfloat/datas/ -I./ -I./host/ -I./kernel/ -I${XF_PROJ_ROOT}/L1/tests/hw/ -I${XF_PROJ_ROOT}/L1/include/ -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/../utils/L1/include/
 syn.top=kernel_matrixMultiply_cfloat_0
 tb.file=${XF_PROJ_ROOT}/L1/tests/hw/matrixMultiply_cfloat/host/test_matrixMultiply_cfloat.cpp
-tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/hw/matrixMultiply_cfloat/host/test_matrixMultiply_cfloat.cpp, -D_ROWA=128 -D_COLA=64 -D_COLB=32 -D_DATA_PATH=${XF_PROJ_ROOT}/L1/tests/hw/matrixMultiply_cfloat/datas/ -I./ -I./host/ -I./kernel/ -I../ -I${XF_PROJ_ROOT}/L1/tests/ -I${XF_PROJ_ROOT}/L1/include/ -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../utils/L1/include/
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/hw/matrixMultiply_cfloat/host/test_matrixMultiply_cfloat.cpp, -D_ROWA=128 -D_COLA=64 -D_COLB=32 -D_DATA_PATH=${XF_PROJ_ROOT}/L1/tests/hw/matrixMultiply_cfloat/datas/ -I./ -I./host/ -I./kernel/ -I${XF_PROJ_ROOT}/L1/tests/hw/ -I${XF_PROJ_ROOT}/L1/include/ -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../utils/L1/include/
 
 
 

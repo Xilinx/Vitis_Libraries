@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := u250
+PLATFORM := vck190
 endif
 
 # add warnning for sw_emu
@@ -65,7 +65,7 @@ ifeq ($(TARGET),sw_emu)
 $(error Error: The sw_emu target is no longer supported starting from 2025.1.)
 endif
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST += u250 vck190 aws-vu9p-f1
+PLATFORM_ALLOWLIST += vck190
 PLATFORM_BLOCKLIST += zc
 
 include ./utils.mk
@@ -102,18 +102,10 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 ########################## Setting up Host Variables ##########################
 
 #Inclue Required Host Source Files
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-HOST_SRCS += test_potrf.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -D USE_DDR
-CXXFLAGS +=  -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/MatrixGen -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
-CXXFLAGS += -O3 
-
-else 
 HOST_SRCS += test_potrf.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/MatrixGen -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
 CXXFLAGS += -O3 
 
-endif
 # workaround for opencv
 ifeq (,$(findstring opencv,$(CXXFLAGS)))
 CXXFLAGS += $(XRT_CXXFLAGS)
@@ -129,32 +121,25 @@ PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args
 endif
 
 ########################## Kernel compiler global settings ##########################
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-VPP_FLAGS +=   --config $(CUR_DIR)/conn_u250.cfg
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext -I $(XFLIB_DIR)/L1/include
-
-else 
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext -I $(XFLIB_DIR)/L1/include
-
-endif
 
 ######################### binary container global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 VPP_FLAGS_kernel_potrf_0 +=  -D KERNEL_NAME=kernel_potrf_0
-VPP_FLAGS_kernel_potrf_0 += --hls.clock 100000000:kernel_potrf_0
+VPP_FLAGS_kernel_potrf_0 += --hls.clock 200000000:kernel_potrf_0
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_kernel_potrf += --clock.defaultFreqHz 100000000
+VPP_LDFLAGS_kernel_potrf += --clock.defaultFreqHz 200000000
 else
-VPP_LDFLAGS_kernel_potrf += --kernel_frequency 100
+VPP_LDFLAGS_kernel_potrf += --kernel_frequency 200
 endif
 
 else 
 VPP_FLAGS_kernel_potrf_0 +=  -D KERNEL_NAME=kernel_potrf_0
-VPP_FLAGS_kernel_potrf_0 += --hls.clock 100000000:kernel_potrf_0
+VPP_FLAGS_kernel_potrf_0 += --hls.clock 200000000:kernel_potrf_0
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_kernel_potrf += --clock.defaultFreqHz 100000000
+VPP_LDFLAGS_kernel_potrf += --clock.defaultFreqHz 200000000
 else
-VPP_LDFLAGS_kernel_potrf += --kernel_frequency 100
+VPP_LDFLAGS_kernel_potrf += --kernel_frequency 200
 endif
 
 endif
@@ -240,7 +225,7 @@ endif
 # 2. General Embeded flow
 ifeq ($(dfx_hw), off)
 ifeq ($(pcie_versal), off)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.generate_sdcard --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
 endif

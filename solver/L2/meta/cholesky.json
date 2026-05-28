@@ -51,6 +51,28 @@
             }
         },
         {
+            "name": "TP_GRID_DIM",
+            "description": "The dimension size of the grid of kernels used to break up a matrix.",
+            "type": "uint",
+            "test_max": 6,
+            "updater": {
+                "file": "cholesky.py",
+                "function": "update_TP_GRID_DIM",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA"
+                ]
+            },
+            "validator": {
+                "file": "cholesky.py",
+                "function": "validate_TP_GRID_DIM",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA"
+                ]
+            }
+        },
+        {
             "name": "TP_DIM",
             "description": "The dimension size of the matrix.",
             "type": "uint",
@@ -59,7 +81,8 @@
                 "function": "update_TP_DIM",
                 "args": [
                     "AIE_VARIANT",
-                    "TT_DATA"
+                    "TT_DATA",
+                    "TP_GRID_DIM"
                 ]
             },
             "validator": {
@@ -67,7 +90,8 @@
                 "function": "validate_TP_DIM",
                 "args": [
                     "AIE_VARIANT",
-                    "TT_DATA"
+                    "TT_DATA",
+                    "TP_GRID_DIM"
                 ]
             }
         },
@@ -75,12 +99,14 @@
             "name": "TP_NUM_FRAMES",
             "description": "The number of operations per call to the kernel",
             "type": "uint",
+            "test_max": 8,
             "updater": {
                 "file": "cholesky.py",
                 "function": "update_TP_NUM_FRAMES",
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA",
+                    "TP_GRID_DIM",
                     "TP_DIM"
                 ]
             },
@@ -90,33 +116,44 @@
                 "args": [
                     "AIE_VARIANT",
                     "TT_DATA",
+                    "TP_GRID_DIM",
                     "TP_DIM"
                 ]
             }
         },
         {
-            "name": "TP_GRID_DIM",
-            "description": "The dimension size of the grid of kernels used to break up a matrix.",
+            "name": "TP_CASC_LEN",
+            "description": "The number of kernels to be used to split up and cascade the workload.",
             "type": "uint",
+            "test_max": 10,
             "updater": {
                 "file": "cholesky.py",
-                "function": "update_TP_GRID_DIM",
+                "function": "update_TP_CASC_LEN",
                 "args": [
-                    "AIE_VARIANT",
-                    "TT_DATA",
-                    "TP_DIM",
-                    "TP_NUM_FRAMES"
+                    "TP_DIM"
                 ]
             },
             "validator": {
                 "file": "cholesky.py",
-                "function": "validate_TP_GRID_DIM",
+                "function": "validate_TP_CASC_LEN",
                 "args": [
-                    "AIE_VARIANT",
-                    "TT_DATA",
-                    "TP_DIM",
-                    "TP_NUM_FRAMES"
+                    "TP_DIM"
                 ]
+            }
+        },
+        {
+            "name": "TP_DIAG_INV",
+            "description": "A specialization of the Cholesky which eliminates redundant calculations when used in series with the Substiution core (TP_DIAG_INV set to 0).",
+            "type": "uint",
+            "updater": {
+                "file": "cholesky.py",
+                "function": "update_TP_DIAG_INV",
+                "args": []
+            },
+            "validator": {
+                "file": "cholesky.py",
+                "function": "validate_TP_DIAG_INV",
+                "args": []
             }
         }
     ],

@@ -114,7 +114,7 @@
             "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk get_status DSP_ROOT_DIR=LIB_DIR/$(DSP_DIR) HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")"
         },
         {
-            "build_cmd": "#$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/$(DSP_DIR)/L2/meta/scripts/metadata_checker.py --ip $(UUT_KERNEL) --lib_dir LIB_DIR --xf_solver_test)"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/$(DSP_DIR)/L2/meta/scripts/metadata_checker.py --ip $(UUT_KERNEL) --lib_dir LIB_DIR"
         },
         {
             "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f $(CUR_DIR)/helper.mk DSP_ROOT_DIR=LIB_DIR/$(DSP_DIR) HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=LIB_DIR LOC_INPUT_FILE_A=$(LOC_INPUT_FILE_A) VITIS_PYTHON3='$(VITIS_PYTHON3)'\")"
@@ -125,26 +125,22 @@
             "target": "aiesim",
             "launch_cmd": [
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk prep_aie_out DSP_ROOT_DIR=LIB_DIR/$(DSP_DIR) HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE_Q) REF_SIM_FILE=$(REF_SIM_FILE_Q)\"",
-
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR DSP_ROOT_DIR=LIB_DIR/$(DSP_DIR) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE_Q=$(UUT_SIM_FILE_Q) REF_SIM_FILE_Q=$(REF_SIM_FILE_Q) UUT_SIM_FILE_R=$(UUT_SIM_FILE_R) REF_SIM_FILE_R=$(REF_SIM_FILE_R) VITIS_PYTHON3='$(VITIS_PYTHON3)'\"",
-
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status DSP_ROOT_DIR=LIB_DIR/$(DSP_DIR) HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE_Q) REF_SIM_FILE=$(REF_SIM_FILE_Q)\"",
-
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f $(CUR_DIR)/helper.mk get_latency DSP_ROOT_DIR=LIB_DIR/$(DSP_DIR) HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f $(CUR_DIR)/helper.mk get_stats DSP_ROOT_DIR=LIB_DIR/$(DSP_DIR) HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
-                "tclsh LIB_DIR/$(DSP_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./"
+                "tclsh LIB_DIR/$(DSP_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./",
+                "$(if $(filter-out REF,$(TAG)), $(if $(filter 1,$(CLEANUP_AFTER_TEST)), make ultraclean))"
             ]
         },
         {
             "target": "x86sim",
             "launch_cmd": [
                 "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk prep_x86_out DSP_ROOT_DIR=LIB_DIR/$(DSP_DIR) HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE_Q) REF_SIM_FILE=$(REF_SIM_FILE_Q)\")",
-
                 "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR DSP_ROOT_DIR=LIB_DIR/$(DSP_DIR) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE_Q=$(UUT_SIM_FILE_Q) REF_SIM_FILE_Q=$(REF_SIM_FILE_Q) UUT_SIM_FILE_R=$(UUT_SIM_FILE_R) REF_SIM_FILE_R=$(REF_SIM_FILE_R) VITIS_PYTHON3='$(VITIS_PYTHON3)'\")",
-
                 "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status DSP_ROOT_DIR=LIB_DIR/$(DSP_DIR) HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE_Q) REF_SIM_FILE=$(REF_SIM_FILE_Q)\")",
-                
-                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/$(DSP_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
+                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/$(DSP_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./)",
+                "$(if $(filter-out REF,$(TAG)), $(if $(filter 1,$(CLEANUP_AFTER_TEST)), make ultraclean))"
             ]
         }
     ],
@@ -242,11 +238,11 @@
                 "cmd": "",
                 "max_memory_MB": {
                     "vitis_aie_x86sim": 8192,
-                    "vitis_aie_sim": 51200
+                    "vitis_aie_sim": 8192
                 },
                 "max_time_min": {
-                    "vitis_aie_x86sim": 470,
-                    "vitis_aie_sim": 470
+                    "vitis_aie_x86sim": 1000,
+                    "vitis_aie_sim": 1000
                 }
             }
         ],

@@ -33,8 +33,10 @@ DIM_Q_LEADING ?= 0
 DIM_R_LEADING ?= 0
 
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
-PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) DIM_ROWS $(DIM_ROWS) DIM_COLS $(DIM_COLS) NUM_FRAMES $(NUM_FRAMES) CASC_LEN $(CASC_LEN)
+PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) DIM_ROWS $(DIM_ROWS) DIM_COLS $(DIM_COLS) NUM_FRAMES $(NUM_FRAMES) CASC_LEN $(CASC_LEN) DIM_A_LEADING $(DIM_A_LEADING) DIM_Q_LEADING $(DIM_Q_LEADING) DIM_R_LEADING $(DIM_R_LEADING)
 
+TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
 
 HELPER:= $(HELPER_CUR_DIR)/.HELPER
 
@@ -59,8 +61,7 @@ create_input:
 	@echo DIM_SIZE_PADDED  $(DIM_SIZE_PADDED)
 
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/qrd/gen_input_qrd.py --loc_input_file $(LOC_INPUT_FILE_A) --aie_variant $(AIE_VARIANT) --data_type $(DATA_TYPE) --row_dim_size $(DIM_ROWS) --col_dim_size $(DIM_COLS) --casc_len $(CASC_LEN) --num_frames $(NUM_FRAMES) --niter $(NITER) --seed $(SEED) --pliowidth 64 --dim_a_leading $(DIM_A_LEADING)
-
-	echo Input ready
+	@echo Input ready
 
 sim_ref:
 	make UUT_KERNEL=qrd_ref run TARGET=x86sim TAG=REF
@@ -94,13 +95,8 @@ get_status:
 	tclsh $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
 
 get_latency:
-	sh $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
-	tclsh $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input_A_0.txt ./data/uut_output_Q_0.txt $(STATUS_FILE) $(WINDOW_VSIZE_Q) $(NITER)
+	$(VITIS_PYTHON3) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file T_input_A_0.txt -t_out_file uut_output_Q_0.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(WINDOW_VSIZE_Q) -niter $(NITER) -use_outputs_if_no_inputs False -casc_len $(CASC_LEN) -aiesim_out_dir ./aiesimulator_output -ip qrd
 
-
-get_stats:
-	tclsh $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output "qrd" $(NITER)
-	$(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts
 
 
 	

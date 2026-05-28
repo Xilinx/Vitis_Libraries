@@ -4,7 +4,7 @@
 
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _API_REFERENCE:
+.. _SOLVER_API_REFERENCE:
 
 ======================
 API Reference Overview
@@ -14,6 +14,8 @@ For all library elements, the recommended approach is to instantiate each librar
 
 - `Cholesky <../../rst/group_cholesky.html>`_
 - `QRD <../../rst/group_qrd_graph.html>`_
+- `QRD_HH <../../rst/group_qrd_hh_graph.html>`_
+- `SVD <../../rst/group_svd_graph.html>`_
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:

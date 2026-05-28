@@ -45,14 +45,13 @@ class qrd_ref {
    private:
 
    public:
-    // using out_t = outTypeMult_t<TT_DATA, TT_DATA>;
-
+   
     // Constructor
     qrd_ref() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(qrd_ref::qrd_main); }
-
+   
     void qrd_main(input_buffer<TT_DATA>& inWindowA,
                   output_buffer<TT_DATA>& outWindowQ,
                   output_buffer<TT_DATA>& outWindowR);

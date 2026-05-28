@@ -88,20 +88,21 @@ qrd_kernel<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, TP_DIM
     inAPtr = (vect_t*)inInterface.inWindowA.data() + (m_kRowChunkNum * TP_DIM_COLS * frame_id);
 
     for (int vect = 0; vect < TP_DIM_COLS; vect++) chess_prepare_for_pipelining chess_loop_range(TP_DIM_COLS, ){
-
         for (int vect_pre = 0; vect_pre < vect; vect_pre++){  
             //init acc_proj
-            a_vect = *inAPtr++;//reading current A vector
-            q_vect_pre = *outQPtr++;
-            conj_vector(q_vect_pre);
-            acc_proj = ::aie::mul(q_vect_pre, a_vect);
+            if constexpr(isComplex<TT_DATA>()) {
+                acc_proj = ::aie::mul(::aie::op_conj(*outQPtr++), *inAPtr++);            
+            } else {
+                acc_proj = ::aie::mul(*outQPtr++, *inAPtr++);
+            } 
 
             //rest of the loop
             for (int row_chunk = 1; row_chunk < m_kRowChunkNum; row_chunk++) chess_prepare_for_pipelining chess_loop_range (m_kRowChunkNum-1, ){ 
-                a_vect = *inAPtr++;//reading current A vector
-                q_vect_pre = *outQPtr++;
-                conj_vector(q_vect_pre);
-                acc_proj = ::aie::mac(acc_proj, q_vect_pre, a_vect);
+                if constexpr(isComplex<TT_DATA>()) {
+                    acc_proj = ::aie::mac(acc_proj, ::aie::op_conj(*outQPtr++), *inAPtr++);            
+                } else {
+                    acc_proj = ::aie::mac(acc_proj, *outQPtr++, *inAPtr++);
+                } 
             }
 
             dot_product_val = ::aie::reduce_add(acc_proj.template to_vector<TT_DATA>(0)); // reduce the accumulated value to a scalar value
@@ -109,41 +110,41 @@ qrd_kernel<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, TP_DIM
             inAPtr = inAPtr - m_kRowChunkNum; // reset the input pointer to the start of the A vector
             outQPtr = outQPtr - m_kRowChunkNum; // reset the output pointer to the start of the Q vector
 
-
             for (int row_chunk = 0; row_chunk < m_kRowChunkNum; row_chunk++) chess_prepare_for_pipelining chess_loop_range(m_kRowChunkNum, ) { 
-                v_vect = *VPtr; 
-                q_vect_pre = *outQPtr++;
-                project_vector=mul(dot_product_val, q_vect_pre);
-                v_vect = sub(v_vect, project_vector);
+                project_vector=mul(dot_product_val, *outQPtr++);
+                v_vect = sub(*VPtr, project_vector);
                 *VPtr++ = v_vect; // save the v-vector to the input buffer
             }       
             VPtr = VPtr - m_kRowChunkNum; 
-
         } // end of vect_pre
         
         //init acc_norm
         v_vect = *VPtr++;     
-        v_vect_conj = v_vect;
-        conj_vector(v_vect_conj);
-        acc_norm = ::aie::mul(v_vect_conj, v_vect);
+        if constexpr(isComplex<TT_DATA>()) {
+            acc_norm = ::aie::mul(::aie::op_conj(v_vect), v_vect);            
+        } else {
+            acc_norm = ::aie::mul(v_vect, v_vect);
+        } 
 
         //rest of the loop
         for (int row_chunk = 1; row_chunk < m_kRowChunkNum; row_chunk++) chess_prepare_for_pipelining chess_loop_range(m_kRowChunkNum-1, ){ 
             v_vect = *VPtr++;
-            v_vect_conj = v_vect;
-            conj_vector(v_vect_conj);
-            acc_norm = ::aie::mac(acc_norm, v_vect_conj, v_vect);
+            if constexpr(isComplex<TT_DATA>()) {
+                acc_norm = ::aie::mac(acc_norm, ::aie::op_conj(v_vect), v_vect);            
+            } else {
+                acc_norm = ::aie::mac(acc_norm, v_vect, v_vect);
+            } 
+
         }
         VPtr = VPtr - m_kRowChunkNum;
 
         dot_product_val = ::aie::reduce_add(acc_norm.template to_vector<TT_DATA>(0)); // reduce the accumulated value to a scalar 
-        norm_val = calc_sqrt(dot_product_val); // save the norm value to the R vector 
+        calc_sqrt(dot_product_val, norm_val); // save the norm value to the R vector 
         *outRPtr_s = norm_val; //we are at the diagonal element of the R matrix
-        norm_val_inv = calc_inv(norm_val); // calculate the inverse of the norm value         
+        calc_inv(norm_val, norm_val_inv); // calculate the inverse of the norm value         
 
         for (int row_chunk = 0; row_chunk < m_kRowChunkNum; row_chunk++) chess_prepare_for_pipelining chess_loop_range(m_kRowChunkNum, ) {  
-            v_vect = *VPtr++;               
-            acc_q  = ::aie::mul<acc_t>(v_vect, norm_val_inv);
+            acc_q  = ::aie::mul<acc_t>(*VPtr++, norm_val_inv);
             q_vect = acc_q.template to_vector<TT_DATA>(0);
             *outQPtr++ = q_vect;
 
@@ -210,19 +211,23 @@ qrd_kernel<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, TP_DIM
             }
             QrdCascPtr = (vect_t*)&QrdCascData[0]; //reset the pointer to the start of the QrdCascData buffer
 
-
             for (int vect = 0; vect < TP_DIM_COLS; vect++) chess_prepare_for_pipelining chess_loop_range(TP_DIM_COLS, ){
-                a_vect = *inAPtr++;//reading current A vector
-                q_vect_prev = *QrdCascPtr++;
-                conj_vector(q_vect_prev);
-                acc_proj = ::aie::mul(q_vect_prev, a_vect); //initial condition for acc_proj
+                //init acc_proj
+                if constexpr(isComplex<TT_DATA>()) {
+                    acc_proj = ::aie::mul(::aie::op_conj(*QrdCascPtr++), *inAPtr++);            
+                } else {
+                    acc_proj = ::aie::mul(*QrdCascPtr++, *inAPtr++);
+                } 
+
                 //rest of the loop
                 for (int row_chunk = 1; row_chunk < m_kRowChunkNum; row_chunk++) chess_prepare_for_pipelining chess_loop_range(m_kRowChunkNum-1, ){ 
-                    a_vect = *inAPtr++;//reading current A vector
-                    q_vect_prev = *QrdCascPtr++;
-                    conj_vector(q_vect_prev);
-                    acc_proj = ::aie::mac(acc_proj, q_vect_prev, a_vect);
+                    if constexpr(isComplex<TT_DATA>()) {
+                        acc_proj = ::aie::mac(acc_proj, ::aie::op_conj(*QrdCascPtr++), *inAPtr++);            
+                    } else {
+                        acc_proj = ::aie::mac(acc_proj, *QrdCascPtr++, *inAPtr++);
+                    } 
                 }
+
                 dot_product_val = ::aie::reduce_add(acc_proj.template to_vector<TT_DATA>(0)); // reduce the accumulated value to a scalar value
                 QrdCascPtr = (vect_t*)&QrdCascData[0]; //reset the pointer to the start of the QrdCascData buffer
 
@@ -232,9 +237,8 @@ qrd_kernel<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, TP_DIM
 
                 for (int row_chunk = 0; row_chunk < m_kRowChunkNum; row_chunk++) chess_prepare_for_pipelining chess_loop_range(m_kRowChunkNum, ){  
                     v_vect_intermediate = (vect_prev == 0) ? *inAPtr++ : *outQPtr;
-                    q_vect_prev = *QrdCascPtr++;
-                    vect_t project_vector=mul(dot_product_val, q_vect_prev);
-                    v_vect_intermediate = sub(v_vect_intermediate, project_vector);
+                    vect_t project_vector = ::aie::mul(dot_product_val, *QrdCascPtr++);
+                    v_vect_intermediate = ::aie::sub(v_vect_intermediate, project_vector);
                     *outQPtr++ = v_vect_intermediate; // save the v-vector to the Q buffer
                 }     
                 QrdCascPtr = (vect_t*)&QrdCascData[0]; //reset the pointer to the start of the QrdCascData buffer

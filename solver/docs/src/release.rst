@@ -19,6 +19,25 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2026.1
+------
+
+* **Cholesky** - 2025.2 EA library element now in Production.
+* **SVD** - New EA library element.
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and class name**                                                |
++=======================================+=============================================================================+
+| Cholesky                              |  xf::solver::aie::cholesky                                                  |
++---------------------------------------+-----------------------------------------------------------------------------+
+| SVD                                   |  xf::solver::aie::svd::svd_graph                                            |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This element adds an implementation of the Cholesky Decomposition.
+Supports AIE, AIE-ML and AIE-MLv2 devices.
+The 2026.1 offering adds the CASC_LEN parameter and brings performance improvements.
+
+
 2025.2
 ------
 

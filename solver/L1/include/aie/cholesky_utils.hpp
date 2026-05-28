@@ -54,12 +54,20 @@ INLINE_DECL float getScalarAsType(float& val) {
 }
 
 template <typename TT>
-INLINE_DECL DATA_VECT_T(TT) getConj(typename DATA_VECT_T(TT)& vectInput) {
-    return ::aie::conj(vectInput);
+INLINE_DECL ::aie::accum<accType_t<TT>, fnVecSampleNum<TT>()> msc_with_conj(
+    typename ::aie::accum<accType_t<TT>, fnVecSampleNum<TT>()>& accum,
+    typename DATA_VECT_T(TT)& diagRowVect,
+    typename DATA_VECT_T(TT)& diagColVect,
+    int& k) {
+        return ::aie::msc(accum, ::aie::op_conj(diagRowVect[k]), diagColVect);
 };
 template <>
-INLINE_DECL DATA_VECT_T(float) getConj(typename DATA_VECT_T(float)& vectInput) {
-    return vectInput;
+INLINE_DECL ::aie::accum<accType_t<float>, fnVecSampleNum<float>()> msc_with_conj(
+    typename ::aie::accum<accType_t<float>, fnVecSampleNum<float>()>& accum,
+    typename DATA_VECT_T(float)& diagRowVect,
+    typename DATA_VECT_T(float)& diagColVect,
+    int& k) {
+        return ::aie::msc(accum, diagRowVect[k], diagColVect);
 };
 
 
@@ -96,13 +104,14 @@ INLINE_DECL void matrixBlockEliminations(   DATA_VECT_T(TT)* __restrict (&diagCo
     constexpr unsigned int kVecSampleNum = fnVecSampleNum<TT>();
     using dataVect_t = ::aie::vector<TT, kVecSampleNum>;
     using dataAcc_t = ::aie::accum<accType_t<TT>, kVecSampleNum>;
+    DATA_VECT_T(TT)* __restrict readPtr = inPtr;
     dataAcc_t accum;
     
     for (int j = 0; j < kNumVecsPerDim; j++)
     chess_prepare_for_pipelining chess_loop_count( kNumVecsPerDim ) {
 
         unsigned int vectBlockIdx = j * kVecSampleNum * kNumVecsPerDim;
-        dataVect_t diagRowVect = getConj<TT>(diagRowPtr[j]);
+        dataVect_t diagRowVect = diagRowPtr[j];
 
         for (int i = 0; i < kNumVecsPerDim; i++)
         chess_prepare_for_pipelining chess_loop_count( kNumVecsPerDim ) {
@@ -112,8 +121,8 @@ INLINE_DECL void matrixBlockEliminations(   DATA_VECT_T(TT)* __restrict (&diagCo
             #pragma unroll( kVecSampleNum )
             for (int k = 0; k < kVecSampleNum; k++) {
                 unsigned int vectIdx = vectBlockIdx + k * kNumVecsPerDim;
-                accum.from_vector(inPtr[vectIdx]);
-                accum = ::aie::msc(accum, diagRowVect[k], diagColVect); //TODO: utilise msc with conjugate.
+                accum.from_vector(readPtr[vectIdx]);
+                accum = msc_with_conj<TT>(accum, diagRowVect, diagColVect, k);
                 inPtr[vectIdx] = accum.template to_vector<TT>();
             }
             vectBlockIdx++;
@@ -121,34 +130,6 @@ INLINE_DECL void matrixBlockEliminations(   DATA_VECT_T(TT)* __restrict (&diagCo
     }
 };
 
-
-template <typename TT, unsigned int kNumVecsPerDim>
-INLINE_DECL void firstColBlockEliminations( DATA_VECT_T(TT)* __restrict (&diagColPtr),  // These multiply together and could come from different tiles.
-                                            DATA_VECT_T(TT)* __restrict (&diagRowPtr),
-                                            DATA_VECT_T(TT)* __restrict (&inPtr),
-                                            int& colStart,
-                                            int& rowStart,
-                                            int& diagLocal) {
-    constexpr unsigned int kVecSampleNum = fnVecSampleNum<TT>();
-    using dataVect_t = ::aie::vector<TT, kVecSampleNum>;
-    using dataAcc_t = ::aie::accum<accType_t<TT>, kVecSampleNum>;
-
-    dataVect_t diagRowVect = getConj<TT>(diagRowPtr[colStart]);
-    dataAcc_t accum;
-    unsigned int vectBlockIdx = colStart * kVecSampleNum * kNumVecsPerDim + rowStart;
-    
-    for (int i = rowStart; i < kNumVecsPerDim; i++) {   // ! not pipelineable
-        dataVect_t diagColVect = diagColPtr[i];
-        
-        for (int k = diagLocal+1; k < kVecSampleNum; k++) { // ! not unrollable
-            unsigned int vectIdx = vectBlockIdx + k * kNumVecsPerDim;
-            accum.from_vector(inPtr[vectIdx]);
-            accum = ::aie::msc(accum, diagRowVect[k], diagColVect);
-            inPtr[vectIdx] = accum.template to_vector<TT>();
-        }
-        vectBlockIdx++;
-    }
-};
 
 template <typename TT, unsigned int kNumVecsPerDim>
 INLINE_DECL void colBlockEliminations(  DATA_VECT_T(TT)* __restrict (&diagColPtr),  // These multiply together and could come from different tiles.
@@ -160,7 +141,8 @@ INLINE_DECL void colBlockEliminations(  DATA_VECT_T(TT)* __restrict (&diagColPtr
     using dataVect_t = ::aie::vector<TT, kVecSampleNum>;
     using dataAcc_t = ::aie::accum<accType_t<TT>, kVecSampleNum>;
 
-    dataVect_t diagRowVect = getConj<TT>(diagRowPtr[colStart]);
+    DATA_VECT_T(TT)* __restrict readPtr = inPtr;
+    dataVect_t diagRowVect = diagRowPtr[colStart];
     dataAcc_t accum;
     unsigned int vectBlockIdx = colStart * kVecSampleNum * kNumVecsPerDim + rowStart;
     
@@ -170,8 +152,8 @@ INLINE_DECL void colBlockEliminations(  DATA_VECT_T(TT)* __restrict (&diagColPtr
         #pragma unroll( kVecSampleNum )
         for (int k = 0; k < kVecSampleNum; k++) {
             unsigned int vectIdx = vectBlockIdx + k * kNumVecsPerDim;
-            accum.from_vector(inPtr[vectIdx]);
-            accum = ::aie::msc(accum, diagRowVect[k], diagColVect);
+            accum.from_vector(readPtr[vectIdx]);
+            accum = msc_with_conj<TT>(accum, diagRowVect, diagColVect, k);
             inPtr[vectIdx] = accum.template to_vector<TT>();
         }
         vectBlockIdx++;

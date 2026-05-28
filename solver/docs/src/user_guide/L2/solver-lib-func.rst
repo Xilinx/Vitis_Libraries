@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _SOLVER_LIB_FUNC:
+.. _SOLVER_SOLVER_LIB_FUNC:
 
 ========================
 Solver Library Functions
@@ -19,6 +19,8 @@ The SolverLib consists of the following solver elements:
 
    Cholesky <func-cholesky.rst>
    QRD <func-qrd.rst>
+   QRD Householder<func-qrd_hh.rst>
+   SVD <func-svd.rst>
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:
@@ -26,7 +28,7 @@ The SolverLib consists of the following solver elements:
    :ltrim:
 
 
-.. _vecSampleNum:
+.. _SOLVER_vecSampleNum:
 
 ============
 vecSampleNum

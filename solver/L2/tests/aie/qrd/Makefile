@@ -209,6 +209,7 @@ ifeq ($(TARGET), x86sim)
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_diff HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) DSP_ROOT_DIR=$(XFLIB_DIR)/$(DSP_DIR) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE_Q=$(UUT_SIM_FILE_Q) REF_SIM_FILE_Q=$(REF_SIM_FILE_Q) UUT_SIM_FILE_R=$(UUT_SIM_FILE_R) REF_SIM_FILE_R=$(REF_SIM_FILE_R) VITIS_PYTHON3='$(VITIS_PYTHON3)'")
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_status DSP_ROOT_DIR=$(XFLIB_DIR)/$(DSP_DIR) HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE_Q) REF_SIM_FILE=$(REF_SIM_FILE_Q)")
 	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/$(DSP_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./)
+	$(if $(filter-out REF,$(TAG)), $(if $(filter 1,$(CLEANUP_AFTER_TEST)), make ultraclean))
 endif
 #aiesim
 ifeq ($(TARGET), aiesim)
@@ -219,6 +220,7 @@ ifeq ($(TARGET), aiesim)
 	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_latency DSP_ROOT_DIR=$(XFLIB_DIR)/$(DSP_DIR) HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)"
 	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_stats DSP_ROOT_DIR=$(XFLIB_DIR)/$(DSP_DIR) HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)"
 	tclsh $(XFLIB_DIR)/$(DSP_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./
+	$(if $(filter-out REF,$(TAG)), $(if $(filter 1,$(CLEANUP_AFTER_TEST)), make ultraclean))
 endif
 
 ############################## Setting Targets ##############################
@@ -228,7 +230,7 @@ pre_build:
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk create_config DSP_ROOT_DIR=$(XFLIB_DIR)/$(DSP_DIR) HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)")
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk create_input DSP_ROOT_DIR=$(XFLIB_DIR)/$(DSP_DIR) HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL) LOC_INPUT_FILE_A=$(LOC_INPUT_FILE_A) VITIS_PYTHON3='$(VITIS_PYTHON3)'")
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk get_status DSP_ROOT_DIR=$(XFLIB_DIR)/$(DSP_DIR) HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)")
-	#$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/$(DSP_DIR)/L2/meta/scripts/metadata_checker.py --ip $(UUT_KERNEL) --lib_dir $(XFLIB_DIR) --xf_solver_test)
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/$(DSP_DIR)/L2/meta/scripts/metadata_checker.py --ip $(UUT_KERNEL) --lib_dir $(XFLIB_DIR))
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk DSP_ROOT_DIR=$(XFLIB_DIR)/$(DSP_DIR) HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) LOC_INPUT_FILE_A=$(LOC_INPUT_FILE_A) VITIS_PYTHON3='$(VITIS_PYTHON3)'")
 
 .PHONY: clean cleanall valid_params

@@ -32,10 +32,12 @@ namespace cholesky {
 
 template <typename TT_DATA,
           unsigned int TP_DIM,
-          unsigned int TP_NUM_FRAMES>
+          unsigned int TP_NUM_FRAMES,
+          unsigned int TP_DIAG_INV>
 void cholesky_ref<TT_DATA,
                     TP_DIM,
-                    TP_NUM_FRAMES>::cholesky_main(input_buffer<TT_DATA>& inWindow0,
+                    TP_NUM_FRAMES,
+                    TP_DIAG_INV>::cholesky_main(input_buffer<TT_DATA>& inWindow0,
                                                     output_buffer<TT_DATA>& outWindow0) {
     TT_DATA* inPtr = (TT_DATA*)inWindow0.data();
     TT_DATA* outPtr = (TT_DATA*)outWindow0.data();
@@ -44,11 +46,6 @@ void cholesky_ref<TT_DATA,
     // Processing of one window
     for (int frame = 0; frame < TP_NUM_FRAMES; frame++) {
 
-
-        // Motivation: We're going to copy all the data across for comparison in our smoke tests.
-        for (int i = 0; i < TP_DIM * TP_DIM; i++) {
-            outPtr[i] = inPtr[i];
-        }
 
         // The actual cholesky algorithm...
         for (int D = 0; D < TP_DIM; D++) {
@@ -65,12 +62,10 @@ void cholesky_ref<TT_DATA,
                     inPtr[IDX(i, j)] -= subtractor;
                 }
             }
-        }
 
-
-        // Flushing all of the copied input data out of the output buffer.
-        for (int i = 0; i < TP_DIM * TP_DIM; i++) {
-            outPtr[i] = zero<TT_DATA>();
+            if (TP_DIAG_INV == 1) {
+                inPtr[IDX(D, D)] = getScalarAsType<TT_DATA>(diag_inv_sqrt);
+            }
         }
 
         // Copying over only the vectors which will be processed by the UUT...

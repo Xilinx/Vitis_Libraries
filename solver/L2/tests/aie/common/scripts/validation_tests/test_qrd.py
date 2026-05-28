@@ -42,7 +42,9 @@ for i in range(len(sys.argv)):
     if sys.argv[i] == "--niter":
         niter = int(sys.argv[i + 1])
     if sys.argv[i] == "--model_ut":
-        model_ut = sys.argv[i + 1]        
+        model_ut = sys.argv[i + 1]  
+    if sys.argv[i] == "--tolerance":
+        tolerance = float(sys.argv[i + 1])     
 
 complex_data=False    
 if data_type =="cfloat":
@@ -54,6 +56,8 @@ if 'dim_q_leading' not in locals():
     dim_q_leading = 0
 if 'dim_r_leading' not in locals():
     dim_r_leading = 0
+if 'tolerance' not in locals():
+    tolerance=0.005
 
 if dim_a_leading == 0: order_a = 'column-major'
 elif dim_a_leading == 1: order_a = 'row-major'
@@ -67,9 +71,9 @@ a_mat=read_matrix_from_file(a_dir, dim_rows, dim_cols, num_matrices, order_a, co
 q_mat=read_matrix_from_file(q_dir, dim_rows, dim_cols, num_matrices, order_q, complex_data)
 r_mat=read_matrix_from_file(r_dir, dim_cols, dim_cols, num_matrices, order_r, complex_data)
 
-tolerance=0.005
+
 check_mul=multiply_and_compare(q_mat, r_mat, a_mat, tol=tolerance)
-check_r_mat=is_triangular(r_mat, triangular_type='upper')
+check_r_mat=is_triangular(r_mat, triangular_type='upper', tol=tolerance)
 check_q_mat_orthogonal_col=is_orthogonal(q_mat, order='column-major', tol=tolerance)
 check_q_mat_orthonormal_col=is_orthonormal(q_mat, order='column-major', tol=tolerance)
 check_q_mat_orthogonal_row=is_orthogonal(q_mat, order='row-major', tol=tolerance)

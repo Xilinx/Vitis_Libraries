@@ -36,114 +36,76 @@ namespace solver {
 namespace aie {
 namespace qrd {             
 
+#if __USES_NATIVE_SQRT_FUNC__
+#else
+    static constexpr int kHwVecSize = __MAX_READ_WRITE__ / 8 / sizeof(float);
 
-//dot product of two vectors
-template <typename T_A>
-INLINE_DECL ::aie::vector<T_A, kMaxReadInBytes / sizeof(T_A)> mul_vectors(::aie::vector<T_A, kMaxReadInBytes / sizeof(T_A)> va, ::aie::vector<T_A, kMaxReadInBytes / sizeof(T_A)> vb)
-    {
-
-        T_A ret_val;
-        using acc_t = accTypeMult_t<T_A, T_A>;
-        // ::aie::accum<acc_t, kMaxReadInBytes/ sizeof(out_t)> outAcc_v_init = ::aie::zero<acc_t>();
-        ::aie::accum<acc_t, kMaxReadInBytes/ sizeof(T_A)> outAcc_v;
-        ::aie::vector<T_A, kMaxReadInBytes / sizeof(T_A)> out_v;
-
-        outAcc_v = ::aie::mac<acc_t>(va, vb);
-        out_v = outAcc_v.template to_vector<T_A>(0);
-        // ret_val = ::aie::reduce_add(out_v);
-        // return ret_val;
-        return out_v;
+    static INLINE_DECL float hw_mul(float a, float b) {
+        ::aie::vector<float, kHwVecSize> va = ::aie::broadcast<float, kHwVecSize>(a);
+        return ::aie::mul(va, b).to_vector<float>()[0];
     }
 
-template <typename T_A>
-INLINE_DECL void conj_vector(::aie::vector<T_A, kMaxReadInBytes / sizeof(T_A)> &va)
-    {
-        // intentionally does nothing
-    }
-template <>
-INLINE_DECL void conj_vector<cfloat>(::aie::vector<cfloat, kMaxReadInBytes / sizeof(cfloat)> &va)
-    {
-        va = ::aie::conj(va);
+    static INLINE_DECL float hw_inv(float x) {
+        ::aie::vector<float, kHwVecSize> v = ::aie::broadcast<float, kHwVecSize>(x);
+        return ::aie::inv(v)[0];
     }
 
-//dot product of two vectors
-template <typename T_A, typename T_B>
-INLINE_DECL outTypeMult_t<T_A, T_B> calc_dot_product(::aie::vector<T_A, kMaxReadInBytes / sizeof(outTypeMult_t<T_A, T_B>)> va, ::aie::vector<T_B, kMaxReadInBytes / sizeof(outTypeMult_t<T_A, T_B>)> vb)
-    {
-        using out_t = outTypeMult_t<T_A, T_B>;
-        using acc_t = accTypeMult_t<T_A, T_B>;
+    static NOINLINE_DECL float hw_invsqrt(float x) {
+        ::aie::vector<float, kHwVecSize> vconst_0_5 = ::aie::broadcast<float, kHwVecSize>(0.5f);
+        ::aie::vector<float, kHwVecSize> vconst_1_5 = ::aie::broadcast<float, kHwVecSize>(1.5f);
+        ::aie::vector<float, kHwVecSize> vx = ::aie::broadcast<float, kHwVecSize>(x);
+        ::aie::vector<float, kHwVecSize> vy = ::aie::invsqrt(vx);   // ~12-bit hardware approximation
+        // NR step: y1 = y0*(1.5 - 0.5*x*y0^2) — full float precision
+        ::aie::vector<float, kHwVecSize> vysqr = ::aie::mul(vy, vy);
+        ::aie::vector<float, kHwVecSize> vhalf = ::aie::mul(vconst_0_5, vx);
+        ::aie::vector<float, kHwVecSize> t = ::aie::mul(vysqr, vhalf);
+        ::aie::vector<float, kHwVecSize> t_sub = ::aie::sub(vconst_1_5, t);
 
-        out_t ret_val;
-        ::aie::accum<acc_t, kMaxReadInBytes/ sizeof(out_t)> outAcc_v;
-        ::aie::vector<out_t, kMaxReadInBytes / sizeof(out_t)> out_v;
-
-        outAcc_v = ::aie::mul<acc_t>(va, vb);
-        out_v = outAcc_v.template to_vector<out_t>(0);
-        ret_val = ::aie::reduce_add(out_v);
-        return ret_val;
+        return ::aie::mul(vy, t_sub).to_vector<float>()[0];
     }
-template <>
-INLINE_DECL cfloat calc_dot_product<cfloat, cfloat>(::aie::vector<cfloat, kMaxReadInBytes / sizeof(cfloat)> va, ::aie::vector<cfloat, kMaxReadInBytes / sizeof(cfloat)> vb)
-        {
-            using acc_t = accTypeMult_t<cfloat, cfloat>;
 
-            cfloat ret_val;
-            ::aie::accum<acc_t, kMaxReadInBytes / sizeof(cfloat)> outAcc_v;
-            ::aie::vector<cfloat, kMaxReadInBytes / sizeof(cfloat)> out_v;
-            ::aie::vector<cfloat, kMaxReadInBytes / sizeof(cfloat)> conj_va;
+    static INLINE_DECL float hw_sqrt(float x) {
+        uint32_t bits;
+        __builtin_memcpy(&bits, &x, sizeof(bits));
+        if ((bits & 0x7FFFFFFFu) == 0u) return 0.0f;
+        return hw_mul(x, hw_invsqrt(x));
+    }
 
-            conj_va=::aie::conj(va);
-            outAcc_v = ::aie::mul<acc_t>(conj_va, vb);
-            out_v = outAcc_v.template to_vector<cfloat>(0);
-            ret_val = ::aie::reduce_add(out_v);
-            return ret_val;
-        }
+#endif
 
 template <typename T_DATA>
-INLINE_DECL T_DATA calc_inv(T_DATA val)
+INLINE_DECL void calc_inv(T_DATA& val, T_DATA& val_inv)
     {
-        T_DATA val_inv;
         val_inv = ::aie::inv(val);
-        return val_inv;
     }  
+
 template <>
-INLINE_DECL cfloat calc_inv<cfloat>(cfloat val)
+INLINE_DECL void calc_inv<cfloat>(cfloat& val, cfloat& val_inv)
     {
-        cfloat val_inv;
         val_inv.real = ::aie::inv(val.real);
         val_inv.imag = 0;
-        return val_inv;
-    }
-template <typename T_DATA>
-    INLINE_DECL T_DATA calc_sqrt(T_DATA val)
-    {
-        T_DATA val_sqrt;
-        val_sqrt = ::aie::sqrt(val);
-        return val_sqrt;
-    }
-template <>
-INLINE_DECL cfloat calc_sqrt<cfloat>(cfloat val)
-    {
-        cfloat val_sqrt;
-        val_sqrt.real = ::aie::sqrt(val.real);
-        val_sqrt.imag = 0;
-        return val_sqrt;
     }
 
 template <typename T_DATA>
-    INLINE_DECL T_DATA init_zero()
+INLINE_DECL void calc_sqrt(T_DATA val, T_DATA &val_sqrt)
     {
-        T_DATA val;
-        val = 0;
-        return val;
+#if __USES_NATIVE_SQRT_FUNC__ 
+        val_sqrt = ::aie::sqrt(val);
+#else
+        val_sqrt = hw_sqrt(val);
+#endif   
     }
+
+    
 template <>
-    INLINE_DECL cfloat init_zero<cfloat>()
+INLINE_DECL void calc_sqrt<cfloat>(cfloat val, cfloat &val_sqrt)
     {
-        cfloat val;
-        val.imag = 0;
-        val.real = 0;
-        return val;
+#if __USES_NATIVE_SQRT_FUNC__ 
+        val_sqrt.real = ::aie::sqrt(val.real);
+#else
+        val_sqrt.real = hw_sqrt(val.real);
+#endif
+        val_sqrt.imag = 0;
     }
 
 }

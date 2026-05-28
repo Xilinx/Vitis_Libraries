@@ -76,9 +76,9 @@ for {set i 3} { $i < [llength $argv] } { incr i 2 } {
         if { [expr ($i+1)] == [expr [llength $argv]-1] } {
             # FIRs and FFT Window both need a comma
             #TODO This file needs cleaned up of xf_dsp stuff
-            if { $libElement eq "qrd" || $libElement eq "cholesky"} {
+            if { $libElement eq "qrd" || $libElement eq "cholesky"|| $libElement eq "substitution" || $libElement eq "svd" || $libElement eq "qrd_hh"} {
                 set isComma ""
-            } elseif { $libElement eq "fir_sr_asym" || $libElement eq "fir_sr_sym" || $libElement eq "fir_interpolate_hb" || $libElement eq "fir_decimate_hb" || $libElement eq "fir_interpolate_asym" || $libElement eq "fir_decimate_asym" || $libElement eq "fir_decimate_sym" || $libElement eq "fir_resampler" || $libElement eq "fir_tdm" || $libElement eq "fft_window"	 || $libElement eq "func_approx"    } {
+            } elseif { $libElement eq "fir_sr_asym" || $libElement eq "fir_sr_sym" || $libElement eq "fir_interpolate_hb" || $libElement eq "fir_decimate_hb" || $libElement eq "fir_interpolate_asym" || $libElement eq "fir_decimate_asym" || $libElement eq "fir_decimate_sym" || $libElement eq "fir_resampler" || $libElement eq "fir_tdm" || $libElement eq "fft_window"   || $libElement eq "func_approx"    } {
                 set isComma ","
             } else {
                 puts "Error: You need to add your new library element to get_common_config_json.tcl"

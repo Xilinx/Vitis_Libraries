@@ -26,6 +26,11 @@ data_width_bit_dict = {
     "cfloat": 64,
 }
 
+data_complex_dict = {
+    "float": False,
+    "cfloat": True,
+}
+
 if __name__ == "__main__":
     for i in range(len(sys.argv)):
         if sys.argv[i] == "--loc_output_file_Q":
@@ -61,15 +66,21 @@ if 'DIM_R_LEADING' not in locals():
 print("Stitching outputs... \n")
 col_dim_kernel_list= load_utils.qrd_load_split(AIE_VARIANT, DATA_TYPE, ROW_DIM_SIZE, COL_DIM_SIZE, CASC_LEN, NUM_FRAMES)
 wr_sample = PLIO_WIDTH/data_width_bit_dict[DATA_TYPE]
+rd_sample = 1
+if data_complex_dict[DATA_TYPE]:
+    wr_sample = wr_sample * 2
+    rd_sample = rd_sample * 2
 
-Q_matrix_frm_niter = [[[["0" for _ in range(ROW_DIM_SIZE * COL_DIM_SIZE)] for _ in range(NITER)] for _ in range(NUM_FRAMES)] for _ in range(CASC_LEN)]
-R_matrix_frm_niter = [[[["0" for _ in range(COL_DIM_SIZE * COL_DIM_SIZE)] for _ in range(NITER)] for _ in range(NUM_FRAMES)] for _ in range(CASC_LEN)]
+Q_matrix_frm_niter = [[[[None for _ in range(ROW_DIM_SIZE * COL_DIM_SIZE)] for _ in range(NITER)] for _ in range(NUM_FRAMES)] for _ in range(CASC_LEN)]
+R_matrix_frm_niter = [[[[None for _ in range(COL_DIM_SIZE * COL_DIM_SIZE)] for _ in range(NITER)] for _ in range(NUM_FRAMES)] for _ in range(CASC_LEN)]
 
-Q_matrix_out = ["0"] * (ROW_DIM_SIZE * COL_DIM_SIZE * NUM_FRAMES * NITER)
-R_matrix_out = ["0"] * (COL_DIM_SIZE * COL_DIM_SIZE * NUM_FRAMES * NITER)
+col_dist = 0
 
-col_size_pre = 0
+Q_matrix_out = [None] * (ROW_DIM_SIZE * COL_DIM_SIZE * NUM_FRAMES * NITER * rd_sample)
+R_matrix_out = [None] * (COL_DIM_SIZE * COL_DIM_SIZE * NUM_FRAMES * NITER * rd_sample)
+
 for casc in range(CASC_LEN):
+    # print(f"casc={casc}")
     col_size = col_dim_kernel_list[casc]
 
     base_name_q = os.path.splitext(os.path.basename(LOC_OUTPUT_FILE_Q))[0]
@@ -79,128 +90,67 @@ for casc in range(CASC_LEN):
     LOC_OUTPUT_FILE_R_rd = f"{os.path.dirname(LOC_OUTPUT_FILE_R)}/{base_name_r}_{casc}.txt"
 
     with open(LOC_OUTPUT_FILE_Q_rd, "r") as f:
-        if int(wr_sample) == 1:
-            Q_matrix = f.readlines()
-        elif int(wr_sample) == 2:
-            Q_matrix = []
-            for line in f:
-                parts = line.strip().split()
-                Q_matrix.extend(parts)
-        else:
-            raise ValueError(f"Unsupported wr_sample value: {wr_sample}")
+        with open(LOC_OUTPUT_FILE_Q_rd, "r") as f:
+            Q_matrix = [val for line in f for val in line.strip().split()]
 
-    with open(LOC_OUTPUT_FILE_R_rd, "r") as f:
-        if int(wr_sample) == 1:
-            R_matrix = f.readlines()
-        elif int(wr_sample) == 2:
-            R_matrix = []
-            for line in f:
-                parts = line.strip().split()
-                R_matrix.extend(parts)
-        else:
-            raise ValueError(f"Unsupported wr_sample value: {wr_sample}")
-
+        with open(LOC_OUTPUT_FILE_R_rd, "r") as f:
+            R_matrix = [val for line in f for val in line.strip().split()]
     k_q=0
     k_r=0
     for j in range(NITER):
         for i in range(NUM_FRAMES):
-            print(f"Processing cascade {casc}, iteration {j}, frame {i}...\n")
-            rd_start_q = (((j * NUM_FRAMES) + i) * COL_DIM_SIZE * ROW_DIM_SIZE) + col_size_pre
-            rd_start_r = (((j * NUM_FRAMES) + i) * COL_DIM_SIZE * COL_DIM_SIZE) + col_size_pre
+            # print(f"Processing cascade {casc}, iteration {j}, frame {i}...\n")
+            rd_start_q = ((((j * NUM_FRAMES) + i) * COL_DIM_SIZE * ROW_DIM_SIZE) + col_dist) * rd_sample
+            rd_start_r = ((((j * NUM_FRAMES) + i) * COL_DIM_SIZE * COL_DIM_SIZE) + col_dist) * rd_sample
+            # print(f"rd_start_r={rd_start_r}")
             if DIM_Q_LEADING == 1:
                 for row in range(ROW_DIM_SIZE):
                     for col in range(col_size):
-                        idxq = rd_start_q  + row*(ROW_DIM_SIZE) + col
-                        Q_matrix_out[idxq] = Q_matrix[k_q]
-                        k_q += 1
+                        idxq = rd_start_q  + (row*(COL_DIM_SIZE) + col) *rd_sample
+                        Q_matrix_out[idxq:idxq+rd_sample] = Q_matrix[k_q:k_q+rd_sample]
+                        k_q += rd_sample
                 rd_start_q = rd_start_q + col_size
 
             else:
-                read_start_q = ROW_DIM_SIZE * col_size * (i + NUM_FRAMES * j) 
-                read_end_q = ROW_DIM_SIZE * col_size * (i + 1 + NUM_FRAMES * j)
+                read_start_q = ROW_DIM_SIZE * col_size * (i + NUM_FRAMES * j) * rd_sample
+                read_end_q = ROW_DIM_SIZE * col_size * (i + 1 + NUM_FRAMES * j) * rd_sample
                 Q_matrix_frm_niter[casc][i][j] = (Q_matrix[read_start_q:read_end_q])
 
             if DIM_R_LEADING == 1:
                 for row in range(COL_DIM_SIZE):
                     for col in range(col_size):
-                        idxr = rd_start_r + row*(COL_DIM_SIZE) + col
-                        R_matrix_out[idxr] = R_matrix[k_r]
-                        k_r += 1
+                        idxr = rd_start_r + (row*(COL_DIM_SIZE) + col)*rd_sample
+                        R_matrix_out[idxr:idxr+rd_sample] = R_matrix[k_r:k_r+rd_sample]
+                        # print(f"k_r={k_r}")
+                        # print(f"idxr={idxr}")
+                        k_r += rd_sample
                 rd_start_r = rd_start_r + col_size
             else:
-                read_start_r = COL_DIM_SIZE * col_size * (i + NUM_FRAMES * j) 
-                read_end_r = COL_DIM_SIZE * col_size * (i + 1 + NUM_FRAMES * j)
+                read_start_r = COL_DIM_SIZE * col_size * (i + NUM_FRAMES * j) * rd_sample
+                read_end_r = COL_DIM_SIZE * col_size * (i + 1 + NUM_FRAMES * j) * rd_sample
                 R_matrix_frm_niter[casc][i][j] = (R_matrix[read_start_r:read_end_r])
-    col_size_pre = col_size + col_size_pre
+    col_dist = col_size + col_dist
 
-if DIM_Q_LEADING == 1:
-    with open(LOC_OUTPUT_FILE_Q, "a") as f:
-        if int(wr_sample) == 1:
-            f.writelines(Q_matrix_out)
-        elif int(wr_sample) == 2:
-            # Write two samples per line, separated by space
-            for k in range(0, len(Q_matrix_out), 2):
-                line = f"{Q_matrix_out[k]} \n"
-                if k + 1 < len(Q_matrix_out):
-                    line = f"{Q_matrix_out[k]} {Q_matrix_out[k+1]} \n"
-                else:
-                    line = f"{Q_matrix_out[k]} \n"
-                f.write(line)
-        else:
-            raise ValueError(f"Unsupported wr_sample value: {wr_sample}")
-
-else:
-
-    for j in range(NITER):
-        for i in range(NUM_FRAMES):
-            for casc in range(CASC_LEN):
-                with open(LOC_OUTPUT_FILE_Q, "a") as f:
-                    if int(wr_sample) == 1:
-                        f.writelines(Q_matrix_frm_niter[casc][i][j])
-                    elif int(wr_sample) == 2:
-                        # Write two samples per line, separated by space
-                        q_chunck = Q_matrix_frm_niter[casc][i][j]
-                        for k in range(0, len(q_chunck), 2):
-                            line = f"{q_chunck[k]} \n"
-                            if k + 1 < len(q_chunck):
-                                line = f"{q_chunck[k]} {q_chunck[k+1]} \n"
-                            else:
-                                line = f"{q_chunck[k]} \n"
-                            f.write(line)
-                    else:
-                        raise ValueError(f"Unsupported wr_sample value: {wr_sample}")
+def write_matrix(filepath, data, wr_sample):
+    wr_sample = int(wr_sample)
+    with open(filepath, "a") as f:
+        for k in range(0, len(data), wr_sample):
+            chunk = data[k:k + wr_sample]
+            f.write(" ".join(str(v).strip() for v in chunk) + " \n")
 
 
-if DIM_R_LEADING == 1:
-    with open(LOC_OUTPUT_FILE_R, "a") as f:
-        if int(wr_sample) == 1:
-            f.writelines(R_matrix_out)
-        elif int(wr_sample) == 2:
-            # Write two samples per line, separated by space
-            for k in range(0, len(R_matrix_out), 2):
-                line = f"{R_matrix_out[k]} \n"
-                if k + 1 < len(R_matrix_out):
-                    line = f"{R_matrix_out[k]} {R_matrix_out[k+1]} \n"
-                else:
-                    line = f"{R_matrix_out[k]} \n"
-                f.write(line)
-        else:
-            raise ValueError(f"Unsupported wr_sample value: {wr_sample}")
+if DIM_Q_LEADING==1:
+    write_matrix(LOC_OUTPUT_FILE_Q, Q_matrix_out, wr_sample)
 else:
     for j in range(NITER):
-        for i in range(NUM_FRAMES):
-            for casc in range(CASC_LEN):
-                with open(LOC_OUTPUT_FILE_R, "a") as f:
-                    if int(wr_sample) == 1:
-                        f.writelines(R_matrix_frm_niter[casc][i][j])
-                    elif int(wr_sample) == 2:
-                        r_chunck = R_matrix_frm_niter[casc][i][j]
-                        for k in range(0, len(r_chunck), 2):
-                            line = f"{r_chunck[k]} \n"
-                            if k + 1 < len(r_chunck):
-                                line = f"{r_chunck[k]} {r_chunck[k+1]} \n"
-                            else:
-                                line = f"{r_chunck[k]} \n"
-                            f.write(line)
-                    else:
-                        raise ValueError(f"Unsupported wr_sample value: {wr_sample}")
+        for i in range(NUM_FRAMES):  
+            for casc in range(CASC_LEN):     
+                write_matrix(LOC_OUTPUT_FILE_Q, Q_matrix_frm_niter[casc][i][j], wr_sample)
+
+if DIM_R_LEADING==1:
+    write_matrix(LOC_OUTPUT_FILE_R, R_matrix_out, wr_sample)
+else:
+    for j in range(NITER):
+        for i in range(NUM_FRAMES):   
+            for casc in range(CASC_LEN):    
+                write_matrix(LOC_OUTPUT_FILE_R, R_matrix_frm_niter[casc][i][j], wr_sample)

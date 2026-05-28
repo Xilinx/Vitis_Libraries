@@ -21,15 +21,17 @@ using namespace adf;
 namespace cholesky_example {
 
 #define DATA_TYPE_CHOLESKY cfloat
-#define DIM_SIZE_CHOLESKY 8 
+#define DIM_SIZE_CHOLESKY 8
 #define NUM_FRAMES_CHOLESKY 4
 #define GRID_DIM_CHOLESKY 1
+#define CASC_LEN_CHOLESKY 1
+#define DIAG_INV_CHOLESKY 0
 
 class test_cholesky: public adf::graph {
    public:
     port<input> in;
     port<output> out;
-    xf::solver::aie::cholesky::cholesky_graph<DATA_TYPE_CHOLESKY, DIM_SIZE_CHOLESKY, NUM_FRAMES_CHOLESKY, GRID_DIM_CHOLESKY>
+    xf::solver::aie::cholesky::cholesky_graph<DATA_TYPE_CHOLESKY, DIM_SIZE_CHOLESKY, NUM_FRAMES_CHOLESKY, GRID_DIM_CHOLESKY, CASC_LEN_CHOLESKY, DIAG_INV_CHOLESKY>
         choleskyGraph;
 
     test_cholesky() {

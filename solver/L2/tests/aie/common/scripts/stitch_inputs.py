@@ -40,8 +40,8 @@ if __name__ == "__main__":
     parser.add_argument("N_GRID_COLS", type=int)
     parser.add_argument("NUM_MATRICES", type=int)
     parser.add_argument("DATA_TYPE")
-    parser.add_argument("--COL_MAJOR", type=bool, default=True)
-    parser.add_argument("--HANDLE_MISSING", type=bool, default=False, help="If set to True, will substitute zeroed matrices characterized by specified arguments.")
+    parser.add_argument("--COL_MAJOR", type=int, default=1)
+    parser.add_argument("--HANDLE_MISSING", type=int, default=0, help="If set to True, will substitute zeroed matrices characterized by specified arguments.")
     args = parser.parse_args()
 
     ROW_DIM_PER_MATRIX = args.ROW_DIM_PER_MATRIX
@@ -50,8 +50,8 @@ if __name__ == "__main__":
     N_GRID_COLS = args.N_GRID_COLS
     NUM_MATRICES = args.NUM_MATRICES
     DATA_TYPE = args.DATA_TYPE
-    COL_MAJOR = args.COL_MAJOR
-    HANDLE_MISSING = args.HANDLE_MISSING
+    COL_MAJOR = bool(args.COL_MAJOR)
+    HANDLE_MISSING = bool(args.HANDLE_MISSING)
 
     sub_matrices = []
     for i in range(N_GRID_ROWS):
@@ -100,6 +100,6 @@ if __name__ == "__main__":
     matrices_stitched_contigious = np.ascontiguousarray(matrices_stitched)  # views only possible on contigious memory.
     matrices_serial = matrices_stitched_contigious.view(np.float32).flatten()
 
-    with open("data/uut_output.txt", "a") as file:
+    with open("data/uut_output.txt", "w") as file:
         for elem in matrices_serial:
             file.write(str(elem) + "\n")

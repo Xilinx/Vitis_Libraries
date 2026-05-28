@@ -37,7 +37,8 @@ namespace cholesky {
 
 template <typename TT_DATA,
           unsigned int TP_DIM,
-          unsigned int TP_NUM_FRAMES>
+          unsigned int TP_NUM_FRAMES,
+          unsigned int TP_DIAG_INV>
 class cholesky_ref_base { // base class with all features except interface which is left to inherited
     private:
     public:
@@ -49,10 +50,12 @@ class cholesky_ref_base { // base class with all features except interface which
 // Cholesky - default/base 'specialization'
 template <typename TT_DATA,
           unsigned int TP_DIM,
-          unsigned int TP_NUM_FRAMES>
+          unsigned int TP_NUM_FRAMES,
+          unsigned int TP_DIAG_INV>
 class cholesky_ref : public cholesky_ref_base<TT_DATA,
                                                 TP_DIM,
-                                                TP_NUM_FRAMES> {
+                                                TP_NUM_FRAMES,
+                                                TP_DIAG_INV> {
     private:
     public:
         static constexpr unsigned int kVecSampleNum = __MAX_READ_WRITE__ / 8 / sizeof(TT_DATA);

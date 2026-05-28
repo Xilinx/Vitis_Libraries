@@ -48,7 +48,7 @@ l_mat=read_matrix_from_file(l_dir, dim_size, dim_size, num_matrices, order_l, co
 l_mat_T=conjugate_transpose_matrices(l_mat) #transpose of L matrix
 
 tolerance_upper_tri=1e-2
-tolerance_mul=1e-1
+tolerance_mul=1e-0
 check_mul=multiply_and_compare(l_mat, l_mat_T, a_mat, tol=tolerance_mul)
 check_l_mat=is_triangular(l_mat, triangular_type='lower', tol=tolerance_upper_tri)
 

@@ -4,7 +4,7 @@
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. _BENCHMARK:
+.. _SOLVER_BENCHMARK:
 
 =============
 Benchmark/QoR
@@ -53,13 +53,27 @@ Furthermore, if there are no input ports included in the design, then the throug
 Cholesky
 ============
 
-The following table provides results for Cholesky across a wide range of supported parameters, defined in :ref:`CONFIGURATION_PARAMETERS_CHOLESKY`.
+The following table provides results for Cholesky across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_CHOLESKY`.
 
 :download:`cholesky_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.2/solver/docs/src/csv_data_files/L2/cholesky_benchmark.csv>`
 
 QRD
 ============
 
-The following table provides results for QRD across a wide range of supported parameters, defined in :ref:`CONFIGURATION_PARAMETERS_QRD`.
+The following table provides results for QRD across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_QRD`.
 
 :download:`qrd_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.2/solver/docs/src/csv_data_files/L2/qrd_benchmark.csv>`
+
+QRD_HH
+============
+
+The following table provides results for QRD across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_QRD_HH`.
+
+:download:`qrd_hh_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.2/solver/docs/src/csv_data_files/L2/qrd_hh_benchmark.csv>`
+
+SVD
+============
+
+The following table provides results for QRD across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_SVD`.
+
+:download:`svd_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.2/solver/docs/src/csv_data_files/L2/svd_benchmark.csv>`

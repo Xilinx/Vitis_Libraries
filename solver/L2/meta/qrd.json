@@ -50,6 +50,7 @@
             "name": "TP_DIM_ROWS",
             "description": "Row dimension of the input matrix.",
             "type": "uint",
+            "test_max": 1024,
             "updater": {
                 "file": "qrd.py",
                 "function": "update_TP_DIM_ROWS",
@@ -71,6 +72,7 @@
             "name": "TP_DIM_COLS",
             "description": "Column dimension of the input matrix.",
             "type": "uint",
+            "test_max": 1024,
             "updater": {
                 "file": "qrd.py",
                 "function": "update_TP_DIM_COLS",
@@ -94,6 +96,7 @@
             "name": "TP_NUM_FRAMES",
             "description": "The number of operations per call to the kernel.",
             "type": "uint",
+            "test_max": 8,
             "updater": {
                 "file": "qrd.py",
                 "function": "update_TP_NUM_FRAMES",
@@ -119,6 +122,7 @@
             "name": "TP_CASC_LEN",
             "description": "The number of cascaded kernels to be used to perform the function.",
             "type": "uint",
+            "test_max": 10,
             "validator": {
                 "file": "qrd.py",
                 "function": "validate_TP_CASC_LEN",
@@ -137,12 +141,12 @@
             "validator": {
                 "file": "qrd.py",
                 "function": "validate_TP_DIM_A_LEADING",
-                "args": ["AIE_VARIANT", "TT_DATA"] 
+                "args": ["AIE_VARIANT", "TT_DATA", "TP_DIM_ROWS"] 
             },
             "updater": {
                 "file": "qrd.py",
                 "function": "update_TP_DIM_A_LEADING",
-                "args": ["AIE_VARIANT", "TT_DATA"] 
+                "args": ["AIE_VARIANT", "TT_DATA", "TP_DIM_ROWS"] 
             }
         },
         {
@@ -152,12 +156,12 @@
             "validator": {
                 "file": "qrd.py",
                 "function": "validate_TP_DIM_Q_LEADING",
-                "args": ["AIE_VARIANT", "TT_DATA"] 
+                "args": ["AIE_VARIANT", "TT_DATA", "TP_DIM_ROWS"] 
             },
             "updater": {
                 "file": "qrd.py",
                 "function": "update_TP_DIM_Q_LEADING",
-                "args": ["AIE_VARIANT", "TT_DATA"] 
+                "args": ["AIE_VARIANT", "TT_DATA", "TP_DIM_ROWS"] 
             }
         },
         {
@@ -167,12 +171,12 @@
             "validator": {
                 "file": "qrd.py",
                 "function": "validate_TP_DIM_R_LEADING",
-                "args": ["AIE_VARIANT", "TT_DATA"] 
+                "args": ["AIE_VARIANT", "TT_DATA", "TP_DIM_COLS"] 
             },
             "updater": {
                 "file": "qrd.py",
                 "function": "update_TP_DIM_R_LEADING",
-                "args": ["AIE_VARIANT", "TT_DATA"] 
+                "args": ["AIE_VARIANT", "TT_DATA", "TP_DIM_COLS"] 
             }
         }
 

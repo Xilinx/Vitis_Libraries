@@ -59,7 +59,7 @@ constexpr unsigned int qrd_load_split(
     unsigned int load_distributed = col_dim_distributed * (col_dim_distributed - 1) / 2;
     unsigned int load_remained = total_load - load_distributed;
     unsigned int load_per_core = load_remained / (TP_CASC_LEN - kernel_num);
-    unsigned int col_dim_kernel; 
+    unsigned int col_dim_kernel = TP_DIM_COLS; 
     unsigned int a = 1;
     unsigned int b = -1;
     unsigned int c = -(2 * load_per_core + col_dim_distributed * (col_dim_distributed - 1));

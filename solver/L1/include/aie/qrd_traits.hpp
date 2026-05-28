@@ -123,26 +123,18 @@ INLINE_DECL constexpr bool fnCheckDistributedLoad(unsigned int col_dist) {
 }
 
 template <typename TT_DATA,
+unsigned int TP_DIM_ROWS,
 unsigned int TP_DIM_A_LEADING,
 unsigned int TP_DIM_Q_LEADING,
 unsigned int TP_DIM_R_LEADING>
 INLINE_DECL constexpr bool fnCheckTiling() {
-    //in 25.2 cfloat transpose will not be allowed for any AIE variants
-    //aie1 is naturally not capable, aie2 and aie22 tests are not finishing, so disabling for now
 
     if ((TP_DIM_A_LEADING == 1) || (TP_DIM_Q_LEADING == 1) || (TP_DIM_R_LEADING == 1)){
-        if (sizeof(TT_DATA) == 8) { //currently disabling for all 64 bits data
+        if ((sizeof(TT_DATA) == 8) || (TP_DIM_ROWS>255)) { //currently disabling for all 64 bits data
             return false;
         }
     }
     return true;
-
-    // if ((TP_DIM_A_LEADING == 1) || (TP_DIM_Q_LEADING == 1) || (TP_DIM_R_LEADING == 1)){
-    //     if (sizeof(TT_DATA) > __MAX_BD_DSIZE__) {
-    //         return false;
-    //     }
-    // }
-    // return true;
 }
 
 

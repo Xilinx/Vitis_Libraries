@@ -146,7 +146,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "mismatch_check=" << mismatch_check << ", pass_faile=" << pass_fail << std::endl;
 
-    debug = 2;
+    //debug = 2;
     if ((pass_fail > 0 && debug > 0) || debug > 1 || ROWC < 16 || COLC < 16) {
         printf("  A=\n");
         xf::solver::print_matrix<ROWA, COLA, IN_TYPE, xf::solver::NoTranspose>(A, "   ", print_precision, 1);

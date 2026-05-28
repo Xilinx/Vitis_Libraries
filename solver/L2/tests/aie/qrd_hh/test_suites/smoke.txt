@@ -1,0 +1,3 @@
+make all AIE_VARIANT=1
+make all AIE_VARIANT=2
+make all AIE_VARIANT=22

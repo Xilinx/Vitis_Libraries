@@ -18,33 +18,33 @@ AMD Vitis |trade| Solver Library (SolverLib) provides a collection of matrix dec
 
 The SolverLib contains:
 
-- :ref:`INTRODUCTION_PL`.
+- :ref:`SOLVER_INTRODUCTION_PL`.
 
-- :ref:`INTRODUCTION_AIE`.
+- :ref:`SOLVER_INTRODUCTION_AIE`.
 
-.. _INTRODUCTION_PL:
+.. _SOLVER_INTRODUCTION_PL:
 
 PL Solver library
 =================
 
 Currently, the Vitis PL Solver library includes the following operations for dense matrix:
- 
+
 * Matrix decomposition
    * Cholesky decomposition for symmetric positive definite matrix
    * LU decomposition without pivoting and with partial pivoting
    * QR decomposition for general matrix
-   * SVD decomposition (single value decomposition) for symmetric matrix and non-symmetric matrix (Jacobi method)
- 
+   * SVD decomposition (singular value decomposition) for symmetric matrix and non-symmetric matrix (Jacobi method)
+
 * Linear solver
    * Tridiagonal linear solver (Parallel cyclic reduction method)
    * Linear solver for triangular matrix
    * Linear solver for symmetric and non-symmetric matrix
    * Matrix inverse for symmetric and non-symmetric matrix
- 
+
 * Eigenvalue solver
    * Jacobi eigenvalue solver for symmetric matrix
 
-.. _INTRODUCTION_AIE:
+.. _SOLVER_INTRODUCTION_AIE:
 
 AI Engine Solver Library
 ========================
@@ -55,6 +55,7 @@ The AMD Vitis AI Engine Solver library encapsulates several solver algorithms, o
 * Matrix decomposition
    * Cholesky decomposition for symmetric positive definite matrix
    * QR decomposition (Gram-Schmidt method)
+   * Singular Value Decomposition (one-sided Jacobi with parallel-pairs schedule)
 
 .. toctree::
    :caption: Introduction
@@ -87,6 +88,7 @@ The AMD Vitis AI Engine Solver library encapsulates several solver algorithms, o
    API Reference Overview <user_guide/L2/api-reference.rst>
    Cholesky <rst/group_cholesky.rst>
    QRD <rst/group_qrd_graph.rst>
+   SVD <rst/group_svd_graph.rst>
 
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN

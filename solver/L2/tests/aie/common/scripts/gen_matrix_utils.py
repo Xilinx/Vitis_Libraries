@@ -122,8 +122,8 @@ def get_serial(matrix, row_major=True):
     
     if isinstance(matrix_flat[0], complex):
         for elem in matrix_flat:
-            matrix_serial.append(int(elem.real))
-            matrix_serial.append(int(elem.imag))
+            matrix_serial.append(elem.real)
+            matrix_serial.append(elem.imag)
     else:
         matrix_serial = matrix_flat
 

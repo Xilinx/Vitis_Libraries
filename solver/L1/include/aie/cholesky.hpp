@@ -42,6 +42,7 @@ compilation.
 #include <adf.h>
 #include "device_defs.h"
 #include "cholesky_traits.hpp"
+#include "fir_utils.hpp"
 
 using namespace adf;
 
@@ -55,17 +56,34 @@ namespace cholesky {
 template <typename TT_DATA,
           unsigned int TP_DIM,
           unsigned int TP_NUM_FRAMES,
+          unsigned int TP_GRID_DIM,
+          unsigned int TP_DIAG_INV,
           unsigned int TP_X,
           unsigned int TP_Y,
-          unsigned int TP_GRID_DIM>
+          unsigned int kDiagStart,
+          unsigned int kDiagEnd>
 class cholesky {
    private:
    public:
+      static constexpr unsigned int kKernelDim = TP_DIM / TP_GRID_DIM;
       static constexpr unsigned int kVecSampleNum = fnVecSampleNum<TT_DATA>();
-      static constexpr unsigned int kNumVecsPerDim = TP_DIM / kVecSampleNum;
-      static constexpr unsigned int kNumPriorKernels = TP_X;
-      TT_DATA (&diagColBuffer)[TP_DIM];    // holds diagonal col data from other tiles
-      TT_DATA (&diagRowBuffer)[TP_DIM];    // holds diagonal row data from other tiles
+      static constexpr unsigned int kNumVecsPerDim = kKernelDim / kVecSampleNum;
+      static constexpr unsigned int kActiveGridOffset = kDiagStart / kKernelDim;
+
+      static constexpr unsigned int kNumPriorKernels = TP_X;   // Number of kernels above this one in the grid.
+      static constexpr unsigned int kKernelDiagStart = kNumPriorKernels * kKernelDim;  // defines the first diagonal belonging to current kernel.
+      static constexpr unsigned int kKernelDiagEnd = (kNumPriorKernels+1) * kKernelDim;
+
+      static constexpr unsigned int kNumStages = MIN(kKernelDiagEnd, kDiagEnd) - kDiagStart; // Number of prior and current stages performed by kernel.
+      static constexpr          int kStageStartLocal = kDiagStart - kKernelDiagStart;  // negative when start is prior to current kernel.
+      static constexpr          int kStageEndLocal = kStageStartLocal + kNumStages;    // negative when end is prior to current kernel.
+      static constexpr          int kStageStartPrior = MIN(0, kStageStartLocal);
+      static constexpr          int kStageEndPrior = MIN(0, kStageEndLocal);
+      static constexpr unsigned int kStageStartKernel = MAX(0, kStageStartLocal);
+      static constexpr unsigned int kStageEndKernel = MAX(0, kStageEndLocal);
+
+      TT_DATA (&diagColBuffer)[kKernelDim];    // holds diagonal col data from other tiles
+      TT_DATA (&diagRowBuffer)[kKernelDim];    // holds diagonal row data from other tiles
 
 #if (__STREAMS_PER_TILE__ == 1)
       using inputPortLeft_t = input_cascade<TT_DATA>;
@@ -88,18 +106,17 @@ class cholesky {
 
       // Constructor
       cholesky(
-         TT_DATA (&m_diagColBuffer)[TP_DIM], 
-         TT_DATA (&m_diagRowBuffer)[TP_DIM]):   diagColBuffer(m_diagColBuffer),
-                                                diagRowBuffer(m_diagRowBuffer){}
+         TT_DATA (&m_diagColBuffer)[kKernelDim], 
+         TT_DATA (&m_diagRowBuffer)[kKernelDim]):  diagColBuffer(m_diagColBuffer),
+                                                   diagRowBuffer(m_diagRowBuffer){}
 
       // Register Kernel Class
       static void registerKernelClass() {
-         if (TP_GRID_DIM == 1) { // if there is no paralellism
+         if (kActiveGridOffset == TP_GRID_DIM-1) { // if isolated tile.
             REGISTER_FUNCTION(cholesky::cholesky_main);
          }
-
          else if (TP_X == TP_Y) {
-            if (TP_X == 0) {
+            if (TP_X == kActiveGridOffset) {
                REGISTER_FUNCTION(cholesky::cholesky_diagKernel_topLeft);
             }
             else if (TP_X < TP_GRID_DIM-1) {
@@ -110,13 +127,13 @@ class cholesky {
             }
          }
          else if (TP_X < TP_Y) {
-            if ((TP_Y < TP_GRID_DIM-1) && (TP_X == 0)) {
+            if ((TP_Y < TP_GRID_DIM-1) && (TP_X == kActiveGridOffset)) {
                REGISTER_FUNCTION(cholesky::cholesky_lowerKernel_leftEdge);
             }
-            else if ((TP_Y == TP_GRID_DIM-1) && (TP_X == 0)) {
+            else if ((TP_Y == TP_GRID_DIM-1) && (TP_X == kActiveGridOffset)) {
                REGISTER_FUNCTION(cholesky::cholesky_lowerKernel_botLeft);
             }
-            else if ((TP_Y == TP_GRID_DIM-1) && (TP_X > 0)) {
+            else if ((TP_Y == TP_GRID_DIM-1) && (TP_X > kActiveGridOffset)) {
                REGISTER_FUNCTION(cholesky::cholesky_lowerKernel_botEdge);
             }
             else {
@@ -165,8 +182,7 @@ class cholesky {
       void cholesky_lowerKernel_leftEdge(input_buffer<TT_DATA>& __restrict inWindow,
                                     output_buffer<TT_DATA>& __restrict outWindow,
                                     inputPortUp_t* inUp,
-                                    outputPortRight_t* outRight,
-                                    outputPortDown_t* outDown);
+                                    outputPortRight_t* outRight);
 
       // Bottom Left Kernel
       void cholesky_lowerKernel_botLeft(input_buffer<TT_DATA>& __restrict inWindow,
@@ -187,8 +203,7 @@ class cholesky {
                                     output_buffer<TT_DATA>& __restrict outWindow,
                                     inputPortLeft_t* inLeft,
                                     inputPortUp_t* inUp,
-                                    outputPortRight_t* outRight,
-                                    outputPortDown_t* outDown);
+                                    outputPortRight_t* outRight);
 
 };
 

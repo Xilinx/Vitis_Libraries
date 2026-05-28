@@ -17,3 +17,8 @@
 ifneq (,$(findstring VCD,$(PARAMS)))
 	AIESIMFLAGS += --dump-vcd ${UUT_KERNEL}_sim --simulation-cycle-timeout=100000
 endif
+
+CLEANUP_AFTER_TEST := 0
+ifneq (,$(findstring CLEAN,$(PARAMS)))
+    CLEANUP_AFTER_TEST := 1
+endif

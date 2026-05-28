@@ -33,6 +33,7 @@ the Cholesky library element.
 
 #include "cholesky.hpp"
 #include "cholesky_traits.hpp"
+#include "cholesky_cascade_table.hpp"
 
 namespace xf {
 namespace solver {
@@ -53,33 +54,75 @@ using namespace adf;
   */
 
 template <typename TT_DATA,
-          unsigned int kKernelDim,
+          unsigned int TP_DIM,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_GRID_DIM,
-          unsigned int kNumKernels,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DIAG_INV,
           unsigned int TP_X,
           unsigned int TP_Y,
-          unsigned int currTileIdx>
-class cholesky_recur {
+          unsigned int TP_CASC_IDX,
+          unsigned int kDiagStart>
+class cholesky_cascade_recur {
    public:
-    using cholesky_template = cholesky<TT_DATA, kKernelDim, TP_NUM_FRAMES, TP_X, TP_Y, TP_GRID_DIM>;
-    using cholesky_recur_right_template = cholesky_recur<TT_DATA, kKernelDim, TP_NUM_FRAMES, TP_GRID_DIM, kNumKernels, TP_X+1, TP_Y, currTileIdx+1>;
-    using cholesky_recur_next_row_template = cholesky_recur<TT_DATA, kKernelDim, TP_NUM_FRAMES, TP_GRID_DIM, kNumKernels, 0, TP_Y+1, currTileIdx+1>;
+    static constexpr unsigned int kKernelDim = TP_DIM / TP_GRID_DIM;
+    static constexpr unsigned int kNumDiagsSeenByXY = (TP_X+1) * kKernelDim;    // I think TP_X instead of TP_Y?
+    static constexpr unsigned int rowIndex = TP_DIM - kDiagStart - 1;
+    static constexpr unsigned int colIndex = TP_CASC_LEN - TP_CASC_IDX - 1;
+    static constexpr unsigned int kNumStages = cholesky_cascade_stages_table[rowIndex][colIndex];
+    static constexpr unsigned int kDiagEnd = kDiagStart + kNumStages;
+    
+    using cholesky_template = cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>;
+    using cholesky_cascade_recur_template = cholesky_cascade_recur<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_CASC_LEN, TP_DIAG_INV, TP_X, TP_Y, TP_CASC_IDX+1, kDiagEnd>;
 
-    static void create(kernel (&m_kernels)[kNumKernels]) {
+    static void create( kernel  (&m_kernels)[TP_GRID_DIM][TP_GRID_DIM][TP_CASC_LEN], 
+                        int     (&depthMap)[TP_GRID_DIM][TP_GRID_DIM],
+                        int     (&activeGridOffsets)[TP_CASC_LEN]) {
+
+
         alignas(__ALIGN_BYTE_SIZE__) std::vector<TT_DATA> m_diagColBuffer(kKernelDim);  // Redundant if single tile.
-        alignas(__ALIGN_BYTE_SIZE__) std::vector<TT_DATA> m_diagRowBuffer(kKernelDim);  
+        alignas(__ALIGN_BYTE_SIZE__) std::vector<TT_DATA> m_diagRowBuffer(kKernelDim);     
 
-        m_kernels[currTileIdx] = kernel::create_object<cholesky_template>(m_diagColBuffer, m_diagRowBuffer);
+        activeGridOffsets[TP_CASC_IDX] = kDiagStart / kKernelDim;
+        m_kernels[TP_X][TP_Y][TP_CASC_IDX] = kernel::create_object<cholesky_template>(m_diagColBuffer, m_diagRowBuffer);
 
-        if constexpr(TP_X < TP_Y) {
-            cholesky_recur_right_template::create(m_kernels);
-        }
-        else if constexpr(TP_Y < TP_GRID_DIM-1) {
-            cholesky_recur_next_row_template::create(m_kernels);
+        if constexpr(kDiagEnd < kNumDiagsSeenByXY) {
+            cholesky_cascade_recur_template::create(m_kernels, depthMap, activeGridOffsets);
+        } else {
+            depthMap[TP_X][TP_Y] = TP_CASC_IDX + 1;  // The depth of the cascade at this XY position.
         }
     }
 };
+
+template <typename TT_DATA,
+          unsigned int TP_DIM,
+          unsigned int TP_NUM_FRAMES,
+          unsigned int TP_GRID_DIM,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DIAG_INV,
+          unsigned int TP_X,
+          unsigned int TP_Y>
+class cholesky_grid_recur {
+   public:
+    using cholesky_cascade_recur_entry = cholesky_cascade_recur<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_CASC_LEN, TP_DIAG_INV, TP_X, TP_Y, 0, 0>;
+    using cholesky_recur_right_template = cholesky_grid_recur<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_CASC_LEN, TP_DIAG_INV, TP_X+1, TP_Y>;
+    using cholesky_recur_next_row_template = cholesky_grid_recur<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_CASC_LEN, TP_DIAG_INV, 0, TP_Y+1>;
+
+    static void create( kernel  (&m_kernels)[TP_GRID_DIM][TP_GRID_DIM][TP_CASC_LEN], 
+                        int     (&depthMap)[TP_GRID_DIM][TP_GRID_DIM],
+                        int     (&activeGridOffsets)[TP_CASC_LEN]) {
+
+        cholesky_cascade_recur_entry::create(m_kernels, depthMap, activeGridOffsets);
+
+        if constexpr(TP_X < TP_Y) {
+            cholesky_recur_right_template::create(m_kernels, depthMap, activeGridOffsets);
+        }
+        else if constexpr(TP_Y < TP_GRID_DIM-1) {
+            cholesky_recur_next_row_template::create(m_kernels, depthMap, activeGridOffsets);
+        }
+    }
+};
+
 
 /**
   * @endcond
@@ -110,11 +153,14 @@ class cholesky_recur {
  * @tparam TP_GRID_DIM describes the length of one dimension of the tiling scheme used to divide up the input matrix. \n
  *         This allows support for larger matrices than can fit on a single kernel. \n
  *         The number of kernels is TP_GRID_DIM * (TP_GRID_DIM+1) / 2. \n
+ * @tparam TP_CASC_LEN describes the depth of the cascade chain to increase throughput. 
  **/
 template <typename TT_DATA,
           unsigned int TP_DIM,
           unsigned int TP_NUM_FRAMES,
-          unsigned int TP_GRID_DIM>
+          unsigned int TP_GRID_DIM,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DIAG_INV = 0>
 
 class cholesky_graph : public graph {
     public:
@@ -122,16 +168,26 @@ class cholesky_graph : public graph {
     * @cond NOCOMMENTS
     */
         static constexpr unsigned int kTotalMatrixSize = TP_DIM * TP_DIM;
-        static constexpr unsigned int kNumKernels = TP_GRID_DIM * (TP_GRID_DIM+1) / 2;
         static constexpr unsigned int kKernelDim = TP_DIM / TP_GRID_DIM;
+        static constexpr unsigned int kNumPortKernels = TP_GRID_DIM * (TP_GRID_DIM+1) / 2;
         static constexpr unsigned int kKernelMatrixSize = kKernelDim * kKernelDim;
 
+        static_assert(std::is_same<TT_DATA, float>::value || std::is_same<TT_DATA, cfloat>::value,
+            "ERROR: TP_DATA must be either float or cfloat.");
         static_assert(kKernelDim % fnVecSampleNum<TT_DATA>() == 0,
             "ERROR: kKernelDim must be a multiple of number of samples that can fit in a vector.");
-        static_assert(kKernelMatrixSize * TP_NUM_FRAMES * sizeof(TT_DATA) <= __DATA_MEM_BYTES__ / 2,
-            "ERROR: kKernelMatrixSize * TP_NUM_FRAMES * sizeof(TT_DATA) must be less than or equal to __DATA_MEM_BYTES__ / 2.");
+        static_assert(kKernelMatrixSize * TP_NUM_FRAMES * sizeof(TT_DATA) <= __DATA_MEM_BYTES__,
+            "ERROR: kKernelMatrixSize * TP_NUM_FRAMES * sizeof(TT_DATA) must be less than or equal to __DATA_MEM_BYTES__.");
         static_assert(TP_DIM % TP_GRID_DIM == 0,
             "ERROR: TP_DIM must exactly divide into TP_GRID_DIM.");
+        static_assert(TP_NUM_FRAMES > 0,
+            "ERROR: TP_NUM_FRAMES must be greater than 0.");
+        static_assert(TP_CASC_LEN > 0,
+            "ERROR: TP_CASC_LEN must be greater than 0.");
+        static_assert(TP_CASC_LEN <= TP_DIM,
+            "ERROR: TP_CASC_LEN must be less than or equal to TP_DIM.");
+        static_assert(TP_DIAG_INV == 0 || TP_DIAG_INV == 1,
+            "ERROR: TP_DIAG_INV must be either 0 or 1.");
     /**
     * @endcond
     */
@@ -139,15 +195,43 @@ class cholesky_graph : public graph {
     /**
      * The input matrix tile(s).
      **/
-    xf::dsp::aie::port_array<input, kNumKernels> in;
+    xf::dsp::aie::port_array<input, kNumPortKernels> in;
     /**
      * The output matrix tile(s).
      **/
-    xf::dsp::aie::port_array<output, kNumKernels> out;
+    xf::dsp::aie::port_array<output, kNumPortKernels> out;
     /**
-     * The array of kernels that will be created and mapped onto AIE tiles.
+     * The cascade depth map and 3D array of kernels that will be created and mapped onto AIE tiles.
+     * Although we are initializing the full voxel grid of tiles, this is for ease of indexing.
+     * The depth map indicates the depth of the cascade chain at a given X, Y coordinate.
+     * 
+     * Kernels are classified as one of 8 types, with associated XY interconnections:-
+     *  DTL = Diagonal Top Left     (Incoming:          Outgoing: Down      )
+     *  DM  = Diagonal Middle       (Incoming: Left,    Outgoing: Down      )
+     *  DBR = Diagonal Bottom Right (Incoming: Left,    Outgoing:           )
+     *  LLE = Lower Left Edge       (Incoming: Up,      Outgoing: Right,Down)
+     *  LBL = Lower Bottom Left     (Incoming: Up,      Outgoing: Right     )
+     *  LBE = Lower Bottom Edge     (Incoming: Left,Up  Outgoing: Right     )
+     *  LNE = Lower None Edge       (Incoming: Left,Up  Outgoing: Right,Down)
+     *  IT  = Isolated Tile         (Incoming:          Outgoing:           )
+     *  
+     *          + ____  ____  ----------+    ↑ 
+     *        / /____ /____ /|        / |    | 
+     *      /  | DTL | DTL | |      /   |    | 
+     *     +-- |_____|_____|/|___ -+    |    | 
+     *     |  /____ /____ /____ /| |    |    | TP_GRID_DIM (Y-axis)   
+     *     | | DM  | DM  | DTL | | |    |    | 
+     *     | |_____|_____|_____|/|_|_   |    | 
+     *     |/____ /____ /____ /____|/|--+  ↑ ↓       
+     *     ‖ DBR | DBR | DBR | IT  ‖ | /  /         
+     *     ‖_____|_____|_____|_____‖//  /  TP_GRID_DIM (X-axis)   
+     *     +-----------------------+  ↓  
+     *     ←-----------------------→ 
+     *        TP_CASC_LEN (Z-axis)  
      **/
-    kernel m_kernels[kNumKernels];
+    kernel m_kernels[TP_GRID_DIM][TP_GRID_DIM][TP_CASC_LEN];
+    int depthMap[TP_GRID_DIM][TP_GRID_DIM];
+    int activeGridOffsets[TP_CASC_LEN];
     /**
     * Access function to get pointer to kernel (or first kernel in a chained configuration).
     * No arguments required.
@@ -159,41 +243,48 @@ class cholesky_graph : public graph {
      **/
     cholesky_graph() {
         
-        cholesky_recur<TT_DATA, kKernelDim, TP_NUM_FRAMES, TP_GRID_DIM, kNumKernels, 0, 0, 0>::create(m_kernels);
+        cholesky_grid_recur<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_CASC_LEN, TP_DIAG_INV, 0, 0>::create(m_kernels, depthMap, activeGridOffsets);
 
-        int currTileIdx = 0;
+        int portIdx = 0;
         for (int y = 0; y < TP_GRID_DIM; y++) {
             for (int x = 0; x < y+1; x++) {
 
+                connect(in[portIdx], m_kernels[x][y][0].in[0]); // cascade entry
 
-                // Specify mapping constraints
-                runtime<ratio>(m_kernels[currTileIdx]) = 0.9;     // Nominal figure. Requires knowledge of sample rate.
+                int cascadeDepth = depthMap[x][y];
+                for (int z = 0; z < cascadeDepth; z++) {
 
-                // Source files
-                source(m_kernels[currTileIdx]) = "cholesky.cpp";
-                stack_size(m_kernels[currTileIdx]) = 4096;  // Empirically seen cases which utilise ~2560 bytes
+                    // Specify mapping constraints
+                    runtime<ratio>(m_kernels[x][y][z]) = 0.9;     // Nominal figure. Requires knowledge of sample rate.
 
-                // Make connections
-                connect(in[currTileIdx], m_kernels[currTileIdx].in[0]);
-                connect(m_kernels[currTileIdx].out[0], out[currTileIdx]);
-                dimensions(m_kernels[currTileIdx].in[0]) = {kKernelMatrixSize * TP_NUM_FRAMES};
-                dimensions(m_kernels[currTileIdx].out[0]) = {kKernelMatrixSize * TP_NUM_FRAMES};
+                    // Source files
+                    source(m_kernels[x][y][z]) = "cholesky.cpp";
+                    stack_size(m_kernels[x][y][z]) = 4096;  // Empirically seen cases which utilise ~2560 bytes
 
-                int outPortIdx = 1;
-                if (x < y) {
-                    int rightTileIdx = currTileIdx + 1;
-                    connect<HORIZONTAL_PORT>(m_kernels[currTileIdx].out[outPortIdx], m_kernels[rightTileIdx].in[outPortIdx]);
-                    outPortIdx++;
+                    dimensions(m_kernels[x][y][z].in[0]) = {kKernelMatrixSize * TP_NUM_FRAMES};
+                    dimensions(m_kernels[x][y][z].out[0]) = {kKernelMatrixSize * TP_NUM_FRAMES};
+                    
+                    if (kKernelMatrixSize * TP_NUM_FRAMES * sizeof(TT_DATA) > __DATA_MEM_BYTES__ / 2) {
+                        single_buffer(m_kernels[x][y][z].in[0]);
+                        single_buffer(m_kernels[x][y][z].out[0]);
+                    }
+
+                    if (z + 1 < cascadeDepth) {
+                        connect(m_kernels[x][y][z].out[0], m_kernels[x][y][z+1].in[0]);
+                    }
+
+                    if (x < y) {
+                        connect<HORIZONTAL_PORT>(m_kernels[x][y][z].out[1], m_kernels[x+1][y][z].in[1]);
+
+                        if (x == activeGridOffsets[z]) {
+                            connect<VERTICAL_PORT>(m_kernels[x][x][z].out[1], m_kernels[x][y][z].in[1]);
+                        } else {
+                            connect<VERTICAL_PORT>(m_kernels[x][x][z].out[1], m_kernels[x][y][z].in[2]);
+                        }     
+                    }
                 }
-                if (y < TP_GRID_DIM-1) {
-                    int downTileIdx = currTileIdx + y + 1;
-                    if (x == 0) {
-                        connect<VERTICAL_PORT>(m_kernels[currTileIdx].out[outPortIdx], m_kernels[downTileIdx].in[1]);
-                    } else {
-                        connect<VERTICAL_PORT>(m_kernels[currTileIdx].out[outPortIdx], m_kernels[downTileIdx].in[2]);
-                    }          
-                }
-                currTileIdx++;
+                connect(m_kernels[x][y][cascadeDepth-1].out[0], out[portIdx]);  // cascade exit
+                portIdx++;
             }
         }
     }; // constructor

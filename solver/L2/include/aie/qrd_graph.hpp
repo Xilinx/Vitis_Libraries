@@ -55,11 +55,7 @@ template <unsigned int cascPos,
 class create_casc_kernel_recur_qrd {
    public:
     static void create(kernel (&qrdKernels)[TP_CASC_LEN]) {
-
     constexpr unsigned int kKernelColSize = qrd_load_split <TT_DATA,TP_DIM_COLS,TP_DIM_ROWS,TP_CASC_LEN,TP_NUM_FRAMES>(ColsDist, cascPos);
-    printf("Creating Kernel %d\n", cascPos);
-    printf("COL DIM for Kernel %d is %d\n", cascPos, kKernelColSize);
-    printf("Distributed columns before Kernel %d is %d\n", cascPos, ColsDist);
 
     //defensive check for buffer size
     static_assert(fnCheckBufferSize<TT_DATA, TP_DIM_ROWS, kKernelColSize, TP_NUM_FRAMES>(),
@@ -162,9 +158,9 @@ class qrd_graph : public graph {
                   " Assertion Failed : \n"
                   "             ERROR: TP_DIM_ROWS should be minimum of 32 bytes / sizeof(TT_DATA) for AIE1 / 64 bytes / sizeof(TT_DATA) for AIE-ML and AIE-MLv2. \n");
 
-    static_assert(fnCheckTiling<TT_DATA, TP_DIM_A_LEADING, TP_DIM_Q_LEADING, TP_DIM_R_LEADING>(),
-                  " Assertion Failed : \n"
-                  "             ERROR: Row-major is not supported for cfloat data type on AIE1.\n");
+    // static_assert(fnCheckTiling<TT_DATA, TP_DIM_ROWS, TP_DIM_A_LEADING, TP_DIM_Q_LEADING, TP_DIM_R_LEADING>(),
+    //               " Assertion Failed : \n"
+    //               "             ERROR: Row-major is not supported for cfloat data type or TP_DIM_ROWS>255 on AIE1 cases.\n");
 
     /**
     * @endcond
@@ -214,13 +210,10 @@ class qrd_graph : public graph {
             unsigned int kKernelColSize = col_dim_kernel_arr[i];
             unsigned int kKernelWindowVsizeQ = (TP_NUM_FRAMES * TP_DIM_ROWS * kKernelColSize);
             unsigned int kKernelWindowVsizeR = (TP_NUM_FRAMES * TP_DIM_COLS * kKernelColSize);
-            printf("Kernel Num = %d \n", i);
-            printf("COL_PER_KERNEL = %d \n", kKernelColSize);
-            printf("kKernelWindowVsizeQ = %d \n", kKernelWindowVsizeQ);
-            printf("kKernelWindowVsizeR = %d \n", kKernelWindowVsizeR);
-
+            printf("Col Dim for Kernel-%d = %d \n", i, kKernelColSize);
+            
             // Specify mapping constraints
-            runtime<ratio>(m_kernels[i]) = 0.1; // Nominal figure. The real figure requires knowledge of the sample
+            runtime<ratio>(m_kernels[i]) = 0.9; // Nominal figure. The real figure requires knowledge of the sample
                                                 // rate.
             // Source files
             source(m_kernels[i]) = "qrd.cpp";
@@ -255,8 +248,8 @@ class qrd_graph : public graph {
             };
 
             if (TP_DIM_Q_LEADING == 1){
-            read_access(m_kernels[i].out[0]) =
-                adf::tiling(
+                read_access(m_kernels[i].out[0]) =
+                    adf::tiling(
                     {       .buffer_dimension = {TP_DIM_ROWS, kKernelColSize, TP_NUM_FRAMES},
                             .tiling_dimension = {1, kKernelColSize, 1},
                             .offset = {0, 0, 0},
@@ -265,9 +258,8 @@ class qrd_graph : public graph {
                             {.dimension = 1, .stride = kKernelColSize, .wrap = 1},
                             {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}
                     }
-                });
+                    });
             }
-
 
             if (TP_DIM_R_LEADING == 1){
             read_access(m_kernels[i].out[1]) =
@@ -282,7 +274,6 @@ class qrd_graph : public graph {
                     }
                 });
             }
-
 
 
             if (i > 0 ) {

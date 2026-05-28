@@ -14,15 +14,7 @@
 # limitations under the License.
 #
 import aie_common as com
-from aie_common import (
-    validate_legal_set,
-    validate_range,
-    fn_is_power_of_two,
-    round_power_of_2,
-    isError,
-    isValid,
-)
-from math import log2, sqrt
+from math import sqrt
 
 #### naming ####
 #
@@ -46,7 +38,9 @@ from math import log2, sqrt
 # and "err_message" if "is_valid" is False.
 #
 
+TP_DIM_max = 1024
 TP_GRID_DIM_max = 16
+TP_CASC_LEN_max = 32
 
 
 #######################################################
@@ -55,25 +49,19 @@ TP_GRID_DIM_max = 16
 def update_AIE_VARIANT(args):
     return fn_update_AIE_VARIANT()
 
-
 def fn_update_AIE_VARIANT():
     legal_set_AIE_VARIANT = [com.AIE, com.AIE_ML, com.AIE_MLv2]
-
-    param_dict = {}
-    param_dict.update({"name": "AIE_VARIANT"})
-    param_dict.update({"enum": legal_set_AIE_VARIANT})
+    param_dict = {"name": "AIE_VARIANT", "enum": legal_set_AIE_VARIANT}
     return param_dict
-
 
 def validate_AIE_VARIANT(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     return fn_validate_AIE_VARIANT(AIE_VARIANT)
 
-
 def fn_validate_AIE_VARIANT(AIE_VARIANT):
     param_dict = fn_update_AIE_VARIANT()
     legal_set_AIE_VARIANT = param_dict["enum"]
-    return validate_legal_set(legal_set_AIE_VARIANT, "AIE_VARIANT", AIE_VARIANT)
+    return com.validate_legal_set(legal_set_AIE_VARIANT, "AIE_VARIANT", AIE_VARIANT)
 
 
 #######################################################
@@ -83,22 +71,45 @@ def update_TT_DATA(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     return fn_update_data_type(AIE_VARIANT)
 
-
 def fn_update_data_type(AIE_VARIANT):
     valid_types = ["float", "cfloat"]
     param_dict = {"name": "TT_DATA", "enum": valid_types}
     return param_dict
-
 
 def validate_TT_DATA(args):
     TT_DATA = args["TT_DATA"]
     AIE_VARIANT = args["AIE_VARIANT"]
     return fn_validate_data_type(TT_DATA, AIE_VARIANT)
 
-
 def fn_validate_data_type(TT_DATA, AIE_VARIANT):
     param_dict = fn_update_data_type(AIE_VARIANT)
-    return validate_legal_set(param_dict["enum"], "TT_DATA", TT_DATA)
+    return com.validate_legal_set(param_dict["enum"], "TT_DATA", TT_DATA)
+
+
+#######################################################
+######### TP_GRID_DIM Updater and Validator ###########
+#######################################################
+def update_TP_GRID_DIM(args):
+    TP_GRID_DIM = args["TP_GRID_DIM"] if "TP_GRID_DIM" in args and args["TP_GRID_DIM"] else 0
+    return fn_update_grid_dim(TP_GRID_DIM)
+
+def fn_update_grid_dim(TP_GRID_DIM):
+    param_dict = {
+        "name": "TP_GRID_DIM",
+        "minimum": 1,
+        "maximum": TP_GRID_DIM_max
+    }
+    param_dict["actual"] = com.CLIP(TP_GRID_DIM, param_dict["minimum"], param_dict["maximum"])
+    return param_dict
+
+def validate_TP_GRID_DIM(args):
+    TP_GRID_DIM = args["TP_GRID_DIM"]
+    return fn_validate_grid_dim(TP_GRID_DIM)
+
+def fn_validate_grid_dim(TP_GRID_DIM):
+    param_dict = fn_update_grid_dim(TP_GRID_DIM)
+    range_TP_DIM = [param_dict["minimum"], param_dict["maximum"]]
+    return com.validate_range(range_TP_DIM, "TP_GRID_DIM", TP_GRID_DIM)
 
 
 #######################################################
@@ -107,62 +118,46 @@ def fn_validate_data_type(TT_DATA, AIE_VARIANT):
 def update_TP_DIM(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
-    TP_DIM = args["TP_DIM"] if "TP_DIM" in args else 0
-    return fn_update_TP_DIM(AIE_VARIANT, TT_DATA, TP_DIM)
+    TP_GRID_DIM = args["TP_GRID_DIM"]
+    TP_DIM = args["TP_DIM"] if "TP_DIM" in args and args["TP_DIM"] else 0
+    return fn_update_TP_DIM(AIE_VARIANT, TT_DATA, TP_GRID_DIM, TP_DIM)
 
-
-def fn_update_TP_DIM(AIE_VARIANT, TT_DATA, TP_DIM):
-    max_read = com.k_max_read_write_bytes[AIE_VARIANT]
-    data_bytes = com.fn_size_by_byte(TT_DATA)
-    kVecSampleNum = max_read // data_bytes
-
-    io_bytes_max_per_tile = com.k_data_memory_bytes[AIE_VARIANT]
-    io_samples_max_per_tile = io_bytes_max_per_tile // data_bytes
-    io_samples_max_ping_pong = io_samples_max_per_tile // 2
-
-    max_dim_per_tile = com.FLOOR( sqrt(io_samples_max_per_tile), kVecSampleNum )
-    max_dim_ping_pong = com.FLOOR( sqrt(io_samples_max_ping_pong), kVecSampleNum )
-
-    io_dim_max = TP_GRID_DIM_max * max_dim_per_tile
-    io_dim_max_ping_pong = TP_GRID_DIM_max * max_dim_ping_pong
+def fn_update_TP_DIM(AIE_VARIANT, TT_DATA, TP_GRID_DIM, TP_DIM):
+    kVecSampleNum = com.fnVecSampleNumMax(AIE_VARIANT, TT_DATA)
+    io_samples_max_per_tile = com.k_data_memory_bytes[AIE_VARIANT] // com.sizeof(TT_DATA)
+    max_dim_per_tile = com.FLOOR( int(sqrt(io_samples_max_per_tile)), kVecSampleNum )
+    io_dim_min = TP_GRID_DIM * kVecSampleNum
+    io_dim_max = TP_GRID_DIM * max_dim_per_tile
 
     param_dict = {
         "name": "TP_DIM",
-        "minimum": kVecSampleNum,
-        "maximum": io_dim_max,
-        "maximum_pingpong_buf": io_dim_max_ping_pong,
+        "minimum": io_dim_min,
+        "maximum": min(io_dim_max, TP_DIM_max)  # cascade tables do not support TP_DIM which exceeds 1024.
     }
-
-    if TP_DIM < param_dict["minimum"]:
-        param_dict.update({"actual": param_dict["minimum"]})
-    elif TP_DIM > param_dict["maximum_pingpong_buf"]:
-        param_dict.update({"actual": param_dict["maximum_pingpong_buf"]})
-    elif TP_DIM % kVecSampleNum != 0:
-        param_dict.update({"actual": com.CEIL(TP_DIM, kVecSampleNum)})
-    else:
-        param_dict.update({"actual": TP_DIM})
-
+    TP_DIM = com.CLIP(TP_DIM, param_dict["minimum"], param_dict["maximum"])
+    TP_DIM = com.ROUND_TO_NEAREST_MULTIPLE(TP_DIM, io_dim_min)
+    param_dict["actual"] = TP_DIM
     return param_dict
-
 
 def validate_TP_DIM(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
+    TP_GRID_DIM = args["TP_GRID_DIM"]
     TP_DIM = args["TP_DIM"]
-    return fn_validate_dim_size(AIE_VARIANT, TT_DATA, TP_DIM)
+    return fn_validate_dim_size(AIE_VARIANT, TT_DATA, TP_GRID_DIM, TP_DIM)
 
+def fn_validate_dim_size(AIE_VARIANT, TT_DATA, TP_GRID_DIM, TP_DIM):
+    kVecSampleNum = com.fnVecSampleNumMax(AIE_VARIANT, TT_DATA)
+    kKernelDim = TP_DIM // TP_GRID_DIM
 
-def fn_validate_dim_size(AIE_VARIANT, TT_DATA, TP_DIM):
-    max_read = com.k_max_read_write_bytes[AIE_VARIANT]
-    data_bytes = com.fn_size_by_byte(TT_DATA)
-    kVecSampleNum = max_read // data_bytes
-
-    if TP_DIM % kVecSampleNum != 0:
-        return isError("TP_DIM should be a multiple of vecSampleNum.")
+    if kKernelDim % kVecSampleNum != 0:
+        return com.isError("TP_DIM / TP_GRID_DIM should be a multiple of vecSampleNum.")
+    if TP_DIM % TP_GRID_DIM != 0:
+        return com.isError("TP_DIM must be a multiple of TP_GRID_DIM.")
     else:
-        param_dict = fn_update_TP_DIM(AIE_VARIANT, TT_DATA, TP_DIM)
-        range_TP_DIM = [param_dict["minimum"], param_dict["maximum_pingpong_buf"]]
-        return validate_range(range_TP_DIM, "TP_DIM", TP_DIM)
+        param_dict = fn_update_TP_DIM(AIE_VARIANT, TT_DATA, TP_GRID_DIM, TP_DIM)
+        range_TP_DIM = [param_dict["minimum"], param_dict["maximum"]]
+        return com.validate_range(range_TP_DIM, "TP_DIM", TP_DIM)
 
 
 #######################################################
@@ -171,109 +166,86 @@ def fn_validate_dim_size(AIE_VARIANT, TT_DATA, TP_DIM):
 def update_TP_NUM_FRAMES(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
+    TP_GRID_DIM = args["TP_GRID_DIM"]
     TP_DIM = args["TP_DIM"]
-    return fn_update_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_DIM)
+    TP_NUM_FRAMES = args["TP_NUM_FRAMES"] if "TP_NUM_FRAMES" in args and args["TP_NUM_FRAMES"] else 0
+    return fn_update_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_GRID_DIM, TP_DIM, TP_NUM_FRAMES)
 
-
-def fn_update_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_DIM):
-    io_bytes_max_per_tile = com.k_data_memory_bytes[AIE_VARIANT]
-    max_read = com.k_max_read_write_bytes[AIE_VARIANT]
-    data_bytes = com.fn_size_by_byte(TT_DATA)
-    kVecSampleNum = max_read // data_bytes
-
-    for grid_dim in reversed(range(1, TP_GRID_DIM_max+1)):
-        if TP_DIM % grid_dim == 0:
-            min_dim_per_tile = TP_DIM // grid_dim
-            if min_dim_per_tile % kVecSampleNum == 0:
-                break
-
-    min_frame_memory_per_tile = min_dim_per_tile * min_dim_per_tile * data_bytes
-    max_frames_per_tile = io_bytes_max_per_tile // min_frame_memory_per_tile
-
+def fn_update_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_GRID_DIM, TP_DIM, TP_NUM_FRAMES):
+    kKernelDim = TP_DIM // TP_GRID_DIM
+    frame_memory_per_kernel = kKernelDim * kKernelDim * com.sizeof(TT_DATA)
+    max_frames_per_tile = com.k_data_memory_bytes[AIE_VARIANT] // frame_memory_per_kernel
+    
     param_dict = {
         "name": "TP_NUM_FRAMES",
         "minimum": 1,
         "maximum": max_frames_per_tile,
-        "maximum_pingpong_buf": max_frames_per_tile // 2,
     }
+    TP_NUM_FRAMES = com.CLIP(TP_NUM_FRAMES, param_dict["minimum"], param_dict["maximum"])
+    param_dict["actual"] = TP_NUM_FRAMES
     return param_dict
-
 
 def validate_TP_NUM_FRAMES(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
+    TP_GRID_DIM = args["TP_GRID_DIM"]
     TP_DIM = args["TP_DIM"]
     TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
-    return fn_validate_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_DIM, TP_NUM_FRAMES)
+    return fn_validate_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_GRID_DIM, TP_DIM, TP_NUM_FRAMES)
 
-
-def fn_validate_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_DIM, TP_NUM_FRAMES):
-    param_dict = fn_update_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_DIM)
+def fn_validate_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_GRID_DIM, TP_DIM, TP_NUM_FRAMES):
+    param_dict = fn_update_TP_NUM_FRAMES(AIE_VARIANT, TT_DATA, TP_GRID_DIM, TP_DIM, TP_NUM_FRAMES)
     range_TP_NUM_FRAMES = [param_dict["minimum"], param_dict["maximum"]]
-    return validate_range(range_TP_NUM_FRAMES, "TP_NUM_FRAMES", TP_NUM_FRAMES)
+    return com.validate_range(range_TP_NUM_FRAMES, "TP_NUM_FRAMES", TP_NUM_FRAMES)
 
 
 #######################################################
-######### TP_GRID_DIM Updater and Validator ###########
+######### TP_CASC_LEN Updater and Validator ###########
 #######################################################
-def update_TP_GRID_DIM(args):
-    AIE_VARIANT = args["AIE_VARIANT"]
-    TT_DATA = args["TT_DATA"]
+def update_TP_CASC_LEN(args):
     TP_DIM = args["TP_DIM"]
-    TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
-    return fn_update_grid_dim(AIE_VARIANT, TT_DATA, TP_DIM, TP_NUM_FRAMES)
+    TP_CASC_LEN = args["TP_CASC_LEN"] if "TP_CASC_LEN" in args and args["TP_CASC_LEN"] else 0
+    return fn_update_casc_len(TP_DIM, TP_CASC_LEN)
 
-
-def fn_update_grid_dim(AIE_VARIANT, TT_DATA, TP_DIM, TP_NUM_FRAMES):
-    io_bytes_max = com.k_data_memory_bytes[AIE_VARIANT]
-    pingpong_max = io_bytes_max // 2
-    max_read = com.k_max_read_write_bytes[AIE_VARIANT]
-    data_bytes = com.fn_size_by_byte(TT_DATA)
-    kVecSampleNum = max_read // data_bytes
-
-    legal_set_TP_GRID_DIM = set(range(1, TP_GRID_DIM_max+1))
-    legal_set_TP_GRID_DIM_pingpong = legal_set_TP_GRID_DIM.copy()
-
-    for grid_dim in range(1, TP_GRID_DIM_max+1):
-        kernel_dim = TP_DIM // grid_dim
-        kernel_matrix_size = kernel_dim * kernel_dim
-        memory_per_kernel = kernel_matrix_size * TP_NUM_FRAMES * data_bytes
-
-        if TP_DIM % grid_dim != 0:
-            legal_set_TP_GRID_DIM.discard(grid_dim)
-            legal_set_TP_GRID_DIM_pingpong.discard(grid_dim)
-
-        if kernel_dim % kVecSampleNum != 0:
-            legal_set_TP_GRID_DIM.discard(grid_dim)
-            legal_set_TP_GRID_DIM_pingpong.discard(grid_dim)
-
-        if memory_per_kernel > pingpong_max:
-            legal_set_TP_GRID_DIM_pingpong.discard(grid_dim)
-        if memory_per_kernel > io_bytes_max:
-            legal_set_TP_GRID_DIM.discard(grid_dim)
-
-
+def fn_update_casc_len(TP_DIM, TP_CASC_LEN):
     param_dict = {
-        "name": "TP_GRID_DIM",
-        "enum": legal_set_TP_GRID_DIM,
-        "enum_pingpong_buf": legal_set_TP_GRID_DIM_pingpong,
+        "name": "TP_CASC_LEN",
+        "minimum": 1,
+        "maximum": min(TP_CASC_LEN_max, TP_DIM)
     }
+    TP_CASC_LEN = com.CLIP(TP_CASC_LEN, param_dict["minimum"], param_dict["maximum"])
+    param_dict["actual"] = TP_CASC_LEN
     return param_dict
 
-
-def validate_TP_GRID_DIM(args):
-    AIE_VARIANT = args["AIE_VARIANT"]
-    TT_DATA = args["TT_DATA"]
+def validate_TP_CASC_LEN(args):
+    TP_CASC_LEN = args["TP_CASC_LEN"]
     TP_DIM = args["TP_DIM"]
-    TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
-    TP_GRID_DIM = args["TP_GRID_DIM"]
-    return fn_validate_grid_dim(AIE_VARIANT, TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM)
+    return fn_validate_casc_len(TP_CASC_LEN, TP_DIM)
+
+def fn_validate_casc_len(TP_CASC_LEN, TP_DIM):
+    param_dict = fn_update_casc_len(TP_DIM, TP_CASC_LEN)
+    range_CASC_LEN = [param_dict["minimum"], param_dict["maximum"]]
+    return com.validate_range(range_CASC_LEN, "TP_CASC_LEN", TP_CASC_LEN)
 
 
-def fn_validate_grid_dim(AIE_VARIANT, TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM):
-    param_dict = fn_update_grid_dim(AIE_VARIANT, TT_DATA, TP_DIM, TP_NUM_FRAMES)
-    legal_set_TP_GRID_DIM = param_dict["enum_pingpong_buf"]
-    return validate_legal_set(legal_set_TP_GRID_DIM, "TP_GRID_DIM", TP_GRID_DIM)
+#######################################################
+########## TP_DIAG_INV Updater and Validator ##########
+#######################################################
+def update_TP_DIAG_INV(args):
+    return fn_update_diag_inv()
+
+def fn_update_diag_inv():
+    param_dict = {"name": "TP_DIAG_INV", "enum": [0, 1]}
+    return param_dict
+
+def validate_TP_DIAG_INV(args):
+    TP_DIAG_INV = args["TP_DIAG_INV"]
+    return fn_validate_diag_inv(TP_DIAG_INV)
+
+def fn_validate_diag_inv(TP_DIAG_INV):
+    param_dict = fn_update_diag_inv()
+    legal_set_diag_inv = param_dict["enum"]
+    return com.validate_legal_set(legal_set_diag_inv, "TP_DIAG_INV", TP_DIAG_INV)
 
 
 # #### port ####
@@ -333,6 +305,7 @@ def generate_graph(graphname, args):
     TP_DIM = args["TP_DIM"]
     TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
     TP_GRID_DIM = args["TP_GRID_DIM"]
+    TP_CASC_LEN = args["TP_CASC_LEN"]
 
     # Use formatted multi-line string to avoid a lot of \n and \t
     code = f"""
@@ -346,6 +319,7 @@ public:
     {TP_DIM}, //TP_DIM
     {TP_NUM_FRAMES}, //TP_NUM_FRAMES
     {TP_GRID_DIM}, //TP_GRID_DIM
+    {TP_CASC_LEN}, //TP_CASC_LEN
   > cholesky;
 
   {graphname}() : cholesky() {{

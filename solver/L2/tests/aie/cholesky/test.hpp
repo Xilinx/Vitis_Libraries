@@ -64,34 +64,36 @@ class test_graph : public graph {
         printf("DIM_SIZE        = %d \n", DIM_SIZE);
         printf("NUM_FRAMES      = %d \n", NUM_FRAMES);
         printf("GRID_DIM        = %d \n", GRID_DIM);
+        printf("CASC_LEN        = %d \n", CASC_LEN);
+        printf("DIAG_INV        = %d \n", DIAG_INV);
         printf("kNumKernels     = %d \n", kNumKernels);
         printf("========================\n");
 
 #ifdef USING_UUT
         // Cholesky sub-graph
-        solverlib::cholesky::UUT_GRAPH<DATA_TYPE, DIM_SIZE, NUM_FRAMES, GRID_DIM> choleskyGraph;
+        solverlib::cholesky::UUT_GRAPH<DATA_TYPE, DIM_SIZE, NUM_FRAMES, GRID_DIM, CASC_LEN, DIAG_INV> choleskyGraph;
 
-        int currTileIdx = 0;
+        int portIdx = 0;
         for (int y = 0; y < GRID_DIM; y++) {
             for (int x = 0; x < y+1; x++) {
 
                 // Make connections
                 std::string filenameIn = QUOTE(INPUT_FILE);
                 filenameIn.insert(filenameIn.length() - 4, ("_" + std::to_string(y) + "_" + std::to_string(x)));
-                in[currTileIdx] = input_plio::create("PLIO_in_" + std::to_string(currTileIdx), adf::plio_64_bits, filenameIn);
-                connect<>(in[currTileIdx].out[0], choleskyGraph.in[currTileIdx]);
+                in[portIdx] = input_plio::create("PLIO_in_" + std::to_string(portIdx), adf::plio_64_bits, filenameIn);
+                connect<>(in[portIdx].out[0], choleskyGraph.in[portIdx]);
 
                 std::string filenameOut = QUOTE(OUTPUT_FILE);
                 filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(y) + "_" + std::to_string(x)));
-                out[currTileIdx] = output_plio::create("PLIO_out_" + std::to_string(currTileIdx), adf::plio_64_bits, filenameOut);
-                connect<>(choleskyGraph.out[currTileIdx], out[currTileIdx].in[0]);
+                out[portIdx] = output_plio::create("PLIO_out_" + std::to_string(portIdx), adf::plio_64_bits, filenameOut);
+                connect<>(choleskyGraph.out[portIdx], out[portIdx].in[0]);
                 
-                currTileIdx++;
+                portIdx++;
             }
         }
 #else // USING_REF
         // Cholesky sub-graph
-        solverlib::cholesky::UUT_GRAPH<DATA_TYPE, DIM_SIZE, NUM_FRAMES> choleskyGraph;
+        solverlib::cholesky::UUT_GRAPH<DATA_TYPE, DIM_SIZE, NUM_FRAMES, DIAG_INV> choleskyGraph;
 
         std::string filenameIn = QUOTE(INPUT_FILE);
         in[0] = input_plio::create("PLIO_in_" + std::to_string(0), adf::plio_64_bits, filenameIn);

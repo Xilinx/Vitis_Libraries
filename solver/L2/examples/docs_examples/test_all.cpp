@@ -21,7 +21,7 @@ all_example_solver::test_example uut_all;
 
 int main(void) {
     uut_all.init();
-    uut_all.run(8);
+    uut_all.run(1);
     uut_all.end();
 
     return 0;

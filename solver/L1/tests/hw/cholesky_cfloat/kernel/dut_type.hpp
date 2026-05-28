@@ -29,11 +29,11 @@ typedef std::complex<float> L_TYPE;
 #define DATA_PATH TOSTR(_DATA_PATH)
 
 //const unsigned DIM = MATRIX_DIM;
-//const bool LOWER_TRIANGULAR = MATRIX_LOWER_TRIANGULAR;
+const bool LOWER_TRIANGULAR = MATRIX_LOWER_TRIANGULAR;
 const unsigned DIM = 256;
 const unsigned M = DIM;
 const unsigned N = DIM;
-const bool LOWER_TRIANGULAR = 1;
+//const bool LOWER_TRIANGULAR = 1;
 
 
 

@@ -66,10 +66,12 @@ os.makedirs(os.path.dirname(LOC_INPUT_FILE), exist_ok=True)
 random.seed(SEED)
 
 wr_sample = PLIOWIDTH // data_width_bit_dict[DATA_TYPE]
+rd_sample = 1
 if data_complex_dict[DATA_TYPE]:
     wr_sample = wr_sample * 2
+    rd_sample = rd_sample * 2
 
-print("Generating input matrix... \n")
+print("Generating input matrix...")
 
 line_to_file = ""
 matrix_serial = []
@@ -85,65 +87,39 @@ for i in range(NITER):
         matrix_serial.extend(gen_utils.get_serial(matrix, row_major=True))
     
 with open(LOC_INPUT_FILE, "a") as file:
-    if wr_sample == 1:
-        for num in matrix_serial:
-            file.write(str(num)+"\n")
-    elif wr_sample == 2:
-        for i in range(0, len(matrix_serial), 2):
-            file.write(str(matrix_serial[i]) + " " + str(matrix_serial[i+1]) + "\n")
-
+    for i in range(0, len(matrix_serial), wr_sample):
+        line_elements = [str(matrix_serial[j]) for j in range(i, i + wr_sample)]
+        file.write(" ".join(line_elements) + "\n")
 
 col_dim_kernel_list= load_utils.qrd_load_split(AIE_VARIANT, DATA_TYPE, ROW_DIM_SIZE, COL_DIM_SIZE, CASC_LEN, NUM_FRAMES)
-print("Column distribution over kernels: \n")
-print(col_dim_kernel_list)
+# print("Column distribution over kernels: \n")
+# print(col_dim_kernel_list)
 
 for i in range(NITER):
     for j in range(NUM_FRAMES):
-        print(f"Generating input matrix for iteration {i}, frame {j}...\n")
         kernel = 0
-        if data_complex_dict[DATA_TYPE]:
-            wr_start = ((i * NUM_FRAMES) + j) * COL_DIM_SIZE * ROW_DIM_SIZE * 2
-        else:
-            wr_start = ((i * NUM_FRAMES) + j) * COL_DIM_SIZE * ROW_DIM_SIZE
+        wr_start = ((i * NUM_FRAMES) + j) * COL_DIM_SIZE * ROW_DIM_SIZE * rd_sample
 
+        col_dist=0
         for col_dim in col_dim_kernel_list:
-            if data_width_bit_dict[DATA_TYPE] == 32:
-                file_size = ROW_DIM_SIZE * col_dim
-            elif data_width_bit_dict[DATA_TYPE] == 64:
-                file_size = ROW_DIM_SIZE * col_dim * 2
-
+            matrix_size_of_kernel = ROW_DIM_SIZE * col_dim * rd_sample
             base_name = os.path.splitext(os.path.basename(LOC_INPUT_FILE))[0]
             LOC_INPUT_FILE_CASC = f"{os.path.dirname(LOC_INPUT_FILE)}/{base_name}_{kernel}.txt"
-            with open(LOC_INPUT_FILE_CASC, "a") as file:
-                if wr_sample == 1:
-                    if DIM_A_LEADING == 1:
-                        for row in range(ROW_DIM_SIZE):
-                            for col in range(col_dim*2):
-                                idx1 = wr_start + row*(ROW_DIM_SIZE)*2 + col
-                                file.write(str(matrix_serial[idx1]) + "\n")
-                        wr_start = wr_start + (col_dim * 2) 
+            matrix_serial_to_wr=[]
+            with open(LOC_INPUT_FILE_CASC, "a") as file:                  
+                if DIM_A_LEADING == 1:
+                    for row in range(ROW_DIM_SIZE):
+                        for col in range(col_dim):
+                            idx1 = wr_start + (COL_DIM_SIZE*row + col_dist + col)*rd_sample
+                            matrix_serial_to_wr.extend(matrix_serial[idx1:idx1+rd_sample])
 
-                    else:
-                        for num in matrix_serial[wr_start : wr_start + file_size]:
-                            file.write(str(num)+"\n")
-                        wr_start = wr_start + file_size
-
-
-                elif wr_sample == 2:    
-                    if DIM_A_LEADING == 1:
-                        sample_num = False
-                        for row in range(ROW_DIM_SIZE):
-                            for col in range(col_dim):
-                                idx1 = wr_start + row*(ROW_DIM_SIZE) + col
-                                if sample_num:  
-                                    file.write(str(wr_val_pre) + " " + str(matrix_serial[idx1]) + "\n")
-                                sample_num = not sample_num
-                                wr_val_pre = matrix_serial[idx1]    
-                        wr_start = wr_start + col_dim        
-                                    
-                    else:                        
-                        for num in range(wr_start, wr_start + file_size, 2):
-                            file.write(str(matrix_serial[num]) + " " + str(matrix_serial[num+1]) + "\n")
-
-                        wr_start = wr_start + file_size
+                    for num in range(0, len(matrix_serial_to_wr), wr_sample):
+                        line_elements = [str(matrix_serial_to_wr[j]) for j in range(num, num + wr_sample)]
+                        file.write(" ".join(line_elements) + "\n")
+                else:
+                    for num in range(wr_start, wr_start + matrix_size_of_kernel, wr_sample):
+                        line_elements = [str(matrix_serial[j]) for j in range(num, num + wr_sample)]
+                        file.write(" ".join(line_elements) + "\n")
+                    wr_start = wr_start + matrix_size_of_kernel
             kernel += 1
+            col_dist = col_dist + col_dim

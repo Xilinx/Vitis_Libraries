@@ -122,12 +122,10 @@ def update_TP_DIM_ROWS(args):
 
 
 def fn_update_tp_dim_rows(AIE_VARIANT, TT_DATA, TP_DIM_ROWS):
-    TP_DIM_ROWS_min = com.k_max_read_write_bytes[AIE_VARIANT] / byte_size[TT_DATA]
-
-    BUFFER_SIZE = com.k_data_memory_bytes[AIE_VARIANT]
-
+    TP_DIM_ROWS_min = int(com.k_max_read_write_bytes[AIE_VARIANT] / byte_size[TT_DATA])
+    buffer_size_sample = com.k_data_memory_bytes[AIE_VARIANT] / byte_size[TT_DATA]
     TP_DIM_ROWS_max = int(
-        math.floor(BUFFER_SIZE / byte_size[TT_DATA])
+        int(buffer_size_sample / 1) #theoratical min for tp_dim_col is 1 here assumining min colsize will be distributed over cascaded kernels
     )
 
     param_dict = {}
@@ -178,10 +176,8 @@ def fn_update_tp_dim_cols(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS):
         math.floor(BUFFER_SIZE / byte_size[TT_DATA])
     )
 
-    TP_DIM_COLS_max_buffer_q = int((BUFFER_SIZE_sample/TP_DIM_ROWS) * TP_CASC_LEN_max)
-    TP_DIM_COLS_max_buffer_r = int(math.sqrt(BUFFER_SIZE_sample* TP_CASC_LEN_max))
-    TP_DIM_COLS_max = min(TP_DIM_COLS_max_buffer_q, TP_DIM_COLS_max_buffer_r)
-
+    TP_DIM_COLS_max_buffer_q = int((BUFFER_SIZE_sample/TP_DIM_ROWS)) * TP_CASC_LEN_max
+    TP_DIM_COLS_max = min(TP_DIM_COLS_max_buffer_q, TP_DIM_ROWS)
 
     param_dict = {}
     param_dict.update({"name": "TP_DIM_ROWS"})
@@ -190,7 +186,7 @@ def fn_update_tp_dim_cols(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS):
 
     if TP_DIM_COLS !=0:
         if (TP_DIM_COLS % TP_DIM_COLS_min) != 0:
-            TP_DIM_COLS_actual = int(com.CEIL(TP_DIM_COLS, TP_DIM_COLS_min))
+            TP_DIM_COLS_actual = int(com.FLOOR(TP_DIM_COLS, TP_DIM_COLS_min))
             param_dict.update({"actual": TP_DIM_COLS_actual})
 
     return param_dict
@@ -227,10 +223,7 @@ def fn_update_tp_num_frames(AIE_VARIANT, TT_DATA,  TP_DIM_ROWS, TP_DIM_COLS):
     )
     cols_per_kernel_min = math.ceil(TP_DIM_COLS / TP_CASC_LEN_max)
 
-
-    TP_NUM_FRAMES_max_q=int(BUFFER_SIZE_sample/(TP_DIM_ROWS*cols_per_kernel_min))
-    TP_NUM_FRAMES_max_r=int(BUFFER_SIZE_sample/(cols_per_kernel_min*cols_per_kernel_min))
-    TP_NUM_FRAMES_max = min(TP_NUM_FRAMES_max_q, TP_NUM_FRAMES_max_r)
+    TP_NUM_FRAMES_max=int(BUFFER_SIZE_sample/(TP_DIM_ROWS*cols_per_kernel_min))
 
     param_dict = {}
 
@@ -271,8 +264,6 @@ def fn_update_tp_casc_len(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM
     casc_len_min_q = ceil(total_matrix_size_q/BUFFER_SIZE_sample)
     casc_len_min_r = ceil(total_matrix_size_r/BUFFER_SIZE_sample)  
     casc_len_min = max(casc_len_min_q, casc_len_min_r)
-    col_per_kernel_min = floor(TP_DIM_COLS/casc_len_min)
-    casc_len_min = ceil(TP_DIM_COLS/col_per_kernel_min)
 
     casc_len_max = min(TP_DIM_COLS, TP_CASC_LEN_max)
     while True:
@@ -301,13 +292,14 @@ def validate_TP_CASC_LEN(args):
 def update_TP_DIM_A_LEADING(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
-    return fn_update_TP_DIM_A_LEADING(AIE_VARIANT, TT_DATA)
+    TP_DIM_ROWS = args["TP_DIM_ROWS"]
+    return fn_update_TP_DIM_A_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_ROWS)
 
-def fn_update_TP_DIM_A_LEADING(AIE_VARIANT, TT_DATA):
+def fn_update_TP_DIM_A_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_ROWS):
     #in 25.2 cfloat transpose will not be allowed for any AIE variants
     #aie1 is naturally not capable, aie2 and aie22 tests are not finishing, so disabling for now
 
-    if TT_DATA in ["cfloat"]:
+    if (TT_DATA in ["cfloat"] or TP_DIM_ROWS > 255) and AIE_VARIANT in [com.AIE]:
     # if TT_DATA in ["cfloat"] and AIE_VARIANT in [com.AIE]:
         legal_set_TP_DIM_A_LEADING = [0]
     else:
@@ -320,11 +312,12 @@ def fn_update_TP_DIM_A_LEADING(AIE_VARIANT, TT_DATA):
 def validate_TP_DIM_A_LEADING(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
+    TP_DIM_ROWS = args["TP_DIM_ROWS"]
     TP_DIM_A_LEADING = args["TP_DIM_A_LEADING"]
-    return fn_validate_TP_DIM_A_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_A_LEADING)
+    return fn_validate_TP_DIM_A_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_A_LEADING)
 
-def fn_validate_TP_DIM_A_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_A_LEADING):    
-    param_dict = fn_update_TP_DIM_A_LEADING(AIE_VARIANT, TT_DATA)
+def fn_validate_TP_DIM_A_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_A_LEADING):    
+    param_dict = fn_update_TP_DIM_A_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_ROWS)
     legal_set_TP_DIM_A_LEADING = param_dict["enum"]
     return com.validate_legal_set(legal_set_TP_DIM_A_LEADING, "TP_DIM_A_LEADING", TP_DIM_A_LEADING)
 
@@ -334,13 +327,15 @@ def fn_validate_TP_DIM_A_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_A_LEADING):
 def update_TP_DIM_Q_LEADING(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
-    return fn_update_TP_DIM_Q_LEADING(AIE_VARIANT, TT_DATA)
+    TP_DIM_ROWS = args["TP_DIM_ROWS"]
 
-def fn_update_TP_DIM_Q_LEADING(AIE_VARIANT, TT_DATA):
+    return fn_update_TP_DIM_Q_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_ROWS)
+
+def fn_update_TP_DIM_Q_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_ROWS):
     #in 25.2 cfloat transpose will not be allowed for any AIE variants
     #aie1 is naturally not capable, aie2 and aie22 tests are not finishing, so disabling for now
 
-    if TT_DATA in ["cfloat"]:
+    if (TT_DATA in ["cfloat"] or TP_DIM_ROWS > 255) and AIE_VARIANT in [com.AIE]:
     # if TT_DATA in ["cfloat"] and AIE_VARIANT in [com.AIE]:
         legal_set_TP_DIM_Q_LEADING = [0]
     else:
@@ -353,11 +348,12 @@ def fn_update_TP_DIM_Q_LEADING(AIE_VARIANT, TT_DATA):
 def validate_TP_DIM_Q_LEADING(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
+    TP_DIM_ROWS = args["TP_DIM_ROWS"]
     TP_DIM_Q_LEADING = args["TP_DIM_Q_LEADING"]
-    return fn_validate_TP_DIM_Q_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_Q_LEADING)
+    return fn_validate_TP_DIM_Q_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_Q_LEADING)
 
-def fn_validate_TP_DIM_Q_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_Q_LEADING):    
-    param_dict = fn_update_TP_DIM_Q_LEADING(AIE_VARIANT, TT_DATA)
+def fn_validate_TP_DIM_Q_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_Q_LEADING):    
+    param_dict = fn_update_TP_DIM_Q_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_ROWS)
     legal_set_TP_DIM_Q_LEADING = param_dict["enum"]
     return com.validate_legal_set(legal_set_TP_DIM_Q_LEADING, "TP_DIM_Q_LEADING", TP_DIM_Q_LEADING)
 
@@ -367,13 +363,14 @@ def fn_validate_TP_DIM_Q_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_Q_LEADING):
 def update_TP_DIM_R_LEADING(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
-    return fn_update_TP_DIM_R_LEADING(AIE_VARIANT, TT_DATA)
+    TP_DIM_COLS = args["TP_DIM_COLS"]
+    return fn_update_TP_DIM_R_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_COLS)
 
-def fn_update_TP_DIM_R_LEADING(AIE_VARIANT, TT_DATA):
+def fn_update_TP_DIM_R_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_COLS):
     #in 25.2 cfloat transpose will not be allowed for any AIE variants
     #aie1 is naturally not capable, aie2 and aie22 tests are not finishing, so disabling for now
 
-    if TT_DATA in ["cfloat"]:
+    if (TT_DATA in ["cfloat"] or TP_DIM_COLS > 255) and AIE_VARIANT in [com.AIE]:
     # if TT_DATA in ["cfloat"] and AIE_VARIANT in [com.AIE]:
         legal_set_TP_DIM_R_LEADING = [0]
     else:
@@ -386,11 +383,12 @@ def fn_update_TP_DIM_R_LEADING(AIE_VARIANT, TT_DATA):
 def validate_TP_DIM_R_LEADING(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
+    TP_DIM_COLS = args["TP_DIM_COLS"]
     TP_DIM_R_LEADING = args["TP_DIM_R_LEADING"]
-    return fn_validate_TP_DIM_Q_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_R_LEADING)
+    return fn_validate_TP_DIM_Q_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_COLS, TP_DIM_R_LEADING)
 
-def fn_validate_TP_DIM_R_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_R_LEADING):    
-    param_dict = fn_update_TP_DIM_R_LEADING(AIE_VARIANT, TT_DATA)
+def fn_validate_TP_DIM_R_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_COLS, TP_DIM_R_LEADING):    
+    param_dict = fn_update_TP_DIM_R_LEADING(AIE_VARIANT, TT_DATA, TP_DIM_COLS)
     legal_set_TP_DIM_Q_LEADING = param_dict["enum"]
     return com.validate_legal_set(legal_set_TP_DIM_Q_LEADING, "TP_DIM_R_LEADING", TP_DIM_R_LEADING)
 
@@ -445,7 +443,7 @@ def info_ports(args):
             idx=casc_num
         )
         portsOutQ += get_port_info(
-            portname="out",
+            portname="outQ",
             dir="out",
             dataType=TT_DATA,
             windowVsize=TP_WINDOW_VSIZE_Q,
@@ -453,7 +451,7 @@ def info_ports(args):
             idx=casc_num
         )
         portsOutR += get_port_info(
-            portname="out",
+            portname="outR",
             dir="out",
             dataType=TT_DATA,
             windowVsize=TP_WINDOW_VSIZE_R,
@@ -474,7 +472,9 @@ def generate_graph(graphname, args):
     TP_DIM_COLS = args["TP_DIM_COLS"]
     TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
     TP_CASC_LEN = args["TP_CASC_LEN"]
-
+    TP_DIM_A_LEADING = args["TP_DIM_A_LEADING"]
+    TP_DIM_Q_LEADING = args["TP_DIM_Q_LEADING"]
+    TP_DIM_R_LEADING = args["TP_DIM_R_LEADING"]
 
     # Use formatted multi-line string to avoid a lot of \n and \t
     code = f"""
@@ -494,6 +494,9 @@ public:
     {TP_DIM_COLS}, //TP_DIM_COLS
     {TP_NUM_FRAMES}, //TP_NUM_FRAMES
     {TP_CASC_LEN}, //TP_CASC_LEN
+    {TP_DIM_A_LEADING}, //TP_DIM_A_LEADING
+    {TP_DIM_Q_LEADING}, //TP_DIM_Q_LEADING
+    {TP_DIM_R_LEADING} //TP_DIM_R_LEADING
   > qrd;
 
   {graphname}() : qrd() {{

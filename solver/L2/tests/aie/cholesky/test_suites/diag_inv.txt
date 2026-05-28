@@ -1,0 +1,1 @@
+make all AIE_VARIANT=[1,2] DATA_TYPE=[float,cfloat] TP_DIM=[4,64] TP_NUM_FRAMES=[1,3] GRID_DIM=[1,4] CASC_LEN=[1,3] DIAG_INV=[0,1] NITER=1 TARGET=[hw]

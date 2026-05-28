@@ -87,6 +87,14 @@ float getReal(cfloat val) {
     return val.real;
 };
 
+template <typename TT>
+TT getScalarAsType(float& val) { // Base case when TT_DATA = cfloat;
+    return {val, 0.0};
+};
+template <>
+float getScalarAsType(float& val) {
+    return val;
+};
 
 template <typename TT>
 float getAbs(TT num) {

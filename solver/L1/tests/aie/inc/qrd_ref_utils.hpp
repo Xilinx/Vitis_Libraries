@@ -112,6 +112,7 @@ template <typename T_A, typename T_B, unsigned int ARRAY_LENGTH>
             }
             return v_div;
         }
+
 };
 
 
@@ -198,6 +199,7 @@ class array_operations <cfloat, cfloat, ARRAY_LENGTH>
             }
             return v_div;
         }
+
 };
 
 // Value accumulator type
