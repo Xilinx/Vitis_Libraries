@@ -57,7 +57,7 @@ void hls_svpwm_duty(hls::stream<t_svpwm_cmd>& strm_Va_cmd,
 #pragma HLS interface s_axilite port = pwm_stt_Va_cmd offset = 0x38 bundle = pwm_args
 #pragma HLS interface s_axilite port = pwm_stt_Vb_cmd offset = 0x48 bundle = pwm_args
 #pragma HLS interface s_axilite port = pwm_stt_Vc_cmd offset = 0x58 bundle = pwm_args
-#pragma HLS interface ap_ctrl_hs port=return
+#pragma HLS interface ap_ctrl_hs port = return
 #pragma HLS interface s_axilite port = return bundle = pwm_args
 
 // #pragma HLS interface ap_none port = pwm_args_dc_link_ref
@@ -125,7 +125,7 @@ void hls_pwm_gen(hls::stream<t_svpwm_ratio>& strm_duty_ratio_a,
 #pragma HLS interface s_axilite port = pwm_stt_duty_ratio_a offset = 0x40 bundle = pwm_args
 #pragma HLS interface s_axilite port = pwm_stt_duty_ratio_b offset = 0x50 bundle = pwm_args
 #pragma HLS interface s_axilite port = pwm_stt_duty_ratio_c offset = 0x60 bundle = pwm_args
-#pragma HLS interface ap_ctrl_hs port=return
+#pragma HLS interface ap_ctrl_hs port = return
 #pragma HLS interface s_axilite port = return bundle = pwm_args
 
 // #pragma HLS interface ap_none port = pwm_stt_pwm_cycle

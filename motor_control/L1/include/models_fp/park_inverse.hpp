@@ -50,14 +50,8 @@ namespace golden {
  * param cos_theta_in Value of cos(theta) as input of Park Inverse.
  * param sin_theta_in Value of sin(theta) as input of Park Inverse.
  */
-template<typename T = float>
-void park_inverse_golden(
-    T& valpha_out,
-    T& vbeta_out,
-    T vd_in,
-    T vq_in,
-    T cos_theta_in,
-    T sin_theta_in) {
+template <typename T = float>
+void park_inverse_golden(T& valpha_out, T& vbeta_out, T vd_in, T vq_in, T cos_theta_in, T sin_theta_in) {
     T Vd = vd_in;
     T Vq = vq_in;
     T cos_theta = cos_theta_in;

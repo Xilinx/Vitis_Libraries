@@ -28,13 +28,6 @@ from Advanced Micro Devices, Inc.
 #include "svpwm_fp32.hpp"
 
 void SVPWM_fp32_top(
-    xf::motorcontrol::hls::SVPWMOutput_fp32& output,
-    float va_cmd,
-    float vb_cmd,
-    float vc_cmd,
-    float dc_link) {
-    
-    xf::motorcontrol::hls::SVPWM_fp32(
-        output, va_cmd, vb_cmd, vc_cmd, dc_link
-    );
+    xf::motorcontrol::hls::SVPWMOutput_fp32& output, float va_cmd, float vb_cmd, float vc_cmd, float dc_link) {
+    xf::motorcontrol::hls::SVPWM_fp32(output, va_cmd, vb_cmd, vc_cmd, dc_link);
 }

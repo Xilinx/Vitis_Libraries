@@ -49,14 +49,9 @@ namespace hls {
  * param ic_in         Ic as input of Clarke Direct.
  */
 inline void Clarke_Direct_3p_fp32(
-    float& ialpha_out,
-    float& ibeta_out,
-    float& ihomop_out,
-    float ia_in,
-    float ib_in,
-    float ic_in) {
+    float& ialpha_out, float& ibeta_out, float& ihomop_out, float ia_in, float ib_in, float ic_in) {
 #pragma HLS INLINE
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II = 1
     const float sqrt3a = 0.577350f;
     const float one_third = 0.333333333333f;
     float Ia = ia_in;

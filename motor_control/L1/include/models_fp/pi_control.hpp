@@ -41,13 +41,13 @@ namespace golden {
 // Output = P + I
 //--------------------------------------------------------------------------
 
-template<typename T = float>
+template <typename T = float>
 struct PIControllerState {
     T integral_error;
     T previous_error;
-    
+
     PIControllerState() : integral_error(0), previous_error(0) {}
-    
+
     void reset() {
         integral_error = 0;
         previous_error = 0;
@@ -65,15 +65,9 @@ struct PIControllerState {
  * param ki            Integral coefficient
  * param mode_change   is mode_change ? 1 : 0
  */
-template<typename T = float>
+template <typename T = float>
 void pi_control_golden(
-    T& output,
-    PIControllerState<T>& state,
-    T measured_value,
-    T setpoint,
-    T kp,
-    T ki,
-    bool mode_change = false) {
+    T& output, PIControllerState<T>& state, T measured_value, T setpoint, T kp, T ki, bool mode_change = false) {
     T err = setpoint - measured_value;
     T acc;
     if (mode_change == true)

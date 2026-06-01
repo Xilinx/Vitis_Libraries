@@ -27,15 +27,12 @@ from Advanced Micro Devices, Inc.
 */
 #include "pi_control_fp32.hpp"
 
-void PI_Control_fp32_top(
-    float& output,
-    xf::motorcontrol::hls::PIControllerState_fp32& state,
-    float measured_value,
-    float setpoint,
-    float kp,
-    float ki,
-    bool mode_change) {
-    
-    xf::motorcontrol::hls::PI_Control_fp32(
-        output, setpoint, measured_value, kp, ki, mode_change, state);
+void PI_Control_fp32_top(float& output,
+                         xf::motorcontrol::hls::PIControllerState_fp32& state,
+                         float measured_value,
+                         float setpoint,
+                         float kp,
+                         float ki,
+                         bool mode_change) {
+    xf::motorcontrol::hls::PI_Control_fp32(output, setpoint, measured_value, kp, ki, mode_change, state);
 }

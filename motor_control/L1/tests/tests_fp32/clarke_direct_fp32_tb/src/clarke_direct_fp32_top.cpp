@@ -28,16 +28,7 @@ from Advanced Micro Devices, Inc.
 #include "clarke_direct_fp32.hpp"
 
 void Clarke_Direct_3p_fp32_top(
-    float& ialpha_out,
-    float& ibeta_out,
-    float& ihomop_out,
-    float ia_in,
-    float ib_in,
-    float ic_in) {
-    
+    float& ialpha_out, float& ibeta_out, float& ihomop_out, float ia_in, float ib_in, float ic_in) {
     // Call the actual implementation
-    xf::motorcontrol::hls::Clarke_Direct_3p_fp32(
-        ialpha_out, ibeta_out, ihomop_out,
-        ia_in, ib_in, ic_in
-    );
+    xf::motorcontrol::hls::Clarke_Direct_3p_fp32(ialpha_out, ibeta_out, ihomop_out, ia_in, ib_in, ic_in);
 }

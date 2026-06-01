@@ -44,9 +44,9 @@ namespace hls {
 struct PIControllerState_fp32 {
     float integral_error;
     float previous_error;
-    
+
     PIControllerState_fp32() : integral_error(0), previous_error(0) {}
-    
+
     void reset() {
         integral_error = 0;
         previous_error = 0;
@@ -63,16 +63,15 @@ struct PIControllerState_fp32 {
  * param mode_change     is mode_change ? 1 : 0
  * param state           Reference to a variable storing the controller state
  */
-inline void PI_Control_fp32(
-    float& output,
-    float setpoint,
-    float measured_value,
-    float kp,
-    float ki,
-    bool mode_change,
-    PIControllerState_fp32& state) {
+inline void PI_Control_fp32(float& output,
+                            float setpoint,
+                            float measured_value,
+                            float kp,
+                            float ki,
+                            bool mode_change,
+                            PIControllerState_fp32& state) {
 #pragma HLS INLINE
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II = 1
     float err = setpoint - measured_value;
     float acc;
     if (mode_change == true)

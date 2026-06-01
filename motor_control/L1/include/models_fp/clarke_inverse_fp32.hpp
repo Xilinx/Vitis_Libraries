@@ -47,14 +47,9 @@ namespace hls {
  * param valpha_in    Valpha as input of Clarke Inverse.
  * param vbeta_in     Vbeta as input of Clarke Inverse.
  */
-inline void Clarke_Inverse_2p_fp32(
-    float& va_out,
-    float& vb_out,
-    float& vc_out,
-    float valpha_in,
-    float vbeta_in) {
+inline void Clarke_Inverse_2p_fp32(float& va_out, float& vb_out, float& vc_out, float valpha_in, float vbeta_in) {
 #pragma HLS INLINE
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II = 1
     const float sqrt3 = 1.732050f;
     const float one_half = 0.5f;
     float Valpha = valpha_in;

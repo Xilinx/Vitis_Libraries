@@ -28,16 +28,6 @@ from Advanced Micro Devices, Inc.
 #include "park_direct_fp32.hpp"
 
 void Park_Direct_fp32_top(
-    float& id_out,
-    float& iq_out,
-    float ialpha_in,
-    float ibeta_in,
-    float cos_theta_in,
-    float sin_theta_in) {
-    
-    xf::motorcontrol::hls::Park_Direct_fp32(
-        id_out, iq_out,
-        ialpha_in, ibeta_in,
-        cos_theta_in, sin_theta_in
-    );
+    float& id_out, float& iq_out, float ialpha_in, float ibeta_in, float cos_theta_in, float sin_theta_in) {
+    xf::motorcontrol::hls::Park_Direct_fp32(id_out, iq_out, ialpha_in, ibeta_in, cos_theta_in, sin_theta_in);
 }

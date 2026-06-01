@@ -28,16 +28,6 @@ from Advanced Micro Devices, Inc.
 #include "park_inverse_fp32.hpp"
 
 void Park_Inverse_fp32_top(
-    float& valpha_out,
-    float& vbeta_out,
-    float vd_in,
-    float vq_in,
-    float cos_theta_in,
-    float sin_theta_in) {
-    
-    xf::motorcontrol::hls::Park_Inverse_fp32(
-        valpha_out, vbeta_out,
-        vd_in, vq_in,
-        cos_theta_in, sin_theta_in
-    );
+    float& valpha_out, float& vbeta_out, float vd_in, float vq_in, float cos_theta_in, float sin_theta_in) {
+    xf::motorcontrol::hls::Park_Inverse_fp32(valpha_out, vbeta_out, vd_in, vq_in, cos_theta_in, sin_theta_in);
 }

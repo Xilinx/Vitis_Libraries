@@ -27,15 +27,6 @@ from Advanced Micro Devices, Inc.
 */
 #include "clarke_inverse_fp32.hpp"
 
-void Clarke_Inverse_2p_fp32_top(
-    float& va_out,
-    float& vb_out,
-    float& vc_out,
-    float valpha_in,
-    float vbeta_in) {
-    
-    xf::motorcontrol::hls::Clarke_Inverse_2p_fp32(
-        va_out, vb_out, vc_out,
-        valpha_in, vbeta_in
-    );
+void Clarke_Inverse_2p_fp32_top(float& va_out, float& vb_out, float& vc_out, float valpha_in, float vbeta_in) {
+    xf::motorcontrol::hls::Clarke_Inverse_2p_fp32(va_out, vb_out, vc_out, valpha_in, vbeta_in);
 }

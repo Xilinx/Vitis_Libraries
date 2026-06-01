@@ -10,11 +10,6 @@
 
 typedef ap_fixed<32, 16> T_IO;
 
-void Clarke_Inverse_2p_apfixed_top(
-    T_IO& va_out,
-    T_IO& vb_out,
-    T_IO& vc_out,
-    T_IO valpha_in,
-    T_IO vbeta_in) {
+void Clarke_Inverse_2p_apfixed_top(T_IO& va_out, T_IO& vb_out, T_IO& vc_out, T_IO valpha_in, T_IO vbeta_in) {
     Clarke_Inverse_2p_ap_fixed<T_IO>(va_out, vb_out, vc_out, valpha_in, vbeta_in);
 }

@@ -49,14 +49,8 @@ namespace golden {
  * param ib_in       Ib as input of Clarke Direct.
  * param ic_in       Ic as input of Clarke Direct.
  */
-template<typename T = float>
-void clarke_direct_golden(
-    T& ialpha_out,
-    T& ibeta_out,
-    T& ihomop_out,
-    T ia_in,
-    T ib_in,
-    T ic_in) {
+template <typename T = float>
+void clarke_direct_golden(T& ialpha_out, T& ibeta_out, T& ihomop_out, T ia_in, T ib_in, T ic_in) {
     const T sqrt3a = static_cast<T>(0.577350);
     T Ia = ia_in;
     T Ib = ib_in;

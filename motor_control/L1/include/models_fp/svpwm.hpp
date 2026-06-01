@@ -44,7 +44,7 @@ namespace golden {
 // duty_ratio = (V_saddle + dc_link) / (2 * dc_link)
 //--------------------------------------------------------------------------
 
-template<typename T = float>
+template <typename T = float>
 struct SVPWMOutput {
     T duty_a;
     T duty_b;
@@ -54,19 +54,18 @@ struct SVPWMOutput {
     T va_saddle;
     T vb_saddle;
     T vc_saddle;
-    
-    SVPWMOutput() : duty_a(0), duty_b(0), duty_c(0), voff(0), sector(0),
-                    va_saddle(0), vb_saddle(0), vc_saddle(0) {}
+
+    SVPWMOutput() : duty_a(0), duty_b(0), duty_c(0), voff(0), sector(0), va_saddle(0), vb_saddle(0), vc_saddle(0) {}
 };
 
-template<typename T>
+template <typename T>
 inline T get_voff(T va, T vb, T vc) {
     T vmin = std::min({va, vb, vc});
     T vmax = std::max({va, vb, vc});
     return (vmin + vmax) / static_cast<T>(2.0);
 }
 
-template<typename T>
+template <typename T>
 inline T get_duty_ratio(T v_saddle, T dc_link) {
     T max_val = dc_link;
     T min_val = -dc_link;
@@ -79,7 +78,7 @@ inline T get_duty_ratio(T v_saddle, T dc_link) {
     return ratio;
 }
 
-template<typename T>
+template <typename T>
 inline int determine_sector(T valpha, T vbeta) {
     T angle = std::atan2(vbeta, valpha);
     if (angle < 0) angle += static_cast<T>(2.0 * M_PI);
@@ -98,13 +97,8 @@ inline int determine_sector(T valpha, T vbeta) {
  * param vc_cmd    Phase C voltage command
  * param dc_link   DC link voltage
  */
-template<typename T = float>
-void svpwm_golden(
-    SVPWMOutput<T>& output,
-    T va_cmd,
-    T vb_cmd,
-    T vc_cmd,
-    T dc_link) {
+template <typename T = float>
+void svpwm_golden(SVPWMOutput<T>& output, T va_cmd, T vb_cmd, T vc_cmd, T dc_link) {
     T voff = get_voff(va_cmd, vb_cmd, vc_cmd);
     T va_saddle = va_cmd - voff;
     T vb_saddle = vb_cmd - voff;

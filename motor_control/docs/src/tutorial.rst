@@ -150,7 +150,7 @@ CSIM verification flow
       git checkout next
       git pull
       cd L1/tests/IP_FOC/
-      make run CSIM=1
+      make run TARGET=csim
 
 Stdout explanation
 
@@ -309,7 +309,7 @@ CSIM verification flow
       git checkout next
       git pull
       cd L1/tests/IP_SVPWM/
-      make run CSIM=1
+      make run TARGET=csim
 
 Execute the executable file with parameters. Follow the step below:
 
@@ -456,7 +456,7 @@ CSIM verification flow
       git checkout next
       git pull
       cd L1/tests/IP_PWM_GEN/
-      make run CSIM=1
+      make run TARGET=csim
 
 Stdout explanation
 
@@ -519,7 +519,7 @@ CSIM verification flow
    .. code-block:: shell
 
       cd ./motor_control/L1/tests/IP_QEI/
-      make run CSIM=1
+      make run TARGET=csim
 
 Stdout explanation
 

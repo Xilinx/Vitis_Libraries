@@ -50,14 +50,8 @@ namespace golden {
  * param cos_theta_in Value of cos(theta) as input of Park Direct.
  * param sin_theta_in Value of sin(theta) as input of Park Direct.
  */
-template<typename T = float>
-void park_direct_golden(
-    T& id_out,
-    T& iq_out,
-    T ialpha_in,
-    T ibeta_in,
-    T cos_theta_in,
-    T sin_theta_in) {
+template <typename T = float>
+void park_direct_golden(T& id_out, T& iq_out, T ialpha_in, T ibeta_in, T cos_theta_in, T sin_theta_in) {
     T Ialpha = ialpha_in;
     T Ibeta = ibeta_in;
     T cos_theta = cos_theta_in;

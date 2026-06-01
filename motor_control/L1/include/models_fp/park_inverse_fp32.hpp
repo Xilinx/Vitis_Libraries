@@ -48,14 +48,9 @@ namespace hls {
  * param sin_theta_in   Value of sin(theta) as input of Park Inverse.
  */
 inline void Park_Inverse_fp32(
-    float& valpha_out,
-    float& vbeta_out,
-    float vd_in,
-    float vq_in,
-    float cos_theta_in,
-    float sin_theta_in) {
+    float& valpha_out, float& vbeta_out, float vd_in, float vq_in, float cos_theta_in, float sin_theta_in) {
 #pragma HLS INLINE
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II = 1
     float Vd = vd_in;
     float Vq = vq_in;
     float cos_theta = cos_theta_in;

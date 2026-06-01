@@ -48,13 +48,8 @@ namespace golden {
  * param valpha_in  Valpha as input of Clarke Inverse.
  * param vbeta_in   Vbeta as input of Clarke Inverse.
  */
-template<typename T = float>
-void clarke_inverse_golden(
-    T& va_out,
-    T& vb_out,
-    T& vc_out,
-    T valpha_in,
-    T vbeta_in) {
+template <typename T = float>
+void clarke_inverse_golden(T& va_out, T& vb_out, T& vc_out, T valpha_in, T vbeta_in) {
     const T sqrt3 = static_cast<T>(1.732050);
     T Valpha = valpha_in;
     T Vbeta = vbeta_in;

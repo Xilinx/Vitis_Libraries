@@ -52,9 +52,9 @@ struct SVPWMOutput_fp32 {
     float va_saddle;
     float vb_saddle;
     float vc_saddle;
-    
-    SVPWMOutput_fp32() : duty_a(0), duty_b(0), duty_c(0), voff(0), sector(0),
-                         va_saddle(0), vb_saddle(0), vc_saddle(0) {}
+
+    SVPWMOutput_fp32()
+        : duty_a(0), duty_b(0), duty_c(0), voff(0), sector(0), va_saddle(0), vb_saddle(0), vc_saddle(0) {}
 };
 
 inline float get_voff_fp32(float va, float vb, float vc) {
@@ -102,14 +102,9 @@ inline int determine_sector_fp32(float valpha, float vbeta) {
  * param vc_cmd     Phase C voltage command
  * param dc_link    DC link voltage
  */
-inline void SVPWM_fp32(
-    SVPWMOutput_fp32& output,
-    float va_cmd,
-    float vb_cmd,
-    float vc_cmd,
-    float dc_link) {
+inline void SVPWM_fp32(SVPWMOutput_fp32& output, float va_cmd, float vb_cmd, float vc_cmd, float dc_link) {
 #pragma HLS INLINE
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II = 1
     float voff = get_voff_fp32(va_cmd, vb_cmd, vc_cmd);
     float va_saddle = va_cmd - voff;
     float vb_saddle = vb_cmd - voff;

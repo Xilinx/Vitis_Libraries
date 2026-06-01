@@ -287,9 +287,9 @@ int main(int argc, char** argv) {
                   (volatile int&)axi_para.args_dead_cycles, (volatile int&)axi_para.args_phase_shift,
                   (volatile int&)axi_para.args_dc_link_ref, pwm_stt_cnt_iter_io,
                   (volatile int&)axi_para.stt_cnt_read_foc, (volatile int&)axi_para.stt_cnt_read_dc,
-                  (volatile int&)axi_para.args_dc_src_mode, (volatile int&)axi_para.args_sample_ii,
-                  pwm_stt_Va_cmd_io, pwm_stt_Vb_cmd_io, pwm_stt_Vc_cmd_io, pwm_stt_duty_ratio_a_io,
-                  pwm_stt_duty_ratio_b_io, pwm_stt_duty_ratio_c_io);
+                  (volatile int&)axi_para.args_dc_src_mode, (volatile int&)axi_para.args_sample_ii, pwm_stt_Va_cmd_io,
+                  pwm_stt_Vb_cmd_io, pwm_stt_Vc_cmd_io, pwm_stt_duty_ratio_a_io, pwm_stt_duty_ratio_b_io,
+                  pwm_stt_duty_ratio_c_io);
     //(volatile long&)axi_para.args_cnt_trip);
     //        volatile t_svpwm_cmd& pwm_stt_Va_cmd,
     //    volatile t_svpwm_cmd& pwm_stt_Vb_cmd,

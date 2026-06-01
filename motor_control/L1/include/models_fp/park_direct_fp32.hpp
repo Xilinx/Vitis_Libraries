@@ -48,14 +48,9 @@ namespace hls {
  * param sin_theta_in   Value of sin(theta) as input of Park Direct.
  */
 inline void Park_Direct_fp32(
-    float& id_out,
-    float& iq_out,
-    float ialpha_in,
-    float ibeta_in,
-    float cos_theta_in,
-    float sin_theta_in) {
+    float& id_out, float& iq_out, float ialpha_in, float ibeta_in, float cos_theta_in, float sin_theta_in) {
 #pragma HLS INLINE
-#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II = 1
     float Ialpha = ialpha_in;
     float Ibeta = ibeta_in;
     float cos_theta = cos_theta_in;
