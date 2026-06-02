@@ -168,7 +168,7 @@ class svd_graph : public graph {
     static constexpr unsigned int kScratchSize = SvdScratchSize<TT_DATA, TP_DIM_COLS>::kSize;
 
     // Buffer sizes.
-    static constexpr int kInWindowVsize   = TP_DIM_ROWS * TP_DIM_COLS;
+    static constexpr int kInWindowVsize = TP_DIM_ROWS * TP_DIM_COLS;
     static constexpr int kOutUWindowVsize = TP_DIM_ROWS * kStoreCols;
     static constexpr int kOutSWindowVsize = kStoreCols;
     static constexpr int kOutVWindowVsize = kStoreCols * kStoreCols;

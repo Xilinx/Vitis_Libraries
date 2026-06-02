@@ -102,7 +102,7 @@ By default, input and output buffers use **column-major** layout. Row-major layo
 Set these to ``0`` (the default) for column-major operation.
 
 .. note::
-   Row-major tiling for ``cfloat`` data is not supported on AIE1 devices. For ``cfloat`` on AIE1, all leading-dimension parameters must be set to ``0``.
+   Row-major tiling for ``cfloat`` data is not supported on AIE devices. For ``cfloat`` on AIE, all leading-dimension parameters must be set to ``0``.
 
 
 Padding

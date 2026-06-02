@@ -32,9 +32,8 @@ namespace solver {
 namespace aie {
 namespace cholesky {
 
-#define IDX(i, j)  (i)*kNumVecsPerDim + (j) // 2D indexing for 1D inputs.
-#define DATA_VECT_T(TT) ::aie::vector<TT, fnVecSampleNum<TT>()>  // Shortcut for defining vectors.
-
+#define IDX(i, j) (i) * kNumVecsPerDim + (j)                    // 2D indexing for 1D inputs.
+#define DATA_VECT_T(TT) ::aie::vector<TT, fnVecSampleNum<TT>()> // Shortcut for defining vectors.
 
 template <typename TT>
 INLINE_DECL constexpr unsigned int fnVecSampleNum() {
@@ -51,8 +50,6 @@ struct acc_t<cfloat> {
 };
 template <typename TT>
 using accType_t = typename acc_t<TT>::type;
-
-
 }
 }
 }

@@ -18,7 +18,7 @@
 #define _SOLVERLIB_QRD_HH_GRAPH_HPP_
 /*
 The file captures the definition of the 'L2' graph level class for
-the QRD function library element.
+the QRD Householder function library element.
 */
 /**
  * @file qrd_hh_graph.hpp
@@ -39,7 +39,6 @@ namespace solver {
 namespace aie {
 namespace qrd_hh {
 
-
 /**
 * @cond NOCOMMENTS
 */
@@ -54,44 +53,52 @@ template <typename TT_DATA,
 class create_casc_kernel_recur_qrd {
    public:
     static void create(kernel (&m_kernels)[TP_CASC_LEN]) {
-    constexpr unsigned int kRrowsDistributed = cascPos*kernelRowSize;
+        constexpr unsigned int kRrowsDistributed = cascPos * kernelRowSize;
 
-    if constexpr (TP_CASC_LEN == 1) {
-        m_kernels[cascPos] = kernel::create_object<qrd_hh<TT_DATA, kernelRowSize, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, cascPos, true, streamEn> >();
-    }
-    else{
-        if constexpr (kRrowsDistributed < TP_DIM_COLS) {
-            m_kernels[cascPos] = kernel::create_object<qrd_hh<TT_DATA, kernelRowSize, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, cascPos, true, streamEn> >();
-        }
+        if
+            constexpr(TP_CASC_LEN == 1) {
+                m_kernels[cascPos] = kernel::create_object<qrd_hh<TT_DATA, kernelRowSize, TP_DIM_COLS, TP_NUM_FRAMES,
+                                                                  TP_CASC_LEN, cascPos, true, streamEn> >();
+            }
         else {
-            m_kernels[cascPos] = kernel::create_object<qrd_hh<TT_DATA, kernelRowSize, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, cascPos, false, streamEn> >();
+            if
+                constexpr(kRrowsDistributed < TP_DIM_COLS) {
+                    m_kernels[cascPos] =
+                        kernel::create_object<qrd_hh<TT_DATA, kernelRowSize, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN,
+                                                     cascPos, true, streamEn> >();
+                }
+            else {
+                m_kernels[cascPos] = kernel::create_object<qrd_hh<TT_DATA, kernelRowSize, TP_DIM_COLS, TP_NUM_FRAMES,
+                                                                  TP_CASC_LEN, cascPos, false, streamEn> >();
+            }
+
+            if
+                constexpr(cascPos < TP_CASC_LEN - 1) {
+                    create_casc_kernel_recur_qrd<TT_DATA, kernelRowSize, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN,
+                                                 streamEn, cascPos + 1>::create(m_kernels);
+                }
         }
 
-        if constexpr (cascPos < TP_CASC_LEN - 1) {
-        create_casc_kernel_recur_qrd <TT_DATA, kernelRowSize, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, streamEn, cascPos+1>::create(m_kernels);
-        }
-    }
-
-    }// constructor
-}; //   create_casc_kernel_recur_qrd
+    } // constructor
+};    //   create_casc_kernel_recur_qrd
 
 /**
  * @endcond
  */
 
- 
 /**
- * @defgroup qrd_hh_graph QRD function
+ * @defgroup qrd_hh QRD Householder function
  *
- * QR Decomposition function graph class
+ * QR Decomposition (Householder) function graph class
 **/
 //--------------------------------------------------------------------------------------------------
 // qrd_hh_graph template
 //--------------------------------------------------------------------------------------------------
 /**
- * @ingroup qrd_hh_graph
- * @brief QRD Housholder implements the QR Decomposition of a matrix A such that A = QR, where Q is an orthogonal matrix
- * and R is an upper triangular matrix using Modified Gram-Schmidt process.
+ * @ingroup qrd_hh
+ * @brief QRD Householder implements the QR Decomposition of a matrix A such that A = QR, where Q is an orthogonal
+ *matrix
+ * and R is an upper triangular matrix using Householder reflections.
  *
  * These are the templates to configure the function.
  * @tparam TT_DATA describes the type of individual data samples input to the function. \n
@@ -104,7 +111,6 @@ class create_casc_kernel_recur_qrd {
  * @tparam TP_CASC_LEN selects the number of kernels the QRD will be split over to accomplish
  *         higher matrix sizes.
  **/
-
 
 template <typename TT_DATA,
           unsigned int TP_DIM_ROWS,
@@ -126,37 +132,42 @@ class qrd_hh_graph : public graph {
                   " Assertion Failed : \n"
                   "             ERROR: TT_DATA is not a supported data type. \n");
 
-    //defensive checks for row size
+    // defensive checks for row size
     static_assert(fnCheckChunkSize<TT_DATA, TP_DIM_COLS>(),
                   " Assertion Failed : \n"
-                  "             ERROR: TP_DIM_COLS x sizeof(TT_DATA) should be multiples of 32 bytes for AIE1 / 64 bytes for AIE-ML and AIE-MLv2. \n");
-                  
+                  "             ERROR: TP_DIM_COLS x sizeof(TT_DATA) should be multiples of 32 bytes for AIE1 / 64 "
+                  "bytes for AIE-ML and AIE-MLv2. \n");
+
     static_assert(fnCheckMinSize<TT_DATA, TP_DIM_COLS>(),
                   " Assertion Failed : \n"
-                  "             ERROR: TP_DIM_COLS should be minimum of 32 bytes / sizeof(TT_DATA) for AIE1 / 64 bytes / sizeof(TT_DATA) for AIE-ML and AIE-MLv2. \n");
+                  "             ERROR: TP_DIM_COLS should be minimum of 32 bytes / sizeof(TT_DATA) for AIE1 / 64 bytes "
+                  "/ sizeof(TT_DATA) for AIE-ML and AIE-MLv2. \n");
 
-    static_assert(TP_DIM_COLS <= TP_DIM_ROWS, 
+    static_assert(TP_DIM_COLS <= TP_DIM_ROWS,
                   " Assertion Failed : \n"
-                  "             ERROR: TP_DIM_COLS should be less than or equal to TP_DIM_ROWS for QRD. \n");   
+                  "             ERROR: TP_DIM_COLS should be less than or equal to TP_DIM_ROWS for QRD. \n");
 
-    //defensive checks for row size
+    // defensive checks for row size
     static_assert(fnCheckChunkSize<TT_DATA, TP_DIM_ROWS>(),
                   " Assertion Failed : \n"
-                  "             ERROR: TP_DIM_ROWS x sizeof(TT_DATA) should be multiples of 32 bytes for AIE1 / 64 bytes for AIE-ML and AIE-MLv2.\n");
+                  "             ERROR: TP_DIM_ROWS x sizeof(TT_DATA) should be multiples of 32 bytes for AIE1 / 64 "
+                  "bytes for AIE-ML and AIE-MLv2.\n");
 
     static_assert(fnCheckMinSize<TT_DATA, TP_DIM_ROWS>(),
                   " Assertion Failed : \n"
-                  "             ERROR: TP_DIM_ROWS should be minimum of 32 bytes / sizeof(TT_DATA) for AIE1 / 64 bytes / sizeof(TT_DATA) for AIE-ML and AIE-MLv2. \n");
+                  "             ERROR: TP_DIM_ROWS should be minimum of 32 bytes / sizeof(TT_DATA) for AIE1 / 64 bytes "
+                  "/ sizeof(TT_DATA) for AIE-ML and AIE-MLv2. \n");
     static_assert(fnCheckKernelLoadShare<TT_DATA, TP_DIM_ROWS, TP_CASC_LEN>(),
                   " Assertion Failed : \n"
-                  "             ERROR: The number of row chunks per kernel (TP_DIM_ROWS/(TP_CASC_LEN))  should be multiples of 32 bytes for AIE1 / 64 bytes for AIE-ML and AIE-MLv2.\n");
+                  "             ERROR: The number of row chunks per kernel (TP_DIM_ROWS/(TP_CASC_LEN))  should be "
+                  "multiples of 32 bytes for AIE1 / 64 bytes for AIE-ML and AIE-MLv2.\n");
 
-
-    //defensive checks for buffer size per kernel
+    // defensive checks for buffer size per kernel
     static_assert(fnCheckMaxSize<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN>(),
-                    " Assertion Failed : \n"
-                    "             ERROR: The total input data size (TP_DIM_ROWS x TP_DIM_COLS x TP_NUM_FRAMES x sizeof(TT_DATA)) exceeds the maximum supported for the given cascade length (TP_CASC_LEN). Please reduce the matrix dimensions, number of frames or increase the cascade length. \n");
-
+                  " Assertion Failed : \n"
+                  "             ERROR: The total input data size (TP_DIM_ROWS x TP_DIM_COLS x TP_NUM_FRAMES x "
+                  "sizeof(TT_DATA)) exceeds the maximum supported for the given cascade length (TP_CASC_LEN). Please "
+                  "reduce the matrix dimensions, number of frames or increase the cascade length. \n");
 
     // static_assert(fnCheckTiling<TT_DATA, TP_DIM_A_LEADING, TP_DIM_Q_LEADING, TP_DIM_R_LEADING>(),
     //               " Assertion Failed : \n"
@@ -165,7 +176,7 @@ class qrd_hh_graph : public graph {
     /**
     * @endcond
     */
-   
+
     /**
      * The input matrix tile(s).
      **/
@@ -196,19 +207,20 @@ class qrd_hh_graph : public graph {
     /**
      * @brief This is the constructor function for the qrd_hh graph.
      **/
-    qrd_hh_graph() {        
-        constexpr unsigned int kKernelRowSize = (TP_DIM_ROWS/TP_CASC_LEN);  
+    qrd_hh_graph() {
+        constexpr unsigned int kKernelRowSize = (TP_DIM_ROWS / TP_CASC_LEN);
         unsigned int kKernelWindowVsizeQ = (TP_NUM_FRAMES * kKernelRowSize * TP_DIM_COLS);
         printf("kKernelRowSize: %d \n", kKernelRowSize);
         printf("kKernelWindowVsizeQ: %d \n", kKernelWindowVsizeQ);
 
         constexpr bool streamEn = (TP_CASC_LEN > 1);
-        create_casc_kernel_recur_qrd <TT_DATA, kKernelRowSize, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, streamEn, 0>::create(m_kernels);
+        create_casc_kernel_recur_qrd<TT_DATA, kKernelRowSize, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, streamEn,
+                                     0>::create(m_kernels);
 
-        for (int i = 0; i < TP_CASC_LEN; i++) {  
-            unsigned int kRrowsDistributed = i*kKernelRowSize;
-            bool routEn = (kRrowsDistributed < TP_DIM_COLS); 
- 
+        for (int i = 0; i < TP_CASC_LEN; i++) {
+            unsigned int kRrowsDistributed = i * kKernelRowSize;
+            bool routEn = (kRrowsDistributed < TP_DIM_COLS);
+
             // Specify mapping constraints
             source(m_kernels[i]) = "qrd_hh.cpp";
             headers(m_kernels[i]) = {"qrd_hh.hpp"};
@@ -223,9 +235,11 @@ class qrd_hh_graph : public graph {
             single_buffer(m_kernels[i].in[0]);
             single_buffer(m_kernels[i].out[0]);
 
-            if (routEn){
-                unsigned int kKernelRrowSize =  (kKernelRowSize <= (TP_DIM_COLS-kRrowsDistributed)) ? kKernelRowSize : (TP_DIM_COLS-kRrowsDistributed); 
-                unsigned int kKernelWindowVsizeR = (TP_NUM_FRAMES * kKernelRrowSize * TP_DIM_COLS); 
+            if (routEn) {
+                unsigned int kKernelRrowSize = (kKernelRowSize <= (TP_DIM_COLS - kRrowsDistributed))
+                                                   ? kKernelRowSize
+                                                   : (TP_DIM_COLS - kRrowsDistributed);
+                unsigned int kKernelWindowVsizeR = (TP_NUM_FRAMES * kKernelRrowSize * TP_DIM_COLS);
                 printf("Kernel : %d \n", i);
                 printf("kKernelWindowVsizeR: %d \n", kKernelWindowVsizeR);
 
@@ -233,70 +247,66 @@ class qrd_hh_graph : public graph {
                 dimensions(m_kernels[i].out[1]) = {kKernelWindowVsizeR};
                 single_buffer(m_kernels[i].out[1]);
 
-                if constexpr (TP_DIM_R_LEADING == 1){
-                read_access(m_kernels[i].out[1]) =
-                    adf::tiling(
-                        {       .buffer_dimension = {kKernelRrowSize, TP_DIM_COLS, TP_NUM_FRAMES},
-                                .tiling_dimension = {1, TP_DIM_COLS, 1},
-                                .offset = {0, 0, 0},
-                                .tile_traversal = {
-                                {.dimension = 0, .stride = 1, .wrap = kKernelRrowSize},
-                                {.dimension = 1, .stride = TP_DIM_COLS, .wrap = 1},
-                                {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}
-                        }
-                    });
-                }
-            }
-
-            if constexpr (TP_CASC_LEN > 1) {
-                if (routEn){
-                    if (i > 0) {connect<stream>(m_kernels[i].out[2], m_kernels[i-1].in[1]);}
-                    if (i == TP_CASC_LEN - 1) {connect<stream>(m_kernels[0].out[2], m_kernels[i].in[1]);}
-                }else{//in this scenario stream is out1 for the kernel instead of out2
-                    if (i > 0) {connect<stream>(m_kernels[i].out[1], m_kernels[i-1].in[1]);}
-                    if (i == TP_CASC_LEN - 1) {connect<stream>(m_kernels[0].out[2], m_kernels[i].in[1]);}
-                }
-
-            }       
-
-            if constexpr (TP_DIM_A_LEADING == 1){
-            write_access(m_kernels[i].in[0]) =
-                adf::tiling(
-                {       .buffer_dimension = {(TP_DIM_ROWS/TP_CASC_LEN), TP_DIM_COLS, TP_NUM_FRAMES},
-                        .tiling_dimension = {1, TP_DIM_COLS, 1},
-                        .offset = {0, 0, 0},
-                        .tile_traversal = {
-                        {.dimension = 0, .stride = 1, .wrap = (TP_DIM_ROWS/TP_CASC_LEN)},
-                        {.dimension = 1, .stride = TP_DIM_COLS, .wrap = 1},
-                        {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}
-                }
-                });
-
-            };
-
-            if constexpr (TP_DIM_Q_LEADING == 1){
-            read_access(m_kernels[i].out[0]) =
-                adf::tiling(
-                    {       .buffer_dimension = {(TP_DIM_ROWS/TP_CASC_LEN), TP_DIM_COLS, TP_NUM_FRAMES},
-                            .tiling_dimension = {1, TP_DIM_COLS, 1},
-                            .offset = {0, 0, 0},
-                            .tile_traversal = {
-                            {.dimension = 0, .stride = 1, .wrap = (TP_DIM_ROWS/TP_CASC_LEN)},
-                            {.dimension = 1, .stride = TP_DIM_COLS, .wrap = 1},
-                            {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}
+                if
+                    constexpr(TP_DIM_R_LEADING == 1) {
+                        read_access(m_kernels[i].out[1]) =
+                            adf::tiling({.buffer_dimension = {kKernelRrowSize, TP_DIM_COLS, TP_NUM_FRAMES},
+                                         .tiling_dimension = {1, TP_DIM_COLS, 1},
+                                         .offset = {0, 0, 0},
+                                         .tile_traversal = {{.dimension = 0, .stride = 1, .wrap = kKernelRrowSize},
+                                                            {.dimension = 1, .stride = TP_DIM_COLS, .wrap = 1},
+                                                            {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}}});
                     }
-                });
             }
 
+            if
+                constexpr(TP_CASC_LEN > 1) {
+                    if (routEn) {
+                        if (i > 0) {
+                            connect<stream>(m_kernels[i].out[2], m_kernels[i - 1].in[1]);
+                        }
+                        if (i == TP_CASC_LEN - 1) {
+                            connect<stream>(m_kernels[0].out[2], m_kernels[i].in[1]);
+                        }
+                    } else { // in this scenario stream is out1 for the kernel instead of out2
+                        if (i > 0) {
+                            connect<stream>(m_kernels[i].out[1], m_kernels[i - 1].in[1]);
+                        }
+                        if (i == TP_CASC_LEN - 1) {
+                            connect<stream>(m_kernels[0].out[2], m_kernels[i].in[1]);
+                        }
+                    }
+                }
 
+            if
+                constexpr(TP_DIM_A_LEADING == 1) {
+                    write_access(m_kernels[i].in[0]) = adf::tiling(
+                        {.buffer_dimension = {(TP_DIM_ROWS / TP_CASC_LEN), TP_DIM_COLS, TP_NUM_FRAMES},
+                         .tiling_dimension = {1, TP_DIM_COLS, 1},
+                         .offset = {0, 0, 0},
+                         .tile_traversal = {{.dimension = 0, .stride = 1, .wrap = (TP_DIM_ROWS / TP_CASC_LEN)},
+                                            {.dimension = 1, .stride = TP_DIM_COLS, .wrap = 1},
+                                            {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}}});
+                };
+
+            if
+                constexpr(TP_DIM_Q_LEADING == 1) {
+                    read_access(m_kernels[i].out[0]) = adf::tiling(
+                        {.buffer_dimension = {(TP_DIM_ROWS / TP_CASC_LEN), TP_DIM_COLS, TP_NUM_FRAMES},
+                         .tiling_dimension = {1, TP_DIM_COLS, 1},
+                         .offset = {0, 0, 0},
+                         .tile_traversal = {{.dimension = 0, .stride = 1, .wrap = (TP_DIM_ROWS / TP_CASC_LEN)},
+                                            {.dimension = 1, .stride = TP_DIM_COLS, .wrap = 1},
+                                            {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}}});
+                }
         }
 
     }; // constructor
-}; //graph class
+};     // graph class
 
 } // namespace qrd_hh
-}// namespace aie
-}// namespace solver
+} // namespace aie
+} // namespace solver
 } // namespace xf
 
 #endif //_SOLVERLIB_QRD_HH_GRAPH_HPP_

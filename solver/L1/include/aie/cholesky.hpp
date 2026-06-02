@@ -65,148 +65,136 @@ template <typename TT_DATA,
 class cholesky {
    private:
    public:
-      static constexpr unsigned int kKernelDim = TP_DIM / TP_GRID_DIM;
-      static constexpr unsigned int kVecSampleNum = fnVecSampleNum<TT_DATA>();
-      static constexpr unsigned int kNumVecsPerDim = kKernelDim / kVecSampleNum;
-      static constexpr unsigned int kActiveGridOffset = kDiagStart / kKernelDim;
+    static constexpr unsigned int kKernelDim = TP_DIM / TP_GRID_DIM;
+    static constexpr unsigned int kVecSampleNum = fnVecSampleNum<TT_DATA>();
+    static constexpr unsigned int kNumVecsPerDim = kKernelDim / kVecSampleNum;
+    static constexpr unsigned int kActiveGridOffset = kDiagStart / kKernelDim;
 
-      static constexpr unsigned int kNumPriorKernels = TP_X;   // Number of kernels above this one in the grid.
-      static constexpr unsigned int kKernelDiagStart = kNumPriorKernels * kKernelDim;  // defines the first diagonal belonging to current kernel.
-      static constexpr unsigned int kKernelDiagEnd = (kNumPriorKernels+1) * kKernelDim;
+    static constexpr unsigned int kNumPriorKernels = TP_X; // Number of kernels above this one in the grid.
+    static constexpr unsigned int kKernelDiagStart =
+        kNumPriorKernels * kKernelDim; // defines the first diagonal belonging to current kernel.
+    static constexpr unsigned int kKernelDiagEnd = (kNumPriorKernels + 1) * kKernelDim;
 
-      static constexpr unsigned int kNumStages = MIN(kKernelDiagEnd, kDiagEnd) - kDiagStart; // Number of prior and current stages performed by kernel.
-      static constexpr          int kStageStartLocal = kDiagStart - kKernelDiagStart;  // negative when start is prior to current kernel.
-      static constexpr          int kStageEndLocal = kStageStartLocal + kNumStages;    // negative when end is prior to current kernel.
-      static constexpr          int kStageStartPrior = MIN(0, kStageStartLocal);
-      static constexpr          int kStageEndPrior = MIN(0, kStageEndLocal);
-      static constexpr unsigned int kStageStartKernel = MAX(0, kStageStartLocal);
-      static constexpr unsigned int kStageEndKernel = MAX(0, kStageEndLocal);
+    static constexpr unsigned int kNumStages =
+        MIN(kKernelDiagEnd, kDiagEnd) - kDiagStart; // Number of prior and current stages performed by kernel.
+    static constexpr int kStageStartLocal =
+        kDiagStart - kKernelDiagStart; // negative when start is prior to current kernel.
+    static constexpr int kStageEndLocal =
+        kStageStartLocal + kNumStages; // negative when end is prior to current kernel.
+    static constexpr int kStageStartPrior = MIN(0, kStageStartLocal);
+    static constexpr int kStageEndPrior = MIN(0, kStageEndLocal);
+    static constexpr unsigned int kStageStartKernel = MAX(0, kStageStartLocal);
+    static constexpr unsigned int kStageEndKernel = MAX(0, kStageEndLocal);
 
-      TT_DATA (&diagColBuffer)[kKernelDim];    // holds diagonal col data from other tiles
-      TT_DATA (&diagRowBuffer)[kKernelDim];    // holds diagonal row data from other tiles
+    TT_DATA (&diagColBuffer)[kKernelDim]; // holds diagonal col data from other tiles
+    TT_DATA (&diagRowBuffer)[kKernelDim]; // holds diagonal row data from other tiles
 
 #if (__STREAMS_PER_TILE__ == 1)
-      using inputPortLeft_t = input_cascade<TT_DATA>;
-      using inputPortUp_t = input_stream<TT_DATA>;
-      using outputPortRight_t = output_cascade<TT_DATA>;
-      using outputPortDown_t = output_stream<TT_DATA>;
+    using inputPortLeft_t = input_cascade<TT_DATA>;
+    using inputPortUp_t = input_stream<TT_DATA>;
+    using outputPortRight_t = output_cascade<TT_DATA>;
+    using outputPortDown_t = output_stream<TT_DATA>;
 #elif (__STREAMS_PER_TILE__ == 2)
-      using inputPortLeft_t = input_stream<TT_DATA>;
-      using inputPortUp_t = input_stream<TT_DATA>;
-      using outputPortRight_t = output_stream<TT_DATA>;
-      using outputPortDown_t = output_stream<TT_DATA>;
-#endif   // No "else" clause since we want to explicitly only support AIE and AIE-ML
+    using inputPortLeft_t = input_stream<TT_DATA>;
+    using inputPortUp_t = input_stream<TT_DATA>;
+    using outputPortRight_t = output_stream<TT_DATA>;
+    using outputPortDown_t = output_stream<TT_DATA>;
+#endif // No "else" clause since we want to explicitly only support AIE and AIE-ML
 
-      struct T_communicationIF {
-         inputPortLeft_t* inLeft;
-         inputPortUp_t* inUp;
-         outputPortRight_t* outRight;
-         outputPortDown_t* outDown;
-      };
+    struct T_communicationIF {
+        inputPortLeft_t* inLeft;
+        inputPortUp_t* inUp;
+        outputPortRight_t* outRight;
+        outputPortDown_t* outDown;
+    };
 
-      // Constructor
-      cholesky(
-         TT_DATA (&m_diagColBuffer)[kKernelDim], 
-         TT_DATA (&m_diagRowBuffer)[kKernelDim]):  diagColBuffer(m_diagColBuffer),
-                                                   diagRowBuffer(m_diagRowBuffer){}
+    // Constructor
+    cholesky(TT_DATA (&m_diagColBuffer)[kKernelDim], TT_DATA (&m_diagRowBuffer)[kKernelDim])
+        : diagColBuffer(m_diagColBuffer), diagRowBuffer(m_diagRowBuffer) {}
 
-      // Register Kernel Class
-      static void registerKernelClass() {
-         if (kActiveGridOffset == TP_GRID_DIM-1) { // if isolated tile.
+    // Register Kernel Class
+    static void registerKernelClass() {
+        if (kActiveGridOffset == TP_GRID_DIM - 1) { // if isolated tile.
             REGISTER_FUNCTION(cholesky::cholesky_main);
-         }
-         else if (TP_X == TP_Y) {
+        } else if (TP_X == TP_Y) {
             if (TP_X == kActiveGridOffset) {
-               REGISTER_FUNCTION(cholesky::cholesky_diagKernel_topLeft);
+                REGISTER_FUNCTION(cholesky::cholesky_diagKernel_topLeft);
+            } else if (TP_X < TP_GRID_DIM - 1) {
+                REGISTER_FUNCTION(cholesky::cholesky_diagKernel_middle);
+            } else if (TP_X == TP_GRID_DIM - 1) {
+                REGISTER_FUNCTION(cholesky::cholesky_diagKernel_botRight);
             }
-            else if (TP_X < TP_GRID_DIM-1) {
-               REGISTER_FUNCTION(cholesky::cholesky_diagKernel_middle);
+        } else if (TP_X < TP_Y) {
+            if ((TP_Y < TP_GRID_DIM - 1) && (TP_X == kActiveGridOffset)) {
+                REGISTER_FUNCTION(cholesky::cholesky_lowerKernel_leftEdge);
+            } else if ((TP_Y == TP_GRID_DIM - 1) && (TP_X == kActiveGridOffset)) {
+                REGISTER_FUNCTION(cholesky::cholesky_lowerKernel_botLeft);
+            } else if ((TP_Y == TP_GRID_DIM - 1) && (TP_X > kActiveGridOffset)) {
+                REGISTER_FUNCTION(cholesky::cholesky_lowerKernel_botEdge);
+            } else {
+                REGISTER_FUNCTION(cholesky::cholesky_lowerKernel_nonEdge);
             }
-            else if (TP_X == TP_GRID_DIM-1) {
-               REGISTER_FUNCTION(cholesky::cholesky_diagKernel_botRight);
-            }
-         }
-         else if (TP_X < TP_Y) {
-            if ((TP_Y < TP_GRID_DIM-1) && (TP_X == kActiveGridOffset)) {
-               REGISTER_FUNCTION(cholesky::cholesky_lowerKernel_leftEdge);
-            }
-            else if ((TP_Y == TP_GRID_DIM-1) && (TP_X == kActiveGridOffset)) {
-               REGISTER_FUNCTION(cholesky::cholesky_lowerKernel_botLeft);
-            }
-            else if ((TP_Y == TP_GRID_DIM-1) && (TP_X > kActiveGridOffset)) {
-               REGISTER_FUNCTION(cholesky::cholesky_lowerKernel_botEdge);
-            }
-            else {
-               REGISTER_FUNCTION(cholesky::cholesky_lowerKernel_nonEdge);
-            }
-         }
-         REGISTER_PARAMETER(diagColBuffer);
-         REGISTER_PARAMETER(diagRowBuffer);
+        }
+        REGISTER_PARAMETER(diagColBuffer);
+        REGISTER_PARAMETER(diagRowBuffer);
+    }
 
-      }
+    // Main (Single Tile) Function
+    void cholesky_main(input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_DATA>& __restrict outWindow);
 
-      // Main (Single Tile) Function
-      void cholesky_main(input_buffer<TT_DATA>& __restrict inWindow,
-                           output_buffer<TT_DATA>& __restrict outWindow);
+    // ************** Function Body Kernels **************
+    void cholesky_diagKernel(input_buffer<TT_DATA>& __restrict inWindow,
+                             output_buffer<TT_DATA>& __restrict outWindow,
+                             T_communicationIF ports);
 
-      // ************** Function Body Kernels **************
-      void cholesky_diagKernel(input_buffer<TT_DATA>& __restrict inWindow,
+    void cholesky_lowerKernel(input_buffer<TT_DATA>& __restrict inWindow,
                               output_buffer<TT_DATA>& __restrict outWindow,
                               T_communicationIF ports);
 
-      void cholesky_lowerKernel(input_buffer<TT_DATA>& __restrict inWindow,
-                              output_buffer<TT_DATA>& __restrict outWindow,
-                              T_communicationIF ports);
+    // ************** Diagonal Entry Functions **************
+    // Top Left Kernel
+    void cholesky_diagKernel_topLeft(input_buffer<TT_DATA>& __restrict inWindow,
+                                     output_buffer<TT_DATA>& __restrict outWindow,
+                                     outputPortDown_t* outDown);
 
-                           
-
-      // ************** Diagonal Entry Functions **************
-      // Top Left Kernel
-      void cholesky_diagKernel_topLeft(input_buffer<TT_DATA>& __restrict inWindow,
-                                    output_buffer<TT_DATA>& __restrict outWindow,
-                                    outputPortDown_t* outDown);
-
-      // Kernels along diagonal
-      void cholesky_diagKernel_middle(input_buffer<TT_DATA>& __restrict inWindow,
+    // Kernels along diagonal
+    void cholesky_diagKernel_middle(input_buffer<TT_DATA>& __restrict inWindow,
                                     output_buffer<TT_DATA>& __restrict outWindow,
                                     inputPortLeft_t* inLeft,
                                     outputPortDown_t* outDown);
 
-      // Bottom Right Kernel
-      void cholesky_diagKernel_botRight(input_buffer<TT_DATA>& __restrict inWindow,
-                                    output_buffer<TT_DATA>& __restrict outWindow,
-                                    inputPortLeft_t* inLeft);
+    // Bottom Right Kernel
+    void cholesky_diagKernel_botRight(input_buffer<TT_DATA>& __restrict inWindow,
+                                      output_buffer<TT_DATA>& __restrict outWindow,
+                                      inputPortLeft_t* inLeft);
 
-      // ************** Lower Entry Functions *****************
-      // Kernels along Left Edge
-      void cholesky_lowerKernel_leftEdge(input_buffer<TT_DATA>& __restrict inWindow,
-                                    output_buffer<TT_DATA>& __restrict outWindow,
-                                    inputPortUp_t* inUp,
-                                    outputPortRight_t* outRight);
+    // ************** Lower Entry Functions *****************
+    // Kernels along Left Edge
+    void cholesky_lowerKernel_leftEdge(input_buffer<TT_DATA>& __restrict inWindow,
+                                       output_buffer<TT_DATA>& __restrict outWindow,
+                                       inputPortUp_t* inUp,
+                                       outputPortRight_t* outRight);
 
-      // Bottom Left Kernel
-      void cholesky_lowerKernel_botLeft(input_buffer<TT_DATA>& __restrict inWindow,
-                                    output_buffer<TT_DATA>& __restrict outWindow,
-                                    inputPortUp_t* inUp,
-                                    outputPortRight_t* outRight);
+    // Bottom Left Kernel
+    void cholesky_lowerKernel_botLeft(input_buffer<TT_DATA>& __restrict inWindow,
+                                      output_buffer<TT_DATA>& __restrict outWindow,
+                                      inputPortUp_t* inUp,
+                                      outputPortRight_t* outRight);
 
+    // Kernels along Bottom Edge
+    void cholesky_lowerKernel_botEdge(input_buffer<TT_DATA>& __restrict inWindow,
+                                      output_buffer<TT_DATA>& __restrict outWindow,
+                                      inputPortLeft_t* inLeft,
+                                      inputPortUp_t* inUp,
+                                      outputPortRight_t* outRight);
 
-      // Kernels along Bottom Edge
-      void cholesky_lowerKernel_botEdge(input_buffer<TT_DATA>& __restrict inWindow,
-                                    output_buffer<TT_DATA>& __restrict outWindow,
-                                    inputPortLeft_t* inLeft,
-                                    inputPortUp_t* inUp,
-                                    outputPortRight_t* outRight);
-
-      // Non-Edge Lower Kernels
-      void cholesky_lowerKernel_nonEdge(input_buffer<TT_DATA>& __restrict inWindow,
-                                    output_buffer<TT_DATA>& __restrict outWindow,
-                                    inputPortLeft_t* inLeft,
-                                    inputPortUp_t* inUp,
-                                    outputPortRight_t* outRight);
-
+    // Non-Edge Lower Kernels
+    void cholesky_lowerKernel_nonEdge(input_buffer<TT_DATA>& __restrict inWindow,
+                                      output_buffer<TT_DATA>& __restrict outWindow,
+                                      inputPortLeft_t* inLeft,
+                                      inputPortUp_t* inUp,
+                                      outputPortRight_t* outRight);
 };
-
 }
 }
 }

@@ -22,9 +22,9 @@ using namespace adf;
 namespace xf::solver::aie::test {
 
 class test_graph : public adf::graph {
-public:
-#if USING_UUT==1
-    static constexpr unsigned int kNumKernels = GRID_DIM*(GRID_DIM+1)/2;
+   public:
+#if USING_UUT == 1
+    static constexpr unsigned int kNumKernels = GRID_DIM * (GRID_DIM + 1) / 2;
     // Define input/output PLIO ports
     std::array<input_plio, kNumKernels> plio_in_L;
     std::array<input_plio, kNumKernels> plio_in_y;
@@ -49,19 +49,21 @@ public:
         printf("kNumKernels  = %d \n", kNumKernels);
 
         // Instantiate the substitution graph
-        xf::solver::aie::substitution::UUT_GRAPH<DATA_TYPE, DIM_SIZE, SUBST_TYPE, L_LEADING, GRID_DIM, NUM_FRAMES, DIAG_INV> dut_graph;
+        xf::solver::aie::substitution::UUT_GRAPH<DATA_TYPE, DIM_SIZE, SUBST_TYPE, L_LEADING, GRID_DIM, NUM_FRAMES,
+                                                 DIAG_INV>
+            dut_graph;
 
         int portIdx = 0;
         for (int y = 0; y < GRID_DIM; y++) {
-            for (int x = 0; x < y+1; x++) {
+            for (int x = 0; x < y + 1; x++) {
                 // Make connections
                 std::string filenameInL = QUOTE(INPUT_FILE_L);
-                if (L_LEADING==0) {
-                  filenameInL.insert(filenameInL.length() - 4, ("_" + std::to_string(x) + "_" + std::to_string(y)));
+                if (L_LEADING == 0) {
+                    filenameInL.insert(filenameInL.length() - 4, ("_" + std::to_string(x) + "_" + std::to_string(y)));
                 } else {
-                  filenameInL.insert(filenameInL.length() - 4, ("_" + std::to_string(y) + "_" + std::to_string(x)));
+                    filenameInL.insert(filenameInL.length() - 4, ("_" + std::to_string(y) + "_" + std::to_string(x)));
                 }
-                //if (SUBST_TYPE == 0) {
+                // if (SUBST_TYPE == 0) {
                 //  if (L_LEADING==0) {
                 //    filenameInL.insert(filenameInL.length() - 4, ("_" + std::to_string(x) + "_" + std::to_string(y)));
                 //  } else {
@@ -74,20 +76,23 @@ public:
                 //    filenameInL.insert(filenameInL.length() - 4, ("_" + std::to_string(x) + "_" + std::to_string(y)));
                 //  }
                 // }
-                plio_in_L[portIdx] = input_plio::create("PLIO_in_L_" + std::to_string(portIdx), adf::plio_64_bits, filenameInL);
+                plio_in_L[portIdx] =
+                    input_plio::create("PLIO_in_L_" + std::to_string(portIdx), adf::plio_64_bits, filenameInL);
                 connect<>(plio_in_L[portIdx].out[0], dut_graph.L_in[portIdx]);
                 single_buffer(dut_graph.L_in[portIdx]);
 
                 std::string filenameInY = QUOTE(INPUT_FILE_Y);
-                filenameInY.insert(filenameInY.length() - 4, ("_" + std::to_string(x) + "_0" ));
-                plio_in_y[portIdx] = input_plio::create("PLIO_in_Y_" + std::to_string(portIdx), adf::plio_64_bits, filenameInY);
+                filenameInY.insert(filenameInY.length() - 4, ("_" + std::to_string(x) + "_0"));
+                plio_in_y[portIdx] =
+                    input_plio::create("PLIO_in_Y_" + std::to_string(portIdx), adf::plio_64_bits, filenameInY);
                 connect<>(plio_in_y[portIdx].out[0], dut_graph.y_in[portIdx]);
 
                 if (x == y) {
-                  std::string filenameOutX = QUOTE(OUTPUT_FILE);
-                  filenameOutX.insert(filenameOutX.length() - 4, ("_" + std::to_string(y) + "_0" ));
-                  plio_out_x[y] = output_plio::create("PLIO_out_X_" + std::to_string(y), adf::plio_64_bits, filenameOutX);
-                  connect<>(dut_graph.x_out[y], plio_out_x[y].in[0]);
+                    std::string filenameOutX = QUOTE(OUTPUT_FILE);
+                    filenameOutX.insert(filenameOutX.length() - 4, ("_" + std::to_string(y) + "_0"));
+                    plio_out_x[y] =
+                        output_plio::create("PLIO_out_X_" + std::to_string(y), adf::plio_64_bits, filenameOutX);
+                    connect<>(dut_graph.x_out[y], plio_out_x[y].in[0]);
                 }
                 portIdx++;
             }
@@ -121,7 +126,9 @@ public:
         printf("NITER        = %d \n", NITER);
 
         // Instantiate the substitution graph
-        xf::solver::aie::substitution::UUT_GRAPH<DATA_TYPE, DIM_SIZE, SUBST_TYPE, L_LEADING, GRID_DIM, NUM_FRAMES, DIAG_INV> dut_graph;
+        xf::solver::aie::substitution::UUT_GRAPH<DATA_TYPE, DIM_SIZE, SUBST_TYPE, L_LEADING, GRID_DIM, NUM_FRAMES,
+                                                 DIAG_INV>
+            dut_graph;
 
         plio_in_L[0] = input_plio::create("PLIO_inL_" + std::to_string(0), adf::plio_64_bits, QUOTE(INPUT_FILE_L));
         connect<>(plio_in_L[0].out[0], dut_graph.L_in[0]);

@@ -22,7 +22,7 @@ template <typename TT_DATA,
           unsigned int TP_DIAG_INV>
 class substitution_ref_graph : public adf::graph {
    public:
-    static constexpr unsigned int kNumKernels = TP_GRID_DIM*(TP_GRID_DIM+1)/2;
+    static constexpr unsigned int kNumKernels = TP_GRID_DIM * (TP_GRID_DIM + 1) / 2;
 
     kernel k;
 
@@ -31,7 +31,8 @@ class substitution_ref_graph : public adf::graph {
     port_array<output, 1> x_out;
 
     substitution_ref_graph() {
-      k = kernel::create_object<substitution_ref<TT_DATA, TP_DIM_SIZE, TP_SUBST_TYPE, TP_L_LEADING, TP_GRID_DIM, TP_NUM_FRAMES, TP_DIAG_INV> >();
+        k = kernel::create_object<substitution_ref<TT_DATA, TP_DIM_SIZE, TP_SUBST_TYPE, TP_L_LEADING, TP_GRID_DIM,
+                                                   TP_NUM_FRAMES, TP_DIAG_INV> >();
 
         connect(L_in[0], k.in[0]);
         dimensions(k.in[0]) = {TP_NUM_FRAMES * TP_DIM_SIZE * TP_DIM_SIZE};

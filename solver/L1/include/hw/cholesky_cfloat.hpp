@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
  * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,12 +87,11 @@ template <int DIM, class InputType, class OutputType>
 void cholesky_cfloat_core(InputType A[DIM][DIM]) {
 outer_column_loop:
     for (int j = 0; j < DIM; j++) {
-
         // Calculate the diagonal value for this column
         InputType ajj = A[j][j];
         InputType ljj = {0.0, 0.0};
-        float invDiag=1;
-        for(int i=0; i<j; i++) {
+        float invDiag = 1;
+        for (int i = 0; i < j; i++) {
 #pragma HLS UNROLL
             A[i][j].real(0.0);
             A[i][j].imag(0.0);
@@ -103,7 +102,7 @@ outer_column_loop:
 
     // Calculate the off diagonal values for this column
     off_diag_loop:
-        for (int i = j+ 1; i < DIM; i++) {
+        for (int i = j + 1; i < DIM; i++) {
 #pragma HLS PIPELINE II = 1
             InputType aij = A[i][j];
             OutputType lij = aij * invDiag;
@@ -111,7 +110,7 @@ outer_column_loop:
         }
 
     update_rest_outer_loop:
-        for (int k = j+ 1; k < DIM; k++) {
+        for (int k = j + 1; k < DIM; k++) {
 #pragma HLS LOOP_TRIPCOUNT min = 1 max = 128
             InputType akj = A[k][j];
         update_rest_zeros_loop:
@@ -130,7 +129,8 @@ outer_column_loop:
 /**
 * @brief cholesky_cfloat
 *
-* @tparam LowerTriangularL   Defines the output matrix is lower triangular or upper tirangular, When false generates upper triangle
+* @tparam LowerTriangularL   Defines the output matrix is lower triangular or upper tirangular, When false generates
+* upper triangle
 * @tparam DIM                Defines the input Hermitian/symmetric positive matrix dimensions
 * @tparam InputType          Input data type
 * @tparam OutputType         Output data type
@@ -146,25 +146,24 @@ void cholesky_cfloat(hls::stream<InputType>& matrixAStrm, hls::stream<OutputType
 outer_read_A:
     for (int r = 0; r < DIM; r++) {
 #pragma HLS PIPELINE
-        for(int c=0; c<DIM; c++){
+        for (int c = 0; c < DIM; c++) {
             matrixAStrm.read(matA[r][c]);
         }
     }
 
     cholesky_cfloat_core<DIM, InputType, OutputType>(matA);
 
-    if (LowerTriangularL == true){ 
-outer_write_lowerL:
-        for(int c=0; c<DIM; c++){
+    if (LowerTriangularL == true) {
+    outer_write_lowerL:
+        for (int c = 0; c < DIM; c++) {
             for (int r = 0; r < DIM; r++) {
 #pragma HLS PIPELINE
                 matrixLStrm.write(matA[r][c]);
             }
         }
-    }
-    else{
-outer_write_upperL:
-        for(int c=0; c<DIM; c++){
+    } else {
+    outer_write_upperL:
+        for (int c = 0; c < DIM; c++) {
             for (int r = 0; r < DIM; r++) {
 #pragma HLS PIPELINE
                 matrixLStrm.write(std::conj(matA[c][r]));

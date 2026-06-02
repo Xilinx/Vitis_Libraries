@@ -53,12 +53,16 @@ Furthermore, if there are no input ports included in the design, then the throug
 Cholesky
 ============
 
+QoR for this library element can be estimated using the ``config_qor_helper`` tool, located at ``L2/meta/scripts/qor_helper/``. Refer to the README in ``L2/meta/scripts/qor_helper/`` for usage instructions.
+
 The following table provides results for Cholesky across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_CHOLESKY`.
 
 :download:`cholesky_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.2/solver/docs/src/csv_data_files/L2/cholesky_benchmark.csv>`
 
 QRD
 ============
+
+QoR for this library element can be estimated using the ``config_qor_helper`` tool, located at ``L2/meta/scripts/qor_helper/``. Refer to the README in ``L2/meta/scripts/qor_helper/`` for usage instructions.
 
 The following table provides results for QRD across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_QRD`.
 
@@ -67,13 +71,18 @@ The following table provides results for QRD across a wide range of supported pa
 QRD_HH
 ============
 
-The following table provides results for QRD across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_QRD_HH`.
+The following table provides results for QRD_HH across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_QRD_HH`.
 
-:download:`qrd_hh_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.2/solver/docs/src/csv_data_files/L2/qrd_hh_benchmark.csv>`
+.. note:: Benchmark data for QRD_HH is not currently available.
 
 SVD
 ============
 
-The following table provides results for QRD across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_SVD`.
+The following table provides results for SVD across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_SVD`.
 
-:download:`svd_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.2/solver/docs/src/csv_data_files/L2/svd_benchmark.csv>`
+.. note:: Benchmark data for SVD is not currently available.
+
+Substitution
+============
+
+QoR for this library element can be estimated using the ``config_qor_helper`` tool, located at ``L2/meta/scripts/qor_helper/``. Refer to the README in ``L2/meta/scripts/qor_helper/`` for usage instructions.

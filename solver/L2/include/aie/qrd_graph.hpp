@@ -40,7 +40,6 @@ namespace solver {
 namespace aie {
 namespace qrd {
 
-
 /**
 * @cond NOCOMMENTS
 */
@@ -55,45 +54,60 @@ template <unsigned int cascPos,
 class create_casc_kernel_recur_qrd {
    public:
     static void create(kernel (&qrdKernels)[TP_CASC_LEN]) {
-    constexpr unsigned int kKernelColSize = qrd_load_split <TT_DATA,TP_DIM_COLS,TP_DIM_ROWS,TP_CASC_LEN,TP_NUM_FRAMES>(ColsDist, cascPos);
+        constexpr unsigned int kKernelColSize =
+            qrd_load_split<TT_DATA, TP_DIM_COLS, TP_DIM_ROWS, TP_CASC_LEN, TP_NUM_FRAMES>(ColsDist, cascPos);
 
-    //defensive check for buffer size
-    static_assert(fnCheckBufferSize<TT_DATA, TP_DIM_ROWS, kKernelColSize, TP_NUM_FRAMES>(),
-                  " Assertion Failed : \n"
-                  "             ERROR: Design does not fit in maximum buffer size, consider reducing one of the dimension parameters. TP_DIM_COLS/TP_DIM_ROWS/TP_NUM_FRAMES. \n");
-    
-    static_assert(fnCheckKernelLoadMin(kKernelColSize),
-                  " Assertion Failed : \n"
-                  "             ERROR: CASC_LEN is too big to fit in. Either decrease CASC_LEN or increase TP_DIM_COLS. \n");
+        // defensive check for buffer size
+        static_assert(fnCheckBufferSize<TT_DATA, TP_DIM_ROWS, kKernelColSize, TP_NUM_FRAMES>(),
+                      " Assertion Failed : \n"
+                      "             ERROR: Design does not fit in maximum buffer size, consider reducing one of the "
+                      "dimension parameters. TP_DIM_COLS/TP_DIM_ROWS/TP_NUM_FRAMES. \n");
 
+        static_assert(
+            fnCheckKernelLoadMin(kKernelColSize),
+            " Assertion Failed : \n"
+            "             ERROR: CASC_LEN is too big to fit in. Either decrease CASC_LEN or increase TP_DIM_COLS. \n");
 
+        if
+            constexpr(cascPos == 0 && TP_CASC_LEN == 1) {
+                qrdKernels[cascPos] =
+                    kernel::create_object<qrd<TT_DATA, TP_DIM_ROWS, kKernelColSize, TP_NUM_FRAMES, TP_CASC_LEN,
+                                              ColsDist, TP_DIM_COLS, CASC_IN_FALSE, CASC_OUT_FALSE> >();
+            }
+        else if
+            constexpr(cascPos == 0 && TP_CASC_LEN > 1) {
+                qrdKernels[cascPos] =
+                    kernel::create_object<qrd<TT_DATA, TP_DIM_ROWS, kKernelColSize, TP_NUM_FRAMES, TP_CASC_LEN,
+                                              ColsDist, TP_DIM_COLS, CASC_IN_FALSE, CASC_OUT_TRUE> >();
+                create_casc_kernel_recur_qrd<cascPos + 1, ColsDist + kKernelColSize, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS,
+                                             TP_NUM_FRAMES, TP_CASC_LEN>::create(qrdKernels);
+            }
+        else if
+            constexpr(cascPos == TP_CASC_LEN - 1 && TP_CASC_LEN > 1) {
+                qrdKernels[cascPos] =
+                    kernel::create_object<qrd<TT_DATA, TP_DIM_ROWS, kKernelColSize, TP_NUM_FRAMES, TP_CASC_LEN,
+                                              ColsDist, TP_DIM_COLS, CASC_IN_TRUE, CASC_OUT_FALSE> >();
 
-    if constexpr (cascPos == 0 && TP_CASC_LEN == 1) {
-        qrdKernels[cascPos] = kernel::create_object<qrd<TT_DATA, TP_DIM_ROWS, kKernelColSize, TP_NUM_FRAMES, TP_CASC_LEN, ColsDist, TP_DIM_COLS, CASC_IN_FALSE, CASC_OUT_FALSE>>();
-
-    } else if constexpr (cascPos == 0 && TP_CASC_LEN > 1) {
-        qrdKernels[cascPos] = kernel::create_object<qrd<TT_DATA, TP_DIM_ROWS, kKernelColSize, TP_NUM_FRAMES, TP_CASC_LEN, ColsDist, TP_DIM_COLS, CASC_IN_FALSE, CASC_OUT_TRUE>>();
-        create_casc_kernel_recur_qrd <cascPos + 1, ColsDist + kKernelColSize, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN>::create(qrdKernels);
-        
-    } else if constexpr (cascPos == TP_CASC_LEN - 1 && TP_CASC_LEN > 1) {
-        qrdKernels[cascPos] = kernel::create_object<qrd<TT_DATA, TP_DIM_ROWS, kKernelColSize, TP_NUM_FRAMES, TP_CASC_LEN, ColsDist, TP_DIM_COLS, CASC_IN_TRUE, CASC_OUT_FALSE>>();
-
-        static_assert(fnCheckDistributedLoad<TP_DIM_COLS>(ColsDist+kKernelColSize),
-                  " Assertion Failed : \n"
-                  "             ERROR: Design does not fit in cascaded stages, consider increasing TP_CASC_LEN or reducing TP_DIM_COLS. \n");
-
-    } else if constexpr (cascPos != 0 && cascPos != TP_CASC_LEN - 1 && TP_CASC_LEN > 1) {
-        qrdKernels[cascPos] = kernel::create_object<qrd<TT_DATA, TP_DIM_ROWS, kKernelColSize, TP_NUM_FRAMES, TP_CASC_LEN, ColsDist, TP_DIM_COLS, CASC_IN_TRUE, CASC_OUT_TRUE>>();
-        create_casc_kernel_recur_qrd <cascPos + 1, ColsDist + kKernelColSize, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN>::create(qrdKernels);
+                static_assert(fnCheckDistributedLoad<TP_DIM_COLS>(ColsDist + kKernelColSize),
+                              " Assertion Failed : \n"
+                              "             ERROR: Design does not fit in cascaded stages, consider increasing "
+                              "TP_CASC_LEN or reducing TP_DIM_COLS. \n");
+            }
+        else if
+            constexpr(cascPos != 0 && cascPos != TP_CASC_LEN - 1 && TP_CASC_LEN > 1) {
+                qrdKernels[cascPos] =
+                    kernel::create_object<qrd<TT_DATA, TP_DIM_ROWS, kKernelColSize, TP_NUM_FRAMES, TP_CASC_LEN,
+                                              ColsDist, TP_DIM_COLS, CASC_IN_TRUE, CASC_OUT_TRUE> >();
+                create_casc_kernel_recur_qrd<cascPos + 1, ColsDist + kKernelColSize, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS,
+                                             TP_NUM_FRAMES, TP_CASC_LEN>::create(qrdKernels);
+            }
     }
-        }
-    };
+};
 
 /**
  * @endcond
  */
 
- 
 /**
  * @defgroup qrd_graph QRD function
  *
@@ -119,7 +133,6 @@ class create_casc_kernel_recur_qrd {
  *         higher matrix sizes.
  **/
 
-
 template <typename TT_DATA,
           unsigned int TP_DIM_ROWS,
           unsigned int TP_DIM_COLS,
@@ -140,32 +153,36 @@ class qrd_graph : public graph {
                   " Assertion Failed : \n"
                   "             ERROR: TT_DATA is not a supported data type. \n");
 
-
     static_assert(fnCheckChunkSize<TT_DATA, TP_DIM_COLS>(),
                   " Assertion Failed : \n"
-                  "             ERROR: TP_DIM_COLS x sizeof(TT_DATA) should be multiples of 32 bytes for AIE1 / 64 bytes for AIE-ML and AIE-MLv2. \n");
-                  
+                  "             ERROR: TP_DIM_COLS x sizeof(TT_DATA) should be multiples of 32 bytes for AIE1 / 64 "
+                  "bytes for AIE-ML and AIE-MLv2. \n");
+
     static_assert(fnCheckMinSize<TT_DATA, TP_DIM_COLS>(),
                   " Assertion Failed : \n"
-                  "             ERROR: TP_DIM_COLS should be minimum of 32 bytes / sizeof(TT_DATA) for AIE1 / 64 bytes / sizeof(TT_DATA) for AIE-ML and AIE-MLv2. \n");
-                  
-    //defensive checks for row size
+                  "             ERROR: TP_DIM_COLS should be minimum of 32 bytes / sizeof(TT_DATA) for AIE1 / 64 bytes "
+                  "/ sizeof(TT_DATA) for AIE-ML and AIE-MLv2. \n");
+
+    // defensive checks for row size
     static_assert(fnCheckChunkSize<TT_DATA, TP_DIM_ROWS>(),
                   " Assertion Failed : \n"
-                  "             ERROR: TP_DIM_ROWS x sizeof(TT_DATA) should be multiples of 32 bytes for AIE1 / 64 bytes for AIE-ML and AIE-MLv2.\n");
-                  
+                  "             ERROR: TP_DIM_ROWS x sizeof(TT_DATA) should be multiples of 32 bytes for AIE1 / 64 "
+                  "bytes for AIE-ML and AIE-MLv2.\n");
+
     static_assert(fnCheckMinSize<TT_DATA, TP_DIM_ROWS>(),
                   " Assertion Failed : \n"
-                  "             ERROR: TP_DIM_ROWS should be minimum of 32 bytes / sizeof(TT_DATA) for AIE1 / 64 bytes / sizeof(TT_DATA) for AIE-ML and AIE-MLv2. \n");
+                  "             ERROR: TP_DIM_ROWS should be minimum of 32 bytes / sizeof(TT_DATA) for AIE1 / 64 bytes "
+                  "/ sizeof(TT_DATA) for AIE-ML and AIE-MLv2. \n");
 
     // static_assert(fnCheckTiling<TT_DATA, TP_DIM_ROWS, TP_DIM_A_LEADING, TP_DIM_Q_LEADING, TP_DIM_R_LEADING>(),
     //               " Assertion Failed : \n"
-    //               "             ERROR: Row-major is not supported for cfloat data type or TP_DIM_ROWS>255 on AIE1 cases.\n");
+    //               "             ERROR: Row-major is not supported for cfloat data type or TP_DIM_ROWS>255 on AIE1
+    //               cases.\n");
 
     /**
     * @endcond
     */
-   
+
     /**
      * The input matrix tile(s).
      **/
@@ -195,23 +212,23 @@ class qrd_graph : public graph {
      * @brief This is the constructor function for the qrd graph.
      **/
     qrd_graph() {
-
-        //Calc to set Kernel buffer Sizes
-        std::pair<std::array<unsigned int, TP_CASC_LEN>, std::array<unsigned int, TP_CASC_LEN>> cols_result;
+        // Calc to set Kernel buffer Sizes
+        std::pair<std::array<unsigned int, TP_CASC_LEN>, std::array<unsigned int, TP_CASC_LEN> > cols_result;
         cols_result = get_qrd_loads_of_kernels<TT_DATA, TP_DIM_COLS, TP_DIM_ROWS, TP_CASC_LEN, TP_NUM_FRAMES>();
 
         std::array<unsigned int, TP_CASC_LEN> col_dim_kernel_arr = cols_result.first;
         std::array<unsigned int, TP_CASC_LEN> col_dim_dist_kernel_arr = cols_result.second;
-        
+
         // create kernels
-        create_casc_kernel_recur_qrd<0, 0, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN>::create(m_kernels);
-        
-        for (int i = 0; i < TP_CASC_LEN; i++) {        
+        create_casc_kernel_recur_qrd<0, 0, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN>::create(
+            m_kernels);
+
+        for (int i = 0; i < TP_CASC_LEN; i++) {
             unsigned int kKernelColSize = col_dim_kernel_arr[i];
             unsigned int kKernelWindowVsizeQ = (TP_NUM_FRAMES * TP_DIM_ROWS * kKernelColSize);
             unsigned int kKernelWindowVsizeR = (TP_NUM_FRAMES * TP_DIM_COLS * kKernelColSize);
             printf("Col Dim for Kernel-%d = %d \n", i, kKernelColSize);
-            
+
             // Specify mapping constraints
             runtime<ratio>(m_kernels[i]) = 0.9; // Nominal figure. The real figure requires knowledge of the sample
                                                 // rate.
@@ -226,67 +243,52 @@ class qrd_graph : public graph {
             dimensions(m_kernels[i].out[0]) = {kKernelWindowVsizeQ};
             dimensions(m_kernels[i].out[1]) = {kKernelWindowVsizeR};
 
-            //apply single buffer constraints, QRD is a by-default single buffer implementation
+            // apply single buffer constraints, QRD is a by-default single buffer implementation
             single_buffer(m_kernels[i].in[0]);
             single_buffer(m_kernels[i].out[0]);
-            single_buffer(m_kernels[i].out[1]);  
+            single_buffer(m_kernels[i].out[1]);
 
-
-            if (TP_DIM_A_LEADING == 1){
-            write_access(m_kernels[i].in[0]) =
-                adf::tiling(
-                {       .buffer_dimension = {TP_DIM_ROWS, kKernelColSize, TP_NUM_FRAMES},
-                        .tiling_dimension = {1, kKernelColSize, 1},
-                        .offset = {0, 0, 0},
-                        .tile_traversal = {
-                        {.dimension = 0, .stride = 1, .wrap = TP_DIM_ROWS},
-                        {.dimension = 1, .stride = kKernelColSize, .wrap = 1},
-                        {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}
-                }
-                });
-
+            if (TP_DIM_A_LEADING == 1) {
+                write_access(m_kernels[i].in[0]) =
+                    adf::tiling({.buffer_dimension = {TP_DIM_ROWS, kKernelColSize, TP_NUM_FRAMES},
+                                 .tiling_dimension = {1, kKernelColSize, 1},
+                                 .offset = {0, 0, 0},
+                                 .tile_traversal = {{.dimension = 0, .stride = 1, .wrap = TP_DIM_ROWS},
+                                                    {.dimension = 1, .stride = kKernelColSize, .wrap = 1},
+                                                    {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}}});
             };
 
-            if (TP_DIM_Q_LEADING == 1){
+            if (TP_DIM_Q_LEADING == 1) {
                 read_access(m_kernels[i].out[0]) =
-                    adf::tiling(
-                    {       .buffer_dimension = {TP_DIM_ROWS, kKernelColSize, TP_NUM_FRAMES},
-                            .tiling_dimension = {1, kKernelColSize, 1},
-                            .offset = {0, 0, 0},
-                            .tile_traversal = {
-                            {.dimension = 0, .stride = 1, .wrap = TP_DIM_ROWS},
-                            {.dimension = 1, .stride = kKernelColSize, .wrap = 1},
-                            {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}
-                    }
-                    });
+                    adf::tiling({.buffer_dimension = {TP_DIM_ROWS, kKernelColSize, TP_NUM_FRAMES},
+                                 .tiling_dimension = {1, kKernelColSize, 1},
+                                 .offset = {0, 0, 0},
+                                 .tile_traversal = {{.dimension = 0, .stride = 1, .wrap = TP_DIM_ROWS},
+                                                    {.dimension = 1, .stride = kKernelColSize, .wrap = 1},
+                                                    {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}}});
             }
 
-            if (TP_DIM_R_LEADING == 1){
-            read_access(m_kernels[i].out[1]) =
-                adf::tiling(
-                    {       .buffer_dimension = {TP_DIM_COLS, kKernelColSize, TP_NUM_FRAMES},
-                            .tiling_dimension = {1, kKernelColSize, 1},
-                            .offset = {0, 0, 0},
-                            .tile_traversal = {
-                            {.dimension = 0, .stride = 1, .wrap = TP_DIM_COLS},
-                            {.dimension = 1, .stride = kKernelColSize, .wrap = 1},
-                            {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}
-                    }
-                });
+            if (TP_DIM_R_LEADING == 1) {
+                read_access(m_kernels[i].out[1]) =
+                    adf::tiling({.buffer_dimension = {TP_DIM_COLS, kKernelColSize, TP_NUM_FRAMES},
+                                 .tiling_dimension = {1, kKernelColSize, 1},
+                                 .offset = {0, 0, 0},
+                                 .tile_traversal = {{.dimension = 0, .stride = 1, .wrap = TP_DIM_COLS},
+                                                    {.dimension = 1, .stride = kKernelColSize, .wrap = 1},
+                                                    {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}}});
             }
 
-
-            if (i > 0 ) {
-                connect<cascade>(m_kernels[i-1].out[2], m_kernels[i].in[1]); 
+            if (i > 0) {
+                connect<cascade>(m_kernels[i - 1].out[2], m_kernels[i].in[1]);
             }
         }
 
     }; // constructor
-}; //graph class
+};     // graph class
 
 } // namespace qrd
-}// namespace aie
-}// namespace solver
+} // namespace aie
+} // namespace solver
 } // namespace xf
 
 #endif //_SOLVERLIB_QRD_GRAPH_HPP_

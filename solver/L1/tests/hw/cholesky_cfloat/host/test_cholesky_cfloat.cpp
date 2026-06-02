@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
  * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,14 +46,13 @@ void writeComplextoFile(MATRIX_OUT_T* X, std::string filename0, unsigned M, unsi
     for (int j = 0; j < N; j++) {
         for (int i = 0; i < M; i++) {
             MATRIX_OUT_T x;
-            x = *(X+j*M + i);
+            x = *(X + j * M + i);
             myfile0 << x.real() << " ";
             myfile0 << x.imag() << " " << std::endl;
         }
     }
     myfile0.close();
 }
-
 
 int main(int argc, char* argv[]) {
     unsigned allowed_ulp_mismatch = 0;
@@ -124,16 +123,16 @@ int main(int argc, char* argv[]) {
 
     writeComplextoFile((MATRIX_OUT_T*)L, file_Lout, DIM, DIM);
 
-    bool mismatch_check = are_matrices_equal<DIM, DIM, MATRIX_OUT_T>(
-        (MATRIX_OUT_T*)L, (MATRIX_OUT_T*)L_expected, allowed_ulp_mismatch, NULL);
+    bool mismatch_check = are_matrices_equal<DIM, DIM, MATRIX_OUT_T>((MATRIX_OUT_T*)L, (MATRIX_OUT_T*)L_expected,
+                                                                     allowed_ulp_mismatch, NULL);
 
     unsigned int pass_fail = 0; // Pass=0 Fail =1
-    if(mismatch_check == false) pass_fail +=1; 
+    if (mismatch_check == false) pass_fail += 1;
 
     std::cout << "pass_fail=" << pass_fail << ", mismatch_check=" << mismatch_check << std::endl;
 
-    //debug = 2;
-    if (( pass_fail > 0 && debug > 0) || debug > 1 ) {
+    // debug = 2;
+    if ((pass_fail > 0 && debug > 0) || debug > 1) {
         printf("  A=\n");
         xf::solver::print_matrix<DIM, DIM, L_TYPE, xf::solver::NoTranspose>(A, "   ", print_precision, 1);
         printf("  L_out=\n");
@@ -149,5 +148,4 @@ int main(int argc, char* argv[]) {
     std::cout << "" << std::endl;
 
     return (pass_fail);
-
-    }
+}

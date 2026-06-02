@@ -43,15 +43,13 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN>
 class qrd_ref {
    private:
-
    public:
-   
     // Constructor
     qrd_ref() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(qrd_ref::qrd_main); }
-   
+
     void qrd_main(input_buffer<TT_DATA>& inWindowA,
                   output_buffer<TT_DATA>& outWindowQ,
                   output_buffer<TT_DATA>& outWindowR);

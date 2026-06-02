@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
  * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,8 @@
 #include "kernel_gemv_cfloat.hpp"
 #include "gemv_cfloat.hpp"
 
-
-extern void kernel_gemv_cfloat_0(hls::stream<MATRIX_IN_T>& matrixAStrm, hls::stream<MATRIX_IN_T>& matrixBStrm, hls::stream<MATRIX_OUT_T>& matrixCStrm) {
+extern void kernel_gemv_cfloat_0(hls::stream<MATRIX_IN_T>& matrixAStrm,
+                                 hls::stream<MATRIX_IN_T>& matrixBStrm,
+                                 hls::stream<MATRIX_OUT_T>& matrixCStrm) {
     xf::solver::gemv<ROWA, COLA, BR, BC, MATRIX_IN_T, MATRIX_OUT_T>(matrixAStrm, matrixBStrm, matrixCStrm);
 }

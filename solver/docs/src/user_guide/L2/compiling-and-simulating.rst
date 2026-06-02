@@ -132,7 +132,6 @@ Compilation Arguments
 ^^^^^^^^^^^^^^^^^^^^^
 
 The test harness supplied with the library allows each library unit to be compiled and simulated in isolation. When the library unit is instantiated within your design, the compilation result might differ from the result obtained with the test harness. This can occur because your system may require compiler arguments not present in the test harness.
-This can occur because your system may require compiler arguments not present in the test harness.
 
 Search the Makefile provided for UUT_TARGET_COMPILE_ARGS. For each library element, there can be compile arguments used to avoid errors or to improve performance, that is, specifying memories to be on separate banks to avoid wait states. These arguments will likely change with each release as the compile tool changes with each release.
 
@@ -332,7 +331,7 @@ For the QRD library element, use the following list of configurable parameters a
 
 .. note:: Given parameter values are subject to checks early in compilation to ensure support.
 
-.. _SOLVER_LEGALITY_CHECKING:
+.. _SOLVER_CONFIGURATION_PARAMETERS_QRD_HH:
 
 QRD Householder configuration parameters
 ----------------------------------------
@@ -377,7 +376,7 @@ For the QRD Householder library element, use the following list of configurable 
 
 .. note:: Given parameter values are subject to checks early in compilation to ensure support.
 
-.. _SOLVER_LEGALITY_CHECKING:
+.. _SOLVER_CONFIGURATION_PARAMETERS_SVD:
 
 
 SVD configuration parameters
@@ -404,6 +403,49 @@ For the SVD library element, use the following list of configurable parameters a
     +------------------------+----------------+----------------+------------------------------------------------+
     | CASC_LEN               |    unsigned    |    1           | The number of cascaded kernels to              |
     |                        |                |                | be used to perform the function.               |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | NITER                  |    unsigned    |    4           | See :ref:`SOLVER_COMMON_CONFIG_PARAMETERS`     |
+    |                        |                |                |                                                |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`SOLVER_COMMON_CONFIG_PARAMETERS`     |
+    |                        |                |                |                                                |
+    +------------------------+----------------+----------------+------------------------------------------------+
+
+.. note:: Given parameter values are subject to checks early in compilation to ensure support.
+
+.. _SOLVER_CONFIGURATION_PARAMETERS_SUBSTITUTION:
+
+Substitution configuration parameters
+--------------------------------------
+
+For the Substitution library element, use the following list of configurable parameters and default values.
+
+.. table:: Substitution configuration parameters
+
+    +------------------------+----------------+----------------+------------------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                                  |
+    +========================+================+================+================================================+
+    | DATA_TYPE              |    typename    |    float       | Data Type.                                     |
+    |                        |                |                |                                                |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | DIM_SIZE               |    unsigned    |                | Dimension of the input L triangular matrix.    |
+    |                        |                |                |                                                |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | SUBS_TYPE              |    unsigned    |                | Direction of substitution. 0=forwards          |
+    |                        |                |                | 1=backwards                                    |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | L_LEADING              |    unsigned    |    0           | Majority of input matrix. 0 = Row Major        |
+    |                        |                |                | 1 = Column major                               |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | GRID_DIM               |    unsigned    |    1           | The dimension size of the grid                 |
+    |                        |                |                | of kernels used to break up a matrix.          |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | NUM_FRAMES             |    unsigned    |    1           | Number of frames processed for each iteration  |
+    |                        |                |                | of this function.                              |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | DIAG_INV               |    unsigned    |    0           | 0 = normal processing                          |
+    |                        |                |                | 1 = the input has been provided with inverted  |
+    |                        |                |                | (1/x) diagonal elements for faster execution   |
     +------------------------+----------------+----------------+------------------------------------------------+
     | NITER                  |    unsigned    |    4           | See :ref:`SOLVER_COMMON_CONFIG_PARAMETERS`     |
     |                        |                |                |                                                |

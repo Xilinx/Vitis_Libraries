@@ -23,26 +23,25 @@ namespace qrd_hh_example {
 #define DATA_TYPE_QRD_HH float
 #define DIM_ROWS_QRD_HH 16
 #define DIM_COLS_QRD_HH 16
-#define NUM_FRAMES_QRD_HH 2 
+#define NUM_FRAMES_QRD_HH 2
 #define CASC_LEN_QRD_HH 1
 #define DIM_A_LEADING_QRD_HH 0
-#define DIM_Q_LEADING_QRD_HH 0 
+#define DIM_Q_LEADING_QRD_HH 0
 #define DIM_R_LEADING_QRD_HH 0
 
-
-class test_qrd_hh: public adf::graph {
+class test_qrd_hh : public adf::graph {
    public:
     port<input> inA;
     port<output> outQ;
     port<output> outR;
-    xf::solver::aie::qrd_hh::qrd_hh_graph<DATA_TYPE_QRD_HH, 
-                                    DIM_ROWS_QRD_HH, 
-                                    DIM_COLS_QRD_HH, 
-                                    NUM_FRAMES_QRD_HH, 
-                                    CASC_LEN_QRD_HH,
-                                    DIM_A_LEADING_QRD_HH,
-                                    DIM_Q_LEADING_QRD_HH,
-                                    DIM_R_LEADING_QRD_HH>
+    xf::solver::aie::qrd_hh::qrd_hh_graph<DATA_TYPE_QRD_HH,
+                                          DIM_ROWS_QRD_HH,
+                                          DIM_COLS_QRD_HH,
+                                          NUM_FRAMES_QRD_HH,
+                                          CASC_LEN_QRD_HH,
+                                          DIM_A_LEADING_QRD_HH,
+                                          DIM_Q_LEADING_QRD_HH,
+                                          DIM_R_LEADING_QRD_HH>
         qrdHHGraph;
 
     test_qrd_hh() {

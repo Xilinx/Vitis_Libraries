@@ -58,9 +58,9 @@ INLINE_DECL constexpr unsigned int fnVecSampleNumIO() {
 template <typename TT>
 INLINE_DECL constexpr unsigned int fnVecStoreAlign() {
 #if __AIE_ARCH__ >= 22
-    return __MAX_READ_WRITE__ / 8 / sizeof(TT);  // 512-bit alignment on AIE22
+    return __MAX_READ_WRITE__ / 8 / sizeof(TT); // 512-bit alignment on AIE22
 #else
-    return 256 / 8 / sizeof(TT);                 // 256-bit on AIE1/AIE-ML
+    return 256 / 8 / sizeof(TT); // 256-bit on AIE1/AIE-ML
 #endif
 }
 

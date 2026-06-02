@@ -27,7 +27,7 @@ The graph entry point is the following:
 
 .. code-block::
 
-    xf::solver::cholesky::cholesky_graph
+    xf::solver::aie::cholesky::cholesky_graph
 
 Device Support
 ==============
@@ -107,7 +107,7 @@ The number of AIE tiles used in the design scales according to ``TP_GRID_DIM`` *
         ------------------------→ 
            TP_CASC_LEN (Z-axis)  
 
-.. node:: The diagram above demonstrates a TP_GRID_DIM of 3 and a TP_CASC_LEN of 4. There is a one-to-one correspondance between an in-kernel to the cascade chain and an out-kernel. The other in and out kernels are occluded in this diagram.
+.. note:: The diagram above demonstrates a TP_GRID_DIM of 3 and a TP_CASC_LEN of 4. There is a one-to-one correspondence between an in-kernel to the cascade chain and an out-kernel. The other in and out kernels are occluded in this diagram.
 
 
 Padding

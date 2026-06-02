@@ -71,21 +71,15 @@ class test_graph : public graph {
         printf("DIM_R_LEADING     = %d \n", DIM_R_LEADING);
 
         // Hadamard sub-graph
-        solverlib::qrd_hh::UUT_GRAPH<DATA_TYPE, 
-                                DIM_ROWS, 
-                                DIM_COLS, 
-                                NUM_FRAMES, 
-                                CASC_LEN,
-                                DIM_A_LEADING,
-                                DIM_Q_LEADING,
-                                DIM_R_LEADING>
+        solverlib::qrd_hh::UUT_GRAPH<DATA_TYPE, DIM_ROWS, DIM_COLS, NUM_FRAMES, CASC_LEN, DIM_A_LEADING, DIM_Q_LEADING,
+                                     DIM_R_LEADING>
             qrd_hh_graph;
 
 // Make connections
 #ifdef USING_UUT
         for (int i = 0; i < CASC_LEN; i++) {
-            unsigned int kRrowsDistributed = i*(DIM_ROWS/CASC_LEN);
-            bool routEn = (kRrowsDistributed < DIM_COLS); 
+            unsigned int kRrowsDistributed = i * (DIM_ROWS / CASC_LEN);
+            bool routEn = (kRrowsDistributed < DIM_COLS);
 
             std::string filenameInA = QUOTE(INPUT_FILE_A);
             filenameInA.insert(filenameInA.length() - 4, ("_" + std::to_string(i)));
@@ -97,13 +91,12 @@ class test_graph : public graph {
             outQ[i] = output_plio::create("PLIO_outQ_" + std::to_string(i), adf::plio_64_bits, filenameOutQ);
             connect<>(qrd_hh_graph.outQ[i], outQ[i].in[0]);
 
-            if (routEn){
+            if (routEn) {
                 std::string filenameOutR = QUOTE(OUTPUT_FILE2);
                 filenameOutR.insert(filenameOutR.length() - 4, ("_" + std::to_string(i)));
                 outR[i] = output_plio::create("PLIO_outR_" + std::to_string(i), adf::plio_64_bits, filenameOutR);
                 connect<>(qrd_hh_graph.outR[i], outR[i].in[0]);
             }
-
         }
 #else
         std::string filenameInA = QUOTE(INPUT_FILE_A);

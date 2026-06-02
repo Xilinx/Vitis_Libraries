@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
  * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,16 +126,18 @@ block_compute_row_loop:
 /**
  * @brief gemv entry point function.
  *
- *  @tparam RowsA             Defines the matrixA rows number 
- *  @tparam ColsA             Defines the matrixA columns number 
- *  @tparam BR                Defines the rows number of block matrix in the block matrix vector multiplication algorithm
- *  @tparam BC                Defines the columns number of block matrix in the block matrix vector multiplication algorithm
+ *  @tparam RowsA             Defines the matrixA rows number
+ *  @tparam ColsA             Defines the matrixA columns number
+ *  @tparam BR                Defines the rows number of block matrix in the block matrix vector multiplication
+ * algorithm
+ *  @tparam BC                Defines the columns number of block matrix in the block matrix vector multiplication
+ * algorithm
  *  @tparam InputType         Input data type
  *  @tparam OutputType        Output data type
  *
  *  @param AStrm        Stream of input matrix
- *  @param xStrm        Stream of input vector 
- *  @param yStrm        Stream of output vector y=Ax 
+ *  @param xStrm        Stream of input vector
+ *  @param yStrm        Stream of output vector y=Ax
  */
 template <int RowsA, int ColsA, int BR, int BC, typename InputType, typename OutputType>
 void gemv(hls::stream<InputType>& AStrm, hls::stream<InputType>& xStrm, hls::stream<OutputType>& yStrm) {

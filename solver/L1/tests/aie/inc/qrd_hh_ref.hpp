@@ -43,11 +43,10 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN>
 class qrd_hh_ref {
    private:
-
    public:
-   static constexpr TT_DATA m_kZERO = constVals<TT_DATA>().c0;
-   static constexpr TT_DATA m_kONE = constVals<TT_DATA>().c1;
-   static constexpr TT_DATA m_kTWO = constVals<TT_DATA>().c2;
+    static constexpr TT_DATA m_kZERO = constVals<TT_DATA>().c0;
+    static constexpr TT_DATA m_kONE = constVals<TT_DATA>().c1;
+    static constexpr TT_DATA m_kTWO = constVals<TT_DATA>().c2;
 
     // Constructor
     qrd_hh_ref() {}
@@ -56,8 +55,8 @@ class qrd_hh_ref {
     static void registerKernelClass() { REGISTER_FUNCTION(qrd_hh_ref::qrd_hh_main); }
 
     void qrd_hh_main(input_buffer<TT_DATA>& inWindowA,
-                  output_buffer<TT_DATA>& outWindowQ,
-                  output_buffer<TT_DATA>& outWindowR);
+                     output_buffer<TT_DATA>& outWindowQ,
+                     output_buffer<TT_DATA>& outWindowR);
 };
 }
 }

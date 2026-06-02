@@ -55,8 +55,7 @@ struct SvdScratchSize {
     // Pad each scratch slice to IO vector width so vector stream writes
     // (writeincr of v8float / v4cfloat) are aligned and in-bounds.
     static constexpr unsigned int kVecSizeIO = fnVecSampleNumIO<TT_DATA>();
-    static constexpr unsigned int kPaddedPairsPerSet =
-        ((kPairsPerSet + kVecSizeIO - 1) / kVecSizeIO) * kVecSizeIO;
+    static constexpr unsigned int kPaddedPairsPerSet = ((kPairsPerSet + kVecSizeIO - 1) / kVecSizeIO) * kVecSizeIO;
     // Layout: dotII[PP] + dotJJ[PP] + dotIJ[PP] + c_arr[PP] + s_arr[PP] + phase_real[PP] + phase_imag[PP]
     static constexpr unsigned int kSize = 7 * kPaddedPairsPerSet;
 };
@@ -83,7 +82,11 @@ struct SetOrganizer {
                 for (int k = 1; k < pairsPerSet; k++) {
                     uint8_t a = static_cast<uint8_t>(1 + ((k + round) % (N - 1)));
                     uint8_t b = static_cast<uint8_t>(1 + ((N - 1 - k + round) % (N - 1)));
-                    if (a > b) { uint8_t tmp = a; a = b; b = tmp; }
+                    if (a > b) {
+                        uint8_t tmp = a;
+                        a = b;
+                        b = tmp;
+                    }
                     data[globalIdx][0] = a;
                     data[globalIdx][1] = b;
                     globalIdx++;
@@ -107,8 +110,12 @@ struct ParallelPairSets {
 // =====================================================================
 // Single kernel (TP_CASC_LEN=1)
 // =====================================================================
-template <typename TT_DATA, unsigned int TP_DIM_ROWS, unsigned int TP_DIM_COLS,
-          unsigned int TP_PASSES, unsigned int TP_CASC_LEN, unsigned int TP_KERNEL_POSITION>
+template <typename TT_DATA,
+          unsigned int TP_DIM_ROWS,
+          unsigned int TP_DIM_COLS,
+          unsigned int TP_PASSES,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_KERNEL_POSITION>
 class SVDecomposition {
    public:
     static constexpr unsigned int kScratchSize = SvdScratchSize<TT_DATA, TP_DIM_COLS>::kSize;
@@ -130,8 +137,12 @@ class SVDecomposition {
 // =====================================================================
 // First kernel (receives feedback stream from last, sends to next)
 // =====================================================================
-template <typename TT_DATA, unsigned int TP_DIM_ROWS, unsigned int TP_DIM_COLS,
-          unsigned int TP_PASSES, unsigned int TP_CASC_LEN, unsigned int TP_KERNEL_POSITION>
+template <typename TT_DATA,
+          unsigned int TP_DIM_ROWS,
+          unsigned int TP_DIM_COLS,
+          unsigned int TP_PASSES,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_KERNEL_POSITION>
 class SVDecomposition_First {
    public:
     static constexpr unsigned int kScratchSize = SvdScratchSize<TT_DATA, TP_DIM_COLS>::kSize;
@@ -155,8 +166,12 @@ class SVDecomposition_First {
 // =====================================================================
 // Middle kernel (receives stream, sends stream)
 // =====================================================================
-template <typename TT_DATA, unsigned int TP_DIM_ROWS, unsigned int TP_DIM_COLS,
-          unsigned int TP_PASSES, unsigned int TP_CASC_LEN, unsigned int TP_KERNEL_POSITION>
+template <typename TT_DATA,
+          unsigned int TP_DIM_ROWS,
+          unsigned int TP_DIM_COLS,
+          unsigned int TP_PASSES,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_KERNEL_POSITION>
 class SVDecomposition_Middle {
    public:
     static constexpr unsigned int kScratchSize = SvdScratchSize<TT_DATA, TP_DIM_COLS>::kSize;
@@ -180,8 +195,12 @@ class SVDecomposition_Middle {
 // =====================================================================
 // Last kernel (receives stream, sends back to first)
 // =====================================================================
-template <typename TT_DATA, unsigned int TP_DIM_ROWS, unsigned int TP_DIM_COLS,
-          unsigned int TP_PASSES, unsigned int TP_CASC_LEN, unsigned int TP_KERNEL_POSITION>
+template <typename TT_DATA,
+          unsigned int TP_DIM_ROWS,
+          unsigned int TP_DIM_COLS,
+          unsigned int TP_PASSES,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_KERNEL_POSITION>
 class SVDecomposition_Last {
    public:
     static constexpr unsigned int kScratchSize = SvdScratchSize<TT_DATA, TP_DIM_COLS>::kSize;

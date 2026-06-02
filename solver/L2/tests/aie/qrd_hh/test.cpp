@@ -24,7 +24,7 @@ This file holds the body of the test harness for the Hadamard graph
 xf::solver::aie::testcase::test_graph qrdhhTestHarness;
 
 int main(void) {
-    qrdhhTestHarness.init();    
+    qrdhhTestHarness.init();
     qrdhhTestHarness.run(NITER);
     qrdhhTestHarness.end();
     return 0;

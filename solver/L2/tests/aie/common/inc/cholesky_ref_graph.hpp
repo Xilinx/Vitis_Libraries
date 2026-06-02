@@ -32,13 +32,9 @@ namespace aie {
 namespace cholesky {
 using namespace adf;
 
-template <typename TT_DATA,
-          unsigned int TP_DIM,
-          unsigned int TP_NUM_FRAMES,
-          unsigned int TP_DIAG_INV = 0>
+template <typename TT_DATA, unsigned int TP_DIM, unsigned int TP_NUM_FRAMES, unsigned int TP_DIAG_INV = 0>
 class cholesky_ref_graph : public graph {
    public:
-
     port<input> in;
     port<output> out;
 
@@ -53,11 +49,11 @@ class cholesky_ref_graph : public graph {
         printf("TP_NUM_FRAMES           = %d\n", TP_NUM_FRAMES);
         printf("TP_DIAG_INV             = %d\n", TP_DIAG_INV);
 
-        m_kernel = kernel::create_object<cholesky_ref<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_DIAG_INV>>();
+        m_kernel = kernel::create_object<cholesky_ref<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_DIAG_INV> >();
 
         // Specify mapping constraints
         runtime<ratio>(m_kernel) = 0.9; // Nominal figure. The real figure requires knowledge of the sample
-                                            // rate.
+                                        // rate.
         // Source files
         source(m_kernel) = "cholesky_ref.cpp";
 

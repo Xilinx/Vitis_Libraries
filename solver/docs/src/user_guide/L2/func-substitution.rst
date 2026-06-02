@@ -7,15 +7,15 @@
 .. _SOLVER_SUBSTITUTION:
 
 ============
-SUBSTITUTUON
+SUBSTITUTION
 ============
 
 This function performs forwards or backwards substitution to solve :math:`x` in the equation  
 
 .. math::
-    Lx = y  (forwards)   or  {L^}*x = y  (backwards)
+    Lx = y  (forwards)   or  {L}^{*}x = y  (backwards)
 
-where L is a lower triangular matrix with real diagonal elements, y is a vector and :math:`{L^}*` is an upper triangular matrix, the conjugate transpose of L.
+where L is a lower triangular matrix with real diagonal elements, y is a vector and :math:`{L}^{*}` is an upper triangular matrix, the conjugate transpose of L.
 
 The Substitution IP is designed for standalone operation, or in conjunction with the Cholesky IP to solve a set of linear equations.  
 
@@ -29,7 +29,7 @@ The graph entry point is the following:
 
 .. code-block::
 
-    xf::solver::substitution::substitution_graph
+    xf::solver::aie::substitution::substitution_graph
 
 Device Support
 ==============
@@ -97,7 +97,7 @@ For backwards substitution, the Substitution library element still requires L, n
 to be used more easily in conjunction with the Cholesky library element to solve a set of linear equations because the Cholesky library element outputs L.
 
 Solving a System of Linear Equations
----------------------------------
+-------------------------------------
 
 The Substitution library element may be used in conjunction with the Cholesky library element to solve a system of linear equations 
 :math:`Ax=y` where A is an mxm matrix suitable for input to the Cholesky library element and x and y are vectors of length m.
@@ -109,8 +109,8 @@ if we substitute :math:`b` for :math:`{L}^* x`
 we get
 :math:`Lb = y`
 We can use forward substitution to solve for b.
-Then, we use backward substitution to solve for :math:`x` in 
-:math:`{L}^* x = y`
+Then, we use backward substitution to solve for :math:`x` in
+:math:`{L}^{*} x = b`
 
 Padding
 -------
@@ -136,9 +136,9 @@ The following is an example of a 6x6 matrix with :ref:`SOLVER_vecSampleNum` of 4
 
 Constraints
 -----------
-``TP_DIM_SIZE`` must be a multiple of :ref:`SOLVER_vecSampleNum``.
-``TP_DIM_SIZE`` must be a multiple of ``TP_GRID_DIM``.
-``TP_DIM_SIZE``/``TP_GRID_DIM`` must be a multiple of :ref:`SOLVER_vecSampleNum``.
+``TP_DIM`` must be a multiple of :ref:`SOLVER_vecSampleNum`.
+``TP_DIM`` must be a multiple of ``TP_GRID_DIM``.
+``TP_DIM``/``TP_GRID_DIM`` must be a multiple of :ref:`SOLVER_vecSampleNum`.
 
 
 Code Example

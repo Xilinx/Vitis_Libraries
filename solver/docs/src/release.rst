@@ -23,19 +23,30 @@ Release Note
 ------
 
 * **Cholesky** - 2025.2 EA library element now in Production.
+* **QRD** - 2025.2 EA library element now in Production
+* **QRD_HH** - New EA library element
 * **SVD** - New EA library element.
+* **Substitution** - New EA library element
 
 +---------------------------------------+-----------------------------------------------------------------------------+
 | **Function**                          | **Namespace and class name**                                                |
 +=======================================+=============================================================================+
-| Cholesky                              |  xf::solver::aie::cholesky                                                  |
+| Cholesky                              |  xf::solver::aie::cholesky_graph                                            |
++---------------------------------------+-----------------------------------------------------------------------------+
+| QRD                                   |  xf::solver::aie::qrd_graph                                                 |
++---------------------------------------+-----------------------------------------------------------------------------+
+| QRD_HH                                |  xf::solver::aie::qrd_hh_graph                                              |
 +---------------------------------------+-----------------------------------------------------------------------------+
 | SVD                                   |  xf::solver::aie::svd::svd_graph                                            |
 +---------------------------------------+-----------------------------------------------------------------------------+
+| Substitution                          |  xf::solver::aie::substitution::substitution_graph                          |
++---------------------------------------+-----------------------------------------------------------------------------+
 
-This element adds an implementation of the Cholesky Decomposition.
-Supports AIE, AIE-ML and AIE-MLv2 devices.
-The 2026.1 offering adds the CASC_LEN parameter and brings performance improvements.
+The Cholesky Decomposition is now at Production standard. 2026.1 adds CASC_LEN and DIAG_INV parameters for performance improvements.
+The QRD Decomposition is also now at Production standard.
+The QRD Householder Decomposition is introduced at Early Access standard.
+The SVD Decomposition is introduced at Early Access standard.
+The Substitution function is introduced at Early Acccess standard.
 
 
 2025.2

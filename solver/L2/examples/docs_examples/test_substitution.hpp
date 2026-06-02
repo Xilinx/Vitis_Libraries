@@ -26,13 +26,14 @@ namespace substitution_example {
 #define L_LEADING_SUBSTITUTION 0
 #define GRID_DIM_SUBSTITUTION 1
 
-class test_substitution: public adf::graph {
+class test_substitution : public adf::graph {
    public:
     port<input> L_in;
     port<input> y_in;
     port<output> x_out;
-    xf::solver::aie::substitution::substitution_graph<DATA_TYPE_SUBSTITUTION, DIM_SIZE_SUBSTITUTION, L_LEADING_SUBSTITUTION, GRID_DIM_SUBSTITUTION>
-        substitutionGraph;
+    xf::solver::aie::substitution::
+        substitution_graph<DATA_TYPE_SUBSTITUTION, DIM_SIZE_SUBSTITUTION, L_LEADING_SUBSTITUTION, GRID_DIM_SUBSTITUTION>
+            substitutionGraph;
 
     test_substitution() {
         connect<>(L_in, substitutionGraph.L_in[0]);

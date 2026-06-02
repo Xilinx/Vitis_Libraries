@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
  * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-
 #ifndef _DUT_TYPE_HPP_
 #define _DUT_TYPE_HPP_
 
@@ -28,13 +27,11 @@ typedef std::complex<float> L_TYPE;
 #define TOSTR(x) STRINGIZE(x)
 #define DATA_PATH TOSTR(_DATA_PATH)
 
-//const unsigned DIM = MATRIX_DIM;
+// const unsigned DIM = MATRIX_DIM;
 const bool LOWER_TRIANGULAR = MATRIX_LOWER_TRIANGULAR;
 const unsigned DIM = 256;
 const unsigned M = DIM;
 const unsigned N = DIM;
-//const bool LOWER_TRIANGULAR = 1;
-
-
+// const bool LOWER_TRIANGULAR = 1;
 
 #endif

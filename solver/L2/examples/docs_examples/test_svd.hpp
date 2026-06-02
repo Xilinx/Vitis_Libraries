@@ -32,12 +32,7 @@ class test_svd : public adf::graph {
     port<output> outU;
     port<output> outS;
     port<output> outV;
-    xf::solver::aie::svd::svd_graph<DATA_TYPE_SVD,
-                                    DIM_ROWS_SVD,
-                                    DIM_COLS_SVD,
-                                    PASSES_SVD,
-                                    CASC_LEN_SVD>
-        svdGraph;
+    xf::solver::aie::svd::svd_graph<DATA_TYPE_SVD, DIM_ROWS_SVD, DIM_COLS_SVD, PASSES_SVD, CASC_LEN_SVD> svdGraph;
 
     test_svd() {
         connect<>(in, svdGraph.in[0]);

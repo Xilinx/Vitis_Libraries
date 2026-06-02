@@ -59,7 +59,6 @@ struct vectByte<cint32, int16> {
     unsigned int kCaptureDataB = 1;
     unsigned int kCaptureDataOut = 2;
 };
-
 }
 }
 }

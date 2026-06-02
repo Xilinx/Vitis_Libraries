@@ -52,66 +52,68 @@ template <typename TT_DATA,
           unsigned int kDiagEnd>
 NOINLINE_DECL void
 cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::cholesky_main(
-        input_buffer<TT_DATA>& __restrict inWindow, 
-        output_buffer<TT_DATA>& __restrict outWindow) {
+    input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_DATA>& __restrict outWindow) {
     using dataVect_t = ::aie::vector<TT_DATA, kVecSampleNum>;
 
-    dataVect_t* __restrict  inPtr   = (dataVect_t*)inWindow.data();
-    dataVect_t* __restrict  outPtr  = (dataVect_t*)outWindow.data();
-    
-    for (int frame = 0; frame < TP_NUM_FRAMES; frame++) 
-    chess_prepare_for_pipelining chess_loop_count(TP_NUM_FRAMES) {
-        TT_DATA*    __restrict diagInPtr = (TT_DATA*)inPtr;
-        TT_DATA*    __restrict diagOutPtr = (TT_DATA*)outPtr;
-        dataVect_t* __restrict diagColPtr = outPtr + kStageStartKernel * kNumVecsPerDim;
+    dataVect_t* __restrict inPtr = (dataVect_t*)inWindow.data();
+    dataVect_t* __restrict outPtr = (dataVect_t*)outWindow.data();
 
+    for (int frame = 0; frame < TP_NUM_FRAMES; frame++) chess_prepare_for_pipelining chess_loop_count(TP_NUM_FRAMES) {
+            TT_DATA* __restrict diagInPtr = (TT_DATA*)inPtr;
+            TT_DATA* __restrict diagOutPtr = (TT_DATA*)outPtr;
+            dataVect_t* __restrict diagColPtr = outPtr + kStageStartKernel * kNumVecsPerDim;
 
-        int preIdx = 0;
-        for (int diag = 0; diag < kStageStartKernel; diag++) chess_prepare_for_pipelining chess_loop_count(kStageStartKernel) {
-            for (int i = 0; i < kNumVecsPerDim; i++) chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
-                outPtr[preIdx] = inPtr[preIdx];
-                preIdx++;
-            }
+            int preIdx = 0;
+            for (int diag = 0; diag < kStageStartKernel; diag++)
+                chess_prepare_for_pipelining chess_loop_count(kStageStartKernel) {
+                    for (int i = 0; i < kNumVecsPerDim; i++)
+                        chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
+                            outPtr[preIdx] = inPtr[preIdx];
+                            preIdx++;
+                        }
+                }
+
+            // * SHRINKING ROWS RUNTIME
+            for (int diag = kStageStartKernel; diag < kStageEndKernel; diag++)
+                chess_prepare_for_pipelining chess_loop_count(kStageEndKernel - kStageStartKernel) {
+                    int diagChunk = diag / kVecSampleNum;
+                    int diagLocal = diag % kVecSampleNum;
+
+                    // * Multiplying current row with reciprocal square root of its diagonal...
+                    float diagInvSqrt = ::aie::invsqrt(getReal<TT_DATA>(diagInPtr[diag * kKernelDim + diag]));
+                    for (int j = diagChunk; j < kNumVecsPerDim; j++) {
+                        dataVect_t diagColVect = ::aie::mul(diagInvSqrt, inPtr[IDX(diag, j)]);
+                        outPtr[IDX(diag, j)] = diagColVect;
+                    }
+                    chess_memory_fence();
+
+                    // Performing eliminations on columns...
+                    for (int chunk = diagChunk; chunk < kNumVecsPerDim; chunk++) {
+                        colBlockEliminations<TT_DATA, kNumVecsPerDim>(diagColPtr, diagColPtr, inPtr, chunk, chunk);
+                    }
+                    chess_memory_fence();
+                    if
+                        constexpr(TP_DIAG_INV) {
+                            diagOutPtr[diag * kKernelDim + diag] =
+                                getScalarAsType<TT_DATA>(diagInvSqrt); // Overwrite diagonal value.
+                            chess_memory_fence();
+                        }
+                    diagColPtr += kNumVecsPerDim;
+                }
+
+            int postIdx = kStageEndKernel * kNumVecsPerDim;
+            for (int diag = kStageEndKernel; diag < kKernelDim; diag++)
+                chess_prepare_for_pipelining chess_loop_count(kKernelDim - kStageEndKernel) {
+                    for (int i = 0; i < kNumVecsPerDim; i++)
+                        chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
+                            outPtr[postIdx] = inPtr[postIdx];
+                            postIdx++;
+                        }
+                }
+
+            inPtr += kNumVecsPerDim * kKernelDim;
+            outPtr += kNumVecsPerDim * kKernelDim;
         }
-
-        // * SHRINKING ROWS RUNTIME
-        for (int diag = kStageStartKernel; diag < kStageEndKernel; diag++)
-        chess_prepare_for_pipelining chess_loop_count( kStageEndKernel - kStageStartKernel ) {
-
-            int diagChunk = diag / kVecSampleNum;
-            int diagLocal = diag % kVecSampleNum;
-
-            // * Multiplying current row with reciprocal square root of its diagonal...
-            float diagInvSqrt = ::aie::invsqrt(getReal<TT_DATA>( diagInPtr[diag*kKernelDim + diag] ));
-            for (int j = diagChunk; j < kNumVecsPerDim; j++) {
-                dataVect_t diagColVect = ::aie::mul(diagInvSqrt, inPtr[IDX(diag, j)]);
-                outPtr[IDX(diag, j)] = diagColVect;
-            }
-            chess_memory_fence();
-            
-            // Performing eliminations on columns...
-            for (int chunk = diagChunk; chunk < kNumVecsPerDim; chunk++) {
-                colBlockEliminations<TT_DATA, kNumVecsPerDim>(diagColPtr, diagColPtr, inPtr, chunk, chunk);
-            }
-            chess_memory_fence();
-            if constexpr(TP_DIAG_INV) {
-                diagOutPtr[diag*kKernelDim + diag] = getScalarAsType<TT_DATA>(diagInvSqrt); // Overwrite diagonal value.
-                chess_memory_fence();
-            }
-            diagColPtr += kNumVecsPerDim;
-        }
-
-        int postIdx = kStageEndKernel * kNumVecsPerDim;
-        for (int diag = kStageEndKernel; diag < kKernelDim; diag++) chess_prepare_for_pipelining chess_loop_count(kKernelDim - kStageEndKernel) {
-            for (int i = 0; i < kNumVecsPerDim; i++) chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
-                outPtr[postIdx] = inPtr[postIdx];
-                postIdx++;
-            }
-        }
-
-        inPtr += kNumVecsPerDim * kKernelDim;
-        outPtr += kNumVecsPerDim * kKernelDim;
-    }
 };
 
 // ************** DIAGONAL KERNEL FUNCTION **************
@@ -126,102 +128,109 @@ template <typename TT_DATA,
           unsigned int kDiagStart,
           unsigned int kDiagEnd>
 NOINLINE_DECL void
-cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::cholesky_diagKernel(
-        input_buffer<TT_DATA>& __restrict inWindow, 
-        output_buffer<TT_DATA>& __restrict outWindow,
-        T_communicationIF ports) {
+cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::
+    cholesky_diagKernel(input_buffer<TT_DATA>& __restrict inWindow,
+                        output_buffer<TT_DATA>& __restrict outWindow,
+                        T_communicationIF ports) {
     using dataVect_t = ::aie::vector<TT_DATA, kVecSampleNum>;
 
-    dataVect_t* __restrict  inPtr           = (dataVect_t*)inWindow.data();
-    dataVect_t* __restrict  outPtr          = (dataVect_t*)outWindow.data();
-    dataVect_t* __restrict  diagColBuffPtr  = (dataVect_t*)diagColBuffer;
+    dataVect_t* __restrict inPtr = (dataVect_t*)inWindow.data();
+    dataVect_t* __restrict outPtr = (dataVect_t*)outWindow.data();
+    dataVect_t* __restrict diagColBuffPtr = (dataVect_t*)diagColBuffer;
 
-    for (int frame = 0; frame < TP_NUM_FRAMES; frame++) 
-    chess_prepare_for_pipelining chess_loop_count( TP_NUM_FRAMES ) {
-        TT_DATA*    __restrict diagInPtr = (TT_DATA*)inPtr;
-        TT_DATA*    __restrict diagOutPtr = (TT_DATA*)outPtr;
-        dataVect_t* __restrict diagColHomePtr = outPtr + kStageStartKernel * kNumVecsPerDim;
+    for (int frame = 0; frame < TP_NUM_FRAMES; frame++) chess_prepare_for_pipelining chess_loop_count(TP_NUM_FRAMES) {
+            TT_DATA* __restrict diagInPtr = (TT_DATA*)inPtr;
+            TT_DATA* __restrict diagOutPtr = (TT_DATA*)outPtr;
+            dataVect_t* __restrict diagColHomePtr = outPtr + kStageStartKernel * kNumVecsPerDim;
 
-
-        int preIdx = 0;
-        for (int diag = 0; diag < kStageStartKernel; diag++) chess_prepare_for_pipelining chess_loop_count(kStageStartKernel) {
-            for (int i = 0; i < kNumVecsPerDim; i++) chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
-                outPtr[preIdx] = inPtr[preIdx];
-                preIdx++;
-            }
-        }
-
-        // * diag has NOT yet reached our kernel
-        for (int diag = kStageStartPrior; diag < kStageEndPrior; diag++)
-        chess_prepare_for_pipelining chess_loop_count( kStageEndPrior - kStageStartPrior ) {
-            
-            for (int i = 0; i < kNumVecsPerDim; i++)
-            chess_prepare_for_pipelining chess_loop_count( kNumVecsPerDim ) {
-
-                dataVect_t diagColVect = readincr_v<kVecSampleNum>(ports.inLeft);
-                diagColBuffPtr[i] = diagColVect;
-
-                if constexpr(TP_Y + 1 < TP_GRID_DIM) {
-                    writeincr(ports.outDown, diagColVect);  // For the below kernel, this is the diagRowVect.
+            int preIdx = 0;
+            for (int diag = 0; diag < kStageStartKernel; diag++)
+                chess_prepare_for_pipelining chess_loop_count(kStageStartKernel) {
+                    for (int i = 0; i < kNumVecsPerDim; i++)
+                        chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
+                            outPtr[preIdx] = inPtr[preIdx];
+                            preIdx++;
+                        }
                 }
-            }
-            chess_memory_fence();
 
-            for (int chunk = 0; chunk < kNumVecsPerDim; chunk++)
-            chess_prepare_for_pipelining chess_loop_count( kNumVecsPerDim ) {
-                colBlockEliminations<TT_DATA, kNumVecsPerDim>(diagColBuffPtr, diagColBuffPtr, inPtr, chunk, chunk);
-            }
-        }
+            // * diag has NOT yet reached our kernel
+            for (int diag = kStageStartPrior; diag < kStageEndPrior; diag++)
+                chess_prepare_for_pipelining chess_loop_count(kStageEndPrior - kStageStartPrior) {
+                    for (int i = 0; i < kNumVecsPerDim; i++)
+                        chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
+                            dataVect_t diagColVect = readincr_v<kVecSampleNum>(ports.inLeft);
+                            diagColBuffPtr[i] = diagColVect;
 
-        // * diag HAS reached our kernel
-        for (int diag = kStageStartKernel; diag < kStageEndKernel; diag++) 
-        chess_prepare_for_pipelining chess_loop_count( kStageEndKernel - kStageStartKernel ) {
-            chess_memory_fence();
+                            if
+                                constexpr(TP_Y + 1 < TP_GRID_DIM) {
+                                    writeincr(ports.outDown,
+                                              diagColVect); // For the below kernel, this is the diagRowVect.
+                                }
+                        }
+                    chess_memory_fence();
 
-            int diagChunk = diag / kVecSampleNum;
-            int diagLocal = diag % kVecSampleNum;
-
-            float diagInvSqrt = ::aie::invsqrt(getReal<TT_DATA>( diagInPtr[diag*kKernelDim + diag] ));
-            if constexpr(TP_Y + 1 < TP_GRID_DIM) {  // if there are kernels below us...
-                TT_DATA diagInvSqrtCompatible = getScalarAsType<TT_DATA>(diagInvSqrt);
-                writeScalarToPort<TT_DATA>(ports.outDown, diagInvSqrtCompatible);
-            }
-
-            for (int j = diagChunk; j < kNumVecsPerDim; j++) {
-                dataVect_t diagColVect = ::aie::mul(diagInvSqrt, inPtr[IDX(diag, j)]);
-                outPtr[IDX(diag, j)] = diagColVect;
-
-                if constexpr(TP_Y + 1 < TP_GRID_DIM) {  // if there are kernels below us...
-                    writeincr(ports.outDown, diagColVect);
+                    for (int chunk = 0; chunk < kNumVecsPerDim; chunk++)
+                        chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
+                            colBlockEliminations<TT_DATA, kNumVecsPerDim>(diagColBuffPtr, diagColBuffPtr, inPtr, chunk,
+                                                                          chunk);
+                        }
                 }
-            }
-            chess_memory_fence();
 
-            // Performing eliminations on columns...
-            for (int chunk = diagChunk; chunk < kNumVecsPerDim; chunk++) {
-                colBlockEliminations<TT_DATA, kNumVecsPerDim>(diagColHomePtr, diagColHomePtr, inPtr, chunk, chunk);
-            }
-            chess_memory_fence();
-            if constexpr(TP_DIAG_INV) { 
-                diagOutPtr[diag*kKernelDim + diag] = getScalarAsType<TT_DATA>(diagInvSqrt); // Overwrite diagonal value.
-                chess_memory_fence();
-            }
-            diagColHomePtr += kNumVecsPerDim;
+            // * diag HAS reached our kernel
+            for (int diag = kStageStartKernel; diag < kStageEndKernel; diag++)
+                chess_prepare_for_pipelining chess_loop_count(kStageEndKernel - kStageStartKernel) {
+                    chess_memory_fence();
+
+                    int diagChunk = diag / kVecSampleNum;
+                    int diagLocal = diag % kVecSampleNum;
+
+                    float diagInvSqrt = ::aie::invsqrt(getReal<TT_DATA>(diagInPtr[diag * kKernelDim + diag]));
+                    if
+                        constexpr(TP_Y + 1 < TP_GRID_DIM) { // if there are kernels below us...
+                            TT_DATA diagInvSqrtCompatible = getScalarAsType<TT_DATA>(diagInvSqrt);
+                            writeScalarToPort<TT_DATA>(ports.outDown, diagInvSqrtCompatible);
+                        }
+
+                    for (int j = diagChunk; j < kNumVecsPerDim; j++) {
+                        dataVect_t diagColVect = ::aie::mul(diagInvSqrt, inPtr[IDX(diag, j)]);
+                        outPtr[IDX(diag, j)] = diagColVect;
+
+                        if
+                            constexpr(TP_Y + 1 < TP_GRID_DIM) { // if there are kernels below us...
+                                writeincr(ports.outDown, diagColVect);
+                            }
+                    }
+                    chess_memory_fence();
+
+                    // Performing eliminations on columns...
+                    for (int chunk = diagChunk; chunk < kNumVecsPerDim; chunk++) {
+                        colBlockEliminations<TT_DATA, kNumVecsPerDim>(diagColHomePtr, diagColHomePtr, inPtr, chunk,
+                                                                      chunk);
+                    }
+                    chess_memory_fence();
+                    if
+                        constexpr(TP_DIAG_INV) {
+                            diagOutPtr[diag * kKernelDim + diag] =
+                                getScalarAsType<TT_DATA>(diagInvSqrt); // Overwrite diagonal value.
+                            chess_memory_fence();
+                        }
+                    diagColHomePtr += kNumVecsPerDim;
+                }
+
+            int postIdx = kStageEndKernel * kNumVecsPerDim;
+            for (int diag = kStageEndKernel; diag < kKernelDim; diag++)
+                chess_prepare_for_pipelining chess_loop_count(kKernelDim - kStageEndKernel) {
+                    for (int i = 0; i < kNumVecsPerDim; i++)
+                        chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
+                            outPtr[postIdx] = inPtr[postIdx];
+                            postIdx++;
+                        }
+                }
+
+            inPtr += kNumVecsPerDim * kKernelDim;
+            outPtr += kNumVecsPerDim * kKernelDim;
         }
-
-        int postIdx = kStageEndKernel * kNumVecsPerDim;
-        for (int diag = kStageEndKernel; diag < kKernelDim; diag++) chess_prepare_for_pipelining chess_loop_count(kKernelDim - kStageEndKernel) {
-            for (int i = 0; i < kNumVecsPerDim; i++) chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
-                outPtr[postIdx] = inPtr[postIdx];
-                postIdx++;
-            }
-        }
-
-        inPtr += kNumVecsPerDim * kKernelDim;
-        outPtr += kNumVecsPerDim * kKernelDim;
-    }
 };
-
 
 // ************** LOWER KERNEL FUNCTION **************
 
@@ -235,95 +244,93 @@ template <typename TT_DATA,
           unsigned int kDiagStart,
           unsigned int kDiagEnd>
 NOINLINE_DECL void
-cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::cholesky_lowerKernel(
-        input_buffer<TT_DATA>& inWindow, 
-        output_buffer<TT_DATA>& outWindow,
-        T_communicationIF ports) {
+cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::
+    cholesky_lowerKernel(input_buffer<TT_DATA>& inWindow, output_buffer<TT_DATA>& outWindow, T_communicationIF ports) {
     using dataVect_t = ::aie::vector<TT_DATA, kVecSampleNum>;
 
-    dataVect_t* __restrict  inPtr           = (dataVect_t*)inWindow.data();
-    dataVect_t* __restrict  outPtr          = (dataVect_t*)outWindow.data();
-    dataVect_t* __restrict  diagColBuffPtr  = (dataVect_t*)diagColBuffer;
-    dataVect_t* __restrict  diagRowBuffPtr  = (dataVect_t*)diagRowBuffer;
+    dataVect_t* __restrict inPtr = (dataVect_t*)inWindow.data();
+    dataVect_t* __restrict outPtr = (dataVect_t*)outWindow.data();
+    dataVect_t* __restrict diagColBuffPtr = (dataVect_t*)diagColBuffer;
+    dataVect_t* __restrict diagRowBuffPtr = (dataVect_t*)diagRowBuffer;
 
-    for (int frame = 0; frame < TP_NUM_FRAMES; frame++) 
-    chess_prepare_for_pipelining chess_loop_count(TP_NUM_FRAMES) {
+    for (int frame = 0; frame < TP_NUM_FRAMES; frame++) chess_prepare_for_pipelining chess_loop_count(TP_NUM_FRAMES) {
+            dataVect_t* __restrict diagColHomePtr = outPtr + kStageStartKernel * kNumVecsPerDim;
 
-        dataVect_t* __restrict diagColHomePtr = outPtr + kStageStartKernel * kNumVecsPerDim;
+            int preIdx = 0;
+            for (int diag = 0; diag < kStageStartKernel; diag++)
+                chess_prepare_for_pipelining chess_loop_count(kStageStartKernel) {
+                    for (int i = 0; i < kNumVecsPerDim; i++)
+                        chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
+                            outPtr[preIdx] = inPtr[preIdx];
+                            preIdx++;
+                        }
+                }
 
+            // * diag has NOT yet reached our kernel
+            for (int diag = kStageStartPrior; diag < kStageEndPrior; diag++)
+                chess_prepare_for_pipelining chess_loop_count(kStageEndPrior - kStageStartPrior) {
+                    for (int i = 0; i < kNumVecsPerDim; i++)
+                        chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
+                            dataVect_t diagColVect = readincr_v<kVecSampleNum>(ports.inLeft);
+                            diagColBuffPtr[i] = diagColVect;
+                            writeincr(ports.outRight, diagColVect);
+                        }
 
-        int preIdx = 0;
-        for (int diag = 0; diag < kStageStartKernel; diag++) chess_prepare_for_pipelining chess_loop_count(kStageStartKernel) {
-            for (int i = 0; i < kNumVecsPerDim; i++) chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
-                outPtr[preIdx] = inPtr[preIdx];
-                preIdx++;
-            }
+                    for (int i = 0; i < kNumVecsPerDim; i++)
+                        chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
+                            dataVect_t diagRowVect = readincr_v<kVecSampleNum>(ports.inUp);
+                            diagRowBuffPtr[i] = diagRowVect;
+                        }
+                    chess_memory_fence();
+                    matrixBlockEliminations<TT_DATA, kNumVecsPerDim>(diagColBuffPtr, diagRowBuffPtr, inPtr);
+                }
+
+            // * diag HAS reached our kernel
+            for (int diag = kStageStartKernel; diag < kStageEndKernel; diag++)
+                chess_prepare_for_pipelining chess_loop_count(kStageEndKernel - kStageStartKernel) {
+                    chess_memory_fence();
+
+                    int diagChunk = diag / kVecSampleNum;
+                    int diagLocal = diag % kVecSampleNum;
+
+                    TT_DATA diagInvSqrtCompatible = readScalarFromPort<TT_DATA>(ports.inUp);
+                    float diagInvSqrt = getReal<TT_DATA>(diagInvSqrtCompatible);
+
+                    for (int i = diagChunk; i < kNumVecsPerDim; i++) {
+                        diagRowBuffPtr[i] = readincr_v<kVecSampleNum>(ports.inUp);
+                    }
+
+                    for (int i = 0; i < kNumVecsPerDim; i++)
+                        chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
+                            dataVect_t diagColVect = ::aie::mul(diagInvSqrt, inPtr[IDX(diag, i)]);
+                            outPtr[IDX(diag, i)] = diagColVect;
+                            writeincr(ports.outRight, diagColVect);
+                        }
+                    chess_memory_fence();
+
+                    int rowStart = 0;
+                    for (int colStart = diagChunk; colStart < kNumVecsPerDim; colStart++) {
+                        colBlockEliminations<TT_DATA, kNumVecsPerDim>(diagColHomePtr, diagRowBuffPtr, inPtr, colStart,
+                                                                      rowStart);
+                    }
+                    chess_memory_fence();
+                    diagColHomePtr += kNumVecsPerDim;
+                }
+
+            int postIdx = kStageEndKernel * kNumVecsPerDim;
+            for (int diag = kStageEndKernel; diag < kKernelDim; diag++)
+                chess_prepare_for_pipelining chess_loop_count(kKernelDim - kStageEndKernel) {
+                    for (int i = 0; i < kNumVecsPerDim; i++)
+                        chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
+                            outPtr[postIdx] = inPtr[postIdx];
+                            postIdx++;
+                        }
+                }
+
+            inPtr += kNumVecsPerDim * kKernelDim;
+            outPtr += kNumVecsPerDim * kKernelDim;
         }
-        
-        // * diag has NOT yet reached our kernel
-        for (int diag = kStageStartPrior; diag < kStageEndPrior; diag++)
-        chess_prepare_for_pipelining chess_loop_count( kStageEndPrior - kStageStartPrior ) {
-
-            for (int i = 0; i < kNumVecsPerDim; i++)
-            chess_prepare_for_pipelining chess_loop_count( kNumVecsPerDim ) {
-                dataVect_t diagColVect = readincr_v<kVecSampleNum>(ports.inLeft);
-                diagColBuffPtr[i] = diagColVect;
-                writeincr(ports.outRight, diagColVect);
-            }
-
-            for (int i = 0; i < kNumVecsPerDim; i++)
-            chess_prepare_for_pipelining chess_loop_count( kNumVecsPerDim ) {
-                dataVect_t diagRowVect = readincr_v<kVecSampleNum>(ports.inUp);
-                diagRowBuffPtr[i] = diagRowVect;
-            }
-            chess_memory_fence();
-            matrixBlockEliminations<TT_DATA, kNumVecsPerDim>(diagColBuffPtr, diagRowBuffPtr, inPtr);
-        }
-
-        // * diag HAS reached our kernel
-        for (int diag = kStageStartKernel; diag < kStageEndKernel; diag++) 
-        chess_prepare_for_pipelining chess_loop_count(kStageEndKernel - kStageStartKernel) {
-            chess_memory_fence();
-
-            int diagChunk = diag / kVecSampleNum;
-            int diagLocal = diag % kVecSampleNum;
-
-            TT_DATA diagInvSqrtCompatible = readScalarFromPort<TT_DATA>(ports.inUp);
-            float diagInvSqrt = getReal<TT_DATA>(diagInvSqrtCompatible);
-
-            for (int i = diagChunk; i < kNumVecsPerDim; i++) {
-                diagRowBuffPtr[i] = readincr_v<kVecSampleNum>(ports.inUp);
-            }
-
-            for (int i = 0; i < kNumVecsPerDim; i++)
-            chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
-                dataVect_t diagColVect = ::aie::mul(diagInvSqrt, inPtr[IDX(diag, i)]);
-                outPtr[IDX(diag, i)] = diagColVect;
-                writeincr(ports.outRight, diagColVect);
-            }
-            chess_memory_fence();
-
-            int rowStart = 0;
-            for (int colStart = diagChunk; colStart < kNumVecsPerDim; colStart++) {
-                colBlockEliminations<TT_DATA, kNumVecsPerDim>(diagColHomePtr, diagRowBuffPtr, inPtr, colStart, rowStart);
-            }
-            chess_memory_fence();
-            diagColHomePtr += kNumVecsPerDim;
-        }
-
-        int postIdx = kStageEndKernel * kNumVecsPerDim;
-        for (int diag = kStageEndKernel; diag < kKernelDim; diag++) chess_prepare_for_pipelining chess_loop_count(kKernelDim - kStageEndKernel) {
-            for (int i = 0; i < kNumVecsPerDim; i++) chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
-                outPtr[postIdx] = inPtr[postIdx];
-                postIdx++;
-            }
-        }
-
-        inPtr += kNumVecsPerDim * kKernelDim;
-        outPtr += kNumVecsPerDim * kKernelDim;
-    }
 };
-
 
 // ************** DIAGONAL ENTRY-POINT FUNCTIONS **************
 
@@ -337,11 +344,10 @@ template <typename TT_DATA,
           unsigned int kDiagStart,
           unsigned int kDiagEnd>
 NOINLINE_DECL void
-cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::cholesky_diagKernel_topLeft(
-        input_buffer<TT_DATA>& __restrict inWindow, 
-        output_buffer<TT_DATA>& __restrict outWindow,
-        outputPortDown_t* outDown) {
-
+cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::
+    cholesky_diagKernel_topLeft(input_buffer<TT_DATA>& __restrict inWindow,
+                                output_buffer<TT_DATA>& __restrict outWindow,
+                                outputPortDown_t* outDown) {
     T_communicationIF ports;
     ports.outDown = outDown;
     this->cholesky_diagKernel(inWindow, outWindow, ports);
@@ -357,12 +363,11 @@ template <typename TT_DATA,
           unsigned int kDiagStart,
           unsigned int kDiagEnd>
 NOINLINE_DECL void
-cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::cholesky_diagKernel_middle(
-        input_buffer<TT_DATA>& __restrict inWindow, 
-        output_buffer<TT_DATA>& __restrict outWindow,
-        inputPortLeft_t* inLeft,
-        outputPortDown_t* outDown) {
-
+cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::
+    cholesky_diagKernel_middle(input_buffer<TT_DATA>& __restrict inWindow,
+                               output_buffer<TT_DATA>& __restrict outWindow,
+                               inputPortLeft_t* inLeft,
+                               outputPortDown_t* outDown) {
     T_communicationIF ports;
     ports.inLeft = inLeft;
     ports.outDown = outDown;
@@ -379,16 +384,14 @@ template <typename TT_DATA,
           unsigned int kDiagStart,
           unsigned int kDiagEnd>
 NOINLINE_DECL void
-cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::cholesky_diagKernel_botRight(
-        input_buffer<TT_DATA>& __restrict inWindow, 
-        output_buffer<TT_DATA>& __restrict outWindow,
-        inputPortLeft_t* inLeft) {
-
+cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::
+    cholesky_diagKernel_botRight(input_buffer<TT_DATA>& __restrict inWindow,
+                                 output_buffer<TT_DATA>& __restrict outWindow,
+                                 inputPortLeft_t* inLeft) {
     T_communicationIF ports;
     ports.inLeft = inLeft;
     this->cholesky_diagKernel(inWindow, outWindow, ports);
 };
-
 
 // ************** LOWER ENTRY-POINT FUNCTIONS **************
 
@@ -402,12 +405,11 @@ template <typename TT_DATA,
           unsigned int kDiagStart,
           unsigned int kDiagEnd>
 NOINLINE_DECL void
-cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::cholesky_lowerKernel_leftEdge(
-        input_buffer<TT_DATA>& __restrict inWindow, 
-        output_buffer<TT_DATA>& __restrict outWindow,
-        inputPortUp_t* inUp,
-        outputPortRight_t* outRight) {
-
+cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::
+    cholesky_lowerKernel_leftEdge(input_buffer<TT_DATA>& __restrict inWindow,
+                                  output_buffer<TT_DATA>& __restrict outWindow,
+                                  inputPortUp_t* inUp,
+                                  outputPortRight_t* outRight) {
     T_communicationIF ports;
     ports.inUp = inUp;
     ports.outRight = outRight;
@@ -424,12 +426,11 @@ template <typename TT_DATA,
           unsigned int kDiagStart,
           unsigned int kDiagEnd>
 NOINLINE_DECL void
-cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::cholesky_lowerKernel_botLeft(
-        input_buffer<TT_DATA>& __restrict inWindow, 
-        output_buffer<TT_DATA>& __restrict outWindow,
-        inputPortUp_t* inUp,
-        outputPortRight_t* outRight) {
-
+cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::
+    cholesky_lowerKernel_botLeft(input_buffer<TT_DATA>& __restrict inWindow,
+                                 output_buffer<TT_DATA>& __restrict outWindow,
+                                 inputPortUp_t* inUp,
+                                 outputPortRight_t* outRight) {
     T_communicationIF ports;
     ports.inUp = inUp;
     ports.outRight = outRight;
@@ -446,13 +447,12 @@ template <typename TT_DATA,
           unsigned int kDiagStart,
           unsigned int kDiagEnd>
 NOINLINE_DECL void
-cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::cholesky_lowerKernel_botEdge(
-        input_buffer<TT_DATA>& __restrict inWindow, 
-        output_buffer<TT_DATA>& __restrict outWindow,
-        inputPortLeft_t* inLeft,
-        inputPortUp_t* inUp,
-        outputPortRight_t* outRight) {
-
+cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::
+    cholesky_lowerKernel_botEdge(input_buffer<TT_DATA>& __restrict inWindow,
+                                 output_buffer<TT_DATA>& __restrict outWindow,
+                                 inputPortLeft_t* inLeft,
+                                 inputPortUp_t* inUp,
+                                 outputPortRight_t* outRight) {
     T_communicationIF ports;
     ports.inLeft = inLeft;
     ports.inUp = inUp;
@@ -470,20 +470,18 @@ template <typename TT_DATA,
           unsigned int kDiagStart,
           unsigned int kDiagEnd>
 NOINLINE_DECL void
-cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::cholesky_lowerKernel_nonEdge(
-        input_buffer<TT_DATA>& __restrict inWindow, 
-        output_buffer<TT_DATA>& __restrict outWindow,
-        inputPortLeft_t* inLeft,
-        inputPortUp_t* inUp,
-        outputPortRight_t* outRight) {
-
+cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, kDiagStart, kDiagEnd>::
+    cholesky_lowerKernel_nonEdge(input_buffer<TT_DATA>& __restrict inWindow,
+                                 output_buffer<TT_DATA>& __restrict outWindow,
+                                 inputPortLeft_t* inLeft,
+                                 inputPortUp_t* inUp,
+                                 outputPortRight_t* outRight) {
     T_communicationIF ports;
     ports.inLeft = inLeft;
     ports.inUp = inUp;
     ports.outRight = outRight;
     this->cholesky_lowerKernel(inWindow, outWindow, ports);
 };
-
 }
 }
 }

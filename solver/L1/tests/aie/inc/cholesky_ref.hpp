@@ -40,35 +40,28 @@ template <typename TT_DATA,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_DIAG_INV>
 class cholesky_ref_base { // base class with all features except interface which is left to inherited
-    private:
-    public:
-        // Constructor
-        cholesky_ref_base() {}
+   private:
+   public:
+    // Constructor
+    cholesky_ref_base() {}
 };
 
 //-----------------------------------------------------------------------------------------------------
 // Cholesky - default/base 'specialization'
-template <typename TT_DATA,
-          unsigned int TP_DIM,
-          unsigned int TP_NUM_FRAMES,
-          unsigned int TP_DIAG_INV>
-class cholesky_ref : public cholesky_ref_base<TT_DATA,
-                                                TP_DIM,
-                                                TP_NUM_FRAMES,
-                                                TP_DIAG_INV> {
-    private:
-    public:
-        static constexpr unsigned int kVecSampleNum = __MAX_READ_WRITE__ / 8 / sizeof(TT_DATA);
-        static constexpr unsigned int kNumVecsPerDim = TP_DIM / kVecSampleNum;
+template <typename TT_DATA, unsigned int TP_DIM, unsigned int TP_NUM_FRAMES, unsigned int TP_DIAG_INV>
+class cholesky_ref : public cholesky_ref_base<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_DIAG_INV> {
+   private:
+   public:
+    static constexpr unsigned int kVecSampleNum = __MAX_READ_WRITE__ / 8 / sizeof(TT_DATA);
+    static constexpr unsigned int kNumVecsPerDim = TP_DIM / kVecSampleNum;
 
-        // Constructor
-        cholesky_ref() {}
+    // Constructor
+    cholesky_ref() {}
 
-        // Register Kernel Class
-        static void registerKernelClass() { REGISTER_FUNCTION(cholesky_ref::cholesky_main); }
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(cholesky_ref::cholesky_main); }
 
-        void cholesky_main(input_buffer<TT_DATA>& inWindow0,
-                            output_buffer<TT_DATA>& outWindow0);
+    void cholesky_main(input_buffer<TT_DATA>& inWindow0, output_buffer<TT_DATA>& outWindow0);
 };
 }
 }

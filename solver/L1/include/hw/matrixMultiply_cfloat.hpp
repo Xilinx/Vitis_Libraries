@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
  * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,7 +125,11 @@ template <int RowsA,
           int TILE_SIZE,
           typename InputType,
           typename OutputType>
-void matrixBlockMultiply_core(const InputType A[RowsA][ColsA], const InputType B[RowsB][ColsB], OutputType C[RowsC][ColsC], int startRow, int endRow) {
+void matrixBlockMultiply_core(const InputType A[RowsA][ColsA],
+                              const InputType B[RowsB][ColsB],
+                              OutputType C[RowsC][ColsC],
+                              int startRow,
+                              int endRow) {
 // AXI Interface config
 #pragma HLS INTERFACE m_axi port = A offset = slave bundle = gmem0 num_read_outstanding = 32 max_read_burst_length = 256
 #pragma HLS INTERFACE m_axi port = B offset = slave bundle = gmem1 num_read_outstanding = 32 max_read_burst_length = 256
@@ -181,9 +185,9 @@ blockA_row_loop:
 /**
  * @brief matrixBlockMultiply entry point function.
  *
- *  @tparam RowsA             Defines the matrixA rows number 
- *  @tparam ColsA             Defines the matrixA columns number 
- *  @tparam RowsB             Defines the matrixB rows number 
+ *  @tparam RowsA             Defines the matrixA rows number
+ *  @tparam ColsA             Defines the matrixA columns number
+ *  @tparam RowsB             Defines the matrixB rows number
  *  @tparam ColsB             Defines the matrixB column number
  *  @tparam RowsC             Defines the matrixC rows number
  *  @tparam ColsC             Defines the matrixC columns number
@@ -207,8 +211,8 @@ template <int RowsA,
           typename InputType,
           typename OutputType>
 void matrixBlockMultiply(hls::stream<InputType>& matrixAStrm,
-                    hls::stream<InputType>& matrixBStrm,
-                    hls::stream<OutputType>& matrixCStrm) {
+                         hls::stream<InputType>& matrixBStrm,
+                         hls::stream<OutputType>& matrixCStrm) {
     InputType A[BLK][ColsA];
     InputType B[RowsB][ColsB];
     OutputType C[BLK][ColsC];
@@ -226,7 +230,8 @@ void matrixBlockMultiply(hls::stream<InputType>& matrixAStrm,
                 matrixAStrm.read(A[r][c]);
             }
         }
-        matrixBlockMultiply_core<BLK, ColsA, RowsB, ColsB, BLK, ColsC, TILE_SIZE, InputType, OutputType>(A, B, C, n, n+BLK);
+        matrixBlockMultiply_core<BLK, ColsA, RowsB, ColsB, BLK, ColsC, TILE_SIZE, InputType, OutputType>(A, B, C, n,
+                                                                                                         n + BLK);
         for (int r = 0; r < BLK; r++) {
 #pragma HLS PIPELINE
             for (int c = 0; c < ColsC; c++) {

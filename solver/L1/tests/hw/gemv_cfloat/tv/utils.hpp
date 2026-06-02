@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
  * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -205,12 +205,12 @@ void writeComplextoFileByBlock(ComplexMatrix<T>& X, std::string filename0, unsig
         std::cout << "[ERROR]: file " << filename0 << "could not be opened !" << std::endl;
         exit(1);
     }
-    for (int ii = 0; ii < X.M; ii+=BR) {
-        for (int jj = 0; jj < X.N; jj+=BC) {
-            for(int i=0; i<BR; i++) {
-                for(int j=0; j<BC; j++) {
-                    myfile0 << X.elem(ii+i, jj+j).real() << " ";
-                    myfile0 << X.elem(ii+i, jj+j).imag() << " " << std::endl;
+    for (int ii = 0; ii < X.M; ii += BR) {
+        for (int jj = 0; jj < X.N; jj += BC) {
+            for (int i = 0; i < BR; i++) {
+                for (int j = 0; j < BC; j++) {
+                    myfile0 << X.elem(ii + i, jj + j).real() << " ";
+                    myfile0 << X.elem(ii + i, jj + j).imag() << " " << std::endl;
                 }
             }
         }

@@ -34,80 +34,74 @@ and therefore must be suitable for the aie compiler graph-level compilation.
 namespace xf {
 namespace solver {
 namespace aie {
-namespace qrd {             
+namespace qrd {
 
 #if __USES_NATIVE_SQRT_FUNC__
 #else
-    static constexpr int kHwVecSize = __MAX_READ_WRITE__ / 8 / sizeof(float);
+static constexpr int kHwVecSize = __MAX_READ_WRITE__ / 8 / sizeof(float);
 
-    static INLINE_DECL float hw_mul(float a, float b) {
-        ::aie::vector<float, kHwVecSize> va = ::aie::broadcast<float, kHwVecSize>(a);
-        return ::aie::mul(va, b).to_vector<float>()[0];
-    }
+static INLINE_DECL float hw_mul(float a, float b) {
+    ::aie::vector<float, kHwVecSize> va = ::aie::broadcast<float, kHwVecSize>(a);
+    return ::aie::mul(va, b).to_vector<float>()[0];
+}
 
-    static INLINE_DECL float hw_inv(float x) {
-        ::aie::vector<float, kHwVecSize> v = ::aie::broadcast<float, kHwVecSize>(x);
-        return ::aie::inv(v)[0];
-    }
+static INLINE_DECL float hw_inv(float x) {
+    ::aie::vector<float, kHwVecSize> v = ::aie::broadcast<float, kHwVecSize>(x);
+    return ::aie::inv(v)[0];
+}
 
-    static NOINLINE_DECL float hw_invsqrt(float x) {
-        ::aie::vector<float, kHwVecSize> vconst_0_5 = ::aie::broadcast<float, kHwVecSize>(0.5f);
-        ::aie::vector<float, kHwVecSize> vconst_1_5 = ::aie::broadcast<float, kHwVecSize>(1.5f);
-        ::aie::vector<float, kHwVecSize> vx = ::aie::broadcast<float, kHwVecSize>(x);
-        ::aie::vector<float, kHwVecSize> vy = ::aie::invsqrt(vx);   // ~12-bit hardware approximation
-        // NR step: y1 = y0*(1.5 - 0.5*x*y0^2) — full float precision
-        ::aie::vector<float, kHwVecSize> vysqr = ::aie::mul(vy, vy);
-        ::aie::vector<float, kHwVecSize> vhalf = ::aie::mul(vconst_0_5, vx);
-        ::aie::vector<float, kHwVecSize> t = ::aie::mul(vysqr, vhalf);
-        ::aie::vector<float, kHwVecSize> t_sub = ::aie::sub(vconst_1_5, t);
+static NOINLINE_DECL float hw_invsqrt(float x) {
+    ::aie::vector<float, kHwVecSize> vconst_0_5 = ::aie::broadcast<float, kHwVecSize>(0.5f);
+    ::aie::vector<float, kHwVecSize> vconst_1_5 = ::aie::broadcast<float, kHwVecSize>(1.5f);
+    ::aie::vector<float, kHwVecSize> vx = ::aie::broadcast<float, kHwVecSize>(x);
+    ::aie::vector<float, kHwVecSize> vy = ::aie::invsqrt(vx); // ~12-bit hardware approximation
+    // NR step: y1 = y0*(1.5 - 0.5*x*y0^2) — full float precision
+    ::aie::vector<float, kHwVecSize> vysqr = ::aie::mul(vy, vy);
+    ::aie::vector<float, kHwVecSize> vhalf = ::aie::mul(vconst_0_5, vx);
+    ::aie::vector<float, kHwVecSize> t = ::aie::mul(vysqr, vhalf);
+    ::aie::vector<float, kHwVecSize> t_sub = ::aie::sub(vconst_1_5, t);
 
-        return ::aie::mul(vy, t_sub).to_vector<float>()[0];
-    }
+    return ::aie::mul(vy, t_sub).to_vector<float>()[0];
+}
 
-    static INLINE_DECL float hw_sqrt(float x) {
-        uint32_t bits;
-        __builtin_memcpy(&bits, &x, sizeof(bits));
-        if ((bits & 0x7FFFFFFFu) == 0u) return 0.0f;
-        return hw_mul(x, hw_invsqrt(x));
-    }
+static INLINE_DECL float hw_sqrt(float x) {
+    uint32_t bits;
+    __builtin_memcpy(&bits, &x, sizeof(bits));
+    if ((bits & 0x7FFFFFFFu) == 0u) return 0.0f;
+    return hw_mul(x, hw_invsqrt(x));
+}
 
 #endif
 
 template <typename T_DATA>
-INLINE_DECL void calc_inv(T_DATA& val, T_DATA& val_inv)
-    {
-        val_inv = ::aie::inv(val);
-    }  
+INLINE_DECL void calc_inv(T_DATA& val, T_DATA& val_inv) {
+    val_inv = ::aie::inv(val);
+}
 
 template <>
-INLINE_DECL void calc_inv<cfloat>(cfloat& val, cfloat& val_inv)
-    {
-        val_inv.real = ::aie::inv(val.real);
-        val_inv.imag = 0;
-    }
+INLINE_DECL void calc_inv<cfloat>(cfloat& val, cfloat& val_inv) {
+    val_inv.real = ::aie::inv(val.real);
+    val_inv.imag = 0;
+}
 
 template <typename T_DATA>
-INLINE_DECL void calc_sqrt(T_DATA val, T_DATA &val_sqrt)
-    {
-#if __USES_NATIVE_SQRT_FUNC__ 
-        val_sqrt = ::aie::sqrt(val);
+INLINE_DECL void calc_sqrt(T_DATA val, T_DATA& val_sqrt) {
+#if __USES_NATIVE_SQRT_FUNC__
+    val_sqrt = ::aie::sqrt(val);
 #else
-        val_sqrt = hw_sqrt(val);
-#endif   
-    }
-
-    
-template <>
-INLINE_DECL void calc_sqrt<cfloat>(cfloat val, cfloat &val_sqrt)
-    {
-#if __USES_NATIVE_SQRT_FUNC__ 
-        val_sqrt.real = ::aie::sqrt(val.real);
-#else
-        val_sqrt.real = hw_sqrt(val.real);
+    val_sqrt = hw_sqrt(val);
 #endif
-        val_sqrt.imag = 0;
-    }
+}
 
+template <>
+INLINE_DECL void calc_sqrt<cfloat>(cfloat val, cfloat& val_sqrt) {
+#if __USES_NATIVE_SQRT_FUNC__
+    val_sqrt.real = ::aie::sqrt(val.real);
+#else
+    val_sqrt.real = hw_sqrt(val.real);
+#endif
+    val_sqrt.imag = 0;
+}
 }
 }
 }

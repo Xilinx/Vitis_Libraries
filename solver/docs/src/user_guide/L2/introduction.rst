@@ -46,6 +46,8 @@ AMD documentation is organized around a set of standard design processes to help
    -  :ref:`SOLVER_QRD_HH`
 
    -  :ref:`SOLVER_SVD`
+   
+   -  :ref:`SOLVER_SUBSTITUTION`
 
 -  **System Integration and Validation:** Integrating and validating the system functional performance, including timing, resource use, and power closure. Topics in this document that apply to this design process include:
 
@@ -64,62 +66,74 @@ The following figure shows the SolverLib organization.
 **SolverLib Organization**
 
 .. graphviz::
+   :caption: SolverLib Directory Organization
 
    digraph solver {
-       node [shape=folder];
-       solver -> docs;
-       solver -> ext;
-       solver -> L1;
-       solver -> L2;
-       solver -> scripts;
+      solver [shape=box, label="solver"];
+      docs [shape=box];
+      ext [shape=box];
+      scripts [shape=box];
 
-       L1 -> L1_include;
-       L1 -> L1_meta;
-       L1 -> L1_src;
-       L1 -> L1_tests;
+      L1 [shape=box, label="L1"];
+      L1_include [shape=box, label="include"];
+      L1_include_aie [shape=box, label="aie"];
+      L1_include_hw [shape=box, label="hw"];
+      L1_meta [shape=box, label="meta"];
+      L1_src [shape=box, label="src"];
+      L1_src_aie [shape=box, label="aie"];
+      L1_tests [shape=box, label="tests"];
+      L1_tests_aie [shape=box, label="aie"];
+      L1_tests_aie_src [shape=box, label="src"];
+      L1_tests_aie_inc [shape=box, label="inc"];
+      L1_tests_hw [shape=box, label="hw"];
 
-       L1_include -> L1_include_aie;
-       L1_include -> L1_include_hw;
+      L2 [shape=box, label="L2"];
+      L2_benchmarks [shape=box, label="benchmarks"];
+      L2_examples [shape=box, label="examples"];
+      L2_examples_docs [shape=box, label="docs_examples"];
+      L2_include [shape=box, label="include"];
+      L2_include_aie [shape=box, label="aie"];
+      L2_include_hw [shape=box, label="hw"];
+      L2_meta [shape=box, label="meta"];
+      L2_tests [shape=box, label="tests"];
+      L2_tests_aie [shape=box, label="aie"];
+      L2_tests_hw [shape=box, label="hw"];
 
-       L1_src -> L1_src_aie;
+      solver -> docs;
+      solver -> ext;
+      solver -> L1;
+      solver -> L2;
+      solver -> scripts;
 
-       L1_tests -> L1_tests_aie;
-       L1_tests -> L1_tests_src;
+      L1 -> L1_include;
+      L1 -> L1_meta;
+      L1 -> L1_src;
+      L1 -> L1_tests;
 
-       L2 -> L2_benchmarks;
-       L2 -> L2_examples;
-       L2 -> L2_include;
-       L2 -> L2_meta;
-       L2 -> L2_tests;
+      L1_include -> L1_include_aie;
+      L1_include -> L1_include_hw;
 
-       L2_examples -> L2_examples_docs;
+      L1_src -> L1_src_aie;
 
-       L2_include -> L2_include_aie;
-       L2_include -> L2_include_hw;
+      L1_tests -> L1_tests_aie;
+      L1_tests -> L1_tests_hw;
 
-       L2_tests -> L2_tests_aie;
-       L2_tests -> L2_tests_hw;
+      L1_tests_aie -> L1_tests_aie_src;
+      L1_tests_aie -> L1_tests_aie_inc;
 
-       L1_include [label="include"];
-       L1_include_aie [label="aie"];
-       L1_include_hw [label="hw"];
-       L1_meta [label="meta"];
-       L1_src [label="src"];
-       L1_src_aie [label="aie"];
-       L1_tests [label="tests"];
-       L1_tests_aie [label="aie"];
-       L1_tests_src [label="src"];
+      L2 -> L2_benchmarks;
+      L2 -> L2_examples;
+      L2 -> L2_include;
+      L2 -> L2_meta;
+      L2 -> L2_tests;
 
-       L2_include [label="include"];
-       L2_include_aie [label="aie"];
-       L2_include_hw [label="hw"];
-       L2_benchmarks [label="benchmarks"];
-       L2_examples [label="examples"];
-       L2_examples_docs [label="docs"];
-       L2_meta [label="meta"];
-       L2_tests [label="tests"];
-       L2_tests_aie [label="aie"];
-       L2_tests_hw [label="hw"];
+      L2_examples -> L2_examples_docs;
+
+      L2_include -> L2_include_aie;
+      L2_include -> L2_include_hw;
+
+      L2_tests -> L2_tests_aie;
+      L2_tests -> L2_tests_hw;
    }
 
 
@@ -171,7 +185,7 @@ Use the following option in the aiecompiler command to provide the path:
 Known Issues
 ============
 
-See Answer Record `75802 <https://www.xilinx.com/support/answers/75802.html>`__ for a list of known issues.
+See Answer Record `75802 <https://adaptivesupport.amd.com/s/article/75802>`__ for a list of known issues.
 
 
 .. _SOLVER_TUTORIALS:

@@ -69,9 +69,9 @@ int main() {
     // A.cholesky_opt_1();
     A.cholesky_opt_6();
     std::cout << "Output matrix L : \n";
-    //A.print();
+    // A.print();
     std::cout << "Golden matrix L : \n";
-    //L.print();
+    // L.print();
     writeComplextoFileByRow<Type>(A, fgld);
 
     std::cout << "Verify Cholesky: Diff gld - out" << std::endl;

@@ -19,8 +19,9 @@ The SolverLib consists of the following solver elements:
 
    Cholesky <func-cholesky.rst>
    QRD <func-qrd.rst>
-   QRD Householder<func-qrd_hh.rst>
+   QRD Householder <func-qrd_hh.rst>
    SVD <func-svd.rst>
+   Substitution <func-substitution.rst>
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:
@@ -40,4 +41,4 @@ The number of samples per vector is given by:
 
     \text{vecSampleNum} = \frac{\text{vector size (bytes)}}{\text{sizeof(TT_DATA)}}
 
-Consider an example where the data type is float (4 bytes). On AIE1 devices, the vector size is 32 bytes; thus, ``vecSampleNum`` is 32 / 4 = 8. On AIE-ML and AIE-MLv2 devices, the vector size is 64 bytes; thus, ``vecSampleNum`` is 64 / 4 = 16.
+Consider an example where the data type is float (4 bytes). On AIE devices, the vector size is 32 bytes; thus, ``vecSampleNum`` is 32 / 4 = 8. On AIE-ML and AIE-MLv2 devices, the vector size is 64 bytes; thus, ``vecSampleNum`` is 64 / 4 = 16. For cfloat (8 bytes), ``vecSampleNum`` is 4 on AIE and 8 on AIE-ML and AIE-MLv2 devices.

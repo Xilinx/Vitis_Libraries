@@ -350,30 +350,30 @@ static NOINLINE_DECL void sortSingularValues(T_outSDataType* __restrict S,
     // relative to U/V column swaps — volatile would prevent that.
     chess_protect_access T_outSDataType* Sv = S;
     for (int i = 0; i < numCols - 1; i++) {
-            int maxIdx = i;
+        int maxIdx = i;
         for (int j = i + 1; j < numCols; j++) {
-                    if (hw_lt(Sv[maxIdx], Sv[j])) maxIdx = j;
-                }
-            if (maxIdx != i) {
-                T_outSDataType tmpS = Sv[i];
-                Sv[i] = Sv[maxIdx];
-                Sv[maxIdx] = tmpS;
-                vec_t* Ui = U + i * vecsPerUCol;
-                vec_t* Uj = U + maxIdx * vecsPerUCol;
-                for (int v = 0; v < vecsPerUCol; v++) {
-                    vec_t t = Ui[v];
-                    Ui[v] = Uj[v];
-                    Uj[v] = t;
-                }
-                vec_t* Vi = V + i * vecsPerVCol;
-                vec_t* Vj = V + maxIdx * vecsPerVCol;
-                for (int v = 0; v < vecsPerVCol; v++) {
-                    vec_t t = Vi[v];
-                    Vi[v] = Vj[v];
-                    Vj[v] = t;
-                }
+            if (hw_lt(Sv[maxIdx], Sv[j])) maxIdx = j;
+        }
+        if (maxIdx != i) {
+            T_outSDataType tmpS = Sv[i];
+            Sv[i] = Sv[maxIdx];
+            Sv[maxIdx] = tmpS;
+            vec_t* Ui = U + i * vecsPerUCol;
+            vec_t* Uj = U + maxIdx * vecsPerUCol;
+            for (int v = 0; v < vecsPerUCol; v++) {
+                vec_t t = Ui[v];
+                Ui[v] = Uj[v];
+                Uj[v] = t;
+            }
+            vec_t* Vi = V + i * vecsPerVCol;
+            vec_t* Vj = V + maxIdx * vecsPerVCol;
+            for (int v = 0; v < vecsPerVCol; v++) {
+                vec_t t = Vi[v];
+                Vi[v] = Vj[v];
+                Vj[v] = t;
             }
         }
+    }
 }
 
 } // namespace svd

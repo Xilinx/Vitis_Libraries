@@ -27,11 +27,16 @@ namespace cholesky_example {
 #define CASC_LEN_CHOLESKY 1
 #define DIAG_INV_CHOLESKY 0
 
-class test_cholesky: public adf::graph {
+class test_cholesky : public adf::graph {
    public:
     port<input> in;
     port<output> out;
-    xf::solver::aie::cholesky::cholesky_graph<DATA_TYPE_CHOLESKY, DIM_SIZE_CHOLESKY, NUM_FRAMES_CHOLESKY, GRID_DIM_CHOLESKY, CASC_LEN_CHOLESKY, DIAG_INV_CHOLESKY>
+    xf::solver::aie::cholesky::cholesky_graph<DATA_TYPE_CHOLESKY,
+                                              DIM_SIZE_CHOLESKY,
+                                              NUM_FRAMES_CHOLESKY,
+                                              GRID_DIM_CHOLESKY,
+                                              CASC_LEN_CHOLESKY,
+                                              DIAG_INV_CHOLESKY>
         choleskyGraph;
 
     test_cholesky() {

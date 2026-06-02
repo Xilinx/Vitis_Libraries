@@ -28,58 +28,53 @@ because they are purely for kernel use, not graph level compilation.
 #include <adf.h>
 #include "substitution_traits.hpp"
 
-
 namespace xf {
 namespace solver {
 namespace aie {
 namespace substitution {
 
-    //-----------------------------------------------------------------
-    //fnMyInv: templatized function to return reciprocal of input value
-    template<typename T_D>
-INLINE_DECL    tFbsubBaseType<T_D> fnMyInv(T_D& inVal) {
-       //empty default
-    };
+//-----------------------------------------------------------------
+// fnMyInv: templatized function to return reciprocal of input value
+template <typename T_D>
+INLINE_DECL tFbsubBaseType<T_D> fnMyInv(T_D& inVal){
+    // empty default
+};
 
-    template<>
-INLINE_DECL    tFbsubBaseType<float> fnMyInv<float>(float& inVal) {
+template <>
+INLINE_DECL tFbsubBaseType<float> fnMyInv<float>(float& inVal) {
 #ifdef _SUPPORTS_HW_INVERSE_
-        return ::aie::inv(inVal);//supported in scalar processor
+    return ::aie::inv(inVal); // supported in scalar processor
 #else
-        return ::aie::inv(inVal);//emulated - may replace with LUT-based method later
+    return ::aie::inv(inVal);      // emulated - may replace with LUT-based method later
 #endif //_SUPPORTS_HW_INVERSE_
-    };
+};
 
-    template<>
-INLINE_DECL    tFbsubBaseType<cfloat> fnMyInv<cfloat>(cfloat& inVal) {
+template <>
+INLINE_DECL tFbsubBaseType<cfloat> fnMyInv<cfloat>(cfloat& inVal) {
 #ifdef _SUPPORTS_HW_INVERSE_
-        return ::aie::inv(inVal.real);//supported in scalar processor
+    return ::aie::inv(inVal.real); // supported in scalar processor
 #else
-        return ::aie::inv(inVal.real);//emulated - may replace with LUT-based method later
+    return ::aie::inv(inVal.real); // emulated - may replace with LUT-based method later
 #endif //_SUPPORTS_HW_INVERSE_
-    };
+};
 
-    //----------------------
-    //NullElem
-    template<typename T_D>
-INLINE_DECL    T_D nullElem() {
-        //empty default
-    };
-    template<>
-INLINE_DECL    float nullElem<float>() {
-        return 0.0f;
-    };
-    template<>
-INLINE_DECL    cfloat nullElem<cfloat>() {
-        cfloat retVal;
-        retVal.real = 0.0f;
-        retVal.imag = 0.0f;
-        return retVal;
-    };
-
-
-
-
+//----------------------
+// NullElem
+template <typename T_D>
+INLINE_DECL T_D nullElem(){
+    // empty default
+};
+template <>
+INLINE_DECL float nullElem<float>() {
+    return 0.0f;
+};
+template <>
+INLINE_DECL cfloat nullElem<cfloat>() {
+    cfloat retVal;
+    retVal.real = 0.0f;
+    retVal.imag = 0.0f;
+    return retVal;
+};
 }
 }
 }

@@ -28,7 +28,6 @@ and therefore must be suitable for the aie compiler graph-level compilation.
 #include "single_mul_out_types.hpp"
 #include "single_mul_acc_types.hpp"
 
-
 using namespace ::xf::dsp::aie;
 
 namespace xf {
@@ -36,10 +35,8 @@ namespace solver {
 namespace aie {
 namespace qrd {
 
-
 static constexpr unsigned int kMaxBufferLenInBytes = __DATA_MEM_BYTES__; // Max buffer Length
 static constexpr unsigned int kMaxReadInBytes = __MAX_READ_WRITE__ / 8;
-
 
 template <typename TT_DATA>
 INLINE_DECL constexpr bool fnCheckDataType() {
@@ -54,9 +51,10 @@ INLINE_DECL constexpr bool fnCheckDataType<cfloat>() {
     return true;
 };
 
-template <typename TT_DATA,  unsigned int TP_DIM_ROWS, unsigned int TP_DIM_COLS, unsigned int TP_NUM_FRAMES>
+template <typename TT_DATA, unsigned int TP_DIM_ROWS, unsigned int TP_DIM_COLS, unsigned int TP_NUM_FRAMES>
 INLINE_DECL constexpr bool fnCheckBufferSize() {
-    if ((TP_DIM_COLS * TP_DIM_ROWS * TP_NUM_FRAMES * sizeof(TT_DATA) <= kMaxBufferLenInBytes) && (TP_DIM_COLS * TP_DIM_COLS * sizeof(TT_DATA) <= kMaxBufferLenInBytes)) {
+    if ((TP_DIM_COLS * TP_DIM_ROWS * TP_NUM_FRAMES * sizeof(TT_DATA) <= kMaxBufferLenInBytes) &&
+        (TP_DIM_COLS * TP_DIM_COLS * sizeof(TT_DATA) <= kMaxBufferLenInBytes)) {
         return true;
     }
     return false;
@@ -80,7 +78,7 @@ INLINE_DECL constexpr bool fnCheckChunkSize() {
 
 template <typename TT_DATA, unsigned int TP_DIM>
 INLINE_DECL constexpr bool fnCheckMinSize() {
-    if  (TP_DIM >= (kMaxReadInBytes / sizeof(TT_DATA))) {
+    if (TP_DIM >= (kMaxReadInBytes / sizeof(TT_DATA))) {
         return true;
     }
     return false;
@@ -88,10 +86,10 @@ INLINE_DECL constexpr bool fnCheckMinSize() {
 
 template <typename TT_DATA, unsigned int TP_DIM_ROWS, unsigned int TP_DIM_COLS>
 INLINE_DECL constexpr bool fnCheckKernelLoadMax(unsigned int col_dim_per_kernel) {
-
-    unsigned int max_col_per_kernel_q = __DATA_MEM_BYTES__/(TP_DIM_ROWS * sizeof(TT_DATA));
-    unsigned int max_col_per_kernel_r = __DATA_MEM_BYTES__/(TP_DIM_COLS * sizeof(TT_DATA));
-    unsigned int max_col_per_kernel = (max_col_per_kernel_q < max_col_per_kernel_r) ? max_col_per_kernel_r : max_col_per_kernel_q;
+    unsigned int max_col_per_kernel_q = __DATA_MEM_BYTES__ / (TP_DIM_ROWS * sizeof(TT_DATA));
+    unsigned int max_col_per_kernel_r = __DATA_MEM_BYTES__ / (TP_DIM_COLS * sizeof(TT_DATA));
+    unsigned int max_col_per_kernel =
+        (max_col_per_kernel_q < max_col_per_kernel_r) ? max_col_per_kernel_r : max_col_per_kernel_q;
 
     if (col_dim_per_kernel > max_col_per_kernel) {
         return false;
@@ -101,42 +99,36 @@ INLINE_DECL constexpr bool fnCheckKernelLoadMax(unsigned int col_dim_per_kernel)
 }
 
 INLINE_DECL constexpr bool fnCheckKernelLoadMin(unsigned int col_dim_per_kernel) {
-
-    unsigned int min_col_per_kernel =  1;
+    unsigned int min_col_per_kernel = 1;
     if (col_dim_per_kernel < min_col_per_kernel) {
         return false;
     } else {
         return true;
-
     }
 }
 
 template <unsigned int TP_DIM_COLS>
 INLINE_DECL constexpr bool fnCheckDistributedLoad(unsigned int col_dist) {
-
     if (col_dist == TP_DIM_COLS) {
         return true;
     } else {
         return false;
-
     }
 }
 
 template <typename TT_DATA,
-unsigned int TP_DIM_ROWS,
-unsigned int TP_DIM_A_LEADING,
-unsigned int TP_DIM_Q_LEADING,
-unsigned int TP_DIM_R_LEADING>
+          unsigned int TP_DIM_ROWS,
+          unsigned int TP_DIM_A_LEADING,
+          unsigned int TP_DIM_Q_LEADING,
+          unsigned int TP_DIM_R_LEADING>
 INLINE_DECL constexpr bool fnCheckTiling() {
-
-    if ((TP_DIM_A_LEADING == 1) || (TP_DIM_Q_LEADING == 1) || (TP_DIM_R_LEADING == 1)){
-        if ((sizeof(TT_DATA) == 8) || (TP_DIM_ROWS>255)) { //currently disabling for all 64 bits data
+    if ((TP_DIM_A_LEADING == 1) || (TP_DIM_Q_LEADING == 1) || (TP_DIM_R_LEADING == 1)) {
+        if ((sizeof(TT_DATA) == 8) || (TP_DIM_ROWS > 255)) { // currently disabling for all 64 bits data
             return false;
         }
     }
     return true;
 }
-
 
 struct no_port {};
 
@@ -151,12 +143,10 @@ template <bool T_CASC_OUT, typename TT_DATA>
 struct T_outputIF {
     output_buffer<TT_DATA>& __restrict outWindowQ;
     output_buffer<TT_DATA>& __restrict outWindowR;
-    T_outputIF(output_buffer<TT_DATA>& winQ, output_buffer<TT_DATA>& winR)
-        : outWindowQ(winQ), outWindowR(winR) {}
-    typename std::conditional<T_CASC_OUT == CASC_OUT_FALSE, no_port, output_cascade<TT_DATA> >::type* __restrict outCascade;
+    T_outputIF(output_buffer<TT_DATA>& winQ, output_buffer<TT_DATA>& winR) : outWindowQ(winQ), outWindowR(winR) {}
+    typename std::conditional<T_CASC_OUT == CASC_OUT_FALSE, no_port, output_cascade<TT_DATA> >::
+        type* __restrict outCascade;
 };
-
-
 }
 }
 }

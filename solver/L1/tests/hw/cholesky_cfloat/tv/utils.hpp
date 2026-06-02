@@ -205,12 +205,12 @@ void writeComplextoFileByBlock(ComplexMatrix<T>& X, std::string filename0, unsig
         std::cout << "[ERROR]: file " << filename0 << "could not be opened !" << std::endl;
         exit(1);
     }
-    for (int ii = 0; ii < X.M; ii+=BR) {
-        for (int jj = 0; jj < X.N; jj+=BC) {
-            for(int i=0; i<BR; i++) {
-                for(int j=0; j<BC; j++) {
-                    myfile0 << X.elem(ii+i, jj+j).real() << " ";
-                    myfile0 << X.elem(ii+i, jj+j).imag() << " " << std::endl;
+    for (int ii = 0; ii < X.M; ii += BR) {
+        for (int jj = 0; jj < X.N; jj += BC) {
+            for (int i = 0; i < BR; i++) {
+                for (int j = 0; j < BC; j++) {
+                    myfile0 << X.elem(ii + i, jj + j).real() << " ";
+                    myfile0 << X.elem(ii + i, jj + j).imag() << " " << std::endl;
                 }
             }
         }

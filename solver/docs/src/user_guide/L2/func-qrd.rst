@@ -26,7 +26,7 @@ The graph entry point is the following:
 
 .. code-block::
 
-    xf::solver::qrd::qrd_graph
+    xf::solver::aie::qrd::qrd_graph
 
 Device Support
 ==============
@@ -109,7 +109,7 @@ The following is an example of load-splitting for a 32x32 matrix with a cascade 
 Padding
 -------
 
-Padding is not a supported feature of the library element. ``TP_DIM_ROWS`` and ``TP_DIM_COLS`` must be set to multiples of :ref:`SOLVER_vecSampleNum` (which is 8 for float and 4 for cfloat on AIE-ML and AIE-MLv2 devices and 16 for float and 8 for cfloat on AIE2 devices).
+Padding is not a supported feature of the library element. ``TP_DIM_ROWS`` and ``TP_DIM_COLS`` must be set to multiples of :ref:`SOLVER_vecSampleNum`.
 
 If a float input matrix of 5x5 is to be processed, the user must set ``TP_DIM_ROWS`` and ``TP_DIM_COLS`` to 8x8, and pad the input matrix with zeros to make it 8x8. The resulting Q and R matrices will also be of size 8x8, with the additional rows and columns being padded with zeros.
 

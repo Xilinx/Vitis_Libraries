@@ -41,7 +41,6 @@ template <typename TT_DATA,
           unsigned int TP_DIM_R_LEADING>
 class qrd_hh_ref_graph : public graph {
    public:
-
     static constexpr int kWindowVsizeQ = (TP_NUM_FRAMES * TP_DIM_COLS * TP_DIM_ROWS);
     static constexpr int kWindowVsizeR = (TP_NUM_FRAMES * TP_DIM_COLS * TP_DIM_COLS);
 
@@ -70,7 +69,7 @@ class qrd_hh_ref_graph : public graph {
 
         // Specify mapping constraints
         runtime<ratio>(m_kernels) = 0.1; // Nominal figure. The real figure requires knowledge of the sample
-                                            // rate.
+                                         // rate.
         // Source files
         source(m_kernels) = "qrd_hh_ref.cpp";
 
@@ -83,52 +82,38 @@ class qrd_hh_ref_graph : public graph {
         dimensions(m_kernels.out[0]) = {kWindowVsizeQ};
         dimensions(m_kernels.out[1]) = {kWindowVsizeR};
 
-        if (TP_DIM_A_LEADING == 1){
-        write_access(m_kernels.in[0]) =
-                adf::tiling(
-                {       .buffer_dimension = {TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES},
-                        .tiling_dimension = {1, TP_DIM_COLS, 1},
-                        .offset = {0, 0, 0},
-                        .tile_traversal = {
-                        {.dimension = 0, .stride = 1, .wrap = TP_DIM_ROWS},
-                        {.dimension = 1, .stride = TP_DIM_COLS, .wrap = 1},
-                        {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}
-                }
-                });
+        if (TP_DIM_A_LEADING == 1) {
+            write_access(m_kernels.in[0]) =
+                adf::tiling({.buffer_dimension = {TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES},
+                             .tiling_dimension = {1, TP_DIM_COLS, 1},
+                             .offset = {0, 0, 0},
+                             .tile_traversal = {{.dimension = 0, .stride = 1, .wrap = TP_DIM_ROWS},
+                                                {.dimension = 1, .stride = TP_DIM_COLS, .wrap = 1},
+                                                {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}}});
         };
 
-
-        if (TP_DIM_Q_LEADING == 1){
-        read_access(m_kernels.out[0]) =
-                adf::tiling(
-                {       .buffer_dimension = {TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES},
-                        .tiling_dimension = {1, TP_DIM_COLS, 1},
-                        .offset = {0, 0, 0},
-                        .tile_traversal = {
-                        {.dimension = 0, .stride = 1, .wrap = TP_DIM_ROWS},
-                        {.dimension = 1, .stride = TP_DIM_COLS, .wrap = 1},
-                        {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}
-                }
-                });
+        if (TP_DIM_Q_LEADING == 1) {
+            read_access(m_kernels.out[0]) =
+                adf::tiling({.buffer_dimension = {TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES},
+                             .tiling_dimension = {1, TP_DIM_COLS, 1},
+                             .offset = {0, 0, 0},
+                             .tile_traversal = {{.dimension = 0, .stride = 1, .wrap = TP_DIM_ROWS},
+                                                {.dimension = 1, .stride = TP_DIM_COLS, .wrap = 1},
+                                                {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}}});
         };
 
-        if (TP_DIM_R_LEADING == 1){
-        read_access(m_kernels.out[1]) =
-                adf::tiling(
-                {       .buffer_dimension = {TP_DIM_COLS, TP_DIM_COLS, TP_NUM_FRAMES},
-                        .tiling_dimension = {1, TP_DIM_COLS, 1},
-                        .offset = {0, 0, 0},
-                        .tile_traversal = {
-                        {.dimension = 0, .stride = 1, .wrap = TP_DIM_COLS},
-                        {.dimension = 1, .stride = TP_DIM_COLS, .wrap = 1},
-                        {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}
-                }
-                });
+        if (TP_DIM_R_LEADING == 1) {
+            read_access(m_kernels.out[1]) =
+                adf::tiling({.buffer_dimension = {TP_DIM_COLS, TP_DIM_COLS, TP_NUM_FRAMES},
+                             .tiling_dimension = {1, TP_DIM_COLS, 1},
+                             .offset = {0, 0, 0},
+                             .tile_traversal = {{.dimension = 0, .stride = 1, .wrap = TP_DIM_COLS},
+                                                {.dimension = 1, .stride = TP_DIM_COLS, .wrap = 1},
+                                                {.dimension = 2, .stride = 1, .wrap = TP_NUM_FRAMES}}});
         };
-
 
     }; // end of constructor
-}; // end of class qrd_hh_ref_graph
+};     // end of class qrd_hh_ref_graph
 
 } // namespace qrd_hh
 } // namespace aie

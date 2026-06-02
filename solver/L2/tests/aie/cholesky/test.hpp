@@ -47,7 +47,7 @@ namespace solverlib = xf::solver::aie;
 
 class test_graph : public graph {
    public:
-    static constexpr unsigned int kNumKernels = GRID_DIM * (GRID_DIM+1) / 2;   // Triangular number of kernels.
+    static constexpr unsigned int kNumKernels = GRID_DIM * (GRID_DIM + 1) / 2; // Triangular number of kernels.
     std::array<input_plio, kNumKernels> in;
     std::array<output_plio, kNumKernels> out;
 
@@ -75,8 +75,7 @@ class test_graph : public graph {
 
         int portIdx = 0;
         for (int y = 0; y < GRID_DIM; y++) {
-            for (int x = 0; x < y+1; x++) {
-
+            for (int x = 0; x < y + 1; x++) {
                 // Make connections
                 std::string filenameIn = QUOTE(INPUT_FILE);
                 filenameIn.insert(filenameIn.length() - 4, ("_" + std::to_string(y) + "_" + std::to_string(x)));
@@ -85,9 +84,10 @@ class test_graph : public graph {
 
                 std::string filenameOut = QUOTE(OUTPUT_FILE);
                 filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(y) + "_" + std::to_string(x)));
-                out[portIdx] = output_plio::create("PLIO_out_" + std::to_string(portIdx), adf::plio_64_bits, filenameOut);
+                out[portIdx] =
+                    output_plio::create("PLIO_out_" + std::to_string(portIdx), adf::plio_64_bits, filenameOut);
                 connect<>(choleskyGraph.out[portIdx], out[portIdx].in[0]);
-                
+
                 portIdx++;
             }
         }

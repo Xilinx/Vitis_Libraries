@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
  * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,8 +42,8 @@ int main() {
         for (int j = 0; j < K; j++) {
             float dataAR = A.random_float(1, 4, 0);
             float dataAI = A.random_float(1, 4, 0);
-            //float dataAR = i+1;
-            //float dataAI = j+1;
+            // float dataAR = i+1;
+            // float dataAI = j+1;
             A.elem(i, j).real(dataAR);
             A.elem(i, j).imag(dataAI);
         }
@@ -53,13 +53,13 @@ int main() {
         for (int j = 0; j < N; j++) {
             float dataBR = B.random_float(1, 4, 0);
             float dataBI = B.random_float(1, 4, 0);
-            //float dataBR;
-            //float dataBI;
-            //if(i==j){
+            // float dataBR;
+            // float dataBI;
+            // if(i==j){
             //    dataBR = 1;
             //    dataBI = 0;
             //}
-            //else {
+            // else {
             //    dataBR = 0;
             //    dataBI = 0;
             //}
@@ -69,17 +69,17 @@ int main() {
     }
     writeComplextoFileByRow<Type>(A, file_A);
     writeComplextoFileByRow<Type>(B, file_B);
-    //A.print();
-    //B.print();
+    // A.print();
+    // B.print();
 
     std::cout << "Gernerate matrix C: \n";
     C.matrix_mul(A, B);
-    //C.print();
+    // C.print();
     writeComplextoFileByRow<Type>(C, file_C);
 
-    //std::cout << "Output matrix C : \n";
+    // std::cout << "Output matrix C : \n";
 
-    //std::cout << "Verify matrit multiplication: Diff gld - out" << std::endl;
+    // std::cout << "Verify matrit multiplication: Diff gld - out" << std::endl;
 
     return 0;
 }

@@ -68,7 +68,7 @@ Algorithm: One-Sided Jacobi with Parallel Pairs
 
 The SVD is computed using the one-sided Jacobi algorithm. At each iteration, a Givens rotation is applied to a pair of columns of the working matrix to reduce their inner product towards zero. After convergence, the column norms of the working matrix are the singular values, and the accumulated rotation matrices form ``U`` and ``V``.
 
-To maximise throughput, the implementation uses a *parallel-pairs* schedule. In each *set*, the full column set is partitioned into :math:`\lfloor n/2 \rfloor` independent column pairs that can be processed simultaneously. A complete *pass* consists of :math:`n-1` such sets that together cover all :math:`n(n-1)/2` distinct pairs. The number of passes is configured by ``TP_PASSES``.
+To maximize throughput, the implementation uses a *parallel-pairs* schedule. In each *set*, the full column set is partitioned into :math:`\lfloor n/2 \rfloor` independent column pairs that can be processed simultaneously. A complete *pass* consists of :math:`n-1` such sets that together cover all :math:`n(n-1)/2` distinct pairs. The number of passes is configured by ``TP_PASSES``.
 
 .. note::
 
@@ -109,7 +109,7 @@ Cascading increases the maximum supported matrix size and can improve throughput
 
 .. note::
 
-   ``TP_DIM_ROWS`` must be divisible by ``TP_CASC_LEN``, and ``TP_DIM_ROWS / TP_CASC_LEN`` must be a multiple of the internal vector width (8 for ``float`` on AIE1, 16 for ``float`` on AIE-ML/AIE-MLv2, half those values for ``cfloat``).
+   ``TP_DIM_ROWS`` must be divisible by ``TP_CASC_LEN``, and ``TP_DIM_ROWS / TP_CASC_LEN`` must be a multiple of :ref:`SOLVER_vecSampleNum`.
 
 Column Padding (Internal)
 --------------------------
@@ -123,7 +123,7 @@ Constraints
 - ``TP_DIM_COLS`` must be in the range [2, 128].
 - ``TP_PASSES`` must be in the range [1, 10].
 - ``TP_CASC_LEN`` must be in the range [1, 16].
-- ``TP_DIM_ROWS`` must be at least one internal vector width: 8 (``float``) or 4 (``cfloat``) on AIE1; 16 (``float``) or 8 (``cfloat``) on AIE-ML/AIE-MLv2.
+- ``TP_DIM_ROWS`` must be at least :ref:`SOLVER_vecSampleNum`.
 - ``TP_DIM_ROWS`` must be a multiple of the internal vector width.
 - ``TP_DIM_ROWS`` must be divisible by ``TP_CASC_LEN``.
 - ``TP_DIM_ROWS / TP_CASC_LEN`` must be a multiple of the internal vector width.

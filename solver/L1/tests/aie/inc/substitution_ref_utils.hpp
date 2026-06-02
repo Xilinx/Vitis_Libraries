@@ -9,37 +9,37 @@ namespace solver {
 namespace aie {
 namespace substitution {
 
-    //----------------------
-    //NullElem
-    template<typename T_D>
-    T_D nullElem() {
-        //empty default
-    };
-    template<>
-    inline float nullElem<float>() {
-        return 0.0f;
-    };
-    template<>
-    inline cfloat nullElem<cfloat>() {
-        cfloat retVal;
-        retVal.real = 0.0f;
-        retVal.imag = 0.0f;
-        return retVal;
-    };
+//----------------------
+// NullElem
+template <typename T_D>
+T_D nullElem(){
+    // empty default
+};
+template <>
+inline float nullElem<float>() {
+    return 0.0f;
+};
+template <>
+inline cfloat nullElem<cfloat>() {
+    cfloat retVal;
+    retVal.real = 0.0f;
+    retVal.imag = 0.0f;
+    return retVal;
+};
 
-    template<typename T_D>
-    float fnGetReal(T_D inVal) {
-        //empty default
-      return -1.0;
-    };
-    template<>
-    inline float fnGetReal<float>(float inVal) {
-        return inVal;
-    };
-    template<>
-    inline float fnGetReal<cfloat>(cfloat inVal) {
-        return inVal.real;
-    };
+template <typename T_D>
+float fnGetReal(T_D inVal) {
+    // empty default
+    return -1.0;
+};
+template <>
+inline float fnGetReal<float>(float inVal) {
+    return inVal;
+};
+template <>
+inline float fnGetReal<cfloat>(cfloat inVal) {
+    return inVal.real;
+};
 
 template <typename TT_DATA, unsigned int TP_DIM_SIZE, unsigned int TP_L_LEADING>
 void fwd_subst_ref(const TT_DATA* L, const TT_DATA* y, TT_DATA* x) {

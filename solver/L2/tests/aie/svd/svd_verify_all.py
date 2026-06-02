@@ -8,7 +8,6 @@ Usage:
     python3 svd_verify_all.py [base_directory] [--niter N]
     
 Example:
-    cd /proj/.../results/ref_aie1_x86sim
     python3 svd_verify_all.py . --niter 2
 """
 

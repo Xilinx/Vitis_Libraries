@@ -28,35 +28,26 @@ namespace solver {
 namespace aie {
 namespace cholesky {
 
-#define IDX(i, j)  (i)*TP_DIM + (j)
+#define IDX(i, j) (i) * TP_DIM + (j)
 
-template <typename TT_DATA,
-          unsigned int TP_DIM,
-          unsigned int TP_NUM_FRAMES,
-          unsigned int TP_DIAG_INV>
-void cholesky_ref<TT_DATA,
-                    TP_DIM,
-                    TP_NUM_FRAMES,
-                    TP_DIAG_INV>::cholesky_main(input_buffer<TT_DATA>& inWindow0,
-                                                    output_buffer<TT_DATA>& outWindow0) {
+template <typename TT_DATA, unsigned int TP_DIM, unsigned int TP_NUM_FRAMES, unsigned int TP_DIAG_INV>
+void cholesky_ref<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_DIAG_INV>::cholesky_main(input_buffer<TT_DATA>& inWindow0,
+                                                                              output_buffer<TT_DATA>& outWindow0) {
     TT_DATA* inPtr = (TT_DATA*)inWindow0.data();
     TT_DATA* outPtr = (TT_DATA*)outWindow0.data();
 
-
     // Processing of one window
     for (int frame = 0; frame < TP_NUM_FRAMES; frame++) {
-
-
         // The actual cholesky algorithm...
         for (int D = 0; D < TP_DIM; D++) {
-            float diag = getReal<TT_DATA>( inPtr[IDX(D, D)] );
+            float diag = getReal<TT_DATA>(inPtr[IDX(D, D)]);
             float diag_inv_sqrt = 1.0 / std::sqrt(diag);
 
             for (int j = 0; j < TP_DIM; j++) {
                 inPtr[IDX(D, j)] *= diag_inv_sqrt;
             }
 
-            for (int i = D+1; i < TP_DIM; i++) {
+            for (int i = D + 1; i < TP_DIM; i++) {
                 for (int j = D; j < TP_DIM; j++) {
                     TT_DATA subtractor = getConj<TT_DATA>(inPtr[IDX(D, i)]) * inPtr[IDX(D, j)];
                     inPtr[IDX(i, j)] -= subtractor;
@@ -71,22 +62,19 @@ void cholesky_ref<TT_DATA,
         // Copying over only the vectors which will be processed by the UUT...
         for (int i = 0; i < TP_DIM; i += kVecSampleNum) {
             for (int j = i; j < TP_DIM; j += kVecSampleNum) {
-
                 // Populating in kVecSampleNum * kVecSampleNum blocks...
-                for (int m = i; m < i+kVecSampleNum; m++) {
-                    for(int n = j; n < j+kVecSampleNum; n++) {
+                for (int m = i; m < i + kVecSampleNum; m++) {
+                    for (int n = j; n < j + kVecSampleNum; n++) {
                         outPtr[IDX(m, n)] = inPtr[IDX(m, n)];
                     }
                 }
             }
         }
 
-
         inPtr += TP_DIM * TP_DIM;
         outPtr += TP_DIM * TP_DIM;
     }
 }
-
 };
 }
 }

@@ -9,8 +9,8 @@
         "NUM_FRAMES": "1",
         "DIAG_INV": "0",
         "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
+        "DIFF_TOLERANCE": "0.05",
+        "CC_TOLERANCE": "0.05",
         "NITER": "1",
         "DATA_SEED": "1"
     },

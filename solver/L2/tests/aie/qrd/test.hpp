@@ -71,14 +71,8 @@ class test_graph : public graph {
         printf("DIM_R_LEADING     = %d \n", DIM_R_LEADING);
 
         // Hadamard sub-graph
-        solverlib::qrd::UUT_GRAPH<DATA_TYPE, 
-                                DIM_ROWS, 
-                                DIM_COLS, 
-                                NUM_FRAMES, 
-                                CASC_LEN,
-                                DIM_A_LEADING,
-                                DIM_Q_LEADING,
-                                DIM_R_LEADING>
+        solverlib::qrd::UUT_GRAPH<DATA_TYPE, DIM_ROWS, DIM_COLS, NUM_FRAMES, CASC_LEN, DIM_A_LEADING, DIM_Q_LEADING,
+                                  DIM_R_LEADING>
             qrdGraph;
 
 // Make connections

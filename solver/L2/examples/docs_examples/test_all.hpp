@@ -25,7 +25,7 @@
 using namespace adf;
 using namespace ::xf::dsp::aie;
 
-//The following defined values are for the number of ports in and out for each IP example.
+// The following defined values are for the number of ports in and out for each IP example.
 #define NUM_IP_CHOLESKY 1
 #define NUM_IP_QRD 1
 #define NUM_IP_SVD 1
@@ -55,8 +55,10 @@ namespace all_example_solver {
 
 class test_example : public graph {
    public:
-    static constexpr unsigned int NUM_IP_ALL = NUM_IP_CHOLESKY + NUM_IP_QRD + NUM_IP_SVD + NUM_IP_QRD_HH + NUM_IP_SUBSTITUTION;
-    static constexpr unsigned int NUM_OP_ALL = NUM_OP_CHOLESKY + NUM_OP_QRD + NUM_OP_SVD + NUM_OP_QRD_HH + NUM_OP_SUBSTITUTION;
+    static constexpr unsigned int NUM_IP_ALL =
+        NUM_IP_CHOLESKY + NUM_IP_QRD + NUM_IP_SVD + NUM_IP_QRD_HH + NUM_IP_SUBSTITUTION;
+    static constexpr unsigned int NUM_OP_ALL =
+        NUM_OP_CHOLESKY + NUM_OP_QRD + NUM_OP_SVD + NUM_OP_QRD_HH + NUM_OP_SUBSTITUTION;
 
     std::array<input_plio, NUM_IP_ALL> in;
     std::array<output_plio, NUM_OP_ALL> out;

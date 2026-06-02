@@ -33,12 +33,11 @@ struct constVals {
 };
 
 template <>
-struct constVals <cfloat> {
+struct constVals<cfloat> {
     static constexpr cfloat c0 = {0.0, 0.0};
     static constexpr cfloat c1 = {1.0, 0.0};
     static constexpr cfloat c2 = {2.0, 0.0};
 };
-
 }
 }
 }
