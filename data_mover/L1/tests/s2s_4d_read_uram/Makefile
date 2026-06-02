@@ -26,21 +26,21 @@ help::
 	@echo ""
 	@echo "Makefile Usage:"
 	@echo ""
-	@echo "  make run CSIM=1 CSYNTH=1 COSIM=1 PLATFORM=<FPGA platform> PLATFORM_REPO_PATHS=<path to platform directories>"
+	@echo "  make run TARGET=<csim/csynth/cosim/vivado_syn/vivado_impl> PLATFORM=<FPGA platform> PLATFORM_REPO_PATHS=<path to platform directories>"
 	@echo "      Command to run the selected tasks for specified device."
 	@echo ""
-	@echo "      Valid tasks are CSIM, CSYNTH, COSIM, VIVADO_SYN, VIVADO_IMPL"
+	@echo "      Valid tasks are csim, csynth, cosim, vivado_syn, vivado_impl"
 	@echo ""
 	@echo "      PLATFORM is case-insensitive and support awk regex."
-	@echo "      For example, \`make run PLATFORM='u200.*xdma' COSIM=1\`"
+	@echo "      For example, \`make run PLATFORM='u200.*xdma' TARGET=cosim\`"
 	@echo "      It can also be an absolute path to platform file."
 	@echo ""
 	@echo "      PLATFORM_REPO_PATHS variable is used to specify the paths in which the platform files will be"
 	@echo "      searched for."
 	@echo ""
-	@echo "  make run CSIM=1 CSYNTH=1 COSIM=1 XPART=<FPGA part name>"
+	@echo "  make run TARGET=<csim/csynth/cosim/vivado_syn/vivado_impl> XPART=<FPGA part name>"
 	@echo "      Alternatively, the FPGA part can be speficied via XPART."
-	@echo "      For example, \`make run XPART='xcu200-fsgd2104-2-e' COSIM=1\`"
+	@echo "      For example, \`make run XPART='xcu200-fsgd2104-2-e' TARGET=cosim\`"
 	@echo "      When XPART is set, PLATFORM will be ignored."
 	@echo ""
 	@echo "  make clean "
@@ -208,6 +208,19 @@ COSIM ?= 0
 VIVADO_SYN ?= 0
 VIVADO_IMPL ?= 0
 QOR_CHECK ?= 0
+TARGET ?=
+
+ifeq ($(TARGET),csim)
+override CSIM := 1
+else ifeq ($(TARGET),csynth)
+override CSYNTH := 1
+else ifeq ($(TARGET),cosim)
+override COSIM := 1
+else ifeq ($(TARGET),vivado_syn)
+override VIVADO_SYN := 1
+else ifeq ($(TARGET),vivado_impl)
+override VIVADO_IMPL := 1
+endif
 
 # at least RTL synthesis before check QoR
 ifeq (1,$(QOR_CHECK))

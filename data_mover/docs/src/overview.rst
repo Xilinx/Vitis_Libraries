@@ -11,10 +11,10 @@
 Overview
 ========
 
-The AMD Vitis™ Data Mover Library is an open-sourced Vitis library for exchanging data between the programmable logic (PL) and AI Engine (AIE).
+The AMD Vitis™ Data Mover Library is an open-source Vitis library for exchanging data between the programmable logic (PL) and AI Engine (AIE).
 
-This library provides the **Programmable 4D Data-Mover** and **Static Data-Mover** to help generate a kernel design and improve development efficiency.
+This library provides the **Programmable 4D Data Mover** and the **Static Data Mover** to help generate kernel designs and improve development efficiency.
 
-The **Programmable 4D Data-Mover** has two types of kernels, **4DCuboidRead** and **4DCuboidWrite**, which provide both flexible access patterns and keep high performance between the double-data rate (DDR) and AIE.
+The **Programmable 4D Data Mover** has two types of kernels, **4DCuboidRead** and **4DCuboidWrite**, that provide flexible access patterns and high performance between the double-data rate (DDR) memory and AIE.
 
-**Static Data-Mover** has nine types of kernels which help AIE connect with DDR/URAM and block RAM. Their access pattern is a simple continously read/write.
+The **Static Data Mover** has nine types of kernels that connect AIE with DDR, URAM, and block RAM using a contiguous read/write access pattern.

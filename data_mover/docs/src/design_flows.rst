@@ -15,9 +15,7 @@
 Design Flows
 ============
 
-The common tool and library prerequisites that apply across all design flows are documented in the requirements section above.
-
-The recommended design flows are described as follows:
+The common tool and library prerequisites for all design flows are listed in the requirements section.
 
 Shell Environment
 =================
@@ -30,9 +28,9 @@ Set up the build environment using the AMD Vitis™ and XRT scripts.
     source /opt/xilinx/xrt/setup.sh
     export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 
-For ``csh`` users, look for the corresponding scripts with the ``.csh`` suffix and adjust the variable setting command accordingly.
+For ``csh`` users, use the corresponding scripts with the ``.csh`` suffix and adjust the variable assignment command.
 
-Setting `PLATFORM_REPO_PATHS` to the installation folder of platform files can enable the makefiles in this library to use the `PLATFORM` variable as a pattern. Otherwise, the full path to the .xpfm file needs to be provided via the `PLATFORM` variable.
+Set ``PLATFORM_REPO_PATHS`` to the installation folder of the platform files so that the makefiles in this library can use the ``PLATFORM`` variable as a pattern. Otherwise, provide the full path to the ``.xpfm`` file using the ``PLATFORM`` variable.
 
 HLS Cases Command Line Flow
 ===========================
@@ -40,16 +38,16 @@ HLS Cases Command Line Flow
 .. code-block:: shell
 
     cd L1/tests/hls_case_folder
-    
+
     make run TARGET=csim \
         PLATFORM=/path/to/xilinx_u280_xdma_201920_3.xpfm
 
-Test control variables are:
+The following test control variables are available:
 
-* ``CSIM`` for high level simulation.
-* ``CSYNTH`` for high level synthesis to RTL.
-* ``COSIM`` for cosimulation between software test bench and generated RTL.
+* ``CSIM`` for high-level simulation.
+* ``CSYNTH`` for high-level synthesis to RTL.
+* ``COSIM`` for co-simulation between the software test bench and generated RTL.
 * ``VIVADO_SYN`` for synthesis by AMD Vivado™.
 * ``VIVADO_IMPL`` for implementation by Vivado.
 
-For all these variables, setting to ``1`` indicates execution while ``0`` for skipping. The default value of all these control variables are ``0``, so they can be omitted from command line if the corresponding step is not wanted.
+For all these variables, set to ``1`` to enable execution or ``0`` to skip. The default value of all control variables is ``0``; omit any variable from the command line to skip the corresponding step.

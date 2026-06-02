@@ -8,41 +8,41 @@
    :caption: Table of Contents
    :maxdepth: 3
 
-All Data-Mover designs are "codeless" that you need to create the OpenCL™ kernels by simply calling the **Kernel Generator** with a JSON description and ROM content (if needed) as text file.
+All Data Mover designs are codeless — you create the OpenCL™ kernels by calling the **Kernel Generator** with a JSON description and ROM content (if needed) as a text file.
 
 The **Kernel Generator** consists of:
 
 - Kernel templates (in Jinja2), which can be instantiated through configurations from JSON.
-- Data converter to transform the user provided texture ROM content into a usable initialization file.
-- Python script to automate the kernel generation from JSON to HLS C++ OpenCL kernel, which is ``L2/scripts/internal/generate_kernels.py``.
+- Data converter to transform the user-provided texture ROM content into a usable initialization file.
+- Python script to automate kernel generation from JSON to HLS C++ OpenCL kernel: ``L2/scripts/internal/generate_kernels.py``.
 
 .. ATTENTION::
-    Generated kernels are not self-contained source code, they would reference low-level block implementation headers in ``L1/include`` folder. Ensure that folder is passed to the AMD Vitis™ compiler as the header search path when compiling the project using the generated programmable logic (PL) kernels.
+    Generated kernels are not self-contained source code; they reference low-level block implementation headers in the ``L1/include`` folder. Ensure that folder is passed to the AMD Vitis™ compiler as a header search path when compiling a project using generated programmable logic (PL) kernels.
 
-Static Data-Mover
-==================
+Static Data Mover
+=================
 
 .. _static-features:
 
 Feature
 -------
 
-``Static Data Mover`` has nine types of kernels in two different categories. They all access a certain amount of data in the Memory/URAM/block RAM in a continuous style. This is the only access pattern.
+The Static Data Mover has nine types of kernels in two categories. All kernels access a fixed amount of data in memory, URAM, or block RAM in a contiguous pattern.
 
-Data to AIE:
+The following kernels move data to AIE:
 
-- LoadDdrToStream: For loading data from the programmable logic (PL) double-data rate (DDR) to AIE through AXI stream
-- LoadDdrToStreamWithCounter: For loading data from PL's DDR to AIE through AXI stream and recording the data count sending to AIE
-- SendRomToStream: For sending data from on-chip block RAM to AIE through AXI stream
-- SendRamToStream: The same as ``SendRomToStream``, but the difference is that the source data is coming from URAM instead of block RAM
+- ``LoadDdrToStream``: Loads data from the programmable logic (PL) double-data rate (DDR) memory to AIE through an AXI stream.
+- ``LoadDdrToStreamWithCounter``: Loads data from PL DDR to AIE through an AXI stream and records the data count sent to AIE.
+- ``SendRomToStream``: Sends data from on-chip block RAM to AIE through an AXI stream.
+- ``SendRamToStream``: Sends data from on-chip URAM to AIE through an AXI stream (same as ``SendRomToStream``, but uses URAM as the data source instead of block RAM).
 
-Data from AIE:
+The following kernels move data from AIE:
 
-- StoreStreamToMaster: For receiving data from AIE through AXI stream and save them to the PL's DDR
-- StoreStreamToMasterWithCounter: For receiving data from AIE through AXI stream and saving them to the PL's DDR, as well as recording the data count sending to DDR
-- ValidateStreamWithMaster: For receiving data from AIE through AXI stream and comparing with the goldens in PL's DDR, as well as putting the overall pass/fail flag into the PL's DDR
-- ValidateStreamWithRom: For receiving data from AIE through AXI stream and comparing with the goldens in PL's BRAM, as well as putting the overall pass/fail flag into the PL's DDR
-- ValidateStreamWithRam: For receiving data from AIE through AXI stream and comparing with the goldens in PL's URAM, as well as putting the overall pass/fail flag into the PL's DDR
+- ``StoreStreamToMaster``: Receives data from AIE through an AXI stream and saves it to PL DDR.
+- ``StoreStreamToMasterWithCounter``: Receives data from AIE through an AXI stream, saves it to PL DDR, and records the data count sent to DDR.
+- ``ValidateStreamWithMaster``: Receives data from AIE through an AXI stream, compares it with reference data in PL DDR, and writes the overall pass/fail flag to PL DDR.
+- ``ValidateStreamWithRom``: Receives data from AIE through an AXI stream, compares it with reference data in PL block RAM (BRAM), and writes the overall pass/fail flag to PL DDR.
+- ``ValidateStreamWithRam``: Receives data from AIE through an AXI stream, compares it with reference data in PL URAM, and writes the overall pass/fail flag to PL DDR.
 
 .. _static-build-config:
 
@@ -52,11 +52,11 @@ Build Time Configuration
 Example Kernel Specification (JSON)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The following kernel specification in JSON described a ``SendRomToStream`` kernel and a ``StoreStreamToMaster`` kernel.
+The following kernel specification in JSON describes a ``SendRomToStream`` kernel and a ``StoreStreamToMaster`` kernel.
 
-The ``SendRomToStream`` kernel should have two data paths, as you can see that there are two specifications in the ``map`` field. For example, take the first data path, it will be using texture contents for ROM initialization from file named ``din0``, and the corresponding datatype is specified as ``int64_t``. As the ``num`` is set to 512, so the depth of the internal ROM should be 512. Because you want to send the data to AXI stream in II = 1, the on-chip ROM's width will be automatically generated regarding to the output port's width, that said 64-bit. The second data path will be auto-generated with the same rules.
+The ``SendRomToStream`` kernel has two data paths, as shown by the two specifications in the ``map`` field. The first data path uses texture contents for ROM initialization from a file named ``din0``, and the corresponding datatype is specified as ``int64_t``. With ``num`` set to 512, the depth of the internal ROM is 512. To send data to the AXI stream at II = 1, the on-chip ROM width is automatically generated to match the output port width: 64 bits. The second data path is auto-generated using the same rules.
 
-The ``StoreStreamToMater`` kernel should also have two data paths. Because you want to load the data from AIE through AXI stream in II = 1, the output port width for PL's DDR will be auto-generated regarding to the width of the corresponding AXI stream, that said 64-bit for the first data path and  32-bit for the second data path.
+The ``StoreStreamToMaster`` kernel also has two data paths. To load data from AIE through the AXI stream at II = 1, the output port width for PL DDR is automatically generated to match the width of the corresponding AXI stream: 64 bits for the first data path and 32 bits for the second data path.
 
 .. code-block:: JSON
 
@@ -115,8 +115,8 @@ The ``StoreStreamToMater`` kernel should also have two data paths. Because you w
 
 Refer to ``L2/tests/datamover`` for the JSON format of all nine types of kernels that can be generated.
 
-Example of How to Generate Kernels
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Generating Kernels
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash
 
@@ -126,8 +126,8 @@ Example of How to Generate Kernels
     # pre_build:
     #     make -f $(CUR_DIR)/ksrc.mk GENKERNEL=$(XFLIB_DIR)/L2/scripts/generate_kernels SPEC=$(CUR_DIR)/kernel/spec.json TOOLDIR=$(CUR_DIR)/_krnlgen
 
-Example of How to Run Hardware Emulation of Hardware
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Running Hardware Emulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash
 
@@ -138,20 +138,20 @@ Example of How to Run Hardware Emulation of Hardware
    make run TARGET=hw PLATFORM=${PLATFORM_REPO_PATHS}/xilinx_vck190_base_202210_1/xilinx_vck190_base_202210_1.xpfm
 
 .. ATTENTION::
-   * Only HW_EMU and HW run available
+   * Only HW_EMU and HW run are available.
    * Kernel-to-kernel streaming can only be emulated in hardware emulation.
 
 Data Converter
 --------------
 
-This C-based data converter is used to transform the texture ROM contents to a hexadecimal string with a specific width that can be directly programmed into on-chip ROMs.
+This C-based data converter transforms texture ROM contents to a hexadecimal string with a specific width that can be directly programmed into on-chip ROMs.
 
-There are several limitations for this data converter, so when you provide the JSON specifications or the ROM contents, these rules have to be followed:
+The following limitations apply when providing JSON specifications or ROM contents:
 
-- Maximum width of the output data width is 512-bit
-- Output data width have to be wider than input
-- Input texture contents should be provided line-by-line, that said ``\n`` separated
-- Only the following input data types are supoorted
+- Maximum output data width is 512 bits.
+- Output data width must be wider than input.
+- Input texture contents must be provided line by line, separated by ``\n``.
+- Only the following input data types are supported.
 
 Supported Input Datatypes
 ^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -8,18 +8,18 @@
    :caption: Table of Contents
    :maxdepth: 3
 
-All Data-Mover designs are "codeless" that you need to create the OpenCL™ kernels by simply calling the **Kernel Generator** with a JSON description and ROM content (if needed) as a text file.
+All Data Mover designs are codeless — you create the OpenCL™ kernels by calling the **Kernel Generator** with a JSON description and ROM content (if needed) as a text file.
 
 The **Kernel Generator** consists of:
 
 - Kernel templates (in Jinja2), which can be instantiated through configurations from JSON.
 - Data converter to transform the user-provided texture ROM content into a usable initialization file.
-- Python script to automate the kernel generation from JSON to HLS C++ OpenCL kernel, which is ``L2/scripts/internal/generate_kernels.py``.
+- Python script to automate kernel generation from JSON to HLS C++ OpenCL kernel: ``L2/scripts/internal/generate_kernels.py``.
 
 .. ATTENTION::
-    Generated kernels are not self-contained source code, they would reference low-level block implementation headers in the ``L1/include`` folder. Ensure that folder is passed to the AMD Vitis™ compiler as a header search path when compiling project using generated programmable logic (PL) kernels.
+    Generated kernels are not self-contained source code; they reference low-level block implementation headers in the ``L1/include`` folder. Ensure that folder is passed to the AMD Vitis™ compiler as a header search path when compiling a project using generated programmable logic (PL) kernels.
 
-Programmable 4D Data-Mover
+Programmable 4D Data Mover
 ===========================
 
 .. _programmable-features:
@@ -27,31 +27,31 @@ Programmable 4D Data-Mover
 Feature
 --------
 
-The AI Engine (AIE) application often needs to deal with multi-dimension data. The most common cases are that the AIE application needs to select and read/write a regularly distributed sub-set from a multi-dimensional array. Because a multi-dimension array has to be stored in a linear addressing memory space, such sub-set is rarely a contiguous block in memory but always a lot of data segment. It is not convenient for you to implement logic to calculate all segments' address and size and not efficient for AIE to do so.
+The AI Engine (AIE) application often needs to handle multi-dimension data. The most common case is that the AIE application needs to select and read or write a regularly distributed subset from a multi-dimensional array. Because a multi-dimension array must be stored in a linear addressing memory space, such a subset is rarely a contiguous block in memory but consists of many data segments. Implementing logic to calculate all segment addresses and sizes is impractical, and doing so on the AIE is inefficient.
 
-The Programmable 4D Data-Mover includes:
+The Programmable 4D Data Mover includes:
 
-- Concise descriptor design that uses 9x64 bits to fully describe access on 4-dimension (and low-dimension) data.
-- Template kernel design that can read multiple descriptors and accomplish the defined access pattern one by one.
+- Concise descriptor design that uses 9×64 bits to fully describe access on four-dimension (and lower-dimension) data.
+- Template kernel design that reads multiple descriptors and completes the defined access pattern one by one.
 
 Descriptor Design
 ^^^^^^^^^^^^^^^^^
 
-The Descriptor design is the most important part of the Programmable 4D Data-Mover. It defines:
+The descriptor design is the most important part of the Programmable 4D Data Mover. It defines:
 
-- How 4-dimension data is mapped to linear addresses
-- Where to find the sub-set to access
-- What is the dimension of sub-set
-- How to serialize the sub-set
+- How four-dimension data is mapped to linear addresses
+- Where to find the subset to access
+- What the dimension of the subset is
+- How to serialize the subset
 
-To store a 4D array, ``A[W][Z][Y][X]``, in memory, it has to be mapped into a linear address space which will certainly lead to addressing like ``&A[w][z][y][x] = bias + w * (Z*Y*X) + z * (Y*X) + y * (X) + x``. In such a condition, adjacent elements in the 4D array will have const strid. Then nine parameters { bias (address of first element), X, X_stride, Y, Y_stride, Z, Z_stride, W, W_stride } will be enough to define the 4D array in memory.
+To store a 4D array, ``A[W][Z][Y][X]``, in memory, it must be mapped into a linear address space, which leads to addressing such as ``&A[w][z][y][x] = bias + w * (Z*Y*X) + z * (Y*X) + y * (X) + x``. In this arrangement, adjacent elements in the 4D array have a constant stride. Nine parameters — bias (address of first element), X, X_stride, Y, Y_stride, Z, Z_stride, W, W_stride — are sufficient to define the 4D array in memory.
 
 - &A[w][z][y][x+1] – &A[w][z][y][x] = 1             (X_stride)
 - &A[w][z][y+1][x] – &A[w][z][y][x] = X             (Y_stride)
 - &A[w][z+1][y][x] – &A[w][z][y][x] = X * Y         (Z_stride)
 - &A[w+1][z][y][x] – &A[w][z][y][x] = X * Y * Z     (W_stride)
 
-Because the Programmable 4D Data Mover needs to write to/read from the AXI4-Stream, it also needs to define how to serialize the 4D array. Define ``ap_int<64> cfg[9]`` as descriptor to define one access:
+Because the Programmable 4D Data Mover reads from and writes to the AXI4-Stream, it also needs to define how to serialize the 4D array. Define ``ap_int<64> cfg[9]`` as the descriptor to define one access:
 
 - cfg[0]: Bias (address of the 4D array's first element in memory)
 - cfg[1], cfg[2]: Stride of the first accessed dimension, size of the first accessed dimension
@@ -59,7 +59,7 @@ Because the Programmable 4D Data Mover needs to write to/read from the AXI4-Stre
 - cfg[5], cfg[6]: Stride of the third accessed dimension, size of the third accessed dimension
 - cfg[7], cfg[8]: Stride of the fourth accessed dimension, size of the fourth accessed dimension
 
-With the descriptor above, the Programmable 4D Data Mover will serialize the read/write as the following pseudo code (take read as example). The Programmable 4D Data Mover will load one or multiple descriptors from a descriptor buffer. The descriptor buffer begins with a 64-bit ``num`` which indicate how many descriptors are there in the buffer. Then ``num`` will be followed by one or multiple 9x64 bit descriptors, all compact stored. It will start parsing the first descriptor, finish the access, then parse and finish the next descriptor. It will keep the processing until it finishes all descriptors.
+With the descriptor above, the Programmable 4D Data Mover serializes the read/write as shown in the following pseudo-code (using read as an example). The Programmable 4D Data Mover loads one or more descriptors from a descriptor buffer. The descriptor buffer begins with a 64-bit ``num`` that indicates how many descriptors are in the buffer. Then ``num`` descriptors follow, each nine 64-bit values stored compactly. The kernel parses the first descriptor, completes the access, then parses and completes the next descriptor, continuing until all descriptors are processed.
 
 .. code-block:: cpp
 
@@ -77,19 +77,21 @@ With the descriptor above, the Programmable 4D Data Mover will serialize the rea
 Kernel Design
 ^^^^^^^^^^^^^
 
-Programmable 4D Data Movers are templated designs to access elements of 32/64/128/256/512 bits width. They have a standalone AXI master port to access the descriptor buffer. The AXI master to access descriptors are configured to be 64 bits wide. Other AXI master and AXI4-Stream ports are configured to be same width of data elements. AXI master ports share the same "latency" "outstanding" "burst length" setup, and they should be the same with the pragma setup in the kernels that wrap up the data mover. They share the same kernel generator and JSON spec; take reference from the following example.
+Programmable 4D Data Movers are templated designs that access elements of 32, 64, 128, 256, or 512 bits width. They have a standalone AXI master port to access the descriptor buffer, configured to be 64 bits wide. Other AXI master and AXI4-Stream ports are configured to the same width as the data elements. AXI master ports share the same "latency", "outstanding", and "burst length" settings; these must match the pragma settings in the kernels that wrap the data mover. They share the same kernel generator and JSON specification. The following figure shows the kernel interface.
 
-.. image:: /images/4d_kernl_interface.png 
+.. image:: /images/4d_kernl_interface.png
    :alt: various pattern
    :width: 100%
    :align: center
 
-The Programmable 4D Data Mover's performance depends on:
+The Programmable 4D Data Mover performance depends on:
 
-- Compile time: Data width, larger data width, and larger bandwidth.
-- Runtime: cfg[1] of each descriptor. When cfg[1] = 1, it will lead to burst access and bandwidth will be nice; otherwise it will lead to non-burst access and bandwidth will not be as good as burst access.
+- Compile time: data width. Larger data width provides larger bandwidth.
+- Runtime: ``cfg[1]`` of each descriptor. When ``cfg[1]`` = 1, the kernel uses burst access and achieves full bandwidth. Otherwise, it uses non-burst access and bandwidth is lower than burst access.
 
-.. image:: /images/dm_perf.png 
+The following figure shows the performance characteristics of the data mover.
+
+.. image:: /images/dm_perf.png
    :alt: various pattern
    :width: 50%
    :align: center
@@ -104,9 +106,9 @@ Example Kernel Specification (JSON)
 
 The following kernel specification in JSON describes a ``4DCuboidRead`` kernel and a ``4DCuboidWrite`` kernel.
 
-The ``4DCuboidRead`` kernel should have two data paths as you can see that there are two specifications in the ``map`` field. For example, take the first data path, it will use an AXI-M port ``din_0`` to read 4D array and AXI-M ``desp_0`` to access the descriptor buffer. Both AXI-M ports have "latency", "outstanding", and "burst_len" set up in their HLS kernel pragma. Its output port is AXI4-Stream ``dout_0``, and both the ``din_0`` and ``dout_0``'s port width are 64.
+The ``4DCuboidRead`` kernel has two data paths, as shown by the two specifications in the ``map`` field. The first data path uses an AXI-M port ``din_0`` to read the 4D array and AXI-M ``desp_0`` to access the descriptor buffer. Both AXI-M ports have "latency", "outstanding", and "burst_len" set in their HLS kernel pragma. The output port is AXI4-Stream ``dout_0``, and both ``din_0`` and ``dout_0`` have a port width of 64.
 
-The ``4DCuboidWrite`` kernel should have two data paths, as you can see that there are two specifications in the ``map`` field. For example, take the first data path, it will use an AXI4-Stream port, ``din_0``, to read the 4D array and AXI-M ``desp_0`` to access the descriptor buffer. It will use the AXI-M port, ``dout_0``, for output. Both AXI-M ports have "latency", "outstanding", and "burst_len" set up in their HLS kernel pragma. Both the ``din_0`` and ``dout_0``'s port width are 64.
+The ``4DCuboidWrite`` kernel has two data paths, as shown by the two specifications in the ``map`` field. The first data path uses an AXI4-Stream port ``din_0`` to read the 4D array and AXI-M ``desp_0`` to access the descriptor buffer. It uses the AXI-M port ``dout_0`` for output. Both AXI-M ports have "latency", "outstanding", and "burst_len" set in their HLS kernel pragma. Both ``din_0`` and ``dout_0`` have a port width of 64.
 
 .. code-block:: JSON
 
@@ -175,8 +177,8 @@ The ``4DCuboidWrite`` kernel should have two data paths, as you can see that the
         }
     }
 
-Example of How to Generate Kernels
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Generating Kernels
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash
 
@@ -186,8 +188,8 @@ Example of How to Generate Kernels
     # pre_build:
     #     make -f $(CUR_DIR)/ksrc.mk GENKERNEL=$(XFLIB_DIR)/L2/scripts/generate_kernels SPEC=$(CUR_DIR)/kernel/spec.json TOOLDIR=$(CUR_DIR)/_krnlgen
 
-Example of How to Run Hardware Emulation of Hardware
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Running Hardware Emulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash
 
@@ -202,10 +204,9 @@ Example of How to Run Hardware Emulation of Hardware
 Runtime Configuration
 -----------------------
 
-The Programmable 4D Data-Mover will read multiple descriptors from a descriptor buffer which can be configured from the host side in runtime. The descriptor buffer is compacted store in memory and start with 1x64 bit ``num`` that indicate how many descriptors are there in the buffer. Then ``num`` is followed by one or multiple descriptors.
+The Programmable 4D Data Mover reads multiple descriptors from a descriptor buffer that can be configured from the host side at runtime. The descriptor buffer is stored compactly in memory and starts with a 1×64-bit ``num`` that indicates how many descriptors are in the buffer. Then ``num`` descriptors follow.
 
-Here are examples of the descriptor buffer and corresponding patterns. The underlying array is a 3D array (due to difficulties to draw a actual 4D array): ``A[10][7][8]`` which could be treated as ``A[1][10][7][8]``.
-Its first element's address is 0, which means 'bias' = 0. Its size means that W = 1, Z = 10, Y = 7, and X = 8. Assume that its mapping lead to W_stride = 0 (), Z_stride = 56, Y_stride = 8, X_stride = 1.
+The following examples show the descriptor buffer and corresponding patterns. The underlying array is a 3D array (shown as a 3D array because 4D arrays cannot be drawn directly): ``A[10][7][8]``, which can be treated as ``A[1][10][7][8]``. Its first element's address is 0, so bias = 0. Its size means W = 1, Z = 10, Y = 7, and X = 8. Its mapping leads to W_stride = 0, Z_stride = 56, Y_stride = 8, X_stride = 1.
 
 .. code-block:: cpp
 
@@ -215,7 +216,7 @@ Its first element's address is 0, which means 'bias' = 0. Its size means that W 
     0, 56, 10, 8, 7, 1, 8, 0, 1,
     4, 1, 4, 8, 3, 56, 2, 0, 1}
 
-The first number in buffer is ``4`` which means there are four descriptors followed. Their implied pattern are:
+The first number in the buffer is ``4``, which means four descriptors follow. Their implied patterns are:
 
 Descriptor[0]: {0, 1, 8, 8, 7, 56, 10, 0, 1}. The implied pattern is:
 
@@ -232,6 +233,8 @@ Descriptor[0]: {0, 1, 8, 8, 7, 56, 10, 0, 1}. The implied pattern is:
             }
         }
     }
+
+The following figure shows the access pattern for Descriptor[0].
 
 .. image:: /images/X_Y_Z_W_pattern.png
    :alt: various pattern
@@ -254,6 +257,8 @@ Descriptor[1]: {0, 8, 7, 1, 8, 56, 10, 0, 1}. The implied pattern is:
         }
     }
 
+The following figure shows the access pattern for Descriptor[1].
+
 .. image:: /images/Y_X_Z_W_pattern.png
    :alt: various pattern
    :width: 30%
@@ -275,6 +280,8 @@ Descriptor[2]: {0, 56, 10, 8, 7, 1, 8, 0, 1}. The implied pattern is:
         }
     }
 
+The following figure shows the access pattern for Descriptor[2].
+
 .. image:: /images/Z_Y_X_W_pattern.png
    :alt: various pattern
    :width: 30%
@@ -295,6 +302,8 @@ Descriptor[3]: {4, 1, 4, 8, 3, 56, 2, 0, 1}. The implied pattern is:
             }
         }
     }
+
+The following figure shows the access pattern for Descriptor[3].
 
 .. image:: /images/X_Y_Z_W_sub_pattern.png
    :alt: various pattern

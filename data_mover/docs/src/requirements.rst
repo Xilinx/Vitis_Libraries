@@ -19,11 +19,14 @@ Requirements
 Software Platform
 =================
 
-The supported operating systems are RHEL8.10, RHEL9.2,RHEL9.3,RHEL9.4,RHEL9.5 and Ubuntu22.04.3 LTS,22.04.4 LTS,22.04.5 LTS.
+The following operating systems are supported:
 
-And C++14 should be enabled during compilation.
+- RHEL 8.10, 9.2, 9.3, 9.4, 9.5
+- Ubuntu 22.04.3 LTS, 22.04.4 LTS, 22.04.5 LTS
+
+C++14 must be enabled during compilation.
 
 Development Tools
 =================
 
-This library is designed to work with AMD Vitis™ 2023.1 and later, and a matching version of XRT should be installed.
+This library works with AMD Vitis™ 2023.1 and later. A matching version of XRT must be installed.
