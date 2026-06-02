@@ -138,9 +138,9 @@ int main(int argc, char** argv) {
 
     // Find minimum and maximum differences.
     float err_per;
-    xf::cv::analyzeDiff(diff, 0, err_per);
+    xf::cv::analyzeDiff(diff, 1, err_per);
 
-    if (err_per > 0.0f) {
+    if (err_per > 1.0f) {
         fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     } else

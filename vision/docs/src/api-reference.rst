@@ -15748,12 +15748,12 @@ Remap
 
 .. code:: c
 
-   template<int WIN_ROWS,int INTERPOLATION_TYPE, int SRC_T, int MAP_T, int DST_T, int ROWS, int COLS, int NPC = 1, bool USE_URAM=false, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_Remapped = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_MAPX = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_MAPY = _XFCVDEPTH_DEFAULT>
+   template<int WIN_ROWS,int INTERPOLATION_TYPE, int SRC_T, int MAP_T, int DST_T, int ROWS, int COLS, int REMAPPED_ROWS, int REMAPPED_COLS, int NPC = 1, bool USE_URAM=false, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_Remapped = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_MAPX = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_MAPY = _XFCVDEPTH_DEFAULT>
 
    void remap (xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN> &_src_mat,
-            xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_Remapped> &_remapped_mat,
-            xf::cv::Mat<MAP_T, ROWS, COLS, NPC, XFCVDEPTH_MAPX> &_mapx_mat,
-            xf::cv::Mat<MAP_T, ROWS, COLS, NPC, XFCVDEPTH_MAPY> &_mapy_mat);
+            xf::cv::Mat<DST_T, REMAPPED_ROWS, REMAPPED_COLS, NPC, XFCVDEPTH_Remapped> &_remapped_mat,
+            xf::cv::Mat<MAP_T, REMAPPED_ROWS, REMAPPED_COLS, NPC, XFCVDEPTH_MAPX> &_mapx_mat,
+            xf::cv::Mat<MAP_T, REMAPPED_ROWS, REMAPPED_COLS, NPC, XFCVDEPTH_MAPY> &_mapy_mat);
 
 
 .. rubric:: Parameter Descriptions
@@ -15787,6 +15787,10 @@ The following table describes the template parameters.
    | ROWS                | Height of input and output images                     |
    +---------------------+-------------------------------------------------------+
    | COLS                | Width of input and output images                      |
+   +---------------------+-------------------------------------------------------+
+   | REMAPPED_ROWS       | Height of output remapped image                       |
+   +---------------------+-------------------------------------------------------+
+   | REMAPPED_COLS       | Width of output remapped image                        |
    +---------------------+-------------------------------------------------------+
    | NPC                 | Number of pixels to be processed per cycle; this      |
    |                     | function supports XF_NPPC1 and XF_NPPC2 pixel per     |
@@ -15866,6 +15870,161 @@ for XF_INTERPOLATION_BILINEAR mode.
    |                | (MHz)               | Max latency (ms) |
    +================+=====================+==================+
    | 2 pixel mode   | 300                 | 14.1             |
+   +----------------+---------------------+------------------+
+
+.. _stitch:
+
+Stitch
+======
+
+The ``stitch`` function blends up to four remapped image tiles into a single
+panorama using per-tile feather masks. For each output pixel, mask values from
+the overlapping tiles are normalized and used as weights to combine the source
+pixel values (feather blending). The output canvas size is computed internally
+from the tile sizes and placement corners.
+
+.. rubric:: API Syntax
+
+
+.. code:: c
+
+   template <int SRC_T,
+             int MASK_T,
+             int ROWS_1, int COLS_1,
+             int ROWS_2, int COLS_2,
+             int ROWS_3, int COLS_3,
+             int ROWS_4, int COLS_4,
+             int ROWS_DST, int COLS_DST,
+             int NPC = 1,
+             int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+             int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+   void stitch (xf::cv::Mat<SRC_T, ROWS_1, COLS_1, NPC, XFCVDEPTH_IN_1>& src1,
+                xf::cv::Mat<SRC_T, ROWS_2, COLS_2, NPC, XFCVDEPTH_IN_1>& src2,
+                xf::cv::Mat<SRC_T, ROWS_3, COLS_3, NPC, XFCVDEPTH_IN_1>& src3,
+                xf::cv::Mat<SRC_T, ROWS_4, COLS_4, NPC, XFCVDEPTH_IN_1>& src4,
+                xf::cv::Mat<MASK_T, ROWS_1, COLS_1, NPC, XFCVDEPTH_IN_1>& mask1,
+                xf::cv::Mat<MASK_T, ROWS_2, COLS_2, NPC, XFCVDEPTH_IN_1>& mask2,
+                xf::cv::Mat<MASK_T, ROWS_3, COLS_3, NPC, XFCVDEPTH_IN_1>& mask3,
+                xf::cv::Mat<MASK_T, ROWS_4, COLS_4, NPC, XFCVDEPTH_IN_1>& mask4,
+                int mask_corners[8],
+                xf::cv::Mat<SRC_T, ROWS_DST, COLS_DST, NPC, XFCVDEPTH_OUT_1>& dst);
+
+
+.. rubric:: Parameter Descriptions
+
+
+The following table describes the template parameters.
+
+.. table:: Table . stitch Template Parameter Descriptions
+
+   +----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Parameter                                    | Description                                                                                                                                                          |
+   +==============================================+======================================================================================================================================================================+
+   | SRC_T                                        | Input/output image pixel type. Supported: 8-bit unsigned, 1 or 3 channel (XF_8UC1, XF_8UC3).                                                                         |
+   +----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | MASK_T                                       | Per-tile mask pixel type (XF_8UC1). Mask values are used as blend weights at each pixel.                                                                             |
+   +----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | ROWS_1, ROWS_2, ROWS_3, ROWS_4               | Maximum height of each input tile (tiles 1–4). The actual value is taken from the corresponding ``xf::cv::Mat``'s ``rows`` member at run time.                       |
+   +----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | COLS_1, COLS_2, COLS_3, COLS_4               | Maximum width of each input tile (tiles 1–4). The actual value is taken from the corresponding ``xf::cv::Mat``'s ``cols`` member at run time.                        |
+   +----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | ROWS_DST                                     | Maximum height of the stitched panorama. Must be large enough to contain the resulting region of interest (ROI) as computed by ``stitch_roi``.                       |
+   +----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | COLS_DST                                     | Maximum width of the stitched panorama. Must be large enough to contain the resulting region of interest (ROI) as computed by ``stitch_roi``.                        |
+   +----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | NPC                                          | Pixels processed per cycle. Supported: XF_NPPC1                                                                                    |
+   +----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | XFCVDEPTH_IN_1                               | Stream depth for input tiles and masks (AXI stream internal buffer depth for the input images/masks).                                                                |
+   +----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | XFCVDEPTH_OUT_1                              | Stream depth for the output panorama (AXI stream internal buffer depth for the output image).                                                                        |
+   +----------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+.. note::
+
+   The ``ROWS_DST`` and ``COLS_DST`` parameters (maximum height and width of the stitched panorama) must be large enough to contain the bounding region of all input tiles after placement on the output canvas. To determine the minimal required values for these parameters:
+
+   - For each input tile (tiles 1–4), identify its top-left output coordinate from the ``mask_corners`` array: {(x0, y0), (x1, y1), (x2, y2), (x3, y3)}.
+   - Obtain the height and width (runtime ``rows`` and ``cols``) for each tile.
+   - For each tile *i*, compute its bottom-right coordinate as (xᵢ + colsᵢ, yᵢ + rowsᵢ).
+   - The minimal required ``COLS_DST`` is:
+
+     ::
+
+        COLS_DST = max(x₀ + cols₁, x₁ + cols₂, x₂ + cols₃, x₃ + cols₄)
+
+   - The minimal required ``ROWS_DST`` is:
+
+     ::
+
+        ROWS_DST = max(y₀ + rows₁, y₁ + rows₂, y₂ + rows₃, y₃ + rows₄)
+
+   where the indices 1–4 refer to the respective tile.
+
+   For safe operation, ensure the compile-time values of ``ROWS_DST`` and ``COLS_DST`` are **greater than or equal to** these computed values, accounting for the largest possible arrangement in your use case.
+
+The following table describes the function parameters.
+
+.. table:: Table . stitch Function Parameter Descriptions
+
+   +----------------+-------------------------------------------------------+
+   | Parameter      | Description                                           |
+   +================+=======================================================+
+   | src1           | Remapped tile image from first camera/stream.         |
+   +----------------+-------------------------------------------------------+
+   | src2           | Remapped tile image from second camera/stream.        |
+   +----------------+-------------------------------------------------------+
+   | src3           | Remapped tile image from third camera/stream.         |
+   +----------------+-------------------------------------------------------+
+   | src4           | Remapped tile image from fourth camera/stream.        |
+   +----------------+-------------------------------------------------------+
+   | mask1          | Feather mask aligned with src1; same spatial size as  |
+   |                | ``src1`` mat.                                         |
+   +----------------+-------------------------------------------------------+
+   | mask2          | Feather mask aligned with src2; same spatial size as  |
+   |                | ``src2`` mat.                                         |
+   +----------------+-------------------------------------------------------+
+   | mask3          | Feather mask aligned with src3; same spatial size as  |
+   |                | ``src3`` mat.                                         |
+   +----------------+-------------------------------------------------------+
+   | mask4          | Feather mask aligned with src4; same spatial size as  |
+   |                | ``src4`` mat.                                         |
+   +----------------+-------------------------------------------------------+
+   | mask_corners   | Top-left placement of each tile on the output canvas, |
+   |                | packed as ``{x0, y0, x1, y1, x2, y2, x3, y3}`` in     |
+   |                | panorama coordinates.                                 |
+   +----------------+-------------------------------------------------------+
+   | dst            | Stitched output image.                                |
+   +----------------+-------------------------------------------------------+
+
+.. rubric:: Resource Utilization
+
+
+The following table summarizes the resource utilization of ``stitch`` for the
+``L1/examples/stitch`` configuration (four tiles, grayscale XF_8UC1,
+XF_NPPC1, output panorama 1056 x 1312), as generated in the Vitis HLS 2025.2
+tool for the Xilinx xcvc1902-vsva2197-2MP-e-S FPGA at 300 MHz.
+
+.. table:: Table . stitch Function Resource Utilization Summary
+
+   +---------------------------+----------+----------------+----------------+-------+---------+---------+----------+---------+---------+
+   | Function                  | channels | Output size    | Frequency(MHz) | NPC   | LUT     | FF      | DSP      | BRAM    | URAM    |
+   +===========================+==========+================+================+=======+=========+=========+==========+=========+=========+
+   | stitch                    | 1        | 1056 x 1312    | 300            | 1     | 6070    | 3897    | 5        | 2       | 0       |
+   +---------------------------+----------+----------------+----------------+-------+---------+---------+----------+---------+---------+
+
+.. rubric:: Performance Estimate
+
+
+The following table summarizes the performance of ``stitch`` for the same
+configuration as above (1056 x 1312 output, 300 MHz).
+
+.. table:: Table . stitch Function Performance Estimate Summary
+
+   +----------------+---------------------+------------------+
+   | Operating Mode | Operating Frequency | Latency Estimate |
+   |                |                     |                  |
+   |                | (MHz)               | Max latency (ms) |
+   +================+=====================+==================+
+   | 1 pixel mode   | 300                 | 4.52             |
    +----------------+---------------------+------------------+
 
 .. _resolution-conversion:

@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
 
         if ((width != srcImageBGR.cols) || (height != srcImageBGR.rows))
             cv::resize(srcImageBGR, srcImageBGR, cv::Size(width, height));
-        
+
         cv::cvtColor(srcImageBGR, srcImageRGB, cv::COLOR_BGR2RGB);
         cv::imwrite("src_BGR.png", srcImageBGR);
         cv::imwrite("src_RGB.png", srcImageRGB);
@@ -120,7 +120,7 @@ int main(int argc, char** argv) {
         // Convert to 4K RGB
         int width_in = srcImageRGB.cols;
         int height_in = srcImageRGB.rows;
-        //cv::resize(srcImageRGB, srcImageRGB, cv::Size(width_in, height_in));
+        // cv::resize(srcImageRGB, srcImageRGB, cv::Size(width_in, height_in));
         cv::imwrite("input_rgba_check.png", srcImageBGR);
         std::cout << "Image size of RGB : " << srcImageRGB.cols << " x " << srcImageRGB.rows << " x "
                   << srcImageRGB.channels() << std::endl;
@@ -165,7 +165,6 @@ int main(int argc, char** argv) {
 
         cv::Mat srcImage = srcImageRGB;
 
-       
         // Initializa device
         xF::deviceInit(xclBinName);
 
@@ -182,12 +181,9 @@ int main(int argc, char** argv) {
             xrt::bo(xF::gpDhdl, (srcImage.cols * srcImage.rows * (CHANNELS - 1) * srcImage.elemSize()), 0, 0);
         dstData = dst_hndl.map();
         cv::Mat dst(srcImage.rows, srcImage.cols, CV_8UC3, (void*)dstData);
-        xF::xfcvDataMoverParams params(cv::Size(srcImage.cols, srcImage.rows),
-                                       cv::Size(srcImage.cols, srcImage.rows));
-        xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT, TILE_WIDTH, 64, NO_COLS, 16, false> tiler(0, 0, true,
-                                                                                                            4);
-        xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_HEIGHT, TILE_WIDTH, 64, NO_COLS, 16, false> stitcher(
-            true);
+        xF::xfcvDataMoverParams params(cv::Size(srcImage.cols, srcImage.rows), cv::Size(srcImage.cols, srcImage.rows));
+        xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT, TILE_WIDTH, 64, NO_COLS, 16, false> tiler(0, 0, true, 4);
+        xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_HEIGHT, TILE_WIDTH, 64, NO_COLS, 16, false> stitcher(true);
 
         std::cout << "Graph init. This does nothing because CDO in boot PDI "
                      "already configures AIE.\n";
@@ -201,7 +197,6 @@ int main(int argc, char** argv) {
             std::cout << "XRT graph opened" << std::endl;
             gHndl.back().reset();
             std::cout << "Graph reset done" << std::endl;
-            
         }
 #endif
 

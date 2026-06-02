@@ -24,7 +24,8 @@
                 "opencv_flann",
 				"opencv_video",
 				"opencv_calib3d",
-				"opencv_highgui"
+				"opencv_highgui",
+                "opencv_stitching"
             ]
         }
     }

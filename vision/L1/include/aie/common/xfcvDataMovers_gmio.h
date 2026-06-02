@@ -654,7 +654,7 @@ void xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTOR
                                                             AIE_VECTORIZATION_FACTOR, true, false);
         mIsOutputResize = false;
         mOutSize = cv::Size(inputImgSize.height, inputImgSize.width);
-    } else if ((resize_type == 0) || (resize_type == 1)|| (resize_type == 2)) {
+    } else if ((resize_type == 0) || (resize_type == 1) || (resize_type == 2)) {
         smartTileTilerGenerateMetaDataWithSpecifiedTileSize(
             {inputImgSize.height, inputImgSize.width}, {outputImgSize.height, outputImgSize.width}, mMetaDataList,
             {TILE_HEIGHT_MAX, TILE_WIDTH_MAX}, {OUT_TILE_HEIGHT_MAX, OUT_TILE_WIDTH_MAX}, mTileRows, mTileCols,

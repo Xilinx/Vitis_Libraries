@@ -60,7 +60,6 @@ static inline void setNewFlag(ap_int<4>* elem, ap_int<4> nbd) {
     *elem = nbd;
 }
 
-
 static int findNextX_row(int x, int y, ap_int<4> prev, ap_int<4>& p, ap_int<8>* im, int cols, int new_cols) {
 #pragma HLS INLINE off
     int width = cols - 1;
@@ -114,7 +113,7 @@ Scan:
         }
     }
 }
-//Helper for packed 2‑pixels/byte storage (low nibble = even x, high nibble = odd x)
+// Helper for packed 2‑pixels/byte storage (low nibble = even x, high nibble = odd x)
 static inline ap_int<4> pix_read(const ap_int<8>* base, int words_per_row, int x, int y) {
 #pragma HLS INLINE
     int widx = y * words_per_row + (x >> 1);
@@ -306,20 +305,20 @@ void findcontours(xf::cv::Mat<SRC_T, MAX_H, MAX_W, NPPCX, XF_CV_DEPTH_IN_MAT>& _
     int cols_padded = cols + 2;
     int packed_cols_pad = (cols_padded + 1) / 2;
 
-    LoadImage:
+LoadImage:
     for (int i = 0; i < rows; ++i) {
         int dy = i + 1;
         int row_off = dy * packed_cols_pad;
         ap_int<4> even_bit = 0;
         bool even_valid = false;
-    
+
         for (int j = 0; j < cols; ++j) {
-    #pragma HLS PIPELINE II = 1
+#pragma HLS PIPELINE II = 1
             ap_uint<8> vin = _src.read(i * cols + j);
             ap_int<4> bit = (vin != 0) ? (ap_int<4>)1 : (ap_int<4>)0;
             int dx = j + 1;
             int widx = row_off + (dx >> 1);
-    
+
             if ((dx & 1) == 0) {
                 even_bit = bit;
                 even_valid = true;

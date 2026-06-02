@@ -34,8 +34,8 @@
 #define XF_CV_DEPTH_OUT 2
 
 // The type of interpolation, define INTERPOLATION as 0 for Nearest Neighbour
-// or 1 for Bilinear
-#define INTERPOLATION 1
+// or 1 for Bilinear or 2 for Bicubic
+#define INTERPOLATION 2
 #define XF_INTERPOLATION_BICUBIC 2
 // Resolve interpolation type:
 #if (INTERPOLATION == 0)
@@ -51,6 +51,11 @@
 // Configure this based on the number of rows needed for the remap purpose
 // e.g., If its a right to left flip two rows are enough
 #define XF_WIN_ROWS 8
+#if XF_WIN_ROWS >= HEIGHT
+#undef XF_WIN_ROWS
+#define XF_WIN_ROWS HEIGHT
+#endif
+
 #define BARREL 0
 #define XF_USE_URAM 1
 

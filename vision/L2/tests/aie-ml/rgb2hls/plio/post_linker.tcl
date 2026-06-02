@@ -9,8 +9,8 @@ if {[info exists ::env(XF_PROJ_ROOT)]} {
 source -notrace $script
 
 #Instances of PL kernels need to be declared as in system.cfg
-set TilerInstances [list [list "Tiler_top_1" 0] [list "Tiler_top_2" 1]]
-set StitcherInstances [list [list "stitcher_top_1" 0] [list "stitcher_top_2" 1]  ]
+set TilerInstances [list [list "Tiler_top_1" 0]]
+set StitcherInstances [list [list "stitcher_top_1" 0]]
 
 # ConfigDM <HostPixelType> <AIEPixelType> <DDRDataWidth> <AIEDataWidth> <TilerInst> <StitcherInst>
 # Default     <XF_8UC1>      <XF_8UC1>        <128>          <128>          <"">         <"">
@@ -25,27 +25,13 @@ foreach inst_info $TilerInstances {
     configTiler \
         HostPixelType $PixelType("XF_8UC3") \
         AIEPixelType $PixelType("XF_8UC4") \
-        TilerInstInfo [lindex $TilerInstances 0]
-configTiler \
-        HostPixelType $PixelType("XF_8UC3") \
-        AIEPixelType $PixelType("XF_8UC4") \
-        TilerInstInfo [lindex $TilerInstances 1]        
-       
- 
-     
-    }
+        TilerInstInfo $inst_info
+}
 
 # Stitcher Instances Configuration 
 foreach inst_info $StitcherInstances { 
     configStitcher \
         HostPixelType $PixelType("XF_8UC3") \
         AIEPixelType $PixelType("XF_8UC4") \
-        StitcherInstInfo [lindex $StitcherInstances 0]
-    configStitcher \
-        HostPixelType $PixelType("XF_8UC3") \
-        AIEPixelType $PixelType("XF_8UC4") \
-        StitcherInstInfo [lindex $StitcherInstances 1]        
-
- 
-                     
+        StitcherInstInfo $inst_info
 }

@@ -43,7 +43,7 @@ cv::Vec3b HSVtoRGB(const cv::Vec3b& hsv) {
     unsigned char h = hsv[0];
     unsigned char s = hsv[1];
     unsigned char v = hsv[2];
-    
+
     unsigned char r, g, b;
     if (s == 0) {
         r = g = b = v;
@@ -51,20 +51,44 @@ cv::Vec3b HSVtoRGB(const cv::Vec3b& hsv) {
     }
 
     // find the region
-    unsigned char region = h/30; //divided the 180 into six parts
-    unsigned char remainder = (h % 30) * 6; 
+    unsigned char region = h / 30; // divided the 180 into six parts
+    unsigned char remainder = (h % 30) * 6;
 
     unsigned char p = (v * (255 - s)) / 255;
     unsigned char q = (v * (255 - (s * remainder) / 255)) / 255;
     unsigned char t = (v * (255 - (s * (255 - remainder)) / 255)) / 255;
 
     switch (region) {
-        case 0:  r = v; g = t; b = p; break;
-        case 1:  r = q; g = v; b = p; break;
-        case 2:  r = p; g = v; b = t; break;
-        case 3:  r = p; g = q; b = v; break;
-        case 4:  r = t; g = p; b = v; break;
-        default: r = v; g = p; b = q; break;
+        case 0:
+            r = v;
+            g = t;
+            b = p;
+            break;
+        case 1:
+            r = q;
+            g = v;
+            b = p;
+            break;
+        case 2:
+            r = p;
+            g = v;
+            b = t;
+            break;
+        case 3:
+            r = p;
+            g = q;
+            b = v;
+            break;
+        case 4:
+            r = t;
+            g = p;
+            b = v;
+            break;
+        default:
+            r = v;
+            g = p;
+            b = q;
+            break;
     }
 
     return cv::Vec3b(b, g, r);
@@ -129,7 +153,7 @@ int main(int argc, char** argv) {
         // Run AIE
         //////////////////////////////////////////
         cv::Mat srcImage = srcImageHSV;
-       
+
         // Initializa device
         xF::deviceInit(xclBinName);
 
@@ -146,10 +170,9 @@ int main(int argc, char** argv) {
             xrt::bo(xF::gpDhdl, (srcImage.cols * srcImage.rows * (CHANNELS - 1) * srcImage.elemSize()), 0, 0);
         dstData = dst_hndl.map();
         cv::Mat dst(srcImage.rows, srcImage.cols, CV_8UC3, (void*)dstData);
-        xF::xfcvDataMoverParams params(cv::Size(srcImage.cols, srcImage.rows),
-                                       cv::Size(srcImage.cols, srcImage.rows));
+        xF::xfcvDataMoverParams params(cv::Size(srcImage.cols, srcImage.rows), cv::Size(srcImage.cols, srcImage.rows));
         xF::xfcvDataMovers<xF::TILER, uint8_t, TILE_HEIGHT, TILE_WIDTH, 64, NO_COLS, 16, false, false> tiler(0, 0, true,
-                                                                                                            4);
+                                                                                                             4);
         xF::xfcvDataMovers<xF::STITCHER, uint8_t, TILE_HEIGHT, TILE_WIDTH, 64, NO_COLS, 16, false, false> stitcher(
             true);
 
@@ -165,7 +188,6 @@ int main(int argc, char** argv) {
             std::cout << "XRT graph opened" << std::endl;
             gHndl.back().reset();
             std::cout << "Graph reset done" << std::endl;
-            
         }
 #endif
 

@@ -1,0 +1,155 @@
+{
+    "name": "Xilinx AVFIRS 4stream Test",
+    "description": [
+        "AVFIRS 4stream L3 function example"
+    ],
+    "flow": "system",
+    "platform_allowlist": [
+        "vek385"
+    ],
+    "platform_blocklist": [
+        "u280",
+        "u250"
+    ],
+    "platform_properties": {
+        "vek385": {
+            "host": {
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include",
+                        "$(SYSROOT)/usr/include/opencv4"
+                    ]
+                },
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib",
+                        "${SYSROOT}/lib"
+                    ]
+                },
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                },
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
+                    ]
+                }
+            }
+        }
+
+    },
+    "gui": false,
+    "launch": [
+        {
+            "target": "hw_emu",
+            "cmd_args": "LIB_DIR/data/my_frames/ LIB_DIR/data/dewarp_inputs/ LIB_DIR/data/stitch_inputs/ LIB_DIR/data/mask_inputs/ ",
+
+            "name": "hw_emu",
+            "ld_library_path": [
+                "$(OPENCV_LIB)",
+                "$(LD_LIBRARY_PATH)",
+                "$(XILINX_XRT)/lib"
+            ]
+        },
+        {
+            "target": "hw",
+            "cmd_args": "LIB_DIR/data/my_frames/ LIB_DIR/data/dewarp_inputs/ LIB_DIR/data/stitch_inputs/ LIB_DIR/data/mask_inputs/ ",            
+            "name": "Hardware",
+            "ld_library_path": [
+                "$(OPENCV_LIB)",
+                "$(LD_LIBRARY_PATH)",
+                "$(XILINX_XRT)/lib"
+            ]
+        }
+    ],
+    "data": [
+        "LIB_DIR/data/avfirs_frames/",
+        "LIB_DIR/data/dewarp_inputs/", 
+        "LIB_DIR/data/stitch_inputs/",
+        "LIB_DIR/data/mask_inputs/"
+    ],
+    "host": {
+        "host_exe": "AVFIRS_4stream",
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L3/examples/AVFIRS_4stream/xf_AVFIRS_4stream_tb.cpp",
+                "LIB_DIR/ext/xcl2/xcl2.cpp"
+            ],
+            "includepaths": [
+                "LIB_DIR/L3/examples/AVFIRS_4stream/config"
+            ],
+            "options": "-O1 -I$(XILINX_HLS)/include"
+        }
+    },
+    "v++": {
+        "compiler": {
+            "symbols": [],
+            "includepaths": [
+                "LIB_DIR/L3/examples/AVFIRS_4stream/config"
+            ],
+            "clflags": []
+        }
+    },
+    "containers": [
+        {
+            "name": "krnl_AVFIRS_4stream",
+            "accelerators": [
+                {
+                    "name": "AVFIRS_4stream_accel",
+                    "location": "LIB_DIR/L3/examples/AVFIRS_4stream/xf_AVFIRS_4stream_accel.cpp",
+                    "frequency": 100.0
+                }
+            ],
+            "frequency": 100.0
+        }
+    ],
+    "check_env": [
+        {
+            "env": "OPENCV_INCLUDE",
+            "platform": [
+                "u200",
+                "u50",
+                "aws-vu9p-f1"
+            ],
+            "echo": "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable"
+        },
+        {
+            "env": "OPENCV_LIB",
+            "platform": [
+                "u200",
+                "u50",
+                "aws-vu9p-f1"
+            ],
+            "echo": "Cannot find Opencv lib path. Please set OPENCV_LIB variable"
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": {
+                    "vitis_hw_build": 40960,
+                    "vitis_hw_emu": 28672,
+                    "vitis_hw_run": 10240
+                },
+                "max_time_min": {
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 470,
+                    "vitis_hw_run": 30
+                }
+            }
+        ],
+        "targets": [
+            "vitis_hw_emu",
+            "vitis_hw_build",
+            "vitis_hw_run"
+        ],
+        "category": "full"
+    }
+}

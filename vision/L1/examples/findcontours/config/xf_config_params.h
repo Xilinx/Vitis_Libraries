@@ -24,7 +24,7 @@
 #include "common/xf_utility.hpp"
 #include "imgproc/xf_findcontours.hpp"
 
-#define MAX_W 1200 
+#define MAX_W 1200
 #define MAX_H 800
 #define MAX_CONTOURS 4096
 #define MAX_TOTAL_POINTS 10000

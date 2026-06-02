@@ -47,13 +47,11 @@ class HSV2RGBAGraph : public adf::graph {
 
         mtx_in = shared_buffer<uint8_t>::create({TILE_WINDOW_SIZE * NO_CORES_PER_COL}, 1, NO_CORES_PER_COL);
         num_buffers(mtx_in) = 2;
-        location<buffer>(mtx_in) = {address(mt_col, 0, 0),
-                                    address(mt_col, 0, (TILE_WINDOW_SIZE * NO_CORES_PER_COL))};
+        location<buffer>(mtx_in) = {address(mt_col, 0, 0), address(mt_col, 0, (TILE_WINDOW_SIZE * NO_CORES_PER_COL))};
 
         mtx_out = shared_buffer<uint8_t>::create({TILE_WINDOW_SIZE * NO_CORES_PER_COL}, NO_CORES_PER_COL, 1);
         num_buffers(mtx_out) = 2;
-        location<buffer>(mtx_out) = {address(mt_col, 1, 0),
-                                     address(mt_col, 1, (TILE_WINDOW_SIZE * NO_CORES_PER_COL))};
+        location<buffer>(mtx_out) = {address(mt_col, 1, 0), address(mt_col, 1, (TILE_WINDOW_SIZE * NO_CORES_PER_COL))};
 
         connect<>(in1.out[0], mtx_in.in[0]);
         write_access(mtx_in.in[0]) = buffer_descriptor((TILE_WINDOW_SIZE * NO_CORES_PER_COL) / 4, 0, {1}, {});
@@ -62,7 +60,6 @@ class HSV2RGBAGraph : public adf::graph {
         for (int i = 0; i < NO_CORES_PER_COL; i++) {
             k[i] = kernel::create(hsv2rgba);
 
-            
             connect<>(mtx_in.out[i], k[i].in[0]);
             adf::dimensions(k[i].in[0]) = {TILE_WINDOW_SIZE};
             read_access(mtx_in.out[i]) =

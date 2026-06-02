@@ -17,8 +17,8 @@
 #include "graph.h"
 
 // instantiate adf dataflow graph
-resizeGraph resize[NO_INSTANCES] = {{6, 0, 0}, {8, 0, 1}, {10, 0, 2}};//,{13, 0, 3}};
-resizeGraph2 resize2[NO_INSTANCES] = {{6, 0, 4}, {8, 0, 5}, {10, 0, 6}};//, {13, 0, 7}};
+resizeGraph resize[NO_INSTANCES] = {{6, 0, 0}, {8, 0, 1}, {10, 0, 2}};   //,{13, 0, 3}};
+resizeGraph2 resize2[NO_INSTANCES] = {{6, 0, 4}, {8, 0, 5}, {10, 0, 6}}; //, {13, 0, 7}};
 
 // initialize and run the dataflow graph
 #if defined(__AIESIM__) || defined(__X86SIM__)

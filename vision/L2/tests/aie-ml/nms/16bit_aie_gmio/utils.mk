@@ -123,6 +123,18 @@ To add more platform directories, set the PLATFORM_REPO_PATHS variable or point 
 endef
 export MSG_PLATFORM
 
+define CONFIG_GEN_PY
+import os, string
+import sys
+tmpl_file = sys.argv[1]
+out_file = sys.argv[2]
+with open(tmpl_file, 'r') as fr:
+    t = fr.read()
+with open(out_file, 'w') as f:
+    f.write(string.Template(t).safe_substitute(**os.environ))
+endef
+export CONFIG_GEN_PY
+
 .PHONY: check_platform
 check_platform:
 ifeq (,$(XPLATFORM))

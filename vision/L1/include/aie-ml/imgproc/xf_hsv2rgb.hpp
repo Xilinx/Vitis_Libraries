@@ -28,14 +28,13 @@ namespace aie {
 
 class Hsv2Rgba {
 #if __AIE_ARCH__ == 22 || __AIE_ARCH__ == 21 // AIE2P/S
-    static constexpr int N = 64;             // Vectorization factor
+    static constexpr int N = 32;             // Vectorization factor
 #else
-    static constexpr int N = 64; // Vectorization factor
+    static constexpr int N = 32; // Vectorization factor
 #endif
 
    public:
    private:
-
    public:
     void runImpl(adf::input_buffer<uint8_t>& in, adf::output_buffer<uint8_t>& out);
     void xf_hsv2rgba(uint8_t* in_ptr, uint8_t* out_ptr, uint16_t tile_width, uint16_t tile_height);
@@ -48,7 +47,7 @@ __attribute__((noinline)) void Hsv2Rgba::xf_hsv2rgba(uint8_t* restrict in_ptr,
     ::aie::vector<uint8_t, N> hsv_channel0, hsv_channel1, hsv_channel2, hsv_channel3;
     ::aie::vector<uint8_t, N> r, g, b, a, h, s, v;
     ::aie::accum<acc64, N> acc_s, acc_h, acc_v;
-    ::aie::accum<acc32, N> acc_h1,acc_h2,acc_h3;
+    ::aie::accum<acc32, N> acc_h1, acc_h2, acc_h3;
     ::aie::accum<acc32, N> acc1;
     uint16_t more_pixels = 0, loop_count;
     loop_count = (tile_height * tile_width) / N; // Divide by VECTORIZATION-FACTOR
@@ -67,9 +66,9 @@ __attribute__((noinline)) void Hsv2Rgba::xf_hsv2rgba(uint8_t* restrict in_ptr,
     bfloat16 three_sixty_bf16 = 360.0;
     bfloat16 point_five_bf16 = 0.5;
     bfloat16 two_five_five_bf16 = 255.0;
-    bfloat16 one_by_255 = one_bf16/two_five_five_bf16;
-    bfloat16 one_by_30  = one_bf16/thirty_bf16;
-    bfloat16 h_scale = six_bf16/one_eighty_bf16;
+    bfloat16 one_by_255 = one_bf16 / two_five_five_bf16;
+    bfloat16 one_by_30 = one_bf16 / thirty_bf16;
+    bfloat16 h_scale = six_bf16 / one_eighty_bf16;
     ::aie::vector<bfloat16, N> out_tab[4];
     ::aie::vector<uint8_t, N> vec_add_sub;
     uint16_t one_uint16 = 1;
@@ -82,7 +81,7 @@ __attribute__((noinline)) void Hsv2Rgba::xf_hsv2rgba(uint8_t* restrict in_ptr,
     ::aie::vector<uint8_t, N> num_fives = ::aie::broadcast<uint8_t, N>(5);
 
     for (int j = 0; j < loop_count; j++) {
-        // h,s,v extraction 
+        // h,s,v extraction
         hsv_channel0 = ::aie::load_v<N>(in_ptr);
         in_ptr += N;
         hsv_channel1 = ::aie::load_v<N>(in_ptr);
@@ -99,24 +98,24 @@ __attribute__((noinline)) void Hsv2Rgba::xf_hsv2rgba(uint8_t* restrict in_ptr,
         s = ::aie::filter_odd(hs_temp, 1);
         v = ::aie::filter_even(va_temp, 1);
         a = ::aie::filter_odd(va_temp, 1);
-            
-        //Find the region which is divided into 6 parts each of 30deg
+
+        // Find the region which is divided into 6 parts each of 30deg
         acc_f = ::aie::mul(::aie::to_float<bfloat16>(h), one_by_30);
         ::aie::vector<bfloat16, N> region_bf16 = acc_f.template to_vector<bfloat16>(0);
         ::aie::vector<uint8_t, N> region = ::aie::to_fixed<uint8_t>(region_bf16, 0);
         ::aie::vector<bfloat16, N> region_bfloat16 = ::aie::to_float<bfloat16>(region);
-        ::aie::mask<N> m1 = ::aie::gt(region_bfloat16,region_bf16);
-        region = ::aie::select(region,::aie::sub(region, (uint8_t)1), m1);
+        ::aie::mask<N> m1 = ::aie::gt(region_bfloat16, region_bf16);
+        region = ::aie::select(region, ::aie::sub(region, (uint8_t)1), m1);
 
-        //Scale remainder to 0-255
+        // Scale remainder to 0-255
         ::aie::accum<acc32, N> acc_v = ::aie::mul(region, (uint8_t)30);
         ::aie::vector<uint8_t, N> h_mod_30 = ::aie::sub(h, acc_v.template to_vector<uint8_t>(0));
         auto acc_v1 = ::aie::mul(h_mod_30, (uint8_t)255);
         acc_f = ::aie::mul(::aie::to_float<bfloat16>(acc_v1.template to_vector<uint16_t>(0)), one_by_30);
         ::aie::vector<bfloat16, N> remainder_bf16 = acc_f.template to_vector<bfloat16>(0);
         ::aie::vector<uint8_t, N> remainder = ::aie::to_fixed<uint8_t>(remainder_bf16, 0);
-        
-        //get floor value of h_bfloat16 and do h = h - floor(h)
+
+        // get floor value of h_bfloat16 and do h = h - floor(h)
         // if h < 0 => h = h + 6.0
         m1 = ::aie::lt(region, num_zeroes);
         vec_add_sub = ::aie::add(region, (uint8_t)6);
@@ -126,16 +125,16 @@ __attribute__((noinline)) void Hsv2Rgba::xf_hsv2rgba(uint8_t* restrict in_ptr,
         m1 = ::aie::ge(region, num_sixes);
         vec_add_sub = ::aie::sub(region, (uint8_t)6);
         region = ::aie::select(region, vec_add_sub, m1);
-        
-        //p = (v * (255 - s)) / 255;
+
+        // p = (v * (255 - s)) / 255;
         ::aie::vector<uint8_t, N> vec_sub = ::aie::sub((uint8_t)255, s);
         acc_v = ::aie::mul(v, vec_sub);
         ::aie::vector<bfloat16, N> vec_mul = ::aie::to_float<bfloat16>(acc_v.template to_vector<uint16_t>(0));
         acc_f = ::aie::mul(vec_mul, one_by_255);
         ::aie::vector<bfloat16, N> p_bf16 = acc_f.template to_vector<bfloat16>(0);
         ::aie::vector<uint8_t, N> p = ::aie::to_fixed<uint8_t>(p_bf16, 0);
-        
-        //q = (v * (255 - (s * remainder) / 255)) / 255;
+
+        // q = (v * (255 - (s * remainder) / 255)) / 255;
         acc_v = ::aie::mul(s, remainder);
         acc_f = ::aie::mul(::aie::to_float<bfloat16>(acc_v.template to_vector<uint16_t>(0)), one_by_255);
         ::aie::vector<bfloat16, N> q_bf16 = acc_f.template to_vector<bfloat16>(0);
@@ -146,8 +145,8 @@ __attribute__((noinline)) void Hsv2Rgba::xf_hsv2rgba(uint8_t* restrict in_ptr,
         acc_f = ::aie::mul(vec_mul, one_by_255);
         q_bf16 = acc_f.template to_vector<bfloat16>(0);
         q = ::aie::to_fixed<uint8_t>(q_bf16, 0);
-        
-        //t = (v * (255 - (s * (255 - remainder)) / 255)) / 255;
+
+        // t = (v * (255 - (s * (255 - remainder)) / 255)) / 255;
         vec_sub = ::aie::sub((uint8_t)255, remainder);
         acc_v = ::aie::mul(s, vec_sub);
         vec_mul = ::aie::to_float<bfloat16>(acc_v.template to_vector<uint16_t>(0));
@@ -167,26 +166,26 @@ __attribute__((noinline)) void Hsv2Rgba::xf_hsv2rgba(uint8_t* restrict in_ptr,
         // region == 3 => b = v, g = q, r = p
         // region == 4 => b = v, g = p, r = t
         // region == 5 => b = q, g = p, r = v
-        auto b = ::aie::select(::aie::select(::aie::select(::aie::select(::aie::select(q
-                               , v, ::aie::eq(region, num_fours))
-                               , v, ::aie::eq(region, num_threes))
-                               , t, ::aie::eq(region, num_twos))
-                               , p, ::aie::eq(region, num_ones))
-                               , p, ::aie::eq(region, num_zeroes));
+        auto b =
+            ::aie::select(::aie::select(::aie::select(::aie::select(::aie::select(q, v, ::aie::eq(region, num_fours)),
+                                                                    v, ::aie::eq(region, num_threes)),
+                                                      t, ::aie::eq(region, num_twos)),
+                                        p, ::aie::eq(region, num_ones)),
+                          p, ::aie::eq(region, num_zeroes));
 
-        auto g = ::aie::select(::aie::select(::aie::select(::aie::select(::aie::select(p
-                               , p, ::aie::eq(region, num_fours))
-                               , q, ::aie::eq(region, num_threes))
-                               , v, ::aie::eq(region, num_twos))
-                               , v, ::aie::eq(region, num_ones))
-                               , t, ::aie::eq(region, num_zeroes));
+        auto g =
+            ::aie::select(::aie::select(::aie::select(::aie::select(::aie::select(p, p, ::aie::eq(region, num_fours)),
+                                                                    q, ::aie::eq(region, num_threes)),
+                                                      v, ::aie::eq(region, num_twos)),
+                                        v, ::aie::eq(region, num_ones)),
+                          t, ::aie::eq(region, num_zeroes));
 
-        auto r = ::aie::select(::aie::select(::aie::select(::aie::select(::aie::select(v
-                               , t, ::aie::eq(region, num_fours))
-                               , p, ::aie::eq(region, num_threes))
-                               , p, ::aie::eq(region, num_twos))
-                               , q, ::aie::eq(region, num_ones))
-                               , v, ::aie::eq(region, num_zeroes));
+        auto r =
+            ::aie::select(::aie::select(::aie::select(::aie::select(::aie::select(v, t, ::aie::eq(region, num_fours)),
+                                                                    p, ::aie::eq(region, num_threes)),
+                                                      p, ::aie::eq(region, num_twos)),
+                                        q, ::aie::eq(region, num_ones)),
+                          v, ::aie::eq(region, num_zeroes));
 
         // s == 0 => b = v, g = v, r = v else above values
         b = ::aie::select(b, v, ::aie::eq(s, num_zeroes));

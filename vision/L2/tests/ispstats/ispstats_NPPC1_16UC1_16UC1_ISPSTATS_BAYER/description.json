@@ -1,11 +1,11 @@
 {
     "name": "xilinx isp stats bayer l2 test",
     "description": [
-        "ISP Stats RGB L2 function example"
+        "ISP Stats Bayer function example"
     ],
     "flow": "system",
     "platform_allowlist": [
-	"vek280"
+	"vek385"
     ],
     "platform_blocklist": [
         "u280",
@@ -13,7 +13,7 @@
         "zcu104"
     ],
     "platform_properties": {
-        "vek280": {
+        "vek385": {
             "host": {
                 "compiler": {
                     "includepaths": [

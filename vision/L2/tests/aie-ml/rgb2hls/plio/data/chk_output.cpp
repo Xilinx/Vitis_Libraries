@@ -2,7 +2,7 @@
 #include <cmath>
 #include <fstream>
 #include "./../config.h"
-#include <cstring>  
+#include <cstring>
 
 void read_file_int8(FILE* fpout, uint8_t* in_buffer, int n) {
     for (int i = 0; i < n; i++) {
@@ -20,7 +20,7 @@ void read_file_float(FILE* fpout, float* in_buffer, int n) {
 
 int main(int argc, char** argv) {
     uint8_t* aie_out = (uint8_t*)std::malloc(TILE_WIDTH_IN * CHANNELS * sizeof(uint8_t) + 64);
-    uint8_t* ref_out = (uint8_t*)std::malloc(TILE_WIDTH_IN  * CHANNELS * sizeof(uint8_t));
+    uint8_t* ref_out = (uint8_t*)std::malloc(TILE_WIDTH_IN * CHANNELS * sizeof(uint8_t));
 
     FILE* fp_aie = fopen("output_Y1.txt", "r");
     if (fp_aie == NULL) {
@@ -37,16 +37,16 @@ int main(int argc, char** argv) {
         return -1;
     } else {
         printf("Opened file for reading: %s!!\n", "output_ref.txt");
-        read_file_int8(fp_ref, ref_out, TILE_WIDTH_IN  * CHANNELS);
+        read_file_int8(fp_ref, ref_out, TILE_WIDTH_IN * CHANNELS);
     }
 
     // convert to float
     int ERR_CNT = 0;
-    aie_out+=64;
-    for (int i = 0; i < TILE_WIDTH_IN*4; i+=1) {
-
+    aie_out += 64;
+    for (int i = 0; i < TILE_WIDTH_IN * 4; i += 1) {
         if (abs(aie_out[i] - ref_out[i]) > 4) {
-            std::cout << " i = " << i << " i%4= " << i%4 << " aie_out =" << (unsigned)aie_out[i]  << " ref_out = " << (unsigned)ref_out[i] << std::endl;
+            std::cout << " i = " << i << " i%4= " << i % 4 << " aie_out =" << (unsigned)aie_out[i]
+                      << " ref_out = " << (unsigned)ref_out[i] << std::endl;
             ERR_CNT += 1;
         }
     }

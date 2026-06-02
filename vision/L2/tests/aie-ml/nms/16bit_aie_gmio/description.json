@@ -3,15 +3,14 @@
     "description": "NMS GMIO AIE function example",
     "flow": "system",
     "platform_allowlist": [
-        "vek280"
+        "vek385"
     ],
     "platform_blocklist": [],
     "platform_properties": {
-        "vek280": {
+        "vek385": {
             "v++": {
                 "compiler": {
                     "clflags": [
-                        "-std=c++17"
                     ]
                 },
                 "linker": {

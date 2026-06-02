@@ -50,6 +50,30 @@ void stereopipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_L,
     #pragma HLS INTERFACE s_axilite port=return                bundle=control
     // clang-format on
 
+    float cameraMA_l_local[XF_CAMERA_MATRIX_SIZE];
+    float cameraMA_r_local[XF_CAMERA_MATRIX_SIZE];
+    float distC_l_local[XF_DIST_COEFF_SIZE];
+    float distC_r_local[XF_DIST_COEFF_SIZE];
+    float irA_l_local[XF_CAMERA_MATRIX_SIZE];
+    float irA_r_local[XF_CAMERA_MATRIX_SIZE];
+
+    for (int i = 0; i < XF_CAMERA_MATRIX_SIZE; i++) {
+// clang-format off
+        #pragma HLS PIPELINE II=1
+        // clang-format on
+        cameraMA_l_local[i] = cameraMA_l[i];
+        cameraMA_r_local[i] = cameraMA_r[i];
+        irA_l_local[i] = irA_l[i];
+        irA_r_local[i] = irA_r[i];
+    }
+    for (int i = 0; i < XF_DIST_COEFF_SIZE; i++) {
+// clang-format off
+        #pragma HLS PIPELINE II=1
+        // clang-format on
+        distC_l_local[i] = distC_l[i];
+        distC_r_local[i] = distC_r[i];
+    }
+
     xf::cv::xFSBMState<SAD_WINDOW_SIZE, NO_OF_DISPARITIES, PARALLEL_UNITS> bm_state;
     bm_state.preFilterType = bm_state_arr[0];
     bm_state.preFilterSize = bm_state_arr[1];
@@ -84,17 +108,17 @@ void stereopipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_L,
 
     xf::cv::InitUndistortRectifyMapInverse<XF_CAMERA_MATRIX_SIZE, XF_DIST_COEFF_SIZE, MAP_TYPE, XF_HEIGHT, XF_WIDTH,
                                            NPPCX, XF_CV_DEPTH_mapxL, XF_CV_DEPTH_mapyL>(
-        cameraMA_l, distC_l, irA_l, mapxLMat, mapyLMat, _cm_size, _dc_size);
+        cameraMA_l_local, distC_l_local, irA_l_local, mapxLMat, mapyLMat, _cm_size, _dc_size);
     xf::cv::remap<XF_REMAP_BUFSIZE, XF_INTERPOLATION_BILINEAR, IN_TYPE, MAP_TYPE, REMAP_TYPE, XF_HEIGHT, XF_WIDTH,
-                  NPPCX, XF_USE_URAM, XF_CV_DEPTH_L, XF_CV_DEPTH_leftRemapped, XF_CV_DEPTH_mapxL, XF_CV_DEPTH_mapyL>(
-        mat_L, leftRemappedMat, mapxLMat, mapyLMat);
+                  XF_HEIGHT, XF_WIDTH, NPPCX, XF_USE_URAM, XF_CV_DEPTH_L, XF_CV_DEPTH_leftRemapped, XF_CV_DEPTH_mapxL,
+                  XF_CV_DEPTH_mapyL>(mat_L, leftRemappedMat, mapxLMat, mapyLMat);
 
     xf::cv::InitUndistortRectifyMapInverse<XF_CAMERA_MATRIX_SIZE, XF_DIST_COEFF_SIZE, MAP_TYPE, XF_HEIGHT, XF_WIDTH,
                                            NPPCX, XF_CV_DEPTH_mapxR, XF_CV_DEPTH_mapyR>(
-        cameraMA_r, distC_r, irA_r, mapxRMat, mapyRMat, _cm_size, _dc_size);
+        cameraMA_r_local, distC_r_local, irA_r_local, mapxRMat, mapyRMat, _cm_size, _dc_size);
     xf::cv::remap<XF_REMAP_BUFSIZE, XF_INTERPOLATION_BILINEAR, IN_TYPE, MAP_TYPE, REMAP_TYPE, XF_HEIGHT, XF_WIDTH,
-                  NPPCX, XF_USE_URAM, XF_CV_DEPTH_R, XF_CV_DEPTH_rightRemapped, XF_CV_DEPTH_mapxR, XF_CV_DEPTH_mapyR>(
-        mat_R, rightRemappedMat, mapxRMat, mapyRMat);
+                  XF_HEIGHT, XF_WIDTH, NPPCX, XF_USE_URAM, XF_CV_DEPTH_R, XF_CV_DEPTH_rightRemapped, XF_CV_DEPTH_mapxR,
+                  XF_CV_DEPTH_mapyR>(mat_R, rightRemappedMat, mapxRMat, mapyRMat);
 
     xf::cv::StereoBM<SAD_WINDOW_SIZE, NO_OF_DISPARITIES, PARALLEL_UNITS, REMAP_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH,
                      NPPCX, XF_USE_URAM, XF_CV_DEPTH_leftRemapped, XF_CV_DEPTH_rightRemapped, XF_CV_DEPTH_disp>(

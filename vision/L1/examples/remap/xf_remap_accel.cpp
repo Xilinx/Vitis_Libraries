@@ -196,8 +196,8 @@ void remap_accel(InVideoStrm_t& s_axis_video,
     xf::cv::AXIvideo2xfMat(map_x_axi, mapX);
     xf::cv::AXIvideo2xfMat(map_y_axi, mapY);
 
-    xf::cv::remap<XF_WIN_ROWS, XF_REMAP_INTERPOLATION_TYPE, IN_TYPE, MAPXY_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPPCX,
-                  XF_USE_URAM, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT, XF_CV_DEPTH_MAP_X, XF_CV_DEPTH_MAP_Y>(
+    xf::cv::remap<XF_WIN_ROWS, XF_REMAP_INTERPOLATION_TYPE, IN_TYPE, MAPXY_TYPE, OUT_TYPE, HEIGHT, WIDTH, HEIGHT, WIDTH,
+                  NPPCX, XF_USE_URAM, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT, XF_CV_DEPTH_MAP_X, XF_CV_DEPTH_MAP_Y>(
         imgInput, imgOutput, mapX, mapY);
 
     xf::cv::xfMat2AXIvideo(imgOutput, m_axis_video);

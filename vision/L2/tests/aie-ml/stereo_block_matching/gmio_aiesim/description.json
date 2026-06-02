@@ -163,7 +163,7 @@
             }
         ],
         "targets": [
-            "vitis_aie_sim",
+            "vitis_aie_sim"
         ],
         "category": "canary"
     },

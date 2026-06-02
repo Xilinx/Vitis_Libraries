@@ -1,4 +1,16 @@
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 # vitis makefile-generator v2.0.10
 
 ############################## Help Section ##############################
@@ -6,10 +18,10 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<aiesim/hw_emu/hw> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<aiesim> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<aiesim/hw_emu/hw> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<aiesim> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
 	$(ECHO) "  NOTE: For embedded platform the following setup steps are required:"
@@ -35,7 +47,6 @@ MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/*}')
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
-SCRIPTS_DIR := ${CUR_DIR}/scripts_mk
 
 # setting default value
 TARGET ?= aiesim
@@ -46,10 +57,6 @@ PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
 PLATFORM := vek280
-endif
-
-ifneq (,$(findstring vek385, $(PLATFORM)))
-export SYSROOT = ${YOCTO_ARTIFACTS}/amd-cortexa78-mali-common_meta-edf-app-sdk/sdk/sysroots/cortexa72-cortexa53-amd-linux
 endif
 
 # add warnning for sw_emu
@@ -232,7 +239,7 @@ ifeq ($(SD_CARD_NEEDED), on)
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
-	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} ' >> $(RUN_SCRIPT)
+	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$(LIBRARY_PATH)' >> $(RUN_SCRIPT)
 ifneq ($(filter hw_emu, $(TARGET)),)
 	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> $(RUN_SCRIPT)
 endif
@@ -241,21 +248,12 @@ endif
 	@echo 'if [ -f platform_desc.txt  ]; then' >> $(RUN_SCRIPT)
 	@echo '        cp platform_desc.txt /etc/xocl.txt' >> $(RUN_SCRIPT)
 	@echo 'fi' >> $(RUN_SCRIPT)
-ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
-ifneq ($(filter hw_emu, $(TARGET)),)
-	@echo 'echo "INFO: Load the pdi and dtbo using fpgautil"' >> $(RUN_SCRIPT)
-	@echo 'fpgautil -b vpl_gen_fixed_presynth.pdi -o pl.dtbo' >> $(RUN_SCRIPT)
-else
-	@echo 'echo "INFO: Load the pdi and dtbo using fpgautil"' >> $(RUN_SCRIPT)
-	@echo 'fpgautil -b vpl_gen_fixed_pld.pdi -o pl.dtbo' >> $(RUN_SCRIPT)
-endif
-endif
 	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> $(RUN_SCRIPT)
 	@echo 'return_code=$$?' >> $(RUN_SCRIPT)
 	@echo 'if [ $$return_code -ne 0 ]; then' >> $(RUN_SCRIPT)
-	@echo '        echo "ERROR: TEST FAILED, RC=$$return_code "' >> $(RUN_SCRIPT)
+	@echo '        echo "ERROR: TEST FAILED, RC=$$return_code"' >> $(RUN_SCRIPT)
 	@echo 'else' >> $(RUN_SCRIPT)
-	@echo '        echo "INFO: TEST PASSED, RC=0 "' >> $(RUN_SCRIPT)
+	@echo '        echo "INFO: TEST PASSED, RC=0"' >> $(RUN_SCRIPT)
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
@@ -270,44 +268,27 @@ SD_FILES_WITH_PREFIX = $(foreach sd_file,$(SD_FILES), $(if $(filter $(sd_file),$
 SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
 PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
-PACKAGE_DIR := $(CUR_DIR)/package_$(TARGET)
-PACKAGE_DIR_HW := $(CUR_DIR)/package.$(TARGET)
-$(PACKAGE_DIR): host xclbin $(RUN_SCRIPT) $(EMCONFIG) #check_kimage check_rootfs
+SD_CARD := $(CUR_DIR)/package_$(TARGET)
+$(SD_CARD): host xclbin $(RUN_SCRIPT) $(EMCONFIG) check_kimage check_rootfs
 	@echo "Generating sd_card folder...."
-	mkdir -p $(PACKAGE_DIR)
+	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
 # 1. DFX HW Flow
 ifeq ($(dfx_hw), on)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) $(VPP_PACKAGE) -o $(BINARY_CONTAINERS_PKG)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(PACKAGE_DIR) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
 # 2. General Embeded flow
 ifeq ($(dfx_hw), off)
 ifeq ($(pcie_versal), off)
-ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
-	$(VPP) -s -t $(TARGET) -p -f $(PACKAGE_FILES) -o $(BINARY_CONTAINERS_PKG) $(VPP_PACKAGE) --package.out_dir $(PACKAGE_DIR)
-ifeq (${TARGET},hw)
-	@mkdir -p $(PACKAGE_DIR)/sd_card
-	@cp -rf pl.dtbo $(PACKAGE_DIR)/*.bin $(PACKAGE_DIR)/*.bif $(BINARY_CONTAINERS_PKG) $(EXE_FILE) $(RUN_SCRIPT) $(PACKAGE_DIR)/sd_card
-	@pdi_name=$(shell basename $(BINARY_CONTAINERS_PKG) | cut -f 1 -d '.' ); \
-	mv $(PACKAGE_DIR)/$$pdi_name.pdi  $(PACKAGE_DIR)/sd_card/vpl_gen_fixed_pld.pdi
-	@for dir in $(DATA_DIR); do \
-	    cp -r $$dir/* $(PACKAGE_DIR)/sd_card/ ; \
-	done
-	@ln -sfn $(PACKAGE_DIR) $(PACKAGE_DIR_HW)
-else
-	mv ${PACKAGE_DIR}/BOOT.BIN ${PACKAGE_DIR}/vpl_gen_fixed_presynth.pdi
-endif	
-else
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(PACKAGE_DIR) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
-endif
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.generate_sdcard --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
 endif
 
 .PHONY: sd_card
-sd_card: $(PACKAGE_DIR)
+sd_card: $(SD_CARD)
 endif
 
 ############################## Setting Essential Checks and Building Rules ##############################
@@ -316,15 +297,7 @@ RUN_DEPS += $(AIE_CONTAINER)
 else
 RUN_DEPS += host xclbin $(EMCONFIG)
 ifeq ($(SD_CARD_NEEDED), on)
-ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
-RUN_DEPS += sdt_lopper
-RUN_DEPS += $(PACKAGE_DIR)
-ifeq ($(TARGET),hw_emu)
-RUN_DEPS += qemu_combined qemu_conf_run copy_wic
-endif
-else
-RUN_DEPS += $(PACKAGE_DIR)
-endif
+RUN_DEPS += $(SD_CARD)
 endif
 endif
 
@@ -362,13 +335,9 @@ else
 	
 endif
 else
-ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
-	cd ${PACKAGE_DIR} && ./launch_hw_emu.sh -qemu-config ${QEMU_COMBINED}/${COMBINED}/${COMBINED}.qemuboot.conf -login "amd-edf" -password "amd-edf" -run-app " mount /dev/sda4 /media; cd /media; ls; bash $(notdir $(RUN_SCRIPT)) " 2>&1 | tee qemu_output.log
-else
 	@echo $(RUN_DEPS)
-	$(PACKAGE_DIR)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
-endif
-	grep "TEST PASSED, RC=0" $(PACKAGE_DIR)/qemu_output.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
 endif
@@ -390,50 +359,6 @@ else ifeq ($(HOST_ARCH), x86)
 else
 	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
 endif
-endif
-
-############################## sdt_lopper ##############################
-ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
-#SDT variables
-SDT_OUTPUT = $(CUR_DIR)/sdt_lopper_output
-BOARD_DTSI = versal2-vek385-revA
-PROCESSOR = cortexa78_0
-INPUT_DTSI = $(SDT_OUTPUT)/system-top.dts
-#WIC_IMAGE = basecamp-minimal-disk-image-versal2-common.rootfs.wic
-
-sdt_lopper:
-	bash ${SCRIPTS_DIR}/sdt_lopper.sh $(BINARY_CONTAINERS) $(SDT_OUTPUT) $(BOARD_DTSI) $(PROCESSOR) $(INPUT_DTSI)
-endif
-
-############################## qemu combined and config ##############################
-ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
-QEMU_COMBINED := ${PACKAGE_DIR}/base_camp_images
-COMBINED := combined
-DISK_IMAGES := amd-cortexa78-mali-common_edf-linux-disk-image
-OSPI_IMAGES := versal-2ve-2vm-vek385-sdt-seg_edf-ospi
-
-qemu_combined:
-	cd ${PACKAGE_DIR}; \
-	rm -rf ${QEMU_COMBINED}; \
-	mkdir -p ${QEMU_COMBINED}/${COMBINED}; \
-	cp -prf ${YOCTO_ARTIFACTS}/${DISK_IMAGES}/* ${QEMU_COMBINED}/${COMBINED}/.; \
-	cp -prf ${YOCTO_ARTIFACTS}/${OSPI_IMAGES}/* ${QEMU_COMBINED}/${COMBINED}/.; \
-
-qemu_conf_run:
-	cd ${PACKAGE_DIR}; \
-	cp -prf ${SCRIPTS_DIR}/run.sh ${QEMU_COMBINED}/${COMBINED}/.; \
-	cp -prf ${SCRIPTS_DIR}/run_qemu_conf.sh ${QEMU_COMBINED}/${COMBINED}/.; \
-	cd ${QEMU_COMBINED}/${COMBINED}; \
-	source ./run_qemu_conf.sh; \
-
-endif
-
-############################## copy files to quem ##############################
-ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
-PDI_DIR := ${PACKAGE_DIR}/vpl_gen_fixed_presynth.pdi
-DTBO_DIR := ./pl.dtbo
-copy_wic:
-	bash ${SCRIPTS_DIR}/run_copy_wic.sh ${BINARY_CONTAINERS_PKG} ${EXE_FILE} ${DATA_DIR} ${DTBO_DIR} ${PDI_DIR} ${RUN_SCRIPT} ${QEMU_COMBINED}
 endif
 
 ############################## Setting Targets ##############################

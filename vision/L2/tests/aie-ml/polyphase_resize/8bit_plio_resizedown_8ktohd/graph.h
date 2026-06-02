@@ -41,24 +41,19 @@ float compute_scalefactor_f(int M, int N) {
 }
 #define CV_PII 3.1415926535897932384626433832795
 
-static inline void interpolateLanczos4( float x, float* coeffs )
-{
+static inline void interpolateLanczos4(float x, float* coeffs) {
     static const double s45 = 0.70710678118654752440084436210485;
-    static const double cs[][2]=
-    {{1, 0}, {-s45, -s45}, {0, 1}, {s45, -s45}, {-1, 0}, {s45, s45}, {0, -1}, {-s45, s45}};
+    static const double cs[][2] = {{1, 0},  {-s45, -s45}, {0, 1},  {s45, -s45},
+                                   {-1, 0}, {s45, s45},   {0, -1}, {-s45, s45}};
 
     float sum = 0;
-    double y0=-(x+3)*CV_PII*0.25, s0 = std::sin(y0), c0= std::cos(y0);
-    for(int i = 0; i < 8; i++ )
-    {
-        float y0_ = (x+3-i);
-        if (fabs(y0_) >= 1e-6f)
-        {
-            double y = -y0_*CV_PII*0.25;
-            coeffs[i] = (float)((cs[i][0]*s0 + cs[i][1]*c0)/(y*y));
-        }
-        else
-        {
+    double y0 = -(x + 3) * CV_PII * 0.25, s0 = std::sin(y0), c0 = std::cos(y0);
+    for (int i = 0; i < 8; i++) {
+        float y0_ = (x + 3 - i);
+        if (fabs(y0_) >= 1e-6f) {
+            double y = -y0_ * CV_PII * 0.25;
+            coeffs[i] = (float)((cs[i][0] * s0 + cs[i][1] * c0) / (y * y));
+        } else {
             // special handling for 'x' values:
             // - ~0.0: 0 0 0 1 0 0 0 0
             // - ~1.0: 0 0 0 0 1 0 0 0
@@ -67,19 +62,15 @@ static inline void interpolateLanczos4( float x, float* coeffs )
         sum += coeffs[i];
     }
 
-    sum = 1.f/sum;
-    for(int i = 0; i < 8; i++ )
-        coeffs[i] *= sum;
+    sum = 1.f / sum;
+    for (int i = 0; i < 8; i++) coeffs[i] *= sum;
 }
-void convert2fix(float* coeffs, uint16_t* coeff_fix, int shift)
-{
- float coeffs_round[8];
- for(int i=0; i<8; i++)
- {
-
-   coeffs_round[i] = roundf((coeffs[i] *(1<<shift)));
-   coeff_fix[i]=(uint16_t)coeffs_round[i];
- }
+void convert2fix(float* coeffs, uint16_t* coeff_fix, int shift) {
+    float coeffs_round[8];
+    for (int i = 0; i < 8; i++) {
+        coeffs_round[i] = roundf((coeffs[i] * (1 << shift)));
+        coeff_fix[i] = (uint16_t)coeffs_round[i];
+    }
 }
 template <int depth = 512>
 class WtsArray {
@@ -90,40 +81,43 @@ class WtsArray {
     float x;
     float cbuf[8];
     uint16_t cbuf_fix[8];
-    int shift=15;
-    FILE *fp=fopen("wts.txt","w");
+    int shift = 15;
+    FILE* fp = fopen("wts.txt", "w");
     constexpr WtsArray() : arr() {
         for (int r = 0; r < 256; r++) {
-            x = (1.0 * r) / (256-1);
-	    interpolateLanczos4(x, cbuf);
-	    convert2fix(cbuf, cbuf_fix, shift);
+            x = (1.0 * r) / (256 - 1);
+            interpolateLanczos4(x, cbuf);
+            convert2fix(cbuf, cbuf_fix, shift);
             /*arr_elem  = (cbuf_fix[0] << 24) | (cbuf_fix[1] << 16) | (cbuf_fix[2] << 8) | cbuf_fix[3];
             arr_elem1 = (cbuf_fix[4] << 24) | (cbuf_fix[5] << 16) | (cbuf_fix[6] << 8) | cbuf_fix[7];
             arr[r*2] = arr_elem;
             arr[r*2+1] = arr_elem1;*/
-            arr_elem  =  (cbuf_fix[0] << 16) | cbuf_fix[1];
-            arr_elem1 =  (cbuf_fix[2] << 16) | cbuf_fix[3];
-            arr_elem2 =  (cbuf_fix[4] << 16) | cbuf_fix[5]; 
-	        arr_elem3 =	 (cbuf_fix[6] << 16) | cbuf_fix[7];
-            arr[r*4] =  arr_elem;
-            arr[r*4+1] = arr_elem1;
-            arr[r*4+2] = arr_elem2;
-            arr[r*4+3] = arr_elem3;
-	    /*if(r==1536){
-		cout<< "x=" << x << endl;
-		interpolateLanczos4(0.375, cbuf);
-            fprintf(fp, "%f %f %f %f %f %f %f %f\n", cbuf[0],  cbuf[1], cbuf[2], cbuf[3],  cbuf[4], cbuf[5], cbuf[6], cbuf[7]);
-		interpolateLanczos4(-0.375, cbuf);
-           fprintf(fp, "%f %f %f %f %f %f %f %f\n", cbuf[0],  cbuf[1], cbuf[2], cbuf[3],  cbuf[4], cbuf[5], cbuf[6], cbuf[7]);
+            arr_elem = (cbuf_fix[0] << 16) | cbuf_fix[1];
+            arr_elem1 = (cbuf_fix[2] << 16) | cbuf_fix[3];
+            arr_elem2 = (cbuf_fix[4] << 16) | cbuf_fix[5];
+            arr_elem3 = (cbuf_fix[6] << 16) | cbuf_fix[7];
+            arr[r * 4] = arr_elem;
+            arr[r * 4 + 1] = arr_elem1;
+            arr[r * 4 + 2] = arr_elem2;
+            arr[r * 4 + 3] = arr_elem3;
+            /*if(r==1536){
+                cout<< "x=" << x << endl;
+                interpolateLanczos4(0.375, cbuf);
+            fprintf(fp, "%f %f %f %f %f %f %f %f\n", cbuf[0],  cbuf[1], cbuf[2], cbuf[3],  cbuf[4], cbuf[5], cbuf[6],
+           cbuf[7]);
+                interpolateLanczos4(-0.375, cbuf);
+           fprintf(fp, "%f %f %f %f %f %f %f %f\n", cbuf[0],  cbuf[1], cbuf[2], cbuf[3],  cbuf[4], cbuf[5], cbuf[6],
+           cbuf[7]);
         */
-            fprintf(fp, "%d %d %d %d %d %d %d %d\n", cbuf_fix[0],  cbuf_fix[1], cbuf_fix[2], cbuf_fix[3],  cbuf_fix[4], cbuf_fix[5], cbuf_fix[6], cbuf_fix[7]);
-        //    fprintf(fp, "%d %d \n", arr_elem,  arr_elem1);
-	    //fprintf(fp, "%d %d \n", arr[r*2],  arr[r*2+1]);
-		/*cout<< "arr_elem=" << arr_elem<< endl;
-		cout<< "arr_elem1=" << arr_elem1<< endl;
-		cout<< "arr_elem2=" << arr_elem2<< endl;
-		cout<< "arr_elem3=" << arr_elem3<< endl;
-	   }*/
+            fprintf(fp, "%d %d %d %d %d %d %d %d\n", cbuf_fix[0], cbuf_fix[1], cbuf_fix[2], cbuf_fix[3], cbuf_fix[4],
+                    cbuf_fix[5], cbuf_fix[6], cbuf_fix[7]);
+            //    fprintf(fp, "%d %d \n", arr_elem,  arr_elem1);
+            // fprintf(fp, "%d %d \n", arr[r*2],  arr[r*2+1]);
+            /*cout<< "arr_elem=" << arr_elem<< endl;
+            cout<< "arr_elem1=" << arr_elem1<< endl;
+            cout<< "arr_elem2=" << arr_elem2<< endl;
+            cout<< "arr_elem3=" << arr_elem3<< endl;
+       }*/
         }
     }
 };

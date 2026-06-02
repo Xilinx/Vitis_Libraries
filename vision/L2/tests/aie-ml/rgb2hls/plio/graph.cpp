@@ -19,7 +19,7 @@
 #include <common/xf_aie_utils.hpp>
 
 // instantiate adf dataflow graph
-//RGB2HLSGraph rgb2hls[NO_COLS] = {{6, 2, 0}, {8, 2, 1}};
+// RGB2HLSGraph rgb2hls[NO_COLS] = {{6, 2, 0}, {8, 2, 1}};
 RGB2HLSGraph rgb2hls[NO_COLS] = {{6, 2, 0}};
 
 // initialize and run the dataflow graph

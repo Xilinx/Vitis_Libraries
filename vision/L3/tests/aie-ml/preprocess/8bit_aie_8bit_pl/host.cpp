@@ -149,7 +149,6 @@ int main(int argc, char** argv) {
                   << " (element size: " << srcImageY.elemSize() << ",total: " << srcImageY.total()
                   << ", size: " << srcImageY.size() << ")" << std::endl;
 
-
         //////////////////////////////////////////
         // Run opencv reference test (yuv2rgba design)
         //////////////////////////////////////////
@@ -260,12 +259,12 @@ int main(int argc, char** argv) {
         std::cout << "Analyzing diff\n";
         cv::Mat diff(op_height, op_width, CV_8UC4);
 
-        //signed char ref2[dst.rows * dst.cols * dst.channels()];
-        //signed char aie2[dst.rows * dst.cols * dst.channels()];
+        // signed char ref2[dst.rows * dst.cols * dst.channels()];
+        // signed char aie2[dst.rows * dst.cols * dst.channels()];
 
         signed char ref2;
         signed char aie2;
-        //std::ofstream diff_data("diff_data.txt");
+        // std::ofstream diff_data("diff_data.txt");
 
         for (int ii = 0; ii < dst.rows; ii++) {
             for (int jj = 0; jj < dst.cols; jj++) {

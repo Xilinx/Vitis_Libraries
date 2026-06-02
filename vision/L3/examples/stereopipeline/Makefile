@@ -48,6 +48,10 @@ MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L3/*}')
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
+SCRIPTS_DIR := ${CUR_DIR}/scripts_mk
+VITIS_LIB_ROOT = $(dir $(XF_PROJ_ROOT))
+export XF_PROJ_ROOT
+export VITIS_LIB_ROOT
 
 # setting default value
 TARGET ?= hw_emu
@@ -58,6 +62,18 @@ PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
 PLATFORM := vck190
+endif
+
+#setting SYSROOT
+ifneq (,$(findstring vek385, $(PLATFORM)))
+ifeq (,$(wildcard $(YOCTO_ARTIFACTS)))
+$(error YOCTO_ARTIFACTS ENV variable is not set, please set ENV variable correctly and rerun)
+endif
+export YOCTO_ARTIFACTS
+export SYSROOT = ${YOCTO_ARTIFACTS}/amd-cortexa78-mali-common_meta-edf-app-sdk/sdk/sysroots/cortexa72-cortexa53-amd-linux
+VPP_FLAGS_CFG += --part xc2ve3858-ssva2112-2MP-e-S
+else
+VPP_FLAGS_CFG += -t hw --platform $(XPLATFORM)
 endif
 
 # add warnning for sw_emu
@@ -108,7 +124,7 @@ CXXFLAGS +=  -D __SDSVHLS__
 CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L3/examples/stereopipeline/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(OPENCV_LIB)
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui -l opencv_stitching
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 HOST_SRCS += $(XFLIB_DIR)/L3/examples/stereopipeline/xf_stereo_pipeline_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
@@ -116,14 +132,14 @@ CXXFLAGS +=  -D __SDSVHLS__
 CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L3/examples/stereopipeline/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/lib
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui -l opencv_stitching
 
 else 
 HOST_SRCS += $(XFLIB_DIR)/L3/examples/stereopipeline/xf_stereo_pipeline_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D __SDSVHLS__
 CXXFLAGS +=  -I $(XFLIB_DIR)/L3/examples/stereopipeline/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui -l opencv_stitching
 
 endif
 # workaround for opencv
@@ -176,14 +192,29 @@ BINARY_CONTAINERS += $(BUILD_DIR)/krnl_stereopipeline.xclbin
 else
 BINARY_CONTAINERS += $(BUILD_DIR)/krnl_stereopipeline_pkg.$(LINK_TARGET_FMT)
 BINARY_CONTAINERS_PKG += $(BUILD_DIR)/krnl_stereopipeline.xclbin
+BINARY_NAME := krnl_stereopipeline
 endif
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
-$(TEMP_DIR)/stereopipeline_accel.xo: $(XFLIB_DIR)/L3/examples/stereopipeline/xf_stereo_pipeline_accel.cpp 
+
+ifeq ($(wildcard hls_config_stereopipeline_accel.tmpl),)
+-include gen_param.mk
+endif
+$(TEMP_DIR)/stereopipeline_accel/stereopipeline_accel.xo: $(XFLIB_DIR)/L3/examples/stereopipeline/xf_stereo_pipeline_accel.cpp 
 	$(ECHO) "Compiling Kernel: stereopipeline_accel"
 	mkdir -p $(TEMP_DIR)
+ifeq ($(wildcard hls_config_stereopipeline_accel.tmpl),)
 	$(VPP) -c $(VPP_FLAGS_stereopipeline_accel) $(VPP_FLAGS) -k stereopipeline_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
-BINARY_CONTAINER_krnl_stereopipeline_OBJS += $(TEMP_DIR)/stereopipeline_accel.xo
+else
+	set hls_config_stereopipeline_accel.tmpl hls_config_stereopipeline_accel.cfg && \
+	    printf '%s\n' "$$CONFIG_GEN_PY" > gen_config.py && \
+	    ${PYTHON3} gen_config.py \
+		hls_config_stereopipeline_accel.tmpl \
+		hls_config_stereopipeline_accel.cfg && \
+	    rm -f gen_config.py
+	$(VPP) -c --mode hls --config hls_config_stereopipeline_accel.cfg --work_dir $(TEMP_DIR)/stereopipeline_accel $(VPP_FLAGS_CFG)
+endif
+BINARY_CONTAINER_krnl_stereopipeline_OBJS += $(TEMP_DIR)/stereopipeline_accel/stereopipeline_accel.xo
 
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_stereopipeline_OBJS) 
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
@@ -210,7 +241,7 @@ ifeq ($(SD_CARD_NEEDED), on)
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
-	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp:$(LIBRARY_PATH)' >> $(RUN_SCRIPT)
+	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} ' >> $(RUN_SCRIPT)
 ifneq ($(filter hw_emu, $(TARGET)),)
 	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> $(RUN_SCRIPT)
 endif
@@ -219,17 +250,23 @@ endif
 	@echo 'if [ -f platform_desc.txt  ]; then' >> $(RUN_SCRIPT)
 	@echo '        cp platform_desc.txt /etc/xocl.txt' >> $(RUN_SCRIPT)
 	@echo 'fi' >> $(RUN_SCRIPT)
+ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
+	@echo 'echo "INFO: Load the pdi and dtbo using fpgautil"' >> $(RUN_SCRIPT)
+	@echo 'fpgautil -b $(BINARY_NAME).pdi -o ${BINARY_NAME}.dtbo' >> $(RUN_SCRIPT)
+endif
 	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> $(RUN_SCRIPT)
 	@echo 'return_code=$$?' >> $(RUN_SCRIPT)
 	@echo 'if [ $$return_code -ne 0 ]; then' >> $(RUN_SCRIPT)
-	@echo '        echo "ERROR: TEST FAILED, RC=$$return_code"' >> $(RUN_SCRIPT)
+	@echo '        echo "ERROR: TEST FAILED, RC=$$return_code "' >> $(RUN_SCRIPT)
 	@echo 'else' >> $(RUN_SCRIPT)
-	@echo '        echo "INFO: TEST PASSED, RC=0"' >> $(RUN_SCRIPT)
+	@echo '        echo "INFO: TEST PASSED, RC=0 "' >> $(RUN_SCRIPT)
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
 DATA_FILE := $(XFLIB_DIR)/data/right.png $(XFLIB_DIR)/data/left.png $(XFLIB_DIR)/data/right_emu.png $(XFLIB_DIR)/data/left_emu.png $(custom_data_file)
 DATA_DIR := $(custom_data_dir)
+DATA_FILE := $(strip $(DATA_FILE))
+DATA_DIR := $(strip $(DATA_DIR))
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
 SD_FILES += $(EMCONFIG)
@@ -239,33 +276,58 @@ SD_FILES_WITH_PREFIX = $(foreach sd_file,$(SD_FILES), $(if $(filter $(sd_file),$
 SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
 PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
+PACKAGE_DIR := $(CUR_DIR)/package_$(TARGET)
+PACKAGE_DIR_HW := $(CUR_DIR)/package.$(TARGET)
 SD_CARD := $(CUR_DIR)/package_$(TARGET)
-$(SD_CARD): host xclbin $(RUN_SCRIPT) $(EMCONFIG) check_kimage check_rootfs
+$(PACKAGE_DIR): host xclbin $(RUN_SCRIPT) $(EMCONFIG) #check_kimage check_rootfs
 	@echo "Generating sd_card folder...."
-	mkdir -p $(SD_CARD)
+	mkdir -p $(PACKAGE_DIR)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
 # 1. DFX HW Flow
 ifeq ($(dfx_hw), on)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) $(VPP_PACKAGE) -o $(BINARY_CONTAINERS_PKG)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(PACKAGE_DIR) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
 # 2. General Embeded flow
 ifeq ($(dfx_hw), off)
 ifeq ($(pcie_versal), off)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.generate_sdcard --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
+	$(VPP) -s -t $(TARGET) -p -f $(PACKAGE_FILES) -o $(BINARY_CONTAINERS_PKG) $(VPP_PACKAGE) --package.out_dir $(PACKAGE_DIR)
+ifeq (${TARGET},hw)
+	@mkdir -p $(PACKAGE_DIR)/sd_card
+	@cp -rf $(PACKAGE_DIR)/${BINARY_NAME}.dtbo $(PACKAGE_DIR)/*.bif $(BINARY_CONTAINERS_PKG) $(EXE_FILE) $(RUN_SCRIPT) $(PACKAGE_DIR)/sd_card
+	mv $(PACKAGE_DIR)/${BINARY_NAME}.pdi $(PACKAGE_DIR)/sd_card/${BINARY_NAME}.pdi
+	@for dir in $(DATA_DIR); do \
+	    cp -r $$dir/* $(PACKAGE_DIR)/sd_card/ ; \
+	done
+	@for f in $(DATA_FILE); do \
+	    [ -e "$$f" ] && cp -r $$f $(PACKAGE_DIR)/sd_card/ ; \
+	done
+	@ln -sfn $(PACKAGE_DIR) $(PACKAGE_DIR_HW)
+endif	
+else
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(PACKAGE_DIR) --package.rootfs $(ROOTFS) --package.generate_sdcard --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+endif
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
 endif
 
 .PHONY: sd_card
-sd_card: $(SD_CARD)
+sd_card: $(PACKAGE_DIR)
 endif
 
 ############################## Setting Essential Checks and Building Rules ##############################
 RUN_DEPS += host xclbin $(EMCONFIG)
 ifeq ($(SD_CARD_NEEDED), on)
-RUN_DEPS += $(SD_CARD)
+ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
+RUN_DEPS += $(PACKAGE_DIR)
+ifeq ($(TARGET),hw_emu)
+RUN_DEPS += qemu_combined copy_wic
+endif
+else
+RUN_DEPS += $(PACKAGE_DIR)
+endif
 endif
 
 .PHONY: mkflag all run
@@ -292,9 +354,13 @@ else
 	
 endif
 else
+ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
+	cd ${PACKAGE_DIR} && ./launch_hw_emu.sh -qemu-config ${QEMU_COMBINED}/combined.qemuboot.conf -login "amd-edf" -password "amd-edf" -run-app " mount /dev/sda2 /media; cd /media; ls; bash $(notdir $(RUN_SCRIPT)) " 2>&1 | tee qemu_output.log
+else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	$(PACKAGE_DIR)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+endif
+	grep "TEST PASSED, RC=0" $(PACKAGE_DIR)/qemu_output.log || exit 1
 	
 endif
 endif
@@ -316,6 +382,27 @@ else ifeq ($(HOST_ARCH), x86)
 else
 	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
 endif
+endif
+
+############################## qemu combined and config ##############################
+ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
+QEMU_COMBINED := ${PACKAGE_DIR}/base_camp_images
+QEMU_PREBUILT := amd-cortexa78-mali-common_vek385_qemu_prebuilt
+
+qemu_combined:
+	cd ${PACKAGE_DIR}; \
+	rm -rf ${QEMU_COMBINED}; \
+	mkdir -p ${QEMU_COMBINED}; \
+	cp -prf ${YOCTO_ARTIFACTS}/${QEMU_PREBUILT}/* ${QEMU_COMBINED}/.; 
+endif
+
+############################## copy files to quem ##############################
+ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
+PDI_DIR := ${PACKAGE_DIR}/${BINARY_NAME}.pdi
+DTBO_DIR := ${PACKAGE_DIR}/${BINARY_NAME}.dtbo
+WIC_PARTITION := edf-linux-disk-image-amd-cortexa78-mali-common.rootfs.wic.ufs:2
+copy_wic:
+	bash ${SCRIPTS_DIR}/run_copy_wic.sh ${BINARY_CONTAINERS_PKG} ${EXE_FILE} ${DTBO_DIR} ${PDI_DIR} ${RUN_SCRIPT} ${QEMU_COMBINED} ${WIC_PARTITION} "${DATA_DIR}" ${DATA_FILE}
 endif
 
 ############################## Setting Targets ##############################

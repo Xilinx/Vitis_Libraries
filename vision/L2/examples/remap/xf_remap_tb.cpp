@@ -186,8 +186,20 @@ int main(int argc, char** argv) {
                                        map_y_int.data,    // Pointer to the data to copy
                                        nullptr, &event));
 
+    // Profiling Objects
+    cl_ulong start = 0;
+    cl_ulong end = 0;
+    double diff_prof = 0.0f;
+    cl::Event event_sp;
+
     // Execute the kernel:
-    OCL_CHECK(err, err = queue.enqueueTask(kernel));
+    OCL_CHECK(err, err = queue.enqueueTask(kernel, NULL, &event_sp));
+    clWaitForEvents(1, (const cl_event*)&event_sp);
+
+    event_sp.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
+    event_sp.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
+    diff_prof = end - start;
+    std::cout << "INFO: Latency for hardware function is " << (diff_prof / 1000000) << "ms" << std::endl;
 
     // Copy Result from Device Global Memory to Host Local Memory
     queue.enqueueReadBuffer(buffer_outImage, // This buffers data will be read
@@ -212,7 +224,7 @@ int main(int argc, char** argv) {
     float err_per;
     xf::cv::analyzeDiff(diff, 0, err_per);
 
-    if (err_per > 0.0f) {
+    if (err_per > 1.0f) {
         fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
     } else

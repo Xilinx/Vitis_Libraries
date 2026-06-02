@@ -211,8 +211,20 @@ int main(int argc, char** argv) {
 
     std::cout << "before enqueue task" << std::endl;
 
+    // Profiling Objects
+    cl_ulong start = 0;
+    cl_ulong end = 0;
+    double diff_prof = 0.0f;
+    cl::Event event_sp;
+
     // Execute the kernel:
-    OCL_CHECK(err, err = queue.enqueueTask(kernel));
+    OCL_CHECK(err, err = queue.enqueueTask(kernel, NULL, &event_sp));
+    clWaitForEvents(1, (const cl_event*)&event_sp);
+
+    event_sp.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
+    event_sp.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
+    diff_prof = end - start;
+    std::cout << "INFO: Latency for hardware function is " << (diff_prof / 1000000) << "ms" << std::endl;
 
     std::cout << "after enqueue task" << std::endl;
 

@@ -151,7 +151,6 @@ void Yuv2Rgba::runImpl(
 
     uint8_t index = (((y_row == 1) && (uv_row == 0)) ? 1 : (((y_row == 0) && (uv_row == 0)) ? 0 : (y_row % uv_row)));
     xf_yuv2rgba(ptr1, ptr2, ptr_out, tile_width, tile_height, index);
- 
 }
 } // aie
 } // cv

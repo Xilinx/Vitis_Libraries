@@ -94,20 +94,20 @@ class Resizepolyphase {
 
         ::aie::vector<float, 16> dist = ::aie::sub(acc.to_vector<float>(0), ::aie::broadcast<float, 16>((float)p));
         ::aie::accum<accfloat, 16> mul_Acc = ::aie::mul(dist, ::aie::broadcast<float, 16>(256.0f));
-        ::aie::vector<int32_t, 16> idx = ::aie::to_fixed<int32_t, 16>(mul_Acc.to_vector<bfloat16>(), 0);
+        ::aie::vector<int32_t, 16> idx = ::aie::to_fixed<int32_t, 16>(mul_Acc, 0);
         //    ::aie::vector<int32_t, 16> idx=::aie::to_fixed<int32_t,16>(dist, 8);
-        uint32_t val=weighty[idx[0]*4];
-        uint32_t val1=weighty[idx[0]*4 +1];
-        uint32_t val2=weighty[idx[0]*4 +2];
-        uint32_t val3=weighty[idx[0]*4 +3];
-        cbuf_fix[0]=(int16_t)(val>>16);
-        cbuf_fix[1]=(int16_t)(val);
-        cbuf_fix[2]=(int16_t)(val1>>16);
-        cbuf_fix[3]=(int16_t)val1;
-        cbuf_fix[4]=(int16_t)(val2>>16);
-        cbuf_fix[5]=(int16_t)(val2);
-        cbuf_fix[6]=(int16_t)(val3>>16);
-        cbuf_fix[7]=(int16_t)val3;
+        uint32_t val = weighty[idx[0] * 4];
+        uint32_t val1 = weighty[idx[0] * 4 + 1];
+        uint32_t val2 = weighty[idx[0] * 4 + 2];
+        uint32_t val3 = weighty[idx[0] * 4 + 3];
+        cbuf_fix[0] = (int16_t)(val >> 16);
+        cbuf_fix[1] = (int16_t)(val);
+        cbuf_fix[2] = (int16_t)(val1 >> 16);
+        cbuf_fix[3] = (int16_t)val1;
+        cbuf_fix[4] = (int16_t)(val2 >> 16);
+        cbuf_fix[5] = (int16_t)(val2);
+        cbuf_fix[6] = (int16_t)(val3 >> 16);
+        cbuf_fix[7] = (int16_t)val3;
 
         int pos11 = (p - 3) < 0 ? 0 : (p - 3);
         int pos22 = (p - 2) < 0 ? 0 : (p - 2);
@@ -128,25 +128,25 @@ class Resizepolyphase {
         pos[5] = (pos66 < (img_height_in - 1)) * pos66 + (pos66 >= (img_height_in - 1)) * (img_height_in - 1);
         pos[6] = (pos77 < (img_height_in - 1)) * pos77 + (pos77 >= (img_height_in - 1)) * (img_height_in - 1);
         pos[7] = (pos88 < (img_height_in - 1)) * pos88 + (pos88 >= (img_height_in - 1)) * (img_height_in - 1);
-      for(int i =0;i<8;i++){
-        printf("%d\n", pos[i]);
-    }
-          for(int i =0;i<8;i++){
-        printf("%d\n", cbuf_fix[i]);
-    }
+        for (int i = 0; i < 8; i++) {
+            printf("%d\n", pos[i]);
+        }
+        for (int i = 0; i < 8; i++) {
+            printf("%d\n", cbuf_fix[i]);
+        }
     }
 
     void xf_poly_resize_1DV(T* input,
-                      T* output,
-                      int channels,
-                      int start_in_row,
-                      int start_out_row,
-                      uint32_t scale_y,
-                      int img_height_in,
-                      int tile_height_out,
-                      int tile_width_out,
-                      const uint32_t* weighty,
-                      float scale_y_f);
+                            T* output,
+                            int channels,
+                            int start_in_row,
+                            int start_out_row,
+                            uint32_t scale_y,
+                            int img_height_in,
+                            int tile_height_out,
+                            int tile_width_out,
+                            const uint32_t* weighty,
+                            float scale_y_f);
 
     void runImpl(T* input,
                  T* metaData,
@@ -160,23 +160,23 @@ class Resizepolyphase {
 
 template <typename T, int N>
 __attribute__((noinline)) void Resizepolyphase<T, N>::xf_poly_resize_1DV(T* input,
-                                                                 T* output,
-                                                                 int channels,
-                                                                 int start_in_row,
-                                                                 int start_out_row,
-                                                                 uint32_t scale_y,
-                                                                 int img_height_in,
-                                                                 int tile_height_out,
-                                                                 int tile_width_out,
-                                                                 const uint32_t* weighty,
-                                                                 float scale_y_f) {
+                                                                         T* output,
+                                                                         int channels,
+                                                                         int start_in_row,
+                                                                         int start_out_row,
+                                                                         uint32_t scale_y,
+                                                                         int img_height_in,
+                                                                         int tile_height_out,
+                                                                         int tile_width_out,
+                                                                         const uint32_t* weighty,
+                                                                         float scale_y_f) {
     const uint32_t* wty = weighty;
     int16_t cbuf[8];
     int pos[8]; // y-1
     T* restrict img_out_ptr = (T*)output;
     set_rnd(rnd_conv_even);
 
-    ::aie::vector<T, (N*2)> data_vec1, data_vec2, data_vec3, data_vec4;
+    ::aie::vector<T, (N * 2)> data_vec1, data_vec2, data_vec3, data_vec4;
     ::aie::vector<int16_t, 32> Wy1_y2, Wy3_y4, Wy5_y6, Wy7_y8;
     ::aie::accum<acc64, N> acc1, acc2, acc3, acc4;
 
@@ -184,7 +184,8 @@ __attribute__((noinline)) void Resizepolyphase<T, N>::xf_poly_resize_1DV(T* inpu
         //        compute_wtsy(start_out_row + i, img_height_in, img_height_out, scale_y, weighty, Wy1, Wy2, Wy3, Wy4,
         //        pos1, pos2,pos3,pos4);
         compute_wtsy_f(start_out_row + i, img_height_in, scale_y, scale_y_f, weighty, cbuf, pos);
-        if constexpr(std::is_same_v<T, uint8>) {
+        if
+            constexpr(std::is_same_v<T, uint8>) {
                 Wy1_y2 = ::aie::concat(::aie::broadcast<int16_t, 16>(cbuf[0]), ::aie::broadcast<int16_t, 16>(cbuf[1]));
                 Wy3_y4 = ::aie::concat(::aie::broadcast<int16_t, 16>(cbuf[2]), ::aie::broadcast<int16_t, 16>(cbuf[3]));
                 Wy5_y6 = ::aie::concat(::aie::broadcast<int16_t, 16>(cbuf[4]), ::aie::broadcast<int16_t, 16>(cbuf[5]));
@@ -239,7 +240,8 @@ __attribute__((noinline)) void Resizepolyphase<T, N>::xf_poly_resize_1DV(T* inpu
                 img_in_ptr7 += N;
                 img_in_ptr8 += N;
 
-                if constexpr(std::is_same_v<T, uint8>) {
+                if
+                    constexpr(std::is_same_v<T, uint8>) {
                         acc1 = mul_elem_16_2(data_vec1.unpack(), Wy1_y2);
                         acc2 = mac_elem_16_2(data_vec2.unpack(), Wy3_y4, acc1);
                         acc3 = mac_elem_16_2(data_vec3.unpack(), Wy5_y6, acc2);
@@ -247,7 +249,7 @@ __attribute__((noinline)) void Resizepolyphase<T, N>::xf_poly_resize_1DV(T* inpu
                         set_sat();
                         ::aie::store_v(img_out_ptr, acc4.template to_vector<T>(15));
                     }
-                    if(i==0 && j==0){
+                if (i == 0 && j == 0) {
                     chess_report(data_vec1.unpack());
                     chess_report(data_vec2.unpack());
                     chess_report(data_vec3.unpack());
@@ -256,7 +258,7 @@ __attribute__((noinline)) void Resizepolyphase<T, N>::xf_poly_resize_1DV(T* inpu
                     chess_report(Wy3_y4);
                     chess_report(Wy5_y6);
                     chess_report(Wy7_y8);
-                    }
+                }
                 /*else {
                     acc11 = mul_elem_16_2(data_vec1, Wy1_y2_16);
                     acc22 = mac_elem_16_2(data_vec2, Wy3_y4_16, acc11);
@@ -343,20 +345,20 @@ pos2,pos3,pos4);
 */
 template <typename T, int N>
 __attribute__((noinline)) void Resizepolyphase<T, N>::runImpl(T* input,
-                                                            T* metaData,
-                                                            T* output,
-                                                            int channels,
-                                                            uint32_t scale_y,
-                                                            int img_height_in,
-                                                            int img_height_out,
-                                                            float scale_y_f) {
+                                                              T* metaData,
+                                                              T* output,
+                                                              int channels,
+                                                              uint32_t scale_y,
+                                                              int img_height_in,
+                                                              int img_height_out,
+                                                              float scale_y_f) {
     int start_out_row = xfGetTileOutPosV(input);
     int start_in_row = xfGetTilePosV(input);
     const int16_t tile_height_out = xfGetTileOutTHeight(input);
     const int16_t tile_width_out = xfGetTileOutTWidth(input);
 
-     printf("start_in_row=%d start_out_row=%d\n", start_in_row, start_out_row);
-     printf("tile_height_out=%d tile_width_out=%d\n", tile_height_out, tile_width_out);
+    printf("start_in_row=%d start_out_row=%d\n", start_in_row, start_out_row);
+    printf("tile_height_out=%d tile_width_out=%d\n", tile_height_out, tile_width_out);
 
     /*     int core_id = get_coreid();
 
@@ -394,8 +396,8 @@ __attribute__((noinline)) void Resizepolyphase<T, N>::runImpl(T* input,
 
     T* ptr_in = (T*)xfGetImgDataPtr(input);
 
-    xf_poly_resize_1DV((T*)ptr_in, (T*)output, channels, start_in_row, start_out_row, scale_y, img_height_in, tile_height_out,
-                 tile_width_out, mwtsY, scale_y_f);
+    xf_poly_resize_1DV((T*)ptr_in, (T*)output, channels, start_in_row, start_out_row, scale_y, img_height_in,
+                       tile_height_out, tile_width_out, mwtsY, scale_y_f);
 
     xfCopyMetaData(input, metaData);
 

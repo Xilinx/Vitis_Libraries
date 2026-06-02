@@ -217,12 +217,8 @@ loop_height:
 
                 float u;
                 float v;
-                xFComputeUndistortCoordinates<
-                    float,
-                    float, ROWT, COLT,
-                    float,
-                    float, CM_T,
-                    CM_SIZE, N>(cameraMatrixHLS, distCoeffsHLS, iRnewCameraMatrixHLS, noRotation, ifixed, jfixed, u, v);
+                xFComputeUndistortCoordinates<float, float, ROWT, COLT, float, float, CM_T, CM_SIZE, N>(
+                    cameraMatrixHLS, distCoeffsHLS, iRnewCameraMatrixHLS, noRotation, ifixed, jfixed, u, v);
 
                 float mx = (float)u;
                 float my = (float)v;
@@ -263,8 +259,8 @@ void InitUndistortRectifyMapInverse(float* cameraMatrix,
     uint16_t cols = _mapx_mat.cols >> XF_BITSHIFT(NPC);
 
     xFInitUndistortRectifyMapInverseKernel<ROWS, COLS, CM_SIZE, float, DC_SIZE, MAP_T, NPC, XFCVDEPTH_mapx,
-                                           XFCVDEPTH_mapy, XF_TNAME(MAP_T, NPC)>(
-        cameraMatrix, distCoeffs, ir, _mapx_mat, _mapy_mat, rows, cols);
+                                           XFCVDEPTH_mapy, XF_TNAME(MAP_T, NPC)>(cameraMatrix, distCoeffs, ir,
+                                                                                 _mapx_mat, _mapy_mat, rows, cols);
 }
 } // namespace cv
 } // namespace xf

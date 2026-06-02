@@ -30,15 +30,15 @@ static constexpr int NO_CORES_PER_COL_Y = 4;
 
 static constexpr int NO_COLS = 1;
 /********  UV  *********** */
-static constexpr int IMAGE_WIDTH_IN_UV = 1920;  
-static constexpr int IMAGE_HEIGHT_IN_UV = 1080; 
-static constexpr int IMAGE_WIDTH_OUT_UV = 1728; 
-static constexpr int IMAGE_HEIGHT_OUT_UV = 972; 
+static constexpr int IMAGE_WIDTH_IN_UV = 1920;
+static constexpr int IMAGE_HEIGHT_IN_UV = 1080;
+static constexpr int IMAGE_WIDTH_OUT_UV = 1728;
+static constexpr int IMAGE_HEIGHT_OUT_UV = 972;
 static constexpr int METADATA_SIZE = xf::cv::aie::METADATA_SIZE;
 
-static constexpr int TILE_WIDTH_IN_UV = IMAGE_WIDTH_IN_UV; 
+static constexpr int TILE_WIDTH_IN_UV = IMAGE_WIDTH_IN_UV;
 static constexpr int TILE_HEIGHT_IN_UV = 2;
-static constexpr int TILE_WIDTH_OUT_UV = IMAGE_WIDTH_OUT_UV; 
+static constexpr int TILE_WIDTH_OUT_UV = IMAGE_WIDTH_OUT_UV;
 static constexpr int TILE_HEIGHT_OUT_UV = 1;
 
 static constexpr int CHANNELS_UV = 2;

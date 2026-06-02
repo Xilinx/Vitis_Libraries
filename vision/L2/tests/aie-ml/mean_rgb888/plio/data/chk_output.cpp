@@ -2,7 +2,7 @@
 #include <cmath>
 #include <fstream>
 #include "./../config.h"
-#include <cstring>  
+#include <cstring>
 
 void read_file_int8(FILE* fpout, uint8_t* in_buffer, int n) {
     for (int i = 0; i < n; i++) {
@@ -42,10 +42,10 @@ int main(int argc, char** argv) {
 
     // convert to float
     int ERR_CNT = 0;
-    aie_out+=64;
-    for (int i = 0; i < 3; i+=1) {
+    aie_out += 64;
+    for (int i = 0; i < 3; i += 1) {
         float value;
-        std::memcpy(&value, &aie_out[4*i], sizeof(float));
+        std::memcpy(&value, &aie_out[4 * i], sizeof(float));
         std::cout << " AIE out = " << value << " ; ref_out = " << ref_out[i] << std::endl;
 
         if (abs(value - ref_out[i]) > 4) {

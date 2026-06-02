@@ -19,7 +19,7 @@
 #include <common/xf_aie_utils.hpp>
 
 // instantiate adf dataflow graph
-HLS2RGBGraph hls2rgb[NO_COLS] = {{6, 2, 0}}; 
+HLS2RGBGraph hls2rgb[NO_COLS] = {{6, 2, 0}};
 
 // initialize and run the dataflow graph
 #if defined(__AIESIM__) || defined(__X86SIM__)

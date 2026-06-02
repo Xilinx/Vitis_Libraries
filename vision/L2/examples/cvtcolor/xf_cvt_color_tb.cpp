@@ -5994,9 +5994,10 @@ int main(int argc, char** argv) {
 
     OCL_CHECK(err, cl::Kernel krnl(program, "cvtcolor_rgb2hsv", &err));
 
-    OCL_CHECK(err, cl::Buffer imageToDevicergb(context, CL_MEM_READ_ONLY, (inputimg.rows * inputimg.cols), NULL, &err));
-    OCL_CHECK(err,
-              cl::Buffer imageFromDevicehsv(context, CL_MEM_WRITE_ONLY, (outputimg.rows * outputimg.cols), NULL, &err));
+    OCL_CHECK(err, cl::Buffer imageToDevicergb(context, CL_MEM_READ_ONLY,
+                                               (inputimg.rows * inputimg.cols * INPUT_CH_TYPE), NULL, &err));
+    OCL_CHECK(err, cl::Buffer imageFromDevicehsv(context, CL_MEM_WRITE_ONLY,
+                                                 (outputimg.rows * outputimg.cols * OUTPUT_CH_TYPE), NULL, &err));
 
     printf("finished buffer creation task\n");
 

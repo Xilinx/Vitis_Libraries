@@ -614,7 +614,7 @@ __attribute__((noinline)) void ResizeNorm::xf_resize1DUpscaleGenericTile(uint8_t
                                                                          int tile_width_out) {
     set_rnd(rnd_conv_even);
     ::aie::vector<uint8_t, 64> data_vec;
-    //::aie::accum<acc32, 32> acc;
+//::aie::accum<acc32, 32> acc;
 #ifdef __SUPPORT_16BIT_VEC__
     ::aie::accum<acc64, 32> acc;
 #else

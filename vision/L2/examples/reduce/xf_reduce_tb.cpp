@@ -108,6 +108,12 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(3, height));
     OCL_CHECK(err, err = kernel.setArg(4, width));
 
+    // Profiling Objects
+    cl_ulong start = 0;
+    cl_ulong end = 0;
+    double diff_prof = 0.0f;
+    cl::Event event_sp;
+
     // Initialize the buffers:
     cl::Event event;
 
@@ -122,6 +128,11 @@ int main(int argc, char** argv) {
     // Execute the kernel:
     OCL_CHECK(err, err = queue.enqueueTask(kernel, NULL, &event));
     clWaitForEvents(1, (const cl_event*)&event);
+
+    event.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
+    event.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
+    diff_prof = end - start;
+    std::cout << "INFO: Latency for hardware function is " << (diff_prof / 1000000) << "ms" << std::endl;
 
     // Copy Result from Device Global Memory to Host Local Memory
     queue.enqueueReadBuffer(buffer_outImage, // This buffers data will be read

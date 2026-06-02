@@ -302,7 +302,7 @@ int main(int argc, char** argv) {
     std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
-    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_resize");
+    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_resize_pipeline");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
@@ -423,7 +423,7 @@ int main(int argc, char** argv) {
     std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
-    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_resize");
+    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_resize_pipeline");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
@@ -633,7 +633,7 @@ int main(int argc, char** argv) {
     std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
-    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_resize");
+    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_resize_pipeline");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));

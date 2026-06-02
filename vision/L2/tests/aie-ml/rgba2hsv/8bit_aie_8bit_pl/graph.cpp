@@ -18,19 +18,19 @@
 
 using namespace adf;
 // instantiate adf dataflow graph
-//RGBA2HSVGraph mygraph;
+// RGBA2HSVGraph mygraph;
 RGBA2HSVGraph mygraph[NO_COLS] = {{6, 2, 0}};
 
 // initialize and run the dataflow graph
 #if defined(__AIESIM__) || defined(__X86SIM__)
 
 int main(int argc, char** argv) {
-      for (int i = 0; i < NO_COLS; i++) {
+    for (int i = 0; i < NO_COLS; i++) {
         mygraph[i].init();
         mygraph[i].run(1);
         mygraph[i].wait();
         mygraph[i].end();
-      }
+    }
     return 0;
 }
 #endif

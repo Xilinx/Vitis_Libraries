@@ -35,7 +35,7 @@ static constexpr int METADATA_SIZE = xf::cv::aie::METADATA_SIZE;
 
 static constexpr int TILE_WIDTH_IN = IMAGE_WIDTH_IN; //(8 y and 8 uv)
 static constexpr int TILE_HEIGHT_IN = 2;
-static constexpr int TILE_WIDTH_OUT = 4; 
+static constexpr int TILE_WIDTH_OUT = 4;
 static constexpr int TILE_HEIGHT_OUT = 1;
 
 static constexpr int CHANNELS = 4;

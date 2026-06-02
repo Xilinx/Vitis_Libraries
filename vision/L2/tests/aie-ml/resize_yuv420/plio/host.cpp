@@ -475,7 +475,7 @@ int main(int argc, char** argv) {
             outFile << "\n";
         }
         outFile.close();
-        
+
         if (maxDifference > 4) {
             std::cerr << "Test failed" << std::endl;
             exit(-1);

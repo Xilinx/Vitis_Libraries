@@ -29,8 +29,10 @@ static constexpr int TILE_HEIGHT = 32;
 static constexpr int CHANNELS = 4;
 static constexpr int TILE_ELEMENTS = (TILE_WIDTH * TILE_HEIGHT * CHANNELS);
 static constexpr int TILE_WINDOW_SIZE = TILE_ELEMENTS * sizeof(DATA_TYPE) + xf::cv::aie::METADATA_SIZE;
-static constexpr int ELEM_WITH_METADATA_IN = CHANNELS * TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / sizeof(DATA_TYPE));
-static constexpr int ELEM_WITH_METADATA_OUT = CHANNELS * TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / sizeof(DATA_TYPE));
+static constexpr int ELEM_WITH_METADATA_IN =
+    CHANNELS * TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / sizeof(DATA_TYPE));
+static constexpr int ELEM_WITH_METADATA_OUT =
+    CHANNELS * TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / sizeof(DATA_TYPE));
 
 static constexpr int __X86_DEVICE__ = 0;
 

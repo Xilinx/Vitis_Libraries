@@ -58,9 +58,9 @@ int main(int argc, char** argv) {
     ap_uint<32>* points = (ap_uint<32>*)malloc(MAX_TOTAL_POINTS * sizeof(int));
     ap_uint<32>* offsets = (ap_uint<32>*)malloc((MAX_CONTOURS + 1) * sizeof(int));
     ap_uint<32>* numc = (ap_uint<32>*)malloc(sizeof(int));
-START_TIMER
+    START_TIMER
     findcontours_accel((ap_uint<8>*)refThreshold1.data, in_gray.rows, in_gray.cols, points, offsets, numc);
-STOP_TIMER("Total time to process frame")
+    STOP_TIMER("Total time to process frame")
 
     std::vector<std::vector<cv::Point> > hlscontours;
     std::cout << "Contours: " << (unsigned)numc[0] << "\n";
@@ -88,9 +88,9 @@ STOP_TIMER("Total time to process frame")
 
     // Opencv Reference
     std::vector<std::vector<cv::Point> > refcontours;
-START_TIMER
+    START_TIMER
     cv::findContours(refThreshold1, refcontours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-STOP_TIMER("Total time to process ref frame")
+    STOP_TIMER("Total time to process ref frame")
     cv::Mat refContourOutput(in_gray.rows, in_gray.cols, CV_8UC1);
     refContourOutput.setTo(cv::Scalar(255));
     drawContours(refContourOutput, refcontours, -1, cv::Scalar(0, 255, 0), 0); // Green contours

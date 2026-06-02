@@ -50,8 +50,8 @@ void remap_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
     xf::cv::Array2xfMat<MAPXY_TYPE_PTR_WIDTH, MAPXY_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_3>(map_y, mapY);
 
     // Run xfOpenCV kernel:
-    xf::cv::remap<XF_WIN_ROWS, XF_REMAP_INTERPOLATION_TYPE, IN_TYPE, MAPXY_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPPCX,
-                  XF_USE_URAM, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_IN_3, XF_CV_DEPTH_OUT>(
+    xf::cv::remap<XF_WIN_ROWS, XF_REMAP_INTERPOLATION_TYPE, IN_TYPE, MAPXY_TYPE, OUT_TYPE, HEIGHT, WIDTH, HEIGHT, WIDTH,
+                  NPPCX, XF_USE_URAM, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_IN_3, XF_CV_DEPTH_OUT>(
         imgInput, imgOutput, mapX, mapY);
 
     // Convert _dst xf::cv::Mat object to output array:

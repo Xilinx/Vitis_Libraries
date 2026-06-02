@@ -32,7 +32,6 @@ class ResizeRunnerY {
     static void registerKernelClass() { REGISTER_FUNCTION(ResizeRunnerY::run); }
 };
 
-
 class ResizeRunner {
    public:
     void run(adf::input_buffer<uint8_t>& input,

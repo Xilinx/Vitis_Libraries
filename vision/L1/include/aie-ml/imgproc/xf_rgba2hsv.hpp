@@ -71,7 +71,6 @@ __attribute__((noinline)) void Rgba2Hsv::xf_rgba2hsv(uint8_t* restrict in_ptr,
     uint8_t zero_uint8 = 0;
 
     for (int j = 0; j < loop_count; j++) chess_prepare_for_pipelining {
-
             /* r,g,b extraction */
             rgba_channel0 = ::aie::load_v<N>(in_ptr);
             in_ptr += N;
@@ -83,8 +82,8 @@ __attribute__((noinline)) void Rgba2Hsv::xf_rgba2hsv(uint8_t* restrict in_ptr,
             in_ptr += N;
 
             // Unzip the interleaved channels
-            auto [rg_temp, ba_temp] = ::aie::interleave_unzip(::aie::concat(rgba_channel0, rgba_channel1),
-                                                              ::aie::concat(rgba_channel2, rgba_channel3), 2);
+            auto[rg_temp, ba_temp] = ::aie::interleave_unzip(::aie::concat(rgba_channel0, rgba_channel1),
+                                                             ::aie::concat(rgba_channel2, rgba_channel3), 2);
             r = ::aie::filter_even(rg_temp, 1);
             g = ::aie::filter_odd(rg_temp, 1);
             b = ::aie::filter_even(ba_temp, 1);
@@ -116,7 +115,6 @@ __attribute__((noinline)) void Rgba2Hsv::xf_rgba2hsv(uint8_t* restrict in_ptr,
             acc_f = ::aie::mul(sixty_bf16, acc_f.template to_vector<bfloat16>());
             ::aie::vector<bfloat16, N> h1_bf16 = acc_f.template to_vector<bfloat16>();
 
-
             // *** h2 = 60.0f * (((b - r) / delta) + 2.0f);
             temp2 = (::aie::sub(::aie::unpack(b), ::aie::unpack(r))).cast_to<int16>();
             acc_f = ::aie::mul(::aie::to_float<bfloat16>(temp2), delta_inv);
@@ -139,7 +137,7 @@ __attribute__((noinline)) void Rgba2Hsv::xf_rgba2hsv(uint8_t* restrict in_ptr,
             m1 = ::aie::lt(h3_bf16, zero_bf16);
             auto temp1 = ::aie::add(h3_bf16, one_eighty_bf16);
             h3_bf16 = ::aie::select(h3_bf16, temp1, m1);
-            //acc_f = ::aie::mul(h3_bf16, point_five_bf16);
+            // acc_f = ::aie::mul(h3_bf16, point_five_bf16);
             //::aie::vector<uint8_t, N> h_uint8 = ::aie::to_fixed<uint8>(acc_f.template to_vector<bfloat16>(), 0);
             ::aie::vector<uint8_t, N> h_uint8 = ::aie::to_fixed<uint8>(h3_bf16, 0);
 
@@ -148,14 +146,12 @@ __attribute__((noinline)) void Rgba2Hsv::xf_rgba2hsv(uint8_t* restrict in_ptr,
 
             h_uint8 = ::aie::select(h_uint8, zero_uint8, m1);
 
-
-            auto [rg1_tmp, rg2_tmp] = ::aie::interleave_zip(h_uint8, s_uint8, 1);
-            auto [ba1_tmp, ba2_tmp] = ::aie::interleave_zip(v_max, a, 1);
-            auto [x1, y1] = ::aie::interleave_zip(::aie::concat(rg1_tmp, rg2_tmp), ::aie::concat(ba1_tmp, ba2_tmp), 2);
+            auto[rg1_tmp, rg2_tmp] = ::aie::interleave_zip(h_uint8, s_uint8, 1);
+            auto[ba1_tmp, ba2_tmp] = ::aie::interleave_zip(v_max, a, 1);
+            auto[x1, y1] = ::aie::interleave_zip(::aie::concat(rg1_tmp, rg2_tmp), ::aie::concat(ba1_tmp, ba2_tmp), 2);
             ::aie::store_v((uint8_t*)out_ptr, ::aie::concat(x1, y1));
             out_ptr = out_ptr + 4 * N;
         }
-
 }
 
 void Rgba2Hsv::runImpl(adf::input_buffer<uint8_t>& in, adf::output_buffer<uint8_t>& out) {

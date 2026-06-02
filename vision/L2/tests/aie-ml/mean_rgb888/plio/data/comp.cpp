@@ -7,7 +7,7 @@
 using namespace std;
 
 // Function to calculate the maximum difference between corresponding values in two files
-int max_difference(const string &file1, const string &file2) {
+int max_difference(const string& file1, const string& file2) {
     ifstream f1(file1);
     ifstream f2(file2);
 
@@ -53,10 +53,9 @@ int main() {
     try {
         int diff = max_difference(file1, file2);
         cout << "The maximum difference between the values in the two files is: " << diff << endl;
-    } catch (const exception &e) {
+    } catch (const exception& e) {
         cerr << "An error occurred: " << e.what() << endl;
     }
 
     return 0;
 }
-
