@@ -39,7 +39,7 @@ Motor Control Library is an open-sourced library written in C/C++ for accelerati
 2026.1
 -------
 
-In the 2026.1 release, the non-FP32 Motor Control HLS source implementation is restored to the 2024.1 source-based implementation for KD240 application integration readiness. The 2024.2/2025.1 MKLabs wrapper/container-oriented IP path and related APC integer API tests are removed from the delivered source tree. The FP32 model and precision-test infrastructure remains available for verification and future FP32 FOC development.
+In the 2026.1 release, Motor Control adds six FP32 APIs that can be synthesized directly and also used as high-precision references for validation and future FOC development. The existing non-FP32 APIs are restored to the 2024.1 source-based implementation for KD240 application integration readiness.
 
 2023.2
 -------
