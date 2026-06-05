@@ -12,6 +12,9 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2026.1
+-------
+
 .. note:: Known Issue
 
     * Synthetic_Aperture_Test and Scanline_Test have a known hardware build issue on xilinx_vck190_base_202610_1 and later VCK190 platforms because the designs require more interrupt resources than the platform provides. As a workaround, use xilinx_vck190_base_202520_1 for Synthetic_Aperture_Test, and use the scanline_AllinAIE design instead of Scanline_Test.

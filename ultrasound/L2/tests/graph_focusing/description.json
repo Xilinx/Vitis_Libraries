@@ -36,7 +36,10 @@
                     "location": "LIB_DIR/L2/tests/graph_focusing/aie_graph/graph.cpp",
                     "workdir": "./Work",
                     "name": "libadf.a",
-                    "config": "aie.cfg"
+                    "config": "aie.cfg",
+                    "files": [
+                        "LIB_DIR/L1/include/kernel_focusing/kernel_focusing.cpp"
+                    ]
                 }
             ]
         }

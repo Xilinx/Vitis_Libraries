@@ -36,7 +36,11 @@
                     "location": "LIB_DIR/L2/tests/graph_apodization/aie_graph/graph.cpp",
                     "workdir": "./Work",
                     "name": "libadf.a",
-                    "config": "aie.cfg"
+                    "config": "aie.cfg",
+                    "files": [
+                        "LIB_DIR/L1/include/kernel_apodization/kernel_apodization_pre.cpp",
+                        "LIB_DIR/L1/include/kernel_apodization/kernel_apodization_main.cpp"
+                    ]
                 }
             ]
         }

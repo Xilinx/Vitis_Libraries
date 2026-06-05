@@ -39,7 +39,17 @@
                     "location": "LIB_DIR/L2/tests/graph_scanline/aie_graph/graph.cpp",
                     "workdir": "./Work",
                     "name": "libadf.a",
-                    "config": "aie.cfg"
+                    "config": "aie.cfg",
+                    "files": [
+                        "LIB_DIR/L1/include/kernel_imagepoints/kernel_imagepoints.cpp",
+                        "LIB_DIR/L1/include/kernel_focusing/kernel_focusing.cpp",
+                        "LIB_DIR/L1/include/kernel_delay/kernel_delay.cpp",
+                        "LIB_DIR/L1/include/kernel_sample/kernel_sample.cpp",
+                        "LIB_DIR/L1/include/kernel_interpolation/kernel_interpolation.cpp",
+                        "LIB_DIR/L1/include/kernel_apodization/kernel_apodization_pre.cpp",
+                        "LIB_DIR/L1/include/kernel_apodization/kernel_apodization_main.cpp",
+                        "LIB_DIR/L1/include/kernel_mult/kernel_mult.cpp"
+                    ]
                 }
             ]
         }
