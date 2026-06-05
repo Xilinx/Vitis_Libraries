@@ -878,13 +878,13 @@
         "POINT_SIZE_D1": "1",
         "CASC_LEN": "1"
     },
-    "cint16_cint16_16384_1_10_5_4_0_0_rnd_sym_inf_1_1_1_0_0_0_8_312500000_128_2_1_1_1_1_aie1_hw_checkin": {
+    "cint16_cint16_16384_1_14_5_4_0_0_rnd_sym_inf_1_1_1_0_0_0_8_312500000_128_2_1_1_1_1_aie1_hw_checkin": {
         "VSS_MODE": "2",
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "SSR": "8",
         "PARALLEL_POWER": "2",
-        "SHIFT": "10",
+        "SHIFT": "14",
         "POINT_SIZE": "16384",
         "AIE_VARIANT": "1",
         "WINDOW_VSIZE": "16384",

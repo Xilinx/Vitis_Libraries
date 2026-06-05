@@ -67,7 +67,6 @@ ifeq ($(PLATFORM),)
 PLATFORM := vck190
 endif
 
-
 #setting SYSROOT
 ifneq (,$(findstring vek385, $(PLATFORM)))
 ifeq (,$(wildcard $(YOCTO_ARTIFACTS)))
@@ -185,7 +184,7 @@ endif
 HOST_SRCS += host.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__ -D USING_UUT=1
 CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/include/vss/common -I $(XFLIB_DIR)/L1/include/vss/vss_fft_ifft_1d -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I PROJECT -I $(XFLIB_DIR)/L1/include/hw
-CXXFLAGS += --sysroot=$(SYSROOT) -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE")  -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "NITER")   -DSSR=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "SSR") -DTT_DATA=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "DATA_TYPE") -DPOINT_SIZE_D1=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE_D1") -DDUAL_STREAMS=$(DUAL_STREAMS)
+CXXFLAGS += --sysroot=$(SYSROOT) -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE")  -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "NITER")   -DSSR=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "SSR") -DTT_DATA=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "DATA_TYPE") -DPOINT_SIZE_D1=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE_D1") -DAPI_IO=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "API_IO")
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/
 LDFLAGS += --sysroot=$(SYSROOT)
 
@@ -220,8 +219,8 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw
 endif
 
 ######################### binary container global settings ##########################
-VPP_FLAGS_mm2s_wrapper += -DNSTREAM=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "SSR") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE") -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "NITER") -DDATAWIDTH=$(DATA_WIDTH) -DPOINT_SIZE_D1=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE_D1") -DDUAL_STREAMS=$(DUAL_STREAMS)
-VPP_FLAGS_s2mm_wrapper += -DNSTREAM=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "SSR") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE") -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "NITER") -DDATAWIDTH=$(DATA_WIDTH) -DPOINT_SIZE_D1=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE_D1") -DDUAL_STREAMS=$(DUAL_STREAMS)
+VPP_FLAGS_mm2s_wrapper += -DNSTREAM=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "SSR") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE") -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "NITER") -DDATAWIDTH=$(DATA_WIDTH) -DPOINT_SIZE_D1=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE_D1") -DAPI_IO=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "API_IO")
+VPP_FLAGS_s2mm_wrapper += -DNSTREAM=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "SSR") -DPOINT_SIZE=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE") -DNITER=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "NITER") -DDATAWIDTH=$(DATA_WIDTH) -DPOINT_SIZE_D1=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "POINT_SIZE_D1") -DAPI_IO=$(shell $(VITIS_PYTHON3) paramset.py $(PARAMS_FILE) $(PARAMS) "API_IO")
 
 ifneq ($(PACKAGE_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/kernel.xclbin
@@ -337,6 +336,7 @@ PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 PACKAGE_DIR := $(CUR_DIR)/package_$(TARGET)
 PACKAGE_DIR_HW := $(CUR_DIR)/package.$(TARGET)
+SD_CARD := $(CUR_DIR)/package_$(TARGET)
 $(PACKAGE_DIR): host xclbin $(RUN_SCRIPT) $(EMCONFIG) #check_kimage check_rootfs
 	@echo "Generating sd_card folder...."
 	mkdir -p $(PACKAGE_DIR)
@@ -365,7 +365,7 @@ ifeq (${TARGET},hw)
 	@ln -sfn $(PACKAGE_DIR) $(PACKAGE_DIR_HW)
 endif	
 else
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(PACKAGE_DIR) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(PACKAGE_DIR) --package.rootfs $(ROOTFS) --package.generate_sdcard --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 endif
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
@@ -399,10 +399,6 @@ mkflag:
 	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
 
 all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
-
-status:
-	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_resources HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL) TAG=$(TAG) FRONT_INPUT_FILE=$(FRONT_INPUT_FILE) BACK_INPUT_FILE=$(BACK_INPUT_FILE) REF_INPUT_FILE=$(REF_INPUT_FILE) REF_SIM_FILE=$(REF_SIM_FILE)"
-	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_perf HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL) TAG=$(TAG) FRONT_INPUT_FILE=$(FRONT_INPUT_FILE) BACK_INPUT_FILE=$(BACK_INPUT_FILE) REF_INPUT_FILE=$(REF_INPUT_FILE) REF_SIM_FILE=$(REF_SIM_FILE)"
 
 run: all
 #x86sim

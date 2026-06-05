@@ -88,14 +88,9 @@ conv_corr<TT_DATA_F,
     using T_buff_FSig = T_InOut_W_buff<TT_DATA_F>;             // W_REG_BITS buffer for reading F Data
     using T_buff_GSig = T_InOut_W_buff<TT_DATA_G>;             // W_REG_BITS buffer for reading G Data
     using dataVecOut_t = ::aie::vector<TT_DATA_OUT, m_kLanes>; // Output vector based on output data type and lanes
-    using T_vecF = ::aie::vector<TT_DATA_F, m_kVecLoadF>;      // Vector type for F data load
-    T_vecF zeroVec =
-        ::aie::zeros<TT_DATA_F,
-                     m_kVecLoadF>(); // Zero Vector of F data type and F load size to use for padding of zeros.
-
-    T_accum acc;             // Declaration of Accumulator
-    T_buff_Xbuff xbuff;      // Declaration of xbuff using X(1024b) Reg.
-    T_buff_Zbuff zbuff;      // Declaration of zbuff using W(256b) Reg.
+    T_accum acc;                                               // Declaration of Accumulator
+    T_buff_Xbuff xbuff;                                        // Declaration of xbuff using X(1024b) Reg.
+    T_buff_Zbuff zbuff;                                        // Declaration of zbuff using W(256b) Reg.
     dataVecOut_t dataVecOut; // Declaration of Output Vector to store results into Out buffer.
     dataVecOut_t dataOut =
         ::aie::zeros<TT_DATA_OUT, m_kLanes>(); // Declaration of Output Vector to store results after masking.
@@ -125,6 +120,12 @@ conv_corr<TT_DATA_F,
             : (TP_COMPUTE_MODE == VALID_MODE) ? 0 : ((m_kFdataStartIndx * m_kVecLoadF) -
                                                      (TP_G_LEN - 1)); // Offset accounting for vector-aligned padding
 
+    // True when the sliding MAC window reaches beyond the two loaded xbuff slots.
+    // Derivation: innerloop max xstart = (m_kVecLoadF - m_kPoints) + kXStartIdxAdj;
+    // sliding_mul reads up to xstart + m_kLanes + m_kPoints - 2 = m_kVecLoadF + kXStartIdxAdj + m_kLanes - 2
+    // (m_kPoints cancels). 3rd slot needed when this >= 2*m_kVecLoadF, i.e.:
+    constexpr bool kRequiresThirdXbuffSlot = ((kXStartIdxAdj + m_kLanes) >= (m_kVecLoadF + kBuffIndx2));
+
     // Pointers to do Padding zeros to the F data based on compute mode
     T_buff_FSig* __restrict inPtrF = (T_buff_FSig*)inWindowF.data(); // Alias Input pointer for Sig_F
     T_buff_FSig* paddedFdataPtr = (T_buff_FSig*)paddedFdata;         // Vector pointer to padded F data
@@ -147,25 +148,13 @@ conv_corr<TT_DATA_F,
             // Initialize pointer to start of current frame
             T_buff_FSig* paddedFdataPtr = (T_buff_FSig*)paddedFdata + (frameIndx * kFrameoffsetF);
 
-            // ========== Zero padding before F data(0 to kDataStartIndex) ==========
-            for (unsigned int dataIndx = 0; dataIndx < kDataStartIndex; dataIndx++)
-                chess_prepare_for_pipelining chess_loop_count(kDataStartIndex) {
-                    *paddedFdataPtr++ = (T_buff_FSig)zeroVec; // Write zeroVec, increment paddedFdataPtr
-                }
-
             // ========== Copy F data (kDataStartIndex to kDataEndIndex) ==========
+            // Padding regions (prefix 0..kDataStartIndex and suffix kDataEndIndex..totalVecs) stay zero
+            // because paddedFdata is statically zero-initialized — no per-call zero-fill needed.
+            paddedFdataPtr += kDataStartIndex;
             for (unsigned int dataIndx = kDataStartIndex; dataIndx < kDataEndIndex; dataIndx++)
                 chess_prepare_for_pipelining chess_loop_count(kDataEndIndex - kDataStartIndex) {
                     *paddedFdataPtr++ = *inPtrF++; // Copy F data, increment both pointers
-                }
-
-            // ========== Zero padding after F data (kDataEndIndex to end) ==========
-            constexpr unsigned int totalVecs = m_kPaddedLenData / m_kVecLoadF;
-            constexpr unsigned int suffixCount = totalVecs - kDataEndIndex;
-
-            for (unsigned int dataIndx = kDataEndIndex; dataIndx < totalVecs; dataIndx++)
-                chess_prepare_for_pipelining chess_loop_count(suffixCount) {
-                    *paddedFdataPtr++ = (T_buff_FSig)zeroVec; // Write zeroVec, increment paddedFdataPtr
                 }
 
             // If the function type is conv (1), then we need to reverse the G data.
@@ -222,24 +211,9 @@ conv_corr<TT_DATA_F,
             for (unsigned int outIndx = 0; outIndx < kLoopCount; outIndx++)
                 chess_prepare_for_pipelining chess_loop_count(kLoopCount) {
                     // Updation of F and G pointer to fetch respective data from both signal
-                    inDataPtrF =
-                        (rdInDataFPtr + (outIndx * (m_kLanes >> kFLoadbits)) +
-                         (frameIndx * kPaddedVecLoopCnt)); // Reset F Sig Pointer - load from start including padding
+                    inDataPtrF = (rdInDataFPtr + (outIndx * (m_kLanes >> kFLoadbits)) +
+                                  (frameIndx * kFrameoffsetF));                // Reset F Sig Pointer.
                     inDataPtrG = (rdInDataGPtr + (frameIndx * kFrameoffsetG)); // Reset G Sig Pointer.
-
-                    // Conservative bounds check - done ONCE per outer loop before any inner loops
-                    // kInnerLoopFptrIncr: max F-ptr offset at the moment of 3rd vector load in the inner loop (4th load
-                    // goes one further, but that one is also conditionally loaded)
-                    constexpr unsigned int kInnerLoopFptrIncr = kAccumLen * kGandFLoadRatio + 1;
-                    constexpr unsigned int kThirdVecLoadOffset =
-                        (kInnerLoopFptrIncr < kPaddedVecLoopCnt) ? (kPaddedVecLoopCnt - kInnerLoopFptrIncr) : 0;
-                    // The additional pre-increment advances one extra vector, so the threshold is reduced by one.
-                    constexpr unsigned int kFourthVecLoadOffset =
-                        (kInnerLoopFptrIncr + 1 < kPaddedVecLoopCnt) ? (kPaddedVecLoopCnt - kInnerLoopFptrIncr - 1) : 0;
-
-                    unsigned int baseOffset = (outIndx * (m_kLanes >> kFLoadbits));
-                    bool load3rdVec = (baseOffset < kThirdVecLoadOffset);
-                    bool load4thVec = (baseOffset < kFourthVecLoadOffset);
 
                     // Initialization of Accumulator with Zeros to flush the previous data.
                     acc.val = ::aie::zeros<tConvCorrAccType_t<TT_DATA_F, TT_DATA_G>,
@@ -261,30 +235,16 @@ conv_corr<TT_DATA_F,
 // Load Data of F Signal
 #pragma unroll(kGandFLoadRatio)
                         for (unsigned int k = 0; k < kGandFLoadRatio; k++) {
-                            // Pointer Manipulation to read No of "FLoad" elements into Y_REG_BITS buffer
-                            // Always load first two vectors
                             upd_W_buff(xbuff.val, 0,
                                        inDataPtrF++); // update xbuff with F sig data based on vector load.
                             upd_W_buff(xbuff.val, kBuffIndx1,
                                        inDataPtrF); // update xbuff with F sig data based on vector load.
-
-                            // Load 3rd and 4th vectors only when the precomputed bounds condition is true (evaluated
-                            // once per outer loop); otherwise this unrolled path is a no-op and the pointer is not
-                            // advanced.
-                            if (load3rdVec) {
-                                inDataPtrF++; // increment pointer to next vector boundary if 3rd vector load is valid
-                                upd_W_buff(xbuff.val, kBuffIndx2,
-                                           inDataPtrF); // update xbuff with F sig data based on 3rd vector load.
-
-                                if (load4thVec) {
-                                    inDataPtrF++; // increment pointer to next vector boundary if 4th vector load is
-                                                  // valid
-                                    upd_W_buff(xbuff.val, kBuffIndx3, inDataPtrF--); // update xbuff with F sig data
-                                                                                     // based on 4th vector load, then
-                                                                                     // decrement pointer
+                            if
+                                constexpr(kRequiresThirdXbuffSlot) {
+                                    inDataPtrF++;
+                                    upd_W_buff(xbuff.val, kBuffIndx2,
+                                               inDataPtrF--); // Load 3rd xbuff slot: MAC window exceeds 2 loaded slots
                                 }
-                                inDataPtrF--; // restore pointer to next iteration's first vector
-                            }
 
 #pragma unroll(kInLoopLen)
                             for (unsigned int l = 0; l < kInLoopLen; l++) {

@@ -113,9 +113,11 @@ class conv_corr {
     // load max possible elements each time based on sample size from memory that aie would operate
     static constexpr unsigned int m_kVecLoadG = (kMaxBytesLoadOnAie / sizeof(TT_DATA_G));
 
-    // Zero initialized memory buffer where F signal data is filled based on paddedLength
+    // Zero initialized memory buffer where F signal data is filled based on paddedLength.
+    // The static zero-init ensures padding regions stay zero across invocations so the kernel
+    // only needs to copy F data each call, not re-zero the prefix/suffix on every iteration.
     alignas(__ALIGN_BYTE_SIZE__) TT_DATA_F
-        chess_storage(% chess_alignof(v32int8)) paddedFdata[m_kPaddedLenData * TP_NUM_FRAMES];
+        chess_storage(% chess_alignof(v32int8)) paddedFdata[m_kPaddedLenData * TP_NUM_FRAMES] = {};
 
     // Start index where data filling begins in the paddedFdata buffer
     static constexpr unsigned int m_kFdataStartIndx =

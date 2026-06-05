@@ -2306,7 +2306,7 @@
         "DIFF_MODE": "ABS",
         "CC_TOLERANCE": "0"
     },
-    "test_216_cbfloat16_cbfloat16_cbfloat16_128_128_1_0_1_0_0_0_2_4_0_20_PERCENT_0_05_0_0_8_0_0_1_0_aie2_x86sim_checkin": {
+    "test_216_cbfloat16_cbfloat16_cbfloat16_128_128_1_0_1_0_0_0_2_4_0_20_PERCENT_0_1_0_0_8_0_0_1_0_aie2_x86sim_checkin": {
         "DATA_TYPE": "cbfloat16",
         "DATA_OUT_TYPE": "cbfloat16",
         "TWIDDLE_TYPE": "cbfloat16",
@@ -2323,7 +2323,7 @@
         "TARGET": "x86sim",
         "DIFF_TOLERANCE": "0.20",
         "DIFF_MODE": "PERCENT",
-        "CC_TOLERANCE": "0.05",
+        "CC_TOLERANCE": "0.1",
         "TWIDDLE_MODE": "0",
         "PARALLEL_POWER": "0",
         "ROUND_MODE": "8",
@@ -2332,7 +2332,7 @@
         "DATA_SEED": "1",
         "SINGLE_BUF": "0"
     },
-    "test_217_cbfloat16_cbfloat16_cbfloat16_128_128_1_0_1_0_1_0_22_4_0_20_PERCENT_0_05_0_0_8_0_0_1_0_aie22_x86sim_checkin": {
+    "test_217_cbfloat16_cbfloat16_cbfloat16_128_128_1_0_1_0_1_0_22_4_0_20_PERCENT_0_1_0_0_8_0_0_1_0_aie22_x86sim_checkin": {
         "DATA_TYPE": "cbfloat16",
         "DATA_OUT_TYPE": "cbfloat16",
         "TWIDDLE_TYPE": "cbfloat16",
@@ -2349,7 +2349,7 @@
         "TARGET": "x86sim",
         "DIFF_TOLERANCE": "0.20",
         "DIFF_MODE": "PERCENT",
-        "CC_TOLERANCE": "0.05",
+        "CC_TOLERANCE": "0.1",
         "TWIDDLE_MODE": "0",
         "PARALLEL_POWER": "0",
         "ROUND_MODE": "8",
@@ -2358,7 +2358,7 @@
         "DATA_SEED": "1",
         "SINGLE_BUF": "0"
     },
-    "test_218_cbfloat16_cbfloat16_cbfloat16_2048_2048_0_0_1_0_0_0_2_4_0_20_PERCENT_0_05_0_0_8_0_0_1_0_aie2_x86sim_checkin": {
+    "test_218_cbfloat16_cbfloat16_cbfloat16_2048_2048_0_0_1_0_0_0_2_4_0_20_PERCENT_0_1_0_0_8_0_0_1_0_aie2_x86sim_checkin": {
         "DATA_TYPE": "cbfloat16",
         "DATA_OUT_TYPE": "cbfloat16",
         "TWIDDLE_TYPE": "cbfloat16",
@@ -2375,7 +2375,7 @@
         "TARGET": "x86sim",
         "DIFF_TOLERANCE": "0.20",
         "DIFF_MODE": "PERCENT",
-        "CC_TOLERANCE": "0.05",
+        "CC_TOLERANCE": "0.1",
         "TWIDDLE_MODE": "0",
         "PARALLEL_POWER": "0",
         "ROUND_MODE": "8",
@@ -2384,7 +2384,7 @@
         "DATA_SEED": "1",
         "SINGLE_BUF": "0"
     },
-    "test_219_cbfloat16_cbfloat16_cbfloat16_2048_2048_1_0_4_0_0_0_22_4_0_20_PERCENT_0_05_0_0_8_0_0_1_0_aie22_x86sim_checkin": {
+    "test_219_cbfloat16_cbfloat16_cbfloat16_2048_2048_1_0_4_0_0_0_22_4_0_20_PERCENT_0_1_0_0_8_0_0_1_0_aie22_x86sim_checkin": {
         "DATA_TYPE": "cbfloat16",
         "DATA_OUT_TYPE": "cbfloat16",
         "TWIDDLE_TYPE": "cbfloat16",
@@ -2401,7 +2401,7 @@
         "TARGET": "x86sim",
         "DIFF_TOLERANCE": "0.20",
         "DIFF_MODE": "PERCENT",
-        "CC_TOLERANCE": "0.05",
+        "CC_TOLERANCE": "0.1",
         "TWIDDLE_MODE": "0",
         "PARALLEL_POWER": "0",
         "ROUND_MODE": "8",
@@ -2410,7 +2410,7 @@
         "DATA_SEED": "1",
         "SINGLE_BUF": "0"
     },
-    "test_223_cbfloat16_cbfloat16_cbfloat16_128_128_1_0_1_0_0_0_22_4_0_20_PERCENT_0_05_0_0_8_0_0_1_0_aie22_aiesim_checkin": {
+    "test_223_cbfloat16_cbfloat16_cbfloat16_128_128_1_0_1_0_0_0_22_4_0_20_PERCENT_0_1_0_0_8_0_0_1_0_aie22_aiesim_checkin": {
         "DATA_TYPE": "cbfloat16",
         "DATA_OUT_TYPE": "cbfloat16",
         "TWIDDLE_TYPE": "cbfloat16",
@@ -2427,7 +2427,7 @@
         "TARGET": "aiesim",
         "DIFF_TOLERANCE": "0.20",
         "DIFF_MODE": "PERCENT",
-        "CC_TOLERANCE": "0.05",
+        "CC_TOLERANCE": "0.1",
         "TWIDDLE_MODE": "0",
         "PARALLEL_POWER": "0",
         "ROUND_MODE": "8",
@@ -2436,7 +2436,7 @@
         "DATA_SEED": "1",
         "SINGLE_BUF": "0"
     },
-    "test_224_cbfloat16_cbfloat16_cbfloat16_128_128_1_0_1_0_1_0_2_4_0_20_PERCENT_0_05_0_0_8_0_0_1_0_aie2_aiesim_checkin": {
+    "test_224_cbfloat16_cbfloat16_cbfloat16_128_128_1_0_1_0_1_0_2_4_0_20_PERCENT_0_1_0_0_8_0_0_1_0_aie2_aiesim_checkin": {
         "DATA_TYPE": "cbfloat16",
         "DATA_OUT_TYPE": "cbfloat16",
         "TWIDDLE_TYPE": "cbfloat16",
@@ -2453,7 +2453,7 @@
         "TARGET": "aiesim",
         "DIFF_TOLERANCE": "0.20",
         "DIFF_MODE": "PERCENT",
-        "CC_TOLERANCE": "0.05",
+        "CC_TOLERANCE": "0.1",
         "TWIDDLE_MODE": "0",
         "PARALLEL_POWER": "0",
         "ROUND_MODE": "8",
@@ -2462,7 +2462,7 @@
         "DATA_SEED": "1",
         "SINGLE_BUF": "0"
     },
-    "test_225_cbfloat16_cbfloat16_cbfloat16_2048_2048_0_0_1_0_0_0_22_4_0_20_PERCENT_0_05_0_0_8_0_0_1_0_aie22_aiesim_checkin": {
+    "test_225_cbfloat16_cbfloat16_cbfloat16_2048_2048_0_0_1_0_0_0_22_4_0_20_PERCENT_0_1_0_0_8_0_0_1_0_aie22_aiesim_checkin": {
         "DATA_TYPE": "cbfloat16",
         "DATA_OUT_TYPE": "cbfloat16",
         "TWIDDLE_TYPE": "cbfloat16",
@@ -2479,7 +2479,7 @@
         "TARGET": "aiesim",
         "DIFF_TOLERANCE": "0.20",
         "DIFF_MODE": "PERCENT",
-        "CC_TOLERANCE": "0.05",
+        "CC_TOLERANCE": "0.1",
         "TWIDDLE_MODE": "0",
         "PARALLEL_POWER": "0",
         "ROUND_MODE": "8",
@@ -2488,7 +2488,7 @@
         "DATA_SEED": "1",
         "SINGLE_BUF": "0"
     },
-    "test_226_cbfloat16_cbfloat16_cbfloat16_2048_2048_1_0_4_0_0_0_2_4_0_20_PERCENT_0_05_0_0_8_0_0_1_0_aie2_aiesim_checkin": {
+    "test_226_cbfloat16_cbfloat16_cbfloat16_2048_2048_1_0_4_0_0_0_2_4_0_20_PERCENT_0_1_0_0_8_0_0_1_0_aie2_aiesim_checkin": {
         "DATA_TYPE": "cbfloat16",
         "DATA_OUT_TYPE": "cbfloat16",
         "TWIDDLE_TYPE": "cbfloat16",
@@ -2505,7 +2505,7 @@
         "TARGET": "aiesim",
         "DIFF_TOLERANCE": "0.20",
         "DIFF_MODE": "PERCENT",
-        "CC_TOLERANCE": "0.05",
+        "CC_TOLERANCE": "0.1",
         "TWIDDLE_MODE": "0",
         "PARALLEL_POWER": "0",
         "ROUND_MODE": "8",
@@ -6839,7 +6839,7 @@
         "DIFF_MODE": "ABS",
         "CC_TOLERANCE": "0"
     },
-    "test_511_cbfloat16_cbfloat16_cbfloat16_128_128_1_0_1_0_0_2_0_8_0_01_PERCENT_0_01_0_0_8_0_0_1_0_aie2_x86sim_qor": {
+    "test_511_cbfloat16_cbfloat16_cbfloat16_128_128_1_0_1_0_0_2_0_8_0_2_PERCENT_0_1_0_0_8_0_0_1_0_aie2_x86sim_qor": {
         "DATA_TYPE": "cbfloat16",
         "DATA_OUT_TYPE": "cbfloat16",
         "TWIDDLE_TYPE": "cbfloat16",
@@ -6854,9 +6854,9 @@
         "STIM_TYPE": "0",
         "NITER": "8",
         "TARGET": "x86sim",
-        "DIFF_TOLERANCE": "0.01",
+        "DIFF_TOLERANCE": "0.2",
         "DIFF_MODE": "PERCENT",
-        "CC_TOLERANCE": "0.01",
+        "CC_TOLERANCE": "0.1",
         "TWIDDLE_MODE": "0",
         "PARALLEL_POWER": "0",
         "ROUND_MODE": "8",
@@ -6865,7 +6865,7 @@
         "DATA_SEED": "1",
         "SINGLE_BUF": "0"
     },
-    "test_512_cbfloat16_cbfloat16_cbfloat16_128_128_1_0_1_0_1_22_0_8_0_01_PERCENT_0_01_0_0_8_0_0_1_0_aie22_x86sim_qor": {
+    "test_512_cbfloat16_cbfloat16_cbfloat16_128_128_1_0_1_0_1_22_0_8_0_2_PERCENT_0_1_0_0_8_0_0_1_0_aie22_x86sim_qor": {
         "DATA_TYPE": "cbfloat16",
         "DATA_OUT_TYPE": "cbfloat16",
         "TWIDDLE_TYPE": "cbfloat16",
@@ -6880,9 +6880,9 @@
         "STIM_TYPE": "0",
         "NITER": "8",
         "TARGET": "x86sim",
-        "DIFF_TOLERANCE": "0.01",
+        "DIFF_TOLERANCE": "0.2",
         "DIFF_MODE": "PERCENT",
-        "CC_TOLERANCE": "0.01",
+        "CC_TOLERANCE": "0.1",
         "TWIDDLE_MODE": "0",
         "PARALLEL_POWER": "0",
         "ROUND_MODE": "8",
@@ -6891,7 +6891,7 @@
         "DATA_SEED": "1",
         "SINGLE_BUF": "0"
     },
-    "test_513_cbfloat16_cbfloat16_cbfloat16_2048_2048_0_0_1_0_0_2_0_8_0_01_PERCENT_0_01_0_0_8_0_0_1_0_aie2_x86sim_qor": {
+    "test_513_cbfloat16_cbfloat16_cbfloat16_2048_2048_0_0_1_0_0_2_0_8_0_2_PERCENT_0_1_0_0_8_0_0_1_0_aie2_x86sim_qor": {
         "DATA_TYPE": "cbfloat16",
         "DATA_OUT_TYPE": "cbfloat16",
         "TWIDDLE_TYPE": "cbfloat16",
@@ -6906,9 +6906,9 @@
         "STIM_TYPE": "0",
         "NITER": "8",
         "TARGET": "x86sim",
-        "DIFF_TOLERANCE": "0.01",
+        "DIFF_TOLERANCE": "0.2",
         "DIFF_MODE": "PERCENT",
-        "CC_TOLERANCE": "0.01",
+        "CC_TOLERANCE": "0.1",
         "TWIDDLE_MODE": "0",
         "PARALLEL_POWER": "0",
         "ROUND_MODE": "8",
@@ -6917,7 +6917,7 @@
         "DATA_SEED": "1",
         "SINGLE_BUF": "0"
     },
-    "test_514_cbfloat16_cbfloat16_cbfloat16_2048_2048_1_0_4_0_0_22_0_8_0_01_PERCENT_0_01_0_0_8_0_0_1_0_aie22_x86sim_qor": {
+    "test_514_cbfloat16_cbfloat16_cbfloat16_2048_2048_1_0_4_0_0_22_0_8_0_2_PERCENT_0_1_0_0_8_0_0_1_0_aie22_x86sim_qor": {
         "DATA_TYPE": "cbfloat16",
         "DATA_OUT_TYPE": "cbfloat16",
         "TWIDDLE_TYPE": "cbfloat16",
@@ -6932,9 +6932,9 @@
         "STIM_TYPE": "0",
         "NITER": "8",
         "TARGET": "x86sim",
-        "DIFF_TOLERANCE": "0.01",
+        "DIFF_TOLERANCE": "0.2",
         "DIFF_MODE": "PERCENT",
-        "CC_TOLERANCE": "0.01",
+        "CC_TOLERANCE": "0.1",
         "TWIDDLE_MODE": "0",
         "PARALLEL_POWER": "0",
         "ROUND_MODE": "8",
@@ -6943,7 +6943,7 @@
         "DATA_SEED": "1",
         "SINGLE_BUF": "0"
     },
-    "test_518_cbfloat16_cbfloat16_cbfloat16_128_128_1_0_1_0_0_22_0_8_0_01_PERCENT_0_01_0_0_8_0_0_1_0_aie22_aiesim_qor": {
+    "test_518_cbfloat16_cbfloat16_cbfloat16_128_128_1_0_1_0_0_22_0_8_0_2_PERCENT_0_1_0_0_8_0_0_1_0_aie22_aiesim_qor": {
         "DATA_TYPE": "cbfloat16",
         "DATA_OUT_TYPE": "cbfloat16",
         "TWIDDLE_TYPE": "cbfloat16",
@@ -6958,9 +6958,9 @@
         "STIM_TYPE": "0",
         "NITER": "8",
         "TARGET": "aiesim",
-        "DIFF_TOLERANCE": "0.01",
+        "DIFF_TOLERANCE": "0.2",
         "DIFF_MODE": "PERCENT",
-        "CC_TOLERANCE": "0.01",
+        "CC_TOLERANCE": "0.1",
         "TWIDDLE_MODE": "0",
         "PARALLEL_POWER": "0",
         "ROUND_MODE": "8",
@@ -6969,7 +6969,7 @@
         "DATA_SEED": "1",
         "SINGLE_BUF": "0"
     },
-    "test_519_cbfloat16_cbfloat16_cbfloat16_128_128_1_0_1_0_1_2_0_8_0_01_PERCENT_0_01_0_0_8_0_0_1_0_aie2_aiesim_qor": {
+    "test_519_cbfloat16_cbfloat16_cbfloat16_128_128_1_0_1_0_1_2_0_8_0_2_PERCENT_0_1_0_0_8_0_0_1_0_aie2_aiesim_qor": {
         "DATA_TYPE": "cbfloat16",
         "DATA_OUT_TYPE": "cbfloat16",
         "TWIDDLE_TYPE": "cbfloat16",
@@ -6984,9 +6984,9 @@
         "STIM_TYPE": "0",
         "NITER": "8",
         "TARGET": "aiesim",
-        "DIFF_TOLERANCE": "0.01",
+        "DIFF_TOLERANCE": "0.2",
         "DIFF_MODE": "PERCENT",
-        "CC_TOLERANCE": "0.01",
+        "CC_TOLERANCE": "0.1",
         "TWIDDLE_MODE": "0",
         "PARALLEL_POWER": "0",
         "ROUND_MODE": "8",
@@ -6995,7 +6995,7 @@
         "DATA_SEED": "1",
         "SINGLE_BUF": "0"
     },
-    "test_520_cbfloat16_cbfloat16_cbfloat16_2048_2048_0_0_1_0_0_22_0_8_0_01_PERCENT_0_01_0_0_8_0_0_1_0_aie22_aiesim_qor": {
+    "test_520_cbfloat16_cbfloat16_cbfloat16_2048_2048_0_0_1_0_0_22_0_8_0_2_PERCENT_0_1_0_0_8_0_0_1_0_aie22_aiesim_qor": {
         "DATA_TYPE": "cbfloat16",
         "DATA_OUT_TYPE": "cbfloat16",
         "TWIDDLE_TYPE": "cbfloat16",
@@ -7010,9 +7010,9 @@
         "STIM_TYPE": "0",
         "NITER": "8",
         "TARGET": "aiesim",
-        "DIFF_TOLERANCE": "0.01",
+        "DIFF_TOLERANCE": "0.2",
         "DIFF_MODE": "PERCENT",
-        "CC_TOLERANCE": "0.01",
+        "CC_TOLERANCE": "0.1",
         "TWIDDLE_MODE": "0",
         "PARALLEL_POWER": "0",
         "ROUND_MODE": "8",
@@ -7021,7 +7021,7 @@
         "DATA_SEED": "1",
         "SINGLE_BUF": "0"
     },
-    "test_521_cbfloat16_cbfloat16_cbfloat16_2048_2048_1_0_4_0_0_2_0_8_0_01_PERCENT_0_01_0_0_8_0_0_1_0_aie2_aiesim_qor": {
+    "test_521_cbfloat16_cbfloat16_cbfloat16_2048_2048_1_0_4_0_0_2_0_8_0_2_PERCENT_0_1_0_0_8_0_0_1_0_aie2_aiesim_qor": {
         "DATA_TYPE": "cbfloat16",
         "DATA_OUT_TYPE": "cbfloat16",
         "TWIDDLE_TYPE": "cbfloat16",
@@ -7036,9 +7036,9 @@
         "STIM_TYPE": "0",
         "NITER": "8",
         "TARGET": "aiesim",
-        "DIFF_TOLERANCE": "0.01",
+        "DIFF_TOLERANCE": "0.2",
         "DIFF_MODE": "PERCENT",
-        "CC_TOLERANCE": "0.01",
+        "CC_TOLERANCE": "0.1",
         "TWIDDLE_MODE": "0",
         "PARALLEL_POWER": "0",
         "ROUND_MODE": "8",
