@@ -1,5 +1,5 @@
 {
-    "name": "xilinx lsc test",
+    "name": "L1 lensshadingcorrection_NPPC8_16UC1_16UC1_BAYER_RG",
     "description": "HLS case",
     "flow": "hls",
     "platform_allowlist": [

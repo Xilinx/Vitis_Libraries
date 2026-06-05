@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx Stereo Block Matching AIE2 Test",
+    "name": "gmio",
     "description": "Stereo Block Matching AIE function example",
     "flow": "system",
     "platform_allowlist": [

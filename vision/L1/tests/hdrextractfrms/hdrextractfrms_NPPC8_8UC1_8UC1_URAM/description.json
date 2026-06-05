@@ -1,5 +1,5 @@
 {
-    "name": "xilinx hdrextractframes test",
+    "name": "hdrextractfrms_NPPC8_8UC1_8UC1_URAM",
     "description": "HLS case",
     "flow": "hls",
     "platform_allowlist": [

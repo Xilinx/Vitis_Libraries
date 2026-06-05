@@ -1,5 +1,5 @@
 {
-    "name": "xilinx isp stats basic test",
+    "name": "ispstats_NPPC1_8UC1_8UC1_ISPSTATS_GRAY",
     "description": "HLS case",
     "flow": "hls",
     "platform_allowlist": [

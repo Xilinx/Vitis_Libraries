@@ -1,5 +1,5 @@
 {
-    "name": "xilinx rgbr-ir bayer l1 test",
+    "name": "rgbirbayer_NPPC1_8UC1_8UC1",
     "description": "HLS case",
     "flow": "hls",
     "platform_allowlist": [

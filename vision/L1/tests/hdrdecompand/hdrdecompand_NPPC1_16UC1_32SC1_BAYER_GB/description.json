@@ -1,5 +1,5 @@
 {
-    "name": "xilinx hdr decompanding test",
+    "name": "hdrdecompand_NPPC1_16UC1_32SC1_BAYER_GB",
     "description": "HLS case",
     "flow": "hls",
     "platform_allowlist": [

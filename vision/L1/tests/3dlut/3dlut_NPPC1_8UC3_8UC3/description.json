@@ -1,5 +1,5 @@
 {
-    "name": "xilinx 3d lut l1 test",
+    "name": "3dlut_NPPC1_8UC3_8UC3",
     "description": "HLS case",
     "flow": "hls",
     "platform_allowlist": [

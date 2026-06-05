@@ -42,16 +42,6 @@
                         "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/lib"
                     ]
-                },
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
                 }
             }
         },
@@ -68,16 +58,6 @@
                         "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/lib"
                     ]
-                },
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
                 }
             }
         },
@@ -93,16 +73,6 @@
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/lib"
-                    ]
-                },
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
                     ]
                 }
             }

@@ -25,23 +25,12 @@
                         "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/lib"
                     ]
-                },
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
                 }
             }
         }
     },
     "gui": true,
     "launch": [
-        
         {
             "target": "hw_emu",
             "cmd_args": "LIB_DIR/data/128x128.png ",

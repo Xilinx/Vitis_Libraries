@@ -1,5 +1,5 @@
 {
-    "name": "xilinx bpc l2 test",
+    "name": "badpixelcorrection_NPPC1_8UC1_8UC1",
     "description": [
         "BPC L2 function example"
     ],

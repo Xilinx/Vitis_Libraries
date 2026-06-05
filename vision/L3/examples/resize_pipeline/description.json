@@ -25,16 +25,6 @@
                         "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/lib"
                     ]
-                },
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
                 }
             }
         }
@@ -77,8 +67,7 @@
                 "LIB_DIR/L3/examples/resize_pipeline/config"
             ],
             "options": "-O3 -I$(XILINX_HLS)/include",
-            "symbols": [
-            ]
+            "symbols": []
         }
     },
     "v++": {

@@ -1,5 +1,5 @@
 {
-    "name": "xilinx ccm l2 test",
+    "name": "L2 colorcorrectionmatrix_NPPC1_16UC3_16UC3_CCM_yuv_rgb_601",
     "description": [
         "CCM L2 function example"
     ],

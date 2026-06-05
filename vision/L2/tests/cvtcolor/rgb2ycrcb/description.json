@@ -5,7 +5,7 @@
     ],
     "flow": "system",
     "platform_allowlist": [
-	"vek385"
+        "vek385"
     ],
     "platform_blocklist": [
         "u280",
@@ -25,22 +25,10 @@
                         "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/lib"
                     ]
-                },
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
                 }
             }
         }
-
     },
-
     "gui": true,
     "launch": [
         {

@@ -1,5 +1,5 @@
 {
-    "name": "xilinx ccm test",
+    "name": "L1 colorcorrectionmatrix_NPPC8_16UC3_16UC3_CCM_yuv_rgb_2020",
     "description": "HLS case",
     "flow": "hls",
     "platform_allowlist": [

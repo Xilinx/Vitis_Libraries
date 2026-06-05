@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx hybridISP AIE2 Test",
+    "name": "8bit_aie_plio",
     "description": "Hybrid ISP AIE-ML function example",
     "flow": "system",
     "platform_allowlist": [

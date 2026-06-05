@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx 8bit_gmio_resizedown_8ktohd AIE Test",
+    "name": "resize_bicubic 8bit_gmio_resizedown_8ktohd",
     "description": "8bit_gmio_resizedown_8ktohd AIE function example",
     "flow": "system",
     "platform_allowlist": [

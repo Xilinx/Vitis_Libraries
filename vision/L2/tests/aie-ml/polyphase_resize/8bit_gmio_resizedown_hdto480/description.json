@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx 8bit_gmio_resizedown_hdto480 AIE Test",
+    "name": "polyphase_resize 8bit_gmio_resizedown_hdto480",
     "description": "8bit_gmio_resizedown_hdto480 AIE function example",
     "flow": "system",
     "platform_allowlist": [
@@ -162,9 +162,10 @@
             }
         ],
         "targets": [
-            "vitis_hw_emu", 
-            "vitis_hw_build", 
-            "vitis_hw_run"
+            "vitis_hw_emu",
+            "vitis_hw_build",
+            "vitis_hw_run",
+            "vitis_aie_sim"
         ],
         "category": "canary"
     },

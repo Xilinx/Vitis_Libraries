@@ -1,5 +1,5 @@
 {
-    "name": "xilinx isp stats basic test",
+    "name": "ispstats_NPPC1_16UC3_16UC3_ISPSTATS_BGR",
     "description": "HLS case",
     "flow": "hls",
     "platform_allowlist": [

@@ -1,5 +1,5 @@
 {
-    "name": "xilinx mode filter l2 test",
+    "name": "modefilter_NPPC8_8UC3_8UC3_WINDOW_SIZE_3X3",
     "description": [
         "Mode filter L2 function example"
     ],

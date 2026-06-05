@@ -1,5 +1,5 @@
 {
-    "name": "xilinx distance transform test",
+    "name": "distancetransform_NPPC1_8UC4_8UC4",
     "description": "HLS case",
     "flow": "hls",
     "platform_allowlist": [

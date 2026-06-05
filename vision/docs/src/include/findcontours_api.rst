@@ -10,10 +10,31 @@ Find Contours
 =============
 
 The ``findcontours`` function detects object boundaries in a binary (8-bit) image
-using a chain-code contour tracer. Contour vertices are written as packed
-``(x, y)`` coordinates; per-contour start indices and the total contour count are
-returned in separate buffers. The implementation is in
+using a chain-code contour tracer. Contour vertices are written to
+``points_packed`` as 32-bit words; ``contour_offsets`` records where each
+contour begins and ends in that array, and ``num_contours`` returns the total
+number of contours found. The implementation is in
 ``L1/include/imgproc/xf_findcontours.hpp``.
+
+.. rubric:: Output Point Packing
+
+Each contour vertex is stored as one 32-bit word in ``points_packed``:
+
+- Bits ``[15:0]`` hold the **x** coordinate (16-bit unsigned).
+- Bits ``[31:16]`` hold the **y** coordinate (16-bit unsigned).
+
+All contours are stored back-to-back in ``points_packed``. The
+``contour_offsets`` array (length ``MAX_CONTOURS + 1``) indexes into that flat
+array:
+
+- ``contour_offsets[0]`` is always ``0``.
+- For ``c >= 1``, ``contour_offsets[c]`` is the exclusive end index for
+  contour ``c - 1`` (the number of 32-bit words consumed by contours ``0``
+  through ``c - 1``).
+
+Contour ``k`` therefore spans ``points_packed[contour_offsets[k]]`` through
+``points_packed[contour_offsets[k + 1] - 1]``. The number of points in
+contour ``k`` is ``contour_offsets[k + 1] - contour_offsets[k]``.
 
 .. rubric:: API Syntax
 
@@ -51,7 +72,7 @@ The following table describes the template parameters.
     +---------------------+-------------------------------------------------------+
     | INPUT_PTR_WIDTH     | AXI width (bits) for the input image port. Typical: 8.|
     +---------------------+-------------------------------------------------------+
-    | OUTPUT_PTR_WIDTH    | AXI width (bits) for output buffers.                  |
+    | OUTPUT_PTR_WIDTH    | AXI width (bits) for output pointers. Typical: 32.    |
     +---------------------+-------------------------------------------------------+
     | MAX_H               | Maximum image height the kernel is compiled for.      |
     +---------------------+-------------------------------------------------------+
@@ -79,10 +100,14 @@ The following table describes the function parameters.
     +-------------------+-------------------------------------------------------+
     | cols              | Active image width (``<= MAX_W``).                    |
     +-------------------+-------------------------------------------------------+
-    | points_packed     | Device buffer for packed contour points.              |
+    | points_packed     | Flat array of packed contour vertices. Each entry is  |
+    |                   | one 32-bit word: ``y[31:16] | x[15:0]``. Contours are |
+    |                   | stored sequentially (see Output Point Packing).       |
     +-------------------+-------------------------------------------------------+
-    | contour_offsets   | Device buffer of start indices into ``points_packed`` |
-    |                   | for each contour (length ``MAX_CONTOURS + 1``).       |
+    | contour_offsets   | Index table into ``points_packed`` (length            |
+    |                   | ``MAX_CONTOURS + 1``). ``contour_offsets[0] = 0``;    |
+    |                   | ``contour_offsets[c]`` is the exclusive end index for   |
+    |                   | contour ``c - 1``.                                      |
     +-------------------+-------------------------------------------------------+
     | num_contours      | Output: number of contours found.                     |
     +-------------------+-------------------------------------------------------+
@@ -108,6 +133,12 @@ Versal AI Edge at 300 MHz.
 
 The following table summarizes performance for the same configuration (1200 x 800,
 XF_8UC1, 300 MHz).
+
+.. note::
+
+   Latency is proportional to the number of contours detected in the input
+   image. Images with more or longer contours take longer to process than
+   sparse binary images with few boundaries.
 
 .. table:: Table . findcontours Function Performance Estimate Summary
 

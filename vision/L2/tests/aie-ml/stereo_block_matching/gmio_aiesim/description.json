@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx Stereo Block Matching AIE2 Test",
+    "name": "gmio_aiesim",
     "description": "Stereo Block Matching AIE function example",
     "flow": "system",
     "platform_allowlist": [
@@ -60,16 +60,6 @@
         {
             "name": "aiesim-launch",
             "target": "aiesim"
-        },
-        {
-            "name": "hwemu-launch",
-            "target": "hw_emu",
-            "cmd_args": "kernel.xclbin LIB_DIR/data/left.png LIB_DIR/data/right.png"
-        },
-        {
-            "name": "hw",
-            "target": "hw",
-            "cmd_args": "kernel.xclbin LIB_DIR/data/left.png LIB_DIR/data/right.png"
         }
     ],
     "v++": {
@@ -117,10 +107,10 @@
                 "LIB_DIR/L1/include/aie-ml",
                 "LIB_DIR/L1/include/aie-ml/dnn"
             ],
-            "clflags": [ 
+            "clflags": [
                 "--aie.stacksize=2048",
                 "--aie.heapsize=38000"
-            ]              
+            ]
         }
     },
     "aiecontainers": [
@@ -156,9 +146,9 @@
                 "max_memory_MB": 40960,
                 "max_time_min": {
                     "vitis_aie_sim": 50,
-					"vitis_hw_emu": 300,
-					"vitis_hw_build": 470,
-					"vitis_hw_run": 70
+                    "vitis_hw_emu": 300,
+                    "vitis_hw_build": 470,
+                    "vitis_hw_run": 70
                 }
             }
         ],

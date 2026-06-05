@@ -2610,6 +2610,85 @@
                                       }
                     },
   {
+                                      "api_name": "xf::cv::duplicateMat",
+                                      "target_domain": "PL",
+                                      "spec": {
+                                                        "schema": "vitis_libraries_api_list_schema-1.0",
+                                                        "api_name": "xf::cv::duplicateMat",
+                                                        "target_domain": "PL",
+                                                        "display_name": "duplicateMat",
+                                                        "brief": "The ``duplicateMat`` function copies an input image stream to two output image streams. It is used in dataflow pipelines when the same image must be consumed by multiple downstream stages in parallel.",
+                                                        
+                                                        "header_file_name": [
+                                                                          "imgproc/xf_duplicateimage.hpp"
+                                                        ],
+                                                        "search_paths": [
+                                                                          "L1/include/"
+                                                        ],
+                                                        "instance": "function",
+                                                        "parameters": [
+                                                                          {
+                                                                                            "name": "SRC_T",
+                                                                                            "type": "int",
+                                                                                            "description": " Input and output pixel type. 8-bit unsigned 1 and 3 channel types are supported (XF_8UC1, XF_8UC3). ",
+                                                                                            "enum": ["XF_8UC1", "XF_8UC3"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "ROWS",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 2160,
+                                                                                            "description": " Maximum height of input and output images. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "COLS",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 3840,
+                                                                                            "description": " Maximum width of input and output images. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "NPC",
+                                                                                            "type": "int",
+                                                                                            "description": " Number of pixels to be processed per cycle. ",
+                                                                                            "enum": ["XF_NPPC1", "XF_NPPC8"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "XFCVDEPTH_IN_1",
+                                                                                            "type": "int",
+                                                                                            "description": " Stream depth for the input Mat. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "XFCVDEPTH_OUT_1",
+                                                                                            "type": "int",
+                                                                                            "description": " Stream depth for the first output Mat. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "XFCVDEPTH_OUT_2",
+                                                                                            "type": "int",
+                                                                                            "description": " Stream depth for the second output Mat. "
+                                                                          }
+                                                        ],
+                                                        "ports": [
+                                                                          {
+                                                                                            "name": "_src",
+                                                                                            "direction": "in",
+                                                                                            "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "_dst1",
+                                                                                            "direction": "out",
+                                                                                            "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "_dst2",
+                                                                                            "direction": "out",
+                                                                                            "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_2>& "
+                                                                          }
+                                                        ]
+                                      }
+                    },
+  {
                                       "api_name": "xf::cv::equalizeHist",
                                       "target_domain": "PL",
                                       "spec": {
@@ -3008,6 +3087,110 @@
                                                                                             "name": "_shift",
                                                                                             "direction": "in",
                                                                                             "type": "unsigned char"
+                                                                          }
+                                                        ]
+                                      }
+                    },
+  {
+                                      "api_name": "xf::cv::findcontours",
+                                      "target_domain": "PL",
+                                      "spec": {
+                                                        "schema": "vitis_libraries_api_list_schema-1.0",
+                                                        "api_name": "xf::cv::findcontours",
+                                                        "target_domain": "PL",
+                                                        "display_name": "findcontours",
+                                                        "brief": "The ``findcontours`` function detects object boundaries in a binary 8-bit image using a chain-code contour tracer. Contour vertices are written as packed (x, y) coordinates; per-contour start indices and the total contour count are returned in separate device buffers.",
+                                                        
+                                                        "header_file_name": [
+                                                                          "imgproc/xf_findcontours.hpp"
+                                                        ],
+                                                        "search_paths": [
+                                                                          "L1/include/"
+                                                        ],
+                                                        "instance": "function",
+                                                        "parameters": [
+                                                                          {
+                                                                                            "name": "SRC_T",
+                                                                                            "type": "int",
+                                                                                            "description": " Input pixel type. Only 8-bit, unsigned, 1 channel is supported (XF_8UC1). ",
+                                                                                            "enum": ["XF_8UC1"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "INPUT_PTR_WIDTH",
+                                                                                            "type": "int",
+                                                                                            "description": " AXI width (bits) for the input image port. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "OUTPUT_PTR_WIDTH",
+                                                                                            "type": "int",
+                                                                                            "description": " AXI width (bits) for output buffers. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "MAX_H",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 2160,
+                                                                                            "description": " Maximum image height the kernel is compiled for. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "MAX_W",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 3840,
+                                                                                            "description": " Maximum image width the kernel is compiled for. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "MAX_TOTAL_POINTS",
+                                                                                            "type": "int",
+                                                                                            "description": " Maximum number of contour points that can be stored. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "MAX_CONTOURS",
+                                                                                            "type": "int",
+                                                                                            "description": " Maximum number of contours that can be detected. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "NPPCX",
+                                                                                            "type": "int",
+                                                                                            "description": " Number of pixels to be processed per cycle. ",
+                                                                                            "enum": ["XF_NPPC1"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "XFCVDEPTH_IN_MAT",
+                                                                                            "type": "int",
+                                                                                            "description": " Stream depth for the input Mat. "
+                                                                          }
+                                                        ],
+                                                        "ports": [
+                                                                          {
+                                                                                            "name": "_src",
+                                                                                            "direction": "in",
+                                                                                            "type": "xf::cv::Mat<SRC_T, MAX_H, MAX_W, NPPCX, XFCVDEPTH_IN_MAT>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "rows",
+                                                                                            "direction": "in",
+                                                                                            "type": "int"
+                                                                          },
+                                                                          {
+                                                                                            "name": "cols",
+                                                                                            "direction": "in",
+                                                                                            "type": "int"
+                                                                          },
+                                                                          {
+                                                                                            "name": "points_packed",
+                                                                                            "direction": "out",
+                                                                                            "type": "ap_uint<OUTPUT_PTR_WIDTH>* "
+                                                                          },
+                                                                          {
+                                                                                            "name": "contour_offsets",
+                                                                                            "direction": "out",
+                                                                                            "type": "ap_uint<OUTPUT_PTR_WIDTH>* "
+                                                                          },
+                                                                          {
+                                                                                            "name": "num_contours",
+                                                                                            "direction": "out",
+                                                                                            "type": "ap_uint<OUTPUT_PTR_WIDTH>& "
                                                                           }
                                                         ]
                                       }
@@ -6306,6 +6489,178 @@
                                                         ]
                                       }
                     },
+  {
+                                      "api_name": "xf::cv::stitch",
+                                      "target_domain": "PL",
+                                      "spec": {
+                                                        "schema": "vitis_libraries_api_list_schema-1.0",
+                                                        "api_name": "xf::cv::stitch",
+                                                        "target_domain": "PL",
+                                                        "display_name": "stitch",
+                                                        "brief": "The ``stitch`` function blends four remapped input tiles and their feathering masks into a single stitched panorama. Each tile is weighted by normalized mask values and combined per pixel to produce the output image.",
+                                                        
+                                                        "header_file_name": [
+                                                                          "imgproc/xf_stitch.hpp"
+                                                        ],
+                                                        "search_paths": [
+                                                                          "L1/include/"
+                                                        ],
+                                                        "instance": "function",
+                                                        "parameters": [
+                                                                          {
+                                                                                            "name": "SRC_T",
+                                                                                            "type": "int",
+                                                                                            "description": " Input image pixel type. 8-bit unsigned 1 and 3 channel types are supported (XF_8UC1, XF_8UC3). ",
+                                                                                            "enum": ["XF_8UC1", "XF_8UC3"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "MASK_T",
+                                                                                            "type": "int",
+                                                                                            "description": " Feathering mask pixel type. Only 8-bit unsigned 1 channel is supported (XF_8UC1). ",
+                                                                                            "enum": ["XF_8UC1"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "ROWS_1",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 2160,
+                                                                                            "description": " Maximum height of input tile 1. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "COLS_1",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 3840,
+                                                                                            "description": " Maximum width of input tile 1. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "ROWS_2",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 2160,
+                                                                                            "description": " Maximum height of input tile 2. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "COLS_2",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 3840,
+                                                                                            "description": " Maximum width of input tile 2. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "ROWS_3",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 2160,
+                                                                                            "description": " Maximum height of input tile 3. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "COLS_3",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 3840,
+                                                                                            "description": " Maximum width of input tile 3. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "ROWS_4",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 2160,
+                                                                                            "description": " Maximum height of input tile 4. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "COLS_4",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 3840,
+                                                                                            "description": " Maximum width of input tile 4. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "ROWS_DST",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 2160,
+                                                                                            "description": " Maximum height of the stitched output panorama. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "COLS_DST",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 3840,
+                                                                                            "description": " Maximum width of the stitched output panorama. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "NPC",
+                                                                                            "type": "int",
+                                                                                            "description": " Number of pixels to be processed per cycle. ",
+                                                                                            "enum": ["XF_NPPC1", "XF_NPPC2", "XF_NPPC4", "XF_NPPC8"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "XFCVDEPTH_IN_1",
+                                                                                            "type": "int",
+                                                                                            "description": " Stream depth for input Mats. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "XFCVDEPTH_OUT_1",
+                                                                                            "type": "int",
+                                                                                            "description": " Stream depth for the output Mat. "
+                                                                          }
+                                                        ],
+                                                        "ports": [
+                                                                          {
+                                                                                            "name": "src1",
+                                                                                            "direction": "in",
+                                                                                            "type": "xf::cv::Mat<SRC_T, ROWS_1, COLS_1, NPC, XFCVDEPTH_IN_1>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "src2",
+                                                                                            "direction": "in",
+                                                                                            "type": "xf::cv::Mat<SRC_T, ROWS_2, COLS_2, NPC, XFCVDEPTH_IN_1>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "src3",
+                                                                                            "direction": "in",
+                                                                                            "type": "xf::cv::Mat<SRC_T, ROWS_3, COLS_3, NPC, XFCVDEPTH_IN_1>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "src4",
+                                                                                            "direction": "in",
+                                                                                            "type": "xf::cv::Mat<SRC_T, ROWS_4, COLS_4, NPC, XFCVDEPTH_IN_1>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "mask1",
+                                                                                            "direction": "in",
+                                                                                            "type": "xf::cv::Mat<MASK_T, ROWS_1, COLS_1, NPC, XFCVDEPTH_IN_1>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "mask2",
+                                                                                            "direction": "in",
+                                                                                            "type": "xf::cv::Mat<MASK_T, ROWS_2, COLS_2, NPC, XFCVDEPTH_IN_1>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "mask3",
+                                                                                            "direction": "in",
+                                                                                            "type": "xf::cv::Mat<MASK_T, ROWS_3, COLS_3, NPC, XFCVDEPTH_IN_1>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "mask4",
+                                                                                            "direction": "in",
+                                                                                            "type": "xf::cv::Mat<MASK_T, ROWS_4, COLS_4, NPC, XFCVDEPTH_IN_1>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "mask_corners",
+                                                                                            "direction": "in",
+                                                                                            "type": "int",
+                                                                                            "arrays": ["8"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "dst",
+                                                                                            "direction": "out",
+                                                                                            "type": "xf::cv::Mat<SRC_T, ROWS_DST, COLS_DST, NPC, XFCVDEPTH_OUT_1>& "
+                                                                          }
+                                                        ]
+                                      }
+                    },
    {
                                       "api_name": "xf::cv::SubRS",
                                       "target_domain": "PL",
@@ -6965,6 +7320,75 @@
                                                                                             "direction": "in",
                                                                                             "type": "float",
                                                                                             "arrays":["9"]
+                                                                          }
+                                                        ]
+                                      }
+                    },
+  {
+                                      "api_name": "xf::cv::waitMat",
+                                      "target_domain": "PL",
+                                      "spec": {
+                                                        "schema": "vitis_libraries_api_list_schema-1.0",
+                                                        "api_name": "xf::cv::waitMat",
+                                                        "target_domain": "PL",
+                                                        "display_name": "waitMat",
+                                                        "brief": "The ``waitMat`` function performs a row-major stream passthrough that copies the input xf::cv::Mat stream to the output Mat. It synchronizes mask and image streams in multi-stage dataflow pipelines so downstream stages receive aligned data.",
+                                                        
+                                                        "header_file_name": [
+                                                                          "imgproc/xf_waitMat.hpp"
+                                                        ],
+                                                        "search_paths": [
+                                                                          "L1/include/"
+                                                        ],
+                                                        "instance": "function",
+                                                        "parameters": [
+                                                                          {
+                                                                                            "name": "ROWS",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 2160,
+                                                                                            "description": " Maximum height of input and output images. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "COLS",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 3840,
+                                                                                            "description": " Maximum width of input and output images. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "XF_WIN_ROWS",
+                                                                                            "type": "int",
+                                                                                            "description": " Number of padding rows to skip before copying active image data. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "MASK_T",
+                                                                                            "type": "int",
+                                                                                            "description": " Pixel type of the input and output Mats. Only 8-bit unsigned 1 channel is supported (XF_8UC1). ",
+                                                                                            "enum": ["XF_8UC1"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "NPC",
+                                                                                            "type": "int",
+                                                                                            "description": " Number of pixels to be processed per cycle. ",
+                                                                                            "enum": ["XF_NPPC1"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "XFCVDEPTH",
+                                                                                            "type": "int",
+                                                                                            "description": " Stream depth for input and output Mats. "
+                                                                          }
+                                                        ],
+                                                        "ports": [
+                                                                          {
+                                                                                            "name": "src",
+                                                                                            "direction": "in",
+                                                                                            "type": "xf::cv::Mat<MASK_T, ROWS, COLS, NPC, XFCVDEPTH>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "dst",
+                                                                                            "direction": "out",
+                                                                                            "type": "xf::cv::Mat<MASK_T, ROWS, COLS, NPC, XFCVDEPTH>& "
                                                                           }
                                                         ]
                                       }

@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx normalize AIE-ML Test",
+    "name": "normalize 8bit_aie_gmio",
     "description": "normalize AIE-ML function example",
     "flow": "system",
     "platform_allowlist": [

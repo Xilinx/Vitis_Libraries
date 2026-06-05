@@ -1,5 +1,5 @@
 {
-    "name": "xilinx isp stats bayer l2 test",
+    "name": "L2 ispstats_NPPC1_16UC1_16UC1_ISPSTATS_BAYER",
     "description": [
         "ISP Stats Bayer function example"
     ],

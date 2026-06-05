@@ -1,5 +1,5 @@
 {
-    "name": "xilinx hdr decompand l2 test",
+    "name": "hdrdecompand_NPPC1_16UC1_32SC1_BAYER_RG",
     "description": [
         "HDR Decompand L2 function example"
     ],

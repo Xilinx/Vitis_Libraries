@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx threshold AIE Test",
+    "name": "16bit_aie_8bit_pl",
     "description": "threshold AIE function example",
     "flow": "system",
     "platform_allowlist": [

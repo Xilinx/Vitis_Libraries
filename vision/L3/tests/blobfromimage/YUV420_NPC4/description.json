@@ -7,8 +7,8 @@
     "platform_allowlist": [
         "vck190",
         "aws-vu9p-f1",
-	"vek280",
-	"vek385"
+        "vek280",
+        "vek385"
     ],
     "platform_blocklist": [
         "u280",
@@ -42,16 +42,6 @@
                         "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/lib"
                     ]
-                },
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
                 }
             }
         },
@@ -67,16 +57,6 @@
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/lib"
-                    ]
-                },
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
                     ]
                 }
             }
@@ -94,20 +74,9 @@
                         "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/lib"
                     ]
-                },
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
                 }
             }
         }
-
     },
     "gui": false,
     "launch": [
@@ -145,7 +114,7 @@
             ],
             "includepaths": [
                 "LIB_DIR/L3/tests/blobfromimage/YUV420_NPC4",
-		"LIB_DIR/L3/examples/blobfromimage"
+                "LIB_DIR/L3/examples/blobfromimage"
             ],
             "options": "-O3  -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include",
             "symbols": [
@@ -156,7 +125,7 @@
     "v++": {
         "compiler": {
             "symbols": [],
-           "includepaths": [
+            "includepaths": [
                 "LIB_DIR/L3/tests/blobfromimage/YUV420_NPC4",
                 "LIB_DIR/L3/examples/blobfromimage"
             ],
