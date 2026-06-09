@@ -26,7 +26,7 @@ This example resides in the ``L2/benchmarks/streamingKernel/gemvStreamCh16`` dir
 1.1.1 Work Directory (Step 1)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The steps for library download and environment setup can be found [here](https://github.com/Xilinx/Vitis_Libraries/tree/main/blas/L2/benchmarks#building). For getting the design:
+The steps for library download and environment setup can be found in :ref:`benchmark_l2`. For getting the design:
 
 .. code-block:: bash 
 

@@ -32,7 +32,7 @@ namespace xf {
 
 namespace blas {
 
-// For C++11
+// For modern C++
 // template<class T>
 // auto operator<<(std::ostream& os, const T& t) -> decltype(t.print(os), os)
 //{
