@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx Blake2B",
+    "name": "Xilinx Blake2B Size Less",
     "description": "",
     "flow": "hls",
     "platform_allowlist": [

@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx CRC32 Size Less",
+    "name": "Xilinx CRC32 Size Less 2",
     "description": "",
     "flow": "hls",
     "platform_allowlist": [

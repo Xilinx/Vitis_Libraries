@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx CRC32",
+    "name": "Xilinx CRC32 2",
     "description": "",
     "flow": "hls",
     "platform_allowlist": [

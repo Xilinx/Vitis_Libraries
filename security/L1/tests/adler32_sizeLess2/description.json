@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx Adler32 size-less version",
+    "name": "Xilinx Adler32 Size Less 2",
     "description": "",
     "flow": "hls",
     "platform_allowlist": [

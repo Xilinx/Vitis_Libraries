@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx HMAC SHA284",
+    "name": "Xilinx HMAC SHA384 2in1",
     "description": "",
     "flow": "hls",
     "platform_allowlist": [

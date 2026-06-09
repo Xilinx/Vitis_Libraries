@@ -1,5 +1,5 @@
 .. 
-   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+   .. Copyright © 2019–2026 Advanced Micro Devices, Inc
 
 `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -22,12 +22,25 @@ Release Note
 Known Issue
 ------------
 
+2026.1
+------
+
+In this release, support for the following security-sensitive APIs is withdrawn:
+
+* EC/ECDSA implementations for secp256k1, NIST P-256, and NIST P-384
+* Generic ECC helper APIs
+* BLS curve/signature support
+* SM2 sign/verify support
+
+SM3 and SM4 support remains available.
+
 2022.2
 ------
 
 In this release, support for the following functions is added:
 
 * Poseidon Hash function
+* ECDSA NIST-P384
 
 2021.2
 ------
@@ -44,6 +57,7 @@ The 2021.2 release provides support for:
 The 2021.1 release provides support for:
 
 * RIPEMD160
+* Initial support for BLS (not complete)
 
 2020.2
 ------
@@ -51,6 +65,8 @@ The 2021.1 release provides support for:
 The 2020.2 release provides support for signatures algorithms and VDF functions.
 
 * DSA
+* ECC
+* ECDSA
 * EDDSA
 * VDF
 
