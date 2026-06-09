@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,6 @@ using namespace std;
 // if we use 1kb registers -> aie api uses 2x512b registers for 1024b so we need this for QoR
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
 #include "aie_api/aie_adf.hpp"
-
-//#define _DSPLIB_MRFFT_TWGEN_HPP_DEBUG_
 
 #include "mixed_radix_twGen.hpp"
 #include "mixed_radix_twGen_utils.hpp"

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ Widget API Cast reference model
 #include "aie_api/aie_adf.hpp"
 #include "widget_api_cast_ref.hpp"
 #include "fir_ref_utils.hpp"
-//#define _DSPLIB_WIDGET_API_CAST_REF_DEBUG_
 
 namespace xf {
 namespace dsp {

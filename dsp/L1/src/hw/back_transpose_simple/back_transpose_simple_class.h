@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@
 #include <hls_streamofblocks.h>
 #include "common.hpp"
 #include "vss_fft_ifft_1d_common.hpp"
-//#define __BACK_TRANSPOSE_DEBUG__
 
 using namespace xf::dsp::vss::common;
 
@@ -64,10 +63,6 @@ class backTransposeSimpleCls {
     typedef t_sample buff_t[kNstreamInt][TP_NFFT / kNstreamInt]; // 4 * 1024
 
     void unpack_inputs(t_stream_out sig_int[TP_NSTREAM_EXT], hls::stream_of_blocks<buff_t>& inter_buff) {
-#ifdef __BACK_TRANSPOSE_DEBUG__
-        FILE* fptr = fopen("/home/uvimalku/4debug_unpack_inputs.txt", "a");
-#endif //  __BACK_TRANSPOSE_DEBUG__
-
         hls::write_lock<buff_t> buff_in(inter_buff);
         t_sample trans_i0[kNstreamInt];
 #pragma HLS array_partition variable = trans_i0 dim = 1
@@ -78,12 +73,6 @@ class backTransposeSimpleCls {
 #pragma HLS PIPELINE II = 2
         READ:
             for (int ss = 0; ss < TP_NSTREAM_EXT; ss++) {
-#ifdef __BACK_TRANSPOSE_DEBUG__
-                for (int samp = 0; samp < kSamplesPerRead; samp++) {
-                    printf("write into bank %d idx = %d\n", wrBnkLut0[kSamplesPerRead * ss + samp],
-                           kSamplesPerRead * ss + samp);
-                }
-#endif //  __BACK_TRANSPOSE_DEBUG__
                 t_data sig_int_data = sig_int[ss].read();
                 for (int jj = 0; jj < kSamplesPerRead; jj++) {
 #pragma HLS unroll
@@ -106,22 +95,9 @@ class backTransposeSimpleCls {
             }
             idx = idx + 1;
         }
-#ifdef __BACK_TRANSPOSE_DEBUG__
-        for (int ss = 0; ss < kNstreamInt; ss++) {
-            for (int pp = 0; pp < kNumLoads; pp++) {
-                printf("[%d, %d] ", (buff_in[ss][pp] >> TP_SAMPLE_WIDTH / 2),
-                       (buff_in[ss][pp] % (1 << (TP_SAMPLE_WIDTH / 2 - 1))));
-            }
-            printf("\n");
-        }
-        fclose(fptr);
-#endif //  __BACK_TRANSPOSE_DEBUG__
     }
 
     void ifft_load_buff(hls::stream_of_blocks<buff_t>& inter_buff, t_stream_out sig_o[TP_NSTREAM_EXT]) {
-#ifdef __BACK_TRANSPOSE_DEBUG__
-        FILE* buff_data2 = fopen("/home/uvimalku/4debug_load_buff.txt", "a");
-#endif //  __BACK_TRANSPOSE_DEBUG__
         t_sample trans_o0[kNstreamInt];
 #pragma HLS array_partition variable = trans_o0 dim = 1
         hls::read_lock<buff_t> buff_out(inter_buff);
@@ -134,9 +110,6 @@ class backTransposeSimpleCls {
 #pragma HLS PIPELINE II = 2
             for (int ss = 0; ss < kNstreamInt; ss++) { // 5
                 trans_o0[ss] = buff_out[ss][rdAddrLut[ss]];
-#ifdef __BACK_TRANSPOSE_DEBUG__
-                fprintf(buff_data2, "rd from add = [%d][%d] \n", ss, rdAddrLut[ss]);
-#endif //  __BACK_TRANSPOSE_DEBUG__
             }
             for (int ss = 0; ss < TP_NSTREAM_EXT; ss++) {
                 t_data outDat;
@@ -162,9 +135,6 @@ class backTransposeSimpleCls {
                 colCtr = colCtr + 1;
             }
         }
-#ifdef __BACK_TRANSPOSE_DEBUG__
-        fclose(buff_data2);
-#endif //  __BACK_TRANSPOSE_DEBUG__
     }
 
     void back_transpose_simple_top(t_stream_in sig_i[TP_NSTREAM_EXT], t_stream_out sig_o[kNstreamInt]) {
@@ -180,16 +150,10 @@ class backTransposeSimpleCls {
         for (int ss = 0; ss < kNstreamInt; ss++) {
             rdAddrLut[ss] = ss / kSamplesPerRead;
             rdBnkLut[ss] = ss;
-#ifdef __BACK_TRANSPOSE_DEBUG__
-            printf("1. stream= %d alculating bank: %d address : %d\n", ss, rdBnkLut[ss], rdAddrLut[ss]);
-#endif //  __BACK_TRANSPOSE_DEBUG__
         }
 
         for (int ss = 0; ss < kNstreamInt; ss++) {
             wrBnkLut0[ss] = ss;
-#ifdef __BACK_TRANSPOSE_DEBUG__
-            printf("wrBnkLut0[%d] = %d\n", ss, wrBnkLut0[ss]);
-#endif //  __BACK_TRANSPOSE_DEBUG__
         }
     }
 };

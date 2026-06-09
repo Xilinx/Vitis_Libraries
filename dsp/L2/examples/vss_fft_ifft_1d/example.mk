@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ example_host:
 
 example_sd_card:
 	emconfigutil --platform ${PLATFORM} --od ./
-	v++ -t hw_emu --platform ${PLATFORM} -o kernel.xclbin -p kernel_pkg.xsa libadf.a --package.defer_aie_run --package.out_dir package_hw_emu --package.rootfs ${SYSROOT}/../../rootfs.ext4 --package.kernel_image ${SYSROOT}/../../Image --package.boot_mode sd    --package.sd_file run_script.sh   --package.sd_file host.elf   --package.sd_file emconfig.json --package.sd_file data/input_front.txt --package.sd_file data/ref_output.txt
+	v++ -t hw_emu --platform ${PLATFORM} -o kernel.xclbin -p kernel_pkg.xsa libadf.a --package.defer_aie_run --package.out_dir package_hw_emu --package.rootfs ${SYSROOT}/../../rootfs.ext4 --package.generate_sdcard --package.kernel_image ${SYSROOT}/../../Image --package.boot_mode sd    --package.sd_file run_script.sh   --package.sd_file host.elf   --package.sd_file emconfig.json --package.sd_file data/input_front.txt --package.sd_file data/ref_output.txt
 
 example_run:
 	./package_hw_emu/launch_hw_emu.sh -no-reboot -run-app run_script.sh

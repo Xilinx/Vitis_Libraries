@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ Coding conventions
 
 using namespace std;
 
-//#define _DSPLIB_FFT_R2COMB_HPP_DEBUG_
-
 // if we use 1kb registers -> aie api uses 2x512b registers for 1024b so we need this for QoR
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
 #include "aie_api/aie_adf.hpp"
@@ -40,8 +38,6 @@ using namespace std;
 #include "fft_ifft_dit_1ch_traits.hpp"
 #include "fft_ifft_dit_1ch_utils.hpp"
 #include "fft_r2comb_twiddle_lut_all.hpp"
-
-//#define _DSPLIB_FFT_R2COMB_HPP_DEBUG_
 
 namespace xf {
 namespace dsp {

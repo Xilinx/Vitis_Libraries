@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ included in aie graph level compilation.
 #include "mixed_radix_fft_traits.hpp"
 
 #ifndef _DSPLIB_MIXED_RADIX_FFT_HPP_DEBUG_
-//#define _DSPLIB_MIXED_RADIX_FFT_HPP_DEBUG_
 #endif //_DSPLIB_MIXED_RADIX_FFT_HPP_DEBUG_
 
 using namespace adf;

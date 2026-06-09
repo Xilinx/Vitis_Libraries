@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,31 +212,6 @@ class conv_corr_ref_graph : public graph {
         static constexpr unsigned int kRefLoopCount = (CEIL(kLoopCount, kLanes) / kLanes);
         static constexpr unsigned int kRefOutLen = (kRefLoopCount * kLanes);
 
-#ifdef _DSPLIB_CONV_CORR_REF_DEBUG_
-        printf("=================================\n");
-        printf("== CONV_CORR REF KERNEL Graph ===\n");
-        printf("=================================\n");
-        printf(
-            " if 'TP_FUNCT_TYPE' is 1 the its CONV.\
-                                     else its CORR if its 0\n");
-        printf("Function Type        = %d\n", TP_FUNCT_TYPE);
-        printf(
-            "if TP_COMPUTE_MODE is 0 then FULL Mode\
-             if TP_COMPUTE_MODE is 1 then SAME Mode \
-             if TP_COMPUTE_MODE is 2 then its VALID Mode \n");
-        printf("Mode                 = %d\n", TP_COMPUTE_MODE);
-        printf("TP_F_LEN             = %d\n", TP_F_LEN);
-        printf("TP_G_LEN             = %d\n", TP_G_LEN);
-        printf("TP_SHIFT             = %d\n", TP_SHIFT);
-        printf("TP_API               = %d\n", TP_API);
-        printf("TP_RND               = %d\n", TP_RND);
-        printf("TP_SAT               = %d\n", TP_SAT);
-        printf("TP_NUM_FRAMES        = %d\n", TP_NUM_FRAMES);
-        printf("TP_CASC_LEN          = %d\n", TP_CASC_LEN);
-        printf("TP_PHASES            = %d\n", TP_PHASES);
-        printf("TP_USE_RTP_VECTOR_LENGTHS = %d\n", TP_USE_RTP_VECTOR_LENGTHS);
-
-#endif
         // make connections
         m_conv_corr_ref[0] =
             kernel::create_object<conv_corr_ref<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_FUNCT_TYPE, TP_COMPUTE_MODE,

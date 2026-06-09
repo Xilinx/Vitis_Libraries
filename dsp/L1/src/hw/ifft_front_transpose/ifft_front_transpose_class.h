@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@
 #include <hls_streamofblocks.h>
 #include "common.hpp"
 #include "vss_fft_ifft_1d_common.hpp"
-//#define __FRONT_TRANSPOSE_DEBUG__
 using namespace xf::dsp::vss::common;
 
 namespace front_transpose {

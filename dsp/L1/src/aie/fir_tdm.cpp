@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ Coding conventions
 #include <adf.h>
 
 #ifdef __X86SIM__
-// #define _DSPLIB_FIR_TDM_HPP_DEBUG_
 #endif
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
 #include "aie_api/aie_adf.hpp"

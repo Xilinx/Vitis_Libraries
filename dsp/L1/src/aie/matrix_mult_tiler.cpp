@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,6 @@
 #include "aie_api/aie_adf.hpp"
 #include "matrix_mult_tiler.hpp"
 #include "matrix_mult_tiler_common.hpp"
-
-// #define _DSPLIB_MATRIX_MULT_TILER_HPP_DEBUG_
-
-// #define MATMUL_DEBUG
 
 #ifndef ROW_MAJOR
 #define ROW_MAJOR 0

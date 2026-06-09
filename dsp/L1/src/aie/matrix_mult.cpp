@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,6 @@ Coding conventions
 
 #include "matrix_mult.hpp" //hence including matrix_mult_traits.hpp too
 #include "kernel_api_utils.hpp"
-
-//#define _DSPLIB_MATRIX_MULT_HPP_DEBUG_
 
 namespace xf {
 namespace dsp {

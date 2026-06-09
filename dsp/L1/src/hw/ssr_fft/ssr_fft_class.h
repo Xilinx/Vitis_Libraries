@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,6 @@ struct cfloat {
     float real;
     float imag;
 };
-
-//#define __SSR_FFT_DEBUG__
 
 template <typename t_data_real, typename t_twid_real>
 void butterfly(std::complex<t_data_real>* inData1,

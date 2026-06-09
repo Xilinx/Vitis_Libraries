@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@
 #include <stdlib.h>
 #include "matrix_vector_mul_ref.hpp"
 #include "fir_ref_utils.hpp"
-
-// #define _DSPLIB_MATRIX_VECTOR_MUL_HPP_DEBUG_
 
 namespace xf {
 namespace dsp {

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@
 #include "kernel_api_utils.hpp"
 #include "dds_luts.h"
 #include "fir_utils.hpp"
-//#define _DSPLIB_TWID_ROT_DEBUG_
 
 namespace xf {
 namespace dsp {
@@ -65,16 +64,16 @@ template <typename TT_DATA,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_PHASE,
           unsigned int TP_API>
-NOINLINE_DECL void twiddleRotator<TT_DATA,
-                                  TT_TWIDDLE,
-                                  TP_WINDOW_SIZE,
-                                  TP_PT_SIZE_D1,
-                                  TP_PT_SIZE_D2,
-                                  TP_SSR,
-                                  TP_FFT_NIFFT,
-                                  TP_PHASE,
-                                  TP_API>::twiddleRotationMain(T_inputIF<TT_DATA> inInterface,
-                                                               T_outputIF<TT_DATA, TP_API> outInterface) {
+INLINE_DECL void twiddleRotator<TT_DATA,
+                                TT_TWIDDLE,
+                                TP_WINDOW_SIZE,
+                                TP_PT_SIZE_D1,
+                                TP_PT_SIZE_D2,
+                                TP_SSR,
+                                TP_FFT_NIFFT,
+                                TP_PHASE,
+                                TP_API>::twiddleRotationMain(T_inputIF<TT_DATA> inInterface,
+                                                             T_outputIF<TT_DATA, TP_API> outInterface) {
     using dataVect_t = ::aie::vector<TT_DATA, m_kNumDataLanes>;
     using twidVect_t = ::aie::vector<TT_TWIDDLE, m_kNumTwLanes>;
     using accVect_t = ::aie::accum<typename tAccBaseTypeMul<TT_DATA, TT_TWIDDLE>::type, m_kNumDataLanes>;

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ compilation.
 #include <vector>
 #include "dds_luts.h"
 #include "dds_luts_floats.h"
-//#define _DSPLIB_DDS_MIXER_HPP_DEBUG_
 
 using namespace adf;
 namespace xf {

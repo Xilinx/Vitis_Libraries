@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -459,7 +459,6 @@ INLINE_DECL void writeOutputSel(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface
     }
 }
 #ifdef __X86SIM__
-// #define _DSPLIB_FIR_SR_SYM_DEBUG_ 1
 #endif
 
 // template for mulSlidingSym1buffUCT - uses ::aie::api HLI
@@ -478,8 +477,6 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> mulSlidingSym1buffUC
     using acc_type = typename T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT>::v_type;
     // acc_type chess_storage(bm0) tmp;
     acc_type tmp;
-
-    // #define _DSPLIB_FIR_INT_HB_UTILS_DEBUG_
 
     T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> retVal;
 #if __HAS_SYM_PREADD__ == 1

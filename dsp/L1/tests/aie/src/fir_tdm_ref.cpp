@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ Single rate asymetric FIR filter reference model
 #define TDM_COEFF_SCHEME_5 5
 
 #define TDM_COEFF_SCHEME TDM_COEFF_SCHEME_4
-// #define _DSPLIB_FIR_TDM_REF_HPP_DEBUG_
 
 #include "aie_api/aie_adf.hpp"
 #include "fir_tdm_ref.hpp"

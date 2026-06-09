@@ -26,7 +26,7 @@ help::
 	@echo "      Valid tasks are cosim, csynth, csim, vivado_syn, vivadp_impl"
 	@echo ""
 	@echo "      PLATFORM is case-insensitive and support awk regex."
-	@echo "      For example, \`make run PLATFORM='u200.*xdma' TARGET=cosim\`"
+	@echo "      For example, \`make run PLATFORM='vck190' TARGET=cosim\`"
 	@echo "      It can also be an absolute path to platform file."
 	@echo ""
 	@echo "      PLATFORM_REPO_PATHS variable is used to specify the paths in which the platform files will be"
@@ -34,8 +34,12 @@ help::
 	@echo ""
 	@echo "  make run TARGET=cosim/csim/csynth/vivado_syn/vivado_impl XPART=<FPGA part name>"
 	@echo "      Alternatively, the FPGA part can be speficied via XPART."
-	@echo "      For example, \`make run XPART='xcu200-fsgd2104-2-e' TARGET=cosim\`"
+	@echo "      For example, \`make run XPART='xcvc1902-vsva2197-2MP-e-S' TARGET=cosim\`"
 	@echo "      When XPART is set, PLATFORM will be ignored."
+	@echo ""
+	@echo "  Optional knobs:"
+	@echo "      NUM_FFT (default 4096)"
+	@echo "      CLOCK in ns (default 2.0, i.e. 500MHz)"
 	@echo ""
 	@echo "  make clean "
 	@echo "      Command to remove the generated files."
@@ -47,7 +51,12 @@ export CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 export XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L1/*}')
 
 # setting default value
-PLATFORM ?= xilinx_vck190_base_202610_1
+PLATFORM ?= vck190
+XPART ?= xcvc1902-vsva2197-2MP-e-S
+NUM_FFT ?= 4096
+CLOCK ?= 2.0
+export NUM_FFT
+export HLS_CLOCK := $(CLOCK)
 
 export PATH := $(XILINX_VIVADO)/bin:$(PATH)
 WORK_DIR ?= hls
@@ -171,11 +180,8 @@ VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
 
 $(CONFIG_FILE): $(CONFIG_TMPL)
 	@echo "$${CONFIG_GEN_PY}" | (${VITIS_PYTHON3})
-
-data:
-	@true
 	
-all: check_vivado check_part data $(CONFIG_FILE)
+all: check_vivado check_part $(CONFIG_FILE)
 ifneq ($(TARGET_REL), csim)
 	v++ -c --mode hls --config $(CONFIG_FILE) --work_dir $(WORK_DIR) --part $(XPART)
 endif

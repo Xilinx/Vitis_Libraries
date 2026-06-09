@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
  */
 #ifndef _DSPLIB_BITONIC_SORT_UTILS_HPP_
 #define _DSPLIB_BITONIC_SORT_UTILS_HPP_
-
-// #define _DSPLIB_BITONIC_SORT_UTILS_DEBUG_
 
 /*
 This file contains sets of overloaded, templatized and specialized templatized functions for use

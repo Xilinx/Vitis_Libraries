@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 #include "ap_int.h"
 #include "common.hpp"
 #include "vss_fft_ifft_1d_common.hpp"
-//#define __MID_TRANSPOSE_DEBUG__
 using namespace xf::dsp::vss::common;
 #ifndef POINT_SIZE_D1
 #define POINT_SIZE_D1 1
@@ -58,10 +57,6 @@ class midTransposeCls {
     static constexpr unsigned int k_numxdimssrsquares = XDIM / k_ssrSquare;
     static constexpr unsigned int k_numXdim_Buff = k_buffSize / XDIM;
     void square_transpose(TT_STREAM_IN sig_in_st_buff[TP_NSTREAM], TT_STREAM_IN sig_o_st_buff[TP_NSTREAM]) {
-#ifdef __MID_TRANSPOSE_DEBUG__
-        FILE* fptr = fopen("/home/uvimalku/4mid_unpack_inputs.txt", "a");
-#endif // __MID_TRANSPOSE_DEBUG__
-
         static TT_SAMPLE interBuff[TP_NSTREAM][k_buffSize];
 
         // separate accountancy variables for read and write sides

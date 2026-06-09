@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@
 #include "common.hpp"
 #include "vss_fft_ifft_1d_common.hpp"
 using namespace xf::dsp::vss::common;
-//#define __MID_TRANSPOSE_DEBUG__
 namespace ifft_mid_transpose {
 template <int TP_NFFT, int TP_NSTREAM, int TP_POINT_SIZE_D1 = 1>
 class midTransposeCls {

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,20 +81,6 @@ class euclidean_distance_ref_graph : public graph {
         // Create EUCLIDEAN_DISTANCE class
         m_ED_ref_kernel = kernel::create_object<
             euclidean_distance_ref<TT_DATA, TP_LEN, TP_DIM, TP_API, TP_RND, TP_SAT, TP_IS_OUTPUT_SQUARED> >();
-#ifdef _DSPLIB_EUCLIDEAN_DISTANCE_REF_DEBUG_
-        printf("==========================================\n");
-        printf("== EUCLIDEAN_DISTANCE REF KERNEL Graph ===\n");
-        printf("==========================================\n");
-        printf("LEN               = %d \n", TP_LEN);
-        printf("DIM               = %d \n", TP_DIM);
-        printf("API               = %d \n", TP_API);
-        printf("RND               = %d \n", TP_RND);
-        printf("SAT               = %d \n", TP_SAT);
-        printf("IS_OUTPUT_SQUARED = %d \n", TP_IS_OUTPUT_SQUARED);
-        printf("===================================================\n");
-        printf("== END of EUCLIDEAN_DISTANCE REF KERNEL Graph =====\n");
-        printf("===================================================\n");
-#endif
         // make connections
         connect<>(inWindowP, m_ED_ref_kernel.in[0]);
         dimensions(m_ED_ref_kernel.in[0]) = {(TP_LEN * kDim)};

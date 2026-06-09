@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@
 
 using namespace ::xf::dsp::aie::widget::api_cast;
 using namespace adf;
-
-//#define _MIXED_RADIX_GRAPH_DEBUG_
 
 namespace xf {
 namespace dsp {
