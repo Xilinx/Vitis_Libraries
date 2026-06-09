@@ -1,6 +1,6 @@
 # Vitis Vision Library
 
-The AMD Vitis™ Vision library is a set of 90+ kernels, optimized for AMD FPGAs, AI Engine, and SoCs, based on the OpenCV computer vision library. The kernels in the Vitis Vision library are optimized and supported in the Vitis Tool Suite.
+The AMD Vitis™ Vision library is a set of 100+ kernels, optimized for AMD FPGAs, AI Engine, and SoCs, based on the OpenCV computer vision library. The kernels in the Vitis Vision library are optimized and supported in the Vitis Tool Suite.
 
 ## Hardware and Software Requirements
 
@@ -8,7 +8,7 @@ The Vitis Vision library is designed to work with Zynq™, Zynq Ultrascale+™, 
 
 ### Prerequisites
 
-* Valid installation of [Vitis™ 2025.2](https://docs.amd.com/r/en-US/ug1742-vitis-release-notes/Installing-the-Vitis-Software-Platform) or later version and the corresponding licenses.
+* Valid installation of [Vitis™ 2026.1](https://docs.amd.com/r/en-US/ug1742-vitis-release-notes/Installing-the-Vitis-Software-Platform) or later version and the corresponding licenses.
 * Xilinx Runtime ([XRT](https://docs.amd.com/r/en-US/ug1701-vitis-accelerated-embedded/Installing-Xilinx-Runtime-and-Platforms)) must be installed. XRT provides software interface to AMD FPGAs.
 * Install [OpenCV-4.4.0]((https://github.com/opencv/opencv/tree/4.4.0)) x86 libraries (with compatible ``libjpeg.so``). x86 libs have to be used for:
 
@@ -19,7 +19,7 @@ The Vitis Vision library is designed to work with Zynq™, Zynq Ultrascale+™, 
     For L2/L3 flow targeting embedded platforms (for hardware emulation and hardware build), aarch32/aarch64 version OpenCV shipped within their *sysroot* should be used.
 
 * libOpenCL.so must be [installed](https://docs.amd.com/r/en-US/ug1700-vitis-accelerated-data-center/OpenCL-Installable-Client-Driver-Loader) if not present.
-* [Install the card](https://docs.xilinx.com/r/en-US/ug1301-getting-started-guide-alveo-accelerator-cards) for which the platform is supported in Vitis 2025.2 or later versions.
+* [Install the card](https://docs.xilinx.com/r/en-US/ug1301-getting-started-guide-alveo-accelerator-cards) for which the platform is supported in Vitis 2026.1 or later versions.
 * If targeting an embedded platform, [install](https://docs.amd.com/r/en-US/ug1701-vitis-accelerated-embedded/Installing-Embedded-Platforms) it and set up the [evaluation board](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/2712338433/Versal+AI+Edge+Series+VEK280+Evaluation+Kit).
 
 #### OpenCV Installation Guidance
@@ -156,7 +156,7 @@ For questions and to get help on this project or your own projects, visit the [X
 
 The source for this project is licensed under the [Apache License](http://www.apache.org/licenses/LICENSE-2.0)
 
-    Copyright (C) 2025, Advanced Micro Devices, Inc.
+    Copyright (C) 2026, Advanced Micro Devices, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -182,35 +182,21 @@ This library is written by developers at
 **PL additions/enhancements:** :
 
     • New additions:
-        • 3D depth
-        • 3D point cloud
-        • New L3 pipeline examples
+        • Preprocess
+        • Layout Formatter        
+        • Stitch
+        • waitMat
+        • Remap bicubic mode
+        • AVFIRs L3 pipeline                
 	
     • Updates:
+        • Remap functionality updated to support different input and output sizes.
+        • InitUndistorRectofyMapInverse function API updated to use float datatypes.
         • Fixed isp stats bug of x and y index swap.
-        • Minor bug fixes
+        • Minor bugs and doc fixes
 	
 **AIE additions/enhancements:** :
 
-    • New additions:
-        • hls2rgb
-        • hsv2rgba
-        • mean_rgb888
-        • mean_yuv400
-        • nv12-resize
-        • polyphase resize
-        • bicubic resize
-        • resize-yuv420
-        • resize-yuv422
-        • resize-yuv444
-        • rgb2hls
-        • rgb2ycrcb
-        • rgba2hsv
-        • rgba2rgb
-        • stdev-rgb888
-        • stddev-yuv400
-        • ycrcb2rgb
-	
     • Updates:
         • Bug fixes
 
@@ -219,5 +205,5 @@ This library is written by developers at
   * Few AIE-ML testcases take a long time to finish hardware emulation because of large input size.
   * ``rgbir2bayer`` and ``isppipeline_rgbir`` PL functions are not supplied with input images.
   * ``lkdensepyroptflow`` fails to meet timing when URAM is enabled.
-  * AWB-npc8, customconv-npc8, lkdensepyrof_uram, tonemapping, meanstddev-pipeline, hls2rgb, rgb2hls,
+  * AWB-npc8, customconv-npc8, lkdensepyrof_uram, tonemapping, meanstddev-pipeline, 
   cases fail hw_emu because of a known tool issue. Other targets work fine.

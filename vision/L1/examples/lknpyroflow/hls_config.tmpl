@@ -10,15 +10,15 @@ tb.file=${XF_PROJ_ROOT}/L1/examples/lknpyroflow/xf_dense_npyr_optical_flow_tb.cp
 tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/lknpyroflow/xf_dense_npyr_optical_flow_tb.cpp, -I ${XF_PROJ_ROOT}/L1/examples/lknpyroflow/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
 
 csim.argv= ${XF_PROJ_ROOT}/data/lkof_im0_512x512.png ${XF_PROJ_ROOT}/data/lkof_im1_512x512.png 
-csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
+csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d -lopencv_videoio
 
 cosim.argv= ${XF_PROJ_ROOT}/data/lkof_im0_512x512.png ${XF_PROJ_ROOT}/data/lkof_im1_512x512.png 
-cosim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
+cosim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d -lopencv_videoio
 
 
 
 vivado.flow=${VIVADO_FLOW}
 vivado.rtl=verilog
-sim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
+sim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d -lopencv_videoio
 
 

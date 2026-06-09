@@ -23,7 +23,6 @@
 #include "imgproc/xf_stereo_pipeline.hpp"
 #include "imgproc/xf_remap.hpp"
 #include "imgproc/xf_stereolbm.hpp"
-#include "xf_config_params.h"
 
 /* config width and height */
 #define XF_HEIGHT 1080

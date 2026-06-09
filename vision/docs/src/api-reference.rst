@@ -9801,6 +9801,8 @@ with non-maximum suppression (NMS).
     | 8 pixel                     | 150              | 3x3              | 1.86             |
     +-----------------------------+------------------+------------------+------------------+
 
+.. include:: include/findcontours_api.rst
+
 .. _autogaincontrol:
 
 
@@ -15994,6 +15996,51 @@ The following table describes the function parameters.
    +----------------+-------------------------------------------------------+
    | dst            | Stitched output image.                                |
    +----------------+-------------------------------------------------------+
+
+.. rubric:: Deviation from OpenCV
+
+OpenCV does not provide a single function named ``stitch`` with the same
+interface. Panorama-related host software in OpenCV is typically built from
+separate stages: ``cv::Stitcher`` (feature matching, warping, and blending),
+``cv::detail::Blender`` / ``cv::detail::FeatherBlender`` (overlap blending),
+and utility helpers such as ``cv::detail::resultRoi``. The Vitis Vision
+``xf::cv::stitch`` kernel implements only the **blend** step for **four**
+pre-warped tiles. The main differences are:
+
+**Scope of functionality**
+
+- ``cv::Stitcher`` is an end-to-end panorama pipeline (registration, seam
+  handling, exposure, blending). ``xf::cv::stitch`` does not perform feature
+  detection, homography estimation, or remapping; tiles must already be aligned
+  and supplied with feather masks.
+- The kernel always takes exactly four image tiles and four mask mats. OpenCV
+  blenders accept a variable number of inputs via repeated ``feed()`` calls.
+
+**Blending model**
+
+- In the AVFIRS reference testbench, OpenCV uses ``cv::detail::FeatherBlender``
+  with a configurable ``sharpness`` parameter and 16-bit signed color during
+  ``feed()``.
+- ``xf::cv::stitch`` performs per-pixel **normalized linear feather blending**:
+  at each output pixel, mask values from the overlapping tiles are summed,
+  normalized to weights, and applied to the source pixels
+  (``output = round_half_up(Σ weightᵢ × pixelᵢ)``). There is no
+  ``sharpness`` or exposure-compensation stage.
+- OpenCV's ``FeatherBlender`` and multi-band blenders can produce different
+  seam appearance and numeric results than this fixed-point-friendly kernel,
+  even when the same masks and tile corners are used.
+
+**Placement and geometry**
+
+- Tile placement is controlled by ``mask_corners`` together with each tile's
+  runtime ``rows`` / ``cols``. The output ROI size is derived internally by
+  ``stitch_roi`` (bounding box of all placed tiles), similar in purpose to
+  ``cv::detail::resultRoi`` but not guaranteed to match OpenCV pixel for pixel.
+- The hardware implementation uses a fixed four-tile layout convention in
+  ``stitch_feed`` (top, right, bottom, and origin-aligned fourth tile). Arbitrary
+  panorama layouts supported by a general OpenCV blender workflow may require
+  matching this convention.
+
 
 .. rubric:: Resource Utilization
 

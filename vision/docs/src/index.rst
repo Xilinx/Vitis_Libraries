@@ -7,7 +7,7 @@
 
 .. xfOpenCVlib
 
-   .. Copyright © 2024 Advanced Micro Devices, Inc
+   .. Copyright © 2026 Advanced Micro Devices, Inc
 
 .. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 

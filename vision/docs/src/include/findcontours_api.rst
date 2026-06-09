@@ -112,6 +112,35 @@ The following table describes the function parameters.
     | num_contours      | Output: number of contours found.                     |
     +-------------------+-------------------------------------------------------+
 
+.. rubric:: Deviation from OpenCV
+
+
+**API and parameters**
+
+- There are no ``mode`` (for example ``RETR_EXTERNAL``, ``RETR_TREE``) or
+  ``method`` (for example ``CHAIN_APPROX_SIMPLE``, ``CHAIN_APPROX_NONE``)
+  arguments. Retrieval and chain encoding behavior are fixed in hardware.
+- There is no ``hierarchy`` output and no optional ``offset`` argument.
+- Outputs are written to ``points_packed``, ``contour_offsets``, and
+  ``num_contours`` instead of an array of point lists.
+
+**Contour representation**
+
+- OpenCV returns each contour as a sequence of ``cv::Point`` values (full
+  chain or approximated, depending on ``method``).
+- This kernel stores vertices only when the 8-connected chain direction
+  changes, which compresses the boundary similarly in spirit to
+  ``CHAIN_APPROX_SIMPLE`` but is not guaranteed to match OpenCV point
+  for point.
+- Each vertex is one 32-bit word ``y[31:16] | x[15:0]`` (see Output Point
+  Packing above), not a ``cv::Point`` object.
+
+**Capacity and input**
+
+- ``MAX_CONTOURS`` and ``MAX_TOTAL_POINTS`` are compile-time limits. When
+  either limit is reached, additional contours or points are not written.
+- Input must be a single-channel 8-bit binary image (``XF_8UC1``).
+
 .. rubric:: Resource Utilization
 
 

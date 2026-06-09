@@ -101,7 +101,7 @@ class Resizebicubic {
         ::aie::vector<float, 16> dist = ::aie::sub(acc.to_vector<float>(0), ::aie::broadcast<float, 16>((float)p));
         ::aie::accum<accfloat, 16> mul_Acc = ::aie::mul(dist, ::aie::broadcast<float, 16>(256.0f));
         //::aie::vector<int32_t, 16> idx = ::aie::to_fixed<int32_t, 16>(mul_Acc.to_vector<bfloat16>(), 0);
-        ::aie::vector<int32_t, 16> idx=::aie::to_fixed<int32_t,16>(mul_Acc, 0);
+        ::aie::vector<int32_t, 16> idx = ::aie::to_fixed<int32_t, 16>(mul_Acc, 0);
         uint32_t wtsy = weighty[idx[0]];
 
         Wy1 = (int8_t)(wtsy >> 24);

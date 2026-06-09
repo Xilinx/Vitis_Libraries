@@ -15,12 +15,71 @@
  */
 
 #include "common/xf_headers.hpp"
+#include "xf_stereo_pipeline_ref.h"
 #include "xf_stereo_pipeline_tb_config.h"
 #include "cameraParameters.h"
 
 #define _PROFILE_ 0
 
+// Allow one disparity level (x16) between reference and accelerator per pixel.
+#define DISP_DIFF_THRESH 16
+// Maximum allowed percentage of ROI pixels above DISP_DIFF_THRESH.
+#define DISP_ERR_PER_THRESH 2.0f
+
 using namespace std;
+
+static void clamp_invalid_disparity(cv::Mat& disp) {
+    for (int i = 0; i < disp.rows; i++) {
+        for (int j = 0; j < disp.cols; j++) {
+            short v = (short)disp.at<unsigned short>(i, j);
+            if (v < 0) {
+                disp.at<unsigned short>(i, j) = 0;
+            }
+        }
+    }
+}
+
+static float analyze_diff(const cv::Mat& diff, int thresh) {
+    int cnt = 0;
+    int valid_pixels = diff.rows * diff.cols;
+    double minval = 1e9;
+    double maxval = 0.0;
+
+    for (int r = 0; r < diff.rows; r++) {
+        for (int c = 0; c < diff.cols; c++) {
+            unsigned short v = diff.at<unsigned short>(r, c);
+            if ((int)v > thresh) {
+                cnt++;
+            }
+            if (minval > v) {
+                minval = v;
+            }
+            if (maxval < v) {
+                maxval = v;
+            }
+        }
+    }
+
+    float err_per = (valid_pixels > 0) ? (100.0f * (float)cnt / (float)valid_pixels) : 0.0f;
+    std::cout << "\tMinimum error in disparity = " << minval << std::endl;
+    std::cout << "\tMaximum error in disparity = " << maxval << std::endl;
+    std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
+    return err_per;
+}
+
+static void setup_bm_state_arr(int* bm_state_arr) {
+    bm_state_arr[0] = XF_STEREO_PREFILTER_SOBEL_TYPE;
+    bm_state_arr[1] = SAD_WINDOW_SIZE;
+    bm_state_arr[2] = 31;
+    bm_state_arr[3] = SAD_WINDOW_SIZE;
+    bm_state_arr[4] = 0;
+    bm_state_arr[5] = NO_OF_DISPARITIES;
+    bm_state_arr[6] = 20;
+    bm_state_arr[7] = 15;
+    bm_state_arr[8] = PARALLEL_UNITS;
+    bm_state_arr[9] = (NO_OF_DISPARITIES / PARALLEL_UNITS) + ((NO_OF_DISPARITIES % PARALLEL_UNITS) != 0);
+    bm_state_arr[10] = PARALLEL_UNITS * bm_state_arr[9] - NO_OF_DISPARITIES;
+}
 
 int main(int argc, char** argv) {
     cv::setUseOptimized(false);
@@ -38,7 +97,7 @@ int main(int argc, char** argv) {
     }
     right_img = cv::imread(argv[2], 0);
     if (right_img.data == NULL) {
-        fprintf(stderr, "Cannot open right image at %s\n", argv[1]);
+        fprintf(stderr, "Cannot open right image at %s\n", argv[2]);
         return 0;
     }
 
@@ -46,6 +105,7 @@ int main(int argc, char** argv) {
     int rows = left_img.rows;
     int cols = left_img.cols;
     cv::Mat disp_img(rows, cols, CV_16UC1);
+    cv::Mat ref_disp_img(rows, cols, CV_16UC1);
 
     // allocate mem for camera parameters for rectification and bm_state class
     float* cameraMA_l_fl = (float*)malloc(XF_CAMERA_MATRIX_SIZE * sizeof(float));
@@ -56,21 +116,7 @@ int main(int argc, char** argv) {
     float* distC_r_fl = (float*)malloc(XF_DIST_COEFF_SIZE * sizeof(float));
     int* bm_state_arr = (int*)malloc(11 * sizeof(int));
 
-    xf::cv::xFSBMState<SAD_WINDOW_SIZE, NO_OF_DISPARITIES, PARALLEL_UNITS> bm_state;
-    bm_state.uniquenessRatio = 15;
-    bm_state.textureThreshold = 20;
-    bm_state.minDisparity = 0;
-    bm_state_arr[0] = bm_state.preFilterType;
-    bm_state_arr[1] = bm_state.preFilterSize;
-    bm_state_arr[2] = bm_state.preFilterCap;
-    bm_state_arr[3] = bm_state.SADWindowSize;
-    bm_state_arr[4] = bm_state.minDisparity;
-    bm_state_arr[5] = bm_state.numberOfDisparities;
-    bm_state_arr[6] = bm_state.textureThreshold;
-    bm_state_arr[7] = bm_state.uniquenessRatio;
-    bm_state_arr[8] = bm_state.ndisp_unit;
-    bm_state_arr[9] = bm_state.sweepFactor;
-    bm_state_arr[10] = bm_state.remainder;
+    setup_bm_state_arr(bm_state_arr);
 
     // copy camera params
     for (int i = 0; i < XF_CAMERA_MATRIX_SIZE; i++) {
@@ -86,16 +132,56 @@ int main(int argc, char** argv) {
         distC_r_fl[i] = (float)distC_r[i];
     }
 
+    std::cout << "INFO: Running software reference." << std::endl;
+    stereopipeline_ref(left_img, right_img, ref_disp_img, cameraMA_l_fl, cameraMA_r_fl, distC_l_fl, distC_r_fl,
+                       irA_l_fl, irA_r_fl, XF_DIST_COEFF_SIZE, bm_state_arr);
+
     // Launch the kernel
+    std::cout << "INFO: Running HLS accelerator." << std::endl;
     stereopipeline_accel((ap_uint<INPUT_PTR_WIDTH>*)left_img.data, (ap_uint<INPUT_PTR_WIDTH>*)right_img.data,
                          (ap_uint<OUTPUT_PTR_WIDTH>*)disp_img.data, cameraMA_l_fl, cameraMA_r_fl, distC_l_fl,
                          distC_r_fl, irA_l_fl, irA_r_fl, bm_state_arr, rows, cols);
 
-    // Write output image
-    cv::Mat out_disp_img(rows, cols, CV_8UC1);
-    disp_img.convertTo(out_disp_img, CV_8U, (256.0 / NO_OF_DISPARITIES) / (16.));
-    cv::imwrite("hls_output.png", out_disp_img);
-    printf("run complete !\n");
+    clamp_invalid_disparity(ref_disp_img);
+    clamp_invalid_disparity(disp_img);
 
-    return 0;
+    cv::Mat diff;
+    cv::absdiff(ref_disp_img, disp_img, diff);
+
+    cv::Mat diff_c((diff.rows - (SAD_WINDOW_SIZE << 1)), (diff.cols - (SAD_WINDOW_SIZE << 1)), CV_16UC1);
+    cv::Rect roi(SAD_WINDOW_SIZE, SAD_WINDOW_SIZE, diff.cols - (SAD_WINDOW_SIZE << 1),
+                 diff.rows - (SAD_WINDOW_SIZE << 1));
+    diff(roi).copyTo(diff_c);
+
+    // Write output images
+    cv::Mat ref_out_disp(rows, cols, CV_8UC1);
+    cv::Mat hls_out_disp(rows, cols, CV_8UC1);
+    ref_disp_img.convertTo(ref_out_disp, CV_8U, (256.0 / NO_OF_DISPARITIES) / (16.));
+    disp_img.convertTo(hls_out_disp, CV_8U, (256.0 / NO_OF_DISPARITIES) / (16.));
+    cv::imwrite("ref_output.png", ref_out_disp);
+    cv::imwrite("hls_output.png", hls_out_disp);
+    cv::Mat diff8;
+    diff.convertTo(diff8, CV_8U, (256.0 / NO_OF_DISPARITIES) / (16.));
+    cv::imwrite("diff_img.png", diff8);
+
+    ////////  FUNCTIONAL VALIDATION  ////////
+    float err_per = analyze_diff(diff_c, DISP_DIFF_THRESH);
+    int ret = 0;
+    if (err_per > DISP_ERR_PER_THRESH) {
+        fprintf(stderr, "ERROR: Test Failed.\n");
+        ret = 1;
+    } else {
+        std::cout << "Test Passed" << std::endl;
+    }
+
+    free(cameraMA_l_fl);
+    free(cameraMA_r_fl);
+    free(irA_l_fl);
+    free(irA_r_fl);
+    free(distC_l_fl);
+    free(distC_r_fl);
+    free(bm_state_arr);
+
+    printf("run complete !\n");
+    return ret;
 }

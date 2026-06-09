@@ -13,6 +13,13 @@ then performs edge detection and contour extraction on the resized panorama. A
 duplicate of the resized grayscale panorama is also written to device memory for
 host verification.
 
+.. rubric:: AVFIRS Pipeline Diagram
+
+.. figure:: ./images/AVFIRS.jpg
+   :alt: AVFIRS 4-stream multi-camera pipeline block diagram
+   :figclass: image
+   :name: avfirs-4stream-pipeline-diagram
+
 This AVFIRS 4-stream pipeline includes the following processing stages:
 
 -  **RGB to Grayscale:** Converts each of the four 8-bit RGB input streams

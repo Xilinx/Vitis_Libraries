@@ -25,34 +25,21 @@ This section describes new features, changes to the existing library, and known 
 **PL additions/enhancements:** :
 
 	• New additions:
-		• 3D depth
-		• 3D point cloud
-		• New L3 pipeline examples
+		• Preprocess
+		• Layout Formatter
+		• Stitch
+		• waitMat
+		• Remap bicubic mode
+		• AVFIRs L3 pipeline
 		
 	• Updates:
-    		• Fixed isp stats bug of x and y index swap.
-    		• Minor bug fixes
+		• Remap functionality updated to support different input and output sizes.
+		• InitUndistorRectofyMapInverse function API updated to use float datatypes.
+		• Fixed isp stats bug of x and y index swap.
+		• Minor bugs and doc fixes
 
 **AIE additions/enhancements:** :
 
-	• New additions:
-		• hls2rgb
-		• hsv2rgba
-		• mean_rgb888
-		• mean_yuv400
-		• nv12-resize
-		• polyphase resize
-		• bicubic resize
-		• resize-yuv420
-		• resize-yuv422
-		• resize-yuv444
-		• rgb2hls
-		• rgb2ycrcb
-		• rgba2hsv
-		• rgba2rgb
-		• stdev-rgb888
-		• stddev-yuv400
-		• ycrcb2rgb
 	• Updates:
 		• Bug fixes
 
@@ -64,4 +51,4 @@ Known issues
 	• Few AIE-ML testcases take a long time to finish hardware emulation because of large input size.
 	• ``rgbir2bayer`` and ``isppipeline_rgbir`` PL functions are not supplied with input images.
 	• ``lkdensepyroptflow`` fails to meet timing when URAM is enabled.
-	• AWB-npc8, customconv-npc8, lkdensepyrof_uram, tonemapping, meanstddev-pipeline, hls2rgb, rgb2hls, cases fail hw_emu because of a known tool issue. Other targets work fine.
+	• AWB-npc8, customconv-npc8, lkdensepyrof_uram, tonemapping, meanstddev-pipeline, cases fail hw_emu because of a known tool issue. Other targets work fine.

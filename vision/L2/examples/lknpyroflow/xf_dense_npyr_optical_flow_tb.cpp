@@ -21,12 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define HLS 0
-
-#if !HLS
-
 #include "xcl2.hpp"
-#endif
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>
@@ -34,6 +29,10 @@
 #include <opencv2/highgui/highgui.hpp>
 //#include <iostream>
 #include <string>
+#include <cmath>
+
+// Per-component flow difference threshold (pixels). Tight tolerance for LK golden vs accelerator.
+#define FLOW_DIFF_THRESH 0.5f
 
 static void getPseudoColorInt(pix_t pix, float fx, float fy, rgba_t& rgba) {
     // normalization factor is key for good visualization. Make this auto-ranging
@@ -118,22 +117,172 @@ static void writeMatRowsRGBA(hls::stream<rgba_t>& pixStream, unsigned int* dst, 
     }
 }
 
-void dense_non_pyr_of_accel(ap_uint<INPUT_PTR_WIDTH>* img_curr,
-                            ap_uint<INPUT_PTR_WIDTH>* img_prev,
-                            float* img_outx,
-                            float* img_outy,
-                            int cols,
-                            int rows);
+// Pixel accessor with zero border (matches uninitialized line-buffer edges in HLS).
+static inline int ref_pix(const cv::Mat& img, int r, int c) {
+    if (r < 0 || r >= img.rows || c < 0 || c >= img.cols) {
+        return 0;
+    }
+    return (int)img.at<uchar>(r, c);
+}
+
+// Software reference: dense non-pyramid Lucas-Kanade, matching xf::cv::DenseNonPyrLKOpticalFlow.
+// frame_curr / frame_prev align with dense_non_pyr_of_accel img_curr / img_prev ports (im0 / im1).
+static void dense_npyr_of_ref(const cv::Mat& frame_curr,
+                              const cv::Mat& frame_prev,
+                              cv::Mat& flowx_ref,
+                              cv::Mat& flowy_ref) {
+    const int rows = frame_curr.rows;
+    const int cols = frame_curr.cols;
+    const int W = KMED;
+
+    flowx_ref.create(rows, cols, CV_32FC1);
+    flowy_ref.create(rows, cols, CV_32FC1);
+    flowx_ref.setTo(0);
+    flowy_ref.setTo(0);
+
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            float fx = 0.0f;
+            float fy = 0.0f;
+
+            if (r >= W && c >= (W + 1)) {
+                long long ixix = 0;
+                long long ixiy = 0;
+                long long iyiy = 0;
+                long long dix = 0;
+                long long diy = 0;
+
+                // Window spans [r-W, r] x [c-W-1, c], consistent with HLS border checks.
+                for (int y = r - W; y <= r; y++) {
+                    for (int x = c - W - 1; x <= c; x++) {
+                        const int ix = (ref_pix(frame_curr, y, x + 1) - ref_pix(frame_curr, y, x - 1)) / 2;
+                        const int iy = (ref_pix(frame_curr, y + 1, x) - ref_pix(frame_curr, y - 1, x)) / 2;
+                        const int it = ref_pix(frame_curr, y, x) - ref_pix(frame_prev, y, x);
+                        ixix += (long long)ix * ix;
+                        ixiy += (long long)ix * iy;
+                        iyiy += (long long)iy * iy;
+                        dix += (long long)ix * it;
+                        diy += (long long)iy * it;
+                    }
+                }
+
+                const float det = (float)ixix * (float)iyiy - (float)ixiy * (float)ixiy;
+                if (det > 1.0f) {
+                    const float i00 = (float)iyiy / det;
+                    const float i01 = (float)(-ixiy) / det;
+                    const float i10 = (float)(-ixiy) / det;
+                    const float i11 = (float)ixix / det;
+                    fx = i00 * (float)dix + i01 * (float)diy;
+                    fy = i10 * (float)dix + i11 * (float)diy;
+                }
+            }
+
+            flowx_ref.at<float>(r, c) = fx;
+            flowy_ref.at<float>(r, c) = fy;
+        }
+    }
+}
+
+static float analyze_flow_diff(const cv::Mat& flowx_hls,
+                               const cv::Mat& flowy_hls,
+                               const cv::Mat& flowx_ref,
+                               const cv::Mat& flowy_ref,
+                               int margin,
+                               float err_thresh) {
+    int rows = flowx_hls.rows;
+    int cols = flowx_hls.cols;
+    int cnt = 0;
+    int valid_pixels = 0;
+    double minval = 1e9;
+    double maxval = 0.0;
+
+    for (int r = margin; r < rows - margin; r++) {
+        for (int c = margin; c < cols - margin; c++) {
+            float dx = std::abs(flowx_hls.at<float>(r, c) - flowx_ref.at<float>(r, c));
+            float dy = std::abs(flowy_hls.at<float>(r, c) - flowy_ref.at<float>(r, c));
+            float v = std::max(dx, dy);
+            valid_pixels++;
+            if (v > err_thresh) {
+                cnt++;
+            }
+            if (minval > v) {
+                minval = v;
+            }
+            if (maxval < v) {
+                maxval = v;
+            }
+        }
+    }
+
+    float err_per = (valid_pixels > 0) ? (100.0f * (float)cnt / (float)valid_pixels) : 0.0f;
+    std::cout << "\tMinimum error in flow = " << minval << std::endl;
+    std::cout << "\tMaximum error in flow = " << maxval << std::endl;
+    std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
+    return err_per;
+}
+
+static void write_flow_output_image(const cv::Mat& flowx_in,
+                                    const cv::Mat& flowy_in,
+                                    const cv::Mat& frame1,
+                                    cv::Mat& frame_out,
+                                    const char* out_filename) {
+    int height = flowx_in.rows;
+    int width = flowx_in.cols;
+
+    frame_out.create(height, width, CV_8UC4);
+
+    float* flowx_copy = (float*)malloc(MAX_HEIGHT * MAX_WIDTH * sizeof(float));
+    float* flowy_copy = (float*)malloc(MAX_HEIGHT * MAX_WIDTH * sizeof(float));
+    unsigned int* outputBuffer = (unsigned int*)malloc(MAX_HEIGHT * MAX_WIDTH * sizeof(unsigned int));
+    if (flowx_copy == NULL || flowy_copy == NULL || outputBuffer == NULL) {
+        fprintf(stderr, "Failed to allocate memory for flow visualization output\n");
+        free(flowx_copy);
+        free(flowy_copy);
+        free(outputBuffer);
+        return;
+    }
+
+    for (int f = 0; f < height; f++) {
+        for (int i = 0; i < width; i++) {
+            flowx_copy[f * width + i] = flowx_in.at<float>(f, i);
+            flowy_copy[f * width + i] = flowy_in.at<float>(f, i);
+        }
+    }
+
+    hls::stream<rgba_t> out_pix("Color pixel");
+    getOutPix(flowx_copy, flowy_copy, frame1.data, out_pix, height, width, width * height);
+    writeMatRowsRGBA(out_pix, outputBuffer, height, width, width * height);
+
+    unsigned char p1, p2, p3, p4;
+    unsigned int pix = 0;
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            rgba_t* outbuf_copy = (rgba_t*)(outputBuffer + i * width + j);
+            p1 = outbuf_copy->r;
+            p2 = outbuf_copy->g;
+            p3 = outbuf_copy->b;
+            p4 = outbuf_copy->a;
+            pix = ((unsigned int)p4 << 24) | ((unsigned int)p3 << 16) | ((unsigned int)p2 << 8) | (unsigned int)p1;
+            frame_out.at<unsigned int>(i, j) = pix;
+        }
+    }
+
+    cv::imwrite(out_filename, frame_out);
+
+    free(flowx_copy);
+    free(flowy_copy);
+    free(outputBuffer);
+}
 
 int main(int argc, char** argv) {
     cv::Mat frame0, frame1;
-#if !HLS
     cv::Mat flowx, flowy;
-#endif
+    cv::Mat flowx_ref, flowy_ref;
     cv::Mat frame_out;
+    cv::Mat frame_out_ref;
 
     if (argc != 3) {
-        fprintf(stderr, "Usage incorrect. Correct usage: ./exe <current frame> <next frame>\n");
+        fprintf(stderr, "Usage incorrect. Correct usage: ./exe <frame0/im0> <frame1/im1>\n");
         return -1;
     }
 
@@ -145,23 +294,14 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    frame_out.create(frame0.rows, frame0.cols, CV_8UC4);
-#if !HLS
     flowx.create(frame0.rows, frame0.cols, CV_32FC1);
     flowy.create(frame0.rows, frame0.cols, CV_32FC1);
-#endif
+    flowx_ref.create(frame0.rows, frame0.cols, CV_32FC1);
+    flowy_ref.create(frame0.rows, frame0.cols, CV_32FC1);
 
     int cnt = 0;
-    unsigned char p1, p2, p3, p4;
-    unsigned int pix = 0;
-
     char out_string[200];
 
-#if HLS
-    static xf::cv::Mat<OUT_TYPE, MAX_HEIGHT, MAX_WIDTH, OF_PIX_PER_CLOCK> flowx(frame0.rows, frame0.cols);
-    static xf::cv::Mat<OUT_TYPE, MAX_HEIGHT, MAX_WIDTH, OF_PIX_PER_CLOCK> flowy(frame0.rows, frame0.cols);
-
-#endif
     /////////////////////////////////////// CL ////////////////////////
 
     int height = frame0.rows;
@@ -169,11 +309,11 @@ int main(int argc, char** argv) {
     std::cout << "Input image height : " << height << std::endl;
     std::cout << "Input image width  : " << width << std::endl;
 
-#if HLS
-    dense_non_pyr_of_accel(frame0.data, frame1.data, (float*)flowx.data, (float*)flowy.data, height, width);
-#endif
-#if !HLS
+    // im0 -> img_curr, im1 -> img_prev (same as dense_non_pyr_of_accel port order).
+    std::cout << "INFO: Running software reference (dense non-pyramid LK)." << std::endl;
+    dense_npyr_of_ref(frame0, frame1, flowx_ref, flowy_ref);
 
+    std::cout << "INFO: Running OpenCL accelerator." << std::endl;
     std::cout << "Starting xrt programmingms" << std::endl;
 
     std::vector<cl::Device> devices = xcl::get_xil_devices();
@@ -257,57 +397,21 @@ int main(int argc, char** argv) {
     std::cout << "done" << std::endl;
     q.finish();
 
-#endif
     /////////////////////////////////////// end of CL ////////////////////////
 
-    float* flowx_copy;
-    float* flowy_copy;
-
-    flowx_copy = (float*)malloc(MAX_HEIGHT * MAX_WIDTH * (sizeof(float)));
-    if (flowx_copy == NULL) {
-        fprintf(stderr, "\nFailed to allocate memory for flowx_copy\n");
+    ////////  FUNCTIONAL VALIDATION  ////////
+    float err_per = analyze_flow_diff(flowx, flowy, flowx_ref, flowy_ref, KMED, FLOW_DIFF_THRESH);
+    if (err_per > 5.0f) {
+        fprintf(stderr, "ERROR: Test Failed.\n");
+        return 1;
     }
-    flowy_copy = (float*)malloc(MAX_HEIGHT * MAX_WIDTH * (sizeof(float)));
-    if (flowy_copy == NULL) {
-        fprintf(stderr, "\nFailed to allocate memory for flowy_copy\n");
-    }
+    std::cout << "Test Passed" << std::endl;
 
-#if !HLS
-    int size = height * width;
-    for (int f = 0; f < height; f++) {
-        for (int i = 0; i < width; i++) {
-            flowx_copy[f * width + i] = flowx.at<float>(f, i);
-            flowy_copy[f * width + i] = flowy.at<float>(f, i);
-        }
-    }
-#endif
-
-    unsigned int* outputBuffer;
-    outputBuffer = (unsigned int*)malloc(MAX_HEIGHT * MAX_WIDTH * (sizeof(unsigned int)));
-    if (outputBuffer == NULL) {
-        fprintf(stderr, "\nFailed to allocate memory for outputBuffer\n");
-    }
-
-    hls::stream<rgba_t> out_pix("Color pixel");
-
-    getOutPix(flowx_copy, flowy_copy, frame1.data, out_pix, frame0.rows, frame0.cols, frame0.cols * frame0.rows);
-
-    writeMatRowsRGBA(out_pix, outputBuffer, frame0.rows, frame0.cols, frame0.cols * frame0.rows);
-
-    rgba_t* outbuf_copy;
-    for (int i = 0; i < frame0.rows; i++) {
-        for (int j = 0; j < frame0.cols; j++) {
-            outbuf_copy = (rgba_t*)(outputBuffer + i * (frame0.cols) + j);
-            p1 = outbuf_copy->r;
-            p2 = outbuf_copy->g;
-            p3 = outbuf_copy->b;
-            p4 = outbuf_copy->a;
-            pix = ((unsigned int)p4 << 24) | ((unsigned int)p3 << 16) | ((unsigned int)p2 << 8) | (unsigned int)p1;
-            frame_out.at<unsigned int>(i, j) = pix;
-        }
-    }
+    sprintf(out_string, "out_ref_%d.png", cnt);
+    write_flow_output_image(flowx_ref, flowy_ref, frame1, frame_out_ref, out_string);
 
     sprintf(out_string, "out_%d.png", cnt);
-    cv::imwrite(out_string, frame_out);
+    write_flow_output_image(flowx, flowy, frame1, frame_out, out_string);
+
     return 0;
 }

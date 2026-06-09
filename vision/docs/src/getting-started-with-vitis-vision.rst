@@ -23,10 +23,10 @@ hardware.
 Prerequisites
 =============
 
-#. Valid installation of Vitis 2025.2 or later and the
+#. Valid installation of Vitis 2026.1 or later and the
    corresponding licenses.
 #. Download the Vitis Vision library from github.
-#. Install the card for which the platform is supported in Vitis 2025.2 or
+#. Install the card for which the platform is supported in Vitis 2026.1 or
    later versions.
 #. If targeting an embedded platform, download the platform, common images and set up the evaluation board.
 #. Xilinx® Runtime (XRT) must be installed. XRT provides software

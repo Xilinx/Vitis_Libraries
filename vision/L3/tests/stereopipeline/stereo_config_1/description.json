@@ -75,11 +75,13 @@
         "compiler": {
             "sources": [
                 "LIB_DIR/L3/examples/stereopipeline/xf_stereo_pipeline_tb.cpp",
+                "LIB_DIR/L3/examples/stereopipeline/xf_stereo_pipeline_ref.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ],
             "includepaths": [
                 "LIB_DIR/L3/tests/stereopipeline/stereo_config_1",
-                "LIB_DIR/L3/examples/stereopipeline"
+                "LIB_DIR/L3/examples/stereopipeline",
+                "LIB_DIR/L1/examples/stereopipeline"
             ],
             "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include",
             "symbols": [

@@ -119,25 +119,25 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 
 #Inclue Required Host Source Files
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
-HOST_SRCS += $(XFLIB_DIR)/L3/examples/stereopipeline/xf_stereo_pipeline_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L3/examples/stereopipeline/xf_stereo_pipeline_tb.cpp $(XFLIB_DIR)/L3/examples/stereopipeline/xf_stereo_pipeline_ref.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D __SDSVHLS__
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L3/examples/stereopipeline/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L3/examples/stereopipeline/config -I $(XFLIB_DIR)/L3/examples/stereopipeline -I $(XFLIB_DIR)/L1/examples/stereopipeline -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui -l opencv_stitching
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-HOST_SRCS += $(XFLIB_DIR)/L3/examples/stereopipeline/xf_stereo_pipeline_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L3/examples/stereopipeline/xf_stereo_pipeline_tb.cpp $(XFLIB_DIR)/L3/examples/stereopipeline/xf_stereo_pipeline_ref.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D __SDSVHLS__
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L3/examples/stereopipeline/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L3/examples/stereopipeline/config -I $(XFLIB_DIR)/L3/examples/stereopipeline -I $(XFLIB_DIR)/L1/examples/stereopipeline -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/lib
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui -l opencv_stitching
 
 else 
-HOST_SRCS += $(XFLIB_DIR)/L3/examples/stereopipeline/xf_stereo_pipeline_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L3/examples/stereopipeline/xf_stereo_pipeline_tb.cpp $(XFLIB_DIR)/L3/examples/stereopipeline/xf_stereo_pipeline_ref.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D __SDSVHLS__
-CXXFLAGS +=  -I $(XFLIB_DIR)/L3/examples/stereopipeline/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L3/examples/stereopipeline/config -I $(XFLIB_DIR)/L3/examples/stereopipeline -I $(XFLIB_DIR)/L1/examples/stereopipeline -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui -l opencv_stitching
 
@@ -167,7 +167,7 @@ LIBRARY_PATH := $(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 endif
 
 ########################## Kernel compiler global settings ##########################
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L3/examples/stereopipeline/config -I $(XFLIB_DIR)/L1/include/
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L3/examples/stereopipeline/config -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L1/examples/stereopipeline/
 
 ######################### binary container global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))

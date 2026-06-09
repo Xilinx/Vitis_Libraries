@@ -215,8 +215,7 @@
                     "vitis_aie_sim": 50,
                     "vitis_hw_build": 470,
                     "vitis_hw_emu": 200,
-                    "vitis_hw_run": 30,
-                    "vitis_aie_x86sim": 50
+                    "vitis_hw_run": 30
                 }
             }
         ],
@@ -224,8 +223,7 @@
             "vitis_aie_sim",
             "vitis_hw_emu",
             "vitis_hw_build",
-            "vitis_hw_run",
-            "vitis_aie_x86sim"
+            "vitis_hw_run"
         ],
         "category": "canary"
     },
