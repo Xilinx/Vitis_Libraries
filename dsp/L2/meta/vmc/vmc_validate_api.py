@@ -148,13 +148,3 @@ def ProcessVMCConfig(config_file_loc, spec, key_label_map=None):
         return temp_dict
     temp_dict["err_msg"] = ProcesStrFun(temp_dict["err_msg"], key_label_map)
     return temp_dict
-
-#1-3 for validation config.json
-#config_file_loc="/proj/xhdhdstaff4/mahajan/gradle_HEAD_mahajan/HEAD/xmc_aie_lib/DDS_6e89f154/config.json"
-#temp_dict=ProcessVMCConfig(config_file_loc,"dds_mixer")
-#print(temp_dict)
-
-#generate graph
-#graph_dict=generate_graph_vmc(config_file_loc, "dds_mixer", "DFT_c6844DDS_6e89f154f4f")
-#print(graph_dict["port_info"])
-

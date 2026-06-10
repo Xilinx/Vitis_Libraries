@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 #
@@ -35,13 +35,13 @@ sys.path.insert(1, os.path.join(tools_dir, "share/doxyrest_b/sphinx"))
 # -- Project information -----------------------------------------------------
 
 project = "Vitis DSP Library"
-copyright = "2019-2022, Xilinx Inc. 2022-2025, Advanced Micro Devices, Inc."
+copyright = "2019-2022, Xilinx Inc. 2022-2026, Advanced Micro Devices, Inc."
 author = "AMD Inc."
 
 # The short X.Y version
-version = "2025.2"
+version = "2026.1"
 # The full version, including alpha/beta/rc tags
-release = "v2025.2"
+release = "v2026.1"
 
 
 # -- General configuration ---------------------------------------------------

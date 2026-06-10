@@ -1,6 +1,6 @@
 ..
    Copyright © 2019–2022 Xilinx Inc.
-   Copyright © 2022–2025 Advanced Micro Devices, Inc.
+   Copyright © 2022–2026 Advanced Micro Devices, Inc.
 
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -10,9 +10,9 @@
 Euclidean Distance
 ===================
 
-DSPLib contains a solution for calculating the Euclidean Distance (ED). This library element computes the Euclidean Distance (ED) operation between two input vectors, P and Q, in a vectorized manner for the specified dimension (1D, 2D, 3D, or 4D).
-This is achieved by leveraging hardware acceleration on AIE, AIE-ML, and AIE-MLv2 devices. The operation supports only the IO-buffer interface, depending on the configuration.
-The vectorized implementation ensures high performance by processing multiple data points in parallel, utilizing the hardware's capabilities.
+This library element computes the Euclidean Distance (ED) between two sets of points, P and Q. The Euclidean Distance is the straight-line (L2-norm) distance between a pair of points; for two points of dimension D it is ``ED = sqrt( (q0-p0)^2 + (q1-p1)^2 + ... + (q(D-1)-p(D-1))^2 )``. 
+
+One distance value is produced per point pair, so for ``TP_LEN`` point pairs the output vector has ``TP_LEN`` samples. The Euclidean Distance IP has configurable data type (``float`` or ``bfloat16``), vector length (``TP_LEN``), point dimension (``TP_DIM``, 1D to 4D), output mode (distance or squared, via ``TP_IS_OUTPUT_SQUARED``), rounding, and saturation. It is supported on AIE, AIE-ML, and AIE-MLv2 devices and uses the IO-buffer interface.
 
 Template parameters are used to configure the top-level graph of the ``euclidean_distance_graph`` class.
 
@@ -58,6 +58,23 @@ Design Notes
 
 The Euclidean Distance supports the IO-buffer interface (``TP_API`` = ``0``) only.
 
+Length Constraints
+------------------
+
+``TP_LEN`` specifies the number of P/Q point pairs processed and the number of
+output samples produced. ``TP_LEN`` must be a multiple of the vector load size
+for the chosen device and data type. The minimum ``TP_LEN`` equals the applicable granularity,
+and the maximum is bounded by the data memory available on the target device.
+
+Dimension (TP_DIM)
+------------------
+
+``TP_DIM`` selects the spatial dimension of each point P and Q and must be in the range ``[1, 4]``. All of 1D (``TP_DIM`` = ``1``), 2D, 3D, and 4D are supported on **AIE**, **AIE-ML**, and **AIE-MLv2**.
+
+Regardless of ``TP_DIM``, each point still occupies a fixed four-element group in memory (see :ref:`DSP_ED_INPUT_DATA` below); only the first ``TP_DIM`` elements of each group are used in the calculation, and the remaining ``4 - TP_DIM`` elements are ignored.
+
+.. _DSP_ED_INPUT_DATA:
+
 Input Data
 ----------
 
@@ -83,15 +100,11 @@ Input data must have length ``TP_LEN × 4`` samples for each vector (P and Q), r
     When TP_DIM=3, only first 3 elements are used:
     P0→{1,2,3} Q0→{32,31,30} (4th element ignored)
 
-**Data Fetching and Processing Pattern**
-
-The algorithm processes data in chunks of 4 elements (FIXED_DIM = 4) from each input vector. For TP_LEN = 8, this results in 8 processing iterations, where each iteration compares corresponding 4-element groups from vectors P and Q.
-
 **Memory Layout and Access Pattern**
 
 ::
 
-    Memory Layout (FIXED_DIM = 4):
+    Memory Layout (4-element groups):
 
     Vector P Memory:
     [1][2][3][4]   [5][6][7][8]   [9][10][11][12]   ...   [29][30][31][32]

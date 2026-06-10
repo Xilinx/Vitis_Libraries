@@ -282,13 +282,15 @@ class create_casc_kernel<2,
  * These are the templates to configure the convolution and correlation:
  * @tparam TT_DATA_F describes the type of individual data samples of signal F to input to the function. \n
  *         This is a typename and must be one of the following: \n
- *         int8, int16, int32, cint16, cint32.
+ *         int8 (AIE-ML/AIE-MLv2 only), int16, int32, cint16, cint32, float, cfloat (AIE only), bfloat16
+ *(AIE-ML/AIE-MLv2 only).
  * @tparam TT_DATA_G describes the type of individual data samples of signal G to input to the function. \n
  *         This is a typename and must be one of the following: \n
- *         int8, int16, int32, cint16, cint32.
+ *         int8 (AIE-ML/AIE-MLv2 only), int16, int32, cint16, cint32, float, cfloat (AIE only), bfloat16
+ *(AIE-ML/AIE-MLv2 only).
  * @tparam TT_DATA_OUT describes the type individual data samples at the function output. \n
  *         This is a typename and must be one of the following: \n
- *         int16, int32, cint32, cint32.
+ *         int16, int32, cint16, cint32.
  *         Note: TT_DATA_OUT type should be complex if any input is complex.
  * @tparam TP_FUNCT_TYPE describes the selection of function i.e convolution or correlation. \n
  * @tparam TP_COMPUTE_MODE describes the computation mode of conv/corr. we have 3 modes which are

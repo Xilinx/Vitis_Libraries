@@ -17,9 +17,34 @@ Release Notes
 2026.1
 ======
 
-The follow features have been added to the library this release:
+The following features have been added to the library in this release:
 
-* **Outer Tensor** - TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES and TP_SSR no longer constrained to being powers to 2.
+
+*  **Config QoR Helper** - Available as EA, a Python-based tool that helps configure DSPLib AIE IP based on user performance/QoR requirements.
+
+Config QoR Helper provides users with the valid IP configurations that meet or exceed their constraints, ranked by provided criteria, e.g., resource use (NUM_AIE).
+QoR for a given configuration is predicted using a ML model trained on measured data.
+
+Supported IP includes: FFT, GEMM, FIR SR ASYM, and Cholesky and QRD (available in Solver Library).
+
+* **Convolution / Correlation** - Enabled support for Run Time Programmable (RTP) configuration of vectors F and G lengths to buffer implementation.
+
+* **FFT** - Added support for `cbfloat16` data type.
+
+* **Outer Tensor** - Expanded supported ranges of `TP_DIM_A`, `TP_DIM_B`, `TP_NUM_FRAMES` and `TP_SSR` parameter combinations.
+
+* **Packet Switch Input/Output** - New library graph elements: ``pkt_switch_input`` and ``pkt_switch_output``, that can be used to route multiple input packet streams to a wrapped instance of another graph, and then route the output from the wrapped graph to multiple output packet streams.
+
++----------------------+---------------------------------+
+| **Function**         | **Namespace and class name**    |
++======================+=================================+
+| Packet Switch Input  | xf::dsp::aie::pkt_switch_input  |
++----------------------+---------------------------------+
+| Packet Switch Output | xf::dsp::aie::pkt_switch_output |
++----------------------+---------------------------------+
+
+* **VSS FFT/IFFT** - Extended configuration support for ``vss_fft_ifft_1d_graph``. Added `TP_POINT_SIZE_D1` to allow user-specific FFT decomposition, as well as `TP_CASC_LEN` and `TP_USE_WIDGETS` parameters to configure ``fft_ifft_dit_1ch_graph``.
+
 
 2025.2
 ======

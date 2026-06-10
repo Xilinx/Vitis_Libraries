@@ -90,8 +90,8 @@ The Vitis AIE DSP Library includes a Fast Fourier transform (FFT), Finite Impuls
    Graph utils <rst/group_graph_utils.rst>
    Hadamard Product <rst/group_hadamard_graph.rst>
    Kronecker <rst/group_kronecker_graph.rst>
-   Packet Switch <rst/group_pkt_switch_graph.rst>
    Outer Tensor <rst/group_outer_tensor_graph.rst>
+   Packet Switch <rst/group_pkt_switch_graph.rst>
    Sample Delay <rst/group_sample_delay_graph.rst>
    Widgets <rst/group_widget_graph.rst>
 

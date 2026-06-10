@@ -83,7 +83,7 @@ ifeq (,$(XPLATFORM))
 # 2.1 as exact name vitis < 2022.2
 XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/platforms/$(PLATFORM)/$(PLATFORM).xpfm))
 ifeq (,$(XPLATFORM))
-# 2.2 as exact name vitis >= 2022.2
+# 2.2 as exact name vitis >= 2022.2 (base_platforms)
 XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/base_platforms/$(PLATFORM)/$(PLATFORM).xpfm))
 # 2.3 as a pattern vitis < 2022.2
 ifeq (,$(XPLATFORM))
